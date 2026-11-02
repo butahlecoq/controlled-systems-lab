@@ -217,6 +217,7 @@ TEST_CASE("scenario source provenance round trips without changing mathematical 
     source.input_schema="csl.scenario/1";
     source.defaults_revision="csl.scenario-defaults/1";
     source.defaults={{"objective.offset","zero default",false}};
+    source.external_data={{"matrices/A.json",source.source_digest,3}};
     record.scenario_source=source;
     const auto owner=accepted(ar::publish_identity_recorded_run(std::move(record)));
 
@@ -232,6 +233,9 @@ TEST_CASE("scenario source provenance round trips without changing mathematical 
     REQUIRE(restored.description().scenario_source->defaults.size()==1);
     CHECK(restored.description().scenario_source->defaults[0].path=="objective.offset");
     CHECK_FALSE(restored.description().scenario_source->defaults[0].authored);
+    REQUIRE(restored.description().scenario_source->external_data.size()==1);
+    CHECK(restored.description().scenario_source->external_data[0].uri=="matrices/A.json");
+    CHECK(restored.description().scenario_source->external_data[0].byte_count==3);
     auto invalid=original.description();
     invalid.scenario_source=source;
     invalid.scenario_source->input_schema.clear();
@@ -239,8 +243,20 @@ TEST_CASE("scenario source provenance round trips without changing mathematical 
 
     const auto archived=accepted(ar::encode_recorded_run(owner));
     const std::string archive_wire{reinterpret_cast<const char*>(archived.content().bytes().data()),archived.content().bytes().size()};
-    CHECK(archive_wire.find("csl.run-statistics/9")!=std::string::npos);
+    CHECK(archive_wire.find("csl.run-statistics/10")!=std::string::npos);
+    CHECK(archive_wire.find("csl.scenario-source-record/2")!=std::string::npos);
     CHECK(std::holds_alternative<ar::RecordedRunArtifact>(ar::decode_recorded_run(archive_wire)));
+    auto legacy_record=owner.description();legacy_record.scenario_source->external_data.clear();
+    const auto legacy_owner=accepted(ar::publish_identity_recorded_run(std::move(legacy_record)));
+    const auto legacy_artifact=accepted(ar::encode_recorded_run(legacy_owner));
+    std::string legacy_wire{reinterpret_cast<const char*>(legacy_artifact.content().bytes().data()),legacy_artifact.content().bytes().size()};
+    auto replace_once=[&](std::string_view from,std::string_view to) {
+        const auto at=legacy_wire.find(from);REQUIRE(at!=std::string::npos);legacy_wire.replace(at,from.size(),to);
+    };
+    replace_once("csl.run-statistics/10","csl.run-statistics/9");
+    replace_once("csl.scenario-source-record/2","csl.scenario-source-record/1");
+    replace_once(",\"external_data\":[]","");
+    CHECK(std::holds_alternative<ar::RecordedRunArtifact>(ar::decode_recorded_run(legacy_wire)));
 }
 TEST_CASE("post-join projection preserves earlier failure later cancellation and original deadline") {
     using namespace execution;using Duration=TimePoint::duration;

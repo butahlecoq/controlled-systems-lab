@@ -366,15 +366,16 @@ ST(ExecutionSummary::Task,F(id),F(queued),F(admitted),F(create_started),F(create
 ST(ExecutionSummary,F(configured_deadline),F(admission_closed),F(external_cancellation),F(workers_joined),F(completed),F(clock),F(started),F(tasks))
 ST(ResourceObservation,F(peak_active_tasks),F(peak_reserved_threads),F(peak_reserved_bytes),F(actual_threads),F(outer_admission_enforced),F(memory))
 ST(ScenarioDefaultRecord,F(path),F(meaning),F(authored))
+ST(ScenarioSourceRecord::ExternalData,F(uri),F(digest),F(byte_count))
 std::vector<std::byte> parse_hex(const Json&);
 template<>struct Codec<ScenarioSourceRecord>{
     static Json put(const ScenarioSourceRecord& v){
         require(!v.input_schema.empty(),"scenario_source.schema","Input schema is required");
         require(!v.defaults_revision.empty(),"scenario_source.defaults_revision","Defaults revision is required");
         for(const auto& value:v.defaults){require(!value.path.empty()&&!value.meaning.empty(),"scenario_source.defaults","Default path and meaning are required");}
-        return {{"record_schema","csl.scenario-source-record/1"},{"source_sha256",problem::hex(v.source_digest)},{"schema",v.input_schema},{"defaults_revision",v.defaults_revision},{"defaults",artifacts::put(v.defaults)}};
+        return {{"record_schema","csl.scenario-source-record/2"},{"source_sha256",problem::hex(v.source_digest)},{"schema",v.input_schema},{"defaults_revision",v.defaults_revision},{"defaults",artifacts::put(v.defaults)},{"external_data",artifacts::put(v.external_data)}};
     }
-    static ScenarioSourceRecord get(const Json& j){closed(j,{"record_schema","source_sha256","schema","defaults_revision","defaults"});require(artifacts::get<std::string>(j.at("record_schema"))=="csl.scenario-source-record/1","scenario_source.record_schema","Unsupported source record schema");auto bytes=parse_hex(j.at("source_sha256"));require(bytes.size()==32,"scenario_source.source_sha256","Expected SHA256");problem::ContentDigest d{};std::copy(bytes.begin(),bytes.end(),d.bytes.begin());ScenarioSourceRecord result{d,artifacts::get<std::string>(j.at("schema")),artifacts::get<std::string>(j.at("defaults_revision")),artifacts::get<std::vector<ScenarioDefaultRecord>>(j.at("defaults"))};(void)put(result);return result;}
+    static ScenarioSourceRecord get(const Json& j){const auto schema=artifacts::get<std::string>(j.at("record_schema"));if(schema=="csl.scenario-source-record/1")closed(j,{"record_schema","source_sha256","schema","defaults_revision","defaults"});else if(schema=="csl.scenario-source-record/2")closed(j,{"record_schema","source_sha256","schema","defaults_revision","defaults","external_data"});else throw Invalid{"scenario_source.record_schema","Unsupported source record schema"};auto bytes=parse_hex(j.at("source_sha256"));require(bytes.size()==32,"scenario_source.source_sha256","Expected SHA256");problem::ContentDigest d{};std::copy(bytes.begin(),bytes.end(),d.bytes.begin());ScenarioSourceRecord result{d,artifacts::get<std::string>(j.at("schema")),artifacts::get<std::string>(j.at("defaults_revision")),artifacts::get<std::vector<ScenarioDefaultRecord>>(j.at("defaults")),schema=="csl.scenario-source-record/2"?artifacts::get<std::vector<ScenarioSourceRecord::ExternalData>>(j.at("external_data")):std::vector<ScenarioSourceRecord::ExternalData>{}};(void)put(result);return result;}
 };
 #undef TAG
 #undef EMPTY
@@ -598,7 +599,7 @@ ArtifactResult<RecordedRunArtifact> encode_recorded_run(const RunStatistics& own
         auto wire=Json::parse(recorded_json(owner));
         const bool sourced=wire.at("schema")=="csl.run-statistics/8";
         require(sourced||wire.at("schema")=="csl.run-statistics/4","schema","Live run is not in the current wire form");
-        wire["schema"]=sourced?"csl.run-statistics/9":"csl.run-statistics/7";
+        wire["schema"]=sourced?"csl.run-statistics/10":"csl.run-statistics/7";
         auto& spans=wire["statistics"]["spans"];
         const auto& source_spans=owner.description().statistics.description().spans;
         require(spans.size()==source_spans.size(),"statistics.spans","Span count changed during serialization");
@@ -622,11 +623,16 @@ static ArtifactResult<problem::ResolvedContent> decode_recorded_run_impl(std::st
     try {
         auto wire=parse_document(text,limits);
         const auto version=get<std::string>(wire.at("schema"));
-        if(version=="csl.run-statistics/9")closed(wire,{"schema","problem","dimensions","horizon","configuration","run","final","statistics","resources","execution","attachments","provenance","selection","scenario_source","recorded_state"});
+        if(version=="csl.run-statistics/9"||version=="csl.run-statistics/10")closed(wire,{"schema","problem","dimensions","horizon","configuration","run","final","statistics","resources","execution","attachments","provenance","selection","scenario_source","recorded_state"});
         else closed(wire,{"schema","problem","dimensions","horizon","configuration","run","final","statistics","resources","execution","attachments","provenance","selection","recorded_state"});
-        require(version=="csl.run-statistics/5"||version=="csl.run-statistics/6"||version=="csl.run-statistics/7"||version=="csl.run-statistics/9",
+        require(version=="csl.run-statistics/5"||version=="csl.run-statistics/6"||version=="csl.run-statistics/7"||version=="csl.run-statistics/9"||version=="csl.run-statistics/10",
             "schema","Unsupported recorded run schema");
-        if(version=="csl.run-statistics/9")(void)get<ScenarioSourceRecord>(wire.at("scenario_source"));
+        if(version=="csl.run-statistics/9"||version=="csl.run-statistics/10") {
+            const auto source_schema=get<std::string>(wire.at("scenario_source").at("record_schema"));
+            require(source_schema==(version=="csl.run-statistics/9"?"csl.scenario-source-record/1":"csl.scenario-source-record/2"),
+                "scenario_source.record_schema","Scenario source record schema does not match its run schema");
+            (void)get<ScenarioSourceRecord>(wire.at("scenario_source"));
+        }
         require(wire.at("recorded_state")=="unverified_recorded_data","recorded_state","Recorded claims are always untrusted");
         require(wire.dump()==text,"recorded.canonical","Recorded artifact is not in canonical form or contains trailing bytes");
         if(expected_problem&&get<ProblemId>(wire.at("problem"))!=*expected_problem)

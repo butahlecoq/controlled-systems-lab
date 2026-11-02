@@ -202,6 +202,8 @@ struct ScenarioSourceRecord {
     problem::ContentDigest source_digest;
     std::string input_schema, defaults_revision;
     std::vector<ScenarioDefaultRecord> defaults;
+    struct ExternalData { std::string uri; problem::ContentDigest digest; std::uint64_t byte_count; };
+    std::vector<ExternalData> external_data;
 };
 
 enum class AdmissionCause { cancelled, deadline, task_limit, allocation, adapter_exception, thread_launch };

@@ -104,7 +104,7 @@ build/examples/scenario_cli --run examples/scenarios/two-stage-integrator.json \
 For the named comparison the CLI writes `reach-back.run.json` and
 `strategy-b.run.json`. Explicit method selections write one
 `method-<index>-<strategy-id>.run.json` record per requested method; the index
-keeps duplicate IDs distinct. Records use the `csl.run-statistics/9` schema and include the source SHA-256, scenario schema, defaults revision and resolved defaults. They omit machine-local paths; the content digest is the portable source binding.
+keeps duplicate IDs distinct. Records use the `csl.run-statistics/10` schema and include the source SHA-256, scenario schema, defaults revision, resolved defaults, and content hashes and byte counts for external data. They omit machine-local paths; the content digests are the portable source bindings. The reader also accepts earlier v9 recorded artifacts.
 The CLI does not publish when its selected profile's result requirements or
 witness checks fail.
 Use a fresh directory because the CLI refuses to replace existing result

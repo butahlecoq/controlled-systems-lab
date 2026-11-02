@@ -98,13 +98,27 @@ recognized unsupported; nested entries of a stages provider use ordinary set
 kinds only. No future grammar or capability is fabricated.
 
 An external matrix descriptor has exactly kind=external, string uri, 64 lowercase
-hexadecimal sha256, unsigned rows/cols and layout=row_major. Both executable
-schemas validate the descriptor and then reject it as unsupported. They do not
-resolve the URI, read its bytes, or verify the digest, even when the URI names a
-local file. Keep current schemas fail-closed. A future schema can support local
-files only after it defines path resolution, byte and scalar limits, digest
-mismatch handling, cancellation, and canonical content bindings for the bytes
-passed to resolve. Network references need a separate contract.
+hexadecimal sha256, unsigned rows/cols and layout=row_major. `load_scenario_file`
+supports a relative local path resolved against the scenario file's directory.
+Absolute paths, `..` traversal and symlinks resolving outside that directory are
+rejected. The scenario document and all referenced files share one configured
+aggregate input byte cap; external-file reads poll cancellation. Each external
+file's SHA256 is checked against its raw bytes before strict
+JSON parsing; the JSON value must be a flat array of exactly rows*cols finite
+numbers in row-major order. In-memory `load_scenario` and network URIs remain
+unsupported. The source provenance and run artifact retain each URI, raw byte
+digest and byte count. External values participate in mathematical identity;
+run settings remain outside ProblemId. The source record artifact uses schema
+`csl.scenario-source-record/2`, while readers continue to accept `/1` records.
+
+### Release and package impact
+
+This adds bounded local-file behavior to the installed scenario loader and
+extends its public provenance record. It adds no dependency and changes no
+install layout. Scenario-sourced recorded runs advance from
+`csl.run-statistics/9` to `/10`; readers retain `/9` compatibility. No release
+is needed for the merge because this repository has no attached published
+package workflow; a future release candidate must include the new `/10` schema.
 
 Admission order is bytes/encoding/syntax/duplicate/quota checks; root schema,
 unknown/required fields; exclusions; profile; reserved root keys in the order
@@ -171,7 +185,8 @@ Cancellation is polled before IO, each file chunk, parser node, translation
 expansion and after publication work. Calls into canonical factories are
 synchronous; cancellation is cooperative, not hard interruption. File failures
 distinguish not_found, unreadable and read_failed; parser failures remain parser
-failures. No network or external matrix IO occurs.
+failures. No network IO occurs; external matrix IO is limited to the bounded
+local-file path above.
 
 A separate archival branch recognizes schema_version1, id B04-historical,
 executable=false and restoration_status=incomplete_and_inconsistent. It requires

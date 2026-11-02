@@ -30,7 +30,7 @@ foreach(name IN ITEMS reach-back strategy-b)
   string(JSON input_schema GET "${artifact}" scenario_source schema)
   string(JSON defaults_revision GET "${artifact}" scenario_source defaults_revision)
   string(JSON final_kind GET "${artifact}" final kind)
-  if(NOT "${schema}" STREQUAL "csl.run-statistics/9")
+  if(NOT "${schema}" STREQUAL "csl.run-statistics/10")
     message(FATAL_ERROR "${path} uses unexpected schema ${schema}")
   endif()
   if(NOT "${source_hash}" STREQUAL "${expected_source_hash}" OR

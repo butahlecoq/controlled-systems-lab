@@ -23,7 +23,7 @@ string(JSON defaults_revision GET "${artifact}" scenario_source defaults_revisio
 string(JSON defaults_length LENGTH "${artifact}" scenario_source defaults)
 file(SHA256 "${SCENARIO_INPUT}" expected_source_hash)
 string(JSON module_count LENGTH "${artifact}" configuration value modules)
-if(NOT "${schema}" STREQUAL "csl.run-statistics/9" OR
+if(NOT "${schema}" STREQUAL "csl.run-statistics/10" OR
    NOT "${state}" STREQUAL "unverified_recorded_data" OR
    NOT "${source_hash}" STREQUAL "${expected_source_hash}" OR
    NOT "${source_schema}" STREQUAL "csl.scenario/1" OR
