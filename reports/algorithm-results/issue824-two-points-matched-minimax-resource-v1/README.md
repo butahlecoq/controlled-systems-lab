@@ -27,13 +27,15 @@ The two phase-plane SVGs reuse the independently checked geometry figures from t
 ```sh
 cmake --preset dev -DCSL_BUILD_ISSUE824_MATCHED_MINIMAX_REPORT=ON
 cmake --build build/dev --target csl_issue824_matched_minimax_report --parallel 4
+issue824_run_id="$(date -u +%Y%m%dT%H%M%SZ)"
 systemd-run --user --scope --property=MemoryMax=8G --property=MemorySwapMax=0 --quiet \
   python3 scripts/reports/exp824/run_limited_capture.py \
-  --resource-output build/issue824-resource-profile.json \
-  --capture-dir build/issue824-resource-raw \
-  --publish-output reports/algorithm-results/issue824-two-points-matched-minimax-resource-v1 -- \
+  --resource-output "build/issue824-resource-${issue824_run_id}.json" \
+  --capture-dir "build/issue824-resource-raw-${issue824_run_id}" \
+  --publish-output "build/issue824-resource-report-${issue824_run_id}" -- \
   python3 scripts/reports/exp824/make_matched_minimax_report.py \
-  build/dev/csl_issue824_matched_minimax_report build/dev build/issue824-resource-raw \
+  build/dev/csl_issue824_matched_minimax_report build/dev \
+  "build/issue824-resource-raw-${issue824_run_id}" \
   --limiter-profile reports/algorithm-results/issue824-two-points-matched-minimax-v1/limiter-profile.json \
   --profile-build build/dev
 ```
