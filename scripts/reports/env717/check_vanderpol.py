@@ -276,6 +276,16 @@ def svg_figure(data):
     return "\n".join(parts)
 
 
+def processor_model():
+    cpuinfo = Path("/proc/cpuinfo")
+    if cpuinfo.is_file():
+        for line in cpuinfo.read_text(encoding="utf-8", errors="replace").splitlines():
+            key, separator, value = line.partition(":")
+            if separator and key.strip().lower() in ("model name", "hardware") and value.strip():
+                return value.strip()
+    return platform.processor().strip() or platform.uname().processor.strip() or "unavailable"
+
+
 def report_page(result, data, svg):
     source_bug = result["source_parameters"]["source_execution_note"]
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -311,7 +321,7 @@ def write_bundle(result, output):
         "source_notebook_blob": NOTEBOOK_BLOB,
         "driver_sha256": result["driver_sha256"], "compiler": result["capture_environment"],
         "platform": platform.platform(), "machine": platform.machine(),
-        "processor": platform.processor(), "logical_cpu_count": os.cpu_count(),
+        "processor": processor_model(), "logical_cpu_count": os.cpu_count(),
         "python": platform.python_version(),
         "arithmetic": "IEEE-754 binary64"}
     capture = {"source_commit": result["source_commit"], "driver_sha256": result["driver_sha256"],

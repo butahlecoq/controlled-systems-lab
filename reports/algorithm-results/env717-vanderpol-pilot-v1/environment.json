@@ -13,7 +13,7 @@
   },
   "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
   "machine": "x86_64",
-  "processor": "",
+  "processor": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
   "logical_cpu_count": 8,
   "python": "3.14.8",
   "arithmetic": "IEEE-754 binary64"

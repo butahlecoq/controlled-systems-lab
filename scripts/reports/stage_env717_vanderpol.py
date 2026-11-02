@@ -76,7 +76,9 @@ def inputs(source: Path):
             environment.get("source_repository_commit") != SOURCE_COMMIT or
             environment.get("source_file_blob") != checker.SOURCE_BLOB or
             environment.get("source_notebook_blob") != checker.NOTEBOOK_BLOB or
-            environment.get("driver_sha256") != result["driver_sha256"]):
+            environment.get("driver_sha256") != result["driver_sha256"] or
+            not isinstance(environment.get("processor"), str) or not environment["processor"].strip() or
+            not isinstance(environment.get("logical_cpu_count"), int) or environment["logical_cpu_count"] < 1):
         raise ValueError("capture or environment identity differs")
     parser = LocalLinks()
     parser.feed(files["index.html"].decode("utf-8"))
