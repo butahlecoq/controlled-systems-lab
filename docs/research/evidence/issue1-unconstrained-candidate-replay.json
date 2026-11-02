@@ -1,0 +1,103 @@
+{
+  "limitations": [
+    "The source files are private ignored inputs and are identified by local hashes, not included here.",
+    "The candidate's input and action catalogues differ from L04's published discrete fixture.",
+    "The exhaustive transcription cannot establish which source version generated the printed paper row."
+  ],
+  "linear_minimax": {
+    "disturbance_histories_per_plan": 256,
+    "minimax_plans": [
+      [
+        1.0,
+        -1.0,
+        -0.8,
+        1.0
+      ],
+      [
+        -0.8,
+        0.8,
+        1.0,
+        -0.8
+      ]
+    ],
+    "minimax_value": 55.15290284582085,
+    "plan_count": 625,
+    "selected_plan": [
+      1.0,
+      -1.0,
+      -0.8,
+      1.0
+    ],
+    "worst_disturbance_history": [
+      [
+        -1.0,
+        1.0
+      ],
+      [
+        -1.0,
+        1.0
+      ],
+      [
+        -1.0,
+        1.0
+      ],
+      [
+        -1.0,
+        -1.0
+      ]
+    ],
+    "worst_terminal_state": [
+      1197.2146,
+      49.635000000005675,
+      450.9554,
+      23.86499999999978
+    ]
+  },
+  "nonlinear_replay": {
+    "nearest_published_state_replays": [
+      {
+        "plan": [
+          -0.8,
+          0.8,
+          1.0,
+          -0.8
+        ],
+        "state_l2_error": 19.339964196012158,
+        "terminal_state": [
+          1197.9946074402014,
+          13.411026496511534,
+          451.05218653622046,
+          -5.19188531261806
+        ]
+      }
+    ],
+    "nonlinear_steps_per_plan": 10000,
+    "plan_count": 625,
+    "published_reported_cost": 14.048,
+    "published_state_euclidean_cost": 16.42069148970286,
+    "selected_minimax_plan_euclidean_cost": 14.558159265431309,
+    "selected_minimax_plan_terminal_state": [
+      1197.9946074402014,
+      13.411026516805409,
+      451.05218653622046,
+      -5.191885316270629
+    ],
+    "within_published_three_decimal_rounding_box": []
+  },
+  "schema": "csl.issue1-unconstrained-candidate-replay/1",
+  "scope": "Independent binary64 transcription of a local ignored MATLAB candidate; not an L04 historical reproduction.",
+  "source_candidate": {
+    "execution": "MATLAB/Octave source not executed",
+    "files": {
+      "Minmaxopenloop.m": {
+        "bytes": 3244,
+        "sha256": "bc45e3956992183ca10fef0b878116539c6888be2ccec4fe888d7e6d25bf26d6"
+      },
+      "program.m": {
+        "bytes": 1388,
+        "sha256": "835d8908a8b1422aa783d15a3a66245a67c5b6f1ef3a6b7b810628155b820d8b"
+      }
+    },
+    "local_path": "papers/Minimax/Unconstrained"
+  }
+}
