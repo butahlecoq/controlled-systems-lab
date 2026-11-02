@@ -1,0 +1,155 @@
+name: B04-C immutable Pages augmentation
+
+on:
+  workflow_run:
+    workflows: [Algorithm report records and site]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  augment:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+      queue: max
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Find the upstream Pages artifact
+        id: artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          API_URL: ${{ github.api_url }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from urllib.request import Request, urlopen
+
+          url = (f"{os.environ['API_URL']}/repos/{os.environ['REPOSITORY']}"
+                 f"/actions/runs/{os.environ['RUN_ID']}/artifacts?per_page=100")
+          request = Request(url, headers={
+              'Accept': 'application/vnd.github+json',
+              'Authorization': f"Bearer {os.environ['GH_TOKEN']}",
+          })
+          with urlopen(request, timeout=15) as response:
+              artifacts = json.load(response)['artifacts']
+          matches = [item for item in artifacts if item.get('name') == 'github-pages']
+          if len(matches) > 1:
+              raise SystemExit('upstream run has multiple github-pages artifacts')
+          found = bool(matches) and not matches[0].get('expired', True)
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+              output.write(f"found={'true' if found else 'false'}\n")
+          print('Found an unexpired Pages artifact' if found else 'No Pages artifact; augmentation is skipped')
+          PY
+
+      - name: Download the complete upstream Pages artifact
+        if: steps.artifact.outputs.found == 'true'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: github-pages
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+          path: build/pages-download
+
+      - name: Safely extract the Pages site
+        if: steps.artifact.outputs.found == 'true'
+        run: |
+          python - <<'PY'
+          from pathlib import Path, PurePosixPath
+          import tarfile
+
+          downloaded = Path('build/pages-download')
+          candidates = list(downloaded.iterdir())
+          if len(candidates) != 1 or candidates[0].name != 'artifact.tar' or not candidates[0].is_file():
+              raise SystemExit('Pages download does not contain exactly artifact.tar')
+          destination = Path('build/report-site')
+          destination.mkdir(parents=True, exist_ok=False)
+          with tarfile.open(candidates[0], 'r:') as archive:
+              members = archive.getmembers()
+              if not members:
+                  raise SystemExit('Pages artifact is empty')
+              for member in members:
+                  path = PurePosixPath(member.name)
+                  if path.is_absolute() or '..' in path.parts:
+                      raise SystemExit(f'unsafe Pages artifact path: {member.name!r}')
+                  if not (member.isdir() or member.isfile()):
+                      raise SystemExit(f'unsupported Pages artifact entry: {member.name!r}')
+              archive.extractall(destination, filter='data')
+          if not (destination / 'index.html').is_file():
+              raise SystemExit('upstream Pages artifact has no root index.html')
+          PY
+
+      - name: Stage the immutable B04-C Strategy A report and offline bundle
+        if: steps.artifact.outputs.found == 'true' && hashFiles('reports/algorithm-results/b04-c-strategy-a-verification-v1/record.json') != ''
+        run: python scripts/reports/stage_b04_c_strategy_a.py --site build/report-site
+
+      - name: Verify route, source bindings, and offline archive
+        if: steps.artifact.outputs.found == 'true' && hashFiles('reports/algorithm-results/b04-c-strategy-a-verification-v1/record.json') != ''
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          import zipfile
+
+          site = Path('build/report-site')
+          manifests = list(site.glob('b04-c-strategy-a-*/publication-manifest.json'))
+          if len(manifests) != 1:
+              raise SystemExit('expected exactly one immutable B04-C report route')
+          manifest = json.loads(manifests[0].read_text())
+          route = manifest['report_id']
+          report = site / route
+          archive = site / f'{route}.zip'
+          if not archive.is_file() or not (report / 'trajectory.svg').is_file():
+              raise SystemExit('B04-C report page, SVG, or ZIP is missing')
+          with zipfile.ZipFile(archive) as bundle:
+              names = set(bundle.namelist())
+              if f'{route}/strategy-a-ci.json' not in names or f'{route}/record.json' not in names:
+                  raise SystemExit('B04-C offline archive is incomplete')
+          landing = (site / 'index.html').read_text()
+          if f'href="{route}/index.html"' not in landing or f'href="{route}.zip"' not in landing:
+              raise SystemExit('B04-C report is not linked from the complete Pages landing page')
+          print(route)
+          PY
+
+      - name: Check that the augmented artifact still targets current main
+        if: steps.artifact.outputs.found == 'true' && hashFiles('reports/algorithm-results/b04-c-strategy-a-verification-v1/record.json') != ''
+        id: head
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: python3 scripts/reports/check_deploy_head.py
+
+      - name: Upload the complete augmented Pages site
+        if: steps.artifact.outputs.found == 'true' && steps.head.outputs.current == 'true' && hashFiles('reports/algorithm-results/b04-c-strategy-a-verification-v1/record.json') != ''
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: build/report-site
+
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+        if: steps.artifact.outputs.found == 'true' && steps.head.outputs.current == 'true' && hashFiles('reports/algorithm-results/b04-c-strategy-a-verification-v1/record.json') != ''
+
+      - name: Deploy the complete augmented report site
+        if: steps.artifact.outputs.found == 'true' && steps.head.outputs.current == 'true' && hashFiles('reports/algorithm-results/b04-c-strategy-a-verification-v1/record.json') != ''
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

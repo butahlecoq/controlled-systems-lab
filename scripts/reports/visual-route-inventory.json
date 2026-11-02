@@ -1077,6 +1077,14 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_b04_c_strategy_a.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "trajectory.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_env717.py",
       "signal_count": 3,
       "asset_name_literals": [
@@ -1990,6 +1998,16 @@
         "trajectory.svg"
       ],
       "index_sha256": "a230a5ca5689a705316567268fe4e9deb48c997ce04a1b99bbd3bd56ac3e1977",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "b04-c-strategy-a-verification-v1",
+      "source_bundle": "b04-c-strategy-a-verification-v1",
+      "assets": [
+        "trajectory.svg"
+      ],
+      "index_sha256": "89a5c486f83bbc4eccea080679a947094d81f5a5e77061bcb697823be6185fb9",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B04-C corrected-track registered Strategy A verification</title>
+<style>
+:root{color-scheme:dark;--bg:#101923;--panel:#172431;--ink:#edf4f8;--muted:#b0c0cc;--line:#324656;--accent:#74d0ee}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,sans-serif}
+main{max-width:1100px;margin:auto;padding:clamp(1rem,4vw,3rem)}h1,h2{line-height:1.2}h1{font-size:clamp(2rem,5vw,3.3rem);max-width:22ch}h2{margin-top:2.5rem}
+p,li{max-width:82ch}a{color:var(--accent)}.lede,.muted{color:var(--muted)}.lede{font-size:1.15rem}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1rem 1.25rem;margin:1rem 0}
+figure{margin:1.5rem 0}figure img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:8px}
+figcaption{color:var(--muted)}table{border-collapse:collapse;max-width:900px;width:100%}th,td{text-align:left;border-bottom:1px solid var(--line);padding:.55rem .7rem;vertical-align:top}code{overflow-wrap:anywhere}
+</style></head><body><main>
+<p class="muted">Corrected-track result · exact represented-dyadic record · registered Strategy A functional verification</p>
+<h1>B04-C exact family: from rational certificate to Strategy A</h1>
+<p class="lede">This page joins an independent exact-rational mathematical record to the compiled Strategy A prepared-request test. The CI test is functional verification; it is not a measured solver run or a performance benchmark.</p>
+<div class="card"><strong>Result.</strong> The exact represented-dyadic objective is approximately <code>30.8991360300144</code>. The complete family is represented as bounded 16-control H-polytope with an exact affine lift to the 84 state/control coordinates. The compiled Strategy A test asserts that the prepared request returned <code>completed</code> and <code>CompleteOptimalFamily</code> under the registered B04-C verifier.</div>
+<h2>Pre-registered acceptance bands</h2>
+<table><thead><tr><th>Band</th><th>Verdict</th></tr></thead><tbody><tr><td><code>|J* - 30.899| &lt;= 0.0005</code></td><td>within pre-registered confirmation band</td></tr><tr><td><code>J* &lt; 30.8985</code></td><td>not applicable</td></tr><tr><td><code>J* &gt; 30.8995</code></td><td>not applicable</td></tr></tbody></table>
+<h2>Two distinct checks</h2>
+<table><thead><tr><th>Evidence</th><th>What it establishes</th></tr></thead><tbody>
+<tr><td>Independent exact-rational record</td><td>Feasibility, exact KKT stationarity, convex global optimality for the represented-dyadic profile, the unchanged pre-registered bands, and the 16-dimensional control fiber with its exact affine lift.</td></tr>
+<tr><td>Compiled Strategy A functional test</td><td>The prepared request completes, returns the complete optimal family with the expected 84-coordinate relation and representation, uses the registered verifier, and places its objective interval inside the confirmation band. The test also exercises a full-history membership boundary query.</td></tr>
+</tbody></table>
+<p>The mathematical record reports the exact corrected-track objective as approximately <code>30.8991360300144</code>. The Strategy A test asserts the interval bounds but does not save a separate numerical run record. No timing, speedup, or performance comparison is claimed.</p>
+<h2>Published-point reachability</h2>
+<p>The published rounded terminal point is reachable within its coordinate-wise rounding box. The exact residuals of the two terminal-plane functionals are:</p>
+<table><tbody><tr><th>Flow plane</th><td><code>-65554305551/125000000000</code></td></tr><tr><th>Stock plane</th><td><code>-14444449/1250000000</code></td></tr></tbody></table>
+<p>Reachability of the rounded point is separate from the optimality result.</p>
+<h2>Full optimal family and visual example</h2>
+<p>The exact record describes a bounded 16-control H-polytope with a lift into the 84 joint state/control coordinates <code>x0,...,x16,u0,...,u15</code>; the induced terminal set is a singleton. The plot shows one representative member only.</p>
+<figure><img src="trajectory.svg" alt="One representative B04-C history in the oxidizer (x1,x2) and fuel (x3,x4) phase planes."><figcaption>One representative corrected-track trajectory in the two requested phase planes. Other optimal control histories can have different intermediate states.</figcaption></figure>
+<h2>Model scope and historical context</h2>
+<p>Scenario <code>B04-c-exact-dyadic-20261102</code> uses the saved A39/A01/A40 family and represented-dyadic inputs. It is separate from <code>B04-historical</code> and <code>b04-reference-v1</code>, and does not reproduce a historical result. The A40 fourfold coefficient scaling retains an open unit-convention question; this run uses the archive's coefficients without endorsing a normalization.</p>
+<p>The published linear objective <code>30.899</code> and the four nonlinear rows below remain immutable context. This corrected-track result explains or reproduces none of the nonlinear rows.</p>
+<table><thead><tr><th>Published model row</th><th>Objective</th><th>Displayed terminal state</th></tr></thead><tbody><tr><td>frozen-coefficient regulator</td><td><code>368.45</code></td><td><code>(1190.4, 101.7, 455.12, -72.817)</code></td></tr><tr><td>nonlinear, optimal linear witness 1</td><td><code>41.855</code></td><td><code>(1200.5, -2.695, 449.72, 10.556)</code></td></tr><tr><td>nonlinear, optimal linear witness 2</td><td><code>65.874</code></td><td><code>(1200.5, 0.50887, 449.72, 17.561)</code></td></tr><tr><td>nonlinear, optimal linear witness 3</td><td><code>7.922</code></td><td><code>(1200.5, -6.366, 449.72, -1.475)</code></td></tr></tbody></table>
+<h2>Reproduce and inspect</h2>
+<ul><li><a href="record.json">Exact rational record</a></li><li><a href="verification.json">Independent exact-check result</a></li><li><a href="strategy-a-ci.json">Strategy A CI evidence and source hashes</a></li><li><a href="README.md">Reproduction notes and limitations</a></li><li><a href="manifest.json">Source evidence manifest</a></li></ul>
+<p>The registered test is <code>registered Strategy A publishes the compiled B04-C exact optimal family</code>. It ran in the <a href="https://github.com/butahlecoq/controlled-systems-lab/actions/runs/41467988977">successful exact-head Native C++20 matrix</a>; its source is at the pinned <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/cfe72885b4544e5b005c27395d805faec219a4fc">reviewed commit</a> (see the <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/cfe72885b4544e5b005c27395d805faec219a4fc/tests/synthesis/strategy_a/strategy_tests.cpp#L1869-L1893">test case</a>).</p>
+<p class="muted">This report contains no measured performance result. The exact mathematical record and the compiled functional test are separate evidence sources; neither is a historical reproduction.</p>
+</main></body></html>

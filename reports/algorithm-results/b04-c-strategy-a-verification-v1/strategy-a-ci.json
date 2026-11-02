@@ -1,0 +1,48 @@
+{
+  "claim_type": "functional_test_not_benchmark",
+  "run": {
+    "conclusion": "success",
+    "head_sha": "cfe72885b4544e5b005c27395d805faec219a4fc",
+    "run_id": 41467988977,
+    "status": "completed",
+    "url": "https://github.com/butahlecoq/controlled-systems-lab/actions/runs/41467988977",
+    "workflow": "Native C++20"
+  },
+  "scenario_id": "B04-c-exact-dyadic-20261102",
+  "schema": "csl.b04-c-strategy-a-ci-evidence/1",
+  "scope": "The exact-head Native C++20 matrix is functional test evidence. It is not a saved Strategy A numerical run, benchmark, timing profile, or performance comparison.",
+  "source_commit": "cfe72885b4544e5b005c27395d805faec219a4fc",
+  "source_files": {
+    "docs/contracts/b04-c-exact-family.md": "2c6110ef20ef534e29b61deffb00f9272de3e74c4e9e3b9e636adfa4008be5a7",
+    "include/csl/synthesis/b04_c_exact_family.hpp": "6f326203e47271493c9d6e5f0c9f9b241c1cf0dbe166182407897bebdf527462",
+    "src/registry/b04_c_exact_verifier.cpp": "596e4f46606a49ac863a58b6d77245319b5f5c90b2a656b6bbfff9dccc73a9f6",
+    "src/registry/compiled_verifiers.cpp": "5a3e379ae915becd1a7a1108c93dd296baba02b98dcdda2413d85aa26d95e71b",
+    "src/synthesis/b04_c_exact_family.cpp": "e0fa1a6ef8a5e4d9b71ff7227a7e58284d624c96e34dbc69a553fce1e262d43c",
+    "src/synthesis/b04_c_exact_family.hpp": "6f5ee1ef7b6c1b59f3a0b916c7f7d61af1dcef57b18bb597438808309f964266",
+    "src/synthesis/strategy_a/strategy.cpp": "05c14c195b5b2f1ccd3cd87be13826c646c952d2e0f79bd75ce75c112ca331a0",
+    "tests/synthesis/strategy_a/strategy_tests.cpp": "fea682a56c1839d1921ea8fbec124ffa25b2b69b58de8457d1d1890f230c33d9"
+  },
+  "successful_jobs": [
+    "route / route",
+    "Linux GCC 13 / highs installed package",
+    "Linux GCC 13 / core installed package",
+    "Linux GCC 13 / ASan and UBSan (public modules and consumers)",
+    "Release / Linux GCC 13 x64",
+    "Release / Windows MSVC x64",
+    "Release / Linux Clang 18 x64",
+    "Native validation"
+  ],
+  "test": {
+    "assertions": [
+      "termination_completed",
+      "complete_optimal_family",
+      "exact_relation_coordinates",
+      "requested_representation",
+      "objective_interval_inside_confirmation_band",
+      "registered_b04_c_verifier",
+      "full_history_membership_boundary_query"
+    ],
+    "name": "registered Strategy A publishes the compiled B04-C exact optimal family",
+    "target": "strategy_a_tests"
+  }
+}
