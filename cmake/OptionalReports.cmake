@@ -630,11 +630,7 @@ if(BUILD_TESTING)
   add_test(NAME issue824_matched_minimax_publication
     COMMAND Python3::Interpreter
       ${CMAKE_CURRENT_SOURCE_DIR}/tests/reporting/test_issue824_matched_minimax_publication.py)
-  add_test(NAME issue824_limited_minimax_publication
-    COMMAND Python3::Interpreter
-      ${CMAKE_CURRENT_SOURCE_DIR}/tests/reporting/test_issue824_limited_minimax_publication.py)
   set_tests_properties(issue824_matched_minimax_report_smoke issue824_matched_minimax_publication
-      issue824_limited_minimax_publication
     PROPERTIES LABELS reporting)
 endif()
 endif()

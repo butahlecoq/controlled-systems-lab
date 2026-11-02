@@ -290,8 +290,7 @@
         "geometry-reference-ellipsoid.svg",
         "geometry-reference-parallelotope.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 687
+      "disposition": "publication-validation-or-frozen-route"
     },
     {
       "source": "scripts/reports/exp824/make_ellipsoid_minimax_report.py",
