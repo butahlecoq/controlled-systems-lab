@@ -47,8 +47,13 @@ to its positive `u0` facet at `(1/4,0)`.
 ## Scope boundary
 
 The exact tests also check the slew-memory lift's coordinate projection and
-reconstruction. The current saved measurement report compares the direct
-full-history and lifted formulations only for `mpc02-slew-2d-v1`; the other
-three tracks still need their measured comparison and the broader temporal
-constraint fixtures required by issue #598. No performance ranking follows
-from this oracle.
+reconstruction. The four authored scenarios have a saved direct-joint Release
+measurement in
+[`mpc02-four-track-direct-v1`](../../reports/algorithm-results/mpc02-four-track-direct-v1/README.md).
+The separate
+[`mpc02-slew-formulation-v1`](../../reports/algorithm-results/mpc02-slew-formulation-v1/README.md)
+capture compares the direct full-history and exact one-step memory-lift
+formulations for the slew scenario only. It does not establish a lift for the
+L1-budget history rows. Both reports retain their raw attempts and describe
+their timing and assurance limits; neither supplies a general performance
+ranking or closes the broader temporal-constraint work in issue #598.

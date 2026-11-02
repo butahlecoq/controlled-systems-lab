@@ -2,7 +2,8 @@
 
 Date: 2026-10-26. Scope: exact authored cases and correctness evidence for
 [issue #598](https://github.com/butahlecoq/controlled-systems-lab/issues/598).
-No performance measurement or timing comparison is reported.
+This note is the analytic-fixture record; separate saved reports contain the
+subsequent measurements described under [Evidence boundary](#evidence-boundary).
 
 ## One model and objective, four scenario identities
 
@@ -97,12 +98,18 @@ profile. They do not establish relative solver speed, general implementation
 equivalence for arbitrary constraints, or complete optimal-family coverage
 from Strategy A.
 
-The issue's planning gate does not authorize a benchmark. Accordingly this
-note records no solver timing rows or resource/limiter measurements. A future
-measured study must use reviewed #94 orchestration, preserve the original and
-lifted dimensions separately, report solver/setup/conversion costs, and retain
-the exact run configurations and failures. Do not turn a single functional
-fixture into a method winner claim.
+The four direct-joint scenarios have a saved Release measurement in
+[`mpc02-four-track-direct-v1`](../../reports/algorithm-results/mpc02-four-track-direct-v1/README.md),
+with one warmup and seven measured attempts per scenario. A separate
+[`mpc02-slew-formulation-v1`](../../reports/algorithm-results/mpc02-slew-formulation-v1/README.md)
+bundle compares direct and exact one-step memory-lift formulations on the slew
+scenario, preserving original and lifted program sizes and lift/resolve cost.
+That small single-host pilot is explicitly inconclusive and has no limiter
+profile; the four-track direct measurements are descriptive baselines, not
+matched comparisons or solver rankings. These bundles preserve raw attempts,
+source/build metadata, and their stated evidence limits. They do not establish
+a memory lift for the L1-budget rows or complete the broader comparison
+acceptance work in issue #598.
 
 Release impact: the change adds source-distributed example JSON, documentation,
 and analytic figures. It changes no public API, dependency, installation
