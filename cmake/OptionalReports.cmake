@@ -691,6 +691,7 @@ set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/broken_triangle.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/pendulum_terminal.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/earth_orbit.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/unlimited_bolza.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scenarios/env717-sphere-game-pilot-v1.json
     ${ENV717_LIBRARY_INPUTS})
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/simple_control.cpp
@@ -727,6 +728,8 @@ file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/pendulum_ter
     ENV717_PENDULUM_DRIVER_SHA256)
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/earth_orbit.cpp
     ENV717_EARTH_ORBIT_DRIVER_SHA256)
+file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/env717/unlimited_bolza.cpp
+    ENV717_BOLZA_DRIVER_SHA256)
 file(SHA256 ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/scenarios/env717-sphere-game-pilot-v1.json
     ENV717_SPHERE_GAME_SCENARIO_SHA256)
 execute_process(COMMAND git status --porcelain -- src include
@@ -761,6 +764,7 @@ add_executable(csl_env717_multipoint_cost_game benchmarks/reporting/env717/multi
 add_executable(csl_env717_broken_triangle benchmarks/reporting/env717/broken_triangle.cpp)
 add_executable(csl_env717_pendulum_terminal benchmarks/reporting/env717/pendulum_terminal.cpp)
 add_executable(csl_env717_earth_orbit benchmarks/reporting/env717/earth_orbit.cpp)
+add_executable(csl_env717_unlimited_bolza benchmarks/reporting/env717/unlimited_bolza.cpp)
 target_link_libraries(csl_env717_simple_control PRIVATE CSL::finite_action_minimax)
 target_link_libraries(csl_env717_two_points PRIVATE CSL::finite_action_minimax CSL::finite_feedback)
 target_link_libraries(csl_env717_unequal_game PRIVATE CSL::finite_action_minimax)
@@ -795,6 +799,7 @@ target_include_directories(csl_env717_multipoint_cost_game SYSTEM PRIVATE ${csl_
 target_include_directories(csl_env717_broken_triangle SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_include_directories(csl_env717_pendulum_terminal SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_include_directories(csl_env717_earth_orbit SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
+target_include_directories(csl_env717_unlimited_bolza SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 target_compile_features(csl_env717_simple_control PRIVATE cxx_std_20)
 target_compile_features(csl_env717_two_points PRIVATE cxx_std_20)
 target_compile_features(csl_env717_unequal_game PRIVATE cxx_std_20)
@@ -832,6 +837,7 @@ if(BUILD_TESTING)
             $<TARGET_FILE:csl_env717_earth_orbit> --repetitions 1)
     set_tests_properties(env717_earth_orbit_smoke PROPERTIES LABELS reporting)
 endif()
+target_compile_features(csl_env717_unlimited_bolza PRIVATE cxx_std_20)
 target_compile_definitions(csl_env717_simple_control PRIVATE
     $<$<CONFIG:Release>:NDEBUG>
     CSL_ENV717_DRIVER_SHA256="${ENV717_DRIVER_SHA256}"
@@ -961,6 +967,15 @@ target_compile_definitions(csl_env717_pendulum_terminal PRIVATE
     CSL_ENV717_PENDULUM_ARCHITECTURE="${CMAKE_SYSTEM_PROCESSOR}"
     CSL_ENV717_PENDULUM_ALGORITHM_SOURCE_SHA256="${ENV717_ALGORITHM_SOURCE_SHA256}"
     CSL_ENV717_PENDULUM_SOURCE_COMMIT="${ENV717_SOURCE_COMMIT}")
+target_compile_definitions(csl_env717_unlimited_bolza PRIVATE
+    $<$<CONFIG:Release>:NDEBUG>
+    CSL_ENV717_BOLZA_DRIVER_SHA256="${ENV717_BOLZA_DRIVER_SHA256}"
+    CSL_ENV717_BOLZA_COMPILER_ID="${CMAKE_CXX_COMPILER_ID}"
+    CSL_ENV717_BOLZA_COMPILER_VERSION="${CMAKE_CXX_COMPILER_VERSION}"
+    CSL_ENV717_BOLZA_BUILD_TYPE="$<CONFIG>"
+    CSL_ENV717_BOLZA_ARCHITECTURE="${CMAKE_SYSTEM_PROCESSOR}"
+    CSL_ENV717_BOLZA_ALGORITHM_SHA256="${ENV717_ALGORITHM_SOURCE_SHA256}"
+    CSL_ENV717_BOLZA_SOURCE_COMMIT="${ENV717_SOURCE_COMMIT}")
 if(MSVC)
     target_compile_options(csl_env717_simple_control PRIVATE /W4 /WX /permissive-)
     target_compile_options(csl_env717_two_points PRIVATE /W4 /WX /permissive-)
@@ -976,6 +991,7 @@ if(MSVC)
     target_compile_options(csl_env717_multipoint_cost_game PRIVATE /W4 /WX /permissive-)
     target_compile_options(csl_env717_broken_triangle PRIVATE /W4 /WX /permissive-)
     target_compile_options(csl_env717_pendulum_terminal PRIVATE /W4 /WX /permissive-)
+    target_compile_options(csl_env717_unlimited_bolza PRIVATE /W4 /WX /permissive-)
 else()
     target_compile_options(csl_env717_simple_control PRIVATE -Wall -Wextra -Wpedantic -Werror)
     target_compile_options(csl_env717_two_points PRIVATE -Wall -Wextra -Wpedantic -Werror)
@@ -991,6 +1007,7 @@ else()
     target_compile_options(csl_env717_multipoint_cost_game PRIVATE -Wall -Wextra -Wpedantic -Werror)
     target_compile_options(csl_env717_broken_triangle PRIVATE -Wall -Wextra -Wpedantic -Werror)
     target_compile_options(csl_env717_pendulum_terminal PRIVATE -Wall -Wextra -Wpedantic -Werror)
+    target_compile_options(csl_env717_unlimited_bolza PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
 if(BUILD_TESTING)
     find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
@@ -1050,6 +1067,10 @@ if(BUILD_TESTING)
         ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/env717/check_pendulum_terminal.py
         $<TARGET_FILE:csl_env717_pendulum_terminal>)
     set_tests_properties(env717_pendulum_terminal_smoke PROPERTIES LABELS reporting)
+    add_test(NAME env717_unlimited_bolza_smoke COMMAND Python3::Interpreter
+        ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/env717/check_unlimited_bolza.py
+        $<TARGET_FILE:csl_env717_unlimited_bolza>)
+    set_tests_properties(env717_unlimited_bolza_smoke PROPERTIES LABELS reporting)
 endif()
 endif()
 

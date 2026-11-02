@@ -30,6 +30,8 @@ class Issue824LimitedMinimaxPublicationTest(unittest.TestCase):
         check = json.loads(files["check.json"])
         self.assertTrue(STAGER.report_source_identity.source_hashes_match_commit_or_checkout(
             ROOT, capture["source_commit"], capture["source_files_sha256"]))
+        self.assertFalse(STAGER.report_source_identity.source_hashes_match_commit_or_checkout(
+            ROOT, "0" * 40, capture["source_files_sha256"]))
         self.assertEqual(check["status"], "verified")
         self.assertEqual(check["measurement_samples_verified"], 25)
         self.assertEqual(resource["status"], "completed")

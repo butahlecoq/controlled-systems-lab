@@ -29,6 +29,7 @@ COMPOSED_SAVED_ROUTES = {
     "scripts/reports/ext04/continuous_report.py",
     "scripts/reports/ext04/h_policy_report.py",
     "scripts/reports/issue422/build_bundle.py",
+    "scripts/reports/stage_env717_unlimited_bolza.py",
     "scripts/reports/stage_mpc03.py",
     "scripts/reports/stage_mpc03_b08.py",
     "scripts/reports/mpc05/make_report.py",
@@ -110,6 +111,7 @@ SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
 SAVED_DATA_COMPANION_RENDERERS = {
     "scripts/reports/render_adaptive_ode_example.py",
     "scripts/reports/ext02/render_saved.py",
+    "scripts/reports/env717/check_unlimited_bolza.py",
     "benchmarks/reporting/review05/render_profile_matrix.py",
     "benchmarks/reporting/review05/render_dimension_ladder.py",
     "benchmarks/reporting/review05/render_constraint_ladder.py",

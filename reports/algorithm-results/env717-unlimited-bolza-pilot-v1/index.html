@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unlimited Bolza phase-plane example</title>
+<style>body{max-width:1100px;margin:2rem auto;padding:0 1rem;background:#101820;color:#e8eef2;font:16px/1.5 system-ui,sans-serif}a{color:#8ecbff}img{width:100%;height:auto;border:1px solid #40505a}table{border-collapse:collapse;width:100%}th,td{padding:.55rem;border-bottom:1px solid #40505a;text-align:left}code{overflow-wrap:anywhere}</style></head>
+<body><main><h1>Unlimited Bolza Problem</h1><p>Source-attributed double-integrator example with an analytic feedback reference, a source-step replay, and an exact finite-catalogue search.</p>
+<figure><img src="phase-plane.svg" alt="Position-velocity phase plane with continuous, sampled, and finite-catalogue trajectories"><figcaption>Position versus velocity; point markers show initial and terminal states.</figcaption></figure>
+<table><thead><tr><th>Track</th><th>Objective</th><th>Terminal (x, v)</th></tr></thead><tbody><tr><th>Continuous analytic reference</th><td>1.135557418637</td><td>(0.49663279, -0.86378357)</td></tr>
+<tr><th>Sampled source Euler replay</th><td>1.184807307433</td><td>(0.47641838, -0.90778796)</td></tr>
+<tr><th>Finite catalogue optimum</th><td>1.261827125000</td><td>(0.50500000, -1.00000000)</td></tr></tbody></table>
+<p>The finite result covers only the authored catalogue {-2,-1,0,1,2} over ten stages. It does not solve the original unbounded-control problem. Read the <a href="README.md">scope and reproduction notes</a>, inspect the <a href="result.json">raw result</a> and <a href="figure-data.json">figure data</a>, or open the <a href="phase-plane.svg">standalone SVG</a>.</p>
+<p>Upstream source identity: <a href="https://github.com/imm-rl-lab/optimal_control/tree/f4d76c60f4003f50954174e96eafd8e514bd5441/Environments/UnlimitedBolzaProblem">pinned environment</a> and analytic-agent file. This is supplementary to the <a href="https://butahlecoq.github.io/controlled-systems-lab/env717-two-points-33ebdad360671940fb54/index.html">TwoPointsOnParallelLines differential-game reachability example</a>.</p></main></body></html>

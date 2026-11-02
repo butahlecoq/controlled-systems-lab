@@ -563,6 +563,13 @@ FAMILIES = {
         "and independently replaying them through the nonlinear source map. It distinguishes affine-model "
         "selection from the best replayed candidate; this finite catalogue does not establish continuous-action "
         "or full-horizon optimality, and its timings make no performance-comparison claim."),
+    "env717-unlimited-bolza": Family(
+        r"env717-unlimited-bolza-[0-9a-f]{20}", "synthesis",
+        "UnlimitedBolza analytic and finite-catalogue pilot",
+        "Compares the source-derived double-integrator analytic reference, its sampled feedback replay, and an "
+        "exhaustive five-action finite-catalogue minimum. The position-velocity figure reports the authored "
+        "continuous objective separately from the finite Euler adaptation; this is not the original unbounded "
+        "continuous-action RL result or a performance comparison."),
     "syn06-verifier": Family(
         r"syn06-verifier-\d{8}-[0-9a-f]{64}", "verification", "Trajectory verification",
         "Re-checks two literal two-stage integrator witnesses against the original saved input "

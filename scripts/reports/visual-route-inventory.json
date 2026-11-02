@@ -286,6 +286,14 @@
       "follow_up_issue": 717
     },
     {
+      "source": "scripts/reports/env717/check_unlimited_bolza.py",
+      "signal_count": 5,
+      "asset_name_literals": [
+        "phase-plane.svg"
+      ],
+      "disposition": "analytic-reference-checked-saved-run-renderer"
+    },
+    {
       "source": "scripts/reports/env717/check_vanderpol.py",
       "signal_count": 3,
       "asset_name_literals": [
@@ -1179,6 +1187,14 @@
         "projections.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_env717_unlimited_bolza.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "phase-plane.svg"
+      ],
+      "disposition": "composes-or-copies-existing-saved-figure"
     },
     {
       "source": "scripts/reports/stage_env717_vanderpol.py",
@@ -2177,6 +2193,16 @@
         "projections.svg"
       ],
       "index_sha256": "40a37a09b2b16f0ac097e8c90269794c1b2667b80bb34c6a3bf7abf45e5df737",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 717
+    },
+    {
+      "route": "env717-unlimited-bolza-pilot-v1",
+      "source_bundle": "env717-unlimited-bolza-pilot-v1",
+      "assets": [
+        "phase-plane.svg"
+      ],
+      "index_sha256": "49a5b6cceb81e27493d9c0580cf1137c807f1be0b28f2819c2e0a29485e2da98",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 717
     },
