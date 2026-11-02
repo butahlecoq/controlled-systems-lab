@@ -1,0 +1,92 @@
+{
+  "artifacts": {
+    "README.md": "1c9ccd331e43080f8a26de200a0904e35e139d67146e19f36ae0823b6129c5ff",
+    "diagnostic-attempts.jsonl": "a7ac34e4c88a783373952449636e49d55d02efb8c9c4518ac0a84c7e6d6e0d32",
+    "gmon.out": "a52ed58dc341138faa9e4c543dca44d751eb0647a12216946aea26f4ccb9b3de",
+    "gprof-flat-profile.txt": "3ad5272970728966872f1a1dcd8f6365ea7892b1da103340096534d055c71cc9",
+    "gprof-osqp-callgraph.txt": "1f20e13d5ca36a0025ccd54ef1e611a1f8047a327d18e45157f6f6f45c3e728d",
+    "profile-command.txt": "76068b7441c35c3e68772f39350bb932608dd1adb6c5be4e64be21594dec61d1"
+  },
+  "build": {
+    "c_flags_release": "-O3 -DNDEBUG -g -pg -fno-omit-frame-pointer",
+    "cmake": "3.31.6",
+    "configuration": "Release with GNU gprof instrumentation",
+    "cxx_flags_release": "-O3 -DNDEBUG -g -pg -fno-omit-frame-pointer",
+    "exe_linker_flags_release": "-pg",
+    "gcc": "16.2.1",
+    "generator": "Ninja",
+    "gprof": "2.47"
+  },
+  "classification": "diagnostic_profiler_run_not_benchmark_observations",
+  "profile_findings": {
+    "osqp_solve_callgraph_total_percent": 91.0,
+    "osqp_solve_calls": 280,
+    "sampled_cpu_self_percent": {
+      "QDLDL_Lsolve": 22.02,
+      "QDLDL_Ltsolve": 34.52,
+      "solve_linsys_qdldl": 11.9
+    },
+    "source_locations": {
+      "QDLDL_Lsolve": "qdldl.c:265-277",
+      "QDLDL_Ltsolve": "qdldl.c:280-292",
+      "solve_linsys_qdldl": "qdldl_interface.c:418-443"
+    }
+  },
+  "profile_run": {
+    "attempt_rows": 560,
+    "backend_order": "alternating",
+    "cpu_affinity": "CPU 0",
+    "fixtures": [
+      "ts01-exact-v1",
+      "ts02-constant-v1",
+      "ts03-singular-v1",
+      "infeasible-integrator-v1",
+      "unbounded-integrator-v1",
+      "double-integrator-421-v1",
+      "b04-reference-v1"
+    ],
+    "logical_cpu_count": 8,
+    "method_counts": {
+      "hpipm-structured-ocp-qp": 280,
+      "osqp-sparse-qp": 280
+    },
+    "note": "Peak memory was not captured from the temporary cgroup scope.",
+    "observed_peak_memory_bytes": null,
+    "outcome_counts": {
+      "infeasible": 40,
+      "optimal": 360,
+      "unbounded": 40,
+      "undetermined": 120
+    },
+    "repetitions_per_fixture": 20,
+    "requested_limits": {
+      "cgroup_v2_memory_bytes": 8589934592,
+      "process_tree_wall_seconds": 300,
+      "swap_bytes": 0
+    },
+    "start_mode_counts": {
+      "cold": 280,
+      "warm_if_available": 280
+    },
+    "termination_counts": {
+      "completed": 560
+    }
+  },
+  "schema": "csl.mpc01-source-mapped-profile/1",
+  "source": {
+    "blasfeo_revision": "d6251233923c9b475fe894fb729fb63ab693e301",
+    "commit": "dd3b260b847325bc5821b70fea7cbe812fbdacfe",
+    "hpipm_revision": "e3a56c1caddd7f12d125d84f337b9a9e5c186271",
+    "osqp_qdldl_interface": {
+      "path": "algebra/_common/lin_sys/qdldl/qdldl_interface.c",
+      "sha256": "419cbf3f84e1d5ae3d2d23df2d2c5800d0e6575d3663fa3ba3cc00a9cd1a11aa"
+    },
+    "osqp_version": "1.0.0",
+    "qdldl_source": {
+      "path": "src/qdldl.c",
+      "sha256": "ecbc2e131ac5b76b8afe5e5ea244bb966b1bedc10ae12b087d39ce3a982844a7"
+    },
+    "qdldl_version": "0.1.8",
+    "runner_sha256": "524758e6e8399991435de39c82d16922d92484dab2fc7746c87c16e57dd8b176"
+  }
+}
