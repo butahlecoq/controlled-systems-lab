@@ -167,7 +167,9 @@ TEST_CASE("nonfuel planar geometry preserves named coordinate order against an i
     REQUIRE(std::holds_alternative<ar::StageProjectionSuccess>(batch.records[0].outcome));
     const auto& projection = std::get<ar::StageProjectionSuccess>(batch.records[0].outcome).projection;
     CHECK(projection.coordinates[0].label == "north");
+    CHECK(projection.coordinates[0].unit == "m");
     CHECK(projection.coordinates[1].label == "east");
+    CHECK(projection.coordinates[1].unit == "m");
     const std::vector<Point> expected{{0, 0}, {0, 2}, {3, 2}, {3, 0}};
     CHECK(hull(projected_vertices(projection.projected_relation)) == hull(expected));
 }
@@ -197,7 +199,9 @@ TEST_CASE("three-state nonfuel simplex uses declared names and reordered relatio
     REQUIRE(std::holds_alternative<ar::StageProjectionSuccess>(batch.records[0].outcome));
     const auto& projection = std::get<ar::StageProjectionSuccess>(batch.records[0].outcome).projection;
     CHECK(projection.coordinates[0].label == "east");
+    CHECK(projection.coordinates[0].unit == "m");
     CHECK(projection.coordinates[1].label == "north");
+    CHECK(projection.coordinates[1].unit == "m");
     const std::vector<Point> expected{{0, 0}, {2, 0}, {0, 3}, {0, 0}};
     CHECK(hull(projected_vertices(projection.projected_relation)) == hull(expected));
 }
