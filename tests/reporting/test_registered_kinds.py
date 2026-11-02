@@ -638,7 +638,9 @@ class RegisteredKindTests(unittest.TestCase):
             for report in catalogue['reports']:
                 rid=report['report_id']
                 self.assertIn(rid+'/index.html',index)
-                raw_name=('results.jsonl' if report['report_kind']=='issue6-b07-reference' else
+                policy=site.publication_policies.maybe_for_kind(report['report_kind'])
+                raw_name=(policy.csv_name if policy else
+                          'results.jsonl' if report['report_kind']=='issue6-b07-reference' else
                           'manifest-correction.json' if report['report_kind']=='issue6-b06-manifest-correction' else
                           'records.json')
                 self.assertIn(rid+'/'+raw_name,index)
