@@ -1,0 +1,296 @@
+{
+  "claims": [
+    "source-step equations and reward are independently re-expressed",
+    "the best plan is exact over the declared finite catalogue under binary64 evaluation",
+    "timings are descriptive for one implementation and do not compare algorithms"
+  ],
+  "environment": "Pendulum-v0",
+  "finite_catalogue_optimum": {
+    "objective_cost": 41.05935727695169,
+    "reward": -41.05935727695169,
+    "selected_action_indices": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      2
+    ],
+    "selected_actions_torque_nm": [
+      -2.0,
+      -2.0,
+      -2.0,
+      -2.0,
+      -2.0,
+      -2.0,
+      -2.0,
+      -2.0,
+      -2.0,
+      0.0
+    ],
+    "terminal_state": [
+      2.6800700083223377,
+      4.118594243038505
+    ],
+    "trajectory": [
+      {
+        "action_torque_nm": -2.0,
+        "step": 0,
+        "theta_dot_rad_s": 0.0,
+        "theta_rad": 1.5,
+        "time_seconds": 0.0
+      },
+      {
+        "action_torque_nm": -2.0,
+        "step": 1,
+        "theta_dot_rad_s": 0.4481212399530408,
+        "theta_rad": 1.522406061997652,
+        "time_seconds": 0.05
+      },
+      {
+        "action_torque_nm": -2.0,
+        "step": 2,
+        "theta_dot_rad_s": 0.897243304641161,
+        "theta_rad": 1.56726822722971,
+        "time_seconds": 0.1
+      },
+      {
+        "action_torque_nm": -2.0,
+        "step": 3,
+        "theta_dot_rad_s": 1.3472386368385496,
+        "theta_rad": 1.6346301590716374,
+        "time_seconds": 0.15000000000000002
+      },
+      {
+        "action_torque_nm": -2.0,
+        "step": 4,
+        "theta_dot_rad_s": 1.7957111213285895,
+        "theta_rad": 1.724415715138067,
+        "time_seconds": 0.2
+      },
+      {
+        "action_torque_nm": -2.0,
+        "step": 5,
+        "theta_dot_rad_s": 2.236878917368048,
+        "theta_rad": 1.8362596610064694,
+        "time_seconds": 0.25
+      },
+      {
+        "action_torque_nm": -2.0,
+        "step": 6,
+        "theta_dot_rad_s": 2.6606072016948454,
+        "theta_rad": 1.9692900210912117,
+        "time_seconds": 0.30000000000000004
+      },
+      {
+        "action_torque_nm": -2.0,
+        "step": 7,
+        "theta_dot_rad_s": 3.051842100640518,
+        "theta_rad": 2.1218821261232375,
+        "time_seconds": 0.35000000000000003
+      },
+      {
+        "action_torque_nm": -2.0,
+        "step": 8,
+        "theta_dot_rad_s": 3.3908094652775684,
+        "theta_rad": 2.291422599387116,
+        "time_seconds": 0.4
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 9,
+        "theta_dot_rad_s": 3.6543539356659287,
+        "theta_rad": 2.4741402961704124,
+        "time_seconds": 0.45
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 10,
+        "theta_dot_rad_s": 4.118594243038505,
+        "theta_rad": 2.6800700083223377,
+        "time_seconds": 0.5
+      }
+    ]
+  },
+  "pilot_adaptation": {
+    "action_catalogue_torque_nm": [
+      -2.0,
+      -1.0,
+      0.0,
+      1.0,
+      2.0
+    ],
+    "claim_boundary": "exact minimum over this 5^10 binary64 finite catalogue and authored initial state only; not continuous-action or full-horizon optimality",
+    "horizon_seconds": 0.5,
+    "horizon_steps": 10,
+    "initial_state": [
+      1.5,
+      0.0
+    ],
+    "initial_state_choice": "authored reproducible state inside the Gym reset support",
+    "objective": "minimize the sum of source per-step costs over the finite horizon",
+    "plan_count": 9765625,
+    "semantics": "fixed open-loop action sequences; one torque per 0.05-second source step; no disturbance"
+  },
+  "provenance": {
+    "architecture": "x86_64",
+    "build_type": "Release",
+    "compiler_id": "GNU",
+    "compiler_version": "16.2.1",
+    "driver_sha256": "37cc2ccf5059e841c659d8d5ac82374a5a76e15af184f29c0de33a31cee64214",
+    "source_commit": "f03d53f0df62d591417a7587de7dfc4fa6aac494"
+  },
+  "runtime_measurement": {
+    "comparison": "single-adapter descriptive measurement; no comparator or speedup claim",
+    "failed_repetitions": 0,
+    "maximum_elapsed_ns": 2517125881,
+    "measured_repetitions": 7,
+    "median_elapsed_ns": 2498552101,
+    "metric": "finite_catalogue_enumeration_elapsed",
+    "minimum_elapsed_ns": 2488719985,
+    "raw_elapsed_ns": [
+      2490108108,
+      2505767721,
+      2503261149,
+      2491979665,
+      2498552101,
+      2488719985,
+      2517125881
+    ],
+    "schema": "csl.env717-runtime-measurement/1",
+    "scope": "steady_clock interval for decoding and evaluating every fixed 10-action plan over the source dynamics; excludes JSON generation, Python replay, plotting, and report writes",
+    "successful_repetitions": 7,
+    "timing_clock": "std::chrono::steady_clock",
+    "unit": "ns",
+    "warmup_repetitions": 2,
+    "worker_threads": 1
+  },
+  "schema": "csl.env717-pendulum/1",
+  "search": {
+    "complete": true,
+    "complete_plan_count": 9765625,
+    "evaluated_plan_count": 9765625,
+    "minimizer_count": 1,
+    "selected_plan_index": 3906250
+  },
+  "simulator_commit": "c755d5c35a25ab118746e2ba885894ff66fb8c43",
+  "simulator_license": "MIT",
+  "simulator_registry_blob": "a90b0370730e74d783971a1a3f0771c5a2fb572e",
+  "simulator_registry_source": "gym/envs/__init__.py",
+  "simulator_repository": "openai/gym",
+  "simulator_source": "gym/envs/classic_control/pendulum.py",
+  "simulator_source_blob": "10ced4d43d218fbf0bb344b3bbc006fcaa7f8362",
+  "simulator_version": "v0.21.0",
+  "source_model": {
+    "dynamics": "new_theta_dot=clip(theta_dot+(3*g/(2*l)*sin(theta)+3/(m*l^2)*u)*dt,-8,8); new_theta=theta+new_theta_dot*dt",
+    "gravity_m_s2": 10.0,
+    "length_m": 1.0,
+    "mass_kg": 1.0,
+    "max_speed_rad_s": 8.0,
+    "max_torque_nm": 2.0,
+    "observation": "[cos(theta), sin(theta), theta_dot]",
+    "reset": "Gym Pendulum-v0 samples theta uniformly from [-pi,pi] and theta_dot from [-1,1]",
+    "sample_period_seconds": 0.05,
+    "state_order": [
+      "theta_rad",
+      "theta_dot_rad_s"
+    ],
+    "step_cost": "angle_normalize(theta)^2 + 0.1*theta_dot^2 + 0.001*u^2, evaluated before the state update; reward is its negative",
+    "time_limit_steps": 200
+  },
+  "source_notebook": "Environments/Pendulum/Pendulum.ipynb",
+  "source_notebook_blob": "db58eb7779d84a3a5032288734d61f6d6dcdba09",
+  "source_repository_commit": "f4d76c60f4003f50954174e96eafd8e514bd5441",
+  "upstream_repository_license": "no license declared in upstream optimal_control repository metadata; this report re-expresses equations and copies no upstream implementation",
+  "zero_torque_baseline": {
+    "objective_cost": 60.19579340295621,
+    "reward": -60.19579340295621,
+    "terminal_state": [
+      3.3581445542760537,
+      5.677358650706059
+    ],
+    "trajectory": [
+      {
+        "action_torque_nm": 0.0,
+        "step": 0,
+        "theta_dot_rad_s": 0.0,
+        "theta_rad": 1.5,
+        "time_seconds": 0.0
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 1,
+        "theta_dot_rad_s": 0.7481212399530408,
+        "theta_rad": 1.537406061997652,
+        "time_seconds": 0.05
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 2,
+        "theta_dot_rad_s": 1.4977031876273805,
+        "theta_rad": 1.612291221379021,
+        "time_seconds": 0.1
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 3,
+        "theta_dot_rad_s": 2.2470575954147867,
+        "theta_rad": 1.7246441011497604,
+        "time_seconds": 0.15000000000000002
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 4,
+        "theta_dot_rad_s": 2.988199162107718,
+        "theta_rad": 1.8740540592551462,
+        "time_seconds": 0.2
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 5,
+        "theta_dot_rad_s": 3.703975683849409,
+        "theta_rad": 2.0592528434476165,
+        "time_seconds": 0.25
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 6,
+        "theta_dot_rad_s": 4.3662693417501295,
+        "theta_rad": 2.277566310535123,
+        "time_seconds": 0.30000000000000004
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 7,
+        "theta_dot_rad_s": 4.936616854261666,
+        "theta_rad": 2.5243971532482066,
+        "time_seconds": 0.35000000000000003
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 8,
+        "theta_dot_rad_s": 5.3706796217814095,
+        "theta_rad": 2.792931134337277,
+        "time_seconds": 0.4
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 9,
+        "theta_dot_rad_s": 5.626909748069475,
+        "theta_rad": 3.0742766217407507,
+        "time_seconds": 0.45
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 10,
+        "theta_dot_rad_s": 5.677358650706059,
+        "theta_rad": 3.3581445542760537,
+        "time_seconds": 0.5
+      }
+    ]
+  }
+}

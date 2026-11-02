@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 680" role="img" aria-labelledby="title desc">
+<title id="title">Pendulum finite-action phase portrait</title>
+<desc id="desc">Theta versus angular velocity for the selected finite-catalogue plan and zero-torque baseline.</desc>
+<rect width="1000" height="680" fill="#101820"/>
+<text x="500" y="38" text-anchor="middle" fill="#f3f7f9" font-family="sans-serif" font-size="22">Pendulum-v0: angle–angular velocity</text>
+<line x1="100.00" y1="95.0" x2="100.00" y2="535.0" stroke="#344653"/>
+<text x="100.00" y="557.0" text-anchor="middle" fill="#b9c6ce" font-family="sans-serif" font-size="12">1.351</text>
+<line x1="100.0" y1="535.00" x2="860.0" y2="535.00" stroke="#344653"/>
+<text x="88.0" y="539.00" text-anchor="end" fill="#b9c6ce" font-family="sans-serif" font-size="12">-0.454</text>
+<line x1="252.00" y1="95.0" x2="252.00" y2="535.0" stroke="#344653"/>
+<text x="252.00" y="557.0" text-anchor="middle" fill="#b9c6ce" font-family="sans-serif" font-size="12">1.782</text>
+<line x1="100.0" y1="447.00" x2="860.0" y2="447.00" stroke="#344653"/>
+<text x="88.0" y="451.00" text-anchor="end" fill="#b9c6ce" font-family="sans-serif" font-size="12">0.863</text>
+<line x1="404.00" y1="95.0" x2="404.00" y2="535.0" stroke="#344653"/>
+<text x="404.00" y="557.0" text-anchor="middle" fill="#b9c6ce" font-family="sans-serif" font-size="12">2.214</text>
+<line x1="100.0" y1="359.00" x2="860.0" y2="359.00" stroke="#344653"/>
+<text x="88.0" y="363.00" text-anchor="end" fill="#b9c6ce" font-family="sans-serif" font-size="12">2.180</text>
+<line x1="556.00" y1="95.0" x2="556.00" y2="535.0" stroke="#344653"/>
+<text x="556.00" y="557.0" text-anchor="middle" fill="#b9c6ce" font-family="sans-serif" font-size="12">2.645</text>
+<line x1="100.0" y1="271.00" x2="860.0" y2="271.00" stroke="#344653"/>
+<text x="88.0" y="275.00" text-anchor="end" fill="#b9c6ce" font-family="sans-serif" font-size="12">3.497</text>
+<line x1="708.00" y1="95.0" x2="708.00" y2="535.0" stroke="#344653"/>
+<text x="708.00" y="557.0" text-anchor="middle" fill="#b9c6ce" font-family="sans-serif" font-size="12">3.076</text>
+<line x1="100.0" y1="183.00" x2="860.0" y2="183.00" stroke="#344653"/>
+<text x="88.0" y="187.00" text-anchor="end" fill="#b9c6ce" font-family="sans-serif" font-size="12">4.814</text>
+<line x1="860.00" y1="95.0" x2="860.00" y2="535.0" stroke="#344653"/>
+<text x="860.00" y="557.0" text-anchor="middle" fill="#b9c6ce" font-family="sans-serif" font-size="12">3.507</text>
+<line x1="100.0" y1="95.00" x2="860.0" y2="95.00" stroke="#344653"/>
+<text x="88.0" y="99.00" text-anchor="end" fill="#b9c6ce" font-family="sans-serif" font-size="12">6.132</text>
+<rect x="100.0" y="95.0" width="760.0" height="440.0" fill="none" stroke="#91a2ad" stroke-width="1.5"/>
+<text x="480.0" y="589.0" text-anchor="middle" fill="#e8eef2" font-family="sans-serif" font-size="16">angle theta (rad)</text>
+<text x="26" y="315.0" transform="rotate(-90 26 315.0)" text-anchor="middle" fill="#e8eef2" font-family="sans-serif" font-size="16">angular velocity (rad/s)</text>
+<polyline points="152.41,504.66 160.31,474.72 176.13,444.71 199.88,414.64 231.54,384.68 270.98,355.21 317.88,326.90 371.69,300.76 431.47,278.11 495.89,260.50 568.50,229.49" fill="none" stroke="#2e8b57" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="152.41" cy="504.66" r="5" fill="#2e8b57" stroke="#101820" stroke-width="1.5"/>
+<circle cx="568.50" cy="229.49" r="5" fill="#2e8b57" stroke="#101820" stroke-width="1.5"/>
+<polyline points="152.41,504.66 165.60,454.67 192.01,404.59 231.62,354.53 284.30,305.01 349.60,257.19 426.58,212.94 513.61,174.83 608.29,145.83 707.50,128.72 807.59,125.34" fill="none" stroke="#ed7d31" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="152.41" cy="504.66" r="5" fill="#ed7d31" stroke="#101820" stroke-width="1.5"/>
+<circle cx="807.59" cy="125.34" r="5" fill="#ed7d31" stroke="#101820" stroke-width="1.5"/>
+<line x1="260" y1="600" x2="294" y2="600" stroke="#2e8b57" stroke-width="3"/>
+<text x="304" y="605" fill="#d7e0e5" font-family="sans-serif" font-size="13">finite-catalogue optimum</text>
+<line x1="260" y1="624" x2="294" y2="624" stroke="#ed7d31" stroke-width="3"/>
+<text x="304" y="629" fill="#d7e0e5" font-family="sans-serif" font-size="13">zero-torque baseline</text>
+<text x="500" y="665" text-anchor="middle" fill="#9badb8" font-family="sans-serif" font-size="12">Initial state (theta, theta_dot)=(1.50, 0.00); 5 actions; 10 steps</text>
+</svg>

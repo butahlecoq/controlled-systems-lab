@@ -1,0 +1,173 @@
+{
+  "coordinates": [
+    "theta_rad",
+    "theta_dot_rad_s"
+  ],
+  "finite_catalogue": {
+    "action_count": 5,
+    "horizon_steps": 10,
+    "minimizer_count": 1,
+    "plan_count": 9765625
+  },
+  "schema": "csl.env717-figure-data/1",
+  "tracks": {
+    "finite_catalogue_optimum": [
+      {
+        "action_torque_nm": -2.0,
+        "step": 0,
+        "theta_dot_rad_s": 0.0,
+        "theta_rad": 1.5,
+        "time_seconds": 0.0
+      },
+      {
+        "action_torque_nm": -2.0,
+        "step": 1,
+        "theta_dot_rad_s": 0.4481212399530408,
+        "theta_rad": 1.522406061997652,
+        "time_seconds": 0.05
+      },
+      {
+        "action_torque_nm": -2.0,
+        "step": 2,
+        "theta_dot_rad_s": 0.897243304641161,
+        "theta_rad": 1.56726822722971,
+        "time_seconds": 0.1
+      },
+      {
+        "action_torque_nm": -2.0,
+        "step": 3,
+        "theta_dot_rad_s": 1.3472386368385496,
+        "theta_rad": 1.6346301590716374,
+        "time_seconds": 0.15000000000000002
+      },
+      {
+        "action_torque_nm": -2.0,
+        "step": 4,
+        "theta_dot_rad_s": 1.7957111213285895,
+        "theta_rad": 1.724415715138067,
+        "time_seconds": 0.2
+      },
+      {
+        "action_torque_nm": -2.0,
+        "step": 5,
+        "theta_dot_rad_s": 2.236878917368048,
+        "theta_rad": 1.8362596610064694,
+        "time_seconds": 0.25
+      },
+      {
+        "action_torque_nm": -2.0,
+        "step": 6,
+        "theta_dot_rad_s": 2.6606072016948454,
+        "theta_rad": 1.9692900210912117,
+        "time_seconds": 0.30000000000000004
+      },
+      {
+        "action_torque_nm": -2.0,
+        "step": 7,
+        "theta_dot_rad_s": 3.051842100640518,
+        "theta_rad": 2.1218821261232375,
+        "time_seconds": 0.35000000000000003
+      },
+      {
+        "action_torque_nm": -2.0,
+        "step": 8,
+        "theta_dot_rad_s": 3.3908094652775684,
+        "theta_rad": 2.291422599387116,
+        "time_seconds": 0.4
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 9,
+        "theta_dot_rad_s": 3.6543539356659287,
+        "theta_rad": 2.4741402961704124,
+        "time_seconds": 0.45
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 10,
+        "theta_dot_rad_s": 4.118594243038505,
+        "theta_rad": 2.6800700083223377,
+        "time_seconds": 0.5
+      }
+    ],
+    "zero_torque_baseline": [
+      {
+        "action_torque_nm": 0.0,
+        "step": 0,
+        "theta_dot_rad_s": 0.0,
+        "theta_rad": 1.5,
+        "time_seconds": 0.0
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 1,
+        "theta_dot_rad_s": 0.7481212399530408,
+        "theta_rad": 1.537406061997652,
+        "time_seconds": 0.05
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 2,
+        "theta_dot_rad_s": 1.4977031876273805,
+        "theta_rad": 1.612291221379021,
+        "time_seconds": 0.1
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 3,
+        "theta_dot_rad_s": 2.2470575954147867,
+        "theta_rad": 1.7246441011497604,
+        "time_seconds": 0.15000000000000002
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 4,
+        "theta_dot_rad_s": 2.988199162107718,
+        "theta_rad": 1.8740540592551462,
+        "time_seconds": 0.2
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 5,
+        "theta_dot_rad_s": 3.703975683849409,
+        "theta_rad": 2.0592528434476165,
+        "time_seconds": 0.25
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 6,
+        "theta_dot_rad_s": 4.3662693417501295,
+        "theta_rad": 2.277566310535123,
+        "time_seconds": 0.30000000000000004
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 7,
+        "theta_dot_rad_s": 4.936616854261666,
+        "theta_rad": 2.5243971532482066,
+        "time_seconds": 0.35000000000000003
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 8,
+        "theta_dot_rad_s": 5.3706796217814095,
+        "theta_rad": 2.792931134337277,
+        "time_seconds": 0.4
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 9,
+        "theta_dot_rad_s": 5.626909748069475,
+        "theta_rad": 3.0742766217407507,
+        "time_seconds": 0.45
+      },
+      {
+        "action_torque_nm": 0.0,
+        "step": 10,
+        "theta_dot_rad_s": 5.677358650706059,
+        "theta_rad": 3.3581445542760537,
+        "time_seconds": 0.5
+      }
+    ]
+  }
+}

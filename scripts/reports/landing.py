@@ -496,6 +496,15 @@ FAMILIES = {
         "The upstream step() currently raises NameError after updating its state; this report "
         "independently re-expresses the recorded equations and reward, so it is not a direct run "
         "of that class or a continuous-action optimum."),
+    "env717-pendulum": Family(
+        r"env717-pendulum-[0-9a-f]{20}", "synthesis",
+        "Gym Pendulum finite-action control pilot",
+        "Replays the pinned Gym v0.21.0 two-state dynamics and exhaustively evaluates all "
+        "9,765,625 ten-step open-loop torque plans from the authored state (1.5, 0). The phase "
+        "portrait shows angle versus angular velocity and the selected finite-catalogue path. "
+        "This is an exact minimum only over the stated finite action catalogue and horizon; it "
+        "does not claim continuous-action or full-horizon optimality, minimax control, or a "
+        "performance comparison."),
     "env717-cartpole": Family(
         r"env717-cartpole-[0-9a-f]{20}", "synthesis",
         "CartPole finite open-loop control pilot",

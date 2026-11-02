@@ -45,6 +45,7 @@ not differential games:
 | `DubinsCar_Terminal` | [report](../../reports/algorithm-results/env717-dubins-car-pilot-v1/README.md) | finite open-loop terminal-control catalogue |
 | `PendulumTerminal` | [report](../../reports/algorithm-results/env717-pendulum-terminal-pilot-v1/README.md) | finite-action terminal-control pilot |
 | `VanDerPol` | [report](../../reports/algorithm-results/env717-vanderpol-pilot-v1/README.md) | equation-replayed finite-action oscillator pilot; upstream `step()` raises `NameError` |
+| `Pendulum` | [report](../../reports/algorithm-results/env717-pendulum-pilot-v1/README.md) | Gym v0.21.0 source-qualified finite-action open-loop pilot; exact only over the authored 5-action, 10-step catalogue |
 
 The Van der Pol artifact is not a direct execution of the upstream class: it
 re-expresses the pinned equations because the source's return tuple references
