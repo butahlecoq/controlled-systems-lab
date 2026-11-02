@@ -68,8 +68,9 @@ uses this verifier at source commit
 zero failures and the clean Release build output is retained. Its report and
 standalone 2D example are saved in
 `ext07-hybrid-two-parameter-8ad871b5ea29fc7b`. Exhaustive independent
-continuous-family oracle coverage, resource-scale evidence, and main-only Pages
-URL/hash verification remain open.
+continuous-family oracle coverage and resource-scale evidence remain open.
+Main-only Pages URL/hash verification for the two published bundles passed on
+2026-11-02; see the [published-results verification record](../../../architecture/published-algorithm-results.md#ext-07-hybrid-profile-report).
 The EXT-07 report set includes a measured one-step scalar interval case, an
 earlier two-control polygon-verifier bundle, and a current two-control bundle
 using `ExactLinearHHybridFamilyVerifier`. Each bundle retains raw rows and an
@@ -80,5 +81,5 @@ for a scalar linear objective. The visual gallery also contains an analytic
 constant-zero objective illustration with coupled triangular and quadrilateral
 feasible sets. It links to the measured report while describing the distinct
 geometry and objective. These bounded examples are not scalability results or
-a completion claim. The main-only Pages URL and live hashes remain pending
-until publication succeeds.
+a completion claim. Main-only Pages URL/hash verification passed for the two
+published bundles on 2026-11-02; see the [verification record](../../../architecture/published-algorithm-results.md#ext-07-hybrid-profile-report).
