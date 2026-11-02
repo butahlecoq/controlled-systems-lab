@@ -1,0 +1,12 @@
+{
+  "attempt_count": 2,
+  "attempts_sha256": "3033ec0ac6966a0e7e88d35e4c48c70cde30f40315252aa08a113cabb7a54246",
+  "case_sha256": "bc9e1b804b7878cb0da5c28c030893e1b41e7a2a34cb86b1c0fb8380ec780f6d",
+  "repetition_indices": [
+    0,
+    4
+  ],
+  "runner_source_commit": "452db1ceb0312607fe7791b5ff4d84a2730df6ff",
+  "schema": "csl.mpc01-native-smoke-figure/1",
+  "selection": "one actual cold trajectory per solver, solve-time sample nearest to that solver median across five repetitions"
+}

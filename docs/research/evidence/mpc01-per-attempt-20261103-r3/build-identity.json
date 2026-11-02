@@ -1,0 +1,38 @@
+{
+  "binary_path": "/home/butahlecoq/.local/share/codex/build/mpc01-per-attempt-20261103/csl_mpc01_report",
+  "binary_sha256": "7e33a46cab540882ba84aecf23649c6c7aa81b143a2fe8bb36dbf66178ef0dc7",
+  "build_type": "Release",
+  "cmake_cache_path": "/home/butahlecoq/.local/share/codex/build/mpc01-per-attempt-20261103/CMakeCache.txt",
+  "cmake_version": "3.31.6",
+  "cxx_compiler": "/usr/bin/c++",
+  "cxx_compiler_id": "GNU",
+  "cxx_compiler_version": "16.2.1",
+  "dependency_pins": {
+    "blasfeo": "d6251233923c9b475fe894fb729fb63ab693e301",
+    "hpipm": "e3a56c1caddd7f12d125d84f337b9a9e5c186271",
+    "osqp": "1.0.0"
+  },
+  "mpc01_report_enabled": "ON",
+  "postprocess_sources": {
+    "scripts/reports/mpc01/b04_native_smoke_projection.py": "6f9289ef14864c9fbcd4ddfeed686071e89255176471d60cc9f2df51753c3722",
+    "scripts/reports/mpc01/summarize_per_attempt.py": "5f0146a7647d0e95227f1001870e5e14e3a4799345179f78465059e38e9b84d3"
+  },
+  "release_flags": {
+    "c": "-O3 -DNDEBUG",
+    "cxx": "-O3 -DNDEBUG"
+  },
+  "schema": "csl.mpc01-build-identity/1",
+  "source_files": {
+    "benchmarks/reporting/mpc01/fixtures.cpp": "bffcb952f92150847040b17606677d886e401dbc098686ded78a76947e97eb6c",
+    "benchmarks/reporting/mpc01/hpipm_adapter.cpp": "2276fda8c8e9fb40bbb29bb406f1bd611955b4642b0e36d1ba9d3b0240b65e13",
+    "benchmarks/reporting/mpc01/main.cpp": "5e8c55bab5b36b2b00993d6f2daa4df9e4655c7b6d7f7b7cc659439e5aa92421",
+    "benchmarks/reporting/mpc01/model.cpp": "077e78a2fd69d6aaa5aa09b33a14893f3e365c8890c5a6ddd6d42d04d1e3d7a8",
+    "benchmarks/reporting/mpc01/native/CMakeLists.txt": "65632ae5a07f570ab8b008485c2ad878f48cc739f0236fc0306681bb97cb8f91",
+    "benchmarks/reporting/mpc01/osqp_adapter.cpp": "daeb8674cbdee19ca0b86fb43e452073bb286b195af3613bd4eecab605ffd5aa",
+    "scripts/reports/mpc01/run_exact_checker_limited.py": "aa111552ea40d1aeb97b31f266035ec41c898a80dc2f5e83682e5ebb0e55f401",
+    "scripts/reports/mpc01/run_resource_limited_attempts.py": "bc5978c46cd93305352e5b256e52faaf560703bb858322c5399cf2ce24d9f6c8",
+    "scripts/reports/mpc01/verify_saved_exact_optimality.py": "b132779495a590da91854aff22643c1c77295cf70fbff7b662dec87920bf1f73"
+  },
+  "source_revision": "452db1ceb0312607fe7791b5ff4d84a2730df6ff",
+  "working_tree_changes_included": true
+}

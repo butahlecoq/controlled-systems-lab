@@ -1,0 +1,60 @@
+{
+  "checker_sha256": "b132779495a590da91854aff22643c1c77295cf70fbff7b662dec87920bf1f73",
+  "command": [
+    "/usr/bin/python3",
+    "/home/butahlecoq/.local/share/codex/worktrees/mpc01-per-attempt-20261102/scripts/reports/mpc01/verify_saved_exact_optimality.py",
+    "--attempts",
+    "/home/butahlecoq/.local/share/codex/worktrees/mpc01-per-attempt-20261102/docs/research/evidence/mpc01-per-attempt-20261103-r3/native-attempts.jsonl",
+    "--double-integrator",
+    "examples/scenarios/double-integrator-generality.json",
+    "--b04-case",
+    "docs/research/evidence/b04-reference-v1/canonical-case.json",
+    "--b04-reference",
+    "docs/research/evidence/b04-reference-v1/exact-optimal-reference.json",
+    "--output",
+    "/home/butahlecoq/.local/share/codex/worktrees/mpc01-per-attempt-20261102/docs/research/evidence/mpc01-per-attempt-20261103-r3/exact-candidate-checks.jsonl"
+  ],
+  "elapsed_wall_time_ns": 118806717,
+  "enforced_limits": {
+    "memory_max_bytes": 8589934592,
+    "memory_mechanism": "systemd user scope on Linux cgroup v2",
+    "memory_swap_max_bytes": 0,
+    "process_tree_memory": true,
+    "process_tree_wall_time": true,
+    "wall_mechanism": "Python monotonic watchdog; process-group SIGTERM then SIGKILL"
+  },
+  "observed": {
+    "cpu_stat": [
+      "usage_usec 182164",
+      "user_usec 145333",
+      "system_usec 36831",
+      "nice_usec 0",
+      "core_sched.force_idle_usec 0",
+      "nr_periods 2",
+      "nr_throttled 1",
+      "throttled_usec 691",
+      "nr_bursts 0",
+      "burst_usec 0"
+    ],
+    "exit_code": 0,
+    "memory_events": [
+      "low 0",
+      "high 0",
+      "max 0",
+      "oom 0",
+      "oom_kill 0",
+      "oom_group_kill 0",
+      "sock_throttled 0"
+    ],
+    "process_tree_peak_memory_bytes": 22999040
+  },
+  "requested_limits": {
+    "maximum_concurrent_jobs": 1,
+    "memory_bytes": 8589934592,
+    "memory_swap_bytes": 0,
+    "wall_time_seconds": 5
+  },
+  "schema": "csl.mpc01-exact-checker-resource-profile/1",
+  "status": "completed",
+  "timeout_scope": "exact candidate checker process tree"
+}

@@ -24,6 +24,7 @@ FOLLOW_UP_ISSUE_OVERRIDES = {
     "scripts/reports/exp824/make_ellipsoid_minimax_report.py": 824,
 }
 COMPOSED_SAVED_ROUTES = {
+    "scripts/reports/mpc01/summarize_per_attempt.py",
     "scripts/reports/exp824/make_nominal_report.py",
     "scripts/reports/ext03_transform/report.py",
     "scripts/reports/ext04/continuous_report.py",
@@ -36,6 +37,11 @@ COMPOSED_SAVED_ROUTES = {
     "scripts/reports/mpc05/reference.py",
     "scripts/reports/mpc09/make_report.py",
     "scripts/reports/visual_example_fuel_layers.py",
+}
+ASSET_NAME_LITERAL_OVERRIDES = {
+    # The B04 renderer selects one of these stems with a runtime flag.
+    "scripts/reports/mpc01/b04_native_smoke_projection.py": [
+        "b04-repeated-projections.svg", "native-smoke-projections.svg"],
 }
 FROZEN_DIAGRAM_EXCEPTIONS = {
     "benchmarks/reporting/approximation_pilot/summarize.py",
@@ -214,6 +220,7 @@ def source_inventory(root: Path) -> list[dict]:
             assets = sorted({asset for node in ast.walk(tree)
                              if isinstance(node, ast.Constant) and isinstance(node.value, str)
                              for asset in ASSET_NAME.findall(node.value)})
+            assets = sorted(set(assets) | set(ASSET_NAME_LITERAL_OVERRIDES.get(relative, ())))
             if relative in reviewed:
                 spec = reviewed[relative]
                 found.add(relative)

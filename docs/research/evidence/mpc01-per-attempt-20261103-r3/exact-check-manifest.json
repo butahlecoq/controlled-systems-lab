@@ -1,0 +1,11 @@
+{
+  "arithmetic": "Python fractions.Fraction; input decimals/rationals parsed exactly, saved binary64 controls recovered as exact dyadic rationals",
+  "attempts_sha256": "e1435f4022fc98c039177473c663f6e24dd6bf1a81aba1f57632bd0e1ffe6445",
+  "b04_case_input_sha256": "bc9e1b804b7878cb0da5c28c030893e1b41e7a2a34cb86b1c0fb8380ec780f6d",
+  "b04_exact_reference_sha256": "8b7fa718c473a765aae0fc912548cb32f1206d96e67b5b8df61377955c58c7ba",
+  "checked_optimal_candidates": 90,
+  "checker_source_sha256": "b132779495a590da91854aff22643c1c77295cf70fbff7b662dec87920bf1f73",
+  "checks_sha256": "44846344c6a3573e06f9158a8e658353c376c4872cbb2b92b93889b31c66cbbc",
+  "double_integrator_input_sha256": "b2398f6e84046bd196b885b6e37d1b4e1df877b5e809ec32ee6c3cab8846836a",
+  "schema": "csl.mpc01-exact-check-manifest/1"
+}

@@ -15,6 +15,7 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <map>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -309,6 +310,178 @@ MpcCase take_fixture(FixtureLoad result) {
     return std::get<MpcCase>(std::move(result));
 }
 
+void run_single_attempt(const MpcCase& problem, std::string_view method,
+                        std::string_view start_mode, std::uint32_t repetition) {
+    NativeAttempt attempt;
+    std::optional<NativeAttempt> warm_seed;
+    if (method == "osqp-sparse-qp") {
+        const auto map_start = Clock::now();
+        const auto mapped = make_osqp_problem(problem);
+        const auto map_end = Clock::now();
+        if (const auto* error = std::get_if<ValidationError>(&mapped))
+            throw std::runtime_error("OSQP map " + error->path + ": " + error->message);
+        const auto& qp = std::get<SparseQp>(mapped);
+        if (start_mode == "cold") {
+            attempt = solve_osqp(problem, qp);
+        } else {
+            warm_seed = solve_osqp(problem, qp);
+            warm_seed->formulation_ns = elapsed_ns(map_start, map_end);
+            const auto warm_map_start = Clock::now();
+            const auto warm_mapped = make_osqp_problem(problem);
+            const auto warm_map_end = Clock::now();
+            if (const auto* error = std::get_if<ValidationError>(&warm_mapped))
+                throw std::runtime_error("OSQP warm map " + error->path + ": " + error->message);
+            attempt = solve_osqp(problem, std::get<SparseQp>(warm_mapped), &*warm_seed);
+            attempt.formulation_ns = elapsed_ns(warm_map_start, warm_map_end);
+        }
+        if (start_mode == "cold") attempt.formulation_ns = elapsed_ns(map_start, map_end);
+    } else if (method == "hpipm-structured-ocp-qp") {
+        const auto map_start = Clock::now();
+        const auto mapped = make_hpipm_problem(problem);
+        const auto map_end = Clock::now();
+        if (const auto* error = std::get_if<ValidationError>(&mapped))
+            throw std::runtime_error("HPIPM map " + error->path + ": " + error->message);
+        const auto& qp = std::get<OcpQp>(mapped);
+        if (start_mode == "cold") {
+            attempt = solve_hpipm(problem, qp);
+        } else {
+            warm_seed = solve_hpipm(problem, qp);
+            warm_seed->formulation_ns = elapsed_ns(map_start, map_end);
+            const auto warm_map_start = Clock::now();
+            const auto warm_mapped = make_hpipm_problem(problem);
+            const auto warm_map_end = Clock::now();
+            if (const auto* error = std::get_if<ValidationError>(&warm_mapped))
+                throw std::runtime_error("HPIPM warm map " + error->path + ": " + error->message);
+            attempt = solve_hpipm(problem, std::get<OcpQp>(warm_mapped), &*warm_seed);
+            attempt.formulation_ns = elapsed_ns(warm_map_start, warm_map_end);
+        }
+        if (start_mode == "cold") attempt.formulation_ns = elapsed_ns(map_start, map_end);
+    } else {
+        throw std::runtime_error("Unsupported single-attempt solver method");
+    }
+    auto event = serialize_attempt(problem, attempt, std::string{start_mode});
+    event["start_mode"] = start_mode;
+    event["repetition"] = repetition;
+    event["resource_scope"] = "one-native-attempt-process-tree";
+    if (warm_seed) {
+        event["warm_seed_native_status"] = warm_seed->native_status;
+        event["warm_seed_timings_ns"] = {
+            {"formulation", warm_seed->formulation_ns}, {"setup", warm_seed->setup_ns},
+            {"solve", warm_seed->solve_ns}, {"extraction", warm_seed->extraction_ns}};
+    }
+    std::cout << event.dump() << '\n';
+}
+
+MpcCase single_fixture(std::string_view id) {
+    if (id == "ts01") return make_ts01();
+    if (id == "ts02") return make_ts02();
+    if (id == "ts03-singular") return make_ts03_singular();
+    if (id == "infeasible") return make_infeasible();
+    if (id == "unbounded") return make_unbounded();
+    if (id == "double-integrator-421")
+        return take_fixture(load_double_integrator_421("examples/scenarios/double-integrator-generality.json"));
+    if (id == "b04-reference-v1")
+        return take_fixture(load_b04_reference_v1("docs/research/evidence/b04-reference-v1/canonical-case.json"));
+    throw std::runtime_error("Unknown MPC fixture ID");
+}
+
+Termination parse_termination(std::string_view value) {
+    if (value == "completed") return Termination::completed;
+    if (value == "refused") return Termination::refused;
+    if (value == "unsupported") return Termination::unsupported;
+    if (value == "failed") return Termination::failed;
+    if (value == "timed_out") return Termination::timed_out;
+    if (value == "resource_limited") return Termination::resource_limited;
+    if (value == "cancelled") return Termination::cancelled;
+    if (value == "incomplete") return Termination::incomplete;
+    throw std::runtime_error("Unknown saved attempt termination");
+}
+
+MathematicalOutcome parse_outcome(std::string_view value) {
+    if (value == "optimal") return MathematicalOutcome::optimal;
+    if (value == "feasible") return MathematicalOutcome::feasible;
+    if (value == "infeasible") return MathematicalOutcome::infeasible;
+    if (value == "unbounded") return MathematicalOutcome::unbounded;
+    if (value == "undetermined") return MathematicalOutcome::undetermined;
+    throw std::runtime_error("Unknown saved mathematical outcome");
+}
+
+NativeAttempt parse_native_attempt(const json& event) {
+    NativeAttempt attempt;
+    attempt.method = event.at("method").get<std::string>();
+    attempt.termination = parse_termination(event.at("termination").get<std::string>());
+    attempt.outcome = parse_outcome(event.at("mathematical_outcome").get<std::string>());
+    attempt.native_status = event.at("native_status").get<std::string>();
+    const auto& timings = event.at("timings_ns");
+    attempt.formulation_ns = timings.at("formulation").get<std::uint64_t>();
+    attempt.setup_ns = timings.at("setup").get<std::uint64_t>();
+    attempt.warm_start_ns = timings.at("warm_start").get<std::uint64_t>();
+    attempt.solve_ns = timings.at("solve").get<std::uint64_t>();
+    attempt.extraction_ns = timings.at("extraction").get<std::uint64_t>();
+    if (!event.at("solver_iterations").is_null())
+        attempt.solver_iterations = event.at("solver_iterations").get<std::uint64_t>();
+    attempt.factorization_in_setup = event.at("factorization_in_setup").get<bool>();
+    attempt.factorization_in_solve = event.at("factorization_in_solve").get<bool>();
+    attempt.warm_start_requested = event.at("warm_start_requested").get<bool>();
+    attempt.warm_start_seed_applied = event.at("warm_start_seed_applied").get<bool>();
+    attempt.diagnostics = event.at("diagnostics").get<std::string>();
+    if (!event.at("solver_objective").is_null())
+        attempt.solver_objective = event.at("solver_objective").get<double>();
+    if (!event.at("original_objective").is_null())
+        attempt.original_objective = event.at("original_objective").get<double>();
+    const char* trajectory_key = event.contains("trajectory") ? "trajectory"
+        : event.contains("candidate_iterate") ? "candidate_iterate" : nullptr;
+    if (trajectory_key != nullptr) {
+        const auto& trajectory = event.at(trajectory_key);
+        attempt.witness = Trajectory{trajectory.at("states").get<std::vector<Vector>>(),
+                                     trajectory.at("controls").get<std::vector<Vector>>()};
+    }
+    return attempt;
+}
+
+void build_records_from_attempts(const std::filesystem::path& input_path,
+                                 const std::filesystem::path& output_path,
+                                 std::string_view executable) {
+    if (std::filesystem::exists(output_path))
+        throw std::runtime_error("Comparison-record output already exists");
+    std::map<std::string, MpcCase> cases;
+    for (const auto id : {"ts01", "ts02", "ts03-singular", "infeasible", "unbounded",
+                          "double-integrator-421", "b04-reference-v1"}) {
+        auto problem = single_fixture(id);
+        cases.emplace(problem.id, std::move(problem));
+    }
+    std::map<std::string, std::vector<CapturedAttempt>> grouped;
+    std::ifstream input(input_path);
+    if (!input) throw std::runtime_error("Cannot open saved per-attempt events");
+    std::string line;
+    std::uint32_t repetitions = 0;
+    while (std::getline(input, line)) {
+        if (line.empty()) continue;
+        const auto event = json::parse(line);
+        if (event.at("schema") != "csl.mpc01-native-attempt/1")
+            throw std::runtime_error("Unsupported saved native-attempt schema");
+        const auto case_id = event.at("case_id").get<std::string>();
+        const auto found = cases.find(case_id);
+        if (found == cases.end()) throw std::runtime_error("Attempt references an unknown MPC fixture");
+        const auto repetition = event.at("repetition").get<std::uint32_t>();
+        repetitions = std::max(repetitions, repetition + 1);
+        const auto start_mode = event.at("start_mode").get<std::string>();
+        grouped[case_id].push_back({parse_native_attempt(event), start_mode, repetition, event});
+    }
+    if (input.bad() || grouped.size() != cases.size() || repetitions == 0)
+        throw std::runtime_error("Saved per-attempt events are incomplete");
+    std::ofstream output(output_path, std::ios::binary);
+    if (!output) throw std::runtime_error("Cannot create comparison-record output");
+    for (const auto& [case_id, problem] : cases) {
+        const auto& attempts = grouped.at(case_id);
+        if (attempts.size() != static_cast<std::size_t>(4) * repetitions)
+            throw std::runtime_error("Saved fixture lacks a complete solver/start-mode repetition matrix");
+        output << comparison_record(problem, attempts, executable, false, repetitions) << '\n';
+        output.flush();
+        if (!output) throw std::runtime_error("Cannot write canonical comparison record");
+    }
+}
+
 void run_case(const MpcCase& problem, bool hpipm_first, std::uint32_t repetitions,
               std::ostream* records, std::string_view executable) {
     std::vector<CapturedAttempt> attempts;
@@ -383,6 +556,21 @@ void run_case(const MpcCase& problem, bool hpipm_first, std::uint32_t repetition
 
 int main(int argc, char** argv) {
     try {
+        if (argc == 4 && std::string(argv[1]) == "--records-from-attempts") {
+            build_records_from_attempts(argv[2], argv[3], argv[0]);
+            return 0;
+        }
+        if (argc == 6 && std::string(argv[1]) == "--single-attempt") {
+            std::uint32_t repetition = 0;
+            const std::string value = argv[5];
+            const auto [end, error] = std::from_chars(value.data(), value.data() + value.size(), repetition);
+            if (error != std::errc{} || end != value.data() + value.size())
+                throw std::runtime_error("repetition must be an unsigned integer");
+            if (std::string_view(argv[4]) != "cold" && std::string_view(argv[4]) != "warm_if_available")
+                throw std::runtime_error("start mode must be cold or warm_if_available");
+            run_single_attempt(single_fixture(argv[2]), argv[3], argv[4], repetition);
+            return 0;
+        }
         if (argc == 3 && std::string(argv[1]) == "--verify-records") {
             std::ifstream input(argv[2], std::ios::binary);
             if (!input) throw std::runtime_error("Cannot open comparison records");
@@ -397,7 +585,7 @@ int main(int argc, char** argv) {
             return 0;
         }
         if (argc < 3) {
-            std::cerr << "usage: csl_mpc01_report <double-integrator-generality.json> <b04-reference-v1/canonical-case.json> [--reverse] [--repetitions <positive-count>] [--records <new-file.jsonl>]\n";
+            std::cerr << "usage: csl_mpc01_report --single-attempt <fixture-id> <solver-method> <cold|warm_if_available> <repetition>\n       csl_mpc01_report --records-from-attempts <native-attempts.jsonl> <new-records.jsonl>\n       csl_mpc01_report <double-integrator-generality.json> <b04-reference-v1/canonical-case.json> [--reverse] [--repetitions <positive-count>] [--records <new-file.jsonl>]\n";
             return 2;
         }
         bool hpipm_first = false;

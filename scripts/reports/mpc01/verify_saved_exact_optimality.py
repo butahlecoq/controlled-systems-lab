@@ -187,7 +187,8 @@ def reconstruct(case: Case, controls: list[list[Fraction]]) -> tuple[list[list[F
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--attempts", type=Path, required=True)
-    parser.add_argument("--records", type=Path, required=True)
+    parser.add_argument("--records", type=Path,
+                        help="Optional canonical comparison records associated with these attempts")
     parser.add_argument("--double-integrator", type=Path, required=True)
     parser.add_argument("--b04-case", type=Path, required=True)
     parser.add_argument("--b04-reference", type=Path, required=True)
@@ -247,7 +248,6 @@ def main() -> None:
         "schema": "csl.mpc01-exact-check-manifest/1",
         "checker_source_sha256": sha256(Path(__file__)),
         "attempts_sha256": sha256(args.attempts),
-        "comparison_records_sha256": sha256(args.records),
         "double_integrator_input_sha256": sha256(args.double_integrator),
         "b04_case_input_sha256": sha256(args.b04_case),
         "b04_exact_reference_sha256": sha256(args.b04_reference),
@@ -255,6 +255,8 @@ def main() -> None:
         "checked_optimal_candidates": checked,
         "arithmetic": "Python fractions.Fraction; input decimals/rationals parsed exactly, saved binary64 controls recovered as exact dyadic rationals",
     }
+    if args.records:
+        manifest["comparison_records_sha256"] = sha256(args.records)
     manifest_path = args.output.with_name("exact-check-manifest.json")
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(f"verified exact feasibility and objective bounds for {checked} saved optimal candidates")

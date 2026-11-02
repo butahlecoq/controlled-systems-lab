@@ -127,3 +127,21 @@ strategy. Their descriptive end-to-end medians were 5.322090 ms for reach-back
 1.266303–1.402075 ms). This lower-cap profile uses a suite-level 300-second
 wall limit, not a per-trial deadline; it is not the comparison-program default
 profile and supports no general performance-winner claim.
+
+## Per-attempt resource profile
+
+The follow-up capture in [`mpc01-per-attempt-20261103-r3`](../../../docs/research/evidence/mpc01-per-attempt-20261103-r3/benchmark-summary.md) closes the prior attempt-scope gap. The private runner has a `--single-attempt` mode and `--records-from-attempts` packer. Run every fixture, solver, start mode and repetition in a separate transient systemd user scope:
+
+```sh
+python3 scripts/reports/mpc01/run_resource_limited_attempts.py \
+  --output-dir docs/research/evidence/mpc01-per-attempt-20261103-r3 \
+  --binary build/mpc01/csl_mpc01_report --repetitions 5
+python3 scripts/reports/mpc01/run_exact_checker_limited.py \
+  --bundle docs/research/evidence/mpc01-per-attempt-20261103-r3
+python3 scripts/reports/mpc01/summarize_per_attempt.py \
+  --bundle docs/research/evidence/mpc01-per-attempt-20261103-r3
+```
+
+The runner serializes the fixtures and runs sequentially. Each scope enforces a 300-second process-tree watchdog, 8 GiB cgroup-v2 memory cap, no swap, 100% CPU quota, and one pinned logical CPU. Warm-start attempts include their cold seed solve in the same scope and retain that seed solve duration separately. Every native result is retained with its individual resource receipt; the seven canonical comparison records embed those receipts in their measurement events. The checker runs separately with a 5-second wall limit and the same memory/no-swap cap. Refused, failed, timed-out and resource-limited attempts remain explicit records.
+
+The run retained 140/140 completed attempts and passed exact record decoding and 90 exact-rational candidate checks. It adds a four-state B04 plot from representative saved cold paths in the `(x1,x2)` oxidizer flow/stock and `(x3,x4)` fuel flow/stock planes, with each subsystem's flow bounds shown. The five-repetition per-fixture solve medians and ranges, attempt resource receipts, raw events, exact checks and checksums are in the linked evidence bundle. These are per-fixture native solver timings; they do not establish a general winner or end-to-end MPC latency.
