@@ -1,0 +1,17 @@
+{
+  "exact_check_sha256": "984cd4583f1eddc94edddfe9762cbd2365b0b8766990180a10f082d7f27e6b40",
+  "exact_record_sha256": "2b23edc697fd46dc96bbb0e107ca7cbad175683b5ffd06b945331903350b1fd5",
+  "files": {
+    "README.md": "5e3fc5079f57b0f62c0ff6110a894a72e44f92e3f72b1090f2f53bee59a86e17",
+    "SHA256SUMS": "af841425680a9e45d10cf63d19bd769472549116841616667494f69648ef0d65",
+    "index.html": "89a5c486f83bbc4eccea080679a947094d81f5a5e77061bcb697823be6185fb9",
+    "record.json": "2b23edc697fd46dc96bbb0e107ca7cbad175683b5ffd06b945331903350b1fd5",
+    "strategy-a-ci.json": "4c7dd5d23e568afd2ad8770c8a7aa62090b51ac80c8cb1a98c3eb0dce4678c54",
+    "trajectory.svg": "1a83e9475c5269c738f93502a2f43255a39789e7116fb5638c963b15d417cd82",
+    "verification.json": "984cd4583f1eddc94edddfe9762cbd2365b0b8766990180a10f082d7f27e6b40"
+  },
+  "scenario_id": "B04-c-exact-dyadic-20261102",
+  "schema": "csl.b04-c-strategy-a-publication-input/1",
+  "source_commit": "cfe72885b4544e5b005c27395d805faec219a4fc",
+  "source_report_id": "b04-c-strategy-a-verification-v1"
+}
