@@ -2,7 +2,9 @@
 
 add_library(csl_verifiers_test STATIC
   src/registry/compiled_verifiers.cpp
-  src/registry/nominal_linear_exact_verifier.cpp)
+  src/registry/nominal_linear_exact_verifier.cpp
+  src/registry/b04_c_exact_verifier.cpp
+  src/synthesis/b04_c_exact_family.cpp)
 
 target_compile_definitions(csl_verifiers_test PRIVATE CSL_TEST_VERIFIER_CATALOG)
 
