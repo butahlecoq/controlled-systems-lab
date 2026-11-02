@@ -273,7 +273,9 @@ def svg_figure(data):
             value = xmin + tick * (xmax - xmin) / 4
             px, _ = project(value, ymin)
             parts.append(f'<path d="M {px:.2f} {plot_top} V {plot_bottom}" stroke="#33434e"/>')
-            parts.append(f'<text x="{px:.2f}" y="{plot_bottom+20}" fill="#b6c6d2" font-family="sans-serif" font-size="11" text-anchor="middle">{value:.3g}</text>')
+            tick_anchor = "end" if tick == 4 else "middle"
+            tick_x = px - 4 if tick == 4 else px
+            parts.append(f'<text x="{tick_x:.2f}" y="{plot_bottom+20}" fill="#b6c6d2" font-family="sans-serif" font-size="11" text-anchor="{tick_anchor}">{value:.3g}</text>')
             value = ymin + tick * (ymax - ymin) / 4
             _, py = project(xmin, value)
             parts.append(f'<path d="M {plot_left} {py:.2f} H {plot_right}" stroke="#33434e"/>')
