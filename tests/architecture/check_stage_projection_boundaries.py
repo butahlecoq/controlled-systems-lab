@@ -9,6 +9,7 @@ MATH_MODULES = (
     "controllers",
     "geometry",
     "model",
+    "numeric",
     "optimization",
     "problem",
     "reachability",
