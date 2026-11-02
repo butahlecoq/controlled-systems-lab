@@ -1,0 +1,16 @@
+{
+  "schema": "csl.review05.build-provenance/1",
+  "source_revision": "d4598f340b9d492db2013f2304c529bc4358010a",
+  "source_worktree_dirty": false,
+  "build_type": "Release",
+  "generator": "Ninja",
+  "cmake_version": "cmake version 3.31.6",
+  "ninja_version": "1.13.2",
+  "cxx_compiler": "c++ (GCC) 16.2.1 20260810",
+  "configure_command": "/home/butahlecoq/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -S benchmarks/reporting/review05 -B /home/butahlecoq/.local/share/codex/build/review05-horizon-timing-20261102 -DCSL_SOURCE_ROOT=<source> -DCMAKE_BUILD_TYPE=Release -G Ninja",
+  "build_command": "ninja -C /home/butahlecoq/.local/share/codex/build/review05-horizon-timing-20261102 csl_review05_horizon_ladder -j4",
+  "binary_sha256": "7327a37d9daa52d78f34b190ade7f26cefe9bd46a8ed1fb37e45b3f74ee0293b",
+  "warnings": [
+    "Pinned HiGHS 1.11.0 emitted one -Wmaybe-uninitialized warning in HighsSymmetry.cpp; the Release build completed successfully."
+  ]
+}
