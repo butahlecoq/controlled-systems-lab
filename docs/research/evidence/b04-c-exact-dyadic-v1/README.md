@@ -1,4 +1,6 @@
-# B04-C exact dyadic optimum and history fiber
+# B04-C exact dyadic mathematical dossier
+
+This is a research dossier checked by an independent Python exact-arithmetic tool. It is not a registered Strategy A result: the profile has not passed the compiled verifier and prepared-request boundary required by ADR 0003 and issue #8. The HTML report and figure remain issue evidence and are not staged in the algorithm-results catalog or Pages until that boundary is implemented.
 
 Scenario `B04-c-exact-dyadic-20261102` is the authorized corrected-track case from issue #531. It uses the saved A39/A01/A40 coefficient family; the sixteen-stage execution is the issue's corrected-track scenario, not a recovered historical T16 generator. Source artifact identities are retained in the record. It is separate from `B04-historical` and `b04-reference-v1`; it makes no reproduction claim.
 
@@ -8,11 +10,11 @@ The versioned [record](record.json) contains an exactly feasible control vector,
 
 The reported objective is approximately `30.8991360300144`, inside the pre-registered band `|J* - 30.899| <= 0.0005`. The bands are unchanged; the other two strict bands do not apply. The published rounded terminal point is independently shown reachable inside its coordinate-wise rounding box, with its flow and stock plane-functional residuals included in the record. This reachability fact is separate from the optimality certificate.
 
-The full optimal history family is encoded as a 16-dimensional H-polytope: all 100 exact control and phase inequalities, intersected with the exact terminal-state equalities. The record gives the affine lift for all 17 four-state stages, so the same relation maps exactly to the 84-coordinate joint history `(x0,...,x16,u0,...,u15)` without an 84-dimensional H matrix. Exact control-vector membership, full state/control history membership, and reconstruction are supported; other geometric projections are not claimed by this profile. The induced terminal set is the singleton containing the certified terminal state.
+The Python checker reconstructs a mathematical set of minimizing histories as a 16-dimensional control H-polytope with exact terminal-state equalities and an affine lift to the 84-coordinate joint history `(x0,...,x16,u0,...,u15)`. This is research evidence only: it is not a compiled, registry-verified family payload, and the repository does not expose its membership or projection queries as a supported API.
 
 The SVG plots one certified representative history in both `(x1,x2)` oxidizer and `(x3,x4)` fuel phase planes. It does not imply that every optimal history has this intermediate trajectory; the entire family is represented by the H-polytope and lift.
 
-The English [HTML report](index.html) summarizes the frozen result and links to its raw record, independent verification output, source notes, and evidence manifest. The report is generated from the checked record and staged as a discoverable Pages example.
+The English [HTML report](index.html) summarizes the research audit and links to its raw record, independent verification output, source notes, and evidence manifest. It is retained in this evidence bundle and is not a discoverable Pages result route while compiled-verifier admission is outstanding.
 
 ## Reproduce and check
 
