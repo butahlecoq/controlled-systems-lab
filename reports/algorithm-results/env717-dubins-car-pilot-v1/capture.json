@@ -1,0 +1,11 @@
+{
+  "source_commit": "c75a63204349e29d91b585751c3cd621bf8161c6",
+  "driver_sha256": "f9a5140680f5ccbbce3d632c8a566f2110bfe46ed1484bc1a276163d08282f53",
+  "compiler": {
+    "architecture": "x86_64",
+    "build_type": "Release",
+    "compiler": "GNU",
+    "compiler_version": "16.2.1"
+  },
+  "capture_kind": "one finite-catalogue solve; no performance claim"
+}
