@@ -71,6 +71,8 @@ VIZ10_ROLE_REASONS = {
         "Validates and publishes a saved interval certificate with error-box artwork; the companion reads endpoint strings from the frozen record and does not rerun the checker.",
     "scripts/reports/issue6/render.py":
         "Publishes the saved B06 four-state projection; a VIZ-03 shared-policy companion already provides labeled x1/x3 flow and x2/x4 stock projections.",
+    "scripts/reports/mpc06/render_tube_objective.py":
+        "Renders the saved exact-rational tube-policy witness in a two-dimensional position/velocity projection; it does not rerun optimization or measure performance.",
     "scripts/reports/render.py":
         "Generic report exporter validates and copies a supplied saved figure; it does not produce quantitative plot data.",
 }
@@ -111,6 +113,7 @@ SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
 SAVED_DATA_COMPANION_RENDERERS = {
     "scripts/reports/render_adaptive_ode_example.py",
     "scripts/reports/ext02/render_saved.py",
+    "scripts/reports/mpc06/render_tube_objective.py",
     "scripts/reports/env717/check_unlimited_bolza.py",
     "benchmarks/reporting/review05/render_profile_matrix.py",
     "benchmarks/reporting/review05/render_dimension_ladder.py",

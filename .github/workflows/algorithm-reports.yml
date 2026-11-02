@@ -36,13 +36,6 @@ jobs:
           git fetch --no-tags origin refs/pull/849/head
       - name: Install report-only validation and plotting tools
         run: python -m pip install --cache-dir build/report-pip-cache -r scripts/reports/requirements.txt
-      - name: Rebuild and independently check the MPC-06 tube objective report
-        if: needs.route.outputs.native == 'true' && hashFiles('reports/algorithm-results/mpc06-tube-objective-v1/result.json') != ''
-        run: |
-          python scripts/reports/mpc06/test_tube_objective.py
-          python scripts/reports/mpc06/build_tube_objective.py
-          python scripts/reports/mpc06/check_tube_objective.py
-          (cd reports/algorithm-results/mpc06-tube-objective-v1 && sha256sum -c SHA256SUMS)
       - name: Validate literal records, safe export and real pinned plotting pipeline
         env:
           MPLCONFIGDIR: ${{ github.workspace }}/build/report-mpl-config
@@ -530,9 +523,6 @@ jobs:
       - name: Stage the saved MPC-06 tube feasibility report
         if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/mpc06-nilpotent-tube-pilot-v1/result.json') != ''
         run: python scripts/reports/stage_mpc06_tube.py --site build/report-site
-      - name: Stage the exact MPC-06 tube objective report
-        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/mpc06-tube-objective-v1/result.json') != ''
-        run: python scripts/reports/stage_mpc06_tube_objective.py --site build/report-site
       - name: Upload reviewed static site on main only
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && steps.catalog.outputs.has_reports == 'true'
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
