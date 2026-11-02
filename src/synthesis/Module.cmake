@@ -8,7 +8,8 @@ csl_add_library(csl_control_recovery STATIC src/synthesis/control_recovery.cpp)
 
 target_link_libraries(csl_control_recovery PUBLIC CSL::resolved_problem CSL::sets)
 
-csl_add_library(csl_strategy_a STATIC src/synthesis/strategy_a/strategy.cpp)
+csl_add_library(csl_strategy_a STATIC
+  src/synthesis/strategy_a/strategy.cpp)
 
 target_link_libraries(csl_strategy_a PUBLIC CSL::nominal_forward CSL::terminal_minimizers CSL::control_recovery CSL::artifacts)
 

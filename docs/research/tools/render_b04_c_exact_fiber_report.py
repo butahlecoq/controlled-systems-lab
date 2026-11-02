@@ -1,0 +1,58 @@
+"""Render the English report page for the frozen B04-C evidence bundle."""
+from __future__ import annotations
+
+import html
+import json
+from pathlib import Path
+
+try:
+    from .check_b04_c_exact_fiber import DEFAULT_RECORD, check
+except ImportError:
+    from check_b04_c_exact_fiber import DEFAULT_RECORD, check
+
+ROOT = Path(__file__).resolve().parents[3]
+BUNDLE = ROOT / "docs/research/evidence/b04-c-exact-dyadic-v1"
+
+
+def render(record_path: Path = DEFAULT_RECORD) -> str:
+    verification = check(record_path)
+    record = json.loads(record_path.read_text(encoding="utf-8"))
+    optimum = record["optimality"]
+    objective = float(optimum["objective_approximation"])
+    family = record["optimal_family"]
+    state_dimension = len(family["affine_lift"][0]["offset"])
+    history_dimension = len(family["affine_lift"]) * state_dimension + len(family["latent_variables"])
+    return f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B04-C corrected-track mathematical dossier</title>
+<style>
+:root{{color-scheme:dark;--bg:#101923;--panel:#172431;--ink:#edf4f8;--muted:#b0c0cc;--line:#324656;--accent:#74d0ee}}
+*{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,sans-serif}}
+main{{max-width:1100px;margin:auto;padding:clamp(1rem,4vw,3rem)}}h1,h2{{line-height:1.2}}h1{{font-size:clamp(2rem,5vw,3.5rem);max-width:18ch}}h2{{margin-top:2.5rem}}p,li{{max-width:78ch}}a{{color:var(--accent)}}.lede{{font-size:1.15rem;color:var(--muted)}}.card{{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1rem 1.25rem;margin:1rem 0}}figure{{margin:1.5rem 0}}figure img{{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:8px}}figcaption,.muted{{color:var(--muted)}}table{{border-collapse:collapse;width:100%;max-width:850px}}th,td{{text-align:left;border-bottom:1px solid var(--line);padding:.55rem .7rem}}code{{overflow-wrap:anywhere}}
+</style></head><body><main>
+<p class="muted">Research dossier · external exact mathematical check · separate from registered algorithm results</p>
+<h1>B04-C corrected-track mathematical dossier</h1>
+<p class="lede">An independent Python checker audits the owner-authorized corrected-track model using exact represented-dyadic arithmetic. This research-only report is listed separately from compiled algorithm results; it has not passed the prepared Strategy A verifier boundary and does not satisfy #531 or #8.</p>
+<div class="card"><strong>Mathematical finding.</strong> The external exact checker derives an objective value of approximately <code>{objective:.14f}</code> and a 16-dimensional description of the minimizing control histories, with an affine lift into {history_dimension} joint state/control coordinates. This objective value is {html.escape(verification["acceptance_band"])}. The registry does not currently publish the relation as a verified complete family.</div>
+<figure><img src="trajectory.svg" alt="One representative trajectory in the oxidizer and fuel phase planes, with the initial state and rounded published terminal point marked."><figcaption>One representative full history in the requested (x1,x2) oxidizer and (x3,x4) fuel projections. Other minimizing controls may produce different intermediate trajectories.</figcaption></figure>
+<h2>What was checked</h2>
+<ul><li>Sixteen exact stage transitions and all 100 hard control and phase inequalities.</li><li>An exactly feasible zero-multiplier KKT witness with zero gradient in all sixteen controls for the stated convex represented-dyadic profile.</li><li>The rounded published terminal point is reachable inside its coordinate-wise rounding box; exact plane residuals are retained separately from the optimum proof.</li><li>An external mathematical derivation of the minimizing control histories and their affine state lift. This dossier does not provide a registered family payload, verifier receipt, or public Strategy A query path.</li></ul>
+<h2>Model and evidence boundary</h2>
+<p>Inputs that enter through binary64 are treated as the exact dyadic values represented by their bits, following ADR 0003. The source variant is <code>B04-c-exact-dyadic-20261102</code>, based on A39/A01/A40. It is neither <code>B04-historical</code> nor <code>b04-reference-v1</code>, and makes no historical reproduction claim. The unresolved A40 unit convention remains open.</p>
+<p>The confirmation band is preserved at <code>|J* - 30.899| &lt;= 0.0005</code>. The published rounded linear value is 30.899; the four nonlinear table rows remain 368.45, 41.855, 65.874 and 7.922. This corrected-track result does not explain or reproduce those nonlinear rows.</p>
+<p>The research record describes a 16D H-polytope and affine state lift for the derived minimizing histories. The repository's compiled registry has not verified or exposed that relation as a complete family, and does not currently support its membership or projection queries. This page plots one member only; other geometric projections are not claimed.</p>
+<h2>Reproduce and inspect</h2>
+<p>The builder and independent checker are available at the captured <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{html.escape(record["source_commit"], quote=True)}">source commit</a>. Run <code>python docs/research/tools/build_b04_c_exact_fiber.py</code>, then <code>python docs/research/tools/finalize_b04_c_exact_fiber.py</code>. The finalizer rebuilds the record, checks the proof, renders both phase planes and validates this research bundle. This route appears in the report index under Research Evidence and does not constitute compiled verifier admission.</p>
+<ul><li><a href="record.json">Machine-readable exact record</a></li><li><a href="verification.json">Independent verification result</a></li><li><a href="README.md">Full profile notes and assumptions</a></li><li><a href="manifest.json">Evidence manifest and source hashes</a></li></ul>
+<p class="muted">This is a fixed-profile research result. It does not by itself establish a production Strategy A prepared-request verification path or extend Strategy B coverage.</p>
+</main></body></html>
+"""
+
+
+def main() -> None:
+    (BUNDLE / "index.html").write_text(render(), encoding="utf-8")
+    print((BUNDLE / "index.html").relative_to(ROOT))
+
+
+if __name__ == "__main__":
+    main()

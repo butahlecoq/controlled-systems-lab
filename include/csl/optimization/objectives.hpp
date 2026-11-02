@@ -5,6 +5,8 @@
 
 #include <csl/numeric/data.hpp>
 
+#include <optional>
+
 namespace csl::optimization {
 
 template<class T> using Result = std::variant<T, Diagnostic, OperationStopped>;
@@ -14,7 +16,11 @@ struct ObjectivePolicy {
 };
 struct LinearCoefficients { numeric::VectorView coefficients; double offset; };
 struct QuadraticCoefficients { numeric::MatrixView Q; numeric::VectorView linear; double offset; };
-struct ResidualCoefficients { numeric::MatrixView map; numeric::VectorView target; };
+struct ResidualCoefficients {
+    numeric::MatrixView map;
+    numeric::VectorView target;
+    std::optional<numeric::VectorView> weights{};
+};
 using ObjectiveCoefficients = std::variant<LinearCoefficients, QuadraticCoefficients, ResidualCoefficients>;
 struct QuadraticChecks {
     NumericalCheck symmetry;

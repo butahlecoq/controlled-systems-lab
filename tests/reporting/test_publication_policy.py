@@ -22,7 +22,7 @@ class PublicationPolicyTests(unittest.TestCase):
         self.assertEqual(
             publication_policy.registered_kinds(),
             {
-                "b08-displayed-exact", "ext03-temporal-transform", "geo02-affine-sum", "geo03-hv",
+                "b04-c-research-dossier", "b08-displayed-exact", "ext03-temporal-transform", "geo02-affine-sum", "geo03-hv",
                 "geo04-intersection", "geo05-projection-predecessor", "geo06-quickhull",
                 "issue3-finite-catalogue", "issue3-validated-minimax", "issue6-b06-reference",
                 "issue6-b06-manifest-correction",

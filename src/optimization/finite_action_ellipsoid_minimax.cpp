@@ -76,7 +76,8 @@ std::variant<double, Unsupported, OperationStopped> support_score(
     double frobenius_squared = 0.0;
     for (std::size_t row = 0; row < residual.map.rows(); ++row)
       for (std::size_t column = 0; column < residual.map.cols(); ++column) {
-        const double term = residual.map(row, column) * terminal.radii[column];
+        const double term = std::sqrt(residual.weights ? (*residual.weights)[row] : 1.0) *
+            residual.map(row, column) * terminal.radii[column];
         frobenius_squared += term * term;
       }
     score += std::sqrt(frobenius_squared);

@@ -121,10 +121,22 @@ Result<Objective> snapshot(const TerminalObjective& authored, ObjectivePolicy po
             if (const auto* error = std::get_if<Diagnostic>(&map)) return *error;
             auto target = numeric::snapshot_vector(residual.target);
             if (const auto* error = std::get_if<Diagnostic>(&target)) return *error;
-            if (residual.map.rows != residual.target.size())
+            if (residual.map.rows != residual.target.size() ||
+                (!residual.weights.empty() && residual.weights.size() != residual.map.rows))
                 return Diagnostic{DiagnosticCode::invalid_input, "objective.shape", "Residual target must match map rows."};
+            for (const double weight : residual.weights)
+                if (!std::isfinite(weight) || weight < 0)
+                    return Diagnostic{DiagnosticCode::invalid_input, "objective.weights",
+                        "Residual weights must be finite and nonnegative."};
+            std::optional<numeric::VectorView> weights;
+            if (!residual.weights.empty()) {
+                auto snapshot = numeric::snapshot_vector(residual.weights);
+                if (const auto* error = std::get_if<Diagnostic>(&snapshot)) return *error;
+                weights = std::get<numeric::VectorView>(std::move(snapshot));
+            }
             return Objective{std::make_shared<const detail::ObjectiveStorage>(detail::ObjectiveStorage{
-                ResidualCoefficients{std::get<numeric::MatrixView>(map), std::get<numeric::VectorView>(target)}, policy, std::nullopt})};
+                ResidualCoefficients{std::get<numeric::MatrixView>(map),
+                    std::get<numeric::VectorView>(target), std::move(weights)}, policy, std::nullopt})};
         }
     }, authored);
 }
@@ -160,7 +172,8 @@ Result<double> evaluate(const Objective& objective, std::span<const double> poin
             for (std::size_t row = 0; row < residual.map.rows(); ++row) {
                 double value = -residual.target[row];
                 for (std::size_t col = 0; col < point.size(); ++col) value += residual.map(row, col) * point[col];
-                norm = std::hypot(norm, value);
+                const double weight = residual.weights ? (*residual.weights)[row] : 1.0;
+                norm = std::hypot(norm, std::sqrt(weight) * value);
             }
             if (!std::isfinite(norm))
                 return OperationStopped{StopReason::numerical_failure, "Nonfinite residual arithmetic."};
@@ -188,7 +201,9 @@ Result<NormSquareReformulation> square_residual_norm(const Objective& original) 
         for (std::size_t j = i; j < n; ++j) {
             double value = 0;
             for (std::size_t row = 0; row < residual->map.rows(); ++row)
-                if (!accumulate_product(value, residual->map(row, i), residual->map(row, j)))
+                if (!accumulate_product(value,
+                        (residual->weights ? (*residual->weights)[row] : 1.0) * residual->map(row, i),
+                        residual->map(row, j)))
                     return erased_product("Q");
             value *= 2;
             if (!std::isfinite(value)) return arithmetic_failure();
@@ -197,13 +212,18 @@ Result<NormSquareReformulation> square_residual_norm(const Objective& original) 
         }
         double value = 0;
         for (std::size_t row = 0; row < residual->map.rows(); ++row)
-            if (!accumulate_product(value, residual->map(row, i), residual->target[row]))
+            if (!accumulate_product(value,
+                    (residual->weights ? (*residual->weights)[row] : 1.0) * residual->map(row, i),
+                    residual->target[row]))
                 return erased_product("q");
         authored.linear[i] = -2 * value;
         if (!std::isfinite(authored.linear[i])) return arithmetic_failure();
     }
-    for (const double value : residual->target.values())
-        if (!accumulate_product(authored.offset, value, value)) return erased_product("c");
+    for (std::size_t row = 0; row < residual->target.size(); ++row)
+        if (!accumulate_product(authored.offset,
+                (residual->weights ? (*residual->weights)[row] : 1.0) * residual->target[row],
+                residual->target[row]))
+            return erased_product("c");
     if (!std::isfinite(authored.offset)) return arithmetic_failure();
     auto squared = snapshot(authored, original.policy());
     if (const auto* error = std::get_if<Diagnostic>(&squared)) return *error;

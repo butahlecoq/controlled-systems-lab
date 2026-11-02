@@ -259,7 +259,8 @@ void candidate(ProgramResult& result,const ConvexProgram& p,const ExecutionConte
         for(std::size_t i=0;i<coefficients.target.size();++i) {
             double residual=-coefficients.target[i];
             for(std::size_t j=0;j<s.col_value.size();++j) residual+=coefficients.map(i,j)*s.col_value[j];
-            zero_norm=zero_norm && residual==0;
+            const double weight=coefficients.weights?(*coefficients.weights)[i]:1.0;
+            zero_norm=zero_norm && (weight==0 || residual==0);
         }
     }
     if(zero_norm) {

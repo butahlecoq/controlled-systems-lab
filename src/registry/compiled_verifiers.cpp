@@ -596,6 +596,8 @@ std::shared_ptr<const CompiledCompleteFamilyVerifier> find_compiled_verifier(con
     if(id==ts03->id()&&version==ts03->version())return ts03;
     static const auto nominal_linear_exact=make_nominal_linear_exact_verifier();
     if(id==nominal_linear_exact->id()&&version==nominal_linear_exact->version())return nominal_linear_exact;
+    static const auto b04_c_exact=make_b04_c_exact_family_verifier();
+    if(id==b04_c_exact->id()&&version==b04_c_exact->version())return b04_c_exact;
 #ifdef CSL_TEST_VERIFIER_CATALOG
     static const auto second=std::make_shared<const TestCatalogVerifier>();
     if(id==second->id()&&version==second->version())return second;

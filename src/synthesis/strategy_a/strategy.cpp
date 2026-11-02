@@ -1,5 +1,6 @@
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp>
+#include <csl/synthesis/b04_c_exact_family.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
 #include <csl/synthesis/ts02_constant_integrator.hpp>
 #include <csl/synthesis/ts03_singular_integrator.hpp>
@@ -27,12 +28,14 @@ Diagnostics capabilities(const problem::ResolvedProblem& problem,const FamilyReq
     const bool exact_ts03=registry::detail::ts03_case_valid(problem,family,family.representation);
     const bool exact_nominal=registry::detail::strategy_a_nominal_linear_exact_profile_valid(
         problem,family,family.representation);
-    if(!exact_ts01&&!exact_ts02&&!exact_ts03&&!exact_nominal&&family.profile!="nominal_open_loop")return unsupported("strategy_a.profile","Only nominal_open_loop candidates and reviewed exact profiles are supported.");
-    if(!exact_ts01&&!exact_ts02&&!exact_ts03&&!exact_nominal&&family.target!=FamilyTarget::candidate_relaxation)
+    const bool exact_b04=registry::detail::strategy_a_b04_c_exact_profile_valid(
+        problem,family,family.representation);
+    if(!exact_ts01&&!exact_ts02&&!exact_ts03&&!exact_nominal&&!exact_b04&&family.profile!="nominal_open_loop")return unsupported("strategy_a.profile","Only nominal_open_loop candidates and reviewed exact profiles are supported.");
+    if(!exact_ts01&&!exact_ts02&&!exact_ts03&&!exact_nominal&&!exact_b04&&family.target!=FamilyTarget::candidate_relaxation)
         return unsupported("strategy_a.coverage","No reviewed coverage procedure or optimal-subset verifier; request a candidate relation.");
     if(family.assurance!=Assurance::numerical)
         return unsupported("strategy_a.assurance","Only unestablished binary64 candidate construction is supported.");
-    if(family.representation.value!="csl.polyhedron.h")
+    if(family.representation.value!="csl.polyhedron.h"&&!exact_b04)
         return unsupported("strategy_a.representation","Canonical joint native H output required.");
     if(family.materialization_limit && !exact_nominal)
         return unsupported("strategy_a.capacity","Family row limits are supported only by the compiled nominal exact-H profile.");
@@ -213,6 +216,29 @@ public:
         try {
             if(auto errors=capabilities(problem,request);!errors.empty()) {
                 reject(result,local({"strategy-a/admission"}),std::move(errors),lineage);return result;
+            }
+            if(request.profile==::csl::synthesis::b04_c::exact_family_profile) {
+                const auto request_lineage=prepared_request_.lineage;
+                auto built=registry::detail::build_b04_c_exact_family(prepared_request_);
+                if(const auto* errors=std::get_if<Diagnostics>(&built)) {
+                    reject(result,local({"strategy-a/b04-c-exact"}),*errors,request_lineage);return result;
+                }
+                const auto& exact=std::get<registry::detail::B04CExactFamilyBuild>(built);
+                const FamilyIdentity identity{problem.identity(),request,{{4,1,0},::csl::synthesis::b04_c::exact_family_horizon},
+                    strategy,version,request_lineage};
+                const SymbolicArgument derivation{
+                    "B04-C exact represented-dyadic KKT and full-history fiber",
+                    "All 100 hard inequalities are strictly feasible at the exact witness and the exact gradient of the convex weighted squared terminal objective is zero, proving global optimality. The positive weighted residual map is injective in terminal state, so the optimum terminal state is unique. The complete optimizer family is exactly the feasible 16-control polytope intersected with that terminal fiber and lifted affinely to all 84 canonical history coordinates. A separate exact feasible history lies in the rounding box of the published terminal row. The source variant remains B04-c-exact-dyadic-20261102; no historical reproduction claim is made."};
+                const ClaimEvidence claim{problem.identity(),derivation};
+                const OptimumEvidence optimum{claim,ObjectiveEvidence{ObjectiveBound{exact.objective_lower,claim},
+                    ObjectiveBound{exact.objective_upper,claim}}};
+                CompleteOptimalFamily family{{identity.coordinates,request.representation,exact.relation},optimum,
+                    {identity,RegisteredCompletenessEvidence{{"csl.verifier.strategy-a.b04-c-exact-dyadic"},"1",
+                        "B04-C-exact-dyadic-complete-family-v1"}},Assurance::numerical};
+                result.outcome={problem.identity(),MathematicalOutcome::optimal,derivation,{}};
+                result.objective=optimum.bounds;
+                result.complete_proposal=CompleteFamilyProposal{identity,std::move(family)};
+                return result;
             }
             auto forward_timing=timing_scope(context,timing::forward);
             auto forwarded=reachability::nominal_forward(problem,{"strategy-a/forward"},forward_,context);
@@ -441,6 +467,9 @@ registry::StrategyRegistration make_registration(Providers providers) {
                     if(prepared.family.profile==::csl::synthesis::strategy_a::nominal_linear_exact_profile&&
                         prepared.family.target==FamilyTarget::exact_optimal_relation)
                         selected_verifier={{"csl.verifier.strategy-a.nominal-linear-exact"},"1"};
+                    if(prepared.family.profile==::csl::synthesis::b04_c::exact_family_profile&&
+                        prepared.family.target==FamilyTarget::exact_optimal_relation)
+                        selected_verifier={{"csl.verifier.strategy-a.b04-c-exact-dyadic"},"1"};
                     return std::make_unique<detail::StrategyAExecutionRunner>(reachability::ForwardDependencies{
                         std::get<0>(generated),std::get<1>(generated),std::get<2>(generated)},
                         std::get<3>(generated),std::get<4>(generated),prepared,std::move(selected_verifier));
@@ -461,6 +490,10 @@ registry::StrategyRegistration make_registration(Providers providers) {
                     request.family,request.configuration.representation))
                 return registry::detail::strategy_a_nominal_linear_exact_lineage(
                     request.problem.identity(),request.problem.model().horizon());
+            if(request.strategy_version==version&&request.configuration.strategy==strategy&&
+                registry::detail::strategy_a_b04_c_exact_profile_valid(request.problem,
+                    request.family,request.configuration.representation))
+                return detail::expected_b04_c_exact_lineage(request.problem.identity());
             return std::vector<TransformStepIdentity>{};
         }};
     registration.complete_family_verifier_selector=[](const registry::StrategyRequest& request)
@@ -469,6 +502,10 @@ registry::StrategyRegistration make_registration(Providers providers) {
             registry::detail::strategy_a_nominal_linear_exact_profile_valid(request.problem,
                 request.family,request.configuration.representation))
             return registry::StrategyRegistration::CompleteFamilyVerifierKey{{"csl.verifier.strategy-a.nominal-linear-exact"},"1"};
+        if(request.configuration.strategy==strategy&&
+            registry::detail::strategy_a_b04_c_exact_profile_valid(request.problem,
+                request.family,request.configuration.representation))
+            return registry::StrategyRegistration::CompleteFamilyVerifierKey{{"csl.verifier.strategy-a.b04-c-exact-dyadic"},"1"};
         if(request.configuration.strategy==strategy&&
             registry::detail::ts02_case_valid(request.problem,request.family,request.configuration.representation))
             return registry::StrategyRegistration::CompleteFamilyVerifierKey{{::csl::synthesis::ts02_constant_integrator_verifier},"1"};

@@ -50,6 +50,9 @@ class Entry(NamedTuple):
 
 # Reading order of the archive. Each entry is (key, heading, introduction).
 GROUPS = (
+    ("research", "Research evidence",
+     "Fixed-profile mathematical audits and source investigations. These entries are explicitly "
+     "separate from registered compiled algorithm results and carry their own evidence limits."),
     ("optimization", "Convex optimization",
      "Linear and convex references, feasibility search, hull construction and solver reuse. "
      "Each report states the adapter it measured and the comparisons it does not make."),
@@ -329,6 +332,11 @@ FAMILIES = {
         "and checks the selected plan. The printed rounded model is used as printed; the "
         "historical 67.12 value, the unrounded arrays and the nonlinear plant remain "
         "unresolved."),
+    "b04-c-exact-dyadic": Family(
+        r"b04-c-research-dossier-[0-9a-f]{64}", "research", "B04-C corrected-track research dossier",
+        "An external exact represented-dyadic mathematical audit of the corrected-track profile. "
+        "It is not a compiled or registered Strategy A result and does not satisfy the complete-family "
+        "acceptance in #531/#8; no historical reproduction is claimed."),
     "app01-plan": Family(
         r"app01-plan-\d{8}-[0-9a-f]{64}", "extensions", "State-plan check and trajectory verification",
         "Runs the registered inner state-plan check and then verifies the produced trajectory "
@@ -653,14 +661,14 @@ def page(entries, extras=None) -> str:
             '<meta name="viewport" content="width=device-width,initial-scale=1">'
             "<title>CSL algorithm reports</title><style>\n" + stylesheet() + "\n</style></head><body>"
             '<p class="eyebrow">Controlled Systems Lab &middot; research archive</p>'
-            "<h1>Algorithm reports</h1>"
-            '<p class="lede">This is the published archive of measured algorithm results. Every '
-            "entry names the algorithm family, explains in plain language what the report "
+            "<h1>Algorithm reports and research evidence</h1>"
+            '<p class="lede">This archive contains measured algorithm results and a separate '
+            'Research Evidence section for fixed-profile audits. Every entry explains in plain language what the report '
             "measures, repeats the scope and the evidence limits recorded with the report, and "
             "links to the report page, its raw records, its measured tables and its offline "
             "bundle.</p>"
-            '<p class="meta">' + f"{len(entries)}" + " published reports &middot; versioned and "
-            "reproducible &middot; numerical observations, not mathematical certificates</p>"
+            '<p class="meta">' + f"{len(entries)}" + " catalogued reports &middot; versioned and "
+            "reproducible &middot; each result remains within its stated evidence limits</p>"
             + extra_links +
             '<div class="note"><p><strong>Read the evidence, not just the numbers.</strong> '
             "Measurements do not imply cross-method performance, application-scale results or "
@@ -679,8 +687,8 @@ def page(entries, extras=None) -> str:
             "commit that produced it, so any number can be traced back to one code state.</dd></div>"
             "</dl></div>"
             '<div class="section"><div class="cards"><ul>' + "".join(cards) + "</ul></div></div>"
-            '<div class="footer"><p>Controlled Systems Lab &middot; Numerical observations are '
-            "not mathematical certificates.</p></div></body></html>")
+            '<div class="footer"><p>Controlled Systems Lab &middot; Research evidence is separated from '
+            "registered algorithm results; every entry states its own limits.</p></div></body></html>")
 
 
 class Node:

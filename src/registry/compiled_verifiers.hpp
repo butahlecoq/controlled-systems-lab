@@ -52,5 +52,15 @@ std::variant<sets::SetData, OperationStopped> strategy_a_nominal_linear_exact_op
 std::vector<TransformStepIdentity> strategy_a_nominal_linear_exact_lineage(
     const ProblemId&, std::size_t horizon);
 std::shared_ptr<const CompiledCompleteFamilyVerifier> make_nominal_linear_exact_verifier();
+struct B04CExactFamilyBuild {
+    std::shared_ptr<const JointRelationPayload> relation;
+    double objective_lower{};
+    double objective_upper{};
+};
+std::variant<B04CExactFamilyBuild,Diagnostics> build_b04_c_exact_family(
+    const StrategyRequest&);
+bool strategy_a_b04_c_exact_profile_valid(const problem::ResolvedProblem&,
+    const FamilyRequest&,const RepresentationId&);
+std::shared_ptr<const CompiledCompleteFamilyVerifier> make_b04_c_exact_family_verifier();
 std::variant<std::shared_ptr<const ::csl::synthesis::strategy_ts01::ExactJointRelation>, Diagnostics> make_ts01_relation();
 }

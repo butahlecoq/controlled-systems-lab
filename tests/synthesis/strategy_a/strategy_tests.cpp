@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp>
+#include <csl/synthesis/b04_c_exact_family.hpp>
 #include <csl/contracts.hpp>
 #include <csl/synthesis/ts02_constant_integrator.hpp>
 #include <csl/synthesis/ts03_singular_integrator.hpp>
@@ -181,6 +182,34 @@ problem::ResolvedProblem nominal_linear_exact_over_stage_cap() {
         InformationPattern::nominal_open_loop,LinearTerminal{{1},0}};
     return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
 }
+SetHandle b04_exact_h_box(std::string id,std::size_t dimension,Matrix inequalities,Vector bounds,
+    std::vector<std::string> labels) {
+    return take(sets::make_h({{std::move(id)},dimension,std::move(labels)},
+        {take(numeric::snapshot(std::move(inequalities))),take(numeric::snapshot_vector(std::move(bounds))),
+         take(numeric::snapshot(Matrix{0,dimension,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
+}
+problem::ResolvedProblem b04_c_exact_profile_problem() {
+    constexpr double dt=25.0/4.0;
+    std::vector<double> times(17);
+    for(std::size_t stage=0;stage<times.size();++stage)times[stage]=static_cast<double>(stage)*dt;
+    std::vector<AdmissibleSet> controls,states;
+    for(std::size_t stage=0;stage<16;++stage)
+        controls.push_back(b04_exact_h_box("b04-c-control-"+std::to_string(stage),1,
+            Matrix{2,1,{1,-1}},Vector{1,1},{"u"}));
+    for(std::size_t stage=0;stage<=16;++stage)
+        states.push_back(b04_exact_h_box("b04-c-state-"+std::to_string(stage),4,
+            Matrix{4,4,{1,0,0,0,-1,0,0,0,0,0,1,0,0,0,-1,0}},
+            Vector{1224,-1176,468,-432},{"x1","x2","x3","x4"}));
+    Problem source{{"b04-c-exact-dyadic-20261102"},
+        std::make_shared<const SystemModel>(SystemModel{{{4,1,0},TimeDomain::discrete,
+            LinearStage{Matrix{4,4,{1,0,0,0,-dt,1,0,0,0,0,1,0,0,0,-dt,1}},
+                Matrix{4,1,{2208.0/110.0,0,-1152.0/110.0,0}},Matrix{4,0,{}},Vector{0,0,0,0}}},{}}),
+        std::move(times),KnownInitial{{1220.28265395983,119500,440.005764648976,45300}},
+        ContinuousDomain{std::move(controls)},std::move(states),{},{},InformationPattern::nominal_open_loop,
+        ResidualNormTerminal{Matrix{5,4,{-1,0,0,0,0,1,0,0,0,0,-1,0,0,0,0,1,0,1,0,-(8.0/3.0)}},
+            Vector{-1200,0,-450,0,0},Vector{1,1,64.0/9.0,64.0/9.0,1}}};
+    return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+}
 StrategyRequest request(problem::ResolvedProblem problem) {
     FamilyRequest family;family.objective=problem.identity();family.profile="nominal_open_loop";
     family.representation={"csl.polyhedron.h"};
@@ -347,7 +376,7 @@ std::variant<PreparedStrategy,Rejection> admit(const StrategyRequest& request_,b
     auto registration=synthesis::strategy_a::make_registration(std::move(providers));
     if(omit_test_verifier)registration.complete_family_verifier={};
     StrategyRegistry strategies;REQUIRE_FALSE(strategies.add(std::move(registration)));
-    Requirements output;output.output.representation={"csl.polyhedron.h"};
+    Requirements output;output.output.representation=request_.family.representation;
     output.output.family=request_.family.target;
     if(!omit_test_verifier)output.output.completeness=request_.family.target==FamilyTarget::exact_optimal_relation?
         Completeness::established:Completeness::unestablished;
@@ -1835,4 +1864,31 @@ TEST_CASE("Strategy A timing retains a stopped root and leaves unentered phases 
     }
     CHECK(std::holds_alternative<ar::Unavailable>(timing.run_wall_ticks));
     CHECK(std::get<ar::Unavailable>(timing.run_wall_ticks).reason==ar::MissingReason::incomplete_span);
+}
+
+TEST_CASE("registered Strategy A publishes the compiled B04-C exact optimal family") {
+    auto query=request(b04_c_exact_profile_problem());
+    query.family.profile=synthesis::b04_c::exact_family_profile;
+    query.family.target=FamilyTarget::exact_optimal_relation;
+    query.family.assurance=Assurance::numerical;
+    query.family.representation={synthesis::b04_c::exact_family_representation};
+    query.configuration.representation=query.family.representation;
+    const auto result=run(query);
+    REQUIRE(result.termination==Termination::completed);
+    REQUIRE(result.family);
+    CHECK_FALSE(result.complete_proposal);
+    REQUIRE(std::holds_alternative<CompleteOptimalFamily>(result.family->outcome()));
+    const auto& complete=std::get<CompleteOptimalFamily>(result.family->outcome());
+    CHECK(complete.relation.coordinates==JointCoordinates{{4,1,0},16});
+    CHECK(complete.relation.representation==query.family.representation);
+    REQUIRE(result.objective.lower);
+    REQUIRE(result.objective.upper);
+    CHECK(result.objective.lower->value>30.8985);
+    CHECK(result.objective.upper->value<30.8995);
+    const auto* proof=std::get_if<RegisteredCompletenessEvidence>(&complete.completeness.support);
+    REQUIRE(proof);
+    CHECK(proof->verifier==ModuleId{"csl.verifier.strategy-a.b04-c-exact-dyadic"});
+    std::vector<synthesis::b04_c::RationalCoordinate> origin(84,{"0","1",0});
+    CHECK(synthesis::b04_c::contains_exact_history(complete.relation,origin)==
+        synthesis::b04_c::HistoryMembership::not_member);
 }

@@ -6,7 +6,9 @@ target_link_libraries(csl_registry PUBLIC CSL::contracts)
 
 csl_add_library(csl_verifiers STATIC
   src/registry/compiled_verifiers.cpp
-  src/registry/nominal_linear_exact_verifier.cpp)
+  src/registry/nominal_linear_exact_verifier.cpp
+  src/registry/b04_c_exact_verifier.cpp
+  src/synthesis/b04_c_exact_family.cpp)
 
 target_link_libraries(csl_verifiers PUBLIC CSL::contracts CSL::resolved_core CSL::sets)
 
