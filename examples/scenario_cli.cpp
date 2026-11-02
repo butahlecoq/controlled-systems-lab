@@ -431,7 +431,7 @@ int persist(const input::LoadedScenario& scenario, const problem::ResolvedProble
     const auto source = scenario.source();
     const auto defaults = scenario.defaults();
     ar::ScenarioSourceRecord scenario_source{source->content.digest(), source->schema,
-        source->defaults_revision, {}};
+        source->defaults_revision, {}, {}};
     scenario_source.defaults.reserve(defaults->size());
     for (const auto& value : *defaults)
         scenario_source.defaults.push_back({value.path, value.meaning, value.authored});
