@@ -37,6 +37,11 @@ inline std::vector<TransformStepIdentity> expected_nominal_lineage(const Problem
     lineage.push_back({{"strategy-a/terminal-preimage"},terminal_relation,optimal_history,{"csl.synthesis.control-recovery"},"1"});
     return lineage;
 }
+inline std::vector<TransformStepIdentity> expected_b04_c_exact_lineage(const ProblemId& problem) {
+    const ModuleId strategy{"csl.synthesis.reach-back"};
+    return {{{"strategy-a/b04-c-exact-dyadic"},
+        {"problem:" + problem.value}, {"b04-c-exact-family:" + problem.value}, strategy, "1"}};
+}
 inline std::vector<TransformStepIdentity> expected_ts01_lineage(const ProblemId& problem) {
     return expected_nominal_lineage(problem,2);
 }

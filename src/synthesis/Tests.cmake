@@ -4,6 +4,22 @@ target_link_libraries(exact_rational_tests PRIVATE doctest::doctest)
 add_test(NAME exact_rational_tests COMMAND exact_rational_tests)
 csl_test_target(exact_rational_tests synthesis)
 
+add_executable(b04_c_exact_family_tests
+  tests/unit/synthesis/b04_c_exact_family_tests.cpp
+  src/synthesis/b04_c_exact_family.cpp)
+target_include_directories(b04_c_exact_family_tests PRIVATE
+  ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(b04_c_exact_family_tests PRIVATE doctest::doctest)
+add_test(NAME b04_c_exact_family_tests COMMAND b04_c_exact_family_tests)
+csl_test_target(b04_c_exact_family_tests synthesis)
+
+add_executable(b04_c_exact_verifier_tests tests/synthesis/b04_c_exact_verifier_tests.cpp)
+target_include_directories(b04_c_exact_verifier_tests PRIVATE ${PROJECT_SOURCE_DIR}/src)
+target_link_libraries(b04_c_exact_verifier_tests PRIVATE CSL::verifiers CSL::resolved_problem doctest::doctest)
+add_test(NAME b04_c_exact_verifier_tests COMMAND b04_c_exact_verifier_tests)
+csl_strict_warnings(b04_c_exact_verifier_tests)
+csl_test_target(b04_c_exact_verifier_tests synthesis)
+
 if(TARGET CSL::highs_convex AND TARGET CSL::highs_lp)
   add_executable(terminal_minimizers_tests tests/unit/synthesis/terminal_minimizers_tests.cpp)
   target_link_libraries(terminal_minimizers_tests PRIVATE CSL::terminal_minimizers CSL::highs_lp CSL::highs_convex doctest::doctest)

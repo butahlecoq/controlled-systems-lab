@@ -251,6 +251,11 @@ inline bool negate(const Rational& value, Rational& result, Budget& budget) {
 
 inline bool add(const Rational& lhs, const Rational& rhs,
                 Rational& result, Budget& budget) {
+    if (&lhs == &result || &rhs == &result) {
+        const Rational lhs_copy = lhs;
+        const Rational rhs_copy = rhs;
+        return add(lhs_copy, rhs_copy, result, budget);
+    }
     using namespace exact_h::exact_detail;
     if (!charge(budget) || !valid(lhs, budget) || !valid(rhs, budget))
         return false;
@@ -302,6 +307,11 @@ inline bool subtract(const Rational& lhs, const Rational& rhs,
 
 inline bool multiply(const Rational& lhs, const Rational& rhs,
                      Rational& result, Budget& budget) {
+    if (&lhs == &result || &rhs == &result) {
+        const Rational lhs_copy = lhs;
+        const Rational rhs_copy = rhs;
+        return multiply(lhs_copy, rhs_copy, result, budget);
+    }
     using namespace exact_h::exact_detail;
     if (!charge(budget) || !valid(lhs, budget) || !valid(rhs, budget))
         return false;

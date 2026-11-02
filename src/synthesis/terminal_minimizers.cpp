@@ -49,7 +49,8 @@ TerminalObjective objective_description(const optimization::Objective& objective
         auto dense=[](numeric::MatrixView m){Matrix r{m.rows(),m.cols(),{}};for(std::size_t i=0;i<m.rows();++i)for(std::size_t j=0;j<m.cols();++j)r.values.push_back(m(i,j));return r;};
         if constexpr(std::is_same_v<T,optimization::LinearCoefficients>)return LinearTerminal{copy(c.coefficients),c.offset};
         else if constexpr(std::is_same_v<T,optimization::QuadraticCoefficients>)return QuadraticTerminal{dense(c.Q),copy(c.linear),c.offset};
-        else return ResidualNormTerminal{dense(c.map),copy(c.target)};
+        else return ResidualNormTerminal{dense(c.map),copy(c.target),
+            c.weights ? copy(*c.weights) : Vector{}};
     },objective.coefficients());
 }
 struct Rows { SparseMatrix matrix; std::vector<Interval> bounds; };
@@ -158,8 +159,11 @@ TerminalMinimizers TerminalOptimizer::solve(const problem::ResolvedProblem& prob
             for(std::size_t i=0;i<n;++i){Vector row(n);for(std::size_t j=0;j<n;++j)row[j]=c.Q.values[i*n+j]/2+c.Q.values[j*n+i]/2;append(row);}
             append(c.linear);result.construction.characterization="C intersect {x: Hx=Ha, q'x=q'a}, H=(Q+Q')/2";
         } else {
-            for(std::size_t i=0;i<c.map.rows;++i){Vector row(n);for(std::size_t j=0;j<n;++j)row[j]=c.map.values[i*n+j];append(row);}
-            result.construction.characterization="C intersect {x: Lx=La}";
+            for(std::size_t i=0;i<c.map.rows;++i) {
+                if(!c.weights.empty() && c.weights[i]==0) continue;
+                Vector row(n);for(std::size_t j=0;j<n;++j)row[j]=c.map.values[i*n+j];append(row);
+            }
+            result.construction.characterization="C intersect {x: sqrt(D)Lx=sqrt(D)La}";
         }
     },description);
     auto m=numeric::snapshot(eq);auto b=numeric::snapshot_vector(rhs);

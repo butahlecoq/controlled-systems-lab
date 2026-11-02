@@ -216,7 +216,7 @@ void write_problem(Writer& w,const Problem& p,std::span<const ContentBinding> co
     std::visit(Visitor{
         [&](const LinearTerminal& o){w.tag(0);w.vector(o.coefficients);w.number(o.offset);},
         [&](const QuadraticTerminal& o){w.tag(1);w.matrix(o.Q);w.vector(o.linear);w.number(o.offset);},
-        [&](const ResidualNormTerminal& o){w.tag(2);w.matrix(o.map);w.vector(o.target);}
+        [&](const ResidualNormTerminal& o){w.tag(2);w.matrix(o.map);w.vector(o.target);if(!o.weights.empty()){w.tag(1);w.vector(o.weights);}}
     },p.objective);
     w.tag(0);
     w.array(content,[&](const ContentBinding& binding){w.string(binding.key);w.count(binding.content.bytes().size());w.raw(binding.content.digest().bytes);});

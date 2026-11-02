@@ -31,6 +31,20 @@ TEST_CASE("rectangular residual objective reports original norm including zero")
     CHECK(accepted(evaluate(objective, Vector{3, 1})) == doctest::Approx(2.8284271247461903));
     CHECK(accepted(evaluate(objective, Vector{1, 1})) == 0);
 }
+
+TEST_CASE("weighted residual objective and squared reformulation use diagonal squared-cost weights") {
+    const auto original = accepted(snapshot(ResidualNormTerminal{
+        Matrix{2, 1, {1, 1}}, Vector{1, 2}, Vector{4, 0}}));
+    CHECK(accepted(evaluate(original, Vector{3})) == 4);
+    const auto square = accepted(square_residual_norm(original));
+    const auto coefficients = std::get<QuadraticCoefficients>(square.squared().coefficients());
+    CHECK(coefficients.Q(0, 0) == 8);
+    CHECK(coefficients.linear[0] == -8);
+    CHECK(coefficients.offset == 4);
+    CHECK(accepted(evaluate(square.squared(), Vector{3})) == 16);
+    CHECK(accepted(evaluate(original, Vector{1})) == 0);
+    CHECK(accepted(evaluate(square.squared(), Vector{1})) == 0);
+}
 }
 
 // Dropping the offset, swapping coefficients, or retaining the producer breaks this oracle.
@@ -141,6 +155,8 @@ TEST_CASE("coefficient shapes offsets and finite values are validated at publica
     rejected(snapshot(ResidualNormTerminal{{2, 1, {1}}, {0, 0}}), DiagnosticCode::invalid_input, "numeric.dense.storage");
     rejected(snapshot(ResidualNormTerminal{{1, 1, {inf}}, {0}}), DiagnosticCode::invalid_input, "numeric.values");
     rejected(snapshot(ResidualNormTerminal{{1, 1, {1}}, {inf}}), DiagnosticCode::invalid_input, "numeric.values");
+    rejected(snapshot(ResidualNormTerminal{{1, 1, {1}}, {0}, {-1}}), DiagnosticCode::invalid_input, "objective.weights");
+    rejected(snapshot(ResidualNormTerminal{{1, 1, {1}}, {0}, {1, 2}}), DiagnosticCode::invalid_input, "objective.shape");
 }
 
 // This catches treating empty maps as invalid or collapsing a constant objective to one point.

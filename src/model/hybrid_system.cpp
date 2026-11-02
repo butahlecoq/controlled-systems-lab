@@ -925,7 +925,7 @@ HybridObjectiveLiftResult lift_hybrid_terminal_objective(const HybridSystem& sys
             for(std::size_t i=0;i<value.map.rows;++i)
                 for(std::size_t j=0;j<terminal_dimension;++j)
                     map.values[i*width+terminal_offset+j]=value.map.values[i*terminal_dimension+j];
-            return TerminalObjective{ResidualNormTerminal{std::move(map),value.target}};
+            return TerminalObjective{ResidualNormTerminal{std::move(map),value.target,value.weights}};
         }
     },objective->objective);
 }

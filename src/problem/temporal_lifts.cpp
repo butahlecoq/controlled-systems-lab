@@ -191,7 +191,7 @@ ObjectiveResult lift_objective(const TerminalObjective& objective, std::size_t s
             for (std::size_t i = 0; i < value.map.rows; ++i)
                 for (std::size_t j = 0; j < state_width; ++j)
                     map.values[i * lifted_width + j] = value.map.values[i * state_width + j];
-            return ResidualNormTerminal{std::move(map), value.target};
+            return ResidualNormTerminal{std::move(map), value.target, value.weights};
         }
     }, objective);
 }

@@ -179,7 +179,8 @@ TerminalObjective lift(const TerminalObjective& objective,std::size_t width,std:
         } else {
             Matrix L{c.map.rows,width,Vector(c.map.rows*width)};
             for(std::size_t i=0;i<c.map.rows;++i)for(std::size_t j=0;j<n;++j)L.values[i*width+offset+j]=c.map.values[i*n+j];
-            return ResidualNormTerminal{std::move(L),c.target};
+            return ResidualNormTerminal{std::move(L),c.target,
+                c.weights ? Vector(c.weights->values().begin(),c.weights->values().end()) : Vector{}};
         }
     },objective);
 }

@@ -334,6 +334,15 @@ TEST_CASE("minimal publication exposes literal matrices constraints and complete
         const bool zero=u==Vector{0,0};CHECK(last==Vector{zero?0.0:1.0});CHECK(accepted<double>(optimization::evaluate(p.objective(),last))==(zero?1.0:0.0));
     }
 }
+TEST_CASE("scenario residual weights are preserved in objective identity and evaluation") {
+    auto text=replace(std::string(minimal),R"("objective":{"kind":"terminal_distance","target":[1]})",
+        R"("objective":{"kind":"residual_norm","L":[[1]],"target":[1],"weights":[4]})");
+    auto weighted=accepted<LoadedScenario>(load(text));
+    const auto objective=std::get<ResidualNormTerminal>(weighted.problem().description()->objective);
+    CHECK(objective.weights==Vector{4});
+    CHECK(accepted<double>(optimization::evaluate(weighted.problem().objective(),Vector{2}))==2);
+    CHECK(weighted.problem().identity()!=accepted<LoadedScenario>(load(minimal)).problem().identity());
+}
 TEST_CASE("stage counts malformed shapes zero-dimensional alternatives and fixed endpoints stay distinct") {
     for(const auto& item:{std::pair{R"("B":[[1]])",R"("B":[[1],[1,2]])"},std::pair{R"("A":[[1]])",R"("A":{"rows":18446744073709551615,"cols":2,"values":[]})"}})
         CHECK(std::holds_alternative<InputFailure>(load(replace(std::string(minimal),item.first,item.second))));

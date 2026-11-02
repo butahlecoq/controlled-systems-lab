@@ -241,10 +241,12 @@ public:
         if(tag=="terminal_distance") {
             object(value,path,{"kind","target"});const auto entries=product(dim,dim,path);expansion(entries,1,path);L.values.assign(entries,0);
             for(std::size_t i=0;i<dim;++i) L.values[i*dim+i]=1;
-        } else {object(value,path,{"kind","L","target"});L=matrix(member(value,"L",path),"/objective/L");}
+        } else {object(value,path,{"kind","L","target","weights"});L=matrix(member(value,"L",path),"/objective/L");}
         if(L.cols!=dim) fail("/objective/L","wrong map width","columns matching state dimension");
         auto target=vector(member(value,"target",path),L.rows,"/objective/target");
-        return ResidualNormTerminal{std::move(L),std::move(target)};
+        Vector weights;
+        if(value.contains("weights")) weights=vector(member(value,"weights",path),L.rows,"/objective/weights");
+        return ResidualNormTerminal{std::move(L),std::move(target),std::move(weights)};
     }
 
     TemporalConstraints temporal(const Json& value,std::size_t n,std::size_t m,std::size_t horizon) {

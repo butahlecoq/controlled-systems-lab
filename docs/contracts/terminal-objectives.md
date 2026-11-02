@@ -17,11 +17,12 @@ completeness.
 |---|---|---|
 | `LinearTerminal` | `c^T x + d` | `c` has length n |
 | `QuadraticTerminal` | `0.5 x^T Q x + q^T x + c` | Q is n by n; q has length n |
-| `ResidualNormTerminal` | `||L x - r||_2` | L is m by n; r has length m |
+| `ResidualNormTerminal` | `sqrt(sum_i d_i (Lx-r)_i^2)` | L is m by n; r and optional d have length m |
 
-The supplied L includes any weights. Rectangular maps, rank deficiency, zero
-coefficients, and zero dimensions are supported. No additional term or weight
-is inferred. All coefficients and offsets must be finite. Dense storage and
+An empty `weights` vector means `d_i=1` for every row. Weights are finite,
+nonnegative binary64 values and apply to squared residuals. Rectangular maps,
+rank deficiency, zero coefficients, and zero dimensions are supported. No
+additional term or weight is inferred. All coefficients and offsets must be finite. Dense storage and
 dimension-product validation use `numeric::snapshot`; shape failures specific
 to objectives use `objective.shape`.
 

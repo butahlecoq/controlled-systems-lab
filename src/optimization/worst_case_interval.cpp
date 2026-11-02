@@ -49,7 +49,8 @@ Interval evaluate_box(const ObjectiveCoefficients& objective,
                 for(std::size_t c=0;c<point.size();++c)
                     residual=add(residual,multiply(
                         {coefficients.map(r,c),coefficients.map(r,c)},point[c]));
-                squared=add(squared,square(residual));
+                const double weight=coefficients.weights?(*coefficients.weights)[r]:1.0;
+                squared=add(squared,multiply({weight,weight},square(residual)));
             }
             return square_root(squared);
         }

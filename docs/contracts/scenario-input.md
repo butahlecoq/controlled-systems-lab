@@ -56,9 +56,11 @@ claim. V semantics come from CSL::sets, including the distinction between no
 vertex and a zero vertex with rays. No canonical set vocabulary is duplicated.
 
 Original terminal objective kinds are linear(coefficients, optional offset),
-quadratic(Q, linear, optional offset), residual_norm(L, target), and
-terminal_distance(target). Quadratic means 0.5*x'Q*x + linear'x + offset.
-Residual norm means ||L*x-target||2, not its square; terminal distance sets L=I.
+quadratic(Q, linear, optional offset), residual_norm(L, target, optional
+weights), and terminal_distance(target). Quadratic means
+0.5*x'Q*x + linear'x + offset. Residual norm means
+sqrt(sum_i weights[i]*(L*x-target)[i]^2), not its square; omitted weights are
+all ones. Terminal distance sets L=I.
 Offsets default to zero. Rectangular/zero-row maps are retained. Existing
 ObjectivePolicy checks symmetry and PSD numerically; the loader does not upgrade
 that to validated proof. LoadOptions publication policy is recorded separately

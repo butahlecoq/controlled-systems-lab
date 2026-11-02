@@ -128,13 +128,16 @@ ConvexDataResult<DualResiduals> evaluate_dual(const ConvexProgram& p,std::span<c
             for(std::size_t i=0;i<residual.size();++i) {
                 residual[i]=-c.target[i];
                 for(std::size_t j=0;j<n;++j) residual[i]+=c.map(i,j)*x[j];
-                zero=zero && residual[i]==0;
+                const double weight=c.weights?(*c.weights)[i]:1.0;
+                zero=zero && (weight==0 || residual[i]==0);
             }
             // At checked componentwise zero, zero is a valid norm subgradient.
             if(!zero) {
                 const auto rho=std::get<ConvexPrimalEvaluation>(checked).original_objective;
-                for(std::size_t j=0;j<n;++j) for(std::size_t i=0;i<residual.size();++i)
-                    gradient[j]+=c.map(i,j)*(residual[i]/rho);
+                for(std::size_t j=0;j<n;++j) for(std::size_t i=0;i<residual.size();++i) {
+                    const double weight=c.weights?(*c.weights)[i]:1.0;
+                    gradient[j]+=weight*c.map(i,j)*(residual[i]/rho);
+                }
             }
         }
     },coefficients);

@@ -30,6 +30,10 @@ TEST_CASE("rational arithmetic preserves odd denominators and dyadic exponents")
     int order{};
     REQUIRE(compare(one_third, half, order, budget));
     CHECK(order < 0);
+
+    Rational accumulated = one_third;
+    REQUIRE(add(accumulated, half, accumulated, budget));
+    CHECK(same(accumulated, five_sixths, budget));
 }
 
 TEST_CASE("rational construction canonicalizes signs and powers of two") {

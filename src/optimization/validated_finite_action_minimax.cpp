@@ -91,7 +91,7 @@ std::vector<Check> check_safe(const sets::SetData& set,const std::vector<Interva
 Interval evaluate(const ObjectiveCoefficients& o,const std::vector<Interval>& x,Meter& m) {
     return std::visit([&](const auto& c)->Interval{using T=std::decay_t<decltype(c)>;
         if constexpr(std::is_same_v<T,LinearCoefficients>){Interval y{c.offset,c.offset};for(std::size_t i=0;i<x.size();++i){if(!m.op()||!m.op())return detail::whole();y=add(y,multiply({c.coefficients[i],c.coefficients[i]},x[i]));}return y;}
-        else if constexpr(std::is_same_v<T,ResidualCoefficients>){Interval q{0,0};for(std::size_t r=0;r<c.map.rows();++r){Interval v{-c.target[r],-c.target[r]};for(std::size_t j=0;j<x.size();++j){if(!m.op()||!m.op())return detail::whole();v=add(v,multiply({c.map(r,j),c.map(r,j)},x[j]));}if(!m.op()||!m.op())return detail::whole();q=add(q,square(v));}if(!m.op())return detail::whole();return square_root(q);}
+        else if constexpr(std::is_same_v<T,ResidualCoefficients>){Interval q{0,0};for(std::size_t r=0;r<c.map.rows();++r){Interval v{-c.target[r],-c.target[r]};for(std::size_t j=0;j<x.size();++j){if(!m.op()||!m.op())return detail::whole();v=add(v,multiply({c.map(r,j),c.map(r,j)},x[j]));}if(!m.op()||!m.op())return detail::whole();const double weight=c.weights?(*c.weights)[r]:1.0;q=add(q,multiply({weight,weight},square(v)));}if(!m.op())return detail::whole();return square_root(q);}
         else return {detail::negative_infinity,detail::positive_infinity};},o);
 }
 }
