@@ -86,6 +86,10 @@ Follow-up assessed 2026-10-11. See [architecture implications and reading limits
 
 R40: [Kalev and Shorikov, optimal open-loop terminal fuel control](https://sciencejournals.ru/view-article/?a=TeorSist1902009Kalev&j=teorsist&n=1&v=0&y=2019), 2019, pp. 166–176, DOI 10.1134/S0002338819020094. Published counterpart to L11; numerical section and tables inspected 2026-10-11.
 
+## ENV-717 differential-game comparison
+
+R41: Anton Plaksin and Vitaly Kalev, [Zero-Sum Positional Differential Games as a Framework for Robust Reinforcement Learning: Deep Q-Learning Approach](https://proceedings.mlr.press/v235/plaksin24a.html), Proceedings of the 41st International Conference on Machine Learning, PMLR 235:40869–40885, 2024. Full paper read for game equations, analytic values and the Figure 3 evaluation protocol on 2026-11-02; no RL experiments reproduced.
+
 R29 follow-up: a local copy and editable English paper source were recovered as A21–A22 in the [larger-archive register](archive-selected-sources.json). This changes local availability, not the publication date or proof-audit status.
 
 ## Local primary papers for the proof audits

@@ -30,6 +30,12 @@ upstream Gym dependency gap, justifies the adopted legacy Gym version from the
 pinned solver API, and limits the result to a deterministic 14-step finite
 open-loop catalogue.
 
+The [ENV-717 Plaksin differential-game note](plaksin24a-differential-game-values.md)
+checks the paper's analytic values and learned-policy evaluation protocol,
+maps `GetIntoSquare` to `MaxCoordinateGame` and `GetIntoCircle` to `SphereGame`,
+and records why Figure 3 is qualitative comparison evidence rather than a
+certified acceptance target. See bibliography entry R41.
+
 The [ITIS'17 hull-method source audit](exp02-itis17-source-audit-20261027.md)
 records the primary-paper algorithms, the A43/A44 implementation boundaries,
 paper hashes, and the completed search for matching Pascal sources.
