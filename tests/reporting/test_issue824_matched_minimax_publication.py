@@ -33,6 +33,8 @@ class Issue824MatchedMinimaxPublicationTest(unittest.TestCase):
         self.assertEqual(check["measurement_samples_verified"], 25)
         self.assertEqual(check["exact_finite_minimax_value"], 14.58094225)
         self.assertTrue(capture["source_tree_clean_before_report_generation"])
+        self.assertTrue(STAGER.report_source_identity.source_hashes_match_commit_or_checkout(
+            ROOT, "0" * 40, capture["source_files_sha256"]))
         self.assertEqual(capture["resource_accounting"]["policy"], "uncapped local exploratory run")
         self.assertEqual(capture["resource_accounting"]["enforced_limits"], {
             "algorithm_wall_time": False, "process_tree_memory": False})
