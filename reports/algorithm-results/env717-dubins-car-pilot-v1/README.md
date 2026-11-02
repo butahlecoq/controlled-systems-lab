@@ -15,9 +15,8 @@ The pinned source also has an `h` method over the three physical coordinates and
 ## Reproduce
 
 ```sh
-cmake -S . -B build/env717-dubins-car -DCMAKE_BUILD_TYPE=Release \
-  -DBUILD_TESTING=ON -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF \
-  -DCSL_BUILD_ENV717_REPORT=ON
+cmake -S benchmarks/reporting/env717/dubins-car-build -B build/env717-dubins-car \
+  -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release
 cmake --build build/env717-dubins-car --config Release --target csl_env717_dubins_car
 python3 scripts/reports/env717/check_dubins_car.py \
   build/env717-dubins-car/csl_env717_dubins_car \
