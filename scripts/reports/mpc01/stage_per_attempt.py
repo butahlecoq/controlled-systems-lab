@@ -25,6 +25,22 @@ STRATEGY_AB_FILES = (
 )
 
 
+def _insert_landing_link(site: Path, marker: str, href: str, label: str) -> None:
+    landing = site / "index.html"
+    if landing.is_symlink() or not landing.is_file():
+        raise ValueError("built Pages site must have a regular root index.html")
+    source_page = landing.read_text(encoding="utf-8")
+    marker_attr = f'id="{marker}"'
+    if marker_attr in source_page:
+        raise ValueError("Pages landing link already exists: " + marker)
+    link = f'<p {marker_attr}><a href="{href}">{label}</a></p>'
+    updated, count = re.subn(r"(<body\b[^>]*>)", lambda match: match.group(1) + link,
+                             source_page, count=1, flags=re.IGNORECASE)
+    if count != 1:
+        raise ValueError("built Pages root index.html has no body element")
+    landing.write_text(updated, encoding="utf-8")
+
+
 def page() -> str:
     summary = (SOURCE / "benchmark-summary.md").read_text(encoding="utf-8")
     rows = []
@@ -75,16 +91,8 @@ def stage(site: Path) -> Path:
         raise ValueError("report route must be fresh")
     shutil.copytree(SOURCE, dest, symlinks=False)
     (dest / "index.html").write_text(page(), encoding="utf-8")
-    source_page = landing.read_text(encoding="utf-8")
-    if 'id="mpc01-per-attempt-link"' in source_page:
-        raise ValueError("MPC-01 landing link already exists")
-    link = (f'<p id="mpc01-per-attempt-link"><a href="{REPORT_ID}/index.html">'
-            'MPC-01 per-attempt OSQP and HPIPM capture →</a></p>')
-    updated, count = re.subn(r"(<body\b[^>]*>)", lambda match: match.group(1) + link,
-                             source_page, count=1, flags=re.IGNORECASE)
-    if count != 1:
-        raise ValueError("built Pages root index.html has no body element")
-    landing.write_text(updated, encoding="utf-8")
+    _insert_landing_link(site, "mpc01-per-attempt-link", f"{REPORT_ID}/index.html",
+                         "MPC-01 per-attempt OSQP and HPIPM capture →")
     stage_strategy_ab(site)
     return dest
 
@@ -136,20 +144,10 @@ def stage_strategy_ab(site: Path) -> Path:
         if not target.exists():
             shutil.copy2(source, target)
 
-    landing = site / "index.html"
-    if landing.is_symlink() or not landing.is_file():
-        raise ValueError("built Pages site must have a regular root index.html")
-    source_page = landing.read_text(encoding="utf-8")
-    marker = 'id="mpc01-strategy-ab-ts03-link"'
-    if marker in source_page:
-        raise ValueError("Strategy A/B landing link already exists")
-    link = (f'<p {marker}><a href="{STRATEGY_AB_ROUTE.as_posix()}/strategy-ab-ts03-summary.html">'
-            'MPC-01 Strategy A/B T-S03 report →</a></p>')
-    updated, count = re.subn(r"(<body\b[^>]*>)", lambda match: match.group(1) + link,
-                             source_page, count=1, flags=re.IGNORECASE)
-    if count != 1:
-        raise ValueError("built Pages root index.html has no body element")
-    landing.write_text(updated, encoding="utf-8")
+    _insert_landing_link(
+        site, "mpc01-strategy-ab-ts03-link",
+        f"{STRATEGY_AB_ROUTE.as_posix()}/strategy-ab-ts03-summary.html",
+        "MPC-01 Strategy A/B T-S03 report →")
     return destination
 
 

@@ -4,6 +4,8 @@ from __future__ import annotations
 import importlib.util
 import hashlib
 from pathlib import Path
+import subprocess
+import sys
 import tempfile
 import unittest
 from urllib.parse import urldefrag, urlparse
@@ -17,6 +19,12 @@ SPEC.loader.exec_module(stage_module)
 
 
 class PerAttemptPublicationTests(unittest.TestCase):
+    def test_strategy_ab_bundle_has_valid_checksums_and_reproducible_render(self):
+        validator = ROOT / "scripts/reports/mpc01/validate_strategy_ab_ts03_bundle.py"
+        result = subprocess.run([sys.executable, str(validator)], cwd=ROOT, check=True,
+                                capture_output=True, text=True)
+        self.assertIn("Validated immutable MPC-01 T-S03", result.stdout)
+
     def test_route_preserves_source_bundle_and_links_from_root_landing(self):
         with tempfile.TemporaryDirectory(prefix="mpc01-pages-augmentation-") as temporary:
             site = Path(temporary)
