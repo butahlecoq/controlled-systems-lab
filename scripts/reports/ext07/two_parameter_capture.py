@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import platform
 import re
+import shutil
 import subprocess
 
 if __package__:
@@ -18,7 +19,7 @@ else:
 
 
 def capture(source: Path, destination: Path, commit: str, cmake: str,
-            jobs: int = 4) -> None:
+            jobs: int = 4, build_dir: Path | None = None) -> None:
     validate_jobs(jobs)
     source = source.resolve(strict=True)
     destination = destination.resolve()
@@ -27,7 +28,8 @@ def capture(source: Path, destination: Path, commit: str, cmake: str,
     before = receipt(source, commit, "prebuild")
     destination.mkdir(parents=True)
     save(destination / "prebuild.json", before)
-    build = destination / "build"
+    build = (build_dir.resolve(strict=True) if build_dir is not None else
+             destination / "build")
     env = dict(os.environ, VSLANG="1033", PreferredUILang="en-US",
                DOTNET_CLI_UI_LANGUAGE="en-US")
     run([cmake, "-S", str(source), "-B", str(build), "-DBUILD_TESTING=OFF",
@@ -49,6 +51,9 @@ def capture(source: Path, destination: Path, commit: str, cmake: str,
                           else "csl_ext07_two_parameter_report")
     if not executable.is_file():
         raise FileNotFoundError(executable)
+    capture_executable = destination / "build" / executable.name
+    capture_executable.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(executable, capture_executable)
     for phase in ("smoke", "measure"):
         result = subprocess.run([str(executable), phase], cwd=source, env=env,
                                 capture_output=True)
@@ -57,7 +62,7 @@ def capture(source: Path, destination: Path, commit: str, cmake: str,
         if result.returncode:
             raise RuntimeError(f"Two-parameter {phase} run failed ({result.returncode})")
     after = receipt(source, commit, "postrun")
-    after["executable_sha256"] = hashlib.sha256(executable.read_bytes()).hexdigest()
+    after["executable_sha256"] = hashlib.sha256(capture_executable.read_bytes()).hexdigest()
     save(destination / "postrun.json", after)
     cache = (build / "CMakeCache.txt").read_bytes()
     (destination / "CMakeCache.raw.txt").write_bytes(cache)
@@ -115,5 +120,7 @@ if __name__ == "__main__":
     parser.add_argument("--commit", required=True)
     parser.add_argument("--cmake", default="cmake")
     parser.add_argument("--jobs", type=int, default=4)
+    parser.add_argument("--build-dir", type=Path,
+                        help="reuse a Release build tree for this exact source checkout")
     args = parser.parse_args()
-    capture(args.source, args.capture, args.commit, args.cmake, args.jobs)
+    capture(args.source, args.capture, args.commit, args.cmake, args.jobs, args.build_dir)

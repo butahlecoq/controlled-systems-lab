@@ -116,7 +116,7 @@ def summary_csv(record: dict) -> bytes:
 
 
 def _process_cpu_trial_summary(row: dict) -> list[object]:
-    values = [observation["observed_ns"]
+    values = [observation["nanoseconds"]
               for call in row["process_cpu_observations"]
               for observation in call if observation["status"] == "observed"]
     unavailable = sum(1 for call in row["process_cpu_observations"]
