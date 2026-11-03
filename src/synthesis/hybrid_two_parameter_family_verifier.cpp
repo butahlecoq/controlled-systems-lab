@@ -103,7 +103,7 @@ const HybridTransitionEdge *edge(const HybridSystem &s,
                         [&](const auto &e) { return e.id == id; });
   return i == s.edges.end() ? nullptr : &*i;
 }
-std::optional<I> interval(const AdmissibleSet &set, std::stop_token stop,
+std::optional<I> interval(const AdmissibleSet &set, const HybridVerifierInvocation& stop,
                           bool &cancelled, std::size_t &rows_used) {
   if (stop.stop_requested()) {
     cancelled = true;
@@ -191,7 +191,7 @@ std::optional<I> interval(const AdmissibleSet &set, std::stop_token stop,
       },
       set);
 }
-bool clip(Poly &p, double a, double b, double c, std::stop_token stop,
+bool clip(Poly &p, double a, double b, double c, const HybridVerifierInvocation& stop,
           bool &exact) {
   if (p.empty())
     return true;
@@ -237,7 +237,7 @@ bool clip(Poly &p, double a, double b, double c, std::stop_token stop,
   p = std::move(clean);
   return true;
 }
-bool constrain(Poly &p, const I &in, const Aff &v, std::stop_token stop,
+bool constrain(Poly &p, const I &in, const Aff &v, const HybridVerifierInvocation& stop,
                bool &exact, std::size_t &clips_used) {
   if (in.empty) {
     p.clear();
@@ -391,7 +391,7 @@ bool reset_affine(const SetHandle &h, double &off, double &gain) {
          divi(-p->equalities(0, 0), p->equalities(0, 1), gain);
 }
 Branch eval(const HybridSystem &sys, const HybridRequest &req,
-            const HybridPath &path, std::stop_token stop) {
+            const HybridPath &path, const HybridVerifierInvocation& stop) {
   Branch b;
   auto unsupported = [&](const char *s) {
     b.why = s;
@@ -535,15 +535,13 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::capabilities() const noexcept {
 HybridFamilyVerificationPreflightResult
 TwoParameterScalarPolytopeHybridFamilyVerifier::preflight(
     const HybridSystem &s, const HybridRequest &r,
-    std::span<const HybridPath> paths, std::stop_token stop) const {
+    std::span<const HybridPath> paths, const HybridVerifierInvocation& stop) const {
   for (const auto &p : paths) {
     if (stop.stop_requested())
-      return OperationStopped{StopReason::cancelled,
-                              "Two-parameter admission cancelled"};
+      return stop.stop_result("Two-parameter admission cancelled");
     auto b = eval(s, r, p, stop);
     if (stop.stop_requested())
-      return OperationStopped{StopReason::cancelled,
-                              "Two-parameter admission cancelled"};
+      return stop.stop_result("Two-parameter admission cancelled");
     if (b.state == Branch::State::unsupported)
       return Diagnostics{{DiagnosticCode::unsupported,
                           "hybrid.verification.two_parameter_domain",
@@ -557,10 +555,10 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
     std::span<const HybridPath> paths,
     std::span<const HybridPathProgram> programs,
     std::span<const HybridPathOptimalFaceCandidate> candidates,
-    NumericalPolicy policy, std::stop_token stop) const {
+    const HybridVerifierInvocation& stop) const {
+  const auto policy=stop.numerical_policy();
   if (stop.stop_requested())
-    return OperationStopped{StopReason::cancelled,
-                            "Two-parameter verification cancelled"};
+    return stop.stop_result("Two-parameter verification cancelled");
   if (!std::isfinite(policy.absolute_tolerance) ||
       !std::isfinite(policy.relative_tolerance) ||
       policy.absolute_tolerance < 0 || policy.relative_tolerance < 0)
@@ -574,8 +572,7 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
       s, r, paths.size(), std::max<std::size_t>(64, (s.edges.size() + 1) * 16),
       [&] { return stop.stop_requested(); });
   if (inv.cancelled || stop.stop_requested())
-    return OperationStopped{StopReason::cancelled,
-                            "Two-parameter path enumeration cancelled"};
+    return stop.stop_result("Two-parameter path enumeration cancelled");
   if (inv.resource_limit ||
       inv.paths != std::vector<HybridPath>(paths.begin(), paths.end()) ||
       programs.size() != paths.size())
@@ -600,13 +597,10 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
   double global = INFINITY;
   for (const auto &p : paths) {
     if (stop.stop_requested())
-      return OperationStopped{StopReason::cancelled,
-                              "Two-parameter traversal cancelled"};
+      return stop.stop_result("Two-parameter traversal cancelled");
     auto b = eval(s, r, p, stop);
     if (stop.stop_requested())
-      return OperationStopped{
-          StopReason::cancelled,
-          "Two-parameter verification cancelled during reconstruction"};
+      return stop.stop_result("Two-parameter verification stopped during reconstruction");
     if (b.state == Branch::State::unsupported)
       return Diagnostics{{DiagnosticCode::unsupported,
                           "hybrid.verification.two_parameter_domain", b.why}};
@@ -701,8 +695,7 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
     if (valid) {
       for (std::size_t row = 0; row < h->equalities.rows() && valid; ++row) {
         if ((row & 127U) == 0 && stop.stop_requested())
-          return OperationStopped{StopReason::cancelled,
-                                  "Two-parameter equality check cancelled"};
+          return stop.stop_result("Two-parameter equality check cancelled");
         double c = 0, x = 0, y = 0;
         for (int j = 0; j < 7; ++j) {
           double q = 0;
@@ -726,8 +719,7 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
       }
       for (std::size_t row = 0; row < h->inequalities.rows() && valid; ++row) {
         if ((row & 127U) == 0 && stop.stop_requested())
-          return OperationStopped{StopReason::cancelled,
-                                  "Two-parameter inequality check cancelled"};
+          return stop.stop_result("Two-parameter inequality check cancelled");
         double c = 0, x = 0, y = 0, bound = 0;
         for (int j = 0; j < 7; ++j) {
           double q = 0;
@@ -830,9 +822,7 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
       if (cv) {
         for (std::size_t row = 0; row < ch->equalities.rows() && cv; ++row) {
           if ((row & 127U) == 0 && stop.stop_requested())
-            return OperationStopped{
-                StopReason::cancelled,
-                "Two-parameter face equality check cancelled"};
+            return stop.stop_result("Two-parameter face equality check stopped");
           double c = 0, x = 0, y = 0;
           for (int j = 0; j < 7; ++j) {
             double q = 0;
@@ -857,9 +847,7 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
         }
         for (std::size_t row = 0; row < ch->inequalities.rows() && cv; ++row) {
           if ((row & 127U) == 0 && stop.stop_requested())
-            return OperationStopped{
-                StopReason::cancelled,
-                "Two-parameter face inequality check cancelled"};
+            return stop.stop_result("Two-parameter face inequality check stopped");
           double c = 0, x = 0, y = 0;
           for (int j = 0; j < 7; ++j) {
             double q = 0;
@@ -888,8 +876,7 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
       if (!face_hull || !candidate_hull)
         face_pullback_exact = false;
       if (stop.stop_requested())
-        return OperationStopped{StopReason::cancelled,
-                                "Two-parameter face pullback cancelled"};
+        return stop.stop_result("Two-parameter face pullback cancelled");
       if (!ex || !face_pullback_exact)
         coverage_unsupported = true;
       covered =
@@ -946,9 +933,7 @@ TwoParameterScalarPolytopeHybridFamilyVerifier::verify(
           : (any_unsupported ? HybridVerificationStatus::unsupported
                              : HybridVerificationStatus::refuted);
   if (stop.stop_requested())
-    return OperationStopped{
-        StopReason::cancelled,
-        "Two-parameter report cancelled before publication"};
+    return stop.stop_result("Two-parameter report stopped before publication");
   return report;
 }
 } // namespace csl::synthesis

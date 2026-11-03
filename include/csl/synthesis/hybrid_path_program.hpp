@@ -6,6 +6,7 @@
 #include <csl/optimization/convex_backend.hpp>
 #include <csl/optimization/linear_program.hpp>
 #include <csl/registry/provider.hpp>
+#include <cstdint>
 #include <span>
 #include <variant>
 
@@ -22,6 +23,32 @@ struct HybridPathProgram {
 
 using HybridPortfolioProgramResult = std::variant<std::vector<HybridPathProgram>, Diagnostics,
     OperationStopped, model::HybridPathCompositionFailureReport>;
+
+struct HybridProviderAdmissionAttempt {
+    model::HybridPath path;
+    registry::RequestEnvelope envelope;
+    registry::Provenance provider;
+    registry::AdmissionDeclaration declaration;
+};
+struct HybridProviderAdmissionReport {
+    std::vector<model::HybridPath> paths;
+    std::vector<model::HybridPlannedOperation> relation_operations;
+    std::vector<HybridProviderAdmissionAttempt> attempts;
+    Diagnostics diagnostics;
+    bool admitted{};
+};
+using HybridProviderAdmissionResult = std::variant<HybridProviderAdmissionReport,
+    Diagnostics, OperationStopped>;
+
+// Admits the selected solver provider against a conservative envelope for
+// every complete path. Unknown/conditional declarations remain explicit
+// failures; this performs no relation composition or provider preparation.
+HybridProviderAdmissionResult preflight_hybrid_program_providers(
+    const model::HybridSystem&, const model::HybridRequest&,
+    std::span<const model::HybridPath>, model::HybridRelationLimits,
+    const registry::PreparedProvider<registry::LPPort>&,
+    const registry::PreparedProvider<registry::ConvexPort>&,
+    std::stop_token cancellation = {});
 
 using HybridPathProgramResult = std::variant<HybridPathProgram, Diagnostics, OperationStopped,
     model::HybridPathCompositionFailureReport>;
@@ -45,9 +72,38 @@ struct HybridPathReachability {
 using HybridPathReachabilityResult = std::variant<HybridPathReachability, Diagnostics,
     OperationStopped, model::HybridPathCompositionFailureReport>;
 
+// One concretely prepared path operation. Implementations own adapter-specific
+// state (such as a move-only geometry pipeline) and are consumed at execution.
+class HybridReachabilityStage {
+public:
+    virtual ~HybridReachabilityStage() = default;
+    virtual HybridPathReachabilityResult execute(const ExecutionContext&) && = 0;
+};
+enum class HybridReachabilityStageOperation { relation, projection };
+struct HybridReachabilityStageFailure {
+    HybridReachabilityStageOperation operation{};
+    Diagnostics diagnostics;
+};
+using HybridReachabilityStageResult = std::variant<
+    std::unique_ptr<HybridReachabilityStage>, Diagnostics, HybridReachabilityStageFailure, OperationStopped,
+    model::HybridPathCompositionFailureReport>;
+
+struct HybridReachabilityAttempt {
+    model::HybridPath path;
+    HybridPathReachabilityResult result;
+    std::optional<ResourcePolicy> requested_resources;
+    std::optional<std::size_t> observed_backend_threads;
+    // Wall time spent executing this path's staged reachability operation.
+    // Missing means the stage was not executed.
+    std::optional<std::uint64_t> elapsed_wall_nanoseconds{};
+};
+
 struct HybridReachabilityCapabilities {
     bool retains_branch_labelled_joint_relation{};
     Assurance assurance{Assurance::numerical};
+    bool projects_terminal_state{};
+    std::optional<registry::Provenance> projection_provider;
+    std::size_t maximum_projection_rows{};
 };
 using HybridReachabilityPreflightResult = model::HybridRelationPreflightResult;
 
@@ -66,6 +122,12 @@ public:
     virtual HybridPathReachabilityResult compose_path(const model::HybridSystem&,
         const model::HybridRequest&, const model::HybridPath&,
         model::HybridRelationLimits, std::stop_token cancellation) const = 0;
+    // Stages adapter-specific concrete preparation without creating a
+    // workspace. The default stages validated non-projecting results and fails
+    // closed for adapters that would execute a projection in compose_path.
+    virtual HybridReachabilityStageResult stage_path(const model::HybridSystem&,
+        const model::HybridRequest&, const model::HybridPath&,
+        model::HybridRelationLimits, const ExecutionContext&) const;
 };
 
 // The initial implementation builds the full joint H relation directly. It
@@ -88,6 +150,9 @@ public:
 class ProjectedStateHybridReachabilityAdapter final : public HybridReachabilityAdapter {
 public:
     explicit ProjectedStateHybridReachabilityAdapter(std::size_t maximum_projection_rows = 4096);
+    ProjectedStateHybridReachabilityAdapter(
+        registry::PreparedProvider<registry::GeometryPort> projection,
+        std::size_t maximum_projection_rows);
     HybridReachabilityCapabilities capabilities() const noexcept override;
     HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, const model::HybridPath&,
@@ -95,6 +160,9 @@ public:
     HybridPathReachabilityResult compose_path(const model::HybridSystem&,
         const model::HybridRequest&, const model::HybridPath&,
         model::HybridRelationLimits, std::stop_token cancellation) const override;
+    HybridReachabilityStageResult stage_path(const model::HybridSystem&,
+        const model::HybridRequest&, const model::HybridPath&,
+        model::HybridRelationLimits, const ExecutionContext&) const override;
 private:
     registry::PreparedProvider<registry::GeometryPort> projection_;
     std::size_t maximum_projection_rows_;
@@ -176,6 +244,16 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs(
     const model::HybridRequest&, ProblemId, model::HybridEnumerationLimits,
     model::HybridRelationLimits, optimization::ObjectivePolicy = {},
     std::stop_token cancellation = {});
+// Provider-aware overload. Every path's solver provider is declared before
+// relation composition; concrete provider preparation still occurs through
+// execute_hybrid_path_programs before any workspace is created.
+HybridPortfolioProgramResult build_hybrid_portfolio_programs(
+    const HybridDirectTrajectoryAdapter&, const model::HybridSystem&,
+    const model::HybridRequest&, ProblemId, model::HybridEnumerationLimits,
+    model::HybridRelationLimits,
+    const registry::PreparedProvider<registry::LPPort>&,
+    const registry::PreparedProvider<registry::ConvexPort>&,
+    optimization::ObjectivePolicy = {}, std::stop_token cancellation = {});
 
 // Executes supplied branch programs independently and retains each result and
 // its solver provenance. This does not compare objectives or certify a global
@@ -190,14 +268,15 @@ struct HybridBranchExecution {
     // Resource limits supplied to this branch's provider execution. This is
     // a requested policy, not a measurement or proof of backend enforcement.
     std::optional<ResourcePolicy> requested_resources;
+    // Maximum backend thread width reported through ExecutionContext while
+    // this branch ran. Missing means the provider supplied no observation.
+    std::optional<std::size_t> observed_backend_threads;
+    // Wall time spent creating the workspace and running this branch provider.
+    // Missing means no provider workspace was created.
+    std::optional<std::uint64_t> provider_elapsed_wall_nanoseconds{};
 };
 
-struct HybridPortfolioExecution {
-    std::vector<HybridBranchExecution> branches;
-    // True only if every supplied branch produced a contract-valid completed
-    // solver result. This says nothing about cross-branch optimality.
-    bool all_supplied_branches_completed{};
-};
+struct HybridPortfolioExecution;
 
 // Objective-bound comparison is deliberately separate from complete-family
 // verification. The returned paths are branches that cannot yet be excluded
@@ -285,8 +364,27 @@ struct HybridFamilyVerificationCapabilities {
     Assurance assurance{Assurance::numerical};
 };
 
+enum class HybridVerifierResourceDisposition { not_requested, not_invoked, requested_but_unenforced };
+struct HybridVerifierResourceEvidence {
+    std::optional<ResourcePolicy> requested;
+    HybridVerifierResourceDisposition disposition{HybridVerifierResourceDisposition::not_requested};
+    std::optional<std::size_t> observed_backend_threads;
+    // Wall time spent verifying the family after request preflight. Missing
+    // means verifier execution was not invoked.
+    std::optional<std::uint64_t> elapsed_wall_nanoseconds{};
+};
+
+// The coordinator preserves candidate construction separately from verifier
+// execution. Incomplete solver evidence never looks like a complete-family report.
+struct HybridPortfolioVerificationAttempt {
+    HybridPortfolioOptimalFaceAnalysis candidates;
+    std::optional<HybridFamilyVerificationResult> verification;
+    HybridVerifierResourceEvidence resources;
+};
+
 // Replaceable verification boundary. Reports are inspection data only; they
 // do not create synthesis::OptimalFamily authority or certify publication.
+class HybridVerifierInvocation;
 class HybridFamilyVerificationAdapter {
 public:
     virtual ~HybridFamilyVerificationAdapter() = default;
@@ -295,12 +393,56 @@ public:
     // before branch relation construction. The default fails closed.
     virtual HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
-        std::stop_token cancellation) const;
+        const class HybridVerifierInvocation&) const;
     virtual HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,
-        std::span<const HybridPathOptimalFaceCandidate>, NumericalPolicy,
-        std::stop_token cancellation) const = 0;
+        std::span<const HybridPathOptimalFaceCandidate>,
+        const class HybridVerifierInvocation&) const = 0;
+};
+
+// A verifier-scoped projection of ExecutionContext. Each invocation owns a
+// fresh thread observer; adapter reports update it and the caller's aggregate.
+// Resource requests remain requests and are not treated as enforcement.
+class HybridVerifierInvocation {
+public:
+    explicit HybridVerifierInvocation(const ExecutionContext&);
+    std::optional<OperationStopped> interruption() const noexcept;
+    OperationStopped stop_result(std::string diagnostics) const;
+    bool stop_requested() const noexcept { return interruption().has_value(); }
+    std::stop_token cancellation_token() const noexcept { return cancellation_; }
+    NumericalPolicy numerical_policy() const noexcept { return numerical_; }
+    const std::optional<ResourcePolicy>& requested_resources() const noexcept { return resources_; }
+    std::string_view run_id() const noexcept { return run_id_; }
+    const std::shared_ptr<execution::observability::TimingCollector>& timing() const noexcept {
+        return timing_;
+    }
+    void record_backend_threads(std::size_t) const noexcept;
+    std::optional<std::size_t> observed_backend_threads() const noexcept;
+private:
+    std::stop_token cancellation_;
+    std::optional<std::chrono::steady_clock::time_point> deadline_;
+    NumericalPolicy numerical_{};
+    std::optional<ResourcePolicy> resources_;
+    std::string run_id_;
+    std::shared_ptr<execution::observability::TimingCollector> timing_;
+    std::shared_ptr<execution::BackendThreadObservation> observer_;
+    std::shared_ptr<execution::BackendThreadObservation> aggregate_observer_;
+};
+
+struct HybridPortfolioExecution {
+    std::vector<HybridBranchExecution> branches;
+    // True only if every supplied branch produced a contract-valid completed
+    // solver result. This says nothing about cross-branch optimality.
+    bool all_supplied_branches_completed{};
+    // Successful reachability results retained for source compatibility.
+    // Use reachability_attempts when failures and stops must be accounted for.
+    std::vector<HybridPathReachability> reachability;
+    // Per-path reachability outcomes, including failures and stops. These are
+    // separate from solver branches and do not imply objective optimality.
+    std::vector<HybridReachabilityAttempt> reachability_attempts;
+    // Present when the coordinated request selected a family verifier.
+    std::optional<HybridPortfolioVerificationAttempt> family_verification{};
 };
 
 // Independent verifier for deterministic paths with integral singleton data.
@@ -310,12 +452,12 @@ public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
-        std::stop_token cancellation) const override;
+        const HybridVerifierInvocation&) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,
-        std::span<const HybridPathOptimalFaceCandidate>, NumericalPolicy,
-        std::stop_token cancellation) const override;
+        std::span<const HybridPathOptimalFaceCandidate>,
+        const HybridVerifierInvocation&) const override;
 };
 
 // Exact bounded verifier for linear objectives over joint H-relations. It
@@ -327,12 +469,12 @@ public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
-        std::stop_token cancellation) const override;
+        const HybridVerifierInvocation&) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,
-        std::span<const HybridPathOptimalFaceCandidate>, NumericalPolicy,
-        std::stop_token cancellation) const override;
+        std::span<const HybridPathOptimalFaceCandidate>,
+        const HybridVerifierInvocation&) const override;
 };
 
 // Independent numerical verifier for one-stage, one-dimensional hybrid
@@ -344,12 +486,12 @@ public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
-        std::stop_token cancellation) const override;
+        const HybridVerifierInvocation&) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,
-        std::span<const HybridPathOptimalFaceCandidate>, NumericalPolicy,
-        std::stop_token cancellation) const override;
+        std::span<const HybridPathOptimalFaceCandidate>,
+        const HybridVerifierInvocation&) const override;
 };
 
 // Independent numerical verifier for scalar paths at any finite horizon with
@@ -360,12 +502,12 @@ public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
-        std::stop_token cancellation) const override;
+        const HybridVerifierInvocation&) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,
-        std::span<const HybridPathOptimalFaceCandidate>, NumericalPolicy,
-        std::stop_token cancellation) const override;
+        std::span<const HybridPathOptimalFaceCandidate>,
+        const HybridVerifierInvocation&) const override;
 };
 
 // Independent exact-domain verifier for two-stage scalar trajectories with
@@ -377,12 +519,12 @@ public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
-        std::stop_token cancellation) const override;
+        const HybridVerifierInvocation&) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,
-        std::span<const HybridPathOptimalFaceCandidate>, NumericalPolicy,
-        std::stop_token cancellation) const override;
+        std::span<const HybridPathOptimalFaceCandidate>,
+        const HybridVerifierInvocation&) const override;
 };
 
 // Compatibility adapter retained for callers that depend on the two-stage
@@ -392,11 +534,11 @@ public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
-        std::stop_token cancellation) const override;
+        const HybridVerifierInvocation&) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&,std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,std::span<const HybridPathOptimalFaceCandidate>,
-        NumericalPolicy,std::stop_token cancellation) const override;
+        const HybridVerifierInvocation&) const override;
 };
 
 // Enumerates the request path inventory, rejects unsupported verifier plans,
@@ -405,7 +547,14 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
     const HybridFamilyVerificationAdapter&, const HybridDirectTrajectoryAdapter&,
     const model::HybridSystem&, const model::HybridRequest&, ProblemId,
     model::HybridEnumerationLimits, model::HybridRelationLimits,
-    optimization::ObjectivePolicy = {}, std::stop_token cancellation = {});
+    optimization::ObjectivePolicy = {}, const ExecutionContext& context = {});
+HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
+    const HybridFamilyVerificationAdapter&, const HybridDirectTrajectoryAdapter&,
+    const model::HybridSystem&, const model::HybridRequest&, ProblemId,
+    model::HybridEnumerationLimits, model::HybridRelationLimits,
+    const registry::PreparedProvider<registry::LPPort>&,
+    const registry::PreparedProvider<registry::ConvexPort>&,
+    optimization::ObjectivePolicy = {}, const ExecutionContext& context = {});
 
 // Enumerates the full permitted path inventory and validates that programs and
 // reports cover it exactly once. It does not promote a report into a complete
@@ -414,7 +563,7 @@ HybridFamilyVerificationResult verify_hybrid_portfolio_family(
     const HybridFamilyVerificationAdapter&, const model::HybridSystem&,
     const model::HybridRequest&, std::span<const HybridPathProgram>,
     std::span<const HybridPathOptimalFaceCandidate>, model::HybridEnumerationLimits,
-    NumericalPolicy, std::stop_token cancellation = {});
+    const HybridVerifierInvocation&);
 
 // Transactionally assembles a candidate face for every branch that objective
 // bounds cannot exclude. The result retains path and provider provenance but

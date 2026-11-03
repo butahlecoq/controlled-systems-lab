@@ -1,6 +1,7 @@
 #include <csl/synthesis/hybrid_path_program.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <iomanip>
 #include <limits>
@@ -12,6 +13,13 @@
 namespace csl::synthesis {
 namespace {
 using Interval = std::pair<double,double>;
+
+std::optional<Termination> interruption(const ExecutionContext& context) {
+    if(context.cancellation.stop_requested()) return Termination::cancelled;
+    if(context.deadline && std::chrono::steady_clock::now()>=*context.deadline)
+        return Termination::resource_limit;
+    return {};
+}
 
 Diagnostics unsupported(std::string field, std::string explanation) {
     return {{DiagnosticCode::unsupported,std::move(field),std::move(explanation)}};
@@ -144,6 +152,56 @@ std::string exact_input_identity(const model::HybridPath& path,const sets::HRepr
     }
     return identity.str();
 }
+
+class ProjectedReachabilityStage final : public HybridReachabilityStage {
+    HybridPathReachability pending_;
+    registry::PreparedPipeline<registry::GeometryPort> pipeline_;
+    OperationRequest request_;
+    registry::Provenance selected_;
+    std::size_t input_rows_;
+    std::size_t maximum_rows_;
+public:
+    ProjectedReachabilityStage(HybridPathReachability pending,
+        registry::PreparedPipeline<registry::GeometryPort> pipeline,
+        OperationRequest request,registry::Provenance selected,
+        std::size_t input_rows,std::size_t maximum_rows)
+        :pending_(std::move(pending)),pipeline_(std::move(pipeline)),
+         request_(std::move(request)),selected_(std::move(selected)),
+         input_rows_(input_rows),maximum_rows_(maximum_rows) {}
+
+    HybridPathReachabilityResult execute(const ExecutionContext& context) && override {
+        if(const auto stop=interruption(context))
+            return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+                "Projected-state reachability stopped before workspace creation"};
+        auto workers=pipeline_.create();
+        auto outcome=std::get<0>(workers)->run(context);
+        if(const auto* stopped=std::get_if<OperationStopped>(&outcome)) return *stopped;
+        if(const auto* rejected=std::get_if<Unsupported>(&outcome)) return rejected->diagnostics;
+        const auto* result=std::get_if<OperationResult>(&outcome);
+        if(!result || result->relation!=SetRelation::equivalent)
+            return unsupported("hybrid.projected.provider_result",
+                "Projection provider did not return an equivalent set relation");
+        const auto evidence_errors=check_geometry_evidence(result->evidence,request_);
+        if(!evidence_errors.empty()) return evidence_errors;
+        const auto projected_import=sets::from_handle(result->output);
+        if(const auto* diagnostic=std::get_if<Diagnostic>(&projected_import)) return Diagnostics{*diagnostic};
+        auto projected=std::get<sets::SetData>(projected_import);
+        if(projected.metadata()->set.dimension!=1 ||
+           !std::holds_alternative<sets::HRepresentation>(projected.representation()))
+            return unsupported("hybrid.projected.provider_shape",
+                "Projection provider returned a non-scalar or non-H terminal set");
+        const auto output_rows=h_rows(projected);
+        if(output_rows>maximum_rows_)
+            return unsupported("hybrid.projected.row_limit",
+                "Projected terminal H set exceeds the adapter's declared output-row limit");
+        if(const auto stop=interruption(context))
+            return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+                "Projected-state reachability stopped before result publication"};
+        pending_.projected_state=HybridPathReachability::ProjectedStateEvidence{
+            std::move(projected),selected_,result->evidence,input_rows_,output_rows,maximum_rows_};
+        return std::move(pending_);
+    }
+};
 }
 
 ProjectedStateHybridReachabilityAdapter::ProjectedStateHybridReachabilityAdapter(
@@ -151,8 +209,13 @@ ProjectedStateHybridReachabilityAdapter::ProjectedStateHybridReachabilityAdapter
     :projection_(make_projection_provider(maximum_projection_rows)),
      maximum_projection_rows_(maximum_projection_rows) {}
 
+ProjectedStateHybridReachabilityAdapter::ProjectedStateHybridReachabilityAdapter(
+    registry::PreparedProvider<registry::GeometryPort> projection,
+    std::size_t maximum_projection_rows)
+    :projection_(std::move(projection)),maximum_projection_rows_(maximum_projection_rows) {}
+
 HybridReachabilityCapabilities ProjectedStateHybridReachabilityAdapter::capabilities() const noexcept {
-    return {true,Assurance::numerical};
+    return {true,Assurance::numerical,true,projection_.provenance(),maximum_projection_rows_};
 }
 
 HybridReachabilityPreflightResult ProjectedStateHybridReachabilityAdapter::preflight(
@@ -182,15 +245,33 @@ HybridReachabilityPreflightResult ProjectedStateHybridReachabilityAdapter::prefl
     }
     if(required_rows>maximum_projection_rows_)
         return unsupported("hybrid.projected.row_limit","Projection input relation exceeds the selected provider row limit");
+    if(limits.max_variables==0)
+        return unsupported("hybrid.projected.provider_envelope",
+            "Projection provider envelope requires a positive variable limit");
+    if(required_rows>
+       std::numeric_limits<std::size_t>::max()/limits.max_variables)
+        return unsupported("hybrid.projected.provider_envelope",
+            "Projection provider envelope matrix extent overflows size_t");
+    const registry::RequestEnvelope envelope{"geometry.h_projection",required_rows,
+        limits.max_variables,required_rows*limits.max_variables,"equivalent"};
+    const auto declaration=projection_.declare_support(envelope);
+    if(declaration.status!=registry::AdmissionStatus::supported||!declaration.envelope_is_sufficient) {
+        const std::string status=declaration.status==registry::AdmissionStatus::unsupported?"unsupported":
+            declaration.status==registry::AdmissionStatus::conditional?"conditional":"unknown";
+        return unsupported("hybrid.projected.provider_admission",
+            "Selected geometry provider returned "+status+
+            " for the complete H-projection envelope before relation composition");
+    }
     return std::monostate{};
 }
 
-HybridPathReachabilityResult ProjectedStateHybridReachabilityAdapter::compose_path(
+HybridReachabilityStageResult ProjectedStateHybridReachabilityAdapter::stage_path(
     const model::HybridSystem& system,const model::HybridRequest& request,const model::HybridPath& path,
-    model::HybridRelationLimits limits,std::stop_token cancellation) const {
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,"Projected-state reachability was cancelled before relation construction"};
-    const auto admitted=preflight(system,request,path,limits,cancellation);
+    model::HybridRelationLimits limits,const ExecutionContext& context) const {
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+            "Projected-state reachability was cancelled before relation construction"};
+    const auto admitted=preflight(system,request,path,limits,context.cancellation);
     if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&admitted)) return *failure;
     if(const auto* diagnostics=std::get_if<Diagnostics>(&admitted)) return *diagnostics;
     if(const auto* stopped=std::get_if<OperationStopped>(&admitted)) return *stopped;
@@ -202,34 +283,44 @@ HybridPathReachabilityResult ProjectedStateHybridReachabilityAdapter::compose_pa
     Vector bounds,equality_values;
     constexpr std::size_t width=4;
     auto append=[&](Vector row,double rhs,bool equality) {
-        if(cancellation.stop_requested()) return false;
+        if(interruption(context)) return false;
         const auto count=inequalities.size()+equalities.size();
         if(count>=limits.max_rows || width==0 || count+1>limits.max_matrix_elements/width) return false;
         (equality?equalities:inequalities).push_back(std::move(row));
         (equality?equality_values:bounds).push_back(rhs);
         return true;
     };
-    const auto append_failure=[&](std::string field,std::string explanation)->HybridPathReachabilityResult {
-        if(cancellation.stop_requested())
-            return OperationStopped{StopReason::cancelled,"Projected-state relation assembly was cancelled"};
+    const auto append_failure=[&](std::string field,std::string explanation)->HybridReachabilityStageResult {
+        if(const auto stop=interruption(context))
+            return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+                "Projected-state relation assembly was cancelled"};
         return unsupported(std::move(field),std::move(explanation));
     };
     std::vector<model::HybridRelationOperationRecord> operations;
     const auto record=[&](model::HybridRelationOperationKind kind,std::size_t stage,
         std::optional<model::HybridModeId> mode_id,std::optional<model::HybridEdgeId> edge_id,
-        std::size_t before) {
+        std::size_t before,std::chrono::steady_clock::time_point started,bool completed) {
         const auto rows=inequalities.size()+equalities.size();
+        const auto cumulative_elements=rows*width;
+        const auto previous_elements=before*width;
+        const auto elapsed=std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::steady_clock::now()-started).count();
         operations.push_back({kind,stage,std::move(mode_id),std::move(edge_id),
-            "csl.hybrid.projected-scalar-reachability","1",width,rows-before,rows,rows*width});
+            "csl.hybrid.projected-scalar-reachability","1",width,rows-before,
+            cumulative_elements-previous_elements,rows,cumulative_elements,
+            elapsed>0?static_cast<std::uint64_t>(elapsed):0,completed});
     };
     const auto* source=mode(system,path.modes[0]);
     const auto* target=mode(system,path.modes[1]);
     const auto* transition=edge(system,path.edges[0]);
     auto before=inequalities.size()+equalities.size();
+    auto operation_started=std::chrono::steady_clock::now();
     Vector initial(width);initial[0]=1.0;
-    if(!append(std::move(initial),request.initial.state[0],true))
+    const bool initial_added=append(std::move(initial),request.initial.state[0],true);
+    record(model::HybridRelationOperationKind::initial_state,0,source->id,{},before,
+        operation_started,initial_added);
+    if(!initial_added)
         return append_failure("hybrid.projected.rows","Relation row or matrix limit exceeded");
-    record(model::HybridRelationOperationKind::initial_state,0,source->id,{},before);
 
     const auto add_interval=[&](const AdmissibleSet& set,std::size_t coordinate)->bool {
         if(std::holds_alternative<UniversalSet>(set)) return true;
@@ -240,41 +331,63 @@ HybridPathReachabilityResult ProjectedStateHybridReachabilityAdapter::compose_pa
         return append(std::move(upper),interval->second,false)&&append(std::move(lower),-interval->first,false);
     };
     before=inequalities.size()+equalities.size();
-    if(!add_interval(source->invariants[0],0)) return append_failure("hybrid.projected.invariant","Unsupported source invariant or relation limit exceeded");
-    record(model::HybridRelationOperationKind::post_state_invariant,0,source->id,{},before);
+    operation_started=std::chrono::steady_clock::now();
+    const bool source_invariant_added=add_interval(source->invariants[0],0);
+    record(model::HybridRelationOperationKind::post_state_invariant,0,source->id,{},before,
+        operation_started,source_invariant_added);
+    if(!source_invariant_added) return append_failure("hybrid.projected.invariant","Unsupported source invariant or relation limit exceeded");
 
     const auto& flow=std::get<LinearStage>(source->flow);
     before=inequalities.size()+equalities.size();
+    operation_started=std::chrono::steady_clock::now();
     Vector flow_row(width);flow_row[2]=1.0;flow_row[0]-=flow.A.values[0];flow_row[1]-=flow.B.values[0];
-    if(!append(std::move(flow_row),flow.offset[0],true))
+    const bool flow_added=append(std::move(flow_row),flow.offset[0],true);
+    record(model::HybridRelationOperationKind::mode_flow,0,source->id,{},before,
+        operation_started,flow_added);
+    if(!flow_added)
         return append_failure("hybrid.projected.rows","Relation row or matrix limit exceeded");
-    record(model::HybridRelationOperationKind::mode_flow,0,source->id,{},before);
 
     before=inequalities.size()+equalities.size();
-    if(!add_interval(source->control_sets[0],1)) return append_failure("hybrid.projected.control","Unsupported source control interval or relation limit exceeded");
-    record(model::HybridRelationOperationKind::continuous_control,0,source->id,{},before);
+    operation_started=std::chrono::steady_clock::now();
+    const bool control_added=add_interval(source->control_sets[0],1);
+    record(model::HybridRelationOperationKind::continuous_control,0,source->id,{},before,
+        operation_started,control_added);
+    if(!control_added) return append_failure("hybrid.projected.control","Unsupported source control interval or relation limit exceeded");
 
     before=inequalities.size()+equalities.size();
-    if(!add_interval(source->invariants[1],2)) return append_failure("hybrid.projected.invariant","Unsupported pre-reset invariant or relation limit exceeded");
-    record(model::HybridRelationOperationKind::pre_reset_invariant,1,source->id,{},before);
+    operation_started=std::chrono::steady_clock::now();
+    const bool pre_invariant_added=add_interval(source->invariants[1],2);
+    record(model::HybridRelationOperationKind::pre_reset_invariant,1,source->id,{},before,
+        operation_started,pre_invariant_added);
+    if(!pre_invariant_added) return append_failure("hybrid.projected.invariant","Unsupported pre-reset invariant or relation limit exceeded");
 
     before=inequalities.size()+equalities.size();
-    if(!add_interval(transition->guards[0],2)) return append_failure("hybrid.projected.guard","Unsupported transition guard or relation limit exceeded");
-    record(model::HybridRelationOperationKind::transition_guard,0,{},transition->id,before);
+    operation_started=std::chrono::steady_clock::now();
+    const bool guard_added=add_interval(transition->guards[0],2);
+    record(model::HybridRelationOperationKind::transition_guard,0,{},transition->id,before,
+        operation_started,guard_added);
+    if(!guard_added) return append_failure("hybrid.projected.guard","Unsupported transition guard or relation limit exceeded");
 
     const auto reset_data=std::get<sets::SetData>(sets::from_handle(transition->reset_relations[0]));
     const auto reset=std::get<sets::HRepresentation>(reset_data.representation());
     before=inequalities.size()+equalities.size();
+    operation_started=std::chrono::steady_clock::now();
     Vector reset_row(width);reset_row[2]=reset.equalities(0,0);reset_row[3]=reset.equalities(0,1);
-    if(!append(std::move(reset_row),reset.equality_values[0],true))
+    const bool reset_added=append(std::move(reset_row),reset.equality_values[0],true);
+    record(model::HybridRelationOperationKind::reset_relation,0,{},transition->id,before,
+        operation_started,reset_added);
+    if(!reset_added)
         return append_failure("hybrid.projected.rows","Relation row or matrix limit exceeded");
-    record(model::HybridRelationOperationKind::reset_relation,0,{},transition->id,before);
 
     before=inequalities.size()+equalities.size();
-    if(!add_interval(target->invariants[1],3)) return append_failure("hybrid.projected.invariant","Unsupported target invariant or relation limit exceeded");
-    record(model::HybridRelationOperationKind::post_state_invariant,1,target->id,{},before);
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,"Projected-state reachability stopped before relation publication"};
+    operation_started=std::chrono::steady_clock::now();
+    const bool target_invariant_added=add_interval(target->invariants[1],3);
+    record(model::HybridRelationOperationKind::post_state_invariant,1,target->id,{},before,
+        operation_started,target_invariant_added);
+    if(!target_invariant_added) return append_failure("hybrid.projected.invariant","Unsupported target invariant or relation limit exceeded");
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+            "Projected-state reachability stopped before relation publication"};
 
     Matrix a{inequalities.size(),width,{}};Matrix e{equalities.size(),width,{}};
     for(const auto& row:inequalities)a.values.insert(a.values.end(),row.begin(),row.end());
@@ -301,8 +414,9 @@ HybridPathReachabilityResult ProjectedStateHybridReachabilityAdapter::compose_pa
         relation_data);
     if(const auto* diagnostic=std::get_if<Diagnostic>(&relation_result))return Diagnostics{*diagnostic};
     auto relation=std::get<sets::SetData>(std::move(relation_result));
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,"Projected-state reachability stopped before provider admission"};
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+            "Projected-state reachability stopped before provider admission"};
 
     const auto identity=GeometryRequestIdentity{ProblemId{"hybrid-projected-reachability"},
         RequestId{"terminal-state:"+request_identity},ReferenceId{"terminal-state:"+request_identity}};
@@ -312,32 +426,32 @@ HybridPathReachabilityResult ProjectedStateHybridReachabilityAdapter::compose_pa
         Projection{relation.as_handle(),{3}},SetRelation::equivalent,Assurance::numerical};
     auto prepared_result=projection_.prepare(projection_request);
     if(const auto* rejected=std::get_if<registry::Rejection>(&prepared_result))
-        return rejected->diagnostics;
-    const auto pipeline=std::get<registry::PreparedPipeline<registry::GeometryPort>>(std::move(prepared_result));
+        return HybridReachabilityStageFailure{HybridReachabilityStageOperation::projection,
+            rejected->diagnostics};
+    auto pipeline=std::get<registry::PreparedPipeline<registry::GeometryPort>>(std::move(prepared_result));
     const auto selected=pipeline.provenance()[0];
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,"Projected-state reachability stopped before projection workspace creation"};
-    auto workers=pipeline.create();
-    ExecutionContext context;context.cancellation=cancellation;
-    auto outcome=std::get<0>(workers)->run(context);
-    if(const auto* stopped=std::get_if<OperationStopped>(&outcome))return *stopped;
-    if(const auto* rejected=std::get_if<Unsupported>(&outcome))return rejected->diagnostics;
-    const auto* result=std::get_if<OperationResult>(&outcome);
-    if(!result || result->relation!=SetRelation::equivalent)
-        return unsupported("hybrid.projected.provider_result","Projection provider did not return an equivalent set relation");
-    const auto projected_import=sets::from_handle(result->output);
-    if(const auto* diagnostic=std::get_if<Diagnostic>(&projected_import))return Diagnostics{*diagnostic};
-    auto projected=std::get<sets::SetData>(projected_import);
-    if(projected.metadata()->set.dimension!=1 || !std::holds_alternative<sets::HRepresentation>(projected.representation()))
-        return unsupported("hybrid.projected.provider_shape","Projection provider returned a non-scalar or non-H terminal set");
-    const auto output_rows=h_rows(projected);
-    if(output_rows>maximum_projection_rows_)
-        return unsupported("hybrid.projected.row_limit","Projected terminal H set exceeds the adapter's declared output-row limit");
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,"Projected-state reachability stopped before result publication"};
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+            "Projected-state reachability stopped after concrete provider preparation"};
     const auto input_rows=inequalities.size()+equalities.size();
-    return HybridPathReachability{path,std::move(relation),limits,std::move(operations),Assurance::numerical,
-        HybridPathReachability::ProjectedStateEvidence{std::move(projected),selected,result->evidence,input_rows,
-            output_rows,maximum_projection_rows_}};
+    HybridPathReachability pending{path,std::move(relation),limits,std::move(operations),
+        Assurance::numerical,std::nullopt};
+    return std::make_unique<ProjectedReachabilityStage>(std::move(pending),std::move(pipeline),
+        std::move(projection_request),selected,input_rows,maximum_projection_rows_);
+}
+
+HybridPathReachabilityResult ProjectedStateHybridReachabilityAdapter::compose_path(
+    const model::HybridSystem& system,const model::HybridRequest& request,const model::HybridPath& path,
+    model::HybridRelationLimits limits,std::stop_token cancellation) const {
+    ExecutionContext context;
+    context.cancellation=cancellation;
+    auto staged=stage_path(system,request,path,limits,context);
+    if(auto* stage=std::get_if<std::unique_ptr<HybridReachabilityStage>>(&staged))
+        return std::move(**stage).execute(context);
+    if(auto* diagnostics=std::get_if<Diagnostics>(&staged)) return std::move(*diagnostics);
+    if(auto* failure=std::get_if<HybridReachabilityStageFailure>(&staged))
+        return std::move(failure->diagnostics);
+    if(auto* stopped=std::get_if<OperationStopped>(&staged)) return *stopped;
+    return std::get<model::HybridPathCompositionFailureReport>(std::move(staged));
 }
 }

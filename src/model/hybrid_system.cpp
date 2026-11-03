@@ -5,6 +5,7 @@
 #include "hybrid_path_layout_arithmetic.hpp"
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <functional>
 #include <limits>
@@ -781,50 +782,76 @@ HybridRelationResult compose_hybrid_path_relation_impl(const HybridSystem& syste
     };
     auto row_count=[&] { return inequalities.size()+equalities.size(); };
     auto record_operation=[&](HybridRelationOperationKind operation,std::size_t stage,
-        std::optional<HybridModeId> mode,std::optional<HybridEdgeId> edge,std::size_t rows_before) {
+        std::optional<HybridModeId> mode,std::optional<HybridEdgeId> edge,std::size_t rows_before,
+        std::chrono::steady_clock::time_point started,bool completed) {
         if(!operations) return;
         const auto total_rows=row_count();
+        const auto cumulative_elements=total_rows*width;
+        const auto previous_elements=rows_before*width;
+        const auto elapsed=std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::steady_clock::now()-started).count();
         operations->push_back({operation,stage,std::move(mode),std::move(edge),
             "csl.model.hybrid.joint-h-composer","1",width,total_rows-rows_before,
-            total_rows,total_rows*width});
+            cumulative_elements-previous_elements,total_rows,cumulative_elements,
+            elapsed>0?static_cast<std::uint64_t>(elapsed):0,completed});
     };
     auto rows_before=row_count();
+    auto operation_started=operations?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
     auto initial_error=add_set(Singleton{request.initial.state},layout.post_states[0].offset,modes[0]->state_dimension);
+    record_operation(HybridRelationOperationKind::initial_state,0,modes[0]->id,{},rows_before,
+        operation_started,!initial_error);
     if(initial_error) return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*initial_error};
-    record_operation(HybridRelationOperationKind::initial_state,0,modes[0]->id,{},rows_before);
     for(std::size_t t=0;t<=system.horizon;++t) {
         if(cancellation.stop_requested()) return stopped();
         rows_before=row_count();
-        if(auto e=add_set(modes[t]->invariants[t],layout.post_states[t].offset,modes[t]->state_dimension))
-            return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*e};
-        record_operation(HybridRelationOperationKind::post_state_invariant,t,modes[t]->id,{},rows_before);
+        operation_started=operations?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
+        auto post_invariant_error=add_set(modes[t]->invariants[t],layout.post_states[t].offset,modes[t]->state_dimension);
+        record_operation(HybridRelationOperationKind::post_state_invariant,t,modes[t]->id,{},rows_before,
+            operation_started,!post_invariant_error);
+        if(post_invariant_error)
+            return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*post_invariant_error};
         if(t==system.horizon) continue;
         const auto& mode=*modes[t];
         const auto& flow=std::holds_alternative<LinearStage>(mode.flow)?std::get<LinearStage>(mode.flow):std::get<std::vector<LinearStage>>(mode.flow)[t];
         rows_before=row_count();
-        if(!add_linear(flow,layout.post_states[t].offset,transitions[t].control.offset,
-            transitions[t].pre_state.offset)) {
+        operation_started=operations?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
+        const bool flow_completed=add_linear(flow,layout.post_states[t].offset,transitions[t].control.offset,
+            transitions[t].pre_state.offset);
+        record_operation(HybridRelationOperationKind::mode_flow,t,mode.id,{},rows_before,
+            operation_started,flow_completed);
+        if(!flow_completed) {
             if(cancellation.stop_requested()) return stopped();
             return Diagnostic{DiagnosticCode::unsupported,"hybrid.relation.rows","Joint relation exceeds its row limit"};
         }
-        record_operation(HybridRelationOperationKind::mode_flow,t,mode.id,{},rows_before);
         rows_before=row_count();
-        if(auto e=add_set(mode.control_sets[t],transitions[t].control.offset,mode.control_dimension))
-            return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*e};
-        record_operation(HybridRelationOperationKind::continuous_control,t,mode.id,{},rows_before);
+        operation_started=operations?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
+        auto control_error=add_set(mode.control_sets[t],transitions[t].control.offset,mode.control_dimension);
+        record_operation(HybridRelationOperationKind::continuous_control,t,mode.id,{},rows_before,
+            operation_started,!control_error);
+        if(control_error)
+            return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*control_error};
         rows_before=row_count();
-        if(auto e=add_set(mode.invariants[t+1],transitions[t].pre_state.offset,mode.state_dimension))
-            return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*e};
-        record_operation(HybridRelationOperationKind::pre_reset_invariant,t+1,mode.id,{},rows_before);
+        operation_started=operations?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
+        auto pre_invariant_error=add_set(mode.invariants[t+1],transitions[t].pre_state.offset,mode.state_dimension);
+        record_operation(HybridRelationOperationKind::pre_reset_invariant,t+1,mode.id,{},rows_before,
+            operation_started,!pre_invariant_error);
+        if(pre_invariant_error)
+            return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*pre_invariant_error};
         rows_before=row_count();
-        if(auto e=add_set(transitions[t].edge->guards[t],transitions[t].pre_state.offset,mode.state_dimension))
-            return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*e};
-        record_operation(HybridRelationOperationKind::transition_guard,t,{},transitions[t].edge->id,rows_before);
+        operation_started=operations?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
+        auto guard_error=add_set(transitions[t].edge->guards[t],transitions[t].pre_state.offset,mode.state_dimension);
+        record_operation(HybridRelationOperationKind::transition_guard,t,{},transitions[t].edge->id,
+            rows_before,operation_started,!guard_error);
+        if(guard_error)
+            return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*guard_error};
         rows_before=row_count();
-        if(auto e=add_reset(transitions[t].edge->reset_relations[t],transitions[t].pre_state.offset,
-            layout.post_states[t+1].offset,mode.state_dimension,modes[t+1]->state_dimension))
-            return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*e};
-        record_operation(HybridRelationOperationKind::reset_relation,t,{},transitions[t].edge->id,rows_before);
+        operation_started=operations?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
+        auto reset_error=add_reset(transitions[t].edge->reset_relations[t],transitions[t].pre_state.offset,
+            layout.post_states[t+1].offset,mode.state_dimension,modes[t+1]->state_dimension);
+        record_operation(HybridRelationOperationKind::reset_relation,t,{},transitions[t].edge->id,
+            rows_before,operation_started,!reset_error);
+        if(reset_error)
+            return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*reset_error};
     }
     if(cancellation.stop_requested()) return stopped();
     std::vector<std::string> coordinate_labels(width);

@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/adapters/convex/highs.hpp>
+#include <csl/registry/provider.hpp>
 #include <barrier>
 #include <future>
 #include <cmath>
@@ -44,6 +45,31 @@ void optimum(const ProgramResult& r,const ConvexProgram& p,double value) {
         CHECK(m->violation<=1e-8+1e-8*m->scale);
 }
 }
+TEST_CASE("HiGHS convex provider declares bounded hybrid quadratic envelopes") {
+    Registry<ConvexPort> providers;
+    REQUIRE_FALSE(providers.add(accepted(make_highs_registration())));
+    auto prepared=prepare_provider(select_provider(providers,{{"csl.convex.highs"},{}}));
+    REQUIRE(std::holds_alternative<PreparedProvider<ConvexPort>>(prepared));
+    const auto& provider=std::get<PreparedProvider<ConvexPort>>(prepared);
+    const auto incomplete=provider.declare_support(
+        {"hybrid.convex-optimization",10,8,80,"quadratic"});
+    CHECK(incomplete.status==AdmissionStatus::conditional);
+    CHECK_FALSE(incomplete.envelope_is_sufficient);
+    for(const auto* objective:{"quadratic","residual_norm"}) {
+        const auto supported=provider.declare_support(
+            {"hybrid.convex-optimization",10,8,80,objective,1.1e-12});
+        CHECK(supported.status==AdmissionStatus::supported);
+        CHECK(supported.envelope_is_sufficient);
+    }
+    const auto oversized=provider.declare_support(
+        {"hybrid.convex-optimization",10,4097,40970,"quadratic",1.1e-12});
+    CHECK(oversized.status==AdmissionStatus::unsupported);
+    CHECK_FALSE(oversized.envelope_is_sufficient);
+    const auto unrelated=provider.declare_support(
+        {"hybrid.linear-optimization",1,1,1,"linear"});
+    CHECK(unrelated.status==AdmissionStatus::unknown);
+}
+
 TEST_CASE("registered quadratic interior and boundary optima retain original numerical KKT evidence") {
     for(double upper:{5.0,2.0}) {
         const auto p=accepted(make_convex_program(parabola(upper)));

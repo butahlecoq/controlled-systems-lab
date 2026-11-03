@@ -17,7 +17,7 @@ enum class RowsState { built, unsupported, cancelled };
 
 RowsState append_rows(const sets::SetData& data, std::size_t variables,
     hx::Limits limits, std::vector<hx::Row>& rows, std::string& reason,
-    std::stop_token cancellation) {
+    const HybridVerifierInvocation& cancellation) {
     if (cancellation.stop_requested()) return RowsState::cancelled;
     if (data.metadata()->set.dimension != variables) {
         reason = "Set dimension does not match the joint path relation";
@@ -162,7 +162,7 @@ bool append_optimum(std::vector<hx::Row>& rows,
 
 hx::InclusionResult equal_rows(std::span<const hx::Row> lhs,
     std::span<const hx::Row> rhs, std::size_t variables, hx::Limits limits,
-    std::stop_token cancellation) {
+    const HybridVerifierInvocation& cancellation) {
     const auto forward = hx::included_in(lhs, rhs, variables, limits, cancellation);
     if (forward.state != hx::InclusionState::included) return forward;
     return hx::included_in(rhs, lhs, variables, limits, cancellation);
@@ -200,7 +200,7 @@ HybridFamilyVerificationCapabilities ExactLinearHHybridFamilyVerifier::capabilit
 
 HybridFamilyVerificationPreflightResult ExactLinearHHybridFamilyVerifier::preflight(
     const HybridSystem& system, const HybridRequest& request,
-    std::span<const HybridPath> paths, std::stop_token cancellation) const {
+    std::span<const HybridPath> paths, const HybridVerifierInvocation& cancellation) const {
     hx::Limits limits;
     constexpr HybridRelationLimits relation_limits{
         hx::default_max_variables, hx::default_max_rows,
@@ -209,12 +209,14 @@ HybridFamilyVerificationPreflightResult ExactLinearHHybridFamilyVerifier::prefli
     limits.max_rows = relation_limits.max_rows;
     for (const auto& path : paths) {
         if (cancellation.stop_requested())
-            return OperationStopped{StopReason::cancelled,
-                "Exact linear H verifier preflight was cancelled between paths"};
+            return cancellation.stop_result("Exact linear H verifier preflight was cancelled between paths");
         const auto raw = hx::reconstruct_path_relation(
-            system, request, path, relation_limits, limits, cancellation);
+            system, request, path, relation_limits, limits, cancellation.cancellation_token());
+        if (cancellation.stop_requested())
+            return OperationStopped{cancellation.interruption()->reason,
+                "Exact linear H verifier preflight stopped during path reconstruction"};
         if (raw.state == hx::RawRelationState::cancelled)
-            return OperationStopped{StopReason::cancelled, raw.reason};
+            return cancellation.stop_result(raw.reason);
         if (raw.state != hx::RawRelationState::built)
             return Diagnostics{{DiagnosticCode::unsupported,
                 "hybrid.verification.exact_linear_h_domain",
@@ -247,11 +249,11 @@ HybridFamilyVerificationResult ExactLinearHHybridFamilyVerifier::verify(
     const HybridSystem& system, const HybridRequest& request,
     std::span<const HybridPath> paths, std::span<const HybridPathProgram> programs,
     std::span<const HybridPathOptimalFaceCandidate> candidates,
-    NumericalPolicy policy, std::stop_token cancellation) const {
-    const auto cancelled = [] {
-        return HybridFamilyVerificationResult{OperationStopped{
-            StopReason::cancelled,
-            "Exact linear H family verification was cancelled during independent analysis"}};
+    const HybridVerifierInvocation& cancellation) const {
+    const auto policy=cancellation.numerical_policy();
+    const auto cancelled = [&] {
+        return HybridFamilyVerificationResult{cancellation.stop_result(
+            "Exact linear H family verification stopped during independent analysis")};
     };
     if (cancellation.stop_requested()) return cancelled();
     constexpr std::size_t max_visits = 1'000'000;
@@ -299,7 +301,8 @@ HybridFamilyVerificationResult ExactLinearHHybridFamilyVerifier::verify(
         branch.limits.max_generated_rows =
             hx::default_max_generated_rows / per_path_phases;
         auto raw = hx::reconstruct_path_relation(system, request, paths[i],
-            programs[i].relation_limits, branch.limits, cancellation);
+            programs[i].relation_limits, branch.limits, cancellation.cancellation_token());
+        if (cancellation.stop_requested()) return cancelled();
         if (raw.state == hx::RawRelationState::cancelled) return cancelled();
         if (raw.state != hx::RawRelationState::built) {
             branch.reason = raw.reason;
@@ -483,7 +486,8 @@ HybridFamilyVerificationResult ExactLinearHHybridFamilyVerifier::verify(
             continue;
         }
         auto raw = hx::reconstruct_path_relation(system, request, paths[i],
-            programs[i].relation_limits, branch.limits, cancellation);
+            programs[i].relation_limits, branch.limits, cancellation.cancellation_token());
+        if (cancellation.stop_requested()) return cancelled();
         if (raw.state == hx::RawRelationState::cancelled) return cancelled();
         if (raw.state != hx::RawRelationState::built) {
             record.continuous_coverage = HybridVerificationStatus::unsupported;

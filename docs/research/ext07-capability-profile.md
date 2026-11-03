@@ -30,9 +30,15 @@ checks the complete feasible interval on each branch rather than only a
 sampled witness.
 
 These fixtures verify selected cases of path enumeration, joint-relation
-construction, and optimal-family retention. They do not exhaust the admitted
-continuous H-relation domain. The independent exhaustive continuous-family
-oracle remains an open EXT-07 acceptance item.
+construction, and optimal-family retention. The synthesis tests also include
+`exact H verifier matches tied multi-edge simplex families with different
+guards`: it independently enumerates both permitted edge paths and all vertices
+of the four-control simplex clipped by the two inclusive guards, constructs
+literal H relations for each full optimal face, and checks complete-family
+verification for both tied branches. The guards overlap at their shared
+boundary. This is exhaustive for that one-stage, two-edge simplex fixture, not
+for the full admitted continuous H-relation domain. Broader coverage across
+arbitrary H sets, longer horizons, and larger path inventories remains open.
 
 Additional exact linear-H tests now verify literal full optimal faces for a
 three-control box, a four-control simplex, and a five-control simplex. Each
@@ -46,6 +52,7 @@ multi-path continuous-family coverage.
 | Three-control box | 3 | 3 | 1 | 2 | 1 | 1 | 12 | Two free controls in `[0, 1]` after minimizing the first |
 | Four-control simplex | 1 | 4 | 1 | 2 | 1 | 1 | 7 | `u_i >= 0`, `sum(u_i) <= 1` |
 | Five-control simplex | 1 | 5 | 1 | 2 | 1 | 1 | 8 | `u_i >= 0`, `sum(u_i) <= 1` |
+| Guard-clipped four-control simplex | 1 | 4 | 1 | 2 | 2 | 2 | 7 | Overlapping lower/upper guard faces, both globally tied |
 
 ## Saved numerical fixtures
 
@@ -69,7 +76,17 @@ This report makes no new publication or performance claim.
 
 The named tests and reports are finite correctness and measurement fixtures.
 They do not establish general scaling by state dimension, control dimension,
-horizon, mode count, edge count, path count, or provider workload. EXT-07 still
-requires broader operation-plan admission, provider resource and per-mode /
-per-transition provenance accounting, and resource-scale evidence. The issue
-remains open until those gates and the full acceptance checklist are met.
+horizon, mode count, edge count, path count, or provider workload. PR #881 adds
+request-wide admission, per-operation composer accounting, and path/branch
+operation elapsed wall time to the bounded profile tracked by EXT-07. Each
+relation trace records mode or edge, stage, composer version, joint-variable
+count, row and matrix-element deltas, elapsed composer wall time, and completion
+status. Reachability paths and solver branches record operation elapsed wall
+time. Verifier invocations record the full verification phase, including
+coordinator checks and path enumeration as well as the adapter call; this is not
+provider-only time. Backend thread width is retained when reported.
+The separate resource capture records whole-process CPU and memory for two
+fixtures. Provider CPU and heap use remain unattributed, and requested resource
+limits are not enforced by these records. Those limits keep the issue open. See the
+[implementation capability profile](../architecture/hybrid-capability-profile.md)
+for supported dimensions, counts, and remaining capability work.

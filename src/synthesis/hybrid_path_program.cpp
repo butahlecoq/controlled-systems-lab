@@ -1,13 +1,34 @@
 #include <csl/synthesis/hybrid_path_program.hpp>
+#include <csl/synthesis/hybrid_admission.hpp>
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cmath>
 #include <limits>
+#include <type_traits>
 
 namespace csl::synthesis {
 namespace {
 Diagnostics one(Diagnostic diagnostic) { return Diagnostics{std::move(diagnostic)}; }
+std::optional<Termination> interruption(const ExecutionContext& context);
+std::uint64_t elapsed_wall_nanoseconds(std::chrono::steady_clock::time_point started) {
+    const auto elapsed=std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::steady_clock::now()-started).count();
+    return elapsed>0?static_cast<std::uint64_t>(elapsed):0;
+}
+class CompletedHybridReachabilityStage final : public HybridReachabilityStage {
+    HybridPathReachability result_;
+public:
+    explicit CompletedHybridReachabilityStage(HybridPathReachability result)
+        :result_(std::move(result)) {}
+    HybridPathReachabilityResult execute(const ExecutionContext& context) && override {
+        if(const auto stop=interruption(context))
+            return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+                "Hybrid reachability stage stopped before result publication"};
+        return std::move(result_);
+    }
+};
 std::optional<Diagnostic> hybrid_objective_policy_error(optimization::ObjectivePolicy policy) {
     if(policy.assurance!=Assurance::numerical && policy.assurance!=Assurance::validated)
         return Diagnostic{DiagnosticCode::invalid_input,"hybrid.adapter.objective_policy",
@@ -34,6 +55,85 @@ ProgramId path_program_id(const model::HybridPath& path) {
     for(const auto& edge:path.edges)
         value += ":"+std::to_string(edge.value.size())+":"+edge.value;
     return ProgramId{std::move(value)};
+}
+std::optional<double> hybrid_matrix_coefficient_floor(const model::HybridSystem& system,
+    const model::HybridRequest& request,std::span<const model::HybridPath> paths) {
+    // Hybrid flow equations and singleton substitutions add unit coefficients
+    // even when all authored matrices contain larger values.
+    double minimum=1.0;
+    bool complete=true;
+    const auto include_values=[&](std::span<const double> values) {
+        for(const double value:values)
+            if(value!=0) minimum=std::min(minimum,std::abs(value));
+    };
+    const auto include_matrix=[&](const Matrix& matrix) {
+        include_values(matrix.values);
+    };
+    const auto include_matrix_view=[&](numeric::MatrixView matrix) {
+        for(std::size_t row=0;row<matrix.rows();++row)
+            for(std::size_t column=0;column<matrix.cols();++column)
+                if(const double value=matrix(row,column);value!=0)
+                    minimum=std::min(minimum,std::abs(value));
+    };
+    const auto include_handle=[&](const SetHandle& handle) {
+        const auto imported=sets::from_handle(handle);
+        const auto* data=std::get_if<sets::SetData>(&imported);
+        if(!data) { complete=false; return; }
+        const auto representation=data->representation();
+        if(const auto* h=std::get_if<sets::HRepresentation>(&representation)) {
+            include_matrix_view(h->inequalities);
+            include_matrix_view(h->equalities);
+        } else if(!std::holds_alternative<sets::SingletonRepresentation>(representation) &&
+                  !std::holds_alternative<sets::UniversalRepresentation>(representation) &&
+                  !std::holds_alternative<sets::EmptyRepresentation>(representation)) {
+            complete=false;
+        }
+    };
+    const auto include_set=[&](const AdmissibleSet& set) {
+        std::visit([&](const auto& value) {
+            using T=std::decay_t<decltype(value)>;
+            if constexpr(std::is_same_v<T,SetHandle>) include_handle(value);
+        },set);
+    };
+    for(const auto& path:paths) {
+        for(std::size_t stage=0;stage<path.edges.size();++stage) {
+            const auto mode=std::find_if(system.modes.begin(),system.modes.end(),[&](const auto& candidate) {
+                return candidate.id==path.modes[stage];
+            });
+            const auto edge=std::find_if(system.edges.begin(),system.edges.end(),[&](const auto& candidate) {
+                return candidate.id==path.edges[stage];
+            });
+            if(mode==system.modes.end()||edge==system.edges.end()) return {};
+            const LinearStage* flow=nullptr;
+            if(const auto* constant=std::get_if<LinearStage>(&mode->flow)) flow=constant;
+            else if(const auto* varying=std::get_if<std::vector<LinearStage>>(&mode->flow)) {
+                if(stage>=varying->size()) return {};
+                flow=&(*varying)[stage];
+            }
+            if(flow==nullptr) return {};
+            include_matrix(flow->A); include_matrix(flow->B); include_matrix(flow->E);
+            include_set(mode->control_sets[stage]);
+            include_set(mode->invariants[stage]); include_set(mode->invariants[stage+1]);
+            include_set(edge->guards[stage]);
+            include_handle(edge->reset_relations[stage]);
+        }
+        const auto terminal=std::find_if(system.modes.begin(),system.modes.end(),[&](const auto& candidate) {
+            return candidate.id==path.modes.back();
+        });
+        if(terminal==system.modes.end()) return {};
+        include_set(terminal->invariants[system.horizon]);
+        const auto objective=std::find_if(request.terminal_objectives.begin(),request.terminal_objectives.end(),
+            [&](const auto& candidate) { return candidate.mode==path.modes.back(); });
+        if(objective==request.terminal_objectives.end()) return {};
+        if(const auto* quadratic=std::get_if<QuadraticTerminal>(&objective->objective))
+            include_matrix(quadratic->Q);
+        else if(std::holds_alternative<ResidualNormTerminal>(objective->objective))
+            complete=false;
+    }
+    if(!complete) return {};
+    // Convex objective normalization may halve matrix coefficients. This
+    // conservative reduction keeps the declared lower bound sound.
+    return std::nextafter(minimum*0.5,0.0);
 }
 Diagnostics hybrid_path_admission_errors(const model::HybridSystem& system,
     const model::HybridRequest& request, const model::HybridPath& path) {
@@ -202,12 +302,15 @@ Diagnostics hybrid_operation_trace_errors(const model::HybridPath& path,
         const bool row_overflow=operation.rows_added>std::numeric_limits<std::size_t>::max()-previous_rows;
         const bool element_overflow=operation.cumulative_rows!=0 &&
             operation.joint_variables>std::numeric_limits<std::size_t>::max()/operation.cumulative_rows;
+        const bool matrix_elements_decreased=operation.cumulative_matrix_elements<previous_elements;
+        const bool matrix_delta_mismatch=matrix_elements_decreased||operation.matrix_elements_added!=
+            operation.cumulative_matrix_elements-previous_elements;
         if(operation.implementation_id.empty() || operation.implementation_version.empty() ||
            operation.joint_variables>limits.max_variables || operation.cumulative_rows>limits.max_rows ||
            operation.cumulative_matrix_elements>limits.max_matrix_elements ||
            row_overflow || operation.cumulative_rows!=previous_rows+operation.rows_added ||
            element_overflow || operation.cumulative_matrix_elements!=operation.cumulative_rows*operation.joint_variables ||
-           operation.cumulative_matrix_elements<previous_elements ||
+           matrix_delta_mismatch || !operation.completed ||
            (joint_variables && operation.joint_variables!=*joint_variables) ||
            (relation_dimension && operation.joint_variables!=*relation_dimension) ||
            !planned_operation_matches(operation,expected_operation))
@@ -219,6 +322,307 @@ Diagnostics hybrid_operation_trace_errors(const model::HybridPath& path,
     }
     return {};
 }
+
+HybridPathReachabilityResult validate_hybrid_path_reachability_result(
+    const HybridReachabilityAdapter& adapter,const model::HybridPath& path,
+    model::HybridRelationLimits limits,HybridPathReachabilityResult result) {
+    const auto capability=adapter.capabilities();
+    if(capability.assurance!=Assurance::numerical)
+        return one({DiagnosticCode::unsupported,"hybrid.reachability.assurance",
+            "Validated reachability assurance is unsupported until its evidence is carried in the result"});
+    if(!capability.retains_branch_labelled_joint_relation)
+        return one({DiagnosticCode::unsupported,"hybrid.reachability.branch_relation",
+            "Reachability adapter does not declare full branch-labelled joint-relation support"});
+    if(const auto* reachable=std::get_if<HybridPathReachability>(&result)) {
+        if(reachable->path!=path)
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.path",
+                "Reachability adapter returned a relation for a different path"});
+        if(!same_limits(reachable->relation_limits,limits))
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.limits",
+                "Reachability adapter returned limits different from those requested"});
+        if(reachable->assurance!=capability.assurance)
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.assurance",
+                "Reachability result assurance does not match its declared capability"});
+        const auto trace_errors=hybrid_operation_trace_errors(path,limits,reachable->relation_operations,true,
+            reachable->joint_relation.metadata()->set.dimension);
+        if(!trace_errors.empty()) return trace_errors;
+        if(reachable->projected_state) {
+            const auto& projected=*reachable->projected_state;
+            const auto projected_representation=projected.terminal_state_set.representation();
+            if(projected.terminal_state_set.metadata()->set.dimension!=1 ||
+               !std::holds_alternative<sets::HRepresentation>(projected_representation) ||
+               projected.maximum_projection_rows==0 ||
+               projected.output_rows>projected.maximum_projection_rows ||
+               projected.projection_provider.port!="geometry" ||
+               !projected.projection_provider.actual ||
+               projected.projection_provider.actual->id.value.empty() ||
+               projected.projection_evidence.scope!=GeometryClaimScope::set_relation ||
+               projected.input_rows!=reachable->relation_operations.back().cumulative_rows)
+                return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.projected_state",
+                    "Projected terminal-set evidence has an invalid shape, provider, or row accounting"});
+            const auto& terminal=std::get<sets::HRepresentation>(projected_representation);
+            if(terminal.inequalities.rows()+terminal.equalities.rows()!=projected.output_rows)
+                return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.projected_rows",
+                    "Projected terminal-set row count does not match its retained H representation"});
+        }
+    }
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&result)) {
+        if(failure->path!=path)
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.failure_path",
+                "Reachability adapter returned a failure report for a different path"});
+        if(!same_limits(failure->limits,limits))
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.failure_limits",
+                "Reachability failure report lost the configured relation limits"});
+        const auto trace_errors=hybrid_operation_trace_errors(path,limits,failure->operations,false);
+        if(!trace_errors.empty()) return trace_errors;
+    }
+    return result;
+}
+}
+
+struct HybridAdmissionToken::Storage {
+    model::HybridSystem system;
+    model::HybridRequest request;
+    HybridExecutionSelection selection;
+    model::HybridEnumerationLimits enumeration_limits;
+    model::HybridRelationLimits relation_limits;
+    optimization::ObjectivePolicy objective_policy;
+    HybridAdmissionReport report;
+};
+
+class HybridAdmissionAccess {
+public:
+    static HybridAdmissionToken create(model::HybridSystem system,model::HybridRequest request,
+        HybridExecutionSelection selection,model::HybridEnumerationLimits enumeration_limits,
+        model::HybridRelationLimits relation_limits,optimization::ObjectivePolicy objective_policy,
+        HybridAdmissionReport report) {
+        using Storage=HybridAdmissionToken::Storage;
+        return HybridAdmissionToken{std::make_unique<const Storage>(Storage{
+            std::move(system),std::move(request),std::move(selection),enumeration_limits,
+            relation_limits,objective_policy,std::move(report)})};
+    }
+    static const HybridAdmissionToken::Storage& storage(const HybridAdmissionToken& token) {
+        return *token.storage_;
+    }
+};
+
+HybridAdmissionToken::HybridAdmissionToken(std::unique_ptr<const Storage> storage)
+    :storage_(std::move(storage)) {}
+HybridAdmissionToken::HybridAdmissionToken(HybridAdmissionToken&&) noexcept=default;
+HybridAdmissionToken& HybridAdmissionToken::operator=(HybridAdmissionToken&&) noexcept=default;
+HybridAdmissionToken::~HybridAdmissionToken()=default;
+const HybridAdmissionReport& HybridAdmissionToken::report() const noexcept {
+    return storage_->report;
+}
+
+HybridAdmissionResult admit_hybrid_request(const model::HybridSystem& system,
+    const model::HybridRequest& request,const HybridExecutionSelection& selection,
+    model::HybridEnumerationLimits enumeration_limits,model::HybridRelationLimits relation_limits,
+    optimization::ObjectivePolicy objective_policy,const ExecutionContext& context) {
+    HybridAdmissionReport report;
+    if(context.resources) report.requested_resources=*context.resources;
+    const auto refuse=[&](std::string field,std::string explanation) -> HybridAdmissionResult {
+        report.diagnostics.push_back({DiagnosticCode::unsupported,std::move(field),std::move(explanation)});
+        return HybridAdmissionRefused{std::move(report)};
+    };
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+            "Hybrid request admission stopped before profile validation"};
+    if(context.resources) {
+        auto resource_errors=check_resources(*context.resources);
+        report.diagnostics.insert(report.diagnostics.end(),resource_errors.begin(),resource_errors.end());
+    }
+    if(const auto policy_error=hybrid_objective_policy_error(objective_policy))
+        report.diagnostics.push_back(*policy_error);
+    const auto profile_errors=model::check_hybrid_profile(system,request);
+    report.diagnostics.insert(report.diagnostics.end(),profile_errors.begin(),profile_errors.end());
+    if(!report.diagnostics.empty()) return HybridAdmissionRefused{std::move(report)};
+    if(!selection.trajectory&&!selection.reachability)
+        return refuse("hybrid.admission.selection",
+            "At least one trajectory or reachability operation must be selected");
+    if(selection.trajectory&&(!selection.lp||!selection.convex))
+        return refuse("hybrid.admission.solver_selection",
+            "Trajectory admission requires immutable LP and convex provider snapshots");
+    if(selection.verifier&&!selection.trajectory)
+        return refuse("hybrid.admission.verifier_selection",
+            "Family verification admission requires a selected trajectory operation");
+
+    auto enumerated=model::enumerate_hybrid_paths(system,request.initial.mode,
+        request.allowed_terminal_modes,enumeration_limits,context.cancellation);
+    if(const auto* stopped=std::get_if<OperationStopped>(&enumerated)) return *stopped;
+    if(const auto* diagnostic=std::get_if<Diagnostic>(&enumerated))
+        return refuse(diagnostic->field,diagnostic->explanation);
+    report.paths=std::get<std::vector<model::HybridPath>>(std::move(enumerated));
+    if(report.paths.empty())
+        return refuse("hybrid.admission.paths","No permitted hybrid path exists for the requested terminal modes");
+    auto planned=model::plan_hybrid_operations(report.paths);
+    if(const auto* diagnostic=std::get_if<Diagnostic>(&planned))
+        return refuse(diagnostic->field,diagnostic->explanation);
+    for(const auto& relation:std::get<std::vector<model::HybridPlannedOperation>>(planned)) {
+        if(const auto stop=interruption(context))
+            return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+                "Hybrid operation ledger derivation stopped between relation obligations"};
+        HybridOperationKey key{HybridOperationKind::relation,{},{}};
+        std::visit([&](const auto& operation) {
+            key.path_index=operation.path_index;
+            key.stage=operation.stage;
+        },relation);
+        report.operations.push_back({key,relation,{},relation_limits.max_rows,
+            relation_limits.max_variables,relation_limits.max_matrix_elements,Assurance::numerical});
+    }
+
+    const auto record_adapter=[&](HybridOperationKey key,HybridAdmissionAdapterRole role,
+        registry::AdmissionStatus decision,Diagnostics diagnostics={},
+        std::optional<registry::Provenance> provider={}) {
+        report.offers.push_back({std::move(key),role,std::move(provider),decision,diagnostics});
+    };
+
+    bool trajectory_admitted=false;
+    if(selection.trajectory) {
+        const auto operations=preflight_hybrid_trajectory_operations(*selection.trajectory,system,
+            request,report.paths,relation_limits,objective_policy,context.cancellation);
+        if(const auto* stopped=std::get_if<OperationStopped>(&operations)) return *stopped;
+        Diagnostics operation_errors;
+        if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&operations)) {
+            if(const auto* stopped=std::get_if<OperationStopped>(&failure->failure)) return *stopped;
+            operation_errors.push_back(std::get<Diagnostic>(failure->failure));
+        } else if(const auto* errors=std::get_if<Diagnostics>(&operations)) operation_errors=*errors;
+        const auto capabilities=preflight_hybrid_trajectory_capabilities(*selection.trajectory,
+            request,report.paths,objective_policy,context.cancellation);
+        if(const auto* stopped=std::get_if<OperationStopped>(&capabilities)) return *stopped;
+        if(const auto* errors=std::get_if<Diagnostics>(&capabilities))
+            operation_errors.insert(operation_errors.end(),errors->begin(),errors->end());
+        trajectory_admitted=operation_errors.empty();
+        report.diagnostics.insert(report.diagnostics.end(),operation_errors.begin(),operation_errors.end());
+        for(const auto& operation:report.operations)
+            record_adapter(operation.key,HybridAdmissionAdapterRole::trajectory,
+                trajectory_admitted?registry::AdmissionStatus::supported:registry::AdmissionStatus::unsupported,
+                operation_errors);
+    }
+
+    if(selection.reachability) {
+        for(std::size_t i=0;i<report.paths.size();++i) {
+            if(const auto stop=interruption(context))
+                return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+                    "Hybrid reachability admission stopped between path obligations"};
+            const auto preflight=selection.reachability->preflight(system,request,report.paths[i],
+                relation_limits,context.cancellation);
+            if(const auto* stopped=std::get_if<OperationStopped>(&preflight)) return *stopped;
+            Diagnostics errors;
+            if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&preflight)) {
+                if(const auto* stopped=std::get_if<OperationStopped>(&failure->failure)) return *stopped;
+                errors.push_back(std::get<Diagnostic>(failure->failure));
+            } else if(const auto* rejected=std::get_if<Diagnostics>(&preflight)) errors=*rejected;
+            const auto capability=selection.reachability->capabilities();
+            if(capability.assurance!=Assurance::numerical)
+                errors.push_back({DiagnosticCode::unsupported,"hybrid.admission.reachability.assurance",
+                    "Selected reachability adapter does not provide numerical assurance"});
+            if(!capability.retains_branch_labelled_joint_relation)
+                errors.push_back({DiagnosticCode::unsupported,"hybrid.admission.reachability.branch_relation",
+                    "Selected reachability adapter does not preserve branch-labelled joint relations"});
+            report.diagnostics.insert(report.diagnostics.end(),errors.begin(),errors.end());
+            const HybridOperationKey key{HybridOperationKind::relation,i,{}};
+            report.operations.push_back({key,{}, {},relation_limits.max_rows,
+                relation_limits.max_variables,relation_limits.max_matrix_elements,capability.assurance});
+            record_adapter(key,HybridAdmissionAdapterRole::reachability,
+                errors.empty()?registry::AdmissionStatus::supported:registry::AdmissionStatus::unsupported,
+                errors);
+            if(capability.projects_terminal_state) {
+                Diagnostics projection_errors=errors;
+                if(!capability.projection_provider||!capability.projection_provider->actual||
+                   capability.projection_provider->actual->id.value.empty())
+                    projection_errors.push_back({DiagnosticCode::evidence_mismatch,
+                        "hybrid.admission.projection.provider",
+                        "Projected reachability did not expose the selected geometry provider provenance"});
+                if(capability.maximum_projection_rows==0)
+                    projection_errors.push_back({DiagnosticCode::unsupported,
+                        "hybrid.admission.projection.rows",
+                        "Projected reachability did not expose a positive geometry row limit"});
+                if(relation_limits.max_variables==0)
+                    projection_errors.push_back({DiagnosticCode::unsupported,
+                        "hybrid.admission.projection.columns",
+                        "Projected geometry envelope requires a positive relation variable limit"});
+                std::size_t projection_elements=0;
+                if(capability.maximum_projection_rows!=0&&relation_limits.max_variables!=0&&
+                   capability.maximum_projection_rows>
+                       std::numeric_limits<std::size_t>::max()/relation_limits.max_variables) {
+                    projection_errors.push_back({DiagnosticCode::unsupported,
+                        "hybrid.admission.projection.elements",
+                        "Projected geometry envelope matrix extent overflows size_t"});
+                } else {
+                    projection_elements=capability.maximum_projection_rows*relation_limits.max_variables;
+                }
+                HybridOperationKey projection_key{HybridOperationKind::projection,i,{}};
+                report.operations.push_back({projection_key,{}, {},capability.maximum_projection_rows,
+                    relation_limits.max_variables,projection_elements,capability.assurance});
+                report.diagnostics.insert(report.diagnostics.end(),projection_errors.begin(),
+                    projection_errors.end());
+                record_adapter(projection_key,HybridAdmissionAdapterRole::geometry,
+                    projection_errors.empty()?registry::AdmissionStatus::supported:
+                        registry::AdmissionStatus::unsupported,
+                    std::move(projection_errors),capability.projection_provider);
+            }
+        }
+    }
+
+    if(selection.trajectory&&selection.lp&&selection.convex) {
+        const auto providers=preflight_hybrid_program_providers(system,request,report.paths,
+            relation_limits,*selection.lp,*selection.convex,context.cancellation);
+        if(const auto* stopped=std::get_if<OperationStopped>(&providers)) return *stopped;
+        if(const auto* errors=std::get_if<Diagnostics>(&providers))
+            report.diagnostics.insert(report.diagnostics.end(),errors->begin(),errors->end());
+        else {
+            const auto& provider_report=std::get<HybridProviderAdmissionReport>(providers);
+            if(!provider_report.admitted)
+                report.diagnostics.insert(report.diagnostics.end(),provider_report.diagnostics.begin(),
+                    provider_report.diagnostics.end());
+            for(const auto& attempt:provider_report.attempts) {
+                const auto role=attempt.envelope.operation=="hybrid.linear-optimization"
+                    ?HybridAdmissionAdapterRole::lp:HybridAdmissionAdapterRole::convex;
+                const auto kind=role==HybridAdmissionAdapterRole::lp
+                    ?HybridOperationKind::linear_optimization:HybridOperationKind::convex_optimization;
+                const HybridOperationKey key{kind,static_cast<std::size_t>(
+                    std::find(report.paths.begin(),report.paths.end(),attempt.path)-report.paths.begin()),{}};
+                report.operations.push_back({key,{},attempt.envelope.objective,
+                    attempt.envelope.maximum_rows,attempt.envelope.maximum_columns,
+                    attempt.envelope.maximum_elements,Assurance::numerical});
+                record_adapter(key,role,attempt.declaration.status,attempt.declaration.diagnostics,
+                    attempt.provider);
+            }
+        }
+    }
+
+    if(selection.verifier) {
+        const auto capability=selection.verifier->capabilities();
+        Diagnostics errors;
+        if(capability.assurance!=Assurance::numerical||
+           !capability.checks_original_hybrid_feasibility||
+           !capability.checks_global_objective_optimality||
+           !capability.checks_continuous_branch_coverage)
+            errors.push_back({DiagnosticCode::unsupported,"hybrid.admission.verifier.capabilities",
+                "Verifier must declare numerical feasibility, global objective, and continuous coverage checks"});
+        if(errors.empty()) {
+            HybridVerifierInvocation verifier_invocation(context);
+            const auto preflight=selection.verifier->preflight(system,request,report.paths,verifier_invocation);
+            if(const auto* stopped=std::get_if<OperationStopped>(&preflight)) return *stopped;
+            if(const auto* rejected=std::get_if<Diagnostics>(&preflight)) errors=*rejected;
+        }
+        const HybridOperationKey key{HybridOperationKind::family_verification,{},{}};
+        report.operations.push_back({key,{}, {},relation_limits.max_rows,relation_limits.max_variables,
+            relation_limits.max_matrix_elements,capability.assurance});
+        report.diagnostics.insert(report.diagnostics.end(),errors.begin(),errors.end());
+        record_adapter(key,HybridAdmissionAdapterRole::verifier,
+            errors.empty()?registry::AdmissionStatus::supported:registry::AdmissionStatus::unsupported,
+            std::move(errors));
+    }
+
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+            "Hybrid request admission stopped after checking its operation ledger"};
+    report.admitted=report.diagnostics.empty()&&(!selection.trajectory||trajectory_admitted);
+    if(!report.admitted) return HybridAdmissionRefused{std::move(report)};
+    return HybridAdmissionAccess::create(system,request,selection,enumeration_limits,
+        relation_limits,objective_policy,std::move(report));
 }
 
 namespace {
@@ -303,7 +707,7 @@ HybridReachabilityPreflightResult HybridReachabilityAdapter::preflight(
 }
 
 HybridReachabilityCapabilities JointHReachabilityAdapter::capabilities() const noexcept {
-    return {true,Assurance::numerical};
+    return {true,Assurance::numerical,false,{},0};
 }
 
 HybridReachabilityPreflightResult JointHReachabilityAdapter::preflight(
@@ -359,51 +763,31 @@ HybridPathReachabilityResult compute_hybrid_path_reachability(
         return OperationStopped{StopReason::cancelled,
             "Hybrid reachability was cancelled after capability admission"};
     auto result=adapter.compose_path(system,request,path,limits,cancellation);
-    if(const auto* reachable=std::get_if<HybridPathReachability>(&result)) {
-        if(reachable->path!=path)
-            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.path",
-                "Reachability adapter returned a relation for a different path"});
-        if(!same_limits(reachable->relation_limits,limits))
-            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.limits",
-                "Reachability adapter returned limits different from those requested"});
-        if(reachable->assurance!=capability.assurance)
-            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.assurance",
-                "Reachability result assurance does not match its declared capability"});
-        const auto trace_errors=hybrid_operation_trace_errors(path,limits,reachable->relation_operations,true,
-            reachable->joint_relation.metadata()->set.dimension);
-        if(!trace_errors.empty()) return trace_errors;
-        if(reachable->projected_state) {
-            const auto& projected=*reachable->projected_state;
-            const auto projected_representation=projected.terminal_state_set.representation();
-            if(projected.terminal_state_set.metadata()->set.dimension!=1 ||
-               !std::holds_alternative<sets::HRepresentation>(projected_representation) ||
-               projected.maximum_projection_rows==0 ||
-               projected.output_rows>projected.maximum_projection_rows ||
-               projected.projection_provider.port!="geometry" ||
-               !projected.projection_provider.actual ||
-               projected.projection_provider.actual->id.value.empty() ||
-               projected.projection_evidence.scope!=GeometryClaimScope::set_relation ||
-               projected.input_rows!=reachable->relation_operations.back().cumulative_rows)
-                return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.projected_state",
-                    "Projected terminal-set evidence has an invalid shape, provider, or row accounting"});
-            const auto& terminal=std::get<sets::HRepresentation>(projected_representation);
-            if(terminal.inequalities.rows()+terminal.equalities.rows()!=projected.output_rows)
-                return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.projected_rows",
-                    "Projected terminal-set row count does not match its retained H representation"});
-        }
+    return validate_hybrid_path_reachability_result(adapter,path,limits,std::move(result));
+}
+
+HybridReachabilityStageResult HybridReachabilityAdapter::stage_path(
+    const model::HybridSystem& system,const model::HybridRequest& request,
+    const model::HybridPath& path,model::HybridRelationLimits limits,
+    const ExecutionContext& context) const {
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+            "Hybrid reachability preparation stopped before adapter staging"};
+    if(capabilities().projects_terminal_state)
+        return one({DiagnosticCode::unsupported,"hybrid.reachability.staging",
+            "Projected adapters must implement staged concrete preparation for request-wide refinement"});
+    auto result=compute_hybrid_path_reachability(*this,system,request,path,limits,context.cancellation);
+    if(auto* reachable=std::get_if<HybridPathReachability>(&result)) {
+        if(reachable->projected_state)
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.staging_projection",
+                "A non-projecting reachability adapter returned projected evidence"});
+        return std::make_unique<CompletedHybridReachabilityStage>(std::move(*reachable));
     }
-    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&result);
-       failure) {
-        if(failure->path!=path)
-            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.failure_path",
-                "Reachability adapter returned a failure report for a different path"});
-        if(!same_limits(failure->limits,limits))
-            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.failure_limits",
-                "Reachability failure report lost the configured relation limits"});
-        const auto trace_errors=hybrid_operation_trace_errors(path,limits,failure->operations,false);
-        if(!trace_errors.empty()) return trace_errors;
-    }
-    return result;
+    if(auto* diagnostics=std::get_if<Diagnostics>(&result))
+        return HybridReachabilityStageFailure{HybridReachabilityStageOperation::relation,
+            std::move(*diagnostics)};
+    if(auto* stopped=std::get_if<OperationStopped>(&result)) return *stopped;
+    return std::get<model::HybridPathCompositionFailureReport>(std::move(result));
 }
 
 HybridPathProgramResult JointHDirectTrajectoryAdapter::build_path(
@@ -555,6 +939,116 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_for_paths(
 }
 }
 
+HybridProviderAdmissionResult preflight_hybrid_program_providers(
+    const model::HybridSystem& system,const model::HybridRequest& request,
+    std::span<const model::HybridPath> paths,model::HybridRelationLimits limits,
+    const registry::PreparedProvider<registry::LPPort>& lp,
+    const registry::PreparedProvider<registry::ConvexPort>& convex,
+    std::stop_token cancellation) {
+    if(paths.empty())
+        return one({DiagnosticCode::invalid_input,"hybrid.provider.paths",
+            "Provider admission requires a complete, nonempty hybrid path inventory"});
+    const auto planned_operations=model::plan_hybrid_operations(paths);
+    if(const auto* error=std::get_if<Diagnostic>(&planned_operations)) return one(*error);
+    const auto profile_errors=model::check_hybrid_profile(system,request);
+    if(!profile_errors.empty()) return profile_errors;
+    HybridProviderAdmissionReport report;
+    report.paths.assign(paths.begin(),paths.end());
+    report.relation_operations=std::get<std::vector<model::HybridPlannedOperation>>(planned_operations);
+    report.attempts.reserve(paths.size());
+    const auto coefficient_floor=hybrid_matrix_coefficient_floor(system,request,paths);
+    for(const auto& path:paths) {
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,
+                "Hybrid provider admission was cancelled between complete path obligations"};
+        if(path.modes.empty())
+            return one({DiagnosticCode::invalid_input,"hybrid.provider.path",
+                "Provider admission received a path without a terminal mode"});
+        auto lifted=model::lift_hybrid_terminal_objective(system,request,path,limits);
+        if(const auto* error=std::get_if<Diagnostic>(&lifted)) return one(*error);
+        const auto& objective=std::get<TerminalObjective>(lifted);
+        registry::RequestEnvelope envelope;
+        envelope.maximum_rows=limits.max_rows;
+        envelope.maximum_elements=limits.max_matrix_elements;
+        const registry::PreparedProvider<registry::LPPort>* selected_lp=nullptr;
+        const registry::PreparedProvider<registry::ConvexPort>* selected_convex=nullptr;
+        if(const auto* linear=std::get_if<LinearTerminal>(&objective)) {
+            envelope.operation="hybrid.linear-optimization";
+            envelope.objective="linear";
+            envelope.maximum_columns=linear->coefficients.size();
+            selected_lp=&lp;
+        } else if(const auto* quadratic=std::get_if<QuadraticTerminal>(&objective)) {
+            envelope.operation="hybrid.convex-optimization";
+            envelope.objective="quadratic";
+            envelope.maximum_columns=quadratic->linear.size();
+            selected_convex=&convex;
+        } else {
+            const auto& residual=std::get<ResidualNormTerminal>(objective);
+            envelope.operation="hybrid.convex-optimization";
+            envelope.objective="residual_norm";
+            if(residual.map.cols==std::numeric_limits<std::size_t>::max())
+                return one({DiagnosticCode::unsupported,"hybrid.provider.envelope.columns",
+                    "Residual-norm program envelope column count overflows size_t"});
+            envelope.maximum_columns=residual.map.cols+1;
+            selected_convex=&convex;
+        }
+        if(envelope.maximum_rows!=0 && envelope.maximum_columns>
+           std::numeric_limits<std::size_t>::max()/envelope.maximum_rows)
+            return one({DiagnosticCode::unsupported,"hybrid.provider.envelope.elements",
+                "Conservative solver matrix envelope overflows size_t"});
+        envelope.maximum_elements=std::max(envelope.maximum_elements,
+            envelope.maximum_rows*envelope.maximum_columns);
+        envelope.minimum_nonzero_matrix_coefficient_magnitude=coefficient_floor;
+        if(const auto* quadratic=std::get_if<QuadraticTerminal>(&objective)) {
+            if(quadratic->Q.rows!=0 && quadratic->Q.cols>
+               std::numeric_limits<std::size_t>::max()/quadratic->Q.rows)
+                return one({DiagnosticCode::unsupported,"hybrid.provider.envelope.objective_elements",
+                    "Conservative quadratic objective matrix envelope overflows size_t"});
+            envelope.maximum_elements=std::max(envelope.maximum_elements,
+                quadratic->Q.rows*quadratic->Q.cols);
+        }
+        if(const auto* residual=std::get_if<ResidualNormTerminal>(&objective)) {
+            if(residual->map.rows!=0 && residual->map.cols>
+               std::numeric_limits<std::size_t>::max()/residual->map.rows)
+                return one({DiagnosticCode::unsupported,"hybrid.provider.envelope.objective_elements",
+                    "Conservative objective matrix envelope overflows size_t"});
+            envelope.maximum_elements=std::max(envelope.maximum_elements,
+                residual->map.rows*residual->map.cols);
+        }
+        const auto& provider=selected_lp?
+            selected_lp->provenance():selected_convex->provenance();
+        auto declaration=selected_lp?selected_lp->declare_support(envelope):
+            selected_convex->declare_support(envelope);
+        const bool admitted=declaration.status==registry::AdmissionStatus::supported&&
+            declaration.envelope_is_sufficient;
+        if(!admitted) {
+            const auto status=[&] {
+                switch(declaration.status) {
+                case registry::AdmissionStatus::supported: return "conditional";
+                case registry::AdmissionStatus::unsupported: return "unsupported";
+                case registry::AdmissionStatus::unknown: return "unknown";
+                case registry::AdmissionStatus::conditional: return "conditional";
+                }
+                return "unknown";
+            }();
+            const std::string provider_id=provider.actual?provider.actual->id.value:provider.requested.id.value;
+            Diagnostic diagnostic{DiagnosticCode::unsupported,"hybrid.provider.admission",
+                "Provider "+provider_id+" returned "+status+" for "+envelope.operation+
+                " on "+path_program_id(path).value+
+                "; no hybrid relation has been composed"};
+            diagnostic.explanation+=" (envelope rows <= "+std::to_string(envelope.maximum_rows)+
+                ", columns <= "+std::to_string(envelope.maximum_columns)+
+                ", elements <= "+std::to_string(envelope.maximum_elements)+")";
+            if(!declaration.diagnostics.empty())
+                diagnostic.explanation+="; provider: "+declaration.diagnostics.front().explanation;
+            report.diagnostics.push_back(std::move(diagnostic));
+        }
+        report.attempts.push_back({path,std::move(envelope),provider,std::move(declaration)});
+    }
+    report.admitted=report.diagnostics.empty();
+    return report;
+}
+
 HybridPortfolioProgramResult build_hybrid_portfolio_programs(const HybridDirectTrajectoryAdapter& adapter,
     const model::HybridSystem& system,
     const model::HybridRequest& request,ProblemId problem,model::HybridEnumerationLimits enumeration_limits,
@@ -587,6 +1081,50 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs(const HybridDirectT
         std::move(problem),paths,relation_limits,policy,cancellation);
 }
 
+HybridPortfolioProgramResult build_hybrid_portfolio_programs(const HybridDirectTrajectoryAdapter& adapter,
+    const model::HybridSystem& system,const model::HybridRequest& request,ProblemId problem,
+    model::HybridEnumerationLimits enumeration_limits,model::HybridRelationLimits relation_limits,
+    const registry::PreparedProvider<registry::LPPort>& lp,
+    const registry::PreparedProvider<registry::ConvexPort>& convex,
+    optimization::ObjectivePolicy policy,std::stop_token cancellation) {
+    if(problem.value.empty())
+        return one({DiagnosticCode::invalid_input,"hybrid.program.problem","Problem identity must be nonempty"});
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Hybrid portfolio construction was cancelled before request admission"};
+    const auto profile_errors=model::check_hybrid_profile(system,request);
+    if(!profile_errors.empty()) return profile_errors;
+    const auto enumerated=model::enumerate_hybrid_paths(system,request.initial.mode,
+        request.allowed_terminal_modes,enumeration_limits,cancellation);
+    if(const auto* diagnostic=std::get_if<Diagnostic>(&enumerated)) return one(*diagnostic);
+    if(const auto* stopped=std::get_if<OperationStopped>(&enumerated)) return *stopped;
+    const auto& paths=std::get<std::vector<model::HybridPath>>(enumerated);
+    if(paths.empty())
+        return one({DiagnosticCode::invalid_claim,"hybrid.portfolio.paths",
+            "No allowed hybrid path exists for the requested terminal modes"});
+    const auto operation_preflight=preflight_hybrid_trajectory_operations(
+        adapter,system,request,paths,relation_limits,policy,cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&operation_preflight))
+        return *failure;
+    if(const auto* errors=std::get_if<Diagnostics>(&operation_preflight)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&operation_preflight)) return *stopped;
+    const auto trajectory_preflight=preflight_hybrid_trajectory_capabilities(
+        adapter,request,paths,policy,cancellation);
+    if(const auto* errors=std::get_if<Diagnostics>(&trajectory_preflight)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&trajectory_preflight)) return *stopped;
+    auto provider_preflight=preflight_hybrid_program_providers(
+        system,request,paths,relation_limits,lp,convex,cancellation);
+    if(const auto* errors=std::get_if<Diagnostics>(&provider_preflight)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&provider_preflight)) return *stopped;
+    const auto& report=std::get<HybridProviderAdmissionReport>(provider_preflight);
+    if(!report.admitted) return report.diagnostics;
+    if(cancellation.stop_requested())
+        return OperationStopped{StopReason::cancelled,
+            "Hybrid portfolio construction was cancelled after complete provider admission"};
+    return build_hybrid_portfolio_programs_for_paths(adapter,system,request,
+        std::move(problem),paths,relation_limits,policy,cancellation);
+}
+
 HybridPortfolioProgramResult build_hybrid_portfolio_programs(const model::HybridSystem& system,
     const model::HybridRequest& request, ProblemId problem,
     model::HybridEnumerationLimits enumeration_limits, model::HybridRelationLimits relation_limits,
@@ -600,11 +1138,11 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
     const HybridFamilyVerificationAdapter& verifier,const HybridDirectTrajectoryAdapter& trajectory,
     const model::HybridSystem& system,const model::HybridRequest& request,ProblemId problem,
     model::HybridEnumerationLimits enumeration_limits,model::HybridRelationLimits relation_limits,
-    optimization::ObjectivePolicy policy,std::stop_token cancellation) {
+    optimization::ObjectivePolicy policy,const ExecutionContext& context) {
     if(problem.value.empty()) return one({DiagnosticCode::invalid_input,"hybrid.program.problem",
         "Problem identity must be nonempty"});
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
             "Hybrid verified portfolio construction was cancelled before profile admission"};
     const auto profile_errors=model::check_hybrid_profile(system,request);
     if(!profile_errors.empty()) return profile_errors;
@@ -618,7 +1156,10 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
         return one({DiagnosticCode::unsupported,"hybrid.verification.capabilities",
             "Verifier must declare numerical feasibility, global objective, and continuous coverage checks"});
     const auto enumerated=model::enumerate_hybrid_paths(system,request.initial.mode,
-        request.allowed_terminal_modes,enumeration_limits,cancellation);
+        request.allowed_terminal_modes,enumeration_limits,context.cancellation);
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+            "Hybrid verified portfolio construction stopped during path enumeration"};
     if(const auto* diagnostic=std::get_if<Diagnostic>(&enumerated)) return one(*diagnostic);
     if(const auto* stopped=std::get_if<OperationStopped>(&enumerated)) return *stopped;
     const auto& paths=std::get<std::vector<model::HybridPath>>(enumerated);
@@ -626,23 +1167,85 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
         return one({DiagnosticCode::invalid_claim,"hybrid.verification.paths",
             "No allowed hybrid path exists for the requested verifier plan"});
     const auto operation_preflight=preflight_hybrid_trajectory_operations(
-        trajectory,system,request,paths,relation_limits,policy,cancellation);
+        trajectory,system,request,paths,relation_limits,policy,context.cancellation);
     if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&operation_preflight))
         return *failure;
     if(const auto* errors=std::get_if<Diagnostics>(&operation_preflight)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&operation_preflight)) return *stopped;
-    const auto admission=verifier.preflight(system,request,paths,cancellation);
+    HybridVerifierInvocation verifier_invocation(context);
+    const auto admission=verifier.preflight(system,request,paths,verifier_invocation);
     if(const auto* errors=std::get_if<Diagnostics>(&admission)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&admission)) return *stopped;
     const auto trajectory_preflight=preflight_hybrid_trajectory_capabilities(
-        trajectory,request,paths,policy,cancellation);
+        trajectory,request,paths,policy,context.cancellation);
     if(const auto* errors=std::get_if<Diagnostics>(&trajectory_preflight)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&trajectory_preflight)) return *stopped;
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
             "Hybrid verified portfolio construction was cancelled after verifier preflight"};
     return build_hybrid_portfolio_programs_for_paths(trajectory,system,request,
-        std::move(problem),paths,relation_limits,policy,cancellation);
+        std::move(problem),paths,relation_limits,policy,context.cancellation);
+}
+
+HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
+    const HybridFamilyVerificationAdapter& verifier,const HybridDirectTrajectoryAdapter& trajectory,
+    const model::HybridSystem& system,const model::HybridRequest& request,ProblemId problem,
+    model::HybridEnumerationLimits enumeration_limits,model::HybridRelationLimits relation_limits,
+    const registry::PreparedProvider<registry::LPPort>& lp,
+    const registry::PreparedProvider<registry::ConvexPort>& convex,
+    optimization::ObjectivePolicy policy,const ExecutionContext& context) {
+    if(problem.value.empty()) return one({DiagnosticCode::invalid_input,"hybrid.program.problem",
+        "Problem identity must be nonempty"});
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+            "Hybrid verified portfolio construction was cancelled before request admission"};
+    const auto profile_errors=model::check_hybrid_profile(system,request);
+    if(!profile_errors.empty()) return profile_errors;
+    if(const auto policy_error=hybrid_objective_policy_error(policy); policy_error)
+        return one(*policy_error);
+    const auto verifier_capability=verifier.capabilities();
+    if(verifier_capability.assurance!=Assurance::numerical||
+       !verifier_capability.checks_original_hybrid_feasibility||
+       !verifier_capability.checks_global_objective_optimality||
+       !verifier_capability.checks_continuous_branch_coverage)
+        return one({DiagnosticCode::unsupported,"hybrid.verification.capabilities",
+            "Verifier must declare numerical feasibility, global objective, and continuous coverage checks"});
+    const auto enumerated=model::enumerate_hybrid_paths(system,request.initial.mode,
+        request.allowed_terminal_modes,enumeration_limits,context.cancellation);
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+            "Hybrid verified portfolio construction stopped during path enumeration"};
+    if(const auto* diagnostic=std::get_if<Diagnostic>(&enumerated)) return one(*diagnostic);
+    if(const auto* stopped=std::get_if<OperationStopped>(&enumerated)) return *stopped;
+    const auto& paths=std::get<std::vector<model::HybridPath>>(enumerated);
+    if(paths.empty())
+        return one({DiagnosticCode::invalid_claim,"hybrid.verification.paths",
+            "No allowed hybrid path exists for the requested verifier plan"});
+    const auto operation_preflight=preflight_hybrid_trajectory_operations(
+        trajectory,system,request,paths,relation_limits,policy,context.cancellation);
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&operation_preflight))
+        return *failure;
+    if(const auto* errors=std::get_if<Diagnostics>(&operation_preflight)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&operation_preflight)) return *stopped;
+    HybridVerifierInvocation verifier_invocation(context);
+    const auto verifier_preflight=verifier.preflight(system,request,paths,verifier_invocation);
+    if(const auto* errors=std::get_if<Diagnostics>(&verifier_preflight)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&verifier_preflight)) return *stopped;
+    const auto trajectory_preflight=preflight_hybrid_trajectory_capabilities(
+        trajectory,request,paths,policy,context.cancellation);
+    if(const auto* errors=std::get_if<Diagnostics>(&trajectory_preflight)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&trajectory_preflight)) return *stopped;
+    auto provider_preflight=preflight_hybrid_program_providers(
+        system,request,paths,relation_limits,lp,convex,context.cancellation);
+    if(const auto* errors=std::get_if<Diagnostics>(&provider_preflight)) return *errors;
+    if(const auto* stopped=std::get_if<OperationStopped>(&provider_preflight)) return *stopped;
+    const auto& report=std::get<HybridProviderAdmissionReport>(provider_preflight);
+    if(!report.admitted) return report.diagnostics;
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+            "Hybrid verified portfolio construction was cancelled after complete provider admission"};
+    return build_hybrid_portfolio_programs_for_paths(trajectory,system,request,
+        std::move(problem),paths,relation_limits,policy,context.cancellation);
 }
 
 HybridPortfolioObjectiveAnalysis compare_hybrid_portfolio_objective_bounds(
@@ -941,12 +1544,43 @@ HybridPortfolioOptimalFaceAnalysis assemble_hybrid_portfolio_optimal_face_candid
     return HybridPortfolioOptimalFaceCandidates{std::move(bounds),std::move(candidates)};
 }
 
+HybridVerifierInvocation::HybridVerifierInvocation(const ExecutionContext& context)
+    :cancellation_(context.cancellation),deadline_(context.deadline),numerical_(context.numerical),
+     resources_(context.resources?std::optional<ResourcePolicy>{*context.resources}:std::nullopt),
+     run_id_(context.run_id),timing_(context.timing),
+     observer_(std::make_shared<execution::BackendThreadObservation>()),
+     aggregate_observer_(context.backend_thread_observation) {}
+
+std::optional<OperationStopped> HybridVerifierInvocation::interruption() const noexcept {
+    if(cancellation_.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid verifier invocation was cancelled"};
+    if(deadline_&&std::chrono::steady_clock::now()>=*deadline_)
+        return OperationStopped{StopReason::deadline_expired,"Hybrid verifier invocation deadline expired"};
+    return {};
+}
+
+OperationStopped HybridVerifierInvocation::stop_result(std::string diagnostics) const {
+    if(auto stopped=interruption()) {
+        stopped->diagnostics=std::move(diagnostics);
+        return *stopped;
+    }
+    return {StopReason::cancelled,std::move(diagnostics)};
+}
+
+void HybridVerifierInvocation::record_backend_threads(std::size_t threads) const noexcept {
+    observer_->record(threads);
+    if(aggregate_observer_) aggregate_observer_->record(threads);
+}
+
+std::optional<std::size_t> HybridVerifierInvocation::observed_backend_threads() const noexcept {
+    return observer_->maximum();
+}
+
 HybridFamilyVerificationPreflightResult HybridFamilyVerificationAdapter::preflight(
     const model::HybridSystem&,const model::HybridRequest&,std::span<const model::HybridPath>,
-    std::stop_token cancellation) const {
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,
-            "Hybrid verifier admission was cancelled before dispatch"};
+    const HybridVerifierInvocation& invocation) const {
+    if(const auto stopped=invocation.interruption())
+        return *stopped;
     return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.preflight",
         "Verifier adapter must explicitly admit its request domain before verified portfolio construction"}};
 }
@@ -955,20 +1589,20 @@ HybridFamilyVerificationResult verify_hybrid_portfolio_family(
     const HybridFamilyVerificationAdapter& adapter,const model::HybridSystem& system,
     const model::HybridRequest& request,std::span<const HybridPathProgram> programs,
     std::span<const HybridPathOptimalFaceCandidate> candidates,
-    model::HybridEnumerationLimits enumeration_limits,NumericalPolicy numerical_policy,
-    std::stop_token cancellation) {
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,"Hybrid family verification was cancelled before profile admission"};
+    model::HybridEnumerationLimits enumeration_limits,
+    const HybridVerifierInvocation& invocation) {
+    const auto numerical_policy=invocation.numerical_policy();
+    if(const auto stopped=invocation.interruption()) return *stopped;
     const auto profile_errors=model::check_hybrid_profile(system,request);
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,"Hybrid family verification was cancelled during profile admission"};
+    if(const auto stopped=invocation.interruption()) return *stopped;
     if(!profile_errors.empty()) return profile_errors;
     if(!std::isfinite(numerical_policy.absolute_tolerance)||numerical_policy.absolute_tolerance<0||
        !std::isfinite(numerical_policy.relative_tolerance)||numerical_policy.relative_tolerance<0)
         return one({DiagnosticCode::invalid_input,"hybrid.verification.policy",
             "Hybrid verification tolerances must be finite and nonnegative"});
     const auto enumerated=model::enumerate_hybrid_paths(system,request.initial.mode,
-        request.allowed_terminal_modes,enumeration_limits,cancellation);
+        request.allowed_terminal_modes,enumeration_limits,invocation.cancellation_token());
+    if(const auto stopped=invocation.interruption()) return *stopped;
     if(const auto* diagnostic=std::get_if<Diagnostic>(&enumerated)) return one(*diagnostic);
     if(const auto* stopped=std::get_if<OperationStopped>(&enumerated)) return *stopped;
     const auto& paths=std::get<std::vector<model::HybridPath>>(enumerated);
@@ -1005,9 +1639,9 @@ HybridFamilyVerificationResult verify_hybrid_portfolio_family(
        !capability.checks_continuous_branch_coverage)
         return one({DiagnosticCode::unsupported,"hybrid.verification.capabilities",
             "Verifier must declare original feasibility, global objective, and continuous coverage checks"});
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,"Hybrid family verification was cancelled before verifier dispatch"};
-    auto result=adapter.verify(system,request,paths,programs,candidates,numerical_policy,cancellation);
+    if(const auto stopped=invocation.interruption()) return *stopped;
+    auto result=adapter.verify(system,request,paths,programs,candidates,invocation);
+    if(const auto stopped=invocation.interruption()) return *stopped;
     if(const auto* stopped=std::get_if<OperationStopped>(&result)) return *stopped;
     if(const auto* diagnostics=std::get_if<Diagnostics>(&result)) return *diagnostics;
     auto report=std::get<HybridFamilyVerificationReport>(std::move(result));
@@ -1062,13 +1696,98 @@ HybridFamilyVerificationResult verify_hybrid_portfolio_family(
     return report;
 }
 
+namespace {
+using HybridPreparedPipeline=std::variant<
+    registry::PreparedPipeline<registry::LPPort>,
+    registry::PreparedPipeline<registry::ConvexPort>>;
+
+HybridPortfolioExecution execute_prepared_hybrid_branches(
+    std::span<const HybridPathProgram> programs,
+    std::span<const HybridPreparedPipeline> pipelines,
+    std::span<const HybridReachabilityAttempt> reachability,
+    const ExecutionContext& context) {
+    HybridPortfolioExecution portfolio;
+    portfolio.branches.reserve(programs.size());
+    for(const auto& attempt:reachability)
+        if(const auto* completed=std::get_if<HybridPathReachability>(&attempt.result))
+            portfolio.reachability.push_back(*completed);
+    portfolio.reachability_attempts.assign(reachability.begin(),reachability.end());
+    bool complete=true;
+    bool stopped=false;
+    for(std::size_t i=0;i<programs.size();++i) {
+        const auto& branch=programs[i];
+        HybridBranchExecution execution;
+        execution.path=branch.path;
+        if(context.resources) execution.requested_resources=*context.resources;
+        if(stopped) {
+            execution.termination=context.cancellation.stop_requested()?Termination::cancelled:Termination::resource_limit;
+            execution.diagnostics={{DiagnosticCode::unsupported,"hybrid.execution.not_started",
+                "No workspace was created because an earlier branch stopped the coordinated request"}};
+            complete=false;
+            portfolio.branches.push_back(std::move(execution));
+            continue;
+        }
+        if(const auto stop=interruption(context)) {
+            execution.termination=*stop;
+            execution.diagnostics={{DiagnosticCode::unsupported,"hybrid.execution.stopped",
+                "Branch execution stopped before workspace creation"}};
+            stopped=true;
+            complete=false;
+            portfolio.branches.push_back(std::move(execution));
+            continue;
+        }
+        const auto run=[&]<class Program,class Port>(const Program& program,
+            const registry::PreparedPipeline<Port>& pipeline) {
+            const auto provenance=pipeline.provenance();
+            execution.providers.assign(provenance.begin(),provenance.end());
+            const auto provider_started=std::chrono::steady_clock::now();
+            auto workspaces=pipeline.create();
+            auto branch_context=context;
+            auto branch_observation=std::make_shared<csl::execution::BackendThreadObservation>();
+            branch_context.backend_thread_observation=branch_observation;
+            auto outcome=std::get<0>(workspaces)->run(branch_context);
+            execution.provider_elapsed_wall_nanoseconds=elapsed_wall_nanoseconds(provider_started);
+            execution.observed_backend_threads=branch_observation->maximum();
+            if(context.backend_thread_observation && execution.observed_backend_threads)
+                context.backend_thread_observation->record(*execution.observed_backend_threads);
+            if(const auto* unsupported=std::get_if<Unsupported>(&outcome)) {
+                execution.termination=Termination::operation_rejected;
+                execution.diagnostics=unsupported->diagnostics;
+                complete=false;
+                return;
+            }
+            auto result=std::get<ProgramResult>(std::move(outcome));
+            auto diagnostics=optimization::check_program_result(result,program,Assurance::numerical);
+            if(!diagnostics.empty()) {
+                execution.termination=Termination::contract_rejected;
+                execution.diagnostics=std::move(diagnostics);
+                complete=false;
+                return;
+            }
+            execution.termination=result.termination;
+            execution.outcome=result.outcome.value;
+            if(result.termination!=Termination::completed) complete=false;
+            execution.result=std::move(result);
+        };
+        if(const auto* linear=std::get_if<LinearProgram>(&branch.program))
+            run(*linear,std::get<registry::PreparedPipeline<registry::LPPort>>(pipelines[i]));
+        else run(std::get<ConvexProgram>(branch.program),
+            std::get<registry::PreparedPipeline<registry::ConvexPort>>(pipelines[i]));
+        if(execution.termination==Termination::cancelled||execution.termination==Termination::resource_limit)
+            stopped=true;
+        portfolio.branches.push_back(std::move(execution));
+    }
+    portfolio.all_supplied_branches_completed=complete;
+    return portfolio;
+}
+}
+
 HybridPortfolioExecution execute_hybrid_path_programs(
     std::span<const HybridPathProgram> programs,
     const registry::PreparedProvider<registry::LPPort>& lp,
     const registry::PreparedProvider<registry::ConvexPort>& convex,
     const ExecutionContext& context) {
-    using PreparedBranch = std::variant<registry::PreparedPipeline<registry::LPPort>,
-        registry::PreparedPipeline<registry::ConvexPort>>;
+    using PreparedBranch=HybridPreparedPipeline;
     HybridPortfolioExecution portfolio;
     portfolio.branches.reserve(programs.size());
     std::vector<std::optional<PreparedBranch>> prepared_branches;
@@ -1132,44 +1851,239 @@ HybridPortfolioExecution execute_hybrid_path_programs(
         return portfolio;
     }
 
-    bool complete=true;
-    for(std::size_t i=0;i<programs.size();++i) {
-        const auto& branch=programs[i];
-        auto& execution=portfolio.branches[i];
-        auto run=[&]<class Program,class Port>(const Program& program,
-            registry::PreparedPipeline<Port>& pipeline) {
-            if(const auto stop=interruption(context)) {
-                execution.termination=*stop;
-                complete=false;
-                return;
-            }
-            auto workspaces=pipeline.create();
-            auto outcome=std::get<0>(workspaces)->run(context);
-            if(const auto* unsupported=std::get_if<Unsupported>(&outcome)) {
-                execution.termination=Termination::operation_rejected;
-                execution.diagnostics=unsupported->diagnostics;
-                complete=false;
-                return;
-            }
-            auto result=std::get<ProgramResult>(std::move(outcome));
-            auto diagnostics=optimization::check_program_result(result,program,Assurance::numerical);
-            if(!diagnostics.empty()) {
-                execution.termination=Termination::contract_rejected;
-                execution.diagnostics=std::move(diagnostics);
-                complete=false;
-                return;
-            }
-            execution.termination=result.termination;
-            execution.outcome=result.outcome.value;
-            if(result.termination!=Termination::completed) complete=false;
-            execution.result=std::move(result);
-        };
-        if(const auto* linear=std::get_if<LinearProgram>(&branch.program))
-            run(*linear,std::get<registry::PreparedPipeline<registry::LPPort>>(*prepared_branches[i]));
-        else run(std::get<ConvexProgram>(branch.program),
-            std::get<registry::PreparedPipeline<registry::ConvexPort>>(*prepared_branches[i]));
+    std::vector<HybridPreparedPipeline> ready;
+    ready.reserve(prepared_branches.size());
+    for(auto& branch:prepared_branches) ready.push_back(std::move(*branch));
+    return execute_prepared_hybrid_branches(programs,ready,{},context);
+}
+
+struct HybridPreparedExecution::Storage {
+    std::vector<HybridPathProgram> programs;
+    std::vector<HybridPreparedPipeline> pipelines;
+    std::vector<std::unique_ptr<HybridReachabilityStage>> reachability_stages;
+    std::shared_ptr<const HybridReachabilityAdapter> reachability_adapter;
+    std::shared_ptr<const HybridFamilyVerificationAdapter> verifier;
+    model::HybridSystem system;
+    model::HybridRequest request;
+    model::HybridEnumerationLimits enumeration_limits;
+    model::HybridRelationLimits relation_limits;
+    optimization::ObjectivePolicy objective_policy;
+    HybridAdmissionReport report;
+};
+
+class HybridPreparedAccess {
+public:
+    static HybridPreparedExecution create(std::vector<HybridPathProgram> programs,
+        std::vector<HybridPreparedPipeline> pipelines,
+        std::vector<std::unique_ptr<HybridReachabilityStage>> reachability_stages,
+        std::shared_ptr<const HybridReachabilityAdapter> reachability_adapter,
+        std::shared_ptr<const HybridFamilyVerificationAdapter> verifier,
+        model::HybridSystem system,model::HybridRequest request,
+        model::HybridEnumerationLimits enumeration_limits,
+        model::HybridRelationLimits relation_limits,
+        optimization::ObjectivePolicy objective_policy,
+        HybridAdmissionReport report) {
+        using Storage=HybridPreparedExecution::Storage;
+        return HybridPreparedExecution{std::make_unique<const Storage>(Storage{
+            std::move(programs),std::move(pipelines),std::move(reachability_stages),
+            std::move(reachability_adapter),std::move(verifier),std::move(system),
+            std::move(request),enumeration_limits,relation_limits,objective_policy,
+            std::move(report)})};
     }
-    portfolio.all_supplied_branches_completed=complete;
+    static const HybridPreparedExecution::Storage& storage(const HybridPreparedExecution& prepared) {
+        return *prepared.storage_;
+    }
+};
+
+HybridPreparedExecution::HybridPreparedExecution(std::unique_ptr<const Storage> storage)
+    :storage_(std::move(storage)) {}
+HybridPreparedExecution::HybridPreparedExecution(HybridPreparedExecution&&) noexcept=default;
+HybridPreparedExecution& HybridPreparedExecution::operator=(HybridPreparedExecution&&) noexcept=default;
+HybridPreparedExecution::~HybridPreparedExecution()=default;
+const HybridAdmissionReport& HybridPreparedExecution::report() const noexcept {
+    return storage_->report;
+}
+
+HybridRefinementResult refine_hybrid_request(HybridAdmissionToken token,
+    ProblemId problem,const ExecutionContext& context) {
+    const auto& admission=HybridAdmissionAccess::storage(token);
+    const auto refuse=[&](std::string field,std::string explanation) -> HybridRefinementResult {
+        return HybridConcreteRefinementRejected{admission.report,
+            {{DiagnosticCode::unsupported,std::move(field),std::move(explanation)}},{},{}};
+    };
+    if(!admission.report.admitted)
+        return refuse("hybrid.refinement.admission","Only a fully admitted request can be refined");
+    if(!admission.selection.trajectory&&!admission.selection.reachability)
+        return refuse("hybrid.refinement.selection","Refinement requires a selected trajectory or reachability operation");
+    if(admission.selection.trajectory&&(!admission.selection.lp||!admission.selection.convex))
+        return refuse("hybrid.refinement.trajectory","Trajectory refinement requires LP and convex provider snapshots");
+    std::vector<HybridPathProgram> programs;
+    if(admission.selection.trajectory) {
+        if(problem.value.empty())
+            return refuse("hybrid.refinement.problem","Trajectory refinement requires a nonempty problem identity");
+        programs.reserve(admission.report.paths.size());
+        for(const auto& path:admission.report.paths) {
+            if(const auto stop=interruption(context))
+                return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+                    "Hybrid refinement stopped between path programs; no workspace was created"};
+            auto built=build_hybrid_path_program(*admission.selection.trajectory,admission.system,
+                admission.request,path,problem,admission.relation_limits,admission.objective_policy,
+                context.cancellation);
+            if(const auto* stopped=std::get_if<OperationStopped>(&built)) return *stopped;
+            if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&built)) {
+                if(const auto* stopped=std::get_if<OperationStopped>(&failure->failure)) return *stopped;
+                return HybridConcreteRefinementRejected{admission.report,
+                    {std::get<Diagnostic>(failure->failure)},{},{}};
+            }
+            if(const auto* errors=std::get_if<Diagnostics>(&built))
+                return HybridConcreteRefinementRejected{admission.report,*errors,{},{}};
+            programs.push_back(std::get<HybridPathProgram>(std::move(built)));
+        }
+    }
+
+    std::vector<std::unique_ptr<HybridReachabilityStage>> reachability_stages;
+    if(admission.selection.reachability) {
+        reachability_stages.reserve(admission.report.paths.size());
+        for(std::size_t path_index=0;path_index<admission.report.paths.size();++path_index) {
+            const auto& path=admission.report.paths[path_index];
+            if(const auto stop=interruption(context))
+                return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+                    "Hybrid reachability refinement stopped between path stages"};
+            auto staged=admission.selection.reachability->stage_path(admission.system,
+                admission.request,path,admission.relation_limits,context);
+            const auto operation_key=[&](HybridReachabilityStageOperation operation) {
+                return HybridOperationKey{
+                    operation==HybridReachabilityStageOperation::projection?
+                        HybridOperationKind::projection:HybridOperationKind::relation,
+                    path_index,{}};
+            };
+            if(auto* stage=std::get_if<std::unique_ptr<HybridReachabilityStage>>(&staged)) {
+                if(!*stage) return HybridConcreteRefinementRejected{admission.report,
+                    {{DiagnosticCode::evidence_mismatch,"hybrid.refinement.reachability_stage",
+                        "Reachability adapter returned an empty prepared stage"}},path_index,{}};
+                reachability_stages.push_back(std::move(*stage));
+            } else if(auto* stopped=std::get_if<OperationStopped>(&staged)) {
+                return *stopped;
+            } else if(auto* stage_failure=std::get_if<HybridReachabilityStageFailure>(&staged)) {
+                return HybridConcreteRefinementRejected{admission.report,
+                    std::move(stage_failure->diagnostics),path_index,
+                    operation_key(stage_failure->operation)};
+            } else if(auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&staged)) {
+                auto validated=validate_hybrid_path_reachability_result(
+                    *admission.selection.reachability,path,admission.relation_limits,*failure);
+                if(auto* operation_stopped=std::get_if<OperationStopped>(&validated))
+                    return *operation_stopped;
+                if(auto* errors=std::get_if<Diagnostics>(&validated))
+                    return HybridConcreteRefinementRejected{admission.report,*errors,path_index,
+                        operation_key(HybridReachabilityStageOperation::relation)};
+                return HybridConcreteRefinementRejected{admission.report,
+                    {std::get<Diagnostic>(std::get<model::HybridPathCompositionFailureReport>(validated).failure)},
+                    path_index,operation_key(HybridReachabilityStageOperation::relation)};
+            } else {
+                return HybridConcreteRefinementRejected{admission.report,
+                    std::move(std::get<Diagnostics>(staged)),path_index,{}};
+            }
+        }
+    }
+
+    std::vector<HybridPreparedPipeline> pipelines;
+    pipelines.reserve(programs.size());
+    for(auto& program_result:programs) {
+        if(const auto stop=interruption(context))
+            return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+                "Concrete hybrid provider preparation stopped before workspace creation"};
+        std::optional<HybridPreparedPipeline> pipeline;
+        if(const auto* linear=std::get_if<LinearProgram>(&program_result.program)) {
+            auto prepared=admission.selection.lp->prepare(*linear);
+            if(const auto* rejected=std::get_if<registry::Rejection>(&prepared))
+                return HybridConcreteRefinementRejected{admission.report,rejected->diagnostics,{},{}};
+            pipeline.emplace(std::get<registry::PreparedPipeline<registry::LPPort>>(std::move(prepared)));
+        } else {
+            auto prepared=admission.selection.convex->prepare(std::get<ConvexProgram>(program_result.program));
+            if(const auto* rejected=std::get_if<registry::Rejection>(&prepared))
+                return HybridConcreteRefinementRejected{admission.report,rejected->diagnostics,{},{}};
+            pipeline.emplace(std::get<registry::PreparedPipeline<registry::ConvexPort>>(std::move(prepared)));
+        }
+        pipelines.push_back(std::move(*pipeline));
+    }
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+            "Hybrid refinement stopped before publishing prepared providers; no workspace was created"};
+    return HybridPreparedAccess::create(std::move(programs),std::move(pipelines),
+        std::move(reachability_stages),admission.selection.reachability,
+        admission.selection.verifier,admission.system,admission.request,
+        admission.enumeration_limits,admission.relation_limits,admission.objective_policy,
+        admission.report);
+}
+
+HybridPortfolioExecution execute_hybrid_request(HybridPreparedExecution prepared,
+    const ExecutionContext& context) {
+    const auto& storage=HybridPreparedAccess::storage(prepared);
+    std::vector<HybridReachabilityAttempt> reachability_attempts;
+    reachability_attempts.reserve(storage.reachability_stages.size());
+    for(std::size_t index=0;index<storage.reachability_stages.size();++index) {
+        const auto& path=storage.report.paths[index];
+        HybridReachabilityAttempt attempt{path,OperationStopped{
+            StopReason::cancelled,"Hybrid reachability stage was not started"},{},std::nullopt};
+        if(context.resources) attempt.requested_resources=*context.resources;
+        if(const auto stop=interruption(context)) {
+            attempt.result=OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+                "Hybrid reachability stage stopped before workspace creation"};
+            reachability_attempts.push_back(std::move(attempt));
+            continue;
+        }
+        auto path_context=context;
+        auto observation=std::make_shared<csl::execution::BackendThreadObservation>();
+        path_context.backend_thread_observation=observation;
+        const auto reachability_started=std::chrono::steady_clock::now();
+        auto result=std::move(*storage.reachability_stages[index]).execute(path_context);
+        attempt.elapsed_wall_nanoseconds=elapsed_wall_nanoseconds(reachability_started);
+        attempt.observed_backend_threads=observation->maximum();
+        if(context.backend_thread_observation&&attempt.observed_backend_threads)
+            context.backend_thread_observation->record(*attempt.observed_backend_threads);
+        if(storage.reachability_adapter)
+            result=validate_hybrid_path_reachability_result(*storage.reachability_adapter,path,
+                storage.relation_limits,std::move(result));
+        attempt.result=std::move(result);
+        reachability_attempts.push_back(std::move(attempt));
+    }
+    auto portfolio=execute_prepared_hybrid_branches(storage.programs,storage.pipelines,
+        reachability_attempts,context);
+    if(storage.verifier) {
+        HybridPortfolioVerificationAttempt verification{
+            assemble_hybrid_portfolio_optimal_face_candidates(storage.programs,portfolio,
+                storage.objective_policy.numerical,context.cancellation),{}, {}};
+        verification.resources.requested=context.resources
+            ?std::optional<ResourcePolicy>{*context.resources}:std::nullopt;
+        verification.resources.disposition=verification.resources.requested
+            ?HybridVerifierResourceDisposition::not_invoked
+            :HybridVerifierResourceDisposition::not_requested;
+        if(auto* candidates=std::get_if<HybridPortfolioOptimalFaceCandidates>(
+               &verification.candidates)) {
+            if(const auto stop=interruption(context)) {
+                verification.verification=OperationStopped{
+                    *stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+                    "Hybrid family verification stopped before verifier execution"};
+            } else {
+                HybridVerifierInvocation invocation(context);
+                const auto verifier_started=std::chrono::steady_clock::now();
+                auto result=verify_hybrid_portfolio_family(*storage.verifier,storage.system,
+                    storage.request,storage.programs,candidates->branches,storage.enumeration_limits,
+                    invocation);
+                verification.resources.elapsed_wall_nanoseconds=elapsed_wall_nanoseconds(verifier_started);
+                if(const auto post_verification_stop=interruption(context))
+                    result=OperationStopped{*post_verification_stop==Termination::cancelled?StopReason::cancelled:
+                        StopReason::deadline_expired,
+                        "Hybrid family verification stopped before result publication"};
+                verification.verification=std::move(result);
+                verification.resources.observed_backend_threads=invocation.observed_backend_threads();
+                if(verification.resources.requested)
+                    verification.resources.disposition=HybridVerifierResourceDisposition::requested_but_unenforced;
+                else verification.resources.disposition=HybridVerifierResourceDisposition::not_requested;
+            }
+        }
+        portfolio.family_verification=std::move(verification);
+    }
     return portfolio;
 }
 

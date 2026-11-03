@@ -439,10 +439,11 @@ inline bool append_inequality(std::span<const double> coefficients,
     return true;
 }
 
+template<class Cancellation = std::stop_token>
 inline FeasibilityResult feasible(std::vector<Row> rows,
                                   std::size_t variables,
                                   Limits limits = {},
-                                  std::stop_token cancellation = {},
+                                  Cancellation cancellation = {},
                                   std::size_t retained_variables = 0,
                                   std::vector<Row>* projected_rows = nullptr) {
     if (projected_rows)
@@ -734,10 +735,11 @@ inline bool exact_rational_to_double(const ExactRational& value,
 // Project an exact H-relation onto the integer-scaled value of a binary64
 // linear objective. The objective scale is retained so values from paths with
 // different coefficient exponents can be compared without floating point.
+template<class Cancellation = std::stop_token>
 inline LinearMinimumResult minimize_linear(
     std::span<const Row> relation, std::size_t variables,
     std::span<const double> objective, double offset, Limits limits = {},
-    std::stop_token cancellation = {}) {
+    Cancellation cancellation = {}) {
     const auto unsupported = [](const char* reason) {
         LinearMinimumResult result;
         result.reason = reason;
@@ -859,11 +861,12 @@ inline LinearMinimumResult minimize_linear(
 // Prove source ⊆ target by checking whether source intersects the strict
 // complement of each target half-space. Equality rows must be represented by
 // both opposing non-strict inequalities, as produced by append_equality.
+template<class Cancellation = std::stop_token>
 inline InclusionResult included_in(std::span<const Row> source,
                                    std::span<const Row> target,
                                    std::size_t variables,
                                    Limits limits = {},
-                                   std::stop_token cancellation = {}) {
+                                   Cancellation cancellation = {}) {
     const auto unsupported = [](const char* reason) {
         return InclusionResult{InclusionState::unsupported, reason};
     };

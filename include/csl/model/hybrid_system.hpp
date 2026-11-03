@@ -7,6 +7,7 @@
 #include <csl/sets/contracts.hpp>
 #include <csl/sets/data.hpp>
 #include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <span>
 #include <string>
@@ -104,8 +105,14 @@ struct HybridRelationOperationRecord {
     std::string implementation_version;
     std::size_t joint_variables{};
     std::size_t rows_added{};
+    // Dense coefficient elements added by this operation.
+    std::size_t matrix_elements_added{};
     std::size_t cumulative_rows{};
     std::size_t cumulative_matrix_elements{};
+    // Wall time spent in the joint-H composer operation, excluding providers.
+    std::uint64_t elapsed_wall_nanoseconds{};
+    // False when this operation stopped or was refused after partial work.
+    bool completed{};
 };
 
 enum class HybridPlannedModeOperationKind {

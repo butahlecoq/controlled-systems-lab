@@ -304,7 +304,17 @@ registry::Registration<registry::GeometryPort> make_projection_registration(Proj
                 return error("projection.representation","Selected output requires native H or V input; cross H/V conversion is separate.");
             registry::Output output;output.representation={representation(options.output)};output.relation=SetRelation::equivalent;
             return registry::Offer{output};
-        },[options](const OperationRequest&) {return std::make_unique<ProjectionWorkspace>(options);}};
+        },[options](const OperationRequest&) {return std::make_unique<ProjectionWorkspace>(options);}, {},
+        [options](const registry::RequestEnvelope& envelope,const registry::Requirements&) {
+            if(envelope.operation!="geometry.h_projection" || options.output!=ProjectionOutput::h ||
+               !options.max_rows)
+                return registry::AdmissionDeclaration{registry::AdmissionStatus::unknown,{},false};
+            if(envelope.maximum_rows>*options.max_rows)
+                return registry::AdmissionDeclaration{registry::AdmissionStatus::unsupported,
+                    {{DiagnosticCode::unsupported,"projection.admission.rows",
+                      "Requested H-projection envelope exceeds the configured intermediate-row limit"}},false};
+            return registry::AdmissionDeclaration{registry::AdmissionStatus::supported,{},true};
+        }};
 }
 registry::Registration<registry::ConversionPort> make_projection_materializer(std::optional<std::size_t> limit) {
     return {{{"csl.geometry.projection-materializer"},"1.0.0"},

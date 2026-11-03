@@ -1,13 +1,56 @@
-#include <csl/synthesis/hybrid_path_program.hpp>
+#include <csl/synthesis/hybrid_admission.hpp>
 
 #include <iostream>
+#include <memory>
 #include <stdexcept>
+#include <utility>
 #include <variant>
 
 int main() {
     using namespace csl;
     using namespace csl::model;
     using namespace csl::synthesis;
+
+    const HybridPortfolioExecution legacy_aggregate{{},true};
+    if(!legacy_aggregate.all_supplied_branches_completed||!legacy_aggregate.reachability.empty()||
+       !legacy_aggregate.reachability_attempts.empty())
+        throw std::runtime_error("Hybrid execution aggregate source compatibility changed");
+
+    registry::Registry<registry::LPPort> admission_providers;
+    registry::Registration<registry::LPPort> admission_registration{
+        {{"installed-admission"},"1"},
+        [](const LinearProgram&,const registry::Requirements&)->registry::Capability {
+            return registry::Offer{};
+        },
+        [](const LinearProgram&){return std::unique_ptr<LPWorkspace>{};}, {},
+        [](const registry::RequestEnvelope& envelope,const registry::Requirements&) {
+            const auto status=envelope.operation=="hybrid.linear-optimization" &&
+                envelope.maximum_columns<=8?registry::AdmissionStatus::supported:
+                    registry::AdmissionStatus::unsupported;
+            return registry::AdmissionDeclaration{status,{},true};
+        }};
+    if (admission_providers.add(std::move(admission_registration)))
+        throw std::runtime_error("Installed provider registration with admission declaration failed");
+    auto prepared_admission=registry::prepare_provider(registry::select_provider(
+        admission_providers,{{"installed-admission"},{}}));
+    const auto* admission_provider=std::get_if<registry::PreparedProvider<registry::LPPort>>(
+        &prepared_admission);
+    if (admission_provider==nullptr || admission_provider->declare_support(
+            {"hybrid.linear-optimization",4,8,32,"linear"}).status!=registry::AdmissionStatus::supported)
+        throw std::runtime_error("Installed prepared provider did not expose conservative admission");
+
+    registry::Registry<registry::ConvexPort> convex_providers;
+    if (convex_providers.add({{{"installed-unused-convex"},"1"},
+            [](const ConvexProgram&,const registry::Requirements&)->registry::Capability {
+                return registry::Offer{};
+            },
+            [](const ConvexProgram&){return std::unique_ptr<ConvexWorkspace>{};}}))
+        throw std::runtime_error("Installed unused convex provider registration failed");
+    auto prepared_convex=registry::prepare_provider(registry::select_provider(
+        convex_providers,{{"installed-unused-convex"},{}}));
+    auto* convex_provider=std::get_if<registry::PreparedProvider<registry::ConvexPort>>(&prepared_convex);
+    if (convex_provider==nullptr)
+        throw std::runtime_error("Installed convex provider selection failed");
 
     auto inequalities = numeric::snapshot(Matrix{0, 4, {}});
     auto bounds = numeric::snapshot_vector(Vector{});
@@ -40,6 +83,43 @@ int main() {
     const HybridRequest request{{{"source"}, {-1, 0}}, {{"target"}},
         {{{"target"}, LinearTerminal{{1, 0}, 0}, "x", "m"}}};
     const HybridPath path{{{"source"}, {"target"}}, {{"switch"}}};
+    JointHDirectTrajectoryAdapter trajectory;
+    HybridExecutionSelection selection;
+    selection.trajectory=std::make_shared<JointHDirectTrajectoryAdapter>();
+    selection.lp=*admission_provider;
+    selection.convex=*convex_provider;
+    auto request_admission=admit_hybrid_request(system,request,selection,
+        {1,4},{32,128,4096},{},{});
+    auto* admission_token=std::get_if<HybridAdmissionToken>(&request_admission);
+    if(admission_token==nullptr||!admission_token->report().admitted||
+       admission_token->report().paths.size()!=1||admission_token->report().paths.front()!=path)
+        throw std::runtime_error("Installed request-wide admission did not retain the complete path inventory");
+    auto refined=refine_hybrid_request(std::move(*admission_token),{"installed-refinement"},{});
+    const auto* prepared_request=std::get_if<HybridPreparedExecution>(&refined);
+    if(prepared_request==nullptr||!prepared_request->report().admitted||
+       prepared_request->report().paths.size()!=1)
+        throw std::runtime_error("Installed transactional hybrid refinement did not prepare the path request");
+    HybridExecutionSelection reachability_selection;
+    reachability_selection.reachability=std::make_shared<JointHReachabilityAdapter>();
+    auto reachability_admission=admit_hybrid_request(system,request,reachability_selection,
+        {1,4},{32,128,4096},{},{});
+    auto* reachability_token=std::get_if<HybridAdmissionToken>(&reachability_admission);
+    if(reachability_token==nullptr)
+        throw std::runtime_error("Installed exact reachability request was not admitted");
+    auto reachability_refinement=refine_hybrid_request(std::move(*reachability_token),{},{});
+    auto* prepared_reachability=std::get_if<HybridPreparedExecution>(&reachability_refinement);
+    if(prepared_reachability==nullptr)
+        throw std::runtime_error("Installed exact reachability refinement failed");
+    const auto reachability_run=execute_hybrid_request(std::move(*prepared_reachability),{});
+    if(!reachability_run.branches.empty()||reachability_run.reachability.size()!=1||
+       reachability_run.reachability_attempts.size()!=1)
+        throw std::runtime_error("Installed coordinated execution did not retain exact reachability");
+    const auto admitted_portfolio=build_hybrid_portfolio_programs(trajectory,system,request,
+        {"installed-admitted-hybrid"},{1,4},{32,128,4096},*admission_provider,*convex_provider);
+    const auto* admitted=std::get_if<std::vector<HybridPathProgram>>(&admitted_portfolio);
+    if (admitted==nullptr || admitted->size()!=1 || admitted->front().path!=path)
+        throw std::runtime_error("Installed provider-aware hybrid admission did not build its admitted path");
+
     const auto result = build_hybrid_path_program(system, request, path,
         {"installed-hybrid-2d"}, {32, 128, 4096});
     const auto* program = std::get_if<HybridPathProgram>(&result);

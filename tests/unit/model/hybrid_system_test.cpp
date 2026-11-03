@@ -669,7 +669,9 @@ TEST_CASE("hybrid composition report records mode and transition operations with
         CHECK(operation.implementation_id=="csl.model.hybrid.joint-h-composer");
         CHECK(operation.implementation_version=="1");
         CHECK(operation.joint_variables==5);
+        CHECK(operation.matrix_elements_added==operation.rows_added*5);
         CHECK(operation.cumulative_matrix_elements==operation.cumulative_rows*5);
+        CHECK(operation.completed);
     }
     CHECK(report.operations.back().cumulative_rows==2);
     CHECK(report.operations.back().cumulative_matrix_elements==10);
@@ -681,8 +683,11 @@ TEST_CASE("hybrid composition report records mode and transition operations with
     const auto* limit_diagnostic=std::get_if<Diagnostic>(&limit_report.failure);
     REQUIRE(limit_diagnostic);
     CHECK(limit_diagnostic->field=="hybrid.relation.rows");
-    REQUIRE(limit_report.operations.size()==2);
+    REQUIRE(limit_report.operations.size()==3);
+    CHECK(limit_report.operations.back().operation==HybridRelationOperationKind::mode_flow);
     CHECK(limit_report.operations.back().cumulative_rows==1);
+    CHECK(limit_report.operations.back().matrix_elements_added==0);
+    CHECK_FALSE(limit_report.operations.back().completed);
     std::stop_source cancellation;
     cancellation.request_stop();
     const auto stopped=compose_hybrid_path_relation_with_report(
@@ -714,6 +719,28 @@ TEST_CASE("hybrid joint relation rejects V sets during capability preflight") {
     REQUIRE(std::holds_alternative<Diagnostic>(result));
     CHECK(std::get<Diagnostic>(result).code==DiagnosticCode::unsupported);
     CHECK(std::get<Diagnostic>(result).field=="hybrid.guard.representation");
+}
+
+TEST_CASE("hybrid joint relation reports V reset refusal before relation construction") {
+    auto [system,request]=dimension_changing_example();
+    system.edges[0].reset_relations[0]=vertex_set("v-reset",3);
+    const HybridPath path{{{"source"},{"target"}},{{"switch"}}};
+    const auto result=compose_hybrid_path_relation_with_report(system,request,path,{16,64,1024});
+    REQUIRE(std::holds_alternative<HybridPathCompositionFailureReport>(result));
+    const auto& report=std::get<HybridPathCompositionFailureReport>(result);
+    const auto* diagnostic=std::get_if<Diagnostic>(&report.failure);
+    REQUIRE(diagnostic);
+    CHECK(diagnostic->code==DiagnosticCode::unsupported);
+    CHECK(diagnostic->field=="hybrid.reset.representation");
+    CHECK(report.operations.empty());
+    const std::array<HybridPath,1> paths{path};
+    const auto preflight=preflight_hybrid_path_relations(system,request,paths,{16,64,1024});
+    REQUIRE(std::holds_alternative<HybridPathCompositionFailureReport>(preflight));
+    const auto& preflight_report=std::get<HybridPathCompositionFailureReport>(preflight);
+    const auto* preflight_diagnostic=std::get_if<Diagnostic>(&preflight_report.failure);
+    REQUIRE(preflight_diagnostic);
+    CHECK(preflight_diagnostic->field=="hybrid.reset.representation");
+    CHECK(preflight_diagnostic->explanation.find("stage 0 edge switch")!=std::string::npos);
 }
 
 TEST_CASE("hybrid relation IDs distinguish colon-delimited edge-ID sequences") {

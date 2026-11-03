@@ -32,6 +32,29 @@ struct Requirements {
     Output output;
     bool basis_diagnostics{false};
 };
+// A conservative, immutable shape description for admission before a concrete
+// request exists. It is advisory unless a registration declares that its
+// supported result is sound for every request matching this envelope.
+struct RequestEnvelope {
+    std::string operation;
+    // Inclusive upper bounds. Zero means the matching request has exactly
+    // zero rows, columns, or stored elements; it is not an unspecified value.
+    std::size_t maximum_rows{};
+    std::size_t maximum_columns{};
+    std::size_t maximum_elements{};
+    std::string objective;
+    // Lower bound on the absolute value of every nonzero coefficient in
+    // matrices sent to the provider. Absent means unknown.
+    std::optional<double> minimum_nonzero_matrix_coefficient_magnitude{};
+};
+enum class AdmissionStatus { supported, unsupported, unknown, conditional };
+struct AdmissionDeclaration {
+    AdmissionStatus status{AdmissionStatus::unknown};
+    Diagnostics diagnostics;
+    // True only when supported covers every concrete request conforming to
+    // the envelope. Concrete prepare() remains mandatory in all cases.
+    bool envelope_is_sufficient{};
+};
 struct Offer { Output output; };
 using Capability = std::variant<Offer, Diagnostics>;
 struct Transition { std::size_t producer; Output required; };
@@ -95,6 +118,7 @@ template<class Port> struct Registration {
     // The diagnostic may borrow this particular workspace; BoundWorkspace destroys
     // diagnostics before the mathematical workspace. No cross-creation state is shared.
     std::function<std::unique_ptr<BasisDiagnostics>(const typename Port::Request&, typename Port::Workspace&)> basis_factory{};
+    std::function<AdmissionDeclaration(const RequestEnvelope&, const Requirements&)> admission_declaration{};
 };
 namespace detail {
 struct PipelineAccess;
