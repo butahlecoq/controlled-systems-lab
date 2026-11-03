@@ -564,10 +564,13 @@ HybridProviderAdmissionResult preflight_hybrid_program_providers(
     if(paths.empty())
         return one({DiagnosticCode::invalid_input,"hybrid.provider.paths",
             "Provider admission requires a complete, nonempty hybrid path inventory"});
+    const auto planned_operations=model::plan_hybrid_operations(paths);
+    if(const auto* error=std::get_if<Diagnostic>(&planned_operations)) return one(*error);
     const auto profile_errors=model::check_hybrid_profile(system,request);
     if(!profile_errors.empty()) return profile_errors;
     HybridProviderAdmissionReport report;
     report.paths.assign(paths.begin(),paths.end());
+    report.relation_operations=std::get<std::vector<model::HybridPlannedOperation>>(planned_operations);
     report.attempts.reserve(paths.size());
     for(const auto& path:paths) {
         if(cancellation.stop_requested())

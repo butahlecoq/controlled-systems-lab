@@ -31,6 +31,7 @@ struct HybridProviderAdmissionAttempt {
 };
 struct HybridProviderAdmissionReport {
     std::vector<model::HybridPath> paths;
+    std::vector<model::HybridPlannedOperation> relation_operations;
     std::vector<HybridProviderAdmissionAttempt> attempts;
     Diagnostics diagnostics;
     bool admitted{};

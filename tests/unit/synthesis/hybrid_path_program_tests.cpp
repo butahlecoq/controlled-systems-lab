@@ -1513,6 +1513,10 @@ TEST_CASE("hybrid portfolio rejects unknown provider envelopes before adapter pa
     const auto& report=std::get<HybridProviderAdmissionReport>(report_result);
     CHECK_FALSE(report.admitted);
     CHECK(report.paths==paths);
+    const auto planned=model::plan_hybrid_operations(paths);
+    REQUIRE(std::holds_alternative<std::vector<model::HybridPlannedOperation>>(planned));
+    CHECK(report.relation_operations==
+        std::get<std::vector<model::HybridPlannedOperation>>(planned));
     REQUIRE(report.attempts.size()==2);
     CHECK(report.diagnostics.size()==2);
     CHECK(*calls==2);
