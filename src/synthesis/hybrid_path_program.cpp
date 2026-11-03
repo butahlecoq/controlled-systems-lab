@@ -323,10 +323,15 @@ public:
             std::move(system),std::move(request),std::move(selection),enumeration_limits,
             relation_limits,objective_policy,std::move(report)})};
     }
+    static const HybridAdmissionToken::Storage& storage(const HybridAdmissionToken& token) {
+        return *token.storage_;
+    }
 };
 
 HybridAdmissionToken::HybridAdmissionToken(std::unique_ptr<const Storage> storage)
     :storage_(std::move(storage)) {}
+HybridAdmissionToken::HybridAdmissionToken(HybridAdmissionToken&&) noexcept=default;
+HybridAdmissionToken& HybridAdmissionToken::operator=(HybridAdmissionToken&&) noexcept=default;
 HybridAdmissionToken::~HybridAdmissionToken()=default;
 const HybridAdmissionReport& HybridAdmissionToken::report() const noexcept {
     return storage_->report;
@@ -1593,13 +1598,85 @@ HybridFamilyVerificationResult verify_hybrid_portfolio_family(
     return report;
 }
 
+namespace {
+using HybridPreparedPipeline=std::variant<
+    registry::PreparedPipeline<registry::LPPort>,
+    registry::PreparedPipeline<registry::ConvexPort>>;
+
+HybridPortfolioExecution execute_prepared_hybrid_branches(
+    std::span<const HybridPathProgram> programs,
+    std::span<const HybridPreparedPipeline> pipelines,
+    const ExecutionContext& context) {
+    HybridPortfolioExecution portfolio;
+    portfolio.branches.reserve(programs.size());
+    bool complete=true;
+    bool stopped=false;
+    for(std::size_t i=0;i<programs.size();++i) {
+        const auto& branch=programs[i];
+        HybridBranchExecution execution;
+        execution.path=branch.path;
+        if(context.resources) execution.requested_resources=*context.resources;
+        if(stopped) {
+            execution.termination=context.cancellation.stop_requested()?Termination::cancelled:Termination::resource_limit;
+            execution.diagnostics={{DiagnosticCode::unsupported,"hybrid.execution.not_started",
+                "No workspace was created because an earlier branch stopped the coordinated request"}};
+            complete=false;
+            portfolio.branches.push_back(std::move(execution));
+            continue;
+        }
+        if(const auto stop=interruption(context)) {
+            execution.termination=*stop;
+            execution.diagnostics={{DiagnosticCode::unsupported,"hybrid.execution.stopped",
+                "Branch execution stopped before workspace creation"}};
+            stopped=true;
+            complete=false;
+            portfolio.branches.push_back(std::move(execution));
+            continue;
+        }
+        const auto run=[&]<class Program,class Port>(const Program& program,
+            const registry::PreparedPipeline<Port>& pipeline) {
+            const auto provenance=pipeline.provenance();
+            execution.providers.assign(provenance.begin(),provenance.end());
+            auto workspaces=pipeline.create();
+            auto outcome=std::get<0>(workspaces)->run(context);
+            if(const auto* unsupported=std::get_if<Unsupported>(&outcome)) {
+                execution.termination=Termination::operation_rejected;
+                execution.diagnostics=unsupported->diagnostics;
+                complete=false;
+                return;
+            }
+            auto result=std::get<ProgramResult>(std::move(outcome));
+            auto diagnostics=optimization::check_program_result(result,program,Assurance::numerical);
+            if(!diagnostics.empty()) {
+                execution.termination=Termination::contract_rejected;
+                execution.diagnostics=std::move(diagnostics);
+                complete=false;
+                return;
+            }
+            execution.termination=result.termination;
+            execution.outcome=result.outcome.value;
+            if(result.termination!=Termination::completed) complete=false;
+            execution.result=std::move(result);
+        };
+        if(const auto* linear=std::get_if<LinearProgram>(&branch.program))
+            run(*linear,std::get<registry::PreparedPipeline<registry::LPPort>>(pipelines[i]));
+        else run(std::get<ConvexProgram>(branch.program),
+            std::get<registry::PreparedPipeline<registry::ConvexPort>>(pipelines[i]));
+        if(execution.termination==Termination::cancelled||execution.termination==Termination::resource_limit)
+            stopped=true;
+        portfolio.branches.push_back(std::move(execution));
+    }
+    portfolio.all_supplied_branches_completed=complete;
+    return portfolio;
+}
+}
+
 HybridPortfolioExecution execute_hybrid_path_programs(
     std::span<const HybridPathProgram> programs,
     const registry::PreparedProvider<registry::LPPort>& lp,
     const registry::PreparedProvider<registry::ConvexPort>& convex,
     const ExecutionContext& context) {
-    using PreparedBranch = std::variant<registry::PreparedPipeline<registry::LPPort>,
-        registry::PreparedPipeline<registry::ConvexPort>>;
+    using PreparedBranch=HybridPreparedPipeline;
     HybridPortfolioExecution portfolio;
     portfolio.branches.reserve(programs.size());
     std::vector<std::optional<PreparedBranch>> prepared_branches;
@@ -1663,45 +1740,108 @@ HybridPortfolioExecution execute_hybrid_path_programs(
         return portfolio;
     }
 
-    bool complete=true;
-    for(std::size_t i=0;i<programs.size();++i) {
-        const auto& branch=programs[i];
-        auto& execution=portfolio.branches[i];
-        auto run=[&]<class Program,class Port>(const Program& program,
-            registry::PreparedPipeline<Port>& pipeline) {
-            if(const auto stop=interruption(context)) {
-                execution.termination=*stop;
-                complete=false;
-                return;
-            }
-            auto workspaces=pipeline.create();
-            auto outcome=std::get<0>(workspaces)->run(context);
-            if(const auto* unsupported=std::get_if<Unsupported>(&outcome)) {
-                execution.termination=Termination::operation_rejected;
-                execution.diagnostics=unsupported->diagnostics;
-                complete=false;
-                return;
-            }
-            auto result=std::get<ProgramResult>(std::move(outcome));
-            auto diagnostics=optimization::check_program_result(result,program,Assurance::numerical);
-            if(!diagnostics.empty()) {
-                execution.termination=Termination::contract_rejected;
-                execution.diagnostics=std::move(diagnostics);
-                complete=false;
-                return;
-            }
-            execution.termination=result.termination;
-            execution.outcome=result.outcome.value;
-            if(result.termination!=Termination::completed) complete=false;
-            execution.result=std::move(result);
-        };
-        if(const auto* linear=std::get_if<LinearProgram>(&branch.program))
-            run(*linear,std::get<registry::PreparedPipeline<registry::LPPort>>(*prepared_branches[i]));
-        else run(std::get<ConvexProgram>(branch.program),
-            std::get<registry::PreparedPipeline<registry::ConvexPort>>(*prepared_branches[i]));
+    std::vector<HybridPreparedPipeline> ready;
+    ready.reserve(prepared_branches.size());
+    for(auto& branch:prepared_branches) ready.push_back(std::move(*branch));
+    return execute_prepared_hybrid_branches(programs,ready,context);
+}
+
+struct HybridPreparedExecution::Storage {
+    std::vector<HybridPathProgram> programs;
+    std::vector<HybridPreparedPipeline> pipelines;
+    HybridAdmissionReport report;
+};
+
+class HybridPreparedAccess {
+public:
+    static HybridPreparedExecution create(std::vector<HybridPathProgram> programs,
+        std::vector<HybridPreparedPipeline> pipelines,
+        HybridAdmissionReport report) {
+        using Storage=HybridPreparedExecution::Storage;
+        return HybridPreparedExecution{std::make_unique<const Storage>(Storage{
+            std::move(programs),std::move(pipelines),std::move(report)})};
     }
-    portfolio.all_supplied_branches_completed=complete;
-    return portfolio;
+    static const HybridPreparedExecution::Storage& storage(const HybridPreparedExecution& prepared) {
+        return *prepared.storage_;
+    }
+};
+
+HybridPreparedExecution::HybridPreparedExecution(std::unique_ptr<const Storage> storage)
+    :storage_(std::move(storage)) {}
+HybridPreparedExecution::HybridPreparedExecution(HybridPreparedExecution&&) noexcept=default;
+HybridPreparedExecution& HybridPreparedExecution::operator=(HybridPreparedExecution&&) noexcept=default;
+HybridPreparedExecution::~HybridPreparedExecution()=default;
+const HybridAdmissionReport& HybridPreparedExecution::report() const noexcept {
+    return storage_->report;
+}
+
+HybridRefinementResult refine_hybrid_request(HybridAdmissionToken token,
+    ProblemId problem,const ExecutionContext& context) {
+    const auto& admission=HybridAdmissionAccess::storage(token);
+    const auto refuse=[&](std::string field,std::string explanation) -> HybridRefinementResult {
+        return HybridConcreteRefinementRejected{admission.report,
+            {{DiagnosticCode::unsupported,std::move(field),std::move(explanation)}}};
+    };
+    if(problem.value.empty())
+        return refuse("hybrid.refinement.problem","Problem identity must be nonempty");
+    if(!admission.report.admitted)
+        return refuse("hybrid.refinement.admission","Only a fully admitted request can be refined");
+    if(!admission.selection.trajectory||!admission.selection.lp||!admission.selection.convex)
+        return refuse("hybrid.refinement.trajectory","Concrete refinement requires a selected trajectory and LP/convex providers");
+    if(admission.selection.reachability||admission.selection.verifier)
+        return refuse("hybrid.refinement.selection",
+            "Transactional refinement currently supports trajectory-only selections; reachability and verifier preparation are not yet connected");
+
+    std::vector<HybridPathProgram> programs;
+    programs.reserve(admission.report.paths.size());
+    for(const auto& path:admission.report.paths) {
+        if(const auto stop=interruption(context))
+            return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+                "Hybrid refinement stopped between path programs; no workspace was created"};
+        auto built=build_hybrid_path_program(*admission.selection.trajectory,admission.system,
+            admission.request,path,problem,admission.relation_limits,admission.objective_policy,
+            context.cancellation);
+        if(const auto* stopped=std::get_if<OperationStopped>(&built)) return *stopped;
+        if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&built)) {
+            if(const auto* stopped=std::get_if<OperationStopped>(&failure->failure)) return *stopped;
+            return HybridConcreteRefinementRejected{admission.report,
+                {std::get<Diagnostic>(failure->failure)}};
+        }
+        if(const auto* errors=std::get_if<Diagnostics>(&built))
+            return HybridConcreteRefinementRejected{admission.report,*errors};
+        programs.push_back(std::get<HybridPathProgram>(std::move(built)));
+    }
+
+    std::vector<HybridPreparedPipeline> pipelines;
+    pipelines.reserve(programs.size());
+    for(auto& program_result:programs) {
+        if(const auto stop=interruption(context))
+            return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+                "Concrete hybrid provider preparation stopped before workspace creation"};
+        std::optional<HybridPreparedPipeline> pipeline;
+        if(const auto* linear=std::get_if<LinearProgram>(&program_result.program)) {
+            auto prepared=admission.selection.lp->prepare(*linear);
+            if(const auto* rejected=std::get_if<registry::Rejection>(&prepared))
+                return HybridConcreteRefinementRejected{admission.report,rejected->diagnostics};
+            pipeline.emplace(std::get<registry::PreparedPipeline<registry::LPPort>>(std::move(prepared)));
+        } else {
+            auto prepared=admission.selection.convex->prepare(std::get<ConvexProgram>(program_result.program));
+            if(const auto* rejected=std::get_if<registry::Rejection>(&prepared))
+                return HybridConcreteRefinementRejected{admission.report,rejected->diagnostics};
+            pipeline.emplace(std::get<registry::PreparedPipeline<registry::ConvexPort>>(std::move(prepared)));
+        }
+        pipelines.push_back(std::move(*pipeline));
+    }
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+            "Hybrid refinement stopped before publishing prepared providers; no workspace was created"};
+    return HybridPreparedAccess::create(std::move(programs),std::move(pipelines),admission.report);
+}
+
+HybridPortfolioExecution execute_hybrid_request(HybridPreparedExecution prepared,
+    const ExecutionContext& context) {
+    const auto& storage=HybridPreparedAccess::storage(prepared);
+    return execute_prepared_hybrid_branches(storage.programs,storage.pipelines,context);
 }
 
 } // namespace csl::synthesis

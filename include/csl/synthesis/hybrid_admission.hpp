@@ -76,8 +76,8 @@ class HybridAdmissionToken {
 public:
     HybridAdmissionToken(const HybridAdmissionToken&) = delete;
     HybridAdmissionToken& operator=(const HybridAdmissionToken&) = delete;
-    HybridAdmissionToken(HybridAdmissionToken&&) noexcept = default;
-    HybridAdmissionToken& operator=(HybridAdmissionToken&&) noexcept = default;
+    HybridAdmissionToken(HybridAdmissionToken&&) noexcept;
+    HybridAdmissionToken& operator=(HybridAdmissionToken&&) noexcept;
     ~HybridAdmissionToken();
 
     const HybridAdmissionReport& report() const noexcept;
@@ -92,5 +92,40 @@ HybridAdmissionResult admit_hybrid_request(const model::HybridSystem&,
     const model::HybridRequest&, const HybridExecutionSelection&,
     model::HybridEnumerationLimits, model::HybridRelationLimits,
     optimization::ObjectivePolicy, const ExecutionContext&);
+
+struct HybridConcreteRefinementRejected {
+    HybridAdmissionReport admission;
+    Diagnostics diagnostics;
+};
+
+class HybridPreparedExecution {
+    struct Storage;
+    std::unique_ptr<const Storage> storage_;
+    explicit HybridPreparedExecution(std::unique_ptr<const Storage> storage);
+    friend class HybridPreparedAccess;
+public:
+    HybridPreparedExecution(const HybridPreparedExecution&) = delete;
+    HybridPreparedExecution& operator=(const HybridPreparedExecution&) = delete;
+    HybridPreparedExecution(HybridPreparedExecution&&) noexcept;
+    HybridPreparedExecution& operator=(HybridPreparedExecution&&) noexcept;
+    ~HybridPreparedExecution();
+
+    const HybridAdmissionReport& report() const noexcept;
+};
+
+using HybridRefinementResult = std::variant<HybridPreparedExecution,
+    HybridConcreteRefinementRejected, OperationStopped>;
+
+// Transactionally builds each selected trajectory branch and calls concrete
+// LP/convex prepare for every generated program. This first executor supports
+// trajectory-only selections; reachability and verifier selections fail closed
+// until their concrete preparation stages join the same transaction.
+HybridRefinementResult refine_hybrid_request(HybridAdmissionToken,
+    ProblemId, const ExecutionContext&);
+
+// Creates workspaces only after refinement prepared every branch successfully.
+// The prepared request is consumed and cannot be executed twice.
+HybridPortfolioExecution execute_hybrid_request(HybridPreparedExecution,
+    const ExecutionContext&);
 
 } // namespace csl::synthesis

@@ -83,12 +83,17 @@ int main() {
     selection.trajectory=std::make_shared<JointHDirectTrajectoryAdapter>();
     selection.lp=*admission_provider;
     selection.convex=*convex_provider;
-    const auto request_admission=admit_hybrid_request(system,request,selection,
+    auto request_admission=admit_hybrid_request(system,request,selection,
         {1,4},{32,128,4096},{},{});
-    const auto* admission_token=std::get_if<HybridAdmissionToken>(&request_admission);
+    auto* admission_token=std::get_if<HybridAdmissionToken>(&request_admission);
     if(admission_token==nullptr||!admission_token->report().admitted||
        admission_token->report().paths.size()!=1||admission_token->report().paths.front()!=path)
         throw std::runtime_error("Installed request-wide admission did not retain the complete path inventory");
+    auto refined=refine_hybrid_request(std::move(*admission_token),{"installed-refinement"},{});
+    const auto* prepared_request=std::get_if<HybridPreparedExecution>(&refined);
+    if(prepared_request==nullptr||!prepared_request->report().admitted||
+       prepared_request->report().paths.size()!=1)
+        throw std::runtime_error("Installed transactional hybrid refinement did not prepare the path request");
     const auto admitted_portfolio=build_hybrid_portfolio_programs(trajectory,system,request,
         {"installed-admitted-hybrid"},{1,4},{32,128,4096},*admission_provider,*convex_provider);
     const auto* admitted=std::get_if<std::vector<HybridPathProgram>>(&admitted_portfolio);

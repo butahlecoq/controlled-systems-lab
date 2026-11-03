@@ -1629,6 +1629,71 @@ TEST_CASE("hybrid request admission records selected operations before relation 
     CHECK(*rejected_factories==0);
 }
 
+TEST_CASE("hybrid refinement prepares every trajectory branch before workspace creation") {
+    auto [system,request]=variable_size_parallel_profile();
+    const auto make_selection=[&](registry::PreparedProvider<registry::LPPort> lp,
+        std::shared_ptr<int> convex_declarations,std::shared_ptr<int> factories) {
+        HybridExecutionSelection selection;
+        selection.trajectory=std::make_shared<JointHDirectTrajectoryAdapter>();
+        selection.lp=std::move(lp);
+        selection.convex=declared_convex_provider(registry::AdmissionStatus::supported,true,
+            std::move(convex_declarations),std::move(factories));
+        return selection;
+    };
+
+    auto declarations=std::make_shared<int>(0);
+    auto factories=std::make_shared<int>(0);
+    auto lp=declared_lp_provider(registry::AdmissionStatus::supported,true,declarations,factories);
+    auto selection=make_selection(lp,std::make_shared<int>(0),factories);
+    auto admitted=admit_hybrid_request(system,request,selection,{1,8},{16,64,1024},{},{});
+    REQUIRE(std::holds_alternative<HybridAdmissionToken>(admitted));
+    auto refined=refine_hybrid_request(std::move(std::get<HybridAdmissionToken>(admitted)),
+        {"coordinated-refinement"},{});
+    REQUIRE(std::holds_alternative<HybridPreparedExecution>(refined));
+    auto& prepared=std::get<HybridPreparedExecution>(refined);
+    CHECK(prepared.report().admitted);
+    CHECK(prepared.report().paths.size()==2);
+    CHECK(*factories==0);
+
+    const auto execution=execute_hybrid_request(std::move(prepared),{});
+    CHECK(execution.branches.size()==2);
+    CHECK_FALSE(execution.all_supplied_branches_completed);
+    CHECK(*factories==2);
+
+    auto concrete_calls=std::make_shared<int>(0);
+    auto rejected_factories=std::make_shared<int>(0);
+    registry::Registry<registry::LPPort> late_rejection_registry;
+    REQUIRE_FALSE(late_rejection_registry.add({{{"late-reject-lp"},"1"},
+        [concrete_calls](const LinearProgram&,const registry::Requirements&)->registry::Capability {
+            ++*concrete_calls;
+            if(*concrete_calls==2)
+                return Diagnostics{{DiagnosticCode::unsupported,"fixture.late_concrete_rejection",
+                    "the second concrete branch is outside this provider's domain"}};
+            return registry::Offer{};
+        },
+        [rejected_factories](const LinearProgram&) {
+            ++*rejected_factories;
+            return std::make_unique<RejectingLP>();
+        },{},
+        [](const registry::RequestEnvelope&,const registry::Requirements&) {
+            return registry::AdmissionDeclaration{registry::AdmissionStatus::supported,{},true};
+        }}));
+    auto late_lp=registry::prepare_provider(registry::select_provider(
+        late_rejection_registry,{{"late-reject-lp"},{}}));
+    REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::LPPort>>(late_lp));
+    auto late_selection=make_selection(
+        std::get<registry::PreparedProvider<registry::LPPort>>(std::move(late_lp)),
+        std::make_shared<int>(0),rejected_factories);
+    auto late_admission=admit_hybrid_request(system,request,late_selection,
+        {1,8},{16,64,1024}, {}, {});
+    REQUIRE(std::holds_alternative<HybridAdmissionToken>(late_admission));
+    auto late_refinement=refine_hybrid_request(
+        std::move(std::get<HybridAdmissionToken>(late_admission)),{"late-refinement"},{});
+    REQUIRE(std::holds_alternative<HybridConcreteRefinementRejected>(late_refinement));
+    CHECK(*concrete_calls==2);
+    CHECK(*rejected_factories==0);
+}
+
 TEST_CASE("hybrid portfolio rejects unknown provider envelopes before adapter path builds") {
     auto [system,request]=variable_size_parallel_profile();
     const auto enumerated=model::enumerate_hybrid_paths(system,request.initial.mode,
