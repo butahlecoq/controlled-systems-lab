@@ -19,11 +19,21 @@
 namespace csl::model {
 
 HybridOperationThreadCpuTimer::HybridOperationThreadCpuTimer(
-    HybridOperationThreadCpuReader reader) noexcept
-    :reader_(std::move(reader)) {
-    if(!reader_) return;
+    HybridOperationThreadCpuReader reader)
+    :reader_(std::move(reader)),reader_source_(&reader_) {
+    start();
+}
+
+HybridOperationThreadCpuTimer::HybridOperationThreadCpuTimer(
+    std::reference_wrapper<const HybridOperationThreadCpuReader> reader) noexcept
+    :reader_source_(&reader.get()) {
+    start();
+}
+
+void HybridOperationThreadCpuTimer::start() noexcept {
+    if(!reader_source_) return;
     try {
-        if(reader_) started_=reader_();
+        if(*reader_source_) started_=(*reader_source_)();
         else started_=HybridOperationThreadCpuReadUnavailable{
             HybridOperationThreadCpuReadUnavailable::Reason::read_failed};
     } catch(...) {
@@ -37,7 +47,8 @@ HybridOperationThreadCpuObservation HybridOperationThreadCpuTimer::finish() noex
     using ResultReason=HybridOperationThreadCpuUnavailable::Reason;
     if(finished_) return HybridOperationThreadCpuUnavailable{ResultReason::read_failed};
     finished_=true;
-    if(!reader_) return HybridOperationThreadCpuUnavailable{ResultReason::not_requested};
+    if(!reader_source_ || !*reader_source_)
+        return HybridOperationThreadCpuUnavailable{ResultReason::not_requested};
     const auto unavailable=[](ReadReason reason) {
         return HybridOperationThreadCpuObservation{HybridOperationThreadCpuUnavailable{
             reason==ReadReason::unsupported_platform?ResultReason::unsupported_platform:ResultReason::read_failed}};
@@ -46,7 +57,7 @@ HybridOperationThreadCpuObservation HybridOperationThreadCpuTimer::finish() noex
         return unavailable(failed->reason);
     HybridOperationThreadCpuReading ended;
     try {
-        ended=reader_();
+        ended=(*reader_source_)();
     } catch(...) {
         return HybridOperationThreadCpuUnavailable{ResultReason::read_failed};
     }
@@ -840,7 +851,8 @@ HybridRelationResult compose_hybrid_path_relation_impl(const HybridSystem& syste
     };
     auto rows_before=row_count();
     const HybridOperationThreadCpuReader empty_thread_cpu_reader{};
-    HybridOperationThreadCpuTimer thread_cpu_timer{thread_cpu_reader?*thread_cpu_reader:empty_thread_cpu_reader};
+    HybridOperationThreadCpuTimer thread_cpu_timer{
+        std::cref(thread_cpu_reader?*thread_cpu_reader:empty_thread_cpu_reader)};
     auto operation_started=operations?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
     auto initial_error=add_set(Singleton{request.initial.state},layout.post_states[0].offset,modes[0]->state_dimension);
     record_operation(HybridRelationOperationKind::initial_state,0,modes[0]->id,{},rows_before,
@@ -849,7 +861,8 @@ HybridRelationResult compose_hybrid_path_relation_impl(const HybridSystem& syste
     for(std::size_t t=0;t<=system.horizon;++t) {
         if(cancellation.stop_requested()) return stopped();
         rows_before=row_count();
-        HybridOperationThreadCpuTimer post_invariant_cpu_timer{thread_cpu_reader?*thread_cpu_reader:empty_thread_cpu_reader};
+        HybridOperationThreadCpuTimer post_invariant_cpu_timer{
+            std::cref(thread_cpu_reader?*thread_cpu_reader:empty_thread_cpu_reader)};
         operation_started=operations?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
         auto post_invariant_error=add_set(modes[t]->invariants[t],layout.post_states[t].offset,modes[t]->state_dimension);
         record_operation(HybridRelationOperationKind::post_state_invariant,t,modes[t]->id,{},rows_before,
@@ -860,7 +873,8 @@ HybridRelationResult compose_hybrid_path_relation_impl(const HybridSystem& syste
         const auto& mode=*modes[t];
         const auto& flow=std::holds_alternative<LinearStage>(mode.flow)?std::get<LinearStage>(mode.flow):std::get<std::vector<LinearStage>>(mode.flow)[t];
         rows_before=row_count();
-        HybridOperationThreadCpuTimer flow_cpu_timer{thread_cpu_reader?*thread_cpu_reader:empty_thread_cpu_reader};
+        HybridOperationThreadCpuTimer flow_cpu_timer{
+            std::cref(thread_cpu_reader?*thread_cpu_reader:empty_thread_cpu_reader)};
         operation_started=operations?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
         const bool flow_completed=add_linear(flow,layout.post_states[t].offset,transitions[t].control.offset,
             transitions[t].pre_state.offset);
@@ -871,7 +885,8 @@ HybridRelationResult compose_hybrid_path_relation_impl(const HybridSystem& syste
             return Diagnostic{DiagnosticCode::unsupported,"hybrid.relation.rows","Joint relation exceeds its row limit"};
         }
         rows_before=row_count();
-        HybridOperationThreadCpuTimer control_cpu_timer{thread_cpu_reader?*thread_cpu_reader:empty_thread_cpu_reader};
+        HybridOperationThreadCpuTimer control_cpu_timer{
+            std::cref(thread_cpu_reader?*thread_cpu_reader:empty_thread_cpu_reader)};
         operation_started=operations?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
         auto control_error=add_set(mode.control_sets[t],transitions[t].control.offset,mode.control_dimension);
         record_operation(HybridRelationOperationKind::continuous_control,t,mode.id,{},rows_before,
@@ -879,7 +894,8 @@ HybridRelationResult compose_hybrid_path_relation_impl(const HybridSystem& syste
         if(control_error)
             return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*control_error};
         rows_before=row_count();
-        HybridOperationThreadCpuTimer pre_invariant_cpu_timer{thread_cpu_reader?*thread_cpu_reader:empty_thread_cpu_reader};
+        HybridOperationThreadCpuTimer pre_invariant_cpu_timer{
+            std::cref(thread_cpu_reader?*thread_cpu_reader:empty_thread_cpu_reader)};
         operation_started=operations?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
         auto pre_invariant_error=add_set(mode.invariants[t+1],transitions[t].pre_state.offset,mode.state_dimension);
         record_operation(HybridRelationOperationKind::pre_reset_invariant,t+1,mode.id,{},rows_before,
@@ -887,7 +903,8 @@ HybridRelationResult compose_hybrid_path_relation_impl(const HybridSystem& syste
         if(pre_invariant_error)
             return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*pre_invariant_error};
         rows_before=row_count();
-        HybridOperationThreadCpuTimer guard_cpu_timer{thread_cpu_reader?*thread_cpu_reader:empty_thread_cpu_reader};
+        HybridOperationThreadCpuTimer guard_cpu_timer{
+            std::cref(thread_cpu_reader?*thread_cpu_reader:empty_thread_cpu_reader)};
         operation_started=operations?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
         auto guard_error=add_set(transitions[t].edge->guards[t],transitions[t].pre_state.offset,mode.state_dimension);
         record_operation(HybridRelationOperationKind::transition_guard,t,{},transitions[t].edge->id,
@@ -895,7 +912,8 @@ HybridRelationResult compose_hybrid_path_relation_impl(const HybridSystem& syste
         if(guard_error)
             return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*guard_error};
         rows_before=row_count();
-        HybridOperationThreadCpuTimer reset_cpu_timer{thread_cpu_reader?*thread_cpu_reader:empty_thread_cpu_reader};
+        HybridOperationThreadCpuTimer reset_cpu_timer{
+            std::cref(thread_cpu_reader?*thread_cpu_reader:empty_thread_cpu_reader)};
         operation_started=operations?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
         auto reset_error=add_reset(transitions[t].edge->reset_relations[t],transitions[t].pre_state.offset,
             layout.post_states[t+1].offset,mode.state_dimension,modes[t+1]->state_dimension);

@@ -783,6 +783,32 @@ TEST_CASE("hybrid operation CPU timer owns a temporary reader") {
     CHECK(std::get<HybridOperationThreadCpuDuration>(observation).nanoseconds==25);
 }
 
+TEST_CASE("hybrid relation instrumentation does not copy its reader per operation") {
+    struct ThrowOnCopyReader {
+        ThrowOnCopyReader()=default;
+        ThrowOnCopyReader(const ThrowOnCopyReader&) {
+            throw std::runtime_error("reader target copied");
+        }
+        ThrowOnCopyReader(ThrowOnCopyReader&&)=default;
+        HybridOperationThreadCpuReading operator()() const {
+            return HybridOperationThreadCpuTick{100};
+        }
+    };
+    auto [system,request]=dimension_changing_example();
+    const HybridPath path{{{"source"},{"target"}},{{"switch"}}};
+    HybridRelationInstrumentation instrumentation;
+    instrumentation.thread_cpu_reader=HybridOperationThreadCpuReader{ThrowOnCopyReader{}};
+
+    HybridComposedPathRelationResult result=HybridPathCompositionFailureReport{
+        path,{16,64,1024},{},Diagnostic{DiagnosticCode::unsupported,"test","uninitialized"}};
+    CHECK_NOTHROW(result=compose_hybrid_path_relation_with_report(system,request,path,
+        {16,64,1024},{},instrumentation));
+    REQUIRE(std::holds_alternative<HybridComposedPathRelation>(result));
+    const auto& operations=std::get<HybridComposedPathRelation>(result).operations;
+    REQUIRE_FALSE(operations.empty());
+    CHECK(std::holds_alternative<HybridOperationThreadCpuDuration>(operations.front().thread_cpu));
+}
+
 TEST_CASE("hybrid joint relation rejects capacity exhaustion without truncation and observes cancellation") {
     auto [system,request]=dimension_changing_example();
     const HybridPath path{{{"source"},{"target"}},{{"switch"}}};
