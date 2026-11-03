@@ -12,7 +12,8 @@ int main() {
     using namespace csl::synthesis;
 
     const HybridPortfolioExecution legacy_aggregate{{},true};
-    if(!legacy_aggregate.all_supplied_branches_completed||!legacy_aggregate.reachability.empty())
+    if(!legacy_aggregate.all_supplied_branches_completed||!legacy_aggregate.reachability.empty()||
+       !legacy_aggregate.reachability_attempts.empty())
         throw std::runtime_error("Hybrid execution aggregate source compatibility changed");
 
     registry::Registry<registry::LPPort> admission_providers;
@@ -110,7 +111,8 @@ int main() {
     if(prepared_reachability==nullptr)
         throw std::runtime_error("Installed exact reachability refinement failed");
     const auto reachability_run=execute_hybrid_request(std::move(*prepared_reachability),{});
-    if(!reachability_run.branches.empty()||reachability_run.reachability.size()!=1)
+    if(!reachability_run.branches.empty()||reachability_run.reachability.size()!=1||
+       reachability_run.reachability_attempts.size()!=1)
         throw std::runtime_error("Installed coordinated execution did not retain exact reachability");
     const auto admitted_portfolio=build_hybrid_portfolio_programs(trajectory,system,request,
         {"installed-admitted-hybrid"},{1,4},{32,128,4096},*admission_provider,*convex_provider);

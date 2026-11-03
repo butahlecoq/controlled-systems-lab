@@ -1408,6 +1408,56 @@ class RejectingConvex final : public ConvexWorkspace {
     }
 };
 
+class CountingGeometryWorkspace final : public SetOperatorWorkspace {
+    std::unique_ptr<SetOperatorWorkspace> inner_;
+    std::shared_ptr<int> run_calls_;
+    std::size_t reported_threads_;
+public:
+    CountingGeometryWorkspace(std::unique_ptr<SetOperatorWorkspace> inner,
+        std::shared_ptr<int> run_calls,std::size_t reported_threads)
+        :inner_(std::move(inner)),run_calls_(std::move(run_calls)),
+         reported_threads_(reported_threads) {}
+    OperationOutcome apply(const OperationRequest& request,const ExecutionContext& context) override {
+        ++*run_calls_;
+        if(context.backend_thread_observation)
+            context.backend_thread_observation->record(reported_threads_);
+        return inner_->apply(request,context);
+    }
+};
+
+registry::PreparedProvider<registry::GeometryPort> counting_projection_provider(
+    std::size_t reject_on_prepare,std::shared_ptr<int> prepare_calls,
+    std::shared_ptr<int> factory_calls,std::shared_ptr<int> run_calls) {
+    auto entry=geometry::polyhedral::make_projection_registration(
+        {geometry::polyhedral::ProjectionOutput::h,16});
+    auto capability=entry.capabilities;
+    entry.capabilities=[capability,reject_on_prepare,prepare_calls](
+        const OperationRequest& request,const registry::Requirements& requirements) {
+        const auto attempt=++*prepare_calls;
+        if(reject_on_prepare!=0&&attempt==reject_on_prepare)
+            return registry::Capability{Diagnostics{{DiagnosticCode::unsupported,
+                "fixture.geometry.late_refusal","late projection preparation refusal"}}};
+        return capability(request,requirements);
+    };
+    auto factory=entry.factory;
+    entry.factory=[factory,factory_calls,run_calls](const OperationRequest& request) {
+        const auto call=++*factory_calls;
+        const auto width=call==1?7U:4U;
+        return std::unique_ptr<SetOperatorWorkspace>{std::make_unique<CountingGeometryWorkspace>(
+            factory(request),run_calls,width)};
+    };
+    registry::Registry<registry::GeometryPort> providers;
+    const registry::Method method{entry.identity.id,entry.identity.version};
+    REQUIRE_FALSE(providers.add(std::move(entry)));
+    registry::Requirements requirements;
+    requirements.output.representation={"csl.polyhedron.h"};
+    requirements.output.relation=SetRelation::equivalent;
+    auto prepared=registry::prepare_provider(
+        registry::select_provider(providers,method,requirements));
+    REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::GeometryPort>>(prepared));
+    return std::get<registry::PreparedProvider<registry::GeometryPort>>(std::move(prepared));
+}
+
 registry::PreparedProvider<registry::LPPort> lp_provider(std::stop_source* cancel_during_prepare=nullptr,
     std::shared_ptr<int> factory_calls=std::make_shared<int>(0),std::string reject_problem={},
     std::string cancel_problem={}) {
@@ -1714,6 +1764,11 @@ TEST_CASE("hybrid request refinement retains exact reachability and refuses unpr
     CHECK(execution.branches.empty());
     CHECK(execution.all_supplied_branches_completed);
     REQUIRE(execution.reachability.size()==2);
+    REQUIRE(execution.reachability_attempts.size()==2);
+    CHECK(execution.reachability_attempts[0].path==paths[0]);
+    CHECK(execution.reachability_attempts[1].path==paths[1]);
+    CHECK(std::holds_alternative<HybridPathReachability>(execution.reachability_attempts[0].result));
+    CHECK(std::holds_alternative<HybridPathReachability>(execution.reachability_attempts[1].result));
     CHECK(execution.reachability[0].path==paths[0]);
     CHECK(execution.reachability[1].path==paths[1]);
 
@@ -1740,6 +1795,75 @@ TEST_CASE("hybrid request refinement retains exact reachability and refuses unpr
         std::move(std::get<HybridAdmissionToken>(projected_admission)),{},{});
     REQUIRE(std::holds_alternative<HybridConcreteRefinementRejected>(projected_refinement));
     CHECK(projected->compose_calls==0);
+}
+
+TEST_CASE("hybrid refinement rejects a late geometry prepare before creating any projection workspace") {
+    auto [system,request]=projected_interval_fixture();
+    auto parallel=system.edges.front();
+    parallel.id={"transition-second"};
+    system.edges.push_back(std::move(parallel));
+    const auto paths=model::enumerate_hybrid_paths(system,request.initial.mode,
+        request.allowed_terminal_modes,{1,8});
+    REQUIRE(std::holds_alternative<std::vector<model::HybridPath>>(paths));
+    REQUIRE(std::get<std::vector<model::HybridPath>>(paths).size()==2);
+    auto prepare_calls=std::make_shared<int>(0);
+    auto factory_calls=std::make_shared<int>(0);
+    auto run_calls=std::make_shared<int>(0);
+    auto geometry=counting_projection_provider(2,prepare_calls,factory_calls,run_calls);
+    HybridExecutionSelection selection;
+    selection.reachability=std::make_shared<ProjectedStateHybridReachabilityAdapter>(
+        std::move(geometry),16);
+    ExecutionContext context;
+    auto admitted=admit_hybrid_request(system,request,selection,{1,8},{4,16,128},{},context);
+    REQUIRE(std::holds_alternative<HybridAdmissionToken>(admitted));
+    auto refined=refine_hybrid_request(std::move(std::get<HybridAdmissionToken>(admitted)),{},context);
+    REQUIRE(std::holds_alternative<HybridConcreteRefinementRejected>(refined));
+    CHECK(std::get<HybridConcreteRefinementRejected>(refined).diagnostics.front().field==
+        "fixture.geometry.late_refusal");
+    CHECK(*prepare_calls==2);
+    CHECK(*factory_calls==0);
+    CHECK(*run_calls==0);
+}
+
+TEST_CASE("hybrid request stages all projected paths before executing geometry") {
+    auto [system,request]=projected_interval_fixture();
+    auto parallel=system.edges.front();
+    parallel.id={"transition-second"};
+    system.edges.push_back(std::move(parallel));
+    auto prepare_calls=std::make_shared<int>(0);
+    auto factory_calls=std::make_shared<int>(0);
+    auto run_calls=std::make_shared<int>(0);
+    auto geometry=counting_projection_provider(0,prepare_calls,factory_calls,run_calls);
+    HybridExecutionSelection selection;
+    selection.reachability=std::make_shared<ProjectedStateHybridReachabilityAdapter>(
+        std::move(geometry),16);
+    auto resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{4,2,2,4096});
+    auto aggregate_observation=std::make_shared<execution::BackendThreadObservation>();
+    ExecutionContext context;
+    context.resources=resources;
+    context.backend_thread_observation=aggregate_observation;
+    auto admitted=admit_hybrid_request(system,request,selection,{1,8},{4,16,128},{},context);
+    REQUIRE(std::holds_alternative<HybridAdmissionToken>(admitted));
+    auto refined=refine_hybrid_request(std::move(std::get<HybridAdmissionToken>(admitted)),{},context);
+    REQUIRE(std::holds_alternative<HybridPreparedExecution>(refined));
+    CHECK(*prepare_calls==2);
+    CHECK(*factory_calls==0);
+    CHECK(*run_calls==0);
+    auto execution_result=execute_hybrid_request(
+        std::move(std::get<HybridPreparedExecution>(refined)),context);
+    CHECK(execution_result.branches.empty());
+    REQUIRE(execution_result.reachability_attempts.size()==2);
+    CHECK(*factory_calls==2);
+    CHECK(*run_calls==2);
+    CHECK(aggregate_observation->maximum()==7);
+    for(const auto& attempt:execution_result.reachability_attempts) {
+        REQUIRE(std::holds_alternative<HybridPathReachability>(attempt.result));
+        CHECK(std::get<HybridPathReachability>(attempt.result).projected_state.has_value());
+        REQUIRE(attempt.requested_resources);
+        CHECK(attempt.requested_resources->memory_bytes==4096);
+    }
+    CHECK(execution_result.reachability_attempts[0].observed_backend_threads==7);
+    CHECK(execution_result.reachability_attempts[1].observed_backend_threads==4);
 }
 
 TEST_CASE("hybrid portfolio rejects unknown provider envelopes before adapter path builds") {

@@ -10,6 +10,19 @@
 namespace csl::synthesis {
 namespace {
 Diagnostics one(Diagnostic diagnostic) { return Diagnostics{std::move(diagnostic)}; }
+std::optional<Termination> interruption(const ExecutionContext& context);
+class CompletedHybridReachabilityStage final : public HybridReachabilityStage {
+    HybridPathReachability result_;
+public:
+    explicit CompletedHybridReachabilityStage(HybridPathReachability result)
+        :result_(std::move(result)) {}
+    HybridPathReachabilityResult execute(const ExecutionContext& context) && override {
+        if(const auto stop=interruption(context))
+            return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+                "Hybrid reachability stage stopped before result publication"};
+        return std::move(result_);
+    }
+};
 std::optional<Diagnostic> hybrid_objective_policy_error(optimization::ObjectivePolicy policy) {
     if(policy.assurance!=Assurance::numerical && policy.assurance!=Assurance::validated)
         return Diagnostic{DiagnosticCode::invalid_input,"hybrid.adapter.objective_policy",
@@ -299,6 +312,62 @@ Diagnostics hybrid_operation_trace_errors(const model::HybridPath& path,
         previous_elements=operation.cumulative_matrix_elements;
     }
     return {};
+}
+
+HybridPathReachabilityResult validate_hybrid_path_reachability_result(
+    const HybridReachabilityAdapter& adapter,const model::HybridPath& path,
+    model::HybridRelationLimits limits,HybridPathReachabilityResult result) {
+    const auto capability=adapter.capabilities();
+    if(capability.assurance!=Assurance::numerical)
+        return one({DiagnosticCode::unsupported,"hybrid.reachability.assurance",
+            "Validated reachability assurance is unsupported until its evidence is carried in the result"});
+    if(!capability.retains_branch_labelled_joint_relation)
+        return one({DiagnosticCode::unsupported,"hybrid.reachability.branch_relation",
+            "Reachability adapter does not declare full branch-labelled joint-relation support"});
+    if(const auto* reachable=std::get_if<HybridPathReachability>(&result)) {
+        if(reachable->path!=path)
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.path",
+                "Reachability adapter returned a relation for a different path"});
+        if(!same_limits(reachable->relation_limits,limits))
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.limits",
+                "Reachability adapter returned limits different from those requested"});
+        if(reachable->assurance!=capability.assurance)
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.assurance",
+                "Reachability result assurance does not match its declared capability"});
+        const auto trace_errors=hybrid_operation_trace_errors(path,limits,reachable->relation_operations,true,
+            reachable->joint_relation.metadata()->set.dimension);
+        if(!trace_errors.empty()) return trace_errors;
+        if(reachable->projected_state) {
+            const auto& projected=*reachable->projected_state;
+            const auto projected_representation=projected.terminal_state_set.representation();
+            if(projected.terminal_state_set.metadata()->set.dimension!=1 ||
+               !std::holds_alternative<sets::HRepresentation>(projected_representation) ||
+               projected.maximum_projection_rows==0 ||
+               projected.output_rows>projected.maximum_projection_rows ||
+               projected.projection_provider.port!="geometry" ||
+               !projected.projection_provider.actual ||
+               projected.projection_provider.actual->id.value.empty() ||
+               projected.projection_evidence.scope!=GeometryClaimScope::set_relation ||
+               projected.input_rows!=reachable->relation_operations.back().cumulative_rows)
+                return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.projected_state",
+                    "Projected terminal-set evidence has an invalid shape, provider, or row accounting"});
+            const auto& terminal=std::get<sets::HRepresentation>(projected_representation);
+            if(terminal.inequalities.rows()+terminal.equalities.rows()!=projected.output_rows)
+                return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.projected_rows",
+                    "Projected terminal-set row count does not match its retained H representation"});
+        }
+    }
+    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&result)) {
+        if(failure->path!=path)
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.failure_path",
+                "Reachability adapter returned a failure report for a different path"});
+        if(!same_limits(failure->limits,limits))
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.failure_limits",
+                "Reachability failure report lost the configured relation limits"});
+        const auto trace_errors=hybrid_operation_trace_errors(path,limits,failure->operations,false);
+        if(!trace_errors.empty()) return trace_errors;
+    }
+    return result;
 }
 }
 
@@ -684,51 +753,29 @@ HybridPathReachabilityResult compute_hybrid_path_reachability(
         return OperationStopped{StopReason::cancelled,
             "Hybrid reachability was cancelled after capability admission"};
     auto result=adapter.compose_path(system,request,path,limits,cancellation);
-    if(const auto* reachable=std::get_if<HybridPathReachability>(&result)) {
-        if(reachable->path!=path)
-            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.path",
-                "Reachability adapter returned a relation for a different path"});
-        if(!same_limits(reachable->relation_limits,limits))
-            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.limits",
-                "Reachability adapter returned limits different from those requested"});
-        if(reachable->assurance!=capability.assurance)
-            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.assurance",
-                "Reachability result assurance does not match its declared capability"});
-        const auto trace_errors=hybrid_operation_trace_errors(path,limits,reachable->relation_operations,true,
-            reachable->joint_relation.metadata()->set.dimension);
-        if(!trace_errors.empty()) return trace_errors;
-        if(reachable->projected_state) {
-            const auto& projected=*reachable->projected_state;
-            const auto projected_representation=projected.terminal_state_set.representation();
-            if(projected.terminal_state_set.metadata()->set.dimension!=1 ||
-               !std::holds_alternative<sets::HRepresentation>(projected_representation) ||
-               projected.maximum_projection_rows==0 ||
-               projected.output_rows>projected.maximum_projection_rows ||
-               projected.projection_provider.port!="geometry" ||
-               !projected.projection_provider.actual ||
-               projected.projection_provider.actual->id.value.empty() ||
-               projected.projection_evidence.scope!=GeometryClaimScope::set_relation ||
-               projected.input_rows!=reachable->relation_operations.back().cumulative_rows)
-                return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.projected_state",
-                    "Projected terminal-set evidence has an invalid shape, provider, or row accounting"});
-            const auto& terminal=std::get<sets::HRepresentation>(projected_representation);
-            if(terminal.inequalities.rows()+terminal.equalities.rows()!=projected.output_rows)
-                return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.projected_rows",
-                    "Projected terminal-set row count does not match its retained H representation"});
-        }
+    return validate_hybrid_path_reachability_result(adapter,path,limits,std::move(result));
+}
+
+HybridReachabilityStageResult HybridReachabilityAdapter::stage_path(
+    const model::HybridSystem& system,const model::HybridRequest& request,
+    const model::HybridPath& path,model::HybridRelationLimits limits,
+    const ExecutionContext& context) const {
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+            "Hybrid reachability preparation stopped before adapter staging"};
+    if(capabilities().projects_terminal_state)
+        return one({DiagnosticCode::unsupported,"hybrid.reachability.staging",
+            "Projected adapters must implement staged concrete preparation for request-wide refinement"});
+    auto result=compute_hybrid_path_reachability(*this,system,request,path,limits,context.cancellation);
+    if(auto* reachable=std::get_if<HybridPathReachability>(&result)) {
+        if(reachable->projected_state)
+            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.staging_projection",
+                "A non-projecting reachability adapter returned projected evidence"});
+        return std::make_unique<CompletedHybridReachabilityStage>(std::move(*reachable));
     }
-    if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&result);
-       failure) {
-        if(failure->path!=path)
-            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.failure_path",
-                "Reachability adapter returned a failure report for a different path"});
-        if(!same_limits(failure->limits,limits))
-            return one({DiagnosticCode::evidence_mismatch,"hybrid.reachability.failure_limits",
-                "Reachability failure report lost the configured relation limits"});
-        const auto trace_errors=hybrid_operation_trace_errors(path,limits,failure->operations,false);
-        if(!trace_errors.empty()) return trace_errors;
-    }
-    return result;
+    if(auto* diagnostics=std::get_if<Diagnostics>(&result)) return std::move(*diagnostics);
+    if(auto* stopped=std::get_if<OperationStopped>(&result)) return *stopped;
+    return std::get<model::HybridPathCompositionFailureReport>(std::move(result));
 }
 
 HybridPathProgramResult JointHDirectTrajectoryAdapter::build_path(
@@ -1606,11 +1653,14 @@ using HybridPreparedPipeline=std::variant<
 HybridPortfolioExecution execute_prepared_hybrid_branches(
     std::span<const HybridPathProgram> programs,
     std::span<const HybridPreparedPipeline> pipelines,
-    std::span<const HybridPathReachability> reachability,
+    std::span<const HybridReachabilityAttempt> reachability,
     const ExecutionContext& context) {
     HybridPortfolioExecution portfolio;
     portfolio.branches.reserve(programs.size());
-    portfolio.reachability.assign(reachability.begin(),reachability.end());
+    for(const auto& attempt:reachability)
+        if(const auto* completed=std::get_if<HybridPathReachability>(&attempt.result))
+            portfolio.reachability.push_back(*completed);
+    portfolio.reachability_attempts.assign(reachability.begin(),reachability.end());
     bool complete=true;
     bool stopped=false;
     for(std::size_t i=0;i<programs.size();++i) {
@@ -1757,7 +1807,9 @@ HybridPortfolioExecution execute_hybrid_path_programs(
 struct HybridPreparedExecution::Storage {
     std::vector<HybridPathProgram> programs;
     std::vector<HybridPreparedPipeline> pipelines;
-    std::vector<HybridPathReachability> reachability;
+    std::vector<std::unique_ptr<HybridReachabilityStage>> reachability_stages;
+    std::shared_ptr<const HybridReachabilityAdapter> reachability_adapter;
+    model::HybridRelationLimits relation_limits;
     HybridAdmissionReport report;
 };
 
@@ -1765,11 +1817,14 @@ class HybridPreparedAccess {
 public:
     static HybridPreparedExecution create(std::vector<HybridPathProgram> programs,
         std::vector<HybridPreparedPipeline> pipelines,
-        std::vector<HybridPathReachability> reachability,
+        std::vector<std::unique_ptr<HybridReachabilityStage>> reachability_stages,
+        std::shared_ptr<const HybridReachabilityAdapter> reachability_adapter,
+        model::HybridRelationLimits relation_limits,
         HybridAdmissionReport report) {
         using Storage=HybridPreparedExecution::Storage;
         return HybridPreparedExecution{std::make_unique<const Storage>(Storage{
-            std::move(programs),std::move(pipelines),std::move(reachability),std::move(report)})};
+            std::move(programs),std::move(pipelines),std::move(reachability_stages),
+            std::move(reachability_adapter),relation_limits,std::move(report)})};
     }
     static const HybridPreparedExecution::Storage& storage(const HybridPreparedExecution& prepared) {
         return *prepared.storage_;
@@ -1801,11 +1856,6 @@ HybridRefinementResult refine_hybrid_request(HybridAdmissionToken token,
     if(admission.selection.verifier)
         return refuse("hybrid.refinement.selection",
             "Transactional family-verifier preparation is not yet connected");
-    if(admission.selection.reachability&&
-       admission.selection.reachability->capabilities().projects_terminal_state)
-        return refuse("hybrid.refinement.geometry",
-            "Projected reachability requires concrete geometry preparation, which is not yet connected to the transaction");
-
     std::vector<HybridPathProgram> programs;
     if(admission.selection.trajectory) {
         if(problem.value.empty())
@@ -1830,30 +1880,34 @@ HybridRefinementResult refine_hybrid_request(HybridAdmissionToken token,
         }
     }
 
-    std::vector<HybridPathReachability> reachability_results;
+    std::vector<std::unique_ptr<HybridReachabilityStage>> reachability_stages;
     if(admission.selection.reachability) {
-        reachability_results.reserve(admission.report.paths.size());
+        reachability_stages.reserve(admission.report.paths.size());
         for(const auto& path:admission.report.paths) {
             if(const auto stop=interruption(context))
                 return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
-                    "Hybrid reachability refinement stopped between path relations"};
-            auto result=compute_hybrid_path_reachability(*admission.selection.reachability,
-                admission.system,admission.request,path,admission.relation_limits,
-                context.cancellation);
-            if(const auto* stopped=std::get_if<OperationStopped>(&result)) return *stopped;
-            if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&result)) {
-                if(const auto* stopped=std::get_if<OperationStopped>(&failure->failure)) return *stopped;
+                    "Hybrid reachability refinement stopped between path stages"};
+            auto staged=admission.selection.reachability->stage_path(admission.system,
+                admission.request,path,admission.relation_limits,context);
+            if(auto* stage=std::get_if<std::unique_ptr<HybridReachabilityStage>>(&staged)) {
+                if(!*stage) return refuse("hybrid.refinement.reachability_stage",
+                    "Reachability adapter returned an empty prepared stage");
+                reachability_stages.push_back(std::move(*stage));
+            } else if(auto* stopped=std::get_if<OperationStopped>(&staged)) {
+                return *stopped;
+            } else if(auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&staged)) {
+                auto validated=validate_hybrid_path_reachability_result(
+                    *admission.selection.reachability,path,admission.relation_limits,*failure);
+                if(auto* operation_stopped=std::get_if<OperationStopped>(&validated))
+                    return *operation_stopped;
+                if(auto* errors=std::get_if<Diagnostics>(&validated))
+                    return HybridConcreteRefinementRejected{admission.report,*errors};
                 return HybridConcreteRefinementRejected{admission.report,
-                    {std::get<Diagnostic>(failure->failure)}};
+                    {std::get<Diagnostic>(std::get<model::HybridPathCompositionFailureReport>(validated).failure)}};
+            } else {
+                return HybridConcreteRefinementRejected{admission.report,
+                    std::move(std::get<Diagnostics>(staged))};
             }
-            if(const auto* errors=std::get_if<Diagnostics>(&result))
-                return HybridConcreteRefinementRejected{admission.report,*errors};
-            auto path_result=std::get<HybridPathReachability>(std::move(result));
-            if(path_result.path!=path||path_result.assurance!=Assurance::numerical||
-               path_result.projected_state)
-                return refuse("hybrid.refinement.reachability_result",
-                    "Selected reachability adapter returned mismatched, nonnumerical, or unexpectedly projected evidence");
-            reachability_results.push_back(std::move(path_result));
         }
     }
 
@@ -1881,14 +1935,41 @@ HybridRefinementResult refine_hybrid_request(HybridAdmissionToken token,
         return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
             "Hybrid refinement stopped before publishing prepared providers; no workspace was created"};
     return HybridPreparedAccess::create(std::move(programs),std::move(pipelines),
-        std::move(reachability_results),admission.report);
+        std::move(reachability_stages),admission.selection.reachability,
+        admission.relation_limits,admission.report);
 }
 
 HybridPortfolioExecution execute_hybrid_request(HybridPreparedExecution prepared,
     const ExecutionContext& context) {
     const auto& storage=HybridPreparedAccess::storage(prepared);
+    std::vector<HybridReachabilityAttempt> reachability_attempts;
+    reachability_attempts.reserve(storage.reachability_stages.size());
+    for(std::size_t index=0;index<storage.reachability_stages.size();++index) {
+        const auto& path=storage.report.paths[index];
+        HybridReachabilityAttempt attempt{path,OperationStopped{
+            StopReason::cancelled,"Hybrid reachability stage was not started"},{},std::nullopt};
+        if(context.resources) attempt.requested_resources=*context.resources;
+        if(const auto stop=interruption(context)) {
+            attempt.result=OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+                "Hybrid reachability stage stopped before workspace creation"};
+            reachability_attempts.push_back(std::move(attempt));
+            continue;
+        }
+        auto path_context=context;
+        auto observation=std::make_shared<csl::execution::BackendThreadObservation>();
+        path_context.backend_thread_observation=observation;
+        auto result=std::move(*storage.reachability_stages[index]).execute(path_context);
+        attempt.observed_backend_threads=observation->maximum();
+        if(context.backend_thread_observation&&attempt.observed_backend_threads)
+            context.backend_thread_observation->record(*attempt.observed_backend_threads);
+        if(storage.reachability_adapter)
+            result=validate_hybrid_path_reachability_result(*storage.reachability_adapter,path,
+                storage.relation_limits,std::move(result));
+        attempt.result=std::move(result);
+        reachability_attempts.push_back(std::move(attempt));
+    }
     return execute_prepared_hybrid_branches(storage.programs,storage.pipelines,
-        storage.reachability,context);
+        reachability_attempts,context);
 }
 
 } // namespace csl::synthesis

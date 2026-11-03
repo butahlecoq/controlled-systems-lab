@@ -71,6 +71,24 @@ struct HybridPathReachability {
 using HybridPathReachabilityResult = std::variant<HybridPathReachability, Diagnostics,
     OperationStopped, model::HybridPathCompositionFailureReport>;
 
+// One concretely prepared path operation. Implementations own adapter-specific
+// state (such as a move-only geometry pipeline) and are consumed at execution.
+class HybridReachabilityStage {
+public:
+    virtual ~HybridReachabilityStage() = default;
+    virtual HybridPathReachabilityResult execute(const ExecutionContext&) && = 0;
+};
+using HybridReachabilityStageResult = std::variant<
+    std::unique_ptr<HybridReachabilityStage>, Diagnostics, OperationStopped,
+    model::HybridPathCompositionFailureReport>;
+
+struct HybridReachabilityAttempt {
+    model::HybridPath path;
+    HybridPathReachabilityResult result;
+    std::optional<ResourcePolicy> requested_resources;
+    std::optional<std::size_t> observed_backend_threads;
+};
+
 struct HybridReachabilityCapabilities {
     bool retains_branch_labelled_joint_relation{};
     Assurance assurance{Assurance::numerical};
@@ -95,6 +113,12 @@ public:
     virtual HybridPathReachabilityResult compose_path(const model::HybridSystem&,
         const model::HybridRequest&, const model::HybridPath&,
         model::HybridRelationLimits, std::stop_token cancellation) const = 0;
+    // Stages adapter-specific concrete preparation without creating a
+    // workspace. The default stages validated non-projecting results and fails
+    // closed for adapters that would execute a projection in compose_path.
+    virtual HybridReachabilityStageResult stage_path(const model::HybridSystem&,
+        const model::HybridRequest&, const model::HybridPath&,
+        model::HybridRelationLimits, const ExecutionContext&) const;
 };
 
 // The initial implementation builds the full joint H relation directly. It
@@ -127,6 +151,9 @@ public:
     HybridPathReachabilityResult compose_path(const model::HybridSystem&,
         const model::HybridRequest&, const model::HybridPath&,
         model::HybridRelationLimits, std::stop_token cancellation) const override;
+    HybridReachabilityStageResult stage_path(const model::HybridSystem&,
+        const model::HybridRequest&, const model::HybridPath&,
+        model::HybridRelationLimits, const ExecutionContext&) const override;
 private:
     registry::PreparedProvider<registry::GeometryPort> projection_;
     std::size_t maximum_projection_rows_;
@@ -242,10 +269,12 @@ struct HybridPortfolioExecution {
     // True only if every supplied branch produced a contract-valid completed
     // solver result. This says nothing about cross-branch optimality.
     bool all_supplied_branches_completed{};
-    // Exact relation results selected through the request coordinator. These
-    // are separate from solver branches and do not imply objective optimality.
-    // Kept after the original aggregate fields for source compatibility.
+    // Successful reachability results retained for source compatibility.
+    // Use reachability_attempts when failures and stops must be accounted for.
     std::vector<HybridPathReachability> reachability;
+    // Per-path reachability outcomes, including failures and stops. These are
+    // separate from solver branches and do not imply objective optimality.
+    std::vector<HybridReachabilityAttempt> reachability_attempts;
 };
 
 // Objective-bound comparison is deliberately separate from complete-family
