@@ -1,13 +1,38 @@
 #include <csl/synthesis/hybrid_path_program.hpp>
 
 #include <iostream>
+#include <memory>
 #include <stdexcept>
+#include <utility>
 #include <variant>
 
 int main() {
     using namespace csl;
     using namespace csl::model;
     using namespace csl::synthesis;
+
+    registry::Registry<registry::LPPort> admission_providers;
+    registry::Registration<registry::LPPort> admission_registration{
+        {{"installed-admission"},"1"},
+        [](const LinearProgram&,const registry::Requirements&)->registry::Capability {
+            return registry::Offer{};
+        },
+        [](const LinearProgram&){return std::unique_ptr<LPWorkspace>{};}, {},
+        [](const registry::RequestEnvelope& envelope,const registry::Requirements&) {
+            const auto status=envelope.operation=="hybrid.linear-optimization" &&
+                envelope.maximum_columns<=8?registry::AdmissionStatus::supported:
+                    registry::AdmissionStatus::unsupported;
+            return registry::AdmissionDeclaration{status,{},true};
+        }};
+    if (admission_providers.add(std::move(admission_registration)))
+        throw std::runtime_error("Installed provider registration with admission declaration failed");
+    auto prepared_admission=registry::prepare_provider(registry::select_provider(
+        admission_providers,{{"installed-admission"},{}}));
+    const auto* admission_provider=std::get_if<registry::PreparedProvider<registry::LPPort>>(
+        &prepared_admission);
+    if (admission_provider==nullptr || admission_provider->declare_support(
+            {"hybrid.linear-optimization",4,8,32,"linear"}).status!=registry::AdmissionStatus::supported)
+        throw std::runtime_error("Installed prepared provider did not expose conservative admission");
 
     auto inequalities = numeric::snapshot(Matrix{0, 4, {}});
     auto bounds = numeric::snapshot_vector(Vector{});
