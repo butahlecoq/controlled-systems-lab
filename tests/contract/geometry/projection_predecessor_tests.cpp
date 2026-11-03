@@ -519,6 +519,27 @@ TEST_CASE("unavailable geometry operation rejects before creating a projection w
     CHECK(*creations==0);
 }
 
+TEST_CASE("projection provider declares the configured H-row request envelope") {
+    auto selected=provider(geometry::polyhedral::make_projection_registration(
+        {geometry::polyhedral::ProjectionOutput::h,4}),"csl.polyhedron.h");
+    const auto supported=selected.declare_support(
+        {"geometry.h_projection",4,8,32,"equivalent"});
+    CHECK(supported.status==AdmissionStatus::supported);
+    CHECK(supported.envelope_is_sufficient);
+
+    const auto exceeds_limit=selected.declare_support(
+        {"geometry.h_projection",5,8,40,"equivalent"});
+    CHECK(exceeds_limit.status==AdmissionStatus::unsupported);
+    CHECK_FALSE(exceeds_limit.envelope_is_sufficient);
+    REQUIRE(exceeds_limit.diagnostics.size()==1);
+    CHECK(exceeds_limit.diagnostics.front().field=="projection.admission.rows");
+
+    const auto unrelated=selected.declare_support(
+        {"geometry.v_projection",1,1,1,"equivalent"});
+    CHECK(unrelated.status==AdmissionStatus::unknown);
+    CHECK_FALSE(unrelated.envelope_is_sufficient);
+}
+
 TEST_CASE("unsupported triangle intersection request retains both operands and request identity") {
     const auto square=h("typed-unit-square",2,{4,2,{1,0,-1,0,0,1,0,-1}},{1,0,1,0},
         {0,2,{}},{}, {"x","y"});
