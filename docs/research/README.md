@@ -151,5 +151,8 @@ adds a source-bound, resource-constrained five-pair measurement for both
 registered strategies, with its exact control-plane figure, canonical record,
 raw events, source/build identity and failed supervisor setup attempt retained.
 This is a new synthetic singular-objective fixture; it is not the #421
-horizon-three case or the article-derived B04 case. The deployed Pages route and
-the remaining #597 comparison matrix are pending.
+horizon-three case or the article-derived B04 case. The main-only MPC-01 Pages
+augmentation stages this immutable bundle under
+`docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1/` and adds it to the
+reports landing page; live URL verification remains pending after deployment.
+The remaining #597 comparison matrix is also pending.

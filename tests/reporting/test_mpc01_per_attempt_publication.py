@@ -4,6 +4,8 @@ from __future__ import annotations
 import importlib.util
 import hashlib
 from pathlib import Path
+import subprocess
+import sys
 import tempfile
 import unittest
 from urllib.parse import urldefrag, urlparse
@@ -17,6 +19,12 @@ SPEC.loader.exec_module(stage_module)
 
 
 class PerAttemptPublicationTests(unittest.TestCase):
+    def test_strategy_ab_bundle_has_valid_checksums_and_reproducible_render(self):
+        validator = ROOT / "scripts/reports/mpc01/validate_strategy_ab_ts03_bundle.py"
+        result = subprocess.run([sys.executable, str(validator)], cwd=ROOT, check=True,
+                                capture_output=True, text=True)
+        self.assertIn("Validated immutable MPC-01 T-S03", result.stdout)
+
     def test_route_preserves_source_bundle_and_links_from_root_landing(self):
         with tempfile.TemporaryDirectory(prefix="mpc01-pages-augmentation-") as temporary:
             site = Path(temporary)
@@ -38,6 +46,18 @@ class PerAttemptPublicationTests(unittest.TestCase):
 
             landing = (site / "index.html").read_text(encoding="utf-8")
             self.assertIn(f'href="{stage_module.REPORT_ID}/index.html"', landing)
+            strategy_route = site / stage_module.STRATEGY_AB_ROUTE
+            self.assertTrue((strategy_route / "strategy-ab-ts03-summary.html").is_file())
+            self.assertTrue((strategy_route / "strategy-ab-ts03-control-plane.svg").is_file())
+            self.assertTrue((strategy_route / "comparison-record.json").is_file())
+            self.assertTrue((strategy_route / "setup-attempts/supervisor-row-count-mismatch/events.jsonl").is_file())
+            strategy_href = (f'href="{stage_module.STRATEGY_AB_ROUTE.as_posix()}/'
+                             'strategy-ab-ts03-summary.html"')
+            self.assertIn(strategy_href, landing)
+            strategy_page = (strategy_route / "strategy-ab-ts03-summary.html").read_text(encoding="utf-8")
+            self.assertIn("exact optimal family", strategy_page)
+            self.assertIn("does not satisfy that limiter profile", strategy_page)
+            self.assertTrue((site / "scripts/reports/mpc01/summarize_strategy_ab_ts03.py").is_file())
             report_page = (route / "index.html").read_text(encoding="utf-8")
             self.assertIn("not a closed-loop MPC run", report_page)
             self.assertIn("TwoPoints environment report", report_page)
@@ -45,13 +65,21 @@ class PerAttemptPublicationTests(unittest.TestCase):
 
             # All local links in the route page resolve inside the staged Pages tree.
             import re
-            for href in re.findall(r'href="([^"]+)"', report_page):
-                parsed = urlparse(href)
+            for reference in re.findall(r'(?:href|src)="([^"]+)"', report_page):
+                parsed = urlparse(reference)
                 if parsed.scheme or parsed.netloc:
                     continue
-                target = (route / urldefrag(href)[0]).resolve()
-                self.assertTrue(target.is_relative_to(site.resolve()), href)
-                self.assertTrue(target.is_file(), href)
+                target = (route / urldefrag(parsed.path)[0]).resolve()
+                self.assertTrue(target.is_relative_to(site.resolve()), reference)
+                self.assertTrue(target.is_file(), reference)
+
+            for reference in re.findall(r'(?:href|src)="([^"]+)"', strategy_page):
+                parsed = urlparse(reference)
+                if parsed.scheme or parsed.netloc:
+                    continue
+                target = (strategy_route / urldefrag(parsed.path)[0]).resolve()
+                self.assertTrue(target.is_relative_to(site.resolve()), reference)
+                self.assertTrue(target.is_file(), reference)
 
 
 if __name__ == "__main__":
