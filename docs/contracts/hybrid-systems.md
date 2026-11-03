@@ -4,11 +4,13 @@ Status: accepted design contract. Exact-head specification and standards
 reviews cleared this contract in [PR #471](https://github.com/butahlecoq/controlled-systems-lab/pull/471)
 at `7632a4c`; it merged as `5e4f174`. The first adapter implementation landed
 in [PR #472](https://github.com/butahlecoq/controlled-systems-lab/pull/472).
-The bounded profile for [EXT-07 #156](https://github.com/butahlecoq/controlled-systems-lab/issues/156)
-is implemented and validated in [PR #881](https://github.com/butahlecoq/controlled-systems-lab/pull/881).
-The implementation-status notes below identify the supported subset and its
-limits. The profile is distinct from finite/mixed control domains and
-observation-based policy profiles.
+The bounded implementation in [PR #881](https://github.com/butahlecoq/controlled-systems-lab/pull/881)
+adds request-wide provider admission, per-operation composition evidence, and
+cooperative verifier context. [EXT-07 #156](https://github.com/butahlecoq/controlled-systems-lab/issues/156)
+remains open while provider resource attribution and broader operation
+coverage are incomplete. The implementation-status notes below identify the
+supported subset and its limits. The profile is distinct from finite/mixed
+control domains and observation-based policy profiles.
 The measured and test-only dimension/mode/path evidence is summarized in the
 [`EXT-07 implementation capability profile`](../architecture/hybrid-capability-profile.md);
 its fixture counts do not imply general scalability.
@@ -405,16 +407,17 @@ The direct joint composer exposes an operation trace, and every
 record binds an initial-state, mode invariant, flow, control set, transition
 guard, or reset relation to its stage and mode/edge identity, identifies the
 composer implementation and version, and records joint-variable, added-row,
-cumulative-row, and cumulative matrix-element counts. Both successful and
-failed composition reports retain the configured limits and the operation
-records completed before a diagnostic or cancellation; path-program and
-portfolio builders propagate those failure reports without dropping the path
-identity. Solver-provider provenance and the requested `ExecutionContext`
-resource policy remain attached to each branch execution. The resource policy
-is a request record only: it does not measure backend consumption or establish
-thread or memory enforcement. Provider-level observations and resource-scale
-evidence therefore remain incomplete. The default reachability adapter wraps
-this same direct joint-H
+cumulative-row, and cumulative matrix-element counts. Each operation also
+records its matrix-element delta, elapsed composer wall time, and whether it
+completed. A failed operation retains the rows and matrix elements it added
+before stopping. Both successful and failed composition reports retain the
+configured limits and operation records; path-program and portfolio builders
+propagate those reports without dropping the path identity. Solver-provider
+provenance and the requested `ExecutionContext` resource policy remain attached
+to each branch execution. The resource policy is a request record only. It does
+not measure backend consumption or establish thread or memory enforcement.
+Per-operation CPU and heap use from solver and geometry providers remain
+unmeasured. The default reachability adapter wraps this same direct joint-H
 composer. The separate projected-state adapter independently builds and
 projects a one-transition scalar relation; multi-stage and general-dimensional
 projected reachability remain unsupported. The compiled verifiers cover exact
@@ -428,8 +431,8 @@ family oracle coverage and resource-scale evidence remain incomplete. These
 verifier domains reject unsupported input when verification runs;
 `build_hybrid_portfolio_programs_with_verifier` also rejects unsupported
 verifier domains and declared trajectory objective capabilities before
-building branch programs. Validated objective assurance remains unsupported;
-adapter-specific objective-policy semantics, broader provider-operation
+building branch programs. Validated objective assurance remains unsupported.
+Adapter-specific objective-policy semantics, broader provider-operation
 admission, and general projected-set reachability remain incomplete.
 
 ## Independent test oracle requirements

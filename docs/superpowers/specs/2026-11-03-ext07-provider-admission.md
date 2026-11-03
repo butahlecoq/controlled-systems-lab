@@ -140,9 +140,9 @@ The projected-geometry follow-up keeps a single `stage_path` adapter entry point
 - Should unknown symbolic support always refuse coordinated execution, or may a named incomplete mode proceed while preserving the missing evidence?
 - Which backends can eventually provide enforceable CPU, memory, and thread declarations, and which observations remain runtime-only?
 
-## Next implementation step
+## Transition-semantics status
 
-Review and publish the stage-indexed hybrid transition semantics below before extending profile behavior. The current model and tests already encode this order; the review must confirm that the written contract matches the intended model and make any corrections explicit.
+The stage-indexed order below is implemented by the model and joint-H composer and is covered by model and synthesis tests. The direct profile retains pre-reset and post-reset coordinates. It does not project a reset image or merge mode branches.
 
 ## Verifier execution-context decision
 

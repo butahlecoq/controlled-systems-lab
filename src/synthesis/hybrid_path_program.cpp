@@ -296,12 +296,15 @@ Diagnostics hybrid_operation_trace_errors(const model::HybridPath& path,
         const bool row_overflow=operation.rows_added>std::numeric_limits<std::size_t>::max()-previous_rows;
         const bool element_overflow=operation.cumulative_rows!=0 &&
             operation.joint_variables>std::numeric_limits<std::size_t>::max()/operation.cumulative_rows;
+        const bool matrix_elements_decreased=operation.cumulative_matrix_elements<previous_elements;
+        const bool matrix_delta_mismatch=matrix_elements_decreased||operation.matrix_elements_added!=
+            operation.cumulative_matrix_elements-previous_elements;
         if(operation.implementation_id.empty() || operation.implementation_version.empty() ||
            operation.joint_variables>limits.max_variables || operation.cumulative_rows>limits.max_rows ||
            operation.cumulative_matrix_elements>limits.max_matrix_elements ||
            row_overflow || operation.cumulative_rows!=previous_rows+operation.rows_added ||
            element_overflow || operation.cumulative_matrix_elements!=operation.cumulative_rows*operation.joint_variables ||
-           operation.cumulative_matrix_elements<previous_elements ||
+           matrix_delta_mismatch || !operation.completed ||
            (joint_variables && operation.joint_variables!=*joint_variables) ||
            (relation_dimension && operation.joint_variables!=*relation_dimension) ||
            !planned_operation_matches(operation,expected_operation))

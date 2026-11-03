@@ -665,12 +665,17 @@ TEST_CASE("hybrid composition report records mode and transition operations with
     CHECK(report.operations[6].operation==HybridRelationOperationKind::reset_relation);
     CHECK(report.operations[6].edge==HybridEdgeId{"switch"});
     CHECK(report.operations[7].operation==HybridRelationOperationKind::post_state_invariant);
+    std::uint64_t operation_time_total=0;
     for(const auto& operation:report.operations) {
         CHECK(operation.implementation_id=="csl.model.hybrid.joint-h-composer");
         CHECK(operation.implementation_version=="1");
         CHECK(operation.joint_variables==5);
+        CHECK(operation.matrix_elements_added==operation.rows_added*5);
         CHECK(operation.cumulative_matrix_elements==operation.cumulative_rows*5);
+        CHECK(operation.completed);
+        operation_time_total+=operation.elapsed_wall_nanoseconds;
     }
+    CHECK(operation_time_total>0);
     CHECK(report.operations.back().cumulative_rows==2);
     CHECK(report.operations.back().cumulative_matrix_elements==10);
 
@@ -681,8 +686,11 @@ TEST_CASE("hybrid composition report records mode and transition operations with
     const auto* limit_diagnostic=std::get_if<Diagnostic>(&limit_report.failure);
     REQUIRE(limit_diagnostic);
     CHECK(limit_diagnostic->field=="hybrid.relation.rows");
-    REQUIRE(limit_report.operations.size()==2);
+    REQUIRE(limit_report.operations.size()==3);
+    CHECK(limit_report.operations.back().operation==HybridRelationOperationKind::mode_flow);
     CHECK(limit_report.operations.back().cumulative_rows==1);
+    CHECK(limit_report.operations.back().matrix_elements_added==0);
+    CHECK_FALSE(limit_report.operations.back().completed);
     std::stop_source cancellation;
     cancellation.request_stop();
     const auto stopped=compose_hybrid_path_relation_with_report(

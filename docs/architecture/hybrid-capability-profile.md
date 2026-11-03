@@ -75,11 +75,13 @@ adapter-specific and are checked by preflight.
 Each built path and its verification record retain an ordered operation trace.
 The trace identifies the mode or transition, stage, composer implementation
 and version, joint-variable count, rows added and cumulative rows, and
-cumulative coefficient-matrix elements. The
+cumulative coefficient-matrix elements. Each record also gives the matrix
+element delta, elapsed wall time for that composer operation, and completion
+status, including partial resource counts for a failed operation. The
 `exact singleton hybrid verifier independently retains every tied edge path`
 test checks this evidence for every path, including guard and reset identity
 and the structural counters. These counts describe relation construction;
-provider CPU, memory, and thread consumption remain unmeasured.
+they do not measure solver or geometry-provider CPU, heap, or thread use.
 
 ## Implementation-domain limits
 
@@ -100,11 +102,13 @@ provider CPU, memory, and thread consumption remain unmeasured.
   saved hybrid reports. A requested `ResourcePolicy` is not proof of provider
   enforcement or consumption.
 
-PR #881 implements and validates the bounded profile tracked by issue #156.
-Future extensions can add more set representations, enforce provider CPU or
-memory limits, attribute provider costs to individual operations, and measure
-larger dimensions or path inventories. The current evidence makes no claims
-about those extensions or general scalability. The two saved-report routes
+PR #881 adds request-wide admission and per-operation composer accounting to
+the bounded profile tracked by issue #156. The issue remains open while
+provider CPU, heap, and thread use is unmeasured per operation and broader
+operation profiles remain incomplete. Future extensions can add more set
+representations, enforce provider CPU or memory limits, and measure larger
+dimensions or path inventories. The current evidence makes no general
+scalability claim. The two saved-report routes
 and their manifest-listed files and ZIPs were verified against the live
 main-only Pages site on 2026-11-02; details are recorded in
 [published algorithm results](published-algorithm-results.md#ext-07-hybrid-profile-report).
