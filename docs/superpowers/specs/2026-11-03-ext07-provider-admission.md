@@ -142,7 +142,7 @@ The projected-geometry follow-up keeps a single `stage_path` adapter entry point
 
 ## Next implementation step
 
-Add resource capability/enforcement/measurement records and late-path stop/refusal tests across all selected operation roles; strengthen verifier resource/cancellation reporting when its interface can accept the full execution context.
+Review and publish the stage-indexed hybrid transition semantics below before extending profile behavior. The current model and tests already encode this order; the review must confirm that the written contract matches the intended model and make any corrections explicit.
 
 ## Verifier execution-context decision
 
@@ -201,6 +201,35 @@ Three independent sketches were compared against five criteria: cooperative canc
 - Keeping the stop-token-only interface and checking deadlines after return cannot stop a verifier while it is running.
 - Adapter-authored claims that requested limits were enforced cannot be independently established by the wrapper and are not accepted as enforcement evidence.
 
+## Hybrid time and transition semantics
+
+This section makes the semantics already encoded by `HybridSystem`, the joint-H composer, and the model/oracle tests explicit for review against EXT-07 acceptance items 1 and 2. It is a fixed, stage-indexed discrete model, not an event-triggered continuous hybrid automaton.
+
+Mode IDs and edge IDs are each nonempty and unique within their respective catalogues. For horizon `N`, one complete path has modes `(m_0, ..., m_N)` and edges `(e_0, ..., e_(N-1))`; each edge satisfies `source(e_t)=m_t` and `target(e_t)=m_(t+1)`. At stage `t`, mode `m_t` is active for the entire flow interval. Let that mode's state dimension be `n_m` and control dimension be `p_m`; then `x_t,z_(t+1) ∈ R^{n_m}`, `u_t ∈ R^{p_m}`, `A_(m,t) ∈ R^(n_m×n_m)`, `B_(m,t) ∈ R^(n_m×p_m)`, and `c_(m,t) ∈ R^{n_m}`. Each mode invariant belongs to its `R^{n_m}` state space. Each transition edge has one guard in the source state space and one reset relation in the `[source,target]` product space for every stage. The stage flow and control are
+
+```text
+z_(t+1) = A_(m_t,t) x_t + B_(m_t,t) u_t + c_(m_t,t)
+u_t ∈ U_(m_t,t)
+```
+
+The model may supply one affine flow reused at every stage or one flow per stage. Each mode has one control set per flow stage and one invariant set at every state stage. The current profile requires zero external-input columns in each affine flow; disturbance/exogenous-input semantics are outside this profile. The request pins `m_0` and `x_0`; the relation also requires `x_0 ∈ I_(m_0,0)`.
+
+At the integer boundary after the flow, `z_(t+1)` is the pre-reset state. The current mode's next-stage invariant and the selected edge's stage-`t` guard both constrain it. The edge reset relation then relates the pre-reset state to the next mode's post-reset state:
+
+```text
+z_(t+1) ∈ I_(m_t,t+1) ∩ G_(e_t,t)
+(z_(t+1), x_(t+1)) ∈ R_(e_t,t)
+x_(t+1) ∈ I_(m_(t+1),t+1)
+```
+
+`G_(e_t,t)` lives in the source mode's state space. `R_(e_t,t)` lives in concatenated `[source-state, target-state]` space, so resets may change dimension. The target invariant is applied after reset; the source invariant is applied before reset. A guard is evaluated on the flow-produced pre-reset state, not the post-reset state. Missing edges are forbidden transitions. A no-op or identity reset must be represented by an explicit reset relation. Parallel edges are distinct path branches even when they share endpoints.
+
+The terminal objective is evaluated on `x_N` in mode `m_N`, after the final reset. `m_N` must be an allowed terminal mode and `x_N ∈ I_(m_N,N)`. Every allowed terminal mode has exactly one objective, and mode-indexed objectives must use the same declared quantity and units. Each branch couples its complete numeric joint relation (all stage states, controls, and pre-reset states) with its ordered `HybridPath` identity. Mode and edge identities remain branch metadata; they are not numeric coordinates to be merged into a convex hull or unlabeled point cloud. If `N=0`, the path contains only the pinned initial mode and no controls, flows, edges, guards, or resets; the same state is both initial and terminal and must satisfy its stage-zero invariant and terminal objective.
+
+The timing above is an inference from current code and tests, and is the contract proposal for review—not a claim that all set representations, reset operations, or dimensions are supported. Each adapter must continue to admit its operation plan and limits explicitly; unsupported operations must be rejected before execution, with per-path and per-operation provenance retained.
+
+Current executable evidence includes `independent tiny trajectory oracle matches guarded reset branches and ties`, `zero-horizon path is the initial terminal mode and has no edge`, `an absent transition edge is forbidden and yields no path`, `profile admission accepts rectangular reset relations between different mode dimensions`, and `profile admission checks source guard and source-plus-target reset dimensions` in `tests/unit/model/hybrid_system_test.cpp`. The end-to-end `independent two-stage oracle checks every edge history and tied mode sequence` lives in `tests/unit/synthesis/hybrid_path_program_tests.cpp`.
+
 ### Next implementation step
 
-Add the invocation and resource-evidence types, migrate preflight and verification adapters to poll the shared interruption rule, and test deadline/cancellation propagation plus observer isolation through the coordinated path.
+Obtain an independent semantics review of this stage/reset ordering. Then add/retain contract tests that distinguish pre-reset guard/invariant checks from post-reset target invariants across rectangular resets, forbidden transitions, empty branches, and zero horizon; use the independent tiny path oracle to compare complete labelled mode sequences. Next, report capability limits by horizon, mode/edge counts, and state/control dimensions without inferring scalability from fixtures.
