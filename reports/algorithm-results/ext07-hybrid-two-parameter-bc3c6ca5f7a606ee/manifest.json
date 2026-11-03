@@ -1,0 +1,24 @@
+{
+  "files": {
+    "CMakeCXXCompiler.raw.cmake": "fc54f5e431c04fbe157752a68b26b3f49e29f913e0188f9334e2c610971c68b3",
+    "build.log": "ef5c67b4fb1288ae8d26a4225d4a571f9b2de00023f4f1ef7edf0a616f3be937",
+    "configure.log": "ce63b938c646a1be50e92ce923fb338bb243f832baf1416a19fb0c50cc49553f",
+    "feasible-polygons.svg": "84035d5c550f608a0105658b1136ac4e2327e18081cbfe47bf1e1b81b4cb79e2",
+    "host.json": "7219bca99a2557458f9d135d9fd0781ad3a7801c90489385ffb9d2dfd16147b2",
+    "index.html": "f12f3d57675d90f51ac358b62f6843007c98269185b07a642dac33b3eeddc7c3",
+    "measure.jsonl": "52b96433509810cd1597fb71e599b812dcdc8b59518b558381df58276547fbab",
+    "measure.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "postrun.json": "69894a24269b6b51a046843fbbf545c8874e1a91c101b1efd567280288a382ee",
+    "prebuild.json": "c119f7e4c63babd6b5f4a2984e2cbe03ea7bc4869f65fca890644357facced47",
+    "process_cpu_json.hpp": "2dc6ff62e157bbfe09afcf55569788208f6ffdf9adc593fe5783fa19929daaff",
+    "records.json": "c989429458996ea77c20e91ba05dd948bc1da2980babdf64b8f5b6fd024eefee",
+    "smoke.jsonl": "d262853fd5a0d4f3ae5a1c7e025058f38f7abdcf45777f1fc0be2e6dd714678f",
+    "smoke.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "summary.csv": "08dfb30ea353682b26373f1ba34a2d843465511126a8fcd28044a67d43a22ad4",
+    "two-control-example.html": "aee51cd628620e3f745652aca433e3f8c128d8ab209f42035a8c6c9e03979af0",
+    "two_parameter_driver.cpp": "d406b969e3a72574368a90555701a108bc5c50b54d52d1e8a0b0c51c78539c25"
+  },
+  "report_id": "ext07-hybrid-two-parameter-bc3c6ca5f7a606ee",
+  "schema": "csl.ext07-hybrid-two-parameter-manifest/1",
+  "source_commit": "88d1804855e77d8b1a779c144a6e5a2585e888bc"
+}

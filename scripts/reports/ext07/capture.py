@@ -74,7 +74,8 @@ def capture(source: Path, destination: Path, commit: str, cmake: str,
     build = destination / "build"
     env = dict(os.environ, VSLANG="1033", PreferredUILang="en-US")
     run([cmake, "-S", str(source), "-B", str(build), "-DBUILD_TESTING=OFF",
-         "-DCSL_ENABLE_HIGHS=ON", "-DCSL_ENABLE_QHULL=OFF", "-DCSL_BUILD_EXT07_REPORT=ON"],
+         "-DCMAKE_BUILD_TYPE=Release", "-DCSL_ENABLE_HIGHS=ON",
+         "-DCSL_ENABLE_QHULL=OFF", "-DCSL_BUILD_EXT07_REPORT=ON"],
         source, destination / "configure.log", env)
     cache = (build / "CMakeCache.txt").read_text(encoding="utf-8", errors="replace")
     generator_match = re.search(r"^CMAKE_GENERATOR:INTERNAL=(.*)$", cache, re.MULTILINE)

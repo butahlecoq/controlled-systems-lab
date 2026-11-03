@@ -1,28 +1,52 @@
 {
   "reports": [
     {
-      "collector_sha256": "02091eeca10f9cb20c776cef71f4b78a6ce413b0405c0797843e003719b39617",
+      "collector_sha256": "60b438693146edbc2f521e77969c731852fd62c6aa961d885f4b110e537aec9d",
       "index_sha256": "9b914e6355ab9b0ca480b3b50712d2d9182f0c81985cc411bf140f8015359496",
       "manifest_sha256": "4699fb473b04daa04f35141489ba39914bc91cf0870f88cf1b774977dcd429df",
-      "renderer_sha256": "0769946a77183adc5ec85acdb5b1183b70b32b074def3aa033ea7387a32af03e",
+      "renderer_sha256": "a7eea951a596dd7f4222b193ac67484cc863ef095a575ae497d7f01176abcbb4",
       "report_id": "ext07-hybrid-51d9ee2e89d240eb",
       "schema": "csl.ext07-hybrid-profile-report/1",
       "source_commit": "2965baafa325550ad60ec91d44f5e3f86a832178",
-      "stager_sha256": "4e850578988012204c90ce4e9f57a74e6b6afccd9579f29b95db60a96b54375f",
+      "stager_sha256": "8607e3d5051f79a7d1fb3caf615b0198b87e7c9be0464f61ff247891b29ad6c1",
       "zip_sha256": "9d4cf7eb42fe60e3f2e38241ea14fdf6e4484a4b7591286f41f3beafc6c89731"
     },
     {
-      "collector_sha256": "297b773f2d461a3a093d7e2ff133f3dabafbc6cdf06109654e9a547bcc984290",
+      "collector_sha256": "60b438693146edbc2f521e77969c731852fd62c6aa961d885f4b110e537aec9d",
+      "index_sha256": "78bd3abebffe4e8be9b822a785938c2a35066682dd13393ce96b0a9a1784979d",
+      "manifest_sha256": "eff251f06895cb801429b52ccfeda085f7016134bbd92719aee94ad8e3a5dcbf",
+      "renderer_sha256": "a7eea951a596dd7f4222b193ac67484cc863ef095a575ae497d7f01176abcbb4",
+      "report_id": "ext07-hybrid-e7bb939d854b1907",
+      "schema": "csl.ext07-hybrid-profile-report/2",
+      "source_commit": "4641be3f85318cdb09612d8efbe2b056c22d7877",
+      "stager_sha256": "8607e3d5051f79a7d1fb3caf615b0198b87e7c9be0464f61ff247891b29ad6c1",
+      "zip_sha256": "f867e72aead0ba7062d7474106d44e68f024b84ca24a1859bcf42b41d7887ca0"
+    },
+    {
+      "collector_sha256": "59ffb067bf8a4ee3a139c638f0b7581b9ed455f451a8220c7626171a024f2cb3",
       "example_sha256": "a84346df299a62fdb131a2bc2ea58da65c03fa823c4bb7faa14c2e6b0d31c3c7",
       "index_sha256": "8a68ed07ff8b49750fc3d56cb21e20a3c3dbd01bd869251af7768b47a9dfae10",
       "manifest_sha256": "0f07aee507bd028410fe1b37c51bf7c2dc32baf8b7bd0b7cd80c2b2b61076dea",
-      "renderer_sha256": "2185508af5a44172552ad08c5e4d6b746c40abedb0177a8756983daae51b8e39",
+      "renderer_sha256": "ed65f643d14e004a64e9ef14b0e43a965a960b37bd7791668fca269c447e4e85",
       "report_id": "ext07-hybrid-two-parameter-8ad871b5ea29fc7b",
       "schema": "csl.ext07-hybrid-two-parameter-report/1",
       "source_commit": "8f7ea777621c337680b092ba6a15dd09a9d00a88",
-      "stager_sha256": "4e850578988012204c90ce4e9f57a74e6b6afccd9579f29b95db60a96b54375f",
+      "stager_sha256": "8607e3d5051f79a7d1fb3caf615b0198b87e7c9be0464f61ff247891b29ad6c1",
       "verifier_id": "csl.hybrid.exact-linear-h",
       "zip_sha256": "4e8e1ba69f8816e05a0bf6a198f7a89bb1733f00bcf0df8ac5b69227f1981347"
+    },
+    {
+      "collector_sha256": "59ffb067bf8a4ee3a139c638f0b7581b9ed455f451a8220c7626171a024f2cb3",
+      "example_sha256": "aee51cd628620e3f745652aca433e3f8c128d8ab209f42035a8c6c9e03979af0",
+      "index_sha256": "f12f3d57675d90f51ac358b62f6843007c98269185b07a642dac33b3eeddc7c3",
+      "manifest_sha256": "341de72cf4c6c4d0c6d541cff7e67108386049537972527138ab95f675e47d6f",
+      "renderer_sha256": "ed65f643d14e004a64e9ef14b0e43a965a960b37bd7791668fca269c447e4e85",
+      "report_id": "ext07-hybrid-two-parameter-bc3c6ca5f7a606ee",
+      "schema": "csl.ext07-hybrid-two-parameter-report/2",
+      "source_commit": "88d1804855e77d8b1a779c144a6e5a2585e888bc",
+      "stager_sha256": "8607e3d5051f79a7d1fb3caf615b0198b87e7c9be0464f61ff247891b29ad6c1",
+      "verifier_id": "csl.hybrid.exact-linear-h",
+      "zip_sha256": "4f307cba991ff33a56a36818ac7aa37e2e81847b34fb2377d5a85c4da374cd48"
     },
     {
       "collector_sha256": "3b2008e43fd2a2e397ad38d4db48218f7359dbc3345d4bfcf535608d69b61b8e",
@@ -33,7 +57,7 @@
         "1ad2fb668141df575231940526e26cc3c0fceb0a",
         "d3bc6721d8cdd5f84f4abb5d1031db96379a48ae"
       ],
-      "stager_sha256": "4e850578988012204c90ce4e9f57a74e6b6afccd9579f29b95db60a96b54375f",
+      "stager_sha256": "8607e3d5051f79a7d1fb3caf615b0198b87e7c9be0464f61ff247891b29ad6c1",
       "zip_sha256": "a306e0af6d3958b3b899295413273be2c0be5351f0a1f19b136770ddc84f7d7c"
     }
   ],

@@ -1,6 +1,7 @@
 #include <csl/adapters/convex/highs.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/synthesis/hybrid_path_program.hpp>
+#include "process_cpu_json.hpp"
 
 #include <chrono>
 #include <cmath>
@@ -15,6 +16,7 @@
 #include <string>
 #include <string>
 #include <variant>
+#include <vector>
 
 namespace {
 using namespace csl;
@@ -107,6 +109,7 @@ struct Observation {
     std::string feasibility;
     std::string optimality;
     std::string coverage;
+    std::vector<synthesis::ProcessCpuObservation> branch_process_cpu;
 };
 
 const char* status(synthesis::HybridVerificationStatus value) {
@@ -149,6 +152,7 @@ Observation run_once() {
        !execution.branches[0].result || !execution.branches[0].result->primal)
         throw std::runtime_error("Hybrid branch optimization did not complete with a primal point");
     const auto& branch = execution.branches[0];
+    observation.branch_process_cpu.push_back(branch.process_cpu);
     observation.provider = branch.providers.empty() || !branch.providers[0].actual ? "unavailable" :
         branch.providers[0].actual->id.value + "@" + branch.providers[0].actual->version;
     observation.termination = branch.termination == Termination::completed ? "completed" : "other";
@@ -178,8 +182,10 @@ Observation run_once() {
     std::vector<synthesis::HybridPathOptimalFaceCandidate> candidates;
     candidates.push_back(std::get<synthesis::HybridPathOptimalFaceCandidate>(std::move(candidate_result)));
     synthesis::OneStepScalarIntervalHybridFamilyVerifier verifier;
+    ExecutionContext verifier_context;
+    verifier_context.numerical = {1e-8, 1e-8};
     auto verified = synthesis::verify_hybrid_portfolio_family(verifier, system, request, programs,
-        candidates, {1, 8}, {1e-8, 1e-8});
+        candidates, {1, 8}, synthesis::HybridVerifierInvocation{verifier_context});
     if(!std::holds_alternative<synthesis::HybridFamilyVerificationReport>(verified))
         throw std::runtime_error("Hybrid family verifier did not return a report");
     const auto& report = std::get<synthesis::HybridFamilyVerificationReport>(verified);
@@ -212,9 +218,11 @@ void batch(const char* phase, std::size_t repetition, std::size_t calls) {
     Observation last;
     std::size_t failures = 0;
     std::string error;
+    std::vector<std::vector<synthesis::ProcessCpuObservation>> process_cpu_observations;
     for(std::size_t call = 0; call < calls; ++call) {
         try {
             last = run_once();
+            process_cpu_observations.push_back(last.branch_process_cpu);
             setup += last.setup_ns;
             assembly += last.assembly_ns;
             solve += last.solve_ns;
@@ -223,6 +231,7 @@ void batch(const char* phase, std::size_t repetition, std::size_t calls) {
         } catch(const std::exception& exception) {
             ++failures;
             error = exception.what();
+            process_cpu_observations.emplace_back();
         }
     }
     std::cout << "{\"phase\":\"" << phase << "\",\"repetition\":" << repetition
@@ -247,7 +256,18 @@ void batch(const char* phase, std::size_t repetition, std::size_t calls) {
         << "\",\"optimality\":\"" << last.optimality << "\",\"coverage\":\""
         << last.coverage << "\",\"setup_total_ns\":" << setup << ",\"assembly_total_ns\":" << assembly << ",\"solve_total_ns\":"
         << solve << ",\"verify_total_ns\":" << verify << ",\"end_to_end_total_ns\":" << total
-        << ",\"error\":\"" << error << "\"}\n";
+        << ",\"process_cpu_observations\":[";
+    for(std::size_t call=0;call<process_cpu_observations.size();++call) {
+        if(call) std::cout << ',';
+        std::cout << '[';
+        for(std::size_t branch=0;branch<process_cpu_observations[call].size();++branch) {
+            if(branch) std::cout << ',';
+            reports::ext07::write_process_cpu_observation(
+                std::cout,process_cpu_observations[call][branch]);
+        }
+        std::cout << ']';
+    }
+    std::cout << "],\"error\":\"" << error << "\"}\n";
     if(failures != 0) throw std::runtime_error("One or more EXT-07 report calls failed");
 }
 }

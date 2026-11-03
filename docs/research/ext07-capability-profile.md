@@ -86,7 +86,10 @@ time. Verifier invocations record the full verification phase, including
 coordinator checks and path enumeration as well as the adapter call; this is not
 provider-only time. Backend thread width is retained when reported.
 The separate resource capture records whole-process CPU and memory for two
-fixtures. Provider CPU and heap use remain unattributed, and requested resource
-limits are not enforced by these records. Those limits keep the issue open. See the
+fixtures. The path, branch, and verifier records also retain process CPU deltas
+around those operation intervals, summed over all process threads; concurrent
+unrelated work can contribute, so these are not provider-only CPU measurements.
+Heap use remains unmeasured, and requested resource limits are not enforced by
+these records. Those limits keep the issue open. See the
 [implementation capability profile](../architecture/hybrid-capability-profile.md)
 for supported dimensions, counts, and remaining capability work.

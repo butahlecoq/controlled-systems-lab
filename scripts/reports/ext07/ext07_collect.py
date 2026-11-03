@@ -11,14 +11,23 @@ import statistics
 import subprocess
 
 
-SOURCE_FILES = (
+LEGACY_SOURCE_FILES = (
     "driver.cpp", "smoke.jsonl", "measure.jsonl", "smoke.stderr.txt",
     "measure.stderr.txt", "prebuild.json", "postrun.json", "host.json",
     "configure.log", "build.log", "CMakeCXXCompiler.raw.cmake",
 )
+SOURCE_FILES = ("driver.cpp", "process_cpu_json.hpp", *LEGACY_SOURCE_FILES[1:])
 EXPECTED_PROVIDER = "csl.lp.highs@1.1.0+highs.1.11.0"
 EXPECTED_VERIFIER = "csl.hybrid.one-step-scalar-interval"
 TOLERANCE = 1e-8
+
+
+def source_files_for_record(record: dict) -> tuple[str, ...]:
+    if record.get("schema") == "csl.ext07-hybrid-profile-report/1":
+        return LEGACY_SOURCE_FILES
+    require(record.get("schema") == "csl.ext07-hybrid-profile-report/2",
+            "Unsupported EXT-07 report schema")
+    return SOURCE_FILES
 
 
 def require(condition: bool, message: str) -> None:
@@ -47,7 +56,8 @@ def jsonl(path: Path, expected_count: int) -> list[dict]:
     return rows
 
 
-def validate_run(row: dict, phase: str, repetition: int, calls: int) -> None:
+def validate_run(row: dict, phase: str, repetition: int, calls: int,
+                 process_cpu: bool = True) -> None:
     require(row.get("phase") == phase and row.get("repetition") == repetition and
             row.get("calls") == calls and row.get("failures") == 0 and
             row.get("status") == "passed" and row.get("path_count") == 1,
@@ -62,6 +72,8 @@ def validate_run(row: dict, phase: str, repetition: int, calls: int) -> None:
     require(row.get("verifier") == EXPECTED_VERIFIER and row.get("verifier_version") == "1" and
             row.get("feasibility") == row.get("optimality") == row.get("coverage") == "established",
             "EXT-07 complete-family verifier result differs")
+    if process_cpu:
+        validate_process_cpu_observations(row, calls, 1)
     for name in ("setup_total_ns", "assembly_total_ns", "solve_total_ns", "verify_total_ns",
                  "end_to_end_total_ns"):
         require(isinstance(row.get(name), int) and row[name] > 0,
@@ -77,6 +89,57 @@ def validate_run(row: dict, phase: str, repetition: int, calls: int) -> None:
     require(not row.get("error"), "EXT-07 driver recorded an error")
 
 
+def validate_process_cpu_observations(row: dict, calls: int, branches: int) -> None:
+    observations = row.get("process_cpu_observations")
+    require(isinstance(observations, list) and len(observations) == calls,
+            "EXT-07 process CPU observation count differs from calls")
+    allowed_reasons = {"unsupported_platform", "clock_read_failed", "clock_regressed"}
+    for call in observations:
+        require(isinstance(call, list) and len(call) == branches,
+                "EXT-07 process CPU observations do not match branch inventory")
+        for value in call:
+            require(isinstance(value, dict), "EXT-07 process CPU observation is not an object")
+            if value.get("status") == "observed":
+                nanos = value.get("nanoseconds")
+                require(isinstance(nanos, int) and not isinstance(nanos, bool) and nanos >= 0 and
+                        set(value) == {"status", "nanoseconds"},
+                        "EXT-07 process CPU duration is invalid")
+            else:
+                require(value.get("status") == "unavailable" and
+                        value.get("reason") in allowed_reasons and
+                        set(value) == {"status", "reason"},
+                        "EXT-07 process CPU unavailable reason is invalid")
+
+
+def process_cpu_summary(rows: list[dict], branch_labels: list[str]) -> dict:
+    result = []
+    for index, label in enumerate(branch_labels):
+        observed = []
+        unavailable = {}
+        for row in rows:
+            for call in row["process_cpu_observations"]:
+                value = call[index]
+                if value["status"] == "observed":
+                    observed.append(value["nanoseconds"])
+                else:
+                    reason = value["reason"]
+                    unavailable[reason] = unavailable.get(reason, 0) + 1
+        result.append({
+            "branch": label,
+            "observed_calls": len(observed),
+            "unavailable_calls": sum(unavailable.values()),
+            "unavailable_reasons": unavailable,
+            "min_nanoseconds": min(observed) if observed else None,
+            "median_nanoseconds": int(statistics.median(observed)) if observed else None,
+            "max_nanoseconds": max(observed) if observed else None,
+        })
+    return {
+        "scope": "process CPU accumulated across all threads during workspace creation and branch execution",
+        "attribution": "process-scoped, not provider-only; unrelated concurrent process work may contribute",
+        "branches": result,
+    }
+
+
 def collect(capture: Path, source: Path, output_root: Path) -> Path:
     capture = capture.resolve(strict=True)
     source = source.resolve(strict=True)
@@ -90,19 +153,26 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
             pre.get("observed_utc") < post.get("observed_utc") <= host.get("collected_utc"),
             "EXT-07 frozen source receipts differ")
     driver = source / "benchmarks/reporting/ext07/driver.cpp"
+    cpu_header = source / "benchmarks/reporting/ext07/process_cpu_json.hpp"
     require(driver.read_bytes() == subprocess.check_output(
         ["git", "show", commit + ":benchmarks/reporting/ext07/driver.cpp"], cwd=source),
         "EXT-07 driver differs from its frozen source commit")
+    require(cpu_header.read_bytes() == subprocess.check_output(
+        ["git", "show", commit + ":benchmarks/reporting/ext07/process_cpu_json.hpp"], cwd=source),
+        "EXT-07 CPU JSON helper differs from its frozen source commit")
     executable = capture / ("build/Release/csl_ext07_hybrid_report.exe" if os.name == "nt"
                             else "build/csl_ext07_hybrid_report")
     require(sha(executable.read_bytes()) == post.get("executable_sha256"),
             "EXT-07 measured executable hash differs")
     cache = (capture / "CMakeCache.raw.txt").read_text(encoding="utf-8", errors="replace")
+    multiconfig_release = ("CMAKE_CONFIGURATION_TYPES:STRING=Debug;Release;MinSizeRel;RelWithDebInfo" in cache and
+                           "CMAKE_GENERATOR:INTERNAL=Visual Studio 17 2022" in cache)
+    singleconfig_release = ("CMAKE_BUILD_TYPE:STRING=Release" in cache and
+                            "CMAKE_GENERATOR:INTERNAL=Unix Makefiles" in cache)
     require(all(key in cache for key in (
         "BUILD_TESTING:BOOL=OFF", "CSL_ENABLE_HIGHS:BOOL=ON",
-        "CSL_ENABLE_QHULL:BOOL=OFF", "CSL_BUILD_EXT07_REPORT:BOOL=ON",
-        "CMAKE_CONFIGURATION_TYPES:STRING=Debug;Release;MinSizeRel;RelWithDebInfo")) and
-        "CMAKE_GENERATOR:INTERNAL=Visual Studio 17 2022" in cache,
+        "CSL_ENABLE_QHULL:BOOL=OFF", "CSL_BUILD_EXT07_REPORT:BOOL=ON")) and
+        (multiconfig_release or singleconfig_release),
         "EXT-07 measured Release configuration differs")
     require((capture / "smoke.stderr.txt").read_bytes() ==
             (capture / "measure.stderr.txt").read_bytes() == b"",
@@ -114,6 +184,7 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
     for repetition, row in enumerate(measure[1:]):
         validate_run(row, "trial", repetition, 20)
     source_hashes = {name: sha((driver if name == "driver.cpp" else
+                                cpu_header if name == "process_cpu_json.hpp" else
                                 capture / name).read_bytes()) for name in SOURCE_FILES}
     rows = measure[1:]
     def median_total(key: str) -> int:
@@ -138,7 +209,7 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
         "relation_coordinates": ["x0", "u0", "x_pre1", "x1"],
     }
     unsigned = {
-        "schema": "csl.ext07-hybrid-profile-report/1",
+        "schema": "csl.ext07-hybrid-profile-report/2",
         "source_commit": commit,
         "source_tree": pre["tree"],
         "source_sha256": source_hashes,
@@ -172,11 +243,13 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
                                        for key in ("setup_total_ns", "assembly_total_ns",
                                                    "solve_total_ns", "verify_total_ns",
                                                    "end_to_end_total_ns")},
+            "process_cpu": process_cpu_summary(rows, ["coast-to-terminal"]),
             "comparison": "single adapter; descriptive measurements only; no comparator or speedup claim",
         },
         "evidence_scope": "140 successful measured public hybrid portfolio calls over one fixed analytic one-step scalar fixture; each call constructs the path H relation, solves the branch with HiGHS LP and independently verifies its complete interval minimizer family",
         "evidence_limits": [
-            "One host, one MSVC Release configuration, one fixture, and a numerical binary64 verifier.",
+            "One host, one Release configuration, one fixture, and a numerical binary64 verifier.",
+            "Process CPU values sum all process threads during the branch interval; concurrent unrelated process work may contribute and values are not provider-only CPU.",
             "No comparator, speedup, source-mapped bottleneck, application-scale result, or general scalability claim.",
             "The supported verifier domain is one-step scalar interval systems; continuous multi-stage verification is outside this report.",
         ],
@@ -190,6 +263,7 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
     destination.mkdir()
     for name in SOURCE_FILES:
         (destination / name).write_bytes((driver if name == "driver.cpp" else
+                                          cpu_header if name == "process_cpu_json.hpp" else
                                           capture / name).read_bytes())
     (destination / "records.json").write_bytes(encoded(record))
     return destination

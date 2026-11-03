@@ -1,0 +1,2062 @@
+{
+  "analytic": {
+    "complete_minimizing_families": {
+      "enter-full": "u0=0, 0<=u1<=1",
+      "enter-half": "u0=0, 0<=u1<=1"
+    },
+    "global_minimum": 0,
+    "paths": {
+      "enter-full": {
+        "feasible_parameter_set": "(u0,u1) in [0,1] x [0,1]",
+        "minimizing_face": "u0=0, 0<=u1<=1"
+      },
+      "enter-half": {
+        "feasible_parameter_set": "(u0,u1) in [0,0.5] x [0,1]",
+        "minimizing_face": "u0=0, 0<=u1<=1"
+      }
+    },
+    "tied_paths": [
+      "enter-half",
+      "enter-full"
+    ]
+  },
+  "capability_profile": {
+    "assurance": "numerical binary64 exactness checks; not validated arithmetic",
+    "dimensions_and_counts": {
+      "edges": 3,
+      "free_controls": 2,
+      "horizon": 2,
+      "joint_variables": 7,
+      "modes": 3,
+      "paths": 2
+    },
+    "supported_case": "two-stage scalar system with two bounded non-singleton interval controls; scalar interval invariants/guards; deterministic exactly representable affine resets; scalar linear terminal objective; complete family checked by the exact linear H verifier"
+  },
+  "environment": {
+    "absolute_tolerance": 1e-08,
+    "architecture": "x86_64",
+    "cmake": "cmake version 3.31.6",
+    "cmake_cache_sha256": "0021a1e97fe11bd012d8be28ab2946db3873ad6b9beef4e4be0670fd4c79544a",
+    "collected_utc": "2026-11-03T19:20:57.509663+00:00",
+    "compiler_id": "GNU",
+    "compiler_receipt": "CMakeCXXCompiler.raw.cmake",
+    "compiler_version": "16.2.1",
+    "configuration": "Release",
+    "cxx_standard": 20,
+    "enumeration_limits": {
+      "max_horizon": 2,
+      "max_paths": 8
+    },
+    "host": "Linux measurement workstation",
+    "host_name_sha256": "382a803dcc0de9618b141c904dde30f933985956df74ce7fd9886494c7a35a60",
+    "logical_processors": 8,
+    "native_threads_configured": 1,
+    "native_threads_observed": null,
+    "native_threads_requested": 1,
+    "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "outer_workers_observed": 1,
+    "outer_workers_requested": 1,
+    "processor": "",
+    "python": "3.14.8",
+    "raw_build_log_sha256": "ef5c67b4fb1288ae8d26a4225d4a571f9b2de00023f4f1ef7edf0a616f3be937",
+    "raw_configure_log_sha256": "ce63b938c646a1be50e92ce923fb338bb243f832baf1416a19fb0c50cc49553f",
+    "relation_limits": {
+      "max_matrix_elements": 65536,
+      "max_rows": 4096,
+      "max_variables": 64
+    },
+    "relative_tolerance": 1e-08,
+    "source_commit": "88d1804855e77d8b1a779c144a6e5a2585e888bc",
+    "source_tree": "23ec3ed043e2246e7715249263d9350b6e54b575",
+    "timing_scope": "One end-to-end call includes fixture/provider setup, complete path relation assembly, LP execution, candidate-face construction, and verification of all allowed path families. Serialization, build, and rendering are excluded.",
+    "warmup_policy": "One excluded 10-call batch followed by seven measured 20-call batches",
+    "workspace_reuse": "none; fresh fixture, provider and workspace per call"
+  },
+  "evidence_limits": [
+    "One host, one Release configuration, and one fixed analytic two-stage fixture.",
+    "The controls are independent and bounded; no higher-dimensional parameter polytope is measured.",
+    "No comparator, speedup, source-mapped bottleneck, application-scale result, or scalability claim.",
+    "Binary64 checks are numerical assurance and do not establish validated arithmetic."
+  ],
+  "evidence_scope": "140 completed public hybrid portfolio calls; each call assembles both two-stage H relations, solves both branches with registered HiGHS LP, constructs both tied candidate faces, and verifies both complete two-parameter families with ExactLinearHHybridFamilyVerifier",
+  "measurement": {
+    "comparison": "one backend and one fixed fixture; descriptive only, no comparator or speedup claim",
+    "failures": 0,
+    "max_batch_end_to_end_ns": 69786588,
+    "measured_calls": 140,
+    "median_batch_end_to_end_ns": 68178758,
+    "median_call_ns": 3397951,
+    "min_batch_end_to_end_ns": 67800214,
+    "process_cpu": {
+      "attribution": "process-scoped, not provider-only; unrelated concurrent process work may contribute",
+      "branches": [
+        {
+          "branch": "enter-half",
+          "max_nanoseconds": 329312,
+          "median_nanoseconds": 222978,
+          "min_nanoseconds": 210775,
+          "observed_calls": 140,
+          "unavailable_calls": 0,
+          "unavailable_reasons": {}
+        },
+        {
+          "branch": "enter-full",
+          "max_nanoseconds": 235868,
+          "median_nanoseconds": 195036,
+          "min_nanoseconds": 188503,
+          "observed_calls": 140,
+          "unavailable_calls": 0,
+          "unavailable_reasons": {}
+        }
+      ],
+      "scope": "process CPU accumulated across all threads during workspace creation and branch execution"
+    },
+    "raw_measure_sha256": "52b96433509810cd1597fb71e599b812dcdc8b59518b558381df58276547fbab",
+    "raw_smoke_sha256": "d262853fd5a0d4f3ae5a1c7e025058f38f7abdcf45777f1fc0be2e6dd714678f",
+    "trials": [
+      {
+        "call_durations_ns": [
+          3638627,
+          3507534,
+          3402911,
+          3410313,
+          3404726,
+          3502994,
+          3934408,
+          3513540,
+          3459971,
+          3481971,
+          3453267,
+          3478131,
+          3433641,
+          3673338,
+          3486441,
+          3442302,
+          3386637,
+          3383983,
+          3393971,
+          3397882
+        ],
+        "calls": 20,
+        "coverage": "established",
+        "edge_paths": [
+          "enter-half",
+          "enter-full"
+        ],
+        "end_to_end_total_ns": 69786588,
+        "error": "",
+        "failures": 0,
+        "feasibility": "established",
+        "optimality": "established",
+        "paths": 2,
+        "phase": "trial",
+        "process_cpu_observations": [
+          [
+            {
+              "nanoseconds": 230720,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 212829,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 282680,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 235868,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 222717,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194425,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 223399,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194184,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 235522,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194455,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 221866,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194325,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 317492,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 216386,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 308976,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 211467,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 270237,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 190057,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 276983,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 192692,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 292920,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 191369,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 307710,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195597,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 226054,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 197821,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 249107,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 197351,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 243677,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195747,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 252052,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194134,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 228028,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 193503,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 236962,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195888,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 221615,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194735,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 221756,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 210369,
+              "status": "observed"
+            }
+          ]
+        ],
+        "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+        "relation_matrix_elements": 140,
+        "relation_rows": 20,
+        "repetition": 0,
+        "status": "passed",
+        "verifier": "csl.hybrid.exact-linear-h"
+      },
+      {
+        "call_durations_ns": [
+          3413876,
+          3480156,
+          3393202,
+          3416530,
+          3414783,
+          3370853,
+          3361284,
+          3365335,
+          3333278,
+          3386847,
+          3406613,
+          3502366,
+          3520595,
+          3386637,
+          3396066,
+          3368688,
+          3388034,
+          3384682,
+          3367850,
+          3346617
+        ],
+        "calls": 20,
+        "coverage": "established",
+        "edge_paths": [
+          "enter-half",
+          "enter-full"
+        ],
+        "end_to_end_total_ns": 68004292,
+        "error": "",
+        "failures": 0,
+        "feasibility": "established",
+        "optimality": "established",
+        "paths": 2,
+        "phase": "trial",
+        "process_cpu_observations": [
+          [
+            {
+              "nanoseconds": 222006,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 193834,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 275226,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 212418,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220904,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194885,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220463,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 193763,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 244508,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194304,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220945,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 193934,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220032,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 206735,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 211697,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194685,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 210775,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 193804,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 233921,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 193934,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 221275,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 192762,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 284934,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 217417,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 267010,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 225974,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 222848,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 210758,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 235441,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195938,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 221345,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195176,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 233687,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 193493,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 221496,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 193893,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220163,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 205608,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220904,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194094,
+              "status": "observed"
+            }
+          ]
+        ],
+        "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+        "relation_matrix_elements": 140,
+        "relation_rows": 20,
+        "repetition": 1,
+        "status": "passed",
+        "verifier": "csl.hybrid.exact-linear-h"
+      },
+      {
+        "call_durations_ns": [
+          3429729,
+          3386079,
+          3468143,
+          3440625,
+          3370225,
+          3387056,
+          3393202,
+          3370295,
+          3416809,
+          3412200,
+          3345500,
+          3390409,
+          3426378,
+          3468981,
+          3483369,
+          3417577,
+          3361494,
+          3355208,
+          3441463,
+          3414155
+        ],
+        "calls": 20,
+        "coverage": "established",
+        "edge_paths": [
+          "enter-half",
+          "enter-full"
+        ],
+        "end_to_end_total_ns": 68178897,
+        "error": "",
+        "failures": 0,
+        "feasibility": "established",
+        "optimality": "established",
+        "paths": 2,
+        "phase": "trial",
+        "process_cpu_observations": [
+          [
+            {
+              "nanoseconds": 221054,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 193593,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 231884,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 196398,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 267321,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 200747,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 252231,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 197019,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 221075,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194665,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 221465,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 208144,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220894,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194916,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220754,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195858,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 234579,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194304,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 221555,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 193383,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 225473,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 208209,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220653,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 193673,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 260428,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 196218,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 263822,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 199444,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 222587,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195356,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 242245,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195597,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 221826,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194294,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 221846,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 211926,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220714,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195076,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 222317,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194224,
+              "status": "observed"
+            }
+          ]
+        ],
+        "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+        "relation_matrix_elements": 140,
+        "relation_rows": 20,
+        "repetition": 2,
+        "status": "passed",
+        "verifier": "csl.hybrid.exact-linear-h"
+      },
+      {
+        "call_durations_ns": [
+          3468422,
+          3416600,
+          3710914,
+          3495521,
+          3383215,
+          3392783,
+          3387405,
+          3360517,
+          3373786,
+          3388034,
+          3361145,
+          3413806,
+          3348573,
+          3457108,
+          3381399,
+          3378466,
+          3366872,
+          3405634,
+          3390898,
+          3395647
+        ],
+        "calls": 20,
+        "coverage": "established",
+        "edge_paths": [
+          "enter-half",
+          "enter-full"
+        ],
+        "end_to_end_total_ns": 68276745,
+        "error": "",
+        "failures": 0,
+        "feasibility": "established",
+        "optimality": "established",
+        "paths": 2,
+        "phase": "trial",
+        "process_cpu_observations": [
+          [
+            {
+              "nanoseconds": 246779,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195386,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 221245,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194916,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 329312,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 212217,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 269705,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 226896,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 223570,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194004,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 221205,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195857,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 232673,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195176,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 222027,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194945,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 232366,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 205539,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 221024,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 192861,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220364,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195998,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 246802,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 193813,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 222407,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 193322,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 296331,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 188874,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 222217,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194054,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 222056,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 203109,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 234168,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 190477,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 221004,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 188503,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 224270,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 213921,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220794,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194224,
+              "status": "observed"
+            }
+          ]
+        ],
+        "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+        "relation_matrix_elements": 140,
+        "relation_rows": 20,
+        "repetition": 3,
+        "status": "passed",
+        "verifier": "csl.hybrid.exact-linear-h"
+      },
+      {
+        "call_durations_ns": [
+          3337539,
+          3405145,
+          3398021,
+          3460809,
+          3385240,
+          3373368,
+          3393691,
+          3428053,
+          3375602,
+          3380561,
+          3349062,
+          3381748,
+          3359958,
+          3488606,
+          3428822,
+          3409197,
+          3361495,
+          3421837,
+          3431196,
+          3337817
+        ],
+        "calls": 20,
+        "coverage": "established",
+        "edge_paths": [
+          "enter-half",
+          "enter-full"
+        ],
+        "end_to_end_total_ns": 67907767,
+        "error": "",
+        "failures": 0,
+        "feasibility": "established",
+        "optimality": "established",
+        "paths": 2,
+        "phase": "trial",
+        "process_cpu_observations": [
+          [
+            {
+              "nanoseconds": 219762,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 205502,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 232865,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194905,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220784,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194996,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 286072,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 197280,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 231714,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194394,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 223108,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 209805,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 217328,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 191399,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220253,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 193744,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 237026,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194605,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 219872,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194004,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 221225,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 208731,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 211116,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195166,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220403,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 193853,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 308976,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 206838,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 259878,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 196629,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 212508,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 206918,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220073,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195217,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 221084,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 208988,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 232055,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 196479,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 219832,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194344,
+              "status": "observed"
+            }
+          ]
+        ],
+        "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+        "relation_matrix_elements": 140,
+        "relation_rows": 20,
+        "repetition": 4,
+        "status": "passed",
+        "verifier": "csl.hybrid.exact-linear-h"
+      },
+      {
+        "call_durations_ns": [
+          3359958,
+          3357863,
+          3425400,
+          3386498,
+          3468422,
+          3386218,
+          3394460,
+          3416460,
+          3374275,
+          3370015,
+          3400676,
+          3330973,
+          3364567,
+          3362402,
+          3415691,
+          3501248,
+          3384612,
+          3382656,
+          3381539,
+          3336281
+        ],
+        "calls": 20,
+        "coverage": "established",
+        "edge_paths": [
+          "enter-half",
+          "enter-full"
+        ],
+        "end_to_end_total_ns": 67800214,
+        "error": "",
+        "failures": 0,
+        "feasibility": "established",
+        "optimality": "established",
+        "paths": 2,
+        "phase": "trial",
+        "process_cpu_observations": [
+          [
+            {
+              "nanoseconds": 227768,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 193813,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220223,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 193794,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 219562,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 206737,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 222176,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194776,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 260378,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195687,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 244086,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194906,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 223880,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 197310,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 222517,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 226122,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 221816,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 193363,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 221405,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195998,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 240525,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 193813,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220714,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 190898,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 215063,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 235408,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 212538,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194365,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 255359,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 197009,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 294475,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 206498,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 223399,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 191679,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 236103,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 193994,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220724,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194455,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220654,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 207523,
+              "status": "observed"
+            }
+          ]
+        ],
+        "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+        "relation_matrix_elements": 140,
+        "relation_rows": 20,
+        "repetition": 5,
+        "status": "passed",
+        "verifier": "csl.hybrid.exact-linear-h"
+      },
+      {
+        "call_durations_ns": [
+          3363031,
+          3410244,
+          3363659,
+          3399978,
+          3477921,
+          3478969,
+          3450961,
+          3410593,
+          3407450,
+          3367081,
+          3328389,
+          3411920,
+          3415342,
+          3380771,
+          3399279,
+          3416459,
+          3473172,
+          3425120,
+          3393203,
+          3405216
+        ],
+        "calls": 20,
+        "coverage": "established",
+        "edge_paths": [
+          "enter-half",
+          "enter-full"
+        ],
+        "end_to_end_total_ns": 68178758,
+        "error": "",
+        "failures": 0,
+        "feasibility": "established",
+        "optimality": "established",
+        "paths": 2,
+        "phase": "trial",
+        "process_cpu_observations": [
+          [
+            {
+              "nanoseconds": 233828,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195146,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 221365,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 192752,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220934,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194675,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 243717,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195246,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220894,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 208428,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 303148,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195657,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 227526,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 209206,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 224461,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 196108,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220213,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 193713,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 234973,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194424,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 219832,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 192562,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 227657,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 210314,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 223309,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194605,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 219943,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194805,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 227196,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194695,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 249077,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195206,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 266520,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 195767,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 222818,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 194665,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 220614,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 208583,
+              "status": "observed"
+            }
+          ],
+          [
+            {
+              "nanoseconds": 226174,
+              "status": "observed"
+            },
+            {
+              "nanoseconds": 196509,
+              "status": "observed"
+            }
+          ]
+        ],
+        "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+        "relation_matrix_elements": 140,
+        "relation_rows": 20,
+        "repetition": 6,
+        "status": "passed",
+        "verifier": "csl.hybrid.exact-linear-h"
+      }
+    ],
+    "warmup": {
+      "call_durations_ns": [
+        4315116,
+        3881957,
+        3885798,
+        3645612,
+        3388943,
+        3425679,
+        3373507,
+        3384751,
+        3355557,
+        3341310
+      ],
+      "calls": 10,
+      "coverage": "established",
+      "edge_paths": [
+        "enter-half",
+        "enter-full"
+      ],
+      "end_to_end_total_ns": 35998230,
+      "error": "",
+      "failures": 0,
+      "feasibility": "established",
+      "optimality": "established",
+      "paths": 2,
+      "phase": "warmup",
+      "process_cpu_observations": [
+        [
+          {
+            "nanoseconds": 633315,
+            "status": "observed"
+          },
+          {
+            "nanoseconds": 234259,
+            "status": "observed"
+          }
+        ],
+        [
+          {
+            "nanoseconds": 334427,
+            "status": "observed"
+          },
+          {
+            "nanoseconds": 255119,
+            "status": "observed"
+          }
+        ],
+        [
+          {
+            "nanoseconds": 337242,
+            "status": "observed"
+          },
+          {
+            "nanoseconds": 212869,
+            "status": "observed"
+          }
+        ],
+        [
+          {
+            "nanoseconds": 289524,
+            "status": "observed"
+          },
+          {
+            "nanoseconds": 229751,
+            "status": "observed"
+          }
+        ],
+        [
+          {
+            "nanoseconds": 224210,
+            "status": "observed"
+          },
+          {
+            "nanoseconds": 211596,
+            "status": "observed"
+          }
+        ],
+        [
+          {
+            "nanoseconds": 239166,
+            "status": "observed"
+          },
+          {
+            "nanoseconds": 195737,
+            "status": "observed"
+          }
+        ],
+        [
+          {
+            "nanoseconds": 223008,
+            "status": "observed"
+          },
+          {
+            "nanoseconds": 194134,
+            "status": "observed"
+          }
+        ],
+        [
+          {
+            "nanoseconds": 236575,
+            "status": "observed"
+          },
+          {
+            "nanoseconds": 195787,
+            "status": "observed"
+          }
+        ],
+        [
+          {
+            "nanoseconds": 219822,
+            "status": "observed"
+          },
+          {
+            "nanoseconds": 193143,
+            "status": "observed"
+          }
+        ],
+        [
+          {
+            "nanoseconds": 220524,
+            "status": "observed"
+          },
+          {
+            "nanoseconds": 207673,
+            "status": "observed"
+          }
+        ]
+      ],
+      "provider": "csl.lp.highs@1.1.0+highs.1.11.0",
+      "relation_matrix_elements": 140,
+      "relation_rows": 20,
+      "repetition": 0,
+      "status": "passed",
+      "verifier": "csl.hybrid.exact-linear-h"
+    }
+  },
+  "report_id": "ext07-hybrid-two-parameter-bc3c6ca5f7a606ee",
+  "scenario": {
+    "control_dimension": 1,
+    "controls": {
+      "u0": [
+        0,
+        1
+      ],
+      "u1": [
+        0,
+        1
+      ]
+    },
+    "dynamics": [
+      "x_pre1 = u0",
+      "x_pre2 = x_post1 + 0*u1",
+      "x_terminal = x_pre2"
+    ],
+    "edges": [
+      {
+        "guard": "0 <= x_pre1 <= 0.5",
+        "id": "enter-half",
+        "source": "source",
+        "target": "middle"
+      },
+      {
+        "guard": "universal",
+        "id": "enter-full",
+        "source": "source",
+        "target": "middle"
+      },
+      {
+        "guard": "universal",
+        "id": "finish",
+        "source": "middle",
+        "target": "terminal"
+      }
+    ],
+    "horizon": 2,
+    "initial_state": 0,
+    "modes": [
+      "source",
+      "middle",
+      "terminal"
+    ],
+    "relation_coordinates": [
+      "x0",
+      "u0",
+      "x_pre1",
+      "x_post1",
+      "u1",
+      "x_pre2",
+      "x_terminal"
+    ],
+    "resets": "identity on both transitions",
+    "state_dimension": 1,
+    "terminal_objective": "minimize x_terminal = u0"
+  },
+  "scenario_sha256": "c21572e86d499534eef32156f0e1a77dfcbd4d21f84aa8de3cd88f93e3d532bd",
+  "schema": "csl.ext07-hybrid-two-parameter-report/2",
+  "source_commit": "88d1804855e77d8b1a779c144a6e5a2585e888bc",
+  "source_receipts": {
+    "postrun": {
+      "commit": "88d1804855e77d8b1a779c144a6e5a2585e888bc",
+      "executable_sha256": "cb729da15dbe7fbbb15851fdde504aef3b8519ad391f8ea84d5f5e62e5a0dd90",
+      "observed_utc": "2026-11-03T19:20:56.659858+00:00",
+      "phase": "postrun",
+      "status": [],
+      "tree": "23ec3ed043e2246e7715249263d9350b6e54b575"
+    },
+    "prebuild": {
+      "commit": "88d1804855e77d8b1a779c144a6e5a2585e888bc",
+      "observed_utc": "2026-11-03T19:20:45.320738+00:00",
+      "phase": "prebuild",
+      "status": [],
+      "tree": "23ec3ed043e2246e7715249263d9350b6e54b575"
+    }
+  },
+  "source_sha256": {
+    "CMakeCXXCompiler.raw.cmake": "fc54f5e431c04fbe157752a68b26b3f49e29f913e0188f9334e2c610971c68b3",
+    "build.log": "ef5c67b4fb1288ae8d26a4225d4a571f9b2de00023f4f1ef7edf0a616f3be937",
+    "configure.log": "ce63b938c646a1be50e92ce923fb338bb243f832baf1416a19fb0c50cc49553f",
+    "host.json": "7219bca99a2557458f9d135d9fd0781ad3a7801c90489385ffb9d2dfd16147b2",
+    "measure.jsonl": "52b96433509810cd1597fb71e599b812dcdc8b59518b558381df58276547fbab",
+    "measure.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "postrun.json": "69894a24269b6b51a046843fbbf545c8874e1a91c101b1efd567280288a382ee",
+    "prebuild.json": "c119f7e4c63babd6b5f4a2984e2cbe03ea7bc4869f65fca890644357facced47",
+    "process_cpu_json.hpp": "2dc6ff62e157bbfe09afcf55569788208f6ffdf9adc593fe5783fa19929daaff",
+    "smoke.jsonl": "d262853fd5a0d4f3ae5a1c7e025058f38f7abdcf45777f1fc0be2e6dd714678f",
+    "smoke.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "two_parameter_driver.cpp": "d406b969e3a72574368a90555701a108bc5c50b54d52d1e8a0b0c51c78539c25"
+  },
+  "source_tree": "23ec3ed043e2246e7715249263d9350b6e54b575"
+}

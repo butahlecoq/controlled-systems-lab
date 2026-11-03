@@ -13,12 +13,24 @@
 #include <limits>
 #include <memory>
 #include <string_view>
+#include <time.h>
 #include <type_traits>
 
 using namespace csl;
 using namespace csl::synthesis;
 
 namespace {
+void check_process_cpu_observation(const ProcessCpuObservation& observation) {
+    if(const auto* unavailable=std::get_if<ProcessCpuUnavailable>(&observation)) {
+        CHECK(unavailable->reason!=ProcessCpuUnavailable::Reason::not_measured);
+#if defined(_WIN32) || defined(CLOCK_PROCESS_CPUTIME_ID)
+        CHECK(unavailable->reason!=ProcessCpuUnavailable::Reason::unsupported_platform);
+#else
+        CHECK(unavailable->reason==ProcessCpuUnavailable::Reason::unsupported_platform);
+#endif
+    }
+}
+
 HybridVerifierInvocation test_verifier_invocation(NumericalPolicy policy,
     std::stop_token cancellation = {}) {
     ExecutionContext context;
@@ -1936,6 +1948,8 @@ TEST_CASE("hybrid request stages all projected paths before executing geometry")
     CHECK(aggregate_observation->maximum()==7);
     CHECK(execution_result.reachability_attempts[0].elapsed_wall_nanoseconds.has_value());
     CHECK(execution_result.reachability_attempts[1].elapsed_wall_nanoseconds.has_value());
+    check_process_cpu_observation(execution_result.reachability_attempts[0].process_cpu);
+    check_process_cpu_observation(execution_result.reachability_attempts[1].process_cpu);
     for(const auto& attempt:execution_result.reachability_attempts) {
         REQUIRE(std::holds_alternative<HybridPathReachability>(attempt.result));
         CHECK(std::get<HybridPathReachability>(attempt.result).projected_state.has_value());
@@ -1988,6 +2002,7 @@ TEST_CASE("coordinated hybrid execution verifies solver candidates after all bra
     CHECK(attempt.resources.disposition==HybridVerifierResourceDisposition::requested_but_unenforced);
     CHECK(attempt.resources.observed_backend_threads==5);
     CHECK(attempt.resources.elapsed_wall_nanoseconds.has_value());
+    check_process_cpu_observation(attempt.resources.process_cpu);
     const auto* candidates=std::get_if<HybridPortfolioOptimalFaceCandidates>(&attempt.candidates);
     REQUIRE(candidates);
     CHECK(candidates->objective_bounds.global_lower_bound==0.0);
@@ -5373,6 +5388,8 @@ TEST_CASE("hybrid branch execution retains a completed solver result and provena
     CHECK(report.branches[1].observed_backend_threads==3);
     CHECK(report.branches[0].provider_elapsed_wall_nanoseconds.has_value());
     CHECK(report.branches[1].provider_elapsed_wall_nanoseconds.has_value());
+    check_process_cpu_observation(report.branches[0].process_cpu);
+    check_process_cpu_observation(report.branches[1].process_cpu);
     CHECK(aggregate_observation->maximum()==5);
 }
 

@@ -46,7 +46,8 @@ def catalog_entry(bundle: Path) -> dict:
     if bundle.name.startswith("ext07-hybrid-two-parameter-"):
         details = two_parameter_report.render(bundle, check=True)
         record = two_parameter_report.validate(bundle)
-        allowed = set((*two_parameter_report.collect.SOURCE_FILES, "records.json",
+        source_files = two_parameter_report.collect.source_files_for_record(record)
+        allowed = set((*source_files, "records.json",
                        *two_parameter_report.RENDERED, "manifest.json",
                        bundle.name + ".zip"))
         two_parameter_report.collect.require(
@@ -56,7 +57,7 @@ def catalog_entry(bundle: Path) -> dict:
             site.OfflineHTML(allowed).feed(
                 (bundle / name).read_text(encoding="utf-8"))
         return {**details,
-                "schema": "csl.ext07-hybrid-two-parameter-report/1",
+                "schema": record["schema"],
                 "verifier_id": record["measurement"]["trials"][0]["verifier"],
                 "collector_sha256": two_parameter_report.collect.sha(
                     (ROOT / "scripts/reports/ext07/two_parameter_collect.py").read_bytes()),
@@ -65,13 +66,15 @@ def catalog_entry(bundle: Path) -> dict:
                 "stager_sha256": two_parameter_report.collect.sha(
                     Path(__file__).read_bytes())}
     details = report.render(bundle, check=True)
-    allowed = set((*report.collect.SOURCE_FILES, "records.json", *report.RENDERED,
+    record = report.validate(bundle)
+    source_files = report.collect.source_files_for_record(record)
+    allowed = set((*source_files, "records.json", *report.RENDERED,
                    "manifest.json", bundle.name + ".zip"))
     report.collect.require({path.name for path in bundle.iterdir()} == allowed,
                            "EXT-07 saved inventory differs")
     for name in ("index.html", "example-2d.html"):
         site.OfflineHTML(allowed).feed((bundle / name).read_text(encoding="utf-8"))
-    return {**details, "schema": "csl.ext07-hybrid-profile-report/1",
+    return {**details, "schema": record["schema"],
             "collector_sha256": report.collect.sha(
                 (ROOT / "scripts/reports/ext07/ext07_collect.py").read_bytes()),
             "renderer_sha256": report.collect.sha(

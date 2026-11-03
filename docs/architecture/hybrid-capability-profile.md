@@ -42,6 +42,18 @@ horizon, paths, and relation size, so these values do not support a cross-profil
 scaling comparison. Full receipts, raw rows, and their accounting scope are in
 the [EXT-07 bounded resource observation report](../../reports/algorithm-results/ext07-resource-observation-cfec938d120c95cb/).
 
+Schema `/2` follow-up reports add process CPU deltas around each solver-branch
+workspace/execution interval. The one-step profile records 140 observed branch
+intervals (median 181,360 ns; range 177,052–527,189 ns). The two-stage profile
+records 140 intervals per edge path: `enter-half` median 222,978 ns (range
+210,775–329,312 ns), and `enter-full` median 195,036 ns (range
+188,503–235,868 ns). Both runs are Release builds with zero failed calls. These
+are process CPU values summed over all process threads; unrelated concurrent
+work may contribute. They do not attribute CPU to HiGHS, measure heap use, or
+support a performance comparison. The [one-step schema `/2` report](../../reports/algorithm-results/ext07-hybrid-e7bb939d854b1907/)
+and [two-stage schema `/2` report](../../reports/algorithm-results/ext07-hybrid-two-parameter-bc3c6ca5f7a606ee/)
+retain source commits, raw rows, and plots.
+
 ## Independent-oracle test profiles
 
 The unit suite adds exact H-relation and optimal-family checks beyond the two
@@ -100,15 +112,17 @@ verification phase. Backend thread width is retained when a provider reports it.
 - `ExactLinearHHybridFamilyVerifier` checks its admitted exact-H, linear-
   objective domain. The test profiles above are sampled fixtures, not an
   exhaustive description of every admitted H relation.
-- Provider-consumed CPU and memory are not established by the saved hybrid
-  reports. Path-level wall time is diagnostic and does not prove enforcement.
-  A requested `ResourcePolicy` is not proof of provider enforcement or
-  consumption.
+- Path, branch, and verifier reports retain typed process CPU duration or
+  explicit unavailability for each operation interval. The clock sums all
+  process threads and unrelated concurrent work may contribute, so it does not
+  attribute CPU to a provider. Heap use and resource enforcement remain
+  unmeasured. A requested `ResourcePolicy` is not proof of enforcement.
 
 PR #881 adds request-wide admission, per-mode/edge composer accounting, and
 path/branch operation wall-time plus reported thread observations to the
-bounded profile tracked by issue #156. The issue remains open while provider CPU and heap use
-are unmeasured and broader operation profiles remain incomplete. Future
+bounded profile tracked by issue #156. This follow-up records process-wide CPU
+intervals; provider-only CPU, heap use, and broader operation profiles remain
+incomplete. Future
 extensions can add more set representations, enforce provider CPU or memory
 limits, and measure larger dimensions or path inventories. The current evidence
 makes no general scalability claim. The two saved-report routes
