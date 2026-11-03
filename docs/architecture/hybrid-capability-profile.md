@@ -23,10 +23,24 @@ visual example. See the records for exact scenario hashes, environments,
 timing scope, and detailed limitations.
 
 These are separate scope demonstrations, not a paired comparison. They use a
-single Windows MSVC Release host each; they have no source-mapped limiter or
-resource-scale profile, and their timings support no speedup, cross-host,
-application-scale, or general scalability claim. The verifier assurance is
-numerical binary64, not validated arithmetic.
+single Windows MSVC Release host each; their timings support no speedup,
+cross-host, application-scale, or general scalability claim. The verifier
+assurance is numerical binary64, not validated arithmetic.
+
+An additive Linux resource capture records whole-invocation limits and cgroup
+counters for those two fixture profiles. This is process-tree accounting, not
+provider-specific or per-transition resource use:
+
+| Profile | Runtime / memory / swap / CPU cap | Observed peak memory / swap | Cgroup CPU time |
+| --- | --- | --- | ---: |
+| One-step scalar | 300 s / 1,610,612,736 B / 0 B / 100% of one CPU | 2,359,296 B / 0 B | 62,144,000 ns |
+| Two-stage scalar | 300 s / 1,610,612,736 B / 0 B / 100% of one CPU | 2,359,296 B / 0 B | 519,431,000 ns |
+
+The measurements include the shell wrapper and an idle tail while live cgroup
+counters were read; build and smoke are excluded. The profiles differ in
+horizon, paths, and relation size, so these values do not support a cross-profile
+scaling comparison. Full receipts, raw rows, and their accounting scope are in
+the [EXT-07 bounded resource observation report](../../reports/algorithm-results/ext07-resource-observation-cfec938d120c95cb/).
 
 ## Independent-oracle test profiles
 
