@@ -27,7 +27,8 @@ def validate(bundle: Path) -> dict:
     unsigned = {key: value for key, value in record.items() if key != "report_id"}
     schema = record.get("schema")
     require(schema in {"csl.ext07-hybrid-profile-report/1",
-                       "csl.ext07-hybrid-profile-report/2"} and
+                       "csl.ext07-hybrid-profile-report/2",
+                       "csl.ext07-hybrid-profile-report/3"} and
             record.get("report_id") == bundle.name ==
             "ext07-hybrid-" + collect.sha(collect.encoded(unsigned))[:16],
             "EXT-07 record identity differs")
@@ -44,11 +45,12 @@ def validate(bundle: Path) -> dict:
             "EXT-07 frozen-source receipts differ")
     smoke = collect.jsonl(bundle / "smoke.jsonl", 1)
     measure = collect.jsonl(bundle / "measure.jsonl", 8)
-    has_process_cpu = schema.endswith("/2")
-    collect.validate_run(smoke[0], "smoke", 0, 1, has_process_cpu)
-    collect.validate_run(measure[0], "warmup", 0, 10, has_process_cpu)
+    has_process_cpu = schema.endswith(("/2", "/3"))
+    has_operation_cpu = schema.endswith("/3")
+    collect.validate_run(smoke[0], "smoke", 0, 1, has_process_cpu, has_operation_cpu)
+    collect.validate_run(measure[0], "warmup", 0, 10, has_process_cpu, has_operation_cpu)
     for repetition, row in enumerate(measure[1:]):
-        collect.validate_run(row, "trial", repetition, 20, has_process_cpu)
+        collect.validate_run(row, "trial", repetition, 20, has_process_cpu, has_operation_cpu)
     trials = measure[1:]
     measurement = record["measurement"]
     require(measurement["trials"] == trials and measurement["warmup"] == measure[0] and
@@ -61,10 +63,13 @@ def validate(bundle: Path) -> dict:
             measurement["min_batch_end_to_end_ns"] == min(durations) and
             measurement["max_batch_end_to_end_ns"] == max(durations),
             "EXT-07 timing summary differs from raw repetitions")
-    if schema.endswith("/2"):
+    if schema.endswith(("/2", "/3")):
         require(measurement["process_cpu"] ==
                 collect.process_cpu_summary(trials, ["coast-to-terminal"]),
                 "EXT-07 process CPU summary differs from raw observations")
+    if has_operation_cpu:
+        require(measurement["operation_thread_cpu"] == collect.operation_cpu_summary(trials),
+                "EXT-07 operation thread CPU summary differs from raw observations")
     return record
 
 
@@ -97,11 +102,14 @@ def summary_csv(record: dict) -> bytes:
     header = ["repetition", "calls", "failures", "assembly_total_ns", "solve_total_ns",
                      "verify_total_ns", "end_to_end_total_ns", "objective", "control",
                      "relation_rows", "relation_matrix_elements"]
-    if record["schema"].endswith("/2"):
+    if record["schema"].endswith(("/2", "/3")):
         header += ["process_cpu_coast_to_terminal_min_ns",
                    "process_cpu_coast_to_terminal_median_ns",
                    "process_cpu_coast_to_terminal_max_ns",
                    "process_cpu_coast_to_terminal_unavailable"]
+    if record["schema"].endswith("/3"):
+        header += ["operation_thread_cpu_min_ns", "operation_thread_cpu_median_ns",
+                   "operation_thread_cpu_max_ns", "operation_thread_cpu_unavailable"]
     writer.writerow(header)
     for row in record["measurement"]["trials"]:
         values = [row["repetition"], row["calls"], row["failures"],
@@ -109,8 +117,10 @@ def summary_csv(record: dict) -> bytes:
                          row["verify_total_ns"], row["end_to_end_total_ns"],
                          row["objective"], row["control"], row["relation_rows"],
                          row["relation_matrix_elements"]]
-        if record["schema"].endswith("/2"):
+        if record["schema"].endswith(("/2", "/3")):
             values.extend(_process_cpu_trial_summary(row))
+        if record["schema"].endswith("/3"):
+            values.extend(_operation_cpu_trial_summary(row))
         writer.writerow(values)
     return output.getvalue().encode()
 
@@ -126,12 +136,25 @@ def _process_cpu_trial_summary(row: dict) -> list[object]:
             max(values) if values else "", unavailable]
 
 
+def _operation_cpu_trial_summary(row: dict) -> list[object]:
+    values = [operation["thread_cpu"]["nanoseconds"]
+              for call in row["operation_observations"]
+              for path in call for operation in path
+              if operation["thread_cpu"]["status"] == "observed"]
+    unavailable = sum(operation["thread_cpu"]["status"] == "unavailable"
+                      for call in row["operation_observations"]
+                      for path in call for operation in path)
+    import statistics
+    return [min(values) if values else "", int(statistics.median(values)) if values else "",
+            max(values) if values else "", unavailable]
+
+
 def page(record: dict, example: bool) -> bytes:
     report_id = escape(record["report_id"])
     source = escape(record["source_commit"])
     measurement = record["measurement"]
     process_cpu_note = ""
-    if record["schema"].endswith("/2"):
+    if record["schema"].endswith(("/2", "/3")):
         branch = measurement["process_cpu"]["branches"][0]
         if branch["observed_calls"]:
             cpu_range = (f"{branch['min_nanoseconds']:,}–{branch['max_nanoseconds']:,} ns; "
@@ -142,6 +165,30 @@ def page(record: dict, example: bool) -> bytes:
             f" Process CPU around the branch interval: {escape(cpu_range)}. "
             "This sums all process threads and may include unrelated concurrent work; "
             "it is not provider-only CPU. Heap use remains unmeasured.")
+    operation_cpu_table = ""
+    if record["schema"].endswith("/3"):
+        rows = []
+        for item in measurement["operation_thread_cpu"]["operations"]:
+            identity = item["identity"]
+            label = f"path {item['path_index']}, op {item['operation_index']}: {identity['kind']} at stage {identity['stage']}"
+            if identity["mode"] is not None:
+                label += f" · mode {identity['mode']}"
+            if identity["edge"] is not None:
+                label += f" · edge {identity['edge']}"
+            median = (f"{item['median_nanoseconds']:,}" if item["median_nanoseconds"] is not None
+                      else "unavailable")
+            reasons = escape(", ".join(f"{reason}: {count}" for reason, count in
+                                       sorted(item["unavailable_reasons"].items())))
+            rows.append(f"<tr><td>{escape(label)}</td><td>{median}</td>"
+                        f"<td>{item['observed_calls']}</td><td>{item['unavailable_calls']}</td>"
+                        f"<td>{reasons}</td></tr>")
+        operation_cpu_table = (
+            '\n<div class="section"><h2>Per-operation composing-thread CPU</h2>'
+            '<p>CPU nanoseconds on the synchronous thread that constructs the relation. '
+            'This excludes helper-thread CPU and is separate from process-wide branch CPU.</p>'
+            '<table><thead><tr><th>Operation</th><th>Median CPU (ns)</th><th>Observed calls</th>'
+            '<th>Unavailable</th><th>Unavailable reasons</th></tr></thead><tbody>' +
+            "".join(rows) + "</tbody></table></div>")
     medians = measurement["median_phase_total_ns"]
     trials = measurement["trials"]
     provider = escape(trials[0]["provider"])
@@ -209,7 +256,7 @@ Median accumulated phase durations: setup {medians['setup']:,} ns, relation asse
 solve {medians['solve']:,} ns, verify {medians['verify']:,} ns, and end-to-end {medians['end_to_end']:,} ns.
 End-to-end includes fixture/provider setup, path enumeration, relation construction, solve and family verification.
 Phase medians are calculated separately across batches and are not additive to the end-to-end median;
-output serialization and rendering are excluded.{process_cpu_note}</p>
+output serialization and rendering are excluded.{process_cpu_note}</p>{operation_cpu_table}
 <p>One host and one fixed profile are measured. There is no comparator, speedup, source-mapped bottleneck,
 or scalability claim. Thread and backend details, all raw repetitions, source/build receipts, and failures
 are retained in the <a href="records.json">versioned record</a>,

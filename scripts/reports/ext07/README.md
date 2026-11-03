@@ -70,6 +70,14 @@ New schema `/2` records include process CPU observations for each branch and
 label their process-wide scope in the report; the same provider-attribution and
 heap limitations apply.
 
+Schema `/3` captures also preserve each relation operation's kind, stage, mode
+or edge, implementation identity, row and matrix deltas, wall duration,
+completion state, and composing-thread CPU observation. The report summarizes
+those observations per operation and keeps unavailable reasons in raw records.
+This CPU scope covers only the synchronous composing thread; helper-thread CPU
+is excluded, and the clock reads add measurement overhead. Schemas `/1` and
+`/2` remain readable with their original rendered bytes.
+
 ```sh
 python scripts/reports/ext07/two_parameter_capture.py --source <frozen-source> --capture <fresh-capture> --commit <source-commit> --cmake <cmake-executable>
 python scripts/reports/ext07/two_parameter_collect.py --capture <fresh-capture> --source <frozen-source> --out reports/algorithm-results

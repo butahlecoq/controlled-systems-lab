@@ -28,14 +28,18 @@ LEGACY_SOURCE_FILES = (
     "postrun.json", "host.json", "configure.log", "build.log",
     "CMakeCXXCompiler.raw.cmake",
 )
+PROCESS_CPU_SOURCE_FILES = ("two_parameter_driver.cpp", "process_cpu_json.hpp",
+                            *LEGACY_SOURCE_FILES[1:])
 SOURCE_FILES = ("two_parameter_driver.cpp", "process_cpu_json.hpp",
-                *LEGACY_SOURCE_FILES[1:])
+                "operation_cpu_json.hpp", *LEGACY_SOURCE_FILES[1:])
 
 
 def source_files_for_record(record: dict) -> tuple[str, ...]:
     if record.get("schema") == "csl.ext07-hybrid-two-parameter-report/1":
         return LEGACY_SOURCE_FILES
-    require(record.get("schema") == "csl.ext07-hybrid-two-parameter-report/2",
+    if record.get("schema") == "csl.ext07-hybrid-two-parameter-report/2":
+        return PROCESS_CPU_SOURCE_FILES
+    require(record.get("schema") == "csl.ext07-hybrid-two-parameter-report/3",
             "Unsupported EXT-07 two-parameter report schema")
     return SOURCE_FILES
 EXPECTED_PROVIDER = "csl.lp.highs@1.1.0+highs.1.11.0"
@@ -48,7 +52,7 @@ EXPECTED_PATHS = ["enter-half", "enter-full"]
 
 
 def validate_run(row: dict, phase: str, repetition: int, calls: int,
-                 process_cpu: bool = True) -> None:
+                 process_cpu: bool = True, operation_cpu: bool = False) -> None:
     require(row.get("phase") == phase and row.get("repetition") == repetition and
             row.get("calls") == calls and row.get("failures") == 0 and
             row.get("status") == "passed" and row.get("paths") == 2,
@@ -64,6 +68,8 @@ def validate_run(row: dict, phase: str, repetition: int, calls: int,
             "EXT-07 two-parameter provider or family result differs")
     if process_cpu:
         common.validate_process_cpu_observations(row, calls, len(EXPECTED_PATHS))
+    if operation_cpu:
+        common.validate_operation_observations(row, calls, [14, 14])
     durations = row.get("call_durations_ns")
     require(isinstance(durations, list) and len(durations) == calls and
             all(isinstance(value, int) and value > 0 for value in durations) and
@@ -96,15 +102,16 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
             "EXT-07 two-parameter driver wrote stderr")
     smoke = jsonl(capture / "smoke.jsonl", 1)
     measure = jsonl(capture / "measure.jsonl", 8)
-    validate_run(smoke[0], "smoke", 0, 1)
-    validate_run(measure[0], "warmup", 0, 10)
+    validate_run(smoke[0], "smoke", 0, 1, operation_cpu=True)
+    validate_run(measure[0], "warmup", 0, 10, operation_cpu=True)
     for repetition, row in enumerate(measure[1:]):
-        validate_run(row, "trial", repetition, 20)
+        validate_run(row, "trial", repetition, 20, operation_cpu=True)
     require(all(row.get("verifier") == CURRENT_VERIFIER
                 for row in (*smoke, *measure)),
             "Current two-parameter capture did not run the exact linear H verifier")
     driver = source / "benchmarks/reporting/ext07/two_parameter_driver.cpp"
     cpu_header = source / "benchmarks/reporting/ext07/process_cpu_json.hpp"
+    operation_cpu_header = source / "benchmarks/reporting/ext07/operation_cpu_json.hpp"
     require(driver.is_file(), "Missing two-parameter measured driver source")
     require(driver.read_bytes() == subprocess.check_output(
         ["git", "show", commit + ":benchmarks/reporting/ext07/two_parameter_driver.cpp"], cwd=source),
@@ -112,9 +119,13 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
     require(cpu_header.read_bytes() == subprocess.check_output(
         ["git", "show", commit + ":benchmarks/reporting/ext07/process_cpu_json.hpp"], cwd=source),
         "EXT-07 CPU JSON helper differs from its frozen source commit")
+    require(operation_cpu_header.read_bytes() == subprocess.check_output(
+        ["git", "show", commit + ":benchmarks/reporting/ext07/operation_cpu_json.hpp"], cwd=source),
+        "EXT-07 operation CPU JSON helper differs from its frozen source commit")
     source_hashes = {
         name: sha((driver if name == "two_parameter_driver.cpp" else
                    cpu_header if name == "process_cpu_json.hpp" else
+                   operation_cpu_header if name == "operation_cpu_json.hpp" else
                    capture / name).read_bytes()) for name in SOURCE_FILES
     }
     trials = measure[1:]
@@ -166,7 +177,7 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
                        "minimizing_face": "u0=0, 0<=u1<=1"},
     }
     unsigned = {
-        "schema": "csl.ext07-hybrid-two-parameter-report/2",
+        "schema": "csl.ext07-hybrid-two-parameter-report/3",
         "source_commit": commit,
         "source_tree": pre["tree"],
         "source_sha256": source_hashes,
@@ -200,6 +211,7 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
             "median_call_ns": int(statistics.median(
                 value for row in trials for value in row["call_durations_ns"])),
             "process_cpu": common.process_cpu_summary(trials, EXPECTED_PATHS),
+            "operation_thread_cpu": common.operation_cpu_summary(trials),
             "comparison": "one backend and one fixed fixture; descriptive only, no comparator or speedup claim",
         },
         "evidence_scope": "140 completed public hybrid portfolio calls; each call assembles both two-stage H relations, solves both branches with registered HiGHS LP, constructs both tied candidate faces, and verifies both complete two-parameter families with ExactLinearHHybridFamilyVerifier",
@@ -208,6 +220,7 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
             "The controls are independent and bounded; no higher-dimensional parameter polytope is measured.",
             "No comparator, speedup, source-mapped bottleneck, application-scale result, or scalability claim.",
             "Binary64 checks are numerical assurance and do not establish validated arithmetic.",
+            "Per-operation CPU measures only the synchronous composing thread and excludes CPU consumed by helper threads.",
         ],
     }
     report_id = "ext07-hybrid-two-parameter-" + sha(encoded(unsigned))[:16]
@@ -218,7 +231,8 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
     destination.mkdir()
     for name in SOURCE_FILES:
         source_path = (driver if name == "two_parameter_driver.cpp" else
-                       cpu_header if name == "process_cpu_json.hpp" else capture / name)
+                       cpu_header if name == "process_cpu_json.hpp" else
+                       operation_cpu_header if name == "operation_cpu_json.hpp" else capture / name)
         shutil.copyfile(source_path, destination / name)
     (destination / "records.json").write_bytes(encoded(record))
     return destination

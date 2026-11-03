@@ -2,6 +2,7 @@
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/synthesis/hybrid_path_program.hpp>
 #include "process_cpu_json.hpp"
+#include "operation_cpu_json.hpp"
 
 #include <chrono>
 #include <cmath>
@@ -110,6 +111,7 @@ struct Observation {
     std::string optimality;
     std::string coverage;
     std::vector<synthesis::ProcessCpuObservation> branch_process_cpu;
+    std::vector<std::vector<model::HybridRelationOperationRecord>> operation_records;
 };
 
 const char* status(synthesis::HybridVerificationStatus value) {
@@ -143,6 +145,7 @@ Observation run_once() {
         throw std::runtime_error("Expected one complete path with operation provenance");
     observation.relation_rows = programs[0].relation_operations.back().cumulative_rows;
     observation.relation_matrix_elements = programs[0].relation_operations.back().cumulative_matrix_elements;
+    observation.operation_records.push_back(programs[0].relation_operations);
 
     const auto solve_begin = Clock::now();
     const auto execution = synthesis::execute_hybrid_path_programs(programs, lp, convex, {});
@@ -219,10 +222,12 @@ void batch(const char* phase, std::size_t repetition, std::size_t calls) {
     std::size_t failures = 0;
     std::string error;
     std::vector<std::vector<synthesis::ProcessCpuObservation>> process_cpu_observations;
+    std::vector<std::vector<std::vector<model::HybridRelationOperationRecord>>> operation_observations;
     for(std::size_t call = 0; call < calls; ++call) {
         try {
             last = run_once();
             process_cpu_observations.push_back(last.branch_process_cpu);
+            operation_observations.push_back(last.operation_records);
             setup += last.setup_ns;
             assembly += last.assembly_ns;
             solve += last.solve_ns;
@@ -232,6 +237,7 @@ void batch(const char* phase, std::size_t repetition, std::size_t calls) {
             ++failures;
             error = exception.what();
             process_cpu_observations.emplace_back();
+            operation_observations.emplace_back();
         }
     }
     std::cout << "{\"phase\":\"" << phase << "\",\"repetition\":" << repetition
@@ -264,6 +270,16 @@ void batch(const char* phase, std::size_t repetition, std::size_t calls) {
             if(branch) std::cout << ',';
             reports::ext07::write_process_cpu_observation(
                 std::cout,process_cpu_observations[call][branch]);
+        }
+        std::cout << ']';
+    }
+    std::cout << "],\"operation_observations\":[";
+    for(std::size_t call=0;call<operation_observations.size();++call) {
+        if(call) std::cout << ',';
+        std::cout << '[';
+        for(std::size_t path=0;path<operation_observations[call].size();++path) {
+            if(path) std::cout << ',';
+            reports::ext07::write_operation_records(std::cout,operation_observations[call][path]);
         }
         std::cout << ']';
     }

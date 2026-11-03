@@ -1,4 +1,5 @@
 #include <csl/synthesis/hybrid_path_program.hpp>
+#include "hybrid_operation_cpu.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -297,9 +298,11 @@ HybridReachabilityStageResult ProjectedStateHybridReachabilityAdapter::stage_pat
         return unsupported(std::move(field),std::move(explanation));
     };
     std::vector<model::HybridRelationOperationRecord> operations;
+    const auto instrumentation=detail::make_hybrid_operation_instrumentation();
     const auto record=[&](model::HybridRelationOperationKind kind,std::size_t stage,
         std::optional<model::HybridModeId> mode_id,std::optional<model::HybridEdgeId> edge_id,
-        std::size_t before,std::chrono::steady_clock::time_point started,bool completed) {
+        std::size_t before,std::chrono::steady_clock::time_point started,bool completed,
+        model::HybridOperationThreadCpuTimer& thread_cpu_timer) {
         const auto rows=inequalities.size()+equalities.size();
         const auto cumulative_elements=rows*width;
         const auto previous_elements=before*width;
@@ -308,17 +311,18 @@ HybridReachabilityStageResult ProjectedStateHybridReachabilityAdapter::stage_pat
         operations.push_back({kind,stage,std::move(mode_id),std::move(edge_id),
             "csl.hybrid.projected-scalar-reachability","1",width,rows-before,
             cumulative_elements-previous_elements,rows,cumulative_elements,
-            elapsed>0?static_cast<std::uint64_t>(elapsed):0,completed});
+            elapsed>0?static_cast<std::uint64_t>(elapsed):0,completed,thread_cpu_timer.finish()});
     };
     const auto* source=mode(system,path.modes[0]);
     const auto* target=mode(system,path.modes[1]);
     const auto* transition=edge(system,path.edges[0]);
     auto before=inequalities.size()+equalities.size();
+    model::HybridOperationThreadCpuTimer initial_cpu_timer{instrumentation.thread_cpu_reader};
     auto operation_started=std::chrono::steady_clock::now();
     Vector initial(width);initial[0]=1.0;
     const bool initial_added=append(std::move(initial),request.initial.state[0],true);
     record(model::HybridRelationOperationKind::initial_state,0,source->id,{},before,
-        operation_started,initial_added);
+        operation_started,initial_added,initial_cpu_timer);
     if(!initial_added)
         return append_failure("hybrid.projected.rows","Relation row or matrix limit exceeded");
 
@@ -331,59 +335,66 @@ HybridReachabilityStageResult ProjectedStateHybridReachabilityAdapter::stage_pat
         return append(std::move(upper),interval->second,false)&&append(std::move(lower),-interval->first,false);
     };
     before=inequalities.size()+equalities.size();
+    model::HybridOperationThreadCpuTimer source_invariant_cpu_timer{instrumentation.thread_cpu_reader};
     operation_started=std::chrono::steady_clock::now();
     const bool source_invariant_added=add_interval(source->invariants[0],0);
     record(model::HybridRelationOperationKind::post_state_invariant,0,source->id,{},before,
-        operation_started,source_invariant_added);
+        operation_started,source_invariant_added,source_invariant_cpu_timer);
     if(!source_invariant_added) return append_failure("hybrid.projected.invariant","Unsupported source invariant or relation limit exceeded");
 
     const auto& flow=std::get<LinearStage>(source->flow);
     before=inequalities.size()+equalities.size();
+    model::HybridOperationThreadCpuTimer flow_cpu_timer{instrumentation.thread_cpu_reader};
     operation_started=std::chrono::steady_clock::now();
     Vector flow_row(width);flow_row[2]=1.0;flow_row[0]-=flow.A.values[0];flow_row[1]-=flow.B.values[0];
     const bool flow_added=append(std::move(flow_row),flow.offset[0],true);
     record(model::HybridRelationOperationKind::mode_flow,0,source->id,{},before,
-        operation_started,flow_added);
+        operation_started,flow_added,flow_cpu_timer);
     if(!flow_added)
         return append_failure("hybrid.projected.rows","Relation row or matrix limit exceeded");
 
     before=inequalities.size()+equalities.size();
+    model::HybridOperationThreadCpuTimer control_cpu_timer{instrumentation.thread_cpu_reader};
     operation_started=std::chrono::steady_clock::now();
     const bool control_added=add_interval(source->control_sets[0],1);
     record(model::HybridRelationOperationKind::continuous_control,0,source->id,{},before,
-        operation_started,control_added);
+        operation_started,control_added,control_cpu_timer);
     if(!control_added) return append_failure("hybrid.projected.control","Unsupported source control interval or relation limit exceeded");
 
     before=inequalities.size()+equalities.size();
+    model::HybridOperationThreadCpuTimer pre_invariant_cpu_timer{instrumentation.thread_cpu_reader};
     operation_started=std::chrono::steady_clock::now();
     const bool pre_invariant_added=add_interval(source->invariants[1],2);
     record(model::HybridRelationOperationKind::pre_reset_invariant,1,source->id,{},before,
-        operation_started,pre_invariant_added);
+        operation_started,pre_invariant_added,pre_invariant_cpu_timer);
     if(!pre_invariant_added) return append_failure("hybrid.projected.invariant","Unsupported pre-reset invariant or relation limit exceeded");
 
     before=inequalities.size()+equalities.size();
+    model::HybridOperationThreadCpuTimer guard_cpu_timer{instrumentation.thread_cpu_reader};
     operation_started=std::chrono::steady_clock::now();
     const bool guard_added=add_interval(transition->guards[0],2);
     record(model::HybridRelationOperationKind::transition_guard,0,{},transition->id,before,
-        operation_started,guard_added);
+        operation_started,guard_added,guard_cpu_timer);
     if(!guard_added) return append_failure("hybrid.projected.guard","Unsupported transition guard or relation limit exceeded");
 
     const auto reset_data=std::get<sets::SetData>(sets::from_handle(transition->reset_relations[0]));
     const auto reset=std::get<sets::HRepresentation>(reset_data.representation());
     before=inequalities.size()+equalities.size();
+    model::HybridOperationThreadCpuTimer reset_cpu_timer{instrumentation.thread_cpu_reader};
     operation_started=std::chrono::steady_clock::now();
     Vector reset_row(width);reset_row[2]=reset.equalities(0,0);reset_row[3]=reset.equalities(0,1);
     const bool reset_added=append(std::move(reset_row),reset.equality_values[0],true);
     record(model::HybridRelationOperationKind::reset_relation,0,{},transition->id,before,
-        operation_started,reset_added);
+        operation_started,reset_added,reset_cpu_timer);
     if(!reset_added)
         return append_failure("hybrid.projected.rows","Relation row or matrix limit exceeded");
 
     before=inequalities.size()+equalities.size();
+    model::HybridOperationThreadCpuTimer target_invariant_cpu_timer{instrumentation.thread_cpu_reader};
     operation_started=std::chrono::steady_clock::now();
     const bool target_invariant_added=add_interval(target->invariants[1],3);
     record(model::HybridRelationOperationKind::post_state_invariant,1,target->id,{},before,
-        operation_started,target_invariant_added);
+        operation_started,target_invariant_added,target_invariant_cpu_timer);
     if(!target_invariant_added) return append_failure("hybrid.projected.invariant","Unsupported target invariant or relation limit exceeded");
     if(const auto stop=interruption(context))
         return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,

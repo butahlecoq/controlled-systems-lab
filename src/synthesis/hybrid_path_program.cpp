@@ -1,5 +1,6 @@
 #include <csl/synthesis/hybrid_path_program.hpp>
 #include <csl/synthesis/hybrid_admission.hpp>
+#include "hybrid_operation_cpu.hpp"
 
 #include <algorithm>
 #include <array>
@@ -683,7 +684,9 @@ HybridPathProgramResult build_joint_hybrid_path_program(const model::HybridSyste
     std::stop_token cancellation) {
     if(problem.value.empty()) return one({DiagnosticCode::invalid_input,"hybrid.program.problem","Problem identity must be nonempty"});
     if(cancellation.stop_requested()) return OperationStopped{StopReason::cancelled,"Hybrid path program construction was cancelled before relation composition"};
-    auto composed=model::compose_hybrid_path_relation_with_report(system,request,path,limits,cancellation);
+    const auto instrumentation=detail::make_hybrid_operation_instrumentation();
+    auto composed=model::compose_hybrid_path_relation_with_report(system,request,path,limits,cancellation,
+        instrumentation);
     if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&composed)) {
         return *failure;
     }

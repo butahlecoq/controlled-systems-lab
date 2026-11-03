@@ -165,6 +165,15 @@ values are not provider-only attribution, do not measure heap, and make no
 comparative performance claim. The new reports will be Pages-published by the
 main-only report workflow after merge.
 
+Schema `/3` extends these profiles with per-relation-operation records. Each
+record binds its operation kind, stage, mode/edge, implementation identity,
+row/matrix deltas, composer wall time, completion, and CPU consumed by the
+synchronous composing thread. The clock sampling overhead is included in these
+diagnostic observations, helper-thread CPU is excluded, and the process-wide
+branch values remain separate. This is instrumentation evidence; it does not
+claim a provider bottleneck or compare algorithms. Historical `/1` and `/2`
+bundles and rendered bytes remain unchanged.
+
 ## EXT-02 finite/mixed branch portfolio report
 
 The saved [EXT-02 analytic portfolio bundle](../../reports/algorithm-results/ext02-two-state-mixed-v1/)

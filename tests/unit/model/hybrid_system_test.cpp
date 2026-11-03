@@ -699,6 +699,74 @@ TEST_CASE("hybrid composition report records mode and transition operations with
     CHECK(stop_report.operations.empty());
 }
 
+TEST_CASE("hybrid operation CPU readings stay attached to successful and partial records") {
+    auto [system,request]=dimension_changing_example();
+    const HybridPath path{{{"source"},{"target"}},{{"switch"}}};
+    std::uint64_t tick=100;
+    const HybridRelationInstrumentation instrumentation{{[&]() -> HybridOperationThreadCpuReading {
+        tick+=25;
+        return HybridOperationThreadCpuTick{tick};
+    }}};
+    const auto result=compose_hybrid_path_relation_with_report(system,request,path,{16,64,1024},{},
+        instrumentation);
+    REQUIRE(std::holds_alternative<HybridComposedPathRelation>(result));
+    const auto& complete=std::get<HybridComposedPathRelation>(result);
+    REQUIRE(complete.operations.size()==8);
+    for(const auto& operation:complete.operations) {
+        const auto* duration=std::get_if<HybridOperationThreadCpuDuration>(&operation.thread_cpu);
+        REQUIRE(duration);
+        CHECK(duration->nanoseconds==25);
+    }
+
+    tick=100;
+    const auto limited=compose_hybrid_path_relation_with_report(system,request,path,{16,1,1024},{},
+        instrumentation);
+    REQUIRE(std::holds_alternative<HybridPathCompositionFailureReport>(limited));
+    const auto& partial=std::get<HybridPathCompositionFailureReport>(limited).operations;
+    REQUIRE(partial.size()==3);
+    CHECK_FALSE(partial.back().completed);
+    const auto* partial_cpu=std::get_if<HybridOperationThreadCpuDuration>(&partial.back().thread_cpu);
+    REQUIRE(partial_cpu);
+    CHECK(partial_cpu->nanoseconds==25);
+}
+
+TEST_CASE("hybrid operation CPU timer preserves unavailable and regressed clock states") {
+    using Reason=HybridOperationThreadCpuUnavailable::Reason;
+    HybridOperationThreadCpuReader unrequested;
+    HybridOperationThreadCpuTimer not_measured{unrequested};
+    const auto not_requested=not_measured.finish();
+    REQUIRE(std::holds_alternative<HybridOperationThreadCpuUnavailable>(not_requested));
+    CHECK(std::get<HybridOperationThreadCpuUnavailable>(not_requested).reason==Reason::not_requested);
+
+    std::uint64_t reads=0;
+    HybridOperationThreadCpuReader regressed{[&]() -> HybridOperationThreadCpuReading {
+        const auto value=reads++==0?std::uint64_t{200}:std::uint64_t{100};
+        return HybridOperationThreadCpuTick{value};
+    }};
+    HybridOperationThreadCpuTimer timer{regressed};
+    const auto result=timer.finish();
+    REQUIRE(std::holds_alternative<HybridOperationThreadCpuUnavailable>(result));
+    CHECK(std::get<HybridOperationThreadCpuUnavailable>(result).reason==Reason::clock_regressed);
+
+    HybridOperationThreadCpuReader unsupported{[]() -> HybridOperationThreadCpuReading {
+        return HybridOperationThreadCpuReadUnavailable{
+            HybridOperationThreadCpuReadUnavailable::Reason::unsupported_platform};
+    }};
+    HybridOperationThreadCpuTimer unavailable{unsupported};
+    const auto unsupported_result=unavailable.finish();
+    REQUIRE(std::holds_alternative<HybridOperationThreadCpuUnavailable>(unsupported_result));
+    CHECK(std::get<HybridOperationThreadCpuUnavailable>(unsupported_result).reason==
+        Reason::unsupported_platform);
+
+    HybridOperationThreadCpuReader throwing{[]() -> HybridOperationThreadCpuReading {
+        throw std::runtime_error("clock source failed");
+    }};
+    HybridOperationThreadCpuTimer failed{throwing};
+    const auto failed_result=failed.finish();
+    REQUIRE(std::holds_alternative<HybridOperationThreadCpuUnavailable>(failed_result));
+    CHECK(std::get<HybridOperationThreadCpuUnavailable>(failed_result).reason==Reason::read_failed);
+}
+
 TEST_CASE("hybrid joint relation rejects capacity exhaustion without truncation and observes cancellation") {
     auto [system,request]=dimension_changing_example();
     const HybridPath path{{{"source"},{"target"}},{{"switch"}}};

@@ -43,6 +43,42 @@ class Ext07SavedReportTests(unittest.TestCase):
             (ROOT / "scripts/reports/ext07/ext07_collect.py").read_bytes()))
         self.assertEqual(entry["zip_sha256"], collect.sha((self.bundle / (self.bundle.name + ".zip")).read_bytes()))
 
+    def test_operation_cpu_records_validate_identity_counts_and_unavailable_reasons(self) -> None:
+        operations = []
+        kinds = ["initial_state", "post_state_invariant", "mode_flow",
+                 "continuous_control", "pre_reset_invariant", "transition_guard",
+                 "reset_relation", "post_state_invariant"]
+        for index, kind in enumerate(kinds):
+            operations.append({
+                "kind": kind, "stage": 0 if index < 7 else 1,
+                "mode": "source" if index < 7 else "target",
+                "edge": "switch" if kind in {"transition_guard", "reset_relation"} else None,
+                "implementation_id": "csl.model.hybrid.joint-h-composer",
+                "implementation_version": "1",
+                "joint_variables": 4, "rows_added": 1, "matrix_elements_added": 4,
+                "cumulative_rows": index + 1, "cumulative_matrix_elements": (index + 1) * 4,
+                "elapsed_wall_nanoseconds": 10, "completed": True,
+                "thread_cpu": {"status": "observed", "nanoseconds": index},
+            })
+        row = {"operation_observations": [[operations]]}
+        self.assertIsNone(collect.validate_operation_observations(row, 1, [8]))
+        summary = collect.operation_cpu_summary([row])
+        self.assertEqual(len(summary["operations"]), 8)
+        self.assertEqual(summary["operations"][0]["median_nanoseconds"], 0)
+        operations[0]["thread_cpu"] = {"status": "unavailable", "reason": "read_failed"}
+        self.assertIsNone(collect.validate_operation_observations(row, 1, [8]))
+        operations[0]["thread_cpu"] = {"status": "unavailable", "reason": "not_requested"}
+        with self.assertRaises(ValueError):
+            collect.validate_operation_observations(row, 1, [8])
+
+    def test_schema_source_lists_keep_historical_bundles_readable(self) -> None:
+        self.assertEqual(collect.source_files_for_record(
+            {"schema": "csl.ext07-hybrid-profile-report/1"}), collect.LEGACY_SOURCE_FILES)
+        self.assertEqual(collect.source_files_for_record(
+            {"schema": "csl.ext07-hybrid-profile-report/2"}), collect.PROCESS_CPU_SOURCE_FILES)
+        self.assertEqual(collect.source_files_for_record(
+            {"schema": "csl.ext07-hybrid-profile-report/3"}), collect.SOURCE_FILES)
+
     def test_stager_copies_only_the_validated_bundle_and_adds_links(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

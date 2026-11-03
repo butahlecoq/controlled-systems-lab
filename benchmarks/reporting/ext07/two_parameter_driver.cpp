@@ -2,6 +2,7 @@
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/synthesis/hybrid_path_program.hpp>
 #include "process_cpu_json.hpp"
+#include "operation_cpu_json.hpp"
 
 #include <chrono>
 #include <cmath>
@@ -143,6 +144,7 @@ struct Observation {
   std::string coverage;
   std::vector<std::string> edge_paths;
   std::vector<synthesis::ProcessCpuObservation> branch_process_cpu;
+  std::vector<std::vector<HybridRelationOperationRecord>> operation_records;
 };
 
 Observation run_once() {
@@ -153,10 +155,12 @@ Observation run_once() {
   auto built = synthesis::build_hybrid_portfolio_programs(
       system, request, {"ext07-two-parameter"}, {2, 8}, {64, 4096, 65536});
   auto programs = take(std::move(built));
+  Observation observation;
   if (programs.size() != 2)
     throw std::runtime_error("Expected both permitted edge paths");
+  for (const auto &program : programs)
+    observation.operation_records.push_back(program.relation_operations);
 
-  Observation observation;
   const auto execution =
       synthesis::execute_hybrid_path_programs(programs, lp, convex, {});
   if (!execution.all_supplied_branches_completed ||
@@ -251,17 +255,20 @@ void batch(const char *phase, std::size_t repetition, std::size_t calls) {
   std::string last_error;
   std::vector<std::uint64_t> durations;
   std::vector<std::vector<synthesis::ProcessCpuObservation>> process_cpu_observations;
+  std::vector<std::vector<std::vector<HybridRelationOperationRecord>>> operation_observations;
   for (std::size_t i = 0; i < calls; ++i) {
     try {
       last = run_once();
       total += last.total_ns;
       durations.push_back(last.total_ns);
       process_cpu_observations.push_back(last.branch_process_cpu);
+      operation_observations.push_back(last.operation_records);
     } catch (const std::exception &exception) {
       ++failures;
       last_error = exception.what();
       durations.push_back(0);
       process_cpu_observations.emplace_back();
+      operation_observations.emplace_back();
     }
   }
   std::cout << "{\"phase\":\"" << phase << "\",\"repetition\":"
@@ -293,6 +300,16 @@ void batch(const char *phase, std::size_t repetition, std::size_t calls) {
       if(branch) std::cout << ',';
       reports::ext07::write_process_cpu_observation(
           std::cout,process_cpu_observations[call][branch]);
+    }
+    std::cout << ']';
+  }
+  std::cout << "],\"operation_observations\":[";
+  for(std::size_t call=0;call<operation_observations.size();++call) {
+    if(call) std::cout << ',';
+    std::cout << '[';
+    for(std::size_t path=0;path<operation_observations[call].size();++path) {
+      if(path) std::cout << ',';
+      reports::ext07::write_operation_records(std::cout,operation_observations[call][path]);
     }
     std::cout << ']';
   }
