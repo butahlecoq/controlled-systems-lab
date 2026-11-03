@@ -45,11 +45,15 @@ def run(command: list[str], source: Path, output: Path, env: dict[str, str]) -> 
         raise RuntimeError(f"Command failed ({result.returncode}): {command}")
 
 
+def validate_jobs(jobs: int) -> None:
+    if jobs < 1:
+        raise ValueError("Build parallelism must be positive")
+
+
 def cmake_build_command(cmake: str, build: Path, target: str, jobs: int,
                         generator: str,
                         msbuild_args: tuple[str, ...] = ()) -> list[str]:
-    if jobs < 1:
-        raise ValueError("Build parallelism must be positive")
+    validate_jobs(jobs)
     command = [cmake, "--build", str(build), "--config", "Release", "--target",
                target, "--parallel", str(jobs)]
     if generator.startswith("Visual Studio"):
@@ -59,6 +63,7 @@ def cmake_build_command(cmake: str, build: Path, target: str, jobs: int,
 
 def capture(source: Path, destination: Path, commit: str, cmake: str,
             jobs: int = 4) -> None:
+    validate_jobs(jobs)
     source = source.resolve(strict=True)
     destination = destination.resolve()
     if destination.exists():

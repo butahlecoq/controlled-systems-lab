@@ -11,11 +11,15 @@ import platform
 import re
 import subprocess
 
-from capture import cmake_build_command, receipt, run, save
+if __package__:
+    from .capture import cmake_build_command, receipt, run, save, validate_jobs
+else:
+    from capture import cmake_build_command, receipt, run, save, validate_jobs
 
 
 def capture(source: Path, destination: Path, commit: str, cmake: str,
             jobs: int = 4) -> None:
+    validate_jobs(jobs)
     source = source.resolve(strict=True)
     destination = destination.resolve()
     if destination.exists():
