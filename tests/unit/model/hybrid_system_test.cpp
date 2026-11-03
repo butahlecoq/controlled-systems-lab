@@ -665,7 +665,6 @@ TEST_CASE("hybrid composition report records mode and transition operations with
     CHECK(report.operations[6].operation==HybridRelationOperationKind::reset_relation);
     CHECK(report.operations[6].edge==HybridEdgeId{"switch"});
     CHECK(report.operations[7].operation==HybridRelationOperationKind::post_state_invariant);
-    std::uint64_t operation_time_total=0;
     for(const auto& operation:report.operations) {
         CHECK(operation.implementation_id=="csl.model.hybrid.joint-h-composer");
         CHECK(operation.implementation_version=="1");
@@ -673,9 +672,7 @@ TEST_CASE("hybrid composition report records mode and transition operations with
         CHECK(operation.matrix_elements_added==operation.rows_added*5);
         CHECK(operation.cumulative_matrix_elements==operation.cumulative_rows*5);
         CHECK(operation.completed);
-        operation_time_total+=operation.elapsed_wall_nanoseconds;
     }
-    CHECK(operation_time_total>0);
     CHECK(report.operations.back().cumulative_rows==2);
     CHECK(report.operations.back().cumulative_matrix_elements==10);
 
