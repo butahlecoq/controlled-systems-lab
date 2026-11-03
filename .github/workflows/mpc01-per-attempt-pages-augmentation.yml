@@ -104,7 +104,15 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Check whether the source run still targets current main
+        id: source_head
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: python3 scripts/reports/check_deploy_head.py
+
       - name: Validate the saved attempt and Strategy A/B evidence
+        if: steps.source_head.outputs.current == 'true'
         run: |
           python scripts/reports/mpc01/summarize_per_attempt.py --bundle docs/research/evidence/mpc01-per-attempt-20261103-r3
           (cd docs/research/evidence/mpc01-per-attempt-20261103-r3 && sha256sum -c SHA256SUMS)
@@ -135,6 +143,7 @@ jobs:
 
       - name: Find the upstream Pages artifact
         id: artifact
+        if: steps.source_head.outputs.current == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           RUN_ID: ${{ github.event.workflow_run.id }}
