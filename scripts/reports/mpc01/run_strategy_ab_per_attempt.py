@@ -246,7 +246,7 @@ def main() -> int:
                         "cpu_time_or_peak_memory_profiled": True},
         "scenario": scenario_relative, "scenario_sha256": sha256(scenario.read_bytes()),
         "source_commit": source_commit, "source_dirty_before_run": False,
-        "source_file": source_file.relative_to(root).as_posix(),
+        "source_file": "examples/registered_synthesis_comparison.cpp",
         "source_file_sha256": sha256(source_file_bytes),
         "source_tree_sha256": source_tree_sha256(root, source_commit),
         "execution_worktree_role": "The executable was built from source_commit; compiler identity comes from the configured CMake compiler metadata and banner.",
