@@ -35,8 +35,11 @@ public:
     AdmissionDeclaration declare_support(const RequestEnvelope& envelope) const {
         if(!storage_->entry.admission_declaration) return {};
         auto declaration=storage_->entry.admission_declaration(envelope,storage_->requirements);
-        if(declaration.status==AdmissionStatus::supported && !declaration.envelope_is_sufficient)
+        if(declaration.status!=AdmissionStatus::supported) {
+            declaration.envelope_is_sufficient=false;
+        } else if(!declaration.envelope_is_sufficient) {
             declaration.status=AdmissionStatus::conditional;
+        }
         return declaration;
     }
     // There is deliberately no per-query Requirements parameter.

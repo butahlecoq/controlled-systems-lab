@@ -1438,6 +1438,7 @@ TEST_CASE("prepared providers expose conservative request-envelope declarations"
     const auto rejected=provider.declare_support({"hybrid.linear-optimization",4,9,36,"linear"});
     CHECK(rejected.status==registry::AdmissionStatus::unsupported);
     CHECK_FALSE(rejected.diagnostics.empty());
+    CHECK_FALSE(rejected.envelope_is_sufficient);
 
     registry::Registry<registry::LPPort> conditional_providers;
     REQUIRE_FALSE(conditional_providers.add({{{"conditional-lp"},"1"},
