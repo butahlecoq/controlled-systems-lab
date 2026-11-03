@@ -2056,8 +2056,8 @@ HybridPortfolioExecution execute_hybrid_request(HybridPreparedExecution prepared
                 auto result=verify_hybrid_portfolio_family(*storage.verifier,storage.system,
                     storage.request,storage.programs,candidates->branches,storage.enumeration_limits,
                     invocation);
-                if(const auto stop=interruption(context))
-                    result=OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:
+                if(const auto post_verification_stop=interruption(context))
+                    result=OperationStopped{*post_verification_stop==Termination::cancelled?StopReason::cancelled:
                         StopReason::deadline_expired,
                         "Hybrid family verification stopped before result publication"};
                 verification.verification=std::move(result);
