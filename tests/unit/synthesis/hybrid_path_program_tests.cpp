@@ -2490,6 +2490,12 @@ TEST_CASE("projected hybrid reachability returns the literal terminal interval a
     REQUIRE(std::holds_alternative<HybridPathReachability>(result));
     const auto& reachable=std::get<HybridPathReachability>(result);
     REQUIRE(reachable.projected_state.has_value());
+    REQUIRE(reachable.relation_operations.size()==8);
+    for(const auto& operation:reachable.relation_operations) {
+        CHECK(operation.matrix_elements_added==operation.rows_added*operation.joint_variables);
+        CHECK(operation.cumulative_matrix_elements==operation.cumulative_rows*operation.joint_variables);
+        CHECK(operation.completed);
+    }
     const auto terminal=reachable.projected_state->terminal_state_set.representation();
     REQUIRE(std::holds_alternative<sets::HRepresentation>(terminal));
     const auto& terminal_h=std::get<sets::HRepresentation>(terminal);
