@@ -45,7 +45,25 @@ def run(command: list[str], source: Path, output: Path, env: dict[str, str]) -> 
         raise RuntimeError(f"Command failed ({result.returncode}): {command}")
 
 
-def capture(source: Path, destination: Path, commit: str, cmake: str) -> None:
+def validate_jobs(jobs: int) -> None:
+    if jobs < 1:
+        raise ValueError("Build parallelism must be positive")
+
+
+def cmake_build_command(cmake: str, build: Path, target: str, jobs: int,
+                        generator: str,
+                        msbuild_args: tuple[str, ...] = ()) -> list[str]:
+    validate_jobs(jobs)
+    command = [cmake, "--build", str(build), "--config", "Release", "--target",
+               target, "--parallel", str(jobs)]
+    if generator.startswith("Visual Studio"):
+        command.extend(["--", *msbuild_args])
+    return command
+
+
+def capture(source: Path, destination: Path, commit: str, cmake: str,
+            jobs: int = 4) -> None:
+    validate_jobs(jobs)
     source = source.resolve(strict=True)
     destination = destination.resolve()
     if destination.exists():
@@ -58,9 +76,12 @@ def capture(source: Path, destination: Path, commit: str, cmake: str) -> None:
     run([cmake, "-S", str(source), "-B", str(build), "-DBUILD_TESTING=OFF",
          "-DCSL_ENABLE_HIGHS=ON", "-DCSL_ENABLE_QHULL=OFF", "-DCSL_BUILD_EXT07_REPORT=ON"],
         source, destination / "configure.log", env)
-    run([cmake, "--build", str(build), "--config", "Release", "--target",
-         "csl_ext07_hybrid_report", "--parallel", "4", "--",
-         "/p:PreferredUILang=en-US"],
+    cache = (build / "CMakeCache.txt").read_text(encoding="utf-8", errors="replace")
+    generator_match = re.search(r"^CMAKE_GENERATOR:INTERNAL=(.*)$", cache, re.MULTILINE)
+    if not generator_match:
+        raise ValueError("CMake cache is missing its generator")
+    run(cmake_build_command(cmake, build, "csl_ext07_hybrid_report", jobs,
+                            generator_match.group(1).strip()),
         source, destination / "build.log", env)
     if not (destination / "build.log").read_bytes().strip():
         raise ValueError("Release build produced no retained build output")
@@ -96,7 +117,7 @@ def capture(source: Path, destination: Path, commit: str, cmake: str) -> None:
     save(destination / "host.json", {
         "source_commit": commit, "source_tree": before["tree"],
         "collected_utc": datetime.now(timezone.utc).isoformat(),
-        "host": "Windows measurement workstation",
+        "host": f"{platform.system()} measurement workstation",
         "host_name_sha256": hashlib.sha256(platform.node().encode()).hexdigest(),
         "os": platform.platform(),
         "processor": platform.processor(), "architecture": platform.machine(),
@@ -126,5 +147,6 @@ if __name__ == "__main__":
     parser.add_argument("--capture", type=Path, required=True)
     parser.add_argument("--commit", required=True)
     parser.add_argument("--cmake", default="cmake")
+    parser.add_argument("--jobs", type=int, default=4)
     args = parser.parse_args()
-    capture(args.source, args.capture, args.commit, args.cmake)
+    capture(args.source, args.capture, args.commit, args.cmake, args.jobs)

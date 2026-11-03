@@ -44,12 +44,12 @@ SetHandle identity_reset() {
 }
 
 std::pair<HybridSystem, HybridRequest> fixture() {
-    HybridMode source{{"coast"}, 1, 1, {"x"}, {"u"}};
+    HybridMode source{{"coast"}, 1, 1, {"x"}, {"u"}, LinearStage{}, {}, {}};
     source.flow = LinearStage{Matrix{1, 1, {1}}, Matrix{1, 1, {1}}, Matrix{1, 0, {}}, Vector{0}};
     source.control_sets = {interval("ext07-report-control", 0, 1)};
     source.invariants = {UniversalSet{1}, UniversalSet{1}};
 
-    HybridMode target{{"terminal"}, 1, 1, {"x"}, {"u"}};
+    HybridMode target{{"terminal"}, 1, 1, {"x"}, {"u"}, LinearStage{}, {}, {}};
     target.flow = LinearStage{Matrix{1, 1, {1}}, Matrix{1, 1, {1}}, Matrix{1, 0, {}}, Vector{0}};
     target.control_sets = {UniversalSet{1}};
     target.invariants = {UniversalSet{1}, UniversalSet{1}};
