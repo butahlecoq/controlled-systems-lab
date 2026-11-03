@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 import shutil
 import statistics
+import subprocess
 
 _common_spec = importlib.util.spec_from_file_location(
     "csl_ext07_common_collect", Path(__file__).with_name("ext07_collect.py"))
@@ -21,12 +22,22 @@ require = common.require
 sha = common.sha
 
 
-SOURCE_FILES = (
+LEGACY_SOURCE_FILES = (
     "two_parameter_driver.cpp", "smoke.jsonl", "measure.jsonl",
     "smoke.stderr.txt", "measure.stderr.txt", "prebuild.json",
     "postrun.json", "host.json", "configure.log", "build.log",
     "CMakeCXXCompiler.raw.cmake",
 )
+SOURCE_FILES = ("two_parameter_driver.cpp", "process_cpu_json.hpp",
+                *LEGACY_SOURCE_FILES[1:])
+
+
+def source_files_for_record(record: dict) -> tuple[str, ...]:
+    if record.get("schema") == "csl.ext07-hybrid-two-parameter-report/1":
+        return LEGACY_SOURCE_FILES
+    require(record.get("schema") == "csl.ext07-hybrid-two-parameter-report/2",
+            "Unsupported EXT-07 two-parameter report schema")
+    return SOURCE_FILES
 EXPECTED_PROVIDER = "csl.lp.highs@1.1.0+highs.1.11.0"
 SUPPORTED_VERIFIERS = {
     "csl.hybrid.scalar-two-parameter-polytope",
@@ -36,7 +47,8 @@ CURRENT_VERIFIER = "csl.hybrid.exact-linear-h"
 EXPECTED_PATHS = ["enter-half", "enter-full"]
 
 
-def validate_run(row: dict, phase: str, repetition: int, calls: int) -> None:
+def validate_run(row: dict, phase: str, repetition: int, calls: int,
+                 process_cpu: bool = True) -> None:
     require(row.get("phase") == phase and row.get("repetition") == repetition and
             row.get("calls") == calls and row.get("failures") == 0 and
             row.get("status") == "passed" and row.get("paths") == 2,
@@ -50,6 +62,8 @@ def validate_run(row: dict, phase: str, repetition: int, calls: int) -> None:
             row.get("feasibility") == row.get("optimality") ==
             row.get("coverage") == "established",
             "EXT-07 two-parameter provider or family result differs")
+    if process_cpu:
+        common.validate_process_cpu_observations(row, calls, len(EXPECTED_PATHS))
     durations = row.get("call_durations_ns")
     require(isinstance(durations, list) and len(durations) == calls and
             all(isinstance(value, int) and value > 0 for value in durations) and
@@ -71,7 +85,6 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
             pre.get("tree") == post.get("tree") and
             pre.get("commit") == post.get("commit"),
             "EXT-07 two-parameter source receipts differ")
-    import subprocess
     require(subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=source,
                                     text=True).strip() == commit and
             not subprocess.check_output(
@@ -91,20 +104,33 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
                 for row in (*smoke, *measure)),
             "Current two-parameter capture did not run the exact linear H verifier")
     driver = source / "benchmarks/reporting/ext07/two_parameter_driver.cpp"
+    cpu_header = source / "benchmarks/reporting/ext07/process_cpu_json.hpp"
     require(driver.is_file(), "Missing two-parameter measured driver source")
+    require(driver.read_bytes() == subprocess.check_output(
+        ["git", "show", commit + ":benchmarks/reporting/ext07/two_parameter_driver.cpp"], cwd=source),
+        "EXT-07 two-parameter driver differs from its frozen source commit")
+    require(cpu_header.read_bytes() == subprocess.check_output(
+        ["git", "show", commit + ":benchmarks/reporting/ext07/process_cpu_json.hpp"], cwd=source),
+        "EXT-07 CPU JSON helper differs from its frozen source commit")
     source_hashes = {
         name: sha((driver if name == "two_parameter_driver.cpp" else
+                   cpu_header if name == "process_cpu_json.hpp" else
                    capture / name).read_bytes()) for name in SOURCE_FILES
     }
     trials = measure[1:]
     host = read_json(capture / "host.json")
     cache = (capture / "CMakeCache.raw.txt").read_bytes()
+    release_configuration = (
+        b"CMAKE_CONFIGURATION_TYPES:STRING=Debug;Release;MinSizeRel;RelWithDebInfo" in cache and
+        b"CMAKE_GENERATOR:INTERNAL=Visual Studio 17 2022" in cache) or (
+        b"CMAKE_BUILD_TYPE:STRING=Release" in cache and
+        b"CMAKE_GENERATOR:INTERNAL=Unix Makefiles" in cache)
     require(host.get("source_commit") == commit and
             host.get("configuration") == "Release" and
             host.get("cxx_standard") == 20 and
             host.get("absolute_tolerance") == host.get("relative_tolerance") == 1e-8 and
             host.get("cmake_cache_sha256") == sha(cache) and
-            b"CMAKE_GENERATOR:INTERNAL=Visual Studio 17 2022" in cache and
+            release_configuration and
             b"CSL_ENABLE_HIGHS:BOOL=ON" in cache and
             b"CSL_BUILD_EXT07_REPORT:BOOL=ON" in cache and
             b"CSL_ENABLE_QHULL:BOOL=OFF" in cache,
@@ -140,7 +166,7 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
                        "minimizing_face": "u0=0, 0<=u1<=1"},
     }
     unsigned = {
-        "schema": "csl.ext07-hybrid-two-parameter-report/1",
+        "schema": "csl.ext07-hybrid-two-parameter-report/2",
         "source_commit": commit,
         "source_tree": pre["tree"],
         "source_sha256": source_hashes,
@@ -173,11 +199,12 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
                 row["end_to_end_total_ns"] for row in trials),
             "median_call_ns": int(statistics.median(
                 value for row in trials for value in row["call_durations_ns"])),
+            "process_cpu": common.process_cpu_summary(trials, EXPECTED_PATHS),
             "comparison": "one backend and one fixed fixture; descriptive only, no comparator or speedup claim",
         },
         "evidence_scope": "140 completed public hybrid portfolio calls; each call assembles both two-stage H relations, solves both branches with registered HiGHS LP, constructs both tied candidate faces, and verifies both complete two-parameter families with ExactLinearHHybridFamilyVerifier",
         "evidence_limits": [
-            "One Windows MSVC Release host and one fixed analytic two-stage fixture.",
+            "One host, one Release configuration, and one fixed analytic two-stage fixture.",
             "The controls are independent and bounded; no higher-dimensional parameter polytope is measured.",
             "No comparator, speedup, source-mapped bottleneck, application-scale result, or scalability claim.",
             "Binary64 checks are numerical assurance and do not establish validated arithmetic.",
@@ -190,7 +217,8 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
     require(not destination.exists(), "EXT-07 two-parameter report destination must be new")
     destination.mkdir()
     for name in SOURCE_FILES:
-        source_path = driver if name == "two_parameter_driver.cpp" else capture / name
+        source_path = (driver if name == "two_parameter_driver.cpp" else
+                       cpu_header if name == "process_cpu_json.hpp" else capture / name)
         shutil.copyfile(source_path, destination / name)
     (destination / "records.json").write_bytes(encoded(record))
     return destination

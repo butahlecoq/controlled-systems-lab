@@ -41,6 +41,12 @@ medians are computed independently and are not additive to the end-to-end
 median. End-to-end timing includes setup, enumeration, relation assembly, solve,
 and verification, while output and rendering are excluded.
 
+New schema `/2` captures also report process CPU for each branch execution.
+This sums all process threads during workspace creation and provider execution,
+so unrelated concurrent work may contribute. It is not provider-only CPU, and
+it does not measure heap use. Schema `/1` bundles remain readable and retain
+their original rendered bytes.
+
 The publication catalogue is `reports/algorithm-results/ext07-publications.json`.
 The main-only report workflow stages only the allowlisted report bundle after
 the catalogue, hashes, HTML links, and offline ZIP validate. The deployed URL
@@ -60,6 +66,9 @@ LP branches, tied face construction, and verification of both families. It
 uses one excluded 10-call warmup followed by seven measured 20-call batches.
 It makes no comparator or speedup claim. The source commit and every raw
 per-call duration are recorded separately from the existing one-step report.
+New schema `/2` records include process CPU observations for each branch and
+label their process-wide scope in the report; the same provider-attribution and
+heap limitations apply.
 
 ```sh
 python scripts/reports/ext07/two_parameter_capture.py --source <frozen-source> --capture <fresh-capture> --commit <source-commit> --cmake <cmake-executable>

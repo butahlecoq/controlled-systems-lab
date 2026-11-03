@@ -25,11 +25,13 @@ def validate(bundle: Path) -> dict:
     require(bundle.is_dir() and not bundle.is_symlink(), "EXT-07 bundle missing or unsafe")
     record = collect.read_json(bundle / "records.json")
     unsigned = {key: value for key, value in record.items() if key != "report_id"}
-    require(record.get("schema") == "csl.ext07-hybrid-profile-report/1" and
+    schema = record.get("schema")
+    require(schema in {"csl.ext07-hybrid-profile-report/1",
+                       "csl.ext07-hybrid-profile-report/2"} and
             record.get("report_id") == bundle.name ==
             "ext07-hybrid-" + collect.sha(collect.encoded(unsigned))[:16],
             "EXT-07 record identity differs")
-    for name in collect.SOURCE_FILES:
+    for name in collect.source_files_for_record(record):
         path = bundle / name
         require(path.is_file() and not path.is_symlink() and
                 collect.sha(path.read_bytes()) == record["source_sha256"][name],
@@ -42,10 +44,11 @@ def validate(bundle: Path) -> dict:
             "EXT-07 frozen-source receipts differ")
     smoke = collect.jsonl(bundle / "smoke.jsonl", 1)
     measure = collect.jsonl(bundle / "measure.jsonl", 8)
-    collect.validate_run(smoke[0], "smoke", 0, 1)
-    collect.validate_run(measure[0], "warmup", 0, 10)
+    has_process_cpu = schema.endswith("/2")
+    collect.validate_run(smoke[0], "smoke", 0, 1, has_process_cpu)
+    collect.validate_run(measure[0], "warmup", 0, 10, has_process_cpu)
     for repetition, row in enumerate(measure[1:]):
-        collect.validate_run(row, "trial", repetition, 20)
+        collect.validate_run(row, "trial", repetition, 20, has_process_cpu)
     trials = measure[1:]
     measurement = record["measurement"]
     require(measurement["trials"] == trials and measurement["warmup"] == measure[0] and
@@ -58,6 +61,10 @@ def validate(bundle: Path) -> dict:
             measurement["min_batch_end_to_end_ns"] == min(durations) and
             measurement["max_batch_end_to_end_ns"] == max(durations),
             "EXT-07 timing summary differs from raw repetitions")
+    if schema.endswith("/2"):
+        require(measurement["process_cpu"] ==
+                collect.process_cpu_summary(trials, ["coast-to-terminal"]),
+                "EXT-07 process CPU summary differs from raw observations")
     return record
 
 
@@ -87,22 +94,54 @@ def figure() -> bytes:
 def summary_csv(record: dict) -> bytes:
     output = io.StringIO(newline="")
     writer = csv.writer(output, lineterminator="\n")
-    writer.writerow(["repetition", "calls", "failures", "assembly_total_ns", "solve_total_ns",
+    header = ["repetition", "calls", "failures", "assembly_total_ns", "solve_total_ns",
                      "verify_total_ns", "end_to_end_total_ns", "objective", "control",
-                     "relation_rows", "relation_matrix_elements"])
+                     "relation_rows", "relation_matrix_elements"]
+    if record["schema"].endswith("/2"):
+        header += ["process_cpu_coast_to_terminal_min_ns",
+                   "process_cpu_coast_to_terminal_median_ns",
+                   "process_cpu_coast_to_terminal_max_ns",
+                   "process_cpu_coast_to_terminal_unavailable"]
+    writer.writerow(header)
     for row in record["measurement"]["trials"]:
-        writer.writerow([row["repetition"], row["calls"], row["failures"],
+        values = [row["repetition"], row["calls"], row["failures"],
                          row["assembly_total_ns"], row["solve_total_ns"],
                          row["verify_total_ns"], row["end_to_end_total_ns"],
                          row["objective"], row["control"], row["relation_rows"],
-                         row["relation_matrix_elements"]])
+                         row["relation_matrix_elements"]]
+        if record["schema"].endswith("/2"):
+            values.extend(_process_cpu_trial_summary(row))
+        writer.writerow(values)
     return output.getvalue().encode()
+
+
+def _process_cpu_trial_summary(row: dict) -> list[object]:
+    values = [observation["observed_ns"]
+              for call in row["process_cpu_observations"]
+              for observation in call if observation["status"] == "observed"]
+    unavailable = sum(1 for call in row["process_cpu_observations"]
+                      for observation in call if observation["status"] == "unavailable")
+    import statistics
+    return [min(values) if values else "", int(statistics.median(values)) if values else "",
+            max(values) if values else "", unavailable]
 
 
 def page(record: dict, example: bool) -> bytes:
     report_id = escape(record["report_id"])
     source = escape(record["source_commit"])
     measurement = record["measurement"]
+    process_cpu_note = ""
+    if record["schema"].endswith("/2"):
+        branch = measurement["process_cpu"]["branches"][0]
+        if branch["observed_calls"]:
+            cpu_range = (f"{branch['min_nanoseconds']:,}–{branch['max_nanoseconds']:,} ns; "
+                         f"median {branch['median_nanoseconds']:,} ns")
+        else:
+            cpu_range = "unavailable for all calls"
+        process_cpu_note = (
+            f" Process CPU around the branch interval: {escape(cpu_range)}. "
+            "This sums all process threads and may include unrelated concurrent work; "
+            "it is not provider-only CPU. Heap use remains unmeasured.")
     medians = measurement["median_phase_total_ns"]
     trials = measurement["trials"]
     provider = escape(trials[0]["provider"])
@@ -170,7 +209,7 @@ Median accumulated phase durations: setup {medians['setup']:,} ns, relation asse
 solve {medians['solve']:,} ns, verify {medians['verify']:,} ns, and end-to-end {medians['end_to_end']:,} ns.
 End-to-end includes fixture/provider setup, path enumeration, relation construction, solve and family verification.
 Phase medians are calculated separately across batches and are not additive to the end-to-end median;
-output serialization and rendering are excluded.</p>
+output serialization and rendering are excluded.{process_cpu_note}</p>
 <p>One host and one fixed profile are measured. There is no comparator, speedup, source-mapped bottleneck,
 or scalability claim. Thread and backend details, all raw repetitions, source/build receipts, and failures
 are retained in the <a href="records.json">versioned record</a>,
@@ -205,8 +244,9 @@ def render(bundle: Path, check: bool) -> dict:
         else:
             collect.require(not path.exists(), "EXT-07 rendered output already exists: " + name)
             path.write_bytes(content)
+    source_files = collect.source_files_for_record(record)
     inventory = {name: collect.sha((bundle / name).read_bytes()) for name in
-                 (*collect.SOURCE_FILES, "records.json", *RENDERED)}
+                 (*source_files, "records.json", *RENDERED)}
     manifest = {"schema": "csl.ext07-manifest/1", "report_id": bundle.name,
                 "source_commit": record["source_commit"], "sha256": inventory}
     manifest_path = bundle / "manifest.json"

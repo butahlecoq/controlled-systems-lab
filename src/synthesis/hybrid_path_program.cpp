@@ -8,6 +8,15 @@
 #include <limits>
 #include <type_traits>
 
+#if defined(_WIN32)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#else
+#include <time.h>
+#endif
+
 namespace csl::synthesis {
 namespace {
 Diagnostics one(Diagnostic diagnostic) { return Diagnostics{std::move(diagnostic)}; }
@@ -16,6 +25,48 @@ std::uint64_t elapsed_wall_nanoseconds(std::chrono::steady_clock::time_point sta
     const auto elapsed=std::chrono::duration_cast<std::chrono::nanoseconds>(
         std::chrono::steady_clock::now()-started).count();
     return elapsed>0?static_cast<std::uint64_t>(elapsed):0;
+}
+using ProcessCpuClockReading=std::variant<std::uint64_t,ProcessCpuUnavailable>;
+ProcessCpuClockReading read_process_cpu_clock() noexcept {
+#if defined(_WIN32)
+    FILETIME created{},exited{},kernel{},user{};
+    if(!::GetProcessTimes(::GetCurrentProcess(),&created,&exited,&kernel,&user))
+        return ProcessCpuUnavailable{ProcessCpuUnavailable::Reason::clock_read_failed};
+    ULARGE_INTEGER kernel_ticks{},user_ticks{};
+    kernel_ticks.LowPart=kernel.dwLowDateTime;
+    kernel_ticks.HighPart=kernel.dwHighDateTime;
+    user_ticks.LowPart=user.dwLowDateTime;
+    user_ticks.HighPart=user.dwHighDateTime;
+    const auto maximum=std::numeric_limits<std::uint64_t>::max();
+    if(user_ticks.QuadPart>maximum-kernel_ticks.QuadPart)
+        return ProcessCpuUnavailable{ProcessCpuUnavailable::Reason::clock_read_failed};
+    const auto ticks=kernel_ticks.QuadPart+user_ticks.QuadPart;
+    if(ticks>maximum/100)
+        return ProcessCpuUnavailable{ProcessCpuUnavailable::Reason::clock_read_failed};
+    return static_cast<std::uint64_t>(ticks*100);
+#elif defined(CLOCK_PROCESS_CPUTIME_ID)
+    timespec reading{};
+    if(::clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&reading)!=0||reading.tv_sec<0||
+       reading.tv_nsec<0||reading.tv_nsec>=1'000'000'000)
+        return ProcessCpuUnavailable{ProcessCpuUnavailable::Reason::clock_read_failed};
+    const auto seconds=static_cast<std::uint64_t>(reading.tv_sec);
+    constexpr auto billion=std::uint64_t{1'000'000'000};
+    if(seconds>(std::numeric_limits<std::uint64_t>::max()-
+        static_cast<std::uint64_t>(reading.tv_nsec))/billion)
+        return ProcessCpuUnavailable{ProcessCpuUnavailable::Reason::clock_read_failed};
+    return seconds*billion+static_cast<std::uint64_t>(reading.tv_nsec);
+#else
+    return ProcessCpuUnavailable{ProcessCpuUnavailable::Reason::unsupported_platform};
+#endif
+}
+ProcessCpuObservation finish_process_cpu_interval(const ProcessCpuClockReading& started) noexcept {
+    if(const auto* unavailable=std::get_if<ProcessCpuUnavailable>(&started)) return *unavailable;
+    const auto finished=read_process_cpu_clock();
+    if(const auto* unavailable=std::get_if<ProcessCpuUnavailable>(&finished)) return *unavailable;
+    const auto begin=std::get<std::uint64_t>(started);
+    const auto end=std::get<std::uint64_t>(finished);
+    if(end<begin) return ProcessCpuUnavailable{ProcessCpuUnavailable::Reason::clock_regressed};
+    return ProcessCpuDuration{end-begin};
 }
 class CompletedHybridReachabilityStage final : public HybridReachabilityStage {
     HybridPathReachability result_;
@@ -1741,12 +1792,14 @@ HybridPortfolioExecution execute_prepared_hybrid_branches(
             const auto provenance=pipeline.provenance();
             execution.providers.assign(provenance.begin(),provenance.end());
             const auto provider_started=std::chrono::steady_clock::now();
+            const auto process_cpu_started=read_process_cpu_clock();
             auto workspaces=pipeline.create();
             auto branch_context=context;
             auto branch_observation=std::make_shared<csl::execution::BackendThreadObservation>();
             branch_context.backend_thread_observation=branch_observation;
             auto outcome=std::get<0>(workspaces)->run(branch_context);
             execution.provider_elapsed_wall_nanoseconds=elapsed_wall_nanoseconds(provider_started);
+            execution.process_cpu=finish_process_cpu_interval(process_cpu_started);
             execution.observed_backend_threads=branch_observation->maximum();
             if(context.backend_thread_observation && execution.observed_backend_threads)
                 context.backend_thread_observation->record(*execution.observed_backend_threads);
@@ -2036,8 +2089,10 @@ HybridPortfolioExecution execute_hybrid_request(HybridPreparedExecution prepared
         auto observation=std::make_shared<csl::execution::BackendThreadObservation>();
         path_context.backend_thread_observation=observation;
         const auto reachability_started=std::chrono::steady_clock::now();
+        const auto reachability_cpu_started=read_process_cpu_clock();
         auto result=std::move(*storage.reachability_stages[index]).execute(path_context);
         attempt.elapsed_wall_nanoseconds=elapsed_wall_nanoseconds(reachability_started);
+        attempt.process_cpu=finish_process_cpu_interval(reachability_cpu_started);
         attempt.observed_backend_threads=observation->maximum();
         if(context.backend_thread_observation&&attempt.observed_backend_threads)
             context.backend_thread_observation->record(*attempt.observed_backend_threads);
@@ -2067,10 +2122,12 @@ HybridPortfolioExecution execute_hybrid_request(HybridPreparedExecution prepared
             } else {
                 HybridVerifierInvocation invocation(context);
                 const auto verifier_started=std::chrono::steady_clock::now();
+                const auto verifier_cpu_started=read_process_cpu_clock();
                 auto result=verify_hybrid_portfolio_family(*storage.verifier,storage.system,
                     storage.request,storage.programs,candidates->branches,storage.enumeration_limits,
                     invocation);
                 verification.resources.elapsed_wall_nanoseconds=elapsed_wall_nanoseconds(verifier_started);
+                verification.resources.process_cpu=finish_process_cpu_interval(verifier_cpu_started);
                 if(const auto post_verification_stop=interruption(context))
                     result=OperationStopped{*post_verification_stop==Termination::cancelled?StopReason::cancelled:
                         StopReason::deadline_expired,

@@ -421,8 +421,12 @@ creation and provider execution, plus backend-reported thread width. Each
 reachability path records elapsed wall time around staged execution, and each
 verifier invocation records the full verification-phase interval, including
 coordinator checks and path enumeration as well as the adapter call. The
-verifier interval is not provider-only time. These wall-time values do not
-measure provider CPU or heap use. The default
+verifier interval is not provider-only time. Path, branch, and verifier records
+also carry typed process CPU observations for their respective full operation
+intervals. CPU time sums all process threads and unrelated concurrent work may
+contribute, so it is not provider-only attribution. Unsupported or failed
+clock reads remain explicit. These observations do not measure heap use or
+establish resource enforcement. The default
 reachability adapter wraps this same direct joint-H
 composer. The separate projected-state adapter independently builds and
 projects a one-transition scalar relation; multi-stage and general-dimensional

@@ -100,15 +100,17 @@ verification phase. Backend thread width is retained when a provider reports it.
 - `ExactLinearHHybridFamilyVerifier` checks its admitted exact-H, linear-
   objective domain. The test profiles above are sampled fixtures, not an
   exhaustive description of every admitted H relation.
-- Provider-consumed CPU and memory are not established by the saved hybrid
-  reports. Path-level wall time is diagnostic and does not prove enforcement.
-  A requested `ResourcePolicy` is not proof of provider enforcement or
-  consumption.
+- Path, branch, and verifier reports retain typed process CPU duration or
+  explicit unavailability for each operation interval. The clock sums all
+  process threads and unrelated concurrent work may contribute, so it does not
+  attribute CPU to a provider. Heap use and resource enforcement remain
+  unmeasured. A requested `ResourcePolicy` is not proof of enforcement.
 
 PR #881 adds request-wide admission, per-mode/edge composer accounting, and
 path/branch operation wall-time plus reported thread observations to the
-bounded profile tracked by issue #156. The issue remains open while provider CPU and heap use
-are unmeasured and broader operation profiles remain incomplete. Future
+bounded profile tracked by issue #156. This follow-up records process-wide CPU
+intervals; provider-only CPU, heap use, and broader operation profiles remain
+incomplete. Future
 extensions can add more set representations, enforce provider CPU or memory
 limits, and measure larger dimensions or path inventories. The current evidence
 makes no general scalability claim. The two saved-report routes

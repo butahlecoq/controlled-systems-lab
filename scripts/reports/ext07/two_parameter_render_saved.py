@@ -31,10 +31,12 @@ def validate(bundle: Path) -> dict:
     unsigned = {key: value for key, value in record.items() if key != "report_id"}
     expected_id = "ext07-hybrid-two-parameter-" + collect.sha(
         collect.encoded(unsigned))[:16]
-    require(record.get("schema") == "csl.ext07-hybrid-two-parameter-report/1" and
+    schema = record.get("schema")
+    require(schema in {"csl.ext07-hybrid-two-parameter-report/1",
+                       "csl.ext07-hybrid-two-parameter-report/2"} and
             record.get("report_id") == bundle.name == expected_id,
             "Two-parameter report identity differs")
-    for name in collect.SOURCE_FILES:
+    for name in collect.source_files_for_record(record):
         path = bundle / name
         require(path.is_file() and not path.is_symlink() and
                 collect.sha(path.read_bytes()) == record["source_sha256"][name],
@@ -49,10 +51,11 @@ def validate(bundle: Path) -> dict:
             "Two-parameter source receipts differ")
     smoke = collect.jsonl(bundle / "smoke.jsonl", 1)
     measure = collect.jsonl(bundle / "measure.jsonl", 8)
-    collect.validate_run(smoke[0], "smoke", 0, 1)
-    collect.validate_run(measure[0], "warmup", 0, 10)
+    has_process_cpu = schema.endswith("/2")
+    collect.validate_run(smoke[0], "smoke", 0, 1, has_process_cpu)
+    collect.validate_run(measure[0], "warmup", 0, 10, has_process_cpu)
     for repetition, row in enumerate(measure[1:]):
-        collect.validate_run(row, "trial", repetition, 20)
+        collect.validate_run(row, "trial", repetition, 20, has_process_cpu)
     trials = measure[1:]
     measurement = record["measurement"]
     require(measurement["trials"] == trials and measurement["warmup"] == measure[0] and
@@ -68,6 +71,10 @@ def validate(bundle: Path) -> dict:
             measurement["max_batch_end_to_end_ns"] == max(totals) and
             measurement["median_call_ns"] == int(statistics.median(call_times)),
             "Two-parameter summary timings differ from raw calls")
+    if schema.endswith("/2"):
+        require(measurement["process_cpu"] ==
+                collect.common.process_cpu_summary(trials, collect.EXPECTED_PATHS),
+                "Two-parameter process CPU summary differs from raw observations")
     return record
 
 
@@ -92,14 +99,30 @@ def figure(record: dict) -> bytes:
 def summary_csv(record: dict) -> bytes:
     output = io.StringIO(newline="")
     writer = csv.writer(output, lineterminator="\n")
-    writer.writerow(["repetition", "calls", "failures", "paths", "relation_rows",
+    header = ["repetition", "calls", "failures", "paths", "relation_rows",
                      "relation_matrix_elements", "end_to_end_total_ns",
-                     "minimum_call_ns", "maximum_call_ns", "provider", "verifier"])
+                     "minimum_call_ns", "maximum_call_ns", "provider", "verifier"]
+    if record["schema"].endswith("/2"):
+        for path in collect.EXPECTED_PATHS:
+            header.extend([f"process_cpu_{path}_min_ns", f"process_cpu_{path}_median_ns",
+                           f"process_cpu_{path}_max_ns", f"process_cpu_{path}_unavailable"])
+    writer.writerow(header)
     for row in record["measurement"]["trials"]:
-        writer.writerow([row["repetition"], row["calls"], row["failures"], row["paths"],
+        values = [row["repetition"], row["calls"], row["failures"], row["paths"],
                          row["relation_rows"], row["relation_matrix_elements"],
                          row["end_to_end_total_ns"], min(row["call_durations_ns"]),
-                         max(row["call_durations_ns"]), row["provider"], row["verifier"]])
+                         max(row["call_durations_ns"]), row["provider"], row["verifier"]]
+        if record["schema"].endswith("/2"):
+            for index in range(len(collect.EXPECTED_PATHS)):
+                observed = [call[index]["nanoseconds"]
+                            for call in row["process_cpu_observations"]
+                            if call[index]["status"] == "observed"]
+                unavailable = sum(call[index]["status"] == "unavailable"
+                                  for call in row["process_cpu_observations"])
+                values.extend([min(observed) if observed else "",
+                               int(statistics.median(observed)) if observed else "",
+                               max(observed) if observed else "", unavailable])
+        writer.writerow(values)
     return output.getvalue().encode()
 
 
@@ -120,11 +143,20 @@ def index_page(record: dict) -> bytes:
     source = html.escape(record["source_commit"])
     verifier = html.escape(record["measurement"]["trials"][0]["verifier"])
     measurement = record["measurement"]
+    host_scope = ("one Windows MSVC Release host" if record["schema"].endswith("/1") else
+                  f"one {html.escape(record['environment']['host'])} "
+                  f"{html.escape(record['environment']['configuration'])} host")
+    cpu_note = ""
+    if record["schema"].endswith("/2"):
+        cpu_note = (" <p>Per-branch process CPU observations sum all process threads during "
+                    "workspace creation and solver execution. They are process-scoped, not "
+                    "provider-only, and unrelated concurrent work may contribute. Heap use "
+                    "remains unmeasured.</p>")
     trials = "".join(
         f"<tr><td>{row['repetition']}</td><td>{row['calls']}</td>"
         f"<td>{row['end_to_end_total_ns']:,}</td><td>0</td></tr>"
         for row in measurement["trials"])
-    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EXT-07 two-parameter verifier report</title><style>body{{background:#16161e;color:#e0def4;font:16px/1.55 system-ui,sans-serif;margin:0}}main,header,footer{{max-width:980px;margin:auto;padding:1.2rem}}a{{color:#9ccfd8}}section{{background:#23212c;border:1px solid #524f67;border-radius:12px;padding:1rem;margin:1rem 0}}table{{border-collapse:collapse;width:100%}}td,th{{border:1px solid #524f67;padding:.45rem;text-align:left}}code{{overflow-wrap:anywhere}}</style></head><body><header><p>Controlled Systems Lab · EXT-07</p><h1>Two-parameter hybrid family verification</h1><p>Measured public path construction, two-branch optimization, and complete-family verification for one fixed two-stage scalar fixture.</p></header><main><section><h2>Analytic answer</h2><p>The <code>enter-half</code> path has feasible controls <code>[0,0.5]×[0,1]</code>; <code>enter-full</code> has <code>[0,1]×[0,1]</code>. Both minimize <code>x_terminal=u₀</code> at zero, retaining the complete tied families <code>u₀=0, 0≤u₁≤1</code>.</p><p><a href="two-control-example.html">Open the standalone two-control example</a> (includes a labelled plot, fixture, independent answer, and reproduction commands).</p><img src="feasible-polygons.svg" alt="The full unit square, half-width feasible rectangle, and common minimizing face"></section><section><h2>Measured execution</h2><p>One excluded 10-call warmup followed by seven measured batches of 20 calls: 140 measured calls, no failures. Median batch duration is {measurement['median_batch_end_to_end_ns']:,} ns (range {measurement['min_batch_end_to_end_ns']:,}–{measurement['max_batch_end_to_end_ns']:,} ns); median individual call is {measurement['median_call_ns']:,} ns. Each end-to-end interval includes fixture/provider setup, complete two-path relation assembly, both HiGHS LP solves, tied-face construction, and verification of both path families. CTest and build time are excluded.</p><table><thead><tr><th>Batch</th><th>Calls</th><th>End-to-end total (ns)</th><th>Failures</th></tr></thead><tbody>{trials}</tbody></table><p>Recorded provider: <code>{collect.EXPECTED_PROVIDER}</code>. Verifier: <code>{verifier}</code>. Outcomes for both branches are feasibility, objective optimality, and continuous coverage established.</p></section><section><h2>Scope and provenance</h2><p>This is descriptive evidence for one Windows MSVC Release host and one analytic fixture. It makes no comparison, speedup, source-mapped bottleneck, or scalability claim. It covers exactly two scalar free controls; larger polytope dimensions and general horizons remain unmeasured. Assurance is numerical binary64, not validated arithmetic.</p><p>Source commit: <code>{source}</code>. See <a href="records.json">versioned record</a>, <a href="measure.jsonl">raw per-call timings and batches</a>, <a href="smoke.jsonl">smoke record</a>, <a href="summary.csv">summary CSV</a>, <a href="manifest.json">hash manifest</a>, <a href="two_parameter_driver.cpp">measured driver</a>, and <a href="{html.escape(record['report_id'])}.zip">offline ZIP</a>.</p></section></main><footer>EXT-07 · two-parameter numerical evidence · source <code>{source}</code></footer></body></html>'''.encode()
+    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EXT-07 two-parameter verifier report</title><style>body{{background:#16161e;color:#e0def4;font:16px/1.55 system-ui,sans-serif;margin:0}}main,header,footer{{max-width:980px;margin:auto;padding:1.2rem}}a{{color:#9ccfd8}}section{{background:#23212c;border:1px solid #524f67;border-radius:12px;padding:1rem;margin:1rem 0}}table{{border-collapse:collapse;width:100%}}td,th{{border:1px solid #524f67;padding:.45rem;text-align:left}}code{{overflow-wrap:anywhere}}</style></head><body><header><p>Controlled Systems Lab · EXT-07</p><h1>Two-parameter hybrid family verification</h1><p>Measured public path construction, two-branch optimization, and complete-family verification for one fixed two-stage scalar fixture.</p></header><main><section><h2>Analytic answer</h2><p>The <code>enter-half</code> path has feasible controls <code>[0,0.5]×[0,1]</code>; <code>enter-full</code> has <code>[0,1]×[0,1]</code>. Both minimize <code>x_terminal=u₀</code> at zero, retaining the complete tied families <code>u₀=0, 0≤u₁≤1</code>.</p><p><a href="two-control-example.html">Open the standalone two-control example</a> (includes a labelled plot, fixture, independent answer, and reproduction commands).</p><img src="feasible-polygons.svg" alt="The full unit square, half-width feasible rectangle, and common minimizing face"></section><section><h2>Measured execution</h2><p>One excluded 10-call warmup followed by seven measured batches of 20 calls: 140 measured calls, no failures. Median batch duration is {measurement['median_batch_end_to_end_ns']:,} ns (range {measurement['min_batch_end_to_end_ns']:,}–{measurement['max_batch_end_to_end_ns']:,} ns); median individual call is {measurement['median_call_ns']:,} ns. Each end-to-end interval includes fixture/provider setup, complete two-path relation assembly, both HiGHS LP solves, tied-face construction, and verification of both path families. CTest and build time are excluded.</p><table><thead><tr><th>Batch</th><th>Calls</th><th>End-to-end total (ns)</th><th>Failures</th></tr></thead><tbody>{trials}</tbody></table><p>Recorded provider: <code>{collect.EXPECTED_PROVIDER}</code>. Verifier: <code>{verifier}</code>. Outcomes for both branches are feasibility, objective optimality, and continuous coverage established.</p>{cpu_note}</section><section><h2>Scope and provenance</h2><p>This is descriptive evidence for {host_scope} and one analytic fixture. It makes no comparison, speedup, source-mapped bottleneck, or scalability claim. It covers exactly two scalar free controls; larger polytope dimensions and general horizons remain unmeasured. Assurance is numerical binary64, not validated arithmetic.</p><p>Source commit: <code>{source}</code>. See <a href="records.json">versioned record</a>, <a href="measure.jsonl">raw per-call timings and batches</a>, <a href="smoke.jsonl">smoke record</a>, <a href="summary.csv">summary CSV</a>, <a href="manifest.json">hash manifest</a>, <a href="two_parameter_driver.cpp">measured driver</a>, and <a href="{html.escape(record['report_id'])}.zip">offline ZIP</a>.</p></section></main><footer>EXT-07 · two-parameter numerical evidence · source <code>{source}</code></footer></body></html>'''.encode()
 
 
 def offline_zip(files: dict[str, bytes]) -> bytes:
@@ -153,8 +185,9 @@ def render(bundle: Path, check: bool) -> dict:
             collect.require(not path.exists(),
                             "Two-parameter rendered output already exists: " + name)
             path.write_bytes(content)
+    source_files = collect.source_files_for_record(record)
     inventory = {name: collect.sha((bundle / name).read_bytes())
-                 for name in (*collect.SOURCE_FILES, "records.json", *RENDERED)}
+                 for name in (*source_files, "records.json", *RENDERED)}
     manifest = {"schema": "csl.ext07-hybrid-two-parameter-manifest/1",
                 "report_id": bundle.name, "source_commit": record["source_commit"],
                 "files": inventory}

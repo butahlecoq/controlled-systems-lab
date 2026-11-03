@@ -1,6 +1,7 @@
 #include <csl/adapters/convex/highs.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/synthesis/hybrid_path_program.hpp>
+#include "process_cpu_json.hpp"
 
 #include <chrono>
 #include <cmath>
@@ -141,6 +142,7 @@ struct Observation {
   std::string optimality;
   std::string coverage;
   std::vector<std::string> edge_paths;
+  std::vector<synthesis::ProcessCpuObservation> branch_process_cpu;
 };
 
 Observation run_once() {
@@ -154,12 +156,14 @@ Observation run_once() {
   if (programs.size() != 2)
     throw std::runtime_error("Expected both permitted edge paths");
 
+  Observation observation;
   const auto execution =
       synthesis::execute_hybrid_path_programs(programs, lp, convex, {});
   if (!execution.all_supplied_branches_completed ||
       execution.branches.size() != 2)
     throw std::runtime_error("Both hybrid LP branches must complete");
   for (const auto &branch : execution.branches) {
+    observation.branch_process_cpu.push_back(branch.process_cpu);
     if (!branch.result || !branch.result->primal ||
         branch.result->primal->size() != 7 ||
         branch.outcome != MathematicalOutcome::optimal ||
@@ -184,8 +188,11 @@ Observation run_once() {
   }
 
   synthesis::ExactLinearHHybridFamilyVerifier verifier;
+  ExecutionContext verifier_context;
+  verifier_context.numerical = {1e-8, 1e-8};
   auto verified = synthesis::verify_hybrid_portfolio_family(
-      verifier, system, request, programs, candidates, {2, 8}, {1e-8, 1e-8});
+      verifier, system, request, programs, candidates, {2, 8},
+      synthesis::HybridVerifierInvocation{verifier_context});
   if (!std::holds_alternative<synthesis::HybridFamilyVerificationReport>(
           verified))
     throw std::runtime_error("Exact linear H verifier rejected the fixture");
@@ -207,7 +214,6 @@ Observation run_once() {
          ", diagnostic=" + branch.diagnostics.front().explanation));
   }
 
-  Observation observation;
   observation.total_ns = static_cast<std::uint64_t>(
       std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() - begin)
           .count());
@@ -244,15 +250,18 @@ void batch(const char *phase, std::size_t repetition, std::size_t calls) {
   Observation last;
   std::string last_error;
   std::vector<std::uint64_t> durations;
+  std::vector<std::vector<synthesis::ProcessCpuObservation>> process_cpu_observations;
   for (std::size_t i = 0; i < calls; ++i) {
     try {
       last = run_once();
       total += last.total_ns;
       durations.push_back(last.total_ns);
+      process_cpu_observations.push_back(last.branch_process_cpu);
     } catch (const std::exception &exception) {
       ++failures;
       last_error = exception.what();
       durations.push_back(0);
+      process_cpu_observations.emplace_back();
     }
   }
   std::cout << "{\"phase\":\"" << phase << "\",\"repetition\":"
@@ -275,6 +284,17 @@ void batch(const char *phase, std::size_t repetition, std::size_t calls) {
     if (i)
       std::cout << ',';
     std::cout << durations[i];
+  }
+  std::cout << "],\"process_cpu_observations\":[";
+  for(std::size_t call=0;call<process_cpu_observations.size();++call) {
+    if(call) std::cout << ',';
+    std::cout << '[';
+    for(std::size_t branch=0;branch<process_cpu_observations[call].size();++branch) {
+      if(branch) std::cout << ',';
+      reports::ext07::write_process_cpu_observation(
+          std::cout,process_cpu_observations[call][branch]);
+    }
+    std::cout << ']';
   }
   std::cout << "],\"error\":\"" << last_error << "\"}\n";
   if (failures)

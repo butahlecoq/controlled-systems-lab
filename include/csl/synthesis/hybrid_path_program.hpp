@@ -88,6 +88,15 @@ using HybridReachabilityStageResult = std::variant<
     std::unique_ptr<HybridReachabilityStage>, Diagnostics, HybridReachabilityStageFailure, OperationStopped,
     model::HybridPathCompositionFailureReport>;
 
+struct ProcessCpuDuration {
+    std::uint64_t nanoseconds{};
+};
+struct ProcessCpuUnavailable {
+    enum class Reason { not_measured, unsupported_platform, clock_read_failed, clock_regressed };
+    Reason reason{Reason::not_measured};
+};
+using ProcessCpuObservation = std::variant<ProcessCpuDuration, ProcessCpuUnavailable>;
+
 struct HybridReachabilityAttempt {
     model::HybridPath path;
     HybridPathReachabilityResult result;
@@ -96,6 +105,9 @@ struct HybridReachabilityAttempt {
     // Wall time spent executing this path's staged reachability operation.
     // Missing means the stage was not executed.
     std::optional<std::uint64_t> elapsed_wall_nanoseconds{};
+    // Process CPU accumulated across all process threads during staged path
+    // execution. Concurrent process work may contribute.
+    ProcessCpuObservation process_cpu{ProcessCpuUnavailable{}};
 };
 
 struct HybridReachabilityCapabilities {
@@ -274,6 +286,9 @@ struct HybridBranchExecution {
     // Wall time spent creating the workspace and running this branch provider.
     // Missing means no provider workspace was created.
     std::optional<std::uint64_t> provider_elapsed_wall_nanoseconds{};
+    // Process CPU accumulated across all process threads during workspace
+    // creation and branch execution. Concurrent process work may contribute.
+    ProcessCpuObservation process_cpu{ProcessCpuUnavailable{}};
 };
 
 struct HybridPortfolioExecution;
@@ -372,6 +387,9 @@ struct HybridVerifierResourceEvidence {
     // Wall time spent verifying the family after request preflight. Missing
     // means verifier execution was not invoked.
     std::optional<std::uint64_t> elapsed_wall_nanoseconds{};
+    // Process CPU accumulated across all process threads during the full
+    // verification phase. Concurrent process work may contribute.
+    ProcessCpuObservation process_cpu{ProcessCpuUnavailable{}};
 };
 
 // The coordinator preserves candidate construction separately from verifier

@@ -31,6 +31,7 @@ def capture(source: Path, destination: Path, commit: str, cmake: str,
     env = dict(os.environ, VSLANG="1033", PreferredUILang="en-US",
                DOTNET_CLI_UI_LANGUAGE="en-US")
     run([cmake, "-S", str(source), "-B", str(build), "-DBUILD_TESTING=OFF",
+         "-DCMAKE_BUILD_TYPE=Release",
          "-DCSL_ENABLE_HIGHS=ON", "-DCSL_ENABLE_QHULL=OFF",
          "-DCSL_BUILD_EXT07_REPORT=ON"], source,
         destination / "configure.log", env)
