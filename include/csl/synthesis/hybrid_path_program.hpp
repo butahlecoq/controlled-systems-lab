@@ -357,13 +357,67 @@ struct HybridFamilyVerificationCapabilities {
     Assurance assurance{Assurance::numerical};
 };
 
-// The coordinator preserves both the candidate construction result and the
-// verifier outcome. An incomplete solver portfolio therefore remains distinct
-// from a completed verification report.
+enum class HybridVerifierResourceDisposition { not_requested, not_invoked, requested_but_unenforced };
+struct HybridVerifierResourceEvidence {
+    std::optional<ResourcePolicy> requested;
+    HybridVerifierResourceDisposition disposition{HybridVerifierResourceDisposition::not_requested};
+    std::optional<std::size_t> observed_backend_threads;
+};
+
+// The coordinator preserves candidate construction separately from verifier
+// execution. Incomplete solver evidence never looks like a complete-family report.
 struct HybridPortfolioVerificationAttempt {
     HybridPortfolioOptimalFaceAnalysis candidates;
     std::optional<HybridFamilyVerificationResult> verification;
-    std::optional<ResourcePolicy> requested_resources;
+    HybridVerifierResourceEvidence resources;
+};
+
+// Replaceable verification boundary. Reports are inspection data only; they
+// do not create synthesis::OptimalFamily authority or certify publication.
+class HybridVerifierInvocation;
+class HybridFamilyVerificationAdapter {
+public:
+    virtual ~HybridFamilyVerificationAdapter() = default;
+    virtual HybridFamilyVerificationCapabilities capabilities() const noexcept = 0;
+    // Bounded adapters override this to reject unsupported model domains
+    // before branch relation construction. The default fails closed.
+    virtual HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        const class HybridVerifierInvocation&) const;
+    virtual HybridFamilyVerificationResult verify(const model::HybridSystem&,
+        const model::HybridRequest&, std::span<const model::HybridPath>,
+        std::span<const HybridPathProgram>,
+        std::span<const HybridPathOptimalFaceCandidate>,
+        const class HybridVerifierInvocation&) const = 0;
+};
+
+// A verifier-scoped projection of ExecutionContext. Each invocation owns a
+// fresh thread observer; adapter reports update it and the caller's aggregate.
+// Resource requests remain requests and are not treated as enforcement.
+class HybridVerifierInvocation {
+public:
+    explicit HybridVerifierInvocation(const ExecutionContext&);
+    std::optional<OperationStopped> interruption() const noexcept;
+    OperationStopped stop_result(std::string diagnostics) const;
+    bool stop_requested() const noexcept { return interruption().has_value(); }
+    std::stop_token cancellation_token() const noexcept { return cancellation_; }
+    NumericalPolicy numerical_policy() const noexcept { return numerical_; }
+    const std::optional<ResourcePolicy>& requested_resources() const noexcept { return resources_; }
+    std::string_view run_id() const noexcept { return run_id_; }
+    const std::shared_ptr<execution::observability::TimingCollector>& timing() const noexcept {
+        return timing_;
+    }
+    void record_backend_threads(std::size_t) const noexcept;
+    std::optional<std::size_t> observed_backend_threads() const noexcept;
+private:
+    std::stop_token cancellation_;
+    std::optional<std::chrono::steady_clock::time_point> deadline_;
+    NumericalPolicy numerical_{};
+    std::optional<ResourcePolicy> resources_;
+    std::string run_id_;
+    std::shared_ptr<execution::observability::TimingCollector> timing_;
+    std::shared_ptr<execution::BackendThreadObservation> observer_;
+    std::shared_ptr<execution::BackendThreadObservation> aggregate_observer_;
 };
 
 struct HybridPortfolioExecution {
@@ -381,24 +435,6 @@ struct HybridPortfolioExecution {
     std::optional<HybridPortfolioVerificationAttempt> family_verification{};
 };
 
-// Replaceable verification boundary. Reports are inspection data only; they
-// do not create synthesis::OptimalFamily authority or certify publication.
-class HybridFamilyVerificationAdapter {
-public:
-    virtual ~HybridFamilyVerificationAdapter() = default;
-    virtual HybridFamilyVerificationCapabilities capabilities() const noexcept = 0;
-    // Bounded adapters override this to reject unsupported model domains
-    // before branch relation construction. The default fails closed.
-    virtual HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
-        const model::HybridRequest&, std::span<const model::HybridPath>,
-        std::stop_token cancellation) const;
-    virtual HybridFamilyVerificationResult verify(const model::HybridSystem&,
-        const model::HybridRequest&, std::span<const model::HybridPath>,
-        std::span<const HybridPathProgram>,
-        std::span<const HybridPathOptimalFaceCandidate>, NumericalPolicy,
-        std::stop_token cancellation) const = 0;
-};
-
 // Independent verifier for deterministic paths with integral singleton data.
 // It refuses continuous, nonintegral, or unsupported set representations.
 class ExactSingletonHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
@@ -406,12 +442,12 @@ public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
-        std::stop_token cancellation) const override;
+        const HybridVerifierInvocation&) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,
-        std::span<const HybridPathOptimalFaceCandidate>, NumericalPolicy,
-        std::stop_token cancellation) const override;
+        std::span<const HybridPathOptimalFaceCandidate>,
+        const HybridVerifierInvocation&) const override;
 };
 
 // Exact bounded verifier for linear objectives over joint H-relations. It
@@ -423,12 +459,12 @@ public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
-        std::stop_token cancellation) const override;
+        const HybridVerifierInvocation&) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,
-        std::span<const HybridPathOptimalFaceCandidate>, NumericalPolicy,
-        std::stop_token cancellation) const override;
+        std::span<const HybridPathOptimalFaceCandidate>,
+        const HybridVerifierInvocation&) const override;
 };
 
 // Independent numerical verifier for one-stage, one-dimensional hybrid
@@ -440,12 +476,12 @@ public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
-        std::stop_token cancellation) const override;
+        const HybridVerifierInvocation&) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,
-        std::span<const HybridPathOptimalFaceCandidate>, NumericalPolicy,
-        std::stop_token cancellation) const override;
+        std::span<const HybridPathOptimalFaceCandidate>,
+        const HybridVerifierInvocation&) const override;
 };
 
 // Independent numerical verifier for scalar paths at any finite horizon with
@@ -456,12 +492,12 @@ public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
-        std::stop_token cancellation) const override;
+        const HybridVerifierInvocation&) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,
-        std::span<const HybridPathOptimalFaceCandidate>, NumericalPolicy,
-        std::stop_token cancellation) const override;
+        std::span<const HybridPathOptimalFaceCandidate>,
+        const HybridVerifierInvocation&) const override;
 };
 
 // Independent exact-domain verifier for two-stage scalar trajectories with
@@ -473,12 +509,12 @@ public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
-        std::stop_token cancellation) const override;
+        const HybridVerifierInvocation&) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,
-        std::span<const HybridPathOptimalFaceCandidate>, NumericalPolicy,
-        std::stop_token cancellation) const override;
+        std::span<const HybridPathOptimalFaceCandidate>,
+        const HybridVerifierInvocation&) const override;
 };
 
 // Compatibility adapter retained for callers that depend on the two-stage
@@ -488,11 +524,11 @@ public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override;
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, std::span<const model::HybridPath>,
-        std::stop_token cancellation) const override;
+        const HybridVerifierInvocation&) const override;
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&,std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,std::span<const HybridPathOptimalFaceCandidate>,
-        NumericalPolicy,std::stop_token cancellation) const override;
+        const HybridVerifierInvocation&) const override;
 };
 
 // Enumerates the request path inventory, rejects unsupported verifier plans,
@@ -501,14 +537,14 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
     const HybridFamilyVerificationAdapter&, const HybridDirectTrajectoryAdapter&,
     const model::HybridSystem&, const model::HybridRequest&, ProblemId,
     model::HybridEnumerationLimits, model::HybridRelationLimits,
-    optimization::ObjectivePolicy = {}, std::stop_token cancellation = {});
+    optimization::ObjectivePolicy = {}, const ExecutionContext& context = {});
 HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
     const HybridFamilyVerificationAdapter&, const HybridDirectTrajectoryAdapter&,
     const model::HybridSystem&, const model::HybridRequest&, ProblemId,
     model::HybridEnumerationLimits, model::HybridRelationLimits,
     const registry::PreparedProvider<registry::LPPort>&,
     const registry::PreparedProvider<registry::ConvexPort>&,
-    optimization::ObjectivePolicy = {}, std::stop_token cancellation = {});
+    optimization::ObjectivePolicy = {}, const ExecutionContext& context = {});
 
 // Enumerates the full permitted path inventory and validates that programs and
 // reports cover it exactly once. It does not promote a report into a complete
@@ -517,7 +553,7 @@ HybridFamilyVerificationResult verify_hybrid_portfolio_family(
     const HybridFamilyVerificationAdapter&, const model::HybridSystem&,
     const model::HybridRequest&, std::span<const HybridPathProgram>,
     std::span<const HybridPathOptimalFaceCandidate>, model::HybridEnumerationLimits,
-    NumericalPolicy, std::stop_token cancellation = {});
+    const HybridVerifierInvocation&);
 
 // Transactionally assembles a candidate face for every branch that objective
 // bounds cannot exclude. The result retains path and provider provenance but

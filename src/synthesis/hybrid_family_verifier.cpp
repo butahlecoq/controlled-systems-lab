@@ -90,7 +90,7 @@ std::optional<std::size_t> joint_width(const HybridSystem& system,const HybridPa
 
 enum class PointCheck { contains, excludes, unsupported };
 PointCheck contains(const AdmissibleSet& set,const std::vector<Integer>& point,
-    std::stop_token cancellation) {
+    const HybridVerifierInvocation& cancellation) {
     return std::visit([&](const auto& value)->PointCheck {
         using T=std::decay_t<decltype(value)>;
         if constexpr(std::is_same_v<T,UniversalSet>) return PointCheck::contains;
@@ -108,7 +108,7 @@ PointCheck contains(const AdmissibleSet& set,const std::vector<Integer>& point,
     },set);
 }
 
-bool integer_vector(const Vector& source,std::vector<Integer>& result,std::stop_token cancellation) {
+bool integer_vector(const Vector& source,std::vector<Integer>& result,const HybridVerifierInvocation& cancellation) {
     result.clear();
     result.reserve(source.size());
     for(const auto value:source) {
@@ -122,7 +122,7 @@ bool integer_vector(const Vector& source,std::vector<Integer>& result,std::stop_
 
 enum class ResetCheck { point, empty, unsupported };
 ResetCheck exact_singleton_reset(const SetHandle& handle,std::vector<Integer>& result,
-    std::stop_token cancellation) {
+    const HybridVerifierInvocation& cancellation) {
     const auto decoded=sets::from_handle(handle);
     if(std::holds_alternative<Diagnostic>(decoded)) return ResetCheck::unsupported;
     const auto representation=std::get<sets::SetData>(decoded).representation();
@@ -141,7 +141,7 @@ ResetCheck exact_singleton_reset(const SetHandle& handle,std::vector<Integer>& r
 }
 
 BranchEvaluation evaluate(const HybridSystem& system,const HybridRequest& request,
-    const HybridPath& path,std::stop_token cancellation) {
+    const HybridPath& path,const HybridVerifierInvocation& cancellation) {
     BranchEvaluation result;
     std::vector<Integer> state;
     if(!integer_vector(request.initial.state,state,cancellation)) {
@@ -270,7 +270,7 @@ BranchEvaluation evaluate(const HybridSystem& system,const HybridRequest& reques
 
 enum class RelationCheck { matches, differs, unsupported, cancelled };
 RelationCheck relation_is_exact_point(const sets::SetData& data,const std::vector<Integer>& point,
-    HybridRelationLimits limits,std::stop_token cancellation) {
+    HybridRelationLimits limits,const HybridVerifierInvocation& cancellation) {
     if(cancellation.stop_requested()) return RelationCheck::cancelled;
     if(data.metadata()->set.dimension!=point.size()) return RelationCheck::differs;
     if(point.size()>limits.max_variables) return RelationCheck::unsupported;
@@ -363,15 +363,13 @@ HybridFamilyVerificationCapabilities ExactSingletonHybridFamilyVerifier::capabil
 
 HybridFamilyVerificationPreflightResult ExactSingletonHybridFamilyVerifier::preflight(
     const HybridSystem& system,const HybridRequest& request,std::span<const HybridPath> paths,
-    std::stop_token cancellation) const {
+    const HybridVerifierInvocation& cancellation) const {
     for(const auto& path:paths) {
         if(cancellation.stop_requested())
-            return OperationStopped{StopReason::cancelled,
-                "Exact singleton verifier admission was cancelled between paths"};
+            return cancellation.stop_result("Exact singleton verifier admission was cancelled between paths");
         const auto branch=evaluate(system,request,path,cancellation);
         if(cancellation.stop_requested())
-            return OperationStopped{StopReason::cancelled,
-                "Exact singleton verifier admission was cancelled during reconstruction"};
+            return cancellation.stop_result("Exact singleton verifier admission was cancelled during reconstruction");
         if(branch.state==BranchState::unsupported)
             return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.exact_singleton_domain",
                 detail::describe_hybrid_path(path)+": "+branch.reason}};
@@ -382,8 +380,9 @@ HybridFamilyVerificationPreflightResult ExactSingletonHybridFamilyVerifier::pref
 HybridFamilyVerificationResult ExactSingletonHybridFamilyVerifier::verify(
     const HybridSystem& system,const HybridRequest& request,std::span<const HybridPath> paths,
     std::span<const HybridPathProgram> programs,
-    std::span<const HybridPathOptimalFaceCandidate> candidates,NumericalPolicy policy,
-    std::stop_token cancellation) const {
+    std::span<const HybridPathOptimalFaceCandidate> candidates,
+    const HybridVerifierInvocation& cancellation) const {
+    const auto policy=cancellation.numerical_policy();
     constexpr std::size_t max_visits=1'000'000;
     const auto bounded_product=[](std::size_t a,std::size_t b) {
         if(a!=0&&b>std::numeric_limits<std::size_t>::max()/a)
@@ -400,7 +399,7 @@ HybridFamilyVerificationResult ExactSingletonHybridFamilyVerifier::verify(
     auto inventory=detail::independently_enumerate_paths(system,request,paths.size(),visit_limit,
         [&]{return cancellation.stop_requested();});
     if(cancellation.stop_requested()||inventory.cancelled)
-        return OperationStopped{StopReason::cancelled,"Exact singleton hybrid verification was cancelled during path enumeration"};
+        return cancellation.stop_result("Exact singleton hybrid verification was cancelled during path enumeration");
     if(inventory.resource_limit)
         return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.oracle_limit",
             "Independent verifier path traversal exceeded its inventory-derived resource limit"}};
@@ -417,7 +416,7 @@ HybridFamilyVerificationResult ExactSingletonHybridFamilyVerifier::verify(
     bool unsupported=false;
     for(std::size_t index=0;index<paths.size();++index) {
         if(cancellation.stop_requested())
-            return OperationStopped{StopReason::cancelled,"Exact singleton hybrid verification was cancelled between branches"};
+            return cancellation.stop_result("Exact singleton hybrid verification was cancelled between branches");
         const auto width=joint_width(system,paths[index]);
         if(!width||*width>programs[index].relation_limits.max_variables||
            programs[index].joint_relation.metadata()->set.dimension!=*width) {
@@ -425,7 +424,7 @@ HybridFamilyVerificationResult ExactSingletonHybridFamilyVerifier::verify(
                 "Joint path width is invalid, exceeds its recorded limit, or disagrees with the supplied relation"});
         } else evaluations.push_back(evaluate(system,request,paths[index],cancellation));
         if(cancellation.stop_requested())
-            return OperationStopped{StopReason::cancelled,"Exact singleton hybrid verification was cancelled during branch reconstruction"};
+            return cancellation.stop_result("Exact singleton hybrid verification was cancelled during branch reconstruction");
         const auto& value=evaluations.back();
         if(value.state==BranchState::unsupported) unsupported=true;
         if(value.state==BranchState::feasible&&(!minimum||value.objective<*minimum)) minimum=value.objective;
@@ -486,11 +485,11 @@ HybridFamilyVerificationResult ExactSingletonHybridFamilyVerifier::verify(
                     const auto program_check=relation_is_exact_point(programs[i].joint_relation,
                         evaluation.joint_point,programs[i].relation_limits,cancellation);
                     if(program_check==RelationCheck::cancelled)
-                        return OperationStopped{StopReason::cancelled,"Exact singleton hybrid verification was cancelled while checking the program relation"};
+                        return cancellation.stop_result("Exact singleton hybrid verification was cancelled while checking the program relation");
                     const auto face_check=relation_is_exact_point(candidate->relation,
                         evaluation.joint_point,programs[i].relation_limits,cancellation);
                     if(face_check==RelationCheck::cancelled)
-                        return OperationStopped{StopReason::cancelled,"Exact singleton hybrid verification was cancelled while checking the candidate face"};
+                        return cancellation.stop_result("Exact singleton hybrid verification was cancelled while checking the candidate face");
                     branch_covered=program_check==RelationCheck::matches&&face_check==RelationCheck::matches;
                     if(program_check==RelationCheck::unsupported||face_check==RelationCheck::unsupported) {
                         record.continuous_coverage=HybridVerificationStatus::unsupported;

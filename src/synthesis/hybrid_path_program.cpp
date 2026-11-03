@@ -593,7 +593,8 @@ HybridAdmissionResult admit_hybrid_request(const model::HybridSystem& system,
             errors.push_back({DiagnosticCode::unsupported,"hybrid.admission.verifier.capabilities",
                 "Verifier must declare numerical feasibility, global objective, and continuous coverage checks"});
         if(errors.empty()) {
-            const auto preflight=selection.verifier->preflight(system,request,report.paths,context.cancellation);
+            HybridVerifierInvocation verifier_invocation(context);
+            const auto preflight=selection.verifier->preflight(system,request,report.paths,verifier_invocation);
             if(const auto* stopped=std::get_if<OperationStopped>(&preflight)) return *stopped;
             if(const auto* rejected=std::get_if<Diagnostics>(&preflight)) errors=*rejected;
         }
@@ -1128,11 +1129,11 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
     const HybridFamilyVerificationAdapter& verifier,const HybridDirectTrajectoryAdapter& trajectory,
     const model::HybridSystem& system,const model::HybridRequest& request,ProblemId problem,
     model::HybridEnumerationLimits enumeration_limits,model::HybridRelationLimits relation_limits,
-    optimization::ObjectivePolicy policy,std::stop_token cancellation) {
+    optimization::ObjectivePolicy policy,const ExecutionContext& context) {
     if(problem.value.empty()) return one({DiagnosticCode::invalid_input,"hybrid.program.problem",
         "Problem identity must be nonempty"});
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
             "Hybrid verified portfolio construction was cancelled before profile admission"};
     const auto profile_errors=model::check_hybrid_profile(system,request);
     if(!profile_errors.empty()) return profile_errors;
@@ -1146,7 +1147,10 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
         return one({DiagnosticCode::unsupported,"hybrid.verification.capabilities",
             "Verifier must declare numerical feasibility, global objective, and continuous coverage checks"});
     const auto enumerated=model::enumerate_hybrid_paths(system,request.initial.mode,
-        request.allowed_terminal_modes,enumeration_limits,cancellation);
+        request.allowed_terminal_modes,enumeration_limits,context.cancellation);
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+            "Hybrid verified portfolio construction stopped during path enumeration"};
     if(const auto* diagnostic=std::get_if<Diagnostic>(&enumerated)) return one(*diagnostic);
     if(const auto* stopped=std::get_if<OperationStopped>(&enumerated)) return *stopped;
     const auto& paths=std::get<std::vector<model::HybridPath>>(enumerated);
@@ -1154,23 +1158,24 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
         return one({DiagnosticCode::invalid_claim,"hybrid.verification.paths",
             "No allowed hybrid path exists for the requested verifier plan"});
     const auto operation_preflight=preflight_hybrid_trajectory_operations(
-        trajectory,system,request,paths,relation_limits,policy,cancellation);
+        trajectory,system,request,paths,relation_limits,policy,context.cancellation);
     if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&operation_preflight))
         return *failure;
     if(const auto* errors=std::get_if<Diagnostics>(&operation_preflight)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&operation_preflight)) return *stopped;
-    const auto admission=verifier.preflight(system,request,paths,cancellation);
+    HybridVerifierInvocation verifier_invocation(context);
+    const auto admission=verifier.preflight(system,request,paths,verifier_invocation);
     if(const auto* errors=std::get_if<Diagnostics>(&admission)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&admission)) return *stopped;
     const auto trajectory_preflight=preflight_hybrid_trajectory_capabilities(
-        trajectory,request,paths,policy,cancellation);
+        trajectory,request,paths,policy,context.cancellation);
     if(const auto* errors=std::get_if<Diagnostics>(&trajectory_preflight)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&trajectory_preflight)) return *stopped;
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
             "Hybrid verified portfolio construction was cancelled after verifier preflight"};
     return build_hybrid_portfolio_programs_for_paths(trajectory,system,request,
-        std::move(problem),paths,relation_limits,policy,cancellation);
+        std::move(problem),paths,relation_limits,policy,context.cancellation);
 }
 
 HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
@@ -1179,11 +1184,11 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
     model::HybridEnumerationLimits enumeration_limits,model::HybridRelationLimits relation_limits,
     const registry::PreparedProvider<registry::LPPort>& lp,
     const registry::PreparedProvider<registry::ConvexPort>& convex,
-    optimization::ObjectivePolicy policy,std::stop_token cancellation) {
+    optimization::ObjectivePolicy policy,const ExecutionContext& context) {
     if(problem.value.empty()) return one({DiagnosticCode::invalid_input,"hybrid.program.problem",
         "Problem identity must be nonempty"});
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
             "Hybrid verified portfolio construction was cancelled before request admission"};
     const auto profile_errors=model::check_hybrid_profile(system,request);
     if(!profile_errors.empty()) return profile_errors;
@@ -1197,7 +1202,10 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
         return one({DiagnosticCode::unsupported,"hybrid.verification.capabilities",
             "Verifier must declare numerical feasibility, global objective, and continuous coverage checks"});
     const auto enumerated=model::enumerate_hybrid_paths(system,request.initial.mode,
-        request.allowed_terminal_modes,enumeration_limits,cancellation);
+        request.allowed_terminal_modes,enumeration_limits,context.cancellation);
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+            "Hybrid verified portfolio construction stopped during path enumeration"};
     if(const auto* diagnostic=std::get_if<Diagnostic>(&enumerated)) return one(*diagnostic);
     if(const auto* stopped=std::get_if<OperationStopped>(&enumerated)) return *stopped;
     const auto& paths=std::get<std::vector<model::HybridPath>>(enumerated);
@@ -1205,29 +1213,30 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
         return one({DiagnosticCode::invalid_claim,"hybrid.verification.paths",
             "No allowed hybrid path exists for the requested verifier plan"});
     const auto operation_preflight=preflight_hybrid_trajectory_operations(
-        trajectory,system,request,paths,relation_limits,policy,cancellation);
+        trajectory,system,request,paths,relation_limits,policy,context.cancellation);
     if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&operation_preflight))
         return *failure;
     if(const auto* errors=std::get_if<Diagnostics>(&operation_preflight)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&operation_preflight)) return *stopped;
-    const auto verifier_preflight=verifier.preflight(system,request,paths,cancellation);
+    HybridVerifierInvocation verifier_invocation(context);
+    const auto verifier_preflight=verifier.preflight(system,request,paths,verifier_invocation);
     if(const auto* errors=std::get_if<Diagnostics>(&verifier_preflight)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&verifier_preflight)) return *stopped;
     const auto trajectory_preflight=preflight_hybrid_trajectory_capabilities(
-        trajectory,request,paths,policy,cancellation);
+        trajectory,request,paths,policy,context.cancellation);
     if(const auto* errors=std::get_if<Diagnostics>(&trajectory_preflight)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&trajectory_preflight)) return *stopped;
     auto provider_preflight=preflight_hybrid_program_providers(
-        system,request,paths,relation_limits,lp,convex,cancellation);
+        system,request,paths,relation_limits,lp,convex,context.cancellation);
     if(const auto* errors=std::get_if<Diagnostics>(&provider_preflight)) return *errors;
     if(const auto* stopped=std::get_if<OperationStopped>(&provider_preflight)) return *stopped;
     const auto& report=std::get<HybridProviderAdmissionReport>(provider_preflight);
     if(!report.admitted) return report.diagnostics;
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
             "Hybrid verified portfolio construction was cancelled after complete provider admission"};
     return build_hybrid_portfolio_programs_for_paths(trajectory,system,request,
-        std::move(problem),paths,relation_limits,policy,cancellation);
+        std::move(problem),paths,relation_limits,policy,context.cancellation);
 }
 
 HybridPortfolioObjectiveAnalysis compare_hybrid_portfolio_objective_bounds(
@@ -1526,12 +1535,43 @@ HybridPortfolioOptimalFaceAnalysis assemble_hybrid_portfolio_optimal_face_candid
     return HybridPortfolioOptimalFaceCandidates{std::move(bounds),std::move(candidates)};
 }
 
+HybridVerifierInvocation::HybridVerifierInvocation(const ExecutionContext& context)
+    :cancellation_(context.cancellation),deadline_(context.deadline),numerical_(context.numerical),
+     resources_(context.resources?std::optional<ResourcePolicy>{*context.resources}:std::nullopt),
+     run_id_(context.run_id),timing_(context.timing),
+     observer_(std::make_shared<execution::BackendThreadObservation>()),
+     aggregate_observer_(context.backend_thread_observation) {}
+
+std::optional<OperationStopped> HybridVerifierInvocation::interruption() const noexcept {
+    if(cancellation_.stop_requested())
+        return OperationStopped{StopReason::cancelled,"Hybrid verifier invocation was cancelled"};
+    if(deadline_&&std::chrono::steady_clock::now()>=*deadline_)
+        return OperationStopped{StopReason::deadline_expired,"Hybrid verifier invocation deadline expired"};
+    return {};
+}
+
+OperationStopped HybridVerifierInvocation::stop_result(std::string diagnostics) const {
+    if(auto stopped=interruption()) {
+        stopped->diagnostics=std::move(diagnostics);
+        return *stopped;
+    }
+    return {StopReason::cancelled,std::move(diagnostics)};
+}
+
+void HybridVerifierInvocation::record_backend_threads(std::size_t threads) const noexcept {
+    observer_->record(threads);
+    if(aggregate_observer_) aggregate_observer_->record(threads);
+}
+
+std::optional<std::size_t> HybridVerifierInvocation::observed_backend_threads() const noexcept {
+    return observer_->maximum();
+}
+
 HybridFamilyVerificationPreflightResult HybridFamilyVerificationAdapter::preflight(
     const model::HybridSystem&,const model::HybridRequest&,std::span<const model::HybridPath>,
-    std::stop_token cancellation) const {
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,
-            "Hybrid verifier admission was cancelled before dispatch"};
+    const HybridVerifierInvocation& invocation) const {
+    if(const auto stopped=invocation.interruption())
+        return *stopped;
     return Diagnostics{{DiagnosticCode::unsupported,"hybrid.verification.preflight",
         "Verifier adapter must explicitly admit its request domain before verified portfolio construction"}};
 }
@@ -1540,20 +1580,20 @@ HybridFamilyVerificationResult verify_hybrid_portfolio_family(
     const HybridFamilyVerificationAdapter& adapter,const model::HybridSystem& system,
     const model::HybridRequest& request,std::span<const HybridPathProgram> programs,
     std::span<const HybridPathOptimalFaceCandidate> candidates,
-    model::HybridEnumerationLimits enumeration_limits,NumericalPolicy numerical_policy,
-    std::stop_token cancellation) {
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,"Hybrid family verification was cancelled before profile admission"};
+    model::HybridEnumerationLimits enumeration_limits,
+    const HybridVerifierInvocation& invocation) {
+    const auto numerical_policy=invocation.numerical_policy();
+    if(const auto stopped=invocation.interruption()) return *stopped;
     const auto profile_errors=model::check_hybrid_profile(system,request);
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,"Hybrid family verification was cancelled during profile admission"};
+    if(const auto stopped=invocation.interruption()) return *stopped;
     if(!profile_errors.empty()) return profile_errors;
     if(!std::isfinite(numerical_policy.absolute_tolerance)||numerical_policy.absolute_tolerance<0||
        !std::isfinite(numerical_policy.relative_tolerance)||numerical_policy.relative_tolerance<0)
         return one({DiagnosticCode::invalid_input,"hybrid.verification.policy",
             "Hybrid verification tolerances must be finite and nonnegative"});
     const auto enumerated=model::enumerate_hybrid_paths(system,request.initial.mode,
-        request.allowed_terminal_modes,enumeration_limits,cancellation);
+        request.allowed_terminal_modes,enumeration_limits,invocation.cancellation_token());
+    if(const auto stopped=invocation.interruption()) return *stopped;
     if(const auto* diagnostic=std::get_if<Diagnostic>(&enumerated)) return one(*diagnostic);
     if(const auto* stopped=std::get_if<OperationStopped>(&enumerated)) return *stopped;
     const auto& paths=std::get<std::vector<model::HybridPath>>(enumerated);
@@ -1590,9 +1630,9 @@ HybridFamilyVerificationResult verify_hybrid_portfolio_family(
        !capability.checks_continuous_branch_coverage)
         return one({DiagnosticCode::unsupported,"hybrid.verification.capabilities",
             "Verifier must declare original feasibility, global objective, and continuous coverage checks"});
-    if(cancellation.stop_requested())
-        return OperationStopped{StopReason::cancelled,"Hybrid family verification was cancelled before verifier dispatch"};
-    auto result=adapter.verify(system,request,paths,programs,candidates,numerical_policy,cancellation);
+    if(const auto stopped=invocation.interruption()) return *stopped;
+    auto result=adapter.verify(system,request,paths,programs,candidates,invocation);
+    if(const auto stopped=invocation.interruption()) return *stopped;
     if(const auto* stopped=std::get_if<OperationStopped>(&result)) return *stopped;
     if(const auto* diagnostics=std::get_if<Diagnostics>(&result)) return *diagnostics;
     auto report=std::get<HybridFamilyVerificationReport>(std::move(result));
@@ -1999,8 +2039,12 @@ HybridPortfolioExecution execute_hybrid_request(HybridPreparedExecution prepared
     if(storage.verifier) {
         HybridPortfolioVerificationAttempt verification{
             assemble_hybrid_portfolio_optimal_face_candidates(storage.programs,portfolio,
-                storage.objective_policy.numerical,context.cancellation),{},
-            context.resources?std::optional<ResourcePolicy>{*context.resources}:std::nullopt};
+                storage.objective_policy.numerical,context.cancellation),{}, {}};
+        verification.resources.requested=context.resources
+            ?std::optional<ResourcePolicy>{*context.resources}:std::nullopt;
+        verification.resources.disposition=verification.resources.requested
+            ?HybridVerifierResourceDisposition::not_invoked
+            :HybridVerifierResourceDisposition::not_requested;
         if(auto* candidates=std::get_if<HybridPortfolioOptimalFaceCandidates>(
                &verification.candidates)) {
             if(const auto stop=interruption(context)) {
@@ -2008,14 +2052,19 @@ HybridPortfolioExecution execute_hybrid_request(HybridPreparedExecution prepared
                     *stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
                     "Hybrid family verification stopped before verifier execution"};
             } else {
+                HybridVerifierInvocation invocation(context);
                 auto result=verify_hybrid_portfolio_family(*storage.verifier,storage.system,
                     storage.request,storage.programs,candidates->branches,storage.enumeration_limits,
-                    storage.objective_policy.numerical,context.cancellation);
+                    invocation);
                 if(const auto stop=interruption(context))
                     result=OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:
                         StopReason::deadline_expired,
                         "Hybrid family verification stopped before result publication"};
                 verification.verification=std::move(result);
+                verification.resources.observed_backend_threads=invocation.observed_backend_threads();
+                if(verification.resources.requested)
+                    verification.resources.disposition=HybridVerifierResourceDisposition::requested_but_unenforced;
+                else verification.resources.disposition=HybridVerifierResourceDisposition::not_requested;
             }
         }
         portfolio.family_verification=std::move(verification);

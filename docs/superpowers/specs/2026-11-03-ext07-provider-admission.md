@@ -143,3 +143,64 @@ The projected-geometry follow-up keeps a single `stage_path` adapter entry point
 ## Next implementation step
 
 Add resource capability/enforcement/measurement records and late-path stop/refusal tests across all selected operation roles; strengthen verifier resource/cancellation reporting when its interface can accept the full execution context.
+
+## Verifier execution-context decision
+
+### Problem
+
+The request coordinator already receives `ExecutionContext`, but the family-verifier virtual boundary receives only `NumericalPolicy` and `std::stop_token`. A long verifier cannot poll the caller deadline, and requested resources and run provenance do not reach the adapter. The wrapper can discard a late result after return, but cannot make a cooperative verifier stop at the deadline. `ResourcePolicy::memory_bytes` is accounting metadata, not a hard cap, so forwarding it must not imply enforcement.
+
+### Caller view
+
+Callers continue to pass one execution context to coordinated execution:
+
+```cpp
+auto portfolio = execute_hybrid_request(std::move(prepared), context);
+const auto& verification = *portfolio.family_verification;
+if (verification.verification) consume(*verification.verification);
+if (verification.resources.observed_backend_threads)
+    record(*verification.resources.observed_backend_threads);
+```
+
+An adapter receives one immutable invocation capability and polls it at bounded work checkpoints:
+
+```cpp
+HybridFamilyVerificationResult Adapter::verify(...,
+    const HybridVerifierInvocation& invocation) const {
+    for (const auto& path : paths) {
+        if (auto stopped = invocation.interruption()) return *stopped;
+        verify_path(path, invocation.numerical_policy());
+    }
+    return make_report();
+}
+```
+
+### Shape
+
+Add a focused `HybridVerifierInvocation`, projected from `ExecutionContext` by the coordinator. It carries cancellation, deadline, numerical policy, requested resources, run ID, optional timing collector, and an attempt-local thread-observation sink. It exposes `interruption()` so all verifier implementations use one cancellation-first, steady-clock deadline rule. Both verifier preflight and verification receive this type. The direct family-verification function accepts the same scoped invocation; there is one public verification route, not parallel token and context overloads.
+
+`HybridPortfolioVerificationAttempt` owns candidate analysis, optional verifier result, and `HybridVerifierResourceEvidence`. This evidence preserves the requested policy, an explicit disposition (`not_requested`, `not_invoked`, or `requested_but_unenforced`), and optional adapter-reported backend thread width. Memory use stays absent because this path has no measurement source. The coordinator creates a fresh observer for each verifier invocation; adapter reports update that observer and the caller's aggregate. It never treats an adapter declaration, request, or report as independent proof that a limit was enforced.
+
+The wrapper still owns model/path validation, candidate admission, report validation, provenance attachment, and outcome normalization. The adapter gets only the verifier call's invocation capability, not the caller-owned aggregate observer. Deadline stopping remains cooperative: the wrapper checks before and after the virtual call, and adapters poll inside long loops; synchronous native calls cannot be forcibly interrupted.
+
+### Synthesis decision
+
+Three independent sketches were compared against five criteria: cooperative cancellation and deadline polling; separation of requested, enforced, and observed resources; a bounded public adapter boundary; attempt-local observation ownership; and honest behavior for unsupported resource limits. Candidate A and B both projected a verifier-specific context but added overlapping capability/disposition types and either caller-side acceptance policy or adapter-authored enforcement claims. Candidate C made resource enforcement a wrapper-owned fact, but introduced a separate invocation result wrapper. The selected shape keeps C's scoped invocation capability and wrapper-owned evidence while storing that evidence directly on the existing portfolio attempt. This avoids a second result wrapper and preserves the existing distinction between candidate analysis and mathematical verifier output. A cross-family arena judge was unavailable: all configured and available runner models belong to the GPT family.
+
+### Tradeoffs accepted
+
+- We accept a source-breaking adapter-signature migration in exchange for deadline polling at the actual verifier boundary.
+- We accept cooperative stop latency between adapter polling points; forced preemption would require process isolation or a different asynchronous contract.
+- We record requested-but-unenforced resources instead of refusing verification, because the existing policy describes accounting/request semantics and does not require hard enforcement.
+- We record only backend thread widths actually reported through the attempt-local observer; memory use remains unobserved.
+
+### Alternatives rejected
+
+- Passing `ExecutionContext` directly would expose its caller-owned aggregate observer to adapters. A scoped projection retains the standard context as the single input source while giving each invocation a fresh observer.
+- Separate deadline, cancellation, numerical, resource, run-ID, timing, and observer parameters would expose repeated plumbing and distribute stop/reconciliation rules across adapters.
+- Keeping the stop-token-only interface and checking deadlines after return cannot stop a verifier while it is running.
+- Adapter-authored claims that requested limits were enforced cannot be independently established by the wrapper and are not accepted as enforcement evidence.
+
+### Next implementation step
+
+Add the invocation and resource-evidence types, migrate preflight and verification adapters to poll the shared interruption rule, and test deadline/cancellation propagation plus observer isolation through the coordinated path.

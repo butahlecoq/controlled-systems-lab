@@ -19,6 +19,14 @@ using namespace csl;
 using namespace csl::synthesis;
 
 namespace {
+HybridVerifierInvocation test_verifier_invocation(NumericalPolicy policy,
+    std::stop_token cancellation = {}) {
+    ExecutionContext context;
+    context.numerical=policy;
+    context.cancellation=cancellation;
+    return HybridVerifierInvocation{context};
+}
+
 SetHandle universal(std::string id,std::size_t dimension) {
     auto data=sets::make_universal({SetId{std::move(id)},dimension,{}});
     REQUIRE(std::holds_alternative<sets::SetData>(data));
@@ -484,9 +492,7 @@ TEST_CASE("exact linear H verifier proves complete continuous optimal faces") {
     auto candidate=exact_candidate(programs.front(),{0,0,0,0});
     candidate.relation=singleton_data({0,0,0,0});
     ExactLinearHHybridFamilyVerifier verifier;
-    const auto result=verify_hybrid_portfolio_family(verifier,system,request,
-        programs,std::span<const HybridPathOptimalFaceCandidate>(&candidate,1),
-        {1,8},{1e-9,1e-9});
+    const auto result=verify_hybrid_portfolio_family(verifier, system, request, programs, std::span<const HybridPathOptimalFaceCandidate>(&candidate,1), {1,8}, test_verifier_invocation({1e-9,1e-9}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
     const auto& report=std::get<HybridFamilyVerificationReport>(result);
     CHECK(report.verifier_id=="csl.hybrid.exact-linear-h");
@@ -507,10 +513,7 @@ TEST_CASE("exact linear H verifier proves complete continuous optimal faces") {
     REQUIRE(mixed_programs.size()==2);
     auto finite_face=exact_candidate(mixed_programs[0],{0,0,0,0});
     finite_face.relation=singleton_data({0,0,0,0});
-    const auto mixed_result=verify_hybrid_portfolio_family(verifier,mixed_system,
-        request,mixed_programs,
-        std::span<const HybridPathOptimalFaceCandidate>(&finite_face,1),
-        {1,8},{1e-9,1e-9});
+    const auto mixed_result=verify_hybrid_portfolio_family(verifier, mixed_system, request, mixed_programs, std::span<const HybridPathOptimalFaceCandidate>(&finite_face,1), {1,8}, test_verifier_invocation({1e-9,1e-9}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(mixed_result));
     const auto& mixed_report=std::get<HybridFamilyVerificationReport>(mixed_result);
     CHECK(mixed_report.global_objective_optimality==HybridVerificationStatus::refuted);
@@ -519,9 +522,7 @@ TEST_CASE("exact linear H verifier proves complete continuous optimal faces") {
     CHECK(mixed_report.branches[1].objective_optimality==HybridVerificationStatus::refuted);
 
     auto forged_face=exact_candidate(programs.front(),{0,1,1,1});
-    const auto forged=verify_hybrid_portfolio_family(verifier,system,request,
-        programs,std::span<const HybridPathOptimalFaceCandidate>(&forged_face,1),
-        {1,8},{1e-9,1e-9});
+    const auto forged=verify_hybrid_portfolio_family(verifier, system, request, programs, std::span<const HybridPathOptimalFaceCandidate>(&forged_face,1), {1,8}, test_verifier_invocation({1e-9,1e-9}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(forged));
     CHECK(std::get<HybridFamilyVerificationReport>(forged).complete_family_coverage==
           HybridVerificationStatus::refuted);
@@ -534,10 +535,7 @@ TEST_CASE("exact linear H verifier proves complete continuous optimal faces") {
     const auto& flat_programs=std::get<std::vector<HybridPathProgram>>(flat_built);
     auto flat_candidate=exact_candidate(flat_programs.front(),{0,1,1,1});
     flat_candidate.relation=flat_programs.front().joint_relation;
-    const auto flat_result=verify_hybrid_portfolio_family(verifier,system,
-        flat_request,flat_programs,
-        std::span<const HybridPathOptimalFaceCandidate>(&flat_candidate,1),
-        {1,8},{1e-9,1e-9});
+    const auto flat_result=verify_hybrid_portfolio_family(verifier, system, flat_request, flat_programs, std::span<const HybridPathOptimalFaceCandidate>(&flat_candidate,1), {1,8}, test_verifier_invocation({1e-9,1e-9}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(flat_result));
     CHECK(std::get<HybridFamilyVerificationReport>(flat_result).complete_family_coverage==
           HybridVerificationStatus::established);
@@ -579,8 +577,7 @@ TEST_CASE("exact linear H verifier retains tied paths across objective scales") 
         exact_candidate(programs[0],{0,0.5,0.5,0}),
         exact_candidate(programs[1],{0,0.5,0.5,0.25})};
     ExactLinearHHybridFamilyVerifier verifier;
-    const auto result=verify_hybrid_portfolio_family(verifier,system,request,
-        programs,candidates,{1,8},{1e-9,1e-9});
+    const auto result=verify_hybrid_portfolio_family(verifier, system, request, programs, candidates, {1,8}, test_verifier_invocation({1e-9,1e-9}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
     const auto& report=std::get<HybridFamilyVerificationReport>(result);
     CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
@@ -1203,19 +1200,18 @@ public:
     }
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&,std::span<const model::HybridPath>,
-        std::stop_token cancellation) const override {
+        const HybridVerifierInvocation& invocation) const override {
         ++preflight_calls;
-        if(cancellation.stop_requested())
-            return OperationStopped{StopReason::cancelled,"fixture preflight cancelled"};
+        if(const auto stopped=invocation.interruption()) return *stopped;
         return std::monostate{};
     }
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&,std::span<const model::HybridPath> paths,
         std::span<const HybridPathProgram>,std::span<const HybridPathOptimalFaceCandidate>,
-        NumericalPolicy policy,std::stop_token cancellation) const override {
+        const HybridVerifierInvocation& invocation) const override {
         ++calls;
-        if(cancellation.stop_requested())
-            return OperationStopped{StopReason::cancelled,"fixture verifier cancelled"};
+        if(const auto stopped=invocation.interruption()) return *stopped;
+        const auto policy=invocation.numerical_policy();
         std::vector<model::HybridPath> inventory(paths.begin(),paths.end());
         std::vector<HybridPathVerificationRecord> branches;
         const auto count=omit_last_branch && !paths.empty()?paths.size()-1:paths.size();
@@ -1244,22 +1240,27 @@ class CountingExactSingletonHybridFamilyVerifier final : public HybridFamilyVeri
 public:
     mutable int preflight_calls{};
     mutable int verify_calls{};
+    mutable std::optional<ResourcePolicy> observed_resources;
+    mutable std::string observed_run_id;
     HybridFamilyVerificationCapabilities capabilities() const noexcept override {
         return delegate_.capabilities();
     }
     HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem& system,
         const model::HybridRequest& request,std::span<const model::HybridPath> paths,
-        std::stop_token cancellation) const override {
+        const HybridVerifierInvocation& invocation) const override {
         ++preflight_calls;
-        return delegate_.preflight(system,request,paths,cancellation);
+        return delegate_.preflight(system,request,paths,invocation);
     }
     HybridFamilyVerificationResult verify(const model::HybridSystem& system,
         const model::HybridRequest& request,std::span<const model::HybridPath> paths,
         std::span<const HybridPathProgram> programs,
-        std::span<const HybridPathOptimalFaceCandidate> candidates,NumericalPolicy policy,
-        std::stop_token cancellation) const override {
+        std::span<const HybridPathOptimalFaceCandidate> candidates,
+        const HybridVerifierInvocation& invocation) const override {
         ++verify_calls;
-        return delegate_.verify(system,request,paths,programs,candidates,policy,cancellation);
+        observed_resources=invocation.requested_resources();
+        observed_run_id=invocation.run_id();
+        invocation.record_backend_threads(5);
+        return delegate_.verify(system,request,paths,programs,candidates,invocation);
     }
 };
 
@@ -1271,7 +1272,7 @@ public:
     HybridFamilyVerificationResult verify(const model::HybridSystem&,
         const model::HybridRequest&,std::span<const model::HybridPath>,
         std::span<const HybridPathProgram>,std::span<const HybridPathOptimalFaceCandidate>,
-        NumericalPolicy,std::stop_token) const override {
+        const HybridVerifierInvocation&) const override {
         return Diagnostics{{DiagnosticCode::unsupported,"fixture.hybrid.verifier","not used"}};
     }
 };
@@ -1973,10 +1974,15 @@ TEST_CASE("coordinated hybrid execution verifies solver candidates after all bra
     REQUIRE(execution.branches.size()==3);
     CHECK(*factory_calls==3);
     CHECK(verifier->verify_calls==1);
+    REQUIRE(verifier->observed_resources);
+    CHECK(verifier->observed_resources->memory_bytes==4096);
+    CHECK(verifier->observed_run_id==context.run_id);
     REQUIRE(execution.family_verification);
     const auto& attempt=*execution.family_verification;
-    REQUIRE(attempt.requested_resources);
-    CHECK(attempt.requested_resources->memory_bytes==4096);
+    REQUIRE(attempt.resources.requested);
+    CHECK(attempt.resources.requested->memory_bytes==4096);
+    CHECK(attempt.resources.disposition==HybridVerifierResourceDisposition::requested_but_unenforced);
+    CHECK(attempt.resources.observed_backend_threads==5);
     const auto* candidates=std::get_if<HybridPortfolioOptimalFaceCandidates>(&attempt.candidates);
     REQUIRE(candidates);
     CHECK(candidates->objective_bounds.global_lower_bound==0.0);
@@ -2274,13 +2280,13 @@ TEST_CASE("scalar interval verifiers preflight objectives for every allowed term
     const auto single_parameter_request=make_request();
     const std::vector<model::HybridPath> no_single_parameter_paths;
     const auto single_parameter_preflight=single_parameter.preflight(single_parameter_system,
-        single_parameter_request,no_single_parameter_paths,{});
+        single_parameter_request,no_single_parameter_paths,test_verifier_invocation({}));
     CHECK(std::holds_alternative<std::monostate>(single_parameter_preflight));
     auto malformed_request=single_parameter_request;
     malformed_request.terminal_objectives.back().objective=
         QuadraticTerminal{Matrix{1,1,{}},Vector{0},0};
     const auto malformed_preflight=single_parameter.preflight(single_parameter_system,
-        malformed_request,no_single_parameter_paths,{});
+        malformed_request,no_single_parameter_paths,test_verifier_invocation({}));
     REQUIRE(std::holds_alternative<Diagnostics>(malformed_preflight));
     CHECK(std::get<Diagnostics>(malformed_preflight).front().code==DiagnosticCode::unsupported);
 }
@@ -2299,10 +2305,26 @@ TEST_CASE("single-parameter verifier preflights objectives for infeasible reacha
     const std::vector<model::HybridPath> paths{{{{"mode"},{"mode"}},{{"loop"}}}};
 
     SingleParameterScalarIntervalHybridFamilyVerifier verifier;
-    const auto result=verifier.preflight(system,request,paths,{});
+    const auto result=verifier.preflight(system,request,paths,test_verifier_invocation({}));
     REQUIRE(std::holds_alternative<Diagnostics>(result));
     CHECK(std::get<Diagnostics>(result).front().field==
         "hybrid.verification.scalar_parameter_objective");
+}
+
+TEST_CASE("hybrid verifier invocation exposes deadline and cancellation priority") {
+    ExecutionContext expired;
+    expired.deadline=std::chrono::steady_clock::now()-std::chrono::milliseconds{1};
+    HybridVerifierInvocation deadline_invocation{expired};
+    REQUIRE(deadline_invocation.interruption());
+    CHECK(deadline_invocation.interruption()->reason==StopReason::deadline_expired);
+    CHECK(deadline_invocation.stop_result("deadline observed").reason==StopReason::deadline_expired);
+
+    std::stop_source cancellation;
+    cancellation.request_stop();
+    expired.cancellation=cancellation.get_token();
+    HybridVerifierInvocation cancelled_invocation{expired};
+    REQUIRE(cancelled_invocation.interruption());
+    CHECK(cancelled_invocation.interruption()->reason==StopReason::cancelled);
 }
 
 TEST_CASE("hybrid portfolio capability preflight honors cancellation before scanning paths") {
@@ -2756,8 +2778,7 @@ TEST_CASE("hybrid family verification adapter receives the exhaustive path inven
     REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
     const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
     FixtureHybridFamilyVerifier verifier;
-    const auto result=verify_hybrid_portfolio_family(verifier,system,example_request(),programs,{},
-        {1,8},{1e-8,1e-8});
+    const auto result=verify_hybrid_portfolio_family(verifier, system, example_request(), programs, {}, {1,8}, test_verifier_invocation({1e-8,1e-8}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
     const auto& report=std::get<HybridFamilyVerificationReport>(result);
     REQUIRE(report.enumerated_paths.size()==2);
@@ -2779,8 +2800,7 @@ TEST_CASE("hybrid family verification report only retains candidate providers fr
     const auto& programs=std::get<std::vector<HybridPathProgram>>(built);
     FixtureHybridFamilyVerifier verifier;
     verifier.inject_candidate_providers=true;
-    const auto result=verify_hybrid_portfolio_family(verifier,system,example_request(),programs,{},
-        {1,8},{1e-8,1e-8});
+    const auto result=verify_hybrid_portfolio_family(verifier, system, example_request(), programs, {}, {1,8}, test_verifier_invocation({1e-8,1e-8}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
     const auto& report=std::get<HybridFamilyVerificationReport>(result);
     REQUIRE(report.branches.size()==programs.size());
@@ -2795,8 +2815,7 @@ TEST_CASE("hybrid family verification rejects a missing program operation trace 
     auto programs=std::get<std::vector<HybridPathProgram>>(std::move(built));
     programs[0].relation_operations.clear();
     FixtureHybridFamilyVerifier verifier;
-    const auto result=verify_hybrid_portfolio_family(verifier,system,example_request(),programs,{},
-        {1,8},{1e-8,1e-8});
+    const auto result=verify_hybrid_portfolio_family(verifier, system, example_request(), programs, {}, {1,8}, test_verifier_invocation({1e-8,1e-8}));
     REQUIRE(std::holds_alternative<Diagnostics>(result));
     CHECK(std::get<Diagnostics>(result).front().field=="hybrid.adapter.operations");
     CHECK(verifier.calls==0);
@@ -2813,14 +2832,12 @@ TEST_CASE("hybrid family verification rejects missing inventory or report branch
     auto programs=std::get<std::vector<HybridPathProgram>>(built);
     FixtureHybridFamilyVerifier verifier;
     programs.pop_back();
-    auto incomplete=verify_hybrid_portfolio_family(verifier,system,example_request(),programs,{},
-        {1,8},{1e-8,1e-8});
+    auto incomplete=verify_hybrid_portfolio_family(verifier, system, example_request(), programs, {}, {1,8}, test_verifier_invocation({1e-8,1e-8}));
     REQUIRE(std::holds_alternative<Diagnostics>(incomplete));
     CHECK(verifier.calls==0);
     programs=std::get<std::vector<HybridPathProgram>>(built);
     verifier.omit_last_branch=true;
-    auto omitted=verify_hybrid_portfolio_family(verifier,system,example_request(),programs,{},
-        {1,8},{1e-8,1e-8});
+    auto omitted=verify_hybrid_portfolio_family(verifier, system, example_request(), programs, {}, {1,8}, test_verifier_invocation({1e-8,1e-8}));
     REQUIRE(std::holds_alternative<Diagnostics>(omitted));
     CHECK(std::get<Diagnostics>(omitted).front().field=="hybrid.verification.report");
     CHECK(verifier.calls==1);
@@ -2833,8 +2850,7 @@ TEST_CASE("hybrid family verification rejects aggregates unsupported by branch e
     REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
     FixtureHybridFamilyVerifier verifier;
     verifier.claim_established_aggregates=true;
-    const auto result=verify_hybrid_portfolio_family(verifier,system,example_request(),
-        std::get<std::vector<HybridPathProgram>>(built),{}, {1,8},{1e-8,1e-8});
+    const auto result=verify_hybrid_portfolio_family(verifier, system, example_request(), std::get<std::vector<HybridPathProgram>>(built), {}, {1,8}, test_verifier_invocation({1e-8,1e-8}));
     REQUIRE(std::holds_alternative<Diagnostics>(result));
     CHECK(std::get<Diagnostics>(result).front().field=="hybrid.verification.consistency");
 }
@@ -2846,8 +2862,7 @@ TEST_CASE("hybrid family verification requires global optimum before complete co
     REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(built));
     FixtureHybridFamilyVerifier verifier;
     verifier.claim_coverage_only=true;
-    const auto result=verify_hybrid_portfolio_family(verifier,system,example_request(),
-        std::get<std::vector<HybridPathProgram>>(built),{}, {1,8},{1e-8,1e-8});
+    const auto result=verify_hybrid_portfolio_family(verifier, system, example_request(), std::get<std::vector<HybridPathProgram>>(built), {}, {1,8}, test_verifier_invocation({1e-8,1e-8}));
     REQUIRE(std::holds_alternative<Diagnostics>(result));
     CHECK(std::get<Diagnostics>(result).front().field=="hybrid.verification.consistency");
 }
@@ -2860,8 +2875,7 @@ TEST_CASE("hybrid family verification rejects global optimum with no feasible op
     FixtureHybridFamilyVerifier verifier;
     verifier.claim_established_aggregates=true;
     verifier.mark_all_branches_refuted=true;
-    const auto result=verify_hybrid_portfolio_family(verifier,system,example_request(),
-        std::get<std::vector<HybridPathProgram>>(built),{}, {1,8},{1e-8,1e-8});
+    const auto result=verify_hybrid_portfolio_family(verifier, system, example_request(), std::get<std::vector<HybridPathProgram>>(built), {}, {1,8}, test_verifier_invocation({1e-8,1e-8}));
     REQUIRE(std::holds_alternative<Diagnostics>(result));
     CHECK(std::get<Diagnostics>(result).front().field=="hybrid.verification.consistency");
 }
@@ -2879,8 +2893,7 @@ TEST_CASE("exact singleton hybrid verifier independently retains every tied edge
     candidates[0].providers.push_back({"fixture LP",{"fixture.lp",std::string{"1.0"}},
         registry::Identity{{"fixture.lp"},"1.0"}});
     ExactSingletonHybridFamilyVerifier verifier;
-    const auto result=verify_hybrid_portfolio_family(verifier,system,request,programs,candidates,
-        {1,8},{1e-10,1e-10});
+    const auto result=verify_hybrid_portfolio_family(verifier, system, request, programs, candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
     const auto& report=std::get<HybridFamilyVerificationReport>(result);
     CHECK(report.verifier_id=="csl.hybrid.exact-singleton");
@@ -3261,8 +3274,7 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     CHECK(capabilities.checks_global_objective_optimality);
     CHECK(capabilities.checks_continuous_branch_coverage);
     CHECK(capabilities.assurance==Assurance::numerical);
-    const auto result=verify_hybrid_portfolio_family(verifier,system,request,programs,candidates,
-        {1,8},{1e-10,1e-10});
+    const auto result=verify_hybrid_portfolio_family(verifier, system, request, programs, candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
     const auto& report=std::get<HybridFamilyVerificationReport>(result);
     CHECK(report.verifier_id=="csl.hybrid.one-step-scalar-interval");
@@ -3296,8 +3308,7 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     std::vector<HybridPathOptimalFaceCandidate> affine_reset_candidates{
         exact_candidate(affine_reset_programs[0],{0,0,0,1}),
         exact_candidate(affine_reset_programs[1],{0,0,0,1})};
-    const auto affine_reset_result=verify_hybrid_portfolio_family(verifier,affine_reset_system,
-        request,affine_reset_programs,affine_reset_candidates,{1,8},{1e-10,1e-10});
+    const auto affine_reset_result=verify_hybrid_portfolio_family(verifier, affine_reset_system, request, affine_reset_programs, affine_reset_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(affine_reset_result));
     CHECK(std::get<HybridFamilyVerificationReport>(affine_reset_result).complete_family_coverage==
         HybridVerificationStatus::established);
@@ -3323,8 +3334,7 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     std::vector<HybridPathOptimalFaceCandidate> negative_reset_candidates{
         exact_candidate(negative_reset_programs[0],{0,0,0,1}),
         exact_candidate(negative_reset_programs[1],{0,0,0,1})};
-    const auto negative_reset_result=verify_hybrid_portfolio_family(verifier,negative_reset_system,
-        request,negative_reset_programs,negative_reset_candidates,{1,8},{1e-10,1e-10});
+    const auto negative_reset_result=verify_hybrid_portfolio_family(verifier, negative_reset_system, request, negative_reset_programs, negative_reset_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(negative_reset_result));
     CHECK(std::get<HybridFamilyVerificationReport>(negative_reset_result).complete_family_coverage==
         HybridVerificationStatus::established);
@@ -3350,8 +3360,7 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     std::vector<HybridPathOptimalFaceCandidate> constant_reset_candidates{
         exact_candidate(constant_reset_programs[0],{0,0,0,1}),
         exact_candidate(constant_reset_programs[1],{0,0,0,1})};
-    const auto constant_reset_result=verify_hybrid_portfolio_family(verifier,constant_reset_system,
-        request,constant_reset_programs,constant_reset_candidates,{1,8},{1e-10,1e-10});
+    const auto constant_reset_result=verify_hybrid_portfolio_family(verifier, constant_reset_system, request, constant_reset_programs, constant_reset_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(constant_reset_result));
     CHECK(std::get<HybridFamilyVerificationReport>(constant_reset_result).complete_family_coverage==
         HybridVerificationStatus::established);
@@ -3376,8 +3385,7 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     std::vector<HybridPathOptimalFaceCandidate> inexact_reset_candidates{
         exact_candidate(inexact_reset_programs[0],{0,0,0,0}),
         exact_candidate(inexact_reset_programs[1],{0,0,0,0})};
-    const auto inexact_reset_result=verify_hybrid_portfolio_family(verifier,inexact_reset_system,
-        request,inexact_reset_programs,inexact_reset_candidates,{1,8},{1e-10,1e-10});
+    const auto inexact_reset_result=verify_hybrid_portfolio_family(verifier, inexact_reset_system, request, inexact_reset_programs, inexact_reset_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(inexact_reset_result));
     CHECK(std::get<HybridFamilyVerificationReport>(inexact_reset_result).branches[0].continuous_coverage==
         HybridVerificationStatus::unsupported);
@@ -3403,8 +3411,7 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     const auto& overflow_reset_programs=std::get<std::vector<HybridPathProgram>>(overflow_reset_built);
     std::vector<HybridPathOptimalFaceCandidate> overflow_reset_candidates{
         exact_candidate(overflow_reset_programs[0],{0,1.0000000001,1.0000000001,maximum})};
-    const auto overflow_reset_result=verify_hybrid_portfolio_family(verifier,overflow_reset_system,
-        request,overflow_reset_programs,overflow_reset_candidates,{1,8},{1e-10,1e-10});
+    const auto overflow_reset_result=verify_hybrid_portfolio_family(verifier, overflow_reset_system, request, overflow_reset_programs, overflow_reset_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(overflow_reset_result));
     CHECK(std::get<HybridFamilyVerificationReport>(overflow_reset_result).branches[0].continuous_coverage==
         HybridVerificationStatus::refuted);
@@ -3430,8 +3437,7 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
          std::get<numeric::MatrixView>(ratio_equalities),std::get<numeric::VectorView>(ratio_rhs)});
     REQUIRE(std::holds_alternative<sets::SetData>(inexact_row_relation));
     ratio_candidates[1].relation=std::get<sets::SetData>(inexact_row_relation);
-    const auto inexact_row_result=verify_hybrid_portfolio_family(verifier,ratio_system,request,
-        ratio_programs,ratio_candidates,{1,8},{1e-10,1e-10});
+    const auto inexact_row_result=verify_hybrid_portfolio_family(verifier, ratio_system, request, ratio_programs, ratio_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(inexact_row_result));
     CHECK(std::get<HybridFamilyVerificationReport>(inexact_row_result).branches[1].continuous_coverage==
         HybridVerificationStatus::unsupported);
@@ -3460,8 +3466,7 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
         exact_candidate(programs[0],{0,0,0,0}),exact_candidate(programs[1],{0,0,0,0})};
     rank_overcount_programs[1].joint_relation=std::get<sets::SetData>(rank_overcount_relation);
     rank_overcount_candidates[1].relation=std::get<sets::SetData>(rank_overcount_relation);
-    const auto rank_overcount_result=verify_hybrid_portfolio_family(verifier,rank_overcount_system,request,
-        rank_overcount_programs,rank_overcount_candidates,{1,8},{1e-10,1e-10});
+    const auto rank_overcount_result=verify_hybrid_portfolio_family(verifier, rank_overcount_system, request, rank_overcount_programs, rank_overcount_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(rank_overcount_result));
     CHECK(std::get<HybridFamilyVerificationReport>(rank_overcount_result).branches[1].continuous_coverage==
         HybridVerificationStatus::refuted);
@@ -3479,8 +3484,7 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
         exact_candidate(programs[0],{0,0,0,0}),exact_candidate(programs[1],{0,0,0,0})};
     inexact_rank_programs[1].joint_relation=std::get<sets::SetData>(inexact_rank_relation);
     inexact_rank_candidates[1].relation=std::get<sets::SetData>(inexact_rank_relation);
-    const auto inexact_rank_result=verify_hybrid_portfolio_family(verifier,rank_overcount_system,request,
-        inexact_rank_programs,inexact_rank_candidates,{1,8},{1e-10,1e-10});
+    const auto inexact_rank_result=verify_hybrid_portfolio_family(verifier, rank_overcount_system, request, inexact_rank_programs, inexact_rank_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(inexact_rank_result));
     CHECK(std::get<HybridFamilyVerificationReport>(inexact_rank_result).branches[1].continuous_coverage==
         HybridVerificationStatus::unsupported);
@@ -3495,8 +3499,7 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
         exact_candidate(narrow_tied_programs[0],{0,0,0,0}),
         exact_candidate(narrow_tied_programs[1],{0,0,0,0})};
     narrow_tied_candidates[1].relation=singleton_data({0,0,0,0});
-    const auto narrow_tied_result=verify_hybrid_portfolio_family(verifier,narrow_tied_system,request,
-        narrow_tied_programs,narrow_tied_candidates,{1,8},{1e-10,1e-10});
+    const auto narrow_tied_result=verify_hybrid_portfolio_family(verifier, narrow_tied_system, request, narrow_tied_programs, narrow_tied_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(narrow_tied_result));
     CHECK(std::get<HybridFamilyVerificationReport>(narrow_tied_result).complete_family_coverage==
         HybridVerificationStatus::refuted);
@@ -3513,8 +3516,7 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     std::vector<HybridPathOptimalFaceCandidate> underflow_candidates{
         exact_candidate(underflow_programs[0],{0,0,0,0}),
         exact_candidate(underflow_programs[1],{0,0,0,0})};
-    const auto underflow_result=verify_hybrid_portfolio_family(verifier,underflow_system,underflow_request,
-        underflow_programs,underflow_candidates,{1,8},{1e-10,1e-10});
+    const auto underflow_result=verify_hybrid_portfolio_family(verifier, underflow_system, underflow_request, underflow_programs, underflow_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(underflow_result));
     const auto& underflow_report=std::get<HybridFamilyVerificationReport>(underflow_result);
     CHECK(underflow_report.global_objective_optimality==HybridVerificationStatus::unsupported);
@@ -3533,9 +3535,7 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     std::vector<HybridPathOptimalFaceCandidate> subnormal_residual_candidates{
         exact_candidate(subnormal_residual_programs[0],{0,0,0,0}),
         exact_candidate(subnormal_residual_programs[1],{0,0,0,0})};
-    const auto subnormal_residual_result=verify_hybrid_portfolio_family(verifier,
-        subnormal_residual_system,subnormal_residual_request,subnormal_residual_programs,
-        subnormal_residual_candidates,{1,8},{1e-10,1e-10});
+    const auto subnormal_residual_result=verify_hybrid_portfolio_family(verifier, subnormal_residual_system, subnormal_residual_request, subnormal_residual_programs, subnormal_residual_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(subnormal_residual_result));
     CHECK(std::get<HybridFamilyVerificationReport>(subnormal_residual_result).global_objective_optimality==
         HybridVerificationStatus::unsupported);
@@ -3552,8 +3552,7 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     const auto& inexact_flow_programs=std::get<std::vector<HybridPathProgram>>(inexact_flow_built);
     std::vector<HybridPathOptimalFaceCandidate> inexact_flow_candidates{
         exact_candidate(inexact_flow_programs[0],{0,0.3,0.03,0.03})};
-    const auto inexact_flow_result=verify_hybrid_portfolio_family(verifier,inexact_flow_system,
-        inexact_flow_request,inexact_flow_programs,inexact_flow_candidates,{1,8},{1e-10,1e-10});
+    const auto inexact_flow_result=verify_hybrid_portfolio_family(verifier, inexact_flow_system, inexact_flow_request, inexact_flow_programs, inexact_flow_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(inexact_flow_result));
     CHECK(std::get<HybridFamilyVerificationReport>(inexact_flow_result).global_objective_optimality==
         HybridVerificationStatus::unsupported);
@@ -3572,23 +3571,20 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
         exact_candidate(sub_ulp_programs[0],{0,0,0,0}),
         exact_candidate(sub_ulp_programs[1],{0,2.7755575615628914e-17,2.7755575615628914e-17,
             2.7755575615628914e-17})};
-    const auto sub_ulp_result=verify_hybrid_portfolio_family(verifier,sub_ulp_system,sub_ulp_request,
-        sub_ulp_programs,sub_ulp_candidates,{1,8},{1e-10,1e-10});
+    const auto sub_ulp_result=verify_hybrid_portfolio_family(verifier, sub_ulp_system, sub_ulp_request, sub_ulp_programs, sub_ulp_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(sub_ulp_result));
     CHECK(std::get<HybridFamilyVerificationReport>(sub_ulp_result).global_objective_optimality==
         HybridVerificationStatus::unsupported);
 
     candidates.pop_back();
-    const auto missing_tie=verify_hybrid_portfolio_family(verifier,system,request,programs,candidates,
-        {1,8},{1e-10,1e-10});
+    const auto missing_tie=verify_hybrid_portfolio_family(verifier, system, request, programs, candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(missing_tie));
     CHECK(std::get<HybridFamilyVerificationReport>(missing_tie).complete_family_coverage==
         HybridVerificationStatus::refuted);
 
     candidates={exact_candidate(programs[0],{0,0,0,0}),exact_candidate(programs[1],{0,0,0,0})};
     candidates[1].relation=singleton_data({0,0,0,0});
-    const auto altered_tie=verify_hybrid_portfolio_family(verifier,system,request,programs,candidates,
-        {1,8},{1e-10,1e-10});
+    const auto altered_tie=verify_hybrid_portfolio_family(verifier, system, request, programs, candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(altered_tie));
     CHECK(std::get<HybridFamilyVerificationReport>(altered_tie).complete_family_coverage==
         HybridVerificationStatus::refuted);
@@ -3604,8 +3600,7 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
         exact_candidate(increasing_programs[1],{0,0,0,0})};
     endpoint_candidates[0].relation=singleton_data({0,0,0,0});
     endpoint_candidates[1].relation=singleton_data({0,0,0,0});
-    const auto endpoint_result=verify_hybrid_portfolio_family(verifier,system,increasing_request,
-        increasing_programs,endpoint_candidates,{1,8},{1e-10,1e-10});
+    const auto endpoint_result=verify_hybrid_portfolio_family(verifier, system, increasing_request, increasing_programs, endpoint_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(endpoint_result));
     const auto& endpoint_report=std::get<HybridFamilyVerificationReport>(endpoint_result);
     CHECK(endpoint_report.global_objective_optimality==HybridVerificationStatus::established);
@@ -3622,8 +3617,7 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
         exact_candidate(decreasing_programs[1],{0,0.25,0.25,0.25})};
     decreasing_candidates[0].relation=singleton_data({0,0.5,0.5,0.5});
     decreasing_candidates[1].relation=singleton_data({0,0.25,0.25,0.25});
-    const auto decreasing_result=verify_hybrid_portfolio_family(verifier,system,decreasing_request,
-        decreasing_programs,decreasing_candidates,{1,8},{1e-10,1e-10});
+    const auto decreasing_result=verify_hybrid_portfolio_family(verifier, system, decreasing_request, decreasing_programs, decreasing_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(decreasing_result));
     const auto& decreasing_report=std::get<HybridFamilyVerificationReport>(decreasing_result);
     CHECK(decreasing_report.global_objective_optimality==HybridVerificationStatus::established);
@@ -3646,16 +3640,14 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     REQUIRE(std::holds_alternative<sets::SetData>(enlarged_face));
     auto enlarged_candidates=endpoint_candidates;
     enlarged_candidates[0].relation=std::get<sets::SetData>(enlarged_face);
-    const auto enlarged_result=verify_hybrid_portfolio_family(verifier,system,increasing_request,
-        increasing_programs,enlarged_candidates,{1,8},{1e-10,1e-10});
+    const auto enlarged_result=verify_hybrid_portfolio_family(verifier, system, increasing_request, increasing_programs, enlarged_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(enlarged_result));
     CHECK(std::get<HybridFamilyVerificationReport>(enlarged_result).complete_family_coverage==
         HybridVerificationStatus::refuted);
 
     auto shifted_singleton_candidates=endpoint_candidates;
     shifted_singleton_candidates[0].relation=singleton_data({0,5e-11,5e-11,5e-11});
-    const auto shifted_singleton_result=verify_hybrid_portfolio_family(verifier,system,increasing_request,
-        increasing_programs,shifted_singleton_candidates,{1,8},{1e-10,1e-10});
+    const auto shifted_singleton_result=verify_hybrid_portfolio_family(verifier, system, increasing_request, increasing_programs, shifted_singleton_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(shifted_singleton_result));
     CHECK(std::get<HybridFamilyVerificationReport>(shifted_singleton_result).complete_family_coverage==
         HybridVerificationStatus::refuted);
@@ -3675,8 +3667,7 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     REQUIRE(std::holds_alternative<sets::SetData>(empty_candidate));
     auto contradictory_candidates=endpoint_candidates;
     contradictory_candidates[0].relation=std::get<sets::SetData>(empty_candidate);
-    const auto contradictory_result=verify_hybrid_portfolio_family(verifier,system,increasing_request,
-        increasing_programs,contradictory_candidates,{1,8},{1e-10,1e-10});
+    const auto contradictory_result=verify_hybrid_portfolio_family(verifier, system, increasing_request, increasing_programs, contradictory_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(contradictory_result));
     CHECK(std::get<HybridFamilyVerificationReport>(contradictory_result).complete_family_coverage==
         HybridVerificationStatus::refuted);
@@ -3696,8 +3687,7 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     REQUIRE(std::holds_alternative<sets::SetData>(conflicting_face));
     auto conflicting_candidates=endpoint_candidates;
     conflicting_candidates[0].relation=std::get<sets::SetData>(conflicting_face);
-    const auto conflicting_result=verify_hybrid_portfolio_family(verifier,system,increasing_request,
-        increasing_programs,conflicting_candidates,{1,8},{1e-10,1e-10});
+    const auto conflicting_result=verify_hybrid_portfolio_family(verifier, system, increasing_request, increasing_programs, conflicting_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(conflicting_result));
     CHECK(std::get<HybridFamilyVerificationReport>(conflicting_result).complete_family_coverage==
         HybridVerificationStatus::refuted);
@@ -3714,16 +3704,14 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     REQUIRE(std::holds_alternative<sets::SetData>(rotated_face));
     auto rotated_candidates=endpoint_candidates;
     rotated_candidates[0].relation=std::get<sets::SetData>(rotated_face);
-    const auto rotated_result=verify_hybrid_portfolio_family(verifier,system,increasing_request,
-        increasing_programs,rotated_candidates,{1,8},{1e-10,1e-10});
+    const auto rotated_result=verify_hybrid_portfolio_family(verifier, system, increasing_request, increasing_programs, rotated_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(rotated_result));
     CHECK(std::get<HybridFamilyVerificationReport>(rotated_result).complete_family_coverage==
         HybridVerificationStatus::refuted);
 
     auto insufficient_variable_limits=increasing_programs;
     insufficient_variable_limits[0].relation_limits.max_variables=3;
-    const auto variable_limit_result=verify_hybrid_portfolio_family(verifier,system,increasing_request,
-        insufficient_variable_limits,endpoint_candidates,{1,8},{1e-10,1e-10});
+    const auto variable_limit_result=verify_hybrid_portfolio_family(verifier, system, increasing_request, insufficient_variable_limits, endpoint_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<Diagnostics>(variable_limit_result));
     CHECK(std::get<Diagnostics>(variable_limit_result).front().field=="hybrid.adapter.operations");
 
@@ -3738,8 +3726,7 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
         exact_candidate(near_tie_programs[1],{0,5e-11,5e-11,5e-11})};
     near_tie_candidates[0].relation=singleton_data({0,0,0,0});
     near_tie_candidates[1].relation=singleton_data({0,5e-11,5e-11,5e-11});
-    const auto near_tie_result=verify_hybrid_portfolio_family(verifier,near_tie_system,increasing_request,
-        near_tie_programs,near_tie_candidates,{1,8},{1e-10,1e-10});
+    const auto near_tie_result=verify_hybrid_portfolio_family(verifier, near_tie_system, increasing_request, near_tie_programs, near_tie_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(near_tie_result));
     const auto& near_tie_report=std::get<HybridFamilyVerificationReport>(near_tie_result);
     CHECK(near_tie_report.global_objective_optimality==HybridVerificationStatus::established);
@@ -3760,16 +3747,14 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     REQUIRE(std::holds_alternative<sets::SetData>(free_post_data));
     auto malformed_face=endpoint_candidates;
     malformed_face[0].relation=std::get<sets::SetData>(free_post_data);
-    const auto malformed_face_result=verify_hybrid_portfolio_family(verifier,system,increasing_request,
-        increasing_programs,malformed_face,{1,8},{1e-10,1e-10});
+    const auto malformed_face_result=verify_hybrid_portfolio_family(verifier, system, increasing_request, increasing_programs, malformed_face, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(malformed_face_result));
     CHECK(std::get<HybridFamilyVerificationReport>(malformed_face_result).complete_family_coverage==
         HybridVerificationStatus::refuted);
 
     auto malformed_programs=increasing_programs;
     malformed_programs[0].joint_relation=std::get<sets::SetData>(free_post_data);
-    const auto malformed_program_result=verify_hybrid_portfolio_family(verifier,system,increasing_request,
-        malformed_programs,endpoint_candidates,{1,8},{1e-10,1e-10});
+    const auto malformed_program_result=verify_hybrid_portfolio_family(verifier, system, increasing_request, malformed_programs, endpoint_candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(malformed_program_result));
     const auto& malformed_program_report=std::get<HybridFamilyVerificationReport>(malformed_program_result);
     CHECK(malformed_program_report.branches[0].feasibility==HybridVerificationStatus::established);
@@ -3780,9 +3765,7 @@ TEST_CASE("one-step scalar interval verifier certifies distinct tied continuous 
     malformed_suboptimal_programs[1].joint_relation=std::get<sets::SetData>(free_post_data);
     std::vector<HybridPathOptimalFaceCandidate> only_optimal_near_tie_candidate{
         near_tie_candidates[0]};
-    const auto malformed_suboptimal_result=verify_hybrid_portfolio_family(verifier,near_tie_system,
-        increasing_request,malformed_suboptimal_programs,only_optimal_near_tie_candidate,
-        {1,8},{1e-10,1e-10});
+    const auto malformed_suboptimal_result=verify_hybrid_portfolio_family(verifier, near_tie_system, increasing_request, malformed_suboptimal_programs, only_optimal_near_tie_candidate, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(malformed_suboptimal_result));
     const auto& malformed_suboptimal_report=
         std::get<HybridFamilyVerificationReport>(malformed_suboptimal_result);
@@ -3834,8 +3817,7 @@ TEST_CASE("one-step interval verifier accepts a point face fixed by objective eq
     const std::array<HybridPathOptimalFaceCandidate, 1> candidates{
         std::get<HybridPathOptimalFaceCandidate>(candidate_result)};
     OneStepScalarIntervalHybridFamilyVerifier verifier;
-    const auto verified = verify_hybrid_portfolio_family(verifier, system, request, programs,
-        candidates, {1, 4}, {1e-10, 1e-10});
+    const auto verified = verify_hybrid_portfolio_family(verifier, system, request, programs, candidates, {1, 4}, test_verifier_invocation({1e-10, 1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(verified));
     const auto& report = std::get<HybridFamilyVerificationReport>(verified);
     CHECK(report.global_objective_optimality == HybridVerificationStatus::established);
@@ -3855,8 +3837,7 @@ TEST_CASE("exact singleton hybrid verifier checks guard entry and rejects forbid
     ExactSingletonHybridFamilyVerifier verifier;
     const Vector point{2,1,3,0,0};
     std::vector<HybridPathOptimalFaceCandidate> candidates{exact_candidate(programs[0],point)};
-    const auto result=verify_hybrid_portfolio_family(verifier,system,request,programs,candidates,
-        {1,8},{1e-10,1e-10});
+    const auto result=verify_hybrid_portfolio_family(verifier, system, request, programs, candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
     const auto& report=std::get<HybridFamilyVerificationReport>(result);
     CHECK(report.branches[0].feasibility==HybridVerificationStatus::established);
@@ -3866,7 +3847,7 @@ TEST_CASE("exact singleton hybrid verifier checks guard entry and rejects forbid
     auto forbidden_paths=std::vector<model::HybridPath>{programs[0].path,programs[1].path,programs[2].path};
     forbidden_paths[0].modes[1]={"source"};
     const auto rejected=verifier.verify(system,request,forbidden_paths,programs,candidates,
-        {1e-10,1e-10},{});
+        test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<Diagnostics>(rejected));
     CHECK(std::get<Diagnostics>(rejected).front().field=="hybrid.verification.oracle_paths");
 }
@@ -3882,7 +3863,7 @@ TEST_CASE("exact singleton hybrid verifier bounds independent path expansion") {
     }
     request.allowed_terminal_modes={{"target"}};
     ExactSingletonHybridFamilyVerifier verifier;
-    const auto result=verifier.verify(system,request,{}, {}, {},{1e-10,1e-10},{});
+    const auto result=verifier.verify(system,request,{}, {}, {},test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<Diagnostics>(result));
     CHECK(std::get<Diagnostics>(result).front().field=="hybrid.verification.oracle_limit");
 }
@@ -3908,8 +3889,7 @@ TEST_CASE("exact singleton hybrid verifier reports missing or altered optimal fa
     ExactSingletonHybridFamilyVerifier verifier;
     const Vector point{2,1,3,0,0};
     std::vector<HybridPathOptimalFaceCandidate> missing{exact_candidate(programs[0],point)};
-    const auto omitted=verify_hybrid_portfolio_family(verifier,system,request,programs,missing,
-        {1,8},{1e-10,1e-10});
+    const auto omitted=verify_hybrid_portfolio_family(verifier, system, request, programs, missing, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(omitted));
     CHECK(std::get<HybridFamilyVerificationReport>(omitted).global_objective_optimality==
         HybridVerificationStatus::established);
@@ -3919,32 +3899,28 @@ TEST_CASE("exact singleton hybrid verifier reports missing or altered optimal fa
     std::vector<HybridPathOptimalFaceCandidate> altered{
         exact_candidate(programs[0],point),exact_candidate(programs[1],point)};
     altered[1].relation=singleton_data({2,1,3,1,0});
-    const auto wrong_face=verify_hybrid_portfolio_family(verifier,system,request,programs,altered,
-        {1,8},{1e-10,1e-10});
+    const auto wrong_face=verify_hybrid_portfolio_family(verifier, system, request, programs, altered, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(wrong_face));
     CHECK(std::get<HybridFamilyVerificationReport>(wrong_face).complete_family_coverage==
         HybridVerificationStatus::refuted);
 
     auto wrong_programs=programs;
     wrong_programs[0].joint_relation=singleton_data({2,1,3,0,1});
-    const auto wrong_relation=verify_hybrid_portfolio_family(verifier,system,request,wrong_programs,altered,
-        {1,8},{1e-10,1e-10});
+    const auto wrong_relation=verify_hybrid_portfolio_family(verifier, system, request, wrong_programs, altered, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(wrong_relation));
     CHECK(std::get<HybridFamilyVerificationReport>(wrong_relation).complete_family_coverage==
         HybridVerificationStatus::refuted);
 
     auto over_limit_programs=programs;
     over_limit_programs[0].relation_limits.max_matrix_elements=1;
-    const auto over_limit=verify_hybrid_portfolio_family(verifier,system,request,over_limit_programs,altered,
-        {1,8},{1e-10,1e-10});
+    const auto over_limit=verify_hybrid_portfolio_family(verifier, system, request, over_limit_programs, altered, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<Diagnostics>(over_limit));
     CHECK(std::get<Diagnostics>(over_limit).front().field=="hybrid.adapter.operations");
 
     std::vector<HybridPathOptimalFaceCandidate> extra_worse{
         exact_candidate(programs[0],point),exact_candidate(programs[1],point),
         exact_candidate(programs[2],Vector{2,1,3,1,0})};
-    const auto suboptimal=verify_hybrid_portfolio_family(verifier,system,request,programs,extra_worse,
-        {1,8},{1e-10,1e-10});
+    const auto suboptimal=verify_hybrid_portfolio_family(verifier, system, request, programs, extra_worse, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(suboptimal));
     CHECK(std::get<HybridFamilyVerificationReport>(suboptimal).complete_family_coverage==
         HybridVerificationStatus::refuted);
@@ -4079,8 +4055,7 @@ TEST_CASE("independent two-stage singleton oracle matches every mode branch and 
     }
     REQUIRE(optimal_candidates.size()==2);
     ExactSingletonHybridFamilyVerifier verifier;
-    const auto verified=verify_hybrid_portfolio_family(verifier,system,request,programs,
-        optimal_candidates,{2,16},{0,0});
+    const auto verified=verify_hybrid_portfolio_family(verifier, system, request, programs, optimal_candidates, {2,16}, test_verifier_invocation({0,0}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(verified));
     const auto& report=std::get<HybridFamilyVerificationReport>(verified);
     CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
@@ -4188,8 +4163,7 @@ TEST_CASE("two-stage scalar interval verifier checks tied continuous families in
         candidates.push_back(exact_candidate(*found,{0,0,0,0,0,0,0}));
     }
     TwoStageScalarIntervalHybridFamilyVerifier verifier;
-    const auto result=verify_hybrid_portfolio_family(verifier,system,request,programs,candidates,
-        {2,16},{0,0});
+    const auto result=verify_hybrid_portfolio_family(verifier, system, request, programs, candidates, {2,16}, test_verifier_invocation({0,0}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
     const auto& report=std::get<HybridFamilyVerificationReport>(result);
     CHECK(report.verifier_id=="csl.hybrid.two-stage-scalar-interval");
@@ -4238,8 +4212,7 @@ TEST_CASE("two-stage scalar interval verifier checks tied continuous families in
         {"two-stage-infeasible-relation"},{2,16},{64,512,8192});
     REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(disjoint_built));
     const auto& disjoint_programs=std::get<std::vector<HybridPathProgram>>(disjoint_built);
-    const auto disjoint_result=verify_hybrid_portfolio_family(verifier,disjoint_system,request,
-        disjoint_programs,{}, {2,16},{0,0});
+    const auto disjoint_result=verify_hybrid_portfolio_family(verifier, disjoint_system, request, disjoint_programs, {}, {2,16}, test_verifier_invocation({0,0}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(disjoint_result));
     const auto& disjoint_report=std::get<HybridFamilyVerificationReport>(disjoint_result);
     CHECK(disjoint_report.global_objective_optimality==HybridVerificationStatus::unsupported);
@@ -4342,8 +4315,7 @@ TEST_CASE("single-parameter scalar interval verifier covers arbitrary finite hor
         candidates.push_back(exact_candidate(*found,Vector(10,0)));
     }
     SingleParameterScalarIntervalHybridFamilyVerifier verifier;
-    const auto result=verify_hybrid_portfolio_family(verifier,system,request,programs,candidates,
-        {3,32},{0,0});
+    const auto result=verify_hybrid_portfolio_family(verifier, system, request, programs, candidates, {3,32}, test_verifier_invocation({0,0}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
     const auto& report=std::get<HybridFamilyVerificationReport>(result);
     CHECK(report.verifier_id=="csl.hybrid.scalar-single-parameter-interval");
@@ -4380,7 +4352,7 @@ TEST_CASE("single-parameter verifier certifies quadratic interior and full optim
     REQUIRE(programs.size()==1);
     SingleParameterScalarIntervalHybridFamilyVerifier verifier;
     const auto paths=std::vector<model::HybridPath>{programs.front().path};
-    const auto preflight=verifier.preflight(system,request,paths,{});
+    const auto preflight=verifier.preflight(system,request,paths,test_verifier_invocation({}));
     CHECK(std::holds_alternative<std::monostate>(preflight));
     auto& convex=std::get<ConvexProgram>(programs.front().program);
     const Vector optimum{0,0.5,2,2};
@@ -4390,8 +4362,7 @@ TEST_CASE("single-parameter verifier certifies quadratic interior and full optim
         optimum,{},"independent scalar quadratic optimum"};
     HybridPathOptimalFaceCandidate candidate{programs.front().path, singleton_data(optimum),
         optimum,std::move(solver),{},"independent singleton quadratic minimizer",{}};
-    const auto result=verify_hybrid_portfolio_family(verifier,system,request,programs,
-        std::span<const HybridPathOptimalFaceCandidate>(&candidate,1),{1,8},{0,0});
+    const auto result=verify_hybrid_portfolio_family(verifier, system, request, programs, std::span<const HybridPathOptimalFaceCandidate>(&candidate,1), {1,8}, test_verifier_invocation({0,0}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
     const auto& report=std::get<HybridFamilyVerificationReport>(result);
     CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
@@ -4410,8 +4381,7 @@ TEST_CASE("single-parameter verifier certifies quadratic interior and full optim
         optimum,{},"independent flat quadratic optimum"};
     HybridPathOptimalFaceCandidate narrowed{programs.front().path,singleton_data(optimum),
         optimum,std::move(flat_solver),{},"deliberately narrowed flat minimizer",{}};
-    const auto narrowed_result=verify_hybrid_portfolio_family(verifier,system,request,programs,
-        std::span<const HybridPathOptimalFaceCandidate>(&narrowed,1),{1,8},{0,0});
+    const auto narrowed_result=verify_hybrid_portfolio_family(verifier, system, request, programs, std::span<const HybridPathOptimalFaceCandidate>(&narrowed,1), {1,8}, test_verifier_invocation({0,0}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(narrowed_result));
     CHECK(std::get<HybridFamilyVerificationReport>(narrowed_result).complete_family_coverage==
         HybridVerificationStatus::refuted);
@@ -4427,16 +4397,14 @@ TEST_CASE("exact singleton hybrid verifier handles empty branches and rejects co
     ExactSingletonHybridFamilyVerifier verifier;
     const Vector point{2,1,3,0,0};
     std::vector<HybridPathOptimalFaceCandidate> candidates{exact_candidate(programs[1],point)};
-    const auto result=verify_hybrid_portfolio_family(verifier,system,request,programs,candidates,
-        {1,8},{1e-10,1e-10});
+    const auto result=verify_hybrid_portfolio_family(verifier, system, request, programs, candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(result));
     const auto& report=std::get<HybridFamilyVerificationReport>(result);
     CHECK(report.branches[0].feasibility==HybridVerificationStatus::refuted);
     CHECK(report.branches[0].objective_optimality==HybridVerificationStatus::refuted);
     CHECK(report.complete_family_coverage==HybridVerificationStatus::established);
     candidates.push_back(exact_candidate(programs[0],point));
-    const auto infeasible_face=verify_hybrid_portfolio_family(verifier,system,request,programs,candidates,
-        {1,8},{1e-10,1e-10});
+    const auto infeasible_face=verify_hybrid_portfolio_family(verifier, system, request, programs, candidates, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(infeasible_face));
     CHECK(std::get<HybridFamilyVerificationReport>(infeasible_face).complete_family_coverage==
         HybridVerificationStatus::refuted);
@@ -4445,8 +4413,7 @@ TEST_CASE("exact singleton hybrid verifier handles empty branches and rejects co
     auto continuous_built=build_hybrid_portfolio_programs(continuous_system,example_request(),
         {"continuous-hybrid"},{1,8},{32,128,4096});
     REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(continuous_built));
-    const auto unsupported=verify_hybrid_portfolio_family(verifier,continuous_system,example_request(),
-        std::get<std::vector<HybridPathProgram>>(continuous_built),{}, {1,8},{1e-10,1e-10});
+    const auto unsupported=verify_hybrid_portfolio_family(verifier, continuous_system, example_request(), std::get<std::vector<HybridPathProgram>>(continuous_built), {}, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(unsupported));
     CHECK(std::get<HybridFamilyVerificationReport>(unsupported).global_objective_optimality==
         HybridVerificationStatus::unsupported);
@@ -4456,8 +4423,7 @@ TEST_CASE("exact singleton hybrid verifier handles empty branches and rejects co
     const auto mixed_programs=build_hybrid_portfolio_programs(mixed_system,mixed_request,
         {"mixed-domain-hybrid"},{1,8},{32,128,4096});
     REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(mixed_programs));
-    const auto mixed=verify_hybrid_portfolio_family(verifier,mixed_system,mixed_request,
-        std::get<std::vector<HybridPathProgram>>(mixed_programs),{}, {1,8},{1e-10,1e-10});
+    const auto mixed=verify_hybrid_portfolio_family(verifier, mixed_system, mixed_request, std::get<std::vector<HybridPathProgram>>(mixed_programs), {}, {1,8}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(mixed));
     const auto& mixed_report=std::get<HybridFamilyVerificationReport>(mixed);
     CHECK(mixed_report.branches[0].feasibility==HybridVerificationStatus::unsupported);
@@ -4470,23 +4436,20 @@ TEST_CASE("exact singleton hybrid verifier handles empty branches and rejects co
     const auto limited_programs=build_hybrid_portfolio_programs(limited_system,limited_request,
         {"exact-hybrid-limit"},{1,8},{32,128,4096});
     REQUIRE(std::holds_alternative<std::vector<HybridPathProgram>>(limited_programs));
-    const auto path_limit=verify_hybrid_portfolio_family(verifier,limited_system,limited_request,
-        std::get<std::vector<HybridPathProgram>>(limited_programs),{}, {1,2},{1e-10,1e-10});
+    const auto path_limit=verify_hybrid_portfolio_family(verifier, limited_system, limited_request, std::get<std::vector<HybridPathProgram>>(limited_programs), {}, {1,2}, test_verifier_invocation({1e-10,1e-10}));
     REQUIRE(std::holds_alternative<Diagnostics>(path_limit));
     CHECK(std::get<Diagnostics>(path_limit).front().field=="hybrid.paths.limit");
 
     std::stop_source cancellation;
     cancellation.request_stop();
-    const auto cancelled=verify_hybrid_portfolio_family(verifier,limited_system,limited_request,
-        std::get<std::vector<HybridPathProgram>>(limited_programs),{}, {1,8},{1e-10,1e-10},
-        cancellation.get_token());
+    const auto cancelled=verify_hybrid_portfolio_family(verifier, limited_system, limited_request, std::get<std::vector<HybridPathProgram>>(limited_programs), {}, {1,8}, test_verifier_invocation({1e-10,1e-10}, cancellation.get_token()));
     CHECK(std::holds_alternative<OperationStopped>(cancelled));
     std::vector<model::HybridPath> paths;
     for(const auto& program:std::get<std::vector<HybridPathProgram>>(limited_programs))
         paths.push_back(program.path);
     const auto adapter_cancelled=verifier.verify(limited_system,limited_request,paths,
-        std::get<std::vector<HybridPathProgram>>(limited_programs),{}, {1e-10,1e-10},
-        cancellation.get_token());
+        std::get<std::vector<HybridPathProgram>>(limited_programs),{},
+        test_verifier_invocation({1e-10,1e-10},cancellation.get_token()));
     CHECK(std::holds_alternative<OperationStopped>(adapter_cancelled));
 }
 
@@ -4639,8 +4602,7 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
   CHECK_FALSE(satisfies(half_h, tuple(0.75, 0.1)));
   CHECK(satisfies(full_h, tuple(0.75, 0.1)));
   TwoParameterScalarPolytopeHybridFamilyVerifier verifier;
-  auto valid = verify_hybrid_portfolio_family(verifier, system, request,
-                                              programs, faces, {2, 8}, {0, 0});
+  auto valid = verify_hybrid_portfolio_family(verifier, system, request, programs, faces, {2, 8}, test_verifier_invocation({0, 0}));
   REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(valid));
   const auto &report = std::get<HybridFamilyVerificationReport>(valid);
   CHECK(report.verifier_id == "csl.hybrid.scalar-two-parameter-polytope");
@@ -4655,15 +4617,11 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
   CHECK(report.complete_family_coverage ==
         HybridVerificationStatus::established);
 
-  auto missing_face = verify_hybrid_portfolio_family(
-      verifier, system, request, programs,
-      std::span<const HybridPathOptimalFaceCandidate>(faces.data(), 1), {2, 8},
-      {0, 0});
+  auto missing_face = verify_hybrid_portfolio_family(verifier, system, request, programs, std::span<const HybridPathOptimalFaceCandidate>(faces.data(), 1), {2, 8}, test_verifier_invocation({0, 0}));
   CHECK(std::holds_alternative<Diagnostics>(missing_face));
   auto duplicate_faces = faces;
   duplicate_faces.push_back(faces.front());
-  auto duplicate_face = verify_hybrid_portfolio_family(
-      verifier, system, request, programs, duplicate_faces, {2, 8}, {0, 0});
+  auto duplicate_face = verify_hybrid_portfolio_family(verifier, system, request, programs, duplicate_faces, {2, 8}, test_verifier_invocation({0, 0}));
   CHECK(std::holds_alternative<Diagnostics>(duplicate_face));
 
   auto shared_flow_system = system;
@@ -4681,9 +4639,7 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
   std::vector<HybridPathOptimalFaceCandidate> shared_faces;
   for (const auto &program : shared_programs)
     shared_faces.push_back(exact_candidate(program, Vector(7, 0)));
-  auto shared_report = verify_hybrid_portfolio_family(
-      verifier, shared_flow_system, request, shared_programs, shared_faces,
-      {2, 8}, {0, 0});
+  auto shared_report = verify_hybrid_portfolio_family(verifier, shared_flow_system, request, shared_programs, shared_faces, {2, 8}, test_verifier_invocation({0, 0}));
   REQUIRE(
       std::holds_alternative<HybridFamilyVerificationReport>(shared_report));
   CHECK(std::get<HybridFamilyVerificationReport>(shared_report)
@@ -4710,9 +4666,7 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
     candidate.solver_result.primal = candidate.anchor;
     inexact_faces.push_back(std::move(candidate));
   }
-  auto inexact_anchor_report = verify_hybrid_portfolio_family(
-      verifier, inexact_anchor_system, request, inexact_programs,
-      inexact_faces, {2, 8}, {0, 0});
+  auto inexact_anchor_report = verify_hybrid_portfolio_family(verifier, inexact_anchor_system, request, inexact_programs, inexact_faces, {2, 8}, test_verifier_invocation({0, 0}));
   std::string inexact_error =
       "hybrid verifier result variant: " +
       std::to_string(inexact_anchor_report.index());
@@ -4776,8 +4730,7 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
   auto forged_program = programs;
   forged_program[0].joint_relation = drop_coordinate_zero_equality(
       forged_program[0].joint_relation, "forged-program-extra-state");
-  auto forged_program_report = verify_hybrid_portfolio_family(
-      verifier, system, request, forged_program, faces, {2, 8}, {0, 0});
+  auto forged_program_report = verify_hybrid_portfolio_family(verifier, system, request, forged_program, faces, {2, 8}, test_verifier_invocation({0, 0}));
   REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(
       forged_program_report));
   CHECK(std::get<HybridFamilyVerificationReport>(forged_program_report)
@@ -4787,8 +4740,7 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
   const auto decoded_face = forged_faces[0].relation;
   forged_faces[0].relation =
       drop_coordinate_zero_equality(decoded_face, "forged-face-extra-state");
-  auto forged_face_report = verify_hybrid_portfolio_family(
-      verifier, system, request, programs, forged_faces, {2, 8}, {0, 0});
+  auto forged_face_report = verify_hybrid_portfolio_family(verifier, system, request, programs, forged_faces, {2, 8}, test_verifier_invocation({0, 0}));
   REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(
       forged_face_report));
   CHECK(std::get<HybridFamilyVerificationReport>(forged_face_report)
@@ -4803,10 +4755,12 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
     auto degenerate_system = system;
     degenerate_system.modes[2].invariants[2] = terminal_set;
     const auto degenerate_preflight =
-        verifier.preflight(degenerate_system, request, verified_paths, {});
+        verifier.preflight(degenerate_system, request, verified_paths,
+                           test_verifier_invocation({0,0}));
     CHECK(std::holds_alternative<Diagnostics>(degenerate_preflight));
     const auto degenerate_report = verifier.verify(
-        degenerate_system, request, verified_paths, programs, {}, {0, 0}, {});
+        degenerate_system, request, verified_paths, programs, {},
+        test_verifier_invocation({0,0}));
     CHECK(std::holds_alternative<Diagnostics>(degenerate_report));
   }
 
@@ -4827,7 +4781,7 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
   }
   const auto malformed_empty_report = verifier.verify(
       infeasible_system, request, verified_paths, infeasible_programs, {},
-      {0, 0}, {});
+      test_verifier_invocation({0,0}));
   std::string malformed_empty_error =
       "malformed empty result variant: " +
       std::to_string(malformed_empty_report.index());
@@ -4855,7 +4809,7 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
       "two-parameter-wrong-empty-path";
   const auto wrong_path_empty_report = verifier.verify(
       infeasible_system, request, verified_paths, wrong_path_programs, {},
-      {0, 0}, {});
+      test_verifier_invocation({0,0}));
   REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(
       wrong_path_empty_report));
   CHECK(std::get<HybridFamilyVerificationReport>(wrong_path_empty_report)
@@ -4875,9 +4829,7 @@ TEST_CASE("two parameter scalar verifier certifies a coupled polygon and "
   for (const auto &program : nonzero_initial_programs)
     nonzero_initial_faces.push_back(
         exact_candidate(program, Vector{1, 0, 0, 0, 0, 0, 0}));
-  const auto nonzero_initial_report = verify_hybrid_portfolio_family(
-      verifier, system, nonzero_initial_request, nonzero_initial_programs,
-      nonzero_initial_faces, {2, 8}, {0, 0});
+  const auto nonzero_initial_report = verify_hybrid_portfolio_family(verifier, system, nonzero_initial_request, nonzero_initial_programs, nonzero_initial_faces, {2, 8}, test_verifier_invocation({0, 0}));
   REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(
       nonzero_initial_report));
   CHECK(std::get<HybridFamilyVerificationReport>(nonzero_initial_report)
@@ -5581,8 +5533,7 @@ TEST_CASE("exact linear H verifier matches independent 3D control-box oracle") {
 
     ExactLinearHHybridFamilyVerifier verifier;
     const std::array<HybridPathOptimalFaceCandidate,1> candidates{std::move(candidate)};
-    const auto verified=verify_hybrid_portfolio_family(verifier,system,request,
-        programs,candidates,{1,4},{0,0});
+    const auto verified=verify_hybrid_portfolio_family(verifier, system, request, programs, candidates, {1,4}, test_verifier_invocation({0,0}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(verified));
     const auto& report=std::get<HybridFamilyVerificationReport>(verified);
     REQUIRE(report.branches.size()==1);
@@ -5698,8 +5649,7 @@ TEST_CASE("exact linear H verifier matches an independent tied multi-edge box or
     }
 
     ExactLinearHHybridFamilyVerifier verifier;
-    const auto verified=verify_hybrid_portfolio_family(verifier,system,request,
-        programs,candidates,{1,4},{0,0});
+    const auto verified=verify_hybrid_portfolio_family(verifier, system, request, programs, candidates, {1,4}, test_verifier_invocation({0,0}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(verified));
     const auto& report=std::get<HybridFamilyVerificationReport>(verified);
     CHECK(report.enumerated_paths==oracle_paths);
@@ -5851,8 +5801,7 @@ TEST_CASE("exact H verifier matches tied multi-edge simplex families with differ
     }
 
     ExactLinearHHybridFamilyVerifier verifier;
-    const auto verified=verify_hybrid_portfolio_family(verifier,system,request,
-        programs,candidates,{1,2},{0,0});
+    const auto verified=verify_hybrid_portfolio_family(verifier, system, request, programs, candidates, {1,2}, test_verifier_invocation({0,0}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(verified));
     const auto& report=std::get<HybridFamilyVerificationReport>(verified);
     CHECK((report.enumerated_paths==std::vector<HybridPath>{oracle[0].path,oracle[1].path}));
@@ -5913,8 +5862,7 @@ TEST_CASE("exact linear H verifier preserves a four-control simplex through an e
     complete.relation=std::get<sets::SetData>(full_face);
     ExactLinearHHybridFamilyVerifier verifier;
     const std::array<HybridPathOptimalFaceCandidate,1> complete_candidates{std::move(complete)};
-    const auto verified=verify_hybrid_portfolio_family(verifier,system,request,
-        programs,complete_candidates,{1,2},{0,0});
+    const auto verified=verify_hybrid_portfolio_family(verifier, system, request, programs, complete_candidates, {1,2}, test_verifier_invocation({0,0}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(verified));
     const auto& report=std::get<HybridFamilyVerificationReport>(verified);
     CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
@@ -5938,8 +5886,7 @@ TEST_CASE("exact linear H verifier preserves a four-control simplex through an e
     auto incomplete=exact_candidate(programs.front(),{0,0.125,0.125,0.125,0.125,0.5,0});
     incomplete.relation=std::get<sets::SetData>(narrow_face);
     const std::array<HybridPathOptimalFaceCandidate,1> incomplete_candidates{std::move(incomplete)};
-    const auto rejected=verify_hybrid_portfolio_family(verifier,system,request,
-        programs,incomplete_candidates,{1,2},{0,0});
+    const auto rejected=verify_hybrid_portfolio_family(verifier, system, request, programs, incomplete_candidates, {1,2}, test_verifier_invocation({0,0}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(rejected));
     const auto& rejected_report=std::get<HybridFamilyVerificationReport>(rejected);
     CHECK(rejected_report.global_objective_optimality==HybridVerificationStatus::established);
@@ -6018,8 +5965,7 @@ TEST_CASE("exact linear H verifier checks a five-control simplex optimal family"
     complete.relation=std::get<sets::SetData>(full_face);
     ExactLinearHHybridFamilyVerifier verifier;
     const std::array<HybridPathOptimalFaceCandidate,1> complete_candidates{std::move(complete)};
-    const auto verified=verify_hybrid_portfolio_family(verifier,system,request,
-        programs,complete_candidates,{1,2},{0,0});
+    const auto verified=verify_hybrid_portfolio_family(verifier, system, request, programs, complete_candidates, {1,2}, test_verifier_invocation({0,0}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(verified));
     const auto& report=std::get<HybridFamilyVerificationReport>(verified);
     CHECK(report.global_objective_optimality==HybridVerificationStatus::established);
@@ -6034,8 +5980,7 @@ TEST_CASE("exact linear H verifier checks a five-control simplex optimal family"
     auto incomplete=exact_candidate(programs.front(),{0,0.125,0.125,0.125,0.125,0.125,0.625,0});
     incomplete.relation=std::get<sets::SetData>(narrow_face);
     const std::array<HybridPathOptimalFaceCandidate,1> incomplete_candidates{std::move(incomplete)};
-    const auto rejected=verify_hybrid_portfolio_family(verifier,system,request,
-        programs,incomplete_candidates,{1,2},{0,0});
+    const auto rejected=verify_hybrid_portfolio_family(verifier, system, request, programs, incomplete_candidates, {1,2}, test_verifier_invocation({0,0}));
     REQUIRE(std::holds_alternative<HybridFamilyVerificationReport>(rejected));
     const auto& rejected_report=std::get<HybridFamilyVerificationReport>(rejected);
     CHECK(rejected_report.global_objective_optimality==HybridVerificationStatus::established);
