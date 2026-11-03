@@ -23,6 +23,20 @@ STRATEGY_AB_FILES = (
     "capture-environment.json", "codec-environment.json", "resource-profile.json",
     "capture-supervisor.py", "build-note.md",
 )
+STRATEGY_AB_TS02_ID = "mpc01-strategy-ab-ts02-per-attempt-20261103"
+STRATEGY_AB_TS02_SOURCE = ROOT / "docs/research/evidence" / STRATEGY_AB_TS02_ID
+STRATEGY_AB_TS02_ROUTE = Path("docs/research/evidence") / STRATEGY_AB_TS02_ID
+STRATEGY_AB_TS02_FILES = (
+    "strategy-ab-ts02-summary.html", "strategy-ab-ts02-summary.md",
+    "strategy-ab-ts02-control-plane.svg", "strategy-ab-ts02-events.jsonl",
+    "strategy-ab-ts02-stdout.jsonl", "strategy-ab-ts02-comparison-record.json",
+    "scenario.json", "strategy-ab-ts02-environment.json",
+    "strategy-ab-ts02-csl-environment.json", "resource-profile.json",
+    "capture-supervisor.py", "run-capture.py", "binary-dynamic-dependencies.txt",
+    "systemd-scope-processes.jsonl", "build-note.json",
+    "cmake-compiler-metadata.cmake", "target-flags.make", "target-link.txt",
+    "build-record.py", "render-report.py", "write-build-note.py", "sanitize-bundle.py",
+)
 
 
 def _insert_landing_link(site: Path, marker: str, href: str, label: str) -> None:
@@ -76,6 +90,7 @@ th,td{{border-bottom:1px solid #526174;padding:.45rem .6rem;text-align:left}}img
 <h2>Resource and verification scope</h2><p>Each of 140 attempts ran sequentially with a 300-second process-tree watchdog, 8 GiB cgroup-v2 memory cap, swap disabled, one CPU quota, and one pinned logical CPU. The host had 7.55 GiB physical RAM, below the per-attempt memory cap; observed peak process-tree memory was 12,173,312 bytes. There were no timeouts, failed attempts, or OOM events.</p>
 <p>An independent exact-rational checker verified feasibility and objective bounds for 90 attempts classified optimal. Full attempt receipts, checker records, solver outputs, environment identity, and their source checksums are included below.</p>
 <h2>Evidence files</h2><ul><li><a href="benchmark-summary.md">Benchmark summary and reproduction context</a></li><li><a href="attempts.jsonl">140 resource and outcome receipts</a></li><li><a href="comparison-records.jsonl">Canonical comparison records</a></li><li><a href="native-attempts.jsonl">Native solver attempt rows</a></li><li><a href="exact-candidate-checks.jsonl">Independent exact checks</a></li><li><a href="exact-check-manifest.json">Exact-check manifest</a></li><li><a href="capture-profile.json">Capture profile</a></li><li><a href="build-identity.json">Build and source identity</a></li><li><a href="SHA256SUMS">Original source-bundle checksums</a></li></ul>
+<h2>Strategy A/B analytic comparison</h2><p><a href="../{STRATEGY_AB_TS02_ROUTE.as_posix()}/strategy-ab-ts02-summary.html">T-S02: five alternating Strategy A/B pairs, each with its own process-tree limit, plus a separate limiter profile.</a> This constant-objective fixture checks family plumbing and replay, not optimization difficulty or general performance.</p>
 <p>Capture date: 2026-11-02. Source revision: <code>452db1ceb0312607fe7791b5ff4d84a2730df6ff</code>. No package or release change.</p>
 </main></body></html>'''
 
@@ -94,10 +109,11 @@ def stage(site: Path) -> Path:
     _insert_landing_link(site, "mpc01-per-attempt-link", f"{REPORT_ID}/index.html",
                          "MPC-01 per-attempt OSQP and HPIPM capture →")
     stage_strategy_ab(site)
+    stage_strategy_ab_ts02(site)
     return dest
 
 
-def _check_manifest(bundle: Path) -> set[str]:
+def _check_manifest(bundle: Path, required_files: tuple[str, ...] = STRATEGY_AB_FILES) -> set[str]:
     manifest = bundle / "SHA256SUMS"
     if manifest.is_symlink() or not manifest.is_file():
         raise ValueError("Strategy A/B source checksum manifest is required")
@@ -113,7 +129,7 @@ def _check_manifest(bundle: Path) -> set[str]:
                 hashlib.sha256(path.read_bytes()).hexdigest() != digest):
             raise ValueError("Strategy A/B source-bundle checksum mismatch: " + name)
         names.add(name)
-    if not set(STRATEGY_AB_FILES).issubset(names):
+    if not set(required_files).issubset(names):
         raise ValueError("Strategy A/B source-bundle inventory is incomplete")
     actual = {path.relative_to(bundle).as_posix() for path in bundle.rglob("*")
               if path.is_file() and path.name != "SHA256SUMS"}
@@ -148,6 +164,32 @@ def stage_strategy_ab(site: Path) -> Path:
         site, "mpc01-strategy-ab-ts03-link",
         f"{STRATEGY_AB_ROUTE.as_posix()}/strategy-ab-ts03-summary.html",
         "MPC-01 Strategy A/B T-S03 report →")
+    return destination
+
+
+def stage_strategy_ab_ts02(site: Path) -> Path:
+    if (STRATEGY_AB_TS02_SOURCE.is_symlink() or not STRATEGY_AB_TS02_SOURCE.is_dir() or
+            site.is_symlink() or not site.is_dir()):
+        raise ValueError("Strategy A/B T-S02 evidence source and built site directory are required")
+    _check_manifest(STRATEGY_AB_TS02_SOURCE, STRATEGY_AB_TS02_FILES)
+    destination = site / STRATEGY_AB_TS02_ROUTE
+    if destination.exists() or destination.is_symlink():
+        raise ValueError("Strategy A/B T-S02 report route must be fresh")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(STRATEGY_AB_TS02_SOURCE, destination, symlinks=False)
+    source_dir = site / "scripts/reports/mpc01"
+    source_dir.mkdir(parents=True, exist_ok=True)
+    for filename in ("summarize_strategy_ab_ts02.py", "build_strategy_ab_records.py"):
+        source = ROOT / "scripts/reports/mpc01" / filename
+        target = source_dir / filename
+        if target.exists() and target.read_bytes() != source.read_bytes():
+            raise ValueError("T-S02 Strategy A/B renderer route conflicts with an existing site file")
+        if not target.exists():
+            shutil.copy2(source, target)
+    _insert_landing_link(
+        site, "mpc01-strategy-ab-ts02-link",
+        f"{STRATEGY_AB_TS02_ROUTE.as_posix()}/strategy-ab-ts02-summary.html",
+        "MPC-01 Strategy A/B T-S02 per-attempt report →")
     return destination
 
 
@@ -208,6 +250,34 @@ def validate(site: Path) -> None:
     landing_html = landing.read_text(encoding="utf-8")
     if f'href="{STRATEGY_AB_ROUTE.as_posix()}/strategy-ab-ts03-summary.html"' not in landing_html:
         raise ValueError("Strategy A/B T-S03 link is missing from the Pages landing page")
+
+    ts02_source = STRATEGY_AB_TS02_SOURCE
+    ts02_route = site / STRATEGY_AB_TS02_ROUTE
+    ts02_landing = ts02_route / "strategy-ab-ts02-summary.html"
+    if (ts02_source.is_symlink() or not ts02_source.is_dir() or ts02_route.is_symlink() or
+            not ts02_route.is_dir() or ts02_landing.is_symlink() or not ts02_landing.is_file()):
+        raise ValueError("staged Strategy A/B T-S02 report route is missing")
+    ts02_names = _check_manifest(ts02_source, STRATEGY_AB_TS02_FILES)
+    if _check_manifest(ts02_route, STRATEGY_AB_TS02_FILES) != ts02_names:
+        raise ValueError("staged Strategy A/B T-S02 report inventory differs from source")
+    for name in ts02_names:
+        if (ts02_route / name).read_bytes() != (ts02_source / name).read_bytes():
+            raise ValueError("Strategy A/B T-S02 report differs from source: " + name)
+    for filename in ("summarize_strategy_ab_ts02.py", "build_strategy_ab_records.py"):
+        renderer = renderer_dir / filename
+        source = ROOT / "scripts/reports/mpc01" / filename
+        if renderer.is_symlink() or not renderer.is_file() or renderer.read_bytes() != source.read_bytes():
+            raise ValueError("staged Strategy A/B T-S02 renderer differs from source: " + filename)
+    page = ts02_landing.read_text(encoding="utf-8")
+    for reference in re.findall(r'(?:href|src)="([^"]+)"', page):
+        parsed = urlparse(reference)
+        if parsed.scheme or parsed.netloc:
+            continue
+        target = (ts02_landing.parent / urldefrag(parsed.path)[0]).resolve()
+        if not target.is_relative_to(site.resolve()) or not target.is_file():
+            raise ValueError("Strategy A/B T-S02 report links to a missing or escaping file: " + reference)
+    if f'href="{STRATEGY_AB_TS02_ROUTE.as_posix()}/strategy-ab-ts02-summary.html"' not in landing_html:
+        raise ValueError("Strategy A/B T-S02 link is missing from the Pages landing page")
 
 
 if __name__ == "__main__":

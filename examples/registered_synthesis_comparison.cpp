@@ -151,21 +151,29 @@ int main(int argc, char** argv) try {
     using namespace csl::registry;
     const bool measure = argc >= 2 && std::string_view(argv[1]) == "--measure";
     const bool measure_profile = argc >= 2 && std::string_view(argv[1]) == "--measure-profile";
-    const int scenario_index = measure_profile ? 3 : measure ? 2 : 1;
+    const bool measure_attempt = argc >= 2 && std::string_view(argv[1]) == "--measure-attempt";
+    const int scenario_index = measure_profile || measure_attempt ? 3 : measure ? 2 : 1;
     if ((measure && (argc < 3 || argc > 4)) || (measure_profile && (argc < 4 || argc > 5)) ||
-        (!measure && !measure_profile && (argc < 2 || argc > 3))) {
+        (measure_attempt && (argc < 8 || argc > 9)) ||
+        (!measure && !measure_profile && !measure_attempt && (argc < 2 || argc > 3))) {
         std::cerr << "Usage: registered_synthesis_comparison <two-stage-integrator.json> [results.json]\n"
                   << "   or: registered_synthesis_comparison --measure <two-stage-integrator.json> [events.jsonl]\n"
-                  << "   or: registered_synthesis_comparison --measure-profile <exact-profile> <scenario.json> [events.jsonl]\n";
+                  << "   or: registered_synthesis_comparison --measure-profile <exact-profile> <scenario.json> [events.jsonl]\n"
+                  << "   or: registered_synthesis_comparison --measure-attempt <profile> <scenario.json> <strategy-id> <repetition> <order-position> <warmup-0-or-1> [events.jsonl]\n";
         return 2;
     }
-    const std::string_view family_profile = measure_profile ? std::string_view(argv[2]) : "ts01_exact_integrator";
-    const std::size_t measured_pairs = measure_profile ? 5 : 7;
-    const std::string_view event_schema = measure_profile ? "csl.synthesis.paired-family-event/1" : "csl.synthesis.paired-ts01-event/1";
-    const bool has_event_path = measure_profile ? argc == 5 : measure && argc == 4;
-    const int event_path_index = measure_profile ? 4 : 3;
-    if (measure_profile && family_profile != "ts02_constant_integrator" && family_profile != "ts03_singular_integrator") {
-        std::cerr << "Profile rejected: expected ts02_constant_integrator or ts03_singular_integrator\n";
+    const std::string_view family_profile = measure_profile || measure_attempt ? std::string_view(argv[2]) : "ts01_exact_integrator";
+    const std::size_t measured_pairs = measure_profile || measure_attempt ? 5 : 7;
+    const std::string_view event_schema = measure_profile || measure_attempt ? "csl.synthesis.paired-family-event/1" : "csl.synthesis.paired-ts01-event/1";
+    const bool has_event_path = measure_attempt ? argc == 9 : measure_profile ? argc == 5 : measure && argc == 4;
+    const int event_path_index = measure_attempt ? 8 : measure_profile ? 4 : 3;
+    if ((measure_profile || measure_attempt) && family_profile != "ts01_exact_integrator" &&
+        family_profile != "ts02_constant_integrator" && family_profile != "ts03_singular_integrator") {
+        std::cerr << "Profile rejected: expected ts01_exact_integrator, ts02_constant_integrator or ts03_singular_integrator\n";
+        return 2;
+    }
+    if (measure_attempt && std::string_view(argv[7]) != "0" && std::string_view(argv[7]) != "1") {
+        std::cerr << "Warmup rejected: expected 0 or 1\n";
         return 2;
     }
     const auto scenario_load_started = Clock::now();
@@ -232,7 +240,7 @@ int main(int argc, char** argv) try {
     Requirements witness_output; witness_output.output.representation = {"csl.witness-batch.v1"};
     const auto shared_provider_setup_ns = elapsed_ns(provider_setup_started, Clock::now());
 
-    if (measure || measure_profile) {
+    if (measure || measure_profile || measure_attempt) {
         std::ofstream event_file;
         if (has_event_path) {
             std::ifstream existing(argv[event_path_index], std::ios::binary);
@@ -269,7 +277,7 @@ int main(int argc, char** argv) try {
             std::optional<std::uint64_t> end_to_end_ns;
             std::optional<std::uint64_t> preparation_ns, workspace_creation_ns, family_construction_ns;
             std::optional<std::uint64_t> selector_preparation_ns, selector_workspace_creation_ns, witness_query_ns, original_verification_ns;
-            std::string status = "failed", error, outcome = "unknown", termination = "unknown";
+            std::string status = "failed", error, outcome = "unknown", termination = "failed";
             bool complete_family = false;
             std::string strategy_version, family_identity;
             std::string strategy_provenance = "[]", selector_provenance = "[]", membership_provenance = "[]";
@@ -415,13 +423,26 @@ int main(int argc, char** argv) try {
         };
 
         bool all_passed = true;
-        for (std::size_t repetition = 0; repetition <= measured_pairs; ++repetition) {
-            const bool warmup = repetition == 0;
-            const std::size_t order_position = repetition == 0 ? 0 : (repetition - 1) % 2;
-            const char* first = order_position == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b";
-            const char* second = order_position == 0 ? "csl.synthesis.strategy-b" : "csl.synthesis.reach-back";
-            all_passed = run_measured(first, repetition, warmup, 0) && all_passed;
-            all_passed = run_measured(second, repetition, warmup, 1) && all_passed;
+        if (measure_attempt) {
+            const auto repetition = static_cast<std::size_t>(std::stoull(argv[5]));
+            const auto order_position = static_cast<std::size_t>(std::stoull(argv[6]));
+            const std::string_view strategy = argv[4];
+            if ((strategy != "csl.synthesis.reach-back" && strategy != "csl.synthesis.strategy-b") ||
+                order_position > 1 || repetition > measured_pairs ||
+                (std::string_view(argv[7]) == "1") != (repetition == 0)) {
+                std::cerr << "Attempt rejected: strategy, repetition, order position or warmup is invalid\n";
+                return 2;
+            }
+            all_passed = run_measured(argv[4], repetition, std::string_view(argv[7]) == "1", order_position);
+        } else {
+            for (std::size_t repetition = 0; repetition <= measured_pairs; ++repetition) {
+                const bool warmup = repetition == 0;
+                const std::size_t order_position = repetition == 0 ? 0 : (repetition - 1) % 2;
+                const char* first = order_position == 0 ? "csl.synthesis.reach-back" : "csl.synthesis.strategy-b";
+                const char* second = order_position == 0 ? "csl.synthesis.strategy-b" : "csl.synthesis.reach-back";
+                all_passed = run_measured(first, repetition, warmup, 0) && all_passed;
+                all_passed = run_measured(second, repetition, warmup, 1) && all_passed;
+            }
         }
         if (event_file && !event_file.flush()) { std::cerr << "Output rejected: cannot flush events file\n"; return 2; }
         if (!all_passed) return 1;

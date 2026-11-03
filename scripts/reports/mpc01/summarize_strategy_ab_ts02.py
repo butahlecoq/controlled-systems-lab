@@ -55,15 +55,22 @@ def main() -> None:
             record.get("schema") != "csl.comparison-record/1" or
             len(record.get("attempts", [])) != 12):
         raise ValueError("environment or canonical record does not bind this capture")
+    receipts = profile.get("attempts", [])
+    limiter_profiles = profile.get("separate_limiter_profiles", [])
     if (profile.get("schema") != "csl.mpc01-resource-profile/1" or
-            profile.get("status") != "completed" or
-            profile["enforced_limits"].get("memory_max_bytes") != 2147483648 or
+            profile.get("status") != "completed" or len(receipts) != 12 or
+            len(limiter_profiles) != 2 or
+            profile["enforced_limits"].get("memory_max_bytes") != 8 * 1024**3 or
             profile["enforced_limits"].get("memory_swap_max_bytes") != 0 or
             profile["requested_limits"].get("process_tree_wall_time_seconds") != 300 or
-            profile["observed"].get("exit_code") != 0 or
-            profile["observed"].get("timed_out") is not False):
+            any(receipt.get("status") != "completed" or
+                receipt["enforced_limits"].get("memory_max_bytes") != 8 * 1024**3 or
+                receipt["enforced_limits"].get("memory_swap_max_bytes") != 0 or
+                receipt["observed"].get("timed_out") is not False
+                for receipt in receipts + limiter_profiles)):
         raise ValueError("capture did not complete under its declared resource profile")
-    if any(line.rsplit(" ", 1)[-1] != "0" for line in profile["observed"]["memory_events"]
+    if any(int(line.split()[1]) != 0
+           for receipt in receipts for line in receipt["observed"]["memory_events"]
            if line.startswith(("max ", "oom ", "oom_kill ", "oom_group_kill "))):
         raise ValueError("capture reached a cgroup memory/oom event")
 
@@ -129,20 +136,26 @@ def main() -> None:
         timing[strategy] = (statistics.median(values), min(values), max(values))
     scenario_hash = digest(args.scenario)
     event_hash = digest(args.events)
-    build_provenance = environment["binary_build_provenance"]
-    repository_root = Path(__file__).resolve().parents[3]
-    build_note_href = html.escape(os.path.relpath(
-        repository_root / build_provenance["build_note"]["path"], output.parent))
-    process_record_href = html.escape(os.path.relpath(
-        repository_root / build_provenance["process_record"]["path"], output.parent))
-    checksum_href = html.escape(os.path.relpath(
-        repository_root / build_provenance["checksum_manifest"]["path"], output.parent))
+    build_provenance = environment.get("binary_build_provenance")
+    if build_provenance:
+        note_path = build_provenance["build_note"]["path"]
+        build_note_href = html.escape(os.path.relpath(output.parent / note_path, output.parent))
+        provenance_text = (f"Binary source revision <code>{html.escape(build_provenance['source_revision'])}</code> is linked to the configured CMake metadata, object digest, and executable SHA-256 in the retained build note.")
+        provenance_links = f'<li>Retained build note: <a href="{build_note_href}">build-note.json</a></li>'
+    else:
+        provenance_text = "The executable SHA-256, source commit, compiler, and build configuration are recorded in the capture environment."
+        provenance_links = ""
     record_resource_bound = all(
         json.loads(run["run"])["result"]["raw_output"].get("resource_profile_json") ==
         profile_bytes.decode("utf-8")
         for run in record["attempts"])
     if not record_resource_bound:
         raise ValueError("canonical attempts do not embed the exact limited-capture profile")
+    scoped_elapsed = profile["elapsed_wall_time_ns"] / 1e9
+    scoped_peak = profile["observed"]["process_tree_peak_memory_bytes"]
+    resource_text = (f"Each of the 12 strategy attempts ran in its own Linux cgroup-v2 process scope with a 300-second process-tree watchdog, 8 GiB memory cap, no swap, 100% CPU quota, and one pinned logical CPU. The sum of attempt scope wall times was {scoped_elapsed:.6f} s; the largest observed process-tree memory peak was {scoped_peak} bytes. Every attempt completed without timeout or memory-limit events. A separate excluded warmup pair records limiter enforcement for both strategies.")
+    if build_provenance:
+        provenance_text = (f"Binary source revision <code>{html.escape(build_provenance['source_revision'])}</code> is linked to the configured CMake metadata, object digest, and executable SHA-256 in the retained build note.")
 
     report = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MPC-01 T-S02 Strategy A/B</title>
 <style>body{{font:16px/1.55 system-ui,sans-serif;color:#202a33;max-width:980px;margin:2rem auto;padding:0 1rem}}table{{border-collapse:collapse}}th,td{{border:1px solid #bbc5cc;padding:.45rem .7rem;text-align:left}}figure img{{width:min(100%,620px)}}.note{{border-left:4px solid #516b7b;padding:.4rem 1rem;background:#f4f7f8}}code{{overflow-wrap:anywhere}}</style></head><body>
@@ -151,9 +164,9 @@ def main() -> None:
 <h2>Saved run</h2><p>One excluded warmup pair and five measured alternating pairs; all 12 trials passed. Each trial marked the profile-specific family complete and returned two distinct histories. Independent original-model numerical checks passed for bindings, feasibility, and objective (both original and recomputed costs equal 3). Separate optimality and optimizer-completeness proof fields remain unsupported.</p>
 <h2>Descriptive timing</h2><table><thead><tr><th>Strategy</th><th>Median end-to-end (ms)</th><th>Range (ms)</th></tr></thead><tbody>{''.join(f'<tr><th>{html.escape(LABELS[s])}</th><td>{timing[s][0]/1e6:.6f}</td><td>{timing[s][1]/1e6:.6f}–{timing[s][2]/1e6:.6f}</td></tr>' for s in EXPECTED)}</tbody></table>
 <p>Timing covers strategy preparation through two original-problem witness checks. It excludes process startup, shared setup, serialization, build, and rendering. This tiny constant-objective case is not evidence for a general performance winner.</p>
-<h2>Resource profile and provenance</h2><p>The whole capture process tree ran with a 2 GiB cgroup-v2 memory cap, swap disabled, and a 300-second suite-level watchdog. It completed in {profile['elapsed_wall_time_ns']/1e9:.6f} s with peak process-tree memory {profile['observed']['process_tree_peak_memory_bytes']} bytes and zero OOM/limit events. The wall limit applies to the full invocation, not individually restarted trials; this profile is below the default per-attempt 8 GiB cap and does not satisfy that per-attempt timeout contract.</p>
-<p>Binary source revision <code>{html.escape(build_provenance['source_revision'])}</code> is tied to the exact executable SHA-256 by the retained earlier T-S02 build note and process record; the report checksum file pins both. The T-S02 capture executable hash matches that archived binary. The execution worktree commit records the launch directory only, and its captured dynamic-dependency list contains no CSL, HiGHS, or Qhull shared library.</p>
-<ul><li>Source commit: <code>{html.escape(environment['source_commit'])}</code></li><li>Launch worktree commit: <code>{html.escape(environment['execution_worktree_commit'])}</code> (working directory only)</li><li>Executable SHA-256: <code>{html.escape(environment['executable_sha256'])}</code></li><li>Scenario SHA-256: <code>{scenario_hash}</code></li><li>Events SHA-256: <code>{event_hash}</code></li><li><a href="strategy-ab-ts02-environment.json">Capture environment</a> · <a href="strategy-ab-ts02-csl-environment.json">Codec environment</a> · <a href="resource-profile.json">Resource profile</a> · <a href="binary-dynamic-dependencies.txt">Dynamic dependencies</a></li><li>Archived build provenance: <a href="{build_note_href}">build note</a> · <a href="{process_record_href}">process record</a> · <a href="{checksum_href}">checksums</a></li><li><a href="strategy-ab-ts02-events.jsonl">Raw events</a> · <a href="strategy-ab-ts02-stdout.jsonl">Raw stdout</a> · <a href="scenario.json">Scenario</a></li><li><a href="strategy-ab-ts02-comparison-record.json">Canonical comparison record</a> with the exact profile bytes embedded in each attempt</li><li><a href="capture-supervisor.py">Capture supervisor</a></li></ul>
+<h2>Resource profile and provenance</h2><p>{resource_text}</p>
+<p>{provenance_text} Source commit, build configuration, compiler, executable and scenario hashes are recorded in the capture environment; the executable is identified by SHA-256 <code>{html.escape(environment['executable_sha256'])}</code>.</p>
+<ul><li>Source commit: <code>{html.escape(environment['source_commit'])}</code></li><li>Scenario SHA-256: <code>{scenario_hash}</code></li><li>Events SHA-256: <code>{event_hash}</code></li><li><a href="strategy-ab-ts02-environment.json">Capture environment</a> · <a href="strategy-ab-ts02-csl-environment.json">Codec environment</a> · <a href="resource-profile.json">Per-attempt resource receipts</a> · <a href="binary-dynamic-dependencies.txt">Dynamic dependencies</a></li>{provenance_links}<li><a href="strategy-ab-ts02-events.jsonl">Raw events</a> · <a href="strategy-ab-ts02-stdout.jsonl">Raw stdout</a> · <a href="scenario.json">Scenario</a></li><li><a href="strategy-ab-ts02-comparison-record.json">Canonical comparison record</a> with the exact profile bytes embedded in each attempt</li><li><a href="capture-supervisor.py">Capture supervisor</a></li></ul>
 <p class="note">This is a limited T-S02 functional comparison slice for #597. It does not complete the broader MPC-01 matrix, external solver comparison, default per-attempt limiter profile, or general ranking.</p></body></html>'''
     output.write_text(report, encoding="utf-8")
 
@@ -161,16 +174,18 @@ def main() -> None:
         "# Resource-limited saved Strategy A/B T-S02 capture", "",
         "T-S02 is the two-stage scalar integrator with `x0=0`, `x[t+1]=x[t]+u[t]`, `u[t] in [0,1]`, and constant objective `J=3`. Every feasible control pair is therefore an exact minimizer; this fixture checks family plumbing and witness replay, not optimization difficulty.", "",
         f"- Source commit: `{environment['source_commit']}`.", f"- Scenario SHA-256: `{scenario_hash}`.", f"- Event/stdout SHA-256: `{event_hash}`.",
-        f"- Source revision `{build_provenance['source_revision']}` and executable SHA-256 `{build_provenance['executable_sha256']}` are cross-bound by the retained EXP-02 T-S02 build note/process record and its checksum file. The launch worktree commit `{environment['execution_worktree_commit']}` identifies the runtime working directory only; it is not represented as the source used to build the binary.",
+        f"- {provenance_text} Executable SHA-256: `{environment['executable_sha256']}`.",
         "- One excluded warmup pair; five measured alternating pairs; all 12 trials passed.",
         "- Each result marked its profile-specific family complete and returned two distinct histories. Original-model bindings, feasibility, and objective checks passed; separate proof fields for optimality and completeness remain unsupported.",
         "- The exact minimizer set is the full unit square. Both strategies returned the same two corner witnesses.", "",
         "| Strategy | Median end-to-end (ms) | Range (ms) |", "|---|---:|---:|",
     ]
+    if build_provenance:
+        lines.insert(5, f"- Build note: [`{build_provenance['build_note']['path']}`]({build_provenance['build_note']['path']}) (SHA-256 `{build_provenance['build_note']['sha256']}`).")
     for strategy in EXPECTED:
         median, low, high = timing[strategy]
         lines.append(f"| `{strategy}` | {median/1e6:.6f} | {low/1e6:.6f}–{high/1e6:.6f} |")
-    lines.extend(["", f"The process tree completed in {profile['elapsed_wall_time_ns']/1e9:.6f} s under a 2 GiB cgroup-v2 memory cap, no swap, and a 300-second suite-level watchdog; peak memory was {profile['observed']['process_tree_peak_memory_bytes']} bytes with zero OOM/limit events. This wall cap covers the whole capture invocation, not individual trials. The profile is below the default 8 GiB per-attempt cap and does not fulfill the default per-attempt timeout profile.", "", "The timings cover strategy preparation through original-problem witness verification; they exclude process startup, shared setup, JSON I/O, build and rendering. This tiny constant-objective fixture supports no general winner claim.", "", f"Report: [`{output.name}`]({output.name}); figure: [`{svg_path.name}`]({svg_path.name}).", ""])
+    lines.extend(["", resource_text, "", "The timings cover strategy preparation through original-problem witness verification; they exclude process startup, shared setup, JSON I/O, build and rendering. This tiny constant-objective fixture supports no general winner claim.", "", f"Report: [`{output.name}`]({output.name}); figure: [`{svg_path.name}`]({svg_path.name}).", ""])
     summary_path.write_text("\n".join(lines), encoding="utf-8")
 
 

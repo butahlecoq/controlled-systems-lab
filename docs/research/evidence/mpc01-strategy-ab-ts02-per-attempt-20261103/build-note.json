@@ -1,0 +1,34 @@
+{
+  "build": {
+    "compiler": {
+      "id": "GNU",
+      "path": "/usr/bin/c++",
+      "version": "16.2.1"
+    },
+    "generator": "Unix Makefiles",
+    "object_file": {
+      "path": "examples/CMakeFiles/registered_synthesis_comparison.dir/registered_synthesis_comparison.cpp.o",
+      "sha256": "4767f378e07b190c594b8d46d9c981c70975db6a83bfbd7d7a2d935d141f395c"
+    },
+    "release_flags": "-O3 -DNDEBUG",
+    "retained_cmake_files": {
+      "cmake-compiler-metadata.cmake": "fc54f5e431c04fbe157752a68b26b3f49e29f913e0188f9334e2c610971c68b3",
+      "target-flags.make": "69a83b7597ea7ef30ff54983f2afc03e054cc860abe0279c321d3f4d269a5c53",
+      "target-link.txt": "528227c4e2926b0b31770a3d204f0f0bc2699ca8e015c8d55801a69d525fc877"
+    },
+    "type": "Release"
+  },
+  "configured_source_checkout": "${SOURCE_ROOT}",
+  "executable": {
+    "path": "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+    "sha256": "dc57e3c16c5b1c356cd86762105f86a913a61c7a60cc6855c86bad083ac86e5e"
+  },
+  "interpretation": "This note records the configured source revision, generated CMake compile/link metadata, object-file digest, and final executable digest from the retained build tree. It is build provenance evidence, not a signed attestation.",
+  "schema": "csl.mpc01-binary-build-note/1",
+  "source": {
+    "file": "examples/registered_synthesis_comparison.cpp",
+    "file_sha256": "f6593c982a6e1515bdcb9a20982dbe4a105e5d50eacee2db1fd98e405e454ae2",
+    "revision": "af4aa5cec4c8a9673460da63475698c2bd76a92a",
+    "tree_sha256": "267d397563fe7dad428855f6bcba3599b8d54fc6a5ccebc6f24dcad68a010449"
+  }
+}
