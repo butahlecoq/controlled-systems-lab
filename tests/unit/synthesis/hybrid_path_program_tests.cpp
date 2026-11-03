@@ -1538,6 +1538,20 @@ TEST_CASE("hybrid portfolio rejects unknown provider envelopes before adapter pa
     CHECK(trajectory.preflight_calls==1);
     CHECK(trajectory.capability_calls==1);
     CHECK(trajectory.build_calls==0);
+
+    auto verified_calls=std::make_shared<int>(0);
+    const auto verified_lp=declared_lp_provider(
+        registry::AdmissionStatus::conditional,false,verified_calls);
+    FixtureHybridFamilyVerifier verifier;
+    AdmittingTrajectoryPreflightAdapter verified_trajectory;
+    const auto verified_result=build_hybrid_portfolio_programs_with_verifier(
+        verifier,verified_trajectory,system,request,{"provider-preflight-verified"},
+        {1,8},{16,64,1024},verified_lp,convex_provider());
+    REQUIRE(std::holds_alternative<Diagnostics>(verified_result));
+    CHECK(std::get<Diagnostics>(verified_result).front().field=="hybrid.provider.admission");
+    CHECK(*verified_calls==2);
+    CHECK(verifier.preflight_calls==1);
+    CHECK(verified_trajectory.build_calls==0);
 }
 
 TEST_CASE("hybrid portfolio builds only after every provider envelope is supported") {
