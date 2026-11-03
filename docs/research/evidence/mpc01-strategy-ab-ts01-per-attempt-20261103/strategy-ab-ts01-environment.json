@@ -1,0 +1,68 @@
+{
+  "binary_build_provenance": {
+    "build_note": {
+      "path": "build-note.json",
+      "sha256": "a4bb90335a8f3288fb698d554b40c36a36f3b2ac2e25384951e66784d75c06ce"
+    },
+    "executable_sha256": "dc57e3c16c5b1c356cd86762105f86a913a61c7a60cc6855c86bad083ac86e5e",
+    "schema": "csl.binary-build-provenance/2",
+    "source_revision": "af4aa5cec4c8a9673460da63475698c2bd76a92a",
+    "source_tree_sha256": "267d397563fe7dad428855f6bcba3599b8d54fc6a5ccebc6f24dcad68a010449"
+  },
+  "build": {
+    "compiler": "GNU 16.2.1",
+    "compiler_banner": "c++ (GCC) 16.2.1 20260810",
+    "compiler_id": "GNU",
+    "compiler_metadata_file": "${BUILD_ROOT}/CMakeFiles/3.31.6/CMakeCXXCompiler.cmake",
+    "compiler_path": "/usr/bin/c++",
+    "compiler_version": "16.2.1",
+    "flags": "-O3 -DNDEBUG",
+    "generator": "Unix Makefiles",
+    "type": "Release"
+  },
+  "executable": "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+  "executable_sha256": "dc57e3c16c5b1c356cd86762105f86a913a61c7a60cc6855c86bad083ac86e5e",
+  "execution_worktree_clean_before_run": true,
+  "execution_worktree_commit": "8967adc7dbe4b44b3e97ac3b430bada46acea040",
+  "execution_worktree_role": "The executable was built from source_commit; compiler identity comes from the configured CMake compiler metadata and banner.",
+  "host": {
+    "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "kernel": "7.2.8-9-omarchy",
+    "load_average_after_capture": [
+      0.26025390625,
+      0.27783203125,
+      0.33740234375
+    ],
+    "load_average_before_capture": [
+      0.19580078125,
+      0.265625,
+      0.33349609375
+    ],
+    "logical_cpus": 8,
+    "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44"
+  },
+  "measurement": {
+    "capture_supervisor": "scripts/reports/mpc01/capture_strategy_ab_attempt.py",
+    "capture_supervisor_sha256": "ff53851c90fef06af6bd51d02305140e67433e8c271566807a595abb0b2735e4",
+    "command": "registered_synthesis_comparison --measure-attempt, repeated as individual systemd scopes",
+    "cpu_time_or_peak_memory_profiled": true,
+    "event_count_including_header": 13,
+    "measured_alternating_pairs": 5,
+    "per_attempt_wall_time_cap": 300,
+    "process_tree_memory_cap_bytes": 8589934592,
+    "process_tree_memory_swap_max_bytes": 0,
+    "process_tree_wall_time_cap_seconds": 300,
+    "resource_profile": "resource-profile.json",
+    "resource_profile_sha256": "c97120deb88b53a51dfc89a59da98233aabc70e17ffc36d3101decd03135c330",
+    "separate_limiter_profile": "separate-limiter-profiles in resource-profile.json",
+    "timeout_scope": "one strategy attempt per scope",
+    "warmup_pairs_excluded": 1
+  },
+  "scenario": "examples/scenarios/two-stage-integrator.json",
+  "scenario_sha256": "bbeb83947627a197d71dd380dbaa5cfae12e22cd6d79b12e66ef08275b2c390a",
+  "source_commit": "af4aa5cec4c8a9673460da63475698c2bd76a92a",
+  "source_dirty_before_run": false,
+  "source_file": "examples/registered_synthesis_comparison.cpp",
+  "source_file_sha256": "f6593c982a6e1515bdcb9a20982dbe4a105e5d50eacee2db1fd98e405e454ae2",
+  "source_tree_sha256": "267d397563fe7dad428855f6bcba3599b8d54fc6a5ccebc6f24dcad68a010449"
+}

@@ -1,0 +1,4721 @@
+{
+  "attempt_count": 12,
+  "attempts": [
+    {
+      "attempt_id": "r00-p0-reach-back",
+      "command": [
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--measure-attempt",
+        "ts01_exact_integrator",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "csl.synthesis.reach-back",
+        "0",
+        "0",
+        "1",
+        "${CAPTURE_ROOT}/attempts/r00-p0-reach-back/events.jsonl"
+      ],
+      "elapsed_wall_time_ns": 21141225,
+      "enforced_limits": {
+        "memory_max_bytes": 8589934592,
+        "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
+        "memory_swap_max_bytes": 0,
+        "process_tree_memory": true,
+        "process_tree_wall_time": true,
+        "wall_mechanism": "Python watchdog with process-group SIGTERM/SIGKILL"
+      },
+      "host": {
+        "load_average_after": [
+          0.19580078125,
+          0.265625,
+          0.33349609375
+        ],
+        "load_average_before": [
+          0.19580078125,
+          0.265625,
+          0.33349609375
+        ],
+        "logical_cpu_count": 8,
+        "machine": "x86_64",
+        "release": "7.2.8-9-omarchy",
+        "system": "Linux"
+      },
+      "observed": {
+        "exit_code": 0,
+        "memory_current_bytes": 11595776,
+        "memory_events": [
+          "low 0",
+          "high 0",
+          "max 0",
+          "oom 0",
+          "oom_kill 0",
+          "oom_group_kill 0",
+          "sock_throttled 0"
+        ],
+        "process_tree_peak_memory_bytes": 12439552,
+        "timed_out": false,
+        "trial_status": "passed",
+        "trial_termination": "completed"
+      },
+      "requested_limits": {
+        "maximum_concurrent_jobs": 1,
+        "process_tree_memory_bytes": 8589934592,
+        "process_tree_wall_time_seconds": 300
+      },
+      "scenario_sha256": "bbeb83947627a197d71dd380dbaa5cfae12e22cd6d79b12e66ef08275b2c390a",
+      "schema": "csl.mpc01-attempt-resource-receipt/1",
+      "status": "completed",
+      "timeout_scope": "one strategy attempt and its process tree",
+      "trial": {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/initial",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30142:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "strategy-a/feasible-preimage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.terminal-minimizers",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "syn02-terminal:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30161:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "strategy-a/terminal-preimage",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.reach-back",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 0,
+        "outcome": "optimal",
+        "repetition": 0,
+        "schema": "csl.synthesis.paired-family-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.reach-back",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.reach-back",
+            "port": "strategy",
+            "requested": "csl.synthesis.reach-back",
+            "version": "1"
+          },
+          {
+            "actual": "csl.geometry.polyhedral-projection",
+            "port": "geometry",
+            "requested": "csl.geometry.polyhedral-projection",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.geometry.affine-sum",
+            "port": "geometry",
+            "requested": "csl.geometry.affine-sum",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.conversion.qhull",
+            "port": "conversion",
+            "requested": "csl.conversion.qhull",
+            "version": "1.0.0+qhull.8.0.2"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 14918818
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 14174166
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 14876
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 118451
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 22978
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1955
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 551191
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 17181
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": true,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "attempt_id": "r00-p1-strategy-b",
+      "command": [
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--measure-attempt",
+        "ts01_exact_integrator",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "csl.synthesis.strategy-b",
+        "0",
+        "1",
+        "1",
+        "${CAPTURE_ROOT}/attempts/r00-p1-strategy-b/events.jsonl"
+      ],
+      "elapsed_wall_time_ns": 11224051,
+      "enforced_limits": {
+        "memory_max_bytes": 8589934592,
+        "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
+        "memory_swap_max_bytes": 0,
+        "process_tree_memory": true,
+        "process_tree_wall_time": true,
+        "wall_mechanism": "Python watchdog with process-group SIGTERM/SIGKILL"
+      },
+      "host": {
+        "load_average_after": [
+          0.19580078125,
+          0.265625,
+          0.33349609375
+        ],
+        "load_average_before": [
+          0.19580078125,
+          0.265625,
+          0.33349609375
+        ],
+        "logical_cpu_count": 8,
+        "machine": "x86_64",
+        "release": "7.2.8-9-omarchy",
+        "system": "Linux"
+      },
+      "observed": {
+        "exit_code": 0,
+        "memory_current_bytes": 11202560,
+        "memory_events": [
+          "low 0",
+          "high 0",
+          "max 0",
+          "oom 0",
+          "oom_kill 0",
+          "oom_group_kill 0",
+          "sock_throttled 0"
+        ],
+        "process_tree_peak_memory_bytes": 12177408,
+        "timed_out": false,
+        "trial_status": "passed",
+        "trial_termination": "completed"
+      },
+      "requested_limits": {
+        "maximum_concurrent_jobs": 1,
+        "process_tree_memory_bytes": 8589934592,
+        "process_tree_wall_time_seconds": 300
+      },
+      "scenario_sha256": "bbeb83947627a197d71dd380dbaa5cfae12e22cd6d79b12e66ef08275b2c390a",
+      "schema": "csl.mpc01-attempt-resource-receipt/1",
+      "status": "completed",
+      "timeout_scope": "one strategy attempt and its process tree",
+      "trial": {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-build:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            },
+            {
+              "input": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-optimal-level:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-extract:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.strategy-b",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 1,
+        "outcome": "optimal",
+        "repetition": 0,
+        "schema": "csl.synthesis.paired-family-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.strategy-b",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.strategy-b",
+            "port": "strategy",
+            "requested": "csl.synthesis.strategy-b",
+            "version": "1"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 4362383
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 2981542
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 36737
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 82902
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 42464
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1886
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 1190522
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 5657
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": true,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "attempt_id": "r01-p0-reach-back",
+      "command": [
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--measure-attempt",
+        "ts01_exact_integrator",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "csl.synthesis.reach-back",
+        "1",
+        "0",
+        "0",
+        "${CAPTURE_ROOT}/attempts/r01-p0-reach-back/events.jsonl"
+      ],
+      "elapsed_wall_time_ns": 19008119,
+      "enforced_limits": {
+        "memory_max_bytes": 8589934592,
+        "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
+        "memory_swap_max_bytes": 0,
+        "process_tree_memory": true,
+        "process_tree_wall_time": true,
+        "wall_mechanism": "Python watchdog with process-group SIGTERM/SIGKILL"
+      },
+      "host": {
+        "load_average_after": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "load_average_before": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "logical_cpu_count": 8,
+        "machine": "x86_64",
+        "release": "7.2.8-9-omarchy",
+        "system": "Linux"
+      },
+      "observed": {
+        "exit_code": 0,
+        "memory_current_bytes": 11063296,
+        "memory_events": [
+          "low 0",
+          "high 0",
+          "max 0",
+          "oom 0",
+          "oom_kill 0",
+          "oom_group_kill 0",
+          "sock_throttled 0"
+        ],
+        "process_tree_peak_memory_bytes": 12173312,
+        "timed_out": false,
+        "trial_status": "passed",
+        "trial_termination": "completed"
+      },
+      "requested_limits": {
+        "maximum_concurrent_jobs": 1,
+        "process_tree_memory_bytes": 8589934592,
+        "process_tree_wall_time_seconds": 300
+      },
+      "scenario_sha256": "bbeb83947627a197d71dd380dbaa5cfae12e22cd6d79b12e66ef08275b2c390a",
+      "schema": "csl.mpc01-attempt-resource-receipt/1",
+      "status": "completed",
+      "timeout_scope": "one strategy attempt and its process tree",
+      "trial": {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/initial",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30142:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "strategy-a/feasible-preimage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.terminal-minimizers",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "syn02-terminal:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30161:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "strategy-a/terminal-preimage",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.reach-back",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 0,
+        "outcome": "optimal",
+        "repetition": 1,
+        "schema": "csl.synthesis.paired-family-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.reach-back",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.reach-back",
+            "port": "strategy",
+            "requested": "csl.synthesis.reach-back",
+            "version": "1"
+          },
+          {
+            "actual": "csl.geometry.polyhedral-projection",
+            "port": "geometry",
+            "requested": "csl.geometry.polyhedral-projection",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.geometry.affine-sum",
+            "port": "geometry",
+            "requested": "csl.geometry.affine-sum",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.conversion.qhull",
+            "port": "conversion",
+            "requested": "csl.conversion.qhull",
+            "version": "1.0.0+qhull.8.0.2"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 13143232
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 12479596
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 15435
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 125924
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 20114
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1397
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 468987
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 16063
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "attempt_id": "r01-p1-strategy-b",
+      "command": [
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--measure-attempt",
+        "ts01_exact_integrator",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "csl.synthesis.strategy-b",
+        "1",
+        "1",
+        "0",
+        "${CAPTURE_ROOT}/attempts/r01-p1-strategy-b/events.jsonl"
+      ],
+      "elapsed_wall_time_ns": 11185778,
+      "enforced_limits": {
+        "memory_max_bytes": 8589934592,
+        "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
+        "memory_swap_max_bytes": 0,
+        "process_tree_memory": true,
+        "process_tree_wall_time": true,
+        "wall_mechanism": "Python watchdog with process-group SIGTERM/SIGKILL"
+      },
+      "host": {
+        "load_average_after": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "load_average_before": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "logical_cpu_count": 8,
+        "machine": "x86_64",
+        "release": "7.2.8-9-omarchy",
+        "system": "Linux"
+      },
+      "observed": {
+        "exit_code": 0,
+        "memory_current_bytes": 11124736,
+        "memory_events": [
+          "low 0",
+          "high 0",
+          "max 0",
+          "oom 0",
+          "oom_kill 0",
+          "oom_group_kill 0",
+          "sock_throttled 0"
+        ],
+        "process_tree_peak_memory_bytes": 12177408,
+        "timed_out": false,
+        "trial_status": "passed",
+        "trial_termination": "completed"
+      },
+      "requested_limits": {
+        "maximum_concurrent_jobs": 1,
+        "process_tree_memory_bytes": 8589934592,
+        "process_tree_wall_time_seconds": 300
+      },
+      "scenario_sha256": "bbeb83947627a197d71dd380dbaa5cfae12e22cd6d79b12e66ef08275b2c390a",
+      "schema": "csl.mpc01-attempt-resource-receipt/1",
+      "status": "completed",
+      "timeout_scope": "one strategy attempt and its process tree",
+      "trial": {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-build:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            },
+            {
+              "input": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-optimal-level:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-extract:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.strategy-b",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 1,
+        "outcome": "optimal",
+        "repetition": 1,
+        "schema": "csl.synthesis.paired-family-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.strategy-b",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.strategy-b",
+            "port": "strategy",
+            "requested": "csl.synthesis.strategy-b",
+            "version": "1"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 4406174
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 2978819
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 36807
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 84019
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 39670
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 2374
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 1238852
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 5238
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "attempt_id": "r02-p0-strategy-b",
+      "command": [
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--measure-attempt",
+        "ts01_exact_integrator",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "csl.synthesis.strategy-b",
+        "2",
+        "0",
+        "0",
+        "${CAPTURE_ROOT}/attempts/r02-p0-strategy-b/events.jsonl"
+      ],
+      "elapsed_wall_time_ns": 10551546,
+      "enforced_limits": {
+        "memory_max_bytes": 8589934592,
+        "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
+        "memory_swap_max_bytes": 0,
+        "process_tree_memory": true,
+        "process_tree_wall_time": true,
+        "wall_mechanism": "Python watchdog with process-group SIGTERM/SIGKILL"
+      },
+      "host": {
+        "load_average_after": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "load_average_before": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "logical_cpu_count": 8,
+        "machine": "x86_64",
+        "release": "7.2.8-9-omarchy",
+        "system": "Linux"
+      },
+      "observed": {
+        "exit_code": 0,
+        "memory_current_bytes": 11169792,
+        "memory_events": [
+          "low 0",
+          "high 0",
+          "max 0",
+          "oom 0",
+          "oom_kill 0",
+          "oom_group_kill 0",
+          "sock_throttled 0"
+        ],
+        "process_tree_peak_memory_bytes": 12177408,
+        "timed_out": false,
+        "trial_status": "passed",
+        "trial_termination": "completed"
+      },
+      "requested_limits": {
+        "maximum_concurrent_jobs": 1,
+        "process_tree_memory_bytes": 8589934592,
+        "process_tree_wall_time_seconds": 300
+      },
+      "scenario_sha256": "bbeb83947627a197d71dd380dbaa5cfae12e22cd6d79b12e66ef08275b2c390a",
+      "schema": "csl.mpc01-attempt-resource-receipt/1",
+      "status": "completed",
+      "timeout_scope": "one strategy attempt and its process tree",
+      "trial": {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-build:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            },
+            {
+              "input": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-optimal-level:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-extract:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.strategy-b",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 0,
+        "outcome": "optimal",
+        "repetition": 2,
+        "schema": "csl.synthesis.paired-family-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.strategy-b",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.strategy-b",
+            "port": "strategy",
+            "requested": "csl.synthesis.strategy-b",
+            "version": "1"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 3932717
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 2647141
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 35340
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 104833
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 38064
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1956
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 1080730
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 4750
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "attempt_id": "r02-p1-reach-back",
+      "command": [
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--measure-attempt",
+        "ts01_exact_integrator",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "csl.synthesis.reach-back",
+        "2",
+        "1",
+        "0",
+        "${CAPTURE_ROOT}/attempts/r02-p1-reach-back/events.jsonl"
+      ],
+      "elapsed_wall_time_ns": 19331277,
+      "enforced_limits": {
+        "memory_max_bytes": 8589934592,
+        "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
+        "memory_swap_max_bytes": 0,
+        "process_tree_memory": true,
+        "process_tree_wall_time": true,
+        "wall_mechanism": "Python watchdog with process-group SIGTERM/SIGKILL"
+      },
+      "host": {
+        "load_average_after": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "load_average_before": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "logical_cpu_count": 8,
+        "machine": "x86_64",
+        "release": "7.2.8-9-omarchy",
+        "system": "Linux"
+      },
+      "observed": {
+        "exit_code": 0,
+        "memory_current_bytes": 11071488,
+        "memory_events": [
+          "low 0",
+          "high 0",
+          "max 0",
+          "oom 0",
+          "oom_kill 0",
+          "oom_group_kill 0",
+          "sock_throttled 0"
+        ],
+        "process_tree_peak_memory_bytes": 12177408,
+        "timed_out": false,
+        "trial_status": "passed",
+        "trial_termination": "completed"
+      },
+      "requested_limits": {
+        "maximum_concurrent_jobs": 1,
+        "process_tree_memory_bytes": 8589934592,
+        "process_tree_wall_time_seconds": 300
+      },
+      "scenario_sha256": "bbeb83947627a197d71dd380dbaa5cfae12e22cd6d79b12e66ef08275b2c390a",
+      "schema": "csl.mpc01-attempt-resource-receipt/1",
+      "status": "completed",
+      "timeout_scope": "one strategy attempt and its process tree",
+      "trial": {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/initial",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30142:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "strategy-a/feasible-preimage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.terminal-minimizers",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "syn02-terminal:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30161:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "strategy-a/terminal-preimage",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.reach-back",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 1,
+        "outcome": "optimal",
+        "repetition": 2,
+        "schema": "csl.synthesis.paired-family-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.reach-back",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.reach-back",
+            "port": "strategy",
+            "requested": "csl.synthesis.reach-back",
+            "version": "1"
+          },
+          {
+            "actual": "csl.geometry.polyhedral-projection",
+            "port": "geometry",
+            "requested": "csl.geometry.polyhedral-projection",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.geometry.affine-sum",
+            "port": "geometry",
+            "requested": "csl.geometry.affine-sum",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.conversion.qhull",
+            "port": "conversion",
+            "requested": "csl.conversion.qhull",
+            "version": "1.0.0+qhull.8.0.2"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 13507177
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 12852341
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 27657
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 117334
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 20045
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1955
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 454809
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 16762
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "attempt_id": "r03-p0-reach-back",
+      "command": [
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--measure-attempt",
+        "ts01_exact_integrator",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "csl.synthesis.reach-back",
+        "3",
+        "0",
+        "0",
+        "${CAPTURE_ROOT}/attempts/r03-p0-reach-back/events.jsonl"
+      ],
+      "elapsed_wall_time_ns": 17976837,
+      "enforced_limits": {
+        "memory_max_bytes": 8589934592,
+        "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
+        "memory_swap_max_bytes": 0,
+        "process_tree_memory": true,
+        "process_tree_wall_time": true,
+        "wall_mechanism": "Python watchdog with process-group SIGTERM/SIGKILL"
+      },
+      "host": {
+        "load_average_after": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "load_average_before": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "logical_cpu_count": 8,
+        "machine": "x86_64",
+        "release": "7.2.8-9-omarchy",
+        "system": "Linux"
+      },
+      "observed": {
+        "exit_code": 0,
+        "memory_current_bytes": 11333632,
+        "memory_events": [
+          "low 0",
+          "high 0",
+          "max 0",
+          "oom 0",
+          "oom_kill 0",
+          "oom_group_kill 0",
+          "sock_throttled 0"
+        ],
+        "process_tree_peak_memory_bytes": 12439552,
+        "timed_out": false,
+        "trial_status": "passed",
+        "trial_termination": "completed"
+      },
+      "requested_limits": {
+        "maximum_concurrent_jobs": 1,
+        "process_tree_memory_bytes": 8589934592,
+        "process_tree_wall_time_seconds": 300
+      },
+      "scenario_sha256": "bbeb83947627a197d71dd380dbaa5cfae12e22cd6d79b12e66ef08275b2c390a",
+      "schema": "csl.mpc01-attempt-resource-receipt/1",
+      "status": "completed",
+      "timeout_scope": "one strategy attempt and its process tree",
+      "trial": {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/initial",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30142:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "strategy-a/feasible-preimage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.terminal-minimizers",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "syn02-terminal:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30161:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "strategy-a/terminal-preimage",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.reach-back",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 0,
+        "outcome": "optimal",
+        "repetition": 3,
+        "schema": "csl.synthesis.paired-family-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.reach-back",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.reach-back",
+            "port": "strategy",
+            "requested": "csl.synthesis.reach-back",
+            "version": "1"
+          },
+          {
+            "actual": "csl.geometry.polyhedral-projection",
+            "port": "geometry",
+            "requested": "csl.geometry.polyhedral-projection",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.geometry.affine-sum",
+            "port": "geometry",
+            "requested": "csl.geometry.affine-sum",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.conversion.qhull",
+            "port": "conversion",
+            "requested": "csl.conversion.qhull",
+            "version": "1.0.0+qhull.8.0.2"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 12458224
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 11779084
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 15225
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 105811
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 20953
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1815
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 484422
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 34782
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "attempt_id": "r03-p1-strategy-b",
+      "command": [
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--measure-attempt",
+        "ts01_exact_integrator",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "csl.synthesis.strategy-b",
+        "3",
+        "1",
+        "0",
+        "${CAPTURE_ROOT}/attempts/r03-p1-strategy-b/events.jsonl"
+      ],
+      "elapsed_wall_time_ns": 7315709,
+      "enforced_limits": {
+        "memory_max_bytes": 8589934592,
+        "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
+        "memory_swap_max_bytes": 0,
+        "process_tree_memory": true,
+        "process_tree_wall_time": true,
+        "wall_mechanism": "Python watchdog with process-group SIGTERM/SIGKILL"
+      },
+      "host": {
+        "load_average_after": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "load_average_before": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "logical_cpu_count": 8,
+        "machine": "x86_64",
+        "release": "7.2.8-9-omarchy",
+        "system": "Linux"
+      },
+      "observed": {
+        "exit_code": 0,
+        "memory_current_bytes": 11182080,
+        "memory_events": [
+          "low 0",
+          "high 0",
+          "max 0",
+          "oom 0",
+          "oom_kill 0",
+          "oom_group_kill 0",
+          "sock_throttled 0"
+        ],
+        "process_tree_peak_memory_bytes": 12173312,
+        "timed_out": false,
+        "trial_status": "passed",
+        "trial_termination": "completed"
+      },
+      "requested_limits": {
+        "maximum_concurrent_jobs": 1,
+        "process_tree_memory_bytes": 8589934592,
+        "process_tree_wall_time_seconds": 300
+      },
+      "scenario_sha256": "bbeb83947627a197d71dd380dbaa5cfae12e22cd6d79b12e66ef08275b2c390a",
+      "schema": "csl.mpc01-attempt-resource-receipt/1",
+      "status": "completed",
+      "timeout_scope": "one strategy attempt and its process tree",
+      "trial": {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-build:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            },
+            {
+              "input": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-optimal-level:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-extract:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.strategy-b",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 1,
+        "outcome": "optimal",
+        "repetition": 3,
+        "schema": "csl.synthesis.paired-family-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.strategy-b",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.strategy-b",
+            "port": "strategy",
+            "requested": "csl.synthesis.strategy-b",
+            "version": "1"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 2835294
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 2016610
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 16133
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 76756
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 23397
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1885
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 679909
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 4400
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "attempt_id": "r04-p0-strategy-b",
+      "command": [
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--measure-attempt",
+        "ts01_exact_integrator",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "csl.synthesis.strategy-b",
+        "4",
+        "0",
+        "0",
+        "${CAPTURE_ROOT}/attempts/r04-p0-strategy-b/events.jsonl"
+      ],
+      "elapsed_wall_time_ns": 11527793,
+      "enforced_limits": {
+        "memory_max_bytes": 8589934592,
+        "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
+        "memory_swap_max_bytes": 0,
+        "process_tree_memory": true,
+        "process_tree_wall_time": true,
+        "wall_mechanism": "Python watchdog with process-group SIGTERM/SIGKILL"
+      },
+      "host": {
+        "load_average_after": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "load_average_before": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "logical_cpu_count": 8,
+        "machine": "x86_64",
+        "release": "7.2.8-9-omarchy",
+        "system": "Linux"
+      },
+      "observed": {
+        "exit_code": 0,
+        "memory_current_bytes": 11427840,
+        "memory_events": [
+          "low 0",
+          "high 0",
+          "max 0",
+          "oom 0",
+          "oom_kill 0",
+          "oom_group_kill 0",
+          "sock_throttled 0"
+        ],
+        "process_tree_peak_memory_bytes": 12439552,
+        "timed_out": false,
+        "trial_status": "passed",
+        "trial_termination": "completed"
+      },
+      "requested_limits": {
+        "maximum_concurrent_jobs": 1,
+        "process_tree_memory_bytes": 8589934592,
+        "process_tree_wall_time_seconds": 300
+      },
+      "scenario_sha256": "bbeb83947627a197d71dd380dbaa5cfae12e22cd6d79b12e66ef08275b2c390a",
+      "schema": "csl.mpc01-attempt-resource-receipt/1",
+      "status": "completed",
+      "timeout_scope": "one strategy attempt and its process tree",
+      "trial": {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-build:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            },
+            {
+              "input": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-optimal-level:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-extract:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.strategy-b",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 0,
+        "outcome": "optimal",
+        "repetition": 4,
+        "schema": "csl.synthesis.paired-family-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.strategy-b",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.strategy-b",
+            "port": "strategy",
+            "requested": "csl.synthesis.strategy-b",
+            "version": "1"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 4304973
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 2934749
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 36667
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 83810
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 41486
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1956
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 1180953
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 4679
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "attempt_id": "r04-p1-reach-back",
+      "command": [
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--measure-attempt",
+        "ts01_exact_integrator",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "csl.synthesis.reach-back",
+        "4",
+        "1",
+        "0",
+        "${CAPTURE_ROOT}/attempts/r04-p1-reach-back/events.jsonl"
+      ],
+      "elapsed_wall_time_ns": 13407792,
+      "enforced_limits": {
+        "memory_max_bytes": 8589934592,
+        "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
+        "memory_swap_max_bytes": 0,
+        "process_tree_memory": true,
+        "process_tree_wall_time": true,
+        "wall_mechanism": "Python watchdog with process-group SIGTERM/SIGKILL"
+      },
+      "host": {
+        "load_average_after": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "load_average_before": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "logical_cpu_count": 8,
+        "machine": "x86_64",
+        "release": "7.2.8-9-omarchy",
+        "system": "Linux"
+      },
+      "observed": {
+        "exit_code": 0,
+        "memory_current_bytes": 11071488,
+        "memory_events": [
+          "low 0",
+          "high 0",
+          "max 0",
+          "oom 0",
+          "oom_kill 0",
+          "oom_group_kill 0",
+          "sock_throttled 0"
+        ],
+        "process_tree_peak_memory_bytes": 12173312,
+        "timed_out": false,
+        "trial_status": "passed",
+        "trial_termination": "completed"
+      },
+      "requested_limits": {
+        "maximum_concurrent_jobs": 1,
+        "process_tree_memory_bytes": 8589934592,
+        "process_tree_wall_time_seconds": 300
+      },
+      "scenario_sha256": "bbeb83947627a197d71dd380dbaa5cfae12e22cd6d79b12e66ef08275b2c390a",
+      "schema": "csl.mpc01-attempt-resource-receipt/1",
+      "status": "completed",
+      "timeout_scope": "one strategy attempt and its process tree",
+      "trial": {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/initial",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30142:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "strategy-a/feasible-preimage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.terminal-minimizers",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "syn02-terminal:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30161:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "strategy-a/terminal-preimage",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.reach-back",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 1,
+        "outcome": "optimal",
+        "repetition": 4,
+        "schema": "csl.synthesis.paired-family-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.reach-back",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.reach-back",
+            "port": "strategy",
+            "requested": "csl.synthesis.reach-back",
+            "version": "1"
+          },
+          {
+            "actual": "csl.geometry.polyhedral-projection",
+            "port": "geometry",
+            "requested": "csl.geometry.polyhedral-projection",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.geometry.affine-sum",
+            "port": "geometry",
+            "requested": "csl.geometry.affine-sum",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.conversion.qhull",
+            "port": "conversion",
+            "requested": "csl.conversion.qhull",
+            "version": "1.0.0+qhull.8.0.2"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 7425501
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 6626791
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 17670
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 127880
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 19136
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1397
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 597845
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 17670
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "attempt_id": "r05-p0-reach-back",
+      "command": [
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--measure-attempt",
+        "ts01_exact_integrator",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "csl.synthesis.reach-back",
+        "5",
+        "0",
+        "0",
+        "${CAPTURE_ROOT}/attempts/r05-p0-reach-back/events.jsonl"
+      ],
+      "elapsed_wall_time_ns": 12350109,
+      "enforced_limits": {
+        "memory_max_bytes": 8589934592,
+        "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
+        "memory_swap_max_bytes": 0,
+        "process_tree_memory": true,
+        "process_tree_wall_time": true,
+        "wall_mechanism": "Python watchdog with process-group SIGTERM/SIGKILL"
+      },
+      "host": {
+        "load_average_after": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "load_average_before": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "logical_cpu_count": 8,
+        "machine": "x86_64",
+        "release": "7.2.8-9-omarchy",
+        "system": "Linux"
+      },
+      "observed": {
+        "exit_code": 0,
+        "memory_current_bytes": 11071488,
+        "memory_events": [
+          "low 0",
+          "high 0",
+          "max 0",
+          "oom 0",
+          "oom_kill 0",
+          "oom_group_kill 0",
+          "sock_throttled 0"
+        ],
+        "process_tree_peak_memory_bytes": 12173312,
+        "timed_out": false,
+        "trial_status": "passed",
+        "trial_termination": "completed"
+      },
+      "requested_limits": {
+        "maximum_concurrent_jobs": 1,
+        "process_tree_memory_bytes": 8589934592,
+        "process_tree_wall_time_seconds": 300
+      },
+      "scenario_sha256": "bbeb83947627a197d71dd380dbaa5cfae12e22cd6d79b12e66ef08275b2c390a",
+      "schema": "csl.mpc01-attempt-resource-receipt/1",
+      "status": "completed",
+      "timeout_scope": "one strategy attempt and its process tree",
+      "trial": {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/initial",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30142:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "strategy-a/feasible-preimage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.terminal-minimizers",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "syn02-terminal:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30161:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "strategy-a/terminal-preimage",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.reach-back",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 0,
+        "outcome": "optimal",
+        "repetition": 5,
+        "schema": "csl.synthesis.paired-family-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.reach-back",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.reach-back",
+            "port": "strategy",
+            "requested": "csl.synthesis.reach-back",
+            "version": "1"
+          },
+          {
+            "actual": "csl.geometry.polyhedral-projection",
+            "port": "geometry",
+            "requested": "csl.geometry.polyhedral-projection",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.geometry.affine-sum",
+            "port": "geometry",
+            "requested": "csl.geometry.affine-sum",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.conversion.qhull",
+            "port": "conversion",
+            "requested": "csl.conversion.qhull",
+            "version": "1.0.0+qhull.8.0.2"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 7217722
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 6552619
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 15086
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 124667
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 19067
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1467
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 470384
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 17460
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "attempt_id": "r05-p1-strategy-b",
+      "command": [
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--measure-attempt",
+        "ts01_exact_integrator",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "csl.synthesis.strategy-b",
+        "5",
+        "1",
+        "0",
+        "${CAPTURE_ROOT}/attempts/r05-p1-strategy-b/events.jsonl"
+      ],
+      "elapsed_wall_time_ns": 11172788,
+      "enforced_limits": {
+        "memory_max_bytes": 8589934592,
+        "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
+        "memory_swap_max_bytes": 0,
+        "process_tree_memory": true,
+        "process_tree_wall_time": true,
+        "wall_mechanism": "Python watchdog with process-group SIGTERM/SIGKILL"
+      },
+      "host": {
+        "load_average_after": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "load_average_before": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "logical_cpu_count": 8,
+        "machine": "x86_64",
+        "release": "7.2.8-9-omarchy",
+        "system": "Linux"
+      },
+      "observed": {
+        "exit_code": 0,
+        "memory_current_bytes": 11481088,
+        "memory_events": [
+          "low 0",
+          "high 0",
+          "max 0",
+          "oom 0",
+          "oom_kill 0",
+          "oom_group_kill 0",
+          "sock_throttled 0"
+        ],
+        "process_tree_peak_memory_bytes": 12435456,
+        "timed_out": false,
+        "trial_status": "passed",
+        "trial_termination": "completed"
+      },
+      "requested_limits": {
+        "maximum_concurrent_jobs": 1,
+        "process_tree_memory_bytes": 8589934592,
+        "process_tree_wall_time_seconds": 300
+      },
+      "scenario_sha256": "bbeb83947627a197d71dd380dbaa5cfae12e22cd6d79b12e66ef08275b2c390a",
+      "schema": "csl.mpc01-attempt-resource-receipt/1",
+      "status": "completed",
+      "timeout_scope": "one strategy attempt and its process tree",
+      "trial": {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-build:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            },
+            {
+              "input": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-optimal-level:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-extract:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.strategy-b",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 1,
+        "outcome": "optimal",
+        "repetition": 5,
+        "schema": "csl.synthesis.paired-family-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.strategy-b",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.strategy-b",
+            "port": "strategy",
+            "requested": "csl.synthesis.strategy-b",
+            "version": "1"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 4373697
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 2955771
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 36667
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 86324
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 41416
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1956
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 1225442
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 4819
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": false,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "elapsed_wall_time_ns": 166193024,
+  "enforced_limits": {
+    "allowed_cpus": [
+      0
+    ],
+    "cpu_quota": "100%",
+    "memory_max_bytes": 8589934592,
+    "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
+    "memory_swap_max_bytes": 0,
+    "process_tree_memory": true,
+    "process_tree_wall_time": true,
+    "wall_mechanism": "Python watchdog with process-group SIGTERM/SIGKILL"
+  },
+  "observed": {
+    "all_attempts_completed": true,
+    "exit_code": 0,
+    "memory_events": [
+      "r00-p0-reach-back: low 0",
+      "r00-p0-reach-back: high 0",
+      "r00-p0-reach-back: max 0",
+      "r00-p0-reach-back: oom 0",
+      "r00-p0-reach-back: oom_kill 0",
+      "r00-p0-reach-back: oom_group_kill 0",
+      "r00-p0-reach-back: sock_throttled 0",
+      "r00-p1-strategy-b: low 0",
+      "r00-p1-strategy-b: high 0",
+      "r00-p1-strategy-b: max 0",
+      "r00-p1-strategy-b: oom 0",
+      "r00-p1-strategy-b: oom_kill 0",
+      "r00-p1-strategy-b: oom_group_kill 0",
+      "r00-p1-strategy-b: sock_throttled 0",
+      "r01-p0-reach-back: low 0",
+      "r01-p0-reach-back: high 0",
+      "r01-p0-reach-back: max 0",
+      "r01-p0-reach-back: oom 0",
+      "r01-p0-reach-back: oom_kill 0",
+      "r01-p0-reach-back: oom_group_kill 0",
+      "r01-p0-reach-back: sock_throttled 0",
+      "r01-p1-strategy-b: low 0",
+      "r01-p1-strategy-b: high 0",
+      "r01-p1-strategy-b: max 0",
+      "r01-p1-strategy-b: oom 0",
+      "r01-p1-strategy-b: oom_kill 0",
+      "r01-p1-strategy-b: oom_group_kill 0",
+      "r01-p1-strategy-b: sock_throttled 0",
+      "r02-p0-strategy-b: low 0",
+      "r02-p0-strategy-b: high 0",
+      "r02-p0-strategy-b: max 0",
+      "r02-p0-strategy-b: oom 0",
+      "r02-p0-strategy-b: oom_kill 0",
+      "r02-p0-strategy-b: oom_group_kill 0",
+      "r02-p0-strategy-b: sock_throttled 0",
+      "r02-p1-reach-back: low 0",
+      "r02-p1-reach-back: high 0",
+      "r02-p1-reach-back: max 0",
+      "r02-p1-reach-back: oom 0",
+      "r02-p1-reach-back: oom_kill 0",
+      "r02-p1-reach-back: oom_group_kill 0",
+      "r02-p1-reach-back: sock_throttled 0",
+      "r03-p0-reach-back: low 0",
+      "r03-p0-reach-back: high 0",
+      "r03-p0-reach-back: max 0",
+      "r03-p0-reach-back: oom 0",
+      "r03-p0-reach-back: oom_kill 0",
+      "r03-p0-reach-back: oom_group_kill 0",
+      "r03-p0-reach-back: sock_throttled 0",
+      "r03-p1-strategy-b: low 0",
+      "r03-p1-strategy-b: high 0",
+      "r03-p1-strategy-b: max 0",
+      "r03-p1-strategy-b: oom 0",
+      "r03-p1-strategy-b: oom_kill 0",
+      "r03-p1-strategy-b: oom_group_kill 0",
+      "r03-p1-strategy-b: sock_throttled 0",
+      "r04-p0-strategy-b: low 0",
+      "r04-p0-strategy-b: high 0",
+      "r04-p0-strategy-b: max 0",
+      "r04-p0-strategy-b: oom 0",
+      "r04-p0-strategy-b: oom_kill 0",
+      "r04-p0-strategy-b: oom_group_kill 0",
+      "r04-p0-strategy-b: sock_throttled 0",
+      "r04-p1-reach-back: low 0",
+      "r04-p1-reach-back: high 0",
+      "r04-p1-reach-back: max 0",
+      "r04-p1-reach-back: oom 0",
+      "r04-p1-reach-back: oom_kill 0",
+      "r04-p1-reach-back: oom_group_kill 0",
+      "r04-p1-reach-back: sock_throttled 0",
+      "r05-p0-reach-back: low 0",
+      "r05-p0-reach-back: high 0",
+      "r05-p0-reach-back: max 0",
+      "r05-p0-reach-back: oom 0",
+      "r05-p0-reach-back: oom_kill 0",
+      "r05-p0-reach-back: oom_group_kill 0",
+      "r05-p0-reach-back: sock_throttled 0",
+      "r05-p1-strategy-b: low 0",
+      "r05-p1-strategy-b: high 0",
+      "r05-p1-strategy-b: max 0",
+      "r05-p1-strategy-b: oom 0",
+      "r05-p1-strategy-b: oom_kill 0",
+      "r05-p1-strategy-b: oom_group_kill 0",
+      "r05-p1-strategy-b: sock_throttled 0"
+    ],
+    "process_tree_peak_memory_bytes": 12439552,
+    "timed_out": false
+  },
+  "profile": "linux-cgroup-v2-per-attempt",
+  "requested_limits": {
+    "maximum_concurrent_jobs": 1,
+    "process_tree_memory_bytes": 8589934592,
+    "process_tree_wall_time_seconds": 300
+  },
+  "schema": "csl.mpc01-resource-profile/1",
+  "separate_limiter_profiles": [
+    {
+      "attempt_id": "separate-warmup-reach-back",
+      "command": [
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--measure-attempt",
+        "ts01_exact_integrator",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "csl.synthesis.reach-back",
+        "0",
+        "0",
+        "1",
+        "${CAPTURE_ROOT}/limiter-profile/separate-warmup-reach-back/events.jsonl"
+      ],
+      "elapsed_wall_time_ns": 20124260,
+      "enforced_limits": {
+        "memory_max_bytes": 8589934592,
+        "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
+        "memory_swap_max_bytes": 0,
+        "process_tree_memory": true,
+        "process_tree_wall_time": true,
+        "wall_mechanism": "Python watchdog with process-group SIGTERM/SIGKILL"
+      },
+      "host": {
+        "load_average_after": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "load_average_before": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "logical_cpu_count": 8,
+        "machine": "x86_64",
+        "release": "7.2.8-9-omarchy",
+        "system": "Linux"
+      },
+      "observed": {
+        "exit_code": 0,
+        "memory_current_bytes": 11071488,
+        "memory_events": [
+          "low 0",
+          "high 0",
+          "max 0",
+          "oom 0",
+          "oom_kill 0",
+          "oom_group_kill 0",
+          "sock_throttled 0"
+        ],
+        "process_tree_peak_memory_bytes": 12173312,
+        "timed_out": false,
+        "trial_status": "passed",
+        "trial_termination": "completed"
+      },
+      "requested_limits": {
+        "maximum_concurrent_jobs": 1,
+        "process_tree_memory_bytes": 8589934592,
+        "process_tree_wall_time_seconds": 300
+      },
+      "scenario_sha256": "bbeb83947627a197d71dd380dbaa5cfae12e22cd6d79b12e66ef08275b2c390a",
+      "schema": "csl.mpc01-attempt-resource-receipt/1",
+      "status": "completed",
+      "timeout_scope": "one strategy attempt and its process tree",
+      "trial": {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/initial",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward0/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward1/project/output",
+              "module": "csl.synthesis.reach-back",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/stage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30142:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "request": "strategy-a/feasible-preimage",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "module": "csl.synthesis.terminal-minimizers",
+              "output": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "syn02-terminal:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output",
+              "version": "1"
+            },
+            {
+              "input": "nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "module": "csl.synthesis.control-recovery",
+              "output": "recovery/joint-history/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30161:nominal-forward/86:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d3018:strategy-a/forward2/project/output:terminal-candidate",
+              "request": "strategy-a/terminal-preimage",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.reach-back",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 0,
+        "outcome": "optimal",
+        "repetition": 0,
+        "schema": "csl.synthesis.paired-family-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.reach-back",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.reach-back",
+            "port": "strategy",
+            "requested": "csl.synthesis.reach-back",
+            "version": "1"
+          },
+          {
+            "actual": "csl.geometry.polyhedral-projection",
+            "port": "geometry",
+            "requested": "csl.geometry.polyhedral-projection",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.geometry.affine-sum",
+            "port": "geometry",
+            "requested": "csl.geometry.affine-sum",
+            "version": "1.0.0"
+          },
+          {
+            "actual": "csl.conversion.qhull",
+            "port": "conversion",
+            "requested": "csl.conversion.qhull",
+            "version": "1.0.0+qhull.8.0.2"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 14181569
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 13482663
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 29054
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 103855
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 22489
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 1885
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 507470
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 16692
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": true,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "attempt_id": "separate-warmup-strategy-b",
+      "command": [
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--measure-attempt",
+        "ts01_exact_integrator",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "csl.synthesis.strategy-b",
+        "0",
+        "1",
+        "1",
+        "${CAPTURE_ROOT}/limiter-profile/separate-warmup-strategy-b/events.jsonl"
+      ],
+      "elapsed_wall_time_ns": 10985612,
+      "enforced_limits": {
+        "memory_max_bytes": 8589934592,
+        "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
+        "memory_swap_max_bytes": 0,
+        "process_tree_memory": true,
+        "process_tree_wall_time": true,
+        "wall_mechanism": "Python watchdog with process-group SIGTERM/SIGKILL"
+      },
+      "host": {
+        "load_average_after": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "load_average_before": [
+          0.26025390625,
+          0.27783203125,
+          0.33740234375
+        ],
+        "logical_cpu_count": 8,
+        "machine": "x86_64",
+        "release": "7.2.8-9-omarchy",
+        "system": "Linux"
+      },
+      "observed": {
+        "exit_code": 0,
+        "memory_current_bytes": 11149312,
+        "memory_events": [
+          "low 0",
+          "high 0",
+          "max 0",
+          "oom 0",
+          "oom_kill 0",
+          "oom_group_kill 0",
+          "sock_throttled 0"
+        ],
+        "process_tree_peak_memory_bytes": 12169216,
+        "timed_out": false,
+        "trial_status": "passed",
+        "trial_termination": "completed"
+      },
+      "requested_limits": {
+        "maximum_concurrent_jobs": 1,
+        "process_tree_memory_bytes": 8589934592,
+        "process_tree_wall_time_seconds": 300
+      },
+      "scenario_sha256": "bbeb83947627a197d71dd380dbaa5cfae12e22cd6d79b12e66ef08275b2c390a",
+      "schema": "csl.mpc01-attempt-resource-receipt/1",
+      "status": "completed",
+      "timeout_scope": "one strategy attempt and its process tree",
+      "trial": {
+        "assurance": "numerical",
+        "complete_family_verified": true,
+        "distinct_witnesses": 2,
+        "event": "trial",
+        "family_identity": {
+          "coordinates": {
+            "control": 1,
+            "external": 0,
+            "horizon": 2,
+            "state": 1
+          },
+          "lineage": [
+            {
+              "input": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-build:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            },
+            {
+              "input": "syn04-feasible:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "module": "csl.synthesis.strategy-b",
+              "output": "syn04-optimal-level:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "request": "syn04-extract:csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+              "version": "1"
+            }
+          ],
+          "problem": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+          "request": {
+            "absolute_tolerance": 1e-08,
+            "assurance": "numerical",
+            "materialization_limit": null,
+            "objective": "csl.problem.v1.sha256:56871be36e6d8b0db2dde142a02722e82684a101171bd2975da3f4f708cb1d30",
+            "profile": "ts01_exact_integrator",
+            "relative_tolerance": 1e-08,
+            "representation": "csl.polyhedron.h",
+            "target": "exact_optimal_relation"
+          },
+          "strategy": "csl.synthesis.strategy-b",
+          "strategy_version": "1"
+        },
+        "membership_provenance": [
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          }
+        ],
+        "order_position": 1,
+        "outcome": "optimal",
+        "repetition": 0,
+        "schema": "csl.synthesis.paired-family-event/1",
+        "selector_provenance": [
+          {
+            "actual": "csl.selector.ts01-directions",
+            "port": "selector",
+            "requested": "csl.selector.ts01-directions",
+            "version": "1"
+          }
+        ],
+        "status": "passed",
+        "strategy": "csl.synthesis.strategy-b",
+        "strategy_provenance": [
+          {
+            "actual": "csl.synthesis.strategy-b",
+            "port": "strategy",
+            "requested": "csl.synthesis.strategy-b",
+            "version": "1"
+          },
+          {
+            "actual": "csl.lp.highs",
+            "port": "lp",
+            "requested": "csl.lp.highs",
+            "version": "1.1.0+highs.1.11.0"
+          },
+          {
+            "actual": "csl.convex.highs",
+            "port": "convex",
+            "requested": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0"
+          }
+        ],
+        "strategy_version": "1",
+        "termination": "completed",
+        "timings_ns": {
+          "end_to_end_strategy": {
+            "available": true,
+            "unit": "ns",
+            "value": 4301411
+          },
+          "family_construction": {
+            "available": true,
+            "unit": "ns",
+            "value": 2916590
+          },
+          "original_verification": {
+            "available": true,
+            "unit": "ns",
+            "value": 29124
+          },
+          "preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 81575
+          },
+          "selector_preparation": {
+            "available": true,
+            "unit": "ns",
+            "value": 40508
+          },
+          "selector_workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 2304
+          },
+          "witness_query": {
+            "available": true,
+            "unit": "ns",
+            "value": 1206446
+          },
+          "workspace_creation": {
+            "available": true,
+            "unit": "ns",
+            "value": 5168
+          }
+        },
+        "verification_summary": {
+          "completeness": "unsupported",
+          "maximum_absolute_residual": 0,
+          "optimality": "unsupported",
+          "residual_count": 16
+        },
+        "warmup": true,
+        "witnesses": [
+          {
+            "controls": [
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                0
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          },
+          {
+            "controls": [
+              [
+                1
+              ],
+              [
+                0
+              ]
+            ],
+            "maximum_absolute_residual": 0,
+            "original_objective": 0,
+            "recomputed_objective": 0,
+            "residual_count": 8,
+            "states": [
+              [
+                0
+              ],
+              [
+                1
+              ],
+              [
+                1
+              ]
+            ],
+            "verification": {
+              "bindings": "numerical_pass",
+              "completeness": "unsupported",
+              "feasibility": "numerical_pass",
+              "objective": "numerical_pass",
+              "optimality": "unsupported",
+              "verifier": "csl.trajectory.original",
+              "version": "1"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "status": "completed",
+  "supervisor_processes": [
+    {
+      "attempt": "r00-p0-reach-back",
+      "command": [
+        "systemd-run",
+        "--user",
+        "--scope",
+        "--quiet",
+        "-p",
+        "MemoryMax=8589934592",
+        "-p",
+        "MemorySwapMax=0",
+        "-p",
+        "CPUQuota=100%",
+        "-p",
+        "AllowedCPUs=0",
+        "/usr/bin/python3",
+        "${SOURCE_ROOT}/scripts/reports/mpc01/capture_strategy_ab_attempt.py",
+        "--executable",
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--scenario",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "--profile",
+        "ts01_exact_integrator",
+        "--strategy",
+        "csl.synthesis.reach-back",
+        "--repetition",
+        "0",
+        "--order-position",
+        "0",
+        "--output-dir",
+        "${CAPTURE_ROOT}/attempts/r00-p0-reach-back",
+        "--memory-bytes",
+        "8589934592",
+        "--timeout-seconds",
+        "300",
+        "--warmup"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "attempt": "r00-p1-strategy-b",
+      "command": [
+        "systemd-run",
+        "--user",
+        "--scope",
+        "--quiet",
+        "-p",
+        "MemoryMax=8589934592",
+        "-p",
+        "MemorySwapMax=0",
+        "-p",
+        "CPUQuota=100%",
+        "-p",
+        "AllowedCPUs=0",
+        "/usr/bin/python3",
+        "${SOURCE_ROOT}/scripts/reports/mpc01/capture_strategy_ab_attempt.py",
+        "--executable",
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--scenario",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "--profile",
+        "ts01_exact_integrator",
+        "--strategy",
+        "csl.synthesis.strategy-b",
+        "--repetition",
+        "0",
+        "--order-position",
+        "1",
+        "--output-dir",
+        "${CAPTURE_ROOT}/attempts/r00-p1-strategy-b",
+        "--memory-bytes",
+        "8589934592",
+        "--timeout-seconds",
+        "300",
+        "--warmup"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "attempt": "r01-p0-reach-back",
+      "command": [
+        "systemd-run",
+        "--user",
+        "--scope",
+        "--quiet",
+        "-p",
+        "MemoryMax=8589934592",
+        "-p",
+        "MemorySwapMax=0",
+        "-p",
+        "CPUQuota=100%",
+        "-p",
+        "AllowedCPUs=0",
+        "/usr/bin/python3",
+        "${SOURCE_ROOT}/scripts/reports/mpc01/capture_strategy_ab_attempt.py",
+        "--executable",
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--scenario",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "--profile",
+        "ts01_exact_integrator",
+        "--strategy",
+        "csl.synthesis.reach-back",
+        "--repetition",
+        "1",
+        "--order-position",
+        "0",
+        "--output-dir",
+        "${CAPTURE_ROOT}/attempts/r01-p0-reach-back",
+        "--memory-bytes",
+        "8589934592",
+        "--timeout-seconds",
+        "300"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "attempt": "r01-p1-strategy-b",
+      "command": [
+        "systemd-run",
+        "--user",
+        "--scope",
+        "--quiet",
+        "-p",
+        "MemoryMax=8589934592",
+        "-p",
+        "MemorySwapMax=0",
+        "-p",
+        "CPUQuota=100%",
+        "-p",
+        "AllowedCPUs=0",
+        "/usr/bin/python3",
+        "${SOURCE_ROOT}/scripts/reports/mpc01/capture_strategy_ab_attempt.py",
+        "--executable",
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--scenario",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "--profile",
+        "ts01_exact_integrator",
+        "--strategy",
+        "csl.synthesis.strategy-b",
+        "--repetition",
+        "1",
+        "--order-position",
+        "1",
+        "--output-dir",
+        "${CAPTURE_ROOT}/attempts/r01-p1-strategy-b",
+        "--memory-bytes",
+        "8589934592",
+        "--timeout-seconds",
+        "300"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "attempt": "r02-p0-strategy-b",
+      "command": [
+        "systemd-run",
+        "--user",
+        "--scope",
+        "--quiet",
+        "-p",
+        "MemoryMax=8589934592",
+        "-p",
+        "MemorySwapMax=0",
+        "-p",
+        "CPUQuota=100%",
+        "-p",
+        "AllowedCPUs=0",
+        "/usr/bin/python3",
+        "${SOURCE_ROOT}/scripts/reports/mpc01/capture_strategy_ab_attempt.py",
+        "--executable",
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--scenario",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "--profile",
+        "ts01_exact_integrator",
+        "--strategy",
+        "csl.synthesis.strategy-b",
+        "--repetition",
+        "2",
+        "--order-position",
+        "0",
+        "--output-dir",
+        "${CAPTURE_ROOT}/attempts/r02-p0-strategy-b",
+        "--memory-bytes",
+        "8589934592",
+        "--timeout-seconds",
+        "300"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "attempt": "r02-p1-reach-back",
+      "command": [
+        "systemd-run",
+        "--user",
+        "--scope",
+        "--quiet",
+        "-p",
+        "MemoryMax=8589934592",
+        "-p",
+        "MemorySwapMax=0",
+        "-p",
+        "CPUQuota=100%",
+        "-p",
+        "AllowedCPUs=0",
+        "/usr/bin/python3",
+        "${SOURCE_ROOT}/scripts/reports/mpc01/capture_strategy_ab_attempt.py",
+        "--executable",
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--scenario",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "--profile",
+        "ts01_exact_integrator",
+        "--strategy",
+        "csl.synthesis.reach-back",
+        "--repetition",
+        "2",
+        "--order-position",
+        "1",
+        "--output-dir",
+        "${CAPTURE_ROOT}/attempts/r02-p1-reach-back",
+        "--memory-bytes",
+        "8589934592",
+        "--timeout-seconds",
+        "300"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "attempt": "r03-p0-reach-back",
+      "command": [
+        "systemd-run",
+        "--user",
+        "--scope",
+        "--quiet",
+        "-p",
+        "MemoryMax=8589934592",
+        "-p",
+        "MemorySwapMax=0",
+        "-p",
+        "CPUQuota=100%",
+        "-p",
+        "AllowedCPUs=0",
+        "/usr/bin/python3",
+        "${SOURCE_ROOT}/scripts/reports/mpc01/capture_strategy_ab_attempt.py",
+        "--executable",
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--scenario",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "--profile",
+        "ts01_exact_integrator",
+        "--strategy",
+        "csl.synthesis.reach-back",
+        "--repetition",
+        "3",
+        "--order-position",
+        "0",
+        "--output-dir",
+        "${CAPTURE_ROOT}/attempts/r03-p0-reach-back",
+        "--memory-bytes",
+        "8589934592",
+        "--timeout-seconds",
+        "300"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "attempt": "r03-p1-strategy-b",
+      "command": [
+        "systemd-run",
+        "--user",
+        "--scope",
+        "--quiet",
+        "-p",
+        "MemoryMax=8589934592",
+        "-p",
+        "MemorySwapMax=0",
+        "-p",
+        "CPUQuota=100%",
+        "-p",
+        "AllowedCPUs=0",
+        "/usr/bin/python3",
+        "${SOURCE_ROOT}/scripts/reports/mpc01/capture_strategy_ab_attempt.py",
+        "--executable",
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--scenario",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "--profile",
+        "ts01_exact_integrator",
+        "--strategy",
+        "csl.synthesis.strategy-b",
+        "--repetition",
+        "3",
+        "--order-position",
+        "1",
+        "--output-dir",
+        "${CAPTURE_ROOT}/attempts/r03-p1-strategy-b",
+        "--memory-bytes",
+        "8589934592",
+        "--timeout-seconds",
+        "300"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "attempt": "r04-p0-strategy-b",
+      "command": [
+        "systemd-run",
+        "--user",
+        "--scope",
+        "--quiet",
+        "-p",
+        "MemoryMax=8589934592",
+        "-p",
+        "MemorySwapMax=0",
+        "-p",
+        "CPUQuota=100%",
+        "-p",
+        "AllowedCPUs=0",
+        "/usr/bin/python3",
+        "${SOURCE_ROOT}/scripts/reports/mpc01/capture_strategy_ab_attempt.py",
+        "--executable",
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--scenario",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "--profile",
+        "ts01_exact_integrator",
+        "--strategy",
+        "csl.synthesis.strategy-b",
+        "--repetition",
+        "4",
+        "--order-position",
+        "0",
+        "--output-dir",
+        "${CAPTURE_ROOT}/attempts/r04-p0-strategy-b",
+        "--memory-bytes",
+        "8589934592",
+        "--timeout-seconds",
+        "300"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "attempt": "r04-p1-reach-back",
+      "command": [
+        "systemd-run",
+        "--user",
+        "--scope",
+        "--quiet",
+        "-p",
+        "MemoryMax=8589934592",
+        "-p",
+        "MemorySwapMax=0",
+        "-p",
+        "CPUQuota=100%",
+        "-p",
+        "AllowedCPUs=0",
+        "/usr/bin/python3",
+        "${SOURCE_ROOT}/scripts/reports/mpc01/capture_strategy_ab_attempt.py",
+        "--executable",
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--scenario",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "--profile",
+        "ts01_exact_integrator",
+        "--strategy",
+        "csl.synthesis.reach-back",
+        "--repetition",
+        "4",
+        "--order-position",
+        "1",
+        "--output-dir",
+        "${CAPTURE_ROOT}/attempts/r04-p1-reach-back",
+        "--memory-bytes",
+        "8589934592",
+        "--timeout-seconds",
+        "300"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "attempt": "r05-p0-reach-back",
+      "command": [
+        "systemd-run",
+        "--user",
+        "--scope",
+        "--quiet",
+        "-p",
+        "MemoryMax=8589934592",
+        "-p",
+        "MemorySwapMax=0",
+        "-p",
+        "CPUQuota=100%",
+        "-p",
+        "AllowedCPUs=0",
+        "/usr/bin/python3",
+        "${SOURCE_ROOT}/scripts/reports/mpc01/capture_strategy_ab_attempt.py",
+        "--executable",
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--scenario",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "--profile",
+        "ts01_exact_integrator",
+        "--strategy",
+        "csl.synthesis.reach-back",
+        "--repetition",
+        "5",
+        "--order-position",
+        "0",
+        "--output-dir",
+        "${CAPTURE_ROOT}/attempts/r05-p0-reach-back",
+        "--memory-bytes",
+        "8589934592",
+        "--timeout-seconds",
+        "300"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    },
+    {
+      "attempt": "r05-p1-strategy-b",
+      "command": [
+        "systemd-run",
+        "--user",
+        "--scope",
+        "--quiet",
+        "-p",
+        "MemoryMax=8589934592",
+        "-p",
+        "MemorySwapMax=0",
+        "-p",
+        "CPUQuota=100%",
+        "-p",
+        "AllowedCPUs=0",
+        "/usr/bin/python3",
+        "${SOURCE_ROOT}/scripts/reports/mpc01/capture_strategy_ab_attempt.py",
+        "--executable",
+        "${BUILD_ROOT}/examples/registered_synthesis_comparison",
+        "--scenario",
+        "${SOURCE_ROOT}/examples/scenarios/two-stage-integrator.json",
+        "--profile",
+        "ts01_exact_integrator",
+        "--strategy",
+        "csl.synthesis.strategy-b",
+        "--repetition",
+        "5",
+        "--order-position",
+        "1",
+        "--output-dir",
+        "${CAPTURE_ROOT}/attempts/r05-p1-strategy-b",
+        "--memory-bytes",
+        "8589934592",
+        "--timeout-seconds",
+        "300"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    }
+  ],
+  "timeout_scope": "each individual Strategy A or Strategy B attempt is restarted and supervised in its own process tree"
+}

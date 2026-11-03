@@ -98,12 +98,15 @@ def write_report(output: Path, measured: dict[str, list[dict]], environment: dic
     else:
         limits = resource_profile["enforced_limits"]
         observed = resource_profile["observed"]
+        wall_scope = resource_profile.get("timeout_scope", "the full capture invocation")
+        limiter_note = (f" {len(resource_profile.get('separate_limiter_profiles', []))} separate limiter probes are retained in the profile."
+                        if resource_profile.get("separate_limiter_profiles") else "")
         resource_note = (
-            f"The full capture process tree completed under a {limits['memory_max_bytes']} byte cgroup-v2 memory cap "
-            f"with swap disabled and a {resource_profile['requested_limits']['process_tree_wall_time_seconds']} second suite-level wall cap. "
-            "The wall cap covers the whole capture invocation, not each trial separately. "
+            f"The supervised process tree completed under a {limits['memory_max_bytes']} byte cgroup-v2 memory cap "
+            f"with swap disabled and a {resource_profile['requested_limits']['process_tree_wall_time_seconds']} second wall cap. "
+            f"Wall-cap scope: {wall_scope}. "
             f"Observed peak process-tree memory was {observed['process_tree_peak_memory_bytes']} bytes; no OOM or timeout occurred. "
-            "This constrained-host profile is not the comparison-program default per-attempt profile, and timings support no general winner claim."
+            f"This resource profile supports no general performance-winner claim.{limiter_note}"
         )
         resource_link = '<li>Enforced capture resource profile: <a href="resource-profile.json">JSON</a></li>'
     report = f'''<!doctype html>
@@ -113,10 +116,10 @@ def write_report(output: Path, measured: dict[str, list[dict]], environment: dic
 <h1>MPC-01 registered Strategy A/B on T-S01</h1>
 <p>This report renders the saved paired run for the two-stage integrator: <code>x₀=0</code>, <code>xₜ₊₁=xₜ+uₜ</code>, <code>uₜ∈[0,1]</code>, and terminal objective <code>(x₂−1)²</code>. It compares strategy outputs and descriptive functional timings for this single fixture.</p>
 <figure><img src="{html.escape(svg_path.name)}" alt="Control histories on the exact optimal family in the u0-u1 plane"><figcaption>The dashed segment is the exact minimizing relation. Markers are selected control histories saved for each strategy; a ring around a filled marker shows both strategies selected that same history.</figcaption>{legend}</figure>
-<h2>Saved run</h2><p>One warmup pair was excluded; seven measured pairs alternated execution order. All 16 trials completed successfully. Each strategy selected two distinct histories with zero original and recomputed objective; original-data feasibility and objective checks passed numerically. These witness checks do not establish separate optimality or completeness proofs.</p>
+<h2>Saved run</h2><p>{environment['measurement']['warmup_pairs_excluded']} warmup pair(s) were excluded; {environment['measurement']['measured_alternating_pairs']} measured pairs alternated execution order. All {environment['measurement']['event_count_including_header'] - 1} trials completed successfully. Each strategy selected two distinct histories with zero original and recomputed objective; original-data feasibility and objective checks passed numerically. These witness checks do not establish separate optimality or completeness proofs.</p>
 <h2>Descriptive timing</h2><table><thead><tr><th>Strategy</th><th>Median end-to-end (ms)</th><th>Range (ms)</th></tr></thead><tbody>{''.join(timing_rows)}</tbody></table>
 <p>The interval covers strategy preparation through two witness checks. It excludes process startup, shared scenario/provider setup, JSON serialization, build and rendering. {resource_note}</p>
-<h2>Reproducibility</h2><ul><li>Source commit: <code>{source_commit}</code></li><li>Scenario SHA-256: <code>{scenario_hash}</code></li><li>Event and stdout SHA-256: <code>{event_hash}</code> / <code>{stdout_hash}</code></li><li>Environment: <a href="strategy-ab-ts01-environment.json">saved environment metadata</a></li><li>Raw records: <a href="strategy-ab-ts01-events.jsonl">event JSONL</a> · <a href="strategy-ab-ts01-stdout.jsonl">stdout JSONL</a></li>{resource_link}<li>Scenario input: <a href="{scenario_href}">scenario JSON</a></li></ul>
+<h2>Reproducibility</h2><ul><li>Source commit: <code>{source_commit}</code></li><li>Scenario SHA-256: <code>{scenario_hash}</code></li><li>Event and stdout SHA-256: <code>{event_hash}</code> / <code>{stdout_hash}</code></li><li>Environment: <a href="strategy-ab-ts01-environment.json">saved environment metadata</a></li><li>Canonical paired record: <a href="comparison-record.json">JSON</a></li><li>Raw records: <a href="strategy-ab-ts01-events.jsonl">event JSONL</a> · <a href="strategy-ab-ts01-stdout.jsonl">stdout JSONL</a></li>{resource_link}<li>Scenario input: <a href="{scenario_href}">scenario JSON</a></li></ul>
 <p class="note">This is one registered-strategy functional comparison, not a general performance ranking or the full #597 matrix. The separate OSQP/HPIPM solve-phase measurements use different timing boundaries.</p>
 </body></html>'''
     report_path.write_text(report, encoding="utf-8")
@@ -136,17 +139,27 @@ def main() -> None:
     if event_bytes != stdout_bytes:
         raise ValueError("saved event sidecar does not match stdout bytes")
     rows = [json.loads(line) for line in event_bytes.decode("utf-8").splitlines() if line]
-    if len(rows) != 17 or rows[0].get("event") != "header":
-        raise ValueError("expected one header and sixteen trial events")
+    environment = json.loads(args.environment.read_text(encoding="utf-8"))
+    warmup_pairs = int(environment["measurement"]["warmup_pairs_excluded"])
+    measured_pairs = int(environment["measurement"]["measured_alternating_pairs"])
+    if int(environment["measurement"]["event_count_including_header"]) != len(rows):
+        raise ValueError("declared event count differs from the saved event rows")
+    if measured_pairs < 5:
+        raise ValueError("comparison-program timing requires at least five measured pairs")
+    if len(rows) != 1 + 2 * (warmup_pairs + measured_pairs) or rows[0].get("event") != "header":
+        raise ValueError("event count differs from the declared warmup and measured pairs")
     header, trials = rows[0], rows[1:]
-    if header.get("schema") != "csl.synthesis.paired-ts01-event/1":
+    if header.get("schema") not in {
+        "csl.synthesis.paired-ts01-event/1", "csl.synthesis.paired-family-event/1"
+    }:
         raise ValueError("unsupported Strategy A/B event schema")
     if header.get("scenario_sha256") != digest(args.scenario):
         raise ValueError("event header does not bind the supplied T-S01 scenario")
     if header.get("profile") != "ts01_exact_integrator" or header.get("assurance") != "numerical":
         raise ValueError("event request is not the registered T-S01 numerical profile")
-    if len([row for row in trials if row["warmup"]]) != 2 or len([row for row in trials if not row["warmup"]]) != 14:
-        raise ValueError("expected one excluded warmup pair and seven measured pairs")
+    if (len([row for row in trials if row["warmup"]]) != 2 * warmup_pairs or
+            len([row for row in trials if not row["warmup"]]) != 2 * measured_pairs):
+        raise ValueError("trial warmup/measured counts disagree with the capture environment")
 
     measured: dict[str, list[dict]] = defaultdict(list)
     for index, row in enumerate(trials):
@@ -154,6 +167,8 @@ def main() -> None:
         expected_position = index % 2
         if row.get("event") != "trial" or row.get("repetition") != expected_rep or row.get("order_position") != expected_position:
             raise ValueError("trial repetition or order is inconsistent")
+        if bool(row.get("warmup")) != (expected_rep < warmup_pairs):
+            raise ValueError("warmup flag differs from the capture environment")
         if row.get("strategy") not in EXPECTED:
             raise ValueError("unexpected strategy identity")
         if row["status"] != "passed" or row["termination"] != "completed" or row["outcome"] != "optimal":
@@ -171,17 +186,17 @@ def main() -> None:
         if not row["warmup"]:
             measured[row["strategy"]].append(row)
 
-    if set(measured) != set(EXPECTED) or any(len(rows) != 7 for rows in measured.values()):
+    if set(measured) != set(EXPECTED) or any(len(rows) != measured_pairs for rows in measured.values()):
         raise ValueError("measured A/B result counts differ")
     lines = [
-        "# Current-branch Strategy A/B T-S01 paired run",
+        "# Saved per-attempt Strategy A/B T-S01 run",
         "",
         "This functional measurement uses the same exact two-stage integrator equations as `ts01-exact-v1`: `x0=0`, `x[t+1]=x[t]+u[t]`, `u[t] in [0,1]`, and terminal objective `(x2-1)^2`. It is a separate registered-strategy path from the OSQP/HPIPM QP solve-phase measurements; phase timings are not directly comparable.",
         "",
         f"- Source commit: `{json.loads(args.environment.read_text())['source_commit']}`.",
         f"- Scenario SHA-256: `{digest(args.scenario)}`.",
         f"- Event/stdout SHA-256: `{digest(args.events)}`.",
-        "- One excluded warmup pair and seven measured alternating A/B pairs; all 16 trials passed.",
+        f"- {warmup_pairs} excluded warmup pair(s) and {measured_pairs} measured alternating A/B pairs; all {len(trials)} trials passed.",
         "- Every measured result carries the registered T-S01 complete-family profile, two distinct selected witnesses, zero original/recomputed objective, and numerical-pass original-data checks. Witness checks do not claim separate optimality or completeness proofs; the profile-specific family status is retained separately.",
         "",
         "| Strategy | Median end-to-end (ms) | Range (ms) |",
@@ -202,7 +217,7 @@ def main() -> None:
                 observed.get("timed_out") is not False or observed.get("exit_code") != 0 or
                 enforced.get("memory_swap_max_bytes") != 0 or
                 any(line.rsplit(" ", 1)[-1] != "0" for line in observed["memory_events"]
-                    if line.startswith(("max ", "oom ", "oom_kill ", "oom_group_kill ")))):
+                    if line.rsplit(": ", 1)[-1].startswith(("max ", "oom ", "oom_kill ", "oom_group_kill ")))):
             raise ValueError("resource-limited capture did not complete cleanly under its declared caps")
         if json.loads(args.environment.read_text(encoding="utf-8"))["measurement"]["resource_profile_sha256"] != digest(args.resource_profile):
             raise ValueError("environment does not bind the supplied resource profile")
@@ -212,7 +227,7 @@ def main() -> None:
         ("The timing interval covers strategy preparation through two witness checks. It excludes process startup, shared scenario/provider setup, JSON serialization, build and rendering. " +
          ("No separate limiter or per-attempt resource-cap profile was collected, so these tiny-case timings support no general performance winner claim."
           if resource_profile is None else
-          f"The full capture process tree completed under a {resource_profile['enforced_limits']['memory_max_bytes']} byte cgroup-v2 memory cap with swap disabled and a {resource_profile['requested_limits']['process_tree_wall_time_seconds']} second suite-level wall cap. The wall cap covers the whole capture invocation, not each trial separately. Observed peak process-tree memory was {resource_profile['observed']['process_tree_peak_memory_bytes']} bytes; no OOM or timeout occurred. This constrained-host profile is not the comparison-program default per-attempt profile and supports no general performance winner claim.")),
+          f"The supervised process tree ran under a {resource_profile['enforced_limits']['memory_max_bytes']} byte cgroup-v2 memory cap with swap disabled and a {resource_profile['requested_limits']['process_tree_wall_time_seconds']} second watchdog. Wall-cap scope: {resource_profile.get('timeout_scope', 'the full capture invocation')}. Observed peak process-tree memory was {resource_profile['observed']['process_tree_peak_memory_bytes']} bytes; no OOM or timeout occurred. {len(resource_profile.get('separate_limiter_profiles', []))} separate limiter probes are retained. Timings support no general performance-winner claim.")),
         "",
         "Saved-data report: [`strategy-ab-ts01-summary.html`](strategy-ab-ts01-summary.html) with the control-plane figure [`strategy-ab-ts01-control-plane.svg`](strategy-ab-ts01-control-plane.svg).",
         "",
