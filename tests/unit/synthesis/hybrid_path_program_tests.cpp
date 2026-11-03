@@ -1426,7 +1426,7 @@ TEST_CASE("prepared providers expose conservative request-envelope declarations"
         [](const registry::RequestEnvelope& envelope,const registry::Requirements&) {
             if(envelope.operation!="hybrid.linear-optimization" || envelope.maximum_columns>8)
                 return registry::AdmissionDeclaration{registry::AdmissionStatus::unsupported,
-                    {{DiagnosticCode::unsupported,"fixture.envelope","outside declared provider envelope"}},true};
+                    {{DiagnosticCode::unsupported,"fixture.envelope","outside declared provider envelope"}},false};
             return registry::AdmissionDeclaration{registry::AdmissionStatus::supported,{},true};
         }}));
     auto selected=registry::prepare_provider(registry::select_provider(providers,{{"declaring-lp"},{}}));
@@ -1439,6 +1439,24 @@ TEST_CASE("prepared providers expose conservative request-envelope declarations"
     CHECK(rejected.status==registry::AdmissionStatus::unsupported);
     CHECK_FALSE(rejected.diagnostics.empty());
     CHECK_FALSE(rejected.envelope_is_sufficient);
+
+    registry::Registry<registry::LPPort> malformed_providers;
+    REQUIRE_FALSE(malformed_providers.add({{{"malformed-lp"},"1"},
+        [](const LinearProgram&,const registry::Requirements&)->registry::Capability {
+            return registry::Offer{};
+        },
+        [](const LinearProgram&){return std::make_unique<RejectingLP>();}, {},
+        [](const registry::RequestEnvelope&,const registry::Requirements&) {
+            return registry::AdmissionDeclaration{registry::AdmissionStatus::unsupported,
+                {{DiagnosticCode::unsupported,"fixture.malformed","rejected envelope"}},true};
+        }}));
+    auto malformed_selection=registry::prepare_provider(
+        registry::select_provider(malformed_providers,{{"malformed-lp"},{}}));
+    REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::LPPort>>(malformed_selection));
+    const auto normalized=std::get<registry::PreparedProvider<registry::LPPort>>(malformed_selection)
+        .declare_support({"hybrid.linear-optimization",4,9,36,"linear"});
+    CHECK(normalized.status==registry::AdmissionStatus::unsupported);
+    CHECK_FALSE(normalized.envelope_is_sufficient);
 
     registry::Registry<registry::LPPort> conditional_providers;
     REQUIRE_FALSE(conditional_providers.add({{{"conditional-lp"},"1"},
