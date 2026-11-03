@@ -142,6 +142,8 @@ def main() -> None:
     environment = json.loads(args.environment.read_text(encoding="utf-8"))
     warmup_pairs = int(environment["measurement"]["warmup_pairs_excluded"])
     measured_pairs = int(environment["measurement"]["measured_alternating_pairs"])
+    if int(environment["measurement"]["event_count_including_header"]) != len(rows):
+        raise ValueError("declared event count differs from the saved event rows")
     if measured_pairs < 5:
         raise ValueError("comparison-program timing requires at least five measured pairs")
     if len(rows) != 1 + 2 * (warmup_pairs + measured_pairs) or rows[0].get("event") != "header":
