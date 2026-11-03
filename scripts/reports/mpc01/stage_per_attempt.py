@@ -35,7 +35,7 @@ STRATEGY_AB_TS02_FILES = (
     "capture-supervisor.py", "run-capture.py", "binary-dynamic-dependencies.txt",
     "systemd-scope-processes.jsonl", "build-note.json",
     "cmake-compiler-metadata.cmake", "target-flags.make", "target-link.txt",
-    "build-record.py", "render-report.py", "write-build-note.py",
+    "build-record.py", "render-report.py", "write-build-note.py", "sanitize-bundle.py",
 )
 
 

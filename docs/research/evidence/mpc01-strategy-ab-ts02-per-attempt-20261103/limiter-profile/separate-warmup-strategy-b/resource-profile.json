@@ -1,15 +1,15 @@
 {
   "attempt_id": "separate-warmup-strategy-b",
   "command": [
-    "/home/butahlecoq/.local/share/codex/worktrees/issue597-per-attempt-pairs-20261103/build/issue597-attempt/examples/registered_synthesis_comparison",
+    "${BUILD_ROOT}/examples/registered_synthesis_comparison",
     "--measure-attempt",
     "ts02_constant_integrator",
-    "/home/butahlecoq/.local/share/codex/worktrees/issue597-per-attempt-pairs-20261103/docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts02-limited-capture/scenario.json",
+    "${SOURCE_ROOT}/docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts02-limited-capture/scenario.json",
     "csl.synthesis.strategy-b",
     "0",
     "1",
     "1",
-    "/var/tmp/mpc01-strategy-ab-ts02-per-attempt-r3/limiter-profile/separate-warmup-strategy-b/events.jsonl"
+    "${CAPTURE_ROOT}/limiter-profile/separate-warmup-strategy-b/events.jsonl"
   ],
   "elapsed_wall_time_ns": 8538237,
   "enforced_limits": {

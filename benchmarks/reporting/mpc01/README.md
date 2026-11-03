@@ -162,3 +162,13 @@ python3 scripts/reports/mpc01/run_strategy_ab_per_attempt.py \
 ```
 
 The runner writes merged immutable attempt events, capture and codec environments, per-attempt resource receipts, individual stdout/stderr, and exact attempt rows beneath the new output directory. It reads compiler ID/version from the configured CMake compiler metadata, retains the compiler path/banner, and binds the executable to `--binary-source-commit` (default: `HEAD`). The source-tree digest is computed from that Git commit, even when the capture checkout has later documentation or reporting commits. It also writes a build note with the configured CMake metadata, compile/link inputs, object-file digest, and executable digest. Use `build_strategy_ab_records.py` to package the events into a canonical comparison record, then `summarize_strategy_ab_ts02.py` to validate the record and produce the control-plane figure and report. Timing scope remains strategy preparation through two original-problem witness checks; these tiny analytic profiles support no general performance-winner claim.
+
+Before packaging a published bundle, replace local machine paths in saved receipts and build files with stable root placeholders:
+
+```sh
+python3 scripts/reports/mpc01/sanitize_strategy_ab_bundle.py \
+  --bundle /var/tmp/mpc01-strategy-ab-ts02-per-attempt \
+  --source-root "$PWD" \
+  --build-root "$PWD/build/issue597-attempt" \
+  --capture-root /var/tmp/mpc01-strategy-ab-ts02-per-attempt
+```

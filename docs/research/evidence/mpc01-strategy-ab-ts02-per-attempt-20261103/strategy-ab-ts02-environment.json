@@ -2,7 +2,7 @@
   "binary_build_provenance": {
     "build_note": {
       "path": "build-note.json",
-      "sha256": "f890c255e01ec0aa8b6538ae9d3846199c6884b84e88cbc6854174dc7f4c8a3b"
+      "sha256": "a4bb90335a8f3288fb698d554b40c36a36f3b2ac2e25384951e66784d75c06ce"
     },
     "executable_sha256": "dc57e3c16c5b1c356cd86762105f86a913a61c7a60cc6855c86bad083ac86e5e",
     "schema": "csl.binary-build-provenance/2",
@@ -13,14 +13,14 @@
     "compiler": "GNU 16.2.1",
     "compiler_banner": "c++ (GCC) 16.2.1 20260810",
     "compiler_id": "GNU",
-    "compiler_metadata_file": "/home/butahlecoq/.local/share/codex/worktrees/issue597-per-attempt-pairs-20261103/build/issue597-attempt/CMakeFiles/3.31.6/CMakeCXXCompiler.cmake",
+    "compiler_metadata_file": "${BUILD_ROOT}/CMakeFiles/3.31.6/CMakeCXXCompiler.cmake",
     "compiler_path": "/usr/bin/c++",
     "compiler_version": "16.2.1",
     "flags": "-O3 -DNDEBUG",
     "generator": "Unix Makefiles",
     "type": "Release"
   },
-  "executable": "/home/butahlecoq/.local/share/codex/worktrees/issue597-per-attempt-pairs-20261103/build/issue597-attempt/examples/registered_synthesis_comparison",
+  "executable": "${BUILD_ROOT}/examples/registered_synthesis_comparison",
   "executable_sha256": "dc57e3c16c5b1c356cd86762105f86a913a61c7a60cc6855c86bad083ac86e5e",
   "execution_worktree_clean_before_run": true,
   "execution_worktree_commit": "62480a00ffb28018149a8e524b0a45c11d7ad181",
@@ -53,7 +53,7 @@
     "process_tree_memory_swap_max_bytes": 0,
     "process_tree_wall_time_cap_seconds": 300,
     "resource_profile": "resource-profile.json",
-    "resource_profile_sha256": "9be713d6edddba1d2eb3dc964748dbb9dcea93e1d5cf2cb64223cdddbfdec286",
+    "resource_profile_sha256": "0d4332bd679e2f61e9265aae5654009ea0401e2428a8c5bc503bbde849948b54",
     "separate_limiter_profile": "separate-limiter-profiles in resource-profile.json",
     "timeout_scope": "one strategy attempt per scope",
     "warmup_pairs_excluded": 1

@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -isystem /home/butahlecoq/.local/share/codex/worktrees/issue597-per-attempt-pairs-20261103/build/issue597-attempt/install/include
+CXX_INCLUDES = -isystem ${BUILD_ROOT}/install/include
 
 CXX_FLAGS = -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror
 

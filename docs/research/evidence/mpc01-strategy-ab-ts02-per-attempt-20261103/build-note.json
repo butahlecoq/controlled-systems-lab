@@ -13,14 +13,14 @@
     "release_flags": "-O3 -DNDEBUG",
     "retained_cmake_files": {
       "cmake-compiler-metadata.cmake": "fc54f5e431c04fbe157752a68b26b3f49e29f913e0188f9334e2c610971c68b3",
-      "target-flags.make": "f49cd785daf69dfc781ae04b5999fc141fb03ec4d284e8299363eae2bc7677af",
-      "target-link.txt": "f5813df073ece72d75c07d02990590af9418c167789efe8be0e214f28f54c0b5"
+      "target-flags.make": "69a83b7597ea7ef30ff54983f2afc03e054cc860abe0279c321d3f4d269a5c53",
+      "target-link.txt": "528227c4e2926b0b31770a3d204f0f0bc2699ca8e015c8d55801a69d525fc877"
     },
     "type": "Release"
   },
-  "configured_source_checkout": "/home/butahlecoq/.local/share/codex/worktrees/issue597-per-attempt-pairs-20261103",
+  "configured_source_checkout": "${SOURCE_ROOT}",
   "executable": {
-    "path": "/home/butahlecoq/.local/share/codex/worktrees/issue597-per-attempt-pairs-20261103/build/issue597-attempt/examples/registered_synthesis_comparison",
+    "path": "${BUILD_ROOT}/examples/registered_synthesis_comparison",
     "sha256": "dc57e3c16c5b1c356cd86762105f86a913a61c7a60cc6855c86bad083ac86e5e"
   },
   "interpretation": "This note records the configured source revision, generated CMake compile/link metadata, object-file digest, and final executable digest from the retained build tree. It is build provenance evidence, not a signed attestation.",
