@@ -157,7 +157,8 @@ python3 scripts/reports/mpc01/run_strategy_ab_per_attempt.py \
   --binary build/issue597-attempt/examples/registered_synthesis_comparison \
   --scenario docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts02-limited-capture/scenario.json \
   --profile ts02_constant_integrator \
+  --binary-source-commit af4aa5cec4c8a9673460da63475698c2bd76a92a \
   --output-dir /var/tmp/mpc01-strategy-ab-ts02-per-attempt
 ```
 
-The runner writes merged immutable attempt events, capture and codec environments, per-attempt resource receipts, individual stdout/stderr, and exact attempt rows beneath the new output directory. Use `build_strategy_ab_records.py` to package the events into a canonical comparison record, then `summarize_strategy_ab_ts02.py` to validate the record and produce the control-plane figure and report. Timing scope remains strategy preparation through two original-problem witness checks; these tiny analytic profiles support no general performance-winner claim.
+The runner writes merged immutable attempt events, capture and codec environments, per-attempt resource receipts, individual stdout/stderr, and exact attempt rows beneath the new output directory. It reads compiler ID/version from the configured CMake compiler metadata, retains the compiler path/banner, and binds the executable to `--binary-source-commit` (default: `HEAD`). The source-tree digest is computed from that Git commit, even when the capture checkout has later documentation or reporting commits. Use `build_strategy_ab_records.py` to package the events into a canonical comparison record, then `summarize_strategy_ab_ts02.py` to validate the record and produce the control-plane figure and report. Timing scope remains strategy preparation through two original-problem witness checks; these tiny analytic profiles support no general performance-winner claim.
