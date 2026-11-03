@@ -58,17 +58,17 @@ std::pair<HybridSystem, HybridRequest> fixture() {
                                  Matrix{1, 0, {}}, Vector{0}};
   const LinearStage second{Matrix{1, 1, {1}}, Matrix{1, 1, {0}},
                                   Matrix{1, 0, {}}, Vector{0}};
-  HybridMode source{{"source"}, 1, 1, {"x"}, {"u"}};
+  HybridMode source{{"source"}, 1, 1, {"x"}, {"u"}, LinearStage{}, {}, {}};
   source.flow = std::vector<LinearStage>{first, second};
   source.control_sets = {interval("control-u0", 0, 1), Singleton{{0}}};
   source.invariants = {UniversalSet{1}, UniversalSet{1}, UniversalSet{1}};
 
-  HybridMode middle{{"middle"}, 1, 1, {"x"}, {"u"}};
+  HybridMode middle{{"middle"}, 1, 1, {"x"}, {"u"}, LinearStage{}, {}, {}};
   middle.flow = std::vector<LinearStage>{first, second};
   middle.control_sets = {Singleton{{0}}, interval("control-u1", 0, 1)};
   middle.invariants = {UniversalSet{1}, UniversalSet{1}, UniversalSet{1}};
 
-  HybridMode terminal{{"terminal"}, 1, 1, {"x"}, {"u"}};
+  HybridMode terminal{{"terminal"}, 1, 1, {"x"}, {"u"}, LinearStage{}, {}, {}};
   terminal.flow = std::vector<LinearStage>{first, second};
   terminal.control_sets = {Singleton{{0}}, Singleton{{0}}};
   terminal.invariants = {UniversalSet{1}, UniversalSet{1}, UniversalSet{1}};
