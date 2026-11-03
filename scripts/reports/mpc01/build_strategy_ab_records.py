@@ -266,7 +266,9 @@ def build_record(events_path: Path, scenario_path: Path, environment_path: Path,
                 "result": {"reported_status": reported_status, "raw_output": result,
                            "independent_check_json": canonical(row["verification_summary"]),
                            "measurement_phase": "warmup" if row["warmup"] else "measured",
-                           "elapsed_ns": row["timings_ns"]["end_to_end_strategy"]["value"],
+                           "elapsed_ns": (row["timings_ns"]["end_to_end_strategy"].get("value")
+                                          if row["timings_ns"]["end_to_end_strategy"].get("available")
+                                          else None),
                            "captured_sequence": row["order_position"]},
                 "status": reported_status,
                 "recorded_state": "unverified_recorded_data",
@@ -279,7 +281,9 @@ def build_record(events_path: Path, scenario_path: Path, environment_path: Path,
                 "repetition": repetition,
                 "warmup": bool(row["warmup"]),
                 "status": "passed" if reported_status == "completed" else reported_status,
-                "duration_ns": row["timings_ns"]["end_to_end_strategy"]["value"],
+                "duration_ns": (row["timings_ns"]["end_to_end_strategy"].get("value")
+                                if row["timings_ns"]["end_to_end_strategy"].get("available")
+                                else None),
                 "order_position": row["order_position"],
             }
             output_attempts.append({
