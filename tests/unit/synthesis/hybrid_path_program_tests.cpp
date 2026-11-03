@@ -1524,6 +1524,8 @@ TEST_CASE("hybrid portfolio rejects unknown provider envelopes before adapter pa
         CHECK(attempt.declaration.status==registry::AdmissionStatus::unknown);
         CHECK(attempt.provider.actual->id.value=="declared-lp");
         CHECK(attempt.envelope.operation=="hybrid.linear-optimization");
+        REQUIRE(attempt.envelope.minimum_nonzero_matrix_coefficient_magnitude.has_value());
+        CHECK(*attempt.envelope.minimum_nonzero_matrix_coefficient_magnitude==doctest::Approx(0.5));
     }
 
     auto one_call=std::make_shared<int>(0);

@@ -435,6 +435,30 @@ HighsLPRegistrationResult make_highs_registration(HighsLPOptions options) {
             if (auto d = admission(p); !d.empty()) return d;
             return registry::Offer{{{"csl.program-result.v1"},Assurance::numerical,{},{},registry::Completeness::unestablished}};
         },
-        [backend=std::move(backend)](const LinearProgram&) { return backend->make_workspace(); }, {}};
+        [backend=std::move(backend)](const LinearProgram&) { return backend->make_workspace(); }, {},
+        [](const registry::RequestEnvelope& envelope,const registry::Requirements&) {
+            if(envelope.operation!="hybrid.linear-optimization")
+                return registry::AdmissionDeclaration{registry::AdmissionStatus::unknown,{},false};
+            if(envelope.objective!="linear")
+                return registry::AdmissionDeclaration{registry::AdmissionStatus::unsupported,
+                    diagnostic(DiagnosticCode::unsupported,"highs.admission.objective",
+                        "HiGHS LP supports linear hybrid objectives only"),false};
+            if(!envelope.minimum_nonzero_matrix_coefficient_magnitude)
+                return registry::AdmissionDeclaration{registry::AdmissionStatus::conditional,
+                    diagnostic(DiagnosticCode::unsupported,"highs.admission.coefficient_scale",
+                        "Envelope does not bound matrix coefficients against HiGHS' 1e-12 removal threshold"),false};
+            if(!std::isfinite(*envelope.minimum_nonzero_matrix_coefficient_magnitude) ||
+               *envelope.minimum_nonzero_matrix_coefficient_magnitude<=1e-12)
+                return registry::AdmissionDeclaration{registry::AdmissionStatus::unsupported,
+                    diagnostic(DiagnosticCode::unsupported,"highs.admission.coefficient_scale",
+                        "Envelope permits nonzero matrix coefficients at or below HiGHS' 1e-12 removal threshold"),false};
+            const auto maximum=static_cast<std::size_t>(kHighsIInf);
+            if(envelope.maximum_rows>maximum || envelope.maximum_columns>maximum-envelope.maximum_rows ||
+               envelope.maximum_elements>maximum)
+                return registry::AdmissionDeclaration{registry::AdmissionStatus::unsupported,
+                    diagnostic(DiagnosticCode::unsupported,"highs.admission.dimensions",
+                        "Hybrid LP envelope exceeds HiGHS native dimension or nonzero limits"),false};
+            return registry::AdmissionDeclaration{registry::AdmissionStatus::supported,{},true};
+        }};
 }
 } // namespace csl::adapters::lp

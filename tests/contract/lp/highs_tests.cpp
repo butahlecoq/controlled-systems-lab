@@ -5,6 +5,7 @@
 #include "highs_warm_start_test_hook.hpp"
 #include <csl/optimization/lp_backend.hpp>
 #include <csl/optimization/linear_infeasibility_certificate.hpp>
+#include <csl/registry/provider.hpp>
 #include "../../../src/adapters/certificate_verification.hpp"
 #include <barrier>
 #include <future>
@@ -66,6 +67,32 @@ void compare_optimal(const ProgramResult& cold,const ProgramResult& warm,
     const auto warm_objective=accepted(evaluate_primal(program,*warm.primal,{1e-8,1e-8},{{"test.oracle"},"1"})).objective;
     CHECK(cold_objective==doctest::Approx(warm_objective));
 }
+}
+
+TEST_CASE("HiGHS LP declares supported hybrid linear envelopes within native limits") {
+    Registry<LPPort> providers;
+    REQUIRE_FALSE(providers.add(accepted(make_highs_registration())));
+    auto prepared=prepare_provider(select_provider(providers,{{"csl.lp.highs"},{}}));
+    REQUIRE(std::holds_alternative<PreparedProvider<LPPort>>(prepared));
+    const auto& provider=std::get<PreparedProvider<LPPort>>(prepared);
+    const auto incomplete=provider.declare_support(
+        {"hybrid.linear-optimization",2,3,6,"linear"});
+    CHECK(incomplete.status==AdmissionStatus::conditional);
+    CHECK_FALSE(incomplete.envelope_is_sufficient);
+    const auto supported=provider.declare_support(
+        {"hybrid.linear-optimization",2,3,6,"linear",1.1e-12});
+    CHECK(supported.status==AdmissionStatus::supported);
+    CHECK(supported.envelope_is_sufficient);
+    const auto tiny=provider.declare_support(
+        {"hybrid.linear-optimization",2,3,6,"linear",0.5e-12});
+    CHECK(tiny.status==AdmissionStatus::unsupported);
+    const auto oversized=provider.declare_support(
+        {"hybrid.linear-optimization",std::numeric_limits<std::size_t>::max(),1,1,"linear",1.1e-12});
+    CHECK(oversized.status==AdmissionStatus::unsupported);
+    CHECK_FALSE(oversized.envelope_is_sufficient);
+    const auto unrelated=provider.declare_support(
+        {"hybrid.convex-optimization",1,1,1,"quadratic"});
+    CHECK(unrelated.status==AdmissionStatus::unknown);
 }
 
 TEST_CASE("registered native triangle reports literal optimum and independent residuals") {

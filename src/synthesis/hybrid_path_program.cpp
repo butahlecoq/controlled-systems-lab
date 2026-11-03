@@ -4,6 +4,7 @@
 #include <array>
 #include <cmath>
 #include <limits>
+#include <type_traits>
 
 namespace csl::synthesis {
 namespace {
@@ -34,6 +35,85 @@ ProgramId path_program_id(const model::HybridPath& path) {
     for(const auto& edge:path.edges)
         value += ":"+std::to_string(edge.value.size())+":"+edge.value;
     return ProgramId{std::move(value)};
+}
+std::optional<double> hybrid_matrix_coefficient_floor(const model::HybridSystem& system,
+    const model::HybridRequest& request,std::span<const model::HybridPath> paths) {
+    // Hybrid flow equations and singleton substitutions add unit coefficients
+    // even when all authored matrices contain larger values.
+    double minimum=1.0;
+    bool complete=true;
+    const auto include_values=[&](std::span<const double> values) {
+        for(const double value:values)
+            if(value!=0) minimum=std::min(minimum,std::abs(value));
+    };
+    const auto include_matrix=[&](const Matrix& matrix) {
+        include_values(matrix.values);
+    };
+    const auto include_matrix_view=[&](numeric::MatrixView matrix) {
+        for(std::size_t row=0;row<matrix.rows();++row)
+            for(std::size_t column=0;column<matrix.cols();++column)
+                if(const double value=matrix(row,column);value!=0)
+                    minimum=std::min(minimum,std::abs(value));
+    };
+    const auto include_handle=[&](const SetHandle& handle) {
+        const auto imported=sets::from_handle(handle);
+        const auto* data=std::get_if<sets::SetData>(&imported);
+        if(!data) { complete=false; return; }
+        const auto representation=data->representation();
+        if(const auto* h=std::get_if<sets::HRepresentation>(&representation)) {
+            include_matrix_view(h->inequalities);
+            include_matrix_view(h->equalities);
+        } else if(!std::holds_alternative<sets::SingletonRepresentation>(representation) &&
+                  !std::holds_alternative<sets::UniversalRepresentation>(representation) &&
+                  !std::holds_alternative<sets::EmptyRepresentation>(representation)) {
+            complete=false;
+        }
+    };
+    const auto include_set=[&](const AdmissibleSet& set) {
+        std::visit([&](const auto& value) {
+            using T=std::decay_t<decltype(value)>;
+            if constexpr(std::is_same_v<T,SetHandle>) include_handle(value);
+        },set);
+    };
+    for(const auto& path:paths) {
+        for(std::size_t stage=0;stage<path.edges.size();++stage) {
+            const auto mode=std::find_if(system.modes.begin(),system.modes.end(),[&](const auto& candidate) {
+                return candidate.id==path.modes[stage];
+            });
+            const auto edge=std::find_if(system.edges.begin(),system.edges.end(),[&](const auto& candidate) {
+                return candidate.id==path.edges[stage];
+            });
+            if(mode==system.modes.end()||edge==system.edges.end()) return {};
+            const LinearStage* flow=nullptr;
+            if(const auto* constant=std::get_if<LinearStage>(&mode->flow)) flow=constant;
+            else if(const auto* varying=std::get_if<std::vector<LinearStage>>(&mode->flow)) {
+                if(stage>=varying->size()) return {};
+                flow=&(*varying)[stage];
+            }
+            if(flow==nullptr) return {};
+            include_matrix(flow->A); include_matrix(flow->B); include_matrix(flow->E);
+            include_set(mode->control_sets[stage]);
+            include_set(mode->invariants[stage]); include_set(mode->invariants[stage+1]);
+            include_set(edge->guards[stage]);
+            include_handle(edge->reset_relations[stage]);
+        }
+        const auto terminal=std::find_if(system.modes.begin(),system.modes.end(),[&](const auto& candidate) {
+            return candidate.id==path.modes.back();
+        });
+        if(terminal==system.modes.end()) return {};
+        include_set(terminal->invariants[system.horizon]);
+        const auto objective=std::find_if(request.terminal_objectives.begin(),request.terminal_objectives.end(),
+            [&](const auto& candidate) { return candidate.mode==path.modes.back(); });
+        if(objective==request.terminal_objectives.end()) return {};
+        if(const auto* quadratic=std::get_if<QuadraticTerminal>(&objective->objective))
+            include_matrix(quadratic->Q);
+        else if(std::holds_alternative<ResidualNormTerminal>(objective->objective))
+            complete=false;
+    }
+    if(!complete) return {};
+    // Convex objective normalization may halve matrix coefficients. This
+    // conservative reduction keeps the declared lower bound sound.
+    return std::nextafter(minimum*0.5,0.0);
 }
 Diagnostics hybrid_path_admission_errors(const model::HybridSystem& system,
     const model::HybridRequest& request, const model::HybridPath& path) {
@@ -572,6 +652,7 @@ HybridProviderAdmissionResult preflight_hybrid_program_providers(
     report.paths.assign(paths.begin(),paths.end());
     report.relation_operations=std::get<std::vector<model::HybridPlannedOperation>>(planned_operations);
     report.attempts.reserve(paths.size());
+    const auto coefficient_floor=hybrid_matrix_coefficient_floor(system,request,paths);
     for(const auto& path:paths) {
         if(cancellation.stop_requested())
             return OperationStopped{StopReason::cancelled,
@@ -613,6 +694,7 @@ HybridProviderAdmissionResult preflight_hybrid_program_providers(
                 "Conservative solver matrix envelope overflows size_t"});
         envelope.maximum_elements=std::max(envelope.maximum_elements,
             envelope.maximum_rows*envelope.maximum_columns);
+        envelope.minimum_nonzero_matrix_coefficient_magnitude=coefficient_floor;
         if(const auto* quadratic=std::get_if<QuadraticTerminal>(&objective)) {
             if(quadratic->Q.rows!=0 && quadratic->Q.cols>
                std::numeric_limits<std::size_t>::max()/quadratic->Q.rows)

@@ -43,6 +43,9 @@ struct RequestEnvelope {
     std::size_t maximum_columns{};
     std::size_t maximum_elements{};
     std::string objective;
+    // Lower bound on the absolute value of every nonzero coefficient in
+    // matrices sent to the provider. Absent means unknown.
+    std::optional<double> minimum_nonzero_matrix_coefficient_magnitude{};
 };
 enum class AdmissionStatus { supported, unsupported, unknown, conditional };
 struct AdmissionDeclaration {

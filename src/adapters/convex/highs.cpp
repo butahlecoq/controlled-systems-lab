@@ -419,6 +419,32 @@ HighsConvexRegistrationResult make_highs_registration(HighsConvexOptions options
             if(request.scalar!=registry::Scalar::binary64) return unsupported("scalar","binary64 required");
             if(auto d=admission(p);!d.empty()) return d;
             return registry::Offer{{{"csl.program-result.v1"},Assurance::numerical,{},{},registry::Completeness::unestablished}};
-        },[options](const ConvexProgram&) {return std::make_unique<Workspace>(options);}};
+        },[options](const ConvexProgram&) {return std::make_unique<Workspace>(options);}, {},
+        [](const registry::RequestEnvelope& envelope,const registry::Requirements&) {
+            if(envelope.operation!="hybrid.convex-optimization")
+                return registry::AdmissionDeclaration{registry::AdmissionStatus::unknown,{},false};
+            if(envelope.objective!="quadratic" && envelope.objective!="residual_norm")
+                return registry::AdmissionDeclaration{registry::AdmissionStatus::unsupported,
+                    unsupported("highs.convex.admission.objective",
+                        "HiGHS convex provider supports quadratic and residual-norm hybrid objectives only"),false};
+            if(!envelope.minimum_nonzero_matrix_coefficient_magnitude)
+                return registry::AdmissionDeclaration{registry::AdmissionStatus::conditional,
+                    unsupported("highs.convex.admission.coefficient_scale",
+                        "Envelope does not bound matrix coefficients against HiGHS' 1e-12 removal threshold"),false};
+            if(!std::isfinite(*envelope.minimum_nonzero_matrix_coefficient_magnitude) ||
+               *envelope.minimum_nonzero_matrix_coefficient_magnitude<=1e-12)
+                return registry::AdmissionDeclaration{registry::AdmissionStatus::unsupported,
+                    unsupported("highs.convex.admission.coefficient_scale",
+                        "Envelope permits nonzero matrix coefficients at or below HiGHS' 1e-12 removal threshold"),false};
+            constexpr std::size_t maximum_variables=4096;
+            const auto maximum_native=static_cast<std::size_t>(kHighsIInf);
+            if(envelope.maximum_columns>maximum_variables || envelope.maximum_columns>=maximum_native ||
+               envelope.maximum_rows>maximum_native-envelope.maximum_columns-1 ||
+               envelope.maximum_elements>maximum_native)
+                return registry::AdmissionDeclaration{registry::AdmissionStatus::unsupported,
+                    unsupported("highs.convex.admission.capacity",
+                        "Hybrid convex envelope exceeds HiGHS variable, row, or matrix-entry limits"),false};
+            return registry::AdmissionDeclaration{registry::AdmissionStatus::supported,{},true};
+        }};
 }
 }
