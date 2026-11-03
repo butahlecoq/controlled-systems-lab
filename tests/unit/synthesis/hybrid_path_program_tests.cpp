@@ -1393,7 +1393,8 @@ class RejectingLP final : public LPWorkspace {
 };
 
 class CompletingLP final : public LPWorkspace {
-    ProgramOutcome do_solve(const LinearProgram& program,const ExecutionContext&) override {
+    ProgramOutcome do_solve(const LinearProgram& program,const ExecutionContext& context) override {
+        if(context.backend_thread_observation) context.backend_thread_observation->record(3);
         return ProgramResult{Termination::completed,
             {program.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},
             {},{},"fixture completed"};
@@ -5091,7 +5092,9 @@ TEST_CASE("hybrid branch execution retains a completed solver result and provena
     REQUIRE(std::holds_alternative<HybridPathProgram>(built));
     const std::array<HybridPathProgram,1> programs{std::get<HybridPathProgram>(std::move(built))};
     const auto resource_policy=std::make_shared<const ResourcePolicy>(ResourcePolicy{8,4,2,8192});
-    const ExecutionContext context{resource_policy,{},{},{1e-8,1e-8},{},{}};
+    auto aggregate_observation=std::make_shared<execution::BackendThreadObservation>();
+    ExecutionContext context{resource_policy,{},{},{1e-8,1e-8},{},{}};
+    context.backend_thread_observation=aggregate_observation;
     const auto report=execute_hybrid_path_programs(programs,completing_lp_provider(),convex_provider(),context);
     REQUIRE(report.branches.size()==1);
     CHECK(report.all_supplied_branches_completed);
@@ -5108,6 +5111,8 @@ TEST_CASE("hybrid branch execution retains a completed solver result and provena
     CHECK(report.branches[0].requested_resources->outer_workers==4);
     CHECK(report.branches[0].requested_resources->threads_per_worker==2);
     CHECK(report.branches[0].requested_resources->memory_bytes==8192);
+    CHECK(report.branches[0].observed_backend_threads==3);
+    CHECK(aggregate_observation->maximum()==3);
 }
 
 TEST_CASE("hybrid guard entry and exit constrain the pre-reset state") {

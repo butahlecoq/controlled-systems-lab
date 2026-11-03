@@ -232,6 +232,9 @@ struct HybridBranchExecution {
     // Resource limits supplied to this branch's provider execution. This is
     // a requested policy, not a measurement or proof of backend enforcement.
     std::optional<ResourcePolicy> requested_resources;
+    // Maximum backend thread width reported through ExecutionContext while
+    // this branch ran. Missing means the provider supplied no observation.
+    std::optional<std::size_t> observed_backend_threads;
 };
 
 struct HybridPortfolioExecution {

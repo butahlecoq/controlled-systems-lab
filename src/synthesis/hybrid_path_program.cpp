@@ -1640,7 +1640,13 @@ HybridPortfolioExecution execute_prepared_hybrid_branches(
             const auto provenance=pipeline.provenance();
             execution.providers.assign(provenance.begin(),provenance.end());
             auto workspaces=pipeline.create();
-            auto outcome=std::get<0>(workspaces)->run(context);
+            auto branch_context=context;
+            auto branch_observation=std::make_shared<csl::execution::BackendThreadObservation>();
+            branch_context.backend_thread_observation=branch_observation;
+            auto outcome=std::get<0>(workspaces)->run(branch_context);
+            execution.observed_backend_threads=branch_observation->maximum();
+            if(context.backend_thread_observation && execution.observed_backend_threads)
+                context.backend_thread_observation->record(*execution.observed_backend_threads);
             if(const auto* unsupported=std::get_if<Unsupported>(&outcome)) {
                 execution.termination=Termination::operation_rejected;
                 execution.diagnostics=unsupported->diagnostics;
