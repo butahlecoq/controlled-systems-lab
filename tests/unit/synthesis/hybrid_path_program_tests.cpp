@@ -2,6 +2,7 @@
 #include <doctest/doctest.h>
 
 #include <csl/synthesis/hybrid_path_program.hpp>
+#include <csl/synthesis/hybrid_admission.hpp>
 #include <csl/sets/data.hpp>
 #include <csl/registry/provider.hpp>
 #include "hybrid_family_verifier_internal.hpp"
@@ -12,6 +13,7 @@
 #include <limits>
 #include <memory>
 #include <string_view>
+#include <type_traits>
 
 using namespace csl;
 using namespace csl::synthesis;
@@ -966,6 +968,33 @@ public:
     }
 };
 
+class CountingReachabilityAdmissionAdapter final : public HybridReachabilityAdapter {
+public:
+    mutable int preflight_calls{};
+    mutable int capability_calls{};
+    mutable int compose_calls{};
+    HybridReachabilityCapabilities capabilities() const noexcept override {
+        ++capability_calls;
+        return {true,Assurance::numerical,true,
+            registry::Provenance{"geometry",{{"fixture.geometry"},std::string{"1"}},
+                registry::Identity{{"fixture.geometry"},"1"}},1024};
+    }
+    HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath&,
+        model::HybridRelationLimits,std::stop_token cancellation) const override {
+        ++preflight_calls;
+        if(cancellation.stop_requested())
+            return OperationStopped{StopReason::cancelled,"fixture reachability admission cancelled"};
+        return std::monostate{};
+    }
+    HybridPathReachabilityResult compose_path(const model::HybridSystem&,
+        const model::HybridRequest&,const model::HybridPath&,
+        model::HybridRelationLimits,std::stop_token) const override {
+        ++compose_calls;
+        return Diagnostics{{DiagnosticCode::unsupported,"fixture.compose","must not compose during admission"}};
+    }
+};
+
 class InventoryOnlyTrajectoryPreflightAdapter final : public HybridDirectTrajectoryAdapter {
 public:
     mutable int preflight_calls{};
@@ -1037,7 +1066,7 @@ public:
     mutable int capability_calls{};
     HybridReachabilityCapabilities capabilities() const noexcept override {
         ++capability_calls;
-        return {true,Assurance::numerical};
+        return {true,Assurance::numerical,false,{},0};
     }
     HybridReachabilityPreflightResult preflight(const model::HybridSystem& system,
         const model::HybridRequest& request,const model::HybridPath& path,
@@ -1060,7 +1089,7 @@ public:
     mutable int capability_calls{};
     HybridReachabilityCapabilities capabilities() const noexcept override {
         ++capability_calls;
-        return {true,Assurance::numerical};
+        return {true,Assurance::numerical,false,{},0};
     }
     HybridPathReachabilityResult compose_path(const model::HybridSystem&,
         const model::HybridRequest&,const model::HybridPath& path,
@@ -1078,7 +1107,7 @@ public:
     mutable int calls{};
     HybridReachabilityCapabilities capabilities() const noexcept override {
         ++capability_calls;
-        return {true,Assurance::numerical};
+        return {true,Assurance::numerical,false,{},0};
     }
     HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&,const model::HybridPath& path,
@@ -1108,7 +1137,7 @@ public:
     mutable int calls{};
     HybridReachabilityCapabilities capabilities() const noexcept override {
         ++capability_calls;
-        return {true,Assurance::numerical};
+        return {true,Assurance::numerical,false,{},0};
     }
     HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&,const model::HybridPath&,
@@ -1130,7 +1159,7 @@ private:
 class MisreportingReachabilityAdapter final : public HybridReachabilityAdapter {
 public:
     int corruption{};
-    HybridReachabilityCapabilities capabilities() const noexcept override { return {true,Assurance::numerical}; }
+    HybridReachabilityCapabilities capabilities() const noexcept override { return {true,Assurance::numerical,false,{},0}; }
     HybridReachabilityPreflightResult preflight(const model::HybridSystem& system,
         const model::HybridRequest& request,const model::HybridPath& path,
         model::HybridRelationLimits limits,std::stop_token cancellation) const override {
@@ -1396,13 +1425,17 @@ registry::PreparedProvider<registry::LPPort> lp_provider(std::stop_source* cance
 }
 
 registry::PreparedProvider<registry::LPPort> declared_lp_provider(
-    registry::AdmissionStatus status,bool sufficient,std::shared_ptr<int> declaration_calls) {
+    registry::AdmissionStatus status,bool sufficient,std::shared_ptr<int> declaration_calls,
+    std::shared_ptr<int> factory_calls={}) {
     registry::Registry<registry::LPPort> providers;
     REQUIRE_FALSE(providers.add({{{"declared-lp"},"1"},
         [](const LinearProgram&,const registry::Requirements&)->registry::Capability {
             return registry::Offer{};
         },
-        [](const LinearProgram&){return std::make_unique<RejectingLP>();}, {},
+        [factory_calls](const LinearProgram&) {
+            if(factory_calls) ++*factory_calls;
+            return std::make_unique<RejectingLP>();
+        }, {},
         [status,sufficient,declaration_calls](const registry::RequestEnvelope&,
             const registry::Requirements&) {
             ++*declaration_calls;
@@ -1411,6 +1444,28 @@ registry::PreparedProvider<registry::LPPort> declared_lp_provider(
     auto prepared=registry::prepare_provider(registry::select_provider(providers,{{"declared-lp"},{}}));
     REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::LPPort>>(prepared));
     return std::get<registry::PreparedProvider<registry::LPPort>>(std::move(prepared));
+}
+
+registry::PreparedProvider<registry::ConvexPort> declared_convex_provider(
+    registry::AdmissionStatus status,bool sufficient,std::shared_ptr<int> declaration_calls,
+    std::shared_ptr<int> factory_calls) {
+    registry::Registry<registry::ConvexPort> providers;
+    REQUIRE_FALSE(providers.add({{{"declared-convex"},"1"},
+        [](const ConvexProgram&,const registry::Requirements&)->registry::Capability {
+            return registry::Offer{};
+        },
+        [factory_calls](const ConvexProgram&) {
+            ++*factory_calls;
+            return std::make_unique<RejectingConvex>();
+        }, {},
+        [status,sufficient,declaration_calls](const registry::RequestEnvelope&,
+            const registry::Requirements&) {
+            ++*declaration_calls;
+            return registry::AdmissionDeclaration{status,{},sufficient};
+        }}));
+    auto prepared=registry::prepare_provider(registry::select_provider(providers,{{"declared-convex"},{}}));
+    REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::ConvexPort>>(prepared));
+    return std::get<registry::PreparedProvider<registry::ConvexPort>>(std::move(prepared));
 }
 
 registry::PreparedProvider<registry::LPPort> completing_lp_provider() {
@@ -1495,6 +1550,83 @@ TEST_CASE("prepared providers expose conservative request-envelope declarations"
     const auto legacy=lp_provider().declare_support({"hybrid.linear-optimization",4,6,24,"linear"});
     CHECK(legacy.status==registry::AdmissionStatus::unknown);
     CHECK_FALSE(legacy.envelope_is_sufficient);
+}
+
+TEST_CASE("hybrid request admission records selected operations before relation composition") {
+    static_assert(!std::is_copy_constructible_v<HybridAdmissionToken>);
+    auto [system,request]=variable_size_parallel_profile();
+    auto trajectory=std::make_shared<AdmittingTrajectoryPreflightAdapter>();
+    auto reachability=std::make_shared<CountingReachabilityAdmissionAdapter>();
+    auto verifier=std::make_shared<FixtureHybridFamilyVerifier>();
+    auto lp_declarations=std::make_shared<int>(0);
+    auto convex_declarations=std::make_shared<int>(0);
+    auto lp_factories=std::make_shared<int>(0);
+    auto convex_factories=std::make_shared<int>(0);
+    HybridExecutionSelection selection;
+    selection.trajectory=trajectory;
+    selection.reachability=reachability;
+    selection.lp=declared_lp_provider(registry::AdmissionStatus::supported,true,
+        lp_declarations,lp_factories);
+    selection.convex=declared_convex_provider(registry::AdmissionStatus::supported,true,
+        convex_declarations,convex_factories);
+    selection.verifier=verifier;
+
+    const auto admitted=admit_hybrid_request(system,request,selection,{1,8},{16,64,1024},{},{});
+    REQUIRE(std::holds_alternative<HybridAdmissionToken>(admitted));
+    const auto& report=std::get<HybridAdmissionToken>(admitted).report();
+    REQUIRE(report.admitted);
+    REQUIRE(report.paths.size()==2);
+    const auto planned=model::plan_hybrid_operations(report.paths);
+    REQUIRE(std::holds_alternative<std::vector<model::HybridPlannedOperation>>(planned));
+    const auto relation_count=std::get<std::vector<model::HybridPlannedOperation>>(planned).size();
+    CHECK(report.operations.size()==relation_count+7);
+    CHECK(report.offers.size()==relation_count+7);
+    CHECK(std::count_if(report.operations.begin(),report.operations.end(),[](const auto& operation) {
+        return operation.key.kind==HybridOperationKind::projection;
+    })==2);
+    CHECK(std::count_if(report.offers.begin(),report.offers.end(),[](const auto& offer) {
+        return offer.adapter_role==HybridAdmissionAdapterRole::verifier&&
+            offer.decision==registry::AdmissionStatus::supported;
+    })==1);
+    CHECK(report.diagnostics.empty());
+    CHECK(trajectory->preflight_calls==1);
+    CHECK(trajectory->capability_calls==1);
+    CHECK(trajectory->build_calls==0);
+    CHECK(reachability->preflight_calls==2);
+    CHECK(reachability->capability_calls==2);
+    CHECK(reachability->compose_calls==0);
+    CHECK(verifier->preflight_calls==1);
+    CHECK(verifier->calls==0);
+    CHECK(*lp_declarations==2);
+    CHECK(*convex_declarations==0);
+    CHECK(*lp_factories==0);
+    CHECK(*convex_factories==0);
+
+    auto rejected_trajectory=std::make_shared<AdmittingTrajectoryPreflightAdapter>();
+    auto rejected_reachability=std::make_shared<CountingReachabilityAdmissionAdapter>();
+    auto rejected_declarations=std::make_shared<int>(0);
+    auto rejected_factories=std::make_shared<int>(0);
+    HybridExecutionSelection rejected_selection;
+    rejected_selection.trajectory=rejected_trajectory;
+    rejected_selection.reachability=rejected_reachability;
+    rejected_selection.lp=declared_lp_provider(registry::AdmissionStatus::unknown,false,
+        rejected_declarations,rejected_factories);
+    rejected_selection.convex=declared_convex_provider(registry::AdmissionStatus::supported,true,
+        std::make_shared<int>(0),std::make_shared<int>(0));
+    const auto refused=admit_hybrid_request(system,request,rejected_selection,
+        {1,8},{16,64,1024},{},{});
+    REQUIRE(std::holds_alternative<HybridAdmissionRefused>(refused));
+    const auto& refusal=std::get<HybridAdmissionRefused>(refused).report;
+    CHECK_FALSE(refusal.admitted);
+    CHECK_FALSE(refusal.diagnostics.empty());
+    CHECK(*rejected_declarations==2);
+    CHECK(std::count_if(refusal.offers.begin(),refusal.offers.end(),[](const auto& offer) {
+        return offer.adapter_role==HybridAdmissionAdapterRole::lp&&
+            offer.decision==registry::AdmissionStatus::unknown;
+    })==2);
+    CHECK(rejected_trajectory->build_calls==0);
+    CHECK(rejected_reachability->compose_calls==0);
+    CHECK(*rejected_factories==0);
 }
 
 TEST_CASE("hybrid portfolio rejects unknown provider envelopes before adapter path builds") {

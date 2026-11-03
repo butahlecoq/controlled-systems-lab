@@ -140,4 +140,4 @@ Candidate B is the base because its staged coordinator gives the strongest reque
 
 ## Next implementation step
 
-Add the typed operation inventory and tri-state provider declaration seam, then prove a late-path symbolic rejection occurs before any adapter composition or workspace factory call.
+Fold the current solver and projected-geometry preflights into one canonical request ledger and move-only admission token. Prove that late-path, geometry, and verifier refusal leaves relation composition and workspace creation at zero. Then refine every selected concrete provider request transactionally before exposing an executable request.

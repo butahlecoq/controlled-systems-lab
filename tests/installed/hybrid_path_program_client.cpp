@@ -1,4 +1,4 @@
-#include <csl/synthesis/hybrid_path_program.hpp>
+#include <csl/synthesis/hybrid_admission.hpp>
 
 #include <iostream>
 #include <memory>
@@ -79,6 +79,16 @@ int main() {
         {{{"target"}, LinearTerminal{{1, 0}, 0}, "x", "m"}}};
     const HybridPath path{{{"source"}, {"target"}}, {{"switch"}}};
     JointHDirectTrajectoryAdapter trajectory;
+    HybridExecutionSelection selection;
+    selection.trajectory=std::make_shared<JointHDirectTrajectoryAdapter>();
+    selection.lp=*admission_provider;
+    selection.convex=*convex_provider;
+    const auto request_admission=admit_hybrid_request(system,request,selection,
+        {1,4},{32,128,4096},{},{});
+    const auto* admission_token=std::get_if<HybridAdmissionToken>(&request_admission);
+    if(admission_token==nullptr||!admission_token->report().admitted||
+       admission_token->report().paths.size()!=1||admission_token->report().paths.front()!=path)
+        throw std::runtime_error("Installed request-wide admission did not retain the complete path inventory");
     const auto admitted_portfolio=build_hybrid_portfolio_programs(trajectory,system,request,
         {"installed-admitted-hybrid"},{1,4},{32,128,4096},*admission_provider,*convex_provider);
     const auto* admitted=std::get_if<std::vector<HybridPathProgram>>(&admitted_portfolio);

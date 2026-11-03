@@ -1,4 +1,5 @@
 #include <csl/synthesis/hybrid_path_program.hpp>
+#include <csl/synthesis/hybrid_admission.hpp>
 
 #include <algorithm>
 #include <array>
@@ -301,6 +302,245 @@ Diagnostics hybrid_operation_trace_errors(const model::HybridPath& path,
 }
 }
 
+struct HybridAdmissionToken::Storage {
+    model::HybridSystem system;
+    model::HybridRequest request;
+    HybridExecutionSelection selection;
+    model::HybridEnumerationLimits enumeration_limits;
+    model::HybridRelationLimits relation_limits;
+    optimization::ObjectivePolicy objective_policy;
+    HybridAdmissionReport report;
+};
+
+class HybridAdmissionAccess {
+public:
+    static HybridAdmissionToken create(model::HybridSystem system,model::HybridRequest request,
+        HybridExecutionSelection selection,model::HybridEnumerationLimits enumeration_limits,
+        model::HybridRelationLimits relation_limits,optimization::ObjectivePolicy objective_policy,
+        HybridAdmissionReport report) {
+        using Storage=HybridAdmissionToken::Storage;
+        return HybridAdmissionToken{std::make_unique<const Storage>(Storage{
+            std::move(system),std::move(request),std::move(selection),enumeration_limits,
+            relation_limits,objective_policy,std::move(report)})};
+    }
+};
+
+HybridAdmissionToken::HybridAdmissionToken(std::unique_ptr<const Storage> storage)
+    :storage_(std::move(storage)) {}
+HybridAdmissionToken::~HybridAdmissionToken()=default;
+const HybridAdmissionReport& HybridAdmissionToken::report() const noexcept {
+    return storage_->report;
+}
+
+HybridAdmissionResult admit_hybrid_request(const model::HybridSystem& system,
+    const model::HybridRequest& request,const HybridExecutionSelection& selection,
+    model::HybridEnumerationLimits enumeration_limits,model::HybridRelationLimits relation_limits,
+    optimization::ObjectivePolicy objective_policy,const ExecutionContext& context) {
+    HybridAdmissionReport report;
+    if(context.resources) report.requested_resources=*context.resources;
+    const auto refuse=[&](std::string field,std::string explanation) -> HybridAdmissionResult {
+        report.diagnostics.push_back({DiagnosticCode::unsupported,std::move(field),std::move(explanation)});
+        return HybridAdmissionRefused{std::move(report)};
+    };
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+            "Hybrid request admission stopped before profile validation"};
+    if(context.resources) {
+        auto resource_errors=check_resources(*context.resources);
+        report.diagnostics.insert(report.diagnostics.end(),resource_errors.begin(),resource_errors.end());
+    }
+    if(const auto policy_error=hybrid_objective_policy_error(objective_policy))
+        report.diagnostics.push_back(*policy_error);
+    const auto profile_errors=model::check_hybrid_profile(system,request);
+    report.diagnostics.insert(report.diagnostics.end(),profile_errors.begin(),profile_errors.end());
+    if(!report.diagnostics.empty()) return HybridAdmissionRefused{std::move(report)};
+    if(!selection.trajectory&&!selection.reachability)
+        return refuse("hybrid.admission.selection",
+            "At least one trajectory or reachability operation must be selected");
+    if(selection.trajectory&&(!selection.lp||!selection.convex))
+        return refuse("hybrid.admission.solver_selection",
+            "Trajectory admission requires immutable LP and convex provider snapshots");
+    if(selection.verifier&&!selection.trajectory)
+        return refuse("hybrid.admission.verifier_selection",
+            "Family verification admission requires a selected trajectory operation");
+
+    auto enumerated=model::enumerate_hybrid_paths(system,request.initial.mode,
+        request.allowed_terminal_modes,enumeration_limits,context.cancellation);
+    if(const auto* stopped=std::get_if<OperationStopped>(&enumerated)) return *stopped;
+    if(const auto* diagnostic=std::get_if<Diagnostic>(&enumerated))
+        return refuse(diagnostic->field,diagnostic->explanation);
+    report.paths=std::get<std::vector<model::HybridPath>>(std::move(enumerated));
+    if(report.paths.empty())
+        return refuse("hybrid.admission.paths","No permitted hybrid path exists for the requested terminal modes");
+    auto planned=model::plan_hybrid_operations(report.paths);
+    if(const auto* diagnostic=std::get_if<Diagnostic>(&planned))
+        return refuse(diagnostic->field,diagnostic->explanation);
+    for(const auto& relation:std::get<std::vector<model::HybridPlannedOperation>>(planned)) {
+        if(const auto stop=interruption(context))
+            return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+                "Hybrid operation ledger derivation stopped between relation obligations"};
+        HybridOperationKey key{HybridOperationKind::relation,{},{}};
+        std::visit([&](const auto& operation) {
+            key.path_index=operation.path_index;
+            key.stage=operation.stage;
+        },relation);
+        report.operations.push_back({key,relation,{},relation_limits.max_rows,
+            relation_limits.max_variables,relation_limits.max_matrix_elements,Assurance::numerical});
+    }
+
+    const auto record_adapter=[&](HybridOperationKey key,HybridAdmissionAdapterRole role,
+        registry::AdmissionStatus decision,Diagnostics diagnostics={},
+        std::optional<registry::Provenance> provider={}) {
+        report.offers.push_back({std::move(key),role,std::move(provider),decision,diagnostics});
+    };
+
+    bool trajectory_admitted=false;
+    if(selection.trajectory) {
+        const auto operations=preflight_hybrid_trajectory_operations(*selection.trajectory,system,
+            request,report.paths,relation_limits,objective_policy,context.cancellation);
+        if(const auto* stopped=std::get_if<OperationStopped>(&operations)) return *stopped;
+        Diagnostics operation_errors;
+        if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&operations)) {
+            if(const auto* stopped=std::get_if<OperationStopped>(&failure->failure)) return *stopped;
+            operation_errors.push_back(std::get<Diagnostic>(failure->failure));
+        } else if(const auto* errors=std::get_if<Diagnostics>(&operations)) operation_errors=*errors;
+        const auto capabilities=preflight_hybrid_trajectory_capabilities(*selection.trajectory,
+            request,report.paths,objective_policy,context.cancellation);
+        if(const auto* stopped=std::get_if<OperationStopped>(&capabilities)) return *stopped;
+        if(const auto* errors=std::get_if<Diagnostics>(&capabilities))
+            operation_errors.insert(operation_errors.end(),errors->begin(),errors->end());
+        trajectory_admitted=operation_errors.empty();
+        report.diagnostics.insert(report.diagnostics.end(),operation_errors.begin(),operation_errors.end());
+        for(const auto& operation:report.operations)
+            record_adapter(operation.key,HybridAdmissionAdapterRole::trajectory,
+                trajectory_admitted?registry::AdmissionStatus::supported:registry::AdmissionStatus::unsupported,
+                operation_errors);
+    }
+
+    if(selection.reachability) {
+        for(std::size_t i=0;i<report.paths.size();++i) {
+            if(const auto stop=interruption(context))
+                return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+                    "Hybrid reachability admission stopped between path obligations"};
+            const auto preflight=selection.reachability->preflight(system,request,report.paths[i],
+                relation_limits,context.cancellation);
+            if(const auto* stopped=std::get_if<OperationStopped>(&preflight)) return *stopped;
+            Diagnostics errors;
+            if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&preflight)) {
+                if(const auto* stopped=std::get_if<OperationStopped>(&failure->failure)) return *stopped;
+                errors.push_back(std::get<Diagnostic>(failure->failure));
+            } else if(const auto* rejected=std::get_if<Diagnostics>(&preflight)) errors=*rejected;
+            const auto capability=selection.reachability->capabilities();
+            if(capability.assurance!=Assurance::numerical)
+                errors.push_back({DiagnosticCode::unsupported,"hybrid.admission.reachability.assurance",
+                    "Selected reachability adapter does not provide numerical assurance"});
+            if(!capability.retains_branch_labelled_joint_relation)
+                errors.push_back({DiagnosticCode::unsupported,"hybrid.admission.reachability.branch_relation",
+                    "Selected reachability adapter does not preserve branch-labelled joint relations"});
+            report.diagnostics.insert(report.diagnostics.end(),errors.begin(),errors.end());
+            const HybridOperationKey key{HybridOperationKind::relation,i,{}};
+            report.operations.push_back({key,{}, {},relation_limits.max_rows,
+                relation_limits.max_variables,relation_limits.max_matrix_elements,capability.assurance});
+            record_adapter(key,HybridAdmissionAdapterRole::reachability,
+                errors.empty()?registry::AdmissionStatus::supported:registry::AdmissionStatus::unsupported,
+                errors);
+            if(capability.projects_terminal_state) {
+                Diagnostics projection_errors=errors;
+                if(!capability.projection_provider||!capability.projection_provider->actual||
+                   capability.projection_provider->actual->id.value.empty())
+                    projection_errors.push_back({DiagnosticCode::evidence_mismatch,
+                        "hybrid.admission.projection.provider",
+                        "Projected reachability did not expose the selected geometry provider provenance"});
+                if(capability.maximum_projection_rows==0)
+                    projection_errors.push_back({DiagnosticCode::unsupported,
+                        "hybrid.admission.projection.rows",
+                        "Projected reachability did not expose a positive geometry row limit"});
+                if(relation_limits.max_variables==0)
+                    projection_errors.push_back({DiagnosticCode::unsupported,
+                        "hybrid.admission.projection.columns",
+                        "Projected geometry envelope requires a positive relation variable limit"});
+                std::size_t projection_elements=0;
+                if(capability.maximum_projection_rows!=0&&relation_limits.max_variables!=0&&
+                   capability.maximum_projection_rows>
+                       std::numeric_limits<std::size_t>::max()/relation_limits.max_variables) {
+                    projection_errors.push_back({DiagnosticCode::unsupported,
+                        "hybrid.admission.projection.elements",
+                        "Projected geometry envelope matrix extent overflows size_t"});
+                } else {
+                    projection_elements=capability.maximum_projection_rows*relation_limits.max_variables;
+                }
+                HybridOperationKey projection_key{HybridOperationKind::projection,i,{}};
+                report.operations.push_back({projection_key,{}, {},capability.maximum_projection_rows,
+                    relation_limits.max_variables,projection_elements,capability.assurance});
+                report.diagnostics.insert(report.diagnostics.end(),projection_errors.begin(),
+                    projection_errors.end());
+                record_adapter(projection_key,HybridAdmissionAdapterRole::geometry,
+                    projection_errors.empty()?registry::AdmissionStatus::supported:
+                        registry::AdmissionStatus::unsupported,
+                    std::move(projection_errors),capability.projection_provider);
+            }
+        }
+    }
+
+    if(selection.trajectory&&selection.lp&&selection.convex) {
+        const auto providers=preflight_hybrid_program_providers(system,request,report.paths,
+            relation_limits,*selection.lp,*selection.convex,context.cancellation);
+        if(const auto* stopped=std::get_if<OperationStopped>(&providers)) return *stopped;
+        if(const auto* errors=std::get_if<Diagnostics>(&providers))
+            report.diagnostics.insert(report.diagnostics.end(),errors->begin(),errors->end());
+        else {
+            const auto& provider_report=std::get<HybridProviderAdmissionReport>(providers);
+            if(!provider_report.admitted)
+                report.diagnostics.insert(report.diagnostics.end(),provider_report.diagnostics.begin(),
+                    provider_report.diagnostics.end());
+            for(const auto& attempt:provider_report.attempts) {
+                const auto role=attempt.envelope.operation=="hybrid.linear-optimization"
+                    ?HybridAdmissionAdapterRole::lp:HybridAdmissionAdapterRole::convex;
+                const auto kind=role==HybridAdmissionAdapterRole::lp
+                    ?HybridOperationKind::linear_optimization:HybridOperationKind::convex_optimization;
+                const HybridOperationKey key{kind,static_cast<std::size_t>(
+                    std::find(report.paths.begin(),report.paths.end(),attempt.path)-report.paths.begin()),{}};
+                report.operations.push_back({key,{},attempt.envelope.objective,
+                    attempt.envelope.maximum_rows,attempt.envelope.maximum_columns,
+                    attempt.envelope.maximum_elements,Assurance::numerical});
+                record_adapter(key,role,attempt.declaration.status,attempt.declaration.diagnostics,
+                    attempt.provider);
+            }
+        }
+    }
+
+    if(selection.verifier) {
+        const auto capability=selection.verifier->capabilities();
+        Diagnostics errors;
+        if(capability.assurance!=Assurance::numerical||
+           !capability.checks_original_hybrid_feasibility||
+           !capability.checks_global_objective_optimality||
+           !capability.checks_continuous_branch_coverage)
+            errors.push_back({DiagnosticCode::unsupported,"hybrid.admission.verifier.capabilities",
+                "Verifier must declare numerical feasibility, global objective, and continuous coverage checks"});
+        if(errors.empty()) {
+            const auto preflight=selection.verifier->preflight(system,request,report.paths,context.cancellation);
+            if(const auto* stopped=std::get_if<OperationStopped>(&preflight)) return *stopped;
+            if(const auto* rejected=std::get_if<Diagnostics>(&preflight)) errors=*rejected;
+        }
+        const HybridOperationKey key{HybridOperationKind::family_verification,{},{}};
+        report.operations.push_back({key,{}, {},relation_limits.max_rows,relation_limits.max_variables,
+            relation_limits.max_matrix_elements,capability.assurance});
+        report.diagnostics.insert(report.diagnostics.end(),errors.begin(),errors.end());
+        record_adapter(key,HybridAdmissionAdapterRole::verifier,
+            errors.empty()?registry::AdmissionStatus::supported:registry::AdmissionStatus::unsupported,
+            std::move(errors));
+    }
+
+    if(const auto stop=interruption(context))
+        return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+            "Hybrid request admission stopped after checking its operation ledger"};
+    report.admitted=report.diagnostics.empty()&&(!selection.trajectory||trajectory_admitted);
+    if(!report.admitted) return HybridAdmissionRefused{std::move(report)};
+    return HybridAdmissionAccess::create(system,request,selection,enumeration_limits,
+        relation_limits,objective_policy,std::move(report));
+}
+
 namespace {
 HybridPathProgramResult build_joint_hybrid_path_program(const model::HybridSystem& system,
     const model::HybridRequest& request, const model::HybridPath& path, ProblemId problem,
@@ -383,7 +623,7 @@ HybridReachabilityPreflightResult HybridReachabilityAdapter::preflight(
 }
 
 HybridReachabilityCapabilities JointHReachabilityAdapter::capabilities() const noexcept {
-    return {true,Assurance::numerical};
+    return {true,Assurance::numerical,false,{},0};
 }
 
 HybridReachabilityPreflightResult JointHReachabilityAdapter::preflight(

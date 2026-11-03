@@ -74,6 +74,9 @@ using HybridPathReachabilityResult = std::variant<HybridPathReachability, Diagno
 struct HybridReachabilityCapabilities {
     bool retains_branch_labelled_joint_relation{};
     Assurance assurance{Assurance::numerical};
+    bool projects_terminal_state{};
+    std::optional<registry::Provenance> projection_provider;
+    std::size_t maximum_projection_rows{};
 };
 using HybridReachabilityPreflightResult = model::HybridRelationPreflightResult;
 
@@ -114,6 +117,9 @@ public:
 class ProjectedStateHybridReachabilityAdapter final : public HybridReachabilityAdapter {
 public:
     explicit ProjectedStateHybridReachabilityAdapter(std::size_t maximum_projection_rows = 4096);
+    ProjectedStateHybridReachabilityAdapter(
+        registry::PreparedProvider<registry::GeometryPort> projection,
+        std::size_t maximum_projection_rows);
     HybridReachabilityCapabilities capabilities() const noexcept override;
     HybridReachabilityPreflightResult preflight(const model::HybridSystem&,
         const model::HybridRequest&, const model::HybridPath&,

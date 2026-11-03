@@ -151,8 +151,13 @@ ProjectedStateHybridReachabilityAdapter::ProjectedStateHybridReachabilityAdapter
     :projection_(make_projection_provider(maximum_projection_rows)),
      maximum_projection_rows_(maximum_projection_rows) {}
 
+ProjectedStateHybridReachabilityAdapter::ProjectedStateHybridReachabilityAdapter(
+    registry::PreparedProvider<registry::GeometryPort> projection,
+    std::size_t maximum_projection_rows)
+    :projection_(std::move(projection)),maximum_projection_rows_(maximum_projection_rows) {}
+
 HybridReachabilityCapabilities ProjectedStateHybridReachabilityAdapter::capabilities() const noexcept {
-    return {true,Assurance::numerical};
+    return {true,Assurance::numerical,true,projection_.provenance(),maximum_projection_rows_};
 }
 
 HybridReachabilityPreflightResult ProjectedStateHybridReachabilityAdapter::preflight(
