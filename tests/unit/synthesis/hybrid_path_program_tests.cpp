@@ -1416,6 +1416,34 @@ registry::PreparedProvider<registry::ConvexPort> convex_provider() {
 }
 }
 
+TEST_CASE("prepared providers expose conservative request-envelope declarations") {
+    registry::Registry<registry::LPPort> providers;
+    REQUIRE_FALSE(providers.add({{{"declaring-lp"},"1"},
+        [](const LinearProgram&,const registry::Requirements&)->registry::Capability {
+            return registry::Offer{};
+        },
+        [](const LinearProgram&){return std::make_unique<RejectingLP>();}, {},
+        [](const registry::RequestEnvelope& envelope,const registry::Requirements&) {
+            if(envelope.operation!="hybrid.linear-optimization" || envelope.columns>8)
+                return registry::AdmissionDeclaration{registry::AdmissionStatus::unsupported,
+                    {{DiagnosticCode::unsupported,"fixture.envelope","outside declared provider envelope"}},true};
+            return registry::AdmissionDeclaration{registry::AdmissionStatus::supported,{},true};
+        }}));
+    auto selected=registry::prepare_provider(registry::select_provider(providers,{{"declaring-lp"},{}}));
+    REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::LPPort>>(selected));
+    const auto& provider=std::get<registry::PreparedProvider<registry::LPPort>>(selected);
+    const auto admitted=provider.declare_support({"hybrid.linear-optimization",4,6,24,"linear"});
+    CHECK(admitted.status==registry::AdmissionStatus::supported);
+    CHECK(admitted.envelope_is_sufficient);
+    const auto rejected=provider.declare_support({"hybrid.linear-optimization",4,9,36,"linear"});
+    CHECK(rejected.status==registry::AdmissionStatus::unsupported);
+    CHECK_FALSE(rejected.diagnostics.empty());
+
+    const auto legacy=lp_provider().declare_support({"hybrid.linear-optimization",4,6,24,"linear"});
+    CHECK(legacy.status==registry::AdmissionStatus::unknown);
+    CHECK_FALSE(legacy.envelope_is_sufficient);
+}
+
 TEST_CASE("hybrid direct path program preserves branch and terminal objective coordinates") {
     const auto result=build_hybrid_path_program(example_system(),example_request(),example_path(),
         {"hybrid-problem"},{16,64,1024});

@@ -32,6 +32,10 @@ template<class Port> class PreparedProvider {
 public:
     const Provenance& provenance() const noexcept {return storage_->provenance;}
     const Requirements& requirements() const noexcept {return storage_->requirements;}
+    AdmissionDeclaration declare_support(const RequestEnvelope& envelope) const {
+        if(!storage_->entry.admission_declaration) return {};
+        return storage_->entry.admission_declaration(envelope,storage_->requirements);
+    }
     // There is deliberately no per-query Requirements parameter.
     std::variant<PreparedPipeline<Port>,Rejection> prepare(const typename Port::Request&) const;
 };
