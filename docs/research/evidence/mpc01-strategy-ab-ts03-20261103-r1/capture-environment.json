@@ -1,0 +1,47 @@
+{
+  "build": {
+    "cmake": "3.31.6",
+    "compiler": "GNU 16.2.1",
+    "compiler_command": "/usr/bin/c++",
+    "cxx_flags": "-O3 -DNDEBUG",
+    "cxx_standard": 20,
+    "generator": "Ninja",
+    "highs": "1.11.0",
+    "qhull": "8.0.2",
+    "source_snapshot_method": "git archive HEAD SHA-256; source worktree was clean",
+    "source_tree_sha256": "6602f01f1d4db7656222ac4bd1c43c1713ee1591779c9ffbfc0f352a440a06b5",
+    "type": "Release"
+  },
+  "events_sha256": "96ee02b307da0bf038e0910030a43ab39e6fb99e8a58faea24cca03050229512",
+  "executable": "/var/tmp/csl-mpc01-ts03-20261103-r3/examples-build/registered_synthesis_comparison",
+  "executable_sha256": "f87118d2114992fea92625e60599ff6937de694a189389cc3e173187f2d4f73e",
+  "execution_worktree_clean_before_run": true,
+  "execution_worktree_commit": "0f407af581c3a5b536d5d76f6e889fef542c4597",
+  "execution_worktree_role": "clean pinned source checkout used as the process working directory; compiled source identity matches source_commit",
+  "host": {
+    "architecture": "x86_64",
+    "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "logical_cpus": 8,
+    "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44"
+  },
+  "measurement": {
+    "capture_supervisor": "scripts/reports/mpc01/capture_strategy_ab_limited.py",
+    "capture_supervisor_sha256": "17fdcfc01cdcc9d223aa3019a999d9798911d563849937081dd64fd666bb72b6",
+    "command": "registered_synthesis_comparison --measure-profile ts03_singular_integrator scenario.json strategy-ab-ts03-events.jsonl",
+    "event_count_including_header": 13,
+    "events_sha256": "96ee02b307da0bf038e0910030a43ab39e6fb99e8a58faea24cca03050229512",
+    "measured_alternating_pairs": 5,
+    "process_tree_timeout_scope": "one complete strategy A/B capture process group; suite invocation, not individual attempts",
+    "profile": "ts03_singular_integrator",
+    "resource_profile": "resource-profile.json",
+    "resource_profile_sha256": "f10fa69125e42047b9a773a25b32e224023dd195f8ee7a0d52d931ed0e5e627a",
+    "warmup_pairs_excluded": 1
+  },
+  "scenario": "docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1/scenario.json",
+  "scenario_sha256": "a1d6fa3f349bfb6032736e5f6b52e0ff52f8bdece8cfe54752de12c9cf314e4d",
+  "schema": "csl.mpc01-strategy-ab-capture-environment/1",
+  "source_commit": "0f407af581c3a5b536d5d76f6e889fef542c4597",
+  "source_dirty_before_run": false,
+  "source_file": "examples/registered_synthesis_comparison.cpp",
+  "source_file_sha256": "39883c67fcf82b7709ddd9ca60ad47b9b06cfc5dcfe6efffed7324712c52c6ee"
+}

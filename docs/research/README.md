@@ -143,3 +143,13 @@ The [reviewed temporal-lift source audit](temporal-lift-source-audit.md) curates
 ## Minimal numerical examples
 
 - [EXT-07 two-dimensional hybrid path](ext07-hybrid-2d.md): exact input, labelled state plot, literal joint tuple, and installed-client reproduction command.
+
+### MPC-01 initial Strategy A/B timing slice
+
+The [T-S03 singular-integrator Strategy A/B report](evidence/mpc01-strategy-ab-ts03-20261103-r1/strategy-ab-ts03-summary.html)
+adds a source-bound, resource-constrained five-pair measurement for both
+registered strategies, with its exact control-plane figure, canonical record,
+raw events, source/build identity and failed supervisor setup attempt retained.
+This is a new synthetic singular-objective fixture; it is not the #421
+horizon-three case or the article-derived B04 case. The deployed Pages route and
+the remaining #597 comparison matrix are pending.

@@ -1,0 +1,70 @@
+{
+  "build": {
+    "architecture": "x86_64",
+    "backends": {
+      "highs": {
+        "version": "1.11.0"
+      },
+      "qhull": {
+        "version": "8.0.2"
+      }
+    },
+    "build_type": "Release",
+    "compiler_id": "GNU",
+    "compiler_version": "16.2.1",
+    "cxx_standard": "20",
+    "generator": "Ninja",
+    "schema": "csl.obs04-build/1",
+    "source_dirty": false,
+    "source_revision": "0f407af581c3a5b536d5d76f6e889fef542c4597",
+    "source_snapshot_method": "git archive HEAD SHA-256",
+    "source_tree_sha256": "6602f01f1d4db7656222ac4bd1c43c1713ee1591779c9ffbfc0f352a440a06b5"
+  },
+  "execution": {
+    "cache_policy": "One excluded A-then-B warmup pair; five measured pairs alternate A/B then B/A. Both members share the immutable resolved problem and provider registries.",
+    "measured_repetitions": 5,
+    "observed_backend_threads": {
+      "reason": "The driver does not query effective HiGHS thread count.",
+      "status": "unavailable"
+    },
+    "observed_driver_workers": 1,
+    "requested_backend_threads": 1,
+    "requested_workers": 1,
+    "seed_policy": {
+      "kind": "not_applicable",
+      "reason": "The fixed T-S03 fixture uses no random generator."
+    },
+    "tolerances": {
+      "absolute": 1e-08,
+      "relative": 1e-08
+    },
+    "warmup_repetitions": 1,
+    "workspace_policy": "fresh-workspace-per-attempt"
+  },
+  "runtime": {
+    "architecture": "x86_64",
+    "binary_sha256": {
+      "status": "available",
+      "value": "f87118d2114992fea92625e60599ff6937de694a189389cc3e173187f2d4f73e"
+    },
+    "cpu_model": {
+      "status": "available",
+      "value": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx"
+    },
+    "kernel": {
+      "status": "available",
+      "value": "7.2.8-9-omarchy"
+    },
+    "logical_cpus": {
+      "status": "available",
+      "value": 8
+    },
+    "os_family": "Linux",
+    "os_version": {
+      "status": "available",
+      "value": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44"
+    },
+    "schema": "csl.obs04-runtime/1"
+  },
+  "schema": "csl.obs04-environment/1"
+}

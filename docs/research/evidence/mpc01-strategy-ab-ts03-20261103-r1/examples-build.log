@@ -1,0 +1,4 @@
+[1/4] Scanning /home/butahlecoq/.local/share/codex/worktrees/mpc01-pairing-next-20261103/examples/registered_synthesis_comparison.cpp for CXX dependencies
+[2/4] Generating CXX dyndep file CMakeFiles/registered_synthesis_comparison.dir/CXX.dd
+[3/4] Building CXX object CMakeFiles/registered_synthesis_comparison.dir/registered_synthesis_comparison.cpp.o
+[4/4] Linking CXX executable registered_synthesis_comparison
