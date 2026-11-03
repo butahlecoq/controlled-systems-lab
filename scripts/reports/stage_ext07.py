@@ -92,6 +92,7 @@ def stage(catalog: Path, site_dir: Path) -> str:
                            "EXT-07 Pages index insertion point differs")
     report_ids = []
     routes = []
+    hybrid_route_indices = []
     related_links = []
     staged_bundles = []
     for entry in data["reports"]:
@@ -142,6 +143,8 @@ def stage(catalog: Path, site_dir: Path) -> str:
             site.OfflineHTML({report_id + "/index.html", report_id + "/" + example,
                               report_id + "/records.json",
                               report_id + "/" + report_id + ".zip"}).feed(route)
+            if prefix in ("ext07-hybrid-", "ext07-hybrid-two-parameter-"):
+                hybrid_route_indices.append(len(routes))
         for name in ("index.html", example):
             site.OfflineHTML(allowed).feed(
                 (bundle / name).read_text(encoding="utf-8"))
@@ -151,11 +154,12 @@ def stage(catalog: Path, site_dir: Path) -> str:
                                 if path.is_file() and not path.is_symlink()}))
         report_ids.append(report_id)
         routes.append(route)
-    report.collect.require(not related_links or routes,
+    report.collect.require(not related_links or hybrid_route_indices,
                            "EXT-07 resource observations require a hybrid report route")
     if related_links:
-        routes[0] = routes[0].replace(
-            "</li>", " · " + " · ".join(related_links) + "</li>")
+        for route_index in hybrid_route_indices:
+            routes[route_index] = routes[route_index].replace(
+                "</li>", " · " + " · ".join(related_links) + "</li>")
     # Do not leave earlier routes behind when a later catalog entry is invalid.
     for report_id, bundle, files in staged_bundles:
         destination = site_dir / report_id

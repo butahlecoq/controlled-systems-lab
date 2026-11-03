@@ -58,7 +58,7 @@ class Ext07ResourceObservationTests(unittest.TestCase):
             catalog = root / "ext07-publications.json"
             catalog.write_text(resource.encoded({
                 "schema": "csl.ext07-publications/1",
-                "reports": [stager.catalog_entry(parent), stager.catalog_entry(bundle)],
+                "reports": [stager.catalog_entry(bundle), stager.catalog_entry(parent)],
             }).decode(), encoding="utf-8")
             site = root / "site"
             site.mkdir()
@@ -66,13 +66,14 @@ class Ext07ResourceObservationTests(unittest.TestCase):
                 "<!doctype html><html lang=\"en\"><body><ul></ul></body></html>",
                 encoding="utf-8")
             self.assertEqual(stager.stage(catalog, site),
-                             parent.name + "," + self.bundle.name)
+                             self.bundle.name + "," + parent.name)
             self.assertTrue((site / self.bundle.name / "one_step" /
                              "resource-observation.json").is_file())
             self.assertIn("resource-scope.svg", (site / "index.html").read_text(
                 encoding="utf-8"))
             self.assertNotIn('id="visual-examples-link"',
                              (site / "index.html").read_text(encoding="utf-8"))
+            self.assertEqual((site / "index.html").read_text(encoding="utf-8").count("<li>"), 1)
             landing.build(site)
             page = (site / "index.html").read_text(encoding="utf-8")
             self.assertIn("EXT-07 bounded resource observations", page)
@@ -90,6 +91,25 @@ class Ext07ResourceObservationTests(unittest.TestCase):
             self.assertEqual(staged.split(",")[-1], self.bundle.name)
             self.assertTrue((site / self.bundle.name / "two_parameter" /
                              "resource-observation.json").is_file())
+
+    def test_resource_report_requires_a_hybrid_profile_route(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bundle = root / self.bundle.name
+            shutil.copytree(self.bundle, bundle)
+            catalog = root / "ext07-publications.json"
+            catalog.write_text(resource.encoded({
+                "schema": "csl.ext07-publications/1",
+                "reports": [stager.catalog_entry(bundle)],
+            }).decode(), encoding="utf-8")
+            site = root / "site"
+            site.mkdir()
+            (site / "index.html").write_text(
+                "<!doctype html><html lang=\"en\"><body><ul></ul></body></html>",
+                encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "require a hybrid report route"):
+                stager.stage(catalog, site)
+            self.assertEqual([path.name for path in site.iterdir()], ["index.html"])
 
     def test_bundle_excludes_machine_local_build_paths(self) -> None:
         for path in self.bundle.rglob("*"):
@@ -114,6 +134,29 @@ class Ext07ResourceObservationTests(unittest.TestCase):
             path.write_text(path.read_text(encoding="utf-8") + " ", encoding="utf-8")
             with self.assertRaises(ValueError):
                 resource.render(bundle, check=True)
+
+    def test_saved_bundle_rejects_mismatched_enforced_cpu_quota(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bundle = root / self.bundle.name
+            shutil.copytree(self.bundle, bundle)
+            record = resource.read_json(bundle / "records.json")
+            profile = record["profiles"]["one_step"]
+            profile["resource_observation"]["enforced_limits"][
+                "cpu_quota_per_second_usec"] = 999_999
+            receipt_path = bundle / "one_step" / "resource-observation.json"
+            receipt = resource.read_json(receipt_path)
+            receipt["enforced_limits"]["cpu_quota_per_second_usec"] = 999_999
+            receipt_path.write_bytes(resource.encoded(receipt))
+            unsigned = {key: value for key, value in record.items()
+                        if key != "report_id"}
+            record["report_id"] = resource.PREFIX + resource.sha(
+                resource.encoded(unsigned))[:16]
+            (bundle / "records.json").write_bytes(resource.encoded(record))
+            tampered = root / record["report_id"]
+            bundle.rename(tampered)
+            with self.assertRaisesRegex(ValueError, "raw capture"):
+                resource.render(tampered, check=True)
 
 
 if __name__ == "__main__":

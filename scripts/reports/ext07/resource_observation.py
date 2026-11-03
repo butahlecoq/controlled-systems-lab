@@ -49,6 +49,19 @@ def require(ok: bool, message: str) -> None:
         raise ValueError(message)
 
 
+def resource_limits_match(resource: dict) -> bool:
+    requested = resource.get("requested_limits", {})
+    enforced = resource.get("enforced_limits", {})
+    return (requested.get("runtime_max_seconds") == 300 and
+            requested.get("memory_max_bytes") == 1_610_612_736 and
+            requested.get("memory_swap_max_bytes") == 0 and
+            requested.get("cpu_quota_percent") == 100 and
+            enforced.get("runtime_max_usec") == 300_000_000 and
+            enforced.get("memory_max_bytes") == 1_610_612_736 and
+            enforced.get("memory_swap_max_bytes") == 0 and
+            enforced.get("cpu_quota_per_second_usec") == 1_000_000)
+
+
 def read_json(path: Path) -> dict:
     value = json.loads(path.read_text(encoding="utf-8"))
     require(isinstance(value, dict), "Expected JSON object: " + str(path))
@@ -131,18 +144,11 @@ def collect_profile(capture: Path, source: Path, layout: dict) -> dict:
             resource.get("executable_sha256"), "Executable hash receipt differs")
     require(sha(measured.read_bytes()) == resource.get("output_sha256"),
             "Resource receipt is not bound to the saved measurement output")
-    requested = resource.get("requested_limits", {})
     enforced = resource.get("enforced_limits", {})
     observed = resource.get("observed", {})
     require(resource.get("phase") == "measure" and resource.get("scope") and
-            requested.get("runtime_max_seconds") == 300 and
-            requested.get("memory_max_bytes") == 1_610_612_736 and
-            requested.get("memory_swap_max_bytes") == 0 and
-            requested.get("cpu_quota_percent") == 100 and
+            resource_limits_match(resource) and
             enforced.get("result") == "success" and enforced.get("exit_status") == 0 and
-            enforced.get("runtime_max_usec") == 300_000_000 and
-            enforced.get("memory_max_bytes") == 1_610_612_736 and
-            enforced.get("memory_swap_max_bytes") == 0 and
             observed.get("memory_peak_bytes", -1) >= 0 and
             observed.get("swap_peak_bytes", -1) == 0 and
             observed.get("cpu_time_ns", -1) >= 0,
@@ -325,7 +331,7 @@ def render(bundle: Path, check: bool = False) -> dict:
                 pre["commit"] == post["commit"] == item["source_commit"] and
                 pre["tree"] == post["tree"] == item["source_tree"] and
                 pre["status"] == post["status"] == [] and host == item["host"] and
-                receipt == item["resource_observation"] and
+                receipt == item["resource_observation"] and resource_limits_match(receipt) and
                 smoke == [item["smoke"]] and trials[0] == item["warmup"] and
                 trials[1:] == item["trials"] and
                 sha(trials_file.read_bytes()) == receipt["output_sha256"] and
