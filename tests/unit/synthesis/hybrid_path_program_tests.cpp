@@ -1818,8 +1818,15 @@ TEST_CASE("hybrid refinement rejects a late geometry prepare before creating any
     REQUIRE(std::holds_alternative<HybridAdmissionToken>(admitted));
     auto refined=refine_hybrid_request(std::move(std::get<HybridAdmissionToken>(admitted)),{},context);
     REQUIRE(std::holds_alternative<HybridConcreteRefinementRejected>(refined));
-    CHECK(std::get<HybridConcreteRefinementRejected>(refined).diagnostics.front().field==
+    const auto& rejected=std::get<HybridConcreteRefinementRejected>(refined);
+    CHECK(rejected.diagnostics.front().field==
         "fixture.geometry.late_refusal");
+    REQUIRE(rejected.operation);
+    CHECK(rejected.operation->kind==HybridOperationKind::projection);
+    REQUIRE(rejected.operation->path_index);
+    CHECK(*rejected.operation->path_index==1);
+    CHECK(rejected.admission.paths[*rejected.operation->path_index].edges.back().value==
+        "transition-second");
     CHECK(*prepare_calls==2);
     CHECK(*factory_calls==0);
     CHECK(*run_calls==0);
