@@ -1394,7 +1394,8 @@ class RejectingLP final : public LPWorkspace {
 
 class CompletingLP final : public LPWorkspace {
     ProgramOutcome do_solve(const LinearProgram& program,const ExecutionContext& context) override {
-        if(context.backend_thread_observation) context.backend_thread_observation->record(3);
+        const auto width=program.identity().problem.value=="hybrid-problem"?3U:5U;
+        if(context.backend_thread_observation) context.backend_thread_observation->record(width);
         return ProgramResult{Termination::completed,
             {program.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},
             {},{},"fixture completed"};
@@ -5090,13 +5091,18 @@ TEST_CASE("hybrid branch execution retains a completed solver result and provena
     auto built=build_hybrid_path_program(example_system(),example_request(),example_path(),
         {"hybrid-problem"},{16,64,1024});
     REQUIRE(std::holds_alternative<HybridPathProgram>(built));
-    const std::array<HybridPathProgram,1> programs{std::get<HybridPathProgram>(std::move(built))};
+    auto second=build_hybrid_path_program(example_system(),example_request(),example_path(),
+        {"hybrid-problem-second"},{16,64,1024});
+    REQUIRE(std::holds_alternative<HybridPathProgram>(second));
+    const std::array<HybridPathProgram,2> programs{
+        std::get<HybridPathProgram>(std::move(built)),
+        std::get<HybridPathProgram>(std::move(second))};
     const auto resource_policy=std::make_shared<const ResourcePolicy>(ResourcePolicy{8,4,2,8192});
     auto aggregate_observation=std::make_shared<execution::BackendThreadObservation>();
     ExecutionContext context{resource_policy,{},{},{1e-8,1e-8},{},{}};
     context.backend_thread_observation=aggregate_observation;
     const auto report=execute_hybrid_path_programs(programs,completing_lp_provider(),convex_provider(),context);
-    REQUIRE(report.branches.size()==1);
+    REQUIRE(report.branches.size()==2);
     CHECK(report.all_supplied_branches_completed);
     CHECK(report.branches[0].path==example_path());
     CHECK(report.branches[0].termination==Termination::completed);
@@ -5112,7 +5118,8 @@ TEST_CASE("hybrid branch execution retains a completed solver result and provena
     CHECK(report.branches[0].requested_resources->threads_per_worker==2);
     CHECK(report.branches[0].requested_resources->memory_bytes==8192);
     CHECK(report.branches[0].observed_backend_threads==3);
-    CHECK(aggregate_observation->maximum()==3);
+    CHECK(report.branches[1].observed_backend_threads==5);
+    CHECK(aggregate_observation->maximum()==5);
 }
 
 TEST_CASE("hybrid guard entry and exit constrain the pre-reset state") {
