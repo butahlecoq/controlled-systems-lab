@@ -114,6 +114,10 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install cmake==3.31.6
+      - name: Record sanitizer runner disk before build
+        run: |
+          df -h "$GITHUB_WORKSPACE"
+          du -sh .ci-cache/objects .ci-cache/archives 2>/dev/null || true
       - name: Restore instrumented validation caches
         id: cache
         uses: ./.github/actions/native-cache-setup
@@ -123,17 +127,26 @@ jobs:
           generator: Ninja
           options: >-
             -DCSL_DEPENDENCY_PROBES=OFF
-            -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+            -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer -g1"
+            -DCMAKE_CXX_FLAGS_DEBUG="-O0 -g1"
             -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined"
           clean: ${{ inputs.clean || false }}
       - name: Configure instrumented public modules and consumers
         run: >-
           cmake -S . -B tmp/sanitizers -G Ninja -DCMAKE_BUILD_TYPE=Debug
           -DCSL_DEPENDENCY_PROBES=OFF
-          -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+          -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer -g1"
+          -DCMAKE_CXX_FLAGS_DEBUG="-O0 -g1"
           -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined"
-      - run: cmake --build tmp/sanitizers --parallel 4
-      - run: ctest --test-dir tmp/sanitizers --output-on-failure --no-tests=error
+      - name: Build all sanitizer targets with minimal line-level debug info
+        run: cmake --build tmp/sanitizers --parallel 4
+      - name: Run all sanitizer tests
+        run: ctest --test-dir tmp/sanitizers --output-on-failure --no-tests=error
+      - name: Record sanitizer runner disk after build
+        if: always()
+        run: |
+          df -h "$GITHUB_WORKSPACE"
+          du -sh tmp/sanitizers .ci-cache/objects .ci-cache/archives 2>/dev/null || true
       - name: Preserve instrumented cache evidence and permitted snapshots
         if: always() && steps.cache.outputs.archive_key != ''
         uses: ./.github/actions/native-cache-finish
