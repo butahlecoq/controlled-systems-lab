@@ -51,6 +51,7 @@ FROZEN_DIAGRAM_EXCEPTIONS = {
 PUBLICATION_EXPORT_ROUTES = {
     "scripts/reports/render.py", "scripts/reports/mpc05/check_smoke.py",
     "scripts/reports/exp824/finalize_limited_report.py",
+    "scripts/reports/augment_pages_bundle.py",
 }
 VIZ10_ROLE_REASONS = {
     "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py":

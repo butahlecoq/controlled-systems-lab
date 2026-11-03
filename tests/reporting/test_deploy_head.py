@@ -20,8 +20,26 @@ NEWER = "2" * 40
 class BranchHandler(http.server.BaseHTTPRequestHandler):
     current_sha = NEWER
     response_code = 200
+    latest_report_id = 42
 
     def do_GET(self):
+        if self.path.startswith("/repos/example/reports/actions/workflows/algorithm-reports.yml/runs?"):
+            payload = {"workflow_runs": [{
+                "id": self.latest_report_id,
+                "head_sha": NEWER,
+                "head_branch": "main",
+                "event": "push",
+                "status": "completed",
+                "conclusion": "success",
+                "updated_at": "2026-11-03T03:00:00Z",
+            }]}
+            encoded = json.dumps(payload).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(encoded)))
+            self.end_headers()
+            self.wfile.write(encoded)
+            return
         if self.path != "/repos/example/reports/branches/main":
             self.send_error(404)
             return
@@ -52,10 +70,13 @@ class DeploymentHeadTest(unittest.TestCase):
     def setUp(self):
         BranchHandler.current_sha = NEWER
         BranchHandler.response_code = 200
+        BranchHandler.latest_report_id = 42
 
-    def run_gate(self, expected_sha):
+    def run_gate(self, expected_sha, source_run_id=None):
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary) / "github-output"
+            site = Path(temporary) / "site"
+            site.mkdir()
             env = os.environ.copy()
             env.update(
                 {
@@ -64,8 +85,20 @@ class DeploymentHeadTest(unittest.TestCase):
                     "GITHUB_TOKEN": "test-token",
                     "GITHUB_SHA": expected_sha,
                     "GITHUB_OUTPUT": str(output),
+                    "PAGES_SITE_DIR": str(site),
                 }
             )
+            if source_run_id is not None:
+                event = Path(temporary) / "event.json"
+                event.write_text(json.dumps({"workflow_run": {
+                    "id": source_run_id,
+                    "name": "Algorithm report records and site",
+                    "head_sha": expected_sha,
+                    "head_branch": "main",
+                    "status": "completed",
+                    "conclusion": "success",
+                }}))
+                env["GITHUB_EVENT_PATH"] = str(event)
             result = subprocess.run(
                 [sys.executable, str(SCRIPT)],
                 env=env,
@@ -75,11 +108,13 @@ class DeploymentHeadTest(unittest.TestCase):
                 timeout=10,
                 check=False,
             )
-            return result, output.read_text() if output.exists() else ""
+            marker_path = site / "pages-augmentation-source.json"
+            marker = json.loads(marker_path.read_text()) if marker_path.exists() else None
+            return result, output.read_text() if output.exists() else "", marker
 
     def test_later_validation_of_older_run_cannot_deploy_after_newer_run(self):
-        newer, newer_output = self.run_gate(NEWER)
-        older, older_output = self.run_gate(OLDER)
+        newer, newer_output, _ = self.run_gate(NEWER)
+        older, older_output, _ = self.run_gate(OLDER)
         self.assertEqual(newer.returncode, 0, newer.stderr)
         self.assertEqual(newer_output, "current=true\n")
         self.assertEqual(older.returncode, 0, older.stderr)
@@ -107,7 +142,7 @@ class DeploymentHeadTest(unittest.TestCase):
 
         published = "0" * 40  # Already-running deployment finished first.
         for commit in pending:
-            result, output = self.run_gate(commit)
+            result, output, _ = self.run_gate(commit)
             self.assertEqual(result.returncode, 0, result.stderr)
             if output == "current=true\n":
                 published = commit
@@ -115,15 +150,32 @@ class DeploymentHeadTest(unittest.TestCase):
 
     def test_api_failure_blocks_deployment(self):
         BranchHandler.response_code = 503
-        result, output = self.run_gate(NEWER)
+        result, output, _ = self.run_gate(NEWER)
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(output, "")
 
     def test_malformed_branch_response_blocks_deployment(self):
         BranchHandler.current_sha = "not-a-commit"
-        result, output = self.run_gate(NEWER)
+        result, output, _ = self.run_gate(NEWER)
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(output, "")
+
+    def test_older_same_sha_report_run_cannot_deploy_after_newer_run(self):
+        BranchHandler.latest_report_id = 43
+        result, output, marker = self.run_gate(NEWER, source_run_id=42)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(output, "current=false\n")
+        self.assertIsNone(marker)
+
+    def test_current_workflow_run_writes_parent_identity_into_pages_site(self):
+        result, output, marker = self.run_gate(NEWER, source_run_id=42)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("source_run_id=42\n", output)
+        self.assertEqual(marker, {
+            "schema": "csl.pages-augmentation-source/1",
+            "report_run_id": 42,
+            "head_sha": NEWER,
+        })
 
 
 if __name__ == "__main__":
