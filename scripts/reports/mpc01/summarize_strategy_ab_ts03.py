@@ -4,12 +4,13 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import html
 import json
 import statistics
 from pathlib import Path
 
-from build_strategy_ab_records import validate_record
+from build_strategy_ab_records import build_record, canonical, validate_record
 
 
 STRATEGIES = ("csl.synthesis.reach-back", "csl.synthesis.strategy-b")
@@ -26,20 +27,44 @@ def main() -> None:
     args = parser.parse_args()
     bundle = args.bundle.resolve()
     read = lambda name: (bundle / name).read_bytes()
-    events_bytes = read("strategy-ab-ts03-events.jsonl")
-    if events_bytes != read("strategy-ab-ts03-stdout.jsonl"):
+    events_path = bundle / "strategy-ab-ts03-events.jsonl"
+    stdout_path = bundle / "strategy-ab-ts03-stdout.jsonl"
+    supervisor_path = bundle / "capture-supervisor.py"
+    scenario_path = bundle / "scenario.json"
+    environment_path = bundle / "capture-environment.json"
+    codec_environment_path = bundle / "codec-environment.json"
+    resource_profile_path = bundle / "resource-profile.json"
+    record_path = bundle / "comparison-record.json"
+    events_bytes = events_path.read_bytes()
+    if events_bytes != stdout_path.read_bytes():
         raise ValueError("event JSONL and stdout bytes differ")
     events = [json.loads(line) for line in events_bytes.decode().splitlines() if line]
     header, trials = events[0], events[1:]
-    scenario = json.loads(read("scenario.json"))
-    environment = json.loads(read("capture-environment.json"))
-    profile = json.loads(read("resource-profile.json"))
-    record = json.loads(read("comparison-record.json"))
+    scenario = json.loads(scenario_path.read_text(encoding="utf-8"))
+    environment_text = environment_path.read_text(encoding="utf-8")
+    environment = json.loads(environment_text)
+    profile_bytes = resource_profile_path.read_bytes()
+    profile = json.loads(profile_bytes)
+    record_text = record_path.read_text(encoding="utf-8")
+    record = json.loads(record_text)
     validate_record(record)
+    scenario_hash = hashlib.sha256(scenario_path.read_bytes()).hexdigest()
+    events_hash = hashlib.sha256(events_bytes).hexdigest()
+    profile_hash = hashlib.sha256(profile_bytes).hexdigest()
+    supervisor_hash = hashlib.sha256(supervisor_path.read_bytes()).hexdigest()
+    if (environment.get("scenario_sha256") != scenario_hash or
+            environment.get("events_sha256") != events_hash or
+            environment.get("measurement", {}).get("events_sha256") != events_hash or
+            environment.get("measurement", {}).get("resource_profile_sha256") != profile_hash or
+            environment.get("measurement", {}).get("capture_supervisor_sha256") != supervisor_hash or
+            record_text != canonical(record) or
+            canonical(build_record(events_path, scenario_path, environment_path,
+                                   codec_environment_path)) != record_text):
+        raise ValueError("capture metadata or canonical record does not bind the exact saved input bytes")
     if (len(events) != 13 or len(trials) != 12 or
             header.get("schema") != "csl.synthesis.paired-family-event/1" or
             header.get("profile") != "ts03_singular_integrator" or
-            header.get("scenario_sha256") != environment.get("scenario_sha256") or
+            header.get("scenario_sha256") != scenario_hash or
             scenario.get("id") != "mpc01-ts03-singular-integrator-v1" or
             scenario.get("horizon") != 2 or scenario.get("initial_state") != [0] or
             scenario.get("controls") != {"kind": "box", "lower": [0], "upper": [1]} or

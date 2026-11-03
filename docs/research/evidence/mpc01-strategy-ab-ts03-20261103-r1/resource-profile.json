@@ -1,12 +1,12 @@
 {
   "command": [
-    "/var/tmp/csl-mpc01-ts03-20261103-r2/examples-build/registered_synthesis_comparison",
+    "/var/tmp/csl-mpc01-ts03-20261103-r3/examples-build/registered_synthesis_comparison",
     "--measure-profile",
     "ts03_singular_integrator",
-    "/var/tmp/csl-mpc01-ts03-20261103-r2/scenario.json",
-    "/var/tmp/csl-mpc01-ts03-20261103-r2/strategy-ab-ts03-events.jsonl"
+    "/home/butahlecoq/.local/share/codex/worktrees/mpc01-pairing-next-20261103/docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1/scenario.json",
+    "/var/tmp/csl-mpc01-ts03-20261103-r4/strategy-ab-ts03-events.jsonl"
   ],
-  "elapsed_wall_time_ns": 56725906,
+  "elapsed_wall_time_ns": 52850894,
   "enforced_limits": {
     "memory_max_bytes": 2147483648,
     "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
@@ -17,14 +17,14 @@
   },
   "host": {
     "load_average_after": [
-      0.75341796875,
-      1.89013671875,
-      1.521484375
+      0.35498046875,
+      0.8583984375,
+      1.15869140625
     ],
     "load_average_before": [
-      0.75341796875,
-      1.89013671875,
-      1.521484375
+      0.35498046875,
+      0.8583984375,
+      1.15869140625
     ],
     "logical_cpu_count": 8,
     "machine": "x86_64",
@@ -33,7 +33,7 @@
   },
   "observed": {
     "exit_code": 0,
-    "memory_current_bytes": 19132416,
+    "memory_current_bytes": 11104256,
     "memory_events": [
       "low 0",
       "high 0",
@@ -43,7 +43,7 @@
       "oom_group_kill 0",
       "sock_throttled 0"
     ],
-    "process_tree_peak_memory_bytes": 20144128,
+    "process_tree_peak_memory_bytes": 12009472,
     "timed_out": false
   },
   "profile": "local-host-constrained-process-tree",
@@ -54,5 +54,5 @@
   },
   "schema": "csl.mpc01-resource-profile/1",
   "status": "completed",
-  "timeout_scope": "one complete strategy A/B capture process group; applies to the suite invocation, not individually restarted trials"
+  "timeout_scope": "one complete strategy A/B capture process group; suite invocation, not individual attempts"
 }
