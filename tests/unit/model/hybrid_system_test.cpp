@@ -716,6 +716,28 @@ TEST_CASE("hybrid joint relation rejects V sets during capability preflight") {
     CHECK(std::get<Diagnostic>(result).field=="hybrid.guard.representation");
 }
 
+TEST_CASE("hybrid joint relation reports V reset refusal before relation construction") {
+    auto [system,request]=dimension_changing_example();
+    system.edges[0].reset_relations[0]=vertex_set("v-reset",3);
+    const HybridPath path{{{"source"},{"target"}},{{"switch"}}};
+    const auto result=compose_hybrid_path_relation_with_report(system,request,path,{16,64,1024});
+    REQUIRE(std::holds_alternative<HybridPathCompositionFailureReport>(result));
+    const auto& report=std::get<HybridPathCompositionFailureReport>(result);
+    const auto* diagnostic=std::get_if<Diagnostic>(&report.failure);
+    REQUIRE(diagnostic);
+    CHECK(diagnostic->code==DiagnosticCode::unsupported);
+    CHECK(diagnostic->field=="hybrid.reset.representation");
+    CHECK(report.operations.empty());
+    const std::array<HybridPath,1> paths{path};
+    const auto preflight=preflight_hybrid_path_relations(system,request,paths,{16,64,1024});
+    REQUIRE(std::holds_alternative<HybridPathCompositionFailureReport>(preflight));
+    const auto& preflight_report=std::get<HybridPathCompositionFailureReport>(preflight);
+    const auto* preflight_diagnostic=std::get_if<Diagnostic>(&preflight_report.failure);
+    REQUIRE(preflight_diagnostic);
+    CHECK(preflight_diagnostic->field=="hybrid.reset.representation");
+    CHECK(preflight_diagnostic->explanation.find("stage 0 edge switch")!=std::string::npos);
+}
+
 TEST_CASE("hybrid relation IDs distinguish colon-delimited edge-ID sequences") {
     HybridSystem system{2,
         {mode("a",1,0,2),mode("b",1,0,2),mode("c",1,0,2)},
