@@ -1394,7 +1394,7 @@ class RejectingLP final : public LPWorkspace {
 
 class CompletingLP final : public LPWorkspace {
     ProgramOutcome do_solve(const LinearProgram& program,const ExecutionContext& context) override {
-        const auto width=program.identity().problem.value=="hybrid-problem"?3U:5U;
+        const auto width=program.identity().problem.value=="hybrid-problem"?5U:3U;
         if(context.backend_thread_observation) context.backend_thread_observation->record(width);
         return ProgramResult{Termination::completed,
             {program.identity(),MathematicalOutcome::undetermined,Unestablished{},{}},
@@ -5117,8 +5117,8 @@ TEST_CASE("hybrid branch execution retains a completed solver result and provena
     CHECK(report.branches[0].requested_resources->outer_workers==4);
     CHECK(report.branches[0].requested_resources->threads_per_worker==2);
     CHECK(report.branches[0].requested_resources->memory_bytes==8192);
-    CHECK(report.branches[0].observed_backend_threads==3);
-    CHECK(report.branches[1].observed_backend_threads==5);
+    CHECK(report.branches[0].observed_backend_threads==5);
+    CHECK(report.branches[1].observed_backend_threads==3);
     CHECK(aggregate_observation->maximum()==5);
 }
 
