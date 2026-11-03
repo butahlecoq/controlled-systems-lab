@@ -1715,6 +1715,19 @@ TEST_CASE("hybrid request refinement retains exact reachability and refuses unpr
     CHECK(execution.reachability[0].path==paths[0]);
     CHECK(execution.reachability[1].path==paths[1]);
 
+    auto malformed=std::make_shared<MisreportingReachabilityAdapter>();
+    malformed->corruption=1;
+    HybridExecutionSelection malformed_selection;
+    malformed_selection.reachability=malformed;
+    auto malformed_admission=admit_hybrid_request(system,request,malformed_selection,
+        {1,8},{16,64,1024},{},{});
+    REQUIRE(std::holds_alternative<HybridAdmissionToken>(malformed_admission));
+    auto malformed_refinement=refine_hybrid_request(
+        std::move(std::get<HybridAdmissionToken>(malformed_admission)),{},{});
+    REQUIRE(std::holds_alternative<HybridConcreteRefinementRejected>(malformed_refinement));
+    CHECK(std::get<HybridConcreteRefinementRejected>(malformed_refinement).diagnostics.front().field==
+        "hybrid.reachability.limits");
+
     auto projected=std::make_shared<CountingReachabilityAdmissionAdapter>();
     HybridExecutionSelection projected_selection;
     projected_selection.reachability=projected;

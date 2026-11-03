@@ -11,6 +11,10 @@ int main() {
     using namespace csl::model;
     using namespace csl::synthesis;
 
+    const HybridPortfolioExecution legacy_aggregate{{},true};
+    if(!legacy_aggregate.all_supplied_branches_completed||!legacy_aggregate.reachability.empty())
+        throw std::runtime_error("Hybrid execution aggregate source compatibility changed");
+
     registry::Registry<registry::LPPort> admission_providers;
     registry::Registration<registry::LPPort> admission_registration{
         {{"installed-admission"},"1"},

@@ -1831,8 +1831,9 @@ HybridRefinementResult refine_hybrid_request(HybridAdmissionToken token,
             if(const auto stop=interruption(context))
                 return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
                     "Hybrid reachability refinement stopped between path relations"};
-            auto result=admission.selection.reachability->compose_path(admission.system,
-                admission.request,path,admission.relation_limits,context.cancellation);
+            auto result=compute_hybrid_path_reachability(*admission.selection.reachability,
+                admission.system,admission.request,path,admission.relation_limits,
+                context.cancellation);
             if(const auto* stopped=std::get_if<OperationStopped>(&result)) return *stopped;
             if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&result)) {
                 if(const auto* stopped=std::get_if<OperationStopped>(&failure->failure)) return *stopped;
