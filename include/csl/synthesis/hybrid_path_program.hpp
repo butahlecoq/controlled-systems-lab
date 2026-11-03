@@ -23,6 +23,31 @@ struct HybridPathProgram {
 using HybridPortfolioProgramResult = std::variant<std::vector<HybridPathProgram>, Diagnostics,
     OperationStopped, model::HybridPathCompositionFailureReport>;
 
+struct HybridProviderAdmissionAttempt {
+    model::HybridPath path;
+    registry::RequestEnvelope envelope;
+    registry::Provenance provider;
+    registry::AdmissionDeclaration declaration;
+};
+struct HybridProviderAdmissionReport {
+    std::vector<model::HybridPath> paths;
+    std::vector<HybridProviderAdmissionAttempt> attempts;
+    Diagnostics diagnostics;
+    bool admitted{};
+};
+using HybridProviderAdmissionResult = std::variant<HybridProviderAdmissionReport,
+    Diagnostics, OperationStopped>;
+
+// Admits the selected solver provider against a conservative envelope for
+// every complete path. Unknown/conditional declarations remain explicit
+// failures; this performs no relation composition or provider preparation.
+HybridProviderAdmissionResult preflight_hybrid_program_providers(
+    const model::HybridSystem&, const model::HybridRequest&,
+    std::span<const model::HybridPath>, model::HybridRelationLimits,
+    const registry::PreparedProvider<registry::LPPort>&,
+    const registry::PreparedProvider<registry::ConvexPort>&,
+    std::stop_token cancellation = {});
+
 using HybridPathProgramResult = std::variant<HybridPathProgram, Diagnostics, OperationStopped,
     model::HybridPathCompositionFailureReport>;
 
@@ -176,6 +201,16 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs(
     const model::HybridRequest&, ProblemId, model::HybridEnumerationLimits,
     model::HybridRelationLimits, optimization::ObjectivePolicy = {},
     std::stop_token cancellation = {});
+// Provider-aware overload. Every path's solver provider is declared before
+// relation composition; concrete provider preparation still occurs through
+// execute_hybrid_path_programs before any workspace is created.
+HybridPortfolioProgramResult build_hybrid_portfolio_programs(
+    const HybridDirectTrajectoryAdapter&, const model::HybridSystem&,
+    const model::HybridRequest&, ProblemId, model::HybridEnumerationLimits,
+    model::HybridRelationLimits,
+    const registry::PreparedProvider<registry::LPPort>&,
+    const registry::PreparedProvider<registry::ConvexPort>&,
+    optimization::ObjectivePolicy = {}, std::stop_token cancellation = {});
 
 // Executes supplied branch programs independently and retains each result and
 // its solver provenance. This does not compare objectives or certify a global
@@ -405,6 +440,13 @@ HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
     const HybridFamilyVerificationAdapter&, const HybridDirectTrajectoryAdapter&,
     const model::HybridSystem&, const model::HybridRequest&, ProblemId,
     model::HybridEnumerationLimits, model::HybridRelationLimits,
+    optimization::ObjectivePolicy = {}, std::stop_token cancellation = {});
+HybridPortfolioProgramResult build_hybrid_portfolio_programs_with_verifier(
+    const HybridFamilyVerificationAdapter&, const HybridDirectTrajectoryAdapter&,
+    const model::HybridSystem&, const model::HybridRequest&, ProblemId,
+    model::HybridEnumerationLimits, model::HybridRelationLimits,
+    const registry::PreparedProvider<registry::LPPort>&,
+    const registry::PreparedProvider<registry::ConvexPort>&,
     optimization::ObjectivePolicy = {}, std::stop_token cancellation = {});
 
 // Enumerates the full permitted path inventory and validates that programs and

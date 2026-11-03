@@ -1395,6 +1395,24 @@ registry::PreparedProvider<registry::LPPort> lp_provider(std::stop_source* cance
     return std::get<registry::PreparedProvider<registry::LPPort>>(std::move(prepared));
 }
 
+registry::PreparedProvider<registry::LPPort> declared_lp_provider(
+    registry::AdmissionStatus status,bool sufficient,std::shared_ptr<int> declaration_calls) {
+    registry::Registry<registry::LPPort> providers;
+    REQUIRE_FALSE(providers.add({{{"declared-lp"},"1"},
+        [](const LinearProgram&,const registry::Requirements&)->registry::Capability {
+            return registry::Offer{};
+        },
+        [](const LinearProgram&){return std::make_unique<RejectingLP>();}, {},
+        [status,sufficient,declaration_calls](const registry::RequestEnvelope&,
+            const registry::Requirements&) {
+            ++*declaration_calls;
+            return registry::AdmissionDeclaration{status,{},sufficient};
+        }}));
+    auto prepared=registry::prepare_provider(registry::select_provider(providers,{{"declared-lp"},{}}));
+    REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::LPPort>>(prepared));
+    return std::get<registry::PreparedProvider<registry::LPPort>>(std::move(prepared));
+}
+
 registry::PreparedProvider<registry::LPPort> completing_lp_provider() {
     registry::Registry<registry::LPPort> providers;
     REQUIRE_FALSE(providers.add({{{"completing-lp"},"1"},
@@ -1477,6 +1495,57 @@ TEST_CASE("prepared providers expose conservative request-envelope declarations"
     const auto legacy=lp_provider().declare_support({"hybrid.linear-optimization",4,6,24,"linear"});
     CHECK(legacy.status==registry::AdmissionStatus::unknown);
     CHECK_FALSE(legacy.envelope_is_sufficient);
+}
+
+TEST_CASE("hybrid portfolio rejects unknown provider envelopes before adapter path builds") {
+    auto [system,request]=variable_size_parallel_profile();
+    const auto enumerated=model::enumerate_hybrid_paths(system,request.initial.mode,
+        request.allowed_terminal_modes,{1,8});
+    REQUIRE(std::holds_alternative<std::vector<model::HybridPath>>(enumerated));
+    const auto& paths=std::get<std::vector<model::HybridPath>>(enumerated);
+    REQUIRE(paths.size()==2);
+
+    auto calls=std::make_shared<int>(0);
+    const auto lp=declared_lp_provider(registry::AdmissionStatus::unknown,false,calls);
+    const auto report_result=preflight_hybrid_program_providers(
+        system,request,paths,{16,64,1024},lp,convex_provider());
+    REQUIRE(std::holds_alternative<HybridProviderAdmissionReport>(report_result));
+    const auto& report=std::get<HybridProviderAdmissionReport>(report_result);
+    CHECK_FALSE(report.admitted);
+    CHECK(report.paths==paths);
+    REQUIRE(report.attempts.size()==2);
+    CHECK(report.diagnostics.size()==2);
+    CHECK(*calls==2);
+    for(const auto& attempt:report.attempts) {
+        CHECK(attempt.declaration.status==registry::AdmissionStatus::unknown);
+        CHECK(attempt.provider.actual->id.value=="declared-lp");
+        CHECK(attempt.envelope.operation=="hybrid.linear-optimization");
+    }
+
+    auto one_call=std::make_shared<int>(0);
+    const auto rejected_lp=declared_lp_provider(registry::AdmissionStatus::unsupported,false,one_call);
+    AdmittingTrajectoryPreflightAdapter trajectory;
+    const auto result=build_hybrid_portfolio_programs(trajectory,system,request,
+        {"provider-preflight"},{1,8},{16,64,1024},rejected_lp,convex_provider());
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="hybrid.provider.admission");
+    CHECK(std::get<Diagnostics>(result).front().explanation.find("no hybrid relation has been composed")!=std::string::npos);
+    CHECK(*one_call==2);
+    CHECK(trajectory.preflight_calls==1);
+    CHECK(trajectory.capability_calls==1);
+    CHECK(trajectory.build_calls==0);
+}
+
+TEST_CASE("hybrid portfolio builds only after every provider envelope is supported") {
+    auto calls=std::make_shared<int>(0);
+    const auto lp=declared_lp_provider(registry::AdmissionStatus::supported,true,calls);
+    AdmittingTrajectoryPreflightAdapter trajectory;
+    const auto result=build_hybrid_portfolio_programs(trajectory,example_system(),example_request(),
+        {"provider-admitted"},{1,8},{16,64,1024},lp,convex_provider());
+    REQUIRE(std::holds_alternative<Diagnostics>(result));
+    CHECK(std::get<Diagnostics>(result).front().field=="fixture.alternate_representation");
+    CHECK(*calls==1);
+    CHECK(trajectory.build_calls==1);
 }
 
 TEST_CASE("hybrid direct path program preserves branch and terminal objective coordinates") {

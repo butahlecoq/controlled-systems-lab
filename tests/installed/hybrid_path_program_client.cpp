@@ -34,6 +34,19 @@ int main() {
             {"hybrid.linear-optimization",4,8,32,"linear"}).status!=registry::AdmissionStatus::supported)
         throw std::runtime_error("Installed prepared provider did not expose conservative admission");
 
+    registry::Registry<registry::ConvexPort> convex_providers;
+    if (convex_providers.add({{{"installed-unused-convex"},"1"},
+            [](const ConvexProgram&,const registry::Requirements&)->registry::Capability {
+                return registry::Offer{};
+            },
+            [](const ConvexProgram&){return std::unique_ptr<ConvexWorkspace>{};}}))
+        throw std::runtime_error("Installed unused convex provider registration failed");
+    auto prepared_convex=registry::prepare_provider(registry::select_provider(
+        convex_providers,{{"installed-unused-convex"},{}}));
+    auto* convex_provider=std::get_if<registry::PreparedProvider<registry::ConvexPort>>(&prepared_convex);
+    if (convex_provider==nullptr)
+        throw std::runtime_error("Installed convex provider selection failed");
+
     auto inequalities = numeric::snapshot(Matrix{0, 4, {}});
     auto bounds = numeric::snapshot_vector(Vector{});
     auto equalities = numeric::snapshot(Matrix{2, 4, {-1, 0, 1, 0, 0, -1, 0, 1}});
@@ -65,6 +78,13 @@ int main() {
     const HybridRequest request{{{"source"}, {-1, 0}}, {{"target"}},
         {{{"target"}, LinearTerminal{{1, 0}, 0}, "x", "m"}}};
     const HybridPath path{{{"source"}, {"target"}}, {{"switch"}}};
+    JointHDirectTrajectoryAdapter trajectory;
+    const auto admitted_portfolio=build_hybrid_portfolio_programs(trajectory,system,request,
+        {"installed-admitted-hybrid"},{1,4},{32,128,4096},*admission_provider,*convex_provider);
+    const auto* admitted=std::get_if<std::vector<HybridPathProgram>>(&admitted_portfolio);
+    if (admitted==nullptr || admitted->size()!=1 || admitted->front().path!=path)
+        throw std::runtime_error("Installed provider-aware hybrid admission did not build its admitted path");
+
     const auto result = build_hybrid_path_program(system, request, path,
         {"installed-hybrid-2d"}, {32, 128, 4096});
     const auto* program = std::get_if<HybridPathProgram>(&result);

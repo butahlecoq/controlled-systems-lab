@@ -182,6 +182,23 @@ HybridReachabilityPreflightResult ProjectedStateHybridReachabilityAdapter::prefl
     }
     if(required_rows>maximum_projection_rows_)
         return unsupported("hybrid.projected.row_limit","Projection input relation exceeds the selected provider row limit");
+    if(limits.max_variables==0)
+        return unsupported("hybrid.projected.provider_envelope",
+            "Projection provider envelope requires a positive variable limit");
+    if(required_rows>
+       std::numeric_limits<std::size_t>::max()/limits.max_variables)
+        return unsupported("hybrid.projected.provider_envelope",
+            "Projection provider envelope matrix extent overflows size_t");
+    const registry::RequestEnvelope envelope{"geometry.h_projection",required_rows,
+        limits.max_variables,required_rows*limits.max_variables,"equivalent"};
+    const auto declaration=projection_.declare_support(envelope);
+    if(declaration.status!=registry::AdmissionStatus::supported||!declaration.envelope_is_sufficient) {
+        const std::string status=declaration.status==registry::AdmissionStatus::unsupported?"unsupported":
+            declaration.status==registry::AdmissionStatus::conditional?"conditional":"unknown";
+        return unsupported("hybrid.projected.provider_admission",
+            "Selected geometry provider returned "+status+
+            " for the complete H-projection envelope before relation composition");
+    }
     return std::monostate{};
 }
 
