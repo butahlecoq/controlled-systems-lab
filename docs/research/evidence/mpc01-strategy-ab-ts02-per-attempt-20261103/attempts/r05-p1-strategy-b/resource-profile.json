@@ -9,9 +9,9 @@
     "5",
     "1",
     "0",
-    "/var/tmp/mpc01-strategy-ab-ts02-per-attempt/attempts/r05-p1-strategy-b/events.jsonl"
+    "/var/tmp/mpc01-strategy-ab-ts02-per-attempt-r3/attempts/r05-p1-strategy-b/events.jsonl"
   ],
-  "elapsed_wall_time_ns": 8491800,
+  "elapsed_wall_time_ns": 5874190,
   "enforced_limits": {
     "memory_max_bytes": 8589934592,
     "memory_mechanism": "systemd user scope on Linux cgroup v2, memory.max",
@@ -22,14 +22,14 @@
   },
   "host": {
     "load_average_after": [
-      0.44580078125,
-      2.1044921875,
-      1.6865234375
+      0.12158203125,
+      0.572265625,
+      1.0712890625
     ],
     "load_average_before": [
-      0.44580078125,
-      2.1044921875,
-      1.6865234375
+      0.12158203125,
+      0.572265625,
+      1.0712890625
     ],
     "logical_cpu_count": 8,
     "machine": "x86_64",
@@ -38,7 +38,7 @@
   },
   "observed": {
     "exit_code": 0,
-    "memory_current_bytes": 11214848,
+    "memory_current_bytes": 11132928,
     "memory_events": [
       "low 0",
       "high 0",
@@ -48,7 +48,7 @@
       "oom_group_kill 0",
       "sock_throttled 0"
     ],
-    "process_tree_peak_memory_bytes": 11919360,
+    "process_tree_peak_memory_bytes": 11894784,
     "timed_out": false,
     "trial_status": "passed",
     "trial_termination": "completed"
@@ -145,42 +145,42 @@
       "end_to_end_strategy": {
         "available": true,
         "unit": "ns",
-        "value": 2076680
+        "value": 1345154
       },
       "family_construction": {
         "available": true,
         "unit": "ns",
-        "value": 139544
+        "value": 100293
       },
       "original_verification": {
         "available": true,
         "unit": "ns",
-        "value": 36667
+        "value": 19695
       },
       "preparation": {
         "available": true,
         "unit": "ns",
-        "value": 83251
+        "value": 57061
       },
       "selector_preparation": {
         "available": true,
         "unit": "ns",
-        "value": 46236
+        "value": 25702
       },
       "selector_workspace_creation": {
         "available": true,
         "unit": "ns",
-        "value": 1956
+        "value": 1467
       },
       "witness_query": {
         "available": true,
         "unit": "ns",
-        "value": 1743674
+        "value": 1119495
       },
       "workspace_creation": {
         "available": true,
         "unit": "ns",
-        "value": 4679
+        "value": 4749
       }
     },
     "verification_summary": {

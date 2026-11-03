@@ -33,7 +33,9 @@ STRATEGY_AB_TS02_FILES = (
     "scenario.json", "strategy-ab-ts02-environment.json",
     "strategy-ab-ts02-csl-environment.json", "resource-profile.json",
     "capture-supervisor.py", "run-capture.py", "binary-dynamic-dependencies.txt",
-    "systemd-scope-processes.jsonl",
+    "systemd-scope-processes.jsonl", "build-note.json",
+    "cmake-compiler-metadata.cmake", "target-flags.make", "target-link.txt",
+    "build-record.py", "render-report.py", "write-build-note.py",
 )
 
 

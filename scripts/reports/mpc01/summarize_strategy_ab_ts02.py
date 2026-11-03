@@ -138,15 +138,10 @@ def main() -> None:
     event_hash = digest(args.events)
     build_provenance = environment.get("binary_build_provenance")
     if build_provenance:
-        repository_root = Path(__file__).resolve().parents[3]
-        build_note_href = html.escape(os.path.relpath(
-            repository_root / build_provenance["build_note"]["path"], output.parent))
-        process_record_href = html.escape(os.path.relpath(
-            repository_root / build_provenance["process_record"]["path"], output.parent))
-        checksum_href = html.escape(os.path.relpath(
-            repository_root / build_provenance["checksum_manifest"]["path"], output.parent))
-        provenance_text = (f"Binary source revision <code>{html.escape(build_provenance['source_revision'])}</code> is tied to the exact executable SHA-256 by the archived build note and process record.")
-        provenance_links = f'<li>Archived build provenance: <a href="{build_note_href}">build note</a> · <a href="{process_record_href}">process record</a> · <a href="{checksum_href}">checksums</a></li>'
+        note_path = build_provenance["build_note"]["path"]
+        build_note_href = html.escape(os.path.relpath(output.parent / note_path, output.parent))
+        provenance_text = (f"Binary source revision <code>{html.escape(build_provenance['source_revision'])}</code> is linked to the configured CMake metadata, object digest, and executable SHA-256 in the retained build note.")
+        provenance_links = f'<li>Retained build note: <a href="{build_note_href}">build-note.json</a></li>'
     else:
         provenance_text = "The executable SHA-256, source commit, compiler, and build configuration are recorded in the capture environment."
         provenance_links = ""
@@ -160,7 +155,7 @@ def main() -> None:
     scoped_peak = profile["observed"]["process_tree_peak_memory_bytes"]
     resource_text = (f"Each of the 12 strategy attempts ran in its own Linux cgroup-v2 process scope with a 300-second process-tree watchdog, 8 GiB memory cap, no swap, 100% CPU quota, and one pinned logical CPU. The sum of attempt scope wall times was {scoped_elapsed:.6f} s; the largest observed process-tree memory peak was {scoped_peak} bytes. Every attempt completed without timeout or memory-limit events. A separate excluded warmup pair records limiter enforcement for both strategies.")
     if build_provenance:
-        provenance_text = (f"Binary source revision <code>{html.escape(build_provenance['source_revision'])}</code> is tied to the exact executable SHA-256 by the archived build note and process record.")
+        provenance_text = (f"Binary source revision <code>{html.escape(build_provenance['source_revision'])}</code> is linked to the configured CMake metadata, object digest, and executable SHA-256 in the retained build note.")
 
     report = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MPC-01 T-S02 Strategy A/B</title>
 <style>body{{font:16px/1.55 system-ui,sans-serif;color:#202a33;max-width:980px;margin:2rem auto;padding:0 1rem}}table{{border-collapse:collapse}}th,td{{border:1px solid #bbc5cc;padding:.45rem .7rem;text-align:left}}figure img{{width:min(100%,620px)}}.note{{border-left:4px solid #516b7b;padding:.4rem 1rem;background:#f4f7f8}}code{{overflow-wrap:anywhere}}</style></head><body>
@@ -185,6 +180,8 @@ def main() -> None:
         "- The exact minimizer set is the full unit square. Both strategies returned the same two corner witnesses.", "",
         "| Strategy | Median end-to-end (ms) | Range (ms) |", "|---|---:|---:|",
     ]
+    if build_provenance:
+        lines.insert(5, f"- Build note: [`{build_provenance['build_note']['path']}`]({build_provenance['build_note']['path']}) (SHA-256 `{build_provenance['build_note']['sha256']}`).")
     for strategy in EXPECTED:
         median, low, high = timing[strategy]
         lines.append(f"| `{strategy}` | {median/1e6:.6f} | {low/1e6:.6f}–{high/1e6:.6f} |")

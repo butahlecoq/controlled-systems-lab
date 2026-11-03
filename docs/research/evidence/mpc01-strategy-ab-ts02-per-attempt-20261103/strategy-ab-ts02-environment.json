@@ -1,6 +1,21 @@
 {
+  "binary_build_provenance": {
+    "build_note": {
+      "path": "build-note.json",
+      "sha256": "f890c255e01ec0aa8b6538ae9d3846199c6884b84e88cbc6854174dc7f4c8a3b"
+    },
+    "executable_sha256": "dc57e3c16c5b1c356cd86762105f86a913a61c7a60cc6855c86bad083ac86e5e",
+    "schema": "csl.binary-build-provenance/2",
+    "source_revision": "af4aa5cec4c8a9673460da63475698c2bd76a92a",
+    "source_tree_sha256": "267d397563fe7dad428855f6bcba3599b8d54fc6a5ccebc6f24dcad68a010449"
+  },
   "build": {
-    "compiler": "unknown unknown",
+    "compiler": "GNU 16.2.1",
+    "compiler_banner": "c++ (GCC) 16.2.1 20260810",
+    "compiler_id": "GNU",
+    "compiler_metadata_file": "/home/butahlecoq/.local/share/codex/worktrees/issue597-per-attempt-pairs-20261103/build/issue597-attempt/CMakeFiles/3.31.6/CMakeCXXCompiler.cmake",
+    "compiler_path": "/usr/bin/c++",
+    "compiler_version": "16.2.1",
     "flags": "-O3 -DNDEBUG",
     "generator": "Unix Makefiles",
     "type": "Release"
@@ -8,20 +23,20 @@
   "executable": "/home/butahlecoq/.local/share/codex/worktrees/issue597-per-attempt-pairs-20261103/build/issue597-attempt/examples/registered_synthesis_comparison",
   "executable_sha256": "dc57e3c16c5b1c356cd86762105f86a913a61c7a60cc6855c86bad083ac86e5e",
   "execution_worktree_clean_before_run": true,
-  "execution_worktree_commit": "af4aa5cec4c8a9673460da63475698c2bd76a92a",
-  "execution_worktree_role": "The capture runs from the clean source checkout; the executable hash binds the exact built binary.",
+  "execution_worktree_commit": "62480a00ffb28018149a8e524b0a45c11d7ad181",
+  "execution_worktree_role": "The executable was built from source_commit; compiler identity comes from the configured CMake compiler metadata and banner.",
   "host": {
     "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
     "kernel": "7.2.8-9-omarchy",
     "load_average_after_capture": [
-      0.44580078125,
-      2.1044921875,
-      1.6865234375
+      0.12158203125,
+      0.572265625,
+      1.0712890625
     ],
     "load_average_before_capture": [
-      0.3974609375,
-      2.12353515625,
-      1.6904296875
+      0.12158203125,
+      0.572265625,
+      1.0712890625
     ],
     "logical_cpus": 8,
     "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44"
@@ -38,7 +53,7 @@
     "process_tree_memory_swap_max_bytes": 0,
     "process_tree_wall_time_cap_seconds": 300,
     "resource_profile": "resource-profile.json",
-    "resource_profile_sha256": "9a030c006cf01fa7c224a67e39f4e7f394fa2b9a0ffe502dc6ef49d36dab37e6",
+    "resource_profile_sha256": "9be713d6edddba1d2eb3dc964748dbb9dcea93e1d5cf2cb64223cdddbfdec286",
     "separate_limiter_profile": "separate-limiter-profiles in resource-profile.json",
     "timeout_scope": "one strategy attempt per scope",
     "warmup_pairs_excluded": 1
@@ -48,5 +63,6 @@
   "source_commit": "af4aa5cec4c8a9673460da63475698c2bd76a92a",
   "source_dirty_before_run": false,
   "source_file": "examples/registered_synthesis_comparison.cpp",
-  "source_file_sha256": "f6593c982a6e1515bdcb9a20982dbe4a105e5d50eacee2db1fd98e405e454ae2"
+  "source_file_sha256": "f6593c982a6e1515bdcb9a20982dbe4a105e5d50eacee2db1fd98e405e454ae2",
+  "source_tree_sha256": "267d397563fe7dad428855f6bcba3599b8d54fc6a5ccebc6f24dcad68a010449"
 }

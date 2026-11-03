@@ -10,6 +10,7 @@ on:
       - scripts/reports/mpc01/summarize_strategy_ab_ts03.py
       - scripts/reports/mpc01/summarize_strategy_ab_ts02.py
       - scripts/reports/mpc01/build_strategy_ab_records.py
+      - scripts/reports/mpc01/write_strategy_ab_build_note.py
       - scripts/reports/mpc01/validate_strategy_ab_ts03_bundle.py
       - docs/research/evidence/mpc01-per-attempt-20261103-r3/**
       - docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1/**

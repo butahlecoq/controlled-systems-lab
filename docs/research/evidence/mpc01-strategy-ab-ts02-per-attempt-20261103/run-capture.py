@@ -31,19 +31,25 @@ def cache_value(cache: dict[str, str], name: str) -> str:
     return cache.get(name, "unknown")
 
 
-def tracked_tree_sha256(root: pathlib.Path) -> str:
-    paths = subprocess.run(["git", "ls-files", "-z"], cwd=root, check=True,
-                           capture_output=True).stdout.split(b"\0")
-    digest = hashlib.sha256()
-    for raw_path in paths:
-        if not raw_path:
-            continue
-        path = pathlib.Path(os.fsdecode(raw_path))
-        payload = (root / path).read_bytes()
-        digest.update(len(raw_path).to_bytes(8, "big"))
-        digest.update(raw_path)
-        digest.update(hashlib.sha256(payload).digest())
-    return digest.hexdigest()
+def source_tree_sha256(root: pathlib.Path, revision: str) -> str:
+    archive = subprocess.run(["git", "archive", "--format=tar", revision], cwd=root,
+                             check=True, capture_output=True).stdout
+    return sha256(archive)
+
+
+def cmake_compiler_metadata(build_dir: pathlib.Path) -> dict[str, str]:
+    candidates = sorted(build_dir.glob("CMakeFiles/*/CMakeCXXCompiler.cmake"))
+    if len(candidates) != 1:
+        raise RuntimeError(f"expected one CMake compiler metadata file, found {len(candidates)}")
+    values: dict[str, str] = {}
+    for line in candidates[0].read_text().splitlines():
+        for key in ("CMAKE_CXX_COMPILER_ID", "CMAKE_CXX_COMPILER_VERSION", "CMAKE_CXX_COMPILER"):
+            prefix = f'set({key} "'
+            if line.startswith(prefix) and line.endswith('")'):
+                values[key] = line[len(prefix):-2]
+    if not all(values.get(key) for key in ("CMAKE_CXX_COMPILER_ID", "CMAKE_CXX_COMPILER_VERSION")):
+        raise RuntimeError(f"incomplete compiler metadata in {candidates[0]}")
+    return values
 
 
 def main() -> int:
@@ -54,6 +60,7 @@ def main() -> int:
     parser.add_argument("--scenario", type=pathlib.Path, required=True)
     parser.add_argument("--profile", choices=("ts01_exact_integrator", "ts02_constant_integrator"), required=True)
     parser.add_argument("--output-dir", type=pathlib.Path, required=True)
+    parser.add_argument("--binary-source-commit", help="commit used to build the executable; defaults to HEAD")
     args = parser.parse_args()
 
     root = args.root.resolve(strict=True)
@@ -190,8 +197,16 @@ def main() -> int:
         if line and not line.startswith("#") and ":" in line and "=" in line:
             key, rest = line.split(":", 1)
             cache[key] = rest.split("=", 1)[1]
-    source_commit = git(root, "rev-parse", "HEAD")
-    source_file = root / "examples/registered_synthesis_comparison.cpp"
+    execution_commit = git(root, "rev-parse", "HEAD")
+    source_commit = args.binary_source_commit or execution_commit
+    git(root, "cat-file", "-e", f"{source_commit}^{{commit}}")
+    compiler = cmake_compiler_metadata(build_dir)
+    compiler_path = compiler.get("CMAKE_CXX_COMPILER", cache_value(cache, "CMAKE_CXX_COMPILER"))
+    compiler_version_result = subprocess.run([compiler_path, "--version"], check=True,
+                                             capture_output=True, text=True)
+    compiler_banner = compiler_version_result.stdout.splitlines()[0]
+    source_file_bytes = subprocess.run(["git", "show", f"{source_commit}:examples/registered_synthesis_comparison.cpp"],
+                                       cwd=root, check=True, capture_output=True).stdout
     binary_hash = sha256(binary.read_bytes())
     scenario_relative = scenario.relative_to(root).as_posix()
     cpu_model = "unknown"
@@ -201,12 +216,16 @@ def main() -> int:
             break
     environment = {
         "build": {"type": cache_value(cache, "CMAKE_BUILD_TYPE"),
-                  "compiler": cache_value(cache, "CMAKE_CXX_COMPILER_ID") + " " + cache_value(cache, "CMAKE_CXX_COMPILER_VERSION"),
+                  "compiler": compiler["CMAKE_CXX_COMPILER_ID"] + " " + compiler["CMAKE_CXX_COMPILER_VERSION"],
+                  "compiler_id": compiler["CMAKE_CXX_COMPILER_ID"],
+                  "compiler_version": compiler["CMAKE_CXX_COMPILER_VERSION"],
+                  "compiler_path": compiler_path, "compiler_banner": compiler_banner,
+                  "compiler_metadata_file": str((build_dir / sorted(build_dir.glob("CMakeFiles/*/CMakeCXXCompiler.cmake"))[0].relative_to(build_dir))),
                   "generator": cache_value(cache, "CMAKE_GENERATOR"),
                   "flags": cache_value(cache, "CMAKE_CXX_FLAGS_RELEASE")},
         "executable": str(binary), "executable_sha256": binary_hash,
         "execution_worktree_clean_before_run": True,
-        "execution_worktree_commit": source_commit,
+        "execution_worktree_commit": execution_commit,
         "host": {"cpu": cpu_model, "kernel": platform.release(),
                  "logical_cpus": os.cpu_count(), "os": platform.platform(),
                  "load_average_before_capture": receipts[0]["host"]["load_average_before"],
@@ -227,18 +246,19 @@ def main() -> int:
                         "cpu_time_or_peak_memory_profiled": True},
         "scenario": scenario_relative, "scenario_sha256": sha256(scenario.read_bytes()),
         "source_commit": source_commit, "source_dirty_before_run": False,
-        "source_file": source_file.relative_to(root).as_posix(),
-        "source_file_sha256": sha256(source_file.read_bytes()),
-        "execution_worktree_role": "The capture runs from the clean source checkout; the executable hash binds the exact built binary.",
+        "source_file": "examples/registered_synthesis_comparison.cpp",
+        "source_file_sha256": sha256(source_file_bytes),
+        "source_tree_sha256": source_tree_sha256(root, source_commit),
+        "execution_worktree_role": "The executable was built from source_commit; compiler identity comes from the configured CMake compiler metadata and banner.",
     }
     (output / "environment.json").write_text(json.dumps(environment, indent=2, sort_keys=True) + "\n")
     codec_environment = {
         "schema": "csl.obs04-environment/1",
         "build": {"schema": "csl.obs04-build/1", "source_revision": source_commit,
                   "source_dirty": False, "build_type": environment["build"]["type"],
-                  "compiler_id": cache_value(cache, "CMAKE_CXX_COMPILER_ID"),
-                  "compiler_version": cache_value(cache, "CMAKE_CXX_COMPILER_VERSION"),
-                  "cxx_standard": "20", "source_tree_sha256": tracked_tree_sha256(root),
+                  "compiler_id": compiler["CMAKE_CXX_COMPILER_ID"],
+                  "compiler_version": compiler["CMAKE_CXX_COMPILER_VERSION"],
+                  "cxx_standard": "20", "source_tree_sha256": source_tree_sha256(root, source_commit),
                   "backends": {}},
         "execution": {"warmup_repetitions": 1,
                       "observed_driver_workers": 1, "requested_workers": 1,
@@ -255,6 +275,10 @@ def main() -> int:
                     "binary_sha256": {"status": "available", "value": binary_hash}},
     }
     (output / "codec-environment.json").write_text(json.dumps(codec_environment, indent=2, sort_keys=True) + "\n")
+    subprocess.run([sys.executable, str(root / "scripts/reports/mpc01/write_strategy_ab_build_note.py"),
+                    "--root", str(root), "--build-dir", str(build_dir), "--binary", str(binary),
+                    "--source-commit", source_commit, "--output-dir", str(output)],
+                   cwd=root, check=True)
     print(json.dumps({"output_dir": str(output), "attempts": len(trials),
                       "passed": sum(row.get("status") == "passed" for row in trials),
                       "retained_nonpass": sum(row.get("status") != "passed" for row in trials),

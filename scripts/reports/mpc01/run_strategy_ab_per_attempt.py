@@ -275,6 +275,10 @@ def main() -> int:
                     "binary_sha256": {"status": "available", "value": binary_hash}},
     }
     (output / "codec-environment.json").write_text(json.dumps(codec_environment, indent=2, sort_keys=True) + "\n")
+    subprocess.run([sys.executable, str(root / "scripts/reports/mpc01/write_strategy_ab_build_note.py"),
+                    "--root", str(root), "--build-dir", str(build_dir), "--binary", str(binary),
+                    "--source-commit", source_commit, "--output-dir", str(output)],
+                   cwd=root, check=True)
     print(json.dumps({"output_dir": str(output), "attempts": len(trials),
                       "passed": sum(row.get("status") == "passed" for row in trials),
                       "retained_nonpass": sum(row.get("status") != "passed" for row in trials),
