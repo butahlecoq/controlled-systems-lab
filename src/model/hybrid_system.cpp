@@ -14,15 +14,16 @@
 #include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 
 namespace csl::model {
 
 HybridOperationThreadCpuTimer::HybridOperationThreadCpuTimer(
-    const HybridOperationThreadCpuReader& reader) noexcept
-    :reader_(&reader) {
+    HybridOperationThreadCpuReader reader) noexcept
+    :reader_(std::move(reader)) {
     if(!reader_) return;
     try {
-        if(*reader_) started_=(*reader_)();
+        if(reader_) started_=reader_();
         else started_=HybridOperationThreadCpuReadUnavailable{
             HybridOperationThreadCpuReadUnavailable::Reason::read_failed};
     } catch(...) {
@@ -36,7 +37,7 @@ HybridOperationThreadCpuObservation HybridOperationThreadCpuTimer::finish() noex
     using ResultReason=HybridOperationThreadCpuUnavailable::Reason;
     if(finished_) return HybridOperationThreadCpuUnavailable{ResultReason::read_failed};
     finished_=true;
-    if(!reader_ || !*reader_) return HybridOperationThreadCpuUnavailable{ResultReason::not_requested};
+    if(!reader_) return HybridOperationThreadCpuUnavailable{ResultReason::not_requested};
     const auto unavailable=[](ReadReason reason) {
         return HybridOperationThreadCpuObservation{HybridOperationThreadCpuUnavailable{
             reason==ReadReason::unsupported_platform?ResultReason::unsupported_platform:ResultReason::read_failed}};
@@ -45,7 +46,7 @@ HybridOperationThreadCpuObservation HybridOperationThreadCpuTimer::finish() noex
         return unavailable(failed->reason);
     HybridOperationThreadCpuReading ended;
     try {
-        ended=(*reader_)();
+        ended=reader_();
     } catch(...) {
         return HybridOperationThreadCpuUnavailable{ResultReason::read_failed};
     }

@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <array>
 #include <limits>
+#include <memory>
 #include <optional>
 #include <span>
 #include <type_traits>
@@ -765,6 +766,21 @@ TEST_CASE("hybrid operation CPU timer preserves unavailable and regressed clock 
     const auto failed_result=failed.finish();
     REQUIRE(std::holds_alternative<HybridOperationThreadCpuUnavailable>(failed_result));
     CHECK(std::get<HybridOperationThreadCpuUnavailable>(failed_result).reason==Reason::read_failed);
+}
+
+TEST_CASE("hybrid operation CPU timer owns a temporary reader") {
+    std::weak_ptr<int> reader_lifetime;
+    HybridOperationThreadCpuTimer timer{HybridOperationThreadCpuReader{
+        [token=std::make_shared<int>(1), reads=std::uint64_t{0},
+            &reader_lifetime]() mutable -> HybridOperationThreadCpuReading {
+            reader_lifetime=token;
+            return HybridOperationThreadCpuTick{reads++==0?std::uint64_t{100}:std::uint64_t{125}};
+        }}};
+
+    CHECK_FALSE(reader_lifetime.expired());
+    const auto observation=timer.finish();
+    REQUIRE(std::holds_alternative<HybridOperationThreadCpuDuration>(observation));
+    CHECK(std::get<HybridOperationThreadCpuDuration>(observation).nanoseconds==25);
 }
 
 TEST_CASE("hybrid joint relation rejects capacity exhaustion without truncation and observes cancellation") {

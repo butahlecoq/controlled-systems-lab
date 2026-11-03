@@ -110,11 +110,11 @@ using HybridOperationThreadCpuReader = std::function<HybridOperationThreadCpuRea
 // Samples one synchronous operation on the thread that constructs and closes
 // this timer. Missing or failed readings never change operation semantics.
 class HybridOperationThreadCpuTimer {
-    const HybridOperationThreadCpuReader* reader_{};
+    HybridOperationThreadCpuReader reader_;
     HybridOperationThreadCpuReading started_{HybridOperationThreadCpuReadUnavailable{}};
     bool finished_{};
 public:
-    explicit HybridOperationThreadCpuTimer(const HybridOperationThreadCpuReader&) noexcept;
+    explicit HybridOperationThreadCpuTimer(HybridOperationThreadCpuReader) noexcept;
     HybridOperationThreadCpuTimer(const HybridOperationThreadCpuTimer&) = delete;
     HybridOperationThreadCpuTimer& operator=(const HybridOperationThreadCpuTimer&) = delete;
     HybridOperationThreadCpuObservation finish() noexcept;
