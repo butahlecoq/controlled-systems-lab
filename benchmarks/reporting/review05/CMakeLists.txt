@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.31)
 project(CSLReview05HorizonLadder LANGUAGES C CXX)
 
+option(CSL_REVIEW05_PROFILE_DRIVER "Instrument only the REVIEW-05 profile driver for gprof" OFF)
+
 if(NOT DEFINED CSL_SOURCE_ROOT)
   message(FATAL_ERROR "CSL_SOURCE_ROOT must point to the checked-out solver source")
 endif()
@@ -13,6 +15,10 @@ target_link_libraries(csl_review05_horizon_ladder PRIVATE
   CSL::input CSL::application CSL::strategy_a CSL::strategy_b CSL::polyhedral CSL::affine_sum
   CSL::qhull_conversion CSL::highs_lp CSL::highs_convex CSL::witness_selector)
 target_compile_features(csl_review05_horizon_ladder PRIVATE cxx_std_20)
+if(CSL_REVIEW05_PROFILE_DRIVER AND NOT MSVC)
+  target_compile_options(csl_review05_horizon_ladder PRIVATE -pg)
+  target_link_options(csl_review05_horizon_ladder PRIVATE -pg)
+endif()
 
 add_executable(csl_review05_dimension_ladder dimension_ladder.cpp)
 target_link_libraries(csl_review05_dimension_ladder PRIVATE

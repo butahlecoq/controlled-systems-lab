@@ -147,10 +147,13 @@ void bound_json(std::ostream& out, const std::optional<ObjectiveBound>& bound) {
 
 int main(int argc, char** argv) try {
     using namespace csl;
-    if (argc != 3) {
-        std::cerr << "usage: csl_review05_horizon_ladder <scenario.json> <csl.synthesis.reach-back|csl.synthesis.strategy-b>\n";
+    if (argc != 3 && argc != 4) {
+        std::cerr << "usage: csl_review05_horizon_ladder <scenario.json> <csl.synthesis.reach-back|csl.synthesis.strategy-b> [repetitions]\n";
         return 2;
     }
+    const int repetitions = argc == 4 ? std::stoi(argv[3]) : 1;
+    if (repetitions < 1 || repetitions > 1000)
+        throw std::invalid_argument("repetitions must be in [1, 1000]");
     const std::string_view strategy_id = argv[2];
     if (strategy_id != "csl.synthesis.reach-back" && strategy_id != "csl.synthesis.strategy-b")
         throw std::invalid_argument("unrecognized strategy ID");
@@ -214,79 +217,81 @@ int main(int argc, char** argv) try {
     requested_output.output.family = family.target;
     requested_output.output.completeness = Completeness::unestablished;
     auto prepared = take(strategies.prepare(request, requested_output), "Strategy preparation");
-    auto workspace = prepared.create();
-    if (!workspace) throw std::runtime_error("Strategy returned no workspace");
     ExecutionContext context;
     context.numerical = family.numerical;
     context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
     context.backend_thread_observation = std::make_shared<execution::BackendThreadObservation>();
 
-    const auto started = std::chrono::steady_clock::now();
-    const auto outcome = workspace->run(context);
-    const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(
-        std::chrono::steady_clock::now() - started).count();
-
     std::cout.imbue(std::locale::classic());
     std::cout << std::setprecision(std::numeric_limits<double>::max_digits10);
-    std::cout << "{\"schema\":\"csl.review05.horizon-attempt/1\",\"fixture\":\"HORIZON-01-scalar-integrator\",\"horizon\":" << horizon
-        << ",\"problem_id\":" << quoted(resolved.identity().value)
-        << ",\"scenario_sha256\":" << quoted(problem::hex(scenario.source()->content.digest()))
-        << ",\"strategy\":" << quoted(strategy_id)
-        << ",\"strategy_version\":" << quoted(prepared.provenance().front().actual->version)
-        << ",\"target\":\"candidate_relaxation\",\"assurance\":\"numerical\",\"representation\":\"csl.polyhedron.h\""
-        << ",\"solver_threads_requested\":1,\"observed_backend_threads\":";
-    if (const auto observed = context.backend_thread_observation->maximum()) std::cout << *observed;
-    else std::cout << "null";
-    std::cout << ",\"strategy_run_ns\":" << elapsed;
+    for (int repetition = 0; repetition < repetitions; ++repetition) {
+        auto workspace = prepared.create();
+        if (!workspace) throw std::runtime_error("Strategy returned no workspace");
+        const auto started = std::chrono::steady_clock::now();
+        const auto outcome = workspace->run(context);
+        const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::steady_clock::now() - started).count();
 
-    if (const auto* unsupported = std::get_if<Unsupported>(&outcome)) {
-        std::cout << ",\"termination\":\"unsupported\",\"diagnostics\":[";
-        for (std::size_t index = 0; index < unsupported->diagnostics.size(); ++index) {
+        std::cout << "{\"schema\":\"csl.review05.horizon-attempt/1\",\"fixture\":\"HORIZON-01-scalar-integrator\",\"horizon\":" << horizon
+            << ",\"problem_id\":" << quoted(resolved.identity().value)
+            << ",\"scenario_sha256\":" << quoted(problem::hex(scenario.source()->content.digest()))
+            << ",\"strategy\":" << quoted(strategy_id)
+            << ",\"strategy_version\":" << quoted(prepared.provenance().front().actual->version)
+            << ",\"target\":\"candidate_relaxation\",\"assurance\":\"numerical\",\"representation\":\"csl.polyhedron.h\""
+            << ",\"solver_threads_requested\":1,\"observed_backend_threads\":";
+        if (const auto observed = context.backend_thread_observation->maximum()) std::cout << *observed;
+        else std::cout << "null";
+        std::cout << ",\"strategy_run_ns\":" << elapsed;
+
+        if (const auto* unsupported = std::get_if<Unsupported>(&outcome)) {
+            std::cout << ",\"termination\":\"unsupported\",\"diagnostics\":[";
+            for (std::size_t index = 0; index < unsupported->diagnostics.size(); ++index) {
+                if (index) std::cout << ',';
+                std::cout << quoted(unsupported->diagnostics[index].explanation);
+            }
+            std::cout << "],\"candidate_relation\":null,\"incumbents\":[]}\n";
+            continue;
+        }
+        const auto& result = std::get<SynthesisResult>(outcome);
+        std::cout << ",\"termination\":" << quoted(termination_name(result.termination))
+            << ",\"outcome\":" << quoted(outcome_name(result.outcome.value)) << ",\"objective_lower\":";
+        bound_json(std::cout, result.objective.lower);
+        std::cout << ",\"objective_upper\":";
+        bound_json(std::cout, result.objective.upper);
+        std::cout << ",\"family_variant\":";
+        const CandidateFamily* candidate = nullptr;
+        if (result.family) {
+            candidate = std::get_if<CandidateFamily>(&result.family->outcome());
+            std::cout << (candidate ? "\"candidate\"" : "\"non_candidate\"");
+        } else std::cout << "null";
+        std::cout << ",\"family_registry_verified\":" << (result.family && result.family->registry_verified() ? "true" : "false")
+            << ",\"candidate_coordinates\":";
+        if (candidate) {
+            const auto& coordinates = candidate->relation.coordinates;
+            std::cout << "{\"state_dimension\":" << coordinates.dimensions.state
+                << ",\"control_dimension\":" << coordinates.dimensions.control
+                << ",\"external_dimension\":" << coordinates.dimensions.external
+                << ",\"horizon\":" << coordinates.horizon << '}';
+        } else std::cout << "null";
+        std::cout << ",\"candidate_relation\":";
+        const sets::SetData* relation = nullptr;
+        if (candidate && candidate->relation.payload) {
+            relation = candidate->relation.payload->h_relation_for_recording();
+            if (!relation) {
+                const auto* reach_back = dynamic_cast<const synthesis::strategy_a::CandidateHistory*>(
+                    candidate->relation.payload.get());
+                if (reach_back) relation = &reach_back->history.relation;
+            }
+        }
+        if (relation) h_relation_json(std::cout, *relation);
+        else std::cout << "null";
+        std::cout << ",\"incumbents\":[";
+        for (std::size_t index = 0; index < result.incumbents.size(); ++index) {
             if (index) std::cout << ',';
-            std::cout << quoted(unsupported->diagnostics[index].explanation);
+            witness_json(std::cout, result.incumbents[index].witness);
         }
-        std::cout << "],\"candidate_relation\":null,\"incumbents\":[]}\n";
-        return 0;
+        std::cout << "]}\n";
     }
-    const auto& result = std::get<SynthesisResult>(outcome);
-    std::cout << ",\"termination\":" << quoted(termination_name(result.termination))
-        << ",\"outcome\":" << quoted(outcome_name(result.outcome.value)) << ",\"objective_lower\":";
-    bound_json(std::cout, result.objective.lower);
-    std::cout << ",\"objective_upper\":";
-    bound_json(std::cout, result.objective.upper);
-    std::cout << ",\"family_variant\":";
-    const CandidateFamily* candidate = nullptr;
-    if (result.family) {
-        candidate = std::get_if<CandidateFamily>(&result.family->outcome());
-        std::cout << (candidate ? "\"candidate\"" : "\"non_candidate\"");
-    } else std::cout << "null";
-    std::cout << ",\"family_registry_verified\":" << (result.family && result.family->registry_verified() ? "true" : "false")
-        << ",\"candidate_coordinates\":";
-    if (candidate) {
-        const auto& coordinates = candidate->relation.coordinates;
-        std::cout << "{\"state_dimension\":" << coordinates.dimensions.state
-            << ",\"control_dimension\":" << coordinates.dimensions.control
-            << ",\"external_dimension\":" << coordinates.dimensions.external
-            << ",\"horizon\":" << coordinates.horizon << '}';
-    } else std::cout << "null";
-    std::cout << ",\"candidate_relation\":";
-    const sets::SetData* relation = nullptr;
-    if (candidate && candidate->relation.payload) {
-        relation = candidate->relation.payload->h_relation_for_recording();
-        if (!relation) {
-            const auto* reach_back = dynamic_cast<const synthesis::strategy_a::CandidateHistory*>(
-                candidate->relation.payload.get());
-            if (reach_back) relation = &reach_back->history.relation;
-        }
-    }
-    if (relation) h_relation_json(std::cout, *relation);
-    else std::cout << "null";
-    std::cout << ",\"incumbents\":[";
-    for (std::size_t index = 0; index < result.incumbents.size(); ++index) {
-        if (index) std::cout << ',';
-        witness_json(std::cout, result.incumbents[index].witness);
-    }
-    std::cout << "]}\n";
     return 0;
 } catch (const std::exception& error) {
     std::cerr << error.what() << '\n';
