@@ -54,6 +54,14 @@
       "disposition": "shared-quantitative-policy-companion-renderer"
     },
     {
+      "source": "scripts/reports/augment_pages_bundle.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "trajectory.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/b04_c_exact_publication_policy.py",
       "signal_count": 1,
       "asset_name_literals": [
