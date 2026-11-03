@@ -1,0 +1,16 @@
+{
+  "build_log_sha256": "247aa4bd37fc1567845d9bb942aee0fa02591c63fa4e2679fc12a3986a0f720a",
+  "build_testing": "OFF",
+  "build_type": "Release",
+  "cmake_version": "cmake version 3.31.6",
+  "compiler_id": "GNU",
+  "compiler_version": "16.2.1",
+  "configure_log_sha256": "e87887bf165061e07d8880ed2c55b3243fb0d8271617f180c80bf90eb1ad9ae4",
+  "cxx_standard": 20,
+  "generator": "Unix Makefiles",
+  "highs_enabled": "ON",
+  "qhull_enabled": "OFF",
+  "raw_cache_sha256": "db073ce4a0146fd8a85c7fddd4543ecadb02aab251270790dbcdefec894e1f9d",
+  "report_enabled": "ON",
+  "schema": "csl.ext07-build-configuration/1"
+}

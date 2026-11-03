@@ -143,6 +143,7 @@ The [reviewed temporal-lift source audit](temporal-lift-source-audit.md) curates
 ## Minimal numerical examples
 
 - [EXT-07 two-dimensional hybrid path](ext07-hybrid-2d.md): exact input, labelled state plot, literal joint tuple, and installed-client reproduction command.
+- [EXT-07 bounded resource observations](../../reports/algorithm-results/ext07-resource-observation-cfec938d120c95cb/): saved Linux process-tree limits and resource receipts for the one-step and two-parameter profiles; these are whole-invocation observations, not per-transition costs or scalability claims.
 
 ### MPC-01 initial Strategy A/B timing slice
 

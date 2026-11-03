@@ -139,6 +139,20 @@ all 16 manifest-listed files in each route matched their recorded SHA-256, and
 each published offline ZIP matched its repository copy. This verifies these
 two frozen bundles only; it does not resolve the remaining EXT-07 evidence gaps.
 
+The additive [EXT-07 resource observation bundle](../../reports/algorithm-results/ext07-resource-observation-cfec938d120c95cb/)
+records separate Linux Release invocations for the same one-step and
+two-parameter profiles, with 300-second, 1.5 GiB, no-swap and one-CPU limits.
+Both captures complete seven 20-call batches with zero failures. The observed
+process-tree peak is 2,359,296 bytes for each; cgroup CPU totals are 62,144,000
+ns and 519,431,000 ns. These counters include the shell wrapper and idle tail
+used to read cgroup values, so they are not attributed to hybrid transitions.
+The profiles differ in horizon, paths and relation size, which prevents a
+scale comparison. No general resource or speed claim follows from these two
+fixtures. The bundle retains the source drivers, source/build identities,
+resource receipts and raw systemd-limited timing rows; local build paths are
+excluded. Broader continuous-family oracle coverage and capability/scale
+evidence remain open EXT-07 work.
+
 ## EXT-02 finite/mixed branch portfolio report
 
 The saved [EXT-02 analytic portfolio bundle](../../reports/algorithm-results/ext02-two-state-mixed-v1/)

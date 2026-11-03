@@ -1,0 +1,29 @@
+{
+  "enforced_limits": {
+    "cpu_quota_per_second_usec": 1000000,
+    "exit_status": 0,
+    "memory_max_bytes": 1610612736,
+    "memory_swap_max_bytes": 0,
+    "result": "success",
+    "runtime_max_usec": 300000000,
+    "systemd_unit": "ext07-two-param-measure-r2-20261103.service"
+  },
+  "executable_sha256": "97eda63ada1803d448be8e392bc79e16c0cc2fb4bebeffd33d72df079a1d27f8",
+  "observed": {
+    "cpu_time_ns": 519431000,
+    "memory_peak_bytes": 2359296,
+    "swap_peak_bytes": 0
+  },
+  "observed_utc": "2026-11-03T07:35:30.799636+00:00",
+  "output_sha256": "39f242ba01dd465aebafaf745e1d47e41c2dcdfd0fe52f7988a147ba28fd7f88",
+  "phase": "measure",
+  "requested_limits": {
+    "cpu_quota_percent": 100,
+    "memory_max_bytes": 1610612736,
+    "memory_swap_max_bytes": 0,
+    "runtime_max_seconds": 300
+  },
+  "scope": "single executable measurement invocation under a transient systemd service; cgroup accounting includes the shell wrapper and a 3-second idle tail used to read live counters; excludes build and smoke",
+  "source_commit": "d3bc6721d8cdd5f84f4abb5d1031db96379a48ae",
+  "source_tree": "894c3a53dd49f5c0d9de52495568a3d47e64f7e4"
+}
