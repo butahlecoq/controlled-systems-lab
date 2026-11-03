@@ -1,0 +1,52 @@
+{
+  "build": {
+    "compiler": "unknown unknown",
+    "flags": "-O3 -DNDEBUG",
+    "generator": "Unix Makefiles",
+    "type": "Release"
+  },
+  "executable": "/home/butahlecoq/.local/share/codex/worktrees/issue597-per-attempt-pairs-20261103/build/issue597-attempt/examples/registered_synthesis_comparison",
+  "executable_sha256": "dc57e3c16c5b1c356cd86762105f86a913a61c7a60cc6855c86bad083ac86e5e",
+  "execution_worktree_clean_before_run": true,
+  "execution_worktree_commit": "af4aa5cec4c8a9673460da63475698c2bd76a92a",
+  "execution_worktree_role": "The capture runs from the clean source checkout; the executable hash binds the exact built binary.",
+  "host": {
+    "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "kernel": "7.2.8-9-omarchy",
+    "load_average_after_capture": [
+      0.44580078125,
+      2.1044921875,
+      1.6865234375
+    ],
+    "load_average_before_capture": [
+      0.3974609375,
+      2.12353515625,
+      1.6904296875
+    ],
+    "logical_cpus": 8,
+    "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44"
+  },
+  "measurement": {
+    "capture_supervisor": "scripts/reports/mpc01/capture_strategy_ab_attempt.py",
+    "capture_supervisor_sha256": "ff53851c90fef06af6bd51d02305140e67433e8c271566807a595abb0b2735e4",
+    "command": "registered_synthesis_comparison --measure-attempt, repeated as individual systemd scopes",
+    "cpu_time_or_peak_memory_profiled": true,
+    "event_count_including_header": 13,
+    "measured_alternating_pairs": 5,
+    "per_attempt_wall_time_cap": 300,
+    "process_tree_memory_cap_bytes": 8589934592,
+    "process_tree_memory_swap_max_bytes": 0,
+    "process_tree_wall_time_cap_seconds": 300,
+    "resource_profile": "resource-profile.json",
+    "resource_profile_sha256": "9a030c006cf01fa7c224a67e39f4e7f394fa2b9a0ffe502dc6ef49d36dab37e6",
+    "separate_limiter_profile": "separate-limiter-profiles in resource-profile.json",
+    "timeout_scope": "one strategy attempt per scope",
+    "warmup_pairs_excluded": 1
+  },
+  "scenario": "docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts02-limited-capture/scenario.json",
+  "scenario_sha256": "b9bb051c52b6763ceee7a6f7f423fbefd94bea86a0045693b6627a0a0da69ab9",
+  "source_commit": "af4aa5cec4c8a9673460da63475698c2bd76a92a",
+  "source_dirty_before_run": false,
+  "source_file": "examples/registered_synthesis_comparison.cpp",
+  "source_file_sha256": "f6593c982a6e1515bdcb9a20982dbe4a105e5d50eacee2db1fd98e405e454ae2"
+}

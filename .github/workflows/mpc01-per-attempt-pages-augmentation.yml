@@ -8,10 +8,12 @@ on:
       - scripts/reports/mpc01/augment_pages.py
       - scripts/reports/mpc01/summarize_per_attempt.py
       - scripts/reports/mpc01/summarize_strategy_ab_ts03.py
+      - scripts/reports/mpc01/summarize_strategy_ab_ts02.py
       - scripts/reports/mpc01/build_strategy_ab_records.py
       - scripts/reports/mpc01/validate_strategy_ab_ts03_bundle.py
       - docs/research/evidence/mpc01-per-attempt-20261103-r3/**
       - docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1/**
+      - docs/research/evidence/mpc01-strategy-ab-ts02-per-attempt-20261103/**
       - tests/reporting/test_mpc01_per_attempt_publication.py
       - tests/reporting/test_mpc01_pages_augmentation.py
   workflow_run:
@@ -39,6 +41,15 @@ jobs:
           python scripts/reports/mpc01/summarize_per_attempt.py --bundle docs/research/evidence/mpc01-per-attempt-20261103-r3
           (cd docs/research/evidence/mpc01-per-attempt-20261103-r3 && sha256sum -c SHA256SUMS)
           python scripts/reports/mpc01/validate_strategy_ab_ts03_bundle.py
+          python scripts/reports/mpc01/summarize_strategy_ab_ts02.py \
+            --events docs/research/evidence/mpc01-strategy-ab-ts02-per-attempt-20261103/strategy-ab-ts02-events.jsonl \
+            --stdout docs/research/evidence/mpc01-strategy-ab-ts02-per-attempt-20261103/strategy-ab-ts02-stdout.jsonl \
+            --scenario docs/research/evidence/mpc01-strategy-ab-ts02-per-attempt-20261103/scenario.json \
+            --environment docs/research/evidence/mpc01-strategy-ab-ts02-per-attempt-20261103/strategy-ab-ts02-environment.json \
+            --resource-profile docs/research/evidence/mpc01-strategy-ab-ts02-per-attempt-20261103/resource-profile.json \
+            --record docs/research/evidence/mpc01-strategy-ab-ts02-per-attempt-20261103/strategy-ab-ts02-comparison-record.json \
+            --output docs/research/evidence/mpc01-strategy-ab-ts02-per-attempt-20261103/strategy-ab-ts02-summary.html
+          (cd docs/research/evidence/mpc01-strategy-ab-ts02-per-attempt-20261103 && sha256sum -c SHA256SUMS)
           python -m unittest tests.reporting.test_mpc01_pages_augmentation
           python -m unittest tests.reporting.test_mpc01_per_attempt_publication
       - name: Stage and verify the augmented site route
@@ -80,6 +91,15 @@ jobs:
           python scripts/reports/mpc01/summarize_per_attempt.py --bundle docs/research/evidence/mpc01-per-attempt-20261103-r3
           (cd docs/research/evidence/mpc01-per-attempt-20261103-r3 && sha256sum -c SHA256SUMS)
           python scripts/reports/mpc01/validate_strategy_ab_ts03_bundle.py
+          python scripts/reports/mpc01/summarize_strategy_ab_ts02.py \
+            --events docs/research/evidence/mpc01-strategy-ab-ts02-per-attempt-20261103/strategy-ab-ts02-events.jsonl \
+            --stdout docs/research/evidence/mpc01-strategy-ab-ts02-per-attempt-20261103/strategy-ab-ts02-stdout.jsonl \
+            --scenario docs/research/evidence/mpc01-strategy-ab-ts02-per-attempt-20261103/scenario.json \
+            --environment docs/research/evidence/mpc01-strategy-ab-ts02-per-attempt-20261103/strategy-ab-ts02-environment.json \
+            --resource-profile docs/research/evidence/mpc01-strategy-ab-ts02-per-attempt-20261103/resource-profile.json \
+            --record docs/research/evidence/mpc01-strategy-ab-ts02-per-attempt-20261103/strategy-ab-ts02-comparison-record.json \
+            --output docs/research/evidence/mpc01-strategy-ab-ts02-per-attempt-20261103/strategy-ab-ts02-summary.html
+          (cd docs/research/evidence/mpc01-strategy-ab-ts02-per-attempt-20261103 && sha256sum -c SHA256SUMS)
 
       - name: Find the upstream Pages artifact
         id: artifact

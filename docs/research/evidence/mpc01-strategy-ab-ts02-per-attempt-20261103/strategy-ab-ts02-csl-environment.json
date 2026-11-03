@@ -1,0 +1,45 @@
+{
+  "build": {
+    "backends": {},
+    "build_type": "Release",
+    "compiler_id": "unknown",
+    "compiler_version": "unknown",
+    "cxx_standard": "20",
+    "schema": "csl.obs04-build/1",
+    "source_dirty": false,
+    "source_revision": "af4aa5cec4c8a9673460da63475698c2bd76a92a",
+    "source_tree_sha256": "4afda9a360e2dd4fb6ae6221cf89dcd0094c560add13496d6ff44a688ab58c0d"
+  },
+  "execution": {
+    "cache_policy": "One excluded warmup pair; five measured pairs alternate A/B then B/A; each strategy attempt uses a fresh process scope.",
+    "observed_driver_workers": 1,
+    "requested_backend_threads": 1,
+    "requested_workers": 1,
+    "tolerances": {
+      "absolute": 1e-08,
+      "relative": 1e-08
+    },
+    "warmup_repetitions": 1,
+    "workspace_policy": "fresh-workspace-per-attempt"
+  },
+  "runtime": {
+    "architecture": "x86_64",
+    "binary_sha256": {
+      "status": "available",
+      "value": "dc57e3c16c5b1c356cd86762105f86a913a61c7a60cc6855c86bad083ac86e5e"
+    },
+    "cpu_model": {
+      "status": "available",
+      "value": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx"
+    },
+    "kernel": {
+      "status": "available",
+      "value": "7.2.8-9-omarchy"
+    },
+    "logical_cpus": 8,
+    "os_family": "Linux",
+    "os_version": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "schema": "csl.obs04-runtime/1"
+  },
+  "schema": "csl.obs04-environment/1"
+}
