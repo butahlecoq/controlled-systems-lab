@@ -77,12 +77,14 @@ This report makes no new publication or performance claim.
 The named tests and reports are finite correctness and measurement fixtures.
 They do not establish general scaling by state dimension, control dimension,
 horizon, mode count, edge count, path count, or provider workload. PR #881 adds
-request-wide admission and per-operation composer accounting to the bounded
-profile tracked by EXT-07. Each trace records mode or edge, stage, composer
-version, joint-variable count, row and matrix-element deltas, elapsed wall time,
-and completion status. The separate resource capture records whole-process CPU
-and memory for two fixtures. It does not attribute solver or geometry-provider
-CPU, memory, or thread use to individual operations or establish hard
-enforcement. Those limits keep the issue open. See the
+request-wide admission, per-operation composer accounting, and path-level
+provider elapsed wall time to the bounded profile tracked by EXT-07. Each
+relation trace records mode or edge, stage, composer version, joint-variable
+count, row and matrix-element deltas, elapsed composer wall time, and completion
+status. Reachability paths, solver branches, and verifier invocations record
+their own elapsed wall time; backend thread width is retained when reported.
+The separate resource capture records whole-process CPU and memory for two
+fixtures. Provider CPU and heap use remain unattributed, and requested resource
+limits are not enforced by these records. Those limits keep the issue open. See the
 [implementation capability profile](../architecture/hybrid-capability-profile.md)
 for supported dimensions, counts, and remaining capability work.

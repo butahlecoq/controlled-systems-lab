@@ -6,6 +6,7 @@
 #include <csl/optimization/convex_backend.hpp>
 #include <csl/optimization/linear_program.hpp>
 #include <csl/registry/provider.hpp>
+#include <cstdint>
 #include <span>
 #include <variant>
 
@@ -92,6 +93,9 @@ struct HybridReachabilityAttempt {
     HybridPathReachabilityResult result;
     std::optional<ResourcePolicy> requested_resources;
     std::optional<std::size_t> observed_backend_threads;
+    // Wall time spent executing this path's staged reachability operation.
+    // Missing means the stage was not executed.
+    std::optional<std::uint64_t> elapsed_wall_nanoseconds{};
 };
 
 struct HybridReachabilityCapabilities {
@@ -267,6 +271,9 @@ struct HybridBranchExecution {
     // Maximum backend thread width reported through ExecutionContext while
     // this branch ran. Missing means the provider supplied no observation.
     std::optional<std::size_t> observed_backend_threads;
+    // Wall time spent creating the workspace and running this branch provider.
+    // Missing means no provider workspace was created.
+    std::optional<std::uint64_t> provider_elapsed_wall_nanoseconds{};
 };
 
 struct HybridPortfolioExecution;
@@ -362,6 +369,9 @@ struct HybridVerifierResourceEvidence {
     std::optional<ResourcePolicy> requested;
     HybridVerifierResourceDisposition disposition{HybridVerifierResourceDisposition::not_requested};
     std::optional<std::size_t> observed_backend_threads;
+    // Wall time spent verifying the family after request preflight. Missing
+    // means verifier execution was not invoked.
+    std::optional<std::uint64_t> elapsed_wall_nanoseconds{};
 };
 
 // The coordinator preserves candidate construction separately from verifier

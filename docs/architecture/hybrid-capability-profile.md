@@ -81,7 +81,9 @@ status, including partial resource counts for a failed operation. The
 `exact singleton hybrid verifier independently retains every tied edge path`
 test checks this evidence for every path, including guard and reset identity
 and the structural counters. These counts describe relation construction;
-they do not measure solver or geometry-provider CPU, heap, or thread use.
+they do not measure provider CPU or heap use. Path-level elapsed wall time and
+reported backend thread width are recorded separately for reachability, solver,
+and verifier execution.
 
 ## Implementation-domain limits
 
@@ -98,17 +100,18 @@ they do not measure solver or geometry-provider CPU, heap, or thread use.
 - `ExactLinearHHybridFamilyVerifier` checks its admitted exact-H, linear-
   objective domain. The test profiles above are sampled fixtures, not an
   exhaustive description of every admitted H relation.
-- Provider-consumed CPU, memory, and thread use are not established by the
-  saved hybrid reports. A requested `ResourcePolicy` is not proof of provider
-  enforcement or consumption.
+- Provider-consumed CPU and memory are not established by the saved hybrid
+  reports. Path-level wall time is diagnostic and does not prove enforcement.
+  A requested `ResourcePolicy` is not proof of provider enforcement or
+  consumption.
 
-PR #881 adds request-wide admission and per-operation composer accounting to
-the bounded profile tracked by issue #156. The issue remains open while
-provider CPU, heap, and thread use is unmeasured per operation and broader
-operation profiles remain incomplete. Future extensions can add more set
-representations, enforce provider CPU or memory limits, and measure larger
-dimensions or path inventories. The current evidence makes no general
-scalability claim. The two saved-report routes
+PR #881 adds request-wide admission, per-mode/edge composer accounting, and
+path-level provider wall-time/thread observations to the bounded profile
+tracked by issue #156. The issue remains open while provider CPU and heap use
+are unmeasured and broader operation profiles remain incomplete. Future
+extensions can add more set representations, enforce provider CPU or memory
+limits, and measure larger dimensions or path inventories. The current evidence
+makes no general scalability claim. The two saved-report routes
 and their manifest-listed files and ZIPs were verified against the live
 main-only Pages site on 2026-11-02; details are recorded in
 [published algorithm results](published-algorithm-results.md#ext-07-hybrid-profile-report).

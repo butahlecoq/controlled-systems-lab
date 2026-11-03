@@ -1832,6 +1832,8 @@ TEST_CASE("hybrid request refinement retains exact reachability and refuses unpr
     CHECK(execution.reachability_attempts[1].path==paths[1]);
     CHECK(std::holds_alternative<HybridPathReachability>(execution.reachability_attempts[0].result));
     CHECK(std::holds_alternative<HybridPathReachability>(execution.reachability_attempts[1].result));
+    CHECK(execution.reachability_attempts[0].elapsed_wall_nanoseconds.has_value());
+    CHECK(execution.reachability_attempts[1].elapsed_wall_nanoseconds.has_value());
     CHECK(execution.reachability[0].path==paths[0]);
     CHECK(execution.reachability[1].path==paths[1]);
 
@@ -1932,6 +1934,8 @@ TEST_CASE("hybrid request stages all projected paths before executing geometry")
     CHECK(*factory_calls==2);
     CHECK(*run_calls==2);
     CHECK(aggregate_observation->maximum()==7);
+    CHECK(execution_result.reachability_attempts[0].elapsed_wall_nanoseconds.has_value());
+    CHECK(execution_result.reachability_attempts[1].elapsed_wall_nanoseconds.has_value());
     for(const auto& attempt:execution_result.reachability_attempts) {
         REQUIRE(std::holds_alternative<HybridPathReachability>(attempt.result));
         CHECK(std::get<HybridPathReachability>(attempt.result).projected_state.has_value());
@@ -1983,6 +1987,7 @@ TEST_CASE("coordinated hybrid execution verifies solver candidates after all bra
     CHECK(attempt.resources.requested->memory_bytes==4096);
     CHECK(attempt.resources.disposition==HybridVerifierResourceDisposition::requested_but_unenforced);
     CHECK(attempt.resources.observed_backend_threads==5);
+    CHECK(attempt.resources.elapsed_wall_nanoseconds.has_value());
     const auto* candidates=std::get_if<HybridPortfolioOptimalFaceCandidates>(&attempt.candidates);
     REQUIRE(candidates);
     CHECK(candidates->objective_bounds.global_lower_bound==0.0);
@@ -5366,6 +5371,8 @@ TEST_CASE("hybrid branch execution retains a completed solver result and provena
     CHECK(report.branches[0].requested_resources->memory_bytes==8192);
     CHECK(report.branches[0].observed_backend_threads==5);
     CHECK(report.branches[1].observed_backend_threads==3);
+    CHECK(report.branches[0].provider_elapsed_wall_nanoseconds.has_value());
+    CHECK(report.branches[1].provider_elapsed_wall_nanoseconds.has_value());
     CHECK(aggregate_observation->maximum()==5);
 }
 

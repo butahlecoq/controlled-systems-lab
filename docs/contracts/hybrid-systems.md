@@ -416,8 +416,11 @@ propagate those reports without dropping the path identity. Solver-provider
 provenance and the requested `ExecutionContext` resource policy remain attached
 to each branch execution. The resource policy is a request record only. It does
 not measure backend consumption or establish thread or memory enforcement.
-Per-operation CPU and heap use from solver and geometry providers remain
-unmeasured. The default reachability adapter wraps this same direct joint-H
+Each completed solver branch also records provider-call elapsed wall time and
+backend-reported thread width; each reachability path and verifier invocation
+records elapsed wall time, with thread width when the adapter reports it. These
+wall-time values do not measure provider CPU or heap use. The default
+reachability adapter wraps this same direct joint-H
 composer. The separate projected-state adapter independently builds and
 projects a one-transition scalar relation; multi-stage and general-dimensional
 projected reachability remain unsupported. The compiled verifiers cover exact
