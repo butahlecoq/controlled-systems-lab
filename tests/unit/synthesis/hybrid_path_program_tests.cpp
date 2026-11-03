@@ -1424,7 +1424,7 @@ TEST_CASE("prepared providers expose conservative request-envelope declarations"
         },
         [](const LinearProgram&){return std::make_unique<RejectingLP>();}, {},
         [](const registry::RequestEnvelope& envelope,const registry::Requirements&) {
-            if(envelope.operation!="hybrid.linear-optimization" || envelope.columns>8)
+            if(envelope.operation!="hybrid.linear-optimization" || envelope.maximum_columns>8)
                 return registry::AdmissionDeclaration{registry::AdmissionStatus::unsupported,
                     {{DiagnosticCode::unsupported,"fixture.envelope","outside declared provider envelope"}},true};
             return registry::AdmissionDeclaration{registry::AdmissionStatus::supported,{},true};

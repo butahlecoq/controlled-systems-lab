@@ -37,9 +37,11 @@ struct Requirements {
 // supported result is sound for every request matching this envelope.
 struct RequestEnvelope {
     std::string operation;
-    std::size_t rows{};
-    std::size_t columns{};
-    std::size_t elements{};
+    // Inclusive upper bounds. Zero means the matching request has exactly
+    // zero rows, columns, or stored elements; it is not an unspecified value.
+    std::size_t maximum_rows{};
+    std::size_t maximum_columns{};
+    std::size_t maximum_elements{};
     std::string objective;
 };
 enum class AdmissionStatus { supported, unsupported, unknown, conditional };
