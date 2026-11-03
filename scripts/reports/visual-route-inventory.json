@@ -509,6 +509,15 @@
       "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
+      "source": "scripts/reports/ext07/resource_observation.py",
+      "signal_count": 5,
+      "asset_name_literals": [
+        "resource-scope.svg"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 684
+    },
+    {
       "source": "scripts/reports/ext07/two_parameter_render_saved.py",
       "signal_count": 5,
       "asset_name_literals": [
@@ -1351,6 +1360,14 @@
       "asset_name_literals": [
         "h-domain-2d.png",
         "h-domain-2d.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_ext07.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "resource-scope.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
     },
@@ -2679,6 +2696,16 @@
         "feasible-polygons.svg"
       ],
       "index_sha256": "a13f19bf9ec23d74decdad43ca1d97344de64ef58db649dbb6ada5acb7744ac4",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "ext07-resource-observation-cfec938d120c95cb",
+      "source_bundle": "ext07-resource-observation-cfec938d120c95cb",
+      "assets": [
+        "resource-scope.svg"
+      ],
+      "index_sha256": "3b635cba192fa0d87cc7b139fda1ed42cf85f82256f64387be843aec583ce37e",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },

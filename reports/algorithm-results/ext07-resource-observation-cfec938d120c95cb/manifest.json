@@ -1,0 +1,27 @@
+{
+  "files": {
+    "index.html": "3b635cba192fa0d87cc7b139fda1ed42cf85f82256f64387be843aec583ce37e",
+    "one_step/CMakeCXXCompiler.raw.cmake": "fc54f5e431c04fbe157752a68b26b3f49e29f913e0188f9334e2c610971c68b3",
+    "one_step/build-configuration.json": "3e03af84d110b7d134aafc42d786f89150d778bdd22222e97b607061dc03a0d3",
+    "one_step/host.json": "1e337225eeb05c94b60c27fe3db43025fa13954bb43c60741bd83b8283eb47dd",
+    "one_step/measure.resource.jsonl": "5fbd53ad34f636dec44f1818305e878d6af47afa8ba2ef3528c9327f28bea257",
+    "one_step/measured-driver.cpp": "8c2533c1d2b17dfc09ffc91018d6b58f127da57e9c3461152b644b27208243ac",
+    "one_step/postrun.json": "8fb4f7f478c8c6752b88efbd0423adbb0b0df79efc139335e3da6a527550875a",
+    "one_step/prebuild.json": "9bee40a0d057d2f02c317ea74b5bfc72b27b4ac29c1bdfb40b26abca89c73f4d",
+    "one_step/resource-observation.json": "cc82d455e13cfed36b95c289c254b53432839934d07ed7ca1b665a6e1af768b7",
+    "one_step/smoke.jsonl": "bb35d8bcdb19d8ac170030195a478c3ff147bff075049c78513901ebad211a07",
+    "records.json": "9958064b1c95ea1b1d0b42460a832c8bc123341354fadca0c22638ac828845bb",
+    "resource-scope.svg": "b06c360b3aca458205f9c6b0e6737a19ebf5fa8aefe34c8d3575e7434c177d5c",
+    "two_parameter/CMakeCXXCompiler.raw.cmake": "fc54f5e431c04fbe157752a68b26b3f49e29f913e0188f9334e2c610971c68b3",
+    "two_parameter/build-configuration.json": "7d56a5d607fb4d9c1b7f5c53bc216ff4e0e779fae97933d13b7eb3f38de2f06c",
+    "two_parameter/host.json": "86c68a5205206d3707cf43a46c4abfb5d249ae2a5044955b1a9b9d85fc5923b0",
+    "two_parameter/measure.resource.jsonl": "39f242ba01dd465aebafaf745e1d47e41c2dcdfd0fe52f7988a147ba28fd7f88",
+    "two_parameter/measured-driver.cpp": "47846da0b749571e7ba50afffdf8ad5d161add2c82b9ddfd2f995b723f4c7229",
+    "two_parameter/postrun.json": "69f63bd516c7cd11695f36789f7dc74dd12dda2395c54c2550685a6e038de3ca",
+    "two_parameter/prebuild.json": "b7919fb4ce9fd827c196de116b6f3dba057f57df83a1a6f1957d002abe50e2ae",
+    "two_parameter/resource-observation.json": "f06e094d0586ac8a57cbe57034ae3a00b32d5fee39dedf40314e212fd52e41cd",
+    "two_parameter/smoke.jsonl": "870a56945c753ac401b2bc37e3d650b966187dbbe5ab231bd9b395fad8e576fd"
+  },
+  "report_id": "ext07-resource-observation-cfec938d120c95cb",
+  "schema": "csl.ext07-resource-observation-manifest/1"
+}

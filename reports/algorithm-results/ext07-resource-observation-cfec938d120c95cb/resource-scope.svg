@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 310" role="img" aria-labelledby="t d">
+<title id="t">Whole-process peak memory and enforced cap</title>
+<desc id="d">The bars compare each whole-process-tree memory peak against the same 1.5 GiB enforced cap. They are not per-transition measurements.</desc>
+<rect width="720" height="310" fill="#16161e"/><g fill="#e0def4" font-family="system-ui,sans-serif" font-size="14"><text x="35" y="105">one step</text><rect x="150" y="81" width="500" height="25" fill="#393552"/><rect x="150" y="81" width="1" height="25" fill="#9ccfd8"/><text x="155" y="99">2,359,296 B observed / 1,610,612,736 B cap</text><text x="35" y="205">two parameter</text><rect x="150" y="181" width="500" height="25" fill="#393552"/><rect x="150" y="181" width="1" height="25" fill="#9ccfd8"/><text x="155" y="199">2,359,296 B observed / 1,610,612,736 B cap</text><text x="35" y="280">Scope: one measurement invocation including wrapper and counter-read tail</text>
+</g></svg>

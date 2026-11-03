@@ -24,9 +24,25 @@ two_spec = importlib.util.spec_from_file_location(
 two_parameter_report = importlib.util.module_from_spec(two_spec)
 assert two_spec.loader is not None
 two_spec.loader.exec_module(two_parameter_report)
+resource_spec = importlib.util.spec_from_file_location(
+    "ext07_resource_observation",
+    ROOT / "scripts/reports/ext07/resource_observation.py")
+resource_report = importlib.util.module_from_spec(resource_spec)
+assert resource_spec.loader is not None
+resource_spec.loader.exec_module(resource_report)
 
 
 def catalog_entry(bundle: Path) -> dict:
+    if bundle.name.startswith("ext07-resource-observation-"):
+        details = resource_report.render(bundle, check=True)
+        allowed = {path.relative_to(bundle).as_posix() for path in bundle.rglob("*")
+                   if path.is_file() and not path.is_symlink()}
+        for name in ("index.html",):
+            site.OfflineHTML(allowed).feed((bundle / name).read_text(encoding="utf-8"))
+        return {**details, "schema": "csl.ext07-resource-observation/1",
+                "collector_sha256": resource_report.sha(
+                    (ROOT / "scripts/reports/ext07/resource_observation.py").read_bytes()),
+                "stager_sha256": resource_report.sha(Path(__file__).read_bytes())}
     if bundle.name.startswith("ext07-hybrid-two-parameter-"):
         details = two_parameter_report.render(bundle, check=True)
         record = two_parameter_report.validate(bundle)
@@ -76,17 +92,27 @@ def stage(catalog: Path, site_dir: Path) -> str:
                            "EXT-07 Pages index insertion point differs")
     report_ids = []
     routes = []
+    hybrid_route_indices = []
+    related_links = []
     staged_bundles = []
     for entry in data["reports"]:
         report_id = entry["report_id"]
-        if report_id.startswith("ext07-hybrid-two-parameter-"):
+        related = report_id.startswith("ext07-resource-observation-")
+        if report_id.startswith("ext07-resource-observation-"):
+            prefix = "ext07-resource-observation-"
+            example = "resource-scope.svg"
+            label = "EXT-07 bounded resource observations; two profiles"
+            example_label = "resource plot"
+        elif report_id.startswith("ext07-hybrid-two-parameter-"):
             prefix = "ext07-hybrid-two-parameter-"
             example = "two-control-example.html"
             label = "EXT-07 " + entry["verifier_id"] + "; 140 measured calls"
+            example_label = "2D example"
         else:
             prefix = "ext07-hybrid-"
             example = "example-2d.html"
             label = "EXT-07 one-step scalar verifier; 140 measured calls"
+            example_label = "2D example"
         report.collect.require(report_id.startswith(prefix) and
                                len(report_id) == len(prefix) + 16 and
                                all(char in "0123456789abcdef" for char in report_id[-16:]) and
@@ -98,22 +124,42 @@ def stage(catalog: Path, site_dir: Path) -> str:
         destination = site_dir / report_id
         report.collect.require(not destination.exists(),
                                "EXT-07 Pages route must be fresh")
-        allowed = {path.name for path in bundle.iterdir()}
+        allowed = {path.relative_to(bundle).as_posix() for path in bundle.rglob("*")
+                   if path.is_file() and not path.is_symlink()}
         route = ('<li><a href="' + escape(report_id) + '/index.html">' + label + '</a>'
-                 ' · <a href="' + escape(report_id) + '/' + example + '">2D example</a>'
+                 ' · <a href="' + escape(report_id) + '/' + example + '">' +
+                 example_label + '</a>'
                  ' · <a href="' + escape(report_id) + '/records.json">raw record</a>'
                  ' · <a href="' + escape(report_id) + '/' + escape(report_id) +
                  '.zip">offline ZIP</a></li>')
-        site.OfflineHTML({report_id + "/index.html", report_id + "/" + example,
-                          report_id + "/records.json",
-                          report_id + "/" + report_id + ".zip"}).feed(route)
+        if related:
+            route = ('<a href="' + escape(report_id) + '/index.html">' + label + '</a>'
+                     ' · <a href="' + escape(report_id) + '/' + example + '">' +
+                     example_label + '</a>')
+            site.OfflineHTML({report_id + "/index.html",
+                              report_id + "/" + example}).feed(route)
+            related_links.append(route)
+        else:
+            site.OfflineHTML({report_id + "/index.html", report_id + "/" + example,
+                              report_id + "/records.json",
+                              report_id + "/" + report_id + ".zip"}).feed(route)
+            if prefix in ("ext07-hybrid-", "ext07-hybrid-two-parameter-"):
+                hybrid_route_indices.append(len(routes))
         for name in ("index.html", example):
             site.OfflineHTML(allowed).feed(
                 (bundle / name).read_text(encoding="utf-8"))
         staged_bundles.append((report_id, bundle,
-                               {path.name: path.read_bytes() for path in bundle.iterdir()}))
+                               {path.relative_to(bundle).as_posix(): path.read_bytes()
+                                for path in bundle.rglob("*")
+                                if path.is_file() and not path.is_symlink()}))
         report_ids.append(report_id)
         routes.append(route)
+    report.collect.require(not related_links or hybrid_route_indices,
+                           "EXT-07 resource observations require a hybrid report route")
+    if related_links:
+        for route_index in hybrid_route_indices:
+            routes[route_index] = routes[route_index].replace(
+                "</li>", " · " + " · ".join(related_links) + "</li>")
     # Do not leave earlier routes behind when a later catalog entry is invalid.
     for report_id, bundle, files in staged_bundles:
         destination = site_dir / report_id
@@ -121,11 +167,13 @@ def stage(catalog: Path, site_dir: Path) -> str:
                                "EXT-07 Pages route must be fresh")
         destination.mkdir()
         for name, content in files.items():
-            (destination / name).write_bytes(content)
+            output = destination / name
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_bytes(content)
     report.collect.require(index.count("</ul>") == 1,
                            "EXT-07 Pages index insertion point differs")
-    index_path.write_text(index.replace("</ul>", "".join(routes) + "</ul>"),
-                          encoding="utf-8")
+    index = index.replace("</ul>", "".join(routes) + "</ul>")
+    index_path.write_text(index, encoding="utf-8")
     return report_ids[0] if len(report_ids) == 1 else ",".join(report_ids)
 
 
