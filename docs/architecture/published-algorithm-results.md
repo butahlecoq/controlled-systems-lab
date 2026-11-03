@@ -153,6 +153,18 @@ resource receipts and raw systemd-limited timing rows; local build paths are
 excluded. Broader continuous-family oracle coverage and capability/scale
 evidence remain open EXT-07 work.
 
+Schema `/2` follow-up records add process CPU deltas around solver-branch
+workspace creation and execution. The [one-step report](../../reports/algorithm-results/ext07-hybrid-e7bb939d854b1907/)
+contains 140 successful branch samples with a median of 181,360 ns and range
+177,052–527,189 ns. The [two-stage report](../../reports/algorithm-results/ext07-hybrid-two-parameter-bc3c6ca5f7a606ee/)
+contains 140 successful samples per edge path: `enter-half` median 222,978 ns
+(210,775–329,312 ns), `enter-full` median 195,036 ns (188,503–235,868 ns).
+These Release captures use the pinned HiGHS build and fixed fixtures. Process
+CPU sums all process threads, so unrelated concurrent work may contribute; the
+values are not provider-only attribution, do not measure heap, and make no
+comparative performance claim. The new reports will be Pages-published by the
+main-only report workflow after merge.
+
 ## EXT-02 finite/mixed branch portfolio report
 
 The saved [EXT-02 analytic portfolio bundle](../../reports/algorithm-results/ext02-two-state-mixed-v1/)

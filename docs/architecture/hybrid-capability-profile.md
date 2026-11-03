@@ -42,6 +42,18 @@ horizon, paths, and relation size, so these values do not support a cross-profil
 scaling comparison. Full receipts, raw rows, and their accounting scope are in
 the [EXT-07 bounded resource observation report](../../reports/algorithm-results/ext07-resource-observation-cfec938d120c95cb/).
 
+Schema `/2` follow-up reports add process CPU deltas around each solver-branch
+workspace/execution interval. The one-step profile records 140 observed branch
+intervals (median 181,360 ns; range 177,052–527,189 ns). The two-stage profile
+records 140 intervals per edge path: `enter-half` median 222,978 ns (range
+210,775–329,312 ns), and `enter-full` median 195,036 ns (range
+188,503–235,868 ns). Both runs are Release builds with zero failed calls. These
+are process CPU values summed over all process threads; unrelated concurrent
+work may contribute. They do not attribute CPU to HiGHS, measure heap use, or
+support a performance comparison. The [one-step schema `/2` report](../../reports/algorithm-results/ext07-hybrid-e7bb939d854b1907/)
+and [two-stage schema `/2` report](../../reports/algorithm-results/ext07-hybrid-two-parameter-bc3c6ca5f7a606ee/)
+retain source commits, raw rows, and plots.
+
 ## Independent-oracle test profiles
 
 The unit suite adds exact H-relation and optimal-family checks beyond the two
