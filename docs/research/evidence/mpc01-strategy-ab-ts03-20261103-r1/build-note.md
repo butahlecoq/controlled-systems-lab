@@ -6,7 +6,7 @@ This is a new synthetic comparison fixture, ID `mpc01-ts03-singular-integrator-v
 
 ## Build and run
 
-The worktree was clean at source commit `0f407af581c3a5b536d5d76f6e889fef542c4597`. The Release build used GNU C++ 16.2.1, CMake 3.31.6, Ninja, HiGHS 1.11.0 and Qhull 8.0.2. The registered example was built through the repository's installed-consumer path. `CMakeCache.txt` preserves the configuration; the install and installed-example configure/build logs are retained beside this note. The project library build completed successfully. The executable SHA-256 is `f87118d2114992fea92625e60599ff6937de694a189389cc3e173187f2d4f73e`.
+The original worktree was clean at source commit `0f407af581c3a5b536d5d76f6e889fef542c4597`. The Release build used GNU C++ 16.2.1, CMake 3.31.6, Ninja, HiGHS 1.11.0 and Qhull 8.0.2. The registered example was built through the repository's installed-consumer path. `CMakeCache.txt` is from that original build and records its source directory (the PR worktree at the pinned commit) and configuration; the reproduction recipe below uses a separate detached worktree at the same commit to keep the PR checkout available for the scenario and harness. Install and installed-example configure/build logs are retained beside this note. The project library build completed successfully. The executable SHA-256 is `f87118d2114992fea92625e60599ff6937de694a189389cc3e173187f2d4f73e`.
 
 To rebuild from the pinned source commit, use the repository's CMake 3.31.6,
 Ninja, GNU 16.2.1, and network access for pinned dependencies:
@@ -43,6 +43,14 @@ systemd-run --user --scope --quiet -p MemoryMax=2147483648 -p MemorySwapMax=0 \
 The separate pinned worktree contains only source/build files at commit `0f407`;
 the PR checkout supplies the scenario and portable supervisor. The event output
 directory must be fresh because the capture refuses to overwrite results.
+
+After validating a reproduced capture, check that the detached source worktree
+is clean with `git -C "$SOURCE_WORKTREE" status --porcelain`, inspect the
+registered worktree entry and generated build/run directories, and remove only
+the clean worktree with `git worktree remove "$SOURCE_WORKTREE"`. Inspect the
+resolved `/tmp/mpc01-ts03` build/install tree and `/tmp/mpc01-ts03-run` outputs
+before removing generated files; preserve any raw capture you still need. The
+PR checkout and its saved evidence bundle are not temporary build output.
 
 To rebuild the retained comparison record and HTML/SVG reading layer from the
 saved inputs, run the record builder and renderer from the repository root:
