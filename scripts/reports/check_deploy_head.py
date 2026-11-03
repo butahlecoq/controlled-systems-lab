@@ -97,9 +97,12 @@ def main():
         site = Path(os.environ.get("PAGES_SITE_DIR", "build/report-site"))
         if site.is_symlink() or not site.is_dir():
             raise ValueError("current Pages site is missing while recording its report source")
+        marker_path = site / SOURCE_MARKER
+        if marker_path.is_symlink() or marker_path.exists():
+            raise ValueError("Pages source marker already exists or is unsafe")
         marker = {"schema": "csl.pages-augmentation-source/1",
                   "report_run_id": source_run, "head_sha": source_sha}
-        (site / SOURCE_MARKER).write_text(
+        marker_path.write_text(
             json.dumps(marker, sort_keys=True, separators=(",", ":")) + "\n",
             encoding="utf-8")
         with output.open("a", encoding="utf-8") as stream:
