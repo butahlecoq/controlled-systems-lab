@@ -54,6 +54,15 @@ class PerAttemptPublicationTests(unittest.TestCase):
             strategy_href = (f'href="{stage_module.STRATEGY_AB_ROUTE.as_posix()}/'
                              'strategy-ab-ts03-summary.html"')
             self.assertIn(strategy_href, landing)
+            ts01_route = site / stage_module.STRATEGY_AB_TS01_ROUTE
+            self.assertTrue((ts01_route / "comparison-record.json").is_file())
+            self.assertTrue((ts01_route / "strategy-ab-ts01-control-plane.svg").is_file())
+            ts01_href = (f'href="{stage_module.STRATEGY_AB_TS01_ROUTE.as_posix()}/'
+                         'strategy-ab-ts01-summary.html"')
+            self.assertIn(ts01_href, landing)
+            ts01_page = (ts01_route / "strategy-ab-ts01-summary.html").read_text(encoding="utf-8")
+            self.assertIn("5 measured pairs", ts01_page)
+            self.assertIn("each individual Strategy A or Strategy B attempt", ts01_page)
             strategy_page = (strategy_route / "strategy-ab-ts03-summary.html").read_text(encoding="utf-8")
             self.assertIn("exact optimal family", strategy_page)
             self.assertIn("does not satisfy that limiter profile", strategy_page)
@@ -78,6 +87,14 @@ class PerAttemptPublicationTests(unittest.TestCase):
                 if parsed.scheme or parsed.netloc:
                     continue
                 target = (strategy_route / urldefrag(parsed.path)[0]).resolve()
+                self.assertTrue(target.is_relative_to(site.resolve()), reference)
+                self.assertTrue(target.is_file(), reference)
+
+            for reference in re.findall(r'(?:href|src)="([^"]+)"', ts01_page):
+                parsed = urlparse(reference)
+                if parsed.scheme or parsed.netloc:
+                    continue
+                target = (ts01_route / urldefrag(parsed.path)[0]).resolve()
                 self.assertTrue(target.is_relative_to(site.resolve()), reference)
                 self.assertTrue(target.is_file(), reference)
 

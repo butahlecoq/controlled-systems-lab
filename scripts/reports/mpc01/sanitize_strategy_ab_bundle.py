@@ -19,6 +19,7 @@ def main() -> int:
     parser.add_argument("--source-root", type=pathlib.Path, required=True)
     parser.add_argument("--build-root", type=pathlib.Path, required=True)
     parser.add_argument("--capture-root", type=pathlib.Path, required=True)
+    parser.add_argument("--environment-file", default="strategy-ab-ts02-environment.json")
     args = parser.parse_args()
 
     bundle = args.bundle.resolve(strict=True)
@@ -49,7 +50,7 @@ def main() -> int:
         note["build"]["retained_cmake_files"][name] = sha256((bundle / name).read_bytes())
     note_path.write_text(json.dumps(note, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
-    environment_path = bundle / "strategy-ab-ts02-environment.json"
+    environment_path = bundle / args.environment_file
     environment = json.loads(environment_path.read_text(encoding="utf-8"))
     environment["executable"] = "${BUILD_ROOT}/examples/registered_synthesis_comparison"
     metadata_path = environment["build"]["compiler_metadata_file"]
