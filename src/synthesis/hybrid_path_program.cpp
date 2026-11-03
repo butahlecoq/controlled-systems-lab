@@ -1811,7 +1811,12 @@ struct HybridPreparedExecution::Storage {
     std::vector<HybridPreparedPipeline> pipelines;
     std::vector<std::unique_ptr<HybridReachabilityStage>> reachability_stages;
     std::shared_ptr<const HybridReachabilityAdapter> reachability_adapter;
+    std::shared_ptr<const HybridFamilyVerificationAdapter> verifier;
+    model::HybridSystem system;
+    model::HybridRequest request;
+    model::HybridEnumerationLimits enumeration_limits;
     model::HybridRelationLimits relation_limits;
+    optimization::ObjectivePolicy objective_policy;
     HybridAdmissionReport report;
 };
 
@@ -1821,12 +1826,18 @@ public:
         std::vector<HybridPreparedPipeline> pipelines,
         std::vector<std::unique_ptr<HybridReachabilityStage>> reachability_stages,
         std::shared_ptr<const HybridReachabilityAdapter> reachability_adapter,
+        std::shared_ptr<const HybridFamilyVerificationAdapter> verifier,
+        model::HybridSystem system,model::HybridRequest request,
+        model::HybridEnumerationLimits enumeration_limits,
         model::HybridRelationLimits relation_limits,
+        optimization::ObjectivePolicy objective_policy,
         HybridAdmissionReport report) {
         using Storage=HybridPreparedExecution::Storage;
         return HybridPreparedExecution{std::make_unique<const Storage>(Storage{
             std::move(programs),std::move(pipelines),std::move(reachability_stages),
-            std::move(reachability_adapter),relation_limits,std::move(report)})};
+            std::move(reachability_adapter),std::move(verifier),std::move(system),
+            std::move(request),enumeration_limits,relation_limits,objective_policy,
+            std::move(report)})};
     }
     static const HybridPreparedExecution::Storage& storage(const HybridPreparedExecution& prepared) {
         return *prepared.storage_;
@@ -1855,9 +1866,6 @@ HybridRefinementResult refine_hybrid_request(HybridAdmissionToken token,
         return refuse("hybrid.refinement.selection","Refinement requires a selected trajectory or reachability operation");
     if(admission.selection.trajectory&&(!admission.selection.lp||!admission.selection.convex))
         return refuse("hybrid.refinement.trajectory","Trajectory refinement requires LP and convex provider snapshots");
-    if(admission.selection.verifier)
-        return refuse("hybrid.refinement.selection",
-            "Transactional family-verifier preparation is not yet connected");
     std::vector<HybridPathProgram> programs;
     if(admission.selection.trajectory) {
         if(problem.value.empty())
@@ -1952,7 +1960,9 @@ HybridRefinementResult refine_hybrid_request(HybridAdmissionToken token,
             "Hybrid refinement stopped before publishing prepared providers; no workspace was created"};
     return HybridPreparedAccess::create(std::move(programs),std::move(pipelines),
         std::move(reachability_stages),admission.selection.reachability,
-        admission.relation_limits,admission.report);
+        admission.selection.verifier,admission.system,admission.request,
+        admission.enumeration_limits,admission.relation_limits,admission.objective_policy,
+        admission.report);
 }
 
 HybridPortfolioExecution execute_hybrid_request(HybridPreparedExecution prepared,
@@ -1984,8 +1994,33 @@ HybridPortfolioExecution execute_hybrid_request(HybridPreparedExecution prepared
         attempt.result=std::move(result);
         reachability_attempts.push_back(std::move(attempt));
     }
-    return execute_prepared_hybrid_branches(storage.programs,storage.pipelines,
+    auto portfolio=execute_prepared_hybrid_branches(storage.programs,storage.pipelines,
         reachability_attempts,context);
+    if(storage.verifier) {
+        HybridPortfolioVerificationAttempt verification{
+            assemble_hybrid_portfolio_optimal_face_candidates(storage.programs,portfolio,
+                storage.objective_policy.numerical,context.cancellation),{},
+            context.resources?std::optional<ResourcePolicy>{*context.resources}:std::nullopt};
+        if(auto* candidates=std::get_if<HybridPortfolioOptimalFaceCandidates>(
+               &verification.candidates)) {
+            if(const auto stop=interruption(context)) {
+                verification.verification=OperationStopped{
+                    *stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+                    "Hybrid family verification stopped before verifier execution"};
+            } else {
+                auto result=verify_hybrid_portfolio_family(*storage.verifier,storage.system,
+                    storage.request,storage.programs,candidates->branches,storage.enumeration_limits,
+                    storage.objective_policy.numerical,context.cancellation);
+                if(const auto stop=interruption(context))
+                    result=OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:
+                        StopReason::deadline_expired,
+                        "Hybrid family verification stopped before result publication"};
+                verification.verification=std::move(result);
+            }
+        }
+        portfolio.family_verification=std::move(verification);
+    }
+    return portfolio;
 }
 
 } // namespace csl::synthesis

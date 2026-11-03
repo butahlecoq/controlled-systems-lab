@@ -1239,6 +1239,30 @@ public:
     }
 };
 
+class CountingExactSingletonHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
+    ExactSingletonHybridFamilyVerifier delegate_;
+public:
+    mutable int preflight_calls{};
+    mutable int verify_calls{};
+    HybridFamilyVerificationCapabilities capabilities() const noexcept override {
+        return delegate_.capabilities();
+    }
+    HybridFamilyVerificationPreflightResult preflight(const model::HybridSystem& system,
+        const model::HybridRequest& request,std::span<const model::HybridPath> paths,
+        std::stop_token cancellation) const override {
+        ++preflight_calls;
+        return delegate_.preflight(system,request,paths,cancellation);
+    }
+    HybridFamilyVerificationResult verify(const model::HybridSystem& system,
+        const model::HybridRequest& request,std::span<const model::HybridPath> paths,
+        std::span<const HybridPathProgram> programs,
+        std::span<const HybridPathOptimalFaceCandidate> candidates,NumericalPolicy policy,
+        std::stop_token cancellation) const override {
+        ++verify_calls;
+        return delegate_.verify(system,request,paths,programs,candidates,policy,cancellation);
+    }
+};
+
 class DefaultPreflightHybridFamilyVerifier final : public HybridFamilyVerificationAdapter {
 public:
     HybridFamilyVerificationCapabilities capabilities() const noexcept override {
@@ -1402,6 +1426,24 @@ class CompletingLP final : public LPWorkspace {
     }
 };
 
+class ExactSingletonOptimalLP final : public LPWorkspace {
+    ProgramOutcome do_solve(const LinearProgram& program,const ExecutionContext&) override {
+        const auto& identity=program.identity();
+        const bool worse=identity.program.value.find(":5:worse")!=std::string::npos;
+        const double value=worse?1.0:0.0;
+        const Vector primal{2,1,3,value,0};
+        const SymbolicArgument support{"fixture.exact-singleton",
+            "literal integral trajectory and objective of the pinned fixture"};
+        const std::vector<std::string> assumptions{
+            "the pinned fixture has the literal trajectory assigned to this path"};
+        const ProgramBoundEvidence evidence{identity,support,assumptions};
+        const ProgramObjectiveBound bound{value,evidence};
+        return ProgramResult{Termination::completed,
+            {identity,MathematicalOutcome::optimal,support,assumptions},primal,
+            {bound,bound},"fixture exact singleton optimizer"};
+    }
+};
+
 class RejectingConvex final : public ConvexWorkspace {
     ProgramOutcome do_solve(const ConvexProgram&,const ExecutionContext&) override {
         return Unsupported{{{DiagnosticCode::unsupported,"fixture.convex","fixture rejection"}}};
@@ -1526,6 +1568,26 @@ registry::PreparedProvider<registry::LPPort> completing_lp_provider() {
         [](const LinearProgram&,const registry::Requirements&)->registry::Capability{return registry::Offer{};},
         [](const LinearProgram&){return std::make_unique<CompletingLP>();}}));
     auto prepared=registry::prepare_provider(registry::select_provider(providers,{{"completing-lp"},{}}));
+    REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::LPPort>>(prepared));
+    return std::get<registry::PreparedProvider<registry::LPPort>>(std::move(prepared));
+}
+
+registry::PreparedProvider<registry::LPPort> exact_singleton_optimal_lp_provider(
+    std::shared_ptr<int> factory_calls) {
+    registry::Registry<registry::LPPort> providers;
+    REQUIRE_FALSE(providers.add({{{"exact-singleton-lp"},"1"},
+        [](const LinearProgram&,const registry::Requirements&)->registry::Capability {
+            return registry::Offer{};
+        },
+        [factory_calls](const LinearProgram&) {
+            ++*factory_calls;
+            return std::make_unique<ExactSingletonOptimalLP>();
+        }, {},
+        [](const registry::RequestEnvelope&,const registry::Requirements&) {
+            return registry::AdmissionDeclaration{registry::AdmissionStatus::supported,{},true};
+        }}));
+    auto prepared=registry::prepare_provider(registry::select_provider(
+        providers,{{"exact-singleton-lp"},{}}));
     REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::LPPort>>(prepared));
     return std::get<registry::PreparedProvider<registry::LPPort>>(std::move(prepared));
 }
@@ -1877,6 +1939,92 @@ TEST_CASE("hybrid request stages all projected paths before executing geometry")
     }
     CHECK(execution_result.reachability_attempts[0].observed_backend_threads==7);
     CHECK(execution_result.reachability_attempts[1].observed_backend_threads==4);
+}
+
+TEST_CASE("coordinated hybrid execution verifies solver candidates after all branches complete") {
+    auto [system,request]=exact_singleton_portfolio();
+    auto verifier=std::make_shared<CountingExactSingletonHybridFamilyVerifier>();
+    auto factory_calls=std::make_shared<int>(0);
+    auto convex_declarations=std::make_shared<int>(0);
+    auto convex_factories=std::make_shared<int>(0);
+    HybridExecutionSelection selection;
+    selection.trajectory=std::make_shared<JointHDirectTrajectoryAdapter>();
+    selection.lp=exact_singleton_optimal_lp_provider(factory_calls);
+    selection.convex=declared_convex_provider(registry::AdmissionStatus::supported,true,
+        convex_declarations,convex_factories);
+    selection.verifier=verifier;
+    auto resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{4,2,2,4096});
+    ExecutionContext context;
+    context.resources=resources;
+
+    auto admitted=admit_hybrid_request(system,request,selection,{1,8},{16,128,4096},{},context);
+    REQUIRE(std::holds_alternative<HybridAdmissionToken>(admitted));
+    CHECK(verifier->preflight_calls==1);
+    CHECK(verifier->verify_calls==0);
+    auto refined=refine_hybrid_request(std::move(std::get<HybridAdmissionToken>(admitted)),
+        {"coordinated-family-verification"},context);
+    REQUIRE(std::holds_alternative<HybridPreparedExecution>(refined));
+    CHECK(verifier->verify_calls==0);
+    CHECK(*factory_calls==0);
+
+    const auto execution=execute_hybrid_request(
+        std::move(std::get<HybridPreparedExecution>(refined)),context);
+    CHECK(execution.all_supplied_branches_completed);
+    REQUIRE(execution.branches.size()==3);
+    CHECK(*factory_calls==3);
+    CHECK(verifier->verify_calls==1);
+    REQUIRE(execution.family_verification);
+    const auto& attempt=*execution.family_verification;
+    REQUIRE(attempt.requested_resources);
+    CHECK(attempt.requested_resources->memory_bytes==4096);
+    const auto* candidates=std::get_if<HybridPortfolioOptimalFaceCandidates>(&attempt.candidates);
+    REQUIRE(candidates);
+    CHECK(candidates->objective_bounds.global_lower_bound==0.0);
+    CHECK(candidates->objective_bounds.global_upper_bound==0.0);
+    REQUIRE(candidates->branches.size()==2);
+    CHECK(candidates->branches[0].path.edges.front().value=="tie-a");
+    CHECK(candidates->branches[1].path.edges.front().value=="tie-b");
+    REQUIRE(attempt.verification);
+    const auto* report=std::get_if<HybridFamilyVerificationReport>(&*attempt.verification);
+    REQUIRE(report);
+    CHECK(report->global_objective_optimality==HybridVerificationStatus::established);
+    CHECK(report->complete_family_coverage==HybridVerificationStatus::established);
+    REQUIRE(report->branches.size()==3);
+    CHECK(report->branches[0].objective_optimality==HybridVerificationStatus::established);
+    CHECK(report->branches[1].objective_optimality==HybridVerificationStatus::established);
+}
+
+TEST_CASE("coordinated family verification retains incomplete solver coverage without dispatch") {
+    auto [system,request]=exact_singleton_portfolio();
+    auto verifier=std::make_shared<CountingExactSingletonHybridFamilyVerifier>();
+    auto declarations=std::make_shared<int>(0);
+    auto factories=std::make_shared<int>(0);
+    auto convex_declarations=std::make_shared<int>(0);
+    auto convex_factories=std::make_shared<int>(0);
+    HybridExecutionSelection selection;
+    selection.trajectory=std::make_shared<JointHDirectTrajectoryAdapter>();
+    selection.lp=declared_lp_provider(registry::AdmissionStatus::supported,true,
+        declarations,factories);
+    selection.convex=declared_convex_provider(registry::AdmissionStatus::supported,true,
+        convex_declarations,convex_factories);
+    selection.verifier=verifier;
+    auto admitted=admit_hybrid_request(system,request,selection,{1,8},{16,128,4096},{},{});
+    REQUIRE(std::holds_alternative<HybridAdmissionToken>(admitted));
+    auto refined=refine_hybrid_request(std::move(std::get<HybridAdmissionToken>(admitted)),
+        {"coordinated-family-verification-incomplete"},{});
+    REQUIRE(std::holds_alternative<HybridPreparedExecution>(refined));
+    const auto execution=execute_hybrid_request(
+        std::move(std::get<HybridPreparedExecution>(refined)),{});
+    CHECK_FALSE(execution.all_supplied_branches_completed);
+    REQUIRE(execution.family_verification);
+    CHECK(std::holds_alternative<HybridPortfolioObjectiveIncomplete>(
+        execution.family_verification->candidates));
+    CHECK_FALSE(execution.family_verification->verification);
+    CHECK(verifier->verify_calls==0);
+    REQUIRE(execution.branches.size()==3);
+    CHECK(std::all_of(execution.branches.begin(),execution.branches.end(),[](const auto& branch) {
+        return branch.termination==Termination::operation_rejected;
+    }));
 }
 
 TEST_CASE("hybrid portfolio rejects unknown provider envelopes before adapter path builds") {

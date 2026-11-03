@@ -122,13 +122,15 @@ using HybridRefinementResult = std::variant<HybridPreparedExecution,
 
 // Transactionally builds selected trajectory branches, stages reachability
 // operations (including concrete projected-geometry preparation), and
-// prepares every LP/convex program before returning. Family-verifier
-// selections fail closed until their concrete preparation joins this transaction.
+// prepares every LP/convex program before returning. The selected verifier is
+// retained for execution after solver results are available.
 HybridRefinementResult refine_hybrid_request(HybridAdmissionToken,
     ProblemId, const ExecutionContext&);
 
 // Consumes staged reachability operations and creates solver workspaces only
-// after refinement prepared every selected request successfully.
+// after refinement prepared every selected request successfully. If selected,
+// family verification runs after solver results and retains candidate analysis
+// separately from the verifier outcome.
 HybridPortfolioExecution execute_hybrid_request(HybridPreparedExecution,
     const ExecutionContext&);
 

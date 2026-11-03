@@ -269,18 +269,7 @@ struct HybridBranchExecution {
     std::optional<std::size_t> observed_backend_threads;
 };
 
-struct HybridPortfolioExecution {
-    std::vector<HybridBranchExecution> branches;
-    // True only if every supplied branch produced a contract-valid completed
-    // solver result. This says nothing about cross-branch optimality.
-    bool all_supplied_branches_completed{};
-    // Successful reachability results retained for source compatibility.
-    // Use reachability_attempts when failures and stops must be accounted for.
-    std::vector<HybridPathReachability> reachability;
-    // Per-path reachability outcomes, including failures and stops. These are
-    // separate from solver branches and do not imply objective optimality.
-    std::vector<HybridReachabilityAttempt> reachability_attempts;
-};
+struct HybridPortfolioExecution;
 
 // Objective-bound comparison is deliberately separate from complete-family
 // verification. The returned paths are branches that cannot yet be excluded
@@ -366,6 +355,30 @@ struct HybridFamilyVerificationCapabilities {
     bool checks_global_objective_optimality{};
     bool checks_continuous_branch_coverage{};
     Assurance assurance{Assurance::numerical};
+};
+
+// The coordinator preserves both the candidate construction result and the
+// verifier outcome. An incomplete solver portfolio therefore remains distinct
+// from a completed verification report.
+struct HybridPortfolioVerificationAttempt {
+    HybridPortfolioOptimalFaceAnalysis candidates;
+    std::optional<HybridFamilyVerificationResult> verification;
+    std::optional<ResourcePolicy> requested_resources;
+};
+
+struct HybridPortfolioExecution {
+    std::vector<HybridBranchExecution> branches;
+    // True only if every supplied branch produced a contract-valid completed
+    // solver result. This says nothing about cross-branch optimality.
+    bool all_supplied_branches_completed{};
+    // Successful reachability results retained for source compatibility.
+    // Use reachability_attempts when failures and stops must be accounted for.
+    std::vector<HybridPathReachability> reachability;
+    // Per-path reachability outcomes, including failures and stops. These are
+    // separate from solver branches and do not imply objective optimality.
+    std::vector<HybridReachabilityAttempt> reachability_attempts;
+    // Present when the coordinated request selected a family verifier.
+    std::optional<HybridPortfolioVerificationAttempt> family_verification{};
 };
 
 // Replaceable verification boundary. Reports are inspection data only; they
