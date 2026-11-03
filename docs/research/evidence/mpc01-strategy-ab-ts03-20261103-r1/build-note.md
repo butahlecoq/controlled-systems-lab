@@ -12,14 +12,16 @@ To rebuild from the pinned source commit, use the repository's CMake 3.31.6,
 Ninja, GNU 16.2.1, and network access for pinned dependencies:
 
 ```sh
-git checkout 0f407af581c3a5b536d5d76f6e889fef542c4597
-mise exec cmake@3.31.6 -- cmake -S . -B /tmp/mpc01-ts03/build -G Ninja \
+PR_CHECKOUT="$PWD" # Keep this PR checkout: it contains the scenario and capture/report tools.
+SOURCE_WORKTREE=/tmp/csl-mpc01-ts03-source
+git worktree add --detach "$SOURCE_WORKTREE" 0f407af581c3a5b536d5d76f6e889fef542c4597
+mise exec cmake@3.31.6 -- cmake -S "$SOURCE_WORKTREE" -B /tmp/mpc01-ts03/build -G Ninja \
   -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
   -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=ON -DCSL_DEPENDENCY_PROBES=OFF
 mise exec cmake@3.31.6 -- cmake --build /tmp/mpc01-ts03/build --parallel 4
 mise exec cmake@3.31.6 -- cmake --install /tmp/mpc01-ts03/build \
   --prefix /tmp/mpc01-ts03/install
-mise exec cmake@3.31.6 -- cmake -S examples -B /tmp/mpc01-ts03/examples-build \
+mise exec cmake@3.31.6 -- cmake -S "$SOURCE_WORKTREE/examples" -B /tmp/mpc01-ts03/examples-build \
   -G Ninja -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_PREFIX_PATH=/tmp/mpc01-ts03/install
 mise exec cmake@3.31.6 -- cmake --build /tmp/mpc01-ts03/examples-build \
@@ -30,18 +32,17 @@ The run command was:
 
 ```sh
 systemd-run --user --scope --quiet -p MemoryMax=2147483648 -p MemorySwapMax=0 \
-  python3 scripts/reports/mpc01/capture_strategy_ab_limited.py \
+  python3 "$PR_CHECKOUT/scripts/reports/mpc01/capture_strategy_ab_limited.py" \
   --executable /tmp/mpc01-ts03/examples-build/registered_synthesis_comparison \
-  --scenario docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1/scenario.json \
+  --scenario "$PR_CHECKOUT/docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1/scenario.json" \
   --events /tmp/mpc01-ts03-run/strategy-ab-ts03-events.jsonl \
   --resource-profile /tmp/mpc01-ts03-run/resource-profile.json \
-  --workdir "$PWD"
+  --workdir "$SOURCE_WORKTREE"
 ```
 
-The portable supervisor is copied into this evidence directory as
-`capture-supervisor.py`; the invocation above uses its source-controlled copy.
-The event output directory must be fresh because the capture refuses to
-overwrite results.
+The separate pinned worktree contains only source/build files at commit `0f407`;
+the PR checkout supplies the scenario and portable supervisor. The event output
+directory must be fresh because the capture refuses to overwrite results.
 
 To rebuild the retained comparison record and HTML/SVG reading layer from the
 saved inputs, run the record builder and renderer from the repository root:
@@ -61,7 +62,7 @@ One excluded warmup pair and five measured pairs alternated A/B then B/A. One pr
 
 ## Capture correction
 
-The first algorithm process emitted all twelve successful trial rows, but the initial supervisor mistakenly expected ten. Its nonzero validation exit and all generated outputs are retained under `setup-attempts/supervisor-row-count-mismatch/`. A fresh process using the corrected twelve-row check completed successfully; that second run supplies the canonical record and timings in this bundle.
+The first algorithm process emitted all twelve successful trial rows, but the initial supervisor mistakenly expected ten. Its nonzero validation exit and all generated outputs are retained under `setup-attempts/supervisor-row-count-mismatch/`. After correcting that check and exercising the parameterized supervisor, the canonical record and timings were captured by the final portable-supervisor run from a clean worktree at the pinned source commit. Earlier successful recaptures were superseded; only the final run and the initial failed supervisor check are retained here.
 
 ## Evidence limits
 

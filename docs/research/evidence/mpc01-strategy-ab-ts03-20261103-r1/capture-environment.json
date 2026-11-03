@@ -15,6 +15,9 @@
   "events_sha256": "96ee02b307da0bf038e0910030a43ab39e6fb99e8a58faea24cca03050229512",
   "executable": "/var/tmp/csl-mpc01-ts03-20261103-r3/examples-build/registered_synthesis_comparison",
   "executable_sha256": "f87118d2114992fea92625e60599ff6937de694a189389cc3e173187f2d4f73e",
+  "execution_worktree_clean_before_run": true,
+  "execution_worktree_commit": "0f407af581c3a5b536d5d76f6e889fef542c4597",
+  "execution_worktree_role": "clean pinned source checkout used as the process working directory; compiled source identity matches source_commit",
   "host": {
     "architecture": "x86_64",
     "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
