@@ -76,6 +76,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           GITHUB_SHA: ${{ github.event.workflow_run.head_sha }}
+          PAGES_SOURCE_RUN_ID: ${{ needs.await.outputs.upstream_run_id }}
+          PAGES_SITE_DIR: build/report-site
         run: python3 scripts/reports/check_deploy_head.py
       - name: Upload the complete augmented Pages site
         if: steps.head.outputs.current == 'true'

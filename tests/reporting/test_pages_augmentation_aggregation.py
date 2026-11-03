@@ -1,21 +1,25 @@
 """Combined main-only Pages deployment retains all standalone report routes."""
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import tempfile
+import tarfile
 import unittest
 import zipfile
+from io import BytesIO
 
 from scripts.reports import augment_pages_bundle, await_pages_augmentation_runs
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def run(run_id: int, created: str, *, head: str, branch: str = "main",
-        event: str = "workflow_run", status: str = "completed", conclusion: str = "success"):
-    return {"id": run_id, "created_at": created, "head_sha": head,
-            "head_branch": branch, "event": event, "status": status,
-            "conclusion": conclusion}
+def run(run_id: int, created: str, updated: str, *, head: str,
+        branch: str = "main", event: str = "workflow_run", status: str = "completed",
+        conclusion: str = "success"):
+    return {"id": run_id, "created_at": created, "updated_at": updated,
+            "head_sha": head, "head_branch": branch, "event": event,
+            "status": status, "conclusion": conclusion}
 
 
 class PagesAugmentationAggregation(unittest.TestCase):
@@ -48,29 +52,32 @@ class PagesAugmentationAggregation(unittest.TestCase):
                 with zipfile.ZipFile(site / f"{report_id}.zip") as archive:
                     self.assertIn(f"{report_id}/publication-manifest.json", archive.namelist())
 
-    def test_run_selection_excludes_old_same_sha_deployments(self):
-        sha = "a" * 40
-        runs = [
-            run(1, "2026-11-03T02:00:00Z", head=sha),
-            run(2, "2026-11-03T03:00:00Z", head=sha, status="in_progress", conclusion=""),
-            run(3, "2026-11-03T03:05:00Z", head="b" * 40),
-        ]
-        current = await_pages_augmentation_runs.run_after_parent(
-            runs, head_sha=sha, parent_created_at="2026-11-03T02:55:00Z")
-        self.assertEqual(current["id"], 2)
-        self.assertEqual(current["status"], "in_progress")
+    def test_marker_is_bound_to_the_exact_report_run(self):
+        source = {"schema": "csl.pages-augmentation-source/1",
+                  "report_run_id": 42, "head_sha": "a" * 40}
+        tar_bytes = BytesIO()
+        with tarfile.open(fileobj=tar_bytes, mode="w") as archive:
+            encoded = (json.dumps(source, sort_keys=True, separators=(",", ":")) + "\n").encode()
+            item = tarfile.TarInfo("./pages-augmentation-source.json")
+            item.size = len(encoded)
+            archive.addfile(item, BytesIO(encoded))
+        zipped = BytesIO()
+        with zipfile.ZipFile(zipped, "w") as archive:
+            archive.writestr("artifact.tar", tar_bytes.getvalue())
 
-    def test_parent_run_is_latest_success_before_child_run(self):
+        self.assertEqual(await_pages_augmentation_runs.source_marker(zipped.getvalue()), source)
+
+    def test_latest_report_is_selected_by_completion_time_for_same_sha(self):
         sha = "a" * 40
         runs = [
-            run(1, "2026-11-03T02:00:00Z", head=sha, event="push"),
-            run(2, "2026-11-03T02:30:00Z", head=sha, event="push", conclusion="failure"),
-            run(3, "2026-11-03T03:00:00Z", head=sha, event="push"),
-            run(4, "2026-11-03T03:05:00Z", head=sha, event="push"),
+            run(10, "2026-11-03T03:00:00Z", "2026-11-03T03:08:00Z", head=sha, event="push"),
+            run(11, "2026-11-03T03:02:00Z", "2026-11-03T03:05:00Z", head=sha, event="workflow_dispatch"),
+            run(12, "2026-11-03T03:03:00Z", "2026-11-03T03:09:00Z", head=sha,
+                event="push", conclusion="failure"),
+            run(13, "2026-11-03T03:04:00Z", "2026-11-03T03:10:00Z", head="b" * 40, event="push"),
         ]
-        parent = await_pages_augmentation_runs.select_parent_run(
-            runs, head_sha=sha, child_created_at="2026-11-03T03:04:00Z")
-        self.assertEqual(parent["id"], 3)
+        latest = await_pages_augmentation_runs.latest_report_run(runs, head_sha=sha)
+        self.assertEqual(latest["id"], 10)
 
     def test_aggregation_wait_job_precedes_single_cumulative_deployment(self):
         workflow = (ROOT / ".github/workflows/pages-augmentation-aggregation.yml").read_text(encoding="utf-8")
@@ -79,6 +86,7 @@ class PagesAugmentationAggregation(unittest.TestCase):
         self.assertIn("needs: await", workflow)
         self.assertIn("augment_pages_bundle.py", workflow)
         self.assertIn("group: github-pages", workflow)
+        self.assertIn("PAGES_SOURCE_RUN_ID", workflow)
 
 
 if __name__ == "__main__":
