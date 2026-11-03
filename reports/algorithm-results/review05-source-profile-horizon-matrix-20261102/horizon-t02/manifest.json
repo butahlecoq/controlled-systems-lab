@@ -1,0 +1,51 @@
+{
+  "schema": "csl.review05.source-profile-manifest/1",
+  "claim": "source-attribution diagnostic only; gprof-instrumented execution times are not performance measurements",
+  "source_revision": "d50d6734209765d1eaed9d34d2b29f2aa4864207",
+  "source_worktree_dirty": true,
+  "measurement_source_sha256": {
+    "CMakeLists.txt": "2106dfebdf8998390d50607b1063f9085a74aba9f826b120e43a1ffd40332597",
+    "horizon_ladder.cpp": "cd1f9710e41f469c47031c1f951c9bb6e7b35b78a2b47159f53353716055a74f",
+    "capture_source_profile.py": "46a4c34d34df843857097a15d04309fe6ab81e3a2e8d0db2adbc24cfc2727430",
+    "verify_source_profile.py": "b04212b0bcefda73d0736c45bf8b9fba09009aeb500cab578ca548a75d2a0d52",
+    "check_horizon_ladder.py": "d7bfda0eb6fc366274e9fc1e5812f61d93d71b6dbb071714393e57be03b22ace"
+  },
+  "driver_sha256": "805443cd169b74491fab39c54ba64f923774af3988445f87397d47fec3a29bce",
+  "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76",
+  "scenario": "/home/butahlecoq/.local/share/codex/worktrees/review05-profile-horizons-20261102/benchmarks/reporting/review05/scenarios/horizon01-t02.json",
+  "scenario_file": "horizon01-t02.json",
+  "horizon": 2,
+  "process_groups": 3,
+  "repetitions_per_strategy": 3000,
+  "repetitions_per_process": 1000,
+  "schedule": "process order alternates by group; fresh workspace per strategy run",
+  "total_elapsed_wall_seconds": 18.137162172002718,
+  "host": {
+    "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "machine": "x86_64",
+    "logical_cpus": 8,
+    "load_average_after": [
+      0.5322265625,
+      0.54150390625,
+      0.86669921875
+    ]
+  },
+  "resource_limits_per_process": {
+    "cpu_seconds_soft": 300,
+    "cpu_seconds_hard": 305,
+    "address_space_bytes": 8589934592,
+    "wall_timeout_seconds": 300,
+    "mechanism": "POSIX RLIMIT_CPU, RLIMIT_AS, subprocess timeout"
+  },
+  "instrumentation": {
+    "profiler": "GNU gprof",
+    "environment": "GMON_OUT_PREFIX",
+    "release_flags": "-O3 -DNDEBUG -g",
+    "profile_driver_compile_flag": "-pg",
+    "link_flags": "-pg"
+  },
+  "attempts": 6000,
+  "processes": 6,
+  "verified_attempts": 6000,
+  "profile_files": 6
+}

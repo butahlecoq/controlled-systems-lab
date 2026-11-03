@@ -1,0 +1,29 @@
+{
+  "schema": "csl.review05.source-profile-matrix-build-provenance/1",
+  "profiled_source_revision_base": "24dd0072ca865106204107ca6862150e2fea00d4",
+  "matching_profile_harness_commit": "d50d6734209765d1eaed9d34d2b29f2aa4864207",
+  "source_tree_dirty_at_build": true,
+  "profile_driver_source_sha256": {
+    "CMakeLists.txt": "2106dfebdf8998390d50607b1063f9085a74aba9f826b120e43a1ffd40332597",
+    "horizon_ladder.cpp": "cd1f9710e41f469c47031c1f951c9bb6e7b35b78a2b47159f53353716055a74f"
+  },
+  "compiler": "GCC 16.2.1 20260810",
+  "cmake": "3.31.6",
+  "generator": "Ninja 1.13.2",
+  "highs": "1.11.0",
+  "profiler": "GNU gprof (GNU Binutils) 2.47",
+  "platform": "Linux x86_64, kernel 7.2.8-9-omarchy, glibc 2.44",
+  "cpu": "AMD Ryzen 5 3550H, 8 logical CPUs",
+  "release_compile_flags": "-O3 -DNDEBUG -g",
+  "profile_driver_compile_and_link_flags": "-pg",
+  "profiled_driver_sha256": "805443cd169b74491fab39c54ba64f923774af3988445f87397d47fec3a29bce",
+  "scenario_hashes": {
+    "horizon01-t02.json": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76",
+    "horizon01-t04.json": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3",
+    "horizon01-t08.json": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+  },
+  "t02_verified_attempts": 6000,
+  "t04_verified_attempts": 6000,
+  "t08_verified_attempts": 6000,
+  "note": "Only the driver is gprof-instrumented. T=8 capture is retained in the preceding REVIEW-05 source-profile bundle. The profile is diagnostic and is not used as a performance measurement."
+}

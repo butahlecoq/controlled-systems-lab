@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Capture repeated, isolated gprof samples for the pinned T=8 workload."""
+"""Capture repeated, isolated gprof samples for one pinned horizon fixture."""
 
 from __future__ import annotations
 
@@ -16,7 +16,12 @@ from pathlib import Path
 from check_horizon_ladder import check_attempt
 
 STRATEGIES = ("csl.synthesis.reach-back", "csl.synthesis.strategy-b")
-HORIZON = 8
+SUPPORTED_HORIZONS = {2, 4, 8}
+PINNED_SCENARIOS = {
+    2: ("horizon01-t02.json", "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"),
+    4: ("horizon01-t04.json", "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"),
+    8: ("horizon01-t08.json", "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"),
+}
 CPU_LIMIT = 300
 MEMORY_LIMIT = 8 * 1024**3
 WALL_LIMIT = 300
@@ -50,6 +55,13 @@ def main() -> int:
 
     driver = args.driver.resolve(strict=True)
     scenario = args.scenario.resolve(strict=True)
+    scenario_data = json.loads(scenario.read_text(encoding="utf-8"))
+    horizon = scenario_data.get("horizon")
+    if horizon not in SUPPORTED_HORIZONS:
+        parser.error(f"scenario horizon must be one of {sorted(SUPPORTED_HORIZONS)}")
+    expected_name, expected_hash = PINNED_SCENARIOS[horizon]
+    if scenario.name != expected_name or sha256(scenario) != expected_hash:
+        parser.error(f"scenario does not match the pinned T={horizon} fixture")
     repository = scenario.parents[4]
     output = args.output.resolve()
     if output.exists() and any(output.iterdir()):
@@ -59,7 +71,7 @@ def main() -> int:
     profiles = output / "gmon"
     raw.mkdir()
     profiles.mkdir()
-    input_copy = output / "horizon01-t08.json"
+    input_copy = output / scenario.name
     input_copy.write_bytes(scenario.read_bytes())
     scenario_hash = sha256(input_copy)
     source_files = ("CMakeLists.txt", "horizon_ladder.cpp", "capture_source_profile.py",
@@ -135,7 +147,7 @@ def main() -> int:
                     "schema": "csl.review05.source-profile-attempt/1",
                     "attempt_id": attempt_id, "process_id": process_id,
                     "output_line": repetition,
-                    "horizon": HORIZON, "repetition": repetition, "strategy": strategy,
+                    "horizon": horizon, "repetition": repetition, "strategy": strategy,
                     "process_status": "completed" if result is not None and process_status == "completed" else process_status,
                     "scenario_sha256": scenario_hash,
                 }
@@ -146,7 +158,7 @@ def main() -> int:
                 else:
                     status, reasons = check_attempt(
                         {"process_status": "completed", "result": result,
-                         "horizon": HORIZON, "strategy": strategy}, scenario_hash)
+                         "horizon": horizon, "strategy": strategy}, scenario_hash)
                 if not profile_exists:
                     reasons.append("gprof output file missing")
                     if status == "verified":
@@ -174,7 +186,7 @@ def main() -> int:
         "source_worktree_dirty": bool(source_status),
         "measurement_source_sha256": {name: sha256(source_root / name) for name in source_files},
         "driver_sha256": sha256(driver), "scenario_sha256": scenario_hash,
-        "scenario": str(scenario), "horizon": HORIZON,
+        "scenario": str(scenario), "scenario_file": input_copy.name, "horizon": horizon,
         "process_groups": args.process_groups,
         "repetitions_per_strategy": args.process_groups * args.repeats_per_process,
         "repetitions_per_process": args.repeats_per_process,

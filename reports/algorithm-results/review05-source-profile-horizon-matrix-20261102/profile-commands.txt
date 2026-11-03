@@ -1,0 +1,17 @@
+# Run from the repository root after setting DRIVER to the matching profiled executable.
+OUT=reports/algorithm-results/review05-source-profile-horizon-matrix-20261102
+for tag in t02 t04; do
+  for strategy in reach-back strategy-b; do
+    gprof --brief --no-graph --flat-profile "$DRIVER" \
+      "$OUT/horizon-t${tag#t}"/gmon/g*-p*-"$strategy".* \
+      > "$OUT/gprof-flat-$tag-$strategy.txt"
+  done
+done
+
+# T=8 was captured and retained under the preceding PR #869 bundle.
+gprof --brief --no-graph --flat-profile "$DRIVER" \
+  reports/algorithm-results/review05-source-profile-final-20261102/gmon/g*-p*-reach-back.* \
+  > "$OUT/gprof-flat-t08-reach-back.txt"
+gprof --brief --no-graph --flat-profile "$DRIVER" \
+  reports/algorithm-results/review05-source-profile-final-20261102/gmon/g*-p*-strategy-b.* \
+  > "$OUT/gprof-flat-t08-strategy-b.txt"
