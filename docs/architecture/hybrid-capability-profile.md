@@ -100,8 +100,11 @@ provider CPU, memory, and thread consumption remain unmeasured.
   saved hybrid reports. A requested `ResourcePolicy` is not proof of provider
   enforcement or consumption.
 
-The implementation issue remains open for broader adapter/resource evidence,
-operation admission, continuous-family coverage, and capability validation.
-The two current saved-report routes and their manifest-listed files and ZIPs
-were verified against the live main-only Pages site on 2026-11-02; details are
-recorded in [published algorithm results](published-algorithm-results.md#ext-07-hybrid-profile-report).
+PR #881 implements and validates the bounded profile tracked by issue #156.
+Future extensions can add more set representations, enforce provider CPU or
+memory limits, attribute provider costs to individual operations, and measure
+larger dimensions or path inventories. The current evidence makes no claims
+about those extensions or general scalability. The two saved-report routes
+and their manifest-listed files and ZIPs were verified against the live
+main-only Pages site on 2026-11-02; details are recorded in
+[published algorithm results](published-algorithm-results.md#ext-07-hybrid-profile-report).

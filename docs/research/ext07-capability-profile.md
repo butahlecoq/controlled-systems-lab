@@ -76,7 +76,12 @@ This report makes no new publication or performance claim.
 
 The named tests and reports are finite correctness and measurement fixtures.
 They do not establish general scaling by state dimension, control dimension,
-horizon, mode count, edge count, path count, or provider workload. EXT-07 still
-requires broader operation-plan admission, provider resource and per-mode /
-per-transition provenance accounting, and resource-scale evidence. The issue
-remains open until those gates and the full acceptance checklist are met.
+horizon, mode count, edge count, path count, or provider workload. PR #881
+implements the bounded profile tracked by EXT-07. Its operation traces record
+the mode or edge, stage, composer version, joint-variable count, rows added,
+and cumulative matrix elements. The separate resource capture records whole-
+process CPU and memory for two fixtures. It does not attribute provider CPU,
+memory, or thread use to individual operations or establish hard enforcement.
+Those are explicit limits, not general capacity claims. See the
+[implementation capability profile](../architecture/hybrid-capability-profile.md)
+for the supported dimensions, counts, and deferred extensions.

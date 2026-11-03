@@ -2,12 +2,13 @@
 
 Status: accepted design contract. Exact-head specification and standards
 reviews cleared this contract in [PR #471](https://github.com/butahlecoq/controlled-systems-lab/pull/471)
-at `7632a4c`; it merged as `5e4f174`. Implementation is tracked separately in
-[EXT-07 #156](https://github.com/butahlecoq/controlled-systems-lab/issues/156)
-and [PR #472](https://github.com/butahlecoq/controlled-systems-lab/pull/472)
-and remains incomplete. The implementation-status notes below identify the
-supported subset and gaps. The profile is deliberately distinct from the
-finite/mixed control domains and observation-based policy profiles.
+at `7632a4c`; it merged as `5e4f174`. The first adapter implementation landed
+in [PR #472](https://github.com/butahlecoq/controlled-systems-lab/pull/472).
+The bounded profile for [EXT-07 #156](https://github.com/butahlecoq/controlled-systems-lab/issues/156)
+is implemented and validated in [PR #881](https://github.com/butahlecoq/controlled-systems-lab/pull/881).
+The implementation-status notes below identify the supported subset and its
+limits. The profile is distinct from finite/mixed control domains and
+observation-based policy profiles.
 The measured and test-only dimension/mode/path evidence is summarized in the
 [`EXT-07 implementation capability profile`](../architecture/hybrid-capability-profile.md);
 its fixture counts do not imply general scalability.
