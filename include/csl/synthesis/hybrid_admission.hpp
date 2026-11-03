@@ -96,7 +96,9 @@ HybridAdmissionResult admit_hybrid_request(const model::HybridSystem&,
 struct HybridConcreteRefinementRejected {
     HybridAdmissionReport admission;
     Diagnostics diagnostics;
-    // Concrete operation that refused. path_index indexes admission.paths.
+    // Failed path, when a concrete path operation refused. It indexes admission.paths.
+    std::optional<std::size_t> path_index{};
+    // Concrete operation that refused, when the failing stage is known.
     std::optional<HybridOperationKey> operation{};
 };
 

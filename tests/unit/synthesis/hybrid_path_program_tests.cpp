@@ -1794,6 +1794,10 @@ TEST_CASE("hybrid request refinement retains exact reachability and refuses unpr
     auto projected_refinement=refine_hybrid_request(
         std::move(std::get<HybridAdmissionToken>(projected_admission)),{},{});
     REQUIRE(std::holds_alternative<HybridConcreteRefinementRejected>(projected_refinement));
+    const auto& projected_rejected=std::get<HybridConcreteRefinementRejected>(projected_refinement);
+    REQUIRE(projected_rejected.path_index);
+    CHECK(*projected_rejected.path_index==0);
+    CHECK_FALSE(projected_rejected.operation);
     CHECK(projected->compose_calls==0);
 }
 
@@ -1821,6 +1825,8 @@ TEST_CASE("hybrid refinement rejects a late geometry prepare before creating any
     const auto& rejected=std::get<HybridConcreteRefinementRejected>(refined);
     CHECK(rejected.diagnostics.front().field==
         "fixture.geometry.late_refusal");
+    REQUIRE(rejected.path_index);
+    CHECK(*rejected.path_index==1);
     REQUIRE(rejected.operation);
     CHECK(rejected.operation->kind==HybridOperationKind::projection);
     REQUIRE(rejected.operation->path_index);

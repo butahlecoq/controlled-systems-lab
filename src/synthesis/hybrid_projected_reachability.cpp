@@ -395,7 +395,8 @@ HybridReachabilityStageResult ProjectedStateHybridReachabilityAdapter::stage_pat
         Projection{relation.as_handle(),{3}},SetRelation::equivalent,Assurance::numerical};
     auto prepared_result=projection_.prepare(projection_request);
     if(const auto* rejected=std::get_if<registry::Rejection>(&prepared_result))
-        return rejected->diagnostics;
+        return HybridReachabilityStageFailure{HybridReachabilityStageOperation::projection,
+            rejected->diagnostics};
     auto pipeline=std::get<registry::PreparedPipeline<registry::GeometryPort>>(std::move(prepared_result));
     const auto selected=pipeline.provenance()[0];
     if(const auto stop=interruption(context))
@@ -417,6 +418,8 @@ HybridPathReachabilityResult ProjectedStateHybridReachabilityAdapter::compose_pa
     if(auto* stage=std::get_if<std::unique_ptr<HybridReachabilityStage>>(&staged))
         return std::move(**stage).execute(context);
     if(auto* diagnostics=std::get_if<Diagnostics>(&staged)) return std::move(*diagnostics);
+    if(auto* failure=std::get_if<HybridReachabilityStageFailure>(&staged))
+        return std::move(failure->diagnostics);
     if(auto* stopped=std::get_if<OperationStopped>(&staged)) return *stopped;
     return std::get<model::HybridPathCompositionFailureReport>(std::move(staged));
 }

@@ -773,7 +773,9 @@ HybridReachabilityStageResult HybridReachabilityAdapter::stage_path(
                 "A non-projecting reachability adapter returned projected evidence"});
         return std::make_unique<CompletedHybridReachabilityStage>(std::move(*reachable));
     }
-    if(auto* diagnostics=std::get_if<Diagnostics>(&result)) return std::move(*diagnostics);
+    if(auto* diagnostics=std::get_if<Diagnostics>(&result))
+        return HybridReachabilityStageFailure{HybridReachabilityStageOperation::relation,
+            std::move(*diagnostics)};
     if(auto* stopped=std::get_if<OperationStopped>(&result)) return *stopped;
     return std::get<model::HybridPathCompositionFailureReport>(std::move(result));
 }
@@ -1845,7 +1847,7 @@ HybridRefinementResult refine_hybrid_request(HybridAdmissionToken token,
     const auto& admission=HybridAdmissionAccess::storage(token);
     const auto refuse=[&](std::string field,std::string explanation) -> HybridRefinementResult {
         return HybridConcreteRefinementRejected{admission.report,
-            {{DiagnosticCode::unsupported,std::move(field),std::move(explanation)}},{}};
+            {{DiagnosticCode::unsupported,std::move(field),std::move(explanation)}},{},{}};
     };
     if(!admission.report.admitted)
         return refuse("hybrid.refinement.admission","Only a fully admitted request can be refined");
@@ -1872,10 +1874,10 @@ HybridRefinementResult refine_hybrid_request(HybridAdmissionToken token,
             if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&built)) {
                 if(const auto* stopped=std::get_if<OperationStopped>(&failure->failure)) return *stopped;
                 return HybridConcreteRefinementRejected{admission.report,
-                    {std::get<Diagnostic>(failure->failure)},{}};
+                    {std::get<Diagnostic>(failure->failure)},{},{}};
             }
             if(const auto* errors=std::get_if<Diagnostics>(&built))
-                return HybridConcreteRefinementRejected{admission.report,*errors,{}};
+                return HybridConcreteRefinementRejected{admission.report,*errors,{},{}};
             programs.push_back(std::get<HybridPathProgram>(std::move(built)));
         }
     }
@@ -1890,30 +1892,37 @@ HybridRefinementResult refine_hybrid_request(HybridAdmissionToken token,
                     "Hybrid reachability refinement stopped between path stages"};
             auto staged=admission.selection.reachability->stage_path(admission.system,
                 admission.request,path,admission.relation_limits,context);
-            const auto operation_key=HybridOperationKey{
-                admission.selection.reachability->capabilities().projects_terminal_state?
-                    HybridOperationKind::projection:HybridOperationKind::relation,
-                path_index,{}};
+            const auto operation_key=[&](HybridReachabilityStageOperation operation) {
+                return HybridOperationKey{
+                    operation==HybridReachabilityStageOperation::projection?
+                        HybridOperationKind::projection:HybridOperationKind::relation,
+                    path_index,{}};
+            };
             if(auto* stage=std::get_if<std::unique_ptr<HybridReachabilityStage>>(&staged)) {
                 if(!*stage) return HybridConcreteRefinementRejected{admission.report,
                     {{DiagnosticCode::evidence_mismatch,"hybrid.refinement.reachability_stage",
-                        "Reachability adapter returned an empty prepared stage"}},operation_key};
+                        "Reachability adapter returned an empty prepared stage"}},path_index,{}};
                 reachability_stages.push_back(std::move(*stage));
             } else if(auto* stopped=std::get_if<OperationStopped>(&staged)) {
                 return *stopped;
+            } else if(auto* stage_failure=std::get_if<HybridReachabilityStageFailure>(&staged)) {
+                return HybridConcreteRefinementRejected{admission.report,
+                    std::move(stage_failure->diagnostics),path_index,
+                    operation_key(stage_failure->operation)};
             } else if(auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&staged)) {
                 auto validated=validate_hybrid_path_reachability_result(
                     *admission.selection.reachability,path,admission.relation_limits,*failure);
                 if(auto* operation_stopped=std::get_if<OperationStopped>(&validated))
                     return *operation_stopped;
                 if(auto* errors=std::get_if<Diagnostics>(&validated))
-                    return HybridConcreteRefinementRejected{admission.report,*errors,operation_key};
+                    return HybridConcreteRefinementRejected{admission.report,*errors,path_index,
+                        operation_key(HybridReachabilityStageOperation::relation)};
                 return HybridConcreteRefinementRejected{admission.report,
                     {std::get<Diagnostic>(std::get<model::HybridPathCompositionFailureReport>(validated).failure)},
-                    operation_key};
+                    path_index,operation_key(HybridReachabilityStageOperation::relation)};
             } else {
                 return HybridConcreteRefinementRejected{admission.report,
-                    std::move(std::get<Diagnostics>(staged)),operation_key};
+                    std::move(std::get<Diagnostics>(staged)),path_index,{}};
             }
         }
     }
@@ -1928,12 +1937,12 @@ HybridRefinementResult refine_hybrid_request(HybridAdmissionToken token,
         if(const auto* linear=std::get_if<LinearProgram>(&program_result.program)) {
             auto prepared=admission.selection.lp->prepare(*linear);
             if(const auto* rejected=std::get_if<registry::Rejection>(&prepared))
-                return HybridConcreteRefinementRejected{admission.report,rejected->diagnostics,{}};
+                return HybridConcreteRefinementRejected{admission.report,rejected->diagnostics,{},{}};
             pipeline.emplace(std::get<registry::PreparedPipeline<registry::LPPort>>(std::move(prepared)));
         } else {
             auto prepared=admission.selection.convex->prepare(std::get<ConvexProgram>(program_result.program));
             if(const auto* rejected=std::get_if<registry::Rejection>(&prepared))
-                return HybridConcreteRefinementRejected{admission.report,rejected->diagnostics,{}};
+                return HybridConcreteRefinementRejected{admission.report,rejected->diagnostics,{},{}};
             pipeline.emplace(std::get<registry::PreparedPipeline<registry::ConvexPort>>(std::move(prepared)));
         }
         pipelines.push_back(std::move(*pipeline));

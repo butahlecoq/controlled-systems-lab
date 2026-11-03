@@ -78,8 +78,13 @@ public:
     virtual ~HybridReachabilityStage() = default;
     virtual HybridPathReachabilityResult execute(const ExecutionContext&) && = 0;
 };
+enum class HybridReachabilityStageOperation { relation, projection };
+struct HybridReachabilityStageFailure {
+    HybridReachabilityStageOperation operation{};
+    Diagnostics diagnostics;
+};
 using HybridReachabilityStageResult = std::variant<
-    std::unique_ptr<HybridReachabilityStage>, Diagnostics, OperationStopped,
+    std::unique_ptr<HybridReachabilityStage>, Diagnostics, HybridReachabilityStageFailure, OperationStopped,
     model::HybridPathCompositionFailureReport>;
 
 struct HybridReachabilityAttempt {
