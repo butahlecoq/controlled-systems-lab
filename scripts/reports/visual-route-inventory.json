@@ -792,6 +792,14 @@
       ]
     },
     {
+      "source": "scripts/reports/mpc01/stage_per_attempt.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "b04-repeated-projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/mpc01/summarize_per_attempt.py",
       "signal_count": 2,
       "asset_name_literals": [
