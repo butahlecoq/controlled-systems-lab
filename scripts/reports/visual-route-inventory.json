@@ -2658,6 +2658,16 @@
       "companion_route": "examples/ext05-states-v1.html"
     },
     {
+      "route": "ext07-hybrid-4f2ed937429c4908",
+      "source_bundle": "ext07-hybrid-4f2ed937429c4908",
+      "assets": [
+        "joint-relation-2d.svg"
+      ],
+      "index_sha256": "204e5e0e3e9ef283039fa39051f270c9c6aee1b60d1fe947a6f7f47b09a528f9",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
       "route": "ext07-hybrid-51d9ee2e89d240eb",
       "source_bundle": "ext07-hybrid-51d9ee2e89d240eb",
       "assets": [
@@ -2688,6 +2698,16 @@
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669,
       "companion_route": "examples/ext07-two-control-family-v1.html"
+    },
+    {
+      "route": "ext07-hybrid-two-parameter-6f2799c9acfcc5f2",
+      "source_bundle": "ext07-hybrid-two-parameter-6f2799c9acfcc5f2",
+      "assets": [
+        "feasible-polygons.svg"
+      ],
+      "index_sha256": "65c82b0c9022b4a8d6d7f54d72a5648b60a927b10f48300003e503147306b4e9",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
     },
     {
       "route": "ext07-hybrid-two-parameter-8ad871b5ea29fc7b",

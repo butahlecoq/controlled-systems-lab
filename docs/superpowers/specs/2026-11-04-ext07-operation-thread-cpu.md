@@ -54,6 +54,8 @@ The inline record is the base. It matches the model layer's ownership of operati
 - Does the user want resource enforcement in addition to the evidence profile? This observation is not an enforceable CPU cap.
 - Do supported hybrid adapters create helper threads during model relation composition? The built-in composer is synchronous; custom adapters need to label their clock scope accurately.
 
-## Next implementation step
+## Implementation and evidence status
 
-Add the typed observation and optional reader to the model operation recorder, then wire the platform readers, tests, and versioned EXT-07 report serialization through the built-in adapters.
+Implemented at source commit `4c8f1c3dbe393eb39acd4284d29073d0943b3320`. The general relation composer and projected scalar composer now record typed observations. POSIX and Windows readers live in the synthesis layer; report schema `/3` carries the operation observations while `/1` and `/2` bundles remain unchanged. Release builds and model/path-program tests passed, as did the saved-report checks.
+
+Two fresh bundles use this source commit: `ext07-hybrid-4f2ed937429c4908` (one-step scalar) and `ext07-hybrid-two-parameter-6f2799c9acfcc5f2` (two-stage exact linear H). Each has 140 measured calls and zero failures; every operation observation was available. These values include clock sampling overhead, describe only the composing thread, and do not establish performance comparisons or resource enforcement. Publication and exact-head review remain outstanding.

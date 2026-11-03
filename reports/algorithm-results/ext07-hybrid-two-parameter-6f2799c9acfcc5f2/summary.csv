@@ -1,0 +1,8 @@
+repetition,calls,failures,paths,relation_rows,relation_matrix_elements,end_to_end_total_ns,minimum_call_ns,maximum_call_ns,provider,verifier,process_cpu_enter-half_min_ns,process_cpu_enter-half_median_ns,process_cpu_enter-half_max_ns,process_cpu_enter-half_unavailable,process_cpu_enter-full_min_ns,process_cpu_enter-full_median_ns,process_cpu_enter-full_max_ns,process_cpu_enter-full_unavailable,operation_thread_cpu_min_ns,operation_thread_cpu_median_ns,operation_thread_cpu_max_ns,operation_thread_cpu_unavailable
+0,20,0,2,20,140,75171558,3460384,4103139,csl.lp.highs@1.1.0+highs.1.11.0,csl.hybrid.exact-linear-h,225132,275895,338856,0,194034,205846,229241,0,2375,6241,27900,0
+1,20,0,2,20,140,71092237,3469674,3815740,csl.lp.highs@1.1.0+highs.1.11.0,csl.hybrid.exact-linear-h,211116,233062,303405,0,189495,195181,263246,0,3216,6352,26343,0
+2,20,0,2,20,140,81970034,3541541,5526237,csl.lp.highs@1.1.0+highs.1.11.0,csl.hybrid.exact-linear-h,253536,315031,412694,0,190508,224125,297554,0,2484,6302,32428,0
+3,20,0,2,20,140,72605709,3453121,3954795,csl.lp.highs@1.1.0+highs.1.11.0,csl.hybrid.exact-linear-h,213481,253096,305794,0,187171,205515,235241,0,2405,6252,26449,0
+4,20,0,2,20,140,70257066,3448511,3614037,csl.lp.highs@1.1.0+highs.1.11.0,csl.hybrid.exact-linear-h,211697,234041,289292,0,192852,194700,254701,0,2465,6322,23226,0
+5,20,0,2,20,140,70303724,3460245,3622697,csl.lp.highs@1.1.0+highs.1.11.0,csl.hybrid.exact-linear-h,220253,225536,285400,0,191919,195687,212664,0,2916,6281,27105,0
+6,20,0,2,20,140,69834803,3434333,3695542,csl.lp.highs@1.1.0+highs.1.11.0,csl.hybrid.exact-linear-h,211737,230867,295364,0,191810,198487,254858,0,3316,6272,28776,0
