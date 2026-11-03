@@ -8,7 +8,7 @@
       "report_id": "ext07-hybrid-51d9ee2e89d240eb",
       "schema": "csl.ext07-hybrid-profile-report/1",
       "source_commit": "2965baafa325550ad60ec91d44f5e3f86a832178",
-      "stager_sha256": "523dd17caa4dccb6b2c120822fdfd5a242a428be160f1eb0bfa7f1d29d184601",
+      "stager_sha256": "78f2a4507a1fc3c19856308ed7753e4c03ee015534153836581e530007750f62",
       "zip_sha256": "9d4cf7eb42fe60e3f2e38241ea14fdf6e4484a4b7591286f41f3beafc6c89731"
     },
     {
@@ -20,7 +20,7 @@
       "report_id": "ext07-hybrid-two-parameter-8ad871b5ea29fc7b",
       "schema": "csl.ext07-hybrid-two-parameter-report/1",
       "source_commit": "8f7ea777621c337680b092ba6a15dd09a9d00a88",
-      "stager_sha256": "523dd17caa4dccb6b2c120822fdfd5a242a428be160f1eb0bfa7f1d29d184601",
+      "stager_sha256": "78f2a4507a1fc3c19856308ed7753e4c03ee015534153836581e530007750f62",
       "verifier_id": "csl.hybrid.exact-linear-h",
       "zip_sha256": "4e8e1ba69f8816e05a0bf6a198f7a89bb1733f00bcf0df8ac5b69227f1981347"
     },
@@ -33,7 +33,7 @@
         "1ad2fb668141df575231940526e26cc3c0fceb0a",
         "d3bc6721d8cdd5f84f4abb5d1031db96379a48ae"
       ],
-      "stager_sha256": "523dd17caa4dccb6b2c120822fdfd5a242a428be160f1eb0bfa7f1d29d184601",
+      "stager_sha256": "78f2a4507a1fc3c19856308ed7753e4c03ee015534153836581e530007750f62",
       "zip_sha256": "a306e0af6d3958b3b899295413273be2c0be5351f0a1f19b136770ddc84f7d7c"
     }
   ],

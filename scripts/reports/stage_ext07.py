@@ -151,6 +151,11 @@ def stage(catalog: Path, site_dir: Path) -> str:
                                 if path.is_file() and not path.is_symlink()}))
         report_ids.append(report_id)
         routes.append(route)
+    report.collect.require(not related_links or routes,
+                           "EXT-07 resource observations require a hybrid report route")
+    if related_links:
+        routes[0] = routes[0].replace(
+            "</li>", " · " + " · ".join(related_links) + "</li>")
     # Do not leave earlier routes behind when a later catalog entry is invalid.
     for report_id, bundle, files in staged_bundles:
         destination = site_dir / report_id
@@ -164,12 +169,6 @@ def stage(catalog: Path, site_dir: Path) -> str:
     report.collect.require(index.count("</ul>") == 1,
                            "EXT-07 Pages index insertion point differs")
     index = index.replace("</ul>", "".join(routes) + "</ul>")
-    if related_links:
-        related = ('<p id="visual-examples-link">' +
-                   ' &middot; '.join(related_links) + '</p>')
-        report.collect.require(index.count("</body>") == 1,
-                               "EXT-07 Pages body insertion point differs")
-        index = index.replace("</body>", related + "</body>")
     index_path.write_text(index, encoding="utf-8")
     return report_ids[0] if len(report_ids) == 1 else ",".join(report_ids)
 

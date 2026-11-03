@@ -52,21 +52,27 @@ class Ext07ResourceObservationTests(unittest.TestCase):
             root = Path(temporary)
             bundle = root / self.bundle.name
             shutil.copytree(self.bundle, bundle)
+            parent_source = ROOT / "reports/algorithm-results/ext07-hybrid-51d9ee2e89d240eb"
+            parent = root / parent_source.name
+            shutil.copytree(parent_source, parent)
             catalog = root / "ext07-publications.json"
             catalog.write_text(resource.encoded({
                 "schema": "csl.ext07-publications/1",
-                "reports": [stager.catalog_entry(bundle)],
+                "reports": [stager.catalog_entry(parent), stager.catalog_entry(bundle)],
             }).decode(), encoding="utf-8")
             site = root / "site"
             site.mkdir()
             (site / "index.html").write_text(
                 "<!doctype html><html lang=\"en\"><body><ul></ul></body></html>",
                 encoding="utf-8")
-            self.assertEqual(stager.stage(catalog, site), self.bundle.name)
+            self.assertEqual(stager.stage(catalog, site),
+                             parent.name + "," + self.bundle.name)
             self.assertTrue((site / self.bundle.name / "one_step" /
                              "resource-observation.json").is_file())
             self.assertIn("resource-scope.svg", (site / "index.html").read_text(
                 encoding="utf-8"))
+            self.assertNotIn('id="visual-examples-link"',
+                             (site / "index.html").read_text(encoding="utf-8"))
             landing.build(site)
             page = (site / "index.html").read_text(encoding="utf-8")
             self.assertIn("EXT-07 bounded resource observations", page)
