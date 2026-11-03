@@ -106,9 +106,8 @@ The existing split APIs remain available as explicitly lower-level operations wh
 ### Module map
 
 - `include/csl/synthesis/hybrid_admission.hpp`: typed operation inventory, tri-state offers, token, selection and coordinator API.
-- `src/synthesis/hybrid_admission.cpp`: inventory derivation and request-wide preflight/refinement orchestration.
 - `include/csl/registry/registry.hpp` and `provider.hpp`: optional immutable symbolic declaration hook, defaulting to unknown; concrete preparation unchanged.
-- `src/synthesis/hybrid_path_program.cpp`: shared transactional branch construction/refinement and sole coordinated execution boundary.
+- `src/synthesis/hybrid_path_program.cpp`: inventory derivation, shared transactional branch construction/refinement, and coordinated execution boundary.
 - `src/synthesis/hybrid_projected_reachability.cpp`: projected relation assembly, concrete geometry preparation, and deferred workspace execution.
 - `tests/unit/synthesis/hybrid_path_program_tests.cpp`: operation coverage, unknown/refusal, provider snapshot stability, late geometry rejection, and zero workspace creation before request-wide preparation completes.
 
