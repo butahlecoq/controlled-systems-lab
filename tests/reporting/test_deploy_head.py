@@ -72,11 +72,12 @@ class DeploymentHeadTest(unittest.TestCase):
         BranchHandler.response_code = 200
         BranchHandler.latest_report_id = 42
 
-    def run_gate(self, expected_sha, source_run_id=None):
+    def run_gate(self, expected_sha, source_run_id=None, *, check_only=False, create_site=True):
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary) / "github-output"
             site = Path(temporary) / "site"
-            site.mkdir()
+            if create_site:
+                site.mkdir()
             env = os.environ.copy()
             env.update(
                 {
@@ -99,8 +100,11 @@ class DeploymentHeadTest(unittest.TestCase):
                     "conclusion": "success",
                 }}))
                 env["GITHUB_EVENT_PATH"] = str(event)
+            command = [sys.executable, str(SCRIPT)]
+            if check_only:
+                command.append("--check-only")
             result = subprocess.run(
-                [sys.executable, str(SCRIPT)],
+                command,
                 env=env,
                 cwd=ROOT,
                 capture_output=True,
@@ -176,6 +180,18 @@ class DeploymentHeadTest(unittest.TestCase):
             "report_run_id": 42,
             "head_sha": NEWER,
         })
+
+    def test_check_only_mode_allows_freshness_check_before_site_exists(self):
+        stale, stale_output, stale_marker = self.run_gate(
+            OLDER, source_run_id=42, check_only=True, create_site=False)
+        current, current_output, current_marker = self.run_gate(
+            NEWER, source_run_id=42, check_only=True, create_site=False)
+        self.assertEqual(stale.returncode, 0, stale.stderr)
+        self.assertEqual(stale_output, "current=false\n")
+        self.assertIsNone(stale_marker)
+        self.assertEqual(current.returncode, 0, current.stderr)
+        self.assertEqual(current_output, "current=true\n")
+        self.assertIsNone(current_marker)
 
 
 if __name__ == "__main__":

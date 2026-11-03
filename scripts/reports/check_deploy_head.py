@@ -1,5 +1,6 @@
 """Allow a Pages deployment only while its run still targets current main."""
 
+import argparse
 import json
 import os
 from pathlib import Path
@@ -53,6 +54,10 @@ def latest_report_run(api: str, repository: str, token: str, source_sha: str) ->
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check-only", action="store_true",
+                        help="check freshness without writing the Pages source marker")
+    args = parser.parse_args()
     repository = os.environ["GITHUB_REPOSITORY"]
     expected = os.environ["GITHUB_SHA"]
     token = os.environ["GITHUB_TOKEN"]
@@ -93,7 +98,7 @@ def main():
 
     with output.open("a", encoding="utf-8") as stream:
         stream.write(f"current={'true' if is_current else 'false'}\n")
-    if is_current and source_run is not None:
+    if is_current and source_run is not None and not args.check_only:
         site = Path(os.environ.get("PAGES_SITE_DIR", "build/report-site"))
         if site.is_symlink() or not site.is_dir():
             raise ValueError("current Pages site is missing while recording its report source")

@@ -10,6 +10,7 @@ on:
       - scripts/reports/mpc01/summarize_strategy_ab_ts03.py
       - scripts/reports/mpc01/summarize_strategy_ab_ts02.py
       - scripts/reports/mpc01/summarize_strategy_ab.py
+      - scripts/reports/check_deploy_head.py
       - scripts/reports/mpc01/build_strategy_ab_records.py
       - scripts/reports/mpc01/write_strategy_ab_build_note.py
       - scripts/reports/mpc01/sanitize_strategy_ab_bundle.py
@@ -20,6 +21,7 @@ on:
       - docs/research/evidence/mpc01-strategy-ab-ts01-per-attempt-20261103/**
       - tests/reporting/test_mpc01_per_attempt_publication.py
       - tests/reporting/test_mpc01_pages_augmentation.py
+      - tests/reporting/test_deploy_head.py
   workflow_run:
     workflows: [Algorithm report records and site]
     types: [completed]
@@ -68,6 +70,7 @@ jobs:
             --resource-profile docs/research/evidence/mpc01-strategy-ab-ts01-per-attempt-20261103/resource-profile.json \
             --output docs/research/evidence/mpc01-strategy-ab-ts01-per-attempt-20261103/strategy-ab-ts01-summary.md
           (cd docs/research/evidence/mpc01-strategy-ab-ts01-per-attempt-20261103 && sha256sum -c SHA256SUMS)
+          python -m unittest tests.reporting.test_deploy_head
           python -m unittest tests.reporting.test_mpc01_pages_augmentation
           python -m unittest tests.reporting.test_mpc01_per_attempt_publication
       - name: Stage and verify the augmented site route
@@ -109,7 +112,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           GITHUB_SHA: ${{ github.event.workflow_run.head_sha }}
-        run: python3 scripts/reports/check_deploy_head.py
+        run: python3 scripts/reports/check_deploy_head.py --check-only
 
       - name: Validate the saved attempt and Strategy A/B evidence
         if: steps.source_head.outputs.current == 'true'
