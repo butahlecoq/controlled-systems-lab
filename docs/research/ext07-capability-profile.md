@@ -30,9 +30,15 @@ checks the complete feasible interval on each branch rather than only a
 sampled witness.
 
 These fixtures verify selected cases of path enumeration, joint-relation
-construction, and optimal-family retention. They do not exhaust the admitted
-continuous H-relation domain. The independent exhaustive continuous-family
-oracle remains an open EXT-07 acceptance item.
+construction, and optimal-family retention. The synthesis tests also include
+`exact H verifier matches tied multi-edge simplex families with different
+guards`: it independently enumerates both permitted edge paths and all vertices
+of the four-control simplex split by the two guards, constructs literal H
+relations for each full optimal face, and checks complete-family verification
+for both tied branches. This is exhaustive for that one-stage, two-edge simplex
+fixture, not for the full admitted continuous H-relation domain. Broader
+coverage across arbitrary H sets, longer horizons, and larger path inventories
+remains open.
 
 Additional exact linear-H tests now verify literal full optimal faces for a
 three-control box, a four-control simplex, and a five-control simplex. Each
@@ -46,6 +52,7 @@ multi-path continuous-family coverage.
 | Three-control box | 3 | 3 | 1 | 2 | 1 | 1 | 12 | Two free controls in `[0, 1]` after minimizing the first |
 | Four-control simplex | 1 | 4 | 1 | 2 | 1 | 1 | 7 | `u_i >= 0`, `sum(u_i) <= 1` |
 | Five-control simplex | 1 | 5 | 1 | 2 | 1 | 1 | 8 | `u_i >= 0`, `sum(u_i) <= 1` |
+| Guard-split four-control simplex | 1 | 4 | 1 | 2 | 2 | 2 | 7 | Two guard-partitioned complete faces, both globally tied |
 
 ## Saved numerical fixtures
 
