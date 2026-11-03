@@ -1,0 +1,42 @@
+{
+  "build": {
+    "cmake": "3.31.6",
+    "compiler": "GNU 16.2.1",
+    "compiler_command": "/usr/bin/c++",
+    "cxx_flags": "-O3 -DNDEBUG",
+    "cxx_standard": 20,
+    "generator": "Ninja",
+    "highs": "1.11.0",
+    "qhull": "8.0.2",
+    "source_snapshot_method": "git archive HEAD SHA-256; source worktree was clean",
+    "source_tree_sha256": "6602f01f1d4db7656222ac4bd1c43c1713ee1591779c9ffbfc0f352a440a06b5",
+    "type": "Release"
+  },
+  "events_sha256": "bcf51736bf00389ca1eb0579268d383f4a593c6953f7637be490672afa1d578b",
+  "executable": "/var/tmp/csl-mpc01-ts03-20261103-r2/examples-build/registered_synthesis_comparison",
+  "executable_sha256": "f87118d2114992fea92625e60599ff6937de694a189389cc3e173187f2d4f73e",
+  "host": {
+    "architecture": "x86_64",
+    "cpu": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+    "logical_cpus": 8,
+    "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44"
+  },
+  "measurement": {
+    "command": "registered_synthesis_comparison --measure-profile ts03_singular_integrator scenario.json strategy-ab-ts03-events.jsonl",
+    "event_count_including_header": 13,
+    "events_sha256": "bcf51736bf00389ca1eb0579268d383f4a593c6953f7637be490672afa1d578b",
+    "measured_alternating_pairs": 5,
+    "process_tree_timeout_scope": "one complete strategy A/B capture process group; suite invocation, not individual attempts",
+    "profile": "ts03_singular_integrator",
+    "resource_profile": "resource-profile.json",
+    "resource_profile_sha256": "76561bde50f99bb7354fdfadc796104182c46c80a33cdf78bffc509ac3cc653c",
+    "warmup_pairs_excluded": 1
+  },
+  "scenario": "docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1/scenario.json",
+  "scenario_sha256": "a1d6fa3f349bfb6032736e5f6b52e0ff52f8bdece8cfe54752de12c9cf314e4d",
+  "schema": "csl.mpc01-strategy-ab-capture-environment/1",
+  "source_commit": "0f407af581c3a5b536d5d76f6e889fef542c4597",
+  "source_dirty_before_run": false,
+  "source_file": "examples/registered_synthesis_comparison.cpp",
+  "source_file_sha256": "39883c67fcf82b7709ddd9ca60ad47b9b06cfc5dcfe6efffed7324712c52c6ee"
+}
