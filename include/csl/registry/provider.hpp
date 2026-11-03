@@ -34,7 +34,10 @@ public:
     const Requirements& requirements() const noexcept {return storage_->requirements;}
     AdmissionDeclaration declare_support(const RequestEnvelope& envelope) const {
         if(!storage_->entry.admission_declaration) return {};
-        return storage_->entry.admission_declaration(envelope,storage_->requirements);
+        auto declaration=storage_->entry.admission_declaration(envelope,storage_->requirements);
+        if(declaration.status==AdmissionStatus::supported && !declaration.envelope_is_sufficient)
+            declaration.status=AdmissionStatus::conditional;
+        return declaration;
     }
     // There is deliberately no per-query Requirements parameter.
     std::variant<PreparedPipeline<Port>,Rejection> prepare(const typename Port::Request&) const;

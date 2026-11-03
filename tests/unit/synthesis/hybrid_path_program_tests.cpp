@@ -1439,6 +1439,22 @@ TEST_CASE("prepared providers expose conservative request-envelope declarations"
     CHECK(rejected.status==registry::AdmissionStatus::unsupported);
     CHECK_FALSE(rejected.diagnostics.empty());
 
+    registry::Registry<registry::LPPort> conditional_providers;
+    REQUIRE_FALSE(conditional_providers.add({{{"conditional-lp"},"1"},
+        [](const LinearProgram&,const registry::Requirements&)->registry::Capability {
+            return registry::Offer{};
+        },
+        [](const LinearProgram&){return std::make_unique<RejectingLP>();}, {},
+        [](const registry::RequestEnvelope&,const registry::Requirements&) {
+            return registry::AdmissionDeclaration{registry::AdmissionStatus::supported,{},false};
+        }}));
+    auto conditional_selection=registry::prepare_provider(
+        registry::select_provider(conditional_providers,{{"conditional-lp"},{}}));
+    REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::LPPort>>(conditional_selection));
+    CHECK(std::get<registry::PreparedProvider<registry::LPPort>>(conditional_selection)
+        .declare_support({"hybrid.linear-optimization",4,6,24,"linear"}).status==
+        registry::AdmissionStatus::conditional);
+
     const auto legacy=lp_provider().declare_support({"hybrid.linear-optimization",4,6,24,"linear"});
     CHECK(legacy.status==registry::AdmissionStatus::unknown);
     CHECK_FALSE(legacy.envelope_is_sufficient);
