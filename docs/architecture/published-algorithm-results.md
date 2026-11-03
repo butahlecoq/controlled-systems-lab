@@ -87,6 +87,19 @@ the current publication catalogue stages only the final report.
 
 ## EXT-07 hybrid profile report
 
+The in-progress schema-3 source commit
+`4c8f1c3dbe393eb39acd4284d29073d0943b3320` adds per-operation composing-thread
+CPU observations to both report shapes. The saved one-step bundle
+[`ext07-hybrid-4f2ed937429c4908`](../../reports/algorithm-results/ext07-hybrid-4f2ed937429c4908/)
+and two-stage bundle
+[`ext07-hybrid-two-parameter-6f2799c9acfcc5f2`](../../reports/algorithm-results/ext07-hybrid-two-parameter-6f2799c9acfcc5f2/)
+each contain 140 measured calls with zero failures and complete operation
+readings. The values include clock-sampling overhead and cover only the
+synchronous composing thread; helper-thread CPU is excluded. They are
+descriptive evidence, not a performance comparison or enforcement result.
+The report catalog is updated locally; PR review, main-only deployment and
+live URL/hash verification remain pending.
+
 The frozen implementation source is `2965baafa325550ad60ec91d44f5e3f86a832178`.
 The saved bundle
 [`ext07-hybrid-51d9ee2e89d240eb`](../../reports/algorithm-results/ext07-hybrid-51d9ee2e89d240eb/)
@@ -164,6 +177,15 @@ CPU sums all process threads, so unrelated concurrent work may contribute; the
 values are not provider-only attribution, do not measure heap, and make no
 comparative performance claim. The new reports will be Pages-published by the
 main-only report workflow after merge.
+
+Schema `/3` extends these profiles with per-relation-operation records. Each
+record binds its operation kind, stage, mode/edge, implementation identity,
+row/matrix deltas, composer wall time, completion, and CPU consumed by the
+synchronous composing thread. The clock sampling overhead is included in these
+diagnostic observations, helper-thread CPU is excluded, and the process-wide
+branch values remain separate. This is instrumentation evidence; it does not
+claim a provider bottleneck or compare algorithms. Historical `/1` and `/2`
+bundles and rendered bytes remain unchanged.
 
 ## EXT-02 finite/mixed branch portfolio report
 

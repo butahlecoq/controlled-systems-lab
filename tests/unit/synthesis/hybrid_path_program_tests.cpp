@@ -2159,6 +2159,15 @@ TEST_CASE("hybrid direct path program preserves branch and terminal objective co
     CHECK(built.relation_operations[2].mode==model::HybridModeId{"source"});
     CHECK(built.relation_operations[5].operation==model::HybridRelationOperationKind::transition_guard);
     CHECK(built.relation_operations[5].edge==model::HybridEdgeId{"switch"});
+    for(const auto& operation:built.relation_operations) {
+        CHECK(operation.completed);
+        if(const auto* unavailable=std::get_if<model::HybridOperationThreadCpuUnavailable>(
+            &operation.thread_cpu)) {
+            CHECK((unavailable->reason==model::HybridOperationThreadCpuUnavailable::Reason::unsupported_platform ||
+                unavailable->reason==model::HybridOperationThreadCpuUnavailable::Reason::read_failed ||
+                unavailable->reason==model::HybridOperationThreadCpuUnavailable::Reason::clock_regressed));
+        }
+    }
 }
 
 TEST_CASE("hybrid program construction preserves cancellation and unsupported limits") {
@@ -2515,6 +2524,12 @@ TEST_CASE("projected hybrid reachability returns the literal terminal interval a
         CHECK(operation.matrix_elements_added==operation.rows_added*operation.joint_variables);
         CHECK(operation.cumulative_matrix_elements==operation.cumulative_rows*operation.joint_variables);
         CHECK(operation.completed);
+        if(const auto* unavailable=std::get_if<model::HybridOperationThreadCpuUnavailable>(
+            &operation.thread_cpu)) {
+            CHECK((unavailable->reason==model::HybridOperationThreadCpuUnavailable::Reason::unsupported_platform ||
+                unavailable->reason==model::HybridOperationThreadCpuUnavailable::Reason::read_failed ||
+                unavailable->reason==model::HybridOperationThreadCpuUnavailable::Reason::clock_regressed));
+        }
     }
     const auto terminal=reachable.projected_state->terminal_state_set.representation();
     REQUIRE(std::holds_alternative<sets::HRepresentation>(terminal));

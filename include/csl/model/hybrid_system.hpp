@@ -8,6 +8,7 @@
 #include <csl/sets/data.hpp>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <optional>
 #include <span>
 #include <string>
@@ -91,6 +92,42 @@ struct HybridRelationLimits {
 };
 using HybridRelationResult = std::variant<sets::SetData, Diagnostic, OperationStopped>;
 
+struct HybridOperationThreadCpuTick { std::uint64_t nanoseconds{}; };
+struct HybridOperationThreadCpuReadUnavailable {
+    enum class Reason { unsupported_platform, read_failed } reason{Reason::read_failed};
+};
+using HybridOperationThreadCpuReading = std::variant<HybridOperationThreadCpuTick,
+    HybridOperationThreadCpuReadUnavailable>;
+struct HybridOperationThreadCpuDuration { std::uint64_t nanoseconds{}; };
+struct HybridOperationThreadCpuUnavailable {
+    enum class Reason { not_requested, unsupported_platform, read_failed, clock_regressed };
+    Reason reason{Reason::not_requested};
+};
+using HybridOperationThreadCpuObservation = std::variant<HybridOperationThreadCpuDuration,
+    HybridOperationThreadCpuUnavailable>;
+using HybridOperationThreadCpuReader = std::function<HybridOperationThreadCpuReading()>;
+
+// Samples one synchronous operation on the thread that constructs and closes
+// this timer. Missing or failed readings never change operation semantics.
+class HybridOperationThreadCpuTimer {
+    HybridOperationThreadCpuReader reader_;
+    const HybridOperationThreadCpuReader* reader_source_{};
+    HybridOperationThreadCpuReading started_{HybridOperationThreadCpuReadUnavailable{}};
+    bool finished_{};
+    void start() noexcept;
+public:
+    explicit HybridOperationThreadCpuTimer(HybridOperationThreadCpuReader);
+    explicit HybridOperationThreadCpuTimer(
+        std::reference_wrapper<const HybridOperationThreadCpuReader>) noexcept;
+    HybridOperationThreadCpuTimer(const HybridOperationThreadCpuTimer&) = delete;
+    HybridOperationThreadCpuTimer& operator=(const HybridOperationThreadCpuTimer&) = delete;
+    HybridOperationThreadCpuObservation finish() noexcept;
+};
+
+struct HybridRelationInstrumentation {
+    HybridOperationThreadCpuReader thread_cpu_reader;
+};
+
 enum class HybridRelationOperationKind {
     initial_state, post_state_invariant, mode_flow, continuous_control,
     pre_reset_invariant, transition_guard, reset_relation
@@ -113,6 +150,7 @@ struct HybridRelationOperationRecord {
     std::uint64_t elapsed_wall_nanoseconds{};
     // False when this operation stopped or was refused after partial work.
     bool completed{};
+    HybridOperationThreadCpuObservation thread_cpu{HybridOperationThreadCpuUnavailable{}};
 };
 
 enum class HybridPlannedModeOperationKind {
@@ -211,7 +249,7 @@ HybridRelationResult compose_hybrid_path_relation(const HybridSystem&, const Hyb
     const HybridPath&, HybridRelationLimits, std::stop_token cancellation = {});
 HybridComposedPathRelationResult compose_hybrid_path_relation_with_report(
     const HybridSystem&, const HybridRequest&, const HybridPath&, HybridRelationLimits,
-    std::stop_token cancellation = {});
+    std::stop_token cancellation = {}, const HybridRelationInstrumentation& instrumentation = {});
 
 using HybridObjectiveLiftResult = std::variant<TerminalObjective, Diagnostic>;
 HybridObjectiveLiftResult lift_hybrid_terminal_objective(const HybridSystem&, const HybridRequest&,

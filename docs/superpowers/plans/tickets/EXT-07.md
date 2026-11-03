@@ -71,15 +71,15 @@ standalone 2D example are saved in
 continuous-family oracle coverage and resource-scale evidence remain open.
 Main-only Pages URL/hash verification for the two published bundles passed on
 2026-11-02; see the [published-results verification record](../../../architecture/published-algorithm-results.md#ext-07-hybrid-profile-report).
-The EXT-07 report set includes a measured one-step scalar interval case, an
-earlier two-control polygon-verifier bundle, and a current two-control bundle
-using `ExactLinearHHybridFamilyVerifier`. Each bundle retains raw rows and an
-offline ZIP. The one-step report's 2D plot shows control against terminal
-state; it does not measure the finite-horizon verifier. The current two-control
-report covers rectangular parameter sets and their complete minimizing faces
-for a scalar linear objective. The visual gallery also contains an analytic
-constant-zero objective illustration with coupled triangular and quadrilateral
-feasible sets. It links to the measured report while describing the distinct
-geometry and objective. These bounded examples are not scalability results or
-a completion claim. Main-only Pages URL/hash verification passed for the two
-published bundles on 2026-11-02; see the [verification record](../../../architecture/published-algorithm-results.md#ext-07-hybrid-profile-report).
+The EXT-07 report set includes measured one-step scalar and two-stage cases,
+including fresh schema-3 bundles that record current-thread CPU per composer
+operation. Each bundle retains raw rows and an offline ZIP. The one-step
+report's 2D plot shows control against terminal state; it does not measure the
+finite-horizon verifier. The two-control report covers rectangular parameter
+sets and their complete minimizing faces for a scalar linear objective. The
+visual gallery also contains an analytic constant-zero objective illustration
+with coupled triangular and quadrilateral feasible sets. It links to the
+measured report while describing the distinct geometry and objective. These
+bounded examples are not scalability results or a completion claim. The new
+schema-3 bundles and code are in PR preparation; release publication and exact-
+head review gates remain open. See the [evidence record](../../../architecture/published-algorithm-results.md#ext-07-hybrid-profile-report).

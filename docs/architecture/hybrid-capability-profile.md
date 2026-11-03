@@ -54,6 +54,13 @@ support a performance comparison. The [one-step schema `/2` report](../../report
 and [two-stage schema `/2` report](../../reports/algorithm-results/ext07-hybrid-two-parameter-bc3c6ca5f7a606ee/)
 retain source commits, raw rows, and plots.
 
+Schema `/3` is being added to preserve the full joint-relation operation trace
+with composing-thread CPU beside each operation's identity, matrix deltas,
+composer wall time, and completion status. It excludes helper-thread CPU and
+includes clock-read overhead; process-wide branch CPU remains a distinct scope.
+The next two versioned captures will remain descriptive one- and two-stage
+profiles, not controlled comparisons.
+
 ## Independent-oracle test profiles
 
 The unit suite adds exact H-relation and optimal-family checks beyond the two

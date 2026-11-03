@@ -14,8 +14,60 @@
 #include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 
 namespace csl::model {
+
+HybridOperationThreadCpuTimer::HybridOperationThreadCpuTimer(
+    HybridOperationThreadCpuReader reader)
+    :reader_(std::move(reader)),reader_source_(&reader_) {
+    start();
+}
+
+HybridOperationThreadCpuTimer::HybridOperationThreadCpuTimer(
+    std::reference_wrapper<const HybridOperationThreadCpuReader> reader) noexcept
+    :reader_source_(&reader.get()) {
+    start();
+}
+
+void HybridOperationThreadCpuTimer::start() noexcept {
+    if(!reader_source_) return;
+    try {
+        if(*reader_source_) started_=(*reader_source_)();
+        else started_=HybridOperationThreadCpuReadUnavailable{
+            HybridOperationThreadCpuReadUnavailable::Reason::read_failed};
+    } catch(...) {
+        started_=HybridOperationThreadCpuReadUnavailable{
+            HybridOperationThreadCpuReadUnavailable::Reason::read_failed};
+    }
+}
+
+HybridOperationThreadCpuObservation HybridOperationThreadCpuTimer::finish() noexcept {
+    using ReadReason=HybridOperationThreadCpuReadUnavailable::Reason;
+    using ResultReason=HybridOperationThreadCpuUnavailable::Reason;
+    if(finished_) return HybridOperationThreadCpuUnavailable{ResultReason::read_failed};
+    finished_=true;
+    if(!reader_source_ || !*reader_source_)
+        return HybridOperationThreadCpuUnavailable{ResultReason::not_requested};
+    const auto unavailable=[](ReadReason reason) {
+        return HybridOperationThreadCpuObservation{HybridOperationThreadCpuUnavailable{
+            reason==ReadReason::unsupported_platform?ResultReason::unsupported_platform:ResultReason::read_failed}};
+    };
+    if(const auto* failed=std::get_if<HybridOperationThreadCpuReadUnavailable>(&started_))
+        return unavailable(failed->reason);
+    HybridOperationThreadCpuReading ended;
+    try {
+        ended=(*reader_source_)();
+    } catch(...) {
+        return HybridOperationThreadCpuUnavailable{ResultReason::read_failed};
+    }
+    if(const auto* failed=std::get_if<HybridOperationThreadCpuReadUnavailable>(&ended))
+        return unavailable(failed->reason);
+    const auto start=std::get<HybridOperationThreadCpuTick>(started_).nanoseconds;
+    const auto end=std::get<HybridOperationThreadCpuTick>(ended).nanoseconds;
+    if(end<start) return HybridOperationThreadCpuUnavailable{ResultReason::clock_regressed};
+    return HybridOperationThreadCpuDuration{end-start};
+}
 
 HybridOperationPlanResult plan_hybrid_operations(
     std::span<const HybridPath> paths) {
@@ -666,7 +718,8 @@ HybridRelationPreflightResult preflight_hybrid_path_relations(
 namespace {
 HybridRelationResult compose_hybrid_path_relation_impl(const HybridSystem& system,
     const HybridRequest& request, const HybridPath& path, HybridRelationLimits limits,
-    std::stop_token cancellation,std::vector<HybridRelationOperationRecord>* operations) {
+    std::stop_token cancellation,std::vector<HybridRelationOperationRecord>* operations,
+    const HybridOperationThreadCpuReader* thread_cpu_reader) {
     const auto errors = check_hybrid_profile(system, request);
     if (!errors.empty()) return errors.front();
     const auto stopped = [] { return OperationStopped{StopReason::cancelled,
@@ -783,7 +836,8 @@ HybridRelationResult compose_hybrid_path_relation_impl(const HybridSystem& syste
     auto row_count=[&] { return inequalities.size()+equalities.size(); };
     auto record_operation=[&](HybridRelationOperationKind operation,std::size_t stage,
         std::optional<HybridModeId> mode,std::optional<HybridEdgeId> edge,std::size_t rows_before,
-        std::chrono::steady_clock::time_point started,bool completed) {
+        std::chrono::steady_clock::time_point started,bool completed,
+        HybridOperationThreadCpuTimer& thread_cpu_timer) {
         if(!operations) return;
         const auto total_rows=row_count();
         const auto cumulative_elements=total_rows*width;
@@ -793,63 +847,78 @@ HybridRelationResult compose_hybrid_path_relation_impl(const HybridSystem& syste
         operations->push_back({operation,stage,std::move(mode),std::move(edge),
             "csl.model.hybrid.joint-h-composer","1",width,total_rows-rows_before,
             cumulative_elements-previous_elements,total_rows,cumulative_elements,
-            elapsed>0?static_cast<std::uint64_t>(elapsed):0,completed});
+            elapsed>0?static_cast<std::uint64_t>(elapsed):0,completed,thread_cpu_timer.finish()});
     };
     auto rows_before=row_count();
+    const HybridOperationThreadCpuReader empty_thread_cpu_reader{};
+    HybridOperationThreadCpuTimer thread_cpu_timer{
+        std::cref(thread_cpu_reader?*thread_cpu_reader:empty_thread_cpu_reader)};
     auto operation_started=operations?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
     auto initial_error=add_set(Singleton{request.initial.state},layout.post_states[0].offset,modes[0]->state_dimension);
     record_operation(HybridRelationOperationKind::initial_state,0,modes[0]->id,{},rows_before,
-        operation_started,!initial_error);
+        operation_started,!initial_error,thread_cpu_timer);
     if(initial_error) return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*initial_error};
     for(std::size_t t=0;t<=system.horizon;++t) {
         if(cancellation.stop_requested()) return stopped();
         rows_before=row_count();
+        HybridOperationThreadCpuTimer post_invariant_cpu_timer{
+            std::cref(thread_cpu_reader?*thread_cpu_reader:empty_thread_cpu_reader)};
         operation_started=operations?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
         auto post_invariant_error=add_set(modes[t]->invariants[t],layout.post_states[t].offset,modes[t]->state_dimension);
         record_operation(HybridRelationOperationKind::post_state_invariant,t,modes[t]->id,{},rows_before,
-            operation_started,!post_invariant_error);
+            operation_started,!post_invariant_error,post_invariant_cpu_timer);
         if(post_invariant_error)
             return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*post_invariant_error};
         if(t==system.horizon) continue;
         const auto& mode=*modes[t];
         const auto& flow=std::holds_alternative<LinearStage>(mode.flow)?std::get<LinearStage>(mode.flow):std::get<std::vector<LinearStage>>(mode.flow)[t];
         rows_before=row_count();
+        HybridOperationThreadCpuTimer flow_cpu_timer{
+            std::cref(thread_cpu_reader?*thread_cpu_reader:empty_thread_cpu_reader)};
         operation_started=operations?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
         const bool flow_completed=add_linear(flow,layout.post_states[t].offset,transitions[t].control.offset,
             transitions[t].pre_state.offset);
         record_operation(HybridRelationOperationKind::mode_flow,t,mode.id,{},rows_before,
-            operation_started,flow_completed);
+            operation_started,flow_completed,flow_cpu_timer);
         if(!flow_completed) {
             if(cancellation.stop_requested()) return stopped();
             return Diagnostic{DiagnosticCode::unsupported,"hybrid.relation.rows","Joint relation exceeds its row limit"};
         }
         rows_before=row_count();
+        HybridOperationThreadCpuTimer control_cpu_timer{
+            std::cref(thread_cpu_reader?*thread_cpu_reader:empty_thread_cpu_reader)};
         operation_started=operations?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
         auto control_error=add_set(mode.control_sets[t],transitions[t].control.offset,mode.control_dimension);
         record_operation(HybridRelationOperationKind::continuous_control,t,mode.id,{},rows_before,
-            operation_started,!control_error);
+            operation_started,!control_error,control_cpu_timer);
         if(control_error)
             return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*control_error};
         rows_before=row_count();
+        HybridOperationThreadCpuTimer pre_invariant_cpu_timer{
+            std::cref(thread_cpu_reader?*thread_cpu_reader:empty_thread_cpu_reader)};
         operation_started=operations?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
         auto pre_invariant_error=add_set(mode.invariants[t+1],transitions[t].pre_state.offset,mode.state_dimension);
         record_operation(HybridRelationOperationKind::pre_reset_invariant,t+1,mode.id,{},rows_before,
-            operation_started,!pre_invariant_error);
+            operation_started,!pre_invariant_error,pre_invariant_cpu_timer);
         if(pre_invariant_error)
             return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*pre_invariant_error};
         rows_before=row_count();
+        HybridOperationThreadCpuTimer guard_cpu_timer{
+            std::cref(thread_cpu_reader?*thread_cpu_reader:empty_thread_cpu_reader)};
         operation_started=operations?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
         auto guard_error=add_set(transitions[t].edge->guards[t],transitions[t].pre_state.offset,mode.state_dimension);
         record_operation(HybridRelationOperationKind::transition_guard,t,{},transitions[t].edge->id,
-            rows_before,operation_started,!guard_error);
+            rows_before,operation_started,!guard_error,guard_cpu_timer);
         if(guard_error)
             return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*guard_error};
         rows_before=row_count();
+        HybridOperationThreadCpuTimer reset_cpu_timer{
+            std::cref(thread_cpu_reader?*thread_cpu_reader:empty_thread_cpu_reader)};
         operation_started=operations?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
         auto reset_error=add_reset(transitions[t].edge->reset_relations[t],transitions[t].pre_state.offset,
             layout.post_states[t+1].offset,mode.state_dimension,modes[t+1]->state_dimension);
         record_operation(HybridRelationOperationKind::reset_relation,t,{},transitions[t].edge->id,
-            rows_before,operation_started,!reset_error);
+            rows_before,operation_started,!reset_error,reset_cpu_timer);
         if(reset_error)
             return cancellation.stop_requested()?HybridRelationResult{stopped()}:HybridRelationResult{*reset_error};
     }
@@ -893,14 +962,16 @@ HybridRelationResult compose_hybrid_path_relation_impl(const HybridSystem& syste
 HybridRelationResult compose_hybrid_path_relation(const HybridSystem& system,
     const HybridRequest& request,const HybridPath& path,HybridRelationLimits limits,
     std::stop_token cancellation) {
-    return compose_hybrid_path_relation_impl(system,request,path,limits,cancellation,nullptr);
+    return compose_hybrid_path_relation_impl(system,request,path,limits,cancellation,nullptr,nullptr);
 }
 
 HybridComposedPathRelationResult compose_hybrid_path_relation_with_report(
     const HybridSystem& system,const HybridRequest& request,const HybridPath& path,
-    HybridRelationLimits limits,std::stop_token cancellation) {
+    HybridRelationLimits limits,std::stop_token cancellation,
+    const HybridRelationInstrumentation& instrumentation) {
     std::vector<HybridRelationOperationRecord> operations;
-    auto result=compose_hybrid_path_relation_impl(system,request,path,limits,cancellation,&operations);
+    auto result=compose_hybrid_path_relation_impl(system,request,path,limits,cancellation,&operations,
+        &instrumentation.thread_cpu_reader);
     if(const auto* diagnostic=std::get_if<Diagnostic>(&result))
         return HybridPathCompositionFailureReport{path,limits,std::move(operations),*diagnostic};
     if(const auto* stopped=std::get_if<OperationStopped>(&result))

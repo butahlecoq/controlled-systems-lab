@@ -1,0 +1,40 @@
+{
+  "absolute_tolerance": 1e-08,
+  "architecture": "x86_64",
+  "cmake": "cmake version 3.31.6",
+  "cmake_cache_sha256": "62bc37382f093ec6fc682b98b4535e35abbd5659bc0283084d301ba5f6a90246",
+  "collected_utc": "2026-11-03T21:51:59.993319+00:00",
+  "compiler_id": "GNU",
+  "compiler_receipt": "CMakeCXXCompiler.raw.cmake",
+  "compiler_version": "16.2.1",
+  "configuration": "Release",
+  "cxx_standard": 20,
+  "enumeration_limits": {
+    "max_horizon": 2,
+    "max_paths": 8
+  },
+  "host": "Linux measurement workstation",
+  "host_name_sha256": "382a803dcc0de9618b141c904dde30f933985956df74ce7fd9886494c7a35a60",
+  "logical_processors": 8,
+  "native_threads_configured": 1,
+  "native_threads_observed": null,
+  "native_threads_requested": 1,
+  "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+  "outer_workers_observed": 1,
+  "outer_workers_requested": 1,
+  "processor": "",
+  "python": "3.14.8",
+  "raw_build_log_sha256": "b62a94ec485da65108530c32c69d179e049244be6a9b863695125d7cd96a3fd9",
+  "raw_configure_log_sha256": "9331356da08f1210dbbec33948af6b39cd7ac0758a5faffc569ebea670f6a906",
+  "relation_limits": {
+    "max_matrix_elements": 65536,
+    "max_rows": 4096,
+    "max_variables": 64
+  },
+  "relative_tolerance": 1e-08,
+  "source_commit": "4c8f1c3dbe393eb39acd4284d29073d0943b3320",
+  "source_tree": "d065d03bbd5597365ecc94a3661eea83d02055d9",
+  "timing_scope": "One end-to-end call includes fixture/provider setup, complete path relation assembly, LP execution, candidate-face construction, and verification of all allowed path families. Serialization, build, and rendering are excluded.",
+  "warmup_policy": "One excluded 10-call batch followed by seven measured 20-call batches",
+  "workspace_reuse": "none; fresh fixture, provider and workspace per call"
+}
