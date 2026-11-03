@@ -37,6 +37,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
                              "deferred-family-specific-migration")
         self.assertEqual(producers["scripts/reports/stage_mpc04_max_coordinate.py"]["disposition"],
                          "publication-validation-or-frozen-route")
+        self.assertEqual(producers["scripts/reports/mpc01/validate_strategy_ab_ts03_bundle.py"]["disposition"],
+                         "publication-validation-or-frozen-route")
         self.assertNotIn("policy.svg", producers["scripts/reports/site.py"]["asset_name_literals"])
         self.assertIn("visual.svg", producers["scripts/reports/ext03_transform/report.py"]["asset_name_literals"])
         self.assertNotIn("csl.report.svg", {

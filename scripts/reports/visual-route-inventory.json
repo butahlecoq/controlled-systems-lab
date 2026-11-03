@@ -793,9 +793,10 @@
     },
     {
       "source": "scripts/reports/mpc01/stage_per_attempt.py",
-      "signal_count": 1,
+      "signal_count": 2,
       "asset_name_literals": [
-        "b04-repeated-projections.svg"
+        "b04-repeated-projections.svg",
+        "strategy-ab-ts03-control-plane.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
     },
@@ -848,6 +849,14 @@
       ],
       "disposition": "deferred-family-specific-migration",
       "follow_up_issue": 686
+    },
+    {
+      "source": "scripts/reports/mpc01/validate_strategy_ab_ts03_bundle.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "strategy-ab-ts03-control-plane.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
     },
     {
       "source": "scripts/reports/mpc03/b08_miqcp.py",
