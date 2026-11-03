@@ -77,12 +77,14 @@ This report makes no new publication or performance claim.
 The named tests and reports are finite correctness and measurement fixtures.
 They do not establish general scaling by state dimension, control dimension,
 horizon, mode count, edge count, path count, or provider workload. PR #881 adds
-request-wide admission, per-operation composer accounting, and path-level
-provider elapsed wall time to the bounded profile tracked by EXT-07. Each
+request-wide admission, per-operation composer accounting, and path/branch
+operation elapsed wall time to the bounded profile tracked by EXT-07. Each
 relation trace records mode or edge, stage, composer version, joint-variable
 count, row and matrix-element deltas, elapsed composer wall time, and completion
-status. Reachability paths, solver branches, and verifier invocations record
-their own elapsed wall time; backend thread width is retained when reported.
+status. Reachability paths and solver branches record operation elapsed wall
+time. Verifier invocations record the full verification phase, including
+coordinator checks and path enumeration as well as the adapter call; this is not
+provider-only time. Backend thread width is retained when reported.
 The separate resource capture records whole-process CPU and memory for two
 fixtures. Provider CPU and heap use remain unattributed, and requested resource
 limits are not enforced by these records. Those limits keep the issue open. See the

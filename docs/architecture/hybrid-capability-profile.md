@@ -81,9 +81,9 @@ status, including partial resource counts for a failed operation. The
 `exact singleton hybrid verifier independently retains every tied edge path`
 test checks this evidence for every path, including guard and reset identity
 and the structural counters. These counts describe relation construction;
-they do not measure provider CPU or heap use. Path-level elapsed wall time and
-reported backend thread width are recorded separately for reachability, solver,
-and verifier execution.
+they do not measure provider CPU or heap use. Elapsed wall time is recorded
+separately for staged reachability, solver-branch execution, and the full
+verification phase. Backend thread width is retained when a provider reports it.
 
 ## Implementation-domain limits
 
@@ -106,8 +106,8 @@ and verifier execution.
   consumption.
 
 PR #881 adds request-wide admission, per-mode/edge composer accounting, and
-path-level provider wall-time/thread observations to the bounded profile
-tracked by issue #156. The issue remains open while provider CPU and heap use
+path/branch operation wall-time plus reported thread observations to the
+bounded profile tracked by issue #156. The issue remains open while provider CPU and heap use
 are unmeasured and broader operation profiles remain incomplete. Future
 extensions can add more set representations, enforce provider CPU or memory
 limits, and measure larger dimensions or path inventories. The current evidence
