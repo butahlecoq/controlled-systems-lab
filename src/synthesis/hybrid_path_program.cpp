@@ -1606,9 +1606,11 @@ using HybridPreparedPipeline=std::variant<
 HybridPortfolioExecution execute_prepared_hybrid_branches(
     std::span<const HybridPathProgram> programs,
     std::span<const HybridPreparedPipeline> pipelines,
+    std::span<const HybridPathReachability> reachability,
     const ExecutionContext& context) {
     HybridPortfolioExecution portfolio;
     portfolio.branches.reserve(programs.size());
+    portfolio.reachability.assign(reachability.begin(),reachability.end());
     bool complete=true;
     bool stopped=false;
     for(std::size_t i=0;i<programs.size();++i) {
@@ -1743,12 +1745,13 @@ HybridPortfolioExecution execute_hybrid_path_programs(
     std::vector<HybridPreparedPipeline> ready;
     ready.reserve(prepared_branches.size());
     for(auto& branch:prepared_branches) ready.push_back(std::move(*branch));
-    return execute_prepared_hybrid_branches(programs,ready,context);
+    return execute_prepared_hybrid_branches(programs,ready,{},context);
 }
 
 struct HybridPreparedExecution::Storage {
     std::vector<HybridPathProgram> programs;
     std::vector<HybridPreparedPipeline> pipelines;
+    std::vector<HybridPathReachability> reachability;
     HybridAdmissionReport report;
 };
 
@@ -1756,10 +1759,11 @@ class HybridPreparedAccess {
 public:
     static HybridPreparedExecution create(std::vector<HybridPathProgram> programs,
         std::vector<HybridPreparedPipeline> pipelines,
+        std::vector<HybridPathReachability> reachability,
         HybridAdmissionReport report) {
         using Storage=HybridPreparedExecution::Storage;
         return HybridPreparedExecution{std::make_unique<const Storage>(Storage{
-            std::move(programs),std::move(pipelines),std::move(report)})};
+            std::move(programs),std::move(pipelines),std::move(reachability),std::move(report)})};
     }
     static const HybridPreparedExecution::Storage& storage(const HybridPreparedExecution& prepared) {
         return *prepared.storage_;
@@ -1782,34 +1786,68 @@ HybridRefinementResult refine_hybrid_request(HybridAdmissionToken token,
         return HybridConcreteRefinementRejected{admission.report,
             {{DiagnosticCode::unsupported,std::move(field),std::move(explanation)}}};
     };
-    if(problem.value.empty())
-        return refuse("hybrid.refinement.problem","Problem identity must be nonempty");
     if(!admission.report.admitted)
         return refuse("hybrid.refinement.admission","Only a fully admitted request can be refined");
-    if(!admission.selection.trajectory||!admission.selection.lp||!admission.selection.convex)
-        return refuse("hybrid.refinement.trajectory","Concrete refinement requires a selected trajectory and LP/convex providers");
-    if(admission.selection.reachability||admission.selection.verifier)
+    if(!admission.selection.trajectory&&!admission.selection.reachability)
+        return refuse("hybrid.refinement.selection","Refinement requires a selected trajectory or reachability operation");
+    if(admission.selection.trajectory&&(!admission.selection.lp||!admission.selection.convex))
+        return refuse("hybrid.refinement.trajectory","Trajectory refinement requires LP and convex provider snapshots");
+    if(admission.selection.verifier)
         return refuse("hybrid.refinement.selection",
-            "Transactional refinement currently supports trajectory-only selections; reachability and verifier preparation are not yet connected");
+            "Transactional family-verifier preparation is not yet connected");
+    if(admission.selection.reachability&&
+       admission.selection.reachability->capabilities().projects_terminal_state)
+        return refuse("hybrid.refinement.geometry",
+            "Projected reachability requires concrete geometry preparation, which is not yet connected to the transaction");
 
     std::vector<HybridPathProgram> programs;
-    programs.reserve(admission.report.paths.size());
-    for(const auto& path:admission.report.paths) {
-        if(const auto stop=interruption(context))
-            return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
-                "Hybrid refinement stopped between path programs; no workspace was created"};
-        auto built=build_hybrid_path_program(*admission.selection.trajectory,admission.system,
-            admission.request,path,problem,admission.relation_limits,admission.objective_policy,
-            context.cancellation);
-        if(const auto* stopped=std::get_if<OperationStopped>(&built)) return *stopped;
-        if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&built)) {
-            if(const auto* stopped=std::get_if<OperationStopped>(&failure->failure)) return *stopped;
-            return HybridConcreteRefinementRejected{admission.report,
-                {std::get<Diagnostic>(failure->failure)}};
+    if(admission.selection.trajectory) {
+        if(problem.value.empty())
+            return refuse("hybrid.refinement.problem","Trajectory refinement requires a nonempty problem identity");
+        programs.reserve(admission.report.paths.size());
+        for(const auto& path:admission.report.paths) {
+            if(const auto stop=interruption(context))
+                return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+                    "Hybrid refinement stopped between path programs; no workspace was created"};
+            auto built=build_hybrid_path_program(*admission.selection.trajectory,admission.system,
+                admission.request,path,problem,admission.relation_limits,admission.objective_policy,
+                context.cancellation);
+            if(const auto* stopped=std::get_if<OperationStopped>(&built)) return *stopped;
+            if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&built)) {
+                if(const auto* stopped=std::get_if<OperationStopped>(&failure->failure)) return *stopped;
+                return HybridConcreteRefinementRejected{admission.report,
+                    {std::get<Diagnostic>(failure->failure)}};
+            }
+            if(const auto* errors=std::get_if<Diagnostics>(&built))
+                return HybridConcreteRefinementRejected{admission.report,*errors};
+            programs.push_back(std::get<HybridPathProgram>(std::move(built)));
         }
-        if(const auto* errors=std::get_if<Diagnostics>(&built))
-            return HybridConcreteRefinementRejected{admission.report,*errors};
-        programs.push_back(std::get<HybridPathProgram>(std::move(built)));
+    }
+
+    std::vector<HybridPathReachability> reachability_results;
+    if(admission.selection.reachability) {
+        reachability_results.reserve(admission.report.paths.size());
+        for(const auto& path:admission.report.paths) {
+            if(const auto stop=interruption(context))
+                return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
+                    "Hybrid reachability refinement stopped between path relations"};
+            auto result=admission.selection.reachability->compose_path(admission.system,
+                admission.request,path,admission.relation_limits,context.cancellation);
+            if(const auto* stopped=std::get_if<OperationStopped>(&result)) return *stopped;
+            if(const auto* failure=std::get_if<model::HybridPathCompositionFailureReport>(&result)) {
+                if(const auto* stopped=std::get_if<OperationStopped>(&failure->failure)) return *stopped;
+                return HybridConcreteRefinementRejected{admission.report,
+                    {std::get<Diagnostic>(failure->failure)}};
+            }
+            if(const auto* errors=std::get_if<Diagnostics>(&result))
+                return HybridConcreteRefinementRejected{admission.report,*errors};
+            auto path_result=std::get<HybridPathReachability>(std::move(result));
+            if(path_result.path!=path||path_result.assurance!=Assurance::numerical||
+               path_result.projected_state)
+                return refuse("hybrid.refinement.reachability_result",
+                    "Selected reachability adapter returned mismatched, nonnumerical, or unexpectedly projected evidence");
+            reachability_results.push_back(std::move(path_result));
+        }
     }
 
     std::vector<HybridPreparedPipeline> pipelines;
@@ -1835,13 +1873,15 @@ HybridRefinementResult refine_hybrid_request(HybridAdmissionToken token,
     if(const auto stop=interruption(context))
         return OperationStopped{*stop==Termination::cancelled?StopReason::cancelled:StopReason::deadline_expired,
             "Hybrid refinement stopped before publishing prepared providers; no workspace was created"};
-    return HybridPreparedAccess::create(std::move(programs),std::move(pipelines),admission.report);
+    return HybridPreparedAccess::create(std::move(programs),std::move(pipelines),
+        std::move(reachability_results),admission.report);
 }
 
 HybridPortfolioExecution execute_hybrid_request(HybridPreparedExecution prepared,
     const ExecutionContext& context) {
     const auto& storage=HybridPreparedAccess::storage(prepared);
-    return execute_prepared_hybrid_branches(storage.programs,storage.pipelines,context);
+    return execute_prepared_hybrid_branches(storage.programs,storage.pipelines,
+        storage.reachability,context);
 }
 
 } // namespace csl::synthesis

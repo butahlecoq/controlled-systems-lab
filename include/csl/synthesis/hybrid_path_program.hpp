@@ -236,6 +236,9 @@ struct HybridBranchExecution {
 
 struct HybridPortfolioExecution {
     std::vector<HybridBranchExecution> branches;
+    // Exact relation results selected through the request coordinator. These
+    // are separate from solver branches and do not imply objective optimality.
+    std::vector<HybridPathReachability> reachability;
     // True only if every supplied branch produced a contract-valid completed
     // solver result. This says nothing about cross-branch optimality.
     bool all_supplied_branches_completed{};

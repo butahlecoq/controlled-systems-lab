@@ -94,6 +94,20 @@ int main() {
     if(prepared_request==nullptr||!prepared_request->report().admitted||
        prepared_request->report().paths.size()!=1)
         throw std::runtime_error("Installed transactional hybrid refinement did not prepare the path request");
+    HybridExecutionSelection reachability_selection;
+    reachability_selection.reachability=std::make_shared<JointHReachabilityAdapter>();
+    auto reachability_admission=admit_hybrid_request(system,request,reachability_selection,
+        {1,4},{32,128,4096},{},{});
+    auto* reachability_token=std::get_if<HybridAdmissionToken>(&reachability_admission);
+    if(reachability_token==nullptr)
+        throw std::runtime_error("Installed exact reachability request was not admitted");
+    auto reachability_refinement=refine_hybrid_request(std::move(*reachability_token),{},{});
+    auto* prepared_reachability=std::get_if<HybridPreparedExecution>(&reachability_refinement);
+    if(prepared_reachability==nullptr)
+        throw std::runtime_error("Installed exact reachability refinement failed");
+    const auto reachability_run=execute_hybrid_request(std::move(*prepared_reachability),{});
+    if(!reachability_run.branches.empty()||reachability_run.reachability.size()!=1)
+        throw std::runtime_error("Installed coordinated execution did not retain exact reachability");
     const auto admitted_portfolio=build_hybrid_portfolio_programs(trajectory,system,request,
         {"installed-admitted-hybrid"},{1,4},{32,128,4096},*admission_provider,*convex_provider);
     const auto* admitted=std::get_if<std::vector<HybridPathProgram>>(&admitted_portfolio);

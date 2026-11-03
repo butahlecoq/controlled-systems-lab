@@ -116,10 +116,10 @@ public:
 using HybridRefinementResult = std::variant<HybridPreparedExecution,
     HybridConcreteRefinementRejected, OperationStopped>;
 
-// Transactionally builds each selected trajectory branch and calls concrete
-// LP/convex prepare for every generated program. This first executor supports
-// trajectory-only selections; reachability and verifier selections fail closed
-// until their concrete preparation stages join the same transaction.
+// Transactionally builds selected trajectory branches, computes exact
+// non-projecting reachability relations, and concretely prepares every LP/
+// convex program before returning. Projected geometry and family-verifier
+// selections fail closed until their concrete preparation joins this transaction.
 HybridRefinementResult refine_hybrid_request(HybridAdmissionToken,
     ProblemId, const ExecutionContext&);
 

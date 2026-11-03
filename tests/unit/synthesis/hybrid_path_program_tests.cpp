@@ -1694,6 +1694,39 @@ TEST_CASE("hybrid refinement prepares every trajectory branch before workspace c
     CHECK(*rejected_factories==0);
 }
 
+TEST_CASE("hybrid request refinement retains exact reachability and refuses unprepared geometry") {
+    auto [system,request]=variable_size_parallel_profile();
+    const auto expected=model::enumerate_hybrid_paths(system,request.initial.mode,
+        request.allowed_terminal_modes,{1,8});
+    REQUIRE(std::holds_alternative<std::vector<model::HybridPath>>(expected));
+    const auto& paths=std::get<std::vector<model::HybridPath>>(expected);
+    HybridExecutionSelection selection;
+    selection.reachability=std::make_shared<JointHReachabilityAdapter>();
+    auto admitted=admit_hybrid_request(system,request,selection,{1,8},{16,64,1024},{},{});
+    REQUIRE(std::holds_alternative<HybridAdmissionToken>(admitted));
+    auto refined=refine_hybrid_request(std::move(std::get<HybridAdmissionToken>(admitted)),{},{});
+    REQUIRE(std::holds_alternative<HybridPreparedExecution>(refined));
+    auto& prepared=std::get<HybridPreparedExecution>(refined);
+    CHECK(prepared.report().paths.size()==2);
+    const auto execution=execute_hybrid_request(std::move(prepared),{});
+    CHECK(execution.branches.empty());
+    CHECK(execution.all_supplied_branches_completed);
+    REQUIRE(execution.reachability.size()==2);
+    CHECK(execution.reachability[0].path==paths[0]);
+    CHECK(execution.reachability[1].path==paths[1]);
+
+    auto projected=std::make_shared<CountingReachabilityAdmissionAdapter>();
+    HybridExecutionSelection projected_selection;
+    projected_selection.reachability=projected;
+    auto projected_admission=admit_hybrid_request(system,request,projected_selection,
+        {1,8},{16,64,1024},{},{});
+    REQUIRE(std::holds_alternative<HybridAdmissionToken>(projected_admission));
+    auto projected_refinement=refine_hybrid_request(
+        std::move(std::get<HybridAdmissionToken>(projected_admission)),{},{});
+    REQUIRE(std::holds_alternative<HybridConcreteRefinementRejected>(projected_refinement));
+    CHECK(projected->compose_calls==0);
+}
+
 TEST_CASE("hybrid portfolio rejects unknown provider envelopes before adapter path builds") {
     auto [system,request]=variable_size_parallel_profile();
     const auto enumerated=model::enumerate_hybrid_paths(system,request.initial.mode,
