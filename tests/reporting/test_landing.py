@@ -324,6 +324,7 @@ class StagedCatalogueTests(unittest.TestCase):
                 self.assertIn('href="' + report_id + '/index.html"', page)
                 self.assertIn(escape(report["measured_scope"]), page)
                 self.assertIn(escape(report["evidence_limits"]), page)
+            self.assertIn("EXT-07 bounded resource observations", page)
             self.assertEqual(page.count("</ul>"), 1)
 
 

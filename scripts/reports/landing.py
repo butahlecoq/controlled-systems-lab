@@ -395,12 +395,6 @@ FAMILIES = {
         r"ext07-hybrid-[0-9a-f]{16}", "extensions", "Hybrid one-step verifier",
         "Checks a one-step hybrid system with switched dynamics and a piecewise linear state "
         "update, and records the measured calls of the registered hybrid path."),
-    "ext07-resource-observation": Family(
-        r"ext07-resource-observation-[0-9a-f]{16}", "verification",
-        "EXT-07 bounded resource observations",
-        "Records process-scoped CPU and memory observations for two bounded EXT-07 profiles. "
-        "The profiles differ in horizon and relation size, so these observations do not establish "
-        "a scaling comparison or per-transition resource cost."),
     "ext03-transform": Family(
         r"ext03-transform-[0-9a-f]{64}", "extensions", "Temporal memory transform microbenchmark",
         "Measures a fixed two-step scalar memory lift and history recovery. It does not run or "

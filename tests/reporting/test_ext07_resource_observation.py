@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
+import json
 from pathlib import Path
 import shutil
 import sys
@@ -23,6 +25,8 @@ resource = load_module("csl_ext07_resource_test", ROOT /
                        "scripts/reports/ext07/resource_observation.py")
 stager = load_module("csl_ext07_resource_stager_test", ROOT /
                      "scripts/reports/stage_ext07.py")
+landing = load_module("csl_ext07_resource_landing_test", ROOT /
+                      "scripts/reports/landing.py")
 
 
 class Ext07ResourceObservationTests(unittest.TestCase):
@@ -63,6 +67,10 @@ class Ext07ResourceObservationTests(unittest.TestCase):
                              "resource-observation.json").is_file())
             self.assertIn("resource-scope.svg", (site / "index.html").read_text(
                 encoding="utf-8"))
+            landing.build(site)
+            page = (site / "index.html").read_text(encoding="utf-8")
+            self.assertIn("EXT-07 bounded resource observations", page)
+            self.assertIn(self.bundle.name + "/index.html", page)
 
     def test_current_ext07_catalog_stages_all_report_routes(self) -> None:
         catalog = ROOT / "reports/algorithm-results/ext07-publications.json"
@@ -83,6 +91,14 @@ class Ext07ResourceObservationTests(unittest.TestCase):
                 content = path.read_bytes()
                 self.assertNotIn(b"/home/butahlecoq", content, str(path))
                 self.assertNotIn(b"/var/tmp/ext07-resource-capture", content, str(path))
+
+    def test_shared_landing_source_hash_for_frozen_b04_bundle_is_preserved(self) -> None:
+        bundle = ROOT / "reports/algorithm-results/b04-c-exact-dyadic-v1"
+        manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
+        expected = manifest["source_files"]["scripts/reports/landing.py"]
+        actual = hashlib.sha256(
+            (ROOT / "scripts/reports/landing.py").read_bytes()).hexdigest()
+        self.assertEqual(actual, expected)
 
     def test_saved_bundle_rejects_changed_capture_file(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

@@ -92,9 +92,11 @@ def stage(catalog: Path, site_dir: Path) -> str:
                            "EXT-07 Pages index insertion point differs")
     report_ids = []
     routes = []
+    related_links = []
     staged_bundles = []
     for entry in data["reports"]:
         report_id = entry["report_id"]
+        related = report_id.startswith("ext07-resource-observation-")
         if report_id.startswith("ext07-resource-observation-"):
             prefix = "ext07-resource-observation-"
             example = "resource-scope.svg"
@@ -129,9 +131,17 @@ def stage(catalog: Path, site_dir: Path) -> str:
                  ' · <a href="' + escape(report_id) + '/records.json">raw record</a>'
                  ' · <a href="' + escape(report_id) + '/' + escape(report_id) +
                  '.zip">offline ZIP</a></li>')
-        site.OfflineHTML({report_id + "/index.html", report_id + "/" + example,
-                          report_id + "/records.json",
-                          report_id + "/" + report_id + ".zip"}).feed(route)
+        if related:
+            route = ('<a href="' + escape(report_id) + '/index.html">' + label + '</a>'
+                     ' · <a href="' + escape(report_id) + '/' + example + '">' +
+                     example_label + '</a>')
+            site.OfflineHTML({report_id + "/index.html",
+                              report_id + "/" + example}).feed(route)
+            related_links.append(route)
+        else:
+            site.OfflineHTML({report_id + "/index.html", report_id + "/" + example,
+                              report_id + "/records.json",
+                              report_id + "/" + report_id + ".zip"}).feed(route)
         for name in ("index.html", example):
             site.OfflineHTML(allowed).feed(
                 (bundle / name).read_text(encoding="utf-8"))
@@ -153,8 +163,14 @@ def stage(catalog: Path, site_dir: Path) -> str:
             output.write_bytes(content)
     report.collect.require(index.count("</ul>") == 1,
                            "EXT-07 Pages index insertion point differs")
-    index_path.write_text(index.replace("</ul>", "".join(routes) + "</ul>"),
-                          encoding="utf-8")
+    index = index.replace("</ul>", "".join(routes) + "</ul>")
+    if related_links:
+        related = ('<p id="visual-examples-link">' +
+                   ' &middot; '.join(related_links) + '</p>')
+        report.collect.require(index.count("</body>") == 1,
+                               "EXT-07 Pages body insertion point differs")
+        index = index.replace("</body>", related + "</body>")
+    index_path.write_text(index, encoding="utf-8")
     return report_ids[0] if len(report_ids) == 1 else ",".join(report_ids)
 
 
