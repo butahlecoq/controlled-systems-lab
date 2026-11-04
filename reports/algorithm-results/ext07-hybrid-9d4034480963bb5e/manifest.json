@@ -1,0 +1,25 @@
+{
+  "report_id": "ext07-hybrid-9d4034480963bb5e",
+  "schema": "csl.ext07-manifest/1",
+  "sha256": {
+    "CMakeCXXCompiler.raw.cmake": "fc54f5e431c04fbe157752a68b26b3f49e29f913e0188f9334e2c610971c68b3",
+    "build.log": "dc19e9d46d2b7a9ca47f187ea48f656846efe61643d3731407de7b125424c3cc",
+    "configure.log": "a05a7c200d9a71e59cf011b8ce258505bebc35bf943e04568c36e7d305973173",
+    "driver.cpp": "1d299fa86cb12cca78826d2662658e7e7f28fe515956877e7ede467effb0b4bd",
+    "example-2d.html": "455bb8468b0cdfab1fe7ca1e63cce9ffa8b2a332fc1b6d95017c691c667391e6",
+    "host.json": "da448b1f82b5823c92536cd82177c49a8486897a89e652d945106343f9481587",
+    "index.html": "e5ed72c799c2989b9effc17a1904596fddfee25bc4c02da6091e21d15c7e7ecd",
+    "joint-relation-2d.svg": "f8f74337114a0f8322835f137d9718b431dbb0a27bbcd18fc84e148665bcf757",
+    "measure.jsonl": "d0c1902dcfee8651f1deb7524b98ef060a228cfcadc57647c12523fa27ec1e02",
+    "measure.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "operation_cpu_json.hpp": "4133b588fc0a2f3c3d4bed2ac95cb8f29c440754c877957db041e7bc868b6e8e",
+    "postrun.json": "4bac4efd08edbb70b9c75c523c4405586c563a075986e39230eb3e390a50dc4c",
+    "prebuild.json": "677d6e35252cf391009680a8c9b8a98f307398c0ce7bccb2dc031124a56f1998",
+    "process_cpu_json.hpp": "f4d8841c9a997b2221248e6b3f69dcbf08ed89dc55af06ad570feb973d619f46",
+    "records.json": "c7fb7a89f8126eb753872a430ff98bad8f010a7670ebcd72224bac14262ba027",
+    "smoke.jsonl": "573aa5f505d61327e4cc9019ac8bb28b397130a75a16ff6d65e11bb68ddf394d",
+    "smoke.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "summary.csv": "3e4dd1f6828b50f9c2a15198353f8817496524dc56f038aba789067bbb98a21f"
+  },
+  "source_commit": "66653dae21ca2fc28ef3b86b3199d36e4826d5bc"
+}

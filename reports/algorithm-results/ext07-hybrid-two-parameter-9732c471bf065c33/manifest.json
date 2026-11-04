@@ -1,0 +1,25 @@
+{
+  "files": {
+    "CMakeCXXCompiler.raw.cmake": "fc54f5e431c04fbe157752a68b26b3f49e29f913e0188f9334e2c610971c68b3",
+    "build.log": "1b5f8b0512b2184a97703cadfb5f3fbda9ff16aa5bfa7e469bd15e0091ceda9a",
+    "configure.log": "d2b43634b789740678fa9e014a4f933008d94d8784a1f97cd6c02a488b420b32",
+    "feasible-polygons.svg": "84035d5c550f608a0105658b1136ac4e2327e18081cbfe47bf1e1b81b4cb79e2",
+    "host.json": "fda16c4ec1ad52d9f95f2344835d38b4f895a917f77b48ea2b449ff1dae10923",
+    "index.html": "eab2605004e7bb00ff39196820c90dd3cee53784d624d31c3e12aefd1e2bf3e4",
+    "measure.jsonl": "2ababa24457e94a8733e775f49cfec04accc527fdcc2aa411e34394ca90f3461",
+    "measure.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "operation_cpu_json.hpp": "4133b588fc0a2f3c3d4bed2ac95cb8f29c440754c877957db041e7bc868b6e8e",
+    "postrun.json": "f29731124a420c7cf8cea56586953082ca099b62aabedcf698b17af115c58fa4",
+    "prebuild.json": "91c827c6c66ea81efda6d2870e3a4af91081a05c04f203501d4fbb50cfd77273",
+    "process_cpu_json.hpp": "f4d8841c9a997b2221248e6b3f69dcbf08ed89dc55af06ad570feb973d619f46",
+    "records.json": "07f2838b48e09ef7aa65957c6e5d63e14d3f9c87e84994b623a9989b2cd0a8e1",
+    "smoke.jsonl": "fb413f5469b1fc9ce66cb287b210f267f3b09b1f384152e1c3c666a2a777d9ba",
+    "smoke.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "summary.csv": "9dfa9c2ba849df5e88dbe373236553c543aa6910a3f1b3757c7df70d5fc27242",
+    "two-control-example.html": "87b0cf5edae9e53fdf50c31c12e80dc340a29a8a8d24cd8af36b0b14b3662400",
+    "two_parameter_driver.cpp": "f4237382450247d97fabf6462c29e6ef66467c66da74f89f0150d312e52434c7"
+  },
+  "report_id": "ext07-hybrid-two-parameter-9732c471bf065c33",
+  "schema": "csl.ext07-hybrid-two-parameter-manifest/1",
+  "source_commit": "66653dae21ca2fc28ef3b86b3199d36e4826d5bc"
+}

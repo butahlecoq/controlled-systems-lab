@@ -67,6 +67,20 @@ branch CPU remains a distinct scope. Both are descriptive one- and two-stage
 profiles, not a controlled comparison. Their live Pages URLs, 2D examples, and
 ZIP hashes are recorded in [published algorithm results](published-algorithm-results.md#ext-07-hybrid-profile-report).
 
+Schema `/4` adds wall and process-CPU observations around the synchronous
+`BoundWorkspace::run` invocation. The [one-step report](../../reports/algorithm-results/ext07-hybrid-9d4034480963bb5e/)
+records 140 calls (median wall 183,335 ns; median process CPU 187,296 ns).
+The [two-stage report](../../reports/algorithm-results/ext07-hybrid-two-parameter-9732c471bf065c33/)
+records 140 calls per path: `enter-half` median wall/process CPU 223,912 /
+227,797 ns, and `enter-full` 196,883 / 200,856 ns. Both report zero failures
+and zero unavailable invocation CPU readings. These values sum CPU across all
+process threads, include clock sampling, and may include unrelated work in the
+same process. They do not isolate provider CPU, measure heap use, enforce
+provider memory/CPU limits, or establish a performance comparison. Both reports
+use source commit `66653dae21ca2fc28ef3b86b3199d36e4826d5bc`; schema-1 through
+schema-3 records remain unchanged. Bundle and Pages hashes are recorded in
+[published algorithm results](published-algorithm-results.md#ext-07-hybrid-profile-report).
+
 ## Independent-oracle test profiles
 
 The unit suite adds exact H-relation and optimal-family checks beyond the two

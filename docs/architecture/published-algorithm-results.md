@@ -204,6 +204,26 @@ branch values remain separate. This is instrumentation evidence; it does not
 claim a provider bottleneck or compare algorithms. Historical `/1` and `/2`
 bundles and rendered bytes remain unchanged.
 
+Schema `/4` adds a wall-time and process-CPU interval around the synchronous
+`BoundWorkspace::run` call. Both Release bundles use source commit
+`66653dae21ca2fc28ef3b86b3199d36e4826d5bc`, an excluded 10-call warmup, and
+seven measured 20-call batches. The [one-step bundle](../../reports/algorithm-results/ext07-hybrid-9d4034480963bb5e/)
+has 140 successful calls; median invocation wall/process CPU is 183,335 /
+187,296 ns. The [two-parameter bundle](../../reports/algorithm-results/ext07-hybrid-two-parameter-9732c471bf065c33/)
+has 140 successful calls per path: `enter-half` median wall/process CPU is
+223,912 / 227,797 ns, and `enter-full` is 196,883 / 200,856 ns. Process CPU
+sums all process threads, includes clock sampling, and may include unrelated
+concurrent work. These are descriptive observations; they do not isolate
+provider CPU, measure heap use, enforce per-provider resources, or compare
+performance. Historical schema `/1` through `/3` bundles are unchanged.
+
+The saved bundle index/ZIP SHA-256 values are `e5ed72c799c2989b9effc17a1904596fddfee25bc4c02da6091e21d15c7e7ecd` /
+`6213a598609f67766eeebe9d0a20c03baa470f9c76fdddb93f8238ef6fe79c90` for the
+one-step report and `eab2605004e7bb00ff39196820c90dd3cee53784d624d31c3e12aefd1e2bf3e4` /
+`131517a89d69ce6d35c12339fb54e0ed8b0eead99a8b094bc2ce34710fd9e059` for the
+two-parameter report. The bundle records and offline ZIPs are saved; Pages
+publication and live-byte verification remain pending the main-only workflow.
+
 ## EXT-02 finite/mixed branch portfolio report
 
 The saved [EXT-02 analytic portfolio bundle](../../reports/algorithm-results/ext02-two-state-mixed-v1/)
