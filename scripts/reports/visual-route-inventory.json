@@ -2710,6 +2710,16 @@
       "companion_route": "examples/ext07-two-control-family-v1.html"
     },
     {
+      "route": "ext07-hybrid-two-parameter-336c1476ce078d8f",
+      "source_bundle": "ext07-hybrid-two-parameter-336c1476ce078d8f",
+      "assets": [
+        "feasible-polygons.svg"
+      ],
+      "index_sha256": "5dcd1645b43fdb5981c084af8fc3450f3fe166ee06cb4d9f6ef3870890b3ea3b",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
       "route": "ext07-hybrid-two-parameter-6f2799c9acfcc5f2",
       "source_bundle": "ext07-hybrid-two-parameter-6f2799c9acfcc5f2",
       "assets": [

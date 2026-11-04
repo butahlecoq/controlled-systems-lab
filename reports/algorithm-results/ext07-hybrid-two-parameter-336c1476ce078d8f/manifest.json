@@ -1,0 +1,27 @@
+{
+  "files": {
+    "CMakeCXXCompiler.raw.cmake": "fc54f5e431c04fbe157752a68b26b3f49e29f913e0188f9334e2c610971c68b3",
+    "build.log": "8eb1957c7169232e45ac47302889ec5be9d91e253e0c34be4adab4ad121e381a",
+    "capacity.jsonl": "25c783aaa4577bf9297e23ac7a001772f5b1f454153910ab896c699b8ba1d8f0",
+    "capacity.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "configure.log": "721d3e59c7d72e3fcc30e2f1cae33d922bfb9d0a856578294e79d6a228e7a916",
+    "feasible-polygons.svg": "84035d5c550f608a0105658b1136ac4e2327e18081cbfe47bf1e1b81b4cb79e2",
+    "host.json": "784cb1a9ab51348f39bdb7428ecd22a633e53f6f4d3e8d3e9bae0f423172a8c5",
+    "index.html": "5dcd1645b43fdb5981c084af8fc3450f3fe166ee06cb4d9f6ef3870890b3ea3b",
+    "measure.jsonl": "c54699d7501b4a40d79ac96de6aa702e5c54de7e77574c1d729ae4c3914ecfe3",
+    "measure.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "operation_cpu_json.hpp": "4133b588fc0a2f3c3d4bed2ac95cb8f29c440754c877957db041e7bc868b6e8e",
+    "postrun.json": "da1ab863a598074519b5072ba3ed9cfc58f79d5df0ef63217f3bc9b13f050ba3",
+    "prebuild.json": "4b897132f6d3061e889baf74c9b744a2cad31ab261b8ff18dc96fae235d0b714",
+    "process_cpu_json.hpp": "f4d8841c9a997b2221248e6b3f69dcbf08ed89dc55af06ad570feb973d619f46",
+    "records.json": "80b30add86b38a2a55d6316829704eeec317638f6fd9a9f91089d0e4186dfddb",
+    "smoke.jsonl": "ee73f6f21402f807395d0f1379716ee9868cca5cc4aab3b53711e96a8e1549d8",
+    "smoke.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "summary.csv": "5fa5ab4025e54c4eb1d9889917ec99cdb87a037f01783a5e9ee71b8b1642a1fc",
+    "two-control-example.html": "8a3e33d0aa5ab2375f9d345bbe10bbc1f4eb1afc0cee6da5ab004202564595c9",
+    "two_parameter_driver.cpp": "85ffbff279b3763b6eac66a70d0cb9fb31b48ce37453e5ba90d9416439b679b2"
+  },
+  "report_id": "ext07-hybrid-two-parameter-336c1476ce078d8f",
+  "schema": "csl.ext07-hybrid-two-parameter-manifest/1",
+  "source_commit": "fd3946c3bb346f9f1dac7d71bb80335ac5355730"
+}
