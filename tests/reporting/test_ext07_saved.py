@@ -78,6 +78,25 @@ class Ext07SavedReportTests(unittest.TestCase):
             {"schema": "csl.ext07-hybrid-profile-report/2"}), collect.PROCESS_CPU_SOURCE_FILES)
         self.assertEqual(collect.source_files_for_record(
             {"schema": "csl.ext07-hybrid-profile-report/3"}), collect.SOURCE_FILES)
+        self.assertEqual(collect.source_files_for_record(
+            {"schema": "csl.ext07-hybrid-profile-report/4"}), collect.SOURCE_FILES)
+
+    def test_provider_invocation_records_validate_and_summarize_separate_scope(self) -> None:
+        row = {"provider_invocation_observations": [[
+            {"elapsed_wall_nanoseconds": 12,
+             "process_cpu": {"status": "observed", "nanoseconds": 9}},
+            {"elapsed_wall_nanoseconds": 20,
+             "process_cpu": {"status": "observed", "nanoseconds": 16}},
+        ]]}
+        self.assertIsNone(collect.validate_provider_invocation_observations(row, 1, 2))
+        summary = collect.provider_invocation_summary([row], ["left", "right"])
+        self.assertEqual(summary["branches"][0]["wall_median_nanoseconds"], 12)
+        self.assertEqual(summary["branches"][0]["process_cpu"]["median_nanoseconds"], 9)
+        self.assertEqual(summary["branches"][1]["wall_median_nanoseconds"], 20)
+        self.assertIn("unrelated concurrent", summary["scope"])
+        row["provider_invocation_observations"][0][0]["elapsed_wall_nanoseconds"] = True
+        with self.assertRaises(ValueError):
+            collect.validate_provider_invocation_observations(row, 1, 2)
 
     def test_stager_copies_only_the_validated_bundle_and_adds_links(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

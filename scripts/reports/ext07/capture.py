@@ -30,14 +30,18 @@ def receipt(source: Path, commit: str, phase: str) -> dict:
     return value
 
 
-def run(command: list[str], source: Path, output: Path, env: dict[str, str]) -> None:
+def run(command: list[str], source: Path, output: Path, env: dict[str, str],
+        private_paths: tuple[tuple[Path, str], ...] = ()) -> None:
     result = subprocess.run(command, cwd=source, env=env, capture_output=True)
     # Keep diagnostics when a build or run fails so the failed attempt is not lost.
     raw = result.stdout + result.stderr
     raw_path = output.with_suffix(output.suffix + ".raw")
     raw_path.write_bytes(raw)
     redacted = raw
-    for private_path, label in ((source, b"<SOURCE>"), (output.parent, b"<CAPTURE>")):
+    redactions = ((path, label.encode()) for path, label in private_paths)
+    for private_path, label in (*redactions,
+                                (source, b"<SOURCE>"),
+                                (output.parent, b"<CAPTURE>")):
         text = str(private_path).encode()
         redacted = redacted.replace(text, label).replace(text.replace(b"\\", b"/"), label)
     output.write_bytes(redacted)

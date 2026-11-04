@@ -78,6 +78,16 @@ This CPU scope covers only the synchronous composing thread; helper-thread CPU
 is excluded, and the clock reads add measurement overhead. Schemas `/1` and
 `/2` remain readable with their original rendered bytes.
 
+Schema `/4` captures also record wall and process CPU immediately around the
+synchronous `BoundWorkspace::run` provider invocation. Process CPU sums all
+process threads and may include helper or unrelated work; it is not provider-
+only attribution. It does not measure heap use or enforce a resource limit.
+Historical schema `/1` through `/3` bundles and rendered bytes are unchanged.
+The two-parameter capture may reuse a separate build tree with `--build-dir`;
+its configure and build logs redact that path, and its saved capture retains a
+copy of the executable. When the default capture-local build tree is used, the
+driver records that executable in place.
+
 ```sh
 python scripts/reports/ext07/two_parameter_capture.py --source <frozen-source> --capture <fresh-capture> --commit <source-commit> --cmake <cmake-executable>
 python scripts/reports/ext07/two_parameter_collect.py --capture <fresh-capture> --source <frozen-source> --out reports/algorithm-results

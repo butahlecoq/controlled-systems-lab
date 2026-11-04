@@ -1,6 +1,7 @@
 #pragma once
 
 #include <csl/synthesis/hybrid_path_program.hpp>
+#include <optional>
 #include <ostream>
 
 namespace csl::reports::ext07 {
@@ -19,5 +20,17 @@ inline void write_process_cpu_observation(std::ostream& output,
     case synthesis::ProcessCpuUnavailable::Reason::clock_regressed: name="clock_regressed"; break;
     }
     output << "{\"status\":\"unavailable\",\"reason\":\"" << name << "\"}";
+}
+
+inline void write_provider_invocation_observation(std::ostream& output,
+    const std::optional<synthesis::HybridBranchExecution::ProviderInvocationObservation>& observation) {
+    if(!observation) {
+        output << "null";
+        return;
+    }
+    output << "{\"elapsed_wall_nanoseconds\":" << observation->elapsed_wall_nanoseconds
+        << ",\"process_cpu\":";
+    write_process_cpu_observation(output,observation->process_cpu);
+    output << '}';
 }
 }

@@ -34,7 +34,8 @@ def validate(bundle: Path) -> dict:
     schema = record.get("schema")
     require(schema in {"csl.ext07-hybrid-two-parameter-report/1",
                        "csl.ext07-hybrid-two-parameter-report/2",
-                       "csl.ext07-hybrid-two-parameter-report/3"} and
+                       "csl.ext07-hybrid-two-parameter-report/3",
+                       "csl.ext07-hybrid-two-parameter-report/4"} and
             record.get("report_id") == bundle.name == expected_id,
             "Two-parameter report identity differs")
     for name in collect.source_files_for_record(record):
@@ -52,12 +53,13 @@ def validate(bundle: Path) -> dict:
             "Two-parameter source receipts differ")
     smoke = collect.jsonl(bundle / "smoke.jsonl", 1)
     measure = collect.jsonl(bundle / "measure.jsonl", 8)
-    has_process_cpu = schema.endswith(("/2", "/3"))
-    has_operation_cpu = schema.endswith("/3")
-    collect.validate_run(smoke[0], "smoke", 0, 1, has_process_cpu, has_operation_cpu)
-    collect.validate_run(measure[0], "warmup", 0, 10, has_process_cpu, has_operation_cpu)
+    has_provider_invocation = schema.endswith("/4")
+    has_process_cpu = schema.endswith(("/2", "/3", "/4"))
+    has_operation_cpu = schema.endswith(("/3", "/4"))
+    collect.validate_run(smoke[0], "smoke", 0, 1, has_process_cpu, has_operation_cpu, has_provider_invocation)
+    collect.validate_run(measure[0], "warmup", 0, 10, has_process_cpu, has_operation_cpu, has_provider_invocation)
     for repetition, row in enumerate(measure[1:]):
-        collect.validate_run(row, "trial", repetition, 20, has_process_cpu, has_operation_cpu)
+        collect.validate_run(row, "trial", repetition, 20, has_process_cpu, has_operation_cpu, has_provider_invocation)
     trials = measure[1:]
     measurement = record["measurement"]
     require(measurement["trials"] == trials and measurement["warmup"] == measure[0] and
@@ -73,7 +75,7 @@ def validate(bundle: Path) -> dict:
             measurement["max_batch_end_to_end_ns"] == max(totals) and
             measurement["median_call_ns"] == int(statistics.median(call_times)),
             "Two-parameter summary timings differ from raw calls")
-    if schema.endswith(("/2", "/3")):
+    if schema.endswith(("/2", "/3", "/4")):
         require(measurement["process_cpu"] ==
                 collect.common.process_cpu_summary(trials, collect.EXPECTED_PATHS),
                 "Two-parameter process CPU summary differs from raw observations")
@@ -81,6 +83,10 @@ def validate(bundle: Path) -> dict:
         require(measurement["operation_thread_cpu"] ==
                 collect.common.operation_cpu_summary(trials),
                 "Two-parameter operation thread CPU summary differs from raw observations")
+    if has_provider_invocation:
+        require(measurement["provider_invocation"] ==
+                collect.common.provider_invocation_summary(trials, collect.EXPECTED_PATHS),
+                "Two-parameter provider invocation summary differs from raw observations")
     return record
 
 
@@ -108,20 +114,26 @@ def summary_csv(record: dict) -> bytes:
     header = ["repetition", "calls", "failures", "paths", "relation_rows",
                      "relation_matrix_elements", "end_to_end_total_ns",
                      "minimum_call_ns", "maximum_call_ns", "provider", "verifier"]
-    if record["schema"].endswith(("/2", "/3")):
+    if record["schema"].endswith(("/2", "/3", "/4")):
         for path in collect.EXPECTED_PATHS:
             header.extend([f"process_cpu_{path}_min_ns", f"process_cpu_{path}_median_ns",
                            f"process_cpu_{path}_max_ns", f"process_cpu_{path}_unavailable"])
-    if record["schema"].endswith("/3"):
+    if record["schema"].endswith(("/3", "/4")):
         header.extend(["operation_thread_cpu_min_ns", "operation_thread_cpu_median_ns",
                        "operation_thread_cpu_max_ns", "operation_thread_cpu_unavailable"])
+    if record["schema"].endswith("/4"):
+        for path in collect.EXPECTED_PATHS:
+            header.extend([f"provider_wall_{path}_min_ns", f"provider_wall_{path}_median_ns",
+                           f"provider_wall_{path}_max_ns", f"provider_cpu_{path}_min_ns",
+                           f"provider_cpu_{path}_median_ns", f"provider_cpu_{path}_max_ns",
+                           f"provider_cpu_{path}_unavailable"])
     writer.writerow(header)
     for row in record["measurement"]["trials"]:
         values = [row["repetition"], row["calls"], row["failures"], row["paths"],
                          row["relation_rows"], row["relation_matrix_elements"],
                          row["end_to_end_total_ns"], min(row["call_durations_ns"]),
                          max(row["call_durations_ns"]), row["provider"], row["verifier"]]
-        if record["schema"].endswith(("/2", "/3")):
+        if record["schema"].endswith(("/2", "/3", "/4")):
             for index in range(len(collect.EXPECTED_PATHS)):
                 observed = [call[index]["nanoseconds"]
                             for call in row["process_cpu_observations"]
@@ -131,8 +143,10 @@ def summary_csv(record: dict) -> bytes:
                 values.extend([min(observed) if observed else "",
                                int(statistics.median(observed)) if observed else "",
                                max(observed) if observed else "", unavailable])
-        if record["schema"].endswith("/3"):
+        if record["schema"].endswith(("/3", "/4")):
             values.extend(_operation_cpu_trial_summary(row))
+        if record["schema"].endswith("/4"):
+            values.extend(_provider_invocation_trial_summary(row))
         writer.writerow(values)
     return output.getvalue().encode()
 
@@ -147,6 +161,20 @@ def _operation_cpu_trial_summary(row: dict) -> list[object]:
                       for path in call for operation in path)
     return [min(values) if values else "", int(statistics.median(values)) if values else "",
             max(values) if values else "", unavailable]
+
+
+def _provider_invocation_trial_summary(row: dict) -> list[object]:
+    values = []
+    for index in range(len(collect.EXPECTED_PATHS)):
+        invocations = [call[index] for call in row["provider_invocation_observations"]]
+        wall = [value["elapsed_wall_nanoseconds"] for value in invocations]
+        cpu = [value["process_cpu"]["nanoseconds"] for value in invocations
+               if value["process_cpu"]["status"] == "observed"]
+        unavailable = sum(value["process_cpu"]["status"] == "unavailable" for value in invocations)
+        values.extend([min(wall), int(statistics.median(wall)), max(wall),
+                       min(cpu) if cpu else "", int(statistics.median(cpu)) if cpu else "",
+                       max(cpu) if cpu else "", unavailable])
+    return values
 
 
 def example_page(record: dict) -> bytes:
@@ -175,7 +203,7 @@ def index_page(record: dict) -> bytes:
                     "workspace creation and solver execution. They are process-scoped, not "
                     "provider-only, and unrelated concurrent work may contribute. Heap use "
                     "remains unmeasured.</p>")
-    if record["schema"].endswith("/3"):
+    if record["schema"].endswith(("/3", "/4")):
         cpu_note = (" <p>Per-branch process CPU sums all process threads. Per-operation CPU is "
                     "measured on the synchronous composing thread and excludes helper-thread CPU; "
                     "both scopes and unavailable readings are retained in the raw records.</p>")
@@ -197,6 +225,24 @@ def index_page(record: dict) -> bytes:
         cpu_note += ('<table><thead><tr><th>Operation</th><th>Median CPU (ns)</th>'
                      '<th>Observed calls</th><th>Unavailable</th><th>Unavailable reasons</th>'
                      '</tr></thead><tbody>' + "".join(operation_rows) + "</tbody></table>")
+    if record["schema"].endswith("/4"):
+        invocation_rows = []
+        for item in measurement["provider_invocation"]["branches"]:
+            cpu = item["process_cpu"]
+            cpu_median = (f"{cpu['median_nanoseconds']:,}"
+                          if cpu["observed_calls"] else "unavailable")
+            invocation_rows.append(
+                f"<tr><td>{html.escape(item['path'])}</td>"
+                f"<td>{item['wall_median_nanoseconds']:,}</td>"
+                f"<td>{cpu_median}</td><td>{item['observed_calls']}</td>"
+                f"<td>{cpu['unavailable_calls']}</td></tr>")
+        cpu_note += ('<p>Provider invocation wall time covers synchronous execution. The accompanying '
+                     'process CPU sums all process threads, includes clock sampling, and may include helper threads or unrelated '
+                     'concurrent work; it is not provider-only CPU. Memory remains unmeasured.</p>'
+                     '<table><thead><tr><th>Path</th><th>Median invocation wall (ns)</th>'
+                     '<th>Median invocation process CPU (ns)</th><th>Observed calls</th>'
+                     '<th>CPU unavailable</th></tr></thead><tbody>' +
+                     "".join(invocation_rows) + "</tbody></table>")
     trials = "".join(
         f"<tr><td>{row['repetition']}</td><td>{row['calls']}</td>"
         f"<td>{row['end_to_end_total_ns']:,}</td><td>0</td></tr>"

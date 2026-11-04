@@ -144,6 +144,7 @@ struct Observation {
   std::string coverage;
   std::vector<std::string> edge_paths;
   std::vector<synthesis::ProcessCpuObservation> branch_process_cpu;
+  std::vector<std::optional<synthesis::HybridBranchExecution::ProviderInvocationObservation>> provider_invocations;
   std::vector<std::vector<HybridRelationOperationRecord>> operation_records;
 };
 
@@ -168,6 +169,7 @@ Observation run_once() {
     throw std::runtime_error("Both hybrid LP branches must complete");
   for (const auto &branch : execution.branches) {
     observation.branch_process_cpu.push_back(branch.process_cpu);
+    observation.provider_invocations.push_back(branch.provider_invocation);
     if (!branch.result || !branch.result->primal ||
         branch.result->primal->size() != 7 ||
         branch.outcome != MathematicalOutcome::optimal ||
@@ -255,6 +257,7 @@ void batch(const char *phase, std::size_t repetition, std::size_t calls) {
   std::string last_error;
   std::vector<std::uint64_t> durations;
   std::vector<std::vector<synthesis::ProcessCpuObservation>> process_cpu_observations;
+  std::vector<std::vector<std::optional<synthesis::HybridBranchExecution::ProviderInvocationObservation>>> provider_invocation_observations;
   std::vector<std::vector<std::vector<HybridRelationOperationRecord>>> operation_observations;
   for (std::size_t i = 0; i < calls; ++i) {
     try {
@@ -262,12 +265,14 @@ void batch(const char *phase, std::size_t repetition, std::size_t calls) {
       total += last.total_ns;
       durations.push_back(last.total_ns);
       process_cpu_observations.push_back(last.branch_process_cpu);
+      provider_invocation_observations.push_back(last.provider_invocations);
       operation_observations.push_back(last.operation_records);
     } catch (const std::exception &exception) {
       ++failures;
       last_error = exception.what();
       durations.push_back(0);
       process_cpu_observations.emplace_back();
+      provider_invocation_observations.emplace_back();
       operation_observations.emplace_back();
     }
   }
@@ -300,6 +305,17 @@ void batch(const char *phase, std::size_t repetition, std::size_t calls) {
       if(branch) std::cout << ',';
       reports::ext07::write_process_cpu_observation(
           std::cout,process_cpu_observations[call][branch]);
+    }
+    std::cout << ']';
+  }
+  std::cout << "],\"provider_invocation_observations\":[";
+  for(std::size_t call=0;call<provider_invocation_observations.size();++call) {
+    if(call) std::cout << ',';
+    std::cout << '[';
+    for(std::size_t branch=0;branch<provider_invocation_observations[call].size();++branch) {
+      if(branch) std::cout << ',';
+      reports::ext07::write_provider_invocation_observation(
+          std::cout,provider_invocation_observations[call][branch]);
     }
     std::cout << ']';
   }

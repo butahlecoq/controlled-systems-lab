@@ -289,6 +289,16 @@ struct HybridBranchExecution {
     // Process CPU accumulated across all process threads during workspace
     // creation and branch execution. Concurrent process work may contribute.
     ProcessCpuObservation process_cpu{ProcessCpuUnavailable{}};
+    struct ProviderInvocationObservation {
+        std::uint64_t elapsed_wall_nanoseconds{};
+        // Process CPU accumulated across all process threads during the
+        // synchronous provider invocation. Clock reads and concurrent process
+        // work may contribute; this is not provider-only CPU attribution.
+        ProcessCpuObservation process_cpu{ProcessCpuUnavailable{}};
+    };
+    // Narrower interval around BoundWorkspace::run than the aggregate branch
+    // interval above. Missing means provider execution was not invoked.
+    std::optional<ProviderInvocationObservation> provider_invocation;
 };
 
 struct HybridPortfolioExecution;
