@@ -155,3 +155,11 @@ path inventories; the current evidence makes no general scalability claim. The
 two saved-report routes and their manifest-listed files and ZIPs were verified
 against the live main-only Pages site; details are recorded in
 [published algorithm results](published-algorithm-results.md#ext-07-hybrid-profile-report).
+
+The [2026-11-04 admission/enumeration profile](../research/ext07-capability-profile.md#bounded-admission-and-path-count-sweep-2026-11-04)
+adds seven-repeat Release measurements for ten fixtures spanning state/control
+dimensions 1–8, horizons 1–8, mode/edge catalogues up to 8/8, and complete path
+counts up to 256. Its timed region is limited to model-profile validation and
+complete path enumeration. It does not profile relation composition, providers,
+or verifiers; it is a first measured slice, not a bound on the full system's
+supported capability.

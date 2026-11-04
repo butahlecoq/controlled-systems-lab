@@ -93,3 +93,22 @@ Heap use remains unmeasured, and requested resource limits are not enforced by
 these records. Those limits keep the issue open. See the
 [implementation capability profile](../architecture/hybrid-capability-profile.md)
 for supported dimensions, counts, and remaining capability work.
+
+## Bounded admission and path-count sweep (2026-11-04)
+
+The new [capability scale profile](../../reports/algorithm-results/ext07-capability-scale-3d8fdf8589b7194f/README.md)
+measures the request capability report itself across ten fixtures. It varies
+state/control dimension from 1 to 8, horizon from 1 to 8, mode/edge catalogue
+size from 2/2 to 8/8, and complete path count from 1 to 256. Each fixture has
+seven measured batches of 1,000 calls after an excluded warmup; the collector
+checks all 70 records before summarizing them.
+
+The largest tested path inventory (256 paths, horizon 8, two modes, two
+parallel choices from each mode, four edges total) has a median
+capability-report duration of 110,408 ns per call (range 108,482–111,802 ns).
+A one-path case with the same state dimension,
+horizon, and mode count has median 5,619 ns. These numbers cover model admission
+and complete path enumeration only. They do not measure relation construction,
+optimization, verification, provider resources, or memory, and establish no
+general limit or scalability guarantee. This is an initial capability profile;
+larger fixtures and operation-level resource limits remain open under #156.
