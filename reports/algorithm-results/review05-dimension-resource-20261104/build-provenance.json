@@ -1,0 +1,16 @@
+{
+  "schema": "csl.review05.build-provenance/1",
+  "source_revision": "2d5dd1afeb4e52a1f0cc79fbadb5ef29625e3f3f",
+  "source_worktree_dirty": false,
+  "build_type": "Release",
+  "generator": "Ninja",
+  "cmake_version": "cmake version 3.31.6",
+  "ninja_version": "1.13.2",
+  "cxx_compiler": "c++ (GCC) 16.2.1 20260810",
+  "configure_command": "cmake -S benchmarks/reporting/review05 -B <BUILD_DIR> -DCSL_SOURCE_ROOT=<SOURCE_ROOT> -DCMAKE_BUILD_TYPE=Release -G Ninja",
+  "build_command": "ninja -C <BUILD_DIR> -j4 csl_review05_dimension_ladder",
+  "binary_sha256": "676acda839c74b77b93e72e16fbbf6f44e735eaf829eda8da3431bf30dd948ca",
+  "warnings": [
+    "The Release target completed successfully."
+  ]
+}
