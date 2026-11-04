@@ -109,7 +109,10 @@ def stage(catalog: Path, site_dir: Path) -> str:
         elif report_id.startswith("ext07-hybrid-two-parameter-"):
             prefix = "ext07-hybrid-two-parameter-"
             example = "two-control-example.html"
-            label = "EXT-07 " + entry["verifier_id"] + "; 140 measured calls"
+            label = ("EXT-07 exact-H solver capacity; 350 calls, up to 16 tied paths"
+                     if entry.get("schema") ==
+                     "csl.ext07-hybrid-two-parameter-report/5" else
+                     "EXT-07 " + entry["verifier_id"] + "; 140 measured calls")
             example_label = "2D example"
         else:
             prefix = "ext07-hybrid-"
