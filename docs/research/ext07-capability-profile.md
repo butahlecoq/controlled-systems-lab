@@ -96,7 +96,7 @@ for supported dimensions, counts, and remaining capability work.
 
 ## Bounded admission and path-count sweep (2026-11-04)
 
-The new [capability scale profile](../../reports/algorithm-results/ext07-capability-scale-925d2910a9a3080d/README.md)
+The new [capability scale profile](../../reports/algorithm-results/ext07-capability-scale-37e05ea5c0fdcecf/README.md)
 measures the request capability report itself across ten fixtures. It varies
 state/control dimension from 1 to 8, horizon from 1 to 8, mode/edge catalogue
 size from 2/2 to 8/8, and complete path count from 1 to 256. Each fixture has
@@ -104,9 +104,9 @@ seven measured batches of 1,000 calls after an excluded warmup; the collector
 checks all 70 records before summarizing them.
 
 The largest tested path inventory (256 paths, horizon 8, two modes, four
-parallel edges) has a median capability-report duration of 109,406 ns per call
-(range 107,245–110,662 ns). A one-path case with the same state dimension,
-horizon, and mode count has median 5,694 ns. These numbers cover model admission
+parallel edges) has a median capability-report duration of 112,360 ns per call
+(range 111,027–127,369 ns). A one-path case with the same state dimension,
+horizon, and mode count has median 5,652 ns. These numbers cover model admission
 and complete path enumeration only. They do not measure relation construction,
 optimization, verification, provider resources, or memory, and establish no
 general limit or scalability guarantee. This is an initial capability profile;

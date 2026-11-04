@@ -1,0 +1,17 @@
+{
+  "files": {
+    "README.md": "9e4ecda70bc6405b04dc8e00b9a426080f41568a00e4b17e725d77a8be306bbc",
+    "build.log": "4f9f0f2d22a7e3914351b21ebe7d1d05b198c80bda6f7516eeca3f9246abf77d",
+    "configure.log": "1d13dc81f0b48c348b8923306bbfc4183a57a9157a553dbaafd8d62f5761c703",
+    "host.json": "e376dcce17d6f926ef06ef1bdbaf53e4dadfe9a44dc8d0d3f66215501350680a",
+    "measure.jsonl": "37e05ea5c0fdcecf95325095820f186b07521483bed105631baebc3476c5e3f2",
+    "postrun.json": "bb3a31173767bbb54fdb89e91db7216fe37f33ba4ec2da3e20d56b5ee0d9bb9a",
+    "prebuild.json": "8e5fd60667a9dfb0abe18de79580f169343ef4ac455381a4a1d3466139de8dc8",
+    "summary.csv": "315d7429045c5e4a28e73dc35f4178a2f2c304e110933558769534e3620e6124",
+    "summary.json": "2468dda1de35e7413f67d9d82d31b6c423c51ee9d9dcd64340022a973e10717d"
+  },
+  "raw_measurement_sha256": "37e05ea5c0fdcecf95325095820f186b07521483bed105631baebc3476c5e3f2",
+  "report_id": "ext07-capability-scale-37e05ea5c0fdcecf",
+  "schema": "csl.ext07-capability-profile/1",
+  "source_commit": "41883fdca2f15aad3d05808894a64b4ab0a4195d"
+}
