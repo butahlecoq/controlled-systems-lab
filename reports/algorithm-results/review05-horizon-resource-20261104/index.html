@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HORIZON-01 scalar horizon pilot</title>
+<style>
+:root{color-scheme:light dark;font:16px/1.55 system-ui,sans-serif}body{max-width:1080px;margin:2rem auto;padding:0 1rem}
+h1,h2{line-height:1.2}.scope{border-left:5px solid #b57900;padding:.75rem 1rem;background:color-mix(in srgb,#b57900 12%,transparent)}
+table{border-collapse:collapse;width:100%;margin:1rem 0}th,td{border:1px solid #888;padding:.55rem;text-align:left}th{background:color-mix(in srgb,#888 18%,transparent)}
+code{overflow-wrap:anywhere}.counts{display:flex;gap:1rem;flex-wrap:wrap}.counts span{padding:.4rem .7rem;border:1px solid #888;border-radius:.4rem}
+</style></head><body>
+<h1>HORIZON-01: scalar integrator horizon pilot</h1>
+<p>This report records a synthetic scalar integrator run at horizons 2, 4, and 8.
+Each horizon has one excluded warmup pair and six measured alternating pairs. The timed interval is
+<code>SynthesisWorkspace::run()</code>; process launch and setup are excluded.</p>
+<p class="scope"><strong>Evidence limit:</strong> Each relation passed the fixture-specific exact analytic oracle, and timing rows below include only the six matched pairs where both strategies passed.
+These are descriptive timings, not a performance ranking, speedup, general completeness, or complexity claim.</p>
+<h2>Results</h2>
+<table><thead><tr><th scope="col">Horizon</th><th scope="col">Reach-back median†</th><th scope="col">Reach-back range†</th>
+<th scope="col">Strategy B median†</th><th scope="col">Strategy B range†</th><th scope="col">Verified attempts</th><th scope="col">Verified pairs</th></tr></thead>
+<tbody><tr><th scope="row">T=2</th><td>5.453 ms</td><td>5.189 ms – 12.555 ms</td><td>0.689 ms</td><td>0.659 ms – 0.915 ms</td><td>12/12</td><td>6/6</td></tr><tr><th scope="row">T=4</th><td>11.117 ms</td><td>10.910 ms – 11.809 ms</td><td>0.703 ms</td><td>0.676 ms – 1.655 ms</td><td>12/12</td><td>6/6</td></tr><tr><th scope="row">T=8</th><td>29.215 ms</td><td>23.063 ms – 30.389 ms</td><td>0.763 ms</td><td>0.749 ms – 0.878 ms</td><td>12/12</td><td>6/6</td></tr></tbody></table>
+<p>† Median and range use only matched, independently verified measured pairs; inconclusive and failed outcomes are retained but excluded from timing summaries. Raw records are available in <a href="attempts.jsonl">attempts.jsonl</a>;
+independent result checks are in <a href="checks.jsonl">checks.jsonl</a>, with per-horizon details in <a href="summary.json">summary.json</a>.</p>
+<h2>Representation and output growth</h2>
+<p>The scalar state/control dimensions stay fixed while the horizon grows. The relation coordinate count, H-row counts, and nonzero H coefficients are counted from each emitted candidate relation after its independent check. These counts do not measure allocated bytes.</p>
+<table><thead><tr><th scope="col">Horizon</th><th scope="col">Strategy</th><th scope="col">Joint coordinates</th><th scope="col">Inequality rows</th><th scope="col">Equality rows</th><th scope="col">Nonzero H coefficients</th></tr></thead>
+<tbody><tr><th scope="row">T=2</th><td>Reach-back</td><td>5</td><td>6</td><td>4</td><td>14</td></tr><tr><th scope="row">T=2</th><td>Strategy B</td><td>5</td><td>4</td><td>4</td><td>12</td></tr><tr><th scope="row">T=4</th><td>Reach-back</td><td>9</td><td>10</td><td>6</td><td>24</td></tr><tr><th scope="row">T=4</th><td>Strategy B</td><td>9</td><td>8</td><td>6</td><td>22</td></tr><tr><th scope="row">T=8</th><td>Reach-back</td><td>17</td><td>18</td><td>10</td><td>44</td></tr><tr><th scope="row">T=8</th><td>Strategy B</td><td>17</td><td>16</td><td>10</td><td>42</td></tr></tbody></table>
+<h2>Whole-process resource receipts</h2>
+<p>POSIX <code>wait4</code> reports user+system CPU and peak resident memory for each isolated process, including startup and setup. One warmup pair per horizon is excluded; these readings are not solver-phase allocations and are separate from the timed solver interval.</p>
+<table><thead><tr><th scope="col">Horizon</th><th scope="col">Strategy</th><th scope="col">Child CPU median (s)</th><th scope="col">Child CPU range (s)</th><th scope="col">Peak RSS median (KiB)</th></tr></thead>
+<tbody><tr><th scope="row">T=2</th><td>reach-back</td><td>0.009669</td><td>0.009351 – 0.020343</td><td>13928</td></tr><tr><th scope="row">T=2</th><td>strategy-b</td><td>0.004771</td><td>0.004682 – 0.007534</td><td>13928</td></tr><tr><th scope="row">T=4</th><td>reach-back</td><td>0.015419</td><td>0.015178 – 0.016415</td><td>13928</td></tr><tr><th scope="row">T=4</th><td>strategy-b</td><td>0.004788</td><td>0.004738 – 0.008312</td><td>13928</td></tr><tr><th scope="row">T=8</th><td>reach-back</td><td>0.037366</td><td>0.027773 – 0.038577</td><td>13928</td></tr><tr><th scope="row">T=8</th><td>strategy-b</td><td>0.005066</td><td>0.004896 – 0.006264</td><td>13928</td></tr></tbody></table>
+<p>Full per-attempt receipts: <a href="resource-summary.json">resource-summary.json</a> and <a href="attempts.jsonl">attempts.jsonl</a>.</p>
+<h2>Analytic fixture</h2>
+<pre><code>x[t+1] = x[t] + u[t], x[0] = 0, 0 &lt;= u[t] &lt;= 1; minimize x[T].</code></pre>
+<p>Because <code>x[T] = sum(u[t])</code>, the exact optimal value is 0, attained by the all-zero history.
+The checker verifies each relation includes that history, contains the initial, transition, and control-bound rows, and imposes <code>x[T] &lt;= 0</code> (or equality). Together with <code>x[T] = sum(u[t])</code> and <code>u[t] &gt;= 0</code>, these conditions force the relation to be exactly the singleton all-zero optimum for these fixtures. This is a fixture-specific independent proof; neither strategy's general candidate-family completeness is inferred.</p>
+<h2>Run environment</h2>
+<p>Host: <code>omarchy</code>; platform: <code>Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44</code>;
+architecture: <code>x86_64</code>; logical CPUs: <code>8</code>;
+physical memory: <code>8108216320 bytes</code>;
+binary SHA-256: <code>6390d476efe8c8d6897c1f383a6b3558cda1bb67ccf2c4990956230edf455417</code>; source revision: <code>45a5cae68d0962a7ad8f2a12f6fe981ec2e61916</code>.</p>
+<p>Build: Release with c++ (GCC) 16.2.1 20260810,
+CMake cmake version 3.31.6, Ninja 1.13.2.
+See <a href="build-provenance.json">build provenance</a>.</p>
+<p>Each process requested one backend thread and used one driver worker. Observed backend scheduler widths and explicit unavailable counts are in <a href="summary.json">summary.json</a>.</p>
+<p>Attempt checks: <span class="counts"><span>verified: 42</span><span>inconclusive: 0</span><span>incorrect: 0</span><span>unavailable: 0</span></span></p>
+<p>Measurement source hashes: <code>CMakeLists.txt: 2106dfebdf8998390d50607b1063f9085a74aba9f826b120e43a1ffd40332597 check_horizon_ladder.py: d7bfda0eb6fc366274e9fc1e5812f61d93d71b6dbb071714393e57be03b22ace horizon_ladder.cpp: cd1f9710e41f469c47031c1f951c9bb6e7b35b78a2b47159f53353716055a74f render_horizon_ladder.py: e7c626e7bc4a9418598635aae60041e6b11b829765b518e3f6a07018cc3c33d9 run_horizon_ladder.py: fea92424aeaa1655c1ed1e18e1089d9bf3aafc0909223c736c8d55a2681457f5 summarize_horizon_ladder.py: 721af7541c550a1d02290b9f3ec5af55217103009d5cee5111ed439315329f47 summarize_resource_ladder.py: eb02a08234bfc6ede875f4f8bb3dd8e8a3ae997f98047f8be1c15879bc9da9eb</code></p>
+<p>Fixture inputs: <a href="inputs/horizon01-t02.json">T=2</a>, <a href="inputs/horizon01-t04.json">T=4</a>,
+<a href="inputs/horizon01-t08.json">T=8</a>. See the <a href="README.md">benchmark instructions</a> for rebuild and replay commands.</p>
+</body></html>
