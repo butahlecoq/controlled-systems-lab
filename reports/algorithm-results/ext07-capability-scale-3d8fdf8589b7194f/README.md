@@ -6,7 +6,7 @@ does not compose joint relations, invoke a solver, or measure provider work.
 
 ## Run definition
 
-- Source commit: `41883fdca2f15aad3d05808894a64b4ab0a4195d`
+- Source commit: `fec792f4d595085191dab970e0e0a67281588293`
 - Source tree: `62a1813cbacab1fc4bd5af2f4b2b15b5f96aa229`
 - Configuration: CMake Release, GNU C++ 16.2.1, C++20, CMake 3.31.6
 - Native HiGHS and Qhull adapters disabled; standalone capability-report option enabled
@@ -15,8 +15,8 @@ does not compose joint relations, invoke a solver, or measure provider work.
   warmup batch and seven measured batches per fixture
 - Timing excludes fixture construction, build, and JSON serialization
 - Every timed call checks admission, completed enumeration, and a complete path
-  count; the collector verifies all 70 measured rows and the expected fixture
-  matrix
+  count; the collector verifies all 70 measured rows, path caps, fixture labels,
+  and the expected profile matrix
 
 ## Summary
 
@@ -26,20 +26,20 @@ specific capability-report function, not end-to-end hybrid solve time.
 
 | State/control dimension | Horizon | Modes | Edges | Complete paths | Median per call (ns) | Range per call (ns) |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 1 | 1 | 2 | 1 | 1 | 1,943 | 1,929–2,110 |
-| 2 | 1 | 2 | 1 | 1 | 2,134 | 2,089–2,581 |
-| 4 | 1 | 2 | 1 | 1 | 2,813 | 2,476–3,197 |
-| 8 | 1 | 2 | 1 | 1 | 3,812 | 3,719–4,834 |
-| 1 | 2 | 2 | 2 | 1 | 2,752 | 2,682–3,028 |
-| 1 | 4 | 2 | 2 | 1 | 3,818 | 3,653–4,506 |
-| 1 | 8 | 2 | 2 | 1 | 5,652 | 5,484–5,958 |
-| 1 | 4 | 4 | 4 | 1 | 6,301 | 5,836–6,695 |
-| 1 | 4 | 8 | 8 | 1 | 11,543 | 11,326–17,570 |
-| 1 | 8 | 2 | 4 | 256 | 112,360 | 111,027–127,369 |
+| 1 | 1 | 2 | 1 | 1 | 1,970 | 1,958–2,070 |
+| 2 | 1 | 2 | 1 | 1 | 2,163 | 2,137–2,195 |
+| 4 | 1 | 2 | 1 | 1 | 2,602 | 2,568–2,625 |
+| 8 | 1 | 2 | 1 | 1 | 3,864 | 3,835–4,028 |
+| 1 | 2 | 2 | 2 | 1 | 2,789 | 2,751–2,858 |
+| 1 | 4 | 2 | 2 | 1 | 3,723 | 3,674–3,829 |
+| 1 | 8 | 2 | 2 | 1 | 5,619 | 5,509–5,772 |
+| 1 | 4 | 4 | 4 | 1 | 6,001 | 5,930–6,041 |
+| 1 | 4 | 8 | 8 | 1 | 11,472 | 11,394–11,687 |
+| 1 | 8 | 2 | 4 | 256 | 110,408 | 108,482–111,802 |
 
 The single-path cases show increasing admission time as dimensions and catalog
-sizes grow. At horizon 8, the 256-path fixture takes a median 112,360 ns per
-call, compared with 5,652 ns for the one-path fixture with the same state
+sizes grow. At horizon 8, the 256-path fixture takes a median 110,408 ns per
+call, compared with 5,619 ns for the one-path fixture with the same state
 dimension, horizon, and mode count. This is an expected path-enumeration cost,
 not a solver comparison or general scaling law. Source inspection shows profile
 validation scans mode/edge data and the enumerator computes backward-reachable
@@ -63,7 +63,7 @@ scalability guarantee follows from this report.
 - `prebuild.json`, `postrun.json`: clean source-tree and executable receipts
 - `configure.log`, `build.log`: path-redacted build logs
 
-Raw measurement SHA-256: `37e05ea5c0fdcecf95325095820f186b07521483bed105631baebc3476c5e3f2`.
+Raw measurement SHA-256: `3d8fdf8589b7194f50986a3c6a8adef12abd5df3f7cc5233bfd6458abee9bbec`.
 The run was captured from the exact source commit above; the collector checks
 the full ten-fixture matrix and all seven repetitions before producing the
 summary.

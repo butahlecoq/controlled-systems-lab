@@ -1,7 +1,7 @@
 {
   "architecture": "x86_64",
   "cmake": "cmake version 3.31.6",
-  "collected_utc": "2026-11-04T03:19:55.129239+00:00",
+  "collected_utc": "2026-11-04T03:23:35.653972+00:00",
   "compiler_id": "GNU",
   "compiler_receipt": "CMakeCXXCompiler.raw.cmake",
   "compiler_version": "16.2.1",
@@ -23,10 +23,10 @@
   "processor": "",
   "profile_calls_per_batch": 1000,
   "python": "3.14.8",
-  "raw_build_log_sha256": "4f9f0f2d22a7e3914351b21ebe7d1d05b198c80bda6f7516eeca3f9246abf77d",
+  "raw_build_log_sha256": "8e14744d5f7e0455c071a86d8ac2d679c8379c19f7563c0cbbb6f3927954de5a",
   "raw_configure_log_sha256": "0e714d01bcdef38f9ed14604f62569e1c60e076efd7b0e184772f1ef371d9520",
-  "source_commit": "41883fdca2f15aad3d05808894a64b4ab0a4195d",
-  "source_tree": "62a1813cbacab1fc4bd5af2f4b2b15b5f96aa229",
+  "source_commit": "fec792f4d595085191dab970e0e0a67281588293",
+  "source_tree": "2662d36a9649a4b89522cb2224d7dd272b1185c7",
   "timing_scope": "report_hybrid_capability admission and complete path enumeration; fixture construction, build, and JSON output are excluded; no LP provider, relation composer, or optimizer is invoked",
   "warmup_batches_excluded": 1
 }
