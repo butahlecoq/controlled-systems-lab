@@ -88,7 +88,10 @@ class Ext07ResourceObservationTests(unittest.TestCase):
                 "<!doctype html><html lang=\"en\"><body><ul></ul></body></html>",
                 encoding="utf-8")
             staged = stager.stage(catalog, site)
-            self.assertEqual(staged.split(",")[-1], self.bundle.name)
+            catalog_routes = [entry["report_id"] for entry in
+                              json.loads(catalog.read_text(encoding="utf-8"))["reports"]]
+            self.assertEqual(staged.split(","), catalog_routes)
+            self.assertIn(self.bundle.name, catalog_routes)
             self.assertTrue((site / self.bundle.name / "two_parameter" /
                              "resource-observation.json").is_file())
 
