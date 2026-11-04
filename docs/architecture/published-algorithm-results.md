@@ -182,8 +182,18 @@ contains 140 successful samples per edge path: `enter-half` median 222,978 ns
 These Release captures use the pinned HiGHS build and fixed fixtures. Process
 CPU sums all process threads, so unrelated concurrent work may contribute; the
 values are not provider-only attribution, do not measure heap, and make no
-comparative performance claim. The new reports will be Pages-published by the
-main-only report workflow after merge.
+comparative performance claim. Main-only Pages publication is live at the
+[one-step report](https://butahlecoq.github.io/controlled-systems-lab/ext07-hybrid-e7bb939d854b1907/index.html)
+and the
+[two-stage report](https://butahlecoq.github.io/controlled-systems-lab/ext07-hybrid-two-parameter-bc3c6ca5f7a606ee/index.html).
+On 2026-11-03 both routes returned HTTP 200, and the live report pages and
+offline ZIPs matched their saved bundle bytes. Page/ZIP SHA-256 values are
+`78bd3abebffe4e8be9b822a785938c2a35066682dd13393ce96b0a9a1784979d` /
+`f867e72aead0ba7062d7474106d44e68f024b84ca24a1859bcf42b41d7887ca0` for the
+one-step report and
+`f12f3d57675d90f51ac358b62f6843007c98269185b07a642dac33b3eeddc7c3` /
+`4f307cba991ff33a56a36818ac7aa37e2e81847b34fb2377d5a85c4da374cd48` for the
+two-stage report.
 
 Schema `/3` extends these profiles with per-relation-operation records. Each
 record binds its operation kind, stage, mode/edge, implementation identity,
