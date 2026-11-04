@@ -5403,8 +5403,16 @@ TEST_CASE("hybrid branch execution retains a completed solver result and provena
     CHECK(report.branches[1].observed_backend_threads==3);
     CHECK(report.branches[0].provider_elapsed_wall_nanoseconds.has_value());
     CHECK(report.branches[1].provider_elapsed_wall_nanoseconds.has_value());
+    REQUIRE(report.branches[0].provider_invocation);
+    REQUIRE(report.branches[1].provider_invocation);
+    CHECK(report.branches[0].provider_invocation->elapsed_wall_nanoseconds<=
+        *report.branches[0].provider_elapsed_wall_nanoseconds);
+    CHECK(report.branches[1].provider_invocation->elapsed_wall_nanoseconds<=
+        *report.branches[1].provider_elapsed_wall_nanoseconds);
     check_process_cpu_observation(report.branches[0].process_cpu);
     check_process_cpu_observation(report.branches[1].process_cpu);
+    check_process_cpu_observation(report.branches[0].provider_invocation->process_cpu);
+    check_process_cpu_observation(report.branches[1].provider_invocation->process_cpu);
     CHECK(aggregate_observation->maximum()==5);
 }
 

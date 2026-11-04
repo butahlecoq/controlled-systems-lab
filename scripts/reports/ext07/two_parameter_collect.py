@@ -39,7 +39,8 @@ def source_files_for_record(record: dict) -> tuple[str, ...]:
         return LEGACY_SOURCE_FILES
     if record.get("schema") == "csl.ext07-hybrid-two-parameter-report/2":
         return PROCESS_CPU_SOURCE_FILES
-    require(record.get("schema") == "csl.ext07-hybrid-two-parameter-report/3",
+    require(record.get("schema") in {"csl.ext07-hybrid-two-parameter-report/3",
+                                      "csl.ext07-hybrid-two-parameter-report/4"},
             "Unsupported EXT-07 two-parameter report schema")
     return SOURCE_FILES
 EXPECTED_PROVIDER = "csl.lp.highs@1.1.0+highs.1.11.0"
@@ -52,7 +53,8 @@ EXPECTED_PATHS = ["enter-half", "enter-full"]
 
 
 def validate_run(row: dict, phase: str, repetition: int, calls: int,
-                 process_cpu: bool = True, operation_cpu: bool = False) -> None:
+                 process_cpu: bool = True, operation_cpu: bool = False,
+                 provider_invocation: bool = False) -> None:
     require(row.get("phase") == phase and row.get("repetition") == repetition and
             row.get("calls") == calls and row.get("failures") == 0 and
             row.get("status") == "passed" and row.get("paths") == 2,
@@ -70,6 +72,8 @@ def validate_run(row: dict, phase: str, repetition: int, calls: int,
         common.validate_process_cpu_observations(row, calls, len(EXPECTED_PATHS))
     if operation_cpu:
         common.validate_operation_observations(row, calls, [14, 14])
+    if provider_invocation:
+        common.validate_provider_invocation_observations(row, calls, len(EXPECTED_PATHS))
     durations = row.get("call_durations_ns")
     require(isinstance(durations, list) and len(durations) == calls and
             all(isinstance(value, int) and value > 0 for value in durations) and
@@ -102,10 +106,10 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
             "EXT-07 two-parameter driver wrote stderr")
     smoke = jsonl(capture / "smoke.jsonl", 1)
     measure = jsonl(capture / "measure.jsonl", 8)
-    validate_run(smoke[0], "smoke", 0, 1, operation_cpu=True)
-    validate_run(measure[0], "warmup", 0, 10, operation_cpu=True)
+    validate_run(smoke[0], "smoke", 0, 1, operation_cpu=True, provider_invocation=True)
+    validate_run(measure[0], "warmup", 0, 10, operation_cpu=True, provider_invocation=True)
     for repetition, row in enumerate(measure[1:]):
-        validate_run(row, "trial", repetition, 20, operation_cpu=True)
+        validate_run(row, "trial", repetition, 20, operation_cpu=True, provider_invocation=True)
     require(all(row.get("verifier") == CURRENT_VERIFIER
                 for row in (*smoke, *measure)),
             "Current two-parameter capture did not run the exact linear H verifier")
@@ -177,7 +181,7 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
                        "minimizing_face": "u0=0, 0<=u1<=1"},
     }
     unsigned = {
-        "schema": "csl.ext07-hybrid-two-parameter-report/3",
+        "schema": "csl.ext07-hybrid-two-parameter-report/4",
         "source_commit": commit,
         "source_tree": pre["tree"],
         "source_sha256": source_hashes,
@@ -211,6 +215,7 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
             "median_call_ns": int(statistics.median(
                 value for row in trials for value in row["call_durations_ns"])),
             "process_cpu": common.process_cpu_summary(trials, EXPECTED_PATHS),
+            "provider_invocation": common.provider_invocation_summary(trials, EXPECTED_PATHS),
             "operation_thread_cpu": common.operation_cpu_summary(trials),
             "comparison": "one backend and one fixed fixture; descriptive only, no comparator or speedup claim",
         },
@@ -218,6 +223,8 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
         "evidence_limits": [
             "One host, one Release configuration, and one fixed analytic two-stage fixture.",
             "The controls are independent and bounded; no higher-dimensional parameter polytope is measured.",
+            "Provider invocation records use a narrower synchronous wall/CPU interval; process CPU sums all process threads, includes clock sampling, and may include unrelated work.",
+            "Provider memory use is unmeasured; the HiGHS adapter refuses finite memory requests rather than claiming enforcement.",
             "No comparator, speedup, source-mapped bottleneck, application-scale result, or scalability claim.",
             "Binary64 checks are numerical assurance and do not establish validated arithmetic.",
             "Per-operation CPU measures only the synchronous composing thread and excludes CPU consumed by helper threads.",

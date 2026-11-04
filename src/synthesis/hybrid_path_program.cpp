@@ -1800,7 +1800,13 @@ HybridPortfolioExecution execute_prepared_hybrid_branches(
             auto branch_context=context;
             auto branch_observation=std::make_shared<csl::execution::BackendThreadObservation>();
             branch_context.backend_thread_observation=branch_observation;
+            const auto invocation_process_cpu_started=read_process_cpu_clock();
+            const auto invocation_started=std::chrono::steady_clock::now();
             auto outcome=std::get<0>(workspaces)->run(branch_context);
+            const auto invocation_elapsed_wall=elapsed_wall_nanoseconds(invocation_started);
+            execution.provider_invocation=HybridBranchExecution::ProviderInvocationObservation{
+                invocation_elapsed_wall,
+                finish_process_cpu_interval(invocation_process_cpu_started)};
             execution.provider_elapsed_wall_nanoseconds=elapsed_wall_nanoseconds(provider_started);
             execution.process_cpu=finish_process_cpu_interval(process_cpu_started);
             execution.observed_backend_threads=branch_observation->maximum();

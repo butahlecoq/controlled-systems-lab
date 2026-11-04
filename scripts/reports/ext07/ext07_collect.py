@@ -29,7 +29,8 @@ def source_files_for_record(record: dict) -> tuple[str, ...]:
         return LEGACY_SOURCE_FILES
     if record.get("schema") == "csl.ext07-hybrid-profile-report/2":
         return PROCESS_CPU_SOURCE_FILES
-    require(record.get("schema") == "csl.ext07-hybrid-profile-report/3",
+    require(record.get("schema") in {"csl.ext07-hybrid-profile-report/3",
+                                      "csl.ext07-hybrid-profile-report/4"},
             "Unsupported EXT-07 report schema")
     return SOURCE_FILES
 
@@ -61,7 +62,8 @@ def jsonl(path: Path, expected_count: int) -> list[dict]:
 
 
 def validate_run(row: dict, phase: str, repetition: int, calls: int,
-                 process_cpu: bool = True, operation_cpu: bool = False) -> None:
+                 process_cpu: bool = True, operation_cpu: bool = False,
+                 provider_invocation: bool = False) -> None:
     require(row.get("phase") == phase and row.get("repetition") == repetition and
             row.get("calls") == calls and row.get("failures") == 0 and
             row.get("status") == "passed" and row.get("path_count") == 1,
@@ -80,6 +82,8 @@ def validate_run(row: dict, phase: str, repetition: int, calls: int,
         validate_process_cpu_observations(row, calls, 1)
     if operation_cpu:
         validate_operation_observations(row, calls, [8])
+    if provider_invocation:
+        validate_provider_invocation_observations(row, calls, 1)
     for name in ("setup_total_ns", "assembly_total_ns", "solve_total_ns", "verify_total_ns",
                  "end_to_end_total_ns"):
         require(isinstance(row.get(name), int) and row[name] > 0,
@@ -143,6 +147,49 @@ def process_cpu_summary(rows: list[dict], branch_labels: list[str]) -> dict:
         "scope": "process CPU accumulated across all threads during workspace creation and branch execution",
         "attribution": "process-scoped, not provider-only; unrelated concurrent process work may contribute",
         "branches": result,
+    }
+
+
+def validate_provider_invocation_observations(row: dict, calls: int, branches: int) -> None:
+    observations = row.get("provider_invocation_observations")
+    require(isinstance(observations, list) and len(observations) == calls,
+            "EXT-07 provider invocation observation count differs from calls")
+    for call in observations:
+        require(isinstance(call, list) and len(call) == branches,
+                "EXT-07 provider invocation observations differ from branch inventory")
+        for observation in call:
+            require(isinstance(observation, dict) and
+                    set(observation) == {"elapsed_wall_nanoseconds", "process_cpu"},
+                    "EXT-07 provider invocation observation shape differs")
+            wall = observation["elapsed_wall_nanoseconds"]
+            require(isinstance(wall, int) and not isinstance(wall, bool) and wall >= 0,
+                    "EXT-07 provider invocation wall time is invalid")
+            validate_process_cpu_observations(
+                {"process_cpu_observations": [[observation["process_cpu"]]]}, 1, 1)
+
+
+def provider_invocation_summary(rows: list[dict], branch_labels: list[str]) -> dict:
+    summaries = []
+    for index, label in enumerate(branch_labels):
+        wall_values = []
+        cpu_rows = []
+        for row in rows:
+            for call in row["provider_invocation_observations"]:
+                observation = call[index]
+                wall_values.append(observation["elapsed_wall_nanoseconds"])
+                cpu_rows.append({"process_cpu_observations": [[observation["process_cpu"]]]})
+        cpu = process_cpu_summary(cpu_rows, [label])["branches"][0]
+        summaries.append({
+            "path": label,
+            "observed_calls": len(wall_values),
+            "wall_min_nanoseconds": min(wall_values) if wall_values else None,
+            "wall_median_nanoseconds": int(statistics.median(wall_values)) if wall_values else None,
+            "wall_max_nanoseconds": max(wall_values) if wall_values else None,
+            "process_cpu": cpu,
+        })
+    return {
+        "scope": "synchronous provider invocation; process CPU includes clock sampling and may include helper threads or unrelated concurrent process work",
+        "branches": summaries,
     }
 
 
@@ -295,10 +342,10 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
             "EXT-07 report driver wrote stderr")
     smoke = jsonl(capture / "smoke.jsonl", 1)
     measure = jsonl(capture / "measure.jsonl", 8)
-    validate_run(smoke[0], "smoke", 0, 1, operation_cpu=True)
-    validate_run(measure[0], "warmup", 0, 10, operation_cpu=True)
+    validate_run(smoke[0], "smoke", 0, 1, operation_cpu=True, provider_invocation=True)
+    validate_run(measure[0], "warmup", 0, 10, operation_cpu=True, provider_invocation=True)
     for repetition, row in enumerate(measure[1:]):
-        validate_run(row, "trial", repetition, 20, operation_cpu=True)
+        validate_run(row, "trial", repetition, 20, operation_cpu=True, provider_invocation=True)
     source_hashes = {name: sha((driver if name == "driver.cpp" else
                                 cpu_header if name == "process_cpu_json.hpp" else
                                 operation_cpu_header if name == "operation_cpu_json.hpp" else
@@ -326,7 +373,7 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
         "relation_coordinates": ["x0", "u0", "x_pre1", "x1"],
     }
     unsigned = {
-        "schema": "csl.ext07-hybrid-profile-report/3",
+        "schema": "csl.ext07-hybrid-profile-report/4",
         "source_commit": commit,
         "source_tree": pre["tree"],
         "source_sha256": source_hashes,
@@ -361,6 +408,7 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
                                                    "solve_total_ns", "verify_total_ns",
                                                    "end_to_end_total_ns")},
             "process_cpu": process_cpu_summary(rows, ["coast-to-terminal"]),
+            "provider_invocation": provider_invocation_summary(rows, ["coast-to-terminal"]),
             "operation_thread_cpu": operation_cpu_summary(rows),
             "comparison": "single adapter; descriptive measurements only; no comparator or speedup claim",
         },
@@ -368,7 +416,9 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
         "evidence_limits": [
             "One host, one Release configuration, one fixture, and a numerical binary64 verifier.",
             "Process CPU values sum all process threads during the branch interval; concurrent unrelated process work may contribute and values are not provider-only CPU.",
+            "Provider invocation records use a narrower synchronous wall/CPU interval; process CPU still sums all process threads, includes clock sampling, and may include unrelated work.",
             "Per-operation CPU measures only the synchronous composing thread and excludes CPU consumed by helper threads.",
+            "Provider memory use is unmeasured; the HiGHS adapter refuses finite memory requests rather than claiming enforcement.",
             "No comparator, speedup, source-mapped bottleneck, application-scale result, or general scalability claim.",
             "The supported verifier domain is one-step scalar interval systems; continuous multi-stage verification is outside this report.",
         ],

@@ -28,7 +28,8 @@ def validate(bundle: Path) -> dict:
     schema = record.get("schema")
     require(schema in {"csl.ext07-hybrid-profile-report/1",
                        "csl.ext07-hybrid-profile-report/2",
-                       "csl.ext07-hybrid-profile-report/3"} and
+                       "csl.ext07-hybrid-profile-report/3",
+                       "csl.ext07-hybrid-profile-report/4"} and
             record.get("report_id") == bundle.name ==
             "ext07-hybrid-" + collect.sha(collect.encoded(unsigned))[:16],
             "EXT-07 record identity differs")
@@ -47,10 +48,13 @@ def validate(bundle: Path) -> dict:
     measure = collect.jsonl(bundle / "measure.jsonl", 8)
     has_process_cpu = schema.endswith(("/2", "/3"))
     has_operation_cpu = schema.endswith("/3")
-    collect.validate_run(smoke[0], "smoke", 0, 1, has_process_cpu, has_operation_cpu)
-    collect.validate_run(measure[0], "warmup", 0, 10, has_process_cpu, has_operation_cpu)
+    has_provider_invocation = schema.endswith("/4")
+    has_process_cpu = has_process_cpu or has_provider_invocation
+    has_operation_cpu = has_operation_cpu or has_provider_invocation
+    collect.validate_run(smoke[0], "smoke", 0, 1, has_process_cpu, has_operation_cpu, has_provider_invocation)
+    collect.validate_run(measure[0], "warmup", 0, 10, has_process_cpu, has_operation_cpu, has_provider_invocation)
     for repetition, row in enumerate(measure[1:]):
-        collect.validate_run(row, "trial", repetition, 20, has_process_cpu, has_operation_cpu)
+        collect.validate_run(row, "trial", repetition, 20, has_process_cpu, has_operation_cpu, has_provider_invocation)
     trials = measure[1:]
     measurement = record["measurement"]
     require(measurement["trials"] == trials and measurement["warmup"] == measure[0] and
@@ -63,13 +67,17 @@ def validate(bundle: Path) -> dict:
             measurement["min_batch_end_to_end_ns"] == min(durations) and
             measurement["max_batch_end_to_end_ns"] == max(durations),
             "EXT-07 timing summary differs from raw repetitions")
-    if schema.endswith(("/2", "/3")):
+    if schema.endswith(("/2", "/3", "/4")):
         require(measurement["process_cpu"] ==
                 collect.process_cpu_summary(trials, ["coast-to-terminal"]),
                 "EXT-07 process CPU summary differs from raw observations")
     if has_operation_cpu:
         require(measurement["operation_thread_cpu"] == collect.operation_cpu_summary(trials),
                 "EXT-07 operation thread CPU summary differs from raw observations")
+    if has_provider_invocation:
+        require(measurement["provider_invocation"] ==
+                collect.provider_invocation_summary(trials, ["coast-to-terminal"]),
+                "EXT-07 provider invocation summary differs from raw observations")
     return record
 
 
@@ -102,14 +110,18 @@ def summary_csv(record: dict) -> bytes:
     header = ["repetition", "calls", "failures", "assembly_total_ns", "solve_total_ns",
                      "verify_total_ns", "end_to_end_total_ns", "objective", "control",
                      "relation_rows", "relation_matrix_elements"]
-    if record["schema"].endswith(("/2", "/3")):
+    if record["schema"].endswith(("/2", "/3", "/4")):
         header += ["process_cpu_coast_to_terminal_min_ns",
                    "process_cpu_coast_to_terminal_median_ns",
                    "process_cpu_coast_to_terminal_max_ns",
                    "process_cpu_coast_to_terminal_unavailable"]
-    if record["schema"].endswith("/3"):
+    if record["schema"].endswith(("/3", "/4")):
         header += ["operation_thread_cpu_min_ns", "operation_thread_cpu_median_ns",
                    "operation_thread_cpu_max_ns", "operation_thread_cpu_unavailable"]
+    if record["schema"].endswith("/4"):
+        header += ["provider_wall_min_ns", "provider_wall_median_ns", "provider_wall_max_ns",
+                   "provider_cpu_min_ns", "provider_cpu_median_ns", "provider_cpu_max_ns",
+                   "provider_cpu_unavailable"]
     writer.writerow(header)
     for row in record["measurement"]["trials"]:
         values = [row["repetition"], row["calls"], row["failures"],
@@ -117,10 +129,12 @@ def summary_csv(record: dict) -> bytes:
                          row["verify_total_ns"], row["end_to_end_total_ns"],
                          row["objective"], row["control"], row["relation_rows"],
                          row["relation_matrix_elements"]]
-        if record["schema"].endswith(("/2", "/3")):
+        if record["schema"].endswith(("/2", "/3", "/4")):
             values.extend(_process_cpu_trial_summary(row))
-        if record["schema"].endswith("/3"):
+        if record["schema"].endswith(("/3", "/4")):
             values.extend(_operation_cpu_trial_summary(row))
+        if record["schema"].endswith("/4"):
+            values.extend(_provider_invocation_trial_summary(row))
         writer.writerow(values)
     return output.getvalue().encode()
 
@@ -149,6 +163,18 @@ def _operation_cpu_trial_summary(row: dict) -> list[object]:
             max(values) if values else "", unavailable]
 
 
+def _provider_invocation_trial_summary(row: dict) -> list[object]:
+    invocations = [call[0] for call in row["provider_invocation_observations"]]
+    wall = [value["elapsed_wall_nanoseconds"] for value in invocations]
+    cpu = [value["process_cpu"]["nanoseconds"] for value in invocations
+           if value["process_cpu"]["status"] == "observed"]
+    unavailable = sum(value["process_cpu"]["status"] == "unavailable" for value in invocations)
+    import statistics
+    return [min(wall), int(statistics.median(wall)), max(wall),
+            min(cpu) if cpu else "", int(statistics.median(cpu)) if cpu else "",
+            max(cpu) if cpu else "", unavailable]
+
+
 def page(record: dict, example: bool) -> bytes:
     report_id = escape(record["report_id"])
     source = escape(record["source_commit"])
@@ -166,7 +192,7 @@ def page(record: dict, example: bool) -> bytes:
             "This sums all process threads and may include unrelated concurrent work; "
             "it is not provider-only CPU. Heap use remains unmeasured.")
     operation_cpu_table = ""
-    if record["schema"].endswith("/3"):
+    if record["schema"].endswith(("/3", "/4")):
         rows = []
         for item in measurement["operation_thread_cpu"]["operations"]:
             identity = item["identity"]
@@ -189,6 +215,18 @@ def page(record: dict, example: bool) -> bytes:
             '<table><thead><tr><th>Operation</th><th>Median CPU (ns)</th><th>Observed calls</th>'
             '<th>Unavailable</th><th>Unavailable reasons</th></tr></thead><tbody>' +
             "".join(rows) + "</tbody></table></div>")
+    provider_invocation_note = ""
+    if record["schema"].endswith("/4"):
+        entry = measurement["provider_invocation"]["branches"][0]
+        cpu = entry["process_cpu"]
+        cpu_summary = (f"median {cpu['median_nanoseconds']:,} ns" if cpu["observed_calls"]
+                       else "unavailable")
+        provider_invocation_note = (
+            f" Provider invocation interval: wall median {entry['wall_median_nanoseconds']:,} ns "
+            f"(range {entry['wall_min_nanoseconds']:,}–{entry['wall_max_nanoseconds']:,} ns); "
+            f"process CPU {cpu_summary}. This interval covers synchronous provider execution; "
+            "process CPU sums all process threads, includes clock sampling, and may include helper threads or unrelated work. "
+            "It is not provider-only CPU, and memory remains unmeasured.")
     medians = measurement["median_phase_total_ns"]
     trials = measurement["trials"]
     provider = escape(trials[0]["provider"])
@@ -256,7 +294,7 @@ Median accumulated phase durations: setup {medians['setup']:,} ns, relation asse
 solve {medians['solve']:,} ns, verify {medians['verify']:,} ns, and end-to-end {medians['end_to_end']:,} ns.
 End-to-end includes fixture/provider setup, path enumeration, relation construction, solve and family verification.
 Phase medians are calculated separately across batches and are not additive to the end-to-end median;
-output serialization and rendering are excluded.{process_cpu_note}</p>{operation_cpu_table}
+output serialization and rendering are excluded.{process_cpu_note}{provider_invocation_note}</p>{operation_cpu_table}
 <p>One host and one fixed profile are measured. There is no comparator, speedup, source-mapped bottleneck,
 or scalability claim. Thread and backend details, all raw repetitions, source/build receipts, and failures
 are retained in the <a href="records.json">versioned record</a>,

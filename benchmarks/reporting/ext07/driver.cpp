@@ -111,6 +111,7 @@ struct Observation {
     std::string optimality;
     std::string coverage;
     std::vector<synthesis::ProcessCpuObservation> branch_process_cpu;
+    std::vector<std::optional<synthesis::HybridBranchExecution::ProviderInvocationObservation>> provider_invocations;
     std::vector<std::vector<model::HybridRelationOperationRecord>> operation_records;
 };
 
@@ -156,6 +157,7 @@ Observation run_once() {
         throw std::runtime_error("Hybrid branch optimization did not complete with a primal point");
     const auto& branch = execution.branches[0];
     observation.branch_process_cpu.push_back(branch.process_cpu);
+    observation.provider_invocations.push_back(branch.provider_invocation);
     observation.provider = branch.providers.empty() || !branch.providers[0].actual ? "unavailable" :
         branch.providers[0].actual->id.value + "@" + branch.providers[0].actual->version;
     observation.termination = branch.termination == Termination::completed ? "completed" : "other";
@@ -222,11 +224,13 @@ void batch(const char* phase, std::size_t repetition, std::size_t calls) {
     std::size_t failures = 0;
     std::string error;
     std::vector<std::vector<synthesis::ProcessCpuObservation>> process_cpu_observations;
+    std::vector<std::vector<std::optional<synthesis::HybridBranchExecution::ProviderInvocationObservation>>> provider_invocation_observations;
     std::vector<std::vector<std::vector<model::HybridRelationOperationRecord>>> operation_observations;
     for(std::size_t call = 0; call < calls; ++call) {
         try {
             last = run_once();
             process_cpu_observations.push_back(last.branch_process_cpu);
+            provider_invocation_observations.push_back(last.provider_invocations);
             operation_observations.push_back(last.operation_records);
             setup += last.setup_ns;
             assembly += last.assembly_ns;
@@ -237,6 +241,7 @@ void batch(const char* phase, std::size_t repetition, std::size_t calls) {
             ++failures;
             error = exception.what();
             process_cpu_observations.emplace_back();
+            provider_invocation_observations.emplace_back();
             operation_observations.emplace_back();
         }
     }
@@ -270,6 +275,17 @@ void batch(const char* phase, std::size_t repetition, std::size_t calls) {
             if(branch) std::cout << ',';
             reports::ext07::write_process_cpu_observation(
                 std::cout,process_cpu_observations[call][branch]);
+        }
+        std::cout << ']';
+    }
+        std::cout << "],\"provider_invocation_observations\":[";
+    for(std::size_t call=0;call<provider_invocation_observations.size();++call) {
+        if(call) std::cout << ',';
+        std::cout << '[';
+        for(std::size_t branch=0;branch<provider_invocation_observations[call].size();++branch) {
+            if(branch) std::cout << ',';
+            reports::ext07::write_provider_invocation_observation(
+                std::cout,provider_invocation_observations[call][branch]);
         }
         std::cout << ']';
     }

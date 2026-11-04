@@ -36,7 +36,7 @@ def capture(source: Path, destination: Path, commit: str, cmake: str,
          "-DCMAKE_BUILD_TYPE=Release",
          "-DCSL_ENABLE_HIGHS=ON", "-DCSL_ENABLE_QHULL=OFF",
          "-DCSL_BUILD_EXT07_REPORT=ON"], source,
-        destination / "configure.log", env)
+        destination / "configure.log", env, ((build, "<BUILD>"),))
     cache_text = (build / "CMakeCache.txt").read_text(encoding="utf-8", errors="replace")
     generator_match = re.search(r"^CMAKE_GENERATOR:INTERNAL=(.*)$", cache_text, re.MULTILINE)
     if not generator_match:
@@ -44,7 +44,7 @@ def capture(source: Path, destination: Path, commit: str, cmake: str,
     run(cmake_build_command(cmake, build, "csl_ext07_two_parameter_report", jobs,
                             generator_match.group(1).strip(),
                             ("/nologo", "/p:PreferredUILang=en-US")),
-        source, destination / "build.log", env)
+        source, destination / "build.log", env, ((build, "<BUILD>"),))
     if not (destination / "build.log").read_bytes().strip():
         raise ValueError("Release build produced no retained build output")
     executable = build / ("Release/csl_ext07_two_parameter_report.exe" if os.name == "nt"
@@ -53,7 +53,8 @@ def capture(source: Path, destination: Path, commit: str, cmake: str,
         raise FileNotFoundError(executable)
     capture_executable = destination / "build" / executable.name
     capture_executable.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(executable, capture_executable)
+    if executable.resolve() != capture_executable.resolve():
+        shutil.copyfile(executable, capture_executable)
     for phase in ("smoke", "measure"):
         result = subprocess.run([str(executable), phase], cwd=source, env=env,
                                 capture_output=True)
