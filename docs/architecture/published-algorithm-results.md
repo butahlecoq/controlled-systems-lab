@@ -87,18 +87,25 @@ the current publication catalogue stages only the final report.
 
 ## EXT-07 hybrid profile report
 
-The in-progress schema-3 source commit
-`4c8f1c3dbe393eb39acd4284d29073d0943b3320` adds per-operation composing-thread
-CPU observations to both report shapes. The saved one-step bundle
+The schema-3 implementation and two reports merged in PR #883 at main commit
+`67ae36277d7d416e491eda46e92fbc4f076277f8`. The measured bundles retain capture
+source commit `4c8f1c3dbe393eb39acd4284d29073d0943b3320`; follow-up timer
+lifetime and no-copy fixes are included in the merged implementation, while
+the raw captures remain tied to their original source. Both reports record
+per-operation composing-thread CPU observations. The saved one-step bundle
 [`ext07-hybrid-4f2ed937429c4908`](../../reports/algorithm-results/ext07-hybrid-4f2ed937429c4908/)
 and two-stage bundle
 [`ext07-hybrid-two-parameter-6f2799c9acfcc5f2`](../../reports/algorithm-results/ext07-hybrid-two-parameter-6f2799c9acfcc5f2/)
 each contain 140 measured calls with zero failures and complete operation
 readings. The values include clock-sampling overhead and cover only the
 synchronous composing thread; helper-thread CPU is excluded. They are
-descriptive evidence, not a performance comparison or enforcement result.
-The report catalog is updated locally; PR review, main-only deployment and
-live URL/hash verification remain pending.
+descriptive evidence, not a performance comparison or enforcement result. The
+main native and report/site workflows passed on 2026-11-04. The public Pages
+routes, 2D examples and offline ZIPs were fetched and matched byte-for-byte to
+the saved bundles:
+
+- [One-step report](https://butahlecoq.github.io/controlled-systems-lab/ext07-hybrid-4f2ed937429c4908/index.html), [2D example](https://butahlecoq.github.io/controlled-systems-lab/ext07-hybrid-4f2ed937429c4908/example-2d.html), [offline ZIP](https://butahlecoq.github.io/controlled-systems-lab/ext07-hybrid-4f2ed937429c4908/ext07-hybrid-4f2ed937429c4908.zip). Live page SHA-256: `204e5e0e3e9ef283039fa39051f270c9c6aee1b60d1fe947a6f7f47b09a528f9`; ZIP SHA-256: `4af46d27fdabb7c07fc1351157a3a31569481009c3cfad95a84f896c755f1619`.
+- [Two-stage report](https://butahlecoq.github.io/controlled-systems-lab/ext07-hybrid-two-parameter-6f2799c9acfcc5f2/index.html), [2D example](https://butahlecoq.github.io/controlled-systems-lab/ext07-hybrid-two-parameter-6f2799c9acfcc5f2/two-control-example.html), [offline ZIP](https://butahlecoq.github.io/controlled-systems-lab/ext07-hybrid-two-parameter-6f2799c9acfcc5f2/ext07-hybrid-two-parameter-6f2799c9acfcc5f2.zip). Live page SHA-256: `65c82b0c9022b4a8d6d7f54d72a5648b60a927b10f48300003e503147306b4e9`; ZIP SHA-256: `c9c431ce21c6550e6f779b2ecb3f0a82ffac412741dde4ddd14f5d0d5d6bc516`.
 
 The frozen implementation source is `2965baafa325550ad60ec91d44f5e3f86a832178`.
 The saved bundle
