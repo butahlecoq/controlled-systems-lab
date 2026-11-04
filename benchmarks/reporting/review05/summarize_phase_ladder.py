@@ -35,8 +35,7 @@ def summarize(attempts_path: Path, output_path: Path) -> dict[str, object]:
             continue
         for span in spans:
             value = span.get("inclusive_wall_ticks")
-            if span.get("completed") and (not isinstance(value, int) or
-                    not isinstance(span.get("exclusive_wall_ticks"), int)):
+            if span.get("completed") and not isinstance(value, int):
                 raise ValueError(f"completed phase has invalid duration: {row.get('attempt_id')}")
             groups[(row["horizon"], row["strategy"], span["operation"])].append(
                 value if span.get("completed") else None)
