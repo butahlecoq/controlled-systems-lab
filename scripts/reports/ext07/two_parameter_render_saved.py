@@ -54,9 +54,9 @@ def validate(bundle: Path) -> dict:
             "Two-parameter source receipts differ")
     smoke = collect.jsonl(bundle / "smoke.jsonl", 1)
     measure = collect.jsonl(bundle / "measure.jsonl", 8)
-    has_provider_invocation = schema.endswith("/4")
-    has_process_cpu = schema.endswith(("/2", "/3", "/4"))
-    has_operation_cpu = schema.endswith(("/3", "/4"))
+    has_provider_invocation = schema.endswith(("/4", "/5"))
+    has_process_cpu = schema.endswith(("/2", "/3", "/4", "/5"))
+    has_operation_cpu = schema.endswith(("/3", "/4", "/5"))
     collect.validate_run(smoke[0], "smoke", 0, 1, has_process_cpu, has_operation_cpu, has_provider_invocation)
     collect.validate_run(measure[0], "warmup", 0, 10, has_process_cpu, has_operation_cpu, has_provider_invocation)
     for repetition, row in enumerate(measure[1:]):
@@ -86,7 +86,7 @@ def validate(bundle: Path) -> dict:
                 capacity["branch_outcomes"] == 2170 and
                 capacity["failures"] == 0,
                 "EXT-07 solver capacity raw evidence differs")
-    if schema.endswith(("/2", "/3", "/4")):
+    if has_process_cpu:
         require(measurement["process_cpu"] ==
                 collect.common.process_cpu_summary(trials, collect.EXPECTED_PATHS),
                 "Two-parameter process CPU summary differs from raw observations")
@@ -125,7 +125,7 @@ def summary_csv(record: dict) -> bytes:
     header = ["repetition", "calls", "failures", "paths", "relation_rows",
                      "relation_matrix_elements", "end_to_end_total_ns",
                      "minimum_call_ns", "maximum_call_ns", "provider", "verifier"]
-    if record["schema"].endswith(("/2", "/3", "/4")):
+    if record["schema"].endswith(("/2", "/3", "/4", "/5")):
         for path in collect.EXPECTED_PATHS:
             header.extend([f"process_cpu_{path}_min_ns", f"process_cpu_{path}_median_ns",
                            f"process_cpu_{path}_max_ns", f"process_cpu_{path}_unavailable"])
@@ -144,7 +144,7 @@ def summary_csv(record: dict) -> bytes:
                          row["relation_rows"], row["relation_matrix_elements"],
                          row["end_to_end_total_ns"], min(row["call_durations_ns"]),
                          max(row["call_durations_ns"]), row["provider"], row["verifier"]]
-        if record["schema"].endswith(("/2", "/3", "/4")):
+        if record["schema"].endswith(("/2", "/3", "/4", "/5")):
             for index in range(len(collect.EXPECTED_PATHS)):
                 observed = [call[index]["nanoseconds"]
                             for call in row["process_cpu_observations"]
@@ -154,9 +154,9 @@ def summary_csv(record: dict) -> bytes:
                 values.extend([min(observed) if observed else "",
                                int(statistics.median(observed)) if observed else "",
                                max(observed) if observed else "", unavailable])
-        if record["schema"].endswith(("/3", "/4")):
+        if record["schema"].endswith(("/3", "/4", "/5")):
             values.extend(_operation_cpu_trial_summary(row))
-        if record["schema"].endswith("/4"):
+        if record["schema"].endswith(("/4", "/5")):
             values.extend(_provider_invocation_trial_summary(row))
         writer.writerow(values)
     return output.getvalue().encode()
@@ -214,7 +214,7 @@ def index_page(record: dict) -> bytes:
                     "workspace creation and solver execution. They are process-scoped, not "
                     "provider-only, and unrelated concurrent work may contribute. Heap use "
                     "remains unmeasured.</p>")
-    if record["schema"].endswith(("/3", "/4")):
+    if record["schema"].endswith(("/3", "/4", "/5")):
         cpu_note = (" <p>Per-branch process CPU sums all process threads. Per-operation CPU is "
                     "measured on the synchronous composing thread and excludes helper-thread CPU; "
                     "both scopes and unavailable readings are retained in the raw records.</p>")
@@ -236,7 +236,7 @@ def index_page(record: dict) -> bytes:
         cpu_note += ('<table><thead><tr><th>Operation</th><th>Median CPU (ns)</th>'
                      '<th>Observed calls</th><th>Unavailable</th><th>Unavailable reasons</th>'
                      '</tr></thead><tbody>' + "".join(operation_rows) + "</tbody></table>")
-    if record["schema"].endswith("/4"):
+    if record["schema"].endswith(("/4", "/5")):
         invocation_rows = []
         for item in measurement["provider_invocation"]["branches"]:
             cpu = item["process_cpu"]
