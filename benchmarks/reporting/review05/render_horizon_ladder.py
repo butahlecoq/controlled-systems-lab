@@ -22,12 +22,14 @@ def main() -> int:
     bundle = args.bundle.resolve(strict=True)
     manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
     summary = json.loads((bundle / "summary.json").read_text(encoding="utf-8"))
+    resource_summary = json.loads((bundle / "resource-summary.json").read_text(encoding="utf-8"))
     build = json.loads((bundle / "build-provenance.json").read_text(encoding="utf-8"))
     checks = [json.loads(line) for line in (bundle / "checks.jsonl").read_text(encoding="utf-8").splitlines() if line]
     statuses = {status: sum(row.get("status") == status for row in checks)
                 for status in ("verified", "inconclusive", "incorrect", "unavailable")}
     table_rows = []
     representation_rows = []
+    resource_rows = []
     all_pairs_verified = all(case.get("verified_paired_repetitions") == 6
                              for case in summary["horizons"])
     for case in summary["horizons"]:
@@ -54,6 +56,16 @@ def main() -> int:
                     f"<td>{shape['joint_coordinates']}</td><td>{shape['inequality_rows']}</td>"
                     f"<td>{shape['equality_rows']}</td><td>{shape['nonzero_h_coefficients']}</td></tr>"
                 )
+    for row in resource_summary:
+        metrics = row["metrics"]
+        resource_rows.append(
+            f"<tr><th scope=\"row\">T={row['horizon']}</th>"
+            f"<td>{escape(row['strategy'].removeprefix('csl.synthesis.'))}</td>"
+            f"<td>{metrics['child_cpu_seconds']['median']:.6f}</td>"
+            f"<td>{metrics['child_cpu_seconds']['minimum']:.6f} – "
+            f"{metrics['child_cpu_seconds']['maximum']:.6f}</td>"
+            f"<td>{metrics['peak_rss_kib']['median']:.0f}</td></tr>"
+        )
     env = manifest["environment"]
     sources = " ".join(f"{escape(name)}: {escape(digest)}" for name, digest in
                         sorted(env["measurement_source_sha256"].items()))
@@ -82,6 +94,11 @@ independent result checks are in <a href="checks.jsonl">checks.jsonl</a>, with p
 <p>The scalar state/control dimensions stay fixed while the horizon grows. The relation coordinate count, H-row counts, and nonzero H coefficients are counted from each emitted candidate relation after its independent check. These counts do not measure allocated bytes.</p>
 <table><thead><tr><th scope="col">Horizon</th><th scope="col">Strategy</th><th scope="col">Joint coordinates</th><th scope="col">Inequality rows</th><th scope="col">Equality rows</th><th scope="col">Nonzero H coefficients</th></tr></thead>
 <tbody>{''.join(representation_rows)}</tbody></table>
+<h2>Whole-process resource receipts</h2>
+<p>POSIX <code>wait4</code> reports user+system CPU and peak resident memory for each isolated process, including startup and setup. One warmup pair per horizon is excluded; these readings are not solver-phase allocations and are separate from the timed solver interval.</p>
+<table><thead><tr><th scope="col">Horizon</th><th scope="col">Strategy</th><th scope="col">Child CPU median (s)</th><th scope="col">Child CPU range (s)</th><th scope="col">Peak RSS median (KiB)</th></tr></thead>
+<tbody>{''.join(resource_rows)}</tbody></table>
+<p>Full per-attempt receipts: <a href="resource-summary.json">resource-summary.json</a> and <a href="attempts.jsonl">attempts.jsonl</a>.</p>
 <h2>Analytic fixture</h2>
 <pre><code>x[t+1] = x[t] + u[t], x[0] = 0, 0 &lt;= u[t] &lt;= 1; minimize x[T].</code></pre>
 <p>Because <code>x[T] = sum(u[t])</code>, the exact optimal value is 0, attained by the all-zero history.
