@@ -84,6 +84,30 @@ def validate_run(row: dict, phase: str, repetition: int, calls: int,
     require(not row.get("error"), "EXT-07 two-parameter driver recorded an error")
 
 
+def capacity_summary(rows: list[dict]) -> list[dict]:
+    summary = []
+    for path_count in (1, 2, 4, 8, 16):
+        trials = [row for row in rows if row.get("phase") == "trial" and
+                  row.get("paths") == path_count]
+        samples = [value for row in trials for value in row["call_durations_ns"]]
+        batches = [row["end_to_end_total_ns"] for row in trials]
+        summary.append({
+            "paths": path_count,
+            "repetitions": len(trials),
+            "calls_per_repetition": trials[0]["calls"] if trials else 0,
+            "measured_calls": len(samples),
+            "branch_outcomes": sum(row["paths"] * row["calls"] for row in trials),
+            "failures": sum(row["failures"] for row in trials),
+            "median_call_ns": int(statistics.median(samples)) if samples else None,
+            "min_call_ns": min(samples) if samples else None,
+            "max_call_ns": max(samples) if samples else None,
+            "median_batch_ns": int(statistics.median(batches)) if batches else None,
+            "min_batch_ns": min(batches) if batches else None,
+            "max_batch_ns": max(batches) if batches else None,
+        })
+    return summary
+
+
 def collect(capture: Path, source: Path, output_root: Path) -> Path:
     capture = capture.resolve(strict=True)
     source = source.resolve(strict=True)
@@ -284,7 +308,7 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
             "branch_outcomes": sum(row["paths"] * row["calls"]
                                     for row in capacity_rows if row["phase"] == "trial"),
             "failures": sum(row["failures"] for row in capacity_rows),
-            "trials": capacity_rows,
+            "results": capacity_summary(capacity_rows),
             "raw_capacity_sha256": sha((capture / "capacity.jsonl").read_bytes()),
             "timing_scope": "per-call setup, path composition, HiGHS solve of every path, candidate-family construction, and ExactLinearHHybridFamilyVerifier coverage of every tied path",
             "claim_limit": "single scalar, two-stage fixture on one host; descriptive capacity evidence only, not a general scalability or solver limit claim",

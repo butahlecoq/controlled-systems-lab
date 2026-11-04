@@ -81,7 +81,7 @@ def validate(bundle: Path) -> dict:
         capacity_rows = collect.jsonl(bundle / "capacity.jsonl", 40)
         require(capacity["raw_capacity_sha256"] ==
                 collect.sha((bundle / "capacity.jsonl").read_bytes()) and
-                capacity["trials"] == capacity_rows and
+                capacity["results"] == collect.capacity_summary(capacity_rows) and
                 capacity["measured_calls"] == 350 and
                 capacity["branch_outcomes"] == 2170 and
                 capacity["failures"] == 0,
@@ -263,15 +263,11 @@ def index_page(record: dict) -> bytes:
     if record["schema"].endswith("/5"):
         capacity_link = ', <a href="capacity.jsonl">solver capacity raw evidence</a>'
         capacity = record["solver_capacity_profile"]
-        rows = []
-        for path_count in capacity["path_counts"]:
-            trials_for_count = [row for row in capacity["trials"]
-                                if row["phase"] == "trial" and row["paths"] == path_count]
-            samples = [value for row in trials_for_count
-                       for value in row["call_durations_ns"]]
-            rows.append(f"<tr><td>{path_count}</td><td>{len(trials_for_count)}</td>"
-                        f"<td>{len(samples)}</td><td>{int(statistics.median(samples)):,}</td>"
-                        f"<td>{min(samples):,}–{max(samples):,}</td><td>0</td></tr>")
+        rows = [f"<tr><td>{item['paths']}</td><td>{item['repetitions']}</td>"
+                f"<td>{item['measured_calls']}</td><td>{item['median_call_ns']:,}</td>"
+                f"<td>{item['min_call_ns']:,}–{item['max_call_ns']:,}</td>"
+                f"<td>{item['failures']}</td></tr>"
+                for item in capacity["results"]]
         capacity_section = (
             '<section><h2>Full solver and family capacity</h2>'
             '<p>Each call assembles every path relation, runs HiGHS on every branch, builds '
