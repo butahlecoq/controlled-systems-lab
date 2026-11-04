@@ -80,6 +80,6 @@ sets and their complete minimizing faces for a scalar linear objective. The
 visual gallery also contains an analytic constant-zero objective illustration
 with coupled triangular and quadrilateral feasible sets. It links to the
 measured report while describing the distinct geometry and objective. These
-bounded examples are not scalability results or a completion claim. The new
-schema-3 bundles and code are in PR preparation; release publication and exact-
-head review gates remain open. See the [evidence record](../../../architecture/published-algorithm-results.md#ext-07-hybrid-profile-report).
+bounded examples are not scalability results or a completion claim. The two
+new schema-3 bundles are published at the live routes and hashes recorded in
+the [evidence record](../../../architecture/published-algorithm-results.md#ext-07-hybrid-profile-report).
