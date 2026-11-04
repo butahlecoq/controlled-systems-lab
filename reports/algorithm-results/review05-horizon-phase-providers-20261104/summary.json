@@ -14,13 +14,13 @@
       "strategies": {
         "csl.synthesis.reach-back": {
           "verified_rows_within_measured_pairs": 6,
-          "median_strategy_run_ns_within_verified_pairs": 17374431.5,
-          "min_strategy_run_ns_within_verified_pairs": 16623319,
-          "max_strategy_run_ns_within_verified_pairs": 22260806,
+          "median_strategy_run_ns_within_verified_pairs": 17544015.0,
+          "min_strategy_run_ns_within_verified_pairs": 16426721,
+          "max_strategy_run_ns_within_verified_pairs": 21972718,
           "completed_timing_rows_including_inconclusive": 6,
-          "median_completed_run_ns_including_inconclusive": 17374431.5,
-          "min_completed_run_ns_including_inconclusive": 16623319,
-          "max_completed_run_ns_including_inconclusive": 22260806,
+          "median_completed_run_ns_including_inconclusive": 17544015.0,
+          "min_completed_run_ns_including_inconclusive": 16426721,
+          "max_completed_run_ns_including_inconclusive": 21972718,
           "verified_representation_shapes": [
             {
               "joint_coordinates": 5,
@@ -36,13 +36,13 @@
         },
         "csl.synthesis.strategy-b": {
           "verified_rows_within_measured_pairs": 6,
-          "median_strategy_run_ns_within_verified_pairs": 936752.5,
-          "min_strategy_run_ns_within_verified_pairs": 914997,
-          "max_strategy_run_ns_within_verified_pairs": 978902,
+          "median_strategy_run_ns_within_verified_pairs": 1125640.5,
+          "min_strategy_run_ns_within_verified_pairs": 1107132,
+          "max_strategy_run_ns_within_verified_pairs": 1215387,
           "completed_timing_rows_including_inconclusive": 6,
-          "median_completed_run_ns_including_inconclusive": 936752.5,
-          "min_completed_run_ns_including_inconclusive": 914997,
-          "max_completed_run_ns_including_inconclusive": 978902,
+          "median_completed_run_ns_including_inconclusive": 1125640.5,
+          "min_completed_run_ns_including_inconclusive": 1107132,
+          "max_completed_run_ns_including_inconclusive": 1215387,
           "verified_representation_shapes": [
             {
               "joint_coordinates": 5,
@@ -69,13 +69,13 @@
       "strategies": {
         "csl.synthesis.reach-back": {
           "verified_rows_within_measured_pairs": 6,
-          "median_strategy_run_ns_within_verified_pairs": 48921189.5,
-          "min_strategy_run_ns_within_verified_pairs": 43957919,
-          "max_strategy_run_ns_within_verified_pairs": 50213157,
+          "median_strategy_run_ns_within_verified_pairs": 45015448.0,
+          "min_strategy_run_ns_within_verified_pairs": 43310994,
+          "max_strategy_run_ns_within_verified_pairs": 47974121,
           "completed_timing_rows_including_inconclusive": 6,
-          "median_completed_run_ns_including_inconclusive": 48921189.5,
-          "min_completed_run_ns_including_inconclusive": 43957919,
-          "max_completed_run_ns_including_inconclusive": 50213157,
+          "median_completed_run_ns_including_inconclusive": 45015448.0,
+          "min_completed_run_ns_including_inconclusive": 43310994,
+          "max_completed_run_ns_including_inconclusive": 47974121,
           "verified_representation_shapes": [
             {
               "joint_coordinates": 9,
@@ -91,13 +91,13 @@
         },
         "csl.synthesis.strategy-b": {
           "verified_rows_within_measured_pairs": 6,
-          "median_strategy_run_ns_within_verified_pairs": 949533.5,
-          "min_strategy_run_ns_within_verified_pairs": 926381,
-          "max_strategy_run_ns_within_verified_pairs": 963258,
+          "median_strategy_run_ns_within_verified_pairs": 1258409.5,
+          "min_strategy_run_ns_within_verified_pairs": 1154694,
+          "max_strategy_run_ns_within_verified_pairs": 3114176,
           "completed_timing_rows_including_inconclusive": 6,
-          "median_completed_run_ns_including_inconclusive": 949533.5,
-          "min_completed_run_ns_including_inconclusive": 926381,
-          "max_completed_run_ns_including_inconclusive": 963258,
+          "median_completed_run_ns_including_inconclusive": 1258409.5,
+          "min_completed_run_ns_including_inconclusive": 1154694,
+          "max_completed_run_ns_including_inconclusive": 3114176,
           "verified_representation_shapes": [
             {
               "joint_coordinates": 9,
@@ -124,13 +124,13 @@
       "strategies": {
         "csl.synthesis.reach-back": {
           "verified_rows_within_measured_pairs": 6,
-          "median_strategy_run_ns_within_verified_pairs": 134990761.0,
-          "min_strategy_run_ns_within_verified_pairs": 133732737,
-          "max_strategy_run_ns_within_verified_pairs": 135698643,
+          "median_strategy_run_ns_within_verified_pairs": 132941242.5,
+          "min_strategy_run_ns_within_verified_pairs": 131993454,
+          "max_strategy_run_ns_within_verified_pairs": 144287986,
           "completed_timing_rows_including_inconclusive": 6,
-          "median_completed_run_ns_including_inconclusive": 134990761.0,
-          "min_completed_run_ns_including_inconclusive": 133732737,
-          "max_completed_run_ns_including_inconclusive": 135698643,
+          "median_completed_run_ns_including_inconclusive": 132941242.5,
+          "min_completed_run_ns_including_inconclusive": 131993454,
+          "max_completed_run_ns_including_inconclusive": 144287986,
           "verified_representation_shapes": [
             {
               "joint_coordinates": 17,
@@ -146,13 +146,13 @@
         },
         "csl.synthesis.strategy-b": {
           "verified_rows_within_measured_pairs": 6,
-          "median_strategy_run_ns_within_verified_pairs": 1048430.0,
-          "min_strategy_run_ns_within_verified_pairs": 1009703,
-          "max_strategy_run_ns_within_verified_pairs": 1179068,
+          "median_strategy_run_ns_within_verified_pairs": 1260574.5,
+          "min_strategy_run_ns_within_verified_pairs": 1210009,
+          "max_strategy_run_ns_within_verified_pairs": 1352696,
           "completed_timing_rows_including_inconclusive": 6,
-          "median_completed_run_ns_including_inconclusive": 1048430.0,
-          "min_completed_run_ns_including_inconclusive": 1009703,
-          "max_completed_run_ns_including_inconclusive": 1179068,
+          "median_completed_run_ns_including_inconclusive": 1260574.5,
+          "min_completed_run_ns_including_inconclusive": 1210009,
+          "max_completed_run_ns_including_inconclusive": 1352696,
           "verified_representation_shapes": [
             {
               "joint_coordinates": 17,

@@ -5,13 +5,28 @@
       "completed_spans": 6,
       "horizon": 2,
       "inclusive_wall_ns": {
-        "maximum": 20743354,
-        "median": 16146753.0,
-        "minimum": 15383558
+        "maximum": 20564079,
+        "median": 16271008.5,
+        "minimum": 15192407
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
       "operation": "strategy-a/forward",
+      "stage": null,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 24236,
+        "median": 10860.5,
+        "minimum": 9638
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/terminal-preimage",
       "stage": null,
       "strategy": "csl.synthesis.reach-back",
       "timing_scope": "instrumented OBS-03 inclusive wall ticks"
@@ -35,13 +50,13 @@
       "completed_spans": 6,
       "horizon": 2,
       "inclusive_wall_ns": {
-        "maximum": 1287463,
-        "median": 1077029.5,
-        "minimum": 1063061
+        "maximum": 15924,
+        "median": 14632.5,
+        "minimum": 13898
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
-      "operation": "strategy-a/terminal-optimization",
+      "operation": "strategy-a/feasible-preimage",
       "stage": null,
       "strategy": "csl.synthesis.reach-back",
       "timing_scope": "instrumented OBS-03 inclusive wall ticks"
@@ -50,24 +65,9 @@
       "completed_spans": 6,
       "horizon": 2,
       "inclusive_wall_ns": {
-        "maximum": 21022,
-        "median": 10336.5,
-        "minimum": 10057
-      },
-      "measured_spans": 6,
-      "not_called_or_unavailable_spans": 0,
-      "operation": "strategy-a/terminal-preimage",
-      "stage": null,
-      "strategy": "csl.synthesis.reach-back",
-      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
-    },
-    {
-      "completed_spans": 6,
-      "horizon": 2,
-      "inclusive_wall_ns": {
-        "maximum": 22215618,
-        "median": 17351698.5,
-        "minimum": 16602157
+        "maximum": 21928369,
+        "median": 17517894.0,
+        "minimum": 16402207
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -80,13 +80,13 @@
       "completed_spans": 6,
       "horizon": 2,
       "inclusive_wall_ns": {
-        "maximum": 30520,
-        "median": 14387.5,
-        "minimum": 13689
+        "maximum": 1214060,
+        "median": 1080417.5,
+        "minimum": 1063620
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
-      "operation": "strategy-a/feasible-preimage",
+      "operation": "strategy-a/terminal-optimization",
       "stage": null,
       "strategy": "csl.synthesis.reach-back",
       "timing_scope": "instrumented OBS-03 inclusive wall ticks"
@@ -95,9 +95,9 @@
       "completed_spans": 12,
       "horizon": 2,
       "inclusive_wall_ns": {
-        "maximum": 46375,
-        "median": 15749.5,
-        "minimum": 12781
+        "maximum": 43022,
+        "median": 15924.0,
+        "minimum": 12362
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -110,9 +110,9 @@
       "completed_spans": 12,
       "horizon": 2,
       "inclusive_wall_ns": {
-        "maximum": 1552513,
-        "median": 759598.5,
-        "minimum": 76477
+        "maximum": 1506418,
+        "median": 740253.5,
+        "minimum": 87163
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -125,9 +125,9 @@
       "completed_spans": 6,
       "horizon": 2,
       "inclusive_wall_ns": {
-        "maximum": 593516,
-        "median": 437314.5,
-        "minimum": 413812
+        "maximum": 646036,
+        "median": 427396.5,
+        "minimum": 406759
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -140,9 +140,9 @@
       "completed_spans": 6,
       "horizon": 2,
       "inclusive_wall_ns": {
-        "maximum": 40019,
-        "median": 37679.5,
-        "minimum": 30800
+        "maximum": 55384,
+        "median": 38169.0,
+        "minimum": 28147
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -155,9 +155,9 @@
       "completed_spans": 12,
       "horizon": 2,
       "inclusive_wall_ns": {
-        "maximum": 36807,
-        "median": 22628.5,
-        "minimum": 19974
+        "maximum": 75220,
+        "median": 21895.5,
+        "minimum": 18927
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -170,9 +170,9 @@
       "completed_spans": 12,
       "horizon": 2,
       "inclusive_wall_ns": {
-        "maximum": 1104688,
-        "median": 1023950.5,
-        "minimum": 958648
+        "maximum": 2507879,
+        "median": 1033519.0,
+        "minimum": 971569
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -185,9 +185,9 @@
       "completed_spans": 6,
       "horizon": 2,
       "inclusive_wall_ns": {
-        "maximum": 907803,
-        "median": 811177.5,
-        "minimum": 796406
+        "maximum": 859962,
+        "median": 816206.5,
+        "minimum": 807580
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -200,9 +200,9 @@
       "completed_spans": 6,
       "horizon": 2,
       "inclusive_wall_ns": {
-        "maximum": 52591,
+        "maximum": 50635,
         "median": 36248.0,
-        "minimum": 30590
+        "minimum": 31987
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -215,45 +215,15 @@
       "completed_spans": 12,
       "horizon": 2,
       "inclusive_wall_ns": {
-        "maximum": 37226,
-        "median": 26505.0,
-        "minimum": 22908
+        "maximum": 36806,
+        "median": 25771.0,
+        "minimum": 22070
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
       "operation": "geometry.projection",
       "stage": 2,
       "strategy": "csl.synthesis.reach-back",
-      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
-    },
-    {
-      "completed_spans": 6,
-      "horizon": 2,
-      "inclusive_wall_ns": {
-        "maximum": 791656,
-        "median": 764069.0,
-        "minimum": 745980
-      },
-      "measured_spans": 6,
-      "not_called_or_unavailable_spans": 0,
-      "operation": "strategy-b/run",
-      "stage": null,
-      "strategy": "csl.synthesis.strategy-b",
-      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
-    },
-    {
-      "completed_spans": 6,
-      "horizon": 2,
-      "inclusive_wall_ns": {
-        "maximum": 557477,
-        "median": 531391.0,
-        "minimum": 513826
-      },
-      "measured_spans": 6,
-      "not_called_or_unavailable_spans": 0,
-      "operation": "strategy-b/program-solve",
-      "stage": null,
-      "strategy": "csl.synthesis.strategy-b",
       "timing_scope": "instrumented OBS-03 inclusive wall ticks"
     },
     {
@@ -273,15 +243,75 @@
     },
     {
       "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 27099,
+        "median": 8207.0,
+        "minimum": 7962
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-b/program-build",
+      "stage": null,
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 1008306,
+        "median": 932667.5,
+        "minimum": 919327
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-b/run",
+      "stage": null,
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 566348,
+        "median": 521578.5,
+        "minimum": 501813
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-b/program-solve",
+      "stage": null,
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
       "horizon": 4,
       "inclusive_wall_ns": {
-        "maximum": 48271137,
-        "median": 46987551.0,
-        "minimum": 42038598
+        "maximum": 45971617,
+        "median": 43018775.5,
+        "minimum": 41425544
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
       "operation": "strategy-a/forward",
+      "stage": null,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 22978,
+        "median": 12641.5,
+        "minimum": 12013
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/terminal-preimage",
       "stage": null,
       "strategy": "csl.synthesis.reach-back",
       "timing_scope": "instrumented OBS-03 inclusive wall ticks"
@@ -305,13 +335,13 @@
       "completed_spans": 6,
       "horizon": 4,
       "inclusive_wall_ns": {
-        "maximum": 1757707,
-        "median": 1669393.0,
-        "minimum": 1647288
+        "maximum": 23048,
+        "median": 16692.0,
+        "minimum": 15365
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
-      "operation": "strategy-a/terminal-optimization",
+      "operation": "strategy-a/feasible-preimage",
       "stage": null,
       "strategy": "csl.synthesis.reach-back",
       "timing_scope": "instrumented OBS-03 inclusive wall ticks"
@@ -320,24 +350,9 @@
       "completed_spans": 6,
       "horizon": 4,
       "inclusive_wall_ns": {
-        "maximum": 18648,
-        "median": 12851.0,
-        "minimum": 12222
-      },
-      "measured_spans": 6,
-      "not_called_or_unavailable_spans": 0,
-      "operation": "strategy-a/terminal-preimage",
-      "stage": null,
-      "strategy": "csl.synthesis.reach-back",
-      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
-    },
-    {
-      "completed_spans": 6,
-      "horizon": 4,
-      "inclusive_wall_ns": {
-        "maximum": 50160288,
-        "median": 48876282.0,
-        "minimum": 43935570
+        "maximum": 47929353,
+        "median": 44993378.0,
+        "minimum": 43288365
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -350,13 +365,13 @@
       "completed_spans": 6,
       "horizon": 4,
       "inclusive_wall_ns": {
-        "maximum": 17601,
-        "median": 16273.5,
-        "minimum": 16064
+        "maximum": 1811626,
+        "median": 1700927.0,
+        "minimum": 1652317
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
-      "operation": "strategy-a/feasible-preimage",
+      "operation": "strategy-a/terminal-optimization",
       "stage": null,
       "strategy": "csl.synthesis.reach-back",
       "timing_scope": "instrumented OBS-03 inclusive wall ticks"
@@ -365,9 +380,9 @@
       "completed_spans": 12,
       "horizon": 4,
       "inclusive_wall_ns": {
-        "maximum": 51264,
-        "median": 46340.0,
-        "minimum": 14876
+        "maximum": 46933,
+        "median": 17565.0,
+        "minimum": 14388
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -380,9 +395,9 @@
       "completed_spans": 12,
       "horizon": 4,
       "inclusive_wall_ns": {
-        "maximum": 1354931,
-        "median": 725691.0,
-        "minimum": 74171
+        "maximum": 1350810,
+        "median": 695240.0,
+        "minimum": 76687
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -395,9 +410,9 @@
       "completed_spans": 6,
       "horizon": 4,
       "inclusive_wall_ns": {
-        "maximum": 443006,
-        "median": 428339.5,
-        "minimum": 416955
+        "maximum": 565509,
+        "median": 434416.0,
+        "minimum": 415070
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -410,9 +425,9 @@
       "completed_spans": 6,
       "horizon": 4,
       "inclusive_wall_ns": {
-        "maximum": 34642,
-        "median": 29543.0,
-        "minimum": 27098
+        "maximum": 72566,
+        "median": 32197.5,
+        "minimum": 27867
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -425,9 +440,9 @@
       "completed_spans": 12,
       "horizon": 4,
       "inclusive_wall_ns": {
-        "maximum": 37296,
-        "median": 18194.0,
-        "minimum": 16692
+        "maximum": 25283,
+        "median": 18298.5,
+        "minimum": 16273
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -440,9 +455,9 @@
       "completed_spans": 12,
       "horizon": 4,
       "inclusive_wall_ns": {
-        "maximum": 1127456,
-        "median": 1017105.5,
-        "minimum": 995804
+        "maximum": 1451103,
+        "median": 1022378.5,
+        "minimum": 997202
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -455,9 +470,9 @@
       "completed_spans": 6,
       "horizon": 4,
       "inclusive_wall_ns": {
-        "maximum": 871625,
-        "median": 813168.0,
-        "minimum": 803809
+        "maximum": 824412,
+        "median": 813657.0,
+        "minimum": 792704
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -470,9 +485,9 @@
       "completed_spans": 6,
       "horizon": 4,
       "inclusive_wall_ns": {
-        "maximum": 55733,
-        "median": 35060.5,
-        "minimum": 34292
+        "maximum": 52451,
+        "median": 33105.0,
+        "minimum": 28635
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -485,9 +500,9 @@
       "completed_spans": 12,
       "horizon": 4,
       "inclusive_wall_ns": {
-        "maximum": 44280,
-        "median": 36737.0,
-        "minimum": 27168
+        "maximum": 46306,
+        "median": 32127.0,
+        "minimum": 26609
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -500,9 +515,9 @@
       "completed_spans": 12,
       "horizon": 4,
       "inclusive_wall_ns": {
-        "maximum": 1120891,
-        "median": 1030306.0,
-        "minimum": 978902
+        "maximum": 1107481,
+        "median": 1008794.5,
+        "minimum": 982884
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -515,9 +530,9 @@
       "completed_spans": 6,
       "horizon": 4,
       "inclusive_wall_ns": {
-        "maximum": 866038,
-        "median": 846377.5,
-        "minimum": 831745
+        "maximum": 2043781,
+        "median": 852978.0,
+        "minimum": 842781
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -530,9 +545,9 @@
       "completed_spans": 6,
       "horizon": 4,
       "inclusive_wall_ns": {
-        "maximum": 48051,
-        "median": 46130.5,
-        "minimum": 42952
+        "maximum": 78991,
+        "median": 60273.5,
+        "minimum": 43860
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -545,9 +560,9 @@
       "completed_spans": 12,
       "horizon": 4,
       "inclusive_wall_ns": {
-        "maximum": 41137,
-        "median": 36737.0,
-        "minimum": 34851
+        "maximum": 165315,
+        "median": 37121.0,
+        "minimum": 28216
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -560,9 +575,9 @@
       "completed_spans": 12,
       "horizon": 4,
       "inclusive_wall_ns": {
-        "maximum": 1210009,
-        "median": 1037360.0,
-        "minimum": 994966
+        "maximum": 1119913,
+        "median": 1015291.0,
+        "minimum": 985817
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -575,9 +590,9 @@
       "completed_spans": 6,
       "horizon": 4,
       "inclusive_wall_ns": {
-        "maximum": 912134,
-        "median": 851197.0,
-        "minimum": 809955
+        "maximum": 876585,
+        "median": 826473.0,
+        "minimum": 820292
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -590,9 +605,9 @@
       "completed_spans": 6,
       "horizon": 4,
       "inclusive_wall_ns": {
-        "maximum": 61251,
-        "median": 54791.0,
-        "minimum": 46654
+        "maximum": 67747,
+        "median": 58283.5,
+        "minimum": 41137
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -605,45 +620,15 @@
       "completed_spans": 12,
       "horizon": 4,
       "inclusive_wall_ns": {
-        "maximum": 41486,
-        "median": 38343.0,
-        "minimum": 36736
+        "maximum": 60483,
+        "median": 39844.5,
+        "minimum": 36178
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
       "operation": "geometry.projection",
       "stage": 4,
       "strategy": "csl.synthesis.reach-back",
-      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
-    },
-    {
-      "completed_spans": 6,
-      "horizon": 4,
-      "inclusive_wall_ns": {
-        "maximum": 789631,
-        "median": 770669.0,
-        "minimum": 760297
-      },
-      "measured_spans": 6,
-      "not_called_or_unavailable_spans": 0,
-      "operation": "strategy-b/run",
-      "stage": null,
-      "strategy": "csl.synthesis.strategy-b",
-      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
-    },
-    {
-      "completed_spans": 6,
-      "horizon": 4,
-      "inclusive_wall_ns": {
-        "maximum": 561597,
-        "median": 544451.5,
-        "minimum": 536525
-      },
-      "measured_spans": 6,
-      "not_called_or_unavailable_spans": 0,
-      "operation": "strategy-b/program-solve",
-      "stage": null,
-      "strategy": "csl.synthesis.strategy-b",
       "timing_scope": "instrumented OBS-03 inclusive wall ticks"
     },
     {
@@ -663,15 +648,75 @@
     },
     {
       "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 26610,
+        "median": 10161.5,
+        "minimum": 9498
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-b/program-build",
+      "stage": null,
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 2566337,
+        "median": 1008061.5,
+        "minimum": 957740
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-b/run",
+      "stage": null,
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 1386919,
+        "median": 579477.5,
+        "minimum": 544278
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-b/program-solve",
+      "stage": null,
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 132398130,
-        "median": 131584648.5,
-        "minimum": 130528955
+        "maximum": 140947731,
+        "median": 129722478.5,
+        "minimum": 128789322
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
       "operation": "strategy-a/forward",
+      "stage": null,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 30521,
+        "median": 17914.5,
+        "minimum": 17111
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/terminal-preimage",
       "stage": null,
       "strategy": "csl.synthesis.reach-back",
       "timing_scope": "instrumented OBS-03 inclusive wall ticks"
@@ -695,13 +740,13 @@
       "completed_spans": 6,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 3443199,
-        "median": 2849265.0,
-        "minimum": 2816928
+        "maximum": 21023,
+        "median": 19625.5,
+        "minimum": 18857
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
-      "operation": "strategy-a/terminal-optimization",
+      "operation": "strategy-a/feasible-preimage",
       "stage": null,
       "strategy": "csl.synthesis.reach-back",
       "timing_scope": "instrumented OBS-03 inclusive wall ticks"
@@ -710,24 +755,9 @@
       "completed_spans": 6,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 23816,
-        "median": 19171.5,
-        "minimum": 17600
-      },
-      "measured_spans": 6,
-      "not_called_or_unavailable_spans": 0,
-      "operation": "strategy-a/terminal-preimage",
-      "stage": null,
-      "strategy": "csl.synthesis.reach-back",
-      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
-    },
-    {
-      "completed_spans": 6,
-      "horizon": 8,
-      "inclusive_wall_ns": {
-        "maximum": 135671334,
-        "median": 134967399.0,
-        "minimum": 133713879
+        "maximum": 144237210,
+        "median": 132912328.0,
+        "minimum": 131970267
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -740,13 +770,13 @@
       "completed_spans": 6,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 21022,
-        "median": 20288.5,
-        "minimum": 19696
+        "maximum": 2911146,
+        "median": 2822168.0,
+        "minimum": 2795139
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
-      "operation": "strategy-a/feasible-preimage",
+      "operation": "strategy-a/terminal-optimization",
       "stage": null,
       "strategy": "csl.synthesis.reach-back",
       "timing_scope": "instrumented OBS-03 inclusive wall ticks"
@@ -755,9 +785,9 @@
       "completed_spans": 12,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 22489,
-        "median": 21371.5,
-        "minimum": 19136
+        "maximum": 37156,
+        "median": 22000.0,
+        "minimum": 18298
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -770,9 +800,9 @@
       "completed_spans": 12,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 1354860,
-        "median": 701281.5,
-        "minimum": 77245
+        "maximum": 1350810,
+        "median": 705297.0,
+        "minimum": 87233
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -785,9 +815,9 @@
       "completed_spans": 6,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 519414,
-        "median": 449711.0,
-        "minimum": 438257
+        "maximum": 547211,
+        "median": 496854.5,
+        "minimum": 455298
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -800,9 +830,9 @@
       "completed_spans": 6,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 45397,
-        "median": 35304.5,
-        "minimum": 34362
+        "maximum": 48260,
+        "median": 41660.5,
+        "minimum": 33384
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -815,8 +845,8 @@
       "completed_spans": 12,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 39670,
-        "median": 23676.5,
+        "maximum": 36667,
+        "median": 22768.0,
         "minimum": 20883
       },
       "measured_spans": 12,
@@ -830,9 +860,9 @@
       "completed_spans": 12,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 1128853,
-        "median": 1033588.5,
-        "minimum": 997340
+        "maximum": 1116980,
+        "median": 1049303.5,
+        "minimum": 1010331
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -845,9 +875,9 @@
       "completed_spans": 6,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 997899,
-        "median": 838939.5,
-        "minimum": 831745
+        "maximum": 838940,
+        "median": 825879.5,
+        "minimum": 805345
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -860,9 +890,9 @@
       "completed_spans": 6,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 52800,
-        "median": 48225.5,
-        "minimum": 35340
+        "maximum": 38063,
+        "median": 36422.5,
+        "minimum": 35270
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -875,9 +905,9 @@
       "completed_spans": 12,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 70261,
-        "median": 25911.5,
-        "minimum": 22908
+        "maximum": 40857,
+        "median": 24898.0,
+        "minimum": 23327
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -890,9 +920,9 @@
       "completed_spans": 12,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 1139049,
-        "median": 1034775.5,
-        "minimum": 1005512
+        "maximum": 1116072,
+        "median": 1064982.0,
+        "minimum": 1004883
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -905,9 +935,9 @@
       "completed_spans": 6,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 878610,
-        "median": 863034.5,
-        "minimum": 848926
+        "maximum": 888807,
+        "median": 868762.0,
+        "minimum": 863524
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -920,9 +950,9 @@
       "completed_spans": 6,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 84998,
-        "median": 48400.5,
-        "minimum": 45955
+        "maximum": 65861,
+        "median": 47422.5,
+        "minimum": 45607
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -935,9 +965,9 @@
       "completed_spans": 12,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 61181,
-        "median": 36737.0,
-        "minimum": 27238
+        "maximum": 121734,
+        "median": 36771.5,
+        "minimum": 26749
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -950,9 +980,9 @@
       "completed_spans": 12,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 1117049,
-        "median": 1059569.5,
-        "minimum": 1019759
+        "maximum": 1250448,
+        "median": 1093793.0,
+        "minimum": 1028350
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -965,9 +995,9 @@
       "completed_spans": 6,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 904171,
-        "median": 849869.5,
-        "minimum": 820850
+        "maximum": 1049443,
+        "median": 841943.0,
+        "minimum": 819593
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -980,9 +1010,9 @@
       "completed_spans": 6,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 58108,
-        "median": 46410.0,
-        "minimum": 44000
+        "maximum": 81784,
+        "median": 46270.5,
+        "minimum": 43790
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -995,9 +1025,9 @@
       "completed_spans": 12,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 58667,
-        "median": 37994.0,
-        "minimum": 35620
+        "maximum": 75011,
+        "median": 36981.0,
+        "minimum": 36666
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -1010,9 +1040,9 @@
       "completed_spans": 12,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 1197018,
-        "median": 1073642.0,
-        "minimum": 1012497
+        "maximum": 1292143,
+        "median": 1064738.5,
+        "minimum": 1012985
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -1025,9 +1055,9 @@
       "completed_spans": 6,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 1026045,
-        "median": 869006.0,
-        "minimum": 852978
+        "maximum": 1211546,
+        "median": 871625.0,
+        "minimum": 864222
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -1040,9 +1070,9 @@
       "completed_spans": 6,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 63486,
-        "median": 61391.5,
-        "minimum": 57200
+        "maximum": 65372,
+        "median": 62264.0,
+        "minimum": 59575
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -1055,9 +1085,9 @@
       "completed_spans": 12,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 81086,
-        "median": 40717.5,
-        "minimum": 36807
+        "maximum": 75080,
+        "median": 40788.0,
+        "minimum": 36806
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -1070,9 +1100,9 @@
       "completed_spans": 12,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 1164193,
-        "median": 1069347.5,
-        "minimum": 1023042
+        "maximum": 1215527,
+        "median": 1095503.5,
+        "minimum": 1040014
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -1085,9 +1115,9 @@
       "completed_spans": 6,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 1077449,
-        "median": 891425.5,
-        "minimum": 874350
+        "maximum": 985538,
+        "median": 919781.5,
+        "minimum": 900191
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -1101,8 +1131,8 @@
       "horizon": 8,
       "inclusive_wall_ns": {
         "maximum": 64394,
-        "median": 61914.5,
-        "minimum": 59016
+        "median": 62613.5,
+        "minimum": 60483
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -1115,9 +1145,9 @@
       "completed_spans": 12,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 62229,
-        "median": 42219.0,
-        "minimum": 38133
+        "maximum": 76546,
+        "median": 42428.5,
+        "minimum": 38274
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -1130,9 +1160,9 @@
       "completed_spans": 12,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 1292212,
-        "median": 1074516.0,
-        "minimum": 1018503
+        "maximum": 1129481,
+        "median": 1059150.5,
+        "minimum": 1026116
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -1145,9 +1175,9 @@
       "completed_spans": 6,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 987353,
-        "median": 901203.5,
-        "minimum": 889923
+        "maximum": 947753,
+        "median": 899981.0,
+        "minimum": 889295
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -1160,9 +1190,9 @@
       "completed_spans": 6,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 68794,
-        "median": 65057.5,
-        "minimum": 62369
+        "maximum": 80249,
+        "median": 66070.5,
+        "minimum": 62020
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -1175,9 +1205,9 @@
       "completed_spans": 12,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 70541,
-        "median": 46165.0,
-        "minimum": 42882
+        "maximum": 51194,
+        "median": 45362.0,
+        "minimum": 42045
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -1190,9 +1220,9 @@
       "completed_spans": 12,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 1243114,
-        "median": 1077658.5,
-        "minimum": 1028420
+        "maximum": 1211546,
+        "median": 1093967.0,
+        "minimum": 1046160
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
@@ -1205,9 +1235,9 @@
       "completed_spans": 6,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 994757,
-        "median": 878819.0,
-        "minimum": 862476
+        "maximum": 967728,
+        "median": 916079.5,
+        "minimum": 866527
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -1220,9 +1250,9 @@
       "completed_spans": 6,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 85766,
-        "median": 65267.0,
-        "minimum": 62718
+        "maximum": 78922,
+        "median": 64848.0,
+        "minimum": 61181
       },
       "measured_spans": 6,
       "not_called_or_unavailable_spans": 0,
@@ -1235,45 +1265,15 @@
       "completed_spans": 12,
       "horizon": 8,
       "inclusive_wall_ns": {
-        "maximum": 92471,
-        "median": 48469.5,
-        "minimum": 44350
+        "maximum": 61530,
+        "median": 49133.5,
+        "minimum": 44490
       },
       "measured_spans": 12,
       "not_called_or_unavailable_spans": 0,
       "operation": "geometry.projection",
       "stage": 8,
       "strategy": "csl.synthesis.reach-back",
-      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
-    },
-    {
-      "completed_spans": 6,
-      "horizon": 8,
-      "inclusive_wall_ns": {
-        "maximum": 954877,
-        "median": 868377.5,
-        "minimum": 820222
-      },
-      "measured_spans": 6,
-      "not_called_or_unavailable_spans": 0,
-      "operation": "strategy-b/run",
-      "stage": null,
-      "strategy": "csl.synthesis.strategy-b",
-      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
-    },
-    {
-      "completed_spans": 6,
-      "horizon": 8,
-      "inclusive_wall_ns": {
-        "maximum": 684869,
-        "median": 622325.0,
-        "minimum": 580315
-      },
-      "measured_spans": 6,
-      "not_called_or_unavailable_spans": 0,
-      "operation": "strategy-b/program-solve",
-      "stage": null,
-      "strategy": "csl.synthesis.strategy-b",
       "timing_scope": "instrumented OBS-03 inclusive wall ticks"
     },
     {
@@ -1290,17 +1290,62 @@
       "stage": null,
       "strategy": "csl.synthesis.strategy-b",
       "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 12292,
+        "median": 11349.5,
+        "minimum": 10895
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-b/program-build",
+      "stage": null,
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 1148060,
+        "median": 1056322.5,
+        "minimum": 1018713
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-b/run",
+      "stage": null,
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 663567,
+        "median": 610941.0,
+        "minimum": 588207
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-b/program-solve",
+      "stage": null,
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
     }
   ],
-  "measured_provider_operations": [
+  "measured_operations": [
     "geometry affine-image",
     "geometry Minkowski-sum",
     "geometry to-H conversion",
     "geometry projection",
+    "Strategy B joint program build",
     "Strategy B LP program run"
   ],
   "not_measured": [
-    "joint sparse assembly time",
     "LP factorization internals",
     "per-stage family queries",
     "witness-selector queries"

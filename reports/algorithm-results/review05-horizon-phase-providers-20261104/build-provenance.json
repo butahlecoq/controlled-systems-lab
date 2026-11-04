@@ -1,7 +1,7 @@
 {
   "schema": "csl.review05.build-provenance/1",
-  "source_revision": "72718e15e1ae9599b1d579a72442e97eda8a5a0a",
-  "harness_revision": "72718e15e1ae9599b1d579a72442e97eda8a5a0a",
+  "source_revision": "0fea58ef893f677f62a506ae5039b7ae7fe26531",
+  "harness_revision": "0fea58ef893f677f62a506ae5039b7ae7fe26531",
   "source_worktree_dirty": false,
   "build_type": "Release",
   "generator": "Ninja",
@@ -10,8 +10,9 @@
   "cxx_compiler": "c++ (GCC) 16.2.1 20260810",
   "configure_command": "cmake -S benchmarks/reporting/review05 -B <BUILD_DIR> -DCSL_SOURCE_ROOT=<SOURCE_ROOT> -DCMAKE_BUILD_TYPE=Release -G Ninja",
   "build_command": "ninja -C <BUILD_DIR> -j4 csl_review05_horizon_ladder",
-  "binary_sha256": "3da830ead11af6f3c2c4b424fe66e407a24b5ce8621dc9d8253833510f98492d",
+  "binary_sha256": "2d2e592ba5e3948a37aafce7599514b61ee107b984f3761495951a72d3fa48cd",
   "warnings": [
-    "The Release target completed successfully."
+    "Release target completed successfully.",
+    "Strategy B program-build span includes joint sparse H assembly and solver program-object construction; it does not isolate substeps."
   ]
 }
