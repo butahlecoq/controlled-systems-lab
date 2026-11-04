@@ -111,7 +111,7 @@ PhaseCollector make_phase_collector(const problem::ResolvedProblem& problem,
     const std::vector<std::string> operations = strategy_a
         ? std::vector<std::string>{"strategy-a/run", "strategy-a/forward", "strategy-a/feasible-preimage",
             "strategy-a/terminal-optimization", "strategy-a/terminal-preimage", "strategy-a/family-construction"}
-        : std::vector<std::string>{"strategy-b/run", "strategy-b/family-construction"};
+        : std::vector<std::string>{"strategy-b/run", "strategy-b/family-construction", "strategy-b/program-build"};
     ob::PlanInput plan{problem, std::move(resolved_config), {std::move(run_id)},
         {clock->wall_domain()}, {}, 1};
     plan.tasks = {strategy_a ? "strategy-a" : "strategy-b"};

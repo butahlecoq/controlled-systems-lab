@@ -10,9 +10,9 @@ STRATEGIES = ("csl.synthesis.reach-back", "csl.synthesis.strategy-b")
 STRATEGY_OPERATIONS = {
     STRATEGIES[0]: {"strategy-a/run", "strategy-a/forward", "strategy-a/feasible-preimage",
         "strategy-a/terminal-optimization", "strategy-a/terminal-preimage", "strategy-a/family-construction"},
-    STRATEGIES[1]: {"strategy-b/run", "strategy-b/family-construction", "strategy-b/program-solve"},
+    STRATEGIES[1]: {"strategy-b/run", "strategy-b/family-construction", "strategy-b/program-solve", "strategy-b/program-build"},
 }
-NOT_MEASURED = ["joint sparse assembly time", "LP factorization internals", "per-stage family queries",
+NOT_MEASURED = ["LP factorization internals", "per-stage family queries",
                 "witness-selector queries"]
 
 
@@ -76,7 +76,7 @@ def summarize(attempts_path: Path, output_path: Path) -> dict[str, object]:
     result = {"schema": "csl.review05.phase-summary/2",
         "claim": "instrumented strategy and provider-call diagnostics; not directly comparable to the uninstrumented strategy timing ladder",
         "instrumented_phases": summary,
-        "measured_provider_operations": ["geometry affine-image", "geometry Minkowski-sum", "geometry to-H conversion", "geometry projection", "Strategy B LP program run"],
+        "measured_operations": ["geometry affine-image", "geometry Minkowski-sum", "geometry to-H conversion", "geometry projection", "Strategy B joint program build", "Strategy B LP program run"],
         "not_measured": NOT_MEASURED,
         "relation_scope": "candidate-relaxation outputs independently checked against the pinned analytic fixtures; exact history equality is fixture-specific and does not imply general family completeness"}
     output_path.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
