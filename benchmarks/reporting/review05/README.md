@@ -86,11 +86,15 @@ Build `csl_review05_dimension_ladder` in a clean Release tree, then run:
 python3 benchmarks/reporting/review05/run_dimension_ladder.py \
   --driver /tmp/csl-review05-dimension-build/csl_review05_dimension_ladder \
   --scenarios benchmarks/reporting/review05/scenarios \
-  --output /tmp/csl-review05-dimension-results
+  --output /tmp/csl-review05-dimension-results \
+  --resource-receipts
 python3 benchmarks/reporting/review05/check_dimension_ladder.py \
   --bundle /tmp/csl-review05-dimension-results
 python3 benchmarks/reporting/review05/summarize_dimension_ladder.py \
   --bundle /tmp/csl-review05-dimension-results
+python3 benchmarks/reporting/review05/summarize_dimension_resource.py \
+  --attempts /tmp/csl-review05-dimension-results/attempts.jsonl \
+  --output /tmp/csl-review05-dimension-results/resource-summary.json
 python3 benchmarks/reporting/review05/render_dimension_ladder.py \
   --bundle /tmp/csl-review05-dimension-results
 ```
