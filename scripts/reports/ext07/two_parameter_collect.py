@@ -213,6 +213,19 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
     }
     trials = measure[1:]
     host = read_json(capture / "host.json")
+    if capacity_rows is not None:
+        expected_limit_metadata = {
+            "baseline": {"max_horizon": 2, "max_paths": 2},
+            "capacity": [{"paths": count, "max_horizon": 2,
+                          "max_paths": count} for count in (1, 2, 4, 8, 16)],
+        }
+        expected_warmup_metadata = {
+            "baseline": "One excluded 10-call batch followed by seven measured 20-call batches",
+            "capacity": "Two excluded calls per path-count fixture, followed by seven measured batches of 10 calls",
+        }
+        require(host.get("enumeration_limits") == expected_limit_metadata and
+                host.get("warmup_policy") == expected_warmup_metadata,
+                "EXT-07 baseline/capacity execution limits or warmups differ")
     cache = (capture / "CMakeCache.raw.txt").read_bytes()
     release_configuration = (
         b"CMAKE_CONFIGURATION_TYPES:STRING=Debug;Release;MinSizeRel;RelWithDebInfo" in cache and

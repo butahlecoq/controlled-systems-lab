@@ -102,11 +102,18 @@ def capture(source: Path, destination: Path, commit: str, cmake: str,
         "outer_workers_requested": 1, "outer_workers_observed": 1,
         "workspace_reuse": "none; fresh fixture, provider and workspace per call",
         "absolute_tolerance": 1e-8, "relative_tolerance": 1e-8,
-        "enumeration_limits": {"max_horizon": 2, "max_paths": 8},
+        "enumeration_limits": {
+            "baseline": {"max_horizon": 2, "max_paths": 2},
+            "capacity": [{"paths": count, "max_horizon": 2,
+                          "max_paths": count} for count in (1, 2, 4, 8, 16)],
+        },
         "relation_limits": {"max_variables": 64, "max_rows": 4096,
                              "max_matrix_elements": 65536},
         "timing_scope": "One end-to-end call includes fixture/provider setup, complete path relation assembly, LP execution, candidate-face construction, and verification of all allowed path families. Serialization, build, and rendering are excluded.",
-        "warmup_policy": "One excluded 10-call batch followed by seven measured 20-call batches",
+        "warmup_policy": {
+            "baseline": "One excluded 10-call batch followed by seven measured 20-call batches",
+            "capacity": "Two excluded calls per path-count fixture, followed by seven measured batches of 10 calls",
+        },
         "raw_configure_log_sha256": hashlib.sha256(
             (destination / "configure.log.raw").read_bytes()).hexdigest(),
         "raw_build_log_sha256": hashlib.sha256(
