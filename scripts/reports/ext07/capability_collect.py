@@ -9,16 +9,16 @@ import statistics
 from collections import defaultdict
 
 EXPECTED = {
-    (1, 1, 1, 2, 1, 1),
-    (2, 2, 1, 2, 1, 1),
-    (4, 4, 1, 2, 1, 1),
-    (8, 8, 1, 2, 1, 1),
-    (1, 1, 2, 2, 2, 1),
-    (1, 1, 4, 2, 2, 1),
-    (1, 1, 8, 2, 2, 1),
-    (1, 1, 4, 4, 4, 1),
-    (1, 1, 4, 8, 8, 1),
-    (1, 1, 8, 2, 4, 256),
+    (1, 1, 1, 2, 1, 1): (2, "single-chain"),
+    (2, 2, 1, 2, 1, 1): (2, "single-chain"),
+    (4, 4, 1, 2, 1, 1): (2, "single-chain"),
+    (8, 8, 1, 2, 1, 1): (2, "single-chain"),
+    (1, 1, 2, 2, 2, 1): (4, "single-chain"),
+    (1, 1, 4, 2, 2, 1): (16, "single-chain"),
+    (1, 1, 8, 2, 2, 1): (256, "single-chain"),
+    (1, 1, 4, 4, 4, 1): (16, "single-chain"),
+    (1, 1, 4, 8, 8, 1): (16, "single-chain"),
+    (1, 1, 8, 2, 4, 256): (256, "parallel-branching"),
 }
 PROFILE = ("state_dimension", "control_dimension", "horizon", "mode_count",
            "edge_count", "path_count")
@@ -32,11 +32,11 @@ def collect(raw: Path, output: Path) -> list[dict]:
         key = tuple(row[field] for field in PROFILE)
         if row.get("calls") != 1000 or row.get("repetition") not in range(7):
             raise ValueError("Unexpected call count or repetition index")
-        if row.get("family") not in {"single-chain", "parallel-branching"}:
-            raise ValueError("Unexpected fixture family")
+        if (row.get("path_cap"), row.get("family")) != EXPECTED[key]:
+            raise ValueError("A fixture path cap or family label differs")
         groups[key].append(row)
 
-    if set(groups) != EXPECTED or any(len(group) != 7 for group in groups.values()):
+    if set(groups) != set(EXPECTED) or any(len(group) != 7 for group in groups.values()):
         raise ValueError("Raw rows do not contain the complete ten-profile, seven-repeat matrix")
     for group in groups.values():
         if {row["repetition"] for row in group} != set(range(7)):
