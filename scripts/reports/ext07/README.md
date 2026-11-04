@@ -88,6 +88,31 @@ its configure and build logs redact that path, and its saved capture retains a
 copy of the executable. When the default capture-local build tree is used, the
 driver records that executable in place.
 
+## Capability admission and complete-path profile
+
+`capability_driver.cpp` measures only `report_hybrid_capability`: model-profile
+validation plus complete permitted-path enumeration. It does not construct
+joint relations, invoke LP providers, or run optimization. Ten fixtures vary
+state/control dimension (1, 2, 4, 8), horizon (1, 2, 4, 8), mode/edge catalogue
+size (2/2, 4/4, 8/8), and complete path count (1 or 256). Each fixture has one
+excluded 1,000-call warmup and seven 1,000-call measured batches; fixture order
+is repeated each batch to limit time-order drift. A refusal, incomplete report,
+or empty path count fails the capture. `capability_collect.py` checks that all
+ten profiles and seven repetitions are present before it computes medians and
+ranges.
+
+Use a clean checkout of the source commit recorded in the saved report:
+
+```sh
+python scripts/reports/ext07/capability_capture.py --source <frozen-source> --capture <fresh-capture> --commit <source-commit> --cmake <cmake-executable>
+python scripts/reports/ext07/capability_collect.py --raw <fresh-capture>/measure.jsonl --out <summary-directory>
+```
+
+Per-call elapsed time is descriptive for this admission/enumeration routine;
+it is not a hybrid solver benchmark or a general scalability claim. See the
+saved [capability scale profile](../../../docs/research/ext07-capability-profile.md)
+for the source identity, raw data, host, medians, and observed limits.
+
 ```sh
 python scripts/reports/ext07/two_parameter_capture.py --source <frozen-source> --capture <fresh-capture> --commit <source-commit> --cmake <cmake-executable>
 python scripts/reports/ext07/two_parameter_collect.py --capture <fresh-capture> --source <frozen-source> --out reports/algorithm-results
