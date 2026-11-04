@@ -55,7 +55,7 @@ def capture(source: Path, destination: Path, commit: str, cmake: str,
     capture_executable.parent.mkdir(parents=True, exist_ok=True)
     if executable.resolve() != capture_executable.resolve():
         shutil.copyfile(executable, capture_executable)
-    for phase in ("smoke", "measure"):
+    for phase in ("smoke", "measure", "capacity"):
         result = subprocess.run([str(executable), phase], cwd=source, env=env,
                                 capture_output=True)
         (destination / f"{phase}.jsonl").write_bytes(result.stdout)

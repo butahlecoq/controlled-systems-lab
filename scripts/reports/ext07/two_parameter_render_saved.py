@@ -35,7 +35,8 @@ def validate(bundle: Path) -> dict:
     require(schema in {"csl.ext07-hybrid-two-parameter-report/1",
                        "csl.ext07-hybrid-two-parameter-report/2",
                        "csl.ext07-hybrid-two-parameter-report/3",
-                       "csl.ext07-hybrid-two-parameter-report/4"} and
+                       "csl.ext07-hybrid-two-parameter-report/4",
+                       "csl.ext07-hybrid-two-parameter-report/5"} and
             record.get("report_id") == bundle.name == expected_id,
             "Two-parameter report identity differs")
     for name in collect.source_files_for_record(record):
@@ -75,6 +76,16 @@ def validate(bundle: Path) -> dict:
             measurement["max_batch_end_to_end_ns"] == max(totals) and
             measurement["median_call_ns"] == int(statistics.median(call_times)),
             "Two-parameter summary timings differ from raw calls")
+    if schema.endswith("/5"):
+        capacity = record["solver_capacity_profile"]
+        capacity_rows = collect.jsonl(bundle / "capacity.jsonl", 40)
+        require(capacity["raw_capacity_sha256"] ==
+                collect.sha((bundle / "capacity.jsonl").read_bytes()) and
+                capacity["trials"] == capacity_rows and
+                capacity["measured_calls"] == 350 and
+                capacity["branch_outcomes"] == 2170 and
+                capacity["failures"] == 0,
+                "EXT-07 solver capacity raw evidence differs")
     if schema.endswith(("/2", "/3", "/4")):
         require(measurement["process_cpu"] ==
                 collect.common.process_cpu_summary(trials, collect.EXPECTED_PATHS),
@@ -118,10 +129,10 @@ def summary_csv(record: dict) -> bytes:
         for path in collect.EXPECTED_PATHS:
             header.extend([f"process_cpu_{path}_min_ns", f"process_cpu_{path}_median_ns",
                            f"process_cpu_{path}_max_ns", f"process_cpu_{path}_unavailable"])
-    if record["schema"].endswith(("/3", "/4")):
+    if record["schema"].endswith(("/3", "/4", "/5")):
         header.extend(["operation_thread_cpu_min_ns", "operation_thread_cpu_median_ns",
                        "operation_thread_cpu_max_ns", "operation_thread_cpu_unavailable"])
-    if record["schema"].endswith("/4"):
+    if record["schema"].endswith(("/4", "/5")):
         for path in collect.EXPECTED_PATHS:
             header.extend([f"provider_wall_{path}_min_ns", f"provider_wall_{path}_median_ns",
                            f"provider_wall_{path}_max_ns", f"provider_cpu_{path}_min_ns",
@@ -247,7 +258,34 @@ def index_page(record: dict) -> bytes:
         f"<tr><td>{row['repetition']}</td><td>{row['calls']}</td>"
         f"<td>{row['end_to_end_total_ns']:,}</td><td>0</td></tr>"
         for row in measurement["trials"])
-    return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EXT-07 two-parameter verifier report</title><style>body{{background:#16161e;color:#e0def4;font:16px/1.55 system-ui,sans-serif;margin:0}}main,header,footer{{max-width:980px;margin:auto;padding:1.2rem}}a{{color:#9ccfd8}}section{{background:#23212c;border:1px solid #524f67;border-radius:12px;padding:1rem;margin:1rem 0}}table{{border-collapse:collapse;width:100%}}td,th{{border:1px solid #524f67;padding:.45rem;text-align:left}}code{{overflow-wrap:anywhere}}</style></head><body><header><p>Controlled Systems Lab · EXT-07</p><h1>Two-parameter hybrid family verification</h1><p>Measured public path construction, two-branch optimization, and complete-family verification for one fixed two-stage scalar fixture.</p></header><main><section><h2>Analytic answer</h2><p>The <code>enter-half</code> path has feasible controls <code>[0,0.5]×[0,1]</code>; <code>enter-full</code> has <code>[0,1]×[0,1]</code>. Both minimize <code>x_terminal=u₀</code> at zero, retaining the complete tied families <code>u₀=0, 0≤u₁≤1</code>.</p><p><a href="two-control-example.html">Open the standalone two-control example</a> (includes a labelled plot, fixture, independent answer, and reproduction commands).</p><img src="feasible-polygons.svg" alt="The full unit square, half-width feasible rectangle, and common minimizing face"></section><section><h2>Measured execution</h2><p>One excluded 10-call warmup followed by seven measured batches of 20 calls: 140 measured calls, no failures. Median batch duration is {measurement['median_batch_end_to_end_ns']:,} ns (range {measurement['min_batch_end_to_end_ns']:,}–{measurement['max_batch_end_to_end_ns']:,} ns); median individual call is {measurement['median_call_ns']:,} ns. Each end-to-end interval includes fixture/provider setup, complete two-path relation assembly, both HiGHS LP solves, tied-face construction, and verification of both path families. CTest and build time are excluded.</p><table><thead><tr><th>Batch</th><th>Calls</th><th>End-to-end total (ns)</th><th>Failures</th></tr></thead><tbody>{trials}</tbody></table><p>Recorded provider: <code>{collect.EXPECTED_PROVIDER}</code>. Verifier: <code>{verifier}</code>. Outcomes for both branches are feasibility, objective optimality, and continuous coverage established.</p>{cpu_note}</section><section><h2>Scope and provenance</h2><p>This is descriptive evidence for {host_scope} and one analytic fixture. It makes no comparison, speedup, source-mapped bottleneck, or scalability claim. It covers exactly two scalar free controls; larger polytope dimensions and general horizons remain unmeasured. Assurance is numerical binary64, not validated arithmetic.</p><p>Source commit: <code>{source}</code>. See <a href="records.json">versioned record</a>, <a href="measure.jsonl">raw per-call timings and batches</a>, <a href="smoke.jsonl">smoke record</a>, <a href="summary.csv">summary CSV</a>, <a href="manifest.json">hash manifest</a>, <a href="two_parameter_driver.cpp">measured driver</a>, and <a href="{html.escape(record['report_id'])}.zip">offline ZIP</a>.</p></section></main><footer>EXT-07 · two-parameter numerical evidence · source <code>{source}</code></footer></body></html>'''.encode()
+    capacity_section = ""
+    capacity_link = ""
+    if record["schema"].endswith("/5"):
+        capacity_link = ', <a href="capacity.jsonl">solver capacity raw evidence</a>'
+        capacity = record["solver_capacity_profile"]
+        rows = []
+        for path_count in capacity["path_counts"]:
+            trials_for_count = [row for row in capacity["trials"]
+                                if row["phase"] == "trial" and row["paths"] == path_count]
+            samples = [value for row in trials_for_count
+                       for value in row["call_durations_ns"]]
+            rows.append(f"<tr><td>{path_count}</td><td>{len(trials_for_count)}</td>"
+                        f"<td>{len(samples)}</td><td>{int(statistics.median(samples)):,}</td>"
+                        f"<td>{min(samples):,}–{max(samples):,}</td><td>0</td></tr>")
+        capacity_section = (
+            '<section><h2>Full solver and family capacity</h2>'
+            '<p>Each call assembles every path relation, runs HiGHS on every branch, builds '
+            'all tied minimizing faces, and verifies complete family coverage. Seven measured '
+            'batches of ten calls follow two excluded warmup calls per fixture. See the '
+            '<a href="capacity.jsonl">raw capacity records</a>.</p>'
+            '<table><thead><tr><th>Tied paths</th><th>Repetitions</th><th>Calls</th>'
+            '<th>Median call (ns)</th><th>Range (ns)</th><th>Failures</th></tr></thead><tbody>'
+            + "".join(rows) + '</tbody></table>'
+            '<p>Single scalar two-stage fixture on one host: descriptive capacity evidence only, '
+            'not a general scalability or solver limit claim. Provider memory remains '
+            'unmeasured; process CPU is not provider-only attribution.</p></section>')
+    document = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EXT-07 two-parameter verifier report</title><style>body{{background:#16161e;color:#e0def4;font:16px/1.55 system-ui,sans-serif;margin:0}}main,header,footer{{max-width:980px;margin:auto;padding:1.2rem}}a{{color:#9ccfd8}}section{{background:#23212c;border:1px solid #524f67;border-radius:12px;padding:1rem;margin:1rem 0}}table{{border-collapse:collapse;width:100%}}td,th{{border:1px solid #524f67;padding:.45rem;text-align:left}}code{{overflow-wrap:anywhere}}</style></head><body><header><p>Controlled Systems Lab · EXT-07</p><h1>Two-parameter hybrid family verification</h1><p>Measured public path construction, two-branch optimization, and complete-family verification for one fixed two-stage scalar fixture.</p></header><main><section><h2>Analytic answer</h2><p>The <code>enter-half</code> path has feasible controls <code>[0,0.5]×[0,1]</code>; <code>enter-full</code> has <code>[0,1]×[0,1]</code>. Both minimize <code>x_terminal=u₀</code> at zero, retaining the complete tied families <code>u₀=0, 0≤u₁≤1</code>.</p><p><a href="two-control-example.html">Open the standalone two-control example</a> (includes a labelled plot, fixture, independent answer, and reproduction commands).</p><img src="feasible-polygons.svg" alt="The full unit square, half-width feasible rectangle, and common minimizing face"></section><section><h2>Measured execution</h2><p>One excluded 10-call warmup followed by seven measured batches of 20 calls: 140 measured calls, no failures. Median batch duration is {measurement['median_batch_end_to_end_ns']:,} ns (range {measurement['min_batch_end_to_end_ns']:,}–{measurement['max_batch_end_to_end_ns']:,} ns); median individual call is {measurement['median_call_ns']:,} ns. Each end-to-end interval includes fixture/provider setup, complete two-path relation assembly, both HiGHS LP solves, tied-face construction, and verification of both path families. CTest and build time are excluded.</p><table><thead><tr><th>Batch</th><th>Calls</th><th>End-to-end total (ns)</th><th>Failures</th></tr></thead><tbody>{trials}</tbody></table><p>Recorded provider: <code>{collect.EXPECTED_PROVIDER}</code>. Verifier: <code>{verifier}</code>. Outcomes for both branches are feasibility, objective optimality, and continuous coverage established.</p>{cpu_note}</section>{capacity_section}<section><h2>Scope and provenance</h2><p>This is descriptive evidence for {host_scope} and one analytic fixture. It makes no comparison, speedup, source-mapped bottleneck, or scalability claim. It covers exactly two scalar free controls; larger polytope dimensions and general horizons remain unmeasured. Assurance is numerical binary64, not validated arithmetic.</p><p>Source commit: <code>{source}</code>. See <a href="records.json">versioned record</a>, <a href="measure.jsonl">raw per-call timings and batches</a>, <a href="smoke.jsonl">smoke record</a>{capacity_link}, <a href="summary.csv">summary CSV</a>, <a href="manifest.json">hash manifest</a>, <a href="two_parameter_driver.cpp">measured driver</a>, and <a href="{html.escape(record['report_id'])}.zip">offline ZIP</a>.</p></section></main><footer>EXT-07 · two-parameter numerical evidence · source <code>{source}</code></footer></body></html>'''
+    return document.encode()
 
 
 def offline_zip(files: dict[str, bytes]) -> bytes:

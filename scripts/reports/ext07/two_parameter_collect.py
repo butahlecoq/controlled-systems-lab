@@ -32,6 +32,7 @@ PROCESS_CPU_SOURCE_FILES = ("two_parameter_driver.cpp", "process_cpu_json.hpp",
                             *LEGACY_SOURCE_FILES[1:])
 SOURCE_FILES = ("two_parameter_driver.cpp", "process_cpu_json.hpp",
                 "operation_cpu_json.hpp", *LEGACY_SOURCE_FILES[1:])
+CAPACITY_SOURCE_FILES = (*SOURCE_FILES, "capacity.jsonl", "capacity.stderr.txt")
 
 
 def source_files_for_record(record: dict) -> tuple[str, ...]:
@@ -40,9 +41,10 @@ def source_files_for_record(record: dict) -> tuple[str, ...]:
     if record.get("schema") == "csl.ext07-hybrid-two-parameter-report/2":
         return PROCESS_CPU_SOURCE_FILES
     require(record.get("schema") in {"csl.ext07-hybrid-two-parameter-report/3",
-                                      "csl.ext07-hybrid-two-parameter-report/4"},
+                                      "csl.ext07-hybrid-two-parameter-report/4",
+                                      "csl.ext07-hybrid-two-parameter-report/5"},
             "Unsupported EXT-07 two-parameter report schema")
-    return SOURCE_FILES
+    return CAPACITY_SOURCE_FILES if record.get("schema").endswith("/5") else SOURCE_FILES
 EXPECTED_PROVIDER = "csl.lp.highs@1.1.0+highs.1.11.0"
 SUPPORTED_VERIFIERS = {
     "csl.hybrid.scalar-two-parameter-polytope",
@@ -104,6 +106,58 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
     require((capture / "smoke.stderr.txt").read_bytes() ==
             (capture / "measure.stderr.txt").read_bytes() == b"",
             "EXT-07 two-parameter driver wrote stderr")
+    schema = "csl.ext07-hybrid-two-parameter-report/4"
+    capacity_rows: list[dict] | None = None
+    if (capture / "capacity.jsonl").is_file():
+        require((capture / "capacity.stderr.txt").read_bytes() == b"",
+                "EXT-07 capacity sweep wrote stderr")
+        capacity_rows = jsonl(capture / "capacity.jsonl", 40)
+        expected_counts = (1, 2, 4, 8, 16)
+        for count_index, path_count in enumerate(expected_counts):
+            rows = capacity_rows[count_index * 8:(count_index + 1) * 8]
+            expected_path_ids = (["enter-half", "enter-full"] if path_count == 2 else
+                                 [f"enter-{index}" for index in range(path_count)])
+            require(rows[0].get("phase") == "warmup" and
+                    rows[0].get("paths") == path_count and
+                    rows[0].get("calls") == 2 and rows[0].get("failures") == 0 and
+                    rows[0].get("edge_paths") == expected_path_ids,
+                    "EXT-07 capacity warmup differs")
+            for repetition, row in enumerate(rows[1:]):
+                require(row.get("phase") == "trial" and
+                        row.get("repetition") == repetition and
+                        row.get("paths") == path_count and
+                        row.get("calls") == 10 and row.get("failures") == 0 and
+                        row.get("status") == "passed" and
+                        row.get("verifier") == CURRENT_VERIFIER and
+                        row.get("feasibility") == row.get("optimality") ==
+                        row.get("coverage") == "established" and
+                        row.get("edge_paths") == expected_path_ids,
+                        "EXT-07 capacity branch or trial evidence differs")
+                require(isinstance(row.get("call_durations_ns"), list) and
+                        len(row["call_durations_ns"]) == 10 and
+                        all(isinstance(value, int) and value > 0
+                            for value in row["call_durations_ns"]) and
+                        row.get("end_to_end_total_ns") ==
+                        sum(row["call_durations_ns"]),
+                        "EXT-07 capacity raw timing differs")
+                common.validate_process_cpu_observations(row, 10, path_count)
+                common.validate_provider_invocation_observations(row, 10, path_count)
+                common.validate_operation_observations(row, 10,
+                    [14] * path_count)
+                branch_observations = row.get("branch_outcome_observations")
+                require(isinstance(branch_observations, list) and
+                        len(branch_observations) == 10 and
+                        all(isinstance(call, list) and len(call) == path_count and
+                            [branch.get("path") for branch in call] == expected_path_ids and
+                            all(branch.get("optimization") == "optimal" and
+                                branch.get("termination") == "completed" and
+                                branch.get("feasibility") ==
+                                branch.get("optimality") ==
+                                branch.get("coverage") == "established"
+                                for branch in call)
+                            for call in branch_observations),
+                        "EXT-07 per-branch solve or verification outcome differs")
+        schema = "csl.ext07-hybrid-two-parameter-report/5"
     smoke = jsonl(capture / "smoke.jsonl", 1)
     measure = jsonl(capture / "measure.jsonl", 8)
     validate_run(smoke[0], "smoke", 0, 1, operation_cpu=True, provider_invocation=True)
@@ -126,11 +180,12 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
     require(operation_cpu_header.read_bytes() == subprocess.check_output(
         ["git", "show", commit + ":benchmarks/reporting/ext07/operation_cpu_json.hpp"], cwd=source),
         "EXT-07 operation CPU JSON helper differs from its frozen source commit")
+    bundle_sources = CAPACITY_SOURCE_FILES if capacity_rows is not None else SOURCE_FILES
     source_hashes = {
         name: sha((driver if name == "two_parameter_driver.cpp" else
                    cpu_header if name == "process_cpu_json.hpp" else
                    operation_cpu_header if name == "operation_cpu_json.hpp" else
-                   capture / name).read_bytes()) for name in SOURCE_FILES
+                   capture / name).read_bytes()) for name in bundle_sources
     }
     trials = measure[1:]
     host = read_json(capture / "host.json")
@@ -181,7 +236,7 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
                        "minimizing_face": "u0=0, 0<=u1<=1"},
     }
     unsigned = {
-        "schema": "csl.ext07-hybrid-two-parameter-report/4",
+        "schema": schema,
         "source_commit": commit,
         "source_tree": pre["tree"],
         "source_sha256": source_hashes,
@@ -219,7 +274,22 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
             "operation_thread_cpu": common.operation_cpu_summary(trials),
             "comparison": "one backend and one fixed fixture; descriptive only, no comparator or speedup claim",
         },
-        "evidence_scope": "140 completed public hybrid portfolio calls; each call assembles both two-stage H relations, solves both branches with registered HiGHS LP, constructs both tied candidate faces, and verifies both complete two-parameter families with ExactLinearHHybridFamilyVerifier",
+        "solver_capacity_profile": None if capacity_rows is None else {
+            "fixture": "two-stage scalar fixed-control model with N tied mode paths; each guard admits the common optimum u0=0",
+            "path_counts": [1, 2, 4, 8, 16],
+            "warmups_excluded": 5,
+            "repetitions_per_path_count": 7,
+            "calls_per_repetition": 10,
+            "measured_calls": 350,
+            "branch_outcomes": sum(row["paths"] * row["calls"]
+                                    for row in capacity_rows if row["phase"] == "trial"),
+            "failures": sum(row["failures"] for row in capacity_rows),
+            "trials": capacity_rows,
+            "raw_capacity_sha256": sha((capture / "capacity.jsonl").read_bytes()),
+            "timing_scope": "per-call setup, path composition, HiGHS solve of every path, candidate-family construction, and ExactLinearHHybridFamilyVerifier coverage of every tied path",
+            "claim_limit": "single scalar, two-stage fixture on one host; descriptive capacity evidence only, not a general scalability or solver limit claim",
+        },
+        "evidence_scope": "140 completed baseline calls; optional capacity sweep adds 350 full public hybrid portfolio calls across 1, 2, 4, 8, and 16 tied paths, with every path solved and every candidate family verified by ExactLinearHHybridFamilyVerifier",
         "evidence_limits": [
             "One host, one Release configuration, and one fixed analytic two-stage fixture.",
             "The controls are independent and bounded; no higher-dimensional parameter polytope is measured.",
@@ -236,7 +306,7 @@ def collect(capture: Path, source: Path, output_root: Path) -> Path:
     destination = output_root / report_id
     require(not destination.exists(), "EXT-07 two-parameter report destination must be new")
     destination.mkdir()
-    for name in SOURCE_FILES:
+    for name in bundle_sources:
         source_path = (driver if name == "two_parameter_driver.cpp" else
                        cpu_header if name == "process_cpu_json.hpp" else
                        operation_cpu_header if name == "operation_cpu_json.hpp" else capture / name)
