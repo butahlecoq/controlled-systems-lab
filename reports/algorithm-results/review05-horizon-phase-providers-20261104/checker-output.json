@@ -1,0 +1,7 @@
+{
+  "attempts": 42,
+  "statuses": {
+    "verified": 42
+  },
+  "checks": "/home/butahlecoq/.local/share/codex/build/review05-horizon-resource-20261104/phase-capture-provider/checks.jsonl"
+}

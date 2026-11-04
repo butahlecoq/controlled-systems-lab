@@ -1,0 +1,17 @@
+{
+  "schema": "csl.review05.build-provenance/1",
+  "source_revision": "72718e15e1ae9599b1d579a72442e97eda8a5a0a",
+  "harness_revision": "72718e15e1ae9599b1d579a72442e97eda8a5a0a",
+  "source_worktree_dirty": false,
+  "build_type": "Release",
+  "generator": "Ninja",
+  "cmake_version": "cmake version 3.31.6",
+  "ninja_version": "1.13.2",
+  "cxx_compiler": "c++ (GCC) 16.2.1 20260810",
+  "configure_command": "cmake -S benchmarks/reporting/review05 -B <BUILD_DIR> -DCSL_SOURCE_ROOT=<SOURCE_ROOT> -DCMAKE_BUILD_TYPE=Release -G Ninja",
+  "build_command": "ninja -C <BUILD_DIR> -j4 csl_review05_horizon_ladder",
+  "binary_sha256": "3da830ead11af6f3c2c4b424fe66e407a24b5ce8621dc9d8253833510f98492d",
+  "warnings": [
+    "The Release target completed successfully."
+  ]
+}
