@@ -203,7 +203,6 @@ def main() -> int:
                         ["<BUILD_DIR>/csl_review05_horizon_ladder",
                          f"inputs/{scenario_paths[horizon].name}", strategy]
                         + (["--phase-diagnostics"] if args.phase_diagnostics else [])
-                        if args.resource_receipts else command
                     )
                     started = time.monotonic_ns()
                     resource_receipt = None

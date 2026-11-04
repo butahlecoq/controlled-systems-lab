@@ -195,7 +195,8 @@ def main() -> int:
     counts: dict[str, int] = {}
     for check in checks:
         counts[check["status"]] = counts.get(check["status"], 0) + 1
-    print(json.dumps({"attempts": len(checks), "statuses": counts, "checks": str(check_path)}, indent=2))
+    print(json.dumps({"attempts": len(checks), "statuses": counts,
+                      "checks": check_path.name}, indent=2))
     return 0 if checks and counts.get("incorrect", 0) == 0 else 1
 
 
