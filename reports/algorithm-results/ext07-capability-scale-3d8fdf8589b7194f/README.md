@@ -7,7 +7,7 @@ does not compose joint relations, invoke a solver, or measure provider work.
 ## Run definition
 
 - Source commit: `fec792f4d595085191dab970e0e0a67281588293`
-- Source tree: `62a1813cbacab1fc4bd5af2f4b2b15b5f96aa229`
+- Source tree: `2662d36a9649a4b89522cb2224d7dd272b1185c7`
 - Configuration: CMake Release, GNU C++ 16.2.1, C++20, CMake 3.31.6
 - Native HiGHS and Qhull adapters disabled; standalone capability-report option enabled
 - Host: Linux x86_64, 8 logical processors; one process and one worker
