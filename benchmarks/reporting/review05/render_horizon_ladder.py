@@ -75,12 +75,13 @@ def main() -> int:
             phase_rows.append(
                 f"<tr><th scope=\"row\">T={row['horizon']}</th>"
                 f"<td>{escape(row['strategy'].removeprefix('csl.synthesis.'))}</td>"
+                f"<td>{escape(str(row['stage']) if row['stage'] is not None else '—')}</td>"
                 f"<td>{escape(row['operation'])}</td><td>{fmt_ns(metric['median'])}</td>"
                 f"<td>{fmt_ns(metric['minimum'])} – {fmt_ns(metric['maximum'])}</td></tr>"
             )
     phase_section = ""
     if phase_summary:
-        phase_section = (f"<h2>Instrumented phase diagnostics</h2><p>OBS-03 spans from a separate instrumented capture. Their inclusive wall times include instrumentation overhead and must not be compared directly with the uninstrumented timing table. Provider-internal sparse assembly, factorization, conversions, family queries and witness-selector queries are not exposed by these spans.</p><table><thead><tr><th>Horizon</th><th>Strategy</th><th>Phase</th><th>Median</th><th>Range</th></tr></thead><tbody>{''.join(phase_rows)}</tbody></table><p>Details: <a href=\"phase-summary.json\">phase-summary.json</a> and per-attempt spans in <a href=\"attempts.jsonl\">attempts.jsonl</a>.</p>")
+        phase_section = (f"<h2>Instrumented phase diagnostics</h2><p>OBS-03 spans from a separate capture include instrumentation overhead and must not be compared directly with uninstrumented timings. The table includes Strategy A phase spans, its per-stage geometry-provider calls (affine images, Minkowski sums, to-H conversions and projections), and Strategy B's LP program run. Family-construction spans not called by these candidate runs remain unavailable. Joint sparse assembly, LP factorization internals, per-stage family queries and witness-selector queries are not measured.</p><table><thead><tr><th>Horizon</th><th>Strategy</th><th>Stage</th><th>Phase/provider call</th><th>Median</th><th>Range</th></tr></thead><tbody>{''.join(phase_rows)}</tbody></table><p>Details: <a href=\"phase-summary.json\">phase-summary.json</a> and per-attempt spans in <a href=\"attempts.jsonl\">attempts.jsonl</a>.</p>")
     env = manifest["environment"]
     sources = " ".join(f"{escape(name)}: {escape(digest)}" for name, digest in
                         sorted(env["measurement_source_sha256"].items()))

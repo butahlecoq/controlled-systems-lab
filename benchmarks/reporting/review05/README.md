@@ -71,7 +71,7 @@ they are not solver-phase allocations and are not added to `strategy_run_ns`.
 
 ## HORIZON-01 phase diagnostics
 
-The horizon runner accepts `--phase-diagnostics` to collect OBS-03 strategy spans in a separate instrumented capture. These values include instrumentation overhead and are diagnostic only; do not compare them directly with the uninstrumented timing ladder. The current strategy spans expose Strategy A forward/preimage/terminal optimization/family construction and Strategy B family construction. They do not expose provider-internal sparse assembly, LP factorization/solve, conversion, per-stage family queries, or witness-selector queries. The helper `summarize_phase_ladder.py` retains these gaps explicitly.
+The horizon runner accepts `--phase-diagnostics` to collect OBS-03 spans in a separate instrumented capture. These values include instrumentation overhead and are diagnostic only; do not compare them directly with the uninstrumented timing ladder. The capture covers Strategy A forward/preimage/terminal-optimization spans, per-stage affine-image/Minkowski-sum/to-H/projection provider calls, and Strategy B’s LP program run. Family-construction spans not called by candidate-mode executions remain explicitly unavailable. Joint sparse-assembly time, LP factorization internals, per-stage family queries, and witness-selector queries remain unmeasured. The helper `summarize_phase_ladder.py` validates each expected operation and stage while retaining unavailable spans.
 
 Use a separate output directory for this run:
 
