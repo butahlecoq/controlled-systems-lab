@@ -260,6 +260,9 @@ add_test(NAME ext07_two_parameter_report_smoke
   COMMAND csl_ext07_two_parameter_report smoke)
 set_tests_properties(ext07_two_parameter_report_smoke PROPERTIES LABELS reporting)
 endif()
+endif()
+
+if(CSL_BUILD_EXT07_CAPABILITY_REPORT)
 add_executable(csl_ext07_capability_report
   benchmarks/reporting/ext07/capability_driver.cpp)
 target_link_libraries(csl_ext07_capability_report PRIVATE CSL::hybrid_path_program)

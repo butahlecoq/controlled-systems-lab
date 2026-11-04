@@ -99,7 +99,8 @@ excluded 1,000-call warmup and seven 1,000-call measured batches; fixture order
 is repeated each batch to limit time-order drift. A refusal, incomplete report,
 or empty path count fails the capture. `capability_collect.py` checks that all
 ten profiles and seven repetitions are present before it computes medians and
-ranges.
+ranges. It has a separate CMake option and builds with the native HiGHS
+adapter disabled.
 
 Use a clean checkout of the source commit recorded in the saved report:
 

@@ -9,6 +9,7 @@ does not compose joint relations, invoke a solver, or measure provider work.
 - Source commit: `4c3371a05aad6be3f399b4947e9ab27a63fd6262`
 - Source tree: `8143b697ab82b8f459a6aa723b1fe9c3155f2512`
 - Configuration: CMake Release, GNU C++ 16.2.1, C++20, CMake 3.31.6
+- Native HiGHS adapter disabled; standalone capability-report option enabled
 - Host: Linux x86_64, 8 logical processors; one process and one worker
 - Workload: ten deterministic fixtures, 1,000 calls per batch, one excluded
   warmup batch and seven measured batches per fixture

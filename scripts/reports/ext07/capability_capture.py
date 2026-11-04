@@ -35,8 +35,9 @@ def capture(source: Path, destination: Path, commit: str, cmake: str,
                DOTNET_CLI_UI_LANGUAGE="en-US")
     private_paths = ((build, "<BUILD>"),)
     run([cmake, "-S", str(source), "-B", str(build), "-DBUILD_TESTING=OFF",
-         "-DCMAKE_BUILD_TYPE=Release", "-DCSL_ENABLE_HIGHS=ON",
-         "-DCSL_ENABLE_QHULL=OFF", "-DCSL_BUILD_EXT07_REPORT=ON"],
+         "-DCMAKE_BUILD_TYPE=Release", "-DCSL_ENABLE_HIGHS=OFF",
+         "-DCSL_ENABLE_QHULL=OFF",
+         "-DCSL_BUILD_EXT07_CAPABILITY_REPORT=ON"],
         source, destination / "configure.log", env, private_paths)
     cache = (build / "CMakeCache.txt").read_text(encoding="utf-8", errors="replace")
     generator_match = re.search(r"^CMAKE_GENERATOR:INTERNAL=(.*)$", cache,
