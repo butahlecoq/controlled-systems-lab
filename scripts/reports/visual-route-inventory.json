@@ -3306,6 +3306,16 @@
       "follow_up_issue": 669
     },
     {
+      "route": "review05-dimension-resource-20261104",
+      "source_bundle": "review05-dimension-resource-20261104",
+      "assets": [
+        "state-space-illustration.svg"
+      ],
+      "index_sha256": "b73913a8385fc2481b6f7b1a98b50b149761e336b4e277e31421748576dab66a",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
       "route": "review05-profile-matrix-20261031",
       "source_bundle": "review05-profile-matrix-20261031",
       "assets": [
