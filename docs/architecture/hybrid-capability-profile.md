@@ -54,12 +54,18 @@ support a performance comparison. The [one-step schema `/2` report](../../report
 and [two-stage schema `/2` report](../../reports/algorithm-results/ext07-hybrid-two-parameter-bc3c6ca5f7a606ee/)
 retain source commits, raw rows, and plots.
 
-Schema `/3` is being added to preserve the full joint-relation operation trace
-with composing-thread CPU beside each operation's identity, matrix deltas,
-composer wall time, and completion status. It excludes helper-thread CPU and
-includes clock-read overhead; process-wide branch CPU remains a distinct scope.
-The next two versioned captures will remain descriptive one- and two-stage
-profiles, not controlled comparisons.
+Schema `/3` now preserves the full joint-relation operation trace with
+composing-thread CPU beside each operation's identity, matrix deltas, composer
+wall time, and completion status. The [one-step report](../../reports/algorithm-results/ext07-hybrid-4f2ed937429c4908/)
+and [two-stage report](../../reports/algorithm-results/ext07-hybrid-two-parameter-6f2799c9acfcc5f2/)
+each contain 140 measured calls, zero failures, and an available composing-
+thread CPU reading for every recorded operation. The reports retain capture
+source commit `4c8f1c3dbe393eb39acd4284d29073d0943b3320`; follow-up timer fixes
+are in the current implementation and do not rewrite capture provenance. These
+readings exclude helper-thread CPU and include clock-read overhead; process-wide
+branch CPU remains a distinct scope. Both are descriptive one- and two-stage
+profiles, not a controlled comparison. Their live Pages URLs, 2D examples, and
+ZIP hashes are recorded in [published algorithm results](published-algorithm-results.md#ext-07-hybrid-profile-report).
 
 ## Independent-oracle test profiles
 
@@ -127,12 +133,11 @@ verification phase. Backend thread width is retained when a provider reports it.
 
 PR #881 adds request-wide admission, per-mode/edge composer accounting, and
 path/branch operation wall-time plus reported thread observations to the
-bounded profile tracked by issue #156. This follow-up records process-wide CPU
-intervals; provider-only CPU, heap use, and broader operation profiles remain
-incomplete. Future
-extensions can add more set representations, enforce provider CPU or memory
-limits, and measure larger dimensions or path inventories. The current evidence
-makes no general scalability claim. The two saved-report routes
-and their manifest-listed files and ZIPs were verified against the live
-main-only Pages site on 2026-11-02; details are recorded in
+bounded profile tracked by issue #156. The schema `/2` and `/3` follow-ups add
+process-wide and composing-thread CPU intervals respectively. Provider-only
+CPU, heap use, enforceable provider CPU or memory limits, and broader operation
+profiles remain incomplete. Future extensions can measure larger dimensions or
+path inventories; the current evidence makes no general scalability claim. The
+two saved-report routes and their manifest-listed files and ZIPs were verified
+against the live main-only Pages site; details are recorded in
 [published algorithm results](published-algorithm-results.md#ext-07-hybrid-profile-report).
