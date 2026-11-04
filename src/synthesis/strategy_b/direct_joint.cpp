@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <limits>
 #include <numeric>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 
@@ -42,6 +43,29 @@ std::optional<ob::TimingScope> start_planned_run_scope(const ExecutionContext& c
 std::optional<ob::TimingScope> start_planned_family_scope(const ExecutionContext& context) noexcept {
     try {
         auto started=ob::start_timing(context,timing::family_construction);
+        if(auto* scope=std::get_if<ob::TimingScope>(&started))return std::move(*scope);
+    } catch(...) {
+        // Instrumentation failure cannot change the mathematical result.
+    }
+    return {};
+}
+std::optional<ob::TimingScope> start_planned_operation_scope(const ExecutionContext& context,
+    std::string_view operation, std::string_view module_id, std::string_view module_version) noexcept {
+    if(!context.timing||!context.timing->enabled())return {};
+    try {
+        auto snapshot=context.timing->snapshot();
+        const auto* report=std::get_if<ob::TimingReport>(&snapshot);if(!report)return {};
+        const auto& spans=report->observations.description().spans;
+        const ar::SpanDescriptor* match=nullptr;
+        for(const auto& span:spans) {
+            const auto& descriptor=span.descriptor;
+            if(descriptor.operation!=operation||descriptor.module.id.value!=module_id||
+                descriptor.module.version!=module_version)continue;
+            if(match)return {};
+            match=&descriptor;
+        }
+        if(!match)return {};
+        auto started=ob::start_timing(context,match->id);
         if(auto* scope=std::get_if<ob::TimingScope>(&started))return std::move(*scope);
     } catch(...) {
         // Instrumentation failure cannot change the mathematical result.
@@ -376,7 +400,10 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
         result.stop=ScopedOperationStopped{{reason,"Stopped before joint program construction."},
             {{"syn04-build:"+p.identity().value},"strategy",{strategy_id},{},ModuleId{strategy_id},strategy_version},retained(result)};return result;
     }
+    auto build_timing=start_planned_operation_scope(context,"strategy-b/program-build",strategy_id,strategy_version);
     auto built=build_joint_program(p,request);
+    if(build_timing)build_timing->close(std::holds_alternative<JointProgram>(built)?Termination::completed:
+        std::holds_alternative<OperationStopped>(built)?stopped_termination(std::get<OperationStopped>(built).reason):Termination::contract_rejected);
     if(const auto* failure=std::get_if<Diagnostics>(&built)) {reject(*failure,Termination::contract_rejected);return result;}
     if(const auto* stop=std::get_if<OperationStopped>(&built)) {
         result.termination=stopped_termination(stop->reason);

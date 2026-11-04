@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Capture matched DIMENSION-01 vector-integrator runs."""
 from __future__ import annotations
-import argparse, hashlib, json, os, platform, shutil, subprocess, time
+import argparse, hashlib, json, os, platform, shutil, signal, subprocess, tempfile, time
 from pathlib import Path
 
 STRATEGIES = ("csl.synthesis.reach-back", "csl.synthesis.strategy-b")
@@ -16,12 +16,35 @@ def limit_process() -> None:
     cap=8*1024**3
     resource.setrlimit(resource.RLIMIT_AS,(cap,cap))
 
+def run_with_resource_receipt(command: list[str], timeout_seconds: int):
+    with tempfile.TemporaryFile() as stdout_file, tempfile.TemporaryFile() as stderr_file:
+        process=subprocess.Popen(command,stdout=stdout_file,stderr=stderr_file,preexec_fn=limit_process)
+        timed_out=False; previous_handler=signal.getsignal(signal.SIGALRM)
+        def timeout_handler(_signal_number,_frame): raise TimeoutError
+        signal.signal(signal.SIGALRM,timeout_handler); signal.setitimer(signal.ITIMER_REAL,timeout_seconds)
+        try: _pid,status,usage=os.wait4(process.pid,0)
+        except TimeoutError:
+            timed_out=True
+            try: os.kill(process.pid,signal.SIGKILL)
+            except ProcessLookupError: pass
+            _pid,status,usage=os.wait4(process.pid,0)
+        finally:
+            signal.setitimer(signal.ITIMER_REAL,0); signal.signal(signal.SIGALRM,previous_handler)
+        process.returncode=os.waitstatus_to_exitcode(status)
+        stdout_file.seek(0); stderr_file.seek(0)
+        receipt={'source':'POSIX wait4 for the isolated strategy process','user_cpu_seconds':usage.ru_utime,
+                 'system_cpu_seconds':usage.ru_stime,'child_cpu_seconds':usage.ru_utime+usage.ru_stime,
+                 'peak_rss_kib':usage.ru_maxrss,'timed_out':timed_out}
+        return process.returncode,timed_out,stdout_file.read(),stderr_file.read(),receipt
+
 def main() -> int:
     parser=argparse.ArgumentParser()
     parser.add_argument('--driver',required=True,type=Path)
     parser.add_argument('--scenarios',required=True,type=Path)
     parser.add_argument('--output',required=True,type=Path)
+    parser.add_argument('--resource-receipts',action='store_true',help='record Linux per-process CPU and peak RSS with wait4')
     args=parser.parse_args()
+    if args.resource_receipts and not hasattr(os,'wait4'): parser.error('--resource-receipts requires POSIX wait4')
     driver=args.driver.resolve(strict=True); scenarios=args.scenarios.resolve(strict=True)
     source=Path(__file__).resolve().parent; repo=scenarios.parents[3]
     output=args.output.resolve()
@@ -36,12 +59,13 @@ def main() -> int:
     try: load=list(os.getloadavg())
     except (AttributeError,OSError): load=None
     env={'source_revision':revision,'source_worktree_dirty':dirty,
-         'measurement_source_sha256':{name:sha(source/name) for name in ('CMakeLists.txt','dimension_ladder.cpp','run_dimension_ladder.py','check_dimension_ladder.py','summarize_dimension_ladder.py','render_dimension_ladder.py')},
+         'measurement_source_sha256':{name:sha(source/name) for name in ('CMakeLists.txt','dimension_ladder.cpp','run_dimension_ladder.py','check_dimension_ladder.py','summarize_dimension_ladder.py','render_dimension_ladder.py','summarize_dimension_resource.py')},
          'host':platform.node(),'platform':platform.platform(),'machine':platform.machine(),'logical_cpus':os.cpu_count(),
          'physical_memory_bytes':int(os.sysconf('SC_PHYS_PAGES'))*int(os.sysconf('SC_PAGE_SIZE')),
          'python':platform.python_version(),'load_average_at_start':load,'binary_sha256':sha(driver),
          'requested_threads_per_strategy':1,'requested_driver_workers':1,
-         'limits':{'cpu_seconds':300,'address_space_bytes':8*1024**3,'process_timeout_seconds':300,'scope':'one strategy process','enforced':True,'mechanism':'POSIX RLIMIT_CPU and RLIMIT_AS'}}
+         'limits':{'cpu_seconds':300,'address_space_bytes':8*1024**3,'process_timeout_seconds':300,'scope':'one strategy process','enforced':True,'mechanism':'POSIX RLIMIT_CPU and RLIMIT_AS'},
+         'resource_receipts':'POSIX wait4 whole-process CPU and peak RSS' if args.resource_receipts else None}
     manifest={'schema':'csl.review05.dimension-manifest/1','track':'new-comparison','fixture':'DIMENSION-01-vector-integrator',
               'cases':{key:{'state_dimension':n,'control_dimension':n,'horizon':t,'scenario_sha256':sha(path)} for (n,t), (key,path) in zip(CASES,paths.items())},
               'environment':env,'schedule':{'warmup_pairs_per_case':1,'measured_pairs_per_case':6,'order':'alternating AB/BA; case order rotates by repetition','timed_region':'steady_clock around SynthesisWorkspace::run only','startup_setup':'excluded from strategy_run_ns; process wall time retained'}}
@@ -59,11 +83,18 @@ def main() -> int:
             order=(STRATEGIES[first],STRATEGIES[1-first])
             for pos,strategy in enumerate(order):
                 number+=1; aid=f'n{n}-t{t}-r{repetition:02d}-p{pos}-{number:03d}'
-                cmd=[str(driver),str(paths[key]),strategy]; start=time.monotonic_ns()
+                cmd=[str(driver),str(paths[key]),strategy]
+                recorded_cmd=['<BUILD_DIR>/csl_review05_dimension_ladder',f"inputs/{paths[key].name}",strategy] if args.resource_receipts else cmd
+                start=time.monotonic_ns(); receipt=None
                 try:
-                    proc=subprocess.run(cmd,check=False,stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=300,preexec_fn=limit_process)
-                    wall=time.monotonic_ns()-start; stdout=proc.stdout; stderr=proc.stderr; code=proc.returncode
-                    status='completed' if code==0 else 'failed'
+                    if args.resource_receipts:
+                        code,timed_out,stdout,stderr,receipt=run_with_resource_receipt(cmd,300)
+                        status='timed_out' if timed_out else 'completed' if code==0 else 'failed'
+                    else:
+                        proc=subprocess.run(cmd,check=False,stdout=subprocess.PIPE,stderr=subprocess.PIPE,timeout=300,preexec_fn=limit_process)
+                        stdout=proc.stdout; stderr=proc.stderr; code=proc.returncode
+                        status='completed' if code==0 else 'failed'
+                    wall=time.monotonic_ns()-start
                 except subprocess.TimeoutExpired as e:
                     wall=time.monotonic_ns()-start; stdout=e.stdout or b''; stderr=e.stderr or b''; code=None; status='timed_out'
                 except Exception as e:
@@ -72,8 +103,8 @@ def main() -> int:
                 try: result=json.loads(stdout.decode()) if status=='completed' else None; parse_error=None
                 except (UnicodeDecodeError,json.JSONDecodeError) as e: result=None; parse_error=str(e); status='invalid_output'
                 row={'attempt_id':aid,'case':key,'state_dimension':n,'horizon':t,'repetition':repetition,'warmup':warm,'order_position':pos,'strategy':strategy,
-                     'process_status':status,'return_code':code,'process_wall_ns':wall,'scenario_sha256':manifest['cases'][key]['scenario_sha256'],'command':cmd,
-                     'stdout_path':str(outpath.relative_to(output)),'stdout_sha256':sha(outpath),'stderr_path':str(errpath.relative_to(output)),'stderr_sha256':sha(errpath),'parse_error':parse_error,'result':result}
+                     'process_status':status,'return_code':code,'process_wall_ns':wall,'scenario_sha256':manifest['cases'][key]['scenario_sha256'],'command':recorded_cmd,
+                     'stdout_path':str(outpath.relative_to(output)),'stdout_sha256':sha(outpath),'stderr_path':str(errpath.relative_to(output)),'stderr_sha256':sha(errpath),'parse_error':parse_error,'resource_receipt':receipt,'result':result}
                 with attempts_path.open('a',encoding='utf-8') as f:
                     f.write(json.dumps(row,separators=(',',':'),allow_nan=False)+'\n')
                     f.flush(); os.fsync(f.fileno())

@@ -1,0 +1,7 @@
+{
+  "attempts": 42,
+  "statuses": {
+    "verified": 42
+  },
+  "checks": "checks.jsonl"
+}

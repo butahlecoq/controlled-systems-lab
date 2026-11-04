@@ -1,0 +1,350 @@
+{
+  "claim": "instrumented strategy-phase diagnostics; not directly comparable to the uninstrumented strategy timing ladder",
+  "instrumented_phases": [
+    {
+      "completed_spans": 0,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": null,
+        "median": null,
+        "minimum": null
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 6,
+      "operation": "strategy-a/family-construction",
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 20044,
+        "median": 14143.0,
+        "minimum": 13898
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/feasible-preimage",
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 14370657,
+        "median": 7947792.0,
+        "minimum": 7731631
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/forward",
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 14970878,
+        "median": 8550003.5,
+        "minimum": 8325148
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/run",
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 563903,
+        "median": 466124.5,
+        "minimum": 452925
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/terminal-optimization",
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 21022,
+        "median": 10022.0,
+        "minimum": 9150
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/terminal-preimage",
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 0,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": null,
+        "median": null,
+        "minimum": null
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 6,
+      "operation": "strategy-b/family-construction",
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 1770071,
+        "median": 828883.0,
+        "minimum": 730685
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-b/run",
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 0,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": null,
+        "median": null,
+        "minimum": null
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 6,
+      "operation": "strategy-a/family-construction",
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 17041,
+        "median": 16517.5,
+        "minimum": 15785
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/feasible-preimage",
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 22407777,
+        "median": 18310680.0,
+        "minimum": 16939441
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/forward",
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 23121700,
+        "median": 19003510.5,
+        "minimum": 17631084
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/run",
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 513058,
+        "median": 492734.0,
+        "minimum": 467172
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/terminal-optimization",
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 11593,
+        "median": 11210.0,
+        "minimum": 10616
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/terminal-preimage",
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 0,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": null,
+        "median": null,
+        "minimum": null
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 6,
+      "operation": "strategy-b/family-construction",
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 1959552,
+        "median": 761171.0,
+        "minimum": 709454
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-b/run",
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 0,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": null,
+        "median": null,
+        "minimum": null
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 6,
+      "operation": "strategy-a/family-construction",
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 24654,
+        "median": 19765.5,
+        "minimum": 19137
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/feasible-preimage",
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 37180863,
+        "median": 35617278.5,
+        "minimum": 33523735
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/forward",
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 38035797,
+        "median": 36523197.5,
+        "minimum": 34382999
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/run",
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 583947,
+        "median": 557932.0,
+        "minimum": 527655
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/terminal-optimization",
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 15714,
+        "median": 15050.5,
+        "minimum": 14248
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/terminal-preimage",
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 0,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": null,
+        "median": null,
+        "minimum": null
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 6,
+      "operation": "strategy-b/family-construction",
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 1983159,
+        "median": 807406.5,
+        "minimum": 788794
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-b/run",
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    }
+  ],
+  "not_measured": [
+    "sparse assembly",
+    "LP factorization/solve internals",
+    "provider conversions",
+    "per-stage family queries",
+    "witness-selector queries"
+  ],
+  "relation_scope": "candidate-relaxation outputs independently checked against the pinned analytic fixtures; exact history equality is fixture-specific and does not imply general family completeness",
+  "schema": "csl.review05.phase-summary/1"
+}

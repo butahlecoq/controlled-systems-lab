@@ -1,0 +1,1355 @@
+{
+  "claim": "instrumented strategy and provider-call diagnostics; not directly comparable to the uninstrumented strategy timing ladder",
+  "instrumented_phases": [
+    {
+      "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 20564079,
+        "median": 16271008.5,
+        "minimum": 15192407
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/forward",
+      "stage": null,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 24236,
+        "median": 10860.5,
+        "minimum": 9638
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/terminal-preimage",
+      "stage": null,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 0,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": null,
+        "median": null,
+        "minimum": null
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 6,
+      "operation": "strategy-a/family-construction",
+      "stage": null,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 15924,
+        "median": 14632.5,
+        "minimum": 13898
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/feasible-preimage",
+      "stage": null,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 21928369,
+        "median": 17517894.0,
+        "minimum": 16402207
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/run",
+      "stage": null,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 1214060,
+        "median": 1080417.5,
+        "minimum": 1063620
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/terminal-optimization",
+      "stage": null,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 43022,
+        "median": 15924.0,
+        "minimum": 12362
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.projection",
+      "stage": 0,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 1506418,
+        "median": 740253.5,
+        "minimum": 87163
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.affine-image",
+      "stage": 1,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 646036,
+        "median": 427396.5,
+        "minimum": 406759
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.minkowski-sum",
+      "stage": 1,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 55384,
+        "median": 38169.0,
+        "minimum": 28147
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.to-h",
+      "stage": 1,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 75220,
+        "median": 21895.5,
+        "minimum": 18927
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.projection",
+      "stage": 1,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 2507879,
+        "median": 1033519.0,
+        "minimum": 971569
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.affine-image",
+      "stage": 2,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 859962,
+        "median": 816206.5,
+        "minimum": 807580
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.minkowski-sum",
+      "stage": 2,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 50635,
+        "median": 36248.0,
+        "minimum": 31987
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.to-h",
+      "stage": 2,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 36806,
+        "median": 25771.0,
+        "minimum": 22070
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.projection",
+      "stage": 2,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 0,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": null,
+        "median": null,
+        "minimum": null
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 6,
+      "operation": "strategy-b/family-construction",
+      "stage": null,
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 27099,
+        "median": 8207.0,
+        "minimum": 7962
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-b/program-build",
+      "stage": null,
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 1008306,
+        "median": 932667.5,
+        "minimum": 919327
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-b/run",
+      "stage": null,
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 2,
+      "inclusive_wall_ns": {
+        "maximum": 566348,
+        "median": 521578.5,
+        "minimum": 501813
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-b/program-solve",
+      "stage": null,
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 45971617,
+        "median": 43018775.5,
+        "minimum": 41425544
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/forward",
+      "stage": null,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 22978,
+        "median": 12641.5,
+        "minimum": 12013
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/terminal-preimage",
+      "stage": null,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 0,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": null,
+        "median": null,
+        "minimum": null
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 6,
+      "operation": "strategy-a/family-construction",
+      "stage": null,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 23048,
+        "median": 16692.0,
+        "minimum": 15365
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/feasible-preimage",
+      "stage": null,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 47929353,
+        "median": 44993378.0,
+        "minimum": 43288365
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/run",
+      "stage": null,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 1811626,
+        "median": 1700927.0,
+        "minimum": 1652317
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/terminal-optimization",
+      "stage": null,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 46933,
+        "median": 17565.0,
+        "minimum": 14388
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.projection",
+      "stage": 0,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 1350810,
+        "median": 695240.0,
+        "minimum": 76687
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.affine-image",
+      "stage": 1,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 565509,
+        "median": 434416.0,
+        "minimum": 415070
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.minkowski-sum",
+      "stage": 1,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 72566,
+        "median": 32197.5,
+        "minimum": 27867
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.to-h",
+      "stage": 1,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 25283,
+        "median": 18298.5,
+        "minimum": 16273
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.projection",
+      "stage": 1,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 1451103,
+        "median": 1022378.5,
+        "minimum": 997202
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.affine-image",
+      "stage": 2,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 824412,
+        "median": 813657.0,
+        "minimum": 792704
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.minkowski-sum",
+      "stage": 2,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 52451,
+        "median": 33105.0,
+        "minimum": 28635
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.to-h",
+      "stage": 2,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 46306,
+        "median": 32127.0,
+        "minimum": 26609
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.projection",
+      "stage": 2,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 1107481,
+        "median": 1008794.5,
+        "minimum": 982884
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.affine-image",
+      "stage": 3,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 2043781,
+        "median": 852978.0,
+        "minimum": 842781
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.minkowski-sum",
+      "stage": 3,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 78991,
+        "median": 60273.5,
+        "minimum": 43860
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.to-h",
+      "stage": 3,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 165315,
+        "median": 37121.0,
+        "minimum": 28216
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.projection",
+      "stage": 3,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 1119913,
+        "median": 1015291.0,
+        "minimum": 985817
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.affine-image",
+      "stage": 4,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 876585,
+        "median": 826473.0,
+        "minimum": 820292
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.minkowski-sum",
+      "stage": 4,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 67747,
+        "median": 58283.5,
+        "minimum": 41137
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.to-h",
+      "stage": 4,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 60483,
+        "median": 39844.5,
+        "minimum": 36178
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.projection",
+      "stage": 4,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 0,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": null,
+        "median": null,
+        "minimum": null
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 6,
+      "operation": "strategy-b/family-construction",
+      "stage": null,
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 26610,
+        "median": 10161.5,
+        "minimum": 9498
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-b/program-build",
+      "stage": null,
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 2566337,
+        "median": 1008061.5,
+        "minimum": 957740
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-b/run",
+      "stage": null,
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 4,
+      "inclusive_wall_ns": {
+        "maximum": 1386919,
+        "median": 579477.5,
+        "minimum": 544278
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-b/program-solve",
+      "stage": null,
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 140947731,
+        "median": 129722478.5,
+        "minimum": 128789322
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/forward",
+      "stage": null,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 30521,
+        "median": 17914.5,
+        "minimum": 17111
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/terminal-preimage",
+      "stage": null,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 0,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": null,
+        "median": null,
+        "minimum": null
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 6,
+      "operation": "strategy-a/family-construction",
+      "stage": null,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 21023,
+        "median": 19625.5,
+        "minimum": 18857
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/feasible-preimage",
+      "stage": null,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 144237210,
+        "median": 132912328.0,
+        "minimum": 131970267
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/run",
+      "stage": null,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 2911146,
+        "median": 2822168.0,
+        "minimum": 2795139
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-a/terminal-optimization",
+      "stage": null,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 37156,
+        "median": 22000.0,
+        "minimum": 18298
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.projection",
+      "stage": 0,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 1350810,
+        "median": 705297.0,
+        "minimum": 87233
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.affine-image",
+      "stage": 1,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 547211,
+        "median": 496854.5,
+        "minimum": 455298
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.minkowski-sum",
+      "stage": 1,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 48260,
+        "median": 41660.5,
+        "minimum": 33384
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.to-h",
+      "stage": 1,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 36667,
+        "median": 22768.0,
+        "minimum": 20883
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.projection",
+      "stage": 1,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 1116980,
+        "median": 1049303.5,
+        "minimum": 1010331
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.affine-image",
+      "stage": 2,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 838940,
+        "median": 825879.5,
+        "minimum": 805345
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.minkowski-sum",
+      "stage": 2,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 38063,
+        "median": 36422.5,
+        "minimum": 35270
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.to-h",
+      "stage": 2,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 40857,
+        "median": 24898.0,
+        "minimum": 23327
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.projection",
+      "stage": 2,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 1116072,
+        "median": 1064982.0,
+        "minimum": 1004883
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.affine-image",
+      "stage": 3,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 888807,
+        "median": 868762.0,
+        "minimum": 863524
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.minkowski-sum",
+      "stage": 3,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 65861,
+        "median": 47422.5,
+        "minimum": 45607
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.to-h",
+      "stage": 3,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 121734,
+        "median": 36771.5,
+        "minimum": 26749
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.projection",
+      "stage": 3,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 1250448,
+        "median": 1093793.0,
+        "minimum": 1028350
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.affine-image",
+      "stage": 4,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 1049443,
+        "median": 841943.0,
+        "minimum": 819593
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.minkowski-sum",
+      "stage": 4,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 81784,
+        "median": 46270.5,
+        "minimum": 43790
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.to-h",
+      "stage": 4,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 75011,
+        "median": 36981.0,
+        "minimum": 36666
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.projection",
+      "stage": 4,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 1292143,
+        "median": 1064738.5,
+        "minimum": 1012985
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.affine-image",
+      "stage": 5,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 1211546,
+        "median": 871625.0,
+        "minimum": 864222
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.minkowski-sum",
+      "stage": 5,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 65372,
+        "median": 62264.0,
+        "minimum": 59575
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.to-h",
+      "stage": 5,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 75080,
+        "median": 40788.0,
+        "minimum": 36806
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.projection",
+      "stage": 5,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 1215527,
+        "median": 1095503.5,
+        "minimum": 1040014
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.affine-image",
+      "stage": 6,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 985538,
+        "median": 919781.5,
+        "minimum": 900191
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.minkowski-sum",
+      "stage": 6,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 64394,
+        "median": 62613.5,
+        "minimum": 60483
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.to-h",
+      "stage": 6,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 76546,
+        "median": 42428.5,
+        "minimum": 38274
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.projection",
+      "stage": 6,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 1129481,
+        "median": 1059150.5,
+        "minimum": 1026116
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.affine-image",
+      "stage": 7,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 947753,
+        "median": 899981.0,
+        "minimum": 889295
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.minkowski-sum",
+      "stage": 7,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 80249,
+        "median": 66070.5,
+        "minimum": 62020
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.to-h",
+      "stage": 7,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 51194,
+        "median": 45362.0,
+        "minimum": 42045
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.projection",
+      "stage": 7,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 1211546,
+        "median": 1093967.0,
+        "minimum": 1046160
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.affine-image",
+      "stage": 8,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 967728,
+        "median": 916079.5,
+        "minimum": 866527
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.minkowski-sum",
+      "stage": 8,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 78922,
+        "median": 64848.0,
+        "minimum": 61181
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.to-h",
+      "stage": 8,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 12,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 61530,
+        "median": 49133.5,
+        "minimum": 44490
+      },
+      "measured_spans": 12,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "geometry.projection",
+      "stage": 8,
+      "strategy": "csl.synthesis.reach-back",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 0,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": null,
+        "median": null,
+        "minimum": null
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 6,
+      "operation": "strategy-b/family-construction",
+      "stage": null,
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 12292,
+        "median": 11349.5,
+        "minimum": 10895
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-b/program-build",
+      "stage": null,
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 1148060,
+        "median": 1056322.5,
+        "minimum": 1018713
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-b/run",
+      "stage": null,
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    },
+    {
+      "completed_spans": 6,
+      "horizon": 8,
+      "inclusive_wall_ns": {
+        "maximum": 663567,
+        "median": 610941.0,
+        "minimum": 588207
+      },
+      "measured_spans": 6,
+      "not_called_or_unavailable_spans": 0,
+      "operation": "strategy-b/program-solve",
+      "stage": null,
+      "strategy": "csl.synthesis.strategy-b",
+      "timing_scope": "instrumented OBS-03 inclusive wall ticks"
+    }
+  ],
+  "measured_operations": [
+    "geometry affine-image",
+    "geometry Minkowski-sum",
+    "geometry to-H conversion",
+    "geometry projection",
+    "Strategy B joint program build",
+    "Strategy B LP program run"
+  ],
+  "not_measured": [
+    "LP factorization internals",
+    "per-stage family queries",
+    "witness-selector queries"
+  ],
+  "relation_scope": "candidate-relaxation outputs independently checked against the pinned analytic fixtures; exact history equality is fixture-specific and does not imply general family completeness",
+  "schema": "csl.review05.phase-summary/2"
+}

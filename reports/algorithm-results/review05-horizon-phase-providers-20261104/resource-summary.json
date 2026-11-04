@@ -1,0 +1,170 @@
+[
+  {
+    "horizon": 2,
+    "measured_attempts": 6,
+    "metrics": {
+      "child_cpu_seconds": {
+        "maximum": 0.033592,
+        "median": 0.023606000000000002,
+        "minimum": 0.022664999999999998
+      },
+      "peak_rss_kib": {
+        "maximum": 13992,
+        "median": 13990.0,
+        "minimum": 13984
+      },
+      "system_cpu_seconds": {
+        "maximum": 0.008143,
+        "median": 0.006045,
+        "minimum": 0.003941
+      },
+      "user_cpu_seconds": {
+        "maximum": 0.025449,
+        "median": 0.018965999999999997,
+        "minimum": 0.016141
+      }
+    },
+    "resource_source": "POSIX wait4; whole isolated strategy process including startup and setup",
+    "strategy": "csl.synthesis.reach-back"
+  },
+  {
+    "horizon": 2,
+    "measured_attempts": 6,
+    "metrics": {
+      "child_cpu_seconds": {
+        "maximum": 0.0063479999999999995,
+        "median": 0.005925,
+        "minimum": 0.005750999999999999
+      },
+      "peak_rss_kib": {
+        "maximum": 13992,
+        "median": 13990.0,
+        "minimum": 13988
+      },
+      "system_cpu_seconds": {
+        "maximum": 0.0052899999999999996,
+        "median": 0.00342,
+        "minimum": 0.002043
+      },
+      "user_cpu_seconds": {
+        "maximum": 0.004086,
+        "median": 0.0024289999999999997,
+        "minimum": 0.001058
+      }
+    },
+    "resource_source": "POSIX wait4; whole isolated strategy process including startup and setup",
+    "strategy": "csl.synthesis.strategy-b"
+  },
+  {
+    "horizon": 4,
+    "measured_attempts": 6,
+    "metrics": {
+      "child_cpu_seconds": {
+        "maximum": 0.062805,
+        "median": 0.053465,
+        "minimum": 0.05051
+      },
+      "peak_rss_kib": {
+        "maximum": 13992,
+        "median": 13988.0,
+        "minimum": 13984
+      },
+      "system_cpu_seconds": {
+        "maximum": 0.010041999999999999,
+        "median": 0.008493,
+        "minimum": 0.007923
+      },
+      "user_cpu_seconds": {
+        "maximum": 0.052836,
+        "median": 0.044435,
+        "minimum": 0.042178
+      }
+    },
+    "resource_source": "POSIX wait4; whole isolated strategy process including startup and setup",
+    "strategy": "csl.synthesis.reach-back"
+  },
+  {
+    "horizon": 4,
+    "measured_attempts": 6,
+    "metrics": {
+      "child_cpu_seconds": {
+        "maximum": 0.014521,
+        "median": 0.0061775,
+        "minimum": 0.005932
+      },
+      "peak_rss_kib": {
+        "maximum": 13992,
+        "median": 13990.0,
+        "minimum": 13984
+      },
+      "system_cpu_seconds": {
+        "maximum": 0.008298,
+        "median": 0.003628,
+        "minimum": 0.002378
+      },
+      "user_cpu_seconds": {
+        "maximum": 0.006222999999999999,
+        "median": 0.0032665,
+        "minimum": 0.0010429999999999999
+      }
+    },
+    "resource_source": "POSIX wait4; whole isolated strategy process including startup and setup",
+    "strategy": "csl.synthesis.strategy-b"
+  },
+  {
+    "horizon": 8,
+    "measured_attempts": 6,
+    "metrics": {
+      "child_cpu_seconds": {
+        "maximum": 0.162613,
+        "median": 0.1425725,
+        "minimum": 0.141655
+      },
+      "peak_rss_kib": {
+        "maximum": 13992,
+        "median": 13990.0,
+        "minimum": 13984
+      },
+      "system_cpu_seconds": {
+        "maximum": 0.01883,
+        "median": 0.013978999999999998,
+        "minimum": 0.012973
+      },
+      "user_cpu_seconds": {
+        "maximum": 0.148647,
+        "median": 0.1288335,
+        "minimum": 0.125867
+      }
+    },
+    "resource_source": "POSIX wait4; whole isolated strategy process including startup and setup",
+    "strategy": "csl.synthesis.reach-back"
+  },
+  {
+    "horizon": 8,
+    "measured_attempts": 6,
+    "metrics": {
+      "child_cpu_seconds": {
+        "maximum": 0.006390999999999999,
+        "median": 0.0062439999999999996,
+        "minimum": 0.006064
+      },
+      "peak_rss_kib": {
+        "maximum": 13992,
+        "median": 13990.0,
+        "minimum": 13984
+      },
+      "system_cpu_seconds": {
+        "maximum": 0.005183999999999999,
+        "median": 0.0031045,
+        "minimum": 0.002021
+      },
+      "user_cpu_seconds": {
+        "maximum": 0.004043,
+        "median": 0.003162,
+        "minimum": 0.001036
+      }
+    },
+    "resource_source": "POSIX wait4; whole isolated strategy process including startup and setup",
+    "strategy": "csl.synthesis.strategy-b"
+  }
+]

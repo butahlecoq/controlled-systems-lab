@@ -30,11 +30,15 @@ ninja -C /tmp/csl-review05-horizon-build csl_review05_horizon_ladder
 python3 benchmarks/reporting/review05/run_horizon_ladder.py \
   --driver /tmp/csl-review05-horizon-build/csl_review05_horizon_ladder \
   --scenarios benchmarks/reporting/review05/scenarios \
-  --output /tmp/csl-review05-horizon-results
+  --output /tmp/csl-review05-horizon-results \
+  --resource-receipts
 python3 benchmarks/reporting/review05/check_horizon_ladder.py \
   --bundle /tmp/csl-review05-horizon-results
 python3 benchmarks/reporting/review05/summarize_horizon_ladder.py \
   --bundle /tmp/csl-review05-horizon-results
+python3 benchmarks/reporting/review05/summarize_resource_ladder.py \
+  --attempts /tmp/csl-review05-horizon-results/attempts.jsonl \
+  --output /tmp/csl-review05-horizon-results/resource-summary.json
 python3 benchmarks/reporting/review05/render_horizon_ladder.py \
   --bundle /tmp/csl-review05-horizon-results
 ```
@@ -60,6 +64,34 @@ Keep source, raw attempts, checks, and summary together when retaining a run.
 The runner refuses a non-empty output directory so separate captures cannot
 overwrite each other's evidence.
 
+`--resource-receipts` uses POSIX `wait4` for each isolated strategy process and
+records user CPU, system CPU and peak RSS. The resource summary excludes each
+horizon's warmup pair. These process-level readings include startup and setup;
+they are not solver-phase allocations and are not added to `strategy_run_ns`.
+
+## HORIZON-01 phase diagnostics
+
+The horizon runner accepts `--phase-diagnostics` to collect OBS-03 spans in a separate instrumented capture. These values include instrumentation overhead and are diagnostic only; do not compare them directly with the uninstrumented timing ladder. The capture covers Strategy A forward/preimage/terminal-optimization spans, per-stage affine-image/Minkowski-sum/to-H/projection provider calls, and Strategy B’s joint program-build and LP program-run spans. Program-build timing covers joint H assembly and construction of the solver program object; it does not separate those two steps or expose LP factorization internals. Family-construction spans not called by candidate-mode executions remain explicitly unavailable. Per-stage family queries and witness-selector queries remain unmeasured. The helper `summarize_phase_ladder.py` validates each expected operation and stage while retaining unavailable spans.
+
+Use a separate output directory for this run:
+
+```sh
+python3 benchmarks/reporting/review05/run_horizon_ladder.py \
+  --driver /tmp/csl-review05-horizon-build/csl_review05_horizon_ladder \
+  --scenarios benchmarks/reporting/review05/scenarios \
+  --output /tmp/csl-review05-phase-results \
+  --resource-receipts --phase-diagnostics
+python3 benchmarks/reporting/review05/check_horizon_ladder.py --bundle /tmp/csl-review05-phase-results
+python3 benchmarks/reporting/review05/summarize_phase_ladder.py \
+  --attempts /tmp/csl-review05-phase-results/attempts.jsonl \
+  --output /tmp/csl-review05-phase-results/phase-summary.json
+python3 benchmarks/reporting/review05/summarize_resource_ladder.py \
+  --attempts /tmp/csl-review05-phase-results/attempts.jsonl \
+  --output /tmp/csl-review05-phase-results/resource-summary.json
+python3 benchmarks/reporting/review05/summarize_horizon_ladder.py --bundle /tmp/csl-review05-phase-results
+python3 benchmarks/reporting/review05/render_horizon_ladder.py --bundle /tmp/csl-review05-phase-results
+```
+
 ## DIMENSION-01 vector pilot
 
 The follow-up pilot crosses state/control dimensions 1 and 2 with horizons 2
@@ -77,11 +109,15 @@ Build `csl_review05_dimension_ladder` in a clean Release tree, then run:
 python3 benchmarks/reporting/review05/run_dimension_ladder.py \
   --driver /tmp/csl-review05-dimension-build/csl_review05_dimension_ladder \
   --scenarios benchmarks/reporting/review05/scenarios \
-  --output /tmp/csl-review05-dimension-results
+  --output /tmp/csl-review05-dimension-results \
+  --resource-receipts
 python3 benchmarks/reporting/review05/check_dimension_ladder.py \
   --bundle /tmp/csl-review05-dimension-results
 python3 benchmarks/reporting/review05/summarize_dimension_ladder.py \
   --bundle /tmp/csl-review05-dimension-results
+python3 benchmarks/reporting/review05/summarize_dimension_resource.py \
+  --attempts /tmp/csl-review05-dimension-results/attempts.jsonl \
+  --output /tmp/csl-review05-dimension-results/resource-summary.json
 python3 benchmarks/reporting/review05/render_dimension_ladder.py \
   --bundle /tmp/csl-review05-dimension-results
 ```

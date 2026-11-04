@@ -2,11 +2,15 @@
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/adapters/polyhedral/qhull.hpp>
 #include <csl/geometry/affine_sum.hpp>
+#include <csl/execution/observability.hpp>
+#include <csl/execution/timing_collector.hpp>
 #include <csl/input/scenario_loader.hpp>
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
+#include <csl/synthesis/witness_selector.hpp>
 #include <csl/registry/registry.hpp>
 
+#include <algorithm>
 #include <chrono>
 #include <iomanip>
 #include <iostream>
@@ -75,6 +79,150 @@ const char* outcome_name(MathematicalOutcome value) {
     case MathematicalOutcome::undetermined: return "undetermined";
     }
     return "unknown";
+}
+
+struct PhaseCollector final {
+    std::shared_ptr<execution::observability::TimingCollector> collector;
+    std::shared_ptr<execution::observability::TimingClock> clock;
+};
+
+PhaseCollector make_phase_collector(const problem::ResolvedProblem& problem,
+    const FamilyRequest& family, const StrategyConfiguration& strategy,
+    std::string_view strategy_id, std::string_view version, std::string run_id,
+    const registry::Identity& projection, const registry::Identity& affine,
+    const registry::Identity& conversion, const registry::Identity& lp) {
+    namespace ar = artifacts;
+    namespace ob = execution::observability;
+    const ar::Unavailable missing{ar::MissingReason::not_instrumented, {}};
+    ar::ConfigurationInput config;
+    config.collection = {true, ar::CollectionMode::summary, 128, 1 << 20, 0, 0};
+    config.modules = {{"strategy", {std::string(strategy_id), std::string(version), missing}, {}},
+        {"lp", {strategy.lp, "1", missing}, {}}, {"convex", {strategy.convex, "1", missing}, {}}};
+    config.numerical = family.numerical;
+    config.resources = {1, 1, 1, {}};
+    config.output = {ar::OutputKind::synthesis, family.assurance, family.target,
+        family.representation, {2, 0, {{1, -1}, {-1, 1}}, 31}};
+    config.selector = {{synthesis::witness_selector::selector_id}, "1", {}};
+    config.strategy = strategy;
+    config.strategy.selector = config.selector.id;
+    auto resolved_config = take(ar::resolve_configuration(std::move(config)), "phase configuration");
+    auto clock = ob::make_steady_timing_clock();
+    const bool strategy_a = strategy_id == "csl.synthesis.reach-back";
+    const std::vector<std::string> operations = strategy_a
+        ? std::vector<std::string>{"strategy-a/run", "strategy-a/forward", "strategy-a/feasible-preimage",
+            "strategy-a/terminal-optimization", "strategy-a/terminal-preimage", "strategy-a/family-construction"}
+        : std::vector<std::string>{"strategy-b/run", "strategy-b/family-construction", "strategy-b/program-build"};
+    ob::PlanInput plan{problem, std::move(resolved_config), {std::move(run_id)},
+        {clock->wall_domain()}, {}, 1};
+    plan.tasks = {strategy_a ? "strategy-a" : "strategy-b"};
+    plan.operations = operations;
+    plan.spans.reserve(operations.size() + (strategy_a ? 64 : 1));
+    auto add_span = [&](std::uint64_t id, std::optional<ar::SpanId> parent,
+        std::string task, std::string operation, ar::ModuleIdentity module,
+        std::shared_ptr<const ar::ModuleIdentity> backend = {},
+        std::optional<std::uint64_t> stage = {},
+        std::shared_ptr<const ProgramIdentity> program = {}) {
+        ar::SpanDescriptor span{};
+        span.id = {id};
+        if (parent) span.parent = ar::SpanParent{*parent, ar::ParentKind::nested};
+        span.task = std::move(task);
+        span.operation = std::move(operation);
+        span.module = std::move(module);
+        span.backend = std::move(backend);
+        span.program = std::move(program);
+        span.stage = stage;
+        span.clock = plan.clocks.front().id;
+        span.requested_assurance = family.assurance;
+        span.applied_assurance = ar::Available<Assurance>{family.assurance};
+        span.observation_source = "review05-horizon-phase-diagnostic";
+        plan.spans.push_back(std::move(span));
+    };
+    for (std::size_t index = 0; index < operations.size(); ++index) {
+        add_span(index, index ? std::optional<ar::SpanId>{ar::SpanId{0}} : std::nullopt,
+            plan.tasks.front(), operations[index],
+            {std::string(strategy_id), std::string(version), missing});
+    }
+    auto add_task = [&](const std::string& task) {
+        if (std::find(plan.tasks.begin(), plan.tasks.end(), task) == plan.tasks.end())
+            plan.tasks.push_back(task);
+    };
+    auto add_operation = [&](const std::string& operation) {
+        if (std::find(plan.operations.begin(), plan.operations.end(), operation) == plan.operations.end())
+            plan.operations.push_back(operation);
+    };
+    auto module = [&](const registry::Identity& identity) {
+        return ar::ModuleIdentity{identity.id, identity.version, missing};
+    };
+    if (strategy_a) {
+        const auto p = problem.identity().value;
+        const std::string forward_request = "strategy-a/forward";
+        const auto make_task = [&](std::size_t stage, std::string_view suffix) {
+            return std::string{"nominal-forward/"} + std::to_string(p.size()) + ":" + p +
+                std::to_string(forward_request.size()) + ":" + forward_request +
+                std::to_string(stage) + std::string(suffix);
+        };
+        std::uint64_t id = operations.size();
+        const auto nominal_module = ar::ModuleIdentity{"csl.reachability.nominal-forward", "0.1.0", missing};
+        const auto add_geometry_span = [&](std::size_t stage, std::string_view suffix,
+            std::string operation, const registry::Identity& backend) {
+            auto task = make_task(stage, suffix);
+            add_task(task);
+            add_operation(operation);
+            add_span(id++, ar::SpanId{1}, std::move(task), std::move(operation), nominal_module,
+                std::make_shared<const ar::ModuleIdentity>(module(backend)), stage);
+        };
+        for (std::size_t stage = 0; stage <= problem.model().horizon(); ++stage) {
+            if (stage > 0) {
+                add_geometry_span(stage, "/affine-state", "geometry.affine-image", affine);
+                add_geometry_span(stage, "/affine-control", "geometry.affine-image", affine);
+                add_geometry_span(stage, "/sum", "geometry.minkowski-sum", affine);
+                add_geometry_span(stage, "/to-h", "geometry.to-h", conversion);
+            }
+            add_geometry_span(stage, "/project", "geometry.projection", projection);
+            add_geometry_span(stage, "/feasibility", "geometry.projection", projection);
+        }
+    } else {
+        const auto built = take(synthesis::strategy_b::build_joint_program(problem, family),
+            "Strategy B diagnostic program identity");
+        const auto program_id = std::visit([](const auto& value) { return value.identity(); }, built.program);
+        auto task = std::string{"strategy-b"};
+        auto operation = std::string{"strategy-b/program-solve"};
+        add_task(task);
+        add_operation(operation);
+        add_span(operations.size(), ar::SpanId{0}, std::move(task), std::move(operation),
+            {std::string(strategy_id), std::string(version), missing},
+            std::make_shared<const ar::ModuleIdentity>(module(lp)), {},
+            std::make_shared<const ProgramIdentity>(program_id));
+    }
+    auto collection_plan = take(ob::make_collection_plan(std::move(plan)), "phase collection plan");
+    auto collector = take(ob::make_timing_collector(std::move(collection_plan), clock, {0}, {}),
+        "phase timing collector");
+    return {std::move(collector), std::move(clock)};
+}
+
+void phase_json(std::ostream& out, const execution::observability::TimingReport& report) {
+    namespace ar = artifacts;
+    const auto& collection = report.observations.description();
+    const auto& clock = collection.clocks.front();
+    out << "{\"clock_period_numerator\":" << clock.period_numerator
+        << ",\"clock_period_denominator\":" << clock.period_denominator << ",\"spans\":[";
+    for (std::size_t index = 0; index < report.spans.size(); ++index) {
+        if (index) out << ',';
+        const auto& timing = report.spans[index];
+        const auto& record = collection.spans.at(static_cast<std::size_t>(timing.id.value));
+        const auto* inclusive = std::get_if<ar::Available<std::uint64_t>>(&timing.inclusive_wall_ticks);
+        const auto* exclusive = std::get_if<ar::Available<std::uint64_t>>(&timing.exclusive_wall_ticks);
+        out << "{\"operation\":" << quoted(record.descriptor.operation)
+            << ",\"task\":" << quoted(record.descriptor.task)
+            << ",\"stage\":";
+        if (record.descriptor.stage) out << *record.descriptor.stage; else out << "null";
+        out << ",\"inclusive_wall_ticks\":";
+        if (inclusive) out << inclusive->value; else out << "null";
+        out << ",\"exclusive_wall_ticks\":";
+        if (exclusive) out << exclusive->value; else out << "null";
+        out << ",\"completed\":" << (record.completion_observed ? "true" : "false") << '}';
+    }
+    out << "]}";
 }
 
 void vector_json(std::ostream& out, std::span<const double> values) {
@@ -147,11 +295,16 @@ void bound_json(std::ostream& out, const std::optional<ObjectiveBound>& bound) {
 
 int main(int argc, char** argv) try {
     using namespace csl;
-    if (argc != 3 && argc != 4) {
-        std::cerr << "usage: csl_review05_horizon_ladder <scenario.json> <csl.synthesis.reach-back|csl.synthesis.strategy-b> [repetitions]\n";
+    if (argc < 3 || argc > 5) {
+        std::cerr << "usage: csl_review05_horizon_ladder <scenario.json> <strategy> [repetitions] [--phase-diagnostics]\n";
         return 2;
     }
-    const int repetitions = argc == 4 ? std::stoi(argv[3]) : 1;
+    int repetitions = 1;
+    bool phase_diagnostics = false;
+    for (int index = 3; index < argc; ++index) {
+        if (std::string_view(argv[index]) == "--phase-diagnostics") phase_diagnostics = true;
+        else repetitions = std::stoi(argv[index]);
+    }
     if (repetitions < 1 || repetitions > 1000)
         throw std::invalid_argument("repetitions must be in [1, 1000]");
     const std::string_view strategy_id = argv[2];
@@ -217,10 +370,18 @@ int main(int argc, char** argv) try {
     requested_output.output.family = family.target;
     requested_output.output.completeness = Completeness::unestablished;
     auto prepared = take(strategies.prepare(request, requested_output), "Strategy preparation");
+    std::optional<PhaseCollector> phase;
+    if (phase_diagnostics) {
+        const auto& actual = prepared.provenance().front().actual.value();
+        phase.emplace(make_phase_collector(resolved, family, configuration, strategy_id,
+            actual.version, "review05-phase-t" + std::to_string(horizon), projection.identity,
+            affine.identity, converter.identity, lp.identity));
+    }
     ExecutionContext context;
     context.numerical = family.numerical;
     context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
     context.backend_thread_observation = std::make_shared<execution::BackendThreadObservation>();
+    if (phase) context.timing = phase->collector;
 
     std::cout.imbue(std::locale::classic());
     std::cout << std::setprecision(std::numeric_limits<double>::max_digits10);
@@ -231,6 +392,8 @@ int main(int argc, char** argv) try {
         const auto outcome = workspace->run(context);
         const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(
             std::chrono::steady_clock::now() - started).count();
+        std::optional<execution::observability::TimingReport> phase_report;
+        if (phase) phase_report.emplace(take(phase->collector->snapshot(), "phase timing snapshot"));
 
         std::cout << "{\"schema\":\"csl.review05.horizon-attempt/1\",\"fixture\":\"HORIZON-01-scalar-integrator\",\"horizon\":" << horizon
             << ",\"problem_id\":" << quoted(resolved.identity().value)
@@ -249,7 +412,9 @@ int main(int argc, char** argv) try {
                 if (index) std::cout << ',';
                 std::cout << quoted(unsupported->diagnostics[index].explanation);
             }
-            std::cout << "],\"candidate_relation\":null,\"incumbents\":[]}\n";
+            std::cout << "],\"candidate_relation\":null,\"incumbents\":[]";
+            if (phase_report) { std::cout << ",\"phase_timing\":"; phase_json(std::cout, *phase_report); }
+            std::cout << "}\n";
             continue;
         }
         const auto& result = std::get<SynthesisResult>(outcome);
@@ -290,7 +455,9 @@ int main(int argc, char** argv) try {
             if (index) std::cout << ',';
             witness_json(std::cout, result.incumbents[index].witness);
         }
-        std::cout << "]}\n";
+        std::cout << "]";
+        if (phase_report) { std::cout << ",\"phase_timing\":"; phase_json(std::cout, *phase_report); }
+        std::cout << "}\n";
     }
     return 0;
 } catch (const std::exception& error) {

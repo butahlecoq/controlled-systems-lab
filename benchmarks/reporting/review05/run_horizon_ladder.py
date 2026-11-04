@@ -9,9 +9,11 @@ import json
 import os
 import platform
 import resource
+import signal
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -32,6 +34,48 @@ def limit_process() -> None:
     resource.setrlimit(resource.RLIMIT_CPU, (300, 300))
     address_space = 8 * 1024**3
     resource.setrlimit(resource.RLIMIT_AS, (address_space, address_space))
+
+
+def run_with_resource_receipt(command: list[str], timeout_seconds: int) -> tuple[
+    int | None, bool, bytes, bytes, dict[str, object]
+]:
+    """Wait for one isolated Linux child and retain its own wait4 counters."""
+    with tempfile.TemporaryFile() as stdout_file, tempfile.TemporaryFile() as stderr_file:
+        process = subprocess.Popen(command, stdout=stdout_file, stderr=stderr_file,
+                                  preexec_fn=limit_process)
+        timed_out = False
+        previous_handler = signal.getsignal(signal.SIGALRM)
+
+        def timeout_handler(_signal_number: int, _frame: object) -> None:
+            raise TimeoutError
+
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.setitimer(signal.ITIMER_REAL, timeout_seconds)
+        try:
+            _pid, status, usage = os.wait4(process.pid, 0)
+        except TimeoutError:
+            timed_out = True
+            try:
+                os.kill(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            _pid, status, usage = os.wait4(process.pid, 0)
+        finally:
+            signal.setitimer(signal.ITIMER_REAL, 0)
+            signal.signal(signal.SIGALRM, previous_handler)
+
+        process.returncode = os.waitstatus_to_exitcode(status)
+        stdout_file.seek(0)
+        stderr_file.seek(0)
+        receipt = {
+            "source": "POSIX wait4 for the isolated strategy process",
+            "user_cpu_seconds": usage.ru_utime,
+            "system_cpu_seconds": usage.ru_stime,
+            "child_cpu_seconds": usage.ru_utime + usage.ru_stime,
+            "peak_rss_kib": usage.ru_maxrss,
+            "timed_out": timed_out,
+        }
+        return process.returncode, timed_out, stdout_file.read(), stderr_file.read(), receipt
 
 
 def physical_memory_bytes() -> int | None:
@@ -56,7 +100,8 @@ def environment(binary: Path, source_dir: Path, repo_dir: Path) -> dict[str, obj
     ).stdout
     source_files = ("CMakeLists.txt", "horizon_ladder.cpp", "run_horizon_ladder.py",
                     "check_horizon_ladder.py", "summarize_horizon_ladder.py",
-                    "render_horizon_ladder.py")
+                    "render_horizon_ladder.py", "summarize_resource_ladder.py",
+                    "summarize_phase_ladder.py")
     return {
         "source_revision": revision,
         "source_worktree_dirty": bool(status),
@@ -89,7 +134,13 @@ def main() -> int:
     parser.add_argument("--driver", required=True, type=Path)
     parser.add_argument("--scenarios", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--resource-receipts", action="store_true",
+                        help="record Linux per-process CPU and peak RSS with wait4")
+    parser.add_argument("--phase-diagnostics", action="store_true",
+                        help="collect OBS-03 strategy phase spans; results are diagnostic, not uninstrumented timings")
     args = parser.parse_args()
+    if args.resource_receipts and not hasattr(os, "wait4"):
+        parser.error("--resource-receipts requires POSIX wait4")
     driver = args.driver.resolve(strict=True)
     scenario_dir = args.scenarios.resolve(strict=True)
     source_dir = Path(__file__).resolve().parent
@@ -119,6 +170,11 @@ def main() -> int:
             "horizon_order": "rotates by repetition index across 2,4,8",
             "timed_region": "C++ steady_clock around SynthesisWorkspace::run only",
             "process_startup_and_setup": "excluded from strategy_run_ns; process_wall_ns retained separately",
+            "resource_receipts": ("per-process POSIX wait4 CPU and peak RSS"
+                                  if args.resource_receipts else None),
+            "phase_diagnostics": args.phase_diagnostics,
+            "phase_timing_scope": ("OBS-03 strategy spans with collection enabled; instrumented diagnostic capture"
+                                   if args.phase_diagnostics else None),
         },
     }
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
@@ -141,21 +197,33 @@ def main() -> int:
                     attempt_number += 1
                     attempt_id = f"t{horizon:02d}-r{repetition:02d}-p{order_position}-{attempt_number:03d}"
                     command = [str(driver), str(scenario_paths[horizon]), strategy]
+                    if args.phase_diagnostics:
+                        command.append("--phase-diagnostics")
+                    recorded_command = (
+                        ["<BUILD_DIR>/csl_review05_horizon_ladder",
+                         f"inputs/{scenario_paths[horizon].name}", strategy]
+                        + (["--phase-diagnostics"] if args.phase_diagnostics else [])
+                    )
                     started = time.monotonic_ns()
+                    resource_receipt = None
                     try:
-                        process = subprocess.run(
-                            command,
-                            check=False,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                            timeout=300,
-                            preexec_fn=limit_process,
-                        )
+                        if args.resource_receipts:
+                            return_code, timed_out, stdout, stderr, resource_receipt = \
+                                run_with_resource_receipt(command, 300)
+                            process_status = ("timed_out" if timed_out else
+                                              "completed" if return_code == 0 else "failed")
+                        else:
+                            process = subprocess.run(
+                                command,
+                                check=False,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                timeout=300,
+                                preexec_fn=limit_process,
+                            )
+                            stdout, stderr, return_code = process.stdout, process.stderr, process.returncode
+                            process_status = "completed" if return_code == 0 else "failed"
                         process_wall_ns = time.monotonic_ns() - started
-                        stdout = process.stdout
-                        stderr = process.stderr
-                        return_code = process.returncode
-                        process_status = "completed" if return_code == 0 else "failed"
                     except subprocess.TimeoutExpired as timeout:
                         process_wall_ns = time.monotonic_ns() - started
                         stdout = timeout.stdout or b""
@@ -194,12 +262,13 @@ def main() -> int:
                         "return_code": return_code,
                         "process_wall_ns": process_wall_ns,
                         "scenario_sha256": manifest["scenario_sha256"][str(horizon)],
-                        "command": command,
+                        "command": recorded_command,
                         "stdout_path": str(stdout_path.relative_to(output)),
                         "stdout_sha256": hashlib.sha256(stdout).hexdigest(),
                         "stderr_path": str(stderr_path.relative_to(output)),
                         "stderr_sha256": hashlib.sha256(stderr).hexdigest(),
                         "parse_error": parse_error,
+                        "resource_receipt": resource_receipt,
                         "result": parsed,
                     }
                     records.write(json.dumps(row, separators=(",", ":"), allow_nan=False) + "\n")
