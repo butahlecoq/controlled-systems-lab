@@ -69,6 +69,29 @@ records user CPU, system CPU and peak RSS. The resource summary excludes each
 horizon's warmup pair. These process-level readings include startup and setup;
 they are not solver-phase allocations and are not added to `strategy_run_ns`.
 
+## HORIZON-01 phase diagnostics
+
+The horizon runner accepts `--phase-diagnostics` to collect OBS-03 strategy spans in a separate instrumented capture. These values include instrumentation overhead and are diagnostic only; do not compare them directly with the uninstrumented timing ladder. The current strategy spans expose Strategy A forward/preimage/terminal optimization/family construction and Strategy B family construction. They do not expose provider-internal sparse assembly, LP factorization/solve, conversion, per-stage family queries, or witness-selector queries. The helper `summarize_phase_ladder.py` retains these gaps explicitly.
+
+Use a separate output directory for this run:
+
+```sh
+python3 benchmarks/reporting/review05/run_horizon_ladder.py \
+  --driver /tmp/csl-review05-horizon-build/csl_review05_horizon_ladder \
+  --scenarios benchmarks/reporting/review05/scenarios \
+  --output /tmp/csl-review05-phase-results \
+  --resource-receipts --phase-diagnostics
+python3 benchmarks/reporting/review05/check_horizon_ladder.py --bundle /tmp/csl-review05-phase-results
+python3 benchmarks/reporting/review05/summarize_phase_ladder.py \
+  --attempts /tmp/csl-review05-phase-results/attempts.jsonl \
+  --output /tmp/csl-review05-phase-results/phase-summary.json
+python3 benchmarks/reporting/review05/summarize_resource_ladder.py \
+  --attempts /tmp/csl-review05-phase-results/attempts.jsonl \
+  --output /tmp/csl-review05-phase-results/resource-summary.json
+python3 benchmarks/reporting/review05/summarize_horizon_ladder.py --bundle /tmp/csl-review05-phase-results
+python3 benchmarks/reporting/review05/render_horizon_ladder.py --bundle /tmp/csl-review05-phase-results
+```
+
 ## DIMENSION-01 vector pilot
 
 The follow-up pilot crosses state/control dimensions 1 and 2 with horizons 2

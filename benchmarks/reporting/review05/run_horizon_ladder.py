@@ -100,7 +100,8 @@ def environment(binary: Path, source_dir: Path, repo_dir: Path) -> dict[str, obj
     ).stdout
     source_files = ("CMakeLists.txt", "horizon_ladder.cpp", "run_horizon_ladder.py",
                     "check_horizon_ladder.py", "summarize_horizon_ladder.py",
-                    "render_horizon_ladder.py", "summarize_resource_ladder.py")
+                    "render_horizon_ladder.py", "summarize_resource_ladder.py",
+                    "summarize_phase_ladder.py")
     return {
         "source_revision": revision,
         "source_worktree_dirty": bool(status),
@@ -135,6 +136,8 @@ def main() -> int:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--resource-receipts", action="store_true",
                         help="record Linux per-process CPU and peak RSS with wait4")
+    parser.add_argument("--phase-diagnostics", action="store_true",
+                        help="collect OBS-03 strategy phase spans; results are diagnostic, not uninstrumented timings")
     args = parser.parse_args()
     if args.resource_receipts and not hasattr(os, "wait4"):
         parser.error("--resource-receipts requires POSIX wait4")
@@ -169,6 +172,9 @@ def main() -> int:
             "process_startup_and_setup": "excluded from strategy_run_ns; process_wall_ns retained separately",
             "resource_receipts": ("per-process POSIX wait4 CPU and peak RSS"
                                   if args.resource_receipts else None),
+            "phase_diagnostics": args.phase_diagnostics,
+            "phase_timing_scope": ("OBS-03 strategy spans with collection enabled; instrumented diagnostic capture"
+                                   if args.phase_diagnostics else None),
         },
     }
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
@@ -191,9 +197,12 @@ def main() -> int:
                     attempt_number += 1
                     attempt_id = f"t{horizon:02d}-r{repetition:02d}-p{order_position}-{attempt_number:03d}"
                     command = [str(driver), str(scenario_paths[horizon]), strategy]
+                    if args.phase_diagnostics:
+                        command.append("--phase-diagnostics")
                     recorded_command = (
                         ["<BUILD_DIR>/csl_review05_horizon_ladder",
                          f"inputs/{scenario_paths[horizon].name}", strategy]
+                        + (["--phase-diagnostics"] if args.phase_diagnostics else [])
                         if args.resource_receipts else command
                     )
                     started = time.monotonic_ns()
