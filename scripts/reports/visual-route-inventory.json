@@ -2679,6 +2679,16 @@
       "companion_route": "examples/ext07-feasible-relation-v1.html"
     },
     {
+      "route": "ext07-hybrid-9d4034480963bb5e",
+      "source_bundle": "ext07-hybrid-9d4034480963bb5e",
+      "assets": [
+        "joint-relation-2d.svg"
+      ],
+      "index_sha256": "e5ed72c799c2989b9effc17a1904596fddfee25bc4c02da6091e21d15c7e7ecd",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
       "route": "ext07-hybrid-e7bb939d854b1907",
       "source_bundle": "ext07-hybrid-e7bb939d854b1907",
       "assets": [
@@ -2716,6 +2726,16 @@
         "feasible-polygons.svg"
       ],
       "index_sha256": "8a68ed07ff8b49750fc3d56cb21e20a3c3dbd01bd869251af7768b47a9dfae10",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "ext07-hybrid-two-parameter-9732c471bf065c33",
+      "source_bundle": "ext07-hybrid-two-parameter-9732c471bf065c33",
+      "assets": [
+        "feasible-polygons.svg"
+      ],
+      "index_sha256": "eab2605004e7bb00ff39196820c90dd3cee53784d624d31c3e12aefd1e2bf3e4",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },
