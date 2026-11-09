@@ -65,8 +65,11 @@ python3 -m unittest discover -s tests/reporting -p test_mpc06_online.py
 python3 scripts/reports/mpc06_online/study.py \
   --driver build/mpc06-online/csl_mpc06_online --repetitions 5 \
   --output /absolute/new/capture-directory
-python3 scripts/reports/mpc06_online/check.py /absolute/new/capture-directory
-python3 scripts/reports/mpc06_online/render.py /absolute/new/capture-directory
+python3 scripts/reports/mpc06_online/check.py /absolute/new/capture-directory \
+  --receipt-output /absolute/new/evidence/verification-v2.json
+python3 scripts/reports/mpc06_online/render.py /absolute/new/capture-directory \
+  --receipt /absolute/new/evidence/verification-v2.json \
+  --output /absolute/new/rendered-directory
 ```
 
 The native runner consumes one line per scalar QP:
@@ -106,3 +109,24 @@ online records only; issue #602 stays open until its full remaining evidence
 and publication gates pass.
 
 The timing verdict is inconclusive: this capture checks phase accounting and executed work, not an adoption or performance choice. No source-level limiter profile has been established. It excludes no warmup calls; the first native call in each reused process may initialize backend state, and every QP still creates a fresh workspace. Host load and active compiler counts are recorded.
+
+## Versioned checked-source boundary
+
+The original `mpc06-online-anchor-v1` archive remains immutable. Its first
+verification receipt is historical and does not authorize current rendering.
+The shared `evidence.py` boundary verifies the complete prior checksum inventory,
+base scenario and capture-source snapshots, then parses each completed native
+response stream. APP-04 output and every ordered QP response must exactly equal
+the structured process/step records, including program identity and timing.
+Native preparation/setup/solve sums must also fit their observed response
+interval. Checksums alone do not prove this extraction correspondence.
+
+The version-2 receipt binds every source-archive file and the exact checker,
+model, study, boundary helper and renderer source bytes. Rendering validates
+those bindings before reading quantitative values, requires a new output
+directory and preserves the original archive under `checked-inputs/`. A changed
+raw response, result/timing, capture source, receipt or reviewing script requires
+a fresh successful check; rendering cannot renew a manifest around stale checked
+evidence. New manifests describe generated outputs only after this boundary
+passes. The final reading layer retains `review-tools/` for offline rechecking.
+These fixes require no new native optimization or mathematical experiment.

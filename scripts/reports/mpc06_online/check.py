@@ -8,6 +8,7 @@ from pathlib import Path
 import time
 from model import problem,optimizer,value,tightenings,replay,representation_checks
 from study import exact_approximation_check,encode
+from evidence import load_sources,make_receipt,checked_sources
 
 
 def plain(value):return json.loads(json.dumps(value,default=encode))
@@ -53,24 +54,25 @@ def verify(record):
         expected=replay(initial,controls)
         if attempt['actual']!=plain(expected):raise ValueError('actual cost/witness replay changed')
         if not all(row['safe'] for row in expected['paths']):raise ValueError('unsafe actual path')
-    return dict(status='verified' if all(p.get('status')!='inconclusive' for p in record['processes']) else 'inconclusive',
+    return dict(status='verified' if all(p.get('status')!='inconclusive' for p in record['processes']) and all(a['status']=='completed' for a in record['attempts']) else 'inconclusive',
                 completed_native_qps=count,checker_ns=time.perf_counter_ns()-begin,
                 scope='exact saved dyadic safety and continuous-box worst cost for deterministic anchored nominal policy; numerical native optimum agreement only')
 
 
 def main():
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('bundle',type=Path);args=parser.parse_args()
-    # Validate existing frozen bytes before adding this new checker receipt.
-    for line in (args.bundle/'SHA256SUMS').read_text().splitlines():
-        digest,name=line.split('  ',1)
-        if hashlib.sha256((args.bundle/name).read_bytes()).hexdigest()!=digest:raise ValueError('saved bundle digest mismatch: '+name)
-    result=verify(json.loads((args.bundle/'result.json').read_text()))
-    receipt=args.bundle/'verification.json'
-    if receipt.exists():
-        saved=json.loads(receipt.read_text())
-        if any(saved[key]!=result[key] for key in ('status','completed_native_qps','scope')):raise ValueError('saved checker disposition changed')
-    else:
-        receipt.write_text(json.dumps(result,indent=2)+'\n')
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('bundle',type=Path)
+    parser.add_argument('--receipt-output',type=Path);args=parser.parse_args()
+    record,inputs=load_sources(args.bundle)
+    result=verify(record)
+    receipt=make_receipt(args.bundle,inputs,result)
+    if args.receipt_output:
+        if args.receipt_output.resolve().is_relative_to(args.bundle.resolve()):raise ValueError('versioned receipt must be outside the immutable source bundle')
+        if args.receipt_output.exists():
+            _,saved=checked_sources(args.bundle,args.receipt_output)
+            if any(saved['verification'][key]!=result[key] for key in ('status','completed_native_qps','scope')):raise ValueError('saved checker disposition changed')
+        else:
+            args.receipt_output.parent.mkdir(parents=True,exist_ok=True)
+            args.receipt_output.write_text(json.dumps(receipt,indent=2)+'\n')
     print(json.dumps(result))
 
 if __name__=='__main__':main()

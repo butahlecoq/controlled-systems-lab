@@ -8,11 +8,24 @@ import html
 import json
 from pathlib import Path
 import statistics
+import shutil
+from evidence import checked_sources
 
 
-def render(bundle):
-    record=json.loads((bundle/'result.json').read_text());verified=json.loads((bundle/'verification.json').read_text())
-    if verified['status'] not in ('verified','inconclusive'):raise ValueError('missing independent check')
+def render(bundle,receipt_path,output):
+    record,receipt=checked_sources(bundle,receipt_path)
+    verified=receipt['verification']
+    if output.resolve().is_relative_to(bundle.resolve()) or bundle.resolve().is_relative_to(output.resolve()):raise ValueError('render output must be separate from immutable source bundle')
+    if output.exists():raise ValueError('render output must be new')
+    source_prefix='checked-inputs/'+bundle.name
+    output.mkdir(parents=True)
+    shutil.copytree(bundle,output/source_prefix)
+    checked_sources(output/source_prefix,receipt_path)
+    (output/'verification-v2.json').write_bytes(receipt_path.read_bytes())
+    tools=output/'review-tools';tools.mkdir()
+    for name in ('check.py','evidence.py','model.py','study.py','render.py'):
+        (tools/name).write_bytes(Path(__file__).with_name(name).read_bytes())
+    bundle=output
     grid=record['grid']['rows'];counts=Counter(row['method'] for row in grid if row['qp']['feasible'])
     rows=[];metrics=defaultdict(list)
     for attempt in record['attempts']:
@@ -69,7 +82,7 @@ def render(bundle):
         '<style>body{font:16px/1.6 system-ui;max-width:1100px;margin:2rem auto;padding:1rem;background:#1e1e2e;color:#cdd6f4}a{color:#89b4fa}table{border-collapse:collapse;width:100%;display:block;overflow-x:auto}td,th{padding:.5rem;text-align:left;border-bottom:1px solid #45475a}img{max-width:100%;height:auto}</style>',
         '<h1>Tube MPC with a retained nominal anchor</h1>',
         '<p>This bounded two-state LTI study solves actual CSL/HiGHS nominal QPs, compares matched fixed-K robust feasibility, and independently checks all continuous-box disturbance costs for the recorded deterministic nominal schedules. It does not compute fixed-plan minimax or general causal optimum.</p>',
-        f'<p>Source <code>{html.escape(record["source_commit"])}</code>. Independent replay: {html.escape(verified["status"])}; {verified["completed_native_qps"]} completed native QPs. <a href="result.json">Raw mathematical/process records</a>, <a href="verification.json">checker receipt</a>, <a href="summary.json">cost/timing distributions</a>.</p>',
+        f'<p>Source <code>{html.escape(record["source_commit"])}</code>. Independent replay: {html.escape(verified["status"])}; {verified["completed_native_qps"]} completed native QPs. <a href="result.json">Raw mathematical/process records</a>, <a href="verification-v2.json">checker receipt</a>, <a href="summary.json">cost/timing distributions</a>.</p>',
         '<p>At each step u=v+K(x-z), K=(-1,-2); z propagates with the applied nominal v. Full-state measurements affect only the fixed ancillary feedback. The nominal N=3 objective is sum(z²+v²), with terminal z3=0. The finite-error reference uses the same policy and global disturbance clock; invariant tubes are conservative restrictions. All original state/control bounds are checked without clipping. The actual reported objective is sum(x²+u²)+x3² over the three executed steps.</p>',
         '<p>Minimal inputs: A=[[1,1],[0,1]], B=E=(0,1), W=[-1/8,1/8], X=[-1,1]², U=[-1,1]. Initial actual and nominal states coincide at (1/8,0), (3/8,-1/8), or (-1/4,1/8). Exact full-state feedback, independent stage disturbances and continuous actuators are required. <a href="base-scenario.json">Immutable base input</a>; <a href="source/README.md">derivation and reproduction commands</a>.</p>',
         '<h2>Matched feasible intervals and online cost</h2><p>The 17 by 17 initial grid is finite and is not a complete feedback-winning-set characterization. Times are medians [minimum, maximum] in microseconds over completed steps; process/IPC timing is separate from native solve. Actual worst cost ranges cover the same three initial states over all repetitions; exact fractions and matched nominal-objective gaps remain in JSON. No performance ranking is claimed.</p>',
@@ -81,10 +94,15 @@ def render(bundle):
         '<p>The original required <a href="https://butahlecoq.github.io/controlled-systems-lab/mpc06-tube-405a8ac4eb2bea7ebec8/index.html">invariant/tightening figure</a> remains unchanged. These trajectories add online evidence; rendering executes no solver.</p>',
         '<h2>Scope and delivery</h2><p>Actual cost is checked with exact dyadic controls over all eight disturbance vertices; convexity proves the continuous-box maximum for this deterministic-anchor policy. Native optimum agreement is numerical with an independent exact scalar optimum, not a solver certificate. Initial error is zero, actuators are continuous and disturbances are independent stagewise additive intervals. LTV, correlated/model uncertainty, finite actuators, state-reset policies and general stable-tail construction are unsupported.</p>',
         '<p>Offline construction, online preparation/setup/solve and checker costs are retained separately. This Linux capture does not establish other-platform performance, native thread enforcement, heap/RSS caps or hard real-time deadlines. HiGHS is the existing optional MIT integration; no acados or new required dependency is introduced. Compiler/platform/install checks, independent review and versioned Pages publication remain integration gates; no release is needed for the research tool. Issue #602 remains open until all evidence gates pass.</p></html>']
-    (bundle/'index.html').write_text('\n'.join(text)+'\n')
-    paths=sorted(p for p in bundle.rglob('*') if p.is_file() and p.name!='SHA256SUMS')
+    page='\n'.join(text)+'\n'
+    for name in ('result.json','base-scenario.json','source/README.md'):
+        page=page.replace('href="'+name+'"','href="'+source_prefix+'/'+name+'"')
+    (bundle/'index.html').write_text(page)
+    paths=sorted(p for p in bundle.rglob('*') if p.is_file() and p!=bundle/'SHA256SUMS')
     (bundle/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(bundle)}\n' for p in paths))
     return summary
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('bundle',type=Path);args=parser.parse_args();render(args.bundle)
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('bundle',type=Path)
+    parser.add_argument('--receipt',required=True,type=Path);parser.add_argument('--output',required=True,type=Path)
+    args=parser.parse_args();render(args.bundle,args.receipt,args.output)

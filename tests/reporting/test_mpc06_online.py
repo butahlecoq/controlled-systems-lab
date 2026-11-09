@@ -8,6 +8,8 @@ import sys
 import tempfile
 import subprocess
 import hashlib
+import shutil
+from unittest import mock
 
 P=Path(__file__).resolve().parents[2]/'scripts/reports/mpc06_online/model.py'
 S=importlib.util.spec_from_file_location('mpc06_online_model',P)
@@ -111,5 +113,107 @@ for i,line in enumerate(sys.stdin):
             with self.assertRaisesRegex(ValueError,'policy'):check.verify(corrupt)
             corrupt=copy.deepcopy(frozen);corrupt['attempts'][0]['actual']['worst']='0'
             with self.assertRaisesRegex(ValueError,'cost'):check.verify(corrupt)
+
+class EvidenceBindingTests(unittest.TestCase):
+    source=P.parents[3]/'reports/algorithm-results/mpc06-online-anchor-v1'
+
+    def clone(self,folder):
+        bundle=Path(folder)/'bundle';shutil.copytree(self.source,bundle);return bundle
+
+    def refresh_manifest(self,bundle):
+        files=sorted(p for p in bundle.rglob('*') if p.is_file() and p.name!='SHA256SUMS')
+        (bundle/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(bundle)}\n' for p in files))
+
+    def receipt(self,bundle,folder):
+        path=Path(folder)/'verification-v2.json'
+        result=subprocess.run([sys.executable,str(P.with_name('check.py')),str(bundle),'--receipt-output',str(path)],capture_output=True,text=True)
+        self.assertEqual(result.returncode,0,result.stderr)
+        return path
+
+    def renderer(self,bundle,receipt,output):
+        return subprocess.run([sys.executable,str(P.with_name('render.py')),str(bundle),'--receipt',str(receipt),'--output',str(output)],capture_output=True,text=True)
+
+    def test_replaced_native_stream_is_rejected_even_with_updated_checksums(self):
+        with tempfile.TemporaryDirectory() as folder:
+            bundle=self.clone(folder)
+            (bundle/'repetition-00/stdout.txt').write_text('NO NATIVE RESPONSES\n')
+            self.refresh_manifest(bundle)
+            result=subprocess.run([sys.executable,str(P.with_name('check.py')),str(bundle)],capture_output=True,text=True)
+            self.assertNotEqual(result.returncode,0,result.stdout)
+
+    def test_native_app04_response_count_and_order_are_not_inferred_from_labels(self):
+        for mutation in ('APP04','order','extra','missing'):
+            with self.subTest(mutation=mutation),tempfile.TemporaryDirectory() as folder:
+                bundle=self.clone(folder);path=bundle/'repetition-00/stdout.txt'
+                lines=path.read_text().splitlines()
+                if mutation=='APP04':
+                    response=json.loads(lines[0]);response['construction_ns']+=1;lines[0]=json.dumps(response)
+                elif mutation=='order':lines[1],lines[2]=lines[2],lines[1]
+                elif mutation=='extra':lines.append(lines[-1])
+                else:lines.pop()
+                path.write_text('\n'.join(lines)+'\n');self.refresh_manifest(bundle)
+                result=subprocess.run([sys.executable,str(P.with_name('check.py')),str(bundle)],capture_output=True,text=True)
+                self.assertNotEqual(result.returncode,0)
+                self.assertIn('native response stream differs',result.stderr)
+
+    def test_renderer_rejects_changed_timing_without_blessing_source(self):
+        with tempfile.TemporaryDirectory() as folder:
+            bundle=self.clone(folder)
+            receipt=self.receipt(bundle,folder)
+            record=json.loads((bundle/'result.json').read_text())
+            record['attempts'][0]['steps'][0]['native']['solve_ns']=10**18
+            (bundle/'result.json').write_text(json.dumps(record))
+            before=(bundle/'SHA256SUMS').read_bytes()
+            output=Path(folder)/'rendered'
+            result=self.renderer(bundle,receipt,output)
+            self.assertNotEqual(result.returncode,0,result.stdout)
+            self.assertFalse(output.exists())
+            self.assertEqual((bundle/'SHA256SUMS').read_bytes(),before)
+
+    def test_valid_versioned_render_preserves_original_archive(self):
+        with tempfile.TemporaryDirectory() as folder:
+            bundle=self.clone(folder);before={p.relative_to(bundle):p.read_bytes() for p in bundle.rglob('*') if p.is_file()}
+            receipt=self.receipt(bundle,folder);receipt_before=receipt.read_bytes()
+            output=Path(folder)/'rendered';result=self.renderer(bundle,receipt,output)
+            self.assertEqual(result.returncode,0,result.stderr)
+            self.assertTrue((output/'verification-v2.json').exists())
+            subprocess.run([sys.executable,str(output/'review-tools/check.py'),str(output/'checked-inputs'/bundle.name),'--receipt-output',str(output/'verification-v2.json')],check=True,capture_output=True)
+            self.assertEqual({p.relative_to(bundle):p.read_bytes() for p in bundle.rglob('*') if p.is_file()},before)
+            subprocess.run([sys.executable,str(P.with_name('check.py')),str(bundle),'--receipt-output',str(receipt)],check=True,capture_output=True)
+            self.assertEqual(receipt.read_bytes(),receipt_before)
+
+    def test_updated_raw_and_result_timing_still_need_new_verification(self):
+        with tempfile.TemporaryDirectory() as folder:
+            bundle=self.clone(folder);receipt=self.receipt(bundle,folder)
+            record=json.loads((bundle/'result.json').read_text());native=record['attempts'][0]['steps'][0]['native']
+            native['solve_ns']+=1
+            (bundle/'result.json').write_text(json.dumps(record))
+            path=bundle/'repetition-00/stdout.txt';lines=path.read_text().splitlines()
+            lines[1]=json.dumps(native);path.write_text('\n'.join(lines)+'\n');self.refresh_manifest(bundle)
+            result=self.renderer(bundle,receipt,Path(folder)/'rendered')
+            self.assertNotEqual(result.returncode,0)
+            self.assertIn('receipt input binding',result.stderr)
+
+    def test_receipt_count_and_script_binding_are_checked(self):
+        sys.path.insert(0,str(P.parent));import evidence
+        with tempfile.TemporaryDirectory() as folder:
+            bundle=self.clone(folder);receipt=self.receipt(bundle,folder)
+            body=json.loads(receipt.read_text());body['verification']['completed_native_qps']+=1
+            receipt.write_text(json.dumps(body))
+            with self.assertRaisesRegex(ValueError,'content binding'):evidence.checked_sources(bundle,receipt)
+            body['receipt_sha256']=evidence.receipt_id(body);receipt.write_text(json.dumps(body))
+            with self.assertRaisesRegex(ValueError,'disposition binding'):evidence.checked_sources(bundle,receipt)
+            body['verification']['completed_native_qps']-=1;body['receipt_sha256']=evidence.receipt_id(body);receipt.write_text(json.dumps(body))
+            altered=dict(evidence.tool_bindings());altered['model.py']='0'*64
+            with mock.patch.object(evidence,'tool_bindings',return_value=altered):
+                with self.assertRaisesRegex(ValueError,'script binding'):evidence.checked_sources(bundle,receipt)
+
+    def test_capture_source_snapshot_is_not_just_a_checksum_label(self):
+        with tempfile.TemporaryDirectory() as folder:
+            bundle=self.clone(folder);source=bundle/'source/driver.cpp';source.write_text(source.read_text()+'\n// changed\n')
+            self.refresh_manifest(bundle)
+            result=subprocess.run([sys.executable,str(P.with_name('check.py')),str(bundle)],capture_output=True,text=True)
+            self.assertNotEqual(result.returncode,0)
+            self.assertIn('source snapshot binding',result.stderr)
 
 if __name__=='__main__':unittest.main()
