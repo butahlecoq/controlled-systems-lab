@@ -13,6 +13,8 @@ import resource
 import sys
 import warnings
 
+from smoke_requirements import qualification_exit_code
+
 # This script checks plugin loading only. It never creates or solves an NLP.
 for variable in ('OPENBLAS_NUM_THREADS', 'OMP_NUM_THREADS', 'MKL_NUM_THREADS'):
     os.environ[variable] = '1'
@@ -67,5 +69,4 @@ result = {
     'solver_invoked': False, 'claim': 'import/plugin-load smoke; no controller or numerical performance evidence',
 }
 print(json.dumps(result, indent=2))
-if not result['ipopt_plugin_available']:
-    sys.exit(1)
+sys.exit(qualification_exit_code(result))

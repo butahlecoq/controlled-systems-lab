@@ -79,9 +79,17 @@ import warnings are retained as text in the smoke JSON. The notice inventory
 contains all 146 selected notice/license members from the exact 15 wheels.
 CasADi includes third-party interfaces beyond the chosen IPOPT/MUMPS/CVODES
 profile; copying their notices does not activate or qualify those interfaces.
-The bundled MUMPS notice identifies CeCILL-C and references additional upstream
-license documents that are not present in that wheel. Preserve this boundary
-when assessing redistribution; this receipt is not a blanket license approval.
+The bundled MUMPS notice identifies CeCILL-C. Its referenced English and French
+license documents and PORD README are supplied separately in
+`upstream-mumps-license.zip`, extracted from the authoritative MUMPS 5.8.2
+source archive. `upstream-mumps-license.json` records its source URL, archive
+hash and each copied member hash. The original wheel notice archive remains
+unchanged. CeCILL-C Article 5.3.1 conditions redistribution of unmodified
+software on providing the agreement, warranty/liability notice and effective
+source access when redistributing object code. Thus the license text is
+relevant to redistribution, not merely optional reading. This local environment
+qualification does not redistribute the solver binary or establish blanket
+license compliance for every future packaging route.
 The environment is installed locally for research, not redistributed as a CSL
 binary package.
 
@@ -91,3 +99,9 @@ python@3.11.14`, using the python-build-standalone artifact
 The smoke receipt records the installed Python executable hash. Recreating
 Python on a different system may produce a different executable hash even with
 the same Python version; retain that difference explicitly.
+
+The checker accepts only the two fixed authored scenario profiles. A semantic
+change requires a reviewed new profile; canonical digests are independent of
+JSON formatting and object-key order. Successful environment qualification
+requires both IPOPT and CVODES plugin flags; missing either yields exit 1 after
+writing the receipt.

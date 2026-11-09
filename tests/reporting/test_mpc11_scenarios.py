@@ -37,6 +37,19 @@ class ScenarioTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 MODULE.validate(bad)
 
+    def test_rejects_missing_replay_robust_controller_or_replaced_equations(self):
+        for scenario in [self.fuel, self.lv]:
+            for mutation in ['missing-replay', 'robust', 'equations']:
+                bad = copy.deepcopy(scenario)
+                if mutation == 'missing-replay':
+                    del bad['independent_replay']
+                elif mutation == 'robust':
+                    bad['nmpc']['n_robust'] = 3
+                else:
+                    bad['equations'] = ['dx/dt=0'] * len(bad['states'])
+                with self.assertRaises(ValueError):
+                    MODULE.validate(bad)
+
     def test_rejects_infeasible_nominal_fuel_command_after_parameter_change(self):
         self.fuel['parameters']['Q_ox']['value'] = .1
         with self.assertRaisesRegex(ValueError, 'nominal command'):

@@ -1,0 +1,30 @@
+{
+  "schema": "csl.mpc11.upstream-license-source/1",
+  "source_url": "https://mumps-solver.org/MUMPS_5.8.2.tar.gz",
+  "source_archive_sha256": "eb515aa688e6dbab414bb6e889ff4c8b23f1691a843c68da5230a33ac4db7039",
+  "source_version": "MUMPS 5.8.2",
+  "members": [
+    {
+      "member": "MUMPS_5.8.2/doc/CeCILL-C_V1-en.txt",
+      "saved_path": "doc/CeCILL-C_V1-en.txt",
+      "sha256": "b48f5dc16f144cd79ddaadce3cc8ef183778a0b4f75ab4362e134b347ca20f3d"
+    },
+    {
+      "member": "MUMPS_5.8.2/doc/CeCILL-C_V1-fr.txt",
+      "saved_path": "doc/CeCILL-C_V1-fr.txt",
+      "sha256": "a5d3b248c5cfb93fc27b350da3faac63a68598a7e302beb21616a6576f2807a6"
+    },
+    {
+      "member": "MUMPS_5.8.2/LICENSE",
+      "saved_path": "LICENSE",
+      "sha256": "5813fefd30a36fd7550cd2b62274be6586a0db51c11c3f2d4b852283e22ccc42"
+    },
+    {
+      "member": "MUMPS_5.8.2/PORD/README",
+      "saved_path": "PORD/README",
+      "sha256": "42ee4bd932cba9c607fe85d06119c369180e15b2380d47ed6aa39f17191d2b52"
+    }
+  ],
+  "scope": "license/document extraction only; no source installed or compiled",
+  "supplement_archive": "upstream-mumps-license.zip"
+}

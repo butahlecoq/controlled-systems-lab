@@ -14,6 +14,9 @@ def validate(value: dict) -> str:
         raise ValueError('unsupported scenario schema')
     if value['case_id'] not in {'SYN-NL-LV-01', 'SYN-NL-FUEL-01'}:
         raise ValueError('unknown authored case')
+    required = {'equations', 'parameters', 'execution', 'independent_replay', 'affine', 'nmpc', 'objective', 'initial_guess', 'time', 'states', 'controls', 'hold'}
+    if not required <= value.keys():
+        raise ValueError('incomplete authored scenario configuration')
     states, controls = value['states'], value['controls']
     names = [item['name'] for item in states + controls]
     if len(set(names)) != len(names):
@@ -83,7 +86,15 @@ def validate(value: dict) -> str:
         if [p['c']/p['d'], p['a']/p['b']] != affine['state_reference']:
             raise ValueError('LV coexistence reference mismatch')
     raw = json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()
-    return hashlib.sha256(raw).hexdigest()
+    digest = hashlib.sha256(raw).hexdigest()
+    # These IDs name fixed authored scenarios, not an arbitrary model family.
+    expected = {
+        'SYN-NL-FUEL-01': 'c0fb79df63b9b87116ddb96552d139de177eb9ac71440b662d3d4719f6f65572',
+        'SYN-NL-LV-01': 'debf46903cbcd78694ea91bd1734f8ba9e503be36387288bbf1395661450c45b',
+    }
+    if digest != expected[value['case_id']]:
+        raise ValueError('configuration differs from the fixed authored case; use a reviewed new profile')
+    return digest
 
 
 def main() -> None:
