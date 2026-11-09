@@ -83,6 +83,14 @@ synchronous `BoundWorkspace::run` provider invocation. Process CPU sums all
 process threads and may include helper or unrelated work; it is not provider-
 only attribution. It does not measure heap use or enforce a resource limit.
 Historical schema `/1` through `/3` bundles and rendered bytes are unchanged.
+Schema `/5` adds a full solver-capacity sweep over 1, 2, 4, 8, and 16 tied
+mode paths. Each fixture retains every branch's HiGHS outcome and exact
+linear-H feasibility, optimality, and continuous-coverage result. Seven
+10-call measurements per path count follow two excluded warmups; the collector
+checks all 350 end-to-end calls and 2,170 branch outcomes before publication.
+This remains a fixture-specific profile, not a general scalability claim.
+Provider memory remains unmeasured, and process CPU is not provider-only
+attribution.
 The two-parameter capture may reuse a separate build tree with `--build-dir`;
 its configure and build logs redact that path, and its saved capture retains a
 copy of the executable. When the default capture-local build tree is used, the

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 440" role="img" aria-labelledby="title desc">
+<title id="title">Two-stage hybrid feasible control polygons and tied minimizing faces</title>
+<desc id="desc">The horizontal axis is u0 and the vertical axis is u1. The enter-full path allows the unit square. The enter-half path allows the rectangle from u0 zero to one half. Both have the same minimizing face u0 equals zero, with u1 anywhere from zero to one.</desc>
+<rect width="720" height="440" fill="#16161e"/>
+<g font-family="system-ui,sans-serif" fill="#e0def4"><text x="68" y="36" font-size="19">EXT-07 · two free interval controls</text><text x="328" y="408" font-size="16">stage 0 control u₀</text><text x="20" y="290" font-size="16" transform="rotate(-90 20,290)">stage 1 control u₁</text></g>
+<path d="M100 350 H620 M100 350 V72" stroke="#908caa" stroke-width="2"/>
+<g stroke="#6e6a86" stroke-dasharray="4 5"><path d="M100 350 V72"/><path d="M360 350 V72"/><path d="M620 350 V72"/><path d="M100 211 H620"/><path d="M100 72 H620"/></g>
+<path d="M100 350 L620 350 L620 72 L100 72 Z" fill="#9ccfd8" fill-opacity=".08" stroke="#9ccfd8" stroke-width="3" stroke-dasharray="9 6"/>
+<path d="M100 350 L360 350 L360 72 L100 72 Z" fill="#c4a7e7" fill-opacity=".35" stroke="#c4a7e7" stroke-width="4"/>
+<path d="M100 350 V72" stroke="#f6c177" stroke-width="8"/>
+<g font-family="system-ui,sans-serif" fill="#e0def4" font-size="14"><text x="92" y="375">0</text><text x="348" y="375">0.5</text><text x="612" y="375">1</text><text x="69" y="355">0</text><text x="69" y="77">1</text><text x="390" y="105">enter-full: [0,1] × [0,1]</text><text x="390" y="128">enter-half: [0,0.5] × [0,1]</text><text x="128" y="225" fill="#f6c177">both minimizing faces: u₀=0, 0≤u₁≤1</text></g>
+<g font-family="system-ui,sans-serif" font-size="13"><path d="M390 164 h28" stroke="#9ccfd8" stroke-width="3" stroke-dasharray="7 4"/><text x="426" y="169" fill="#e0def4">enter-full path</text><path d="M390 189 h28" stroke="#c4a7e7" stroke-width="5"/><text x="426" y="194" fill="#e0def4">enter-half path</text><path d="M390 214 h28" stroke="#f6c177" stroke-width="7"/><text x="426" y="219" fill="#e0def4">global minimizing family</text></g>
+</svg>

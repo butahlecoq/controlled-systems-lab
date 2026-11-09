@@ -55,7 +55,9 @@ SetHandle universal_reset(std::string id) {
   return data.as_handle();
 }
 
-std::pair<HybridSystem, HybridRequest> fixture() {
+std::pair<HybridSystem, HybridRequest> fixture(std::size_t branch_count = 2) {
+  if (branch_count == 0 || branch_count > 16)
+    throw std::runtime_error("Capacity fixture supports 1 through 16 branches");
   const LinearStage first{Matrix{1, 1, {0}}, Matrix{1, 1, {1}},
                                  Matrix{1, 0, {}}, Vector{0}};
   const LinearStage second{Matrix{1, 1, {1}}, Matrix{1, 1, {0}},
@@ -65,30 +67,53 @@ std::pair<HybridSystem, HybridRequest> fixture() {
   source.control_sets = {interval("control-u0", 0, 1), Singleton{{0}}};
   source.invariants = {UniversalSet{1}, UniversalSet{1}, UniversalSet{1}};
 
-  HybridMode middle{{"middle"}, 1, 1, {"x"}, {"u"}, LinearStage{}, {}, {}};
-  middle.flow = std::vector<LinearStage>{first, second};
-  middle.control_sets = {Singleton{{0}}, interval("control-u1", 0, 1)};
-  middle.invariants = {UniversalSet{1}, UniversalSet{1}, UniversalSet{1}};
-
   HybridMode terminal{{"terminal"}, 1, 1, {"x"}, {"u"}, LinearStage{}, {}, {}};
   terminal.flow = std::vector<LinearStage>{first, second};
   terminal.control_sets = {Singleton{{0}}, Singleton{{0}}};
   terminal.invariants = {UniversalSet{1}, UniversalSet{1}, UniversalSet{1}};
 
+  std::vector<HybridMode> modes{source};
+  std::vector<HybridTransitionEdge> edges;
+  edges.reserve(branch_count * 2);
   const auto id0 = identity_reset("reset-0");
   const auto id1 = identity_reset("reset-1");
-  HybridSystem system{
-      2,
-      {source, middle, terminal},
-      {{{"enter-half"}, {"source"}, {"middle"},
-        {interval("guard-half", 0, 0.5), UniversalSet{1}},
-        {id0, universal_reset("unused-half-reset")}},
-       {{"enter-full"}, {"source"}, {"middle"},
-        {UniversalSet{1}, UniversalSet{1}},
-        {id0, universal_reset("unused-full-reset")}},
-       {{"finish"}, {"middle"}, {"terminal"},
-        {UniversalSet{1}, UniversalSet{1}},
-        {universal_reset("unused-terminal-reset"), id1}}}};
+  for (std::size_t i = 0; i < branch_count; ++i) {
+    const auto suffix = std::to_string(i);
+    const auto middle_id = branch_count == 2 ? std::string{"middle"}
+                                             : "middle-" + suffix;
+    const auto enter_id = branch_count == 2
+                              ? (i == 0 ? std::string{"enter-half"}
+                                        : std::string{"enter-full"})
+                              : "enter-" + suffix;
+    const auto finish_id = branch_count == 2 ? std::string{"finish"}
+                                             : "finish-" + suffix;
+    if (branch_count != 2 || i == 0) {
+      HybridMode middle{{middle_id}, 1, 1, {"x"}, {"u"}, LinearStage{}, {}, {}};
+      middle.flow = std::vector<LinearStage>{first, second};
+      middle.control_sets = {Singleton{{0}}, interval(
+          branch_count == 2 ? "control-u1" : "control-u1-" + suffix, 0, 1)};
+      middle.invariants = {UniversalSet{1}, UniversalSet{1}, UniversalSet{1}};
+      modes.push_back(std::move(middle));
+    }
+    const double upper = static_cast<double>(i + 1) /
+                         static_cast<double>(branch_count);
+    const auto guard = i + 1 == branch_count
+                           ? AdmissibleSet{UniversalSet{1}}
+                           : AdmissibleSet{interval("guard-" + suffix, 0, upper)};
+    edges.push_back({{enter_id}, {"source"}, {middle_id},
+                     {guard, UniversalSet{1}},
+                     {id0, universal_reset("unused-enter-reset-" + suffix)}});
+    if (branch_count != 2)
+      edges.push_back({{finish_id}, {middle_id}, {"terminal"},
+                       {UniversalSet{1}, UniversalSet{1}},
+                       {universal_reset("unused-finish-reset-" + suffix), id1}});
+  }
+  if (branch_count == 2)
+    edges.push_back({{"finish"}, {"middle"}, {"terminal"},
+                     {UniversalSet{1}, UniversalSet{1}},
+                     {universal_reset("unused-terminal-reset"), id1}});
+  modes.push_back(terminal);
+  HybridSystem system{2, std::move(modes), std::move(edges)};
   HybridRequest request{
       {{"source"}, {0}}, {{"terminal"}},
       {{{"terminal"}, LinearTerminal{{1}, 0}, "terminal state", "units"}}};
@@ -146,27 +171,37 @@ struct Observation {
   std::vector<synthesis::ProcessCpuObservation> branch_process_cpu;
   std::vector<std::optional<synthesis::HybridBranchExecution::ProviderInvocationObservation>> provider_invocations;
   std::vector<std::vector<HybridRelationOperationRecord>> operation_records;
+  struct BranchOutcome {
+    std::string path;
+    std::string optimization;
+    std::string termination;
+    std::string feasibility;
+    std::string optimality;
+    std::string coverage;
+  };
+  std::vector<BranchOutcome> branch_outcomes;
 };
 
-Observation run_once() {
+Observation run_once(std::size_t branch_count = 2) {
   const auto begin = Clock::now();
-  auto [system, request] = fixture();
+  auto [system, request] = fixture(branch_count);
   auto lp = lp_provider();
   auto convex = convex_provider();
   auto built = synthesis::build_hybrid_portfolio_programs(
-      system, request, {"ext07-two-parameter"}, {2, 8}, {64, 4096, 65536});
+      system, request, {"ext07-two-parameter"}, {2, branch_count},
+      {64, 4096, 65536});
   auto programs = take(std::move(built));
   Observation observation;
-  if (programs.size() != 2)
-    throw std::runtime_error("Expected both permitted edge paths");
+  if (programs.size() != branch_count)
+    throw std::runtime_error("Expected every permitted edge path");
   for (const auto &program : programs)
     observation.operation_records.push_back(program.relation_operations);
 
   const auto execution =
       synthesis::execute_hybrid_path_programs(programs, lp, convex, {});
   if (!execution.all_supplied_branches_completed ||
-      execution.branches.size() != 2)
-    throw std::runtime_error("Both hybrid LP branches must complete");
+      execution.branches.size() != branch_count)
+    throw std::runtime_error("Every hybrid LP branch must complete");
   for (const auto &branch : execution.branches) {
     observation.branch_process_cpu.push_back(branch.process_cpu);
     observation.provider_invocations.push_back(branch.provider_invocation);
@@ -197,14 +232,14 @@ Observation run_once() {
   ExecutionContext verifier_context;
   verifier_context.numerical = {1e-8, 1e-8};
   auto verified = synthesis::verify_hybrid_portfolio_family(
-      verifier, system, request, programs, candidates, {2, 8},
+      verifier, system, request, programs, candidates, {2, branch_count},
       synthesis::HybridVerifierInvocation{verifier_context});
   if (!std::holds_alternative<synthesis::HybridFamilyVerificationReport>(
           verified))
     throw std::runtime_error("Exact linear H verifier rejected the fixture");
   const auto &report =
       std::get<synthesis::HybridFamilyVerificationReport>(verified);
-  if (report.branches.size() != 2 ||
+  if (report.branches.size() != branch_count ||
       report.global_objective_optimality !=
           synthesis::HybridVerificationStatus::established ||
       report.complete_family_coverage !=
@@ -240,17 +275,24 @@ Observation run_once() {
   observation.feasibility = status(report.branches.front().feasibility);
   observation.optimality = status(report.branches.front().objective_optimality);
   observation.coverage = status(report.branches.front().continuous_coverage);
-  for (const auto &branch : report.branches)
+  for (std::size_t i = 0; i < report.branches.size(); ++i) {
+    const auto &branch = report.branches[i];
     if (branch.feasibility != synthesis::HybridVerificationStatus::established ||
         branch.objective_optimality !=
             synthesis::HybridVerificationStatus::established ||
         branch.continuous_coverage !=
             synthesis::HybridVerificationStatus::established)
       throw std::runtime_error("A tied path did not receive full verification");
+    observation.branch_outcomes.push_back({
+        programs[i].path.edges.front().value, "optimal", "completed",
+        status(branch.feasibility), status(branch.objective_optimality),
+        status(branch.continuous_coverage)});
+  }
   return observation;
 }
 
-void batch(const char *phase, std::size_t repetition, std::size_t calls) {
+void batch(const char *phase, std::size_t repetition, std::size_t calls,
+           std::size_t branch_count = 2) {
   std::uint64_t total = 0;
   std::size_t failures = 0;
   Observation last;
@@ -259,14 +301,16 @@ void batch(const char *phase, std::size_t repetition, std::size_t calls) {
   std::vector<std::vector<synthesis::ProcessCpuObservation>> process_cpu_observations;
   std::vector<std::vector<std::optional<synthesis::HybridBranchExecution::ProviderInvocationObservation>>> provider_invocation_observations;
   std::vector<std::vector<std::vector<HybridRelationOperationRecord>>> operation_observations;
+  std::vector<std::vector<Observation::BranchOutcome>> branch_outcome_observations;
   for (std::size_t i = 0; i < calls; ++i) {
     try {
-      last = run_once();
+      last = run_once(branch_count);
       total += last.total_ns;
       durations.push_back(last.total_ns);
       process_cpu_observations.push_back(last.branch_process_cpu);
       provider_invocation_observations.push_back(last.provider_invocations);
       operation_observations.push_back(last.operation_records);
+      branch_outcome_observations.push_back(last.branch_outcomes);
     } catch (const std::exception &exception) {
       ++failures;
       last_error = exception.what();
@@ -274,16 +318,19 @@ void batch(const char *phase, std::size_t repetition, std::size_t calls) {
       process_cpu_observations.emplace_back();
       provider_invocation_observations.emplace_back();
       operation_observations.emplace_back();
+      branch_outcome_observations.emplace_back();
     }
   }
   std::cout << "{\"phase\":\"" << phase << "\",\"repetition\":"
             << repetition << ",\"calls\":" << calls << ",\"failures\":"
             << failures << ",\"status\":\""
             << (failures == 0 ? "passed" : "failed")
-            << "\",\"paths\":" << last.paths << ",\"edge_paths\":[\""
-            << (last.edge_paths.empty() ? "" : last.edge_paths[0]) << "\",\""
-            << (last.edge_paths.size() < 2 ? "" : last.edge_paths[1])
-            << "\"],\"relation_rows\":" << last.relation_rows
+            << "\",\"paths\":" << last.paths << ",\"edge_paths\":[";
+  for (std::size_t i = 0; i < last.edge_paths.size(); ++i) {
+    if (i) std::cout << ',';
+    std::cout << '"' << last.edge_paths[i] << '"';
+  }
+  std::cout << "],\"relation_rows\":" << last.relation_rows
             << ",\"relation_matrix_elements\":"
             << last.relation_matrix_elements << ",\"provider\":\""
             << last.provider << "\",\"verifier\":\"" << last.verifier
@@ -329,6 +376,22 @@ void batch(const char *phase, std::size_t repetition, std::size_t calls) {
     }
     std::cout << ']';
   }
+  std::cout << "],\"branch_outcome_observations\":[";
+  for (std::size_t call = 0; call < branch_outcome_observations.size(); ++call) {
+    if (call) std::cout << ',';
+    std::cout << '[';
+    for (std::size_t branch = 0; branch < branch_outcome_observations[call].size(); ++branch) {
+      if (branch) std::cout << ',';
+      const auto &outcome = branch_outcome_observations[call][branch];
+      std::cout << "{\"path\":\"" << outcome.path
+                << "\",\"optimization\":\"" << outcome.optimization
+                << "\",\"termination\":\"" << outcome.termination
+                << "\",\"feasibility\":\"" << outcome.feasibility
+                << "\",\"optimality\":\"" << outcome.optimality
+                << "\",\"coverage\":\"" << outcome.coverage << "\"}";
+    }
+    std::cout << ']';
+  }
   std::cout << "],\"error\":\"" << last_error << "\"}\n";
   if (failures)
     throw std::runtime_error("One or more measured verifier calls failed");
@@ -345,8 +408,14 @@ int main(int argc, char **argv) try {
     batch("warmup", 0, 10);
     for (std::size_t repetition = 0; repetition < 7; ++repetition)
       batch("trial", repetition, 20);
+  } else if (mode == "capacity") {
+    for (const std::size_t branches : {1U, 2U, 4U, 8U, 16U}) {
+      batch("warmup", 0, 2, branches);
+      for (std::size_t repetition = 0; repetition < 7; ++repetition)
+        batch("trial", repetition, 10, branches);
+    }
   } else
-    throw std::runtime_error("Expected smoke or measure mode");
+    throw std::runtime_error("Expected smoke, measure, or capacity mode");
   return 0;
 } catch (const std::exception &exception) {
   std::cerr << exception.what() << '\n';
