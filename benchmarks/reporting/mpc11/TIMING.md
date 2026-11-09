@@ -61,3 +61,10 @@ source paths. It also retains partial NLP/replay checks as inconclusive and
 excludes them from completed timing aggregates. Six focused tests pass. The
 original timing archive and measured clocks remain unchanged; later checker
 versions are identified separately rather than replacing capture provenance.
+
+Reader `f7a71968` separates current recheck-helper fingerprints from the captured
+sources. When current sources differ, supply the complete original snapshot;
+its bytes must match both capture digests and the recorded Git commit. The
+current numerical checkers still rebuild and validate every saved program and
+trajectory. A missing snapshot fails closed instead of silently treating new
+helper code as capture source. Seven focused tests cover this boundary.
