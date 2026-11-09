@@ -137,6 +137,9 @@ def figures(record,output):
 
 def capture(driver,receipt,output):
     if output.exists():raise ValueError('new output directory required')
+    build=json.loads(receipt.read_text())
+    if build['binary_sha256']!=sha(driver) or build['client_source_sha256']!=sha(ROOT/'benchmarks/reporting/mpc08_explicit/mpc08_strategy_comparison.cpp'):
+        raise ValueError('native client/build receipt binding differs')
     status=subprocess.check_output(['git','status','--porcelain'],cwd=ROOT,text=True)
     if status:raise ValueError('commit source before capture')
     output.mkdir(parents=True);record=R.build();write(output/'exact-reference.json',record);lookup=queries(record,output);supports=support_queries(record,output)
