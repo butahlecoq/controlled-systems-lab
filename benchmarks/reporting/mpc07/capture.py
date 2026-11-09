@@ -16,6 +16,7 @@ import signal
 import subprocess
 import sys
 import time
+import threading
 from fractions import Fraction as Q
 import policy
 
@@ -38,20 +39,33 @@ def limits():
 
 def attempt(folder,bridge,payload):
     write(folder/'program.json',payload)
-    command=['/usr/bin/time','-v','-o',str(folder/'process-resource.txt'),str(bridge),str(folder/'program.json')]
+    command=[str(bridge),str(folder/'program.json')]
     environment=os.environ.copy();environment.update(OPENBLAS_NUM_THREADS='1',OMP_NUM_THREADS='1',MKL_NUM_THREADS='1')
-    started=time.monotonic_ns();process=subprocess.Popen(command,stdout=subprocess.PIPE,stderr=subprocess.PIPE,
-        env=environment,preexec_fn=limits,start_new_session=True)
-    status='completed';timed_out=False
-    try:stdout,stderr=process.communicate(timeout=300)
-    except subprocess.TimeoutExpired:
-        timed_out=True;status='wall-limit';os.killpg(process.pid,signal.SIGKILL);stdout,stderr=process.communicate()
-    (folder/'stdout.json').write_bytes(stdout);(folder/'stderr.txt').write_bytes(stderr)
-    if process.returncode!=0 and status=='completed':status='process-failed'
-    return dict(status=status,returncode=process.returncode,timed_out=timed_out,whole_process_ns=time.monotonic_ns()-started,
+    started=time.monotonic_ns();expired=threading.Event();finished=threading.Event()
+    with (folder/'stdout.json').open('wb') as stdout,(folder/'stderr.txt').open('wb') as stderr:
+        try:process=subprocess.Popen(command,stdout=stdout,stderr=stderr,
+                env=environment,preexec_fn=limits,start_new_session=True)
+        except OSError as error:
+            (folder/'stderr.txt').write_text(str(error)+'\n');write(folder/'process-resource.txt',dict(status='not-started'))
+            return dict(status='spawn-failed',returncode=None,timed_out=False,whole_process_ns=time.monotonic_ns()-started,command=command)
+        def stop():
+            if finished.is_set():return
+            expired.set()
+            try:os.killpg(process.pid,signal.SIGKILL)
+            except ProcessLookupError:pass
+        timer=threading.Timer(300,stop);timer.daemon=True;timer.start()
+        try:
+            _,status,usage=os.wait4(process.pid,0)
+            process.returncode=os.waitstatus_to_exitcode(status)
+        finally:finished.set();timer.cancel()
+    write(folder/'process-resource.txt',dict(user_cpu_seconds=usage.ru_utime,system_cpu_seconds=usage.ru_stime,
+        maximum_resident_set_kib=usage.ru_maxrss,scope='Linux wait4 direct native child; peak RSS in KiB, not address space'))
+    status='wall-limit' if expired.is_set() else ('completed' if process.returncode==0 else 'process-failed')
+    return dict(status=status,returncode=process.returncode,timed_out=expired.is_set(),whole_process_ns=time.monotonic_ns()-started,
         command=command,limits=dict(wall_seconds=300,cpu_seconds=300,address_space_bytes_per_process=8*1024**3,
-        workers=1,threads_requested=1,mechanism='process-group wall kill; inherited POSIX RLIMIT_CPU/RLIMIT_AS; GNU time child maximum RSS',
+        workers=1,threads_requested=1,mechanism='process-group wall kill; inherited POSIX RLIMIT_CPU/RLIMIT_AS; Linux wait4 child accounting',
         suite_memory='one sequential child; no cgroup aggregate memory cap'))
+
 
 
 def recheck(folder):

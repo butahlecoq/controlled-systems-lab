@@ -98,8 +98,8 @@ Capture requires clean committed source and a new output directory. A retained
 warmup plus five alternating repetitions cover every profile/class/horizon;
 every native/process/check outcome remains a row. One worker requests one
 solver thread. POSIX per-process CPU/address-space limits and a process-group
-wall stop are explicit; no aggregate cgroup cap is claimed. GNU time records
-child peak RSS. Python preparation, native setup (parse/program/registry), native
+wall stop are explicit; no aggregate cgroup cap is claimed. Linux wait4 records
+direct-child peak RSS in KiB and CPU seconds. Python preparation, native setup (parse/program/registry), native
 ConvexPort run (including adapter checks), whole process and independent checker
 costs stay distinct. None is an isolated HiGHS-only solve/verifier measurement.
 The separate Python profile diagnoses only authored preparation/checking. No

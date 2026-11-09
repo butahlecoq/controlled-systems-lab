@@ -92,3 +92,15 @@ class SavedOutcomeTests(unittest.TestCase):
         summary=report.metrics(rows)['T2-sigma1-adf']
         self.assertEqual(summary['attempts'],2);self.assertEqual(summary['verified'],1)
         self.assertEqual(summary['outcomes']['inconclusive-process-outcome'],1)
+
+    def test_spawn_failure_is_a_retained_process_outcome(self):
+        import tempfile,sys
+        sys.path.insert(0,str(ROOT/'benchmarks/reporting/mpc07'))
+        import capture
+        with tempfile.TemporaryDirectory() as temporary:
+            folder=Path(temporary)
+            receipt=capture.attempt(folder,folder/'missing-binary',P.program(2,Q(1),'adf'))
+            self.assertEqual(receipt['status'],'spawn-failed')
+            self.assertIsNone(receipt['returncode'])
+            self.assertEqual((folder/'stdout.json').read_bytes(),b'')
+            self.assertTrue((folder/'process-resource.txt').is_file())
