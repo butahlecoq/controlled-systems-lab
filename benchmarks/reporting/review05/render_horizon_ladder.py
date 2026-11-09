@@ -15,6 +15,10 @@ def fmt_ns(value: object) -> str:
     return f"{value / 1_000_000:.3f} ms"
 
 
+def fmt_seconds(value: object) -> str:
+    return "—" if value is None else f"{value:.9g} s"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--bundle", required=True, type=Path)
@@ -33,6 +37,7 @@ def main() -> int:
     representation_rows = []
     resource_rows = []
     phase_rows = []
+    highs_clock_rows = []
     all_pairs_verified = all(case.get("verified_paired_repetitions") == 6
                              for case in summary["horizons"])
     for case in summary["horizons"]:
@@ -79,9 +84,23 @@ def main() -> int:
                 f"<td>{escape(row['operation'])}</td><td>{fmt_ns(metric['median'])}</td>"
                 f"<td>{fmt_ns(metric['minimum'])} – {fmt_ns(metric['maximum'])}</td></tr>"
             )
+        for row in phase_summary.get("highs_internal_clocks", []):
+            if row["observed_samples"] == 0:
+                continue
+            metric = row["elapsed_seconds"]
+            highs_clock_rows.append(
+                f"<tr><th scope=\"row\">T={row['horizon']}</th>"
+                f"<td>{escape(row['strategy'].removeprefix('csl.synthesis.'))}</td>"
+                f"<td>{row['provider_call_index']}</td><td>{row['clock_id']}</td>"
+                f"<td>{escape(row['clock_name'])}</td><td>{row['verified_measured_samples']}</td>"
+                f"<td>{row['observed_samples']} / {row['uncalled_samples']} / {row['unavailable_samples']}</td>"
+                f"<td>{fmt_seconds(metric['median'])}</td><td>{fmt_seconds(metric['minimum'])} – {fmt_seconds(metric['maximum'])}</td></tr>"
+            )
     phase_section = ""
     if phase_summary:
-        phase_section = (f"<h2>Instrumented phase diagnostics</h2><p>OBS-03 spans from a separate capture include instrumentation overhead and must not be compared directly with uninstrumented timings. The table includes Strategy A phase spans, its per-stage geometry-provider calls (affine images, Minkowski sums, to-H conversions and projections), and Strategy B joint program-build and LP program-run spans. Program-build covers joint H assembly and solver program-object construction together; it does not separate those steps. Family-construction spans not called by these candidate runs remain unavailable. LP factorization internals, per-stage family queries and witness-selector queries are not measured.</p><table><thead><tr><th>Horizon</th><th>Strategy</th><th>Stage</th><th>Phase/provider call</th><th>Median</th><th>Range</th></tr></thead><tbody>{''.join(phase_rows)}</tbody></table><p>Details: <a href=\"phase-summary.json\">phase-summary.json</a> and per-attempt spans in <a href=\"attempts.jsonl\">attempts.jsonl</a>.</p>")
+        phase_section = (f"<h2>Instrumented phase diagnostics</h2><p>OBS-03 spans from a separate capture include instrumentation overhead and must not be compared directly with uninstrumented timings. The table includes Strategy A phase spans, its per-stage geometry-provider calls (affine images, Minkowski sums, to-H conversions and projections), and Strategy B joint program-build and LP program-run spans. Program-build covers joint H assembly and solver program-object construction together; it does not separate those steps. Family-construction spans not called by these candidate runs remain unavailable. Per-stage family queries and witness-selector queries are not measured. Native LP clock availability is reported separately below when enabled.</p><table><thead><tr><th>Horizon</th><th>Strategy</th><th>Stage</th><th>Phase/provider call</th><th>Median</th><th>Range</th></tr></thead><tbody>{''.join(phase_rows)}</tbody></table><p>Details: <a href=\"phase-summary.json\">phase-summary.json</a> and per-attempt spans in <a href=\"attempts.jsonl\">attempts.jsonl</a>.</p>")
+        if phase_summary.get("highs_clock_capture_enabled"):
+            phase_section += (f"<h3>Pinned HiGHS internal clocks</h3><p>Opt-in native clock snapshots are separate diagnostic captures. Their timer scopes can overlap; elapsed values are reported per clock and never summed. Capture overhead means these values must not be compared with the uninstrumented timing ladder. Rows include clocks observed in checker-verified measured attempts. All uncalled and unavailable readings remain in phase-summary.json and the raw records.</p><details><summary>Observed clocks by provider call</summary><table><thead><tr><th>Horizon</th><th>Strategy</th><th>Provider call</th><th>Clock ID</th><th>Clock</th><th>Verified samples</th><th>Observed / uncalled / unavailable</th><th>Elapsed median</th><th>Range</th></tr></thead><tbody>{''.join(highs_clock_rows)}</tbody></table></details>")
     env = manifest["environment"]
     sources = " ".join(f"{escape(name)}: {escape(digest)}" for name, digest in
                         sorted(env["measurement_source_sha256"].items()))

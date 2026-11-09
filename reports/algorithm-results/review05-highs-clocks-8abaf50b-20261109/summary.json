@@ -1,0 +1,12 @@
+{
+  "source_revision": "8abaf50b1dc612eeb9deaf1827c8e57042e8364f",
+  "checker_revision": "c8ecccb95324afe915c9d980106bb7aaa8c75758",
+  "attempts": 42,
+  "verified_attempts": 42,
+  "provider_groups": 1267,
+  "clock_inventory_sizes": [
+    126
+  ],
+  "archive_sha256": "f7c8f38f30ce3152f87f95fe0563404069b8d0c3dfc78d6bdaec675180e4d836",
+  "claim": "instrumented diagnostic capture; overlapping clocks are not summed; no speedup claim"
+}
