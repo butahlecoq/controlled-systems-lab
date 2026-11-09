@@ -10,7 +10,7 @@ X=[(Q(1),Q(0),Q(3)),(Q(-1),Q(0),Q(3)),(Q(0),Q(1),Q(2)),(Q(0),Q(-1),Q(2))]
 
 def hull(points):
     """Exact monotone chain, independent of the producer's polygon clipping."""
-    points=sorted(set(points))
+    points=sorted(set(map(tuple,points)))
     if len(points)<3:return points
     def cross(a,b,c):return (b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])
     sides=[]
@@ -24,6 +24,7 @@ def hull(points):
 
 
 def vertices(rows):
+    rows=[tuple(map(Q,row)) for row in rows]
     points=[]
     for (a,b,c),(d,e,f) in combinations(rows,2):
         det=a*e-b*d
@@ -119,7 +120,11 @@ def check_geometry(record):
     r=record['radius'];sets=record['sets']
     if r!=Q(1,8):raise ValueError('unreviewed disturbance radius')
     expected=geometric_record()
-    if record!=expected:raise ValueError('geometry source/quantifier binding mismatch')
+    def canonical(value):
+        if isinstance(value,dict):return {k:canonical(v) for k,v in value.items()}
+        if isinstance(value,(tuple,list)):return tuple(map(canonical,value))
+        return value
+    if canonical(record)!=canonical(expected):raise ValueError('geometry source/quantifier binding mismatch')
     inclusions=[('T_robust','T'),('inner_target_box','T_robust'),('T_robust','outer_target_box'),
         ('robust_pre_inner','robust_pre_T_robust'),('robust_pre_T_robust','robust_pre_outer'),
         ('robust_pre_T_robust','nominal_pre_T_robust'),('nominal_pre_T_robust','nominal_pre_T')]
@@ -168,7 +173,8 @@ def check_fibers(record):
     if family['selector']!='u0=u1=-v/2' or family['full_history']!='u1=-v0-u0; p1=p0+v0; v1=v0+u0; p2=p0+2*v0+u0; v2=0':
         raise ValueError('nonunique family/selector history map changed')
     for v,u in vertices(hs):
-        if abs(u)>1 or abs(-v-u)>1 or v+u-v-u!=0:raise ValueError('nonunique parameter polytope is unsafe')
+        u1=-v-u
+        if abs(u)>1 or abs(u1)>1 or v+u+u1!=0:raise ValueError('nonunique parameter polytope is unsafe')
     for v in (-2,0,2):
         if abs(-Q(v)/2)>1:raise ValueError('nonunique selector not feasible')
     if [r['horizon'] for r in record['rows']]!=[1,2,4,8,12,16]:raise ValueError('fiber horizon inventory changed')
