@@ -10,11 +10,30 @@ from pathlib import Path
 import statistics
 
 
+def bound_receipt(bundle,path,check):
+    """Consume only the exact bytes certified by this check record."""
+    bindings=check.get('bindings')
+    if not bindings:raise ValueError('missing check-record byte bindings')
+    for key,file in (('receipt_sha256',path),('stdout_sha256',path.parent/'stdout.txt'),
+                     ('stderr_sha256',path.parent/'stderr.txt')):
+        if hashlib.sha256(file.read_bytes()).hexdigest()!=bindings[key]:
+            raise ValueError('stale check-record byte binding: '+key)
+    receipt=json.loads(path.read_bytes())
+    if Path(receipt['scenario']).name!=receipt['scenario']:raise ValueError('unsafe scenario receipt binding')
+    scenario=bundle/'scenarios'/receipt['scenario']
+    actual=hashlib.sha256(scenario.read_bytes()).hexdigest() if scenario.is_file() else None
+    if actual!=bindings['scenario_sha256']:raise ValueError('stale check-record scenario binding')
+    if receipt['stdout_sha256']!=bindings['stdout_sha256'] or receipt['stderr_sha256']!=bindings['stderr_sha256']:
+        raise ValueError('receipt/raw output binding mismatch')
+    return receipt
+
+
 def summary(bundle):
     checks=json.loads((bundle/'checks.json').read_text());checked={r['attempt']:r for r in checks['attempts']}
     groups=defaultdict(list);attempts=[]
     for path in sorted((bundle/'attempts').glob('*/receipt.json')):
-        receipt=json.loads(path.read_text());key=str(path.parent.relative_to(bundle));check=checked[key]
+        key=str(path.parent.relative_to(bundle));check=checked[key]
+        receipt=bound_receipt(bundle,path,check)
         record=None
         try:record=json.loads((path.parent/'stdout.txt').read_text())
         except (ValueError,TypeError):pass
@@ -69,6 +88,7 @@ def plot_saved(record,bundle):
     import os
     import sys
     import importlib.metadata
+    sys.path.insert(0,str(Path(__file__).resolve().parent.parent/'source'))
     sys.path.insert(0,str(Path(__file__).resolve().parents[3]/'scripts/reports'))
     from figure_style import configure_numeric_axis,STYLE_ID
     from plot import normalize_owned_svg

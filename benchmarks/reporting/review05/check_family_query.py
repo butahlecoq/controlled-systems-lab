@@ -170,25 +170,50 @@ def verify_attempt(record,scenario,scenario_hash):
         'scope':'exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical'}
 
 
+def check_process(receipt,stdout,scenario,scenario_hash):
+    """A process stop is missing evidence, never a mathematical counterexample."""
+    if receipt['returncode']!=0 or receipt['timed_out']:
+        return {'status':'inconclusive','reason':'failed or timed-out process; mathematical result unestablished'}
+    try:
+        record=json.loads(stdout)
+        if 'strategy' in receipt and receipt['strategy']!=record['strategy']:
+            raise ValueError('raw record/receipt strategy binding mismatch')
+        if 'mode' in receipt and (receipt['mode']=='on')!=record['instrumented']:
+            raise ValueError('raw record/receipt collector-mode binding mismatch')
+        return verify_attempt(record,scenario,scenario_hash)
+    except OracleBudget as error:
+        return {'status':'inconclusive','reason':str(error)}
+    except (KeyError,ValueError,TypeError,IndexError,ZeroDivisionError) as error:
+        return {'status':'incorrect','reason':str(error)}
+
+
 def main():
     import argparse,hashlib
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('bundle',type=Path);args=parser.parse_args()
-    errors=0;results=[]
+    results=[]
     for path in sorted((args.bundle/'attempts').glob('*/receipt.json')):
         receipt=json.loads(path.read_text());row={'attempt':str(path.parent.relative_to(args.bundle))}
         try:
-            raw=(path.parent/'stdout.txt').read_text();record=json.loads(raw)
-            scenario_path=args.bundle/'scenarios'/receipt['scenario'];scenario=json.loads(scenario_path.read_text())
-            if receipt['stdout_sha256']!=hashlib.sha256(raw.encode()).hexdigest():raise ValueError('raw stdout digest mismatch')
-            row.update(verify_attempt(record,scenario,hashlib.sha256(scenario_path.read_bytes()).hexdigest()))
-        except OracleBudget as error:
-            row.update(status='inconclusive',reason=str(error))
-        except (KeyError,ValueError,TypeError,IndexError,ZeroDivisionError) as error:
-            row.update(status='incorrect',reason=str(error));errors+=1
-        if row['status']=='verified' and (receipt['returncode']!=0 or receipt['timed_out']):
-            row.update(status='incorrect',reason='record claims success in failed/timed-out process');errors+=1
+            raw=(path.parent/'stdout.txt').read_bytes();stderr=(path.parent/'stderr.txt').read_bytes()
+            if Path(receipt['scenario']).name!=receipt['scenario']:raise ValueError('unsafe scenario receipt path')
+            scenario_path=args.bundle/'scenarios'/receipt['scenario']
+            row['bindings']={'receipt_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),
+                'stdout_sha256':hashlib.sha256(raw).hexdigest(),'stderr_sha256':hashlib.sha256(stderr).hexdigest(),
+                'scenario_sha256':hashlib.sha256(scenario_path.read_bytes()).hexdigest() if scenario_path.is_file() else None}
+            if receipt['stdout_sha256']!=hashlib.sha256(raw).hexdigest() or receipt['stderr_sha256']!=hashlib.sha256(stderr).hexdigest():
+                raise ValueError('raw stdout/stderr digest mismatch')
+            if receipt['returncode']!=0 or receipt['timed_out']:
+                row.update(check_process(receipt,raw,None,None))
+            else:
+                if Path(receipt['scenario']).name!=receipt['scenario']:raise ValueError('unsafe scenario receipt path')
+                scenario_path=args.bundle/'scenarios'/receipt['scenario'];scenario=json.loads(scenario_path.read_text())
+                row.update(check_process(receipt,raw,scenario,hashlib.sha256(scenario_path.read_bytes()).hexdigest()))
+        except (OSError,KeyError,ValueError,TypeError) as error:
+            row.update(status='incorrect',reason=str(error))
         results.append(row)
-    (args.bundle/'checks.json').write_text(json.dumps({'schema':'csl.review05.family-query-checks/1','attempts':results},indent=2)+'\n')
+    errors=sum(x['status']=='incorrect' for x in results)
+    (args.bundle/'checks.json').write_text(json.dumps({'schema':'csl.review05.family-query-checks/1',
+        'checker_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'attempts':results},indent=2)+'\n')
     print(json.dumps({'attempts':len(results),'incorrect':errors,'verified':sum(x['status']=='verified' for x in results),'inconclusive':sum(x['status']=='inconclusive' for x in results)}))
     return int(errors>0 or not results)
 

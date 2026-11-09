@@ -1,4 +1,9 @@
 import copy
+import hashlib
+import json
+import subprocess
+import sys
+import tempfile
 import importlib.util
 from pathlib import Path
 import unittest
@@ -62,6 +67,50 @@ class FamilyQueryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'direction'):
             CHECKER.verify_query(witness,[1,-1],2,0)
         self.assertTrue(CHECKER.verify_query(witness,[0,0],2,0))
+
+    def test_empty_output_from_resource_stopped_process_is_inconclusive(self):
+        for receipt in ({'returncode':-9,'timed_out':True},{'returncode':-9,'timed_out':False}):
+            self.assertEqual(CHECKER.check_process(receipt,b'',None,None)['status'],'inconclusive')
+        self.assertEqual(CHECKER.check_process({'returncode':0,'timed_out':False},b'',None,None)['status'],'incorrect')
+
+    def test_profile_resource_stop_uses_the_same_inconclusive_boundary(self):
+        import profile_family_query
+        result=profile_family_query.check_process({'returncode':-9,'timed_out':True},b'',None,None)
+        self.assertEqual(result['status'],'inconclusive')
+
+    def test_checker_cli_keeps_killed_empty_output_inconclusive(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);attempt=root/'attempts/0000';attempt.mkdir(parents=True)
+            for name in ('stdout.txt','stderr.txt'):(attempt/name).write_bytes(b'')
+            digest=hashlib.sha256(b'').hexdigest()
+            (attempt/'receipt.json').write_text(json.dumps({'returncode':-9,'timed_out':True,'scenario':'case.json',
+                'stdout_sha256':digest,'stderr_sha256':digest}))
+            result=subprocess.run([sys.executable,str(SPEC.origin),str(root)],capture_output=True)
+            self.assertEqual(result.returncode,0,result.stderr)
+            checks=json.loads((root/'checks.json').read_text())
+            self.assertEqual(checks['attempts'][0]['status'],'inconclusive')
+
+    def test_renderer_rejects_raw_receipt_or_scenario_changed_after_check(self):
+        import render_family_query
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);attempt=root/'attempts/0000';attempt.mkdir(parents=True);(root/'scenarios').mkdir()
+            (root/'scenarios/case.json').write_text('{}')
+            (attempt/'stdout.txt').write_text('{"registered_synthesis_ns":1}')
+            (attempt/'stderr.txt').write_bytes(b'')
+            digest=lambda path:hashlib.sha256(path.read_bytes()).hexdigest()
+            receipt={'returncode':0,'timed_out':False,'scenario':'case.json','warmup':False,
+                'stdout_sha256':digest(attempt/'stdout.txt'),'stderr_sha256':digest(attempt/'stderr.txt')}
+            (attempt/'receipt.json').write_text(json.dumps(receipt))
+            row={'attempt':'attempts/0000','status':'inconclusive','bindings':{
+                'receipt_sha256':digest(attempt/'receipt.json'),'stdout_sha256':digest(attempt/'stdout.txt'),
+                'stderr_sha256':digest(attempt/'stderr.txt'),'scenario_sha256':digest(root/'scenarios/case.json')}}
+            (root/'checks.json').write_text(json.dumps({'attempts':[row]}))
+            render_family_query.summary(root)
+            for path,changed in ((attempt/'stdout.txt',b'{"registered_synthesis_ns":1e18}'),
+                (attempt/'receipt.json',b'{}'),(root/'scenarios/case.json',b'{"tampered":true}')):
+                original=path.read_bytes();path.write_bytes(changed)
+                with self.assertRaisesRegex(ValueError,'binding'):render_family_query.summary(root)
+                path.write_bytes(original)
 
     def test_structured_attempt_binds_fixture_family_and_actual_query_span(self):
         scenario={'horizon':2,'model':{'kind':'linear_discrete','A':[[1]],'B':[[1]]},

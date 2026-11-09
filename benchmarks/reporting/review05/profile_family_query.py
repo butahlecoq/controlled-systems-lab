@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 import subprocess
 from run_horizon_ladder import run_with_resource_receipt
-from check_family_query import verify_attempt,OracleBudget
+from check_family_query import check_process
 
 
 def main():
@@ -33,11 +33,8 @@ def main():
             command=[str(driver),str((args.bundle/'scenarios/family-query-flat-t08.json').resolve()),side,'on']
             code,timeout,stdout,stderr,resources=run_with_resource_receipt(command,150)
             (folder/'stdout.txt').write_bytes(stdout);(folder/'stderr.txt').write_bytes(stderr)
-            receipt={'strategy':side,'repetition':index,'returncode':code,'timed_out':timeout,'resources':resources}
-            try:
-                receipt['independent_check']=verify_attempt(json.loads(stdout),scenario,scenario_hash)
-            except OracleBudget as error:receipt['independent_check']={'status':'inconclusive','reason':str(error)}
-            except (ValueError,KeyError,TypeError) as error:receipt['independent_check']={'status':'incorrect','reason':str(error)}
+            receipt={'strategy':side,'mode':'on','repetition':index,'returncode':code,'timed_out':timeout,'resources':resources}
+            receipt['independent_check']=check_process(receipt,stdout,scenario,scenario_hash)
             (folder/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n');receipts.append(receipt)
             profiles.extend(sorted(folder.glob('gmon.*')))
     environment=json.loads((args.bundle/'environment.json').read_text())
