@@ -4,6 +4,7 @@
 #include <csl/geometry/affine_sum.hpp>
 #include <csl/input/scenario_loader.hpp>
 #include <csl/optimization/convex_backend.hpp>
+#include <csl/optimization/linear_program.hpp>
 #include <csl/registry/registry.hpp>
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
@@ -405,9 +406,56 @@ void run_online_qp(Providers& providers, const Query& query, std::size_t repetit
         <<",\"candidate_equality_rows\":0,\"coordinate_labels\":\"\",\"elapsed_ns\":"<<elapsed
         <<",\"stop_details\":\"\",\"error\":\""<<json_escape(error)<<"\"}\n";
 }
+
+void run_support_csv(Providers& providers,const char* path) {
+    std::ifstream input(path);std::string line;
+    if(!input||!std::getline(input,line))throw std::runtime_error("support CSV missing");
+    while(std::getline(input,line)) {
+        std::istringstream stream(line);std::vector<std::string> fields;std::string field;
+        while(std::getline(stream,field,','))fields.push_back(field);
+        if(fields.size()<5||(fields.size()-3)%3)throw std::runtime_error("support CSV shape");
+        for(std::size_t repetition=0;repetition<6;++repetition) {
+            const auto begin=Clock::now();auto prepared_end=begin,solved_end=begin;
+            bool optimal=false;std::string error;std::optional<Vector> primal;
+            std::optional<std::size_t> threads;
+            try {
+                const std::size_t rows=(fields.size()-3)/3;SparseMatrix matrix{rows,2,{0},{},{}};std::vector<Interval> bounds;
+                for(std::size_t i=0;i<rows;++i) {
+                    for(std::size_t j=0;j<2;++j) {
+                        const auto value=std::stod(fields[3+3*i+j]);
+                        if(value!=0) {matrix.column_indices.push_back(j);matrix.values.push_back(value);}
+                    }
+                    matrix.row_offsets.push_back(matrix.values.size());bounds.push_back({{},std::stod(fields[5+3*i])});
+                }
+                auto program=take(optimization::make_linear_program({{{"mpc08-set-support"},{fields[0]}},
+                    {std::stod(fields[1]),std::stod(fields[2])},0,std::move(matrix),std::vector<Interval>(2),std::move(bounds)}),"support LP");
+                Requirements requirements;requirements.output.representation={"csl.program-result.v1"};
+                auto provider=take(prepare_provider(select_provider(*providers.lps,{providers.lp_id,{}},requirements)),"support provider");
+                auto pipeline=take(provider.prepare(program),"support prepare");auto [workspace]=pipeline.create();
+                ExecutionContext context;context.numerical={1e-8,1e-8};context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+                context.backend_thread_observation=std::make_shared<execution::BackendThreadObservation>();
+                prepared_end=Clock::now();auto outcome=workspace->run(context);solved_end=Clock::now();
+                threads=context.backend_thread_observation->maximum();
+                if(const auto* result=std::get_if<ProgramResult>(&outcome)) {
+                    optimal=result->termination==Termination::completed&&result->outcome.value==MathematicalOutcome::optimal&&result->primal&&result->primal->size()==2;
+                    primal=result->primal;
+                } else error="support LP unsupported";
+            } catch(const std::exception& e) {error=e.what();solved_end=Clock::now();}
+            std::cout<<"{\"schema\":\"csl.mpc08-support/1\",\"query_id\":\""<<json_escape(fields[0])
+                <<"\",\"repetition\":"<<repetition<<",\"warmup\":"<<(repetition==0?"true":"false")
+                <<",\"optimal\":"<<(optimal?"true":"false")<<",\"primal\":";
+            if(primal)std::cout<<'['<<std::setprecision(17)<<(*primal)[0]<<','<<(*primal)[1]<<']';else std::cout<<"null";
+            std::cout<<",\"prepare_ns\":"<<std::chrono::duration_cast<std::chrono::nanoseconds>(prepared_end-begin).count()
+                <<",\"run_ns\":"<<std::chrono::duration_cast<std::chrono::nanoseconds>(solved_end-prepared_end).count()<<",\"observed_backend_threads\":";
+            if(threads)std::cout<<*threads;else std::cout<<"null";
+            std::cout<<",\"error\":\""<<json_escape(error)<<"\"}\n";
+        }
+    }
+}
 }
 
 int main(int argc,char** argv) try {
+    if(argc==3&&std::string_view(argv[1])=="--support") {auto providers=make_providers();run_support_csv(providers,argv[2]);return 0;}
     if (argc!=2) { std::cerr << "Usage: csl_mpc08_explicit_compare <exact-queries.csv>\n"; return 2; }
     const auto queries=read_queries(argv[1]);
     auto providers=make_providers();
