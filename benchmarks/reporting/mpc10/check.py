@@ -7,18 +7,11 @@ from pathlib import Path,PurePosixPath
 import subprocess
 import re
 import tempfile
+from benchmarks.reporting.mpc10.evidence import load,sha,checked_capture,inventory
 from benchmarks.reporting.mpc10.fixtures import fixtures
 from benchmarks.reporting.mpc10.oracle import solve as exact
 
 
-def load(p):
-    def finite_float(text):
-        value=float(text)
-        if not math.isfinite(value):raise ValueError('nonfinite numerical evidence')
-        return value
-    def reject_constant(text):raise ValueError('nonfinite numerical evidence: '+text)
-    return json.loads(p.read_text(),parse_float=finite_float,parse_constant=reject_constant)
-def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def key(path):return json.dumps(path,sort_keys=True,separators=(',',':'))
 
 
@@ -219,18 +212,7 @@ def check_scip(s,oracle,folder):
 
 
 def check(bundle):
-    hashes=load(bundle/'file-hashes.json')
-    if any(p.is_symlink() for p in bundle.rglob('*')):raise ValueError('capture symlink unsupported')
-    actual={p.relative_to(bundle).as_posix():sha(p) for p in sorted(bundle.rglob('*')) if p.is_file() and p!=bundle/'file-hashes.json'}
-    if actual!=hashes:raise ValueError('capture inventory/checksum mismatch')
-    environment=load(bundle/'environment.json')
-    revision=environment['source_revision']
-    if not isinstance(revision,str) or not re.fullmatch('[0-9a-f]{40}',revision):raise ValueError('capture revision must be full hexadecimal')
-    for name,expected in environment['source_sha256'].items():
-        if PurePosixPath(name).name!=name or name in ['.','..'] or not (bundle/'source'/name).resolve().is_relative_to((bundle/'source').resolve()):raise ValueError('unsafe copied source name')
-        if sha(bundle/'source'/name)!=expected:raise ValueError('copied source binding mismatch')
-        committed=subprocess.check_output(['git','show','--end-of-options',revision+':benchmarks/reporting/mpc10/'+name],cwd=Path(__file__).resolve().parents[3])
-        if (bundle/'source'/name).read_bytes()!=committed:raise ValueError('copied source differs from capture commit')
+    hashes=checked_capture(bundle)
     reports=[]
     for fixture in fixtures():
         folder=bundle/fixture['id'];s=load(folder/'fixture.json');original=dict(s);declared=original.pop('fixture_sha256')
@@ -242,6 +224,7 @@ def check(bundle):
             if process['stdout_sha256']!=sha(path/'stdout.txt') or process['stderr_sha256']!=sha(path/'stderr.txt'):raise ValueError('native process stream binding')
         if np['status']!='completed' or sp['status']!='completed' or np['return_code']!=0 or sp['return_code']!=0:reports.append({'id':s['id'],'status':'inconclusive-process','native_process':np,'scip_process':sp});continue
         reports.append({'id':s['id'],'native':check_native(s,oracle,native),'scip':check_scip(s,oracle,folder/'scip'),'exact_optimum':oracle.get('optimum'),'exact_all_optimal_paths':oracle.get('all_optimal_paths')})
+    if inventory(bundle)!=hashes:raise ValueError('capture changed during verification')
     return {'schema':'csl.mpc10.check/1','reports':reports,'input_files':hashes,'checking_sources':{p.name:sha(p) for p in Path(__file__).parent.glob('*.py')},'scope':'exact independently reconstructed branch LP rows/objectives and interval oracle; numerical external witnesses/bounds; continuous family claims only where actual CSL verifier establishes them'}
 
 
