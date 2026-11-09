@@ -6,6 +6,7 @@ import hashlib
 import json
 from pathlib import Path
 import subprocess
+import re
 import numpy as np
 from check_nmpc_saved import check
 from run_nmpc import write
@@ -17,16 +18,31 @@ def digest(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def check_package_sources(package):
+    if package.is_symlink() or any(path.is_symlink() for path in package.rglob('*')):
+        raise ValueError('source package must not contain symlinks')
     binding=load(package/'source-binding.json')
+    if set(binding['capture_sources'])!={'accepted','refused-profile-attempt'}:
+        raise ValueError('capture source inventory mismatch')
+    for revision in [binding['review_revision'], *[v['source_revision'] for v in binding['capture_sources'].values()]]:
+        if not isinstance(revision,str) or not re.fullmatch('[0-9a-f]{40}',revision):
+            raise ValueError('source revision must be a full hexadecimal commit')
+    review_names={'mesh_summary.py','check_nmpc_saved.py','nmpc.py','check_scenarios.py','replay_evidence.py',
+                  'run_nmpc.py','nonlinear.py','run_affine.py','affine.py','test_mpc11_nmpc.py'}
+    if set(binding['review_source_sha256'])!=review_names:raise ValueError('review source inventory mismatch')
     for label,entry in binding['capture_sources'].items():
         manifest=load(package/label/'manifest.json')
         revision=entry['source_revision']
+        required={'benchmarks/reporting/mpc11/nmpc.py','benchmarks/reporting/mpc11/run_nmpc.py',
+                  'benchmarks/reporting/mpc11/scenarios/mesh-ni2/syn-nl-lv-01.json',
+                  'benchmarks/reporting/mpc11/scenarios/mesh-ni2/syn-nl-fuel-01.json'}
+        if not required<=set(entry['snapshot_sha256']) or set(manifest['source_sha256'])!={'nmpc.py','run_nmpc.py'}:
+            raise ValueError('capture source inventory incomplete')
         if manifest['source_revision']!=revision:raise ValueError('capture source revision mismatch')
         snapshot=package/('source-'+revision[:8])
         for name,expected in entry['snapshot_sha256'].items():
             path=(snapshot/name).resolve()
             if not path.is_relative_to(snapshot.resolve()) or digest(path)!=expected:raise ValueError('source snapshot binding mismatch')
-            committed=subprocess.check_output(['git','show',revision+':'+name],cwd=Path(__file__).resolve().parents[3])
+            committed=subprocess.check_output(['git','show','--end-of-options',revision+':'+name],cwd=Path(__file__).resolve().parents[3])
             if path.read_bytes()!=committed:raise ValueError('source snapshot differs from recorded git commit')
         for name,expected in manifest['source_sha256'].items():
             if entry['snapshot_sha256']['benchmarks/reporting/mpc11/'+name]!=expected:raise ValueError('native capture source binding mismatch')
@@ -35,7 +51,12 @@ def check_package_sources(package):
                 name=f'benchmarks/reporting/mpc11/scenarios/mesh-ni2/syn-nl-{case}-01.json'
                 if (snapshot/name).read_bytes()!=(package/label/f'syn-nl-{case}-01/scenario.json').read_bytes():raise ValueError('scenario snapshot binding mismatch')
     for name,expected in binding['review_source_sha256'].items():
-        if digest(package/'review-source'/name)!=expected:raise ValueError('review source snapshot binding mismatch')
+        path=(package/'review-source'/name).resolve()
+        if not path.is_relative_to((package/'review-source').resolve()) or digest(path)!=expected:
+            raise ValueError('review source snapshot binding mismatch')
+        relative=('tests/reporting/' if name.startswith('test_') else 'benchmarks/reporting/mpc11/')+name
+        committed=subprocess.check_output(['git','show','--end-of-options',binding['review_revision']+':'+relative],cwd=Path(__file__).resolve().parents[3])
+        if path.read_bytes()!=committed:raise ValueError('review source differs from recorded git commit')
     return binding
 
 
