@@ -408,9 +408,9 @@ public:
                     "The selected compiled verifier reconstructs the complete nominal feasible-history relation and checks the exact minimizing face over the stored binary64 dyadic values."};
                 const ClaimEvidence claim{problem.identity(),statement};
                 const auto exact_bounds=registry::detail::
-                    strategy_a_nominal_linear_exact_optimum_bounds(problem);
+                    nominal_linear_exact_optimum_bounds(problem);
                 if(!exact_bounds)return result;
-                auto exact_relation=registry::detail::strategy_a_nominal_linear_exact_optimal_relation(
+                auto exact_relation=registry::detail::nominal_linear_exact_optimal_relation(
                     problem,{{"strategy-a/nominal-linear-exact-optimal-face"}},
                     history.relation.metadata()->coordinate_labels,
                     request.materialization_limit.value_or(

@@ -13,6 +13,12 @@ caps and fails closed when they are exceeded. It remains an explicit
 Strategy-A-only profile, not generic Strategy A or Strategy B coverage; its
 binary64 forward producers are not certified by the exact verifier.
 
+**Catalog update (2026-11-09):** Strategy B adds
+`strategy-b.nominal-linear-exact-v1` with its own producer, verifier, proof and
+lineage bindings. It shares bounded exact-H reconstruction and optimal-face
+comparison with Strategy A, while preserving the independent verifier call at
+publication. Numerical backend completion alone does not establish coverage.
+
 ## Delivered boundary
 
 The prepared strategy owns the frozen resolved problem, effective family request, strategy identity/version, and lineage. [`StrategyRegistry::prepare`](../../src/registry/registry.cpp#L208-L230) selects a compiled verifier for established completeness and rejects a missing or unknown verifier before planning. [`VerifiedStrategyWorkspace::solve`](../../src/registry/registry.cpp#L16-L93) checks the proposal against that prepared identity, requires the selected verifier's registered proof payload, calls the verifier, and only then publishes through the verified authority. [`check_family_evidence`](../../src/contracts/synthesis.cpp#L64-L96) rejects unverified complete-family values and checks their binding.
@@ -21,7 +27,7 @@ The guard is exercised by the public prepared-strategy regression [“rejects co
 
 ## Remaining gap
 
-The production catalog provides profile-specific analytic verifiers for T-S01, T-S02, and T-S03, plus Strategy A's bounded `strategy-a.nominal-linear-exact-v1` verifier. The first three validate their canonical problems and relations; the nominal profile reconstructs admitted finite-horizon relations from exact dyadic values and checks the optimal face under finite arithmetic/work caps. None is a general numerical coverage procedure for arbitrary supported problems or Strategy A/B outputs.
+The production catalog provides profile-specific analytic verifiers for T-S01, T-S02, and T-S03, plus the separately bound `strategy-a.nominal-linear-exact-v1` and `strategy-b.nominal-linear-exact-v1` verifiers. The first three validate their canonical problems and relations; the nominal profiles reconstruct admitted finite-horizon relations from exact dyadic values and checks the optimal face under finite arithmetic/work caps. None is a general numerical coverage procedure for arbitrary supported problems or Strategy A/B outputs.
 
 `NumericalCoverageEvidence` is a typed proposal payload, not proof by construction. A residual, tolerance check, solver status, or list of witnesses cannot by itself prove that the published joint relation contains every optimal history. Until a profile's coverage evidence has a reviewed procedure and a compiled verifier that checks it against the frozen request, that profile must fail closed: report the supported candidate/partial result or reject complete-family publication. This is consistent with #155's completeness-guard addendum and the scientific gates in the [class-level architecture](../superpowers/specs/2026-10-12-class-level-system-architecture.md#scientific-gates-before-complete-family-acceptance).
 
