@@ -8,7 +8,8 @@ implementation, comparison runs and publication.
    shrinking-horizon NMPC archives. Verify archive inventories and run the
    existing saved checkers before rendering. Do not optimize in the renderer.
 2. Overlay affine prediction, affine controls on the nonlinear plant, and NMPC
-   nonlinear execution. LV uses P/R; fuel uses x1/x2 oxidizer and x3/x4 fuel.
+   nonlinear execution. LV uses P/R; fuel uses oxidizer mass/flow and fuel mass/flow. Select these by state
+   name because the canonical stored order is masses followed by flows.
    Mark initial/terminal states, target and physical time samples. Add state and
    held-control traces. These are trajectories, not reachable sets.
 3. Bind exported SVG/PNG and plotted arrays to archive/source/scenario/witness
