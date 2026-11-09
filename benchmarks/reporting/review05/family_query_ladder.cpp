@@ -178,11 +178,11 @@ std::shared_ptr<ob::TimingCollector> collector(const problem::ResolvedProblem& r
         {clock->wall_domain()},{},1};
     const auto add=[&](std::uint64_t id,std::string task,std::string operation,
         const ar::ModuleIdentity& module,std::optional<ProgramIdentity> program={},
-        std::optional<std::uint64_t> query={}) {
+        std::optional<std::uint64_t> query={},std::optional<std::uint64_t> parent={}) {
         if(std::find(plan.tasks.begin(),plan.tasks.end(),task)==plan.tasks.end())plan.tasks.push_back(task);
         if(std::find(plan.operations.begin(),plan.operations.end(),operation)==plan.operations.end())plan.operations.push_back(operation);
         ar::SpanDescriptor span{};span.id={id};
-        if(id)span.parent=ar::SpanParent{{0},ar::ParentKind::nested};
+        if(id)span.parent=ar::SpanParent{{parent.value_or(0)},ar::ParentKind::nested};
         span.task=std::move(task);span.operation=std::move(operation);span.module=module;
         span.clock=clock->wall_domain().id;span.requested_assurance=family.assurance;
         span.applied_assurance=ar::Available<Assurance>{family.assurance};span.query=query;
@@ -208,6 +208,9 @@ std::shared_ptr<ob::TimingCollector> collector(const problem::ResolvedProblem& r
         auto joint=take(synthesis::strategy_b::build_joint_program(resolved,family),"timed B program");
         const auto identity=std::visit([](const auto& p){return p.identity();},joint.program);
         add(3,"strategy-b","strategy-b/program-solve",sm,identity);
+        add(4,"strategy-b","strategy-b/joint-h-assembly",sm,{},{},2);
+        add(5,"strategy-b","strategy-b/objective-lift",sm,{},{},2);
+        add(6,"strategy-b","strategy-b/program-freeze",sm,{},{},2);
     }
     auto plan_value=take(ob::make_collection_plan(std::move(plan)),"timing plan");
     return take(ob::make_timing_collector(std::move(plan_value),clock,{0},{}),"timing collector");
@@ -218,7 +221,14 @@ void timing_json(std::ostream& out,const ob::TimingReport& report) {
     for(std::size_t i=0;i<report.spans.size();++i) {
         if(i)out<<',';
         const auto& time=report.spans[i];const auto& row=collection.spans.at(static_cast<std::size_t>(time.id.value));
-        out<<"{\"module\":"<<json_quote(row.descriptor.module.id.value)<<",\"module_version\":"<<json_quote(row.descriptor.module.version)<<",\"backend_version\":"<<(row.descriptor.backend?json_quote(row.descriptor.backend->version):"null")<<",\"operation\":"<<json_quote(row.descriptor.operation)<<",\"completed\":"<<(row.completion_observed?"true":"false")<<",\"ticks\":";
+        out<<"{\"id\":"<<time.id.value<<",\"parent\":";
+        if(row.descriptor.parent)out<<row.descriptor.parent->id.value;else out<<"null";
+        const auto* interval=std::get_if<ar::TickInterval>(&row.interval);
+        out<<",\"start_tick\":";
+        if(interval) {if(const auto* value=std::get_if<ar::Available<std::int64_t>>(&interval->start))out<<value->value;else out<<"null";}else out<<"null";
+        out<<",\"end_tick\":";
+        if(interval) {if(const auto* value=std::get_if<ar::Available<std::int64_t>>(&interval->end))out<<value->value;else out<<"null";}else out<<"null";
+        out<<",\"module\":"<<json_quote(row.descriptor.module.id.value)<<",\"module_version\":"<<json_quote(row.descriptor.module.version)<<",\"backend_version\":"<<(row.descriptor.backend?json_quote(row.descriptor.backend->version):"null")<<",\"operation\":"<<json_quote(row.descriptor.operation)<<",\"completed\":"<<(row.completion_observed?"true":"false")<<",\"ticks\":";
         if(const auto* t=std::get_if<ar::Available<std::uint64_t>>(&time.inclusive_wall_ticks))out<<t->value;else out<<"null";
         out<<",\"query\":";if(row.descriptor.query)out<<*row.descriptor.query;else out<<"null";
         out<<",\"program\":";if(row.descriptor.program)out<<json_quote(row.descriptor.program->program.value);else out<<"null";
