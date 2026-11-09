@@ -6,6 +6,8 @@ import copy
 import json
 import sys
 import tempfile
+import subprocess
+import hashlib
 
 P=Path(__file__).resolve().parents[2]/'scripts/reports/mpc06_online/model.py'
 S=importlib.util.spec_from_file_location('mpc06_online_model',P)
@@ -92,6 +94,15 @@ for i,line in enumerate(sys.stdin):
             frozen=json.loads(json.dumps(result,default=study.encode))
             self.assertEqual(check.verify(frozen)['status'],'verified')
             self.assertEqual(check.verify(frozen)['completed_native_qps'],36)
+            bundle=folder/'capture'
+            (bundle/'verification.json').write_text(json.dumps(check.verify(frozen)))
+            files=sorted(p for p in bundle.rglob('*') if p.is_file() and p.name!='SHA256SUMS')
+            (bundle/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(bundle)}\n' for p in files))
+            before=(bundle/'verification.json').read_bytes()
+            for _ in range(2):
+                subprocess.run([sys.executable,str(P.with_name('check.py')),str(bundle)],check=True,capture_output=True)
+            self.assertEqual((bundle/'verification.json').read_bytes(),before)
+
             corrupt=copy.deepcopy(frozen);corrupt['attempts'][0]['steps'][0]['native']['a']=10
             with self.assertRaisesRegex(ValueError,'optimum'):check.verify(corrupt)
             corrupt=copy.deepcopy(frozen);corrupt['attempts'][0]['steps'][0]['native']['program']='wrong'
