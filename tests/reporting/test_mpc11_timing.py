@@ -20,6 +20,22 @@ class TimingTests(unittest.TestCase):
             (folder/'stdout.txt').write_text('forged')
             with self.assertRaisesRegex(ValueError,'payload binding'):validate_receipt(folder)
 
+    def test_warmup_is_separate_and_five_arm_orders_alternate(self):
+        from unittest import mock
+        from run_timing import capture
+        with tempfile.TemporaryDirectory() as tmp:
+            calls=[]
+            def fake_unit(root,key,command):
+                calls.append(key);return root/key,{'status':'completed'}
+            with mock.patch('run_timing.source_identity',return_value={'fixture':True}),mock.patch('run_timing.unit',side_effect=fake_unit):
+                capture(Path(tmp),Path('/fixture/affine'),Path('/fixture/replay'))
+            orders=[]
+            for prefix in ['warmup',*[f'rep-{i:02d}' for i in range(5)]]:
+                arms=[key.split('/')[1] for key in calls if key.startswith(prefix+'/') and not key.endswith('/nonlinear')]
+                orders.append(arms)
+            self.assertEqual(orders,[['affine','nmpc'],['affine','nmpc'],['nmpc','affine'],['affine','nmpc'],['nmpc','affine'],['affine','nmpc']])
+            self.assertEqual(len(calls),18)
+
     def test_interrupted_attempt_is_preserved(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);old=root/'trial/attempt-000';old.mkdir(parents=True);(old/'partial').write_text('keep')
