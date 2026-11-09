@@ -1,0 +1,81 @@
+{
+  "schema": "csl.mpc11.affine-pilot-summary/1",
+  "accepted_source_revision": "b3978a98a8bfb30e21841466244ed7f78e987886",
+  "accepted_checks": [
+    {
+      "case_id": "ANALYTIC-JOINT-QP-01",
+      "termination": "completed",
+      "mathematical_outcome": "optimal",
+      "provider": {
+        "id": "csl.convex.highs",
+        "version": "1.0.0+highs.1.11.0"
+      },
+      "check_status": "verified-numerical-witness",
+      "objective": 2.0,
+      "running_cost": null,
+      "objective_multiplier": 1.0,
+      "program_sha256": "284998a40093e37a5550777d15adf213de38084798b62b98e6af143b4622270c"
+    },
+    {
+      "case_id": "SYN-NL-FUEL-01",
+      "termination": "completed",
+      "mathematical_outcome": "optimal",
+      "provider": {
+        "id": "csl.convex.highs",
+        "version": "1.0.0+highs.1.11.0"
+      },
+      "check_status": "verified-numerical-witness",
+      "objective": 0.010570464036763268,
+      "running_cost": 0.0016000000000000005,
+      "objective_multiplier": 1000.0,
+      "program_sha256": "a238ffa30dfc7a574286baa16b76d3948dbe781ea6ace60bafe5b6c575002c0f"
+    },
+    {
+      "case_id": "SYN-NL-LV-01",
+      "termination": "completed",
+      "mathematical_outcome": "optimal",
+      "provider": {
+        "id": "csl.convex.highs",
+        "version": "1.0.0+highs.1.11.0"
+      },
+      "check_status": "verified-numerical-witness",
+      "objective": 0.0782955745731609,
+      "running_cost": 0.016032051380787938,
+      "objective_multiplier": 1000.0,
+      "program_sha256": "37b4a06722ce6324942d93ff1f322d24c9e2370fbe92e65faa8af8ababdff661"
+    }
+  ],
+  "limited_attempts": [
+    {
+      "formulation": "unscaled-joint",
+      "source_revision": "c953748c268f8cb56c43feebf5cae18338b8b7d9",
+      "case_id": "SYN-NL-LV-01",
+      "termination": "resource_limit",
+      "mathematical_outcome": "undetermined",
+      "program_sha256": "a19e3e633d56284f127e28c6fa521443adb72767450c29e6fab9253bb15be4c4",
+      "scope": "candidate primal/log retained, no optimum established"
+    },
+    {
+      "formulation": "controls-first",
+      "source_revision": "8e30a05d593c4e0469eab5b859f82759efdcf75c",
+      "case_id": "SYN-NL-LV-01",
+      "termination": "resource_limit",
+      "mathematical_outcome": "undetermined",
+      "program_sha256": "2d3b45aacfb1a459e727473d0ac1ff1d4b6d26e59512a398ecee2528fec562f2",
+      "scope": "candidate primal/log retained, no optimum established"
+    },
+    {
+      "formulation": "equality-eliminated",
+      "source_revision": "6e4291630069a0edaa5b239b115bf463fb01bcd7",
+      "case_id": "SYN-NL-LV-01",
+      "termination": "resource_limit",
+      "mathematical_outcome": "undetermined",
+      "program_sha256": "276b21ff12fb807f611d681e2a6e2cca7f55581db70fe35054f2664e404620fb",
+      "scope": "candidate primal/log retained, no optimum established"
+    }
+  ],
+  "claim": "actual CSL numerical affine witnesses; no nonlinear execution/global nonlinear or complete-family certificate; no timing comparison",
+  "archive_sha256": "98c6d9663bad80757ddef1adb150706ca8f7e19633267dc436bc4b84f09fe9b3",
+  "checker_revision": "118d2d6ae0239a0554b2a6c9b41e195c78f75fc6",
+  "checker_scope": "rebuild fixed authored scenario model and joint program; verify every retained transform coefficient/bound/row/map before witness checks"
+}
