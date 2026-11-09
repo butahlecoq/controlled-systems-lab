@@ -1,6 +1,6 @@
 import importlib.util
 from fractions import Fraction as Q
-from pathlib import Path
+from pathlib import Path,PureWindowsPath
 import unittest
 import copy
 import json
@@ -99,7 +99,7 @@ for i,line in enumerate(sys.stdin):
             bundle=folder/'capture'
             (bundle/'verification.json').write_text(json.dumps(check.verify(frozen)))
             files=sorted(p for p in bundle.rglob('*') if p.is_file() and p.name!='SHA256SUMS')
-            (bundle/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(bundle)}\n' for p in files))
+            (bundle/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(bundle).as_posix()}\n' for p in files))
             before=(bundle/'verification.json').read_bytes()
             for _ in range(2):
                 subprocess.run([sys.executable,str(P.with_name('check.py')),str(bundle)],check=True,capture_output=True)
@@ -122,7 +122,7 @@ class EvidenceBindingTests(unittest.TestCase):
 
     def refresh_manifest(self,bundle):
         files=sorted(p for p in bundle.rglob('*') if p.is_file() and p.name!='SHA256SUMS')
-        (bundle/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(bundle)}\n' for p in files))
+        (bundle/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(bundle).as_posix()}\n' for p in files))
 
     def receipt(self,bundle,folder):
         path=Path(folder)/'verification-v2.json'
@@ -132,6 +132,18 @@ class EvidenceBindingTests(unittest.TestCase):
 
     def renderer(self,bundle,receipt,output):
         return subprocess.run([sys.executable,str(P.with_name('render.py')),str(bundle),'--receipt',str(receipt),'--output',str(output)],capture_output=True,text=True)
+
+    def test_fixture_checksum_paths_remain_posix_with_windows_relative_paths(self):
+        with tempfile.TemporaryDirectory() as folder:
+            bundle=self.clone(folder)
+            path_type=type(bundle);relative_to=path_type.relative_to
+            def windows_relative(path,*arguments):
+                return PureWindowsPath(relative_to(path,*arguments))
+            with mock.patch.object(path_type,'relative_to',windows_relative):
+                self.refresh_manifest(bundle)
+            names=[line.split('  ',1)[1] for line in (bundle/'SHA256SUMS').read_text().splitlines()]
+            self.assertIn('source/driver.cpp',names)
+            self.assertTrue(all('\\' not in name for name in names))
 
     def test_replaced_native_stream_is_rejected_even_with_updated_checksums(self):
         with tempfile.TemporaryDirectory() as folder:
