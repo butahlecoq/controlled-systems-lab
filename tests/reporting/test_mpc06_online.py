@@ -82,6 +82,7 @@ class OnlineCaptureTests(unittest.TestCase):
         sys.path.insert(0,str(P.parent))
         import study
         import check
+        import evidence
         with tempfile.TemporaryDirectory() as tmp:
             folder=Path(tmp);driver=folder/'fixture-driver'
             driver.write_text("""#!/usr/bin/env python3
@@ -92,7 +93,12 @@ for i,line in enumerate(sys.stdin):
  print(json.dumps(dict(schema='csl.mpc06-online-qp/1',status='completed',backend='csl.convex.highs',backend_version='test-protocol',program='nominal-qp/'+str(i),requested_threads=1,a=x,objective=a*x*x+b*x+c,prepare_ns=1,setup_ns=1,solve_ns=1)),flush=True)
 """)
             driver.chmod(0o700)
-            result=study.run(driver,folder/'capture',1)
+            path_type=type(folder);relative_to=path_type.relative_to
+            def windows_relative(path,*arguments):
+                return PureWindowsPath(relative_to(path,*arguments))
+            with mock.patch.object(path_type,'relative_to',windows_relative):
+                result=study.run(driver,folder/'capture',1)
+            evidence.load_sources(folder/'capture')
             frozen=json.loads(json.dumps(result,default=study.encode))
             self.assertEqual(check.verify(frozen)['status'],'verified')
             self.assertEqual(check.verify(frozen)['completed_native_qps'],36)
@@ -143,6 +149,20 @@ class EvidenceBindingTests(unittest.TestCase):
                 self.refresh_manifest(bundle)
             names=[line.split('  ',1)[1] for line in (bundle/'SHA256SUMS').read_text().splitlines()]
             self.assertIn('source/driver.cpp',names)
+            self.assertTrue(all('\\' not in name for name in names))
+
+    def test_rendered_manifest_paths_remain_posix_with_windows_relative_paths(self):
+        sys.path.insert(0,str(P.parent));import render
+        with tempfile.TemporaryDirectory() as folder:
+            bundle=self.clone(folder);receipt=self.receipt(bundle,folder)
+            path_type=type(bundle);relative_to=path_type.relative_to
+            def windows_relative(path,*arguments):
+                return PureWindowsPath(relative_to(path,*arguments))
+            output=Path(folder)/'rendered'
+            with mock.patch.object(path_type,'relative_to',windows_relative):
+                render.render(bundle,receipt,output)
+            names=[line.split('  ',1)[1] for line in (output/'SHA256SUMS').read_text().splitlines()]
+            self.assertIn('checked-inputs/bundle/source/driver.cpp',names)
             self.assertTrue(all('\\' not in name for name in names))
 
     def test_replaced_native_stream_is_rejected_even_with_updated_checksums(self):

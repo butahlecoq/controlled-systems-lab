@@ -99,7 +99,7 @@ def render(bundle,receipt_path,output):
         page=page.replace('href="'+name+'"','href="'+source_prefix+'/'+name+'"')
     (bundle/'index.html').write_text(page)
     paths=sorted(p for p in bundle.rglob('*') if p.is_file() and p!=bundle/'SHA256SUMS')
-    (bundle/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(bundle)}\n' for p in paths))
+    (bundle/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(bundle).as_posix()}\n' for p in paths))
     return summary
 
 if __name__=='__main__':
