@@ -54,6 +54,8 @@ PUBLICATION_EXPORT_ROUTES = {
     "scripts/reports/augment_pages_bundle.py",
 }
 VIZ10_ROLE_REASONS = {
+    "scripts/reports/mpc06_online/render.py":
+        "Renders checked-source-bound native outcomes and saved actual paths; the shared Matplotlib publication companion remains in issue #602. This is not a benchmark producer.",
     "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py":
         "Generates one exact 2D critical-region diagram from the rational fixture, with labelled initial and terminal coordinates; it is not a general plotting path.",
     "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py":
@@ -84,7 +86,6 @@ VIZ10_ROLE_REASONS = {
         "Generic report exporter validates and copies a supplied saved figure; it does not produce quantitative plot data.",
 }
 SAVED_COMPANION_ROUTES = {
-    "scripts/reports/mpc06_online/render.py",
     "scripts/reports/mpc01/summarize_repeated_comparison.py",
     "scripts/reports/app02/render_saved.py",
     "scripts/reports/app03/render_saved.py",
@@ -119,6 +120,7 @@ SAVED_COMPANION_ROUTES = {
 }
 SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
 SAVED_DATA_COMPANION_RENDERERS = {
+    "scripts/reports/mpc06_online/render.py",
     "scripts/reports/mpc06_delivery/figures.py",
     "scripts/reports/render_adaptive_ode_example.py",
     "scripts/reports/ext02/render_saved.py",
@@ -129,6 +131,10 @@ SAVED_DATA_COMPANION_RENDERERS = {
     "benchmarks/reporting/review05/render_constraint_ladder.py",
 }
 FROZEN_COMPANIONS = {
+    "mpc06-online-anchor-v1": "mpc06-complete-93376f8d4da1a3bb9e63/index.html",
+    "mpc06-online-anchor-checked-v2": "mpc06-complete-93376f8d4da1a3bb9e63/index.html",
+    "mpc06-online-anchor-portable-v3": "mpc06-complete-93376f8d4da1a3bb9e63/index.html",
+    "mpc06-completion-v1": "mpc06-complete-93376f8d4da1a3bb9e63/index.html",
     "app01-plan-20261016-22d406fd": "examples/app01-plan-timing-v1.html",
     "exp02-paired-profiles-20261027-r1": "examples/control-witness-v1.html#exp02-ts02-control-family",
     "mpc03-open-loop-pilot-v1": "examples/index.html",

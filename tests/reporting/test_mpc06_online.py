@@ -16,6 +16,19 @@ S=importlib.util.spec_from_file_location('mpc06_online_model',P)
 M=importlib.util.module_from_spec(S)
 S.loader.exec_module(M)
 
+
+def online_module(name,dependencies=None):
+    spec=importlib.util.spec_from_file_location('test_mpc06_online_'+name,P.with_name(name+'.py'))
+    module=importlib.util.module_from_spec(spec)
+    with mock.patch.dict(sys.modules,dependencies or {}):spec.loader.exec_module(module)
+    return module
+
+
+ONLINE_EVIDENCE=online_module('evidence')
+ONLINE_STUDY=online_module('study',{'model':M})
+ONLINE_CHECK=online_module('check',{'model':M,'study':ONLINE_STUDY,'evidence':ONLINE_EVIDENCE})
+ONLINE_RENDER=online_module('render',{'evidence':ONLINE_EVIDENCE})
+
 class OnlineTubeTests(unittest.TestCase):
     def test_terminal_elimination_and_unique_nominal_optimum(self):
         for p,q in [(Q(1,8),Q(0)),(Q(-1,4),Q(1,8)),(Q(0),Q(0))]:
@@ -79,10 +92,7 @@ class OnlineTubeTests(unittest.TestCase):
 class OnlineCaptureTests(unittest.TestCase):
     @unittest.skipIf(sys.platform=="win32","POSIX subprocess fixture; native smoke separately exercises Windows")
     def test_saved_native_protocol_is_bound_and_replay_detects_corruption(self):
-        sys.path.insert(0,str(P.parent))
-        import study
-        import check
-        import evidence
+        study,check,evidence=ONLINE_STUDY,ONLINE_CHECK,ONLINE_EVIDENCE
         with tempfile.TemporaryDirectory() as tmp:
             folder=Path(tmp);driver=folder/'fixture-driver'
             driver.write_text("""#!/usr/bin/env python3
@@ -152,7 +162,7 @@ class EvidenceBindingTests(unittest.TestCase):
             self.assertTrue(all('\\' not in name for name in names))
 
     def test_rendered_manifest_paths_remain_posix_with_windows_relative_paths(self):
-        sys.path.insert(0,str(P.parent));import render
+        render=ONLINE_RENDER
         with tempfile.TemporaryDirectory() as folder:
             bundle=self.clone(folder);receipt=self.receipt(bundle,folder)
             path_type=type(bundle);relative_to=path_type.relative_to
@@ -227,7 +237,7 @@ class EvidenceBindingTests(unittest.TestCase):
             self.assertIn('receipt input binding',result.stderr)
 
     def test_receipt_count_and_script_binding_are_checked(self):
-        sys.path.insert(0,str(P.parent));import evidence
+        evidence=ONLINE_EVIDENCE
         with tempfile.TemporaryDirectory() as folder:
             bundle=self.clone(folder);receipt=self.receipt(bundle,folder)
             body=json.loads(receipt.read_text());body['verification']['completed_native_qps']+=1

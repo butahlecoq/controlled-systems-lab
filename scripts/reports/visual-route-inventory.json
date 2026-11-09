@@ -986,7 +986,8 @@
       "asset_name_literals": [
         "online-state-paths.svg"
       ],
-      "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
+      "disposition": "analytic-reference-checked-saved-run-renderer",
+      "role_and_disposition_reason": "Renders checked-source-bound native outcomes and saved actual paths; the shared Matplotlib publication companion remains in issue #602. This is not a benchmark producer."
     },
     {
       "source": "scripts/reports/mpc09/make_report.py",
@@ -3155,6 +3156,42 @@
       "follow_up_issue": 601
     },
     {
+      "route": "mpc06-completion-v1",
+      "source_bundle": "mpc06-completion-v1",
+      "assets": [
+        "actual-state-paths.png",
+        "actual-state-paths.svg",
+        "feasibility-grid.png",
+        "feasibility-grid.svg",
+        "invariant-tightenings.png",
+        "invariant-tightenings.svg"
+      ],
+      "index_sha256": "f66cab75bba6adaa534e1b1bfba413837262dc1d4279c4fc10fafe26dc24ef89",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 602,
+      "companion_route": "mpc06-complete-93376f8d4da1a3bb9e63/index.html"
+    },
+    {
+      "route": "mpc06-completion-v1/input/online/checked-inputs/mpc06-online-anchor-v1",
+      "source_bundle": "mpc06-completion-v1/input/online/checked-inputs/mpc06-online-anchor-v1",
+      "assets": [
+        "online-state-paths.svg"
+      ],
+      "index_sha256": "de5b23cab244f6b5b8043e44fb23b3f69bcf4f2a1cbe47c4922f6dfeae5234aa",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "mpc06-completion-v1/input/online",
+      "source_bundle": "mpc06-completion-v1/input/online",
+      "assets": [
+        "online-state-paths.svg"
+      ],
+      "index_sha256": "b90ce19e5bb85dc741947b6fedaa00c3078d52486a3e038d0f87f52e8ca9a677",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
       "route": "mpc06-nilpotent-tube-pilot-v1",
       "source_bundle": "mpc06-nilpotent-tube-pilot-v1",
       "assets": [
@@ -3182,7 +3219,8 @@
       ],
       "index_sha256": "b90ce19e5bb85dc741947b6fedaa00c3078d52486a3e038d0f87f52e8ca9a677",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
-      "follow_up_issue": 669
+      "follow_up_issue": 669,
+      "companion_route": "mpc06-complete-93376f8d4da1a3bb9e63/index.html"
     },
     {
       "route": "mpc06-online-anchor-portable-v3/checked-inputs/mpc06-online-anchor-v1",
@@ -3202,7 +3240,8 @@
       ],
       "index_sha256": "b90ce19e5bb85dc741947b6fedaa00c3078d52486a3e038d0f87f52e8ca9a677",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
-      "follow_up_issue": 669
+      "follow_up_issue": 669,
+      "companion_route": "mpc06-complete-93376f8d4da1a3bb9e63/index.html"
     },
     {
       "route": "mpc06-online-anchor-v1",
@@ -3212,7 +3251,8 @@
       ],
       "index_sha256": "de5b23cab244f6b5b8043e44fb23b3f69bcf4f2a1cbe47c4922f6dfeae5234aa",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
-      "follow_up_issue": 669
+      "follow_up_issue": 669,
+      "companion_route": "mpc06-complete-93376f8d4da1a3bb9e63/index.html"
     },
     {
       "route": "mpc06-tube-objective-v1",
