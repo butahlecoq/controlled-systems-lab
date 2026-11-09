@@ -42,6 +42,16 @@ class Mpc06DeliveryPublicationTests(unittest.TestCase):
             self.assertEqual(routes[0],routes[1]);self.assertEqual(archives[0],archives[1])
             self.assertEqual({p.relative_to(report):p.read_bytes() for p in report.rglob('*') if p.is_file()},before)
 
+    def test_rebound_upstream_record_is_not_a_new_mathematical_certificate(self):
+        import shutil
+        with tempfile.TemporaryDirectory() as temporary:
+            source=Path(temporary)/'online';shutil.copytree(records.UPSTREAM,source)
+            path=source/'checked-inputs/mpc06-online-anchor-v1/result.json'
+            value=json.loads(path.read_text());value['attempts'][0]['actual']['worst']='0'
+            path.write_text(json.dumps(value));self.sums(source)
+            with self.assertRaisesRegex(ValueError,'independently reviewed immutable capture'):
+                records.upstream(source)
+
     def test_rebound_copied_source_is_not_authenticated_by_inventory(self):
         with tempfile.TemporaryDirectory() as temporary:
             folder=Path(temporary);source,_=self.build(folder)

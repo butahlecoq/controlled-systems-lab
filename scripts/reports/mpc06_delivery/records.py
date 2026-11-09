@@ -16,6 +16,7 @@ from scripts.reports.mpc06_delivery import reference
 from scripts.reports.mpc06_online import evidence,model
 
 UPSTREAM=ROOT/'reports/algorithm-results/mpc06-online-anchor-portable-v3'
+REVIEWED_UPSTREAM_MANIFEST_SHA256='8edb28e2744b1b061a47971e5f0613c30be64e7c25727c70bd1ec52d4244034a'
 SOURCE_FILES=('scripts/reports/mpc06_delivery/reference.py','scripts/reports/mpc06_delivery/records.py',
               'scripts/reports/mpc06_delivery/figures.py','scripts/reports/figure_style.py','scripts/reports/plot.py','scripts/reports/report_data.py','scripts/reports/requirements.txt',
               'scripts/reports/mpc06_online/evidence.py','scripts/reports/mpc06_online/model.py')
@@ -42,6 +43,8 @@ def inventory(source):
 
 def upstream(source):
     contents=inventory(source)
+    if evidence.digest(contents['SHA256SUMS'])!=REVIEWED_UPSTREAM_MANIFEST_SHA256:
+        raise ValueError('upstream differs from the independently reviewed immutable capture')
     record,receipt=evidence.checked_sources(source/'checked-inputs/mpc06-online-anchor-v1',source/'verification-v2.json')
     if receipt['verification']['status']!='verified' or receipt['verification']['completed_native_qps']!=180:
         raise ValueError('upstream online study is not the reviewed completed capture')
