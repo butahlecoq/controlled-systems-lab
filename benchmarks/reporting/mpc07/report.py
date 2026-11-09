@@ -10,6 +10,7 @@ import re
 import statistics
 import shutil
 import sys
+import subprocess
 import tempfile
 import time
 import capture
@@ -36,13 +37,41 @@ def inventory(root):
     return actual
 
 
-def checked_records(root):
+SOURCE_PATHS={
+    'PLAN.md':'benchmarks/reporting/mpc07/PLAN.md',
+    'README.md':'benchmarks/reporting/mpc07/README.md',
+    'capture.py':'benchmarks/reporting/mpc07/capture.py',
+    'policy.py':'benchmarks/reporting/mpc07/policy.py',
+    'report.py':'benchmarks/reporting/mpc07/report.py',
+    'native-build-receipt.json':'benchmarks/reporting/mpc07/native-build-receipt.json',
+    'test_mpc07_policy.py':'tests/reporting/test_mpc07_policy.py',
+    'native-affine_bridge.cpp':'benchmarks/reporting/mpc11/affine_bridge.cpp',
+    'native-CMakeLists.txt':'benchmarks/reporting/mpc11/CMakeLists.txt',
+}
+NATIVE_REVISION='b3978a98a8bfb30e21841466244ed7f78e987886'
+
+
+def authenticate_sources(root,environment,repository):
+    revision=environment.get('source_commit');native=environment.get('native_source_commit')
+    if not isinstance(revision,str) or not re.fullmatch('[0-9a-f]{40}',revision) or native!=NATIVE_REVISION:
+        raise ValueError('source revisions must be full pinned hexadecimal commits')
+    if set(environment['source_sha256'])!=set(SOURCE_PATHS):raise ValueError('mandatory source snapshot inventory differs')
+    for name,relative in SOURCE_PATHS.items():
+        content=(root/'source'/name).read_bytes()
+        if hashlib.sha256(content).hexdigest()!=environment['source_sha256'][name]:raise ValueError('source snapshot hash differs')
+        commit=NATIVE_REVISION if name in ('native-affine_bridge.cpp','native-CMakeLists.txt') else revision
+        committed=subprocess.check_output(['git','show','--end-of-options',commit+':'+relative],cwd=repository)
+        if content!=committed:raise ValueError('source snapshot differs from recorded Git commit: '+name)
+    native_receipt=json.loads((root/'source/native-build-receipt.json').read_text())
+    if native_receipt['source_revision']!=NATIVE_REVISION or native_receipt['bridge_sha256']!=capture.BRIDGE_SHA:
+        raise ValueError('reused native source/build receipt differs')
+
+
+def checked_records(root,repository=capture.ROOT):
     hashes=inventory(root);environment=json.loads((root/'environment.json').read_text())
-    if environment['bridge_sha256']!=capture.BRIDGE_SHA or environment['source_status']:
+    if environment['bridge_sha256']!=capture.BRIDGE_SHA or environment.get('source_status')!='':
         raise ValueError('capture source/native identity differs')
-    for name,checksum in environment['source_sha256'].items():
-        if not re.fullmatch('[A-Za-z0-9_.-]+',name) or digest(root/'source'/name)!=checksum:
-            raise ValueError('capture source snapshot binding differs')
+    authenticate_sources(root,environment,repository)
     records=[];policies={};rechecks={}
     for parent in ('attempts','probes'):
         for folder in sorted((root/parent).iterdir()):
@@ -92,6 +121,8 @@ def metrics(records):
         group['verified']+=1;group['exact_virtual_worst_squared']=row['current_check']['worst_terminal_squared']
         values=dict(python_prepare_ns=r['python_prepare_ns'],whole_process_ns=r['whole_process_ns'],
             native_setup_ns=row['native_setup_ns'],native_port_run_ns=row['native_port_run_ns'])
+        if type(values['native_setup_ns']) is not int or type(values['native_port_run_ns']) is not int or values['native_setup_ns']+values['native_port_run_ns']>values['whole_process_ns']:
+            raise ValueError('native inclusive spans exceed supervised process duration')
         for name,value in values.items():
             if type(value) is not int or value<0:raise ValueError('invalid measured clock')
             group['samples'].setdefault(name,[]).append(value)
