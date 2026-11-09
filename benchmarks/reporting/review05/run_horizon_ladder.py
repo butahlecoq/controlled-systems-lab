@@ -17,7 +17,7 @@ import tempfile
 import time
 from pathlib import Path
 
-from highs_clock_events import parse_stderr as parse_highs_clock_events
+from highs_clock_events import parse_stderr as parse_highs_clock_events, parse_result_stdout
 
 
 STRATEGIES = ("csl.synthesis.reach-back", "csl.synthesis.strategy-b")
@@ -261,15 +261,7 @@ def main() -> int:
                     parse_error = None
                     if process_status == "completed":
                         try:
-                            output_text = stdout.decode("utf-8")
-                            if args.highs_internal_clocks:
-                                result_lines = [line for line in output_text.splitlines()
-                                    if line.startswith('{"schema":"csl.review05.horizon-attempt/1"')]
-                                if len(result_lines) != 1:
-                                    raise ValueError("diagnostic stdout requires exactly one versioned result line")
-                                parsed = json.loads(result_lines[0])
-                            else:
-                                parsed = json.loads(output_text)
+                            parsed = parse_result_stdout(stdout, args.highs_internal_clocks)
                         except (UnicodeDecodeError, ValueError) as error:
                             process_status = "invalid_output"
                             parse_error = str(error)

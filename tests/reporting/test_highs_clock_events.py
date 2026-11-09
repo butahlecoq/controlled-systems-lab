@@ -5,7 +5,7 @@ import unittest
 
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "benchmarks" / "reporting" / "review05"))
-from highs_clock_events import parse_stderr
+from highs_clock_events import parse_stderr, parse_result_stdout
 
 
 def group(index=0):
@@ -30,6 +30,16 @@ class HighsClockEventTests(unittest.TestCase):
         raw = (b"solver diagnostic\nCSL_HIGHS_CLOCK/1 " + json.dumps(first).encode() +
                b"\nCSL_HIGHS_CLOCK/1 " + json.dumps(second).encode() + b"\n")
         self.assertEqual(parse_stderr(raw, enabled=True), [first, second])
+
+    def test_diagnostic_stdout_requires_one_versioned_result(self):
+        result = {"schema": "csl.review05.horizon-attempt/1", "horizon": 2}
+        line = json.dumps(result, separators=(",", ":")).encode()
+        self.assertEqual(parse_result_stdout(b"native timer table\n" + line + b"\n", True), result)
+        for raw in (b"no result emitted\n", line + b"\n" + line):
+            with self.assertRaisesRegex(ValueError, "exactly one"):
+                parse_result_stdout(raw, True)
+        with self.assertRaises(ValueError):
+            parse_result_stdout(b"native timer table\n" + line, False)
 
     def test_empty_capture_requires_explicit_unavailable_status(self):
         value = group()

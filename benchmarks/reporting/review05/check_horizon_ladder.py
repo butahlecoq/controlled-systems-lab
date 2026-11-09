@@ -9,7 +9,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from highs_clock_events import parse_stderr as parse_highs_clock_events
+from highs_clock_events import parse_stderr as parse_highs_clock_events, parse_result_stdout
 
 
 STRATEGIES = {"csl.synthesis.reach-back", "csl.synthesis.strategy-b"}
@@ -192,6 +192,10 @@ def main() -> int:
                 raw_stderr = path.read_bytes()
         if raw_stderr is not None:
             try:
+                raw_result = parse_result_stdout((bundle / attempt["stdout_path"]).read_bytes(),
+                    manifest.get("schedule", {}).get("highs_internal_clocks") is True)
+                if raw_result != attempt.get("result"):
+                    raise ValueError("structured result differs from retained stdout")
                 expected_clock_groups = parse_highs_clock_events(
                     raw_stderr, manifest.get("schedule", {}).get("highs_internal_clocks") is True)
                 recorded_clock_groups = attempt.get("solver_clock_groups")

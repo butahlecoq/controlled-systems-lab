@@ -80,3 +80,18 @@ def parse_stderr(data: bytes, enabled: bool) -> list[dict[str, object]]:
     if indices != list(range(len(indices))):
         raise ValueError("provider call indices must be unique and contiguous from zero")
     return groups
+
+
+def parse_result_stdout(data: bytes, diagnostic: bool) -> dict[str, object]:
+    text = data.decode("utf-8")
+    if diagnostic:
+        lines = [line for line in text.splitlines()
+                 if line.startswith('{"schema":"csl.review05.horizon-attempt/1"')]
+        if len(lines) != 1:
+            raise ValueError("diagnostic stdout requires exactly one versioned result line")
+        result = json.loads(lines[0])
+    else:
+        result = json.loads(text)
+    if not isinstance(result, dict) or result.get("schema") != "csl.review05.horizon-attempt/1":
+        raise ValueError("unexpected stdout result schema")
+    return result
