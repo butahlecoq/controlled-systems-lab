@@ -14,7 +14,7 @@ def plain(value):return json.loads(json.dumps(value,default=encode))
 
 
 def verify(record):
-    begin=time.perf_counter_ns();count=0
+    begin=time.perf_counter_ns();count=0;program_index={}
     if record['schema']!='csl.mpc06-online-study/1' or record['policy']['kind']!='propagated-anchor':
         raise ValueError('unsupported schema or disturbance-dependent policy')
     if record['plant']['A']!=[[1,1],[0,1]] or record['plant']['B']!=[[0],[1]] or record['plant']['E']!=[[0],[1]] or record['plant']['W']!=['-1/8','1/8'] or record['plant']['X']!=[[-1,1],[-1,1]] or record['plant']['U']!=[-1,1]:raise ValueError('unsupported plant or uncertainty')
@@ -42,6 +42,9 @@ def verify(record):
             expected=' '.join(format(float(qp[k]),'.17g') for k in ('quadratic','linear','offset','lower','upper'))+'\n'
             if row['native_input']!=expected:raise ValueError('native input differs from independently derived QP')
             native=row['native'];a=Q(native['a'])
+            index=program_index.get(attempt['repetition'],0)
+            if native['schema']!='csl.mpc06-online-qp/1' or native['program']!='nominal-qp/'+str(index) or native['requested_threads']!=1:raise ValueError('native request/program binding mismatch')
+            program_index[attempt['repetition']]=index+1
             if native['status']!='completed' or native['backend']!='csl.convex.highs':raise ValueError('missing native QP completion')
             if not qp['lower']<=a<=qp['upper'] or abs(a-optimizer(qp))>Q(1,1000000):raise ValueError('unsafe or wrong native optimum')
             if abs(Q(native['objective'])-value(qp,a))>Q(1,1000000):raise ValueError('wrong original native objective')

@@ -84,7 +84,7 @@ import json,math,sys
 print(json.dumps(dict(schema='csl.mpc06-online-approximation/1',direction='outer',radii=[math.sqrt(2)/8]*2,center=[0,0],orientation=[[1,0],[1,1]],construction_ns=1)),flush=True)
 for i,line in enumerate(sys.stdin):
  a,b,c,lo,hi=map(float,line.split());x=min(hi,max(lo,-b/(2*a)))
- print(json.dumps(dict(schema='csl.mpc06-online-qp/1',status='completed',backend='csl.convex.highs',backend_version='test-protocol',program='nominal-qp/'+str(i),a=x,objective=a*x*x+b*x+c,prepare_ns=1,setup_ns=1,solve_ns=1)),flush=True)
+ print(json.dumps(dict(schema='csl.mpc06-online-qp/1',status='completed',backend='csl.convex.highs',backend_version='test-protocol',program='nominal-qp/'+str(i),requested_threads=1,a=x,objective=a*x*x+b*x+c,prepare_ns=1,setup_ns=1,solve_ns=1)),flush=True)
 """)
             driver.chmod(0o700)
             result=study.run(driver,folder/'capture',1)
@@ -93,6 +93,8 @@ for i,line in enumerate(sys.stdin):
             self.assertEqual(check.verify(frozen)['completed_native_qps'],36)
             corrupt=copy.deepcopy(frozen);corrupt['attempts'][0]['steps'][0]['native']['a']=10
             with self.assertRaisesRegex(ValueError,'optimum'):check.verify(corrupt)
+            corrupt=copy.deepcopy(frozen);corrupt['attempts'][0]['steps'][0]['native']['program']='wrong'
+            with self.assertRaisesRegex(ValueError,'binding'):check.verify(corrupt)
             corrupt=copy.deepcopy(frozen);corrupt['policy']['kind']='measured-state-reset'
             with self.assertRaisesRegex(ValueError,'policy'):check.verify(corrupt)
             corrupt=copy.deepcopy(frozen);corrupt['attempts'][0]['actual']['worst']='0'

@@ -72,6 +72,9 @@ def run(driver,output,repetitions):
         source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip(),
         source_status=subprocess.check_output(['git','status','--porcelain'],cwd=root,text=True),
         binary_sha256=hashlib.sha256(driver.read_bytes()).hexdigest(),platform=platform.platform(),
+        compiler=subprocess.check_output(['c++','--version'],text=True),architecture=platform.machine(),
+        source_file_sha256={str(path.relative_to(root)):hashlib.sha256(path.read_bytes()).hexdigest() for path in [Path(__file__),Path(__file__).with_name('model.py'),Path(__file__).with_name('check.py'),root/'benchmarks/reporting/mpc06_online/driver.cpp']},
+        build='Release required for comparative capture; explicit CMakeCache retained when available',
         policy=dict(kind='propagated-anchor',gain=[-1,-2],initial_error='zero',nominal_horizon=3,terminal='z3=0',
             nominal_objective='sum(k=0..2,z_k^T z_k+v_k^2)',actual_objective='sum(t=0..2,x_t^T x_t+u_t^2)+x3^T x3',
             quantifier='deterministic nominal-anchor reoptimization with fixed ancillary K; all stagewise continuous disturbance sequences',
@@ -79,8 +82,10 @@ def run(driver,output,repetitions):
         representations=representation_checks(),grid=grid(),attempts=[],processes=[],repetitions=repetitions,
         timing_scope='native prepare/setup/solve separate; Python exact construction and checker separate; IPC/end-to-end separate; no performance winner')
     (output/'source').mkdir()
-    for path in (Path(__file__),Path(__file__).with_name('model.py'),root/'benchmarks/reporting/mpc06_online/driver.cpp',root/'benchmarks/reporting/mpc06_online/CMakeLists.txt'):
+    for path in (Path(__file__),Path(__file__).with_name('model.py'),Path(__file__).with_name('check.py'),Path(__file__).with_name('render.py'),root/'benchmarks/reporting/mpc06_online/README.md',root/'benchmarks/reporting/mpc06_online/driver.cpp',root/'benchmarks/reporting/mpc06_online/CMakeLists.txt'):
         (output/'source'/path.name).write_bytes(path.read_bytes())
+    cache=driver.parent/'CMakeCache.txt'
+    if cache.exists():(output/'CMakeCache.txt').write_bytes(cache.read_bytes())
     for repetition in range(repetitions):
         folder=output/f'repetition-{repetition:02}';folder.mkdir();stdout=[];startup=time.perf_counter_ns()
         with (folder/'stderr.txt').open('w') as stderr:
