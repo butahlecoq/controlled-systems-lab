@@ -129,3 +129,20 @@ def check(result):
     # The active convex quadratic is <= the envelope everywhere and is minimized
     # at a (or on the feasible endpoint). Equality there proves the global value.
     return True
+
+
+def decode(record):
+    """Decode only the declared rational fields; identifiers stay identifiers."""
+    result=dict(record);result['initial']=tuple(map(Q,record['initial']));result['gain']=tuple(record['gain'])
+    result['interval']=tuple(map(Q,record['interval']));result['common_quadratic']=Q(record['common_quadratic'])
+    result['paths']=[dict(path,disturbances=tuple(map(Q,path['disturbances'])),
+        **{key:Q(path[key]) for key in ('quadratic','linear','constant')}) for path in record['paths']]
+    result['constraints']=[dict(row,coefficient=Q(row['coefficient']),bound=Q(row['bound'])) for row in record['constraints']]
+    if record['feasible']:
+        for key in ('a','worst_cost'):result[key]=Q(record[key])
+        result['candidates']=list(map(Q,record['candidates']))
+        proof=dict(record['certificate'])
+        if 'slope' in proof:proof['slope']=Q(proof['slope'])
+        if 'weights' in proof:proof['weights']=list(map(Q,proof['weights']))
+        result['certificate']=proof
+    return result
