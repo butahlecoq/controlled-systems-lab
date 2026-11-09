@@ -27,14 +27,16 @@ def check(bundle):
         witness=check_solution(s,coeff,qp,native)
         if witness['status']!='verified-numerical-witness' or witness!=load(folder/'affine-witness.json'):
             raise ValueError('affine witness differs from source verification')
-        statuses={}
+        statuses={};objectives={}
         for mode in ['cvodes','cvodes-tight','rk4','rk4-tight']:
             attempt=folder/mode;request=load(attempt/'request.json');validate_request(request)
             expected=make_request(s,witness['physical_controls'],witness['witness_sha256'],sensitivity=mode.endswith('-tight'))
             if request!=expected:raise ValueError('request differs from verified affine witness')
             receipt=load(attempt/'process.json')
             if receipt['process_status']!='completed':
-                statuses[mode]=receipt['process_status'];continue
+                statuses[mode]=receipt['process_status'];objectives[mode]=None;continue
+            for name,key in [('stdout.json','stdout_sha256'),('stderr.txt','stderr_sha256')]:
+                if hashlib.sha256((attempt/name).read_bytes()).hexdigest()!=receipt[key]:raise ValueError('process receipt hash mismatch')
             record=load(attempt/'record.json');raw=load(attempt/'stdout.json')
             for key in raw:
                 if key in ['objective','sampled_state_violation_physical','control_violation_physical'] and mode.startswith('rk4'):continue
@@ -52,7 +54,10 @@ def check(bundle):
             if not complete:metrics['objective']=None
             for key,value in metrics.items():
                 if value!=record[key]:raise ValueError('independent cost/violation reconstruction mismatch: '+key)
-            statuses[mode]=record['status']
+            statuses[mode]=record['status'];objectives[mode]=record['objective']
+        comparison=load(folder/'comparison.json')
+        if comparison['statuses']!=statuses or comparison['objectives']!=objectives or comparison['affine_objective']!=witness['objective']:
+            raise ValueError('comparison differs from checked records')
         reports.append({'case_id':s['case_id'],'statuses':statuses,'scope':'bound identities, source rebuild, sampled trace shape/cost/constraints; integration correctness requires replay'})
     return reports
 

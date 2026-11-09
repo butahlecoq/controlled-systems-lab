@@ -40,9 +40,9 @@ class NonlinearTests(unittest.TestCase):
         self.assertEqual(len(r['physical_states']),1)
         self.assertIsNone(r['objective'])
 
-if __name__=='__main__':unittest.main()
 
-class CSLReplayTests(NonlinearTests):
+class CSLReplayTests(unittest.TestCase):
+    scenario=NonlinearTests.scenario
     def bridge(self,request):
         import os
         import subprocess
@@ -73,3 +73,25 @@ class CSLReplayTests(NonlinearTests):
         self.assertEqual(r['status'],'callback_failure');self.assertEqual(len(r['physical_states']),1)
         request=make_request(s,[[0.,0.]]*40,'fixture');request['max_attempts']=1;request['abstol']=1e-20;request['reltol']=1e-20
         r=self.bridge(request);self.assertEqual(r['status'],'resource_limit');self.assertLess(len(r['physical_states']),len(request['times']))
+
+class SavedNonlinearTests(unittest.TestCase):
+    def test_saved_association_rejects_rebound_control(self):
+        import os
+        import shutil
+        import tempfile
+        import hashlib
+        from check_nonlinear_saved import check
+        source=os.environ.get('CSL_MPC11_NONLINEAR_BUNDLE')
+        if not source:self.skipTest('CSL_MPC11_NONLINEAR_BUNDLE required')
+        with tempfile.TemporaryDirectory() as tmp:
+            bundle=Path(tmp)/'bundle';shutil.copytree(source,bundle)
+            self.assertEqual(len(check(bundle)),2)
+            request_path=bundle/'syn-nl-lv-01/rk4/request.json'
+            request=json.loads(request_path.read_text());request['original_controls'][0][0]+=.001
+            request_path.write_text(json.dumps(request))
+            hashes_path=bundle/'file-hashes.json';hashes=json.loads(hashes_path.read_text())
+            hashes[str(request_path.relative_to(bundle))]=hashlib.sha256(request_path.read_bytes()).hexdigest()
+            hashes_path.write_text(json.dumps(hashes))
+            with self.assertRaises(ValueError):check(bundle)
+
+if __name__=='__main__':unittest.main()
