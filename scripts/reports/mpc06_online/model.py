@@ -19,10 +19,10 @@ def plan(anchor,a):
     return states,controls
 
 
-def tightenings(kind):
+def tightenings(kind,stage=0):
     if kind=='finite-reference':
         # e0=0; e1=Ew0; e2 and all subsequent errors fill exactly Z.
-        supports=[(Q(0),Q(0),Q(0)),(Q(0),R,2*R),(R,2*R,3*R)]
+        supports=[(Q(0),Q(0),Q(0)) if k==0 else (Q(0),R,2*R) if k==1 else (R,2*R,3*R) for k in range(stage,stage+3)]
     elif kind in ('polytope','zonotope','parallelotope'):
         supports=[(R,2*R,3*R)]*3
     elif kind=='inflated-zonotope':
