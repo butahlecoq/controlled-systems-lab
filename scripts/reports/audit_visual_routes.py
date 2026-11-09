@@ -54,6 +54,8 @@ PUBLICATION_EXPORT_ROUTES = {
     "scripts/reports/augment_pages_bundle.py",
 }
 VIZ10_ROLE_REASONS = {
+    "scripts/reports/mpc06_online/render.py":
+        "Renders checked-source-bound native outcomes and saved actual paths; the shared Matplotlib publication companion remains in issue #602. This is not a benchmark producer.",
     "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py":
         "Generates one exact 2D critical-region diagram from the rational fixture, with labelled initial and terminal coordinates; it is not a general plotting path.",
     "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py":
@@ -118,6 +120,7 @@ SAVED_COMPANION_ROUTES = {
 }
 SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
 SAVED_DATA_COMPANION_RENDERERS = {
+    "scripts/reports/mpc06_online/render.py",
     "scripts/reports/render_adaptive_ode_example.py",
     "scripts/reports/ext02/render_saved.py",
     "scripts/reports/mpc06/render_tube_objective.py",
