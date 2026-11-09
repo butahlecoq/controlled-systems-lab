@@ -35,3 +35,31 @@ class HorizonRegionsTests(unittest.TestCase):
             for a,b,rhs in rows:
                 self.assertEqual(rhs[2],sum(abs(a*(n-1-j)+b) for j in range(n)))
         with self.assertRaises(ValueError):H.produce(16)
+
+
+class SavedHorizonEvidenceTests(unittest.TestCase):
+    def test_archive_recheck_and_rebound_native_fiber_mutation(self):
+        import tempfile,zipfile,json,hashlib
+        import capture_horizon_regions as C
+        root=Path(__file__).resolve().parents[2]
+        artifact=root/'reports/algorithm-results/mpc08-horizon-regions-01762505-20261110/capture.zip'
+        with tempfile.TemporaryDirectory() as temporary:
+            target=Path(temporary)
+            with zipfile.ZipFile(artifact) as z:
+                self.assertIsNone(z.testzip());z.extractall(target)
+            self.assertEqual(C.recheck(target)['status'],'checked')
+            rows=[json.loads(line) for line in (target/'stdout.jsonl').read_text().splitlines()]
+            complete=next(row for row in rows if row['complete']);complete['equality_values'][0]=100
+            (target/'stdout.jsonl').write_text('\n'.join(json.dumps(row) for row in rows)+'\n')
+            (target/'SHA256SUMS').write_text(''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.name+'\n' for p in sorted(target.iterdir()) if p.name!='SHA256SUMS'))
+            with self.assertRaisesRegex(ValueError,'complete native H relation'):C.recheck(target)
+
+    def test_native_missing_repeat_and_promoted_resource_outcome_rejected(self):
+        import zipfile,json
+        import capture_horizon_regions as C
+        root=Path(__file__).resolve().parents[2]
+        artifact=root/'reports/algorithm-results/mpc08-horizon-regions-01762505-20261110/capture.zip'
+        with zipfile.ZipFile(artifact) as z:rows=[json.loads(line) for line in z.read('stdout.jsonl').splitlines()]
+        with self.assertRaisesRegex(ValueError,'inventory'):C.check_native(rows[:-1])
+        bad=copy.deepcopy(rows);row=next(r for r in bad if r['termination']==3);row['complete']=True
+        with self.assertRaises(ValueError):C.check_native(bad)

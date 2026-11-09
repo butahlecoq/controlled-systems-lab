@@ -1965,6 +1965,13 @@
       "role_and_disposition_reason": "Draws exact checked fixture regions and nominal/robust predecessors with shared numeric axes; numerical native observations remain separate from whole-set proof authority."
     },
     {
+      "source": "benchmarks/reporting/mpc08_explicit/capture_horizon_regions.py",
+      "signal_count": 1,
+      "asset_name_literals": [],
+      "disposition": "adopted-shared-quantitative-policy",
+      "role_and_disposition_reason": "Draws independently checked exact original-quadratic endpoint cells for matched N2/4/8 with shared numeric axes; full optimizer fibers and native resource refusals remain separate products."
+    },
+    {
       "source": "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py",
       "signal_count": 2,
       "asset_name_literals": [
