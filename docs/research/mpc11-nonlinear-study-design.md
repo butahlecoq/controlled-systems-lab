@@ -2,6 +2,15 @@
 
 Date: 2026-10-26. Scope: research and prospective case definitions for [issue #607](https://github.com/butahlecoq/controlled-systems-lab/issues/607). No solver was installed or invoked; no benchmark was run; no acados experiment was performed or authorized. This note proposes new synthetic cases. It reports no computed trajectories, objective values, solver success, or controller winner.
 
+## Executable contract follow-up
+
+The [synthetic controller-study contract](../contracts/mpc11-synthetic-controller-study.md)
+resolves the shrinking terminal horizon, fixed objective normalization,
+controller constraints, initialization, independent replay and result fields
+for implementation. Its execution choices supersede the prospective choices
+below where they differ. This original note remains the source for authored
+scenario equations and parameter values; it contains no run evidence.
+
 ## Finding and boundary
 
 An affine plan replayed on a nonlinear model and a nonlinear model predictive controller do not solve the same mathematical problem. Compare them as a **different-model/controller study**, while preserving three identities:
