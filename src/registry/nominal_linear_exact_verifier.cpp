@@ -2,6 +2,7 @@
 
 #include "../synthesis/exact_h_polytope.hpp"
 #include "strategy_a_lineage.hpp"
+#include <csl/synthesis/strategy_b/direct_joint.hpp>
 
 #include <csl/optimization/objectives.hpp>
 #include <csl/problem/domains.hpp>
@@ -10,6 +11,7 @@
 #include <csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <bit>
 #include <cmath>
 #include <limits>
@@ -30,6 +32,18 @@ enum class CheckState { established, refuted, unsupported };
 struct CheckResult {
     CheckState state{CheckState::unsupported};
     std::string reason;
+};
+
+struct ConstructionCancellation {
+    const ExecutionContext* context{};
+    bool stop_requested() const {
+        return context && (context->cancellation.stop_requested() ||
+            (context->deadline && std::chrono::steady_clock::now() >= *context->deadline));
+    }
+    OperationStopped stopped() const {
+        return {context && context->cancellation.stop_requested() ? StopReason::cancelled : StopReason::deadline_expired,
+            "Stopped during bounded exact-H family construction."};
+    }
 };
 
 bool finite(double value) { return std::isfinite(value); }
@@ -305,16 +319,16 @@ std::optional<std::pair<double, double>> rational_to_outward_doubles(
     return std::pair{floor_magnitude, ceil_magnitude};
 }
 
-CheckResult verify_proposal(const StrategyRequest& request, const CompleteFamilyProposal& proposal) {
+CheckResult verify_proposal(const StrategyRequest& request, const CompleteFamilyProposal& proposal, bool strategy_b) {
     const auto& identity = proposal.identity;
     const auto& family = proposal.family;
     const auto& strategy = request.configuration.strategy;
-    const auto expected_lineage = strategy_a_nominal_linear_exact_lineage(
-        request.problem.identity(), request.problem.model().horizon());
-    if (strategy.value != "csl.synthesis.reach-back" || request.strategy_version != "1" ||
-        !strategy_a_nominal_linear_exact_profile_valid(request.problem, request.family,
+    const auto expected_lineage = strategy_b ? strategy_b_nominal_linear_exact_lineage(request.problem.identity()) :
+        strategy_a_nominal_linear_exact_lineage(request.problem.identity(), request.problem.model().horizon());
+    if (strategy.value != (strategy_b ? "csl.synthesis.strategy-b" : "csl.synthesis.reach-back") || request.strategy_version != "1" ||
+        !(strategy_b ? strategy_b_nominal_linear_exact_profile_valid : strategy_a_nominal_linear_exact_profile_valid)(request.problem, request.family,
             request.configuration.representation))
-        return {CheckState::unsupported, "Verifier only admits the bounded nominal linear Strategy A profile"};
+        return {CheckState::unsupported, "Verifier only admits its bound nominal linear strategy profile"};
     if (identity.problem != request.problem.identity() || identity.request != request.family ||
         identity.coordinates != request.problem.constraints().coordinates() ||
         identity.strategy != strategy || identity.strategy_version != request.strategy_version ||
@@ -323,8 +337,8 @@ CheckResult verify_proposal(const StrategyRequest& request, const CompleteFamily
         family.relation.representation != request.family.representation || family.assurance != Assurance::numerical)
         return {CheckState::refuted, "Complete-family request, identity, coordinates, lineage or assurance do not match"};
     const auto* proof = std::get_if<RegisteredCompletenessEvidence>(&family.completeness.support);
-    if (!proof || proof->verifier.value != verifier_id || proof->verifier_version != verifier_version ||
-        proof->proof != "nominal-linear-exact-v1")
+    if (!proof || proof->verifier.value != (strategy_b ? synthesis::strategy_b::nominal_linear_exact_verifier : verifier_id) || proof->verifier_version != verifier_version ||
+        proof->proof != (strategy_b ? synthesis::strategy_b::nominal_linear_exact_proof : "nominal-linear-exact-v1"))
         return {CheckState::refuted, "Complete-family proof payload does not select this verifier"};
     if (std::holds_alternative<Unestablished>(family.optimum.optimum.support) ||
         family.optimum.optimum.problem != identity.problem || !family.optimum.bounds.lower ||
@@ -396,11 +410,13 @@ CheckResult verify_proposal(const StrategyRequest& request, const CompleteFamily
 }
 
 class NominalLinearExactVerifier final : public CompiledCompleteFamilyVerifier {
+    bool strategy_b_;
 public:
-    const ModuleId& id() const noexcept override { static const ModuleId value{verifier_id}; return value; }
+    explicit NominalLinearExactVerifier(bool strategy_b = false) : strategy_b_(strategy_b) {}
+    const ModuleId& id() const noexcept override { static const ModuleId value{verifier_id}; static const ModuleId b{synthesis::strategy_b::nominal_linear_exact_verifier}; return strategy_b_ ? b : value; }
     const std::string& version() const noexcept override { static const std::string value{verifier_version}; return value; }
     Diagnostics verify(const StrategyRequest& request, const CompleteFamilyProposal& proposal) const override {
-        const auto result = verify_proposal(request, proposal);
+        const auto result = verify_proposal(request, proposal, strategy_b_);
         if (result.state == CheckState::established) return {};
         const auto code = result.state == CheckState::unsupported ? DiagnosticCode::unsupported :
             DiagnosticCode::evidence_mismatch;
@@ -415,9 +431,9 @@ bool supported_set(const AdmissibleSet& input, std::size_t dimension) {
 }
 } // namespace
 
-bool strategy_a_nominal_linear_exact_profile_valid(const problem::ResolvedProblem& problem,
-    const FamilyRequest& family, const RepresentationId& representation) {
-    if (family.profile != synthesis::strategy_a::nominal_linear_exact_profile ||
+bool nominal_linear_exact_profile_valid(const problem::ResolvedProblem& problem,
+    const FamilyRequest& family, const RepresentationId& representation, const std::string& profile) {
+    if (family.profile != profile ||
         family.target != FamilyTarget::exact_optimal_relation || family.assurance != Assurance::numerical ||
         representation.value != "csl.polyhedron.h" ||
         (family.materialization_limit && *family.materialization_limit == 0)) return false;
@@ -445,8 +461,28 @@ bool strategy_a_nominal_linear_exact_profile_valid(const problem::ResolvedProble
     return true;
 }
 
-std::optional<std::pair<double, double>> strategy_a_nominal_linear_exact_optimum_bounds(
-    const problem::ResolvedProblem& problem) {
+bool strategy_a_nominal_linear_exact_profile_valid(const problem::ResolvedProblem& problem,
+    const FamilyRequest& family, const RepresentationId& representation) {
+    return nominal_linear_exact_profile_valid(problem, family, representation, synthesis::strategy_a::nominal_linear_exact_profile);
+}
+bool strategy_b_nominal_linear_exact_profile_valid(const problem::ResolvedProblem& problem,
+    const FamilyRequest& family, const RepresentationId& representation) {
+    return nominal_linear_exact_profile_valid(problem, family, representation, synthesis::strategy_b::nominal_linear_exact_profile);
+}
+std::vector<TransformStepIdentity> strategy_b_nominal_linear_exact_lineage(const ProblemId& problem) {
+    const ModuleId strategy{"csl.synthesis.strategy-b"};
+    const SetId feasible{"syn04-feasible:"+problem.value};
+    return {{{"syn04-build:"+problem.value},{problem.value},feasible,strategy,"1"},
+        {{"syn04-exact-face:"+problem.value},feasible,{"syn04-exact-optimal:"+problem.value},strategy,"1"}};
+}
+std::shared_ptr<const CompiledCompleteFamilyVerifier> make_strategy_b_nominal_linear_exact_verifier() {
+    return std::make_shared<const NominalLinearExactVerifier>(true);
+}
+
+std::optional<std::pair<double, double>> nominal_linear_exact_optimum_bounds(
+    const problem::ResolvedProblem& problem, const ExecutionContext* context) {
+    const ConstructionCancellation cancellation{context};
+    if(cancellation.stop_requested())return {};
     std::vector<exact_h::Row> rows;
     std::vector<double> objective;
     const auto reconstructed = reconstruct(problem, {}, rows, objective);
@@ -455,15 +491,17 @@ std::optional<std::pair<double, double>> strategy_a_nominal_linear_exact_optimum
     const auto* linear = std::get_if<optimization::LinearCoefficients>(&objective_data);
     if (!linear) return {};
     const auto optimum = exact_h::minimize_linear(rows, objective.size(), objective,
-        linear->offset);
+        linear->offset, {}, cancellation);
     if (optimum.state != exact_h::LinearMinimumState::minimum || !optimum.attained)
         return {};
     return rational_to_outward_doubles(optimum.value, exact_h::default_max_integer_bits);
 }
 
-std::variant<sets::SetData, OperationStopped> strategy_a_nominal_linear_exact_optimal_relation(
+std::variant<sets::SetData, OperationStopped> nominal_linear_exact_optimal_relation(
     const problem::ResolvedProblem& problem, SetId id, std::vector<std::string> labels,
-    std::size_t max_relation_rows) {
+    std::size_t max_relation_rows, const ExecutionContext* context) {
+    const ConstructionCancellation cancellation{context};
+    if(cancellation.stop_requested())return cancellation.stopped();
     exact_h::Limits limits;
     limits.max_rows = std::min(limits.max_rows, max_relation_rows);
     std::vector<exact_h::Row> rows;
@@ -474,7 +512,8 @@ std::variant<sets::SetData, OperationStopped> strategy_a_nominal_linear_exact_op
             "Nominal exact-H family construction exhausted its row or arithmetic budget: " + built.reason};
     const auto coefficients = problem.objective().coefficients();
     const auto& linear = std::get<optimization::LinearCoefficients>(coefficients);
-    const auto optimum = exact_h::minimize_linear(rows, objective.size(), objective, linear.offset, limits);
+    const auto optimum = exact_h::minimize_linear(rows, objective.size(), objective, linear.offset, limits, cancellation);
+    if(cancellation.stop_requested())return cancellation.stopped();
     if (optimum.state != exact_h::LinearMinimumState::minimum || !optimum.attained ||
         !append_objective_face(objective, linear.offset, optimum.value, limits, rows))
         return OperationStopped{StopReason::resource_limit,

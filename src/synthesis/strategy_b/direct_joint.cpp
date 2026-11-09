@@ -99,6 +99,12 @@ std::optional<ob::TimingScope> start_planned_program_scope(const ExecutionContex
     }
     return {};
 }
+class NominalExactHRelation final : public JointRelationPayload {
+    sets::SetData relation_;
+public:
+    explicit NominalExactHRelation(sets::SetData relation) : relation_(std::move(relation)) {}
+    const sets::SetData* h_relation_for_recording() const noexcept override { return &relation_; }
+};
 Diagnostic unsupported(std::string field, std::string text) {
     return {DiagnosticCode::unsupported,std::move(field),std::move(text)};
 }
@@ -128,12 +134,13 @@ Diagnostics capabilities(const problem::ResolvedProblem& p,const FamilyRequest& 
     const bool reviewed_ts01=registry::detail::ts01_case_valid(p,request,h_polyhedron);
     const bool reviewed_ts02=registry::detail::ts02_case_valid(p,request,h_polyhedron);
     const bool reviewed_ts03=registry::detail::ts03_case_valid(p,request,h_polyhedron);
-    if(request.profile!="nominal_open_loop"&&!reviewed_ts01&&!reviewed_ts02&&!reviewed_ts03)
-        d.push_back(unsupported("joint.profile","Supported profiles are nominal_open_loop and the exact reviewed T-S01/T-S02/T-S03 cases."));
+    const bool nominal_exact=registry::detail::strategy_b_nominal_linear_exact_profile_valid(p,request,h_polyhedron);
+    if(request.profile!="nominal_open_loop"&&!reviewed_ts01&&!reviewed_ts02&&!reviewed_ts03&&!nominal_exact)
+        d.push_back(unsupported("joint.profile","Supported profiles are nominal_open_loop, the bounded nominal linear exact profile and reviewed T-S01/T-S02/T-S03 cases."));
     if(request.representation.value!="csl.polyhedron.h") d.push_back(unsupported("joint.representation","Native joint H relation is required."));
     if(request.assurance!=Assurance::numerical) d.push_back(unsupported("joint.assurance","Validated construction is unavailable."));
-    if(request.target!=FamilyTarget::candidate_relaxation&&!reviewed_ts01&&!reviewed_ts02&&!reviewed_ts03)
-        d.push_back(unsupported("joint.coverage","Only the exact reviewed T-S01/T-S02/T-S03 profiles have registered complete-family verifiers; other requests remain candidates."));
+    if(request.target!=FamilyTarget::candidate_relaxation&&!reviewed_ts01&&!reviewed_ts02&&!reviewed_ts03&&!nominal_exact)
+        d.push_back(unsupported("joint.coverage","Complete-family verifiers require the bounded nominal linear exact profile or a reviewed T-S01/T-S02/T-S03 profile."));
     if(source->information!=InformationPattern::nominal_open_loop || source->model->dynamics.time_domain!=TimeDomain::discrete)
         d.push_back(unsupported("joint.dynamics","Discrete nominal open-loop dynamics are required."));
     if(source->external || p.model().dimensions().external!=0) d.push_back(unsupported("joint.external","External inputs require a different profile."));
@@ -607,6 +614,49 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
         if constexpr(std::is_same_v<Program,LinearProgram>) run_program(program,lp_);
         else run_program(program,convex_);
     },build_artifact->program);
+    if(registry::detail::strategy_b_nominal_linear_exact_profile_valid(p,request,h_polyhedron)&&
+        result.termination==Termination::completed&&data->optimization&&
+        data->optimization->termination==Termination::completed&&
+        data->optimization->outcome.value==MathematicalOutcome::optimal) {
+        auto family_scope=start_planned_family_scope(context);
+        auto stopped=[&](OperationStopped stop) {
+            result.termination=stopped_termination(stop.reason);
+            result.stop=ScopedOperationStopped{std::move(stop),
+                {{"syn04-exact-face:"+p.identity().value},"strategy",{strategy_id},{},ModuleId{strategy_id},strategy_version},retained(result)};
+        };
+        auto interruption=[&]() -> std::optional<OperationStopped> {
+            if(context.cancellation.stop_requested())return OperationStopped{StopReason::cancelled,"Stopped during exact family construction; direct program evidence retained."};
+            if(context.deadline&&std::chrono::steady_clock::now()>=*context.deadline)
+                return OperationStopped{StopReason::deadline_expired,"Deadline expired during exact family construction; direct program evidence retained."};
+            return {};
+        };
+        if(auto initial_stop=interruption())stopped(*initial_stop);
+        else {
+            auto relation=registry::detail::nominal_linear_exact_optimal_relation(p,
+                {"syn04-exact-optimal:"+p.identity().value},{},
+                request.materialization_limit.value_or(std::numeric_limits<std::size_t>::max()),&context);
+            if(const auto* relation_stop=std::get_if<OperationStopped>(&relation))stopped(*relation_stop);
+            else if(auto post_relation_stop=interruption())stopped(*post_relation_stop);
+            else {
+                const auto bounds=registry::detail::nominal_linear_exact_optimum_bounds(p,&context);
+                if(auto bounds_stop=interruption())stopped(*bounds_stop);
+                else if(bounds) {
+                    const ClaimEvidence claim{p.identity(),SymbolicArgument{"bounded nominal Strategy B exact-H face",
+                        "The compiled verifier independently reconstructs the source feasible histories and verifies both exact optimal-face inclusions over binary64 dyadic inputs."}};
+                    const OptimumEvidence optimum{claim,{ObjectiveBound{bounds->first,claim},ObjectiveBound{bounds->second,claim}}};
+                    auto payload=std::make_shared<const NominalExactHRelation>(std::get<sets::SetData>(std::move(relation)));
+                    const auto exact_lineage=registry::detail::strategy_b_nominal_linear_exact_lineage(p.identity());
+                    const FamilyIdentity identity{p.identity(),request,build_artifact->coordinates,{strategy_id},strategy_version,exact_lineage};
+                    CompleteOptimalFamily complete{{build_artifact->coordinates,request.representation,payload},optimum,
+                        {identity,RegisteredCompletenessEvidence{{nominal_linear_exact_verifier},"1",nominal_linear_exact_proof}},Assurance::numerical};
+                    result.outcome={p.identity(),MathematicalOutcome::optimal,claim.support,{}};
+                    result.objective=optimum.bounds;
+                    result.complete_proposal=CompleteFamilyProposal{identity,std::move(complete)};
+                } else stopped({StopReason::resource_limit,"Exact optimum could not be established within the bounded exact-H profile; direct program evidence retained."});
+            }
+        }
+        if(family_scope)family_scope->close(result.termination);
+    }
     if(reviewed_ts01) {
         const bool completed_extraction=lineage==::csl::synthesis::strategy_b::detail::expected_ts01_lineage(p.identity());
         const bool supported_optimum=data->optimization&&data->optimization->termination==Termination::completed&&
@@ -705,6 +755,8 @@ registry::StrategyRegistration make_registration(const registry::Registry<regist
             complete?registry::Completeness::established:registry::Completeness::unestablished}};
     },[&lp,&convex,verifier_binding](const registry::StrategyRequest& request,const registry::Requirements&)->std::variant<registry::StrategyPlan,registry::Rejection> {
         auto selected_verifier=verifier_binding;
+        if(request.family.profile==nominal_linear_exact_profile)
+            selected_verifier={{nominal_linear_exact_verifier},"1"};
         if(request.family.profile==synthesis::ts02_constant_integrator_profile&&
             request.family.target==FamilyTarget::exact_optimal_relation)
             selected_verifier={{synthesis::ts02_constant_integrator_verifier},"1"};
@@ -727,6 +779,8 @@ registry::StrategyRegistration make_registration(const registry::Registry<regist
     registration.complete_family_verifier_selector=[](const registry::StrategyRequest& request)
         ->std::optional<registry::StrategyRegistration::CompleteFamilyVerifierKey> {
         if(request.family.target!=FamilyTarget::exact_optimal_relation)return std::nullopt;
+        if(request.family.profile==nominal_linear_exact_profile)
+            return registry::StrategyRegistration::CompleteFamilyVerifierKey{{nominal_linear_exact_verifier},"1"};
         if(request.family.profile==synthesis::strategy_ts01::profile_id)
             return registry::StrategyRegistration::CompleteFamilyVerifierKey{{"csl.verifier.ts01-analytic"},"1"};
         if(request.family.profile==synthesis::ts02_constant_integrator_profile)
@@ -736,6 +790,9 @@ registry::StrategyRegistration make_registration(const registry::Registry<regist
         return std::nullopt;
     };
     registration.expected_lineage=[](const registry::StrategyRequest& request) {
+        if(request.configuration.strategy.value==strategy_id&&
+            registry::detail::strategy_b_nominal_linear_exact_profile_valid(request.problem,request.family,request.configuration.representation))
+            return registry::detail::strategy_b_nominal_linear_exact_lineage(request.problem.identity());
         if(request.configuration.strategy.value==strategy_id&&
             registry::detail::ts01_case_valid(request.problem,request.family,request.configuration.representation))
             return detail::expected_ts01_lineage(request.problem.identity());

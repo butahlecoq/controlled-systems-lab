@@ -112,8 +112,9 @@ ProgramIdentity direction_program(const OptimalFamily& family,const WitnessReque
         std::size_t index) {
     const auto& direction=request.directions[index];
     const auto bits=[](double value) {return std::to_string(std::bit_cast<std::uint64_t>(value));};
-    return {family.identity().problem,{"witness-selector-direction/"+std::to_string(index)+"/"+
-        bits(direction[0])+"/"+bits(direction[1])}};
+    auto id="witness-selector-direction/"+std::to_string(index);
+    for(const auto value:direction)id+="/"+bits(value);
+    return {family.identity().problem,{std::move(id)}};
 }
 std::shared_ptr<ob::TimingCollector> selector_timing(const problem::ResolvedProblem& resolved,
         const OptimalFamily& family,const WitnessRequest& request,const registry::Provenance& provider) {
@@ -804,4 +805,157 @@ TEST_CASE("post-solve allocation failure returns a resource stop and retains col
         }
     }
     CHECK(retained_failure);
+}
+
+namespace {
+OptimalFamily horizon_family(std::size_t horizon,bool constant,bool use_a=true) {
+    auto authored=source();authored.id={"selector-horizon-"+std::to_string(horizon)+(constant?"-constant":"-zero")};
+    authored.times.clear();
+    std::vector<AdmissibleSet> controls;
+    for(std::size_t t=0;t<=horizon;++t)authored.times.push_back(static_cast<double>(t));
+    for(std::size_t t=0;t<horizon;++t)controls.push_back(interval("horizon-u"+std::to_string(t),0,1));
+    authored.controls=ContinuousDomain{std::move(controls)};
+    authored.states=decltype(authored.states)(horizon+1,UniversalSet{1});
+    authored.objective=LinearTerminal{{constant?0.0:1.0},constant?3.0:0.0};
+    auto synthesis_request=request(resolve(std::move(authored)));
+    synthesis_request.family.profile=use_a?synthesis::strategy_a::nominal_linear_exact_profile:
+        synthesis::strategy_b::nominal_linear_exact_profile;
+    synthesis_request.configuration.strategy={use_a?"csl.synthesis.reach-back":"csl.synthesis.strategy-b"};
+    synthesis_request.configuration.lp={"csl.lp.highs"};
+    synthesis_request.configuration.convex={"csl.convex.highs"};
+    auto prepared=[&]() {
+        if(use_a)return strategy_a(synthesis_request);
+        Registry<LPPort> lp;REQUIRE_FALSE(lp.add(take(adapters::lp::make_highs_registration())));
+        Registry<ConvexPort> convex;REQUIRE_FALSE(convex.add(take(adapters::convex::make_highs_registration())));
+        StrategyRegistry registry;REQUIRE_FALSE(registry.add(synthesis::strategy_b::make_registration(lp,convex)));
+        Requirements output;output.output.representation=synthesis_request.family.representation;
+        output.output.family=synthesis_request.family.target;output.output.completeness=Completeness::established;
+        return take(registry.prepare(synthesis_request,output));
+    }();
+    auto workspace=prepared.create();
+    auto result=take(workspace->run(make_execution_context()));
+    REQUIRE(result.family);REQUIRE(result.family->registry_verified());
+    return *result.family;
+}
+}
+TEST_CASE("scalar exact H direction queries replay horizons two four and eight") {
+    auto provider=selected(take(adapters::lp::make_highs_registration()),"csl.program-result.v1");
+    auto selector=synthesis::witness_selector::make_registration(provider);
+    for(const std::size_t horizon:{2,4,8})for(const bool constant:{false,true})for(const bool use_a:{true,false}) {
+        CAPTURE(horizon);CAPTURE(constant);CAPTURE(use_a);
+        const auto family=horizon_family(horizon,constant,use_a);
+        Vector positive(horizon,1),negative(horizon,-1);
+        SelectorRequest query{family,{2,1e-9,{positive,negative},97}};
+        auto workspace=selector.factory(query);
+        auto result=take(SelectorPort::run(*workspace,query,make_execution_context()));
+        REQUIRE(result.termination==Termination::completed);
+        REQUIRE(result.batch.returned_count()==2);
+        CHECK(result.batch.distinct_count()==(constant?2:1));
+        CHECK(result.batch.source_family==family.identity());
+        CHECK(result.batch.directions==query.selection.directions);
+        for(std::size_t i=0;i<result.batch.witnesses.size();++i) {
+            const auto& witness=result.batch.witnesses[i];
+            REQUIRE(witness.states.size()==horizon+1);REQUIRE(witness.controls.size()==horizon);
+            CHECK(witness.states.front()==Vector{0});
+            for(std::size_t t=0;t<horizon;++t) {
+                REQUIRE(witness.states[t].size()==1);REQUIRE(witness.controls[t].size()==1);
+                CHECK(witness.controls[t][0]==doctest::Approx(constant&&i==1?1:0));
+                CHECK(witness.states[t+1][0]==doctest::Approx(witness.states[t][0]+witness.controls[t][0]));
+            }
+            const auto original=constant?3.0:witness.states.back()[0];
+            CHECK(witness.original_objective==doctest::Approx(original));
+            CHECK(witness.original_objective==doctest::Approx(constant?3:0));
+        }
+        CHECK((result.diagnostics.find("shortfall")!=std::string::npos)==!constant);
+    }
+}
+TEST_CASE("long horizon selector rejects malformed direction widths and returned primal widths") {
+    const auto family=horizon_family(4,true);
+    auto provider=selected(take(adapters::lp::make_highs_registration()),"csl.program-result.v1");
+    auto selector=synthesis::witness_selector::make_registration(provider);
+    SelectorRequest query{family,{1,0,{{1,1,1,1}},103}};
+    auto workspace=selector.factory(query);
+    for(const Vector direction:{Vector{},Vector{1,1},Vector{1,1,1,1,1},
+            Vector{1,1,1,std::numeric_limits<double>::infinity()}}) {
+        auto bad=query.selection;bad.directions={direction};
+        auto answer=workspace->select(family,bad,make_execution_context());
+        REQUIRE(std::holds_alternative<Unsupported>(answer));
+        CHECK(std::get<Unsupported>(answer).diagnostics.front().field=="selector.directions");
+    }
+    for(const std::size_t width:{5,8,10}) {
+        auto backend=take(adapters::lp::make_highs_registration());auto factory=backend.factory;
+        backend.factory=[factory,width](const LinearProgram& lp) {
+            return std::make_unique<CorruptNominalWitnessWorkspace>(factory(lp),Vector(width,0));
+        };
+        auto corrupt_selector=synthesis::witness_selector::make_registration(selected(std::move(backend),"csl.program-result.v1"));
+        auto corrupt_workspace=corrupt_selector.factory(query);
+        auto answer=take(corrupt_workspace->select(family,query.selection,make_execution_context()));
+        CHECK(answer.termination==Termination::numerical_failure);CHECK(answer.batch.returned_count()==0);
+    }
+}
+
+TEST_CASE("long horizon direction coordinates preserve control order and complete program identity") {
+    const auto family=horizon_family(4,true);
+    auto backend=take(adapters::lp::make_highs_registration());auto factory=backend.factory;
+    auto programs=std::make_shared<std::vector<ProgramIdentity>>();
+    backend.factory=[factory,programs](const LinearProgram& lp) {
+        programs->push_back(lp.identity());return factory(lp);
+    };
+    auto selector=synthesis::witness_selector::make_registration(selected(std::move(backend),"csl.program-result.v1"));
+    SelectorRequest query{family,{2,0,{{1,-1,1,-1},{1,-1,-1,1}},107}};
+    auto workspace=selector.factory(query);
+    const auto answer=take(workspace->select(family,query.selection,make_execution_context()));
+    REQUIRE(answer.termination==Termination::completed);REQUIRE(answer.batch.returned_count()==2);
+    CHECK(answer.batch.witnesses[0].controls==std::vector<Vector>{{0},{1},{0},{1}});
+    CHECK(answer.batch.witnesses[1].controls==std::vector<Vector>{{0},{1},{1},{0}});
+    CHECK(answer.batch.witnesses[0].states==std::vector<Vector>{{0},{0},{1},{1},{2}});
+    CHECK(answer.batch.witnesses[1].states==std::vector<Vector>{{0},{0},{1},{2},{2}});
+    REQUIRE(programs->size()==2);
+    CHECK((*programs)[0]==direction_program(family,query.selection,0));
+    CHECK((*programs)[1]==direction_program(family,query.selection,1));
+}
+
+namespace {
+class InvalidSingularHistoryWorkspace final : public LPWorkspace {
+protected:
+    ProgramOutcome do_solve(const LinearProgram& program,const ExecutionContext& context) override {
+        CHECK(context.numerical.absolute_tolerance==1);
+        CHECK(context.numerical.relative_tolerance==0);
+        return ProgramResult{Termination::completed,
+            {program.identity(),MathematicalOutcome::optimal,Unestablished{},{}},
+            Vector{0,0,0.5,0,0.5},{},"test fixture: deliberately invalid singular history",{}};
+    }
+};
+}
+
+TEST_CASE("canonical singular T-S03 selection preserves exact membership under loose tolerance") {
+    auto authored=source();
+    authored.model=std::make_shared<const SystemModel>(SystemModel{{{1,1,0},TimeDomain::discrete,
+        LinearStage{{1,1,{0}},{1,1,{1}},{1,0,{}},{0}}},{}});
+    auto synthesis_request=request(resolve(std::move(authored)));
+    synthesis_request.family.profile="ts03_singular_integrator";
+    synthesis_request.configuration.strategy={"csl.synthesis.reach-back"};
+    synthesis_request.configuration.lp={"csl.lp.highs"};
+    synthesis_request.configuration.convex={"csl.convex.highs"};
+    auto prepared=strategy_a(synthesis_request);auto synthesis_workspace=prepared.create();
+    const auto synthesized=take(synthesis_workspace->run(make_execution_context()));REQUIRE(synthesized.family);
+    SelectorRequest query{*synthesized.family,{2,0,{{1,-1},{-1,1}},109}};
+    auto selector=synthesis::witness_selector::make_registration(selected(take(adapters::lp::make_highs_registration()),"csl.program-result.v1"));
+    auto workspace=selector.factory(query);
+    const auto answer=take(workspace->select(query.family,query.selection,make_execution_context()));
+    REQUIRE(answer.termination==Termination::completed);REQUIRE(answer.batch.returned_count()==2);
+    CHECK(answer.batch.witnesses[0].states==std::vector<Vector>{{0},{0},{1}});
+    CHECK(answer.batch.witnesses[1].states==std::vector<Vector>{{0},{1},{1}});
+    CHECK(answer.batch.witnesses[0].controls==std::vector<Vector>{{0},{1}});
+    CHECK(answer.batch.witnesses[1].controls==std::vector<Vector>{{1},{1}});
+    auto backend=take(adapters::lp::make_highs_registration());
+    backend.identity.id={"test.lp.invalid-singular-history"};
+    backend.factory=[](const LinearProgram&) {
+        return std::make_unique<InvalidSingularHistoryWorkspace>();
+    };
+    auto corrupt_selector=synthesis::witness_selector::make_registration(selected(std::move(backend),"csl.program-result.v1"));
+    auto corrupt_workspace=corrupt_selector.factory(query);auto context=make_execution_context();
+    context.numerical={1,0};
+    const auto corrupt=take(corrupt_workspace->select(query.family,query.selection,context));
+    CHECK(corrupt.termination==Termination::numerical_failure);CHECK(corrupt.batch.returned_count()==0);
 }
