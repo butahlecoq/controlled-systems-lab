@@ -46,13 +46,34 @@ class TimingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);snapshot=root/'sources';snapshot.mkdir()
             copied=snapshot/'nmpc.py';copied.write_bytes(source.read_bytes())
-            environment={'source_revision':'fixture','identity':{'source_sha256':{'nmpc.py':sha(source)},'do_mpc_controller_source_sha256':sha(Path(inspect.getfile(do_mpc.controller.MPC)))}}
+            environment={'source_revision':'a'*40,'identity':{'source_sha256':{'nmpc.py':sha(source)},'do_mpc_controller_source_sha256':sha(Path(inspect.getfile(do_mpc.controller.MPC)))}}
             (root/'environment.json').write_text(json.dumps(environment))
             with mock.patch('check_timing.subprocess.check_output',return_value=source.read_bytes()):
                 checked_sources(root,snapshot)
                 copied.write_bytes(copied.read_bytes()+b'\n# mutation\n')
                 (snapshot/'SHA256SUMS').write_text(hashlib.sha256(copied.read_bytes()).hexdigest()+'  nmpc.py\n')
                 with self.assertRaisesRegex(ValueError,'copied source snapshot binding'):checked_sources(root,snapshot)
+
+    def test_git_option_revision_rejects_without_git_invocation(self):
+        from unittest import mock
+        from check_timing import checked_sources
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary)
+            (root/'environment.json').write_text(json.dumps({'source_revision':'--output=/tmp/forged','identity':{'source_sha256':{}}}))
+            with mock.patch('check_timing.subprocess.check_output') as git:
+                with self.assertRaisesRegex(ValueError,'full hexadecimal commit'):checked_sources(root)
+                git.assert_not_called()
+
+    def test_partial_results_never_enter_completed_timing_samples(self):
+        from check_timing import complete_checks
+        ids=['SYN-NL-LV-01','SYN-NL-FUEL-01']
+        self.assertTrue(complete_checks('nmpc',[{'case_id':c,'status':'complete'} for c in ids]))
+        self.assertFalse(complete_checks('nmpc',[{'case_id':c,'status':'inconclusive-replay'} for c in ids]))
+        modes=['cvodes','cvodes-tight','rk4','rk4-tight']
+        rows=[{'case_id':c,'statuses':{m:'complete' for m in modes},'process_statuses':{m:'completed' for m in modes}} for c in ids]
+        self.assertTrue(complete_checks('nonlinear',rows))
+        rows[0]['statuses']['rk4']='resource_limit'
+        self.assertFalse(complete_checks('nonlinear',rows))
 
     def test_interrupted_attempt_is_preserved(self):
         with tempfile.TemporaryDirectory() as tmp:

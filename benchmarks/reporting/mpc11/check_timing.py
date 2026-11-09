@@ -2,10 +2,11 @@
 """Verify captured programs/trajectories before extracting scoped pilot clocks."""
 import argparse
 import math
-from pathlib import Path
+from pathlib import Path,PurePosixPath
 import hashlib
 import inspect
 import subprocess
+import re
 import do_mpc
 import statistics
 import time
@@ -30,17 +31,35 @@ def selected(root,key):
 def checked_sources(root,snapshot=None):
     environment=load(root/'environment.json');source=Path(__file__).resolve().parent
     hashes=environment['identity']['source_sha256']
+    revision=environment['source_revision']
+    if not isinstance(revision,str) or not re.fullmatch('[0-9a-f]{40}',revision):
+        raise ValueError('source revision must be a full hexadecimal commit')
     for name,expected in hashes.items():
+        relative=PurePosixPath(name)
+        if relative.is_absolute() or relative.as_posix()!=name or any(part in ('.','..') for part in relative.parts):
+            raise ValueError('unsafe source snapshot name')
+        if not (source/name).resolve().is_relative_to(source.resolve()):raise ValueError('source snapshot escapes source root')
         if name!='check_timing.py' and sha(source/name)!=expected:raise ValueError('consumed source binding mismatch: '+name)
         if snapshot is not None:
             path=(snapshot/name).resolve()
             if not path.is_relative_to(snapshot.resolve()) or sha(path)!=expected:raise ValueError('copied source snapshot binding mismatch: '+name)
-            committed=subprocess.check_output(['git','show',environment['source_revision']+':benchmarks/reporting/mpc11/'+name],cwd=source)
+            committed=subprocess.check_output(['git','show','--end-of-options',revision+':benchmarks/reporting/mpc11/'+name],cwd=source)
             if path.read_bytes()!=committed:raise ValueError('source snapshot differs from recorded commit')
     if sha(Path(inspect.getfile(do_mpc.controller.MPC)))!=environment['identity']['do_mpc_controller_source_sha256']:raise ValueError('do-mpc source binding mismatch')
     return {'capture_source_sha256':hashes,'review_tool_sha256':sha(Path(__file__)),
             'review_tool_scope':'current independently versioned saved-data checker; capture check_timing.py snapshot remains bound to original commit',
             'copied_snapshots_checked':snapshot is not None}
+
+
+def complete_checks(kind,reports):
+    expected={'SYN-NL-LV-01','SYN-NL-FUEL-01'}
+    if len(reports)!=2 or {r['case_id'] for r in reports}!=expected:
+        raise ValueError('incomplete checked case inventory')
+    if kind=='nmpc':return all(r['status']=='complete' for r in reports)
+    modes={'cvodes','cvodes-tight','rk4','rk4-tight'}
+    return all(set(r['statuses'])==modes and set(r['process_statuses'])==modes
+        and all(s=='complete' for s in r['statuses'].values())
+        and all(s=='completed' for s in r['process_statuses'].values()) for r in reports)
 
 
 def summarize(root,snapshot=None):
@@ -60,7 +79,9 @@ def summarize(root,snapshot=None):
                 nonlinear_folder,nonlinear_receipt=selected(root,key+'/nonlinear');record['nonlinear_outer_process_seconds']=nonnegative(nonlinear_receipt['whole_process_seconds'])
                 record['nonlinear_process_status']=nonlinear_receipt['status']
                 if nonlinear_receipt['status']!='completed':records.append(record);continue
-                nonlinear=nonlinear_folder/'capture';check_nonlinear(nonlinear)
+                nonlinear=nonlinear_folder/'capture';nonlinear_checks=check_nonlinear(nonlinear)
+                if not complete_checks('nonlinear',nonlinear_checks):
+                    record.update(status='inconclusive',partial_checks=nonlinear_checks);records.append(record);continue
                 if load(nonlinear/'manifest.json')['affine_capture_source']!=load(capture/'manifest.json')['source_revision']:raise ValueError('nonlinear source capture association')
                 attempts=load(capture/'manifest.json')['attempts']
                 for case in ['syn-nl-lv-01','syn-nl-fuel-01']:
@@ -74,6 +95,8 @@ def summarize(root,snapshot=None):
                     record['cases'].append({'case':case,'cost_seconds':{k:nonnegative(v) for k,v in values.items()},'integration':integration,'original_affine_objective':load(nonlinear/case/'affine-witness.json')['objective'],'nonlinear_executed_objective':load(nonlinear/case/'cvodes/record.json')['objective']})
             else:
                 checks=check_nmpc(capture)
+                if not complete_checks('nmpc',checks):
+                    record.update(status='inconclusive',partial_checks=checks);records.append(record);continue
                 for checked in checks:
                     case=checked['case_id'].lower();source=capture/case;attempt=load(source/'attempt.json');updates=[load(source/f'update-{j:03d}/result.json') for j in range(len(attempt['updates']))]
                     values={'controller_setup_seconds':sum(nonnegative(r['setup_seconds']) for r in updates),'optimization_seconds':sum(nonnegative(r['solve_seconds']) for r in updates),'held_cvodes_execution_seconds':sum(nonnegative(r['elapsed_seconds']) for r in attempt['execution_intervals'])}
