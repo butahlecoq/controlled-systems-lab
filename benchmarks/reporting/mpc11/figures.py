@@ -8,6 +8,7 @@ import math
 from pathlib import Path
 import subprocess
 import sys
+import zipfile
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / 'scripts/reports'))
@@ -16,6 +17,27 @@ from figure_style import configure_numeric_axis, STYLE_ID
 
 def read(path):
     return json.loads(path.read_text())
+
+
+def bind_pilot_archives(bundles):
+    archives = {'affine': 'affine-pilot-b3978a98', 'nonlinear': 'nonlinear-pilot-0092081b',
+                'nmpc': 'nmpc-pilot-55f65110'}
+    bindings = {}
+    for name, bundle in bundles.items():
+        archive = Path(__file__).parent/'evidence'/archives[name]/'capture.zip'
+        with zipfile.ZipFile(archive) as saved:
+            members = [info for info in saved.infolist() if info.filename.startswith('accepted/') and not info.is_dir()]
+            expected = {info.filename.removeprefix('accepted/'): saved.read(info) for info in members}
+            if len(expected) != len(members):
+                raise ValueError('duplicate archived input')
+            actual = {path.relative_to(bundle).as_posix(): path.read_bytes()
+                      for path in bundle.rglob('*') if path.is_file()}
+            if actual != expected:
+                raise ValueError(name+': input differs from immutable pilot archive')
+        bindings[name] = {'archive': archive.relative_to(ROOT).as_posix(),
+                          'sha256': hashlib.sha256(archive.read_bytes()).hexdigest(),
+                          'capture_source': read(bundle/'manifest.json')['source_revision']}
+    return bindings
 
 
 def checked_inputs(affine, nonlinear, nmpc):
@@ -38,6 +60,7 @@ def checked_inputs(affine, nonlinear, nmpc):
 def render(affine: Path, nonlinear: Path, nmpc: Path, output: Path):
     if output.exists():
         raise ValueError('output must be a new directory')
+    archives = bind_pilot_archives({'affine': affine, 'nonlinear': nonlinear, 'nmpc': nmpc})
     checks = checked_inputs(affine, nonlinear, nmpc)
     import matplotlib
     matplotlib.use('Agg')
@@ -121,14 +144,19 @@ def render(affine: Path, nonlinear: Path, nmpc: Path, output: Path):
             fig.savefig(output/f'{slug}-traces.{ext}', dpi=160, metadata={'Date': None} if ext == 'svg' else None)
         plt.close(fig)
         (output/f'{slug}-plotted-data.json').write_text(json.dumps({'scenario': s, 'variants': variants}, indent=2)+'\n')
-    receipt = {'schema': 'csl.mpc11.figure-receipt/1', 'style': STYLE_ID, 'matplotlib': matplotlib.__version__,
+    snapshot = output/'source'
+    snapshot.mkdir()
+    for source in [*Path(__file__).parent.glob('*.py'), ROOT/'scripts/reports/figure_style.py']:
+        (snapshot/source.name).write_bytes(source.read_bytes())
+    receipt = {'input_archives': archives, 'schema': 'csl.mpc11.figure-receipt/1', 'style': STYLE_ID, 'matplotlib': matplotlib.__version__,
                'input_sha256': bindings, 'saved_checks': checks, 'claim': 'saved individual numerical trajectories only; no set or performance guarantee'}
     receipt['tool_sha256'] = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
                              for p in [Path(__file__).resolve(), ROOT/'scripts/reports/figure_style.py',
                                        *[Path(__file__).with_name('check_'+name+'_saved.py') for name in ('affine', 'nonlinear', 'nmpc')]]}
     receipt['bundle_manifest_sha256'] = {name: hashlib.sha256((bundle/'manifest.json').read_bytes()).hexdigest()
                                         for name, bundle in [('affine', affine), ('nonlinear', nonlinear), ('nmpc', nmpc)]}
-    receipt['output_sha256'] = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(output.iterdir())}
+    receipt['helper_snapshot_sha256'] = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(snapshot.iterdir())}
+    receipt['output_sha256'] = {p.relative_to(output).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(output.rglob('*')) if p.is_file()}
     (output/'receipt.json').write_text(json.dumps(receipt, indent=2)+'\n')
 
 

@@ -22,8 +22,11 @@ initial/final states; stars show terminal targets. Intermediate labels are
 physical times. The affine trace has values at hold boundaries; connecting
 segments do not add independently integrated samples.
 
-Plotted arrays, canonical scenarios, input record hashes, bundle inventory
+Plotted arrays, canonical scenarios, input record hashes, bundle manifest
 hashes, checker output and renderer/style identities accompany each export.
+The supplied directories must exactly match the three immutable pilot archives;
+archive hashes and capture commits are recorded. Complete local Python helper
+snapshots accompany each new export.
 These are individual numerical trajectories with local solver diagnostics,
 not reachable-set boundaries, backward sets, global optima, minimax results or
 continuous-time safety certificates. Pilot timings do not rank controllers.
