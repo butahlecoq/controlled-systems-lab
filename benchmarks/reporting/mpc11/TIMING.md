@@ -54,3 +54,10 @@ inconclusive; descriptive medians/ranges are initial observations for this
 configured host workload. No core API, required dependency, install artifact,
 publication workflow or library release changes. This unit does not deploy
 results or close issue #607.
+
+Post-capture checker `0c30e2bb` validates full hexadecimal Git revisions before
+source access, uses an end-of-options delimiter for Git, and rejects escaping
+source paths. It also retains partial NLP/replay checks as inconclusive and
+excludes them from completed timing aggregates. Six focused tests pass. The
+original timing archive and measured clocks remain unchanged; later checker
+versions are identified separately rather than replacing capture provenance.
