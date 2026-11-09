@@ -51,6 +51,7 @@ def expected_relation(n,p):
 def check_native(rows):
     seen=set();counts={};samples={}
     for row in rows:
+        if row.get('schema')!='csl.mpc08-horizon-family/1' or any(type(row.get(k)) is not bool for k in ('complete','registry_verified','warmup','original_quadratic')) or any(type(row.get(k)) is not int for k in ('termination','outcome')):raise ValueError('invalid native result schema/flags')
         n=row['horizon'];p=int(row['query_id'].split('-p')[-1]);original=row['original_quadratic'];rep=row['repetition']
         if type(n) is not int or n not in (2,4,8) or p not in (0,1) or type(original) is not bool or type(rep) is not int or rep not in range(6):raise ValueError('unsupported native query')
         key=(n,p,original,rep)
@@ -134,7 +135,10 @@ def capture(driver,receipt,output):
 
 def recheck(output):
     if output.is_symlink() or any(p.is_symlink() for p in output.rglob('*')):raise ValueError('symlink artifact')
-    files={p.name:p.read_bytes() for p in output.iterdir() if p.is_file()}
+    if any(not p.is_file() for p in output.iterdir()):raise ValueError('flat capture requires regular files only')
+    files={p.name:p.read_bytes() for p in output.iterdir()}
+    required={'SHA256SUMS','reference.json','queries.csv','native-build-receipt.json','stdout.jsonl','stderr.txt','summary.json','manifest.json','horizon-regions.svg','horizon-regions.png'}
+    if set(files)!=required:raise ValueError('mandatory flat artifact inventory differs')
     expected={}
     for line in files['SHA256SUMS'].decode().splitlines():
         checksum,name=line.split('  ',1)
