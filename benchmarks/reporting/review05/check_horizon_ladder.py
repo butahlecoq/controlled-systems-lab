@@ -9,6 +9,8 @@ import hashlib
 import json
 from pathlib import Path
 
+from highs_clock_events import parse_stderr as parse_highs_clock_events
+
 
 STRATEGIES = {"csl.synthesis.reach-back", "csl.synthesis.strategy-b"}
 EXPECTED_HORIZONS = {2, 4, 8}
@@ -180,11 +182,26 @@ def main() -> int:
         horizon = attempt.get("horizon")
         expected_hash = manifest.get("scenario_sha256", {}).get(str(horizon), "")
         status, reasons = check_attempt(attempt, expected_hash)
+        raw_stderr = None
         for field in ("stdout", "stderr"):
             path = bundle / str(attempt.get(f"{field}_path", ""))
             if not path.is_file() or sha256(path) != attempt.get(f"{field}_sha256"):
                 status, reasons = "incorrect", [f"{field} artifact missing or hash mismatch"]
                 break
+            if field == "stderr":
+                raw_stderr = path.read_bytes()
+        if raw_stderr is not None:
+            try:
+                expected_clock_groups = parse_highs_clock_events(
+                    raw_stderr, manifest.get("schedule", {}).get("highs_internal_clocks") is True)
+                recorded_clock_groups = attempt.get("solver_clock_groups")
+                if manifest.get("schedule", {}).get("highs_internal_clocks") is True:
+                    if recorded_clock_groups != expected_clock_groups:
+                        raise ValueError("structured HiGHS clock groups differ from hash-bound stderr")
+                elif recorded_clock_groups is not None:
+                    raise ValueError("unrequested HiGHS clock groups are present")
+            except ValueError as error:
+                status, reasons = "incorrect", [str(error)]
         checks.append({"attempt_id": attempt.get("attempt_id"), "horizon": horizon,
                        "strategy": attempt.get("strategy"), "warmup": attempt.get("warmup"),
                        "status": status, "reasons": reasons})

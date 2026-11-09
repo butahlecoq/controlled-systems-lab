@@ -17,6 +17,8 @@ import tempfile
 import time
 from pathlib import Path
 
+from highs_clock_events import parse_stderr as parse_highs_clock_events
+
 
 STRATEGIES = ("csl.synthesis.reach-back", "csl.synthesis.strategy-b")
 SCENARIOS = {2: "horizon01-t02.json", 4: "horizon01-t04.json", 8: "horizon01-t08.json"}
@@ -36,12 +38,13 @@ def limit_process() -> None:
     resource.setrlimit(resource.RLIMIT_AS, (address_space, address_space))
 
 
-def run_with_resource_receipt(command: list[str], timeout_seconds: int) -> tuple[
+def run_with_resource_receipt(command: list[str], timeout_seconds: int,
+                              child_environment: dict[str, str]) -> tuple[
     int | None, bool, bytes, bytes, dict[str, object]
 ]:
     """Wait for one isolated Linux child and retain its own wait4 counters."""
     with tempfile.TemporaryFile() as stdout_file, tempfile.TemporaryFile() as stderr_file:
-        process = subprocess.Popen(command, stdout=stdout_file, stderr=stderr_file,
+        process = subprocess.Popen(command, stdout=stdout_file, stderr=stderr_file, env=child_environment,
                                   preexec_fn=limit_process)
         timed_out = False
         previous_handler = signal.getsignal(signal.SIGALRM)
@@ -101,7 +104,7 @@ def environment(binary: Path, source_dir: Path, repo_dir: Path) -> dict[str, obj
     source_files = ("CMakeLists.txt", "horizon_ladder.cpp", "run_horizon_ladder.py",
                     "check_horizon_ladder.py", "summarize_horizon_ladder.py",
                     "render_horizon_ladder.py", "summarize_resource_ladder.py",
-                    "summarize_phase_ladder.py")
+                    "summarize_phase_ladder.py", "highs_clock_events.py")
     return {
         "source_revision": revision,
         "source_worktree_dirty": bool(status),
@@ -138,7 +141,11 @@ def main() -> int:
                         help="record Linux per-process CPU and peak RSS with wait4")
     parser.add_argument("--phase-diagnostics", action="store_true",
                         help="collect OBS-03 strategy phase spans; results are diagnostic, not uninstrumented timings")
+    parser.add_argument("--highs-internal-clocks", action="store_true",
+                        help="capture pinned HiGHS internal clocks on stderr; requires --phase-diagnostics")
     args = parser.parse_args()
+    if args.highs_internal_clocks and not args.phase_diagnostics:
+        parser.error("--highs-internal-clocks requires --phase-diagnostics")
     if args.resource_receipts and not hasattr(os, "wait4"):
         parser.error("--resource-receipts requires POSIX wait4")
     driver = args.driver.resolve(strict=True)
@@ -175,6 +182,9 @@ def main() -> int:
             "phase_diagnostics": args.phase_diagnostics,
             "phase_timing_scope": ("OBS-03 strategy spans with collection enabled; instrumented diagnostic capture"
                                    if args.phase_diagnostics else None),
+            "highs_internal_clocks": args.highs_internal_clocks,
+            "highs_clock_scope": ("opt-in pinned HiGHS clocks captured after each native h.run(); groups are diagnostic, may overlap, and are not summed"
+                                  if args.highs_internal_clocks else None),
         },
     }
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
@@ -204,12 +214,16 @@ def main() -> int:
                          f"inputs/{scenario_paths[horizon].name}", strategy]
                         + (["--phase-diagnostics"] if args.phase_diagnostics else [])
                     )
+                    child_environment = os.environ.copy()
+                    child_environment.pop("CSL_HIGHS_INTERNAL_CLOCKS", None)
+                    if args.highs_internal_clocks:
+                        child_environment["CSL_HIGHS_INTERNAL_CLOCKS"] = "1"
                     started = time.monotonic_ns()
                     resource_receipt = None
                     try:
                         if args.resource_receipts:
                             return_code, timed_out, stdout, stderr, resource_receipt = \
-                                run_with_resource_receipt(command, 300)
+                                run_with_resource_receipt(command, 300, child_environment)
                             process_status = ("timed_out" if timed_out else
                                               "completed" if return_code == 0 else "failed")
                         else:
@@ -219,6 +233,7 @@ def main() -> int:
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
                                 timeout=300,
+                                env=child_environment,
                                 preexec_fn=limit_process,
                             )
                             stdout, stderr, return_code = process.stdout, process.stderr, process.returncode
@@ -246,10 +261,24 @@ def main() -> int:
                     parse_error = None
                     if process_status == "completed":
                         try:
-                            parsed = json.loads(stdout.decode("utf-8"))
-                        except (UnicodeDecodeError, json.JSONDecodeError) as error:
+                            output_text = stdout.decode("utf-8")
+                            if args.highs_internal_clocks:
+                                result_lines = [line for line in output_text.splitlines()
+                                    if line.startswith('{"schema":"csl.review05.horizon-attempt/1"')]
+                                if len(result_lines) != 1:
+                                    raise ValueError("diagnostic stdout requires exactly one versioned result line")
+                                parsed = json.loads(result_lines[0])
+                            else:
+                                parsed = json.loads(output_text)
+                        except (UnicodeDecodeError, ValueError) as error:
                             process_status = "invalid_output"
                             parse_error = str(error)
+                    try:
+                        clock_groups = parse_highs_clock_events(stderr, args.highs_internal_clocks)
+                    except ValueError as error:
+                        clock_groups = []
+                        parse_error = f"{parse_error}; {error}" if parse_error else str(error)
+                        process_status = "invalid_output"
 
                     row = {
                         "attempt_id": attempt_id,
@@ -268,6 +297,7 @@ def main() -> int:
                         "stderr_path": str(stderr_path.relative_to(output)),
                         "stderr_sha256": hashlib.sha256(stderr).hexdigest(),
                         "parse_error": parse_error,
+                        "solver_clock_groups": clock_groups if args.highs_internal_clocks else None,
                         "resource_receipt": resource_receipt,
                         "result": parsed,
                     }
