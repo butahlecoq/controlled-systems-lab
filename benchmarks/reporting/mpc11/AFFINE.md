@@ -13,7 +13,10 @@ quadratic, linear and constant objective coefficient is multiplied by the same
 positive factor. The complete unscaled program and its hash remain in the
 bundle. Native objective values map back by division by 1000, and the checker
 independently recomputes the authored physical objective. This conditioning
-changes neither minimizers nor constraints. Native objective-unit residuals
+preserves minimizers in real arithmetic and leaves the stored constraints
+unchanged. Binary64 multiplication rounds the stored cost coefficients; the
+independent checks establish numerical cost/replay consistency for these
+witnesses, not an exact stored-QP argmin-equivalence certificate. Native objective-unit residuals
 and tolerances remain explicitly associated with the scaled program; they are
 not certificates of original nonlinear optimality. The unscaled LV programs
 reached native active-set time limits even after variable permutation and
