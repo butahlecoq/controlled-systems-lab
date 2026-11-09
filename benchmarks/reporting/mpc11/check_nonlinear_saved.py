@@ -9,6 +9,7 @@ from affine import canonical_hash, check_solution
 from check_affine_saved import verify_authored_transform
 from check_scenarios import validate
 from nonlinear import make_request, validate_request, evaluate
+from replay_evidence import read_native_attempt
 
 
 def check(bundle):
@@ -34,14 +35,11 @@ def check(bundle):
             expected=make_request(s,witness['physical_controls'],witness['witness_sha256'],sensitivity=mode.endswith('-tight'))
             if request!=expected:raise ValueError('request differs from verified affine witness')
             receipt=load(attempt/'process.json')
-            if receipt['process_status']!='completed':
-                statuses[mode]=receipt['process_status'];objectives[mode]=None;continue
-            for name,key in [('stdout.json','stdout_sha256'),('stderr.txt','stderr_sha256')]:
-                if hashlib.sha256((attempt/name).read_bytes()).hexdigest()!=receipt[key]:raise ValueError('process receipt hash mismatch')
-            record=load(attempt/'record.json');raw=load(attempt/'stdout.json')
-            for key in raw:
-                if key in ['objective','sampled_state_violation_physical','control_violation_physical'] and mode.startswith('rk4'):continue
-                if raw[key]!=record[key]:raise ValueError('structured record differs from native stdout: '+key)
+            record=read_native_attempt(attempt,receipt,status_key='process_status',time_key='whole_process_seconds',
+                extensions={'objective','sampled_state_violation_physical','control_violation_physical'} if mode.startswith('rk4') else set(),
+                method='rk4' if mode.startswith('rk4') else 'cvodes',wall_seconds=manifest['limits']['wall_seconds'])
+            if record is None:
+                statuses[mode]='process-incomplete';objectives[mode]=None;continue
             for key in ['scenario_sha256','witness_sha256','controls_sha256','abstol','reltol']:
                 if record[key]!=request[key]:raise ValueError('trace association mismatch: '+key)
             states=np.asarray(record['scaled_states']);physical=np.asarray(record['physical_states']);scales=np.array([v['scale'] for v in s['states']])
@@ -75,7 +73,7 @@ def check(bundle):
         elif any(key in comparison for key in difference_keys):
             raise ValueError('incomplete comparison declares complete-trace differences')
         comparisons.append(comparison)
-        reports.append({'case_id':s['case_id'],'statuses':statuses,'scope':'bound identities, source rebuild, sampled trace shape/cost/constraints; integration correctness requires replay'})
+        reports.append({'case_id':s['case_id'],'statuses':statuses,'process_statuses':{mode:load(folder/mode/'process.json')['process_status'] for mode in statuses},'scope':'bound identities, source rebuild, sampled trace shape/cost/constraints; integration correctness requires replay'})
     if manifest['cases']!=comparisons:raise ValueError('manifest comparisons differ from checked case records')
     return reports
 
