@@ -42,13 +42,17 @@ bool strategy_b_ts02_profile_valid(const problem::ResolvedProblem&, const Strate
 bool strategy_a_ts02_profile_valid(const problem::ResolvedProblem&, const StrategyRequest&);
 bool strategy_b_ts03_profile_valid(const problem::ResolvedProblem&, const StrategyRequest&);
 bool strategy_a_ts03_profile_valid(const problem::ResolvedProblem&, const StrategyRequest&);
+bool strategy_b_nominal_linear_exact_profile_valid(const problem::ResolvedProblem&,
+    const FamilyRequest&, const RepresentationId&);
+std::vector<TransformStepIdentity> strategy_b_nominal_linear_exact_lineage(const ProblemId&);
+std::shared_ptr<const CompiledCompleteFamilyVerifier> make_strategy_b_nominal_linear_exact_verifier();
 bool strategy_a_nominal_linear_exact_profile_valid(const problem::ResolvedProblem&,
     const FamilyRequest&, const RepresentationId&);
-std::optional<std::pair<double, double>> strategy_a_nominal_linear_exact_optimum_bounds(
-    const problem::ResolvedProblem&);
-std::variant<sets::SetData, OperationStopped> strategy_a_nominal_linear_exact_optimal_relation(
+std::optional<std::pair<double, double>> nominal_linear_exact_optimum_bounds(
+    const problem::ResolvedProblem&, const ExecutionContext* context = nullptr);
+std::variant<sets::SetData, OperationStopped> nominal_linear_exact_optimal_relation(
     const problem::ResolvedProblem&, SetId, std::vector<std::string> labels,
-    std::size_t max_relation_rows);
+    std::size_t max_relation_rows, const ExecutionContext* context = nullptr);
 std::vector<TransformStepIdentity> strategy_a_nominal_linear_exact_lineage(
     const ProblemId&, std::size_t horizon);
 std::shared_ptr<const CompiledCompleteFamilyVerifier> make_nominal_linear_exact_verifier();

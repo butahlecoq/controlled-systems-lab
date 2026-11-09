@@ -1048,7 +1048,7 @@ TEST_CASE("nominal linear exact profile preserves affine offsets and a free cont
     CHECK_FALSE(contains(*relation,{0.5,0,-0.5,0.25,1.2}));
 }
 TEST_CASE("nominal linear exact evidence derives the dyadic optimum without rounded accumulation") {
-    const auto bounds=registry::detail::strategy_a_nominal_linear_exact_optimum_bounds(
+    const auto bounds=registry::detail::nominal_linear_exact_optimum_bounds(
         nominal_linear_exact_cancellation_objective());
     REQUIRE(bounds);
     CHECK(bounds->first==0.0001);
@@ -1099,7 +1099,7 @@ TEST_CASE("nominal linear exact verifier rejects a candidate that omits optimal 
 }
 TEST_CASE("nominal linear exact verifier encloses a non-dyadic optimum") {
     const auto query=nominal_linear_exact_request(nominal_linear_exact_thirds());
-    const auto bounds=registry::detail::strategy_a_nominal_linear_exact_optimum_bounds(query.problem);
+    const auto bounds=registry::detail::nominal_linear_exact_optimum_bounds(query.problem);
     REQUIRE(bounds);
     CHECK(bounds->first==1.0/3.0);
     CHECK(bounds->second==std::nextafter(1.0/3.0,1.0));
