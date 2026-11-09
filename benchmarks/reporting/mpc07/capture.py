@@ -68,11 +68,26 @@ def attempt(folder,bridge,payload):
 
 
 
+def coherent_receipt(receipt):
+    status=receipt.get('status');code=receipt.get('returncode');timed_out=receipt.get('timed_out')
+    if type(timed_out) is not bool:return False
+    if status=='completed' and (type(code) is not int or code!=0 or timed_out):return False
+    if timed_out and status!='wall-limit':return False
+    if status=='completed' or receipt.get('purpose'):
+        duration=receipt.get('whole_process_ns');limits=receipt.get('limits',{})
+        if type(duration) is not int or not 0<=duration<=301_000_000_000:return False
+        required={'wall_seconds':300,'cpu_seconds':300,'address_space_bytes_per_process':8*1024**3,'workers':1,'threads_requested':1}
+        if any(type(limits.get(key)) is not int or limits[key]!=value for key,value in required.items()):return False
+        if not isinstance(limits.get('mechanism'),str) or not isinstance(limits.get('suite_memory'),str):return False
+    return True
+
+
 def recheck(folder):
     receipt=json.loads((folder/'receipt.json').read_text())
+    if not coherent_receipt(receipt):return dict(status='inconclusive-invalid-process-receipt')
     if receipt.get('purpose')=='provider-width-refusal':
         text=(folder/'stderr.txt').read_text()
-        return dict(status='expected-native-admission-refusal' if receipt['returncode']==1 and 'unsupported variable count' in text else 'inconclusive-process-outcome')
+        return dict(status='expected-native-admission-refusal' if receipt['status']=='process-failed' and receipt['returncode']==1 and not receipt['timed_out'] and 'unsupported variable count' in text else 'inconclusive-process-outcome')
     if receipt['status']!='completed' or receipt['returncode']!=0:return dict(status='inconclusive-process-outcome')
     if receipt.get('purpose')=='literal-contradictory-row':
         payload=json.loads((folder/'program.json').read_text());result=json.loads((folder/'stdout.json').read_text())

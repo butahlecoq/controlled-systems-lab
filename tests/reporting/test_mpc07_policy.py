@@ -104,3 +104,53 @@ class SavedOutcomeTests(unittest.TestCase):
             self.assertIsNone(receipt['returncode'])
             self.assertEqual((folder/'stdout.json').read_bytes(),b'')
             self.assertTrue((folder/'process-resource.txt').is_file())
+
+class ProvenanceRegressionTests(unittest.TestCase):
+    def test_timeout_flag_cannot_bless_completed_zero_return(self):
+        import tempfile,json,sys
+        sys.path.insert(0,str(ROOT/'benchmarks/reporting/mpc07'));import capture
+        with tempfile.TemporaryDirectory() as temporary:
+            folder=Path(temporary)
+            (folder/'receipt.json').write_text(json.dumps(dict(status='completed',returncode=0,timed_out=True,whole_process_ns=100)))
+            # No valid JSON is required: receipt coherence is checked first.
+            (folder/'stdout.json').write_bytes(b'')
+            self.assertEqual(capture.recheck(folder)['status'],'inconclusive-invalid-process-receipt')
+
+    def test_self_rehashed_source_snapshot_requires_git_identity(self):
+        import tempfile,json,zipfile,hashlib,sys
+        sys.path.insert(0,str(ROOT/'benchmarks/reporting/mpc07'));import report
+        artifact=ROOT/'benchmarks/reporting/mpc07/evidence/bounded-policy-0e821c2a/offline.zip'
+        with tempfile.TemporaryDirectory() as temporary:
+            with zipfile.ZipFile(artifact) as saved:saved.extractall(temporary)
+            raw=Path(temporary)/'mpc07-report/RAW'
+            target=raw/'source/policy.py';target.write_bytes(target.read_bytes()+b'\n# changed copied source\n')
+            environment=json.loads((raw/'environment.json').read_text())
+            environment['source_sha256']['policy.py']=hashlib.sha256(target.read_bytes()).hexdigest()
+            (raw/'environment.json').write_text(json.dumps(environment))
+            (raw/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(raw).as_posix()}\n' for p in sorted(raw.rglob('*')) if p.is_file() and p.name!='SHA256SUMS'))
+            with self.assertRaisesRegex(ValueError,'recorded Git commit'):report.checked_records(raw)
+
+    def test_missing_inventory_and_option_revision_refuse_before_source_io(self):
+        import tempfile,sys
+        sys.path.insert(0,str(ROOT/'benchmarks/reporting/mpc07'));import report
+        with tempfile.TemporaryDirectory() as temporary:
+            folder=Path(temporary)
+            for revision,inventory,error in [('--output='+str(folder/'outside'),{},'full pinned'),('a'*40,{},'mandatory')]:
+                environment=dict(source_commit=revision,native_source_commit=report.NATIVE_REVISION,source_sha256=inventory)
+                with self.assertRaisesRegex(ValueError,error):report.authenticate_sources(folder,environment,ROOT)
+            self.assertEqual(list(folder.iterdir()),[])
+
+    def test_rebound_timeout_receipt_cannot_retain_saved_verified_disposition(self):
+        import tempfile,json,zipfile,hashlib,sys
+        sys.path.insert(0,str(ROOT/'benchmarks/reporting/mpc07'));import report
+        artifact=ROOT/'benchmarks/reporting/mpc07/evidence/bounded-policy-0e821c2a/offline.zip'
+        with tempfile.TemporaryDirectory() as temporary:
+            with zipfile.ZipFile(artifact) as saved:saved.extractall(temporary)
+            raw=Path(temporary)/'mpc07-report/RAW';attempt=raw/'attempts/0000'
+            receipt=json.loads((attempt/'receipt.json').read_text());receipt['timed_out']=True
+            (attempt/'receipt.json').write_text(json.dumps(receipt))
+            checked=json.loads((attempt/'check.json').read_text())
+            checked['bindings']['receipt.json']=hashlib.sha256((attempt/'receipt.json').read_bytes()).hexdigest()
+            (attempt/'check.json').write_text(json.dumps(checked))
+            (raw/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(raw).as_posix()}\n' for p in sorted(raw.rglob('*')) if p.is_file() and p!=raw/'SHA256SUMS'))
+            with self.assertRaisesRegex(ValueError,'disposition differs'):report.checked_records(raw)
