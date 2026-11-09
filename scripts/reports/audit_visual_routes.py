@@ -52,6 +52,7 @@ PUBLICATION_EXPORT_ROUTES = {
     "scripts/reports/render.py", "scripts/reports/mpc05/check_smoke.py",
     "scripts/reports/exp824/finalize_limited_report.py",
     "scripts/reports/augment_pages_bundle.py",
+    "benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/figures.py",
 }
 VIZ10_ROLE_REASONS = {
     "scripts/reports/mpc06_online/render.py":
@@ -136,6 +137,8 @@ FROZEN_COMPANIONS = {
     "mpc06-online-anchor-portable-v3": "mpc06-complete-6b7059d62473d32d4210/index.html",
     "mpc06-completion-v1": "mpc06-complete-6b7059d62473d32d4210/index.html",
     "mpc06-completion-v2": "mpc06-complete-6b7059d62473d32d4210/index.html",
+    "review05-family-query-20261110-3b98f5b0": "review05-family-query-d6af180b0e398d78ebd2/index.html",
+    "review05-build-phases-20261110-468cc0eb": "review05-family-query-d6af180b0e398d78ebd2/index.html",
     "app01-plan-20261016-22d406fd": "examples/app01-plan-timing-v1.html",
     "exp02-paired-profiles-20261027-r1": "examples/control-witness-v1.html#exp02-ts02-control-family",
     "mpc03-open-loop-pilot-v1": "examples/index.html",
@@ -260,7 +263,8 @@ def source_inventory(root: Path) -> list[dict]:
                                     "/geometry_opt_companions.py", "/viz10_plot_companions.py")):
                 disposition = "shared-quantitative-policy-companion-renderer"
             elif relative in {"scripts/reports/stage_projection_figures.py",
-                              "benchmarks/reporting/review05/render_family_query.py"}:
+                              "benchmarks/reporting/review05/render_family_query.py",
+                              "benchmarks/reporting/mpc11/figures.py"}:
                 disposition = "adopted-shared-quantitative-policy"
             elif relative.endswith("/control_witness_companions.py"):
                 disposition = "saved-control-witness-gallery-companion-builder"

@@ -1538,10 +1538,29 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_mpc11_controller_comparison.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "-phase.svg",
+        "-traces.svg",
+        "syn-nl-lv-01-phase.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_projection_figures.py",
       "signal_count": 4,
       "asset_name_literals": [],
       "disposition": "adopted-shared-quantitative-policy"
+    },
+    {
+      "source": "scripts/reports/stage_review05_family_query.py",
+      "signal_count": 7,
+      "asset_name_literals": [
+        "control-projection.png",
+        "control-projection.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
     },
     {
       "source": "scripts/reports/stage_syn03_nominal_exact_example.py",
@@ -1992,6 +2011,18 @@
       ],
       "disposition": "reviewed-static-diagram-exception",
       "role_and_disposition_reason": "Draws the exact initial-state rectangle and one full two-control optimal fiber with a distinct minimum-norm selector; solver candidates are not presented as complete-family evidence."
+    },
+    {
+      "source": "benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/figures.py",
+      "signal_count": 2,
+      "asset_name_literals": [],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "benchmarks/reporting/mpc11/figures.py",
+      "signal_count": 2,
+      "asset_name_literals": [],
+      "disposition": "adopted-shared-quantitative-policy"
     },
     {
       "source": "benchmarks/reporting/review05/render_constraint_ladder.py",
@@ -3488,7 +3519,8 @@
         "control-projection.svg"
       ],
       "index_sha256": "49902c79e0b9e39cb5f9b383649fe095b9206776293a89bbfdb019fdd80b5e06",
-      "disposition": "reviewed: root inspected the shared-policy scalar control projection and recorded state paths; exact family coverage is checked separately"
+      "disposition": "reviewed: root inspected the shared-policy scalar control projection and recorded state paths; exact family coverage is checked separately",
+      "companion_route": "review05-family-query-d6af180b0e398d78ebd2/index.html"
     },
     {
       "route": "review05-profile-matrix-20261031",

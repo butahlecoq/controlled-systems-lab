@@ -80,6 +80,9 @@ jobs:
           build/pages-mpc11-env/bin/python -m pip download --only-binary=:all: --require-hashes -r benchmarks/reporting/mpc11/environment/requirements-linux-cp311.lock --dest build/pages-mpc11-wheels
           build/pages-mpc11-env/bin/python -m pip install --no-index --find-links build/pages-mpc11-wheels --require-hashes -r benchmarks/reporting/mpc11/environment/requirements-linux-cp311.lock
           build/pages-mpc11-env/bin/python -m pip check
+          build/pages-mpc11-env/bin/python -m pip inspect > build/pages-mpc11-environment.json
+          build/pages-mpc11-env/bin/python -c 'import sys,json,hashlib,pathlib; p=pathlib.Path(sys.executable).resolve(); print(json.dumps({"python":sys.version,"executable":str(p),"sha256":hashlib.sha256(p.read_bytes()).hexdigest()}))' > build/pages-mpc11-interpreter.json
+          sha256sum build/pages-mpc11-wheels/*.whl > build/pages-mpc11-wheels.sha256
       - name: Check cumulative staging with the qualified optional environment
         env:
           OPENBLAS_NUM_THREADS: '1'
@@ -97,6 +100,12 @@ jobs:
           build/pages-mpc11-env/bin/python scripts/reports/augment_pages_bundle.py
           --download build/pages-download
           --site build/report-site
+      - name: Retain publication environment receipts with the complete site
+        run: |
+          for record in pages-mpc11-environment.json pages-mpc11-interpreter.json pages-mpc11-wheels.sha256; do
+            test ! -e "build/report-site/$record"
+            cp "build/$record" "build/report-site/$record"
+          done
       - name: Check that the complete artifact still targets current main
         id: head
         env:
