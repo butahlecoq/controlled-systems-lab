@@ -192,13 +192,18 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertEqual(paired["companion_route"],
                          "examples/control-witness-v1.html#exp02-ts02-control-family")
         self.assertNotIn("follow_up_issue", paired)
+        query=routes["review05-family-query-20261110-3b98f5b0"]
+        self.assertEqual(query["assets"],["control-projection.png","control-projection.svg"])
+        self.assertIn("reviewed: root inspected the shared-policy scalar",query["disposition"])
+        self.assertNotIn("follow_up_issue",query)
+        reviewed_routes={paired["route"],query["route"]}
         self.assertTrue(all(entry["disposition"].startswith("deferred: original frozen route-level readability")
-                            for entry in routes.values() if entry["route"] != paired["route"]))
+                            for entry in routes.values() if entry["route"] not in reviewed_routes))
         self.assertTrue(all(entry["follow_up_issue"] ==
                             audit_visual_routes.FROZEN_ROUTE_FOLLOW_UP_ISSUES.get(
                                 entry["route"],
                                 717 if entry["route"].startswith("env717-") else 669)
-                            for entry in routes.values() if entry["route"] != paired["route"]))
+                            for entry in routes.values() if entry["route"] not in reviewed_routes))
         self.assertEqual(routes["app03-zonotope-4522855018fa9b0b"]["companion_route"],
                          "examples/app03-zonotope-v1.html")
         self.assertEqual(routes["app01-plan-20261016-22d406fd"]["companion_route"],

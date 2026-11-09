@@ -831,7 +831,8 @@ struct PlannedStrategyTiming {
 };
 PlannedStrategyTiming planned_strategy_timing(const problem::ResolvedProblem& p,
     const FamilyRequest& q,const ProgramIdentity& program,const ar::ModuleIdentity& backend,
-    const std::vector<registry::Provenance>& provenance,const std::shared_ptr<StrategyTimingClock>& clock) {
+    const std::vector<registry::Provenance>& provenance,const std::shared_ptr<StrategyTimingClock>& clock,
+    bool split_build=false) {
     const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
     const ar::ModuleIdentity strategy{{"csl.synthesis.strategy-b"},"1",missing};
     auto lp=ar::ModuleIdentity{{"csl.lp.highs"},"1",missing};
@@ -859,8 +860,20 @@ PlannedStrategyTiming planned_strategy_timing(const problem::ResolvedProblem& p,
     spans[1].backend=std::make_shared<const ar::ModuleIdentity>(backend);
     spans[1].program=std::make_shared<const ProgramIdentity>(program);spans[1].clock=test_wall_domain().id;
     spans[1].requested_assurance=q.assurance;spans[1].applied_assurance=ar::Available<Assurance>{q.assurance};
+    std::vector<std::string> operations{"run","program.solve"};
+    if(split_build) {
+        const std::array<std::string,4> names{"strategy-b/program-build","strategy-b/joint-h-assembly",
+            "strategy-b/objective-lift","strategy-b/program-freeze"};
+        for(std::size_t i=0;i<names.size();++i) {
+            ar::SpanDescriptor span{};span.id={503+i};
+            span.parent=ar::SpanParent{{i?503u:501u},ar::ParentKind::nested};
+            span.task="strategy";span.operation=names[i];span.module=strategy;span.clock=test_wall_domain().id;
+            span.requested_assurance=q.assurance;span.applied_assurance=ar::Available<Assurance>{q.assurance};
+            spans.push_back(std::move(span));operations.push_back(names[i]);
+        }
+    }
     const auto plan=accepted(ob::make_collection_plan({p,resolved,{"strategy-timing-run"},
-        {test_wall_domain()},std::move(spans),1,{"strategy"},{"run","program.solve"}}));
+        {test_wall_domain()},std::move(spans),1,{"strategy"},std::move(operations)}));
     return {accepted(ob::make_timing_collector(plan,clock,{501},{{502}})),std::move(resolved)};
 }
 void require_publishable_timing(const problem::ResolvedProblem& p,const SynthesisResult& result,
@@ -926,6 +939,72 @@ TEST_CASE("Strategy B closes the run and solver spans when the solver stops") {
     CHECK(std::holds_alternative<ar::ReturnedSpan>(records[1].status));
     CHECK(std::get<ar::Available<Termination>>(records[1].termination).value==Termination::cancelled);
     require_publishable_timing(p,result,timing,report);
+}
+TEST_CASE("Strategy B observes sparse assembly and program freeze without changing the joint problem") {
+    for(const bool linear:{false,true}) {
+        CAPTURE(linear);
+        const auto p=resolve(linear?integrator(LinearTerminal{{1},0}):integrator());
+        const auto q=request(p);const auto joint=accepted(build_joint_program(p,q));
+        const auto prepared=registered_prepared(p,q);const auto provenance=prepared.provenance();
+        const auto port=linear?"lp":"convex";
+        const auto provider=std::find_if(provenance.begin(),provenance.end(),[&](const auto& item){return item.port==port;});
+        REQUIRE(provider!=provenance.end());REQUIRE(provider->actual);
+        const auto program=std::visit([](const auto& value){return value.identity();},joint.program);
+        auto clock=std::make_shared<StrategyTimingClock>();
+        const auto timing=planned_strategy_timing(p,q,program,{provider->actual->id,provider->actual->version,
+            ar::Unavailable{ar::MissingReason::not_instrumented,{}}},provenance,clock,true);
+        ExecutionContext context;context.numerical=q.numerical;context.run_id="strategy-timing-run";
+        context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});context.timing=timing.collector;
+        const auto result=accepted(prepared.create()->run(context));
+        REQUIRE(result.termination==Termination::completed);
+        CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+        REQUIRE(payload(result).optimization);
+        CHECK(payload(result).optimization->outcome.value==MathematicalOutcome::optimal);
+        const auto& retained=payload(result).construction;
+        CHECK(retained.constraints.row_offsets==joint.constraints.row_offsets);
+        CHECK(retained.constraints.column_indices==joint.constraints.column_indices);
+        CHECK(retained.constraints.values==joint.constraints.values);
+        CHECK(retained.source_to_program==joint.source_to_program);
+        REQUIRE_FALSE(result.incumbents.empty());
+        for(const auto& candidate:result.incumbents) {
+            const auto& w=candidate.witness;
+            REQUIRE(w.states.size()==3);REQUIRE(w.controls.size()==2);CHECK(w.states[0][0]==0);
+            for(std::size_t t=0;t<2;++t) {
+                CHECK(w.controls[t][0]>=0);CHECK(w.controls[t][0]<=1);
+                CHECK(w.states[t+1][0]==doctest::Approx(w.states[t][0]+w.controls[t][0]));
+            }
+            const auto original=linear?w.states[2][0]:std::pow(w.states[2][0]-1,2);
+            CHECK(original==doctest::Approx(0));CHECK(w.original_objective==doctest::Approx(original));
+        }
+        const auto report=accepted(context.timing->snapshot());const auto& records=report.observations.description().spans;
+        REQUIRE(records.size()==6);
+        for(std::size_t i=2;i<6;++i) {
+            REQUIRE(records[i].completion_observed);
+            CHECK(std::get<ar::ReturnedSpan>(records[i].status).termination==Termination::completed);
+            CHECK(std::get<ar::Available<std::uint64_t>>(report.spans[i].inclusive_wall_ticks).value>0);
+        }
+        CHECK(records[3].descriptor.input_size==joint.constraints.cols);
+        CHECK(records[3].descriptor.output_size==joint.constraints.values.size());
+        CHECK(records[5].descriptor.input_size==joint.constraints.values.size());
+        CHECK(records[5].descriptor.output_size==joint.constraints.cols);
+        require_publishable_timing(p,result,timing,report);
+    }
+}
+TEST_CASE("Strategy B split build observations retain a later resource stop") {
+    const auto p=resolve(integrator(LinearTerminal{{1},0}));auto q=request(p);q.materialization_limit=1;
+    const auto joint=accepted(build_joint_program(p,q));const auto prepared=registered_prepared(p,q);
+    const auto provenance=prepared.provenance();
+    const auto provider=std::find_if(provenance.begin(),provenance.end(),[](const auto& item){return item.port=="lp";});
+    REQUIRE(provider!=provenance.end());REQUIRE(provider->actual);
+    const auto program=std::get<LinearProgram>(joint.program).identity();auto clock=std::make_shared<StrategyTimingClock>();
+    const auto timing=planned_strategy_timing(p,q,program,{provider->actual->id,provider->actual->version,
+        ar::Unavailable{ar::MissingReason::not_instrumented,{}}},provenance,clock,true);
+    ExecutionContext context;context.numerical=q.numerical;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    context.timing=timing.collector;const auto result=accepted(prepared.create()->run(context));
+    CHECK(result.termination==Termination::resource_limit);CHECK(result.incumbents.empty());
+    const auto report=accepted(context.timing->snapshot());const auto& records=report.observations.description().spans;
+    REQUIRE(records.size()==6);CHECK_FALSE(records[1].completion_observed);
+    for(std::size_t i=2;i<6;++i)REQUIRE(records[i].completion_observed);
 }
 TEST_CASE("row-derived intervals are invariant under positive H-row scaling") {
     const Vector origin{0,0,0.5,0,0.5},direction{0,1,0,1,0};
@@ -1670,7 +1749,7 @@ TEST_CASE("registered Strategy B rejects partial-family preparation before creat
     CHECK(rejection.diagnostics.front().code==DiagnosticCode::unsupported);
     CHECK(rejection.diagnostics.front().field=="joint.coverage");
     CHECK(rejection.diagnostics.front().explanation==
-        "Only the exact reviewed T-S01/T-S02/T-S03 profiles have registered complete-family verifiers; other requests remain candidates.");
+        "Complete-family verifiers require the bounded nominal linear exact profile or a reviewed T-S01/T-S02/T-S03 profile.");
     CHECK(lp_factory_calls==0);
     CHECK(convex_factory_calls==0);
 }
@@ -2303,4 +2382,144 @@ TEST_CASE("validation failure uses the contract product without a sanitizer repl
     CHECK(r.incumbents.empty());CHECK(failure.retained.partial_or_candidate_family);
     const auto& data=payload(r);CHECK_FALSE(data.optimization);CHECK(contains(data.relation,{0,1,2,1,1}));
     CHECK(check_synthesis_result(r,expected).empty());
+}
+
+TEST_CASE("bounded nominal Strategy B exact family admits horizons two four eight") {
+    for (const std::size_t horizon : {2u,4u,8u}) for(const bool constant : {false,true}) {
+        CAPTURE(horizon);CAPTURE(constant);
+        auto source=integrator(constant ? LinearTerminal{{0},3} : LinearTerminal{{1},0});
+        source.id={"b-exact-horizon-"+std::to_string(horizon)};
+        source.times.resize(horizon+1);
+        for(std::size_t stage=0;stage<=horizon;++stage) source.times[stage]=static_cast<double>(stage);
+        source.controls=ContinuousDomain{std::vector<AdmissibleSet>(horizon,interval(1).as_handle())};
+        source.states=std::vector<AdmissibleSet>(horizon+1,UniversalSet{1});
+        const auto problem=resolve(source);
+        auto family=request(problem);family.profile="strategy-b.nominal-linear-exact-v1";
+        family.target=FamilyTarget::exact_optimal_relation;
+        const auto prepared=registered_prepared(problem,family);
+        const auto result=accepted(prepared.create()->run({}));
+        CHECK(result.termination==Termination::completed);
+        REQUIRE(result.family);
+        CHECK(result.family->registry_verified());
+        CHECK(std::holds_alternative<CompleteOptimalFamily>(result.family->outcome()));
+        const auto& complete=std::get<CompleteOptimalFamily>(result.family->outcome());
+        REQUIRE(complete.relation.payload);
+        const auto* relation=complete.relation.payload->h_relation_for_recording();
+        REQUIRE(relation);
+        CHECK(relation->metadata()->set.dimension==2*horizon+1);
+        CHECK(contains(*relation,Vector(2*horizon+1,0)));
+        Vector nonoptimal(2*horizon+1,0);nonoptimal[horizon]=1;nonoptimal[2*horizon]=1;
+        CHECK(contains(*relation,nonoptimal)==constant);
+        Vector interior(2*horizon+1,0);
+        for(std::size_t stage=0;stage<horizon;++stage) {
+            interior[horizon+1+stage]=0.25;
+            interior[stage+1]=interior[stage]+0.25;
+        }
+        CHECK(contains(*relation,interior)==constant);
+        REQUIRE(result.objective.lower);REQUIRE(result.objective.upper);
+        CHECK(result.objective.lower->value==(constant?3:0));
+        CHECK(result.objective.upper->value==(constant?3:0));
+        REQUIRE_FALSE(result.incumbents.empty());
+        const auto& witness=result.incumbents.front().witness;
+        REQUIRE(witness.states.size()==horizon+1);REQUIRE(witness.controls.size()==horizon);
+        CHECK(witness.states.front()[0]==doctest::Approx(0));
+        for(std::size_t stage=0;stage<horizon;++stage) {
+            CHECK(witness.controls[stage][0]>=-1e-8);
+            CHECK(witness.controls[stage][0]<=1+1e-8);
+            CHECK(witness.states[stage+1][0]==doctest::Approx(witness.states[stage][0]+witness.controls[stage][0]));
+        }
+        const double objective=constant?3:witness.states.back()[0];
+        CHECK(objective==doctest::Approx(constant?3:0));
+        CHECK(witness.original_objective==doctest::Approx(objective));
+    }
+}
+
+TEST_CASE("nominal B exact verifier rejects foreign bindings and missing or extra histories") {
+    const auto problem=resolve(integrator(LinearTerminal{{0},3}));
+    auto family=request(problem);family.profile="strategy-b.nominal-linear-exact-v1";
+    family.target=FamilyTarget::exact_optimal_relation;
+    const auto result=accepted(registered_prepared(problem,family).create()->run({}));
+    REQUIRE(result.family);
+    const CompleteFamilyProposal proposal{result.family->identity(),std::get<CompleteOptimalFamily>(result.family->outcome())};
+    StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};
+    configuration.representation=family.representation;
+    registry::StrategyRequest query{problem,configuration,family,"1",proposal.identity.lineage};
+    const auto verifier=registry::detail::find_compiled_verifier({"csl.verifier.strategy-b.nominal-linear-exact"},"1");
+    REQUIRE(verifier);
+    REQUIRE(verifier->verify(query,proposal).empty());
+    SUBCASE("foreign producer") {
+        auto altered=proposal;altered.identity.strategy={"csl.synthesis.reach-back"};
+        altered.family.completeness.binding=altered.identity;
+        CHECK_FALSE(verifier->verify(query,altered).empty());
+    }
+    SUBCASE("foreign verifier") {
+        auto altered=proposal;
+        altered.family.completeness.support=RegisteredCompletenessEvidence{{"csl.verifier.strategy-a.nominal-linear-exact"},"1","strategy-b.nominal-linear-exact-v1"};
+        CHECK_FALSE(verifier->verify(query,altered).empty());
+    }
+    SUBCASE("foreign proof") {
+        auto altered=proposal;
+        altered.family.completeness.support=RegisteredCompletenessEvidence{{"csl.verifier.strategy-b.nominal-linear-exact"},"1","nominal-linear-exact-v1"};
+        CHECK_FALSE(verifier->verify(query,altered).empty());
+    }
+    SUBCASE("foreign lineage") {
+        auto altered=proposal;
+        altered.identity.lineage=registry::detail::strategy_a_nominal_linear_exact_lineage(problem.identity(),2);
+        altered.family.completeness.binding=altered.identity;query.lineage=altered.identity.lineage;
+        CHECK_FALSE(verifier->verify(query,altered).empty());
+    }
+    for(const double upper : {0.5,2.0}) {
+        auto altered=proposal;
+        auto original=integrator(LinearTerminal{{0},3});
+        original.controls=ContinuousDomain{{interval(upper).as_handle(),interval(1).as_handle()}};
+        const auto other=resolve(original);
+        const auto other_result=accepted(registered_prepared(other,request(other)).create()->run({}));
+        REQUIRE(other_result.family);
+        const auto& candidate=std::get<CandidateFamily>(other_result.family->outcome());
+        altered.family.relation.payload=candidate.relation.payload;
+        REQUIRE(altered.family.relation.payload->h_relation_for_recording());
+        const auto& relation=*altered.family.relation.payload->h_relation_for_recording();
+        CHECK(contains(relation,{0,1,1,1,0})==(upper==2));
+        CHECK(contains(relation,{0,2,2,2,0})==(upper==2));
+        CHECK_FALSE(verifier->verify(query,altered).empty());
+    }
+}
+TEST_CASE("nominal B exact stops preserve the direct program candidate") {
+    const auto problem=resolve(integrator(LinearTerminal{{0},0}));
+    auto family=request(problem);family.profile="strategy-b.nominal-linear-exact-v1";
+    family.target=FamilyTarget::exact_optimal_relation;
+    SUBCASE("row budget") {
+        family.materialization_limit=8;
+        const auto result=accepted(registered_prepared(problem,family).create()->run({}));
+        CHECK(result.termination==Termination::resource_limit);
+        REQUIRE(result.family);CHECK_FALSE(result.complete_proposal);
+        CHECK(payload(result).optimization.has_value());
+    }
+    SUBCASE("cancel after program") {
+        std::stop_source cancellation;ExecutionContext context;context.cancellation=cancellation.get_token();
+        const auto prepared=registered_prepared(problem,family,false,Termination::completed,&cancellation);
+        const auto result=accepted(prepared.create()->run(context));
+        CHECK(result.termination==Termination::cancelled);
+        REQUIRE(result.family);CHECK_FALSE(result.complete_proposal);
+        CHECK(payload(result).optimization.has_value());
+    }
+}
+TEST_CASE("nominal B exact verifier rejects feasible nonoptimal histories") {
+    const auto problem=resolve(integrator(LinearTerminal{{1},0}));
+    auto family=request(problem);family.profile="strategy-b.nominal-linear-exact-v1";
+    family.target=FamilyTarget::exact_optimal_relation;
+    const auto result=accepted(registered_prepared(problem,family).create()->run({}));
+    REQUIRE(result.family);
+    auto altered=CompleteFamilyProposal{result.family->identity(),std::get<CompleteOptimalFamily>(result.family->outcome())};
+    const auto constant=resolve(integrator(LinearTerminal{{0},3}));
+    const auto feasible=accepted(registered_prepared(constant,request(constant)).create()->run({}));
+    REQUIRE(feasible.family);
+    altered.family.relation.payload=std::get<CandidateFamily>(feasible.family->outcome()).relation.payload;
+    REQUIRE(contains(*altered.family.relation.payload->h_relation_for_recording(),{0,1,2,1,1}));
+    StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};
+    configuration.representation=family.representation;
+    registry::StrategyRequest query{problem,configuration,family,"1",altered.identity.lineage};
+    const auto verifier=registry::detail::find_compiled_verifier({"csl.verifier.strategy-b.nominal-linear-exact"},"1");
+    REQUIRE(verifier);
+    CHECK_FALSE(verifier->verify(query,altered).empty());
 }

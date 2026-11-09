@@ -154,6 +154,8 @@ FROZEN_COMPANIONS = {
     "lotka-volterra-sampled-20261023": "examples/lotka-volterra-sampled-v1.html",
 }
 FROZEN_REVIEWED_ROUTES = {
+    "review05-family-query-20261110-3b98f5b0":
+        "reviewed: root inspected the shared-policy scalar control projection and recorded state paths; exact family coverage is checked separately",
     "exp02-paired-profiles-20261027-r1":
         "reviewed: frozen control-family report preserved with shared-policy saved-data companion",
 }
@@ -257,7 +259,8 @@ def source_inventory(root: Path) -> list[dict]:
             elif relative.endswith(("/geometry_figures.py", "/approx_extension_companions.py",
                                     "/geometry_opt_companions.py", "/viz10_plot_companions.py")):
                 disposition = "shared-quantitative-policy-companion-renderer"
-            elif relative == "scripts/reports/stage_projection_figures.py":
+            elif relative in {"scripts/reports/stage_projection_figures.py",
+                              "benchmarks/reporting/review05/render_family_query.py"}:
                 disposition = "adopted-shared-quantitative-policy"
             elif relative.endswith("/control_witness_companions.py"):
                 disposition = "saved-control-witness-gallery-companion-builder"

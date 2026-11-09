@@ -1,0 +1,40 @@
+{
+  "schema": "review05.integrated-ownership-tsan/1",
+  "source_revision": "cb6a42f645af940b8529c616e403ff9cd7c9f791",
+  "parents": [
+    "83b01b7f4af49e0f7b0b78770804bcc69501268a",
+    "cd63548a809f74054b7ce2334bf80ec5d16467a5",
+    "ea7d89b540fb03cd94b1869947dd3466f830facb"
+  ],
+  "source_scope": "Local integration of reviewed pending clock/family work, not merged main; later MSVC identifier-only fix and later phase-split changes are outside this capture.",
+  "compiler": "g++ (GCC) 16.2.1 20260810",
+  "flags": "RelWithDebInfo; C/C++ -fsanitize=thread -fno-omit-frame-pointer; executable -fsanitize=thread",
+  "tests": [
+    "quickhull_2d_lp_test",
+    "witness_selector_tests",
+    "execution_tests",
+    "timing_collector_tests",
+    "highs_convex_tests",
+    "highs_lp_tests",
+    "hv_conversion_tests",
+    "batch_runner_tests"
+  ],
+  "passed": 8,
+  "failed": 0,
+  "native_clocks_environment": "CSL_HIGHS_INTERNAL_CLOCKS=1; fixed for the whole process, no concurrent environment mutation",
+  "tsan_options": "halt_on_error=1",
+  "clock_prefix_occurrences": 983,
+  "scope_limits": [
+    "Executed stress paths only, not general race freedom or all providers.",
+    "Mixed CTest native stdout/stderr are retained, not promoted to paired performance measurements.",
+    "Keyword search over 85 changed product paths is a discovery aid, not a completed whole-source ownership review.",
+    "Final integrated-source review and later phase instrumentation remain required before #95 closure."
+  ],
+  "host": {
+    "machine": "x86_64",
+    "kernel": "7.2.8-9-omarchy",
+    "cpu_count": 8
+  },
+  "captured_utc": "2026-11-09T22:09:59.375963+00:00",
+  "archive_sha256": "a6770707fc8425b1a10df8ddd12b77882c4db4e4c721b3364152d9f393f46e5a"
+}

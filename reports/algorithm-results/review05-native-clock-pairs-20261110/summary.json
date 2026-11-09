@@ -1,0 +1,167 @@
+{
+  "schema": "review05.native-clock-pair-summary/1",
+  "verdict": "inconclusive",
+  "reason": "concurrent builds and no isolated limiter profile; reused binary provenance requires linkage before publication",
+  "attempts": 84,
+  "verified": 84,
+  "measured_mode_pairs": 36,
+  "clock_groups": 1267,
+  "cells": [
+    {
+      "horizon": 2,
+      "strategy": "csl.synthesis.reach-back",
+      "scope": "OBS-enabled synthesis run including diagnostic clock serialization",
+      "modes": [
+        {
+          "native_clocks": false,
+          "count": 6,
+          "median_ms": 18.944774000000002,
+          "min_ms": 18.010615,
+          "max_ms": 21.073355
+        },
+        {
+          "native_clocks": true,
+          "count": 6,
+          "median_ms": 33.025571,
+          "min_ms": 31.064608,
+          "max_ms": 35.375758
+        }
+      ],
+      "paired_enabled_minus_disabled_ms": {
+        "median": 13.233031000000002,
+        "min": 12.388268,
+        "max": 16.338479
+      }
+    },
+    {
+      "horizon": 2,
+      "strategy": "csl.synthesis.strategy-b",
+      "scope": "OBS-enabled synthesis run including diagnostic clock serialization",
+      "modes": [
+        {
+          "native_clocks": false,
+          "count": 6,
+          "median_ms": 1.8194645,
+          "min_ms": 1.11138,
+          "max_ms": 3.989112
+        },
+        {
+          "native_clocks": true,
+          "count": 6,
+          "median_ms": 2.5652274999999998,
+          "min_ms": 2.418806,
+          "max_ms": 4.923097
+        }
+      ],
+      "paired_enabled_minus_disabled_ms": {
+        "median": 0.769963,
+        "min": -1.4408210000000001,
+        "max": 3.719037
+      }
+    },
+    {
+      "horizon": 4,
+      "strategy": "csl.synthesis.reach-back",
+      "scope": "OBS-enabled synthesis run including diagnostic clock serialization",
+      "modes": [
+        {
+          "native_clocks": false,
+          "count": 6,
+          "median_ms": 49.2520255,
+          "min_ms": 47.307127,
+          "max_ms": 54.760285
+        },
+        {
+          "native_clocks": true,
+          "count": 6,
+          "median_ms": 85.3996315,
+          "min_ms": 77.34116,
+          "max_ms": 90.540144
+        }
+      ],
+      "paired_enabled_minus_disabled_ms": {
+        "median": 33.887759,
+        "min": 28.806296999999994,
+        "max": 40.496992
+      }
+    },
+    {
+      "horizon": 4,
+      "strategy": "csl.synthesis.strategy-b",
+      "scope": "OBS-enabled synthesis run including diagnostic clock serialization",
+      "modes": [
+        {
+          "native_clocks": false,
+          "count": 6,
+          "median_ms": 2.060172,
+          "min_ms": 1.166275,
+          "max_ms": 3.070981
+        },
+        {
+          "native_clocks": true,
+          "count": 6,
+          "median_ms": 4.341111,
+          "min_ms": 2.950994,
+          "max_ms": 6.250566
+        }
+      ],
+      "paired_enabled_minus_disabled_ms": {
+        "median": 2.859886,
+        "min": 0.013201000000000018,
+        "max": 5.084291
+      }
+    },
+    {
+      "horizon": 8,
+      "strategy": "csl.synthesis.reach-back",
+      "scope": "OBS-enabled synthesis run including diagnostic clock serialization",
+      "modes": [
+        {
+          "native_clocks": false,
+          "count": 6,
+          "median_ms": 152.5426675,
+          "min_ms": 147.617475,
+          "max_ms": 161.953474
+        },
+        {
+          "native_clocks": true,
+          "count": 6,
+          "median_ms": 228.593897,
+          "min_ms": 220.878731,
+          "max_ms": 255.441677
+        }
+      ],
+      "paired_enabled_minus_disabled_ms": {
+        "median": 76.0512295,
+        "min": 62.77524600000001,
+        "max": 95.592725
+      }
+    },
+    {
+      "horizon": 8,
+      "strategy": "csl.synthesis.strategy-b",
+      "scope": "OBS-enabled synthesis run including diagnostic clock serialization",
+      "modes": [
+        {
+          "native_clocks": false,
+          "count": 6,
+          "median_ms": 2.7085415,
+          "min_ms": 1.223266,
+          "max_ms": 2.844138
+        },
+        {
+          "native_clocks": true,
+          "count": 6,
+          "median_ms": 5.040744,
+          "min_ms": 4.254997,
+          "max_ms": 7.637819
+        }
+      ],
+      "paired_enabled_minus_disabled_ms": {
+        "median": 2.984029,
+        "min": 1.7289850000000002,
+        "max": 4.942792000000001
+      }
+    }
+  ]
+}

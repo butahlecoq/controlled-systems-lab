@@ -1,0 +1,111 @@
+{
+  "schema": "csl.review05.family-query-figure/1",
+  "matplotlib": "3.11.2",
+  "quantitative_axis_policy": "csl-report-quantitative-v1",
+  "source_problem_id": "csl.problem.v1.sha256:aeff3cafcdbd9d3155fccff7ba7335d4843a66643446030825a60fabd9dff024",
+  "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990",
+  "state_dimension": 1,
+  "control_coordinates": [
+    "u0",
+    "u1"
+  ],
+  "histories": [
+    {
+      "problem_id": "csl.problem.v1.sha256:aeff3cafcdbd9d3155fccff7ba7335d4843a66643446030825a60fabd9dff024",
+      "states": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "controls": [
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "original_objective": 0
+    },
+    {
+      "problem_id": "csl.problem.v1.sha256:aeff3cafcdbd9d3155fccff7ba7335d4843a66643446030825a60fabd9dff024",
+      "states": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          1
+        ]
+      ],
+      "controls": [
+        [
+          1
+        ],
+        [
+          0
+        ]
+      ],
+      "original_objective": 0
+    },
+    {
+      "problem_id": "csl.problem.v1.sha256:aeff3cafcdbd9d3155fccff7ba7335d4843a66643446030825a60fabd9dff024",
+      "states": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "controls": [
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "original_objective": 0
+    },
+    {
+      "problem_id": "csl.problem.v1.sha256:aeff3cafcdbd9d3155fccff7ba7335d4843a66643446030825a60fabd9dff024",
+      "states": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          1
+        ]
+      ],
+      "controls": [
+        [
+          0
+        ],
+        [
+          1
+        ]
+      ],
+      "original_objective": 0
+    }
+  ],
+  "scope": "saved query observations and independently checked control-cube projection; no solve during rendering",
+  "files": {
+    "control-projection.svg": "146c6d4d002f01552214f5a6b8475aa97a76e5a0800956bb07515ecda28ce7a4",
+    "control-projection.png": "c1469e9aa889a202420a9fa4040c187f7edf2fa24b01fb1059105421ffc6c11a"
+  }
+}
