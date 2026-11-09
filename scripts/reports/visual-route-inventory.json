@@ -1955,6 +1955,15 @@
       "disposition": "reviewed-static-diagram-exception"
     },
     {
+      "source": "benchmarks/reporting/mpc07/report.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "fixed-filter-policy.png",
+        "fixed-filter-policy.svg"
+      ],
+      "disposition": "adopted-shared-quantitative-policy"
+    },
+    {
       "source": "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py",
       "signal_count": 2,
       "asset_name_literals": [

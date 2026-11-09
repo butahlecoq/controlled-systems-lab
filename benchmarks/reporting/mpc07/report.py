@@ -130,7 +130,10 @@ def plot(checked,output):
         axes[1].set_aspect('equal',adjustable='box')
         for axis in axes:configure_numeric_axis(axis);axis.legend(fontsize=7)
         fig.suptitle('Two-state model: fixed-filter response illustration; not the full jointly optimized SLS-MPC algorithm',fontsize=10)
-        for extension in ('svg','png'):fig.savefig(output/('fixed-filter-policy.'+extension),dpi=160,metadata={'Date':None} if extension=='svg' else None)
+        for extension in ('svg','png'):
+            path=output/('fixed-filter-policy.'+extension)
+            fig.savefig(path,dpi=160,metadata={'Date':None} if extension=='svg' else None)
+            if extension=='svg':path.write_text('\n'.join(line.rstrip() for line in path.read_text().splitlines())+'\n')
         plt.close(fig)
     return dict(schema='csl.mpc07.figure/1',matplotlib=matplotlib.__version__,quantitative_axis_policy=STYLE_ID,
         virtual_terminal_vertices=virtual,physical_vertices=physical,source_policy=checked,

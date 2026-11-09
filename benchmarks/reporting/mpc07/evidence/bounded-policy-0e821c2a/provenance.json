@@ -5,11 +5,12 @@
   "native_binary_sha256": "266e1cda61b064b4603ff6499d76dc4db59106e4e673905f585c54caafa9c533",
   "original_report_manifest_sha256": "646c1eedf12424ddec394867343923d7505d093f7974e739d6a6f7eb901c9e5c",
   "original_raw_manifest_sha256": "dad11a1ed5172013ad7feb5ab29f51610fe46e6ea0a11a1c78c808e67244c172",
-  "reading_layer_change": "Only raw download/README links in thin outer HTML; original generated report remains byte-preserved in offline.zip",
+  "reading_layer_change": "Only raw download/README links in thin outer HTML; original generated report remains byte-preserved in offline.zip; outer SVG trailing-line whitespace normalized, original bytes remain in ZIP",
   "preserved_local_exploration": [
     "mpc07-pilot-v1:12 additive attempts then fraction-path failure; WIP source not independently frozen",
     "mpc07-pilot-v2:24 correctness candidates; WIP source, not timing evidence",
     "mpc07-capture-fd3485ba:setup failed before native start because /usr/bin/time absent; immutable partial folder/log retained"
   ],
-  "claim": "144 complete verified rational reconstructions, including24warmups;120 measured attempts;2 separate expected native probes; descriptive timings only"
+  "claim": "144 complete verified rational reconstructions, including24warmups;120 measured attempts;2 separate expected native probes; descriptive timings only",
+  "post_capture_report_source_sha256": "af05e8d2e19b215802b77d6cc9629fb72d3b4cbdb53d9e3f089871ad4ebadce8"
 }
