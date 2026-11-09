@@ -145,6 +145,8 @@ FROZEN_COMPANIONS = {
     "lotka-volterra-sampled-20261023": "examples/lotka-volterra-sampled-v1.html",
 }
 FROZEN_REVIEWED_ROUTES = {
+    "review05-family-query-20261110-3b98f5b0":
+        "reviewed: root inspected the shared-policy scalar control projection and recorded state paths; exact family coverage is checked separately",
     "exp02-paired-profiles-20261027-r1":
         "reviewed: frozen control-family report preserved with shared-policy saved-data companion",
 }

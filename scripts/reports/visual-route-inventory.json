@@ -3335,6 +3335,16 @@
       "follow_up_issue": 669
     },
     {
+      "route": "review05-family-query-20261110-3b98f5b0",
+      "source_bundle": "review05-family-query-20261110-3b98f5b0",
+      "assets": [
+        "control-projection.png",
+        "control-projection.svg"
+      ],
+      "index_sha256": "49902c79e0b9e39cb5f9b383649fe095b9206776293a89bbfdb019fdd80b5e06",
+      "disposition": "reviewed: root inspected the shared-policy scalar control projection and recorded state paths; exact family coverage is checked separately"
+    },
+    {
       "route": "review05-profile-matrix-20261031",
       "source_bundle": "review05-profile-matrix-20261031",
       "assets": [

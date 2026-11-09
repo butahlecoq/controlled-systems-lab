@@ -1,0 +1,12 @@
+{
+  "scope": "40 separate whole-process diagnostic runs; A/B combined, not isolated native solver or verifier",
+  "sample_period_seconds": 0.01,
+  "sampled_cpu_seconds": "1.38",
+  "wait4_child_cpu_seconds": 3.383618,
+  "highest_symbol_share_percent": 7.25,
+  "source_mapping": {
+    "exact_h feasible/normalize_rows/Row copy": "src/synthesis/exact_h_polytope.hpp",
+    "JSON destroy/serialization": "pinned nlohmann JSON and src/artifacts/run_statistics_json.cpp"
+  },
+  "verdict": "inconclusive: no unique limiter; exact-H feasibility/normalization, row copies and JSON/OBS work all sampled; whole-process mixing, incomplete library call graph and 10ms sampling prevent attribution to an isolated phase"
+}
