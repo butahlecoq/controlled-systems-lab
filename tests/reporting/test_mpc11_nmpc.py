@@ -71,6 +71,27 @@ class NMPCTests(unittest.TestCase):
         self.assertFalse(result['accepted']);self.assertFalse(result['success'])
         self.assertEqual(result['status'],'Maximum_Iterations_Exceeded')
 
+class MeshReplayTests(unittest.TestCase):
+    def test_fresh_replay_allows_only_clock_difference(self):
+        import tempfile
+        from types import SimpleNamespace
+        from unittest import mock
+        from mesh_summary import replay
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);bridge=root/'bridge';bridge.write_bytes(b'fixture')
+            for case in ['lv','fuel']:
+                for mode in ['rk4','rk4-tight']:
+                    folder=root/'bundle'/f'syn-nl-{case}-01'/mode;folder.mkdir(parents=True)
+                    (folder/'request.json').write_text('{}')
+                    (folder/'stdout.json').write_text(json.dumps({'elapsed_seconds':1.,'states':[[1.,2.]],'status':'complete'}))
+            def process(states):return SimpleNamespace(returncode=0,stderr=b'',stdout=json.dumps({'elapsed_seconds':2.,'states':states,'status':'complete'}).encode())
+            with mock.patch('mesh_summary.subprocess.run',return_value=process([[1.,2.]])):
+                replay(root/'bundle',bridge,root/'valid')
+            receipt=json.loads((root/'valid/receipt.json').read_text())
+            self.assertEqual(len(receipt['records']),4)
+            with mock.patch('mesh_summary.subprocess.run',return_value=process([[1.,3.]])):
+                with self.assertRaisesRegex(ValueError,'numerical response'):replay(root/'bundle',bridge,root/'invalid')
+
 class PrefixReplayTests(unittest.TestCase):
     def test_partial_controls_keep_original_N_and_no_completed_objective(self):
         import os,tempfile

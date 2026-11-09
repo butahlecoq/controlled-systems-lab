@@ -59,8 +59,13 @@ def replay(bundle,bridge,output):
             (target/'stdout.json').write_bytes(p.stdout);(target/'stderr.txt').write_bytes(p.stderr)
             if p.returncode!=0:raise ValueError('independent replay failed')
             actual=json.loads(p.stdout);expected=load(source/'stdout.json')
-            if actual!=expected:raise ValueError('fresh native replay differs from saved raw response')
-            records.append({'case':case,'mode':mode,'request_sha256':digest(request),'stdout_sha256':digest(target/'stdout.json'),'return_code':p.returncode,'full_response_equal':True})
+            # A fresh process has a new measured duration; all numerical and
+            # identity fields must reproduce exactly. Preserve both raw clocks.
+            for response in [actual,expected]:
+                if not np.isfinite(response['elapsed_seconds']) or response['elapsed_seconds']<0:raise ValueError('invalid native replay clock')
+            numerical=lambda response:{k:v for k,v in response.items() if k!='elapsed_seconds'}
+            if numerical(actual)!=numerical(expected):raise ValueError('fresh native replay differs from saved numerical response')
+            records.append({'case':case,'mode':mode,'request_sha256':digest(request),'stdout_sha256':digest(target/'stdout.json'),'return_code':p.returncode,'all_fields_except_elapsed_seconds_equal':True,'saved_elapsed_seconds':expected['elapsed_seconds'],'fresh_elapsed_seconds':actual['elapsed_seconds']})
     write(output/'receipt.json',{'bridge_sha256':digest(bridge),'records':records,'scope':'Fresh execution of existing CSL native replay binary, no controller solve or rebuild.'})
 
 
