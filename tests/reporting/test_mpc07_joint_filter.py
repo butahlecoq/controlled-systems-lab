@@ -33,11 +33,18 @@ class JointFilterTests(unittest.TestCase):
         result=json.loads((ROOT/'tests/reporting/fixtures/mpc07-joint-gain-t08.json').read_text())
         payload=J.program(8,'fixed-gain')
         checked=J.check_result(payload,result)
-        self.assertEqual(checked['upper_minus_oracle_squared'],0)
+        self.assertEqual(checked['upper_minus_virtual_profile_oracle_squared'],0)
         changed=copy.deepcopy(result)
         index=payload['coordinates']['state_response'][-1][0][2]
         changed['primal'][index]+=.001
         with self.assertRaises(ValueError):J.check_result(payload,changed)
+
+    def test_fixed_filter_virtual_optimum_is_not_a_physical_lower_bound(self):
+        s=[[J.RHO,Q(5,4)] for _ in range(2)];h=[[Q(0)]*4,[Q(0),Q(-1),Q(0),Q(0)]]
+        checked=J.check_policy(2,'fixed-filter',s,h)
+        self.assertEqual(checked['virtual_profile_oracle_squared'],Q(9,4))
+        self.assertEqual(checked['physical_unrestricted_lower_squared'],Q(65,64)**2)
+        self.assertNotIn('physical_lower_oracle_squared',checked)
 
     def test_joint_filter_has_design_variables_and_fixed_intersection(self):
         p=J.program(2,'joint');f=J.program(2,'fixed-filter')

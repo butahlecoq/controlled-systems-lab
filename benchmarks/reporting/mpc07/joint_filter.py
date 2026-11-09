@@ -52,8 +52,9 @@ def check_policy(n,kind,s,h):
         if bounds[0]>64 or bounds[1]>16:raise ValueError('robust state bound violated')
         responses.append(response);supports.append(bounds)
     bound=sum(map(abs,response[1]));lower=oracle(n,kind)
-    return dict(virtual_terminal_absolute=bound,virtual_terminal_squared=bound**2,physical_lower_oracle_squared=lower,
-        upper_minus_oracle_squared=bound**2-lower,state_responses=responses,state_supports=supports,
+    return dict(virtual_terminal_absolute=bound,virtual_terminal_squared=bound**2,virtual_profile_oracle_squared=lower,physical_unrestricted_lower_squared=oracle(n,'joint'),
+        upper_minus_virtual_profile_oracle_squared=bound**2-lower,
+        upper_minus_physical_lower_squared=bound**2-oracle(n,'joint'),state_responses=responses,state_supports=supports,
         filter=s,normalized_policy=h,physical_information='zeta past=diag(s)^-1*(x_next-A*x-B*u); current/future zeta forbidden')
 
 
@@ -124,7 +125,7 @@ def check_result(p,r):
                 exact=checked['state_responses'][t][component][column]
                 difference=abs(float(exact)-original);maximum_response_adjustment=max(maximum_response_adjustment,difference)
                 if difference>1e-10:raise ValueError('joint response reconstruction too far from native witness')
-    if checked['upper_minus_oracle_squared']<0:raise ValueError('joint candidate contradicts exact oracle')
+    if checked['upper_minus_virtual_profile_oracle_squared']<0:raise ValueError('joint candidate contradicts exact oracle')
     if abs(primal[c['bound']]**2-float(oracle(n,kind)))>1e-6:raise ValueError('joint native optimum differs from literal oracle')
     return dict(status='verified-joint-rational-policy',maximum_native_response_adjustment=maximum_response_adjustment,
                 response_reconstruction='exact recurrence from reconstructed filter/control; raw response arrays unchanged',rationalization='new candidate limit_denominator(2**48), exact response/filter/support replay',**checked)

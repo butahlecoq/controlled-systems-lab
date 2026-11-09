@@ -73,3 +73,30 @@ terminal velocity is affine in the plan, so its squared worst cost is convex;
 negating plan and physical disturbances preserves cost and feasibility. Thus
 the feasible average zero plan is optimal. The gain comparison is the declared
 pure prescribed full-state gain, not an unmeasured optimized nominal trajectory.
+
+The stored response omits the zero initial-state column. It extends to the
+paper's full block identity by adding Sigma[0,0]=I and choosing the corresponding
+initial-state response consistently with the observer controller. The physical
+initial state is fixed at zero, so those added columns do not change this OCP.
+Positive diagonal filter blocks make the past state/disturbance map invertible;
+the observer implementation is therefore a causal LTV state-history feedback.
+It reconstructs lumped eta, not the unobserved physical w or delta separately.
+
+Timing scope is batch policy synthesis on a fixed initial state, with Python
+assembly, native public-port setup/run and exact checking separate. It is not
+an executed receding-horizon MPC update-latency claim. The paper's terminal and
+shrinking-horizon/backup conditions, full nondiagonal filter, uncertainB and
+additional dimensions remain explicit future profiles, not hidden in these
+measurements. No library API, required dependency or standalone release changes.
+
+
+## Bound-field distinction
+
+virtual_profile_oracle_squared is the optimum of the declared policy/filter LP
+class. physical_unrestricted_lower_squared is the independent causal physical
+lower bound, always (65/64)^(2(T-1)) for this toy. Their gaps are separate. The
+fixed-filter optimum9/4 atT2 is not a physical lower bound. An initial0075400d
+capture used the misleading physical_lower_oracle_squared field name for the
+class/virtual oracle; its native inputs/results are retained with that metadata
+erratum, and it is not the corrected reading layer. No numeric values or LPs
+changed with this field correction.
