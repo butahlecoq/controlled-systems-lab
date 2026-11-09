@@ -3,6 +3,10 @@
 import argparse
 import math
 from pathlib import Path
+import hashlib
+import inspect
+import subprocess
+import do_mpc
 import statistics
 import time
 from check_affine_saved import check as check_affine
@@ -23,8 +27,24 @@ def selected(root,key):
     folder=completed[0];return folder,validate_receipt(folder)
 
 
-def summarize(root):
-    environment=load(root/'environment.json');records=[]
+def checked_sources(root,snapshot=None):
+    environment=load(root/'environment.json');source=Path(__file__).resolve().parent
+    hashes=environment['identity']['source_sha256']
+    for name,expected in hashes.items():
+        if name!='check_timing.py' and sha(source/name)!=expected:raise ValueError('consumed source binding mismatch: '+name)
+        if snapshot is not None:
+            path=(snapshot/name).resolve()
+            if not path.is_relative_to(snapshot.resolve()) or sha(path)!=expected:raise ValueError('copied source snapshot binding mismatch: '+name)
+            committed=subprocess.check_output(['git','show',environment['source_revision']+':benchmarks/reporting/mpc11/'+name],cwd=source)
+            if path.read_bytes()!=committed:raise ValueError('source snapshot differs from recorded commit')
+    if sha(Path(inspect.getfile(do_mpc.controller.MPC)))!=environment['identity']['do_mpc_controller_source_sha256']:raise ValueError('do-mpc source binding mismatch')
+    return {'capture_source_sha256':hashes,'review_tool_sha256':sha(Path(__file__)),
+            'review_tool_scope':'current independently versioned saved-data checker; capture check_timing.py snapshot remains bound to original commit',
+            'copied_snapshots_checked':snapshot is not None}
+
+
+def summarize(root,snapshot=None):
+    environment=load(root/'environment.json');sources=checked_sources(root,snapshot);records=[]
     for repetition in ['warmup',*[f'rep-{i:02d}' for i in range(5)]]:
         for arm in ['affine','nmpc']:
             key=repetition+'/'+arm
@@ -45,6 +65,7 @@ def summarize(root):
                 for case in ['syn-nl-lv-01','syn-nl-fuel-01']:
                     source=capture/case;native=load(source/'stdout.json');attempt=next(r for r in attempts if r['case_id'].lower()==case)
                     values={'configuration_construction_seconds':attempt['configuration_construction_ns']/1e9,'native_setup_seconds':native['setup_ns']/1e9,'native_optimization_seconds':native['solve_ns']/1e9,'native_outer_process_seconds':attempt['whole_process_ns']/1e9}
+                    if values['native_setup_seconds']+values['native_optimization_seconds']>values['native_outer_process_seconds']+.001:raise ValueError('native affine clocks exceed process span')
                     integration={}
                     for mode in ['cvodes','cvodes-tight','rk4','rk4-tight']:
                         target=nonlinear/case/mode;raw=load(target/'stdout.json');process=load(target/'process.json')
@@ -55,6 +76,8 @@ def summarize(root):
                 for checked in checks:
                     case=checked['case_id'].lower();source=capture/case;attempt=load(source/'attempt.json');updates=[load(source/f'update-{j:03d}/result.json') for j in range(len(attempt['updates']))]
                     values={'controller_setup_seconds':sum(nonnegative(r['setup_seconds']) for r in updates),'optimization_seconds':sum(nonnegative(r['solve_seconds']) for r in updates),'held_cvodes_execution_seconds':sum(nonnegative(r['elapsed_seconds']) for r in attempt['execution_intervals'])}
+                    worker=load(source/'process.json')
+                    if sum(values.values())>worker['whole_process_seconds']+.001:raise ValueError('NMPC clocks exceed worker span')
                     integration={}
                     for mode in ['rk4','rk4-tight']:
                         raw=load(source/mode/'stdout.json');process=load(source/mode/'process.json')
@@ -73,12 +96,12 @@ def summarize(root):
                 for mode in samples[0]['integration']:
                     aggregate['integration_seconds'][mode]={key:stats([s['integration'][mode][key] for s in samples]) for key in ['native_integration_seconds','whole_process_seconds']}
             aggregates.append(aggregate)
-    return {'schema':'csl.mpc11.alternating-timing/1','environment_sha256':sha(root/'environment.json'),'verdict':'inconclusive comparative performance: configured policy classes differ and native limiter profile is unavailable; descriptive repeated costs only',
+    return {'schema':'csl.mpc11.alternating-timing/1','checked_sources':sources,'environment_sha256':sha(root/'environment.json'),'verdict':'inconclusive comparative performance: configured policy classes differ and native limiter profile is unavailable; descriptive repeated costs only',
             'clock_scopes':'Affine native setup/solve, Python configuration construction, NMPC per-update setup/solve/held CVODES, and nonlinear integration/process clocks are distinct. Warmups and saved checker clocks excluded from measured aggregates. CVODES affine integration clock includes integrator setup; NMPC held CVODES excludes its once-per-case integrator setup, retained in process envelope.',
             'records':records,'aggregates':aggregates}
 
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--bundle',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--bundle',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--source-snapshot',type=Path);a=p.parse_args()
     if a.output.exists():p.error('output must be new')
-    write(a.output,summarize(a.bundle.resolve()))
+    write(a.output,summarize(a.bundle.resolve(),a.source_snapshot.resolve() if a.source_snapshot else None))
