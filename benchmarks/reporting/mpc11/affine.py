@@ -136,6 +136,31 @@ def program(scenario, coefficients):
     return result
 
 
+
+def permute_program(original, native_to_joint):
+    result = json.loads(json.dumps(original))
+    width = len(original['q_diagonal'])
+    if sorted(native_to_joint) != list(range(width)):
+        raise ValueError('variable ordering must be a permutation')
+    joint_to_native = [0]*width
+    for native, joint in enumerate(native_to_joint):
+        joint_to_native[joint] = native
+    for name in ['q_diagonal','linear','variables']:
+        result[name] = [original[name][joint] for joint in native_to_joint]
+    matrix = original['constraints']; columns, values, starts = [], [], [0]
+    for row in range(matrix['rows']):
+        pairs = sorted((joint_to_native[matrix['column_indices'][k]], matrix['values'][k])
+                       for k in range(matrix['row_offsets'][row], matrix['row_offsets'][row+1]))
+        columns.extend(j for j, _ in pairs); values.extend(a for _, a in pairs); starts.append(len(values))
+    result['constraints'] = {**matrix, 'row_offsets':starts,'column_indices':columns,'values':values}
+    result['coordinates']['joint_indices'] = joint_to_native
+    result['coordinates']['native_order'] = 'controls-first; joint_indices reconstructs states-then-controls'
+    result['program_id'] += '/controls-first'
+    result.pop('program_sha256',None)
+    result['program_sha256'] = canonical_hash(result)
+    return result
+
+
 def check_solution(scenario, coefficients, qp, result):
     if result.get('termination') != 'completed' or result.get('mathematical_outcome') != 'optimal' or 'primal' not in result:
         return {'status':'unavailable','reason':'no completed numerical optimal primal','termination':result.get('termination')}
@@ -145,8 +170,9 @@ def check_solution(scenario, coefficients, qp, result):
         return {'status':'incorrect','reason':'nonfinite or malformed primal'}
     point = np.array(result['primal']); n, m = len(scenario['states']), len(scenario['controls'])
     count = scenario['time']['intervals']; start = n*(count+1)
-    states = point[:start].reshape((count+1,n))*coefficients['state_scale']
-    controls = point[start:].reshape((count,m))*coefficients['control_scale']
+    joint = point[np.array(qp['coordinates'].get('joint_indices',list(range(len(point)))))]
+    states = joint[:start].reshape((count+1,n))*coefficients['state_scale']
+    controls = joint[start:].reshape((count,m))*coefficients['control_scale']
     replay = [np.array([row['initial'] for row in scenario['states']])]
     for stage, control in zip(coefficients['physical_coefficients'],controls):
         replay.append(np.array(stage['A'])@replay[-1]+np.array(stage['B'])@control+stage['c'])

@@ -51,6 +51,21 @@ class AffineTests(unittest.TestCase):
             self.assertEqual(qp['constraints']['cols'], n*(count+1)+m*count)
 
 
+    def test_variable_permutation_preserves_cost_bounds_and_rows(self):
+        qp = {'q_diagonal':[0.,2.,4.], 'linear':[0.,-4.,1.], 'offset':4.,
+              'variables':[[0,0],[-10,10],[-2,2]], 'program_id':'tiny',
+              'constraints':{'rows':1,'cols':3,'row_offsets':[0,3], 'column_indices':[0,1,2], 'values':[-1.,1.,-1.]},
+              'coordinates':{}, 'program_sha256':'old'}
+        result = MODULE.permute_program(qp, [2,0,1])
+        old = np.array([0.,1.,1.]); native = old[[2,0,1]]
+        np.testing.assert_allclose(native[result['coordinates']['joint_indices']],old)
+        def cost(data, point):
+            return .5*np.dot(data['q_diagonal'],point**2)+np.dot(data['linear'],point)+data['offset']
+        self.assertAlmostEqual(cost(qp,old),cost(result,native))
+        row=result['constraints']
+        self.assertAlmostEqual(sum(a*native[j] for a,j in zip(row['values'],row['column_indices'])),0.)
+
+
 
 if __name__ == '__main__':
     unittest.main()
