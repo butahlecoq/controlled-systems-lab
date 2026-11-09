@@ -19,6 +19,13 @@ class ScalarQueryOracleTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "reported objective"):
             oracle.verify_history([[0],[1],[2]], [[1],[1]], 2, 2, 0)
 
+    def test_rejects_invalid_initial_state_and_actuator_bounds(self):
+        for coefficient in (0, 1):
+            for states, controls in (([[1], [1], [1]], [[0], [0]]),
+                                     ([[0], [2], [2]], [[2], [0]])):
+                with self.assertRaises(ValueError):
+                    oracle.verify_history(states, controls, 0, 2, coefficient)
+
     def test_rejects_broken_recurrence_and_nonfinite_input(self):
         for states in ([[0],[0],[1]], [[0],[float("nan")],[0]]):
             with self.assertRaises(ValueError):
