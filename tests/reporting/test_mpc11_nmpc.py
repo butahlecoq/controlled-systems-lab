@@ -47,6 +47,26 @@ class NMPCTests(unittest.TestCase):
         self.assertFalse(result['accepted']);self.assertFalse(result['success'])
         self.assertEqual(result['status'],'Maximum_Iterations_Exceeded')
 
+class PrefixReplayTests(unittest.TestCase):
+    def test_partial_controls_keep_original_N_and_no_completed_objective(self):
+        import os,tempfile
+        from run_nmpc import replay_prefix
+        from affine import canonical_hash
+        bridge=os.environ.get('CSL_MPC11_REPLAY_BRIDGE')
+        if not bridge:self.skipTest('CSL_MPC11_REPLAY_BRIDGE required')
+        s=NMPCTests().scenario();initial=np.array([1.2,.75]);held=np.asarray(execution_integrator(s)(x0=initial,p=[.02])['xf']).T
+        physical=(np.vstack([initial,held])*[100,80]).tolist();controls=[[.02]]
+        record={'controls':controls,'physical_states':physical,'witness_sha256':canonical_hash({'controls':controls,'physical_states':physical})}
+        with tempfile.TemporaryDirectory() as tmp:
+            summary=replay_prefix(s,record,Path(tmp),Path(bridge))
+            self.assertEqual(summary['rk4']['status'],'complete');self.assertIsNone(summary['rk4']['completed_objective'])
+            request=json.loads((Path(tmp)/'rk4/request.json').read_text())
+            self.assertEqual(request['scenario']['time']['intervals'],1)
+            self.assertEqual(request['full_original_interval_count'],30)
+            self.assertEqual(request['full_scenario_sha256'],canonical_hash(s))
+            replay=json.loads((Path(tmp)/'rk4/record.json').read_text())
+            self.assertAlmostEqual(replay['running_cost_prefix'],.05/30*(.02/.05)**2)
+
 class SavedNMPCTests(unittest.TestCase):
     def test_rebound_objective_normalization_metadata_rejects(self):
         import os,shutil,tempfile,hashlib

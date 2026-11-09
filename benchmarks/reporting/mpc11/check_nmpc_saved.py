@@ -14,12 +14,36 @@ from nonlinear import make_request
 from run_nmpc import running_prefix
 
 
+def check_publication_redactions(bundle):
+    path=bundle/'publication-redactions.json'
+    if not path.exists():return
+    receipt=json.loads(path.read_text());originals=json.loads((bundle/'original-file-hashes.json').read_text())
+    if receipt['schema']!='csl.mpc11.warning-prefix-redactions/1' or receipt['scope']!='warning-text path prefixes only':raise ValueError('unsupported publication redaction scope')
+    entries=receipt['files']
+    allowed={f'syn-nl-{case}-01/{name}' for case in ['lv','fuel'] for name in ['worker-stderr.txt','update-000/solver.log']}
+    if {entry['path'] for entry in entries}!=allowed:raise ValueError('unexpected redacted files')
+    for name,digest in originals.items():
+        if name not in allowed and hashlib.sha256((bundle/name).read_bytes()).hexdigest()!=digest:raise ValueError('publication changed non-warning payload: '+name)
+    for entry in entries:
+        published=(bundle/entry['path']).read_bytes()
+        if hashlib.sha256(published).hexdigest()!=entry['published_sha256']:raise ValueError('published redacted stream mismatch')
+        recovered=published
+        for original,replacement in receipt['prefix_map'].items():
+            if not original.startswith('/') or replacement not in ['<OPTIONAL_ENV>','<PYTHON_RUNTIME>']:raise ValueError('unsupported prefix mapping')
+            for line in recovered.splitlines():
+                if replacement.encode() in line and not (line.startswith(replacement.encode()+b'/') and b'.py:' in line):raise ValueError('redaction outside Python warning path line')
+            recovered=recovered.replace(replacement.encode(),original.encode())
+        digest=hashlib.sha256(recovered).hexdigest()
+        if digest!=entry['original_sha256'] or digest!=originals[entry['path']]:raise ValueError('original warning stream recovery mismatch')
+
+
 def check(bundle):
     load=lambda path:json.loads(path.read_text())
     hashes=load(bundle/'file-hashes.json')
     for name,digest in hashes.items():
         path=(bundle/name).resolve()
         if not path.is_relative_to(bundle.resolve()) or hashlib.sha256(path.read_bytes()).hexdigest()!=digest:raise ValueError('saved hash mismatch: '+name)
+    check_publication_redactions(bundle)
     reports=[]
     for case in ['lv','fuel']:
         folder=bundle/f'syn-nl-{case}-01';s=load(folder/'scenario.json');validate(s);attempt=load(folder/'attempt.json');controls=attempt['controls'];count=len(controls);n=s['time']['intervals'];sub=s['independent_replay']['report_subintervals_per_hold'];scales=np.array([v['scale'] for v in s['states']])
