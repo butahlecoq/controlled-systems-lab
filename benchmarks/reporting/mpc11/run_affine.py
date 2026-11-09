@@ -12,7 +12,7 @@ import resource
 import subprocess
 import time
 
-from affine import canonical_hash, check_solution, model, program, permute_program, condense_program
+from affine import canonical_hash, check_solution, model, program, permute_program, condense_program, scale_objective
 from check_scenarios import validate
 
 
@@ -42,6 +42,7 @@ def main():
     parser.add_argument('--output',required=True,type=Path)
     parser.add_argument('--controls-first',action='store_true',help='equivalent public-QP variable permutation; retain both formulations')
     parser.add_argument('--condense',action='store_true',help='equivalent affine equality elimination with full joint reconstruction')
+    parser.add_argument('--objective-multiplier',type=float,default=1.,help='positive uniform scaling of all cost terms; no change to minimizers')
     args=parser.parse_args()
     if args.condense and args.controls_first:parser.error('choose one formulation transform')
     bridge=args.bridge.resolve(strict=True);out=args.output.resolve()
@@ -68,6 +69,9 @@ def main():
                 qp=permute_program(qp,[*range(start,width),*range(start)])
         folder=out/case.lower();folder.mkdir()
         if scenario is not None:write(folder/'scenario.json',scenario);write(folder/'model.json',coefficients)
+        if scenario is not None and args.objective_multiplier!=1.:
+            unscaled_qp=qp;qp=scale_objective(qp,args.objective_multiplier)
+            write(folder/'unscaled-program.json',unscaled_qp)
         write(folder/'program.json',qp)
         if scenario is not None and (args.controls_first or args.condense):write(folder/'joint-program.json',original_qp)
         construction_ns=time.monotonic_ns()-started

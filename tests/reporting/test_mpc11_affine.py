@@ -83,6 +83,20 @@ class AffineTests(unittest.TestCase):
         self.assertEqual(result['joint_reconstruction']['variables'],joint['variables'])
 
 
+    def test_uniform_objective_scaling_preserves_constraints_and_cost_map(self):
+        original = {'program_id':'small','program_sha256':'old','q_diagonal':[2.,4.],
+                    'linear':[-3.,1.],'offset':5.,'variables':[[0,1],[0,2]],'rows':[],
+                    'constraints':{'rows':0,'cols':2,'row_offsets':[0],'column_indices':[],'values':[]}}
+        result = MODULE.scale_objective(original,1000.)
+        point = np.array([.25,1.25])
+        cost = lambda q: .5*np.dot(q['q_diagonal'],point**2)+np.dot(q['linear'],point)+q['offset']
+        self.assertAlmostEqual(cost(result)/result['objective_multiplier'],cost(original))
+        self.assertEqual(result['constraints'],original['constraints'])
+        self.assertEqual(result['variables'],original['variables'])
+        for invalid in [0.,-1.,float('inf')]:
+            with self.assertRaises(ValueError):MODULE.scale_objective(original,invalid)
+
+
 
 if __name__ == '__main__':
     unittest.main()

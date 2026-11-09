@@ -198,6 +198,23 @@ def condense_program(scenario, coefficients, original):
     return result
 
 
+
+def scale_objective(original, factor):
+    if not math.isfinite(factor) or factor <= 0:
+        raise ValueError('objective multiplier must be finite and positive')
+    result=json.loads(json.dumps(original))
+    result['source_unscaled_program_sha256']=result.pop('program_sha256')
+    for name in ['q_diagonal','linear']:result[name]=[factor*x for x in result[name]]
+    if 'q_matrix' in result:result['q_matrix']=[[factor*x for x in row] for row in result['q_matrix']]
+    result['offset']*=factor
+    result['objective_multiplier']=factor*original.get('objective_multiplier',1.)
+    result['solver_objective_id']=original.get('objective_id','authored-objective')+'/positive-uniform-scale/'+format(result['objective_multiplier'],'.17g')
+    result['program_id']+='/objective-times-'+format(factor,'.17g')
+    result['objective_map']='authored objective = native quadratic objective / objective_multiplier; same minimizers'
+    result['program_sha256']=canonical_hash(result)
+    return result
+
+
 def check_solution(scenario, coefficients, qp, result):
     if result.get('termination') != 'completed' or result.get('mathematical_outcome') != 'optimal' or 'primal' not in result:
         return {'status':'unavailable','reason':'no completed numerical optimal primal','termination':result.get('termination')}
@@ -224,18 +241,21 @@ def check_solution(scenario, coefficients, qp, result):
     running = objective['running_weight']/count*float(np.sum(((controls-refs)/objective['running_scale'])**2))
     direct = terminal+running
     quadratic = float(point@np.array(qp['q_matrix'])@point) if 'q_matrix' in qp else float(np.dot(qp['q_diagonal'],point**2))
-    qp_cost = .5*quadratic+float(np.dot(qp['linear'],point))+qp['offset']
+    solver_qp_cost = .5*quadratic+float(np.dot(qp['linear'],point))+qp['offset']
+    multiplier=qp.get('objective_multiplier',1.)
+    if not math.isfinite(multiplier) or multiplier <= 0:return {'status':'incorrect','reason':'invalid objective map'}
+    qp_cost=solver_qp_cost/multiplier
     violation=max(max(lo-x,x-hi,0.) for x,(lo,hi) in zip(point,qp['variables']))
     if 'joint_reconstruction' in qp:
         violation=max(violation,max(max(lo-x,x-hi,0.) for x,(lo,hi) in zip(joint,qp['joint_reconstruction']['variables'])))
     replay_error=float(np.max(np.abs(states-np.array(replay))))
     objective_error=abs(direct-qp_cost)
     native_objective=result.get('primal_check',{}).get('objective')
-    native_error=abs(direct-native_objective) if isinstance(native_objective,(int,float)) and math.isfinite(native_objective) else None
+    native_error=abs(direct-native_objective/multiplier) if isinstance(native_objective,(int,float)) and math.isfinite(native_objective) else None
     status='verified-numerical-witness' if (violation<=1e-7 and replay_error<=1e-6 and objective_error<=1e-7 and native_error is not None and native_error<=1e-7 and not result.get('contract_diagnostics')) else 'incorrect'
     return {'status':status,'physical_states':states.tolist(),'physical_controls':controls.tolist(),
         'affine_replay_states':np.array(replay).tolist(),'terminal_cost':terminal,'running_cost':running,
-        'objective':direct,'qp_objective':qp_cost,'objective_difference':objective_error,'native_objective_difference':native_error,
+        'objective':direct,'qp_objective':qp_cost,'solver_qp_objective':solver_qp_cost,'objective_multiplier':multiplier,'objective_difference':objective_error,'native_objective_difference':native_error,
         'max_scaled_bound_violation':violation,'max_physical_affine_replay_difference':replay_error,
         'witness_sha256':canonical_hash({'states':states.tolist(),'controls':controls.tolist()}),
         'assurance':'numerical replay and cost consistency; no exact/global nonlinear or family certificate'}

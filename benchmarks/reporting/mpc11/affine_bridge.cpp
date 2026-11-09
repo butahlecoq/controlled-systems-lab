@@ -77,7 +77,7 @@ int main(int argc,char** argv) try {
     json output={{"schema","csl.mpc11.affine-result/1"},{"case_id",input.at("case_id")},
         {"program_id",input.at("program_id")},{"program_sha256",input.at("program_sha256")},
         {"formulation",input.value("formulation",std::string("public-CSL-ConvexProgram-joint-state-control-history"))},
-        {"assurance","numerical-binary64"},{"family_coverage","not-established"}};
+        {"objective_multiplier",input.value("objective_multiplier",1.0)},{"assurance","numerical-binary64"},{"family_coverage","not-established"}};
     if(const auto* errors=std::get_if<Diagnostics>(&made)) {
         output["termination"]="contract_rejected";output["diagnostics"]=diagnostics(*errors);
         std::cout<<output.dump()<<'\n';return 0;

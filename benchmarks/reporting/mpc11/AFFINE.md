@@ -8,7 +8,19 @@ Python computes matrix exponentials and exports coefficients; it does not solve
 the optimization problem. The saved formulation is a public joint program,
 not a claim that a particular synthesis strategy admits this stage-cost API.
 
-The recommended `--condense` route substitutes the affine state equalities into
+The recommended full-joint capture uses `--objective-multiplier 1000`: every
+quadratic, linear and constant objective coefficient is multiplied by the same
+positive factor. The complete unscaled program and its hash remain in the
+bundle. Native objective values map back by division by 1000, and the checker
+independently recomputes the authored physical objective. This conditioning
+changes neither minimizers nor constraints. Native objective-unit residuals
+and tolerances remain explicitly associated with the scaled program; they are
+not certificates of original nonlinear optimality. The unscaled LV programs
+reached native active-set time limits even after variable permutation and
+state elimination. Both scaled full-joint and condensed probes completed with
+the same authored objective; no core backend option or API was changed.
+
+The optional `--condense` diagnostic route substitutes the affine state equalities into
 the objective and state bounds, then solves the resulting control-space QP
 through the same actual CSL provider. The complete original joint program,
 its hash, and the full affine reconstruction map remain in the result bundle.
@@ -42,7 +54,7 @@ OPENBLAS_NUM_THREADS=1 "$MPC11_VENV/bin/python" -m unittest \
   tests.reporting.test_mpc11_affine
 OPENBLAS_NUM_THREADS=1 "$MPC11_VENV/bin/python" \
   benchmarks/reporting/mpc11/run_affine.py \
-  --bridge "$MPC11_BUILD/csl_mpc11_affine" --output "$MPC11_RESULTS" --condense
+  --bridge "$MPC11_BUILD/csl_mpc11_affine" --output "$MPC11_RESULTS" --objective-multiplier 1000
 ```
 
 Set these paths to dedicated user-owned directories. Use the
