@@ -915,6 +915,19 @@ TEST_CASE("long horizon direction coordinates preserve control order and complet
     CHECK((*programs)[1]==direction_program(family,query.selection,1));
 }
 
+namespace {
+class InvalidSingularHistoryWorkspace final : public LPWorkspace {
+protected:
+    ProgramOutcome do_solve(const LinearProgram& program,const ExecutionContext& context) override {
+        CHECK(context.numerical.absolute_tolerance==1);
+        CHECK(context.numerical.relative_tolerance==0);
+        return ProgramResult{Termination::completed,
+            {program.identity(),MathematicalOutcome::optimal,Unestablished{},{}},
+            Vector{0,0,0.5,0,0.5},{},"test fixture: deliberately invalid singular history",{}};
+    }
+};
+}
+
 TEST_CASE("canonical singular T-S03 selection preserves exact membership under loose tolerance") {
     auto authored=source();
     authored.model=std::make_shared<const SystemModel>(SystemModel{{{1,1,0},TimeDomain::discrete,
@@ -935,9 +948,10 @@ TEST_CASE("canonical singular T-S03 selection preserves exact membership under l
     CHECK(answer.batch.witnesses[1].states==std::vector<Vector>{{0},{1},{1}});
     CHECK(answer.batch.witnesses[0].controls==std::vector<Vector>{{0},{1}});
     CHECK(answer.batch.witnesses[1].controls==std::vector<Vector>{{1},{1}});
-    auto backend=take(adapters::lp::make_highs_registration());auto factory=backend.factory;
-    backend.factory=[factory](const LinearProgram& lp) {
-        return std::make_unique<CorruptNominalWitnessWorkspace>(factory(lp),Vector{0,0,0.5,0,0.5});
+    auto backend=take(adapters::lp::make_highs_registration());
+    backend.identity.id={"test.lp.invalid-singular-history"};
+    backend.factory=[](const LinearProgram&) {
+        return std::make_unique<InvalidSingularHistoryWorkspace>();
     };
     auto corrupt_selector=synthesis::witness_selector::make_registration(selected(std::move(backend),"csl.program-result.v1"));
     auto corrupt_workspace=corrupt_selector.factory(query);auto context=make_execution_context();
