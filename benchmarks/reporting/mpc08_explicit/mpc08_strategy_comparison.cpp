@@ -466,7 +466,7 @@ void run_horizon_family(Providers& providers, const char* path) {
         if(!std::isfinite(p)||!std::isfinite(v)||!std::isfinite(zp)||!std::isfinite(zv))throw std::runtime_error("nonfinite family input");
         for(const bool original:{true,false})for(std::size_t rep=0;rep<6;++rep) {
             const auto start=Clock::now();bool verified=false,complete=false;int termination=-1,outcome=-1;
-            std::string error;std::optional<sets::HRepresentation> relation;
+            std::string error,stop;std::optional<sets::HRepresentation> relation;
             try {
                 const LinearStage flow{Matrix{2,2,{1,1,0,1}},Matrix{2,1,{0,1}},Matrix{2,0,{}},Vector{0,0}};
                 std::vector<double> times;std::vector<AdmissibleSet> controls;
@@ -490,7 +490,7 @@ void run_horizon_family(Providers& providers, const char* path) {
                 auto prepared=take(providers.strategies->prepare(request,output),"exact family prepare");auto workspace=prepared.create();
                 ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
                 const auto result=take(workspace->run(context),"exact family run");
-                termination=static_cast<int>(result.termination);outcome=static_cast<int>(result.outcome.value);
+                termination=static_cast<int>(result.termination);outcome=static_cast<int>(result.outcome.value);stop=stop_summary(result.stop);
                 if(result.family) {
                     verified=result.family->registry_verified();
                     if(const auto* f=std::get_if<CompleteOptimalFamily>(&result.family->outcome())) {
@@ -503,7 +503,7 @@ void run_horizon_family(Providers& providers, const char* path) {
                 std::cout<<"{\"schema\":\"csl.mpc08-horizon-family/1\",\"query_id\":\""<<json_escape(fields[0])<<"\",\"horizon\":"<<n
                     <<",\"original_quadratic\":"<<(original?"true":"false")<<",\"repetition\":"<<rep<<",\"warmup\":"<<(rep==0?"true":"false")
                     <<",\"registry_verified\":"<<(verified?"true":"false")<<",\"complete\":"<<(complete?"true":"false")
-                    <<",\"termination\":"<<termination<<",\"outcome\":"<<outcome<<",\"elapsed_ns\":"<<std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now()-start).count();
+                    <<",\"termination\":"<<termination<<",\"outcome\":"<<outcome<<",\"stop\":\""<<json_escape(stop)<<"\",\"elapsed_ns\":"<<std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now()-start).count();
                 if(relation) {
                     const auto matrix=[](const auto& m){std::cout<<'[';for(std::size_t r=0;r<m.rows();++r){if(r)std::cout<<',';std::cout<<'[';for(std::size_t c=0;c<m.cols();++c){if(c)std::cout<<',';std::cout<<std::setprecision(17)<<m(r,c);}std::cout<<']';}std::cout<<']';};
                     const auto vector=[](const auto& v0){std::cout<<'[';for(std::size_t i=0;i<v0.size();++i){if(i)std::cout<<',';std::cout<<std::setprecision(17)<<v0[i];}std::cout<<']';};
