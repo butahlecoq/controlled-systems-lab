@@ -131,10 +131,11 @@ SAVED_DATA_COMPANION_RENDERERS = {
     "benchmarks/reporting/review05/render_constraint_ladder.py",
 }
 FROZEN_COMPANIONS = {
-    "mpc06-online-anchor-v1": "mpc06-complete-93376f8d4da1a3bb9e63/index.html",
-    "mpc06-online-anchor-checked-v2": "mpc06-complete-93376f8d4da1a3bb9e63/index.html",
-    "mpc06-online-anchor-portable-v3": "mpc06-complete-93376f8d4da1a3bb9e63/index.html",
-    "mpc06-completion-v1": "mpc06-complete-93376f8d4da1a3bb9e63/index.html",
+    "mpc06-online-anchor-v1": "mpc06-complete-6b7059d62473d32d4210/index.html",
+    "mpc06-online-anchor-checked-v2": "mpc06-complete-6b7059d62473d32d4210/index.html",
+    "mpc06-online-anchor-portable-v3": "mpc06-complete-6b7059d62473d32d4210/index.html",
+    "mpc06-completion-v1": "mpc06-complete-6b7059d62473d32d4210/index.html",
+    "mpc06-completion-v2": "mpc06-complete-6b7059d62473d32d4210/index.html",
     "app01-plan-20261016-22d406fd": "examples/app01-plan-timing-v1.html",
     "exp02-paired-profiles-20261027-r1": "examples/control-witness-v1.html#exp02-ts02-control-family",
     "mpc03-open-loop-pilot-v1": "examples/index.html",
@@ -158,6 +159,7 @@ FROZEN_REVIEWED_ROUTES = {
 }
 FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
     "mpc06-completion-v1": 602,
+    "mpc06-completion-v2": 602,
     "issue824-two-points-nominal-v1": 824,
     "issue824-two-points-nominal-v2": 824,
     "issue824-two-points-zonotope-minimax-v1": 824,

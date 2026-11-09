@@ -169,7 +169,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertTrue(all(entry["follow_up_issue"] in follow_up_counts for entry in deferred))
         routes={entry["route"]:entry for entry in inventory["frozen_published_routes"]}
         self.assertGreater(len(routes),40)
-        self.assertEqual(routes["mpc06-completion-v1"]["companion_route"],"mpc06-complete-93376f8d4da1a3bb9e63/index.html")
+        self.assertEqual(routes["mpc06-completion-v1"]["companion_route"],"mpc06-complete-6b7059d62473d32d4210/index.html")
         self.assertEqual(routes["mpc06-completion-v1"]["follow_up_issue"],602)
         self.assertEqual(routes["issue824-two-points-box-pilot-v2"]["assets"], ["projections.svg"])
         self.assertEqual(routes["issue824-two-points-box-pilot-v3"]["assets"], ["projections.svg"])
