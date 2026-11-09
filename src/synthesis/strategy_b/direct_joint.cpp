@@ -630,16 +630,16 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
                 return OperationStopped{StopReason::deadline_expired,"Deadline expired during exact family construction; direct program evidence retained."};
             return {};
         };
-        if(auto stop=interruption())stopped(*stop);
+        if(auto initial_stop=interruption())stopped(*initial_stop);
         else {
             auto relation=registry::detail::nominal_linear_exact_optimal_relation(p,
                 {"syn04-exact-optimal:"+p.identity().value},{},
                 request.materialization_limit.value_or(std::numeric_limits<std::size_t>::max()),&context);
-            if(const auto* stop=std::get_if<OperationStopped>(&relation))stopped(*stop);
-            else if(auto stop=interruption())stopped(*stop);
+            if(const auto* relation_stop=std::get_if<OperationStopped>(&relation))stopped(*relation_stop);
+            else if(auto post_relation_stop=interruption())stopped(*post_relation_stop);
             else {
                 const auto bounds=registry::detail::nominal_linear_exact_optimum_bounds(p,&context);
-                if(auto stop=interruption())stopped(*stop);
+                if(auto bounds_stop=interruption())stopped(*bounds_stop);
                 else if(bounds) {
                     const ClaimEvidence claim{p.identity(),SymbolicArgument{"bounded nominal Strategy B exact-H face",
                         "The compiled verifier independently reconstructs the source feasible histories and verifies both exact optimal-face inclusions over binary64 dyadic inputs."}};

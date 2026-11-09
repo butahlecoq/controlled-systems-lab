@@ -227,3 +227,28 @@ Share a total thread/memory budget between outer workers and BLAS/solver interna
 5. Restore and reproduce an archived nominal experiment with both historical and new output scopes recorded. Profile conversions, reduction, optimization, queries and memory separately.
 
 The published experiments are validation anchors. They do not replace the architecture discussion or require implementing every possible representation before the first useful solve.
+
+
+## Issue #8 acceptance disposition (2026-11-10)
+
+Reviewed against merged source `7ac1b2b0441c2e576c7cc7eba58c01a20efc9fbe`.
+This maps architecture requirements, not universal algorithm support or completion
+of the later experiment program.
+
+| Requirement | Evidence and disposition |
+| --- | --- |
+| Joint optimal relation, witness queries and coverage/optimality evidence | The joint-history definition and dependence example above, [family contracts](../contracts/core-interfaces.md#joint-family-and-claim-specific-evidence), and compiled verifier boundary define the required output. Complete, partial and candidate evidence are separate. Architecture requirement satisfied. |
+| Independently replaceable mathematical modules | The interfaces above and [composition map](framework-composition.md) separate LP/convex, hull, geometry, conversion, approximation, terminal optimization, strategy and family/query seams. Unsupported compositions remain explicit. Architecture requirement satisfied. |
+| Historical phase-I/basis diagnostics | The historical LP section above distinguishes specialized hull procedures from ordinary LP minimization; the [phase-I contract](../contracts/phase-one.md) and workspace-local warm-start interfaces preserve optional diagnostics. Architecture requirement satisfied. |
+| Dependence, multiple minimizers and finite ties | The `u0+u1=1` example, all-terminal-minimizer rule and finite/mixed tie rules above preserve full histories rather than marginal products or one witness. Architecture requirement satisfied. |
+| Representation capabilities and approximation direction | The [representation matrix](set-representations-and-ellipsoidal-toolbox.md#capability-and-guarantee-contract-for-the-first-representation-routes) separates mathematical closure, inner/outer direction and admitted implementation. Historical snapshots are distinguished from later registered routes. Architecture requirement satisfied. |
+| External Ellipsoidal Toolbox evaluation | The [ET assessment](set-representations-and-ellipsoidal-toolbox.md#ellipsoidal-methods-found-in-the-archive) records software/source identity, dependencies, composite sets and untested executable compatibility. This requirement is research, not a mandatory ET installation or benchmark. Satisfied. |
+| Separate recovered Shorikov/Kalev example and resolve printed ambiguities | The [R29 input audit](../research/zonotope-paper-input-audit.md) and [editorial scalar reference](../research/r29-corrected-scalar-reference.md) preserve the dimensional/center corrections, distinct scenario and exact/native replay evidence (PRs #367/#377). Historical interpretation of the printed four-component control data and actual run correspondence remain unresolved. Restoration requirement incomplete. |
+
+Keep #8 open for the R29 historical source residual. The corrected scalar case
+is an inferred editorial mathematical reference, not restored historical input
+or a reproduction of the reported numbers. R29 supplies no optimization
+objective; adding one is not required to reconcile its reachability example.
+Broader algorithm implementation, performance studies and #95's execution
+review retain their own acceptance criteria. No API, dependency or executable
+behavior changes in this reconciliation; no library release is needed.
