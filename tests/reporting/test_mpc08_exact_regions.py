@@ -18,6 +18,20 @@ class ExactRegionTests(unittest.TestCase):
             else:bad['regions'][0]['value'][0]+=1
             with self.subTest(kind=kind),self.assertRaises(ValueError):R.check_regions(bad)
 
+    def test_recession_guard_rejects_lineality_and_unconstrained_directions(self):
+        box=[(1,0,1),(-1,0,1),(0,1,1),(0,-1,1)]
+        self.assertTrue(R.is_bounded(box))
+        for rows in ([],[(1,0,1)],[(1,1,1),(-1,-1,1)],[(1,0,1),(0,1,1)]):
+            with self.subTest(rows=rows):self.assertFalse(R.is_bounded(rows))
+
+    def test_same_vertices_do_not_certify_an_unbounded_region(self):
+        record=R.region_record();bad=copy.deepcopy(record);q=R.Q
+        rows=[(-1,-1,-1),(-q(2,3),-2,-q(2,3)),(q(1,6),0,q(1,2)),(2,1,q(11,2)),(-2,-1,-1)]
+        self.assertEqual(R.vertices(rows),R.vertices(record['regions'][0]['rows']))
+        self.assertTrue(all(-a+2*b<=0 for a,b,c in rows))
+        bad['regions'][0]['rows']=rows
+        with self.assertRaisesRegex(ValueError,'unbounded'):R.check_regions(bad)
+
     def test_whole_successor_quantifiers_and_containment(self):
         record=R.geometric_record();self.assertEqual(R.check_geometry(record)['status'],'verified-exact-fixture')
         bad=copy.deepcopy(record);bad['radius']=R.Q(0)
