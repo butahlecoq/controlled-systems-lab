@@ -84,4 +84,19 @@ class SavedNMPCTests(unittest.TestCase):
             hp.write_text(json.dumps(hashes))
             with self.assertRaisesRegex(ValueError,'original_interval_count'):check(root)
 
+class PublicationTests(unittest.TestCase):
+    def test_redaction_receipts_reject_changed_native_outcomes(self):
+        import os,shutil,tempfile,hashlib
+        from check_nmpc_saved import check_publication_redactions
+        source=os.environ.get('CSL_MPC11_NMPC_PORTABLE_BUNDLE')
+        if not source:self.skipTest('CSL_MPC11_NMPC_PORTABLE_BUNDLE required')
+        with tempfile.TemporaryDirectory() as tmp:
+            bundle=Path(tmp)/'bundle';shutil.copytree(source,bundle);check_publication_redactions(bundle)
+            receipt_path=bundle/'publication-redactions.json';receipt=json.loads(receipt_path.read_text())
+            entry=receipt['files'][0];path=bundle/entry['path'];data=path.read_bytes()
+            self.assertIn(b'EXIT: Optimal Solution Found.',data)
+            path.write_bytes(data.replace(b'EXIT: Optimal Solution Found.',b'EXIT: Forged Solver Outcome.'))
+            entry['published_sha256']=hashlib.sha256(path.read_bytes()).hexdigest();receipt_path.write_text(json.dumps(receipt))
+            with self.assertRaisesRegex(ValueError,'original warning stream recovery'):check_publication_redactions(bundle)
+
 if __name__=='__main__':unittest.main()
