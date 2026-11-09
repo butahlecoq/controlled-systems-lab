@@ -1,0 +1,147 @@
+#!/usr/bin/env python3
+"""Bounded saved MPC07 attempts using the already reviewed public ConvexPort bridge."""
+from __future__ import annotations
+import argparse
+import cProfile
+import pstats
+import io
+import hashlib
+import json
+import os
+from pathlib import Path
+import platform
+import resource
+import shutil
+import signal
+import subprocess
+import sys
+import time
+from fractions import Fraction as Q
+import policy
+
+ROOT=Path(__file__).resolve().parents[3]
+BRIDGE_SHA='266e1cda61b064b4603ff6499d76dc4db59106e4e673905f585c54caafa9c533'
+
+
+def encode(value):
+    if isinstance(value,Q):return str(value)
+    raise TypeError(type(value).__name__)
+
+
+def write(path,value):path.write_text(json.dumps(value,indent=2,default=encode)+'\n')
+def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def limits():
+    resource.setrlimit(resource.RLIMIT_CPU,(300,300));resource.setrlimit(resource.RLIMIT_AS,(8*1024**3,8*1024**3))
+
+
+def attempt(folder,bridge,payload):
+    write(folder/'program.json',payload)
+    command=['/usr/bin/time','-v','-o',str(folder/'process-resource.txt'),str(bridge),str(folder/'program.json')]
+    environment=os.environ.copy();environment.update(OPENBLAS_NUM_THREADS='1',OMP_NUM_THREADS='1',MKL_NUM_THREADS='1')
+    started=time.monotonic_ns();process=subprocess.Popen(command,stdout=subprocess.PIPE,stderr=subprocess.PIPE,
+        env=environment,preexec_fn=limits,start_new_session=True)
+    status='completed';timed_out=False
+    try:stdout,stderr=process.communicate(timeout=300)
+    except subprocess.TimeoutExpired:
+        timed_out=True;status='wall-limit';os.killpg(process.pid,signal.SIGKILL);stdout,stderr=process.communicate()
+    (folder/'stdout.json').write_bytes(stdout);(folder/'stderr.txt').write_bytes(stderr)
+    if process.returncode!=0 and status=='completed':status='process-failed'
+    return dict(status=status,returncode=process.returncode,timed_out=timed_out,whole_process_ns=time.monotonic_ns()-started,
+        command=command,limits=dict(wall_seconds=300,cpu_seconds=300,address_space_bytes_per_process=8*1024**3,
+        workers=1,threads_requested=1,mechanism='process-group wall kill; inherited POSIX RLIMIT_CPU/RLIMIT_AS; GNU time child maximum RSS',
+        suite_memory='one sequential child; no cgroup aggregate memory cap'))
+
+
+def recheck(folder):
+    receipt=json.loads((folder/'receipt.json').read_text())
+    if receipt.get('purpose')=='provider-width-refusal':
+        text=(folder/'stderr.txt').read_text()
+        return dict(status='expected-native-admission-refusal' if receipt['returncode']==1 and 'unsupported variable count' in text else 'inconclusive-process-outcome')
+    if receipt['status']!='completed' or receipt['returncode']!=0:return dict(status='inconclusive-process-outcome')
+    if receipt.get('purpose')=='literal-contradictory-row':
+        payload=json.loads((folder/'program.json').read_text());result=json.loads((folder/'stdout.json').read_text())
+        csr=payload['constraints']
+        if payload['rows'][-1]!=[None,-1.] or csr['row_offsets'][-1]!=csr['row_offsets'][-2]:
+            raise ValueError('contradictory-row probe differs from literal zero <= -1')
+        return dict(status='expected-literal-infeasibility' if result.get('termination')=='completed' and
+                    result.get('mathematical_outcome')=='infeasible' else 'inconclusive-native-outcome',
+                    proof='last constraint is exactly zero <= -1; native status remains numerical')
+    payload=json.loads((folder/'program.json').read_text());result=json.loads((folder/'stdout.json').read_text())
+    return policy.check_result(payload,result)
+
+
+def capture(bridge,output,repetitions):
+    bridge=bridge.resolve();output=output.resolve()
+    if output.exists():raise ValueError('capture directory must be new')
+    if sha(bridge)!=BRIDGE_SHA:raise ValueError('bridge differs from reviewed reused native artifact')
+    if not 1<=repetitions<=5:raise ValueError('bounded capture requires 1..5 repetitions')
+    source_status=subprocess.check_output(['git','status','--porcelain'],cwd=ROOT,text=True)
+    if source_status:raise ValueError('capture requires committed clean source')
+    output.mkdir(parents=True);(output/'attempts').mkdir();(output/'source').mkdir()
+    for path in Path(__file__).parent.iterdir():
+        if path.is_file():(output/'source'/path.name).write_bytes(path.read_bytes())
+    (output/'source/test_mpc07_policy.py').write_bytes((ROOT/'tests/reporting/test_mpc07_policy.py').read_bytes())
+    (output/'native-CMakeCache.txt').write_bytes((bridge.parent/'CMakeCache.txt').read_bytes())
+    for name in ('affine_bridge.cpp','CMakeLists.txt'):
+        (output/'source'/('native-'+name)).write_bytes(subprocess.check_output(['git','show','--end-of-options','b3978a98a8bfb30e21841466244ed7f78e987886:benchmarks/reporting/mpc11/'+name],cwd=ROOT))
+    environment=dict(schema='csl.mpc07.capture/1',source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+        source_status=source_status,source_sha256={p.name:sha(p) for p in sorted((output/'source').iterdir())},
+        bridge_sha256=sha(bridge),native_source_commit='b3978a98a8bfb30e21841466244ed7f78e987886',
+        native_build_scope='reused reviewed Release public CSL ConvexPort bridge; zero Hessian dispatches actual LP',
+        python=sys.version,platform=platform.platform(),cpu_count=os.cpu_count(),
+        load_start=subprocess.check_output(['uptime'],text=True).strip(),
+        repetitions=repetitions,primary_scope='single batch policy synthesis only; no MPC recursive-feasibility or hard real-time claim')
+    write(output/'environment.json',environment)
+    # One complete retained warmup, then alternating formulation order per repeat.
+    index=0
+    for repetition in range(-1,repetitions):
+        for n in policy.HORIZONS:
+            for sigma in policy.SIGMAS:
+                order=list(policy.KINDS)
+                if repetition%2:order.reverse()
+                for kind in order:
+                    folder=output/'attempts'/f'{index:04d}';folder.mkdir();index+=1
+                    started=time.monotonic_ns();payload=policy.program(n,sigma,kind);prepared=time.monotonic_ns()-started
+                    receipt=attempt(folder,bridge,payload);receipt.update(repetition=repetition,warmup=repetition==-1,
+                        horizon=n,sigma=str(sigma),policy_class=kind,python_prepare_ns=prepared,
+                        variables=len(payload['variables']),rows=len(payload['rows']),nonzeros=len(payload['constraints']['values']))
+                    write(folder/'receipt.json',receipt);checked_at=time.monotonic_ns()
+                    try:checked=recheck(folder)
+                    except Exception as error:checked=dict(status='incorrect-or-unverified',error_type=type(error).__name__,reason=str(error))
+                    checked['independent_check_ns']=time.monotonic_ns()-checked_at
+                    checked['bindings']={name:sha(folder/name) for name in ('program.json','receipt.json','stdout.json','stderr.txt','process-resource.txt')}
+                    write(folder/'check.json',checked)
+    # Retain two explicitly unpaired refusal/infeasibility probes outside timings.
+    import copy
+    (output/'probes').mkdir()
+    for purpose in ('provider-width-refusal','literal-contradictory-row'):
+        folder=output/'probes'/purpose;folder.mkdir();payload=copy.deepcopy(policy.program(2,Q(1),'adf'))
+        if purpose=='provider-width-refusal':payload['q_diagonal']=[0.]*4097
+        else:
+            payload['rows'].append([None,-1.]);payload['constraints']['rows']+=1
+            payload['constraints']['row_offsets'].append(payload['constraints']['row_offsets'][-1])
+        payload['program_sha256']=hashlib.sha256(json.dumps({k:v for k,v in payload.items() if k!='program_sha256'},sort_keys=True,separators=(',',':')).encode()).hexdigest()
+        receipt=attempt(folder,bridge,payload);receipt['purpose']=purpose;write(folder/'receipt.json',receipt)
+        checked=recheck(folder);checked['bindings']={name:sha(folder/name) for name in ('program.json','receipt.json','stdout.json','stderr.txt','process-resource.txt')}
+        write(folder/'check.json',checked)
+    environment['load_end']=subprocess.check_output(['uptime'],text=True).strip();write(output/'environment.json',environment)
+    # A separate Python profile identifies authored assembly/checker work, never native LP cost.
+    def diagnostic():
+        for n in policy.HORIZONS:
+            for kind in policy.KINDS:policy.program(n,Q(5,4),kind)
+        for folder in sorted((output/'attempts').iterdir())[:24]:recheck(folder)
+    profiler=cProfile.Profile();profiler.runcall(diagnostic);profiler.dump_stats(output/'python-diagnostic.prof')
+    profile_text=io.StringIO();pstats.Stats(profiler,stream=profile_text).sort_stats('cumulative').print_stats(25)
+    (output/'python-diagnostic.txt').write_text(profile_text.getvalue())
+    write(output/'profile-scope.json',dict(scope='separate untimed Python LP construction and saved exact checking; native LP limiter not isolated',
+        native_timing_verdict='inconclusive; no native profiler or tuning sweep; no performance ranking'))
+    files=sorted(p for p in output.rglob('*') if p.is_file())
+    (output/'SHA256SUMS').write_text(''.join(f'{sha(p)}  {p.relative_to(output).as_posix()}\n' for p in files))
+    return environment
+
+
+if __name__=='__main__':
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--bridge',required=True,type=Path);p.add_argument('--output',required=True,type=Path);p.add_argument('--repetitions',type=int,default=5)
+    a=p.parse_args();print(json.dumps(capture(a.bridge,a.output,a.repetitions)))
