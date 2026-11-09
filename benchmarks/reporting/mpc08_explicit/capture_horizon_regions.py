@@ -158,9 +158,20 @@ def recheck(output):
     if [record['horizon'] for record in reference['records']]!=[2,4,8]:raise ValueError('reference horizon inventory differs')
     checks=[H.check(record) for record in reference['records']]
     if C.plain(checks)!=C.plain(reference['checks']):raise ValueError('saved exact checks differ')
+    costs=reference.get('costs',[])
+    if [c['horizon'] for c in costs]!=[2,4,8]:raise ValueError('cost horizon inventory differs')
+    for record,cost in zip(reference['records'],costs,strict=True):
+        sizes=dict(serialized_reference_bytes=len(json.dumps(C.plain(record),separators=(',',':')).encode()),stored_H_rows=sum(len(c['rows']) for c in record['cells']),polygon_edges=sum(len(c['vertices']) for c in record['cells']),location_queries_per_batch=len(record['feasible_vertices'])+len(record['cells']),excluded_warmup_index=0)
+        if any(cost.get(k)!=v for k,v in sizes.items()) or cost['construction_ns']!=record['construction_ns']:raise ValueError('recorded storage/work count differs')
+        intervals=[cost['construction_ns'],cost['independent_check_ns'],*cost['point_location_and_endpoint_ns']]
+        if len(cost['point_location_and_endpoint_ns'])!=6 or any(type(v) is not int or v<0 for v in intervals):raise ValueError('invalid reference cost intervals')
     process=manifest['process']
+    if type(process['return_code']) is not int or type(process['timed_out']) is not bool:raise ValueError('invalid process receipt')
     if process['return_code']!=0 or process['timed_out'] is not False:return dict(status='inconclusive-process',exact=C.plain(checks))
-    native=check_native([json.loads(line) for line in files['stdout.jsonl'].splitlines()])
+    native_rows=[json.loads(line) for line in files['stdout.jsonl'].splitlines()]
+    native=check_native(native_rows)
+    duration=process['whole_process_ns']
+    if type(duration) is not int or not sum(r['elapsed_ns'] for r in native_rows)<=duration<=301_000_000_000:raise ValueError('incoherent process/native timing scope')
     summary=json.loads(files['summary.json'])
     if C.plain(checks)!=summary['exact'] or native!=summary['native']:raise ValueError('saved native/reference summary differs')
     return dict(status='checked',exact=C.plain(checks),native=native)
