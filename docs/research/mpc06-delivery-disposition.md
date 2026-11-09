@@ -33,3 +33,8 @@ Before reporting #602 complete: obtain independent code/results/standards comple
 The v2 reading layer adds explicit authentication of copied checker snapshots
 against recorded source-file digests. The v1 report remains immutable; its
 numerical reference and native inputs are unchanged. This is a provenance fix.
+
+The new reference cost receipt records one exact construction plus history
+extraction interval and one independent-check interval, using monotonic
+nanoseconds and excluding upstream loading. These are descriptive Python
+observations, not a controller latency ranking.

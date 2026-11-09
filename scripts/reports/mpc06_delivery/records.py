@@ -9,6 +9,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 
 ROOT=Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:sys.path.insert(0,str(ROOT))
@@ -149,6 +150,11 @@ def check(record,online,upstream_files):
 def validate(source):
     contents=inventory(source);online,upstream_files=upstream(source/'online')
     record=evidence.json_value(contents['result.json'])
+    costs=evidence.json_value(contents['cost-receipt.json'])
+    if costs.get('schema')!='csl.mpc06-reference-costs/1' or costs.get('clock')!='time.monotonic_ns':
+        raise ValueError('invalid exact-reference cost receipt')
+    for key in ('construction_and_extraction_ns','independent_check_ns'):
+        if type(costs.get(key)) is not int or costs[key]<0:raise ValueError('invalid exact-reference cost interval')
     for name in SOURCE_FILES:
         copied='source/'+Path(name).name
         if copied not in contents or evidence.digest(contents[copied])!=record['source_files'].get(name):
@@ -160,12 +166,17 @@ def validate(source):
 
 def build(source,out):
     if out.exists():raise ValueError('delivery source must be new')
-    online,upstream_files=upstream(source);record=plain(make_record(online,upstream_files))
-    verification=check(record,online,upstream_files)
+    online,upstream_files=upstream(source)
+    begin=time.monotonic_ns();record=plain(make_record(online,upstream_files));constructed=time.monotonic_ns()
+    verification=check(record,online,upstream_files);checked=time.monotonic_ns()
+    costs=dict(schema='csl.mpc06-reference-costs/1',clock='time.monotonic_ns',
+        construction_and_extraction_ns=constructed-begin,independent_check_ns=checked-constructed,
+        scope='one descriptive Python exact-reference construction plus geometry/native-history extraction and independent check; upstream loading excluded; no timing ranking')
     out.mkdir(parents=True);shutil.copytree(source,out/'online');(out/'source').mkdir()
     for name in SOURCE_FILES:(out/'source'/Path(name).name).write_bytes((ROOT/name).read_bytes())
     (out/'result.json').write_text(json.dumps(record,indent=2)+'\n',encoding='utf-8')
     (out/'verification.json').write_text(json.dumps(verification,indent=2)+'\n',encoding='utf-8')
+    (out/'cost-receipt.json').write_text(json.dumps(costs,indent=2)+'\n',encoding='utf-8')
     paths=sorted(path for path in out.rglob('*') if path.is_file())
     (out/'SHA256SUMS').write_text(''.join(f'{evidence.digest(path.read_bytes())}  {path.relative_to(out).as_posix()}\n' for path in paths),encoding='utf-8')
     return verification
