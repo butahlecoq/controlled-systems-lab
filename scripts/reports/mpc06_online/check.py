@@ -65,6 +65,12 @@ def main():
         digest,name=line.split('  ',1)
         if hashlib.sha256((args.bundle/name).read_bytes()).hexdigest()!=digest:raise ValueError('saved bundle digest mismatch: '+name)
     result=verify(json.loads((args.bundle/'result.json').read_text()))
-    (args.bundle/'verification.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
+    receipt=args.bundle/'verification.json'
+    if receipt.exists():
+        saved=json.loads(receipt.read_text())
+        if any(saved[key]!=result[key] for key in ('status','completed_native_qps','scope')):raise ValueError('saved checker disposition changed')
+    else:
+        receipt.write_text(json.dumps(result,indent=2)+'\n')
+    print(json.dumps(result))
 
 if __name__=='__main__':main()
