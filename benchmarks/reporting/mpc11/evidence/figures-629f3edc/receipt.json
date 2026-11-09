@@ -1,0 +1,143 @@
+{
+  "schema": "csl.mpc11.figure-receipt/1",
+  "style": "csl-report-quantitative-v1",
+  "matplotlib": "3.11.2",
+  "input_sha256": {
+    "syn-nl-lv-01/scenario": "1a608a0a38f9c1d60d9272b948189e48f9f294048ddf9726aaa0ed8b5cee8464",
+    "syn-nl-lv-01/affine": "7f564a086e1dc60472a72ff954b6bc041201dc7490036872d785cdec1d78977d",
+    "syn-nl-lv-01/nonlinear": "6b24cb200bb8f137476e4f09697ce0d22638e95e5f6c5a66c93c578ad8985aa3",
+    "syn-nl-lv-01/nmpc": "82f1cbafaec6dc69c025fc4278bb9c77c977012b5dbc5ebddcfc6c58601e64d4",
+    "syn-nl-fuel-01/scenario": "5dd38a65f5ad6c5f90b8616fbc866eb9ef2735b1b7f7279bca0b2b0d05f9dce1",
+    "syn-nl-fuel-01/affine": "1f236c421bcb8995d15c955962cbd005ac57c4c8a7daa5b9cbe0e181ffca4239",
+    "syn-nl-fuel-01/nonlinear": "39456e9a23988e61dd9ab37034e6b2fe7a7f5f750a49e898f1029227d9e047ed",
+    "syn-nl-fuel-01/nmpc": "25730635d69907df7581f14de669dd1b8f76d1e4fcbe9e694c340c60bbb25357"
+  },
+  "saved_checks": {
+    "affine": [
+      {
+        "case_id": "ANALYTIC-JOINT-QP-01",
+        "status": "verified-numerical-witness"
+      },
+      {
+        "case_id": "SYN-NL-FUEL-01",
+        "status": "verified-numerical-witness",
+        "objective": 0.010570464036763268
+      },
+      {
+        "case_id": "SYN-NL-LV-01",
+        "status": "verified-numerical-witness",
+        "objective": 0.0782955745731609
+      }
+    ],
+    "nonlinear": [
+      {
+        "case_id": "SYN-NL-LV-01",
+        "statuses": {
+          "cvodes": "complete",
+          "cvodes-tight": "complete",
+          "rk4": "complete",
+          "rk4-tight": "complete"
+        },
+        "process_statuses": {
+          "cvodes": "completed",
+          "cvodes-tight": "completed",
+          "rk4": "completed",
+          "rk4-tight": "completed"
+        },
+        "scope": "bound identities, source rebuild, sampled trace shape/cost/constraints; integration correctness requires replay"
+      },
+      {
+        "case_id": "SYN-NL-FUEL-01",
+        "statuses": {
+          "cvodes": "complete",
+          "cvodes-tight": "complete",
+          "rk4": "complete",
+          "rk4-tight": "complete"
+        },
+        "process_statuses": {
+          "cvodes": "completed",
+          "cvodes-tight": "completed",
+          "rk4": "completed",
+          "rk4-tight": "completed"
+        },
+        "scope": "bound identities, source rebuild, sampled trace shape/cost/constraints; integration correctness requires replay"
+      }
+    ],
+    "nmpc": [
+      {
+        "case_id": "SYN-NL-LV-01",
+        "status": "complete",
+        "controller_status": "complete",
+        "replay_processes": {
+          "rk4": "completed",
+          "rk4-tight": "completed"
+        },
+        "completed_holds": 30,
+        "transcriptions_checked": 30,
+        "completed_objective": 0.09168477962868322,
+        "sampled_execution_physical_state_violation": [
+          0.0,
+          0.0
+        ],
+        "applied_physical_control_violation": [
+          0.0
+        ],
+        "max_nlp_objective_rebuild_difference": 0.0,
+        "max_nlp_constraint_rebuild_difference": 0.0,
+        "max_stationarity_rebuild_difference": 0.0,
+        "claim": "saved transcript/controls/cost/replay association and NLP rebuild; no solver rerun, global guarantee or ODE error certificate"
+      },
+      {
+        "case_id": "SYN-NL-FUEL-01",
+        "status": "complete",
+        "controller_status": "complete",
+        "replay_processes": {
+          "rk4": "completed",
+          "rk4-tight": "completed"
+        },
+        "completed_holds": 40,
+        "transcriptions_checked": 40,
+        "completed_objective": 0.0038259850540860742,
+        "sampled_execution_physical_state_violation": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "applied_physical_control_violation": [
+          0.0,
+          0.0
+        ],
+        "max_nlp_objective_rebuild_difference": 0.0,
+        "max_nlp_constraint_rebuild_difference": 0.0,
+        "max_stationarity_rebuild_difference": 0.0,
+        "claim": "saved transcript/controls/cost/replay association and NLP rebuild; no solver rerun, global guarantee or ODE error certificate"
+      }
+    ]
+  },
+  "claim": "saved individual numerical trajectories only; no set or performance guarantee",
+  "tool_sha256": {
+    "benchmarks/reporting/mpc11/figures.py": "801937790198b4fbb9ce0125534688e9c61ba5b80ff6043724a30bf8012d3414",
+    "scripts/reports/figure_style.py": "c2f7078df95b9d75fe90f0f407023383cae4b58dd688dfa5fa5ac5b9d18664c6",
+    "benchmarks/reporting/mpc11/check_affine_saved.py": "658d326941bb761654de417a8ca3b5be5144088b0a62b3d6496511a8c167ca24",
+    "benchmarks/reporting/mpc11/check_nonlinear_saved.py": "84056242a0f5c0ea8406ac479cbcd01bc7fed3ce1a4f46a9c9990a5b0703a856",
+    "benchmarks/reporting/mpc11/check_nmpc_saved.py": "dc785a2e00a4ff122845f5bb1a64dfa664e0af14e80aaf6892b5b6fcc048a14c"
+  },
+  "bundle_manifest_sha256": {
+    "affine": "b8a1f79453e7e262fa4471b5bc6e4d181be4c218202adc2483636114eb3d0bd6",
+    "nonlinear": "85529a1505fc2a792ca48b3c4ae0c75ef69925f7712c040e9674b56edff440b5",
+    "nmpc": "7a450936f905e7ed6ba0eccecd77f7843a05aa021fe634369738b73df6f691bd"
+  },
+  "output_sha256": {
+    "syn-nl-fuel-01-phase.png": "d46e95fa82b1073488ba7fbf4c171266ab25f9c1056b2943001f6ee967427ae4",
+    "syn-nl-fuel-01-phase.svg": "ec90c90bc1084af206006d14eb3345e7843f81e1c2e01531315a2aa8463952b4",
+    "syn-nl-fuel-01-plotted-data.json": "626998255648b3ce8f62d8889fe6914f48502f4ee4b03960e07bf78f553ed215",
+    "syn-nl-fuel-01-traces.png": "e8c22fbaaf2cd26d4cd289842320390f8ff26589dba4c042b4d77d27df1052c7",
+    "syn-nl-fuel-01-traces.svg": "1a69396353ce34e30efe0bdf591352bfaac66ddc478260b3fa141e5afd70bd3a",
+    "syn-nl-lv-01-phase.png": "3dcfc2e3095bd858b86b777068a2b144b25c945bf14b79020d8f1ed87655009f",
+    "syn-nl-lv-01-phase.svg": "5f9c009f0bfb167510aae21a1ac6222815953c6bd3f7f8cf6e6d5032337a4b8d",
+    "syn-nl-lv-01-plotted-data.json": "c958b8af3f933a077a53b1fe87872788f6c459b01794a5e7e1941204f165ad8d",
+    "syn-nl-lv-01-traces.png": "ac882d6ba4fa29f5e50d1dfd5ca008bef3d1aa95c4a6ded4d19788baee65216b",
+    "syn-nl-lv-01-traces.svg": "2af7144754b7e72e11de4a2df5ebf0d59e57f2a36d7e3fb4e5534225f368e700"
+  }
+}
