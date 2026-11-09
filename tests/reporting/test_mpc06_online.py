@@ -73,6 +73,7 @@ class OnlineTubeTests(unittest.TestCase):
         with self.assertRaises(ValueError):M.replay((Q(0),Q(0)),[Q(0)]*3,policy='measured-state-reset')
 
 class OnlineCaptureTests(unittest.TestCase):
+    @unittest.skipIf(sys.platform=="win32","POSIX subprocess fixture; native smoke separately exercises Windows")
     def test_saved_native_protocol_is_bound_and_replay_detects_corruption(self):
         sys.path.insert(0,str(P.parent))
         import study
