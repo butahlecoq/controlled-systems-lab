@@ -1,0 +1,83 @@
+{
+  "schema": "csl.mpc11.nmpc-summary/1",
+  "capture_source_revision": "55f651105ecf9d19216ab45814614e59b05be4f2",
+  "checker_revision": "b5e503b0ab6f8465da0ad470e3263df7985f68d8",
+  "capture_sha256": "c13fb2db4f5492f5be85d42b3d5866c2a07ec24f78eb3a6a457d37ac15186253",
+  "members": 392,
+  "hashed_payload_files": 391,
+  "cases": [
+    {
+      "case_id": "SYN-NL-LV-01",
+      "status": "complete",
+      "completed_holds": 30,
+      "executed_objective": 0.09168477962868322,
+      "witness_sha256": "4d827ed671ab6b90725730aa54ecae5aa082ebba2dedd645f88f341bcf075ccd",
+      "controls_sha256": "53b09f172a530b57592aa44c6642dfa136d75d38e74ab71dc1414ea5eee7ea3c",
+      "max_scaled_nlp_primal_violation": 6.43062235405889e-11,
+      "max_local_stationarity_infinity_norm": 6.786591224422483e-11,
+      "max_nlp_objective_reconstruction_difference": 1.3877787807814457e-17,
+      "replay": {
+        "rk4": {
+          "status": "complete",
+          "completed_objective": 0.09168478516305174,
+          "max_physical_execution_difference": [
+            6.804822561434776e-06,
+            5.106356468331796e-06
+          ]
+        },
+        "rk4-tight": {
+          "status": "complete",
+          "completed_objective": 0.09168478516305174,
+          "max_physical_execution_difference": [
+            6.804822561434776e-06,
+            5.106356468331796e-06
+          ]
+        },
+        "max_physical_tolerance_sensitivity": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "case_id": "SYN-NL-FUEL-01",
+      "status": "complete",
+      "completed_holds": 40,
+      "executed_objective": 0.0038259850540860742,
+      "witness_sha256": "0802dce80424021fc420bbcb973d30f53d1a1315337515205eb0dc0535cfe41a",
+      "controls_sha256": "8a552118ef2717d6e9ffb3f404c1ce8f629d262aa986f544805bf57df8181d64",
+      "max_scaled_nlp_primal_violation": 5.150126908270991e-09,
+      "max_local_stationarity_infinity_norm": 7.426543607307497e-11,
+      "max_nlp_objective_reconstruction_difference": 8.673617379884035e-19,
+      "replay": {
+        "rk4": {
+          "status": "complete",
+          "completed_objective": 0.0038259850872449114,
+          "max_physical_execution_difference": [
+            1.1075835004703549e-07,
+            2.9522222888545002e-08,
+            3.1974372483034585e-08,
+            1.1023266854870428e-08
+          ]
+        },
+        "rk4-tight": {
+          "status": "complete",
+          "completed_objective": 0.0038259850872449114,
+          "max_physical_execution_difference": [
+            1.1075835004703549e-07,
+            2.9522222888545002e-08,
+            3.1974372483034585e-08,
+            1.1023266854870428e-08
+          ]
+        },
+        "max_physical_tolerance_sensitivity": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    }
+  ],
+  "claim": "actual local NMPC correctness outcomes only; no global/minimax/continuous-safety/reachable-set/performance claim"
+}
