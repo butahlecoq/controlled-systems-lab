@@ -75,6 +75,33 @@ def check_native(rows,lookup):
         timing_scope='existing C++ client interval includes per-query resolve/prepare/workspace/run and candidate or primal checks; not isolated solver time')
 
 
+def support_queries(record,output):
+    lookup={}
+    with (output/'support.csv').open('w') as stream:
+        writer=csv.writer(stream);writer.writerow(['query_id','dx','dy','then H row triples'])
+        for name,item in record['geometry']['sets'].items():
+            for dx,dy in ((1,0),(-1,0),(0,1),(0,-1),(1,1),(-1,-1),(1,2),(-1,-2)):
+                key=f'S{len(lookup):03}';expected=min(dx*p+dy*v for p,v in item['vertices'])
+                writer.writerow([key,dx,dy,*[format(float(q),'.17g') for row in item['rows'] for q in row]])
+                lookup[key]=dict(set=name,direction=[dx,dy],rows=item['rows'],minimum=expected)
+    return lookup
+
+
+def check_support(rows,lookup):
+    counts=Counter();seen=Counter();tol=Q(1,500000)
+    for row in rows:
+        q=lookup[row['query_id']];seen[row['query_id']]+=1
+        if row['optimal']:
+            p,v=map(lambda x:Q(str(x)),row['primal'])
+            if any(a*p+b*v>c+tol for a,b,c in q['rows']) or abs(q['direction'][0]*p+q['direction'][1]*v-q['minimum'])>tol:
+                raise ValueError('public LP support differs from exact whole-set reference')
+            counts['numerical-support-witness']+=1
+        else:counts['inconclusive-native-support']+=1
+    if set(seen)!=set(lookup) or any(n!=6 for n in seen.values()):raise ValueError('support query inventory differs')
+    return dict(counts=counts,queries=len(lookup),scope='actual registered LPPort; exact H/V reference plus independent numerical primal/support checks; no sampled containment proof',
+        timings='prepare includes program/provider/workspace; run includes backend setup/solve/result construction; separate raw intervals, no ranking')
+
+
 def figures(record,output):
     import matplotlib
     if matplotlib.__version__!='3.11.2':raise ValueError('Matplotlib3.11.2 required')
@@ -105,7 +132,7 @@ def capture(driver,receipt,output):
     if output.exists():raise ValueError('new output directory required')
     status=subprocess.check_output(['git','status','--porcelain'],cwd=ROOT,text=True)
     if status:raise ValueError('commit source before capture')
-    output.mkdir(parents=True);record=R.build();write(output/'exact-reference.json',record);lookup=queries(record,output)
+    output.mkdir(parents=True);record=R.build();write(output/'exact-reference.json',record);lookup=queries(record,output);supports=support_queries(record,output)
     environment=dict(os.environ,OPENBLAS_NUM_THREADS='1',OMP_NUM_THREADS='1',MKL_NUM_THREADS='1',CSL_HIGHS_INTERNAL_CLOCKS='0')
     manifest=dict(source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),source_status=status,
         platform=platform.platform(),python=sys.version,logical_cpus=os.cpu_count(),load_before=os.getloadavg(),binary_sha256=sha(driver),
@@ -124,6 +151,13 @@ def capture(driver,receipt,output):
     manifest['load_after']=os.getloadavg();write(output/'manifest.json',manifest)
     if all(p['return_code']==0 and not p['timed_out'] for p in manifest['processes']):summary=check_native(all_rows,lookup)
     else:summary=dict(status='inconclusive-process',scope='retained partial stdout/stderr; no complete capture inference')
+    command=[str(driver),'--support',str((output/'support.csv').resolve())];start=time.perf_counter_ns()
+    code,timed_out,stdout,stderr,resources=run_with_resource_receipt(command,300,environment)
+    (output/'support.stdout.jsonl').write_bytes(stdout);(output/'support.stderr.txt').write_bytes(stderr)
+    manifest['processes'].append(dict(profile='set-support-LP',command=command,return_code=code,timed_out=timed_out,
+        whole_process_ns=time.perf_counter_ns()-start,resources=resources,stdout_sha256=hashlib.sha256(stdout).hexdigest(),stderr_sha256=hashlib.sha256(stderr).hexdigest()))
+    write(output/'manifest.json',manifest)
+    summary['lp_support']=check_support([json.loads(line) for line in stdout.splitlines()],supports) if code==0 and not timed_out else dict(status='inconclusive-process')
     write(output/'native-summary.json',summary);figures(record,output)
     summary_html=html.escape(json.dumps(plain(dict(exact_checks=record['checks'],fiber_growth=record['fibers']['rows'],native=summary)),indent=2))
     (output/'index.html').write_text('<!doctype html><html lang="en"><meta charset="utf-8"><title>MPC08 exact region/predecessor first capture</title><body><h1>Exact regions, matched predecessor quantifiers and optimizer fibers</h1><p>Performance verdict: inconclusive. Fixture-specific exact reference proofs are separate from numerical public solver observations and candidate samples. No MPT3 execution, general winning-set or original-quadratic registered complete-family claim.</p><img src="critical-regions.svg" style="max-width:100%" alt="Exact critical regions, terminal sets and matched nominal/robust predecessors"><p><a href="exact-reference.json">Exact H/V rows and certificates</a> · <a href="manifest.json">Capture provenance/resources</a> · <a href="native-build-receipt.json">Reused-library/native client provenance</a></p><details><summary>Checks, output-growth refusals and native outcomes</summary><pre>'+summary_html+'</pre></details></body></html>')
