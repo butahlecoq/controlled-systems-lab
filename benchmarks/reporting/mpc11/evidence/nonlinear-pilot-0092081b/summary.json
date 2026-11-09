@@ -116,5 +116,7 @@
       ]
     }
   ],
-  "diagnostic": "Initial uncommitted-source per-report CVODES restart pilot retained; source hashes recorded, not a clean-source executable capture. Superseded by accepted per-original-hold source0092081b; no controls or objective changed."
+  "diagnostic": "Initial uncommitted-source per-report CVODES restart pilot retained; source hashes recorded, not a clean-source executable capture. Superseded by accepted per-original-hold source0092081b; no controls or objective changed.",
+  "post_capture_validation_revision": "06780addba87f4a50d388c0d6484b190ff0d659d",
+  "post_capture_validation_scope": "CLI case-fixed dimensions/finite positive scales before callbacks; saved checker independently recomputes all four difference arrays, identities and manifest comparisons. Captured ODE formulas, controls and original archive unchanged."
 }

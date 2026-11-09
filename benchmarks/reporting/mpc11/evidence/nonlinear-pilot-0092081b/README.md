@@ -48,3 +48,15 @@ safety, reachable-set figure, or NMPC result. Issue #607 remains open.
 Delivery: optional example/report consumer only. No core public API, required
 runtime dependency, package installation or release change is needed. Figures,
 NMPC and final publication remain later reviewed steps.
+
+## Post-capture validation fixes
+
+Revision `06780addba87f4a50d388c0d6484b190ff0d659d` adds case-fixed
+state/control dimensions and finite positive scales at the C++ CLI boundary,
+before callback construction. It also reconstructs all four reported difference
+arrays and case/witness/control identities from the checked trace records and
+affine witness, and checks the manifest copies. Regression mutations first
+reproduced the old acceptance failures; all 19 focused tests pass with the
+rebuilt bridge. The captured ODE formulas and controls did not change. The
+original capture and inner source/checker snapshots remain immutable. No
+optimization or ODE recapture was needed for these validation-only changes.
