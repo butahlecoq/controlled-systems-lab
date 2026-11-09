@@ -6,7 +6,7 @@ This partial #604 evidence unit separates full rational fixture proofs from nume
 python -B benchmarks/reporting/mpc08_explicit/recheck_exact_regions.py /path/to/extracted-capture
 ```
 
-The checker never launches a numerical algorithm or rewrites the capture. It checks the complete inner inventory, recorded committed source hashes, build/client binding, exact region and geometry proofs, actual CSV inputs, every raw observation and regenerated summaries. Open extracted `index.html` for the labelled two-panel figure. ZIP has 18 flat members, including its own inventory. No Pages publication is claimed.
+The checker never launches a numerical algorithm or rewrites the capture. It checks the complete inner inventory, recorded committed source hashes, build/client binding, exact region and geometry proofs, actual CSV inputs, every raw observation and regenerated summaries. Open extracted `index.html` for the labelled two-panel figure. ZIP has 17 flat members, including its own inventory. No Pages publication is claimed.
 
 ## Results and limits
 
