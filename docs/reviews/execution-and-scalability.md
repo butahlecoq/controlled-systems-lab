@@ -145,7 +145,7 @@ bundle](../../reports/algorithm-results/review05-gprof-diagnostic-20261031/READM
 This repeats the same one-state, one-control, two-step fixtures and therefore
 does not close the matched size/output-growth gap.
 
-## REVIEW-05 disposition
+## Historical disposition before the November follow-up captures
 
 The ownership, resource-policy and batch-isolation portions have current source/test evidence. The focused execution and batch suites passed with and without ThreadSanitizer; the fresh instrumented run also includes timing, HiGHS, and Qhull targets. The two earlier paired T-S01 captures repeat only one tiny workload. The new horizon and size ladders below broaden the matched scalar evidence, but do not cover alternative set representations or all phase and resource costs.
 
@@ -158,3 +158,64 @@ This evidence still has specific limits. The representation-size axis here is th
 The ownership and batch-isolation findings are addressed in the source audit and TEST-23 evidence above, with focused ThreadSanitizer coverage for executor, LP, convex, and Qhull paths. A backend-observer aggregation defect was fixed with a multi-batch regression. The test evidence covers executed stress paths rather than all possible schedules.
 
 **Status: partial; keep #95 open.** The verified horizon, dimension, constraint-row, and emitted H-relation-size timing slices provide matched evidence; the n=2,T=4 rejection is retained. Remaining work is phase-level cost separation and resource observations across comparable sizes, plus the final independent review against the exact integrated source revision. No measured evidence identifies a defensible general optimization target. Native thread enforcement and hard heap limits remain unsupported contracts, not defects newly discovered by this review.
+
+## 2026-11-10 integrated assessment
+
+This assessment supersedes the historical gap statements above without changing
+those captures or their claims. The integrated numerical source is
+`7243ed353cbfdde3c897572c58cc6d6a244194ea`. Evidence packaging and this assessment
+are later changes; final independent review and delivery remain pending.
+
+| Issue #95 requirement | Evidence and disposition |
+| --- | --- |
+| Mutable ownership and overlap/race tooling | The original ownership inventory and independent 85-path delta inspection cover the integrated source. Nine focused TSan suites passed, including both strategy/selector and native adapter paths. Their new source-bound receipt is being packaged separately from the older eight-suite capture. This is executed-path evidence, not a whole-library race proof. |
+| Threads, memory and interruption | Outer admission and reservation credits are enforced. Native thread declarations, process CPU/address-space/wall limits and observed RSS are distinguished from hard native-heap enforcement. B04-C exact construction has a bounded operation budget but does not poll cancellation during construction. |
+| Matched size and output scopes | Dimension, constraint and horizon pilots supply candidate-labelled relations with fixture-specific exact singleton proofs and zero selected witnesses. New registered complete-family/query runs supply matched actual direction-witness requests at T=2/4/8. The refused n=2,T=4 point remains excluded from paired timings. H coordinates/rows/nonzeros/bytes are the representation-size axis; alternative set families are outside this review's measured scope. |
+| Separate costs and partial outcomes | Provider phases cover conversions; actual joint assembly, objective lifting and program freezing are now separately observed. Pinned native clocks expose overlapping factorization scopes. Query selection/checking and output size are recorded separately. Resource stops remain inconclusive even when preceding construction phases completed. |
+| Findings, remedies and parallel correctness | The finding table below connects observations to their dispositions. Batch ordering, failure, cancellation and observer provenance retain stress tests. No unique global limiter or general performance ranking is established. |
+| Independent fixed-commit review | Source/evidence slices have independent specification and standards reviews. Final consolidated source/evidence review is still required before closure. |
+| TEST-23 batch isolation | Existing gated tests exercise isolation, failure, cancellation, ordering and provenance. Both executor and batch suites pass in the fresh nine-suite run. Outer concurrency and observed native width remain separate quantities. |
+
+The [complete-family/query capture](../../reports/algorithm-results/review05-family-query-20261110-3b98f5b0/README.md)
+retains 170 primary attempts: 168 verified and two deliberate resource or
+materialization stops. Forty separate gprof attempts are attribution diagnostics.
+The flat T=8 fixture requests 16 directions, obtains 16 witnesses and retains
+nine distinct histories; duplicate optima do not imply a uniqueness claim.
+Exact checking proves both family inclusions and each requested direction's
+optimality, and binds the actual query/program spans to those requests.
+
+The [construction-phase capture](../../reports/algorithm-results/review05-build-phases-20261110-468cc0eb/README.md)
+retains 86 attempts: 84 verified and two later resource stops. Actual assembly,
+objective lifting and owning program construction are timed separately. The
+remaining parent span includes admission, identity, map and observer work; it
+is not an isolated verifier timer. Forty-two observed/unobserved pairs retain
+identical mathematical results and witnesses.
+
+The [native-clock on/off diagnostic](../../reports/algorithm-results/review05-native-clock-pairs-20261110/README.md)
+retains 84 verified attempts and 36 measured pairs with the same binary and OBS
+collection enabled in both modes. The portable checker binds raw streams,
+fixtures and reparsed diagnostics. Concurrent builds and absent isolated
+limiter profiling make performance differences inconclusive. The binary's
+precommit build linkage is explicitly retained rather than relabelled as a
+clean rebuild. Native clock scopes overlap and must not be summed.
+
+| Finding or observation | Evidence | Fix or recommendation |
+| --- | --- | --- |
+| A caller-owned backend observer could leak an earlier batch maximum into a later result | Independent source reproduction; gated batches reporting widths 5 then 1 | Fixed with a fresh per-batch observer and post-join aggregate merge. Regression expects batch results 5 and 1, caller aggregate 5. |
+| OBS collection has visible overhead on the tiny T-S01 fixture | Disabled/enabled captures above, with separate strategy and process scopes | Keep collection optional and retain both modes. Do not extrapolate tiny-fixture overhead to larger workloads. |
+| Joint construction retains owning CSR/program snapshots and provenance, which involve copies | Actual assembly/lift/freeze phase capture and source inspection | Keep owning lifetime guarantees. The freeze measurement includes validation and copies together; it does not justify a speculative copy-elimination change or quantify each copy in isolation. |
+| Larger family/query output introduces exact-H, JSON and row-copy work | Complete-family gprof diagnostic, output sizes and separately bound query spans | Retain explicit output scope and raw records. Mixed process samples do not establish one limiting function or a causal optimization benefit. |
+| Native timer export can perturb measured work | Same-binary clock-mode diagnostic | Treat this diagnostic as inconclusive overhead evidence; keep native export opt-in. CSL stderr serialization does not prove concurrent attribution of vendor stdout. |
+| Some admitted phases finish before a later resource stop | Query and phase resource-stop records; executor partial-outcome tests | Preserve the actual partial status and completed observations. Never promote it to mathematical completion or discard it from failure accounting. |
+
+Immutable earlier captures remain available for their original scopes. The new
+families do not retrospectively promote candidate-labelled size pilots to
+registered complete families. Unsupported membership/slice APIs and unmatched
+points remain labelled limitations. Universal heap caps, interruption of every
+native call, success at every grid point and a unique global limiter are not
+claims established by these results.
+
+**Status: evidence consolidation in progress; #95 remains open.** Finish the
+current TSan receipt/inventory, final independent exact-head review, main-branch
+integration/CI and the required Pages staging and live verification before
+closing the issue.
