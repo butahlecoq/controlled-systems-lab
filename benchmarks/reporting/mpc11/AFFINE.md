@@ -8,6 +8,20 @@ Python computes matrix exponentials and exports coefficients; it does not solve
 the optimization problem. The saved formulation is a public joint program,
 not a claim that a particular synthesis strategy admits this stage-cost API.
 
+The recommended `--condense` route substitutes the affine state equalities into
+the objective and state bounds, then solves the resulting control-space QP
+through the same actual CSL provider. The complete original joint program,
+its hash, and the full affine reconstruction map remain in the result bundle.
+Every physical state and control is recovered and checked against the original
+cost, state/input/trust bounds and affine recurrence. No state constraint or
+objective term is dropped. Coefficient substitution is binary64 arithmetic;
+this is algebraic equivalence with numerical checks, not validated arithmetic.
+The direct joint route (no flag) and equivalent `--controls-first` ordering
+remain available to reproduce retained native resource-limit outcomes. The
+initial LV full-state programs cycled in the pinned QP active-set solver until
+the native 290-second time limit. Reordering alone did not resolve the outcome.
+Those attempts are preserved separately from the equality-eliminated capture.
+
 The quadratic objective includes every running penalty and the terminal
 quadratic. CSL's convention is `0.5*y'Q*y + linear'y + offset`; its half factor
 is included explicitly in the exported diagonal. Variables are scaled physical
@@ -28,7 +42,7 @@ OPENBLAS_NUM_THREADS=1 "$MPC11_VENV/bin/python" -m unittest \
   tests.reporting.test_mpc11_affine
 OPENBLAS_NUM_THREADS=1 "$MPC11_VENV/bin/python" \
   benchmarks/reporting/mpc11/run_affine.py \
-  --bridge "$MPC11_BUILD/csl_mpc11_affine" --output "$MPC11_RESULTS"
+  --bridge "$MPC11_BUILD/csl_mpc11_affine" --output "$MPC11_RESULTS" --condense
 ```
 
 Set these paths to dedicated user-owned directories. Use the

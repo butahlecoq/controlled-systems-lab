@@ -161,6 +161,43 @@ def permute_program(original, native_to_joint):
     return result
 
 
+
+def condense_program(scenario, coefficients, original):
+    n, m = len(scenario['states']), len(scenario['controls'])
+    count = scenario['time']['intervals']; controls = count*m
+    current_map = np.zeros((n, controls))
+    current_offset = np.array([row['initial']/row['scale'] for row in scenario['states']])
+    maps, offsets = [current_map.copy()], [current_offset.copy()]
+    for k, stage in enumerate(coefficients['scaled_coefficients']):
+        current_map = np.array(stage['A'])@current_map
+        current_map[:,k*m:(k+1)*m] += stage['B']
+        current_offset = np.array(stage['A'])@current_offset+stage['c']
+        maps.append(current_map.copy()); offsets.append(current_offset.copy())
+    transform = np.vstack([*maps,np.eye(controls)])
+    offset = np.concatenate([*offsets,np.zeros(controls)])
+    diagonal, linear = np.array(original['q_diagonal']), np.array(original['linear'])
+    q = transform.T@(diagonal[:,None]*transform); q = .5*(q+q.T)
+    c = transform.T@(diagonal*offset+linear)
+    constant = .5*np.dot(diagonal,offset**2)+np.dot(linear,offset)+original['offset']
+    starts, columns, values, rows = [0], [], [], []
+    for i in range(n*(count+1)):
+        for j, value in enumerate(transform[i]):
+            if value != 0: columns.append(j); values.append(value)
+        starts.append(len(values))
+        lo, hi = original['variables'][i]; rows.append([lo-offset[i],hi-offset[i]])
+    result = {**original,'program_id':original['program_id']+'/equality-eliminated',
+        'source_joint_program_sha256':original['program_sha256'],
+        'q_diagonal':np.diag(q).tolist(),'q_matrix':q.tolist(),'linear':c.tolist(),'offset':constant,
+        'variables':original['variables'][n*(count+1):],'rows':rows,
+        'constraints':{'rows':len(rows),'cols':controls,'row_offsets':starts,'column_indices':columns,'values':values},
+        'coordinates':{**original['coordinates'],'native_order':'scaled controls only; full joint reconstruction retained'},
+        'joint_reconstruction':{'matrix':transform.tolist(),'offset':offset.tolist(),'variables':original['variables'],
+                               'scope':'algebraic equality elimination evaluated in binary64; independently replay full affine dynamics'},
+        'formulation':'public-CSL-ConvexProgram-equality-eliminated-with-full-joint-reconstruction'}
+    result.pop('program_sha256',None); result['program_sha256']=canonical_hash(result)
+    return result
+
+
 def check_solution(scenario, coefficients, qp, result):
     if result.get('termination') != 'completed' or result.get('mathematical_outcome') != 'optimal' or 'primal' not in result:
         return {'status':'unavailable','reason':'no completed numerical optimal primal','termination':result.get('termination')}
@@ -170,7 +207,11 @@ def check_solution(scenario, coefficients, qp, result):
         return {'status':'incorrect','reason':'nonfinite or malformed primal'}
     point = np.array(result['primal']); n, m = len(scenario['states']), len(scenario['controls'])
     count = scenario['time']['intervals']; start = n*(count+1)
-    joint = point[np.array(qp['coordinates'].get('joint_indices',list(range(len(point)))))]
+    if 'joint_reconstruction' in qp:
+        reconstruction = qp['joint_reconstruction']
+        joint = np.array(reconstruction['matrix'])@point+reconstruction['offset']
+    else:
+        joint = point[np.array(qp['coordinates'].get('joint_indices',list(range(len(point)))))]
     states = joint[:start].reshape((count+1,n))*coefficients['state_scale']
     controls = joint[start:].reshape((count,m))*coefficients['control_scale']
     replay = [np.array([row['initial'] for row in scenario['states']])]
@@ -182,8 +223,11 @@ def check_solution(scenario, coefficients, qp, result):
     refs = np.array(coefficients['reference_commands'])
     running = objective['running_weight']/count*float(np.sum(((controls-refs)/objective['running_scale'])**2))
     direct = terminal+running
-    qp_cost = .5*float(np.dot(qp['q_diagonal'],point**2))+float(np.dot(qp['linear'],point))+qp['offset']
+    quadratic = float(point@np.array(qp['q_matrix'])@point) if 'q_matrix' in qp else float(np.dot(qp['q_diagonal'],point**2))
+    qp_cost = .5*quadratic+float(np.dot(qp['linear'],point))+qp['offset']
     violation=max(max(lo-x,x-hi,0.) for x,(lo,hi) in zip(point,qp['variables']))
+    if 'joint_reconstruction' in qp:
+        violation=max(violation,max(max(lo-x,x-hi,0.) for x,(lo,hi) in zip(joint,qp['joint_reconstruction']['variables'])))
     replay_error=float(np.max(np.abs(states-np.array(replay))))
     objective_error=abs(direct-qp_cost)
     native_objective=result.get('primal_check',{}).get('objective')

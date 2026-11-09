@@ -22,6 +22,10 @@ def check(bundle):
         qp=json.loads((folder/'program.json').read_text());authored=dict(qp);authored.pop('program_sha256')
         if canonical_hash(authored)!=qp['program_sha256'] or qp['program_sha256']!=attempt['program_sha256']:
             raise ValueError('program identity mismatch')
+        if 'source_joint_program_sha256' in qp:
+            original=json.loads((folder/'joint-program.json').read_text()); original_hash=original.pop('program_sha256')
+            if canonical_hash(original)!=original_hash or original_hash!=qp['source_joint_program_sha256']:
+                raise ValueError('original joint-program identity mismatch')
         result=json.loads((folder/'stdout.json').read_text())
         if result.get('program_sha256')!=qp['program_sha256'] or result.get('case_id')!=attempt['case_id']:
             raise ValueError('result identity mismatch')

@@ -12,7 +12,7 @@ import resource
 import subprocess
 import time
 
-from affine import canonical_hash, check_solution, model, program, permute_program
+from affine import canonical_hash, check_solution, model, program, permute_program, condense_program
 from check_scenarios import validate
 
 
@@ -41,7 +41,10 @@ def main():
     parser.add_argument('--bridge',required=True,type=Path)
     parser.add_argument('--output',required=True,type=Path)
     parser.add_argument('--controls-first',action='store_true',help='equivalent public-QP variable permutation; retain both formulations')
-    args=parser.parse_args();bridge=args.bridge.resolve(strict=True);out=args.output.resolve()
+    parser.add_argument('--condense',action='store_true',help='equivalent affine equality elimination with full joint reconstruction')
+    args=parser.parse_args()
+    if args.condense and args.controls_first:parser.error('choose one formulation transform')
+    bridge=args.bridge.resolve(strict=True);out=args.output.resolve()
     if out.exists() and any(out.iterdir()):parser.error('output must be new or empty')
     out.mkdir(parents=True,exist_ok=True)
     root=Path(__file__).resolve().parent
@@ -57,6 +60,8 @@ def main():
         else:
             scenario=json.loads(source.read_text());validate(scenario);case=scenario['case_id']
             coefficients=model(scenario);qp=program(scenario,coefficients)
+            if args.condense:
+                original_qp=qp;qp=condense_program(scenario,coefficients,qp)
             if args.controls_first:
                 width=len(qp['variables']);start=len(scenario['states'])*(scenario['time']['intervals']+1)
                 original_qp=qp
@@ -64,7 +69,7 @@ def main():
         folder=out/case.lower();folder.mkdir()
         if scenario is not None:write(folder/'scenario.json',scenario);write(folder/'model.json',coefficients)
         write(folder/'program.json',qp)
-        if scenario is not None and args.controls_first:write(folder/'joint-program.json',original_qp)
+        if scenario is not None and (args.controls_first or args.condense):write(folder/'joint-program.json',original_qp)
         construction_ns=time.monotonic_ns()-started
         start=time.monotonic_ns();stdout=b'';stderr=b'';status='failed';returncode=None;result=None
         try:

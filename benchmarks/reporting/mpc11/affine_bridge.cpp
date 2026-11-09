@@ -58,7 +58,14 @@ int main(int argc,char** argv) try {
     const auto n=diagonal.size();
     if(n==0 || n>4096) throw std::runtime_error("unsupported variable count");
     Vector hessian(n*n,0);
-    for(std::size_t i=0;i<n;++i)hessian[i*n+i]=diagonal[i];
+    if(input.contains("q_matrix")) {
+        const auto matrix=input.at("q_matrix").get<std::vector<Vector>>();
+        if(matrix.size()!=n)throw std::runtime_error("Hessian height mismatch");
+        for(std::size_t i=0;i<n;++i) {
+            if(matrix[i].size()!=n)throw std::runtime_error("Hessian width mismatch");
+            for(std::size_t j=0;j<n;++j)hessian[i*n+j]=matrix[i][j];
+        }
+    } else for(std::size_t i=0;i<n;++i)hessian[i*n+i]=diagonal[i];
     const auto& matrix=input.at("constraints");
     SparseMatrix constraints{matrix.at("rows").get<std::size_t>(),n,
         matrix.at("row_offsets").get<std::vector<std::size_t>>(),
@@ -69,7 +76,7 @@ int main(int argc,char** argv) try {
         std::move(constraints),intervals(input.at("variables")),intervals(input.at("rows")),{}});
     json output={{"schema","csl.mpc11.affine-result/1"},{"case_id",input.at("case_id")},
         {"program_id",input.at("program_id")},{"program_sha256",input.at("program_sha256")},
-        {"formulation","public-CSL-ConvexProgram-joint-state-control-history"},
+        {"formulation",input.value("formulation",std::string("public-CSL-ConvexProgram-joint-state-control-history"))},
         {"assurance","numerical-binary64"},{"family_coverage","not-established"}};
     if(const auto* errors=std::get_if<Diagnostics>(&made)) {
         output["termination"]="contract_rejected";output["diagnostics"]=diagnostics(*errors);

@@ -66,6 +66,23 @@ class AffineTests(unittest.TestCase):
         self.assertAlmostEqual(sum(a*native[j] for a,j in zip(row['values'],row['column_indices'])),0.)
 
 
+    def test_condensed_program_preserves_joint_cost_dynamics_and_bounds(self):
+        scenario = json.loads((ROOT/'benchmarks/reporting/mpc11/scenarios/syn-nl-lv-01.json').read_text())
+        data = MODULE.model(scenario); joint = MODULE.program(scenario, data)
+        result = MODULE.condense_program(scenario, data, joint)
+        u = np.linspace(.1, .9, len(result['variables']))
+        x = np.array(result['joint_reconstruction']['matrix'])@u+result['joint_reconstruction']['offset']
+        original_cost = .5*np.dot(joint['q_diagonal'],x**2)+np.dot(joint['linear'],x)+joint['offset']
+        reduced_cost = .5*u@np.array(result['q_matrix'])@u+np.dot(result['linear'],u)+result['offset']
+        self.assertAlmostEqual(original_cost,reduced_cost,places=12)
+        self.assertGreater(np.linalg.eigvalsh(result['q_matrix'])[0],0)
+        row=joint['constraints']
+        for i, bound in enumerate(joint['rows']):
+            value=sum(row['values'][k]*x[row['column_indices'][k]] for k in range(row['row_offsets'][i],row['row_offsets'][i+1]))
+            self.assertAlmostEqual(value,bound[0],places=12)
+        self.assertEqual(result['joint_reconstruction']['variables'],joint['variables'])
+
+
 
 if __name__ == '__main__':
     unittest.main()
