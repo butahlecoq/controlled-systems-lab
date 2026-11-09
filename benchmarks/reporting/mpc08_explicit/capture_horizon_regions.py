@@ -4,6 +4,7 @@ from fractions import Fraction as Q
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -51,6 +52,7 @@ def check_native(rows):
     seen=set();counts={};samples={}
     for row in rows:
         n=row['horizon'];p=int(row['query_id'].split('-p')[-1]);original=row['original_quadratic'];rep=row['repetition']
+        if type(n) is not int or n not in (2,4,8) or p not in (0,1) or type(original) is not bool or type(rep) is not int or rep not in range(6):raise ValueError('unsupported native query')
         key=(n,p,original,rep)
         if key in seen or row['query_id']!=f'N{n}-p{p}' or row['warmup']!=(rep==0):raise ValueError('native query/repetition binding differs')
         seen.add(key)
@@ -116,5 +118,42 @@ def capture(driver,receipt,output):
     return manifest
 
 
+def recheck(output):
+    if output.is_symlink() or any(p.is_symlink() for p in output.rglob('*')):raise ValueError('symlink artifact')
+    files={p.name:p.read_bytes() for p in output.iterdir() if p.is_file()}
+    expected={}
+    for line in files['SHA256SUMS'].decode().splitlines():
+        checksum,name=line.split('  ',1)
+        if not re.fullmatch('[0-9a-f]{64}',checksum) or not re.fullmatch('[A-Za-z0-9_.-]+',name) or name in expected:raise ValueError('unsafe/duplicate inventory')
+        expected[name]=checksum
+    if expected!={n:hashlib.sha256(b).hexdigest() for n,b in files.items() if n!='SHA256SUMS'}:raise ValueError('inventory differs')
+    manifest=json.loads(files['manifest.json']);revision=manifest['source_commit']
+    if not re.fullmatch('[0-9a-f]{40}',revision) or manifest['source_status']!='' or set(manifest['source_sha256'])!=set(SOURCE_FILES):raise ValueError('source identity/inventory differs')
+    for name,checksum in manifest['source_sha256'].items():
+        data=subprocess.check_output(['git','show','--end-of-options',revision+':'+name],cwd=C.ROOT)
+        if hashlib.sha256(data).hexdigest()!=checksum:raise ValueError('source differs from committed capture')
+    build=json.loads(files['native-build-receipt.json'])
+    if build['binary_sha256']!=manifest['binary_sha256'] or build['client_source_sha256']!=manifest['source_sha256'][SOURCE_FILES[4]]:raise ValueError('native client/source binding differs')
+    if files['queries.csv'].decode()!=queries():raise ValueError('native inputs differ from exact dyadic reference')
+    def decode(value):
+        if isinstance(value,str) and re.fullmatch(r'-?[0-9]+(?:/[0-9]+)?',value):return Q(value)
+        if isinstance(value,list):return list(map(decode,value))
+        if isinstance(value,dict):return {k:decode(v) for k,v in value.items()}
+        return value
+    reference=decode(json.loads(files['reference.json']))
+    if [record['horizon'] for record in reference['records']]!=[2,4,8]:raise ValueError('reference horizon inventory differs')
+    checks=[H.check(record) for record in reference['records']]
+    if C.plain(checks)!=C.plain(reference['checks']):raise ValueError('saved exact checks differ')
+    process=manifest['process']
+    if process['return_code']!=0 or process['timed_out'] is not False:return dict(status='inconclusive-process',exact=C.plain(checks))
+    native=check_native([json.loads(line) for line in files['stdout.jsonl'].splitlines()])
+    summary=json.loads(files['summary.json'])
+    if C.plain(checks)!=summary['exact'] or native!=summary['native']:raise ValueError('saved native/reference summary differs')
+    return dict(status='checked',exact=C.plain(checks),native=native)
+
+
 if __name__=='__main__':
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--driver',type=Path,required=True);p.add_argument('--build-receipt',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args();print(json.dumps(capture(a.driver,a.build_receipt,a.output)))
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--driver',type=Path);p.add_argument('--build-receipt',type=Path);p.add_argument('--output',type=Path);p.add_argument('--recheck',type=Path);a=p.parse_args()
+    if a.recheck:print(json.dumps(recheck(a.recheck)))
+    elif a.driver and a.build_receipt and a.output:print(json.dumps(capture(a.driver,a.build_receipt,a.output)))
+    else:p.error('supply --recheck or all capture arguments')

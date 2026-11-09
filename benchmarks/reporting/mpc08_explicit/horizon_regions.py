@@ -74,9 +74,14 @@ def check(record):
     rows=endpoint_rows(n);expected=feasible_domain(n)
     if E.hull(record['feasible_vertices'])!=E.hull(expected):raise ValueError('independent Minkowski feasible domain differs')
     family=record['family']
-    if family!=produce_family(n):raise ValueError('complete control-fiber map/model differs')
+    def canonical(value):
+        if isinstance(value,dict):return {k:canonical(v) for k,v in value.items()}
+        if isinstance(value,(list,tuple)):return tuple(map(canonical,value))
+        return value
+    if canonical(family)!=canonical(produce_family(n)):raise ValueError('complete control-fiber map/model differs')
     total=Q(0);checked=[]
     for cell in record['cells']:
+        if not E.is_bounded(cell['rows']):raise ValueError('unbounded endpoint cell')
         if not all(tuple(h) in list(map(tuple,cell['rows'])) for h in E.X):
             raise ValueError('bounded fixture cells require all canonical X box rows')
         polygon=E.vertices(cell['rows'])
