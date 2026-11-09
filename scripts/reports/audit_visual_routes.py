@@ -118,6 +118,7 @@ SAVED_COMPANION_ROUTES = {
 }
 SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
 SAVED_DATA_COMPANION_RENDERERS = {
+    "scripts/reports/mpc06_delivery/figures.py",
     "scripts/reports/render_adaptive_ode_example.py",
     "scripts/reports/ext02/render_saved.py",
     "scripts/reports/mpc06/render_tube_objective.py",
@@ -149,6 +150,7 @@ FROZEN_REVIEWED_ROUTES = {
         "reviewed: frozen control-family report preserved with shared-policy saved-data companion",
 }
 FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
+    "mpc06-completion-v1": 602,
     "issue824-two-points-nominal-v1": 824,
     "issue824-two-points-nominal-v2": 824,
     "issue824-two-points-zonotope-minimax-v1": 824,

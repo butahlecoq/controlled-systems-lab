@@ -14,6 +14,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
         inventory=audit_visual_routes.build(ROOT)
         committed=json.loads((ROOT/"scripts/reports/visual-route-inventory.json").read_text())
         self.assertEqual(committed,inventory)
+        delivery={entry["source"]:entry for entry in inventory["producers_and_routes"]}["scripts/reports/mpc06_delivery/figures.py"]
+        self.assertEqual(delivery["disposition"],"analytic-reference-checked-saved-run-renderer")
         self.assertEqual(inventory["schema"],"csl.visual-route-inventory/1")
         producers={entry["source"]:entry for entry in inventory["producers_and_routes"]}
         self.assertIn("scripts/reports/env717/check_two_points.py", producers)
