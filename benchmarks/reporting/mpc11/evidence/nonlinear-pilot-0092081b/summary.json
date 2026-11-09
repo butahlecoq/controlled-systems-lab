@@ -1,0 +1,122 @@
+{
+  "capture_source_revision": "0092081b4d94b533c8811245c7309e50a434de9f",
+  "checker_revision": "2dc16170c9df4cd8ba022b2752f6d788934e7ca7",
+  "capture_sha256": "c8be3f89a377c5f9be3c0da4c818df26475c17ae282186cd16869c9a923f437e",
+  "members": 115,
+  "hashed_payload_files": 114,
+  "cases": [
+    {
+      "case_id": "SYN-NL-LV-01",
+      "witness_sha256": "26e7721d684c682f1f0ab8dde8ced25fff2e296a07ed1df5414aeb76c7af0f5d",
+      "controls_sha256": "4f3852365f0e6acd2fc2bcdbf66cb1ad5d55b03419ada592d08b33cb157e05a9",
+      "affine_objective": 0.0782955745731609,
+      "statuses": {
+        "cvodes": "complete",
+        "cvodes-tight": "complete",
+        "rk4": "complete",
+        "rk4-tight": "complete"
+      },
+      "objectives": {
+        "cvodes": {
+          "terminal": 0.07692189774151978,
+          "running": 0.016032051380787938,
+          "total": 0.09295394912230771
+        },
+        "cvodes-tight": {
+          "terminal": 0.07692190368443999,
+          "running": 0.016032051380787938,
+          "total": 0.09295395506522793
+        },
+        "rk4": {
+          "terminal": 0.07692190503579734,
+          "running": 0.016032051380787938,
+          "total": 0.09295395641658527
+        },
+        "rk4-tight": {
+          "terminal": 0.07692190503579734,
+          "running": 0.016032051380787938,
+          "total": 0.09295395641658527
+        }
+      },
+      "claim": "numerical sampled execution and integrator sensitivity; no certified error, safety, global optimality, or reachable set",
+      "max_physical_cvodes_sensitivity": [
+        6.719247807041029e-06,
+        4.953195244183917e-06
+      ],
+      "max_physical_cvodes_rk4_difference": [
+        6.938294049518845e-06,
+        5.257511560330386e-06
+      ],
+      "max_physical_rk4_sensitivity": [
+        0.0,
+        0.0
+      ],
+      "max_physical_affine_prediction_nonlinear_difference": [
+        5.23056250721956,
+        3.186394314090947
+      ]
+    },
+    {
+      "case_id": "SYN-NL-FUEL-01",
+      "witness_sha256": "76baf2328cf849972f74dbafd2187e9a3bc5dd87d1578cacee1d62dc6e579ac5",
+      "controls_sha256": "ca9502324ce5583cdd92379f4d9a089d1dbf6a1228fd2eb782b5e593610736cb",
+      "affine_objective": 0.010570464036763268,
+      "statuses": {
+        "cvodes": "complete",
+        "cvodes-tight": "complete",
+        "rk4": "complete",
+        "rk4-tight": "complete"
+      },
+      "objectives": {
+        "cvodes": {
+          "terminal": 0.008096911612915937,
+          "running": 0.0016000000000000005,
+          "total": 0.009696911612915938
+        },
+        "cvodes-tight": {
+          "terminal": 0.008096912034539772,
+          "running": 0.0016000000000000005,
+          "total": 0.009696912034539772
+        },
+        "rk4": {
+          "terminal": 0.008096912083657686,
+          "running": 0.0016000000000000005,
+          "total": 0.009696912083657687
+        },
+        "rk4-tight": {
+          "terminal": 0.008096912083657686,
+          "running": 0.0016000000000000005,
+          "total": 0.009696912083657687
+        }
+      },
+      "claim": "numerical sampled execution and integrator sensitivity; no certified error, safety, global optimality, or reachable set",
+      "max_physical_cvodes_sensitivity": [
+        2.141514130471478e-07,
+        6.02541234684395e-08,
+        3.369024126342879e-08,
+        1.0081065149325497e-08
+      ],
+      "max_physical_cvodes_rk4_difference": [
+        2.389427464777327e-07,
+        6.724684453729424e-08,
+        3.062806364084736e-08,
+        9.165828207535753e-09
+      ],
+      "max_physical_rk4_sensitivity": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max_physical_affine_prediction_nonlinear_difference": [
+        0.2504889379332127,
+        0.092745249703448,
+        0.031090739131217404,
+        0.011485305183173866
+      ]
+    }
+  ],
+  "diagnostic": "Initial uncommitted-source per-report CVODES restart pilot retained; source hashes recorded, not a clean-source executable capture. Superseded by accepted per-original-hold source0092081b; no controls or objective changed.",
+  "post_capture_validation_revision": "06780addba87f4a50d388c0d6484b190ff0d659d",
+  "post_capture_validation_scope": "CLI case-fixed dimensions/finite positive scales before callbacks; saved checker independently recomputes all four difference arrays, identities and manifest comparisons. Captured ODE formulas, controls and original archive unchanged."
+}
