@@ -8,9 +8,14 @@ sys.path.insert(0,str(Path(__file__).resolve().parent))
 from scalar_query_oracle import number,verify_history
 
 
+class OracleBudget(RuntimeError):
+    """Exact oracle stopped without making a mathematical decision."""
+
+
 def _rows(h,horizon):
     width=2*horizon+1
     if horizon not in (2,4,8) or h['dimension']!=width:raise ValueError('unsupported relation dimensions')
+    if len(h['equalities'])+len(h['inequalities'])>100000:raise OracleBudget('exact oracle initial row budget exhausted')
     result=[]
     for matrix,bounds,equality in ((h['equalities'],h['equality_values'],True),(h['inequalities'],h['upper_bounds'],False)):
         if len(matrix)!=len(bounds):raise ValueError('relation row count mismatch')
@@ -35,7 +40,7 @@ def _feasible(rows,width):
         def substitute(c,d):
             nonlocal budget
             factor=c[pivot];budget+=width
-            if budget>5000000:raise ValueError('exact oracle operation budget exhausted')
+            if budget>5000000:raise OracleBudget('exact oracle operation budget exhausted')
             return ([x-factor*y for x,y in zip(c,a)],d-factor*b)
         eq=[substitute(c,d) for c,d in eq]
         ine=[(*substitute(c,d),s) for c,d,s in ine]
@@ -49,7 +54,7 @@ def _feasible(rows,width):
                 continue
             a=tuple(x/first for x in a);b/=first
             if any(x.numerator.bit_length()>8192 or x.denominator.bit_length()>8192 for x in (*a,b)):
-                raise ValueError('exact oracle integer budget exhausted')
+                raise OracleBudget('exact oracle integer budget exhausted')
             old=unique.get(a)
             if old is None or b<old[0] or (b==old[0] and s):unique[a]=(b,s)
         ine=[(list(a),b,s) for a,(b,s) in unique.items()]
@@ -60,11 +65,11 @@ def _feasible(rows,width):
         remaining.remove(pivot)
         pos=[r for r in ine if r[0][pivot]>0];neg=[r for r in ine if r[0][pivot]<0]
         out=[r for r in ine if r[0][pivot]==0]
-        if len(pos)*len(neg)+len(out)>100000:raise ValueError('exact oracle row budget exhausted')
+        if len(pos)*len(neg)+len(out)>100000:raise OracleBudget('exact oracle row budget exhausted')
         for a,b,s in pos:
             for c,d,t in neg:
                 budget+=width
-                if budget>5000000:raise ValueError('exact oracle operation budget exhausted')
+                if budget>5000000:raise OracleBudget('exact oracle operation budget exhausted')
                 p,q=a[pivot],-c[pivot]
                 out.append(([x/p+y/q for x,y in zip(a,c)],b/p+d/q,s or t))
         ine=out
@@ -99,3 +104,92 @@ def verify_family(h,horizon,terminal_coefficient):
         normalized=[(x,y,e,False) for x,y,e in rows]+[violation]
         if _feasible(normalized,width):raise ValueError('relation includes histories outside the literal optimizer family')
     return True
+
+
+def verify_query(witness,direction,horizon,terminal_coefficient):
+    verify_history(witness['states'],witness['controls'],witness['original_objective'],horizon,terminal_coefficient)
+    if len(direction)!=horizon:raise ValueError('direction width mismatch')
+    direction=list(map(number,direction))
+    actual=sum(d*number(u[0]) for d,u in zip(direction,witness['controls']))
+    optimum=sum(min(Fraction(0),d) for d in direction) if terminal_coefficient==0 else Fraction(0)
+    if actual!=optimum:raise ValueError('witness does not attain its associated direction minimum')
+    return True
+
+
+def verify_attempt(record,scenario,scenario_hash):
+    """Bind one structured raw record to a literal fixture and actual query calls."""
+    import struct
+    import time
+    started=time.perf_counter_ns()
+    t=scenario['horizon'];coefficient=scenario['objective']['coefficients'][0]
+    if t not in (2,4,8) or coefficient not in (0,1):raise ValueError('unsupported fixture')
+    if (scenario['model']!={'kind':'linear_discrete','A':[[1]],'B':[[1]]} or
+        scenario['initial_state']!=[0] or scenario['controls']!={'kind':'box','lower':[0],'upper':[1]} or
+        scenario['objective']!={'kind':'linear','coefficients':[coefficient]}):raise ValueError('fixture differs from literal oracle')
+    if record['schema']!='csl.review05.family-query/1' or record['scenario_sha256']!=scenario_hash or record['horizon']!=t:
+        raise ValueError('raw record/fixture binding mismatch')
+    expected_fixture='HORIZON-01' if coefficient else 'FAMILY-QUERY-FLAT'
+    if record['fixture']!=expected_fixture or record['target']!='exact_optimal_relation':raise ValueError('fixture/target mismatch')
+    profiles={'csl.synthesis.reach-back':'strategy-a.nominal-linear-exact-v1','csl.synthesis.strategy-b':'strategy-b.nominal-linear-exact-v1'}
+    if record['profile']!=profiles.get(record['strategy']):raise ValueError('strategy/profile binding mismatch')
+    if record.get('termination')!='completed' or record.get('selector_termination')!='completed':
+        return {'status':'inconclusive','reason':'retained noncompleted/refused synthesis or query'}
+    if not record['family_registry_verified'] or record['outcome']!='optimal' or record['objective_lower']!=0 or record['objective_upper']!=0:
+        raise ValueError('completed family lacks original optimality binding')
+    binding=record['family_binding']
+    if any(binding[key]!=record[key] for key in ('problem_id','profile','strategy','strategy_version')) or not record['selector_source_bound']:
+        raise ValueError('family/selector source binding mismatch')
+    verifier='csl.verifier.strategy-a.nominal-linear-exact' if record['strategy']=='csl.synthesis.reach-back' else 'csl.verifier.strategy-b.nominal-linear-exact'
+    if record['compiled_verifier']['id']!=verifier or record['compiled_verifier']['version']!='1':raise ValueError('compiled verifier binding mismatch')
+    verify_family(record['relation'],t,coefficient)
+    family_ns=time.perf_counter_ns()-started
+    witnesses=record['witnesses'];directions=record['directions']
+    expected_directions=[]
+    for k in range(t):
+        d=[0]*t;d[k]=1;expected_directions.append(d);d=d[:];d[k]=-1;expected_directions.append(d)
+    if directions!=expected_directions:raise ValueError('direction request differs from pinned basis schedule')
+    if record['requested_witnesses']!=(1 if coefficient else 2*t):raise ValueError('witness request scope mismatch')
+    if record['returned_witnesses']!=len(witnesses) or not witnesses:raise ValueError('witness count mismatch')
+    if len(witnesses)>len(directions):raise ValueError('more witnesses than executed directions')
+    replay_start=time.perf_counter_ns()
+    for i,witness in enumerate(witnesses):
+        if witness['problem_id']!=record['problem_id']:raise ValueError('witness problem binding mismatch')
+        verify_query(witness,directions[i],t,coefficient)
+    if coefficient and len(witnesses)!=1:raise ValueError('zero optimizer query must stop at requested one witness')
+    if not coefficient and (len(witnesses)!=2*t or record['distinct_witnesses']<2):raise ValueError('constant fixture needs all queries and distinct histories')
+    if not record['literal_replay_ok']:raise ValueError('driver literal replay failed')
+    if record['instrumented']:
+        observed=[s for s in record['selector_timing']['spans'] if s['operation']=='selector.lp.direction-query' and s['completed']]
+        if len(observed)!=len(witnesses):raise ValueError('actual LP span/witness count mismatch')
+        for i,span in enumerate(observed):
+            bits=[str(struct.unpack('Q',struct.pack('d',float(x)))[0]) for x in directions[i]]
+            expected='witness-selector-direction/'+str(i)+'/'+'/'.join(bits)
+            if span['query']!=i or span['program']!=expected or span['termination']!='completed' or span['ticks'] is None or span['ticks']<0 or span['input_size']!=2*t+1 or span['output_size']!=2*t+1:
+                raise ValueError('actual LP observation lacks matching program/query/size binding')
+    return {'status':'verified','family_check_ns':family_ns,'independent_query_replay_ns':time.perf_counter_ns()-replay_start,
+        'scope':'exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical'}
+
+
+def main():
+    import argparse,hashlib
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('bundle',type=Path);args=parser.parse_args()
+    errors=0;results=[]
+    for path in sorted((args.bundle/'attempts').glob('*/receipt.json')):
+        receipt=json.loads(path.read_text());row={'attempt':str(path.parent.relative_to(args.bundle))}
+        try:
+            raw=(path.parent/'stdout.txt').read_text();record=json.loads(raw)
+            scenario_path=args.bundle/'scenarios'/receipt['scenario'];scenario=json.loads(scenario_path.read_text())
+            if receipt['stdout_sha256']!=hashlib.sha256(raw.encode()).hexdigest():raise ValueError('raw stdout digest mismatch')
+            row.update(verify_attempt(record,scenario,hashlib.sha256(scenario_path.read_bytes()).hexdigest()))
+        except OracleBudget as error:
+            row.update(status='inconclusive',reason=str(error))
+        except (KeyError,ValueError,TypeError,IndexError,ZeroDivisionError) as error:
+            row.update(status='incorrect',reason=str(error));errors+=1
+        if row['status']=='verified' and (receipt['returncode']!=0 or receipt['timed_out']):
+            row.update(status='incorrect',reason='record claims success in failed/timed-out process');errors+=1
+        results.append(row)
+    (args.bundle/'checks.json').write_text(json.dumps({'schema':'csl.review05.family-query-checks/1','attempts':results},indent=2)+'\n')
+    print(json.dumps({'attempts':len(results),'incorrect':errors,'verified':sum(x['status']=='verified' for x in results),'inconclusive':sum(x['status']=='inconclusive' for x in results)}))
+    return int(errors>0 or not results)
+
+if __name__=='__main__':raise SystemExit(main())

@@ -1989,6 +1989,15 @@
       "disposition": "analytic-reference-checked-saved-run-renderer"
     },
     {
+      "source": "benchmarks/reporting/review05/render_family_query.py",
+      "signal_count": 7,
+      "asset_name_literals": [
+        "control-projection.png",
+        "control-projection.svg"
+      ],
+      "disposition": "adopted-shared-quantitative-policy"
+    },
+    {
       "source": "benchmarks/reporting/review05/render_profile_matrix.py",
       "signal_count": 6,
       "asset_name_literals": [
