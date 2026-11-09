@@ -12,6 +12,7 @@ from affine import canonical_hash
 from check_scenarios import validate
 from nmpc import build_controller, initialize_guess, direct_tail_cost, vector
 from nonlinear import make_request
+from replay_evidence import read_native_attempt
 from run_nmpc import running_prefix
 
 
@@ -144,6 +145,13 @@ def check(bundle):
             if u.shape!=(count,len(s['controls'])) or not np.isfinite(u).all():raise ValueError('executed control dimensions/nonfinite')
             control_violation=np.maximum(np.maximum(cb[:,0]-u,u-cb[:,1]),0).max(axis=0).tolist()
             if max(control_violation)>1e-10:raise ValueError('applied input violates physical bounds')
+        native_replays={}
+        if count:
+            for mode in ['rk4','rk4-tight']:
+                target=folder/mode;process=load(target/'process.json')
+                native_replays[mode]=(process,read_native_attempt(target,process,status_key='status',time_key='elapsed_seconds',
+                    extensions={'running_cost_prefix','completed_objective','sampled_physical_state_violation','full_scenario_sha256','full_original_interval_count'},
+                    wall_seconds=manifest['limits']['wall_seconds']))
         previous=None;previous_id=None;max_objective_difference=0.;max_constraint_difference=0.;max_stationarity_difference=0.
         for j,entry in enumerate(attempt['updates']):
             folder_j=folder/f'update-{j:03d}';r=load(folder_j/'result.json');binding=dict(r);digest=binding.pop('solve_sha256')
@@ -187,15 +195,14 @@ def check(bundle):
             if not r['accepted'] and j!=len(attempt['updates'])-1:raise ValueError('continued after failed solve')
             previous=prediction;previous_id=digest
         bounds=np.array([v['physical_bounds'] for v in s['states']]);state_violation=np.maximum(np.maximum(bounds[:,0]-physical,physical-bounds[:,1]),0).max(axis=0).tolist()
-        replay_records={}
+        replay_records={};replay_processes={}
         for mode in ['rk4','rk4-tight']:
             if not count:continue
             target=folder/mode;request=load(target/'request.json');prefix=copy.deepcopy(s);prefix['time']['intervals']=count;prefix['time']['grid']=s['time']['grid'][:count+1];prefix['time']['final']=prefix['time']['grid'][-1]
             expected=make_request(prefix,controls,witness,sensitivity=mode.endswith('tight'));expected['full_scenario_sha256']=canonical_hash(s);expected['full_original_interval_count']=n
             if request!=expected:raise ValueError('independent replay prefix association')
-            raw=load(target/'stdout.json');record=load(target/'record.json')
-            for key,value in raw.items():
-                if record[key]!=value:raise ValueError('replay structured record differs from raw')
+            process,record=native_replays[mode];replay_processes[mode]=process['status']
+            if record is None:continue
             if record['witness_sha256']!=witness or record['controls_sha256']!=canonical_hash(controls) or record['full_scenario_sha256']!=canonical_hash(s) or record['full_original_interval_count']!=n:raise ValueError('replay identity mismatch')
             rs=np.asarray(record['physical_states']);zs=np.asarray(record['scaled_states'])
             if rs.ndim!=2 or rs.shape[1]!=len(scales) or zs.shape!=rs.shape or not np.isfinite(rs).all():raise ValueError('replay dimensions/nonfinite')
@@ -209,13 +216,18 @@ def check(bundle):
         summary=load(folder/'replay-summary.json') if count else {'status':'unavailable-no-executed-holds'}
         if manifest_case['replay']!=summary:raise ValueError('manifest replay summary mismatch')
         if count:
-            for mode,r in replay_records.items():
+            for mode in ['rk4','rk4-tight']:
+                if mode not in replay_records:
+                    if summary[mode]!={'status':replay_processes[mode]}:raise ValueError('unsuccessful replay process contradicts summary')
+                    continue
+                r=replay_records[mode]
                 expected={'status':r['status'],'completed_objective':r['completed_objective'],'max_physical_execution_difference':np.max(np.abs(np.asarray(r['physical_states'])-physical),axis=0).tolist() if len(r['physical_states'])==len(physical) else None}
                 if summary[mode]!=expected:raise ValueError('replay/execution comparison mismatch')
-            if all(r['status']=='complete' for r in replay_records.values()):
+            if len(replay_records)==2 and all(r['status']=='complete' for r in replay_records.values()):
                 difference=np.max(np.abs(np.array(replay_records['rk4']['physical_states'])-replay_records['rk4-tight']['physical_states']),axis=0).tolist()
                 if summary['max_physical_tolerance_sensitivity']!=difference:raise ValueError('replay sensitivity mismatch')
-        reports.append({'case_id':s['case_id'],'status':attempt['status'],'completed_holds':count,'transcriptions_checked':len(attempt['updates']),'completed_objective':objective,'sampled_execution_physical_state_violation':state_violation,'applied_physical_control_violation':control_violation,
+            elif 'max_physical_tolerance_sensitivity' in summary:raise ValueError('incomplete replay declares complete-trace sensitivity')
+        reports.append({'case_id':s['case_id'],'status':attempt['status'] if not complete or (len(replay_records)==2 and all(r['status']=='complete' for r in replay_records.values())) else 'inconclusive-replay','controller_status':attempt['status'],'replay_processes':replay_processes,'completed_holds':count,'transcriptions_checked':len(attempt['updates']),'completed_objective':objective,'sampled_execution_physical_state_violation':state_violation,'applied_physical_control_violation':control_violation,
                         'max_nlp_objective_rebuild_difference':max_objective_difference,'max_nlp_constraint_rebuild_difference':max_constraint_difference,'max_stationarity_rebuild_difference':max_stationarity_difference,
                         'claim':'saved transcript/controls/cost/replay association and NLP rebuild; no solver rerun, global guarantee or ODE error certificate'})
     return reports

@@ -194,4 +194,22 @@ class SavedNativeOutcomeTests(unittest.TestCase):
                 hp=root/'file-hashes.json';hashes=json.loads(hp.read_text());hashes[str(path.relative_to(root))]=hashlib.sha256(path.read_bytes()).hexdigest();hp.write_text(json.dumps(hashes))
                 with self.assertRaises(ValueError):check(root)
 
+class ReplayNativeBindingTests(unittest.TestCase):
+    def test_failed_receipt_empty_raw_missing_field_reject(self):
+        import os,shutil,tempfile,hashlib
+        from check_nmpc_saved import check
+        source=os.environ.get('CSL_MPC11_NMPC_BUNDLE')
+        if not source:self.skipTest('CSL_MPC11_NMPC_BUNDLE required')
+        for mutation in ['failed-receipt','empty-raw','missing-field']:
+            with self.subTest(mutation=mutation),tempfile.TemporaryDirectory() as tmp:
+                root=Path(tmp)/'bundle';shutil.copytree(source,root);target=root/'syn-nl-lv-01/rk4'
+                if mutation=='failed-receipt':
+                    path=target/'process.json';r=json.loads(path.read_text());r.update(status='failed',return_code=1)
+                else:
+                    path=target/'stdout.json';r=json.loads(path.read_text())
+                    if mutation=='empty-raw':r={}
+                    else:r.pop('diagnostics')
+                path.write_text(json.dumps(r));hp=root/'file-hashes.json';hashes=json.loads(hp.read_text());hashes[str(path.relative_to(root))]=hashlib.sha256(path.read_bytes()).hexdigest();hp.write_text(json.dumps(hashes))
+                with self.assertRaises(ValueError):check(root)
+
 if __name__=='__main__':unittest.main()
