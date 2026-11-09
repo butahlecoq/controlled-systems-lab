@@ -39,6 +39,29 @@ ctest --test-dir build/review05-build-phases -R '^direct_joint_strategy_tests$' 
   --output-on-failure --no-tests=error
 ```
 
+Capture a new bounded follow-up with the built executable:
+
+```sh
+python3 benchmarks/reporting/review05/run_build_phases.py \
+  --driver build/review05-build-phases/csl_review05_family_query \
+  --build-cache build/review05-build-phases/CMakeCache.txt \
+  --output /absolute/new/build-phase-capture
+```
+
+The capture requires clean source and a new output directory. It independently
+checks the retained raw data and writes `phase-summary.json`, `index.html` and
+`SHA256SUMS`. To regenerate only checks/reading files from an extracted copy,
+without solving again:
+
+```sh
+python3 source/check_family_query.py .
+python3 -c 'import sys; sys.path.insert(0,"source"); from pathlib import Path; from run_build_phases import summarize; summarize(Path("."))'
+```
+
+Verify the original manifest first and retain regenerated checker durations
+separately. Historical absolute receipt paths identify the capture host; they
+are not commands to run on another machine.
+
 The hook is private benchmark tooling. It adds no installed target, public
 library API or required dependency. The ordinary standalone review05 benchmark
 CMake entry point also builds the same source.

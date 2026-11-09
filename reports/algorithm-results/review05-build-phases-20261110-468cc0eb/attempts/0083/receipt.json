@@ -1,0 +1,31 @@
+{
+  "scenario": "family-query-flat-t04.json",
+  "strategy": "csl.synthesis.strategy-b",
+  "mode": "off",
+  "repetition": 5,
+  "warmup": false,
+  "command": [
+    "/home/butahlecoq/.local/share/codex/build/review05-assembly-phases-20261110/csl_review05_family_query",
+    "/home/butahlecoq/.local/share/codex/captures/review05-build-phases-20261110-v1/scenarios/family-query-flat-t04.json",
+    "csl.synthesis.strategy-b",
+    "off"
+  ],
+  "returncode": 0,
+  "timed_out": false,
+  "process_wall_ns": 12658472,
+  "load_at_start": [
+    0.99609375,
+    2.90673828125,
+    3.501953125
+  ],
+  "resources": {
+    "source": "POSIX wait4 for the isolated strategy process",
+    "user_cpu_seconds": 0.007781,
+    "system_cpu_seconds": 0.002918,
+    "child_cpu_seconds": 0.010699,
+    "peak_rss_kib": 14652,
+    "timed_out": false
+  },
+  "stdout_sha256": "f2f18e64db40a0aef3c56602ec55be88c8a39d129f2019f71e85dccc2d2926c2",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}
