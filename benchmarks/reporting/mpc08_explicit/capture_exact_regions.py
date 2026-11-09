@@ -52,9 +52,13 @@ def queries(record,output):
 
 def check_native(rows,lookup):
     counts=Counter();groups=defaultdict(list);tol=Q(1,500000)
-    expected={key:0 for key in lookup}
+    expected={key:0 for key in lookup};seen=set()
     for row in rows:
         q=lookup[row['query_id']];expected[row['query_id']]+=1
+        key=(row['query_id'],row['strategy'],row['repetition'])
+        if key in seen or row['repetition'] not in range(6) or row['warmup']!=(row['repetition']==0):raise ValueError('native method/repetition duplicated or changed')
+        if row['strategy'] not in ('csl.synthesis.reach-back','csl.synthesis.strategy-b','online-condensed-qp'):raise ValueError('unexpected native method')
+        seen.add(key)
         counts[(row['strategy'],row['status'])]+=1
         if type(row['elapsed_ns']) is not int or row['elapsed_ns']<0:raise ValueError('invalid measured native interval')
         if row['strategy']=='online-condensed-qp' and row['termination_optimal']:
@@ -88,9 +92,12 @@ def support_queries(record,output):
 
 
 def check_support(rows,lookup):
-    counts=Counter();seen=Counter();tol=Q(1,500000)
+    counts=Counter();seen=Counter();keys=set();tol=Q(1,500000)
     for row in rows:
         q=lookup[row['query_id']];seen[row['query_id']]+=1
+        key=(row['query_id'],row['repetition'])
+        if key in keys or row['repetition'] not in range(6) or row['warmup']!=(row['repetition']==0):raise ValueError('support repetition duplicated or changed')
+        keys.add(key)
         if row['optimal']:
             p,v=map(lambda x:Q(str(x)),row['primal'])
             if any(a*p+b*v>c+tol for a,b,c in q['rows']) or abs(q['direction'][0]*p+q['direction'][1]*v-q['minimum'])>tol:
@@ -135,10 +142,11 @@ def capture(driver,receipt,output):
     output.mkdir(parents=True);record=R.build();write(output/'exact-reference.json',record);lookup=queries(record,output);supports=support_queries(record,output)
     environment=dict(os.environ,OPENBLAS_NUM_THREADS='1',OMP_NUM_THREADS='1',MKL_NUM_THREADS='1',CSL_HIGHS_INTERNAL_CLOCKS='0')
     manifest=dict(source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),source_status=status,
-        platform=platform.platform(),python=sys.version,logical_cpus=os.cpu_count(),load_before=os.getloadavg(),binary_sha256=sha(driver),
+        platform=platform.platform(),python=sys.version,cpu_info=subprocess.check_output(['lscpu'],text=True),logical_cpus=os.cpu_count(),load_before=os.getloadavg(),binary_sha256=sha(driver),
         source_sha256={n:sha(ROOT/n) for n in ['benchmarks/reporting/mpc08_explicit/exact_regions.py','benchmarks/reporting/mpc08_explicit/capture_exact_regions.py',
             'benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py','benchmarks/reporting/mpc08_explicit/mpc08_strategy_comparison.cpp','benchmarks/reporting/review05/run_horizon_ladder.py']},
-        limits=dict(wall_seconds=300,cpu_seconds=300,address_space_bytes=8*1024**3,requested_native_threads=1),processes=[],claim='initial descriptive capture only; no timing ranking or clean rebuilt-library claim')
+        limits=dict(wall_seconds=300,cpu_seconds=300,address_space_bytes=8*1024**3,requested_native_threads=1,
+            observation='LP support rows retain actual backend widths; QP/strategy rows do not collect them'),processes=[],claim='initial descriptive capture only; no timing ranking or clean rebuilt-library claim')
     shutil.copy2(receipt,output/'native-build-receipt.json');all_rows=[]
     for name in ('unique','nonunique'):
         command=[str(driver),str((output/(name+'.csv')).resolve())];start=time.perf_counter_ns()

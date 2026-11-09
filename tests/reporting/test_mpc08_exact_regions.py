@@ -5,6 +5,7 @@ import unittest
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'benchmarks/reporting/mpc08_explicit'))
 import exact_regions as R
+import capture_exact_regions as C
 
 
 class ExactRegionTests(unittest.TestCase):
@@ -27,6 +28,15 @@ class ExactRegionTests(unittest.TestCase):
     def test_output_growth_refusal_does_not_discard_analytic_count(self):
         rows=R.fiber_ladder()['rows'];self.assertEqual([r['exact_vertex_count'] for r in rows],[1,2,6,70,924,12870])
         self.assertEqual(rows[-1]['status'],'refused-output-budget');self.assertNotIn('vertices',rows[-1])
+
+    def test_actual_support_witness_and_repetition_mutations_reject(self):
+        lookup={'S':dict(rows=[(1,0,1),(-1,0,1),(0,1,1),(0,-1,1)],direction=[1,0],minimum=-1)}
+        rows=[dict(query_id='S',repetition=i,warmup=i==0,optimal=True,primal=[-1,0]) for i in range(6)]
+        self.assertEqual(C.check_support(rows,lookup)['counts']['numerical-support-witness'],6)
+        bad=copy.deepcopy(rows);bad[0]['primal']=[100,0]
+        with self.assertRaises(ValueError):C.check_support(bad,lookup)
+        bad=copy.deepcopy(rows);bad[1]=bad[0]
+        with self.assertRaises(ValueError):C.check_support(bad,lookup)
 
 
 if __name__=='__main__':unittest.main()
