@@ -317,6 +317,7 @@ void run_online_qp(Providers& providers, const Query& query, std::size_t repetit
     bool optimal=false, matches_reference=false;
     int termination_code=-1, outcome_code=-1;
     double input_value=0, objective_at_primal=0;
+    std::optional<double> second_input_value;
     std::optional<double> objective_lower, objective_upper;
     try {
         const auto resolved=resolve(query);
@@ -367,6 +368,7 @@ void run_online_qp(Providers& providers, const Query& query, std::size_t repetit
             input_value=result.primal->front();
             if (query.nonunique) {
                 const double u1=result.primal->at(1);
+                second_input_value=u1;
                 const double terminal_v=query.v+input_value+u1;
                 objective_at_primal=terminal_v*terminal_v;
                 matches_reference=optimal&&std::abs(objective_at_primal-query.value)<=2e-6&&
@@ -391,7 +393,9 @@ void run_online_qp(Providers& providers, const Query& query, std::size_t repetit
         <<",\"outcome_code\":"<<outcome_code<<",\"candidate_contains_exact_reference_history\":"
         <<"false,\"action_and_value_match_exact_reference\":"<<(matches_reference?"true":"false")
         <<",\"input_value\":"<<std::setprecision(17)<<input_value
-        <<",\"objective_at_primal\":"<<std::setprecision(17)<<objective_at_primal
+        <<",\"second_input_value\":";
+    if(second_input_value)std::cout<<std::setprecision(17)<<*second_input_value;else std::cout<<"null";
+    std::cout<<",\"objective_at_primal\":"<<std::setprecision(17)<<objective_at_primal
         <<",\"objective_lower\":";
     if (objective_lower) std::cout<<std::setprecision(17)<<*objective_lower; else std::cout<<"null";
     std::cout<<",\"objective_upper\":";
