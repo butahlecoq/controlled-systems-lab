@@ -281,6 +281,7 @@ HybridFamilyVerificationResult ExactLinearHHybridFamilyVerifier::verify(
         bool raw_built{};
         bool supported{};
         bool program_matches{};
+        hx::InclusionState program_comparison{hx::InclusionState::unsupported};
         std::string reason;
     };
     std::vector<Branch> branches;
@@ -328,6 +329,7 @@ HybridFamilyVerificationResult ExactLinearHHybridFamilyVerifier::verify(
             const auto relation = equal_rows(raw.rows, program_rows,
                 raw.variables, branch.limits, cancellation);
             if (relation.state == hx::InclusionState::cancelled) return cancelled();
+            branch.program_comparison = relation.state;
             branch.program_matches = relation.state == hx::InclusionState::included;
             if (relation.state == hx::InclusionState::unsupported)
                 relation_reason = relation.reason;
@@ -384,7 +386,9 @@ HybridFamilyVerificationResult ExactLinearHHybridFamilyVerifier::verify(
         record.relation_operations = programs[i].relation_operations;
         if (!branch.program_matches) {
             coverage = false;
-            record.diagnostics.push_back({DiagnosticCode::evidence_mismatch,
+            record.diagnostics.push_back({
+                branch.program_comparison == hx::InclusionState::not_included
+                    ? DiagnosticCode::evidence_mismatch : DiagnosticCode::unsupported,
                 "hybrid.verification.exact_linear_h_program_mismatch",
                 branch.reason.empty()
                     ? "Supplied path program relation differs from the independent raw relation"
@@ -581,8 +585,23 @@ HybridFamilyVerificationResult ExactLinearHHybridFamilyVerifier::verify(
         report.complete_family_coverage = HybridVerificationStatus::refuted;
     } else {
         report.global_objective_optimality = HybridVerificationStatus::established;
+        const bool disproven = std::any_of(report.branches.begin(), report.branches.end(),
+            [](const auto& branch) {
+                return branch.continuous_coverage == HybridVerificationStatus::refuted;
+            }) || std::any_of(branches.begin(), branches.end(), [](const auto& branch) {
+                return branch.program_comparison == hx::InclusionState::not_included;
+            });
+        const bool undecided = std::any_of(report.branches.begin(), report.branches.end(),
+            [](const auto& branch) {
+                return branch.continuous_coverage == HybridVerificationStatus::unsupported;
+            }) || std::any_of(branches.begin(), branches.end(), [](const auto& branch) {
+                return branch.program_comparison == hx::InclusionState::unsupported;
+            });
         report.complete_family_coverage = coverage
-            ? HybridVerificationStatus::established : HybridVerificationStatus::refuted;
+            ? HybridVerificationStatus::established
+            : disproven ? HybridVerificationStatus::refuted
+            : undecided ? HybridVerificationStatus::unsupported
+                        : HybridVerificationStatus::refuted;
     }
     return report;
 }
