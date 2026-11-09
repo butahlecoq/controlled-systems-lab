@@ -139,3 +139,19 @@ class ProvenanceRegressionTests(unittest.TestCase):
                 environment=dict(source_commit=revision,native_source_commit=report.NATIVE_REVISION,source_sha256=inventory)
                 with self.assertRaisesRegex(ValueError,error):report.authenticate_sources(folder,environment,ROOT)
             self.assertEqual(list(folder.iterdir()),[])
+
+    def test_rebound_timeout_receipt_cannot_retain_saved_verified_disposition(self):
+        import tempfile,json,zipfile,hashlib,sys
+        sys.path.insert(0,str(ROOT/'benchmarks/reporting/mpc07'));import report
+        artifact=ROOT/'benchmarks/reporting/mpc07/evidence/bounded-policy-0e821c2a/offline.zip'
+        with tempfile.TemporaryDirectory() as temporary:
+            with zipfile.ZipFile(artifact) as saved:saved.extractall(temporary)
+            raw=Path(temporary)/'mpc07-report/RAW';attempt=raw/'attempts/0000'
+            receipt=json.loads((attempt/'receipt.json').read_text());receipt['timed_out']=True
+            (attempt/'receipt.json').write_text(json.dumps(receipt))
+            checked=json.loads((attempt/'check.json').read_text())
+            checked['bindings']['receipt.json']=hashlib.sha256((attempt/'receipt.json').read_bytes()).hexdigest()
+            (attempt/'check.json').write_text(json.dumps(checked))
+            (raw/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(raw).as_posix()}
+' for p in sorted(raw.rglob('*')) if p.is_file() and p!=raw/'SHA256SUMS'))
+            with self.assertRaisesRegex(ValueError,'disposition differs'):report.checked_records(raw)
