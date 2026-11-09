@@ -51,8 +51,10 @@ class PagesAugmentationAggregation(unittest.TestCase):
             self.assertIn("examples", (site / "examples/index.html").read_text())
             self.assertIn(routes["review05"]+"/index.html#scalar-2d", (site/"examples/index.html").read_text())
             self.assertIn(routes["review05"]+"/index.html", landing)
+            self.assertIn(routes["mpc11"]+"/index.html", landing)
+            self.assertIn(routes["mpc11"]+"/index.html", (site/"examples/index.html").read_text())
             self.assertTrue((site / "docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1/strategy-ab-ts03-summary.html").is_file())
-            for report_id in (routes["b04_c"], routes["mpc06"], routes["mpc06_complete"], routes["review05"]):
+            for report_id in (routes["b04_c"], routes["mpc06"], routes["mpc06_complete"], routes["review05"], routes["mpc11"]):
                 with zipfile.ZipFile(site / f"{report_id}.zip") as archive:
                     self.assertIn(f"{report_id}/publication-manifest.json", archive.namelist())
 
