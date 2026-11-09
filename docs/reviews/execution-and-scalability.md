@@ -168,7 +168,7 @@ are later changes; final independent review and delivery remain pending.
 
 | Issue #95 requirement | Evidence and disposition |
 | --- | --- |
-| Mutable ownership and overlap/race tooling | The original ownership inventory and independent 85-path delta inspection cover the integrated source. Nine focused TSan suites passed, including both strategy/selector and native adapter paths. Their new source-bound receipt is being packaged separately from the older eight-suite capture. This is executed-path evidence, not a whole-library race proof. |
+| Mutable ownership and overlap/race tooling | The original ownership inventory and independent 85-path delta inspection cover the integrated source. Nine focused TSan suites passed, including both strategy/selector and native adapter paths. Their [source-bound receipt](../../reports/algorithm-results/review05-integrated-tsan-7243ed35-20261110/README.md) is separate from the older eight-suite capture. This is executed-path evidence, not a whole-library race proof. |
 | Threads, memory and interruption | Outer admission and reservation credits are enforced. Native thread declarations, process CPU/address-space/wall limits and observed RSS are distinguished from hard native-heap enforcement. B04-C exact construction has a bounded operation budget but does not poll cancellation during construction. |
 | Matched size and output scopes | Dimension, constraint and horizon pilots supply candidate-labelled relations with fixture-specific exact singleton proofs and zero selected witnesses. New registered complete-family/query runs supply matched actual direction-witness requests at T=2/4/8. The refused n=2,T=4 point remains excluded from paired timings. H coordinates/rows/nonzeros/bytes are the representation-size axis; alternative set families are outside this review's measured scope. |
 | Separate costs and partial outcomes | Provider phases cover conversions; actual joint assembly, objective lifting and program freezing are now separately observed. Pinned native clocks expose overlapping factorization scopes. Query selection/checking and output size are recorded separately. Resource stops remain inconclusive even when preceding construction phases completed. |
@@ -216,6 +216,6 @@ native call, success at every grid point and a unique global limiter are not
 claims established by these results.
 
 **Status: evidence consolidation in progress; #95 remains open.** Finish the
-current TSan receipt/inventory, final independent exact-head review, main-branch
+final independent exact-head review, main-branch
 integration/CI and the required Pages staging and live verification before
 closing the issue.
