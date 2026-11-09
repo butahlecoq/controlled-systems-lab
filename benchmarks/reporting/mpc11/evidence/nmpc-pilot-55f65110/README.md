@@ -93,3 +93,25 @@ or release. Mesh refinement, timing repetitions, saved-data figures and final
 publication remain later steps. These results prove neither nonlinear global
 optimality nor minimax correctness, continuous-time safety, robustness or
 reachable-set containment. Issue #607 remains open.
+
+## Post-capture coverage and native-outcome checks
+
+Checker revision `7bdccb0d0bfc57146f88f9542e4578e12d18eb4a` supersedes
+the captured checker for validation. It requires one ordered, unique solve
+record for every executed hold, all original N solves for a complete attempt,
+and at most one consistent final unexecuted solve for an incomplete attempt.
+Declared inventory must match saved result files. Reports now expose 30 and
+40 checked transcriptions, so missing coverage cannot resemble a zero-error
+reconstruction. Initial observations, remaining horizons, shifted guesses and
+applied first inputs remain bound to the execution grid.
+
+The checker also reconciles worker process/return code, manifest and attempt
+outcomes, then checks each native IPOPT EXIT and iteration summary, native
+iteration-row coverage and exposed iteration-series lengths against the saved
+status, success flag and count. Missing or unsupported native evidence cannot
+validate a successful solve. Returned failed solves and declared incomplete
+prefixes remain distinct from complete execution. Thirty-one qualified tests
+pass, including rebound empty histories, missing/duplicate/reordered inventory,
+valid failed-prefix policies, native failure/iteration mutations and manifest
+or process outcome disagreement. The original archive and source55 numerical
+capture remain unchanged. No optimization or ODE rerun occurred.
