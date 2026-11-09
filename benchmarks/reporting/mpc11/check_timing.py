@@ -12,7 +12,7 @@ import time
 from check_affine_saved import check as check_affine
 from check_nonlinear_saved import check as check_nonlinear
 from check_nmpc_saved import check as check_nmpc
-from run_timing import load,sha,validate_receipt
+from run_timing import inventory,load,sha,validate_receipt
 from run_affine import write
 
 
@@ -44,6 +44,7 @@ def checked_sources(root,snapshot=None):
 
 
 def summarize(root,snapshot=None):
+    inputs=inventory(root)
     environment=load(root/'environment.json');sources=checked_sources(root,snapshot);records=[]
     for repetition in ['warmup',*[f'rep-{i:02d}' for i in range(5)]]:
         for arm in ['affine','nmpc']:
@@ -96,7 +97,8 @@ def summarize(root,snapshot=None):
                 for mode in samples[0]['integration']:
                     aggregate['integration_seconds'][mode]={key:stats([s['integration'][mode][key] for s in samples]) for key in ['native_integration_seconds','whole_process_seconds']}
             aggregates.append(aggregate)
-    return {'schema':'csl.mpc11.alternating-timing/1','checked_sources':sources,'environment_sha256':sha(root/'environment.json'),'verdict':'inconclusive comparative performance: configured policy classes differ and native limiter profile is unavailable; descriptive repeated costs only',
+    if inventory(root)!=inputs:raise ValueError('timing inputs changed during verification')
+    return {'schema':'csl.mpc11.alternating-timing/1','input_files':inputs,'checked_sources':sources,'environment_sha256':sha(root/'environment.json'),'verdict':'inconclusive comparative performance: configured policy classes differ and native limiter profile is unavailable; descriptive repeated costs only',
             'clock_scopes':'Affine native setup/solve, Python configuration construction, NMPC per-update setup/solve/held CVODES, and nonlinear integration/process clocks are distinct. Warmups and saved checker clocks excluded from measured aggregates. CVODES affine integration clock includes integrator setup; NMPC held CVODES excludes its once-per-case integrator setup, retained in process envelope.',
             'records':records,'aggregates':aggregates}
 
