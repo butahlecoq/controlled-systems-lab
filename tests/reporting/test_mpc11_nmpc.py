@@ -47,4 +47,21 @@ class NMPCTests(unittest.TestCase):
         self.assertFalse(result['accepted']);self.assertFalse(result['success'])
         self.assertEqual(result['status'],'Maximum_Iterations_Exceeded')
 
+class SavedNMPCTests(unittest.TestCase):
+    def test_rebound_objective_normalization_metadata_rejects(self):
+        import os,shutil,tempfile,hashlib
+        from check_nmpc_saved import check
+        from affine import canonical_hash
+        source=os.environ.get('CSL_MPC11_NMPC_BUNDLE')
+        if not source:self.skipTest('CSL_MPC11_NMPC_BUNDLE required')
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)/'bundle';shutil.copytree(source,root)
+            path=root/'syn-nl-lv-01/update-000/result.json';r=json.loads(path.read_text());r['original_interval_count']=1
+            r.pop('solve_sha256');r['solve_sha256']=canonical_hash(r);path.write_text(json.dumps(r))
+            attempt_path=root/'syn-nl-lv-01/attempt.json';attempt=json.loads(attempt_path.read_text());attempt['updates'][0]['solve_sha256']=r['solve_sha256'];attempt_path.write_text(json.dumps(attempt))
+            hp=root/'file-hashes.json';hashes=json.loads(hp.read_text())
+            for changed in [path,attempt_path]:hashes[str(changed.relative_to(root))]=hashlib.sha256(changed.read_bytes()).hexdigest()
+            hp.write_text(json.dumps(hashes))
+            with self.assertRaisesRegex(ValueError,'original_interval_count'):check(root)
+
 if __name__=='__main__':unittest.main()
