@@ -1,0 +1,31 @@
+{
+  "scenario": "horizon01-t02.json",
+  "strategy": "csl.synthesis.strategy-b",
+  "mode": "on",
+  "repetition": 0,
+  "warmup": false,
+  "command": [
+    "/home/butahlecoq/.local/share/codex/build/review05-assembly-phases-20261110/csl_review05_family_query",
+    "/home/butahlecoq/.local/share/codex/captures/review05-build-phases-20261110-v1/scenarios/horizon01-t02.json",
+    "csl.synthesis.strategy-b",
+    "on"
+  ],
+  "returncode": 0,
+  "timed_out": false,
+  "process_wall_ns": 14912361,
+  "load_at_start": [
+    0.99609375,
+    2.90673828125,
+    3.501953125
+  ],
+  "resources": {
+    "source": "POSIX wait4 for the isolated strategy process",
+    "user_cpu_seconds": 0.007005,
+    "system_cpu_seconds": 0.006005,
+    "child_cpu_seconds": 0.01301,
+    "peak_rss_kib": 14652,
+    "timed_out": false
+  },
+  "stdout_sha256": "afd5c943f7342dbd0f000fb0439e15a9e198422b7fb931093d0f5ca75e90e493",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

@@ -1,0 +1,1868 @@
+{
+  "schema": "csl.review05.family-query-summary/1",
+  "statuses": {
+    "verified": 168,
+    "inconclusive": 2
+  },
+  "process_failures": 0,
+  "retained_attempts": 170,
+  "rows": [
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 2,
+      "strategy": "csl.synthesis.reach-back",
+      "collector": "off",
+      "n": 6,
+      "prepare_ns": {
+        "median": 70366.5,
+        "min": 56712,
+        "max": 104904
+      },
+      "registered_synthesis_ns": {
+        "median": 6824466.0,
+        "min": 6521698,
+        "max": 7117875
+      },
+      "selector_prepare_ns": {
+        "median": 18508.5,
+        "min": 18159,
+        "max": 19975
+      },
+      "selector_ns": {
+        "median": 1179922.0,
+        "min": 1143464,
+        "max": 1226927
+      },
+      "literal_replay_ns": {
+        "median": 1641.5,
+        "min": 1397,
+        "max": 3911
+      },
+      "relation_json_bytes": {
+        "median": 252.0,
+        "min": 252,
+        "max": 252
+      },
+      "family_check_ns": {
+        "median": 2966360.5,
+        "min": 2892432,
+        "max": 3131851
+      },
+      "independent_query_replay_ns": {
+        "median": 137937.5,
+        "min": 128510,
+        "max": 154979
+      },
+      "process_wall_ns": {
+        "median": 14985933.0,
+        "min": 14030133,
+        "max": 15268168
+      },
+      "peak_rss_kib": {
+        "median": 13788.0,
+        "min": 13788,
+        "max": 13788
+      },
+      "relation_shape": {
+        "dimension": 5,
+        "inequalities": 4,
+        "equalities": 3
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 4,
+      "distinct_range": [
+        3,
+        3
+      ]
+    },
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 2,
+      "strategy": "csl.synthesis.reach-back",
+      "collector": "on",
+      "n": 6,
+      "prepare_ns": {
+        "median": 63661.5,
+        "min": 58667,
+        "max": 163712
+      },
+      "registered_synthesis_ns": {
+        "median": 12478685.0,
+        "min": 11729796,
+        "max": 15950179
+      },
+      "selector_prepare_ns": {
+        "median": 18159.0,
+        "min": 16623,
+        "max": 21790
+      },
+      "selector_ns": {
+        "median": 2751906.0,
+        "min": 2672320,
+        "max": 2949595
+      },
+      "literal_replay_ns": {
+        "median": 1466.5,
+        "min": 1397,
+        "max": 3353
+      },
+      "relation_json_bytes": {
+        "median": 252.0,
+        "min": 252,
+        "max": 252
+      },
+      "family_check_ns": {
+        "median": 2954172.5,
+        "min": 2895017,
+        "max": 3136111
+      },
+      "independent_query_replay_ns": {
+        "median": 149182.5,
+        "min": 145202,
+        "max": 166713
+      },
+      "process_wall_ns": {
+        "median": 24613394.0,
+        "min": 24262295,
+        "max": 32119736
+      },
+      "peak_rss_kib": {
+        "median": 13876.0,
+        "min": 13788,
+        "max": 14136
+      },
+      "relation_shape": {
+        "dimension": 5,
+        "inequalities": 4,
+        "equalities": 3
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 4,
+      "distinct_range": [
+        3,
+        3
+      ],
+      "actual_direction_lp_total_ns": {
+        "median": 1223329.0,
+        "min": 1156455.0,
+        "max": 1295442.0
+      }
+    },
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 2,
+      "strategy": "csl.synthesis.strategy-b",
+      "collector": "off",
+      "n": 6,
+      "prepare_ns": {
+        "median": 60623.5,
+        "min": 50147,
+        "max": 98687
+      },
+      "registered_synthesis_ns": {
+        "median": 1268413.0,
+        "min": 1260311,
+        "max": 2919144
+      },
+      "selector_prepare_ns": {
+        "median": 23991.0,
+        "min": 15645,
+        "max": 37436
+      },
+      "selector_ns": {
+        "median": 1212189.5,
+        "min": 1195358,
+        "max": 2800341
+      },
+      "literal_replay_ns": {
+        "median": 1432.0,
+        "min": 1397,
+        "max": 1885
+      },
+      "relation_json_bytes": {
+        "median": 314.0,
+        "min": 314,
+        "max": 314
+      },
+      "family_check_ns": {
+        "median": 2934094.0,
+        "min": 2897531,
+        "max": 2985182
+      },
+      "independent_query_replay_ns": {
+        "median": 132595.0,
+        "min": 130674,
+        "max": 133747
+      },
+      "process_wall_ns": {
+        "median": 9500000.5,
+        "min": 8748282,
+        "max": 18802342
+      },
+      "peak_rss_kib": {
+        "median": 13788.0,
+        "min": 13788,
+        "max": 13788
+      },
+      "relation_shape": {
+        "dimension": 5,
+        "inequalities": 4,
+        "equalities": 3
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 4,
+      "distinct_range": [
+        3,
+        3
+      ]
+    },
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 2,
+      "strategy": "csl.synthesis.strategy-b",
+      "collector": "on",
+      "n": 6,
+      "prepare_ns": {
+        "median": 56258.0,
+        "min": 48610,
+        "max": 74243
+      },
+      "registered_synthesis_ns": {
+        "median": 2998485.0,
+        "min": 2788189,
+        "max": 4538516
+      },
+      "selector_prepare_ns": {
+        "median": 18229.0,
+        "min": 18019,
+        "max": 40020
+      },
+      "selector_ns": {
+        "median": 3203473.5,
+        "min": 2694111,
+        "max": 6629185
+      },
+      "literal_replay_ns": {
+        "median": 1432.0,
+        "min": 1397,
+        "max": 1885
+      },
+      "relation_json_bytes": {
+        "median": 314.0,
+        "min": 314,
+        "max": 314
+      },
+      "family_check_ns": {
+        "median": 2949947.5,
+        "min": 2889220,
+        "max": 3324545
+      },
+      "independent_query_replay_ns": {
+        "median": 167516.0,
+        "min": 141709,
+        "max": 194650
+      },
+      "process_wall_ns": {
+        "median": 16266533.0,
+        "min": 15331725,
+        "max": 26018903
+      },
+      "peak_rss_kib": {
+        "median": 13788.0,
+        "min": 13788,
+        "max": 13836
+      },
+      "relation_shape": {
+        "dimension": 5,
+        "inequalities": 4,
+        "equalities": 3
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 4,
+      "distinct_range": [
+        3,
+        3
+      ],
+      "actual_direction_lp_total_ns": {
+        "median": 1364516.5,
+        "min": 1228394.0,
+        "max": 2849790.0
+      }
+    },
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 4,
+      "strategy": "csl.synthesis.reach-back",
+      "collector": "off",
+      "n": 6,
+      "prepare_ns": {
+        "median": 70715.5,
+        "min": 62718,
+        "max": 114262
+      },
+      "registered_synthesis_ns": {
+        "median": 15785875.5,
+        "min": 14820122,
+        "max": 17633249
+      },
+      "selector_prepare_ns": {
+        "median": 34607.0,
+        "min": 30312,
+        "max": 37645
+      },
+      "selector_ns": {
+        "median": 2478646.5,
+        "min": 2442118,
+        "max": 2626363
+      },
+      "literal_replay_ns": {
+        "median": 1676.5,
+        "min": 1396,
+        "max": 1886
+      },
+      "relation_json_bytes": {
+        "median": 446.0,
+        "min": 446,
+        "max": 446
+      },
+      "family_check_ns": {
+        "median": 22597176.0,
+        "min": 22445656,
+        "max": 23030367
+      },
+      "independent_query_replay_ns": {
+        "median": 407143.5,
+        "min": 387413,
+        "max": 434347
+      },
+      "process_wall_ns": {
+        "median": 25703115.5,
+        "min": 23763963,
+        "max": 27944612
+      },
+      "peak_rss_kib": {
+        "median": 13788.0,
+        "min": 13788,
+        "max": 13788
+      },
+      "relation_shape": {
+        "dimension": 9,
+        "inequalities": 8,
+        "equalities": 5
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 8,
+      "distinct_range": [
+        5,
+        5
+      ]
+    },
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 4,
+      "strategy": "csl.synthesis.reach-back",
+      "collector": "on",
+      "n": 6,
+      "prepare_ns": {
+        "median": 74627.0,
+        "min": 64394,
+        "max": 138009
+      },
+      "registered_synthesis_ns": {
+        "median": 23876308.5,
+        "min": 23443811,
+        "max": 25443542
+      },
+      "selector_prepare_ns": {
+        "median": 32162.5,
+        "min": 31080,
+        "max": 42115
+      },
+      "selector_ns": {
+        "median": 6081515.5,
+        "min": 5982374,
+        "max": 6390952
+      },
+      "literal_replay_ns": {
+        "median": 1467.0,
+        "min": 1397,
+        "max": 2375
+      },
+      "relation_json_bytes": {
+        "median": 446.0,
+        "min": 446,
+        "max": 446
+      },
+      "family_check_ns": {
+        "median": 22777994.0,
+        "min": 22306949,
+        "max": 23076745
+      },
+      "independent_query_replay_ns": {
+        "median": 424499.0,
+        "min": 420379,
+        "max": 487846
+      },
+      "process_wall_ns": {
+        "median": 39737334.0,
+        "min": 38798932,
+        "max": 44952623
+      },
+      "peak_rss_kib": {
+        "median": 13848.0,
+        "min": 13788,
+        "max": 13924
+      },
+      "relation_shape": {
+        "dimension": 9,
+        "inequalities": 8,
+        "equalities": 5
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 8,
+      "distinct_range": [
+        5,
+        5
+      ],
+      "actual_direction_lp_total_ns": {
+        "median": 2559594.5,
+        "min": 2546324.0,
+        "max": 2739995.0
+      }
+    },
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 4,
+      "strategy": "csl.synthesis.strategy-b",
+      "collector": "off",
+      "n": 6,
+      "prepare_ns": {
+        "median": 50810.5,
+        "min": 44769,
+        "max": 67887
+      },
+      "registered_synthesis_ns": {
+        "median": 3094239.5,
+        "min": 3066023,
+        "max": 3503796
+      },
+      "selector_prepare_ns": {
+        "median": 30486.5,
+        "min": 28076,
+        "max": 31918
+      },
+      "selector_ns": {
+        "median": 2598531.5,
+        "min": 2567206,
+        "max": 2766259
+      },
+      "literal_replay_ns": {
+        "median": 1676.5,
+        "min": 1396,
+        "max": 3353
+      },
+      "relation_json_bytes": {
+        "median": 508.0,
+        "min": 508,
+        "max": 508
+      },
+      "family_check_ns": {
+        "median": 22900916.0,
+        "min": 22404238,
+        "max": 23393898
+      },
+      "independent_query_replay_ns": {
+        "median": 407143.5,
+        "min": 388740,
+        "max": 419820
+      },
+      "process_wall_ns": {
+        "median": 12884366.0,
+        "min": 12307882,
+        "max": 13064561
+      },
+      "peak_rss_kib": {
+        "median": 13788.0,
+        "min": 13788,
+        "max": 13788
+      },
+      "relation_shape": {
+        "dimension": 9,
+        "inequalities": 8,
+        "equalities": 5
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 8,
+      "distinct_range": [
+        5,
+        5
+      ]
+    },
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 4,
+      "strategy": "csl.synthesis.strategy-b",
+      "collector": "on",
+      "n": 6,
+      "prepare_ns": {
+        "median": 53709.0,
+        "min": 47353,
+        "max": 91494
+      },
+      "registered_synthesis_ns": {
+        "median": 5694971.0,
+        "min": 4578885,
+        "max": 10928699
+      },
+      "selector_prepare_ns": {
+        "median": 36982.0,
+        "min": 31499,
+        "max": 46725
+      },
+      "selector_ns": {
+        "median": 6366543.0,
+        "min": 5967357,
+        "max": 8399140
+      },
+      "literal_replay_ns": {
+        "median": 1676.5,
+        "min": 1467,
+        "max": 2305
+      },
+      "relation_json_bytes": {
+        "median": 508.0,
+        "min": 508,
+        "max": 508
+      },
+      "family_check_ns": {
+        "median": 22906679.0,
+        "min": 22395299,
+        "max": 23335301
+      },
+      "independent_query_replay_ns": {
+        "median": 442972.0,
+        "min": 420658,
+        "max": 490569
+      },
+      "process_wall_ns": {
+        "median": 24565447.0,
+        "min": 20626844,
+        "max": 33547808
+      },
+      "peak_rss_kib": {
+        "median": 13788.0,
+        "min": 13768,
+        "max": 13788
+      },
+      "relation_shape": {
+        "dimension": 9,
+        "inequalities": 8,
+        "equalities": 5
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 8,
+      "distinct_range": [
+        5,
+        5
+      ],
+      "actual_direction_lp_total_ns": {
+        "median": 2679375.0,
+        "min": 2586972.0,
+        "max": 3578039.0
+      }
+    },
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 8,
+      "strategy": "csl.synthesis.reach-back",
+      "collector": "off",
+      "n": 6,
+      "prepare_ns": {
+        "median": 129768.0,
+        "min": 73055,
+        "max": 210297
+      },
+      "registered_synthesis_ns": {
+        "median": 43607703.0,
+        "min": 39480589,
+        "max": 50208350
+      },
+      "selector_prepare_ns": {
+        "median": 82379.5,
+        "min": 79132,
+        "max": 107697
+      },
+      "selector_ns": {
+        "median": 6241559.5,
+        "min": 5876213,
+        "max": 7012205
+      },
+      "literal_replay_ns": {
+        "median": 2864.0,
+        "min": 1467,
+        "max": 4750
+      },
+      "relation_json_bytes": {
+        "median": 1123.0,
+        "min": 1123,
+        "max": 1123
+      },
+      "family_check_ns": {
+        "median": 368942842.5,
+        "min": 361038486,
+        "max": 384094200
+      },
+      "independent_query_replay_ns": {
+        "median": 1315018.0,
+        "min": 1302482,
+        "max": 1323574
+      },
+      "process_wall_ns": {
+        "median": 59131598.0,
+        "min": 52434518,
+        "max": 68255554
+      },
+      "peak_rss_kib": {
+        "median": 13788.0,
+        "min": 13788,
+        "max": 13788
+      },
+      "relation_shape": {
+        "dimension": 17,
+        "inequalities": 16,
+        "equalities": 9
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 16,
+      "distinct_range": [
+        9,
+        9
+      ]
+    },
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 8,
+      "strategy": "csl.synthesis.reach-back",
+      "collector": "on",
+      "n": 6,
+      "prepare_ns": {
+        "median": 83497.5,
+        "min": 76338,
+        "max": 139965
+      },
+      "registered_synthesis_ns": {
+        "median": 58194374.0,
+        "min": 54598248,
+        "max": 67512151
+      },
+      "selector_prepare_ns": {
+        "median": 77979.5,
+        "min": 76687,
+        "max": 103157
+      },
+      "selector_ns": {
+        "median": 19620132.0,
+        "min": 16957452,
+        "max": 23521542
+      },
+      "literal_replay_ns": {
+        "median": 2409.5,
+        "min": 1467,
+        "max": 4679
+      },
+      "relation_json_bytes": {
+        "median": 1123.0,
+        "min": 1123,
+        "max": 1123
+      },
+      "family_check_ns": {
+        "median": 369266533.5,
+        "min": 363668878,
+        "max": 376536681
+      },
+      "independent_query_replay_ns": {
+        "median": 1381333.0,
+        "min": 1364222,
+        "max": 1642402
+      },
+      "process_wall_ns": {
+        "median": 91095260.5,
+        "min": 83993213,
+        "max": 102683588
+      },
+      "peak_rss_kib": {
+        "median": 14098.0,
+        "min": 13928,
+        "max": 14208
+      },
+      "relation_shape": {
+        "dimension": 17,
+        "inequalities": 16,
+        "equalities": 9
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 16,
+      "distinct_range": [
+        9,
+        9
+      ],
+      "actual_direction_lp_total_ns": {
+        "median": 7066298.5,
+        "min": 6219073.0,
+        "max": 8490562.0
+      }
+    },
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 8,
+      "strategy": "csl.synthesis.strategy-b",
+      "collector": "off",
+      "n": 6,
+      "prepare_ns": {
+        "median": 56502.5,
+        "min": 45467,
+        "max": 66001
+      },
+      "registered_synthesis_ns": {
+        "median": 16837252.0,
+        "min": 14302102,
+        "max": 20564827
+      },
+      "selector_prepare_ns": {
+        "median": 79027.0,
+        "min": 74382,
+        "max": 101761
+      },
+      "selector_ns": {
+        "median": 6217359.5,
+        "min": 6014081,
+        "max": 7000820
+      },
+      "literal_replay_ns": {
+        "median": 1676.5,
+        "min": 1396,
+        "max": 2375
+      },
+      "relation_json_bytes": {
+        "median": 1185.0,
+        "min": 1185,
+        "max": 1185
+      },
+      "family_check_ns": {
+        "median": 364365606.0,
+        "min": 361567533,
+        "max": 365351694
+      },
+      "independent_query_replay_ns": {
+        "median": 1293053.0,
+        "min": 1283624,
+        "max": 1331187
+      },
+      "process_wall_ns": {
+        "median": 31234935.0,
+        "min": 27279636,
+        "max": 34915122
+      },
+      "peak_rss_kib": {
+        "median": 13788.0,
+        "min": 13788,
+        "max": 13788
+      },
+      "relation_shape": {
+        "dimension": 17,
+        "inequalities": 16,
+        "equalities": 9
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 16,
+      "distinct_range": [
+        9,
+        9
+      ]
+    },
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 8,
+      "strategy": "csl.synthesis.strategy-b",
+      "collector": "on",
+      "n": 6,
+      "prepare_ns": {
+        "median": 74976.5,
+        "min": 53778,
+        "max": 126974
+      },
+      "registered_synthesis_ns": {
+        "median": 17153392.0,
+        "min": 15618358,
+        "max": 19806053
+      },
+      "selector_prepare_ns": {
+        "median": 82275.0,
+        "min": 75291,
+        "max": 114961
+      },
+      "selector_ns": {
+        "median": 18711827.0,
+        "min": 16812458,
+        "max": 20343426
+      },
+      "literal_replay_ns": {
+        "median": 2794.0,
+        "min": 1467,
+        "max": 3771
+      },
+      "relation_json_bytes": {
+        "median": 1185.0,
+        "min": 1185,
+        "max": 1185
+      },
+      "family_check_ns": {
+        "median": 367655610.5,
+        "min": 362643841,
+        "max": 381502943
+      },
+      "independent_query_replay_ns": {
+        "median": 1410527.5,
+        "min": 1376165,
+        "max": 1506141
+      },
+      "process_wall_ns": {
+        "median": 51206546.0,
+        "min": 44071075,
+        "max": 54433418
+      },
+      "peak_rss_kib": {
+        "median": 13788.0,
+        "min": 13788,
+        "max": 13788
+      },
+      "relation_shape": {
+        "dimension": 17,
+        "inequalities": 16,
+        "equalities": 9
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 16,
+      "distinct_range": [
+        9,
+        9
+      ],
+      "actual_direction_lp_total_ns": {
+        "median": 6994360.0,
+        "min": 6241142.0,
+        "max": 7650007.0
+      }
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 2,
+      "strategy": "csl.synthesis.reach-back",
+      "collector": "off",
+      "n": 6,
+      "prepare_ns": {
+        "median": 73020.5,
+        "min": 63976,
+        "max": 146530
+      },
+      "registered_synthesis_ns": {
+        "median": 7691739.0,
+        "min": 7260704,
+        "max": 10685440
+      },
+      "selector_prepare_ns": {
+        "median": 20219.5,
+        "min": 17111,
+        "max": 85907
+      },
+      "selector_ns": {
+        "median": 382144.0,
+        "min": 321975,
+        "max": 547288
+      },
+      "literal_replay_ns": {
+        "median": 1431.5,
+        "min": 1396,
+        "max": 1467
+      },
+      "relation_json_bytes": {
+        "median": 266.0,
+        "min": 266,
+        "max": 266
+      },
+      "family_check_ns": {
+        "median": 3709479.0,
+        "min": 3663837,
+        "max": 4352198
+      },
+      "independent_query_replay_ns": {
+        "median": 37994.0,
+        "min": 36737,
+        "max": 48052
+      },
+      "process_wall_ns": {
+        "median": 16207932.5,
+        "min": 14829205,
+        "max": 20811510
+      },
+      "peak_rss_kib": {
+        "median": 13788.0,
+        "min": 13788,
+        "max": 13788
+      },
+      "relation_shape": {
+        "dimension": 5,
+        "inequalities": 4,
+        "equalities": 4
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 1,
+      "distinct_range": [
+        1,
+        1
+      ]
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 2,
+      "strategy": "csl.synthesis.reach-back",
+      "collector": "on",
+      "n": 6,
+      "prepare_ns": {
+        "median": 72462.0,
+        "min": 57830,
+        "max": 127253
+      },
+      "registered_synthesis_ns": {
+        "median": 14249441.0,
+        "min": 12411601,
+        "max": 19598201
+      },
+      "selector_prepare_ns": {
+        "median": 18229.0,
+        "min": 16204,
+        "max": 24305
+      },
+      "selector_ns": {
+        "median": 1274838.5,
+        "min": 1100790,
+        "max": 1534233
+      },
+      "literal_replay_ns": {
+        "median": 1432.0,
+        "min": 1397,
+        "max": 1886
+      },
+      "relation_json_bytes": {
+        "median": 266.0,
+        "min": 266,
+        "max": 266
+      },
+      "family_check_ns": {
+        "median": 3817314.0,
+        "min": 3679481,
+        "max": 4186044
+      },
+      "independent_query_replay_ns": {
+        "median": 58109.0,
+        "min": 46515,
+        "max": 105042
+      },
+      "process_wall_ns": {
+        "median": 27435250.5,
+        "min": 22809219,
+        "max": 32001210
+      },
+      "peak_rss_kib": {
+        "median": 13914.0,
+        "min": 13788,
+        "max": 14044
+      },
+      "relation_shape": {
+        "dimension": 5,
+        "inequalities": 4,
+        "equalities": 4
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 1,
+      "distinct_range": [
+        1,
+        1
+      ],
+      "actual_direction_lp_total_ns": {
+        "median": 398661.5,
+        "min": 340274.0,
+        "max": 478981.0
+      }
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 2,
+      "strategy": "csl.synthesis.strategy-b",
+      "collector": "off",
+      "n": 6,
+      "prepare_ns": {
+        "median": 62265.0,
+        "min": 52592,
+        "max": 93939
+      },
+      "registered_synthesis_ns": {
+        "median": 1651569.5,
+        "min": 1608477,
+        "max": 2372555
+      },
+      "selector_prepare_ns": {
+        "median": 17635.5,
+        "min": 16064,
+        "max": 34432
+      },
+      "selector_ns": {
+        "median": 401176.5,
+        "min": 329169,
+        "max": 632495
+      },
+      "literal_replay_ns": {
+        "median": 1431.5,
+        "min": 1397,
+        "max": 1886
+      },
+      "relation_json_bytes": {
+        "median": 328.0,
+        "min": 328,
+        "max": 328
+      },
+      "family_check_ns": {
+        "median": 3758157.5,
+        "min": 3691774,
+        "max": 3937757
+      },
+      "independent_query_replay_ns": {
+        "median": 38553.0,
+        "min": 32686,
+        "max": 66140
+      },
+      "process_wall_ns": {
+        "median": 9964069.5,
+        "min": 9120404,
+        "max": 14886474
+      },
+      "peak_rss_kib": {
+        "median": 13788.0,
+        "min": 13788,
+        "max": 13828
+      },
+      "relation_shape": {
+        "dimension": 5,
+        "inequalities": 4,
+        "equalities": 4
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 1,
+      "distinct_range": [
+        1,
+        1
+      ]
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 2,
+      "strategy": "csl.synthesis.strategy-b",
+      "collector": "on",
+      "n": 6,
+      "prepare_ns": {
+        "median": 53360.5,
+        "min": 48262,
+        "max": 67328
+      },
+      "registered_synthesis_ns": {
+        "median": 3411884.0,
+        "min": 3103669,
+        "max": 5213405
+      },
+      "selector_prepare_ns": {
+        "median": 20498.5,
+        "min": 17810,
+        "max": 41905
+      },
+      "selector_ns": {
+        "median": 1120311.5,
+        "min": 1097997,
+        "max": 1927518
+      },
+      "literal_replay_ns": {
+        "median": 1467.0,
+        "min": 1397,
+        "max": 1956
+      },
+      "relation_json_bytes": {
+        "median": 328.0,
+        "min": 328,
+        "max": 328
+      },
+      "family_check_ns": {
+        "median": 3831597.0,
+        "min": 3675640,
+        "max": 4036443
+      },
+      "independent_query_replay_ns": {
+        "median": 50495.5,
+        "min": 45188,
+        "max": 103785
+      },
+      "process_wall_ns": {
+        "median": 14653620.0,
+        "min": 13330104,
+        "max": 21625662
+      },
+      "peak_rss_kib": {
+        "median": 13788.0,
+        "min": 13788,
+        "max": 13788
+      },
+      "relation_shape": {
+        "dimension": 5,
+        "inequalities": 4,
+        "equalities": 4
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 1,
+      "distinct_range": [
+        1,
+        1
+      ],
+      "actual_direction_lp_total_ns": {
+        "median": 390455.5,
+        "min": 358433.0,
+        "max": 577040.0
+      }
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 4,
+      "strategy": "csl.synthesis.reach-back",
+      "collector": "off",
+      "n": 6,
+      "prepare_ns": {
+        "median": 70122.0,
+        "min": 67258,
+        "max": 74661
+      },
+      "registered_synthesis_ns": {
+        "median": 16265379.0,
+        "min": 15493619,
+        "max": 17260776
+      },
+      "selector_prepare_ns": {
+        "median": 31255.0,
+        "min": 30032,
+        "max": 52242
+      },
+      "selector_ns": {
+        "median": 437075.5,
+        "min": 402154,
+        "max": 1055532
+      },
+      "literal_replay_ns": {
+        "median": 1431.5,
+        "min": 1397,
+        "max": 1467
+      },
+      "relation_json_bytes": {
+        "median": 468.0,
+        "min": 468,
+        "max": 468
+      },
+      "family_check_ns": {
+        "median": 24991460.5,
+        "min": 24668787,
+        "max": 27868386
+      },
+      "independent_query_replay_ns": {
+        "median": 60204.0,
+        "min": 56781,
+        "max": 83042
+      },
+      "process_wall_ns": {
+        "median": 23708304.0,
+        "min": 22376266,
+        "max": 26695333
+      },
+      "peak_rss_kib": {
+        "median": 13788.0,
+        "min": 13788,
+        "max": 13788
+      },
+      "relation_shape": {
+        "dimension": 9,
+        "inequalities": 8,
+        "equalities": 6
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 1,
+      "distinct_range": [
+        1,
+        1
+      ]
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 4,
+      "strategy": "csl.synthesis.reach-back",
+      "collector": "on",
+      "n": 6,
+      "prepare_ns": {
+        "median": 79795.5,
+        "min": 67538,
+        "max": 210855
+      },
+      "registered_synthesis_ns": {
+        "median": 25817798.0,
+        "min": 23812092,
+        "max": 30244528
+      },
+      "selector_prepare_ns": {
+        "median": 33245.0,
+        "min": 31499,
+        "max": 59157
+      },
+      "selector_ns": {
+        "median": 1375830.5,
+        "min": 1332598,
+        "max": 1470887
+      },
+      "literal_replay_ns": {
+        "median": 1431.5,
+        "min": 1396,
+        "max": 1956
+      },
+      "relation_json_bytes": {
+        "median": 468.0,
+        "min": 468,
+        "max": 468
+      },
+      "family_check_ns": {
+        "median": 24634392.0,
+        "min": 24431118,
+        "max": 30279608
+      },
+      "independent_query_replay_ns": {
+        "median": 72042.0,
+        "min": 69213,
+        "max": 83810
+      },
+      "process_wall_ns": {
+        "median": 37284881.5,
+        "min": 34989566,
+        "max": 47630254
+      },
+      "peak_rss_kib": {
+        "median": 13788.0,
+        "min": 13788,
+        "max": 14004
+      },
+      "relation_shape": {
+        "dimension": 9,
+        "inequalities": 8,
+        "equalities": 6
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 1,
+      "distinct_range": [
+        1,
+        1
+      ],
+      "actual_direction_lp_total_ns": {
+        "median": 449786.5,
+        "min": 419894.0,
+        "max": 551128.0
+      }
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 4,
+      "strategy": "csl.synthesis.strategy-b",
+      "collector": "off",
+      "n": 6,
+      "prepare_ns": {
+        "median": 53394.5,
+        "min": 51055,
+        "max": 56153
+      },
+      "registered_synthesis_ns": {
+        "median": 3659965.0,
+        "min": 3540325,
+        "max": 4104863
+      },
+      "selector_prepare_ns": {
+        "median": 30765.5,
+        "min": 29054,
+        "max": 48820
+      },
+      "selector_ns": {
+        "median": 470774.5,
+        "min": 444339,
+        "max": 549452
+      },
+      "literal_replay_ns": {
+        "median": 1467.0,
+        "min": 1397,
+        "max": 1956
+      },
+      "relation_json_bytes": {
+        "median": 530.0,
+        "min": 530,
+        "max": 530
+      },
+      "family_check_ns": {
+        "median": 24884428.5,
+        "min": 24834453,
+        "max": 32824297
+      },
+      "independent_query_replay_ns": {
+        "median": 59680.0,
+        "min": 57829,
+        "max": 88211
+      },
+      "process_wall_ns": {
+        "median": 10929364.0,
+        "min": 10382603,
+        "max": 12702634
+      },
+      "peak_rss_kib": {
+        "median": 13788.0,
+        "min": 13788,
+        "max": 13788
+      },
+      "relation_shape": {
+        "dimension": 9,
+        "inequalities": 8,
+        "equalities": 6
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 1,
+      "distinct_range": [
+        1,
+        1
+      ]
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 4,
+      "strategy": "csl.synthesis.strategy-b",
+      "collector": "on",
+      "n": 6,
+      "prepare_ns": {
+        "median": 53045.5,
+        "min": 49938,
+        "max": 88700
+      },
+      "registered_synthesis_ns": {
+        "median": 5324142.0,
+        "min": 5105568,
+        "max": 6734997
+      },
+      "selector_prepare_ns": {
+        "median": 33698.5,
+        "min": 31360,
+        "max": 65163
+      },
+      "selector_ns": {
+        "median": 1342620.5,
+        "min": 1299562,
+        "max": 1739012
+      },
+      "literal_replay_ns": {
+        "median": 1676.5,
+        "min": 1397,
+        "max": 1955
+      },
+      "relation_json_bytes": {
+        "median": 530.0,
+        "min": 530,
+        "max": 530
+      },
+      "family_check_ns": {
+        "median": 24831418.5,
+        "min": 24506268,
+        "max": 25343740
+      },
+      "independent_query_replay_ns": {
+        "median": 73090.0,
+        "min": 61530,
+        "max": 122084
+      },
+      "process_wall_ns": {
+        "median": 16687018.5,
+        "min": 15886694,
+        "max": 26400524
+      },
+      "peak_rss_kib": {
+        "median": 13788.0,
+        "min": 13788,
+        "max": 13812
+      },
+      "relation_shape": {
+        "dimension": 9,
+        "inequalities": 8,
+        "equalities": 6
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 1,
+      "distinct_range": [
+        1,
+        1
+      ],
+      "actual_direction_lp_total_ns": {
+        "median": 433443.5,
+        "min": 425342.0,
+        "max": 580183.0
+      }
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 8,
+      "strategy": "csl.synthesis.reach-back",
+      "collector": "off",
+      "n": 6,
+      "prepare_ns": {
+        "median": 80144.5,
+        "min": 72916,
+        "max": 155470
+      },
+      "registered_synthesis_ns": {
+        "median": 44009612.0,
+        "min": 41141307,
+        "max": 49782169
+      },
+      "selector_prepare_ns": {
+        "median": 85382.5,
+        "min": 80669,
+        "max": 92541
+      },
+      "selector_ns": {
+        "median": 594885.0,
+        "min": 570824,
+        "max": 678731
+      },
+      "literal_replay_ns": {
+        "median": 1431.5,
+        "min": 978,
+        "max": 1886
+      },
+      "relation_json_bytes": {
+        "median": 1161.0,
+        "min": 1161,
+        "max": 1161
+      },
+      "family_check_ns": {
+        "median": 234162523.5,
+        "min": 231891512,
+        "max": 247710443
+      },
+      "independent_query_replay_ns": {
+        "median": 85276.5,
+        "min": 84439,
+        "max": 119569
+      },
+      "process_wall_ns": {
+        "median": 54179646.5,
+        "min": 48720927,
+        "max": 58597429
+      },
+      "peak_rss_kib": {
+        "median": 13788.0,
+        "min": 13788,
+        "max": 13788
+      },
+      "relation_shape": {
+        "dimension": 17,
+        "inequalities": 16,
+        "equalities": 10
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 1,
+      "distinct_range": [
+        1,
+        1
+      ]
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 8,
+      "strategy": "csl.synthesis.reach-back",
+      "collector": "on",
+      "n": 6,
+      "prepare_ns": {
+        "median": 83077.5,
+        "min": 68097,
+        "max": 105183
+      },
+      "registered_synthesis_ns": {
+        "median": 65566200.0,
+        "min": 55263776,
+        "max": 68112040
+      },
+      "selector_prepare_ns": {
+        "median": 79027.0,
+        "min": 78153,
+        "max": 88491
+      },
+      "selector_ns": {
+        "median": 2011084.5,
+        "min": 1670009,
+        "max": 2373462
+      },
+      "literal_replay_ns": {
+        "median": 1920.5,
+        "min": 1397,
+        "max": 3423
+      },
+      "relation_json_bytes": {
+        "median": 1161.0,
+        "min": 1161,
+        "max": 1161
+      },
+      "family_check_ns": {
+        "median": 236336435.5,
+        "min": 230412058,
+        "max": 244648015
+      },
+      "independent_query_replay_ns": {
+        "median": 107486.5,
+        "min": 104413,
+        "max": 157912
+      },
+      "process_wall_ns": {
+        "median": 78640153.5,
+        "min": 67666995,
+        "max": 83414204
+      },
+      "peak_rss_kib": {
+        "median": 13960.0,
+        "min": 13712,
+        "max": 14188
+      },
+      "relation_shape": {
+        "dimension": 17,
+        "inequalities": 16,
+        "equalities": 10
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 1,
+      "distinct_range": [
+        1,
+        1
+      ],
+      "actual_direction_lp_total_ns": {
+        "median": 586084.5,
+        "min": 499375.0,
+        "max": 675379.0
+      }
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 8,
+      "strategy": "csl.synthesis.strategy-b",
+      "collector": "off",
+      "n": 6,
+      "prepare_ns": {
+        "median": 54686.5,
+        "min": 49588,
+        "max": 144085
+      },
+      "registered_synthesis_ns": {
+        "median": 18532088.5,
+        "min": 15965264,
+        "max": 23519660
+      },
+      "selector_prepare_ns": {
+        "median": 78189.0,
+        "min": 77735,
+        "max": 105183
+      },
+      "selector_ns": {
+        "median": 671328.0,
+        "min": 646952,
+        "max": 857878
+      },
+      "literal_replay_ns": {
+        "median": 1466.5,
+        "min": 1397,
+        "max": 31499
+      },
+      "relation_json_bytes": {
+        "median": 1223.0,
+        "min": 1223,
+        "max": 1223
+      },
+      "family_check_ns": {
+        "median": 234601081.5,
+        "min": 231311754,
+        "max": 247408866
+      },
+      "independent_query_replay_ns": {
+        "median": 103331.0,
+        "min": 86115,
+        "max": 132700
+      },
+      "process_wall_ns": {
+        "median": 28355320.5,
+        "min": 23681621,
+        "max": 35676965
+      },
+      "peak_rss_kib": {
+        "median": 13788.0,
+        "min": 13788,
+        "max": 13828
+      },
+      "relation_shape": {
+        "dimension": 17,
+        "inequalities": 16,
+        "equalities": 10
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 1,
+      "distinct_range": [
+        1,
+        1
+      ]
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 8,
+      "strategy": "csl.synthesis.strategy-b",
+      "collector": "on",
+      "n": 6,
+      "prepare_ns": {
+        "median": 50740.5,
+        "min": 43023,
+        "max": 58668
+      },
+      "registered_synthesis_ns": {
+        "median": 18287708.0,
+        "min": 17271744,
+        "max": 19155258
+      },
+      "selector_prepare_ns": {
+        "median": 80912.5,
+        "min": 77805,
+        "max": 118313
+      },
+      "selector_ns": {
+        "median": 1799321.5,
+        "min": 1714638,
+        "max": 2422633
+      },
+      "literal_replay_ns": {
+        "median": 1466.5,
+        "min": 1397,
+        "max": 1885
+      },
+      "relation_json_bytes": {
+        "median": 1223.0,
+        "min": 1223,
+        "max": 1223
+      },
+      "family_check_ns": {
+        "median": 233591117.5,
+        "min": 232894861,
+        "max": 234582567
+      },
+      "independent_query_replay_ns": {
+        "median": 108953.5,
+        "min": 103645,
+        "max": 162942
+      },
+      "process_wall_ns": {
+        "median": 30793143.0,
+        "min": 29892246,
+        "max": 33876273
+      },
+      "peak_rss_kib": {
+        "median": 13788.0,
+        "min": 13788,
+        "max": 13788
+      },
+      "relation_shape": {
+        "dimension": 17,
+        "inequalities": 16,
+        "equalities": 10
+      },
+      "observed_backend_threads": [
+        1
+      ],
+      "returned": 1,
+      "distinct_range": [
+        1,
+        1
+      ],
+      "actual_direction_lp_total_ns": {
+        "median": 575678.5,
+        "min": 516068.0,
+        "max": 669232.0
+      }
+    }
+  ],
+  "collector_mode_differences": [
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 2,
+      "strategy": "csl.synthesis.reach-back",
+      "registered_synthesis_on_minus_off_median_ns": 5654219.0,
+      "selector_on_minus_off_median_ns": 1571984.0,
+      "process_on_minus_off_median_ns": 9627461.0,
+      "claim": "descriptive OBS collector-mode difference; distributions and host interference prevent attributing every difference to overhead"
+    },
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 2,
+      "strategy": "csl.synthesis.strategy-b",
+      "registered_synthesis_on_minus_off_median_ns": 1730072.0,
+      "selector_on_minus_off_median_ns": 1991284.0,
+      "process_on_minus_off_median_ns": 6766532.5,
+      "claim": "descriptive OBS collector-mode difference; distributions and host interference prevent attributing every difference to overhead"
+    },
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 4,
+      "strategy": "csl.synthesis.reach-back",
+      "registered_synthesis_on_minus_off_median_ns": 8090433.0,
+      "selector_on_minus_off_median_ns": 3602869.0,
+      "process_on_minus_off_median_ns": 14034218.5,
+      "claim": "descriptive OBS collector-mode difference; distributions and host interference prevent attributing every difference to overhead"
+    },
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 4,
+      "strategy": "csl.synthesis.strategy-b",
+      "registered_synthesis_on_minus_off_median_ns": 2600731.5,
+      "selector_on_minus_off_median_ns": 3768011.5,
+      "process_on_minus_off_median_ns": 11681081.0,
+      "claim": "descriptive OBS collector-mode difference; distributions and host interference prevent attributing every difference to overhead"
+    },
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 8,
+      "strategy": "csl.synthesis.reach-back",
+      "registered_synthesis_on_minus_off_median_ns": 14586671.0,
+      "selector_on_minus_off_median_ns": 13378572.5,
+      "process_on_minus_off_median_ns": 31963662.5,
+      "claim": "descriptive OBS collector-mode difference; distributions and host interference prevent attributing every difference to overhead"
+    },
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 8,
+      "strategy": "csl.synthesis.strategy-b",
+      "registered_synthesis_on_minus_off_median_ns": 316140.0,
+      "selector_on_minus_off_median_ns": 12494467.5,
+      "process_on_minus_off_median_ns": 19971611.0,
+      "claim": "descriptive OBS collector-mode difference; distributions and host interference prevent attributing every difference to overhead"
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 2,
+      "strategy": "csl.synthesis.reach-back",
+      "registered_synthesis_on_minus_off_median_ns": 6557702.0,
+      "selector_on_minus_off_median_ns": 892694.5,
+      "process_on_minus_off_median_ns": 11227318.0,
+      "claim": "descriptive OBS collector-mode difference; distributions and host interference prevent attributing every difference to overhead"
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 2,
+      "strategy": "csl.synthesis.strategy-b",
+      "registered_synthesis_on_minus_off_median_ns": 1760314.5,
+      "selector_on_minus_off_median_ns": 719135.0,
+      "process_on_minus_off_median_ns": 4689550.5,
+      "claim": "descriptive OBS collector-mode difference; distributions and host interference prevent attributing every difference to overhead"
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 4,
+      "strategy": "csl.synthesis.reach-back",
+      "registered_synthesis_on_minus_off_median_ns": 9552419.0,
+      "selector_on_minus_off_median_ns": 938755.0,
+      "process_on_minus_off_median_ns": 13576577.5,
+      "claim": "descriptive OBS collector-mode difference; distributions and host interference prevent attributing every difference to overhead"
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 4,
+      "strategy": "csl.synthesis.strategy-b",
+      "registered_synthesis_on_minus_off_median_ns": 1664177.0,
+      "selector_on_minus_off_median_ns": 871846.0,
+      "process_on_minus_off_median_ns": 5757654.5,
+      "claim": "descriptive OBS collector-mode difference; distributions and host interference prevent attributing every difference to overhead"
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 8,
+      "strategy": "csl.synthesis.reach-back",
+      "registered_synthesis_on_minus_off_median_ns": 21556588.0,
+      "selector_on_minus_off_median_ns": 1416199.5,
+      "process_on_minus_off_median_ns": 24460507.0,
+      "claim": "descriptive OBS collector-mode difference; distributions and host interference prevent attributing every difference to overhead"
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 8,
+      "strategy": "csl.synthesis.strategy-b",
+      "registered_synthesis_on_minus_off_median_ns": -244380.5,
+      "selector_on_minus_off_median_ns": 1127993.5,
+      "process_on_minus_off_median_ns": 2437822.5,
+      "claim": "descriptive OBS collector-mode difference; distributions and host interference prevent attributing every difference to overhead"
+    }
+  ],
+  "verdict": "inconclusive; no strategy ranking or unique source-level limiter established",
+  "phase_limits": [
+    "isolated verifier time unavailable; registered synthesis includes verifier/registry validation",
+    "OBS selector spans measure actual LP runner calls including runner validation, not only native solver time",
+    "literal driver replay and exact Python family/query replay are distinct intervals",
+    "source-level limiter profile and native-clock overhead remain separate issue95 gates"
+  ]
+}

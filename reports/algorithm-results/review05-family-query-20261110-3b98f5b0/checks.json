@@ -1,0 +1,2212 @@
+{
+  "schema": "csl.review05.family-query-checks/1",
+  "checker_sha256": "c2f70c2618b1a967dcda17b8509185e44e9c512d7237ce924d3741c7d063972a",
+  "attempts": [
+    {
+      "attempt": "attempts/0000",
+      "bindings": {
+        "receipt_sha256": "d73dbc3e06d359e11dd77a0cfb5df957d0a989a107b6eca389dbcd624c9df2a9",
+        "stdout_sha256": "b4d1549c3c01d1088c8dfce5a1e3b46903fbfd5a370527d4d923bce583afc25e",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 436000280,
+      "independent_query_replay_ns": 1600288,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0001",
+      "bindings": {
+        "receipt_sha256": "8a8966bf21260214e954d77733df90c209ca004cc05411a00903c1d21676bfc1",
+        "stdout_sha256": "f90aee38a42c083cef8013b75ed5e858708b5f37be23f9df873600f8b2795fd2",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 432969211,
+      "independent_query_replay_ns": 1570046,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0002",
+      "bindings": {
+        "receipt_sha256": "fe8b9ca477a1211300ace3368519cee1a594f38aa759f2eee434d8713e6812d8",
+        "stdout_sha256": "f0d8b0995dd0235d266e106b672bd73563b5e6b530e76b1e078ff65a04afa830",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 402600542,
+      "independent_query_replay_ns": 1363104,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0003",
+      "bindings": {
+        "receipt_sha256": "cca481f3b833c20d6657ec6b5f2a6759388790b2a2f5f1cd56db3a7eccb506a3",
+        "stdout_sha256": "c6196ffb0e017b9f1d0269e3627898e498e675a3d4830e225d8880fbce58ba40",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 371160221,
+      "independent_query_replay_ns": 1293193,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0004",
+      "bindings": {
+        "receipt_sha256": "6dab5e4d03720f9ac8aecbd72abdbbfb1690a7106f73f4b4640a3b25a14d26e6",
+        "stdout_sha256": "867cf64e6109e576de19ade821ae9d8ef08949579e4b8de69aecc45993bc03cf",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3756028,
+      "independent_query_replay_ns": 68515,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0005",
+      "bindings": {
+        "receipt_sha256": "feac8b9182d484ca18b3610c77f3bebd67b5656bb52c8383d339ddee24eaa109",
+        "stdout_sha256": "718bebdde504e7b93df11c7831227238711bd04e44c2d451e5d884e727a51eaf",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3881046,
+      "independent_query_replay_ns": 98337,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0006",
+      "bindings": {
+        "receipt_sha256": "6fbfa3db1ea90eeec64dd472b7c076a86ffe56ff5f53e2ed7b0d57ea2c9eecb6",
+        "stdout_sha256": "8dc4666acc7a9ac6ded8a814d796f514b5f1babed5a5b94eae6aa7438a454adc",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3742689,
+      "independent_query_replay_ns": 44000,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0007",
+      "bindings": {
+        "receipt_sha256": "dcfc8d30ea13f739006b0cc275597eb3297500aba38c5e8ee33e7dd373e80f70",
+        "stdout_sha256": "14ff55b8daf468a23cba65989104da57bf1c2d3ffa0762d059cd8532406b0d2a",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3778029,
+      "independent_query_replay_ns": 43791,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0008",
+      "bindings": {
+        "receipt_sha256": "c317447d03b6d97fa94a3b922b66542a9bd06070d2e89384260a12631d1b9667",
+        "stdout_sha256": "ca498bad24ee0e77f84970a94054a23121b6df98cc844db086588419549a750e",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 24902835,
+      "independent_query_replay_ns": 79061,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0009",
+      "bindings": {
+        "receipt_sha256": "4acd423a743e14bd2ba306e4a65d76682ce76c77a7ecb0c80881bf398d616763",
+        "stdout_sha256": "d1fd71e45819b450b86b42dec52cc71fb80125c1d7b60e4cf021a13f6611c4fe",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 25251905,
+      "independent_query_replay_ns": 74242,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0010",
+      "bindings": {
+        "receipt_sha256": "b12ff673c889a8e7581a00c6e4db2bff73db75d40f61bd7491a29d606540456e",
+        "stdout_sha256": "c7223b25091cbe1d2ea9f5ac33817a7295ec67438da6941a1a61a5196a0a3000",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 25584771,
+      "independent_query_replay_ns": 62718,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0011",
+      "bindings": {
+        "receipt_sha256": "282f1d6562fd1793a5443d8f075be43390968c730c7a322beffed116fbde9e05",
+        "stdout_sha256": "442d61e5950e9e2ed5011659581913b8a83fba8f85e915e92a4fd3f8e4a45eab",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 25123885,
+      "independent_query_replay_ns": 61042,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0012",
+      "bindings": {
+        "receipt_sha256": "014db3888fc42699acec9ccbf306f8706c704c00843a50aecca95d6edf24bd09",
+        "stdout_sha256": "6fa5549700ea82e30dae05a4d46b74a125692ab4c11fef007a60339a319821dd",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 237372224,
+      "independent_query_replay_ns": 164198,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0013",
+      "bindings": {
+        "receipt_sha256": "aaf771077b2a584bff237f85a18b365c94a39987474d9c9af36ccf8bfcf05639",
+        "stdout_sha256": "09d74c6d0ec5815a3b7e9fbf9907a4529baddbd658d0d55614c6fcf58ba3b5bf",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 239361738,
+      "independent_query_replay_ns": 141500,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0014",
+      "bindings": {
+        "receipt_sha256": "f6f49c7f14b815cff73d16f4fb63568b0985e6472e8b786d2d38eecbb0ce1425",
+        "stdout_sha256": "693d0cb3022e721d7307420e60b53a12794a55cdf32399c8a101c9aa224d58f2",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 243069086,
+      "independent_query_replay_ns": 90026,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0015",
+      "bindings": {
+        "receipt_sha256": "296cf1ca4d4ac3e646db2c586bffcb34209092c36df168f916291af65f07ff17",
+        "stdout_sha256": "10313eb9803777310587c0927d0430a602400dde944d5611db6382f76de0cc47",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 250968766,
+      "independent_query_replay_ns": 91144,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0016",
+      "bindings": {
+        "receipt_sha256": "61f0c2df5d1c84277b7a823d41889b36e6d5dbe57c26d5562a5f0659c565a39c",
+        "stdout_sha256": "dadc9d1f616fb6b9838448c0181ea5330cf3c90027b83702dd0d3f00d000148c",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 2938110,
+      "independent_query_replay_ns": 176560,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0017",
+      "bindings": {
+        "receipt_sha256": "299a5e72e92e39eb28e32fcd0126f2b345eccac46b176d58de0b590f64f811c1",
+        "stdout_sha256": "3cd8b564969684be272ba8f60a7cfba1ace572aadf21849e75cc939b785db339",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 2953825,
+      "independent_query_replay_ns": 148833,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0018",
+      "bindings": {
+        "receipt_sha256": "bf9934a49100369ea6e8c3eb47a52d0638b7e15dc0dba4ab71a59e9fe8bcd7b0",
+        "stdout_sha256": "ea9974f37bfe0fc4462ca0d99c8704e05ace6b868ca929e2b2a4febaadb8fb78",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 3405562,
+      "independent_query_replay_ns": 187874,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0019",
+      "bindings": {
+        "receipt_sha256": "b9c7e8a1f2bdd89af22eb76236d2e9aa60d157bee16c9605a8a60555495cc79a",
+        "stdout_sha256": "1356177558218907ed7484fbde4aa49860b7ea80510bfadbecc500dc24aaa9eb",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 3281732,
+      "independent_query_replay_ns": 168878,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0020",
+      "bindings": {
+        "receipt_sha256": "b4da1b530850f3df313b19714b06a3a15658d6883acafee732b7ec5ff04b1736",
+        "stdout_sha256": "eb3e9e400029c580248aa93c26d85873e7dc020c46f77c3e857eb1b9dfb47ee3",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 23343754,
+      "independent_query_replay_ns": 428341,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0021",
+      "bindings": {
+        "receipt_sha256": "86c3387b94edfb4e465d186a5cbb47e222f0a824f6ae61a9dcb5c2366d59bbb7",
+        "stdout_sha256": "1956b9eb0b655a92a58344dd078fe5741e152d0b289ad7f08392894da892a1e9",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 23452986,
+      "independent_query_replay_ns": 426105,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0022",
+      "bindings": {
+        "receipt_sha256": "c9ae995ed1a7955c14a113a928d5a67be175f8a490a166c3558b5b2e7b42b0ae",
+        "stdout_sha256": "d613ca8c10aaa62d15b4ae76652a9f460710d254e507ccfc399839978d4e29a6",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 22971706,
+      "independent_query_replay_ns": 387204,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0023",
+      "bindings": {
+        "receipt_sha256": "ee9054d51e4c8fd4b1e02130ed620a89dc9c53339a9abb2e9d1a449d34c66d92",
+        "stdout_sha256": "a59ec72a136d960a209eca604bb909dc1e9ac569a276cd765f70a7359b26aae2",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 23160768,
+      "independent_query_replay_ns": 432322,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0024",
+      "bindings": {
+        "receipt_sha256": "b288bb43b0ac3cebc334bc37988656ace18393d5cabdf4a2aeecea49adecd90c",
+        "stdout_sha256": "b9d7a8e2be27e90718a676e2631378ef5f1270496838bc930e300a5b6ea85cf6",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3849127,
+      "independent_query_replay_ns": 48052,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0025",
+      "bindings": {
+        "receipt_sha256": "92a65da279e0fccf110ba862e09d9f6891f0fea76ae81355cdb2eb758bca0ddd",
+        "stdout_sha256": "b1012f3ed872f3df84448f57e0941504743b6f486b2ca4315aea541512bb8038",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3937757,
+      "independent_query_replay_ns": 42394,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0026",
+      "bindings": {
+        "receipt_sha256": "c217a223669ca58250d2eceeaad9dcc5730dc58ef6dfa75fc13defb120584ff2",
+        "stdout_sha256": "279ad97ae83267067591e8bb84a2997913335f99f763aa05094335d2b889cd1d",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3834182,
+      "independent_query_replay_ns": 105042,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0027",
+      "bindings": {
+        "receipt_sha256": "a703cefbbf3eb2c6a2d85b2216cc25bb6a9a7d6cc8b172e843fe0bfcd636b326",
+        "stdout_sha256": "7dc9a71671e9fb0dbe299478560e7eb65284a6d1845a93152fb56040e876d480",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3930983,
+      "independent_query_replay_ns": 58178,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0028",
+      "bindings": {
+        "receipt_sha256": "0093eec5e53d4c1acdfaf358131f6737ef550509525b79b5985ff8d9e0830bd7",
+        "stdout_sha256": "e0bb1d22ddcbdc20cc63ab6b2def6831c5e4a07fb06fcfe7b2a34b2b80e36fc3",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 27144830,
+      "independent_query_replay_ns": 83042,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0029",
+      "bindings": {
+        "receipt_sha256": "c517a1d04a64ae1e4f5fdefcfc5ccfc7cd1f5e8a10567c38e2c7b3c54ad5ed2c",
+        "stdout_sha256": "99975517191035945b527f6a5caee65561f0494aeed131d47cfdd8727dae9093",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 25245479,
+      "independent_query_replay_ns": 58458,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0030",
+      "bindings": {
+        "receipt_sha256": "ae5b696a7f9705b4d2d354b31b94e3ca7afc6f74c2395dbf5e51ff9c42b406a3",
+        "stdout_sha256": "1222a0b74fb74aa252826f7b6fc2c194e066ef701ac6fa572e7382db37ab9c77",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 24871196,
+      "independent_query_replay_ns": 70121,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0031",
+      "bindings": {
+        "receipt_sha256": "71dcae8944a401017b3b903b07ec682df8abd8cf4ed43b23bec19b0f925924b0",
+        "stdout_sha256": "0f9ac44ec4a2f7e285d49ccada1ae631abee5143b3e58cfd5f14568cab1996e9",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 24686674,
+      "independent_query_replay_ns": 61530,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0032",
+      "bindings": {
+        "receipt_sha256": "7e0cabb3a82f7a6f3534231c67ecf1fa851745747a58a2801807df31144cfdd2",
+        "stdout_sha256": "c86511534f1a623e4ca67575af2e97e49cbe6367680cdc035b2488c1e82a6b0f",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 231891512,
+      "independent_query_replay_ns": 84509,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0033",
+      "bindings": {
+        "receipt_sha256": "ab14ab204794af46475b0328b677d1c530640cd0bc4851e706cb8c5b4f81a3f0",
+        "stdout_sha256": "425f271ccf46bd630843a4d14cbbc24bf330203dfc5de22fbc76ab38b6ae7939",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 231311754,
+      "independent_query_replay_ns": 105601,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0034",
+      "bindings": {
+        "receipt_sha256": "2b1e227461f02faddec0bc090ab8e13065211d5ffba8d1c498fe661d4dad965d",
+        "stdout_sha256": "c7830f91d3529be99ae6e8c1b3cf1e879008ac943615c657c801b90b8b774e65",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 239813052,
+      "independent_query_replay_ns": 157912,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0035",
+      "bindings": {
+        "receipt_sha256": "842d07dd32ba0a8c9938f64b913a880faac356ed8916034b68147a6769c0ee4a",
+        "stdout_sha256": "d6c9bde567b7eca4e894032b73ef23f980a3c91ef30b4f68adb897be275dd5a9",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 232894861,
+      "independent_query_replay_ns": 156935,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0036",
+      "bindings": {
+        "receipt_sha256": "9f049733679b0df85daf2b4fef3819c31895335dd851dcdc40237d1ac7a6e117",
+        "stdout_sha256": "18c05398ea280292dce2933d18091bb88e92df27c320cd7028d7f9a6f4bf2b66",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 2963253,
+      "independent_query_replay_ns": 137030,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0037",
+      "bindings": {
+        "receipt_sha256": "ace10b99e7a67fe6d25dfe6a05341d704fd0206e1cd900c7f32704e2980d3a38",
+        "stdout_sha256": "44ba6d759965986dad49d64c2e69c4b3102ae0caf367342e1f507bdf95235791",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 2937551,
+      "independent_query_replay_ns": 132281,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0038",
+      "bindings": {
+        "receipt_sha256": "871b363aaf5734d261bc61f9124f5aa8819d4fe533a56fc73ce366bce219deec",
+        "stdout_sha256": "7b0b0e9084c52987e9b416a01951f469715c232ed249b812dfa333c7df2536cc",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 2938529,
+      "independent_query_replay_ns": 166713,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0039",
+      "bindings": {
+        "receipt_sha256": "0cd251ba2b3e5e1d080073a43c59f2a867de31411b20bf162cc30566aa53143f",
+        "stdout_sha256": "98e59a69551e0d52966811908a6eb3beedfad4f8181e7bdc293ed377262ea119",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 2974427,
+      "independent_query_replay_ns": 188364,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0040",
+      "bindings": {
+        "receipt_sha256": "e1d536870235e34d0069ede5b07c4790cad914ad879d9f1380bc82d71086f668",
+        "stdout_sha256": "302310d8c181243250e5c0986fb66755a4ca920071ee045de3d67f2e6d0f7877",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 22445656,
+      "independent_query_replay_ns": 407109,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0041",
+      "bindings": {
+        "receipt_sha256": "5ee6daec16587fbdefb20ab32037a5e2e91283e372663eef01f57925177c164a",
+        "stdout_sha256": "caad86b999783e484b5f1554442dbdf2928e351707baa07c8651e0a0d09ee4de",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 22428335,
+      "independent_query_replay_ns": 389857,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0042",
+      "bindings": {
+        "receipt_sha256": "6f53ce3ec6c12023ca2cf884f2948cfb612f4f43069d12ff02f6c701272e49cf",
+        "stdout_sha256": "0f0952a45bb41de6bcefc8f415a7609ffcb14a553bba16ce71e07ad0f9030c32",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 22306949,
+      "independent_query_replay_ns": 463890,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0043",
+      "bindings": {
+        "receipt_sha256": "17f4cb1c98ab37cc1e2389b465aa593d945f64300808ee697258815248faf38b",
+        "stdout_sha256": "43a8cfaa0c90c6e64a3f63a1a42d914792057937e9d48c7ad7016e07d3f1ee83",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 22395299,
+      "independent_query_replay_ns": 420658,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0044",
+      "bindings": {
+        "receipt_sha256": "f601f80d97baf43b685772cf4c84fa2e46169d944a6d67d5ec3353ea44739b31",
+        "stdout_sha256": "2f6659063e6e054da2edd30cccd13977825894ef845ec95df3778ab57f8c1680",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 368268326,
+      "independent_query_replay_ns": 1323574,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0045",
+      "bindings": {
+        "receipt_sha256": "fea38d4b3d450cb0bfb822248d93876a8247d8abfe2f5bf9845d0d11dabc9046",
+        "stdout_sha256": "15bba91e0679c1a601835f72b0d90ce9412fa6d1f8d05b66e120b275a05a106f",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 365092195,
+      "independent_query_replay_ns": 1283624,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0046",
+      "bindings": {
+        "receipt_sha256": "ded432a04c53435c636dc62d54472c6dccf49b0dfa0489a29f713e747458a2a9",
+        "stdout_sha256": "35303b564b894aca3c4e949ffcfe67fb3d1eb23677ae5b6d4b16337514fc465d",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 363860111,
+      "independent_query_replay_ns": 1642402,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0047",
+      "bindings": {
+        "receipt_sha256": "fd4d1a99ba908bb7eafc435e1dfc11748bdcadec378843b58b2b430dee57e441",
+        "stdout_sha256": "5dc220c216e0c26443bd4497908f8539c9c803dc3aa4931ba61df9168c3e2121",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 381502943,
+      "independent_query_replay_ns": 1376165,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0048",
+      "bindings": {
+        "receipt_sha256": "9c67f1a9d12d81685f7e709ec5d5cae0da41f7ec25d89648a296ea06c4df29f7",
+        "stdout_sha256": "2c3ab07f03db30cb43aa95fc8d15b1744631d16c380fe48b0d56b62986ffa06e",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 24780470,
+      "independent_query_replay_ns": 71448,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0049",
+      "bindings": {
+        "receipt_sha256": "c987334829d346ce2508f2d2cfb9306ab87096a3ab032904addb7926cb6890ee",
+        "stdout_sha256": "0bded71a4d2e6eea4f2e8b3678ae5d40a6cd377f8eb1ddd02db51b1644a96b66",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 24529459,
+      "independent_query_replay_ns": 79061,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0050",
+      "bindings": {
+        "receipt_sha256": "f1d4ce016e5e3fa20c5c622a36c87510430b41b42995905f3260fb5127ada28e",
+        "stdout_sha256": "d28998ed0edba1dbd6345d7cd5317c26892f7f52c427abefd258036c888ef184",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 24852128,
+      "independent_query_replay_ns": 59645,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0051",
+      "bindings": {
+        "receipt_sha256": "79abbcccde5f1f7ecc26bb269739a8ffb4954b02d065c37a1d7fee3ae3e1892a",
+        "stdout_sha256": "9c3a23cc1fd25259c47096b7a7789f7fd8fa51eb7afb49c0612e43bee477ccaa",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 25024637,
+      "independent_query_replay_ns": 80737,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0052",
+      "bindings": {
+        "receipt_sha256": "7d939b3600f690eb5e155f44c71fe24f162c5961ea0f4ef8b9e2e5b22308da34",
+        "stdout_sha256": "7be0ff4430a43531e762ce6f02f60b0fdc4d14de9786d43308911935cfac916a",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 233878994,
+      "independent_query_replay_ns": 162942,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0053",
+      "bindings": {
+        "receipt_sha256": "b8948c252a5a3525d38e9f085c81f7502a087a6699cc8a331217ff3eac46ba9d",
+        "stdout_sha256": "ed8c7d58e9f0217bedb56a4f23b1b4c7ee9e276436f44e48cd58dd116942ff74",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 236752358,
+      "independent_query_replay_ns": 107766,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0054",
+      "bindings": {
+        "receipt_sha256": "bd94385c82815e885d3590640bf56d8cce7c954f03873b8db3782f51fee70dcf",
+        "stdout_sha256": "f51edca68850ba4516e30ca63d44e24d03e0f0554aac56a64be210a07ba9e717",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 235458674,
+      "independent_query_replay_ns": 90515,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0055",
+      "bindings": {
+        "receipt_sha256": "653781478287da2a8e6b3bf275d3579d924c070fa3b7084b140365716623c714",
+        "stdout_sha256": "e3a3284ae28f5a93d44748fb7bfa27ebb076033cc1ed97dd38a072f3bebed043",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 234486685,
+      "independent_query_replay_ns": 84997,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0056",
+      "bindings": {
+        "receipt_sha256": "123bba6f56d4c297c513a5862315d498ce1a1e13583b1f3a52a09cfe5bb0692b",
+        "stdout_sha256": "ea3dcd804578cda3f68ff55e2faddf43d476d889e105669be9812e83855574e1",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 3324545,
+      "independent_query_replay_ns": 194650,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0057",
+      "bindings": {
+        "receipt_sha256": "cda587369befafd23d0cd3a2875b1ff99080e2c1ca94348fa3306a1a3760bdb3",
+        "stdout_sha256": "b9a7ab4e5059d68b03fdfbb902f99c6be3a42336e7c0337399563d8a8d61d20c",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 3012631,
+      "independent_query_replay_ns": 149113,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0058",
+      "bindings": {
+        "receipt_sha256": "00ad47d07bf2ead0744735fe342eccc2b2e6fa754956e22a9d5e6d86ae7c6a8a",
+        "stdout_sha256": "094caff031e707364752c33749944400b51cc7dcce8618ccadf51d86b1fbbba1",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 2947259,
+      "independent_query_replay_ns": 133747,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0059",
+      "bindings": {
+        "receipt_sha256": "c1f2cd5e192339c3caafd3043b7db03d5a89c3e2a3ebc5201ffa6e0a068708b8",
+        "stdout_sha256": "665022efe775b87ca198ac62008a30963b1a73d39bb387287b6e6a1ad09f3c21",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 3026181,
+      "independent_query_replay_ns": 138845,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0060",
+      "bindings": {
+        "receipt_sha256": "e6c9c7c04ba825aaaa627a8371669e192db4e41d99f07f531e113416e6ed8742",
+        "stdout_sha256": "8f60e5ba1892d82d1a746d63b9e398fbd5c365dd9a61337b249faa9ba9695c8f",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 23335301,
+      "independent_query_replay_ns": 473039,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0061",
+      "bindings": {
+        "receipt_sha256": "e0e098d390432b69d86733176bc8388ea9f07f6d1fbaa1715bd836a73af032c8",
+        "stdout_sha256": "afa971b60937140c9e101207a4944b551d977e81bf0f7e8a8f6e43307e901bec",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 22443490,
+      "independent_query_replay_ns": 424918,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0062",
+      "bindings": {
+        "receipt_sha256": "c5952852fa406f0e10030bc02107e993511f124a8f3933715d2e85e2b30f9690",
+        "stdout_sha256": "d5dcad30e9079160197c7fbf81b13963324f11c5226c1588bcd0682ed42dee65",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 23393898,
+      "independent_query_replay_ns": 417724,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0063",
+      "bindings": {
+        "receipt_sha256": "bf781b7efe00a307dc5c82a0b9162738b91abd1d5b68197562b0ee2e27caa5f8",
+        "stdout_sha256": "15d8b9d80a4ddce7921b96675fca4a9fd7cebf806ce99523a6346aff185338b7",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 22636672,
+      "independent_query_replay_ns": 387413,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0064",
+      "bindings": {
+        "receipt_sha256": "e598150063160850682dd03a70e7d4a7475a91632c0cab4557ddf226d116c172",
+        "stdout_sha256": "1e28c7eb05db621e8625e9271aa685ef6e2f2ae7ad92b94c3e8d5feab0217305",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 368215022,
+      "independent_query_replay_ns": 1506141,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0065",
+      "bindings": {
+        "receipt_sha256": "c37e8ba53bc82d3dd60b41e928155ee7852bfac586e1c330c2f8681ab36046a0",
+        "stdout_sha256": "53889da989669df2156706a42de58b516e1a03e089617bc573f207e77e7d334e",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 376536681,
+      "independent_query_replay_ns": 1383777,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0066",
+      "bindings": {
+        "receipt_sha256": "2c4d1bb97b8cd06b4549149584e9abaadd9282dfcae69a9333d241fada66efe0",
+        "stdout_sha256": "712f6cb60dacbb4a0a696b65c8023b141a8591972ce191ed8003bf6a60bbdd8f",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 361567533,
+      "independent_query_replay_ns": 1298640,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0067",
+      "bindings": {
+        "receipt_sha256": "61c76ae4a5ebccb1cb3334e0112a707a20dffd256f8eae836d73db2153b27648",
+        "stdout_sha256": "4bae553789d5bcda4b4c7a024aee91ba392e2047cd3ebcbed72c0b7ac3ee27fc",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 384094200,
+      "independent_query_replay_ns": 1304647,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0068",
+      "bindings": {
+        "receipt_sha256": "6d2541089cc74ed6bf73aa0833f729bbad215a3a2164bfe5c7939e233a61d9c0",
+        "stdout_sha256": "deb3df5876d131980674c08152c270a0712f198f4f086869fe5a00807fb372b5",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3675640,
+      "independent_query_replay_ns": 46305,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0069",
+      "bindings": {
+        "receipt_sha256": "96407652dc0116c589341a888f30f478e8ca18cda3eef9de6f4ac7d79e00d3b4",
+        "stdout_sha256": "bf74de8981f0ac40b1bfe222085f1e589f1d414b3b3909f5da293358f53572e1",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3679481,
+      "independent_query_replay_ns": 59017,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0070",
+      "bindings": {
+        "receipt_sha256": "007e7cf691ab8a41d004a84fe7f64dc40f8c0f2cac5bb91d6d833db86a765f3b",
+        "stdout_sha256": "8b03f24dcfc323e9f3a627b015c113a82dcd882b745c1bce1637c8c38986e81d",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3779215,
+      "independent_query_replay_ns": 38972,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0071",
+      "bindings": {
+        "receipt_sha256": "7744982798ae06ca21e13ac2dd970cc454a7c0fbd28f144a99e95806533fccea",
+        "stdout_sha256": "8fbc6d6c448631cbccac5b705c3ac284bc593c8d7e3a997ece4a16481db277e5",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3705882,
+      "independent_query_replay_ns": 37645,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0072",
+      "bindings": {
+        "receipt_sha256": "1acde2d7e88b4f58ebc38e3cc3643444f7a4f67bd992e53199247129561a53f0",
+        "stdout_sha256": "29c823711aa19271a8726f6df7195948c65ed30faa9dc4dfecc9784bdb293871",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 234557426,
+      "independent_query_replay_ns": 85556,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0073",
+      "bindings": {
+        "receipt_sha256": "8592d383e998d22b9204d9c08d82b27ae1dcace1caf44d0c7f26e5a80245ef7b",
+        "stdout_sha256": "09259100f73b5b26214579bad1c56f8be084f1c66c05616b8135c47e3156d69f",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 233743489,
+      "independent_query_replay_ns": 86115,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0074",
+      "bindings": {
+        "receipt_sha256": "28e48688fcb2302a2905cbea98acd0f633162ca5d1d365dd056985a616815dc6",
+        "stdout_sha256": "2e020355339a964c69feab6b35c3ce184cbb499cfca45f4ce19937bb9b4639a6",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 233215902,
+      "independent_query_replay_ns": 104413,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0075",
+      "bindings": {
+        "receipt_sha256": "a3b7f777a69b6fb78eb9b86a977758b7d3c16c59e1fa02b71869e67ef4b0f5dd",
+        "stdout_sha256": "bf8f857bfaef489b4659541d5a07e69e862ff0d682d887b73a48a0fa1ef1d974",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 234582567,
+      "independent_query_replay_ns": 108674,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0076",
+      "bindings": {
+        "receipt_sha256": "3c527d345e5c7f919e396bf0439079ea966facb80f25d066437fc5e96f306679",
+        "stdout_sha256": "d0ee17d25451e3b3e94061af09cd978990fdc3d8413aa69869f877f908ea0bc3",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 2969468,
+      "independent_query_replay_ns": 154979,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0077",
+      "bindings": {
+        "receipt_sha256": "22862620c1a8764ab00d79a296f824e4e2ca8ea5ddbc5fd7efb2dfb7711b4cb1",
+        "stdout_sha256": "6941e440ea4cd3eafad66e7f90052c63b3abd5b2bb84428ecb5010eb44feba32",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 2930637,
+      "independent_query_replay_ns": 133538,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0078",
+      "bindings": {
+        "receipt_sha256": "d4c7deceb5a6e65798ef5aa183d8754e4255f3b7a2b082786855845f5f90d669",
+        "stdout_sha256": "3a2a46016e985a6db33d56248e4b76889eb7d0df4cde0e91513f4dd8731ada08",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 2953963,
+      "independent_query_replay_ns": 147786,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0079",
+      "bindings": {
+        "receipt_sha256": "6f64f801336c8fb6a4d332591d0e382f4c7f917f207ff714ef9ce2c68e9cc6d8",
+        "stdout_sha256": "7798fffd6fea0a0b19845ac6d613d415470a38bdb59ae6de86eacf5be5ebe26b",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 2889360,
+      "independent_query_replay_ns": 141709,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0080",
+      "bindings": {
+        "receipt_sha256": "e3a1e62296414d21a489d7bfe7033425ee127d000b623fa965c73dcb08cc0afd",
+        "stdout_sha256": "e50ee66ba376456815fb1511f2509959afdc00c770e8a16e0985f2cf5d603150",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 22557680,
+      "independent_query_replay_ns": 407178,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0081",
+      "bindings": {
+        "receipt_sha256": "1507696c2f1e53d8b7e4ae6fef6eec1e0856ff5d1dec264a656cd06df2db0c79",
+        "stdout_sha256": "3fb84c6eba3bdd0b96c2eb32d0aaddea46475889315dfa96565ae85ffdc817a4",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 22404238,
+      "independent_query_replay_ns": 405223,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0082",
+      "bindings": {
+        "receipt_sha256": "a0676004677479a95e20771c0826ad4fe16dcd256e7cb7baa2f2c1fc3f279699",
+        "stdout_sha256": "ce0295e553965e986bacbb8bfa94777d55bf4abb9eea57f9162892a61c59b180",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 23076745,
+      "independent_query_replay_ns": 487846,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0083",
+      "bindings": {
+        "receipt_sha256": "83505656801bc57ad86da90abe2a7c6e5e1afa629488d1ab70d3ac07c2fe4a3e",
+        "stdout_sha256": "ad71be649d8be9c280cc2a64a162b4c0b271128b0eab85514774624d7f2274ff",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 22869803,
+      "independent_query_replay_ns": 443356,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0084",
+      "bindings": {
+        "receipt_sha256": "e20ddb1fe403adf247d34f3462c83beefc41a89391649a03c48794b4f819eee2",
+        "stdout_sha256": "db62fc1fae15090526fd53debfef24f37358baa5db8522dc4c41e4ed1689151b",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 369617359,
+      "independent_query_replay_ns": 1318824,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0085",
+      "bindings": {
+        "receipt_sha256": "30ab3159b2b175df65edbc85b957f38deb03958992da3388795a7de81995c695",
+        "stdout_sha256": "dd69c1ef15e2b629a5e54dce68a67b45dd83cdc53b4623ba6c713f6fa60b34f1",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 365351694,
+      "independent_query_replay_ns": 1331187,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0086",
+      "bindings": {
+        "receipt_sha256": "fdda8ac5f552c5a91cdc41df8a95817ff320e99beccb58d6351fecf1daf05a2f",
+        "stdout_sha256": "8370ba87306532ee9f947513ead5d503451411f891fb061f835e34ebf2d21b06",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 368193555,
+      "independent_query_replay_ns": 1416953,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0087",
+      "bindings": {
+        "receipt_sha256": "6aa7680bfd5adce9bef03ac16b2f823919de0ae8f5b3d8832757fb701c2c271e",
+        "stdout_sha256": "82037b6b6dc02bd10a530299ec320ff79aa5668dfc5aed022482b0c4ea97a0af",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 367096199,
+      "independent_query_replay_ns": 1435741,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0088",
+      "bindings": {
+        "receipt_sha256": "22787dd6a77189e21a32aaa9c48b9f5458ff9494d913392c34b1668fa39d5eb9",
+        "stdout_sha256": "9527aa4c1c40ae3068c599131137d6f309eaca569ddbc7eed8f4f29349fbfdcd",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3713076,
+      "independent_query_replay_ns": 37994,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0089",
+      "bindings": {
+        "receipt_sha256": "94249f558909f901fe2ed4f5d3f826fa130ba7458093bdda129ba4f1995dac44",
+        "stdout_sha256": "4a056599f4a0fd24a9dd4ca39efffa4d9248cddf5e7a664a56ff1bad94215a64",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3703716,
+      "independent_query_replay_ns": 37854,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0090",
+      "bindings": {
+        "receipt_sha256": "1ed05d8e4135d007cb459e70ad0827b7b955ed27dc0efb15c9449925ee990959",
+        "stdout_sha256": "f8b15b86809f079c0373ad723ff099c133c8ed8ada79f5a5a4e86d1662053767",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3826568,
+      "independent_query_replay_ns": 101969,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0091",
+      "bindings": {
+        "receipt_sha256": "bc0634b159bf24bc5113b57f5b8bf2fe0fec2dee9f42b339ab416335219ae02a",
+        "stdout_sha256": "7d6712c21d5d89d6d749b1f4cbc8bc27fc3916b7e7211303dc3d110d49e886cc",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3789692,
+      "independent_query_replay_ns": 45188,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0092",
+      "bindings": {
+        "receipt_sha256": "9d5889369ba0631feeb222aac3ee39100d7b1a7372950f08f1927651cb929ef0",
+        "stdout_sha256": "f9ef315dbb1eaec67b87fb4cf788e2403ce06e4598d6a8605e24e5da62fc3f00",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 24715585,
+      "independent_query_replay_ns": 56781,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0093",
+      "bindings": {
+        "receipt_sha256": "0c870bf6f14ead023f3e6574c8478e1e92771b4222e95b0340f28349e27d347f",
+        "stdout_sha256": "d810d2a80838e10d92a629a8ffb0bc8920793d6abfd6653b7d2673088f09ae1f",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 24844862,
+      "independent_query_replay_ns": 57829,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0094",
+      "bindings": {
+        "receipt_sha256": "bac66e747528fae12cbac219e5a1b3a91f111f87e7b67994f4d7b1bbe52918b9",
+        "stdout_sha256": "760c75c95248e4c4d2254e6bfc20671f57e5dcb14ec14306460bfb489e3a3eae",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 24628841,
+      "independent_query_replay_ns": 70750,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0095",
+      "bindings": {
+        "receipt_sha256": "f7f58d2421059ad3b84db62deb25db7b3b4ee13324697a8a3a2b69c1e65cd16f",
+        "stdout_sha256": "8f95ecf8fc6f97aba67e55d8e3e9818b2064399337f0a334cc2964b849008839",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 24506268,
+      "independent_query_replay_ns": 72636,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0096",
+      "bindings": {
+        "receipt_sha256": "783ff034272e3a92b7b8fa21f8c2d3de83e2f60053bfc11fdfa4ec55320c11b6",
+        "stdout_sha256": "7faab9e25778a30ddaa5ae7181fc362338e645076118f87661e878fd032fb036",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 2889220,
+      "independent_query_replay_ns": 147157,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0097",
+      "bindings": {
+        "receipt_sha256": "a1b374883857700151e5ae7307b14aaa62bcf8483e2c3650ef9ccdaec0db13af",
+        "stdout_sha256": "f8700985a6f03fb2c655c900d840bc3fe0c7a162c172a93ce6cc1a1b19ffbcd3",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 2895017,
+      "independent_query_replay_ns": 145202,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0098",
+      "bindings": {
+        "receipt_sha256": "d7ce8c090bb036ed0e6df0ded011bebf0337060256e8dd180d5cd117dca281fb",
+        "stdout_sha256": "20eee3ee114f0a42ee2df7a286ecfb5a57d12210967e973f98eadb90ee51e21f",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 2985182,
+      "independent_query_replay_ns": 132909,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0099",
+      "bindings": {
+        "receipt_sha256": "17dbf5eae29220ca9ec1f04cdfa07f95590d1b3dac5cb53c591394a185e561b3",
+        "stdout_sha256": "441b0001bd31ea6fa6455a481262e89e366d597e275cbf5344a59b2fe90fede9",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 2927004,
+      "independent_query_replay_ns": 134166,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0100",
+      "bindings": {
+        "receipt_sha256": "bcafd34251d2b3b83edcc61797a074f089d600a0863e92f411fbe963aa9a26f4",
+        "stdout_sha256": "df18dae05b942db150ce2d929a3c0abb31867222d3ddd336b206144002426e69",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 22602029,
+      "independent_query_replay_ns": 429318,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0101",
+      "bindings": {
+        "receipt_sha256": "8a455eb478689fb6d38016b9e68d672971ee8dd5e80fa8079ad4b57bfe178883",
+        "stdout_sha256": "78cf9d2ae4b604af0ceb21b9392287c081665ed2932bc096670d7fd9d3636a9c",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 23030998,
+      "independent_query_replay_ns": 424080,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0102",
+      "bindings": {
+        "receipt_sha256": "53315fb0853a24cc252697941dd2d4892defdefde50d3499d97bbaa2ba399df5",
+        "stdout_sha256": "56e09036b1de12228d5f98eb38bd6086a66299e46dfa970995e664379ef02726",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 22611668,
+      "independent_query_replay_ns": 388740,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0103",
+      "bindings": {
+        "receipt_sha256": "02f4b319b12366e47112ee4b5edc4b5ed9f2964cab1ef1608213f8b3e29cdd70",
+        "stdout_sha256": "27df38bb9e596dcef7182b7a5f4ceadd5b24400daf98658f2ab5fdfba4cb6d61",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 22461926,
+      "independent_query_replay_ns": 434347,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0104",
+      "bindings": {
+        "receipt_sha256": "b07a451093e3cc71984071119657117445f65ea8dbbdcfa1d96ac719093acc3a",
+        "stdout_sha256": "9ec9e098e5179f72664f0597257415bc3763ece96e371560739bac7a2f98261a",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 362643841,
+      "independent_query_replay_ns": 1441747,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0105",
+      "bindings": {
+        "receipt_sha256": "bb19d39803fd44dd73a8049a766c1540507a2f394d2a3cc4a026b97063fe4781",
+        "stdout_sha256": "8e8e78182f6f2a4a5ab13aed0fbe1711fd766d0db91ac54a9425c03dbffdbd21",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 370339512,
+      "independent_query_replay_ns": 1372324,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0106",
+      "bindings": {
+        "receipt_sha256": "50997e0a6f210a47b4c06ef295661654333d0220609f2f2dfb446fb554a8d74f",
+        "stdout_sha256": "58ed2d544efd53e8a3ea0b6cd3f5626b94c7db7c2355cff7027699b96477d646",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 363639017,
+      "independent_query_replay_ns": 1289910,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0107",
+      "bindings": {
+        "receipt_sha256": "86947dc46cec2880522cd6e71865688ccb44512cb432304f5546a52ed2d26300",
+        "stdout_sha256": "9b75fc64571109831da20c9b822a9de6d81b27a110a465f2694c42d61cababdd",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 364350072,
+      "independent_query_replay_ns": 1311212,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0108",
+      "bindings": {
+        "receipt_sha256": "6a0b3f490ace46dd5e66e071b448ad4f66d15623b3d379df1528015d15814c98",
+        "stdout_sha256": "93da2d67c7ca497363445232c3d8afb2ab4ff5f2f2dcfd4e2c3dab755b630da2",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3711120,
+      "independent_query_replay_ns": 46654,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0109",
+      "bindings": {
+        "receipt_sha256": "4578f54e2588a4746e22817826a9608bfb601b9c3362ef55264839f02c43a491",
+        "stdout_sha256": "06e4ee401507c774a4dec7db3d31035584cad28fe5ea6a4a03dd1aa973273c47",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 4186044,
+      "independent_query_replay_ns": 55734,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0110",
+      "bindings": {
+        "receipt_sha256": "cb9489e1e9719b4fba185730cfd2ad3b30ea0cd758c274b251830b0c1fbe2296",
+        "stdout_sha256": "918c4698abeebb82a4471006a4da2bbbd5249797e8c821f127e332be048ba6a8",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3691774,
+      "independent_query_replay_ns": 66140,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0111",
+      "bindings": {
+        "receipt_sha256": "18a50ab37db8869e71704f481e1c6911600cedc0364e6d1fc771d1aaab712075",
+        "stdout_sha256": "a3025bcef51bf2a59e6d414e63c1fa7a85d3387efc9ed7526cd2e45b7c6a8316",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3668726,
+      "independent_query_replay_ns": 36737,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0112",
+      "bindings": {
+        "receipt_sha256": "2b32793cbf89ac6d19b126b42ae994900abc3256f33b3bdd5fb6db6fe364ecc7",
+        "stdout_sha256": "6b67f3e2bd9aa6ad747ff34f6378a94e67e499d591b89bdb674a5701559478dc",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 24882367,
+      "independent_query_replay_ns": 76757,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0113",
+      "bindings": {
+        "receipt_sha256": "521fece5c391d87e4126dbd78356171e7e2cd8581d51fdbcbeccdd8a836969c4",
+        "stdout_sha256": "adccad1413f505c5500b52361bb7d4d1ffd6630615ca05779067ae1f85fa8aef",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 24431118,
+      "independent_query_replay_ns": 73334,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0114",
+      "bindings": {
+        "receipt_sha256": "bbba99868cec2c96ff2a5db1197e4e2349226a575b002f1755b25263e60f8ca1",
+        "stdout_sha256": "00d30bd6f5ad7de694cc091570b6882a76d94d8f6e869e51f4061f9eb577aa93",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 24916729,
+      "independent_query_replay_ns": 64883,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0115",
+      "bindings": {
+        "receipt_sha256": "fa00ede968055481c0fccad4a397ba6fabaf88ded1c6c5e92f2f1a49e4772037",
+        "stdout_sha256": "845e144c7b7929d9765a9e35f8e13f2ffbbf88ec7780b3d4c2da6439d7bc3f31",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 24958284,
+      "independent_query_replay_ns": 59366,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0116",
+      "bindings": {
+        "receipt_sha256": "c572ac0e11b06764b6f4efbcb476d40958378d6a4d74085f1f23e0bb641eef6a",
+        "stdout_sha256": "5d6c6cb4d2220ff686004fd3671c67bec31ef47b403429e1443d7cf1b37f7c13",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 234549866,
+      "independent_query_replay_ns": 109233,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0117",
+      "bindings": {
+        "receipt_sha256": "09cb1cec04fa9ba84197246a8c55f86b56602fd3a08f262b0749f6e24f227956",
+        "stdout_sha256": "4f8f0d451f059671eb882eaac5f2ecfc9ed476e462a7c612b7a3ada436d98c5f",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 235920513,
+      "independent_query_replay_ns": 107207,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0118",
+      "bindings": {
+        "receipt_sha256": "b1fc5b18ade0dbb19f5f1da58be128cdda1f096e7e04f060f20cae104d98a488",
+        "stdout_sha256": "a8e57e224b0e77e6120592fb80fde69ccbce6d509878e9794fd0fedfc69c24ea",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 236754352,
+      "independent_query_replay_ns": 118033,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0119",
+      "bindings": {
+        "receipt_sha256": "7d9550d9e0fdb289e293a5675c6fba0895c3709d39952dc3a1b463cd3794999a",
+        "stdout_sha256": "f00cc031bc273eb6ee448577c15b1a89dd60c51dc1873539fec5ea3e419f3187",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 233170973,
+      "independent_query_replay_ns": 119569,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0120",
+      "bindings": {
+        "receipt_sha256": "78479410ef05c624aae9aa10632efe131f488890ab748aa5c7837ca4e4b9597e",
+        "stdout_sha256": "d9f3d577ddc9fb99d4ee43574fc44e41f9c6c79f4ff208ba5f38441cdbfcc455",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 22734728,
+      "independent_query_replay_ns": 428969,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0121",
+      "bindings": {
+        "receipt_sha256": "0f840f6efb1c460f9a0ff525b006d293fdf57284e9c9ce85da09d2abfc519ace",
+        "stdout_sha256": "5665f38d29283fe165eeaee526cfbee53b3794a924abd898a2ecd02a38980059",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 23202878,
+      "independent_query_replay_ns": 419820,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0122",
+      "bindings": {
+        "receipt_sha256": "ca92af8bd4657cb1623d141abab06a9a4443cc607257698fbca8ae73245a6d26",
+        "stdout_sha256": "c4226298b7a11f58a9132ee5c3750b38c266f1ef3f2c6a30b3dc021f37b6cacf",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 22618860,
+      "independent_query_replay_ns": 423521,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0123",
+      "bindings": {
+        "receipt_sha256": "5a60d468c03f9f5ac7809097a0af97c98e4b803b363ff532b39ff7b842c474e8",
+        "stdout_sha256": "41bba61fbe3e9b50fa12847633282b98ea91bca6adc3f69b735ad8af2c45034d",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 22943555,
+      "independent_query_replay_ns": 442588,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0124",
+      "bindings": {
+        "receipt_sha256": "9fd88fb2b20361bfa97b6c29abf757c31570d5e535e7acb874a949b1c3ec6a92",
+        "stdout_sha256": "2ae3ee247a67cd12a4cdfd3b7ac1f5e4af2683d3dd53d8688fdf7592fb68b69f",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 378821937,
+      "independent_query_replay_ns": 1302482,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0125",
+      "bindings": {
+        "receipt_sha256": "2707acb4583dfe935354f2f9c9488a7b2be209cde6b457bcfccb992b7f1c4095",
+        "stdout_sha256": "f8461daf74669eed24119ead6531a6076d21c790133850e6e1abe8823cf30aa5",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 365304589,
+      "independent_query_replay_ns": 1291866,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0126",
+      "bindings": {
+        "receipt_sha256": "6ec89b228bc6d9b3c17aa3af03961bf15ddb3dac3ea8fd60af30d7abbc83a6c4",
+        "stdout_sha256": "fd28a8361e2554e1599487d9bf761150b6ec11ac68901964245d63eeb81f641a",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 371037212,
+      "independent_query_replay_ns": 1378889,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0127",
+      "bindings": {
+        "receipt_sha256": "08b1724183e41ed95a211f2eb14c706fb26767ec8acd0379e9aad81168423969",
+        "stdout_sha256": "b4046e78c1e945103a78d71a516dad51c565c70252a232f86a162817640ee38b",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 374711732,
+      "independent_query_replay_ns": 1385314,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0128",
+      "bindings": {
+        "receipt_sha256": "cf8322207d2670cc87c2e0f7e27933a453318926bd2137fa56db54cf35bcaa07",
+        "stdout_sha256": "3f298bbf9cf1c6e951ea547ac6c22aca375d24e05a0345219bc54f5b48e39e99",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 4352198,
+      "independent_query_replay_ns": 46445,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0129",
+      "bindings": {
+        "receipt_sha256": "dfaf141fb42c4bc9d89044268040b5c5004fd5a634fc951a5aa5eb437891848f",
+        "stdout_sha256": "1c097543649558c26a40b9923a209aa8b547d4768061acc1fc541ff5b9f37892",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3896270,
+      "independent_query_replay_ns": 38134,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0130",
+      "bindings": {
+        "receipt_sha256": "19fcf404d077c34bfa6da2d2b6a8541be4d59fda3859a2ceb2a7ea931ba2cbf9",
+        "stdout_sha256": "e0723d156c56221ddc86e3f14c8aed85bb869cce90247f96d654d18ba0f71468",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3808060,
+      "independent_query_replay_ns": 46515,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0131",
+      "bindings": {
+        "receipt_sha256": "09ed5db418ff0cd8d967a54b75e0bab37d65177a2bcce0074addc23474968b6f",
+        "stdout_sha256": "198480faf24ac55458819623f772a69820667553f1036b0b201226b7186d4643",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 4036443,
+      "independent_query_replay_ns": 103785,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0132",
+      "bindings": {
+        "receipt_sha256": "ea221fec762fed1c87c49400b4b7091d3dcd24e1335c9da57d98e42e945003df",
+        "stdout_sha256": "0fdbdba01d88facfa94202c0b439bc521d1e78de8ec7ebda5f5109e617e863d6",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 27868386,
+      "independent_query_replay_ns": 61042,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0133",
+      "bindings": {
+        "receipt_sha256": "44edf0bcb1b95d4e8357cd76afd4276b5eb8911c61f7daf73a63f99fe4725949",
+        "stdout_sha256": "2193e1fc20de532cbabdc530317318c7cf64533175f4ba2c9c95e9ada42b8e95",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 32824297,
+      "independent_query_replay_ns": 88211,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0134",
+      "bindings": {
+        "receipt_sha256": "90adab6448402a74cbd7ec5cfadd6c401ea7701a77f14928c9c802f25d9e57a8",
+        "stdout_sha256": "070217af4f56cc553c4d7862e8c04220e4b2256be7642df620a8ed915559cfaf",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 30279608,
+      "independent_query_replay_ns": 83810,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0135",
+      "bindings": {
+        "receipt_sha256": "9c240e2ff1bfad1d78c78b4bb69bc733f9bd3b687addd9f06b54e6b9bd5fd36e",
+        "stdout_sha256": "0935e87aa84559c4c3846dfcce3b5abd26c8dfa8ec491030da08c3b017929ee0",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 24935305,
+      "independent_query_replay_ns": 73544,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0136",
+      "bindings": {
+        "receipt_sha256": "b1f8376fd600b84113595a388ed9f78eb330f40ea2483ff10d3e6c4dd11ff372",
+        "stdout_sha256": "b94ec428db62077fef25bf5787a72ca0874662a6815a18b74ddffe6a6ef3c265",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 247710443,
+      "independent_query_replay_ns": 111956,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0137",
+      "bindings": {
+        "receipt_sha256": "c2af7d61f9b7428a9eaa99c81327006a8346ccef4e93c569dc16b92e6ebe5ccd",
+        "stdout_sha256": "957ff5d1aee9a408e6211cac3c541d106c6aa57c0c3be9cd5378d1c64dd1e177",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 247408866,
+      "independent_query_replay_ns": 132700,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0138",
+      "bindings": {
+        "receipt_sha256": "73048806b56ba929499ad0f3365aa6f0d754901bf36b4b1259b4d493d91f16d2",
+        "stdout_sha256": "257f64eae38b9ebda2f47e0d2c222cda80295c9c71e65932f89ee342611a9c1b",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 244648015,
+      "independent_query_replay_ns": 117474,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0139",
+      "bindings": {
+        "receipt_sha256": "ec03fa6f31e19901ee0ff352407ed020ff74cbfa9bbf537536eb3ec04332a258",
+        "stdout_sha256": "6155d346c70dddd27c2b506be05726b88a9dcf6e3d93e1ee1858634190045f45",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 233303241,
+      "independent_query_replay_ns": 104414,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0140",
+      "bindings": {
+        "receipt_sha256": "55bcd4533c9110019c3fc753ec3d36eec6803cb4b5cc609d5c9b84fb46489dab",
+        "stdout_sha256": "4ae7a4b3d15ad06726566c6b519df3afecff4e81844fe6a2c0428287c41389d0",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 3131851,
+      "independent_query_replay_ns": 152186,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0141",
+      "bindings": {
+        "receipt_sha256": "7cd701e3e3671d8ec9c1029c4e4b1e646fab7aecb827be54836add264b89beca",
+        "stdout_sha256": "cfb7556705bcf38006028963c81837273ac8045549a015d3a42c046c1f0024b2",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 2930078,
+      "independent_query_replay_ns": 131722,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0142",
+      "bindings": {
+        "receipt_sha256": "c0225a089e2d2c49c698f23e4fdc7c09e78cb21ca73313c7bee8c0848e1e54bb",
+        "stdout_sha256": "7c17e128c0e7aecabcb85059f8fea95a7724badd93200801eb23f2c4034b6b8c",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 3136111,
+      "independent_query_replay_ns": 163011,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0143",
+      "bindings": {
+        "receipt_sha256": "eac4c56df6c49ac8f629171e6c6c0df6e832275b7faf54c03a5d602aae7719e5",
+        "stdout_sha256": "fbca2c973124f3d7d772242ca24ed95167ade3ba32a740c79a41b6db6eef782a",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 2925468,
+      "independent_query_replay_ns": 141919,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0144",
+      "bindings": {
+        "receipt_sha256": "ae33813eb676d96c5b9214e7004b3ffd9344789a3af126901bbbbe61d87364e9",
+        "stdout_sha256": "9d471e3c1762932f2ac2582555476def40cb30ba3a63e1c45ecea09827e9502d",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 365347319,
+      "independent_query_replay_ns": 1378888,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0145",
+      "bindings": {
+        "receipt_sha256": "50960f475d5acd6a1571262eeead6b262ba7ee1ab0b6ebf32537e423f99485ce",
+        "stdout_sha256": "acd33410e7d7816d32e17e6f929ffeec5105fef9deaef76d4a83e2bca1eaf360",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 363668878,
+      "independent_query_replay_ns": 1364222,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0146",
+      "bindings": {
+        "receipt_sha256": "b37d3ac5c2176be74467d177630d27ea92b0929ce13be37581f108875cdbae69",
+        "stdout_sha256": "9300e3ac212828505db3099e1d0f2c7f079d43639f03490436381f5a5034341c",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 362901169,
+      "independent_query_replay_ns": 1294240,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0147",
+      "bindings": {
+        "receipt_sha256": "a39b4d896b207a2725ab04ac89115859a84251b411607ec956eb355492aa9478",
+        "stdout_sha256": "f31c23acd1b839de460390140706429be67c2ea734047de70513d19b85d6d24b",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+      },
+      "status": "verified",
+      "family_check_ns": 361038486,
+      "independent_query_replay_ns": 1319802,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0148",
+      "bindings": {
+        "receipt_sha256": "adf690e7fc042b2c3428ce5c1707378f1360a0dc77a529036d07906d5408705b",
+        "stdout_sha256": "bf5fed9d4146322e444566359247672742cfc4ce61338659edcdab71771be66d",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3873502,
+      "independent_query_replay_ns": 54337,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0149",
+      "bindings": {
+        "receipt_sha256": "8c273bb4268b61348ab628c5e754290dd20a4bb58ab127c9b8fea47cc1399f15",
+        "stdout_sha256": "89951ae24434c66c868ecd6457cf022e8b5010c1e96dcc84c872442107df2bf4",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3697290,
+      "independent_query_replay_ns": 57201,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0150",
+      "bindings": {
+        "receipt_sha256": "283b2ddeea2db91302c88f1155bfa5f1012dbe4e560e60f12385b968e4312711",
+        "stdout_sha256": "5a9eefe5f808cf51997007ab9b4dcf01abce8e0a32e0be64e252821b206fdc14",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3737100,
+      "independent_query_replay_ns": 32686,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0151",
+      "bindings": {
+        "receipt_sha256": "8227ce53508240653e567a38fa02aca1688e2477489857c230183d85f5aec937",
+        "stdout_sha256": "f0f7e63d1453537c5d94207873b3a6d5f2638ef522d38ce2bdd1b256947087e0",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "verified",
+      "family_check_ns": 3663837,
+      "independent_query_replay_ns": 37994,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0152",
+      "bindings": {
+        "receipt_sha256": "eeb8c1159bf3105c4270ec73a1627d43b212cb12f13f8bda58174617f126f4fd",
+        "stdout_sha256": "21e00dc1a3dac8e362a6f316a887938bc31237dddcaa30bf7018ce54e97d08b8",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 25343740,
+      "independent_query_replay_ns": 122084,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0153",
+      "bindings": {
+        "receipt_sha256": "21e73e3f54af4b1848ad65fc7d82fa9ed8d48cc976a43ad0ffb87206d7af47ef",
+        "stdout_sha256": "81d47ab39cb23a2f09536bbededc1e341c575a9c541085c8e4ac32a19c470d95",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 24639943,
+      "independent_query_replay_ns": 69213,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0154",
+      "bindings": {
+        "receipt_sha256": "9c703c546c983918e09a68ff702827f044619b2fd20075b4959a80ab8bae7cca",
+        "stdout_sha256": "44b8bf59b0cd0fc3dbd16712f7a51d36165efbdd839c14882c7552077d3dcd8d",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 24834453,
+      "independent_query_replay_ns": 59715,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0155",
+      "bindings": {
+        "receipt_sha256": "d36e7ab643d93b7fee4381395835f6c9f9ad5e8f58aac0d939da9f25c46cee7e",
+        "stdout_sha256": "e3c2b736ec287554046911f6f4785ddc45949e062773bbb0c4a9fa6d7670cd1b",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3"
+      },
+      "status": "verified",
+      "family_check_ns": 24668787,
+      "independent_query_replay_ns": 57830,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0156",
+      "bindings": {
+        "receipt_sha256": "15246ad7d731fdb83a81312b4c7f893f3619da89049d52e84c62e0b69fe502af",
+        "stdout_sha256": "ea644e38cd816bb875aafe11f4610a57b826b1d07e53e770b6ecd663f8e32620",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 233216562,
+      "independent_query_replay_ns": 103645,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0157",
+      "bindings": {
+        "receipt_sha256": "19baa123b3dd364cfbf4e69ab7e55050684a3250d2d9a313f69bf285f6665472",
+        "stdout_sha256": "aa6366c2ccffdcd5e1a413b205d9723b7a21c971c6e971a013947d8e3cb5e84a",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 230412058,
+      "independent_query_replay_ns": 106369,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0158",
+      "bindings": {
+        "receipt_sha256": "f7d40f8c5c60ac61595d05774cb576d3ec926a0a34e7b4b1537eb39a8149fb81",
+        "stdout_sha256": "ec594c5acb637dff3621fc72f65bee18199f050b35b27d3d95d332279f39af82",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 233230737,
+      "independent_query_replay_ns": 101061,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0159",
+      "bindings": {
+        "receipt_sha256": "a603da193fabffd0cb3dd317815a43e99014232fc65dd6e4342552253d06416b",
+        "stdout_sha256": "d96954fbcc7ecc945eceb634478ad39d4356d3fa82bd08d79ecce7823bd6d6d0",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4"
+      },
+      "status": "verified",
+      "family_check_ns": 233838362,
+      "independent_query_replay_ns": 84439,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0160",
+      "bindings": {
+        "receipt_sha256": "ca9b48d7fc18a06fba2cc613ad4dc4e58351ed88fcaac939a595ce7d77dcc8a2",
+        "stdout_sha256": "95a553999c0a74771c8461d19655fa47664d0199e724e732f01f833db6ff3e7b",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 3125006,
+      "independent_query_replay_ns": 187875,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0161",
+      "bindings": {
+        "receipt_sha256": "02024de084a736d99c6451ea631df22c95237904c1f91b6792178b7e63c8f124",
+        "stdout_sha256": "dbf9f75bdd333bb49496a7dca959ee7ee07efc8979166b1b8420054907567627",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 2954382,
+      "independent_query_replay_ns": 149252,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0162",
+      "bindings": {
+        "receipt_sha256": "0221e497f6b4b9c9299235dfd908ebd00e06dffc90ae7eea5b3c6ac78ed3f7f9",
+        "stdout_sha256": "1b279a95fbca8ef4a0a9d8d9b7571079e1467631c7e71c552c2841420aba5fcd",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 2897531,
+      "independent_query_replay_ns": 130674,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0163",
+      "bindings": {
+        "receipt_sha256": "2643486fd02c22d71ed37b095f9384e6024be3c7aa3e15e2bf8831772401c425",
+        "stdout_sha256": "432078354edfbd20ef96ddf7fae42d6a6b661f63872890a5a670a43f1c6b3507",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990"
+      },
+      "status": "verified",
+      "family_check_ns": 2892432,
+      "independent_query_replay_ns": 128510,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0164",
+      "bindings": {
+        "receipt_sha256": "214cb7fdc34bfd9af7c94c4ad8d84be6e45c3490fa14a1c810ec13caa963ab27",
+        "stdout_sha256": "2bebe037fb92d6820c701a12237ce944358a13e595ebf842e2e7a87fee61c8dd",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 23118157,
+      "independent_query_replay_ns": 490569,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0165",
+      "bindings": {
+        "receipt_sha256": "10f18e1f2a76ed9aa438a6f2925f4c34928f1fa49e99e25eca0d82a3010fddaf",
+        "stdout_sha256": "f30643e434a44de1a98234eeec983c06a32e63563429d5d29f513e4714def133",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 22937128,
+      "independent_query_replay_ns": 420379,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0166",
+      "bindings": {
+        "receipt_sha256": "e361a792d92facf9fb86a32f5794ad52deb91d7634003ecb6dd32e14176bb165",
+        "stdout_sha256": "8419e9e502f1c3d671732e4174c51aec638bb7d506ec7702ffb90ecd0bead539",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 23190164,
+      "independent_query_replay_ns": 409064,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0167",
+      "bindings": {
+        "receipt_sha256": "6022c79106873ea2fb81c34e151ec7c79422c3be30952c60b5264d6ee8daffde",
+        "stdout_sha256": "bc67a9e84e51417a853f6f424812ad8133db60410cd2aa5a47afc628f2ba7e3c",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f"
+      },
+      "status": "verified",
+      "family_check_ns": 23030367,
+      "independent_query_replay_ns": 389159,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "attempts/0168",
+      "bindings": {
+        "receipt_sha256": "bc96e38f4a66eb2ce8efd08e03e2b8dacc9a87d35a27a090b216d327e3caf63c",
+        "stdout_sha256": "d012de5211337042bc93eb82644f04f318943918d49bdcd8e8ad0b8054b55b7c",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "inconclusive",
+      "reason": "retained noncompleted/refused synthesis or query"
+    },
+    {
+      "attempt": "attempts/0169",
+      "bindings": {
+        "receipt_sha256": "76377b1197f217973e85cc103e985da8d6c7f9fe0a057ef86bef98585a20785e",
+        "stdout_sha256": "866e8b2362eeb930e9c6475a1015f682ef44ac1baccabc9327be3b756d669451",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scenario_sha256": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76"
+      },
+      "status": "inconclusive",
+      "reason": "retained noncompleted/refused synthesis or query"
+    }
+  ]
+}

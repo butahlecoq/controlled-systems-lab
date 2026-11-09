@@ -1,0 +1,1372 @@
+{
+  "schema": "csl.review05.build-phases/1",
+  "attempts": [
+    {
+      "attempt": "attempts/0000",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 834339,
+        "joint_h_assembly_ticks": 10617,
+        "objective_lift_ticks": 3772,
+        "program_freeze_ticks": 9708,
+        "build_residual_ticks": 810242,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0001",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0002",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 856829,
+        "joint_h_assembly_ticks": 6286,
+        "objective_lift_ticks": 4819,
+        "program_freeze_ticks": 7194,
+        "build_residual_ticks": 838530,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0003",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0004",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 873381,
+        "joint_h_assembly_ticks": 9429,
+        "objective_lift_ticks": 4679,
+        "program_freeze_ticks": 6635,
+        "build_residual_ticks": 852638,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0005",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0006",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 888398,
+        "joint_h_assembly_ticks": 10337,
+        "objective_lift_ticks": 4819,
+        "program_freeze_ticks": 9568,
+        "build_residual_ticks": 863674,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0007",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0008",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 795437,
+        "joint_h_assembly_ticks": 7543,
+        "objective_lift_ticks": 4750,
+        "program_freeze_ticks": 6216,
+        "build_residual_ticks": 776928,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0009",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0010",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 823653,
+        "joint_h_assembly_ticks": 8521,
+        "objective_lift_ticks": 4191,
+        "program_freeze_ticks": 6216,
+        "build_residual_ticks": 804725,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0011",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0012",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0013",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 801723,
+        "joint_h_assembly_ticks": 7194,
+        "objective_lift_ticks": 4679,
+        "program_freeze_ticks": 7054,
+        "build_residual_ticks": 782796,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0014",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0015",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 799558,
+        "joint_h_assembly_ticks": 7962,
+        "objective_lift_ticks": 4750,
+        "program_freeze_ticks": 6705,
+        "build_residual_ticks": 780141,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0016",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0017",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 825608,
+        "joint_h_assembly_ticks": 10477,
+        "objective_lift_ticks": 4749,
+        "program_freeze_ticks": 9499,
+        "build_residual_ticks": 800883,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0018",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0019",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 807380,
+        "joint_h_assembly_ticks": 7264,
+        "objective_lift_ticks": 4261,
+        "program_freeze_ticks": 6216,
+        "build_residual_ticks": 789639,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0020",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0021",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 1121601,
+        "joint_h_assembly_ticks": 9010,
+        "objective_lift_ticks": 5168,
+        "program_freeze_ticks": 7613,
+        "build_residual_ticks": 1099810,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0022",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0023",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 800745,
+        "joint_h_assembly_ticks": 10826,
+        "objective_lift_ticks": 4679,
+        "program_freeze_ticks": 7612,
+        "build_residual_ticks": 777628,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0024",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 799837,
+        "joint_h_assembly_ticks": 8031,
+        "objective_lift_ticks": 4679,
+        "program_freeze_ticks": 6635,
+        "build_residual_ticks": 780492,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0025",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0026",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 793062,
+        "joint_h_assembly_ticks": 9988,
+        "objective_lift_ticks": 4680,
+        "program_freeze_ticks": 7124,
+        "build_residual_ticks": 771270,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0027",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0028",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 866536,
+        "joint_h_assembly_ticks": 8032,
+        "objective_lift_ticks": 4889,
+        "program_freeze_ticks": 6565,
+        "build_residual_ticks": 847050,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0029",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0030",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 799558,
+        "joint_h_assembly_ticks": 7962,
+        "objective_lift_ticks": 4680,
+        "program_freeze_ticks": 6565,
+        "build_residual_ticks": 780351,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0031",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0032",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 795157,
+        "joint_h_assembly_ticks": 9917,
+        "objective_lift_ticks": 4749,
+        "program_freeze_ticks": 7264,
+        "build_residual_ticks": 773227,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0033",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0034",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 802281,
+        "joint_h_assembly_ticks": 7474,
+        "objective_lift_ticks": 4610,
+        "program_freeze_ticks": 6635,
+        "build_residual_ticks": 783562,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0035",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0036",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0037",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 837482,
+        "joint_h_assembly_ticks": 10127,
+        "objective_lift_ticks": 4680,
+        "program_freeze_ticks": 7055,
+        "build_residual_ticks": 815620,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0038",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0039",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 812409,
+        "joint_h_assembly_ticks": 7613,
+        "objective_lift_ticks": 4331,
+        "program_freeze_ticks": 8031,
+        "build_residual_ticks": 792434,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0040",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0041",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 789710,
+        "joint_h_assembly_ticks": 7962,
+        "objective_lift_ticks": 4261,
+        "program_freeze_ticks": 7124,
+        "build_residual_ticks": 770363,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0042",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0043",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 800256,
+        "joint_h_assembly_ticks": 9638,
+        "objective_lift_ticks": 4819,
+        "program_freeze_ticks": 7683,
+        "build_residual_ticks": 778116,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0044",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0045",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 808986,
+        "joint_h_assembly_ticks": 7683,
+        "objective_lift_ticks": 4750,
+        "program_freeze_ticks": 7124,
+        "build_residual_ticks": 789429,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0046",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0047",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 2162046,
+        "joint_h_assembly_ticks": 19346,
+        "objective_lift_ticks": 8590,
+        "program_freeze_ticks": 12013,
+        "build_residual_ticks": 2122097,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0048",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 815272,
+        "joint_h_assembly_ticks": 8591,
+        "objective_lift_ticks": 4819,
+        "program_freeze_ticks": 7263,
+        "build_residual_ticks": 794599,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0049",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0050",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 1306056,
+        "joint_h_assembly_ticks": 9639,
+        "objective_lift_ticks": 8660,
+        "program_freeze_ticks": 16762,
+        "build_residual_ticks": 1270995,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0051",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0052",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 802980,
+        "joint_h_assembly_ticks": 10058,
+        "objective_lift_ticks": 4749,
+        "program_freeze_ticks": 7683,
+        "build_residual_ticks": 780490,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0053",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0054",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 811640,
+        "joint_h_assembly_ticks": 6146,
+        "objective_lift_ticks": 4261,
+        "program_freeze_ticks": 6845,
+        "build_residual_ticks": 794388,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0055",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0056",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 793900,
+        "joint_h_assembly_ticks": 8102,
+        "objective_lift_ticks": 4749,
+        "program_freeze_ticks": 6355,
+        "build_residual_ticks": 774694,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0057",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0058",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 972278,
+        "joint_h_assembly_ticks": 11454,
+        "objective_lift_ticks": 4330,
+        "program_freeze_ticks": 8870,
+        "build_residual_ticks": 947624,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0059",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0060",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0061",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 861438,
+        "joint_h_assembly_ticks": 8730,
+        "objective_lift_ticks": 4679,
+        "program_freeze_ticks": 6566,
+        "build_residual_ticks": 841463,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0062",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0063",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 852358,
+        "joint_h_assembly_ticks": 10546,
+        "objective_lift_ticks": 4679,
+        "program_freeze_ticks": 7124,
+        "build_residual_ticks": 830009,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0064",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0065",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 781608,
+        "joint_h_assembly_ticks": 6705,
+        "objective_lift_ticks": 4749,
+        "program_freeze_ticks": 6984,
+        "build_residual_ticks": 763170,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0066",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0067",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 836923,
+        "joint_h_assembly_ticks": 8661,
+        "objective_lift_ticks": 4680,
+        "program_freeze_ticks": 6146,
+        "build_residual_ticks": 817436,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0068",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0069",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 808847,
+        "joint_h_assembly_ticks": 10826,
+        "objective_lift_ticks": 4889,
+        "program_freeze_ticks": 7264,
+        "build_residual_ticks": 785868,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0070",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0071",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 823164,
+        "joint_h_assembly_ticks": 9080,
+        "objective_lift_ticks": 4749,
+        "program_freeze_ticks": 7054,
+        "build_residual_ticks": 802281,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0072",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 781957,
+        "joint_h_assembly_ticks": 9778,
+        "objective_lift_ticks": 4679,
+        "program_freeze_ticks": 7473,
+        "build_residual_ticks": 760027,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0073",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0074",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 788941,
+        "joint_h_assembly_ticks": 7543,
+        "objective_lift_ticks": 4679,
+        "program_freeze_ticks": 7194,
+        "build_residual_ticks": 769525,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0075",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0076",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 895102,
+        "joint_h_assembly_ticks": 8661,
+        "objective_lift_ticks": 4679,
+        "program_freeze_ticks": 6565,
+        "build_residual_ticks": 875197,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0077",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0078",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 894334,
+        "joint_h_assembly_ticks": 11036,
+        "objective_lift_ticks": 4679,
+        "program_freeze_ticks": 14806,
+        "build_residual_ticks": 863813,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0079",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0080",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 955446,
+        "joint_h_assembly_ticks": 8172,
+        "objective_lift_ticks": 7613,
+        "program_freeze_ticks": 6286,
+        "build_residual_ticks": 933375,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0081",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0082",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "observed",
+        "build_ticks": 904880,
+        "joint_h_assembly_ticks": 9079,
+        "objective_lift_ticks": 4330,
+        "program_freeze_ticks": 7613,
+        "build_residual_ticks": 883858,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0083",
+      "mathematical_check": "verified",
+      "phase_check": {
+        "status": "unobserved",
+        "scope": "collector disabled; no phase timings inferred"
+      }
+    },
+    {
+      "attempt": "attempts/0084",
+      "mathematical_check": "inconclusive",
+      "phase_check": {
+        "status": "observed-build-with-later-stop",
+        "build_ticks": 842301,
+        "joint_h_assembly_ticks": 7194,
+        "objective_lift_ticks": 4331,
+        "program_freeze_ticks": 6705,
+        "build_residual_ticks": 824071,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    },
+    {
+      "attempt": "attempts/0085",
+      "mathematical_check": "inconclusive",
+      "phase_check": {
+        "status": "observed-build-with-later-stop",
+        "build_ticks": 808986,
+        "joint_h_assembly_ticks": 7683,
+        "objective_lift_ticks": 4819,
+        "program_freeze_ticks": 6286,
+        "build_residual_ticks": 790198,
+        "residual_scope": "admission/capacity checks, identity/map/result construction, phase lookup/closure overhead and other gaps; not sparse assembly or isolated snapshot time",
+        "size_scope": "assembly width->nonzeros; objective terminal-state dimension->joint dimension; program freeze nonzeros->program variables"
+      }
+    }
+  ],
+  "groups": [
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 2,
+      "collector": "off",
+      "n": 6,
+      "registered_synthesis_ns": {
+        "median": 1384384.5,
+        "min": 1304170,
+        "max": 3325972
+      },
+      "selector_ns": {
+        "median": 1304833.5,
+        "min": 1247039,
+        "max": 3078031
+      },
+      "process_wall_ns": {
+        "median": 9185621.0,
+        "min": 8856313,
+        "max": 17895126
+      }
+    },
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 2,
+      "collector": "on",
+      "n": 6,
+      "registered_synthesis_ns": {
+        "median": 4112957.5,
+        "min": 3823181,
+        "max": 4411185
+      },
+      "selector_ns": {
+        "median": 3019362.5,
+        "min": 2832813,
+        "max": 4203474
+      },
+      "process_wall_ns": {
+        "median": 16931962.5,
+        "min": 16379613,
+        "max": 18684347
+      },
+      "build_ns": {
+        "median": 819218.0,
+        "min": 807380.0,
+        "max": 955446.0
+      },
+      "joint_h_assembly_ns": {
+        "median": 8102.0,
+        "min": 7264.0,
+        "max": 9080.0
+      },
+      "objective_lift_ns": {
+        "median": 4784.0,
+        "min": 4261.0,
+        "max": 7613.0
+      },
+      "program_freeze_ns": {
+        "median": 6809.5,
+        "min": 6216.0,
+        "max": 8031.0
+      },
+      "build_residual_ns": {
+        "median": 798440.0,
+        "min": 789639.0,
+        "max": 933375.0
+      }
+    },
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 4,
+      "collector": "off",
+      "n": 6,
+      "registered_synthesis_ns": {
+        "median": 3252951.5,
+        "min": 3093536,
+        "max": 3336378
+      },
+      "selector_ns": {
+        "median": 2722602.5,
+        "min": 2616930,
+        "max": 2792863
+      },
+      "process_wall_ns": {
+        "median": 12403616.5,
+        "min": 12026886,
+        "max": 12941823
+      }
+    },
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 4,
+      "collector": "on",
+      "n": 6,
+      "registered_synthesis_ns": {
+        "median": 6069840.5,
+        "min": 5790087,
+        "max": 6604660
+      },
+      "selector_ns": {
+        "median": 6480584.5,
+        "min": 6157528,
+        "max": 8170181
+      },
+      "process_wall_ns": {
+        "median": 23301567.5,
+        "min": 22162646,
+        "max": 25250035
+      },
+      "build_ns": {
+        "median": 883159.0,
+        "min": 789710.0,
+        "max": 1306056.0
+      },
+      "joint_h_assembly_ns": {
+        "median": 8870.0,
+        "min": 7961.999999999999,
+        "max": 9639.0
+      },
+      "objective_lift_ns": {
+        "median": 4679.5,
+        "min": 4261.0,
+        "max": 8660.0
+      },
+      "program_freeze_ns": {
+        "median": 7368.5,
+        "min": 6565.0,
+        "max": 16762.0
+      },
+      "build_residual_ns": {
+        "median": 862660.5,
+        "min": 770363.0,
+        "max": 1270995.0
+      }
+    },
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 8,
+      "collector": "off",
+      "n": 6,
+      "registered_synthesis_ns": {
+        "median": 14405897.0,
+        "min": 14269739,
+        "max": 15211426
+      },
+      "selector_ns": {
+        "median": 6161753.0,
+        "min": 6095369,
+        "max": 6185954
+      },
+      "process_wall_ns": {
+        "median": 27406108.5,
+        "min": 27087313,
+        "max": 28152481
+      }
+    },
+    {
+      "fixture": "FAMILY-QUERY-FLAT",
+      "horizon": 8,
+      "collector": "on",
+      "n": 6,
+      "registered_synthesis_ns": {
+        "median": 16887996.5,
+        "min": 16716952,
+        "max": 17730996
+      },
+      "selector_ns": {
+        "median": 16980432.5,
+        "min": 16703752,
+        "max": 17186433
+      },
+      "process_wall_ns": {
+        "median": 45369436.0,
+        "min": 43821028,
+        "max": 46222422
+      },
+      "build_ns": {
+        "median": 800500.5,
+        "min": 781957.0,
+        "max": 852358.0
+      },
+      "joint_h_assembly_ns": {
+        "median": 9987.5,
+        "min": 9638.0,
+        "max": 10826.0
+      },
+      "objective_lift_ns": {
+        "median": 4714.0,
+        "min": 4679.0,
+        "max": 4819.0
+      },
+      "program_freeze_ns": {
+        "median": 7542.5,
+        "min": 7124.0,
+        "max": 7683.000000000001
+      },
+      "build_residual_ns": {
+        "median": 777872.0,
+        "min": 760027.0,
+        "max": 830009.0
+      }
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 2,
+      "collector": "off",
+      "n": 6,
+      "registered_synthesis_ns": {
+        "median": 1668887.0,
+        "min": 1592270,
+        "max": 2401186
+      },
+      "selector_ns": {
+        "median": 373133.5,
+        "min": 344463,
+        "max": 430091
+      },
+      "process_wall_ns": {
+        "median": 8369930.5,
+        "min": 8122408,
+        "max": 13899992
+      }
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 2,
+      "collector": "on",
+      "n": 6,
+      "registered_synthesis_ns": {
+        "median": 4150218.0,
+        "min": 4111630,
+        "max": 4240490
+      },
+      "selector_ns": {
+        "median": 1158688.0,
+        "min": 1116572,
+        "max": 1190536
+      },
+      "process_wall_ns": {
+        "median": 14796736.0,
+        "min": 14723995,
+        "max": 15012863
+      },
+      "build_ns": {
+        "median": 802002.0,
+        "min": 781608.0,
+        "max": 811640.0
+      },
+      "joint_h_assembly_ns": {
+        "median": 7334.0,
+        "min": 6146.0,
+        "max": 7683.000000000001
+      },
+      "objective_lift_ns": {
+        "median": 4679.0,
+        "min": 4261.0,
+        "max": 4750.0
+      },
+      "program_freeze_ns": {
+        "median": 7019.0,
+        "min": 6635.0,
+        "max": 7194.0
+      },
+      "build_residual_ns": {
+        "median": 783179.0,
+        "min": 763170.0,
+        "max": 794388.0
+      }
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 4,
+      "collector": "off",
+      "n": 6,
+      "registered_synthesis_ns": {
+        "median": 3737903.0,
+        "min": 3671971,
+        "max": 9158732
+      },
+      "selector_ns": {
+        "median": 482856.5,
+        "min": 451182,
+        "max": 1076623
+      },
+      "process_wall_ns": {
+        "median": 10736056.0,
+        "min": 10482806,
+        "max": 21237860
+      }
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 4,
+      "collector": "on",
+      "n": 6,
+      "registered_synthesis_ns": {
+        "median": 6265016.0,
+        "min": 6133013,
+        "max": 11820641
+      },
+      "selector_ns": {
+        "median": 1388399.5,
+        "min": 1335949,
+        "max": 1467950
+      },
+      "process_wall_ns": {
+        "median": 18210848.5,
+        "min": 17376476,
+        "max": 27414176
+      },
+      "build_ns": {
+        "median": 818380.0,
+        "min": 793900.0,
+        "max": 2162046.0
+      },
+      "joint_h_assembly_ns": {
+        "median": 8381.5,
+        "min": 7961.999999999999,
+        "max": 19346.0
+      },
+      "objective_lift_ns": {
+        "median": 4714.5,
+        "min": 4679.0,
+        "max": 8590.0
+      },
+      "program_freeze_ns": {
+        "median": 6600.0,
+        "min": 6146.0,
+        "max": 12013.0
+      },
+      "build_residual_ns": {
+        "median": 798964.0,
+        "min": 774694.0,
+        "max": 2122097.0
+      }
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 8,
+      "collector": "off",
+      "n": 6,
+      "registered_synthesis_ns": {
+        "median": 16946768.5,
+        "min": 16284208,
+        "max": 23438459
+      },
+      "selector_ns": {
+        "median": 694863.5,
+        "min": 614615,
+        "max": 727410
+      },
+      "process_wall_ns": {
+        "median": 24286032.5,
+        "min": 23738921,
+        "max": 34284587
+      }
+    },
+    {
+      "fixture": "HORIZON-01",
+      "horizon": 8,
+      "collector": "on",
+      "n": 6,
+      "registered_synthesis_ns": {
+        "median": 18267945.0,
+        "min": 18124001,
+        "max": 20568348
+      },
+      "selector_ns": {
+        "median": 1722456.5,
+        "min": 1704438,
+        "max": 1991839
+      },
+      "process_wall_ns": {
+        "median": 32125369.0,
+        "min": 30555973,
+        "max": 36365195
+      },
+      "build_ns": {
+        "median": 831545.0,
+        "min": 793062.0,
+        "max": 972278.0
+      },
+      "joint_h_assembly_ns": {
+        "median": 10651.5,
+        "min": 9988.0,
+        "max": 11454.0
+      },
+      "objective_lift_ns": {
+        "median": 4680.0,
+        "min": 4330.0,
+        "max": 4889.0
+      },
+      "program_freeze_ns": {
+        "median": 8067.0,
+        "min": 7055.0,
+        "max": 14806.0
+      },
+      "build_residual_ns": {
+        "median": 808251.5,
+        "min": 771270.0,
+        "max": 947624.0
+      }
+    }
+  ],
+  "mathematical_statuses": {
+    "verified": 84,
+    "inconclusive": 2
+  },
+  "phase_statuses": {
+    "observed": 42,
+    "unobserved": 42,
+    "observed-build-with-later-stop": 2
+  },
+  "claim": "initial descriptive bounded observations only; no ranking, isolated verifier time or universal scaling claim",
+  "residual_scope": "admission/capacity checks, identity/map/result construction, observer lookup/closure overhead and other unmeasured build gaps"
+}
