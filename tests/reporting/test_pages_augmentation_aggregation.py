@@ -33,7 +33,7 @@ class PagesAugmentationAggregation(unittest.TestCase):
             (site / "existing-route").mkdir()
             (site / "existing-route/index.html").write_text("existing", encoding="utf-8")
             (site / "examples").mkdir()
-            (site / "examples/index.html").write_text("examples", encoding="utf-8")
+            (site / "examples/index.html").write_text("<html><body>examples</body></html>", encoding="utf-8")
 
             routes = augment_pages_bundle.stage_all(site)
 
@@ -48,9 +48,11 @@ class PagesAugmentationAggregation(unittest.TestCase):
             self.assertIn(f'href="{routes["mpc06_complete"]}/index.html"', landing)
             self.assertIn(f'href="{routes["mpc06_complete"]}.zip"', landing)
             self.assertEqual((site / "existing-route/index.html").read_text(), "existing")
-            self.assertEqual((site / "examples/index.html").read_text(), "examples")
+            self.assertIn("examples", (site / "examples/index.html").read_text())
+            self.assertIn(routes["review05"]+"/index.html#scalar-2d", (site/"examples/index.html").read_text())
+            self.assertIn(routes["review05"]+"/index.html", landing)
             self.assertTrue((site / "docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1/strategy-ab-ts03-summary.html").is_file())
-            for report_id in (routes["b04_c"], routes["mpc06"], routes["mpc06_complete"]):
+            for report_id in (routes["b04_c"], routes["mpc06"], routes["mpc06_complete"], routes["review05"]):
                 with zipfile.ZipFile(site / f"{report_id}.zip") as archive:
                     self.assertIn(f"{report_id}/publication-manifest.json", archive.namelist())
 
