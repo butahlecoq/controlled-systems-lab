@@ -69,6 +69,10 @@ def authenticate_sources(root,environment,repository):
 
 def checked_records(root,repository=capture.ROOT):
     hashes=inventory(root);environment=json.loads((root/'environment.json').read_text())
+    if environment.get('schema')=='csl.mpc07.joint-filter.capture/1':
+        import joint_capture
+        return joint_capture.checked_records(root,repository,hashes)
+    if environment.get('schema')!='csl.mpc07.capture/1':raise ValueError('unsupported MPC07 capture schema')
     if environment['bridge_sha256']!=capture.BRIDGE_SHA or environment.get('source_status')!='':
         raise ValueError('capture source/native identity differs')
     authenticate_sources(root,environment,repository)
@@ -117,8 +121,8 @@ def metrics(records):
         key=f"T{r['horizon']}-sigma{r['sigma']}-{r['policy_class']}"
         group=groups.setdefault(key,dict(attempts=0,verified=0,outcomes={},variables=r['variables'],rows=r['rows'],nonzeros=r['nonzeros'],samples={}))
         group['attempts']+=1;status=row['current_check']['status'];group['outcomes'][status]=group['outcomes'].get(status,0)+1
-        if status!='verified-rational-reconstruction':continue
-        group['verified']+=1;group['exact_virtual_worst_squared']=row['current_check']['worst_terminal_squared']
+        if status not in ('verified-rational-reconstruction','verified-joint-rational-policy'):continue
+        group['verified']+=1;group['exact_virtual_worst_squared']=row['current_check'].get('worst_terminal_squared',row['current_check'].get('virtual_terminal_squared'))
         values=dict(python_prepare_ns=r['python_prepare_ns'],whole_process_ns=r['whole_process_ns'],
             native_setup_ns=row['native_setup_ns'],native_port_run_ns=row['native_port_run_ns'])
         if type(values['native_setup_ns']) is not int or type(values['native_port_run_ns']) is not int or values['native_setup_ns']+values['native_port_run_ns']>values['whole_process_ns']:
@@ -198,6 +202,59 @@ def render(root,output):
     return groups
 
 
+def render_joint(root,output):
+    if output.exists():raise ValueError('joint report must be new')
+    env,records,policies,hashes=checked_records(root);groups=metrics(records)
+    if 'joint' not in policies or 'fixed-filter' not in policies:raise ValueError('no exact joint/fixed policies for figure')
+    output.mkdir(parents=True);shutil.copytree(root,output/'RAW')
+    import matplotlib
+    if matplotlib.__version__!='3.11.2':raise ValueError('Matplotlib3.11.2 required')
+    matplotlib.use('Agg');import matplotlib.pyplot as plt
+    from matplotlib.patches import Rectangle
+    sys.path.insert(0,str(capture.ROOT/'scripts/reports'));from figure_style import configure_numeric_axis,STYLE_ID
+    joint=policies['joint'];fixed=policies['fixed-filter']
+    s=[[Q(v) for v in row] for row in joint['filter']]
+    bounds_joint=[Q(v) for v in joint['state_supports'][-1]];bounds_fixed=[Q(v) for v in fixed['state_supports'][-1]]
+    effective_M=Q(joint['normalized_policy'][1][1])/s[0][1]
+    physical=policy.physical_vertices_two_step([Q(0),Q(0)],[[Q(0),Q(0)],[effective_M,Q(0)]])
+    if any(abs(row['terminal'][k])>bounds_joint[k] for row in physical for k in range(2)):raise ValueError('physical plotted vertex escapes joint support box')
+    style={'font.family':'DejaVu Sans','svg.hashsalt':'mpc07-joint-filter-v1','figure.facecolor':'#1e1e2e','axes.facecolor':'#1e1e2e',
+           'text.color':'#cdd6f4','axes.labelcolor':'#cdd6f4','axes.edgecolor':'#cdd6f4','xtick.color':'#cdd6f4','ytick.color':'#cdd6f4',
+           'legend.labelcolor':'#cdd6f4','legend.facecolor':'#1e1e2e'}
+    with plt.rc_context(style):
+        fig,axes=plt.subplots(1,2,figsize=(12,5),layout='constrained')
+        q=[-1.,0.,1.];upper=[65/64,1.,65/64];lower=[-65/64,-1.,-65/64]
+        axes[0].add_patch(Rectangle((-1,-1.25),2,2.5,facecolor='#89b4fa',alpha=.25,label='previous fixed filter5/4'))
+        height=float(s[1][1]);axes[0].add_patch(Rectangle((-1,-height),2,2*height,fill=False,edgecolor='#f9e2af',linewidth=2,label='optimized s1,q='+str(s[1][1])))
+        axes[0].fill_between(q,lower,upper,color='#a6e3a1',alpha=.55,label='physical eta1=delta*q1+w1')
+        axes[0].set(xlabel='observed stage1 velocity q1',ylabel='lumped disturbance eta1',title='Joint controller-dependent enclosure, T2',xlim=(-1.1,1.1),ylim=(-1.35,1.35))
+        for bounds,color,label in [(bounds_fixed,'#89b4fa','fixed-filter support box'),(bounds_joint,'#f9e2af','joint-filter support box')]:
+            px,qx=map(float,bounds);axes[1].add_patch(Rectangle((-px,-qx),2*px,2*qx,fill=False,edgecolor=color,linewidth=2,label=label))
+        axes[1].scatter([float(row['terminal'][0]) for row in physical],[float(row['terminal'][1]) for row in physical],color='#a6e3a1',label='physical T2 uncertainty vertices')
+        axes[1].set(xlabel='terminal position p2',ylabel='terminal velocity q2',title='Actual saved normalized-feedback policies',xlim=(-.9,.9),ylim=(-1.65,1.65));axes[1].set_aspect('equal',adjustable='box')
+        for ax in axes:configure_numeric_axis(ax);ax.legend(fontsize=7)
+        fig.suptitle('Two-state uncertain-A model; Chen v3 diagonal-filter restriction, not the full-filter author implementation',fontsize=10)
+        for extension in ('svg','png'):
+            path=output/('joint-filter-policy.'+extension);fig.savefig(path,dpi=160,metadata={'Date':None} if extension=='svg' else None)
+            if extension=='svg':path.write_text('\n'.join(line.rstrip() for line in path.read_text().splitlines())+'\n')
+        plt.close(fig)
+    capture.write(output/'current-rechecks.json',records);capture.write(output/'summary.json',dict(environment=env,groups=groups,
+        capture_manifest_sha256=digest(root/'SHA256SUMS'),performance='inconclusive; descriptive source scopes and no native limiter/tuning claim'))
+    capture.write(output/'figure-data.json',dict(joint_policy=joint,fixed_policy=fixed,position_filter_floor='1/1024',
+        physical_T2_optimum='4225/4096',physical_vertices=physical,axis_policy=STYLE_ID,scope='support boxes, not asserted full reachable/winning sets; physical points are extreme samples only'))
+    for name in ('JOINT-FILTER.md','README.md'):(output/name).write_bytes((root/'source'/name).read_bytes())
+    table=[]
+    for key,g in groups.items():table.append(f'<tr><td>{key}</td><td>{g["verified"]}/{g["attempts"]}</td><td>{g.get("exact_virtual_worst_squared","unavailable")}</td><td>{g["variables"]}/{g["rows"]}/{g["nonzeros"]}</td><td>{g["times_ns"].get("native_port_run_ns",{}).get("median","unavailable")}</td></tr>')
+    page='<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MPC07 joint-filter specialization</title><style>body{font:16px/1.6 system-ui;background:#1e1e2e;color:#cdd6f4;max-width:1200px;margin:2rem auto;padding:1rem}a{color:#89b4fa}img{max-width:100%;height:auto}table{display:block;overflow:auto}td,th{padding:.4rem;text-align:left}</style><h1>Joint diagonal-filter SLS specialization</h1><p>This independently authored profile implements the jointly affine scaled-response identity and controller-dependent uncertainty-overapproximation constraints from Chen v3(24),(26),(36), restricted to block-diagonal positive filters and one uncertain A entry. No author code, full-filter/uncertain-B capability, recursive-feasibility or general causal minimax claim. Physical position disturbance is zero; the virtual position-filter floor1/1024 makes the two-state filter invertible and conservatively enlarges its response set.</p><p>The native LP minimizes a virtual worst-terminal-absolute upper bound, squared for the original toy cost. Exact rational reconstruction checks source, causality, every filter/support row and the physical cost lower bound. For this particular loose-constraint toy, the returned joint upper bound attains the independent physical lower bound (65/64)^(2(T−1)); that equality does not generalize to SLS bounds. Prescribed-gain and symmetry-optimal zero fixed-plan baselines use the same physical controls/uncertainty. The previous fixed5/4 filter is a separate conservative comparison.</p><img src="joint-filter-policy.svg" alt="Two-state optimized disturbance filter and terminal support-box comparison"><p><a href="JOINT-FILTER.md">Complete equations, proof and information order</a> · <a href="figure-data.json">Exact saved figure inputs</a> · <a href="summary.json">Source, counts and all timing ranges</a> · <a href="current-rechecks.json">Independent checks</a> · <a href="RAW/">Complete raw records/source/CPU/RSS</a>.</p><table><tr><th>Profile</th><th>Verified/attempts</th><th>Exact virtual qT² upper bound</th><th>LP vars/rows/nnz</th><th>Median native port-run ns</th></tr>'+''.join(table)+'</table><p>Performance verdict: inconclusive. One warmup plus five alternating repeats are descriptive; native setup and ConvexPort run include documented parse/registry/adapter checks and are not isolated LP time or MPC-update latency. A separate Python diagnostic does not establish the native limiter. Failed/resource/reconstruction outcomes stay in denominators. No core API, required dependency, native rebuild or library release. Existing HiGHS/Matplotlib qualifications remain. Independent review and root-owned checked publication remain required; this unit does not close603.</p></html>'
+    (output/'index.html').write_text(page)
+    capture.write(output/'figure-export.json',dict(input_manifest_sha256=digest(root/'SHA256SUMS'),figure_data_sha256=digest(output/'figure-data.json'),
+        images={name:digest(output/name) for name in ('joint-filter-policy.svg','joint-filter-policy.png')}))
+    (output/'SHA256SUMS').write_text(''.join(f'{digest(p)}  {p.relative_to(output).as_posix()}\n' for p in sorted(output.rglob('*')) if p.is_file()))
+
+
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--capture',required=True,type=Path);p.add_argument('--output',required=True,type=Path)
-    a=p.parse_args();render(a.capture.resolve(),a.output.resolve())
+    a=p.parse_args();
+    environment=json.loads((a.capture/'environment.json').read_text())
+    if environment.get('schema')=='csl.mpc07.joint-filter.capture/1':render_joint(a.capture.resolve(),a.output.resolve())
+    else:render(a.capture.resolve(),a.output.resolve())

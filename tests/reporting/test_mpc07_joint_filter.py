@@ -28,6 +28,17 @@ class JointFilterTests(unittest.TestCase):
             else:h[0][3]=1
             with self.assertRaises(ValueError):J.check_policy(2,'joint',s,h)
 
+    def test_saved_native_roundoff_reconstructs_exact_response_and_rejects_real_change(self):
+        import json,copy
+        result=json.loads((ROOT/'tests/reporting/fixtures/mpc07-joint-gain-t08.json').read_text())
+        payload=J.program(8,'fixed-gain')
+        checked=J.check_result(payload,result)
+        self.assertEqual(checked['upper_minus_oracle_squared'],0)
+        changed=copy.deepcopy(result)
+        index=payload['coordinates']['state_response'][-1][0][2]
+        changed['primal'][index]+=.001
+        with self.assertRaises(ValueError):J.check_result(payload,changed)
+
     def test_joint_filter_has_design_variables_and_fixed_intersection(self):
         p=J.program(2,'joint');f=J.program(2,'fixed-filter')
         self.assertEqual(len(p['coordinates']['filter']),2)

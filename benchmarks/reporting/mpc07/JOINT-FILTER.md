@@ -52,3 +52,24 @@ certificate, not a general consequence of minimizing an SLS upper bound.
 For M0, the symmetric optimum is sum(k=0..T-1)(1+epsilon)^k; prescribed gain
 -alpha*q has support sum(k=0..T-1)(1-alpha+epsilon)^k, alpha=1/16.
 All values are squared only after the nonnegative LP terminal-absolute optimum.
+
+
+Native response coordinates are numerical auxiliaries. Reconstruct filter and
+control coefficients as new rationals, then derive all response coordinates
+from the exact affine recurrence. The maximum change from native response
+coordinates must be <=1e-10 and is recorded separately; raw arrays are retained.
+This does not assert exact equality of binary64 state variables. The candidate
+filter/control and all robust supports are still checked exactly, and any
+nonzero upper/lower gap remains explicit. An actual T8 prescribed-gain pilot
+had a3.5e-18 position-response artifact; its original rejected diagnostic is
+retained and the saved-native regression distinguishes repair from a real
+coordinate mutation. This changes checking/reconstruction, not the native solve.
+
+
+The fixed-plan comparison fixes H=0 and has no affine offsets in this homogeneous
+specialization. This zero-input plan is symmetry-optimal among fixed actual
+plans for the stated centered boxes: for each fixed uncertainty history, the
+terminal velocity is affine in the plan, so its squared worst cost is convex;
+negating plan and physical disturbances preserves cost and feasibility. Thus
+the feasible average zero plan is optimal. The gain comparison is the declared
+pure prescribed full-state gain, not an unmeasured optimized nominal trajectory.

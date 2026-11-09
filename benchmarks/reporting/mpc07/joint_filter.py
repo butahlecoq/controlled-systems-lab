@@ -116,9 +116,15 @@ def check_result(p,r):
     s=[[rational[i] for i in row] for row in c['filter']]
     h=[[rational[i] if i is not None else Q(0) for i in row] for row in c['control']]
     checked=check_policy(n,kind,s,h)
+    maximum_response_adjustment=0.
     for t,indices in enumerate(c['state_response'],1):
-        if [[rational[i] if i is not None else Q(0) for i in row] for row in indices]!=checked['state_responses'][t]:
-            raise ValueError('joint response extraction differs')
+        for component,row in enumerate(indices):
+            for column,index in enumerate(row):
+                original=primal[index] if index is not None else 0.
+                exact=checked['state_responses'][t][component][column]
+                difference=abs(float(exact)-original);maximum_response_adjustment=max(maximum_response_adjustment,difference)
+                if difference>1e-10:raise ValueError('joint response reconstruction too far from native witness')
     if checked['upper_minus_oracle_squared']<0:raise ValueError('joint candidate contradicts exact oracle')
     if abs(primal[c['bound']]**2-float(oracle(n,kind)))>1e-6:raise ValueError('joint native optimum differs from literal oracle')
-    return dict(status='verified-joint-rational-policy',rationalization='new candidate limit_denominator(2**48), exact response/filter/support replay',**checked)
+    return dict(status='verified-joint-rational-policy',maximum_native_response_adjustment=maximum_response_adjustment,
+                response_reconstruction='exact recurrence from reconstructed filter/control; raw response arrays unchanged',rationalization='new candidate limit_denominator(2**48), exact response/filter/support replay',**checked)
