@@ -17,6 +17,7 @@ def check(bundle):
         path=(bundle/name).resolve()
         if not path.is_relative_to(bundle.resolve()) or hashlib.sha256(path.read_bytes()).hexdigest()!=digest:
             raise ValueError('saved file identity mismatch: '+name)
+    manifest=json.loads((bundle/'manifest.json').read_text());comparisons=[]
     reports=[]
     for case in ['syn-nl-lv-01','syn-nl-fuel-01']:
         folder=bundle/case;source=folder/'source'
@@ -27,7 +28,7 @@ def check(bundle):
         witness=check_solution(s,coeff,qp,native)
         if witness['status']!='verified-numerical-witness' or witness!=load(folder/'affine-witness.json'):
             raise ValueError('affine witness differs from source verification')
-        statuses={};objectives={}
+        statuses={};objectives={};records={}
         for mode in ['cvodes','cvodes-tight','rk4','rk4-tight']:
             attempt=folder/mode;request=load(attempt/'request.json');validate_request(request)
             expected=make_request(s,witness['physical_controls'],witness['witness_sha256'],sensitivity=mode.endswith('-tight'))
@@ -54,11 +55,28 @@ def check(bundle):
             if not complete:metrics['objective']=None
             for key,value in metrics.items():
                 if value!=record[key]:raise ValueError('independent cost/violation reconstruction mismatch: '+key)
-            statuses[mode]=record['status'];objectives[mode]=record['objective']
+            statuses[mode]=record['status'];objectives[mode]=record['objective'];records[mode]=record
         comparison=load(folder/'comparison.json')
         if comparison['statuses']!=statuses or comparison['objectives']!=objectives or comparison['affine_objective']!=witness['objective']:
             raise ValueError('comparison differs from checked records')
+        for key,value in [('case_id',s['case_id']),('witness_sha256',witness['witness_sha256']),
+                          ('controls_sha256',canonical_hash(witness['physical_controls']))]:
+            if comparison[key]!=value:raise ValueError('comparison identity mismatch: '+key)
+        difference_keys=['max_physical_cvodes_sensitivity','max_physical_cvodes_rk4_difference',
+                         'max_physical_rk4_sensitivity','max_physical_affine_prediction_nonlinear_difference']
+        if all(status=='complete' for status in statuses.values()):
+            cv=np.asarray(records['cvodes']['physical_states']);rk=np.asarray(records['rk4']['physical_states'])
+            cv_tight=np.asarray(records['cvodes-tight']['physical_states']);rk_tight=np.asarray(records['rk4-tight']['physical_states'])
+            computed=[np.max(np.abs(cv_tight-cv),axis=0).tolist(),np.max(np.abs(cv-rk),axis=0).tolist(),
+                      np.max(np.abs(rk_tight-rk),axis=0).tolist(),
+                      np.max(np.abs(cv[::s['independent_replay']['report_subintervals_per_hold']]-witness['physical_states']),axis=0).tolist()]
+            for key,value in zip(difference_keys,computed):
+                if comparison[key]!=value:raise ValueError('comparison difference reconstruction mismatch: '+key)
+        elif any(key in comparison for key in difference_keys):
+            raise ValueError('incomplete comparison declares complete-trace differences')
+        comparisons.append(comparison)
         reports.append({'case_id':s['case_id'],'statuses':statuses,'scope':'bound identities, source rebuild, sampled trace shape/cost/constraints; integration correctness requires replay'})
+    if manifest['cases']!=comparisons:raise ValueError('manifest comparisons differ from checked case records')
     return reports
 
 if __name__=='__main__':

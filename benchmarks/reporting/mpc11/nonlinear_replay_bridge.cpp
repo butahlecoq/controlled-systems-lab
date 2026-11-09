@@ -15,6 +15,27 @@ int main(int argc,char** argv) {
         const auto case_id=s.at("case_id").get<std::string>();
         if(case_id!="SYN-NL-LV-01" && case_id!="SYN-NL-FUEL-01")throw std::invalid_argument("unsupported synthetic case");
         if(request.at("hold")!="constant-on-original-interval")throw std::invalid_argument("unsupported hold");
+        const std::size_t state_width=case_id=="SYN-NL-LV-01" ? 2 : 4;
+        const std::size_t control_width=case_id=="SYN-NL-LV-01" ? 1 : 2;
+        if(!s.at("states").is_array() || s.at("states").size()!=state_width ||
+            !s.at("controls").is_array() || s.at("controls").size()!=control_width)
+            throw std::invalid_argument("case-fixed state/control declarations have wrong dimensions");
+        const auto finite_vector=[](const Json& values,std::size_t width) {
+            if(!values.is_array() || values.size()!=width)return false;
+            for(const auto& value:values)if(!value.is_number() || !std::isfinite(value.get<double>()))return false;
+            return true;
+        };
+        if(!finite_vector(request.at("initial_scaled"),state_width))throw std::invalid_argument("initial state width or finiteness");
+        for(const auto& state:s.at("states")) {
+            const auto& value=state.at("scale");
+            if(!value.is_number() || !std::isfinite(value.get<double>()) || value.get<double>()<=0)
+                throw std::invalid_argument("state scales must be finite and positive");
+        }
+        for(const char* key:{"original_controls","controls"}) {
+            if(!request.at(key).is_array())throw std::invalid_argument("control history must be an array");
+            for(const auto& row:request.at(key))if(!finite_vector(row,control_width))
+                throw std::invalid_argument("case-fixed control row width or finiteness");
+        }
         const auto count=s.at("time").at("intervals").get<std::size_t>();
         const auto sub=request.at("report_subintervals_per_hold").get<std::size_t>();
         if(sub!=s.at("independent_replay").at("report_subintervals_per_hold").get<std::size_t>())throw std::invalid_argument("report grid mismatch");

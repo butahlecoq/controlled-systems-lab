@@ -54,6 +54,22 @@ class CSLReplayTests(unittest.TestCase):
             p=subprocess.run([bridge,str(path)],capture_output=True,text=True,check=True)
         return json.loads(p.stdout)
 
+    def test_cli_rejects_case_dimensions_and_scales(self):
+        import copy
+        import subprocess
+        for case,width in [('lv',1),('fuel',2)]:
+            request=make_request(self.scenario(case),[[0.]*width]*(30 if case=='lv' else 40),'fixture')
+            variants=[]
+            bad=copy.deepcopy(request);bad['scenario']['states']=bad['scenario']['states'][:1];bad['initial_scaled']=bad['initial_scaled'][:1];variants.append(bad)
+            bad=copy.deepcopy(request);bad['initial_scaled']=bad['initial_scaled'][:-1];variants.append(bad)
+            bad=copy.deepcopy(request);bad['scenario']['controls']=[];variants.append(bad)
+            bad=copy.deepcopy(request);bad['original_controls']=[[] for u in bad['original_controls']];bad['controls']=[[] for u in bad['controls']];variants.append(bad)
+            bad=copy.deepcopy(request);bad['scenario']['states'][0]['scale']=0;variants.append(bad)
+            bad=copy.deepcopy(request);bad['scenario']['states'][0]['scale']=1e309;variants.append(bad)
+            for index,bad in enumerate(variants):
+                with self.subTest(case=case,mutation=index):
+                    with self.assertRaises(subprocess.CalledProcessError):self.bridge(bad)
+
     def test_cpp_analytic_and_hold_association(self):
         s=self.scenario('lv');s['states'][0]['initial']=100;s['states'][1]['initial']=80
         request=make_request(s,[[0.]]*30,'fixture');r=self.bridge(request)
@@ -93,5 +109,23 @@ class SavedNonlinearTests(unittest.TestCase):
             hashes[str(request_path.relative_to(bundle))]=hashlib.sha256(request_path.read_bytes()).hexdigest()
             hashes_path.write_text(json.dumps(hashes))
             with self.assertRaises(ValueError):check(bundle)
+
+class SavedComparisonTests(unittest.TestCase):
+    def test_rejects_rebound_comparison_metrics_and_identity(self):
+        import os, shutil, tempfile, hashlib
+        from check_nonlinear_saved import check
+        source=os.environ.get('CSL_MPC11_NONLINEAR_BUNDLE')
+        if not source:self.skipTest('CSL_MPC11_NONLINEAR_BUNDLE required')
+        for key,value in [('max_physical_cvodes_rk4_difference',[12345,67890]),
+                          ('max_physical_cvodes_sensitivity',[12,34]),
+                          ('max_physical_rk4_sensitivity',[12,34]),
+                          ('max_physical_affine_prediction_nonlinear_difference',[12,34]),
+                          ('case_id','WRONG'),('witness_sha256','wrong'),('controls_sha256','wrong')]:
+            with self.subTest(key=key),tempfile.TemporaryDirectory() as tmp:
+                bundle=Path(tmp)/'bundle';shutil.copytree(source,bundle)
+                path=bundle/'syn-nl-lv-01/comparison.json';record=json.loads(path.read_text());record[key]=value
+                path.write_text(json.dumps(record));hp=bundle/'file-hashes.json';hashes=json.loads(hp.read_text())
+                hashes[str(path.relative_to(bundle))]=hashlib.sha256(path.read_bytes()).hexdigest();hp.write_text(json.dumps(hashes))
+                with self.assertRaises(ValueError):check(bundle)
 
 if __name__=='__main__':unittest.main()
