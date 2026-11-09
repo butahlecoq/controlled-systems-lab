@@ -54,6 +54,27 @@ class TimingTests(unittest.TestCase):
                 (snapshot/'SHA256SUMS').write_text(hashlib.sha256(copied.read_bytes()).hexdigest()+'  nmpc.py\n')
                 with self.assertRaisesRegex(ValueError,'copied source snapshot binding'):checked_sources(root,snapshot)
 
+    def test_committed_capture_snapshot_allows_separately_recorded_reader_changes(self):
+        import inspect
+        import do_mpc
+        from unittest import mock
+        from check_timing import checked_sources
+        from run_timing import sha
+        source=ROOT/'benchmarks/reporting/mpc11/nmpc.py'
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary);snapshot=root/'sources';snapshot.mkdir()
+            (snapshot/'nmpc.py').write_bytes(source.read_bytes())
+            environment={'source_revision':'a'*40,'identity':{'source_sha256':{'nmpc.py':sha(source)},'do_mpc_controller_source_sha256':sha(Path(inspect.getfile(do_mpc.controller.MPC)))}}
+            (root/'environment.json').write_text(json.dumps(environment))
+            def changed_reader(path):
+                return '0'*64 if path==source else sha(path)
+            with mock.patch('check_timing.sha',side_effect=changed_reader),mock.patch('check_timing.subprocess.check_output',return_value=source.read_bytes()):
+                result=checked_sources(root,snapshot)
+                self.assertEqual(result['current_reader_sources']['nmpc.py'],'0'*64)
+                self.assertNotEqual(result['capture_source_sha256']['nmpc.py'],'0'*64)
+                with self.assertRaisesRegex(ValueError,'supply the committed capture source snapshot'):
+                    checked_sources(root)
+
     def test_git_option_revision_rejects_without_git_invocation(self):
         from unittest import mock
         from check_timing import checked_sources

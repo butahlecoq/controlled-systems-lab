@@ -39,7 +39,8 @@ def checked_sources(root,snapshot=None):
         if relative.is_absolute() or relative.as_posix()!=name or any(part in ('.','..') for part in relative.parts):
             raise ValueError('unsafe source snapshot name')
         if not (source/name).resolve().is_relative_to(source.resolve()):raise ValueError('source snapshot escapes source root')
-        if name!='check_timing.py' and sha(source/name)!=expected:raise ValueError('consumed source binding mismatch: '+name)
+        if snapshot is None and name!='check_timing.py' and sha(source/name)!=expected:
+            raise ValueError('source changed; supply the committed capture source snapshot: '+name)
         if snapshot is not None:
             path=(snapshot/name).resolve()
             if not path.is_relative_to(snapshot.resolve()) or sha(path)!=expected:raise ValueError('copied source snapshot binding mismatch: '+name)
@@ -48,7 +49,9 @@ def checked_sources(root,snapshot=None):
     if sha(Path(inspect.getfile(do_mpc.controller.MPC)))!=environment['identity']['do_mpc_controller_source_sha256']:raise ValueError('do-mpc source binding mismatch')
     return {'capture_source_sha256':hashes,'review_tool_sha256':sha(Path(__file__)),
             'review_tool_scope':'current independently versioned saved-data checker; capture check_timing.py snapshot remains bound to original commit',
-            'copied_snapshots_checked':snapshot is not None}
+            'copied_snapshots_checked':snapshot is not None,
+            'current_reader_sources':{p.name:sha(p) for p in sorted(source.glob('*.py'))},
+            'source_scope':'Captured source snapshots are checked against captured digests and Git; current numerical recheck helpers are separately fingerprinted, not relabelled as capture source.'}
 
 
 def complete_checks(kind,reports):
