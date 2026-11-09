@@ -3,16 +3,12 @@ from fractions import Fraction as F
 import hashlib
 import math
 import json
-from pathlib import Path,PurePosixPath
-import subprocess
+from pathlib import Path
 import re
 import tempfile
 from benchmarks.reporting.mpc10.evidence import load,sha,checked_capture,inventory
 from benchmarks.reporting.mpc10.fixtures import fixtures
 from benchmarks.reporting.mpc10.oracle import solve as exact
-
-
-def key(path):return json.dumps(path,sort_keys=True,separators=(',',':'))
 
 
 def normalize(row,rhs,equality):
