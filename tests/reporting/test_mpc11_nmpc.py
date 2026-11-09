@@ -39,6 +39,30 @@ class NMPCTests(unittest.TestCase):
         np.testing.assert_allclose(held,np.ones_like(held),atol=1e-12)
         self.assertAlmostEqual(meta2['original_interval_count'],3)
 
+    def test_fuel_two_element_reference_initializes_every_collocation_node(self):
+        import casadi as ca
+        s=json.loads((ROOT/'benchmarks/reporting/mpc11/scenarios/mesh-ni2/syn-nl-fuel-01.json').read_text())
+        s['time'].update(intervals=3,grid=[0.,.5,1.,1.5],final=1.5,dt=.5)
+        degree=s['nmpc']['collocation']['degree'];elements=2
+        mpc,_=build_controller(s,1)
+        scales=np.array([v['scale'] for v in s['states']])
+        observation=np.array([.95,.9,.8,.7])
+        initialize_guess(mpc,s,1,observation,None)
+        nodes=[0.]+ca.collocation_points(degree,'radau')
+        columns=(degree+1)*elements+1
+        self.assertEqual(len(mpc.opt_x_num['_x',1,0]),columns)
+        for k in range(1,3):
+            for element in range(elements):
+                for local,tau in enumerate(nodes):
+                    t=s['time']['grid'][k]+s['time']['dt']/elements*(element+tau)
+                    expected=np.array([100-2*t,30-.6*t,2.,.6])/scales
+                    value=np.asarray(mpc.opt_x_num['_x',k,0,element*(degree+1)+local,'z']).reshape(-1)
+                    np.testing.assert_allclose(value,expected,rtol=0,atol=1e-14)
+            t=s['time']['grid'][k+1]
+            expected=np.array([100-2*t,30-.6*t,2.,.6])/scales
+            np.testing.assert_allclose(np.asarray(mpc.opt_x_num['_x',k,0,-1,'z']).reshape(-1),expected,rtol=0,atol=1e-14)
+        np.testing.assert_array_equal(np.asarray(mpc.opt_x_num['_x',0,0,-1,'z']).reshape(-1),observation)
+
     def test_failed_local_solve_is_rejected(self):
         s=self.scenario();s['time']['intervals']=1;s['time']['grid']=[0,.1];s['time']['final']=.1
         s['nmpc']['solver']['max_iter']=0
