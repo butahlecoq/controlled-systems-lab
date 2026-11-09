@@ -129,3 +129,24 @@ class SavedComparisonTests(unittest.TestCase):
                 with self.assertRaises(ValueError):check(bundle)
 
 if __name__=='__main__':unittest.main()
+
+class NativeReplayBoundaryTests(unittest.TestCase):
+    def test_mandatory_fields_projection_and_process_prefix(self):
+        import tempfile
+        from replay_evidence import read_native_attempt,RK4_FIELDS
+        with tempfile.TemporaryDirectory() as tmp:
+            folder=Path(tmp);raw={key:None for key in RK4_FIELDS}
+            raw.update(schema='csl.mpc11.independent-replay/1',method='adaptive-rk4-step-doubling',provider='CSL::simulation',status='callback_failure',elapsed_seconds=.01)
+            (folder/'stdout.json').write_text(json.dumps(raw));(folder/'stderr.txt').write_text('');(folder/'record.json').write_text(json.dumps({**raw,'objective':None}))
+            receipt={'status':'completed','return_code':0,'elapsed_seconds':.1}
+            call=lambda:read_native_attempt(folder,receipt,status_key='status',time_key='elapsed_seconds',extensions={'objective'})
+            self.assertEqual(call()['status'],'callback_failure')
+            for bad in [{},{key:value for key,value in raw.items() if key!='diagnostics'}]:
+                (folder/'stdout.json').write_text(json.dumps(bad))
+                with self.assertRaises(ValueError):call()
+            (folder/'stdout.json').write_text(json.dumps(raw));receipt.update(status='failed',return_code=1)
+            with self.assertRaises(ValueError):call()
+            (folder/'record.json').unlink();self.assertIsNone(call())
+            receipt.update(status='timed_out',return_code=None,elapsed_seconds=300.1);self.assertIsNone(call())
+            receipt['elapsed_seconds']=1
+            with self.assertRaises(ValueError):call()
