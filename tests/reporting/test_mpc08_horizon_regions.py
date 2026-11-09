@@ -17,12 +17,13 @@ class HorizonRegionsTests(unittest.TestCase):
 
     def test_missing_cell_and_forged_endpoint_or_family_rejected(self):
         source=H.produce(2)
-        for kind in ('missing','endpoint','multiplier','fiber'):
+        for kind in ('missing','endpoint','multiplier','fiber','unbounded'):
             r=copy.deepcopy(source)
             if kind=='missing':r['cells'].pop()
             elif kind=='endpoint':r['cells'][0]['endpoint'][0]=(H.Q(0),H.Q(0),H.Q(100))
             elif kind=='multiplier':r['cells'][-1]['multipliers']=[(H.Q(0),H.Q(0),H.Q(-1))]*len(r['cells'][-1]['active'])
-            else:r['family']['terminal_map'][0][0]+=1
+            elif kind=='fiber':r['family']['terminal_map'][0][0]+=1
+            else:r['cells'][0]['rows']=r['cells'][0]['rows'][4:]
             with self.subTest(kind=kind),self.assertRaises(ValueError):H.check(r)
 
     def test_corner_image_matches_all_zonotope_facets(self):

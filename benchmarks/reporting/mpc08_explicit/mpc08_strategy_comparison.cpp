@@ -452,9 +452,78 @@ void run_support_csv(Providers& providers,const char* path) {
         }
     }
 }
+
+void run_horizon_family(Providers& providers, const char* path) {
+    std::ifstream input(path);std::string line;
+    if(!std::getline(input,line))throw std::runtime_error("empty horizon family CSV");
+    while(std::getline(input,line)) {
+        std::istringstream row(line);std::vector<std::string> fields;std::string field;
+        while(std::getline(row,field,','))fields.push_back(field);
+        if(fields.size()!=6)throw std::runtime_error("horizon family row needs id,N,p,v,zp,zv");
+        const auto n=static_cast<std::size_t>(std::stoul(fields[1]));
+        if(n!=2&&n!=4&&n!=8)throw std::runtime_error("unsupported family horizon");
+        const double p=std::stod(fields[2]),v=std::stod(fields[3]),zp=std::stod(fields[4]),zv=std::stod(fields[5]);
+        if(!std::isfinite(p)||!std::isfinite(v)||!std::isfinite(zp)||!std::isfinite(zv))throw std::runtime_error("nonfinite family input");
+        for(const bool original:{true,false})for(std::size_t rep=0;rep<6;++rep) {
+            const auto start=Clock::now();bool verified=false,complete=false;int termination=-1,outcome=-1;
+            std::string error;std::optional<sets::HRepresentation> relation;
+            try {
+                const LinearStage flow{Matrix{2,2,{1,1,0,1}},Matrix{2,1,{0,1}},Matrix{2,0,{}},Vector{0,0}};
+                std::vector<double> times;std::vector<AdmissibleSet> controls;
+                for(std::size_t t=0;t<=n;++t)times.push_back(static_cast<double>(t));
+                for(std::size_t t=0;t<n;++t)controls.push_back(input_box());
+                std::vector<AdmissibleSet> states(n+1,UniversalSet{2});
+                states.back()=original?AdmissibleSet{terminal_set()}:AdmissibleSet{Singleton{Vector{zp,zv}}};
+                TerminalObjective objective=LinearTerminal{Vector{0,0},0};
+                if(original)objective=QuadraticTerminal{Matrix{2,2,{2,0,0,2}},Vector{0,0},0};
+                Problem source{{"mpc08-horizon-family-"+fields[0]+(original?"-quadratic":"-endpoint-reduction")},
+                    std::make_shared<const SystemModel>(SystemModel{{{2,1,0},TimeDomain::discrete,flow},{}}),times,
+                    KnownInitial{{p,v}},ContinuousDomain{controls},states,{},{},InformationPattern::nominal_open_loop,objective};
+                auto resolved=take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}),"family resolve");
+                FamilyRequest family;family.profile=synthesis::strategy_b::nominal_linear_exact_profile;
+                family.objective=resolved.identity();family.target=FamilyTarget::exact_optimal_relation;
+                family.assurance=Assurance::numerical;family.representation={"csl.polyhedron.h"};
+                StrategyConfiguration config;config.strategy=providers.strategy_b_id;config.lp=providers.lp_id;
+                config.convex=providers.convex_id;config.representation=family.representation;
+                StrategyRequest request{resolved,config,family,{},{}};Requirements output;
+                output.output.representation=family.representation;output.output.family=family.target;output.output.completeness=Completeness::established;
+                auto prepared=take(providers.strategies->prepare(request,output),"exact family prepare");auto workspace=prepared.create();
+                ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+                const auto result=take(workspace->run(context),"exact family run");
+                termination=static_cast<int>(result.termination);outcome=static_cast<int>(result.outcome.value);
+                if(result.family) {
+                    verified=result.family->registry_verified();
+                    if(const auto* f=std::get_if<CompleteOptimalFamily>(&result.family->outcome())) {
+                        complete=true;
+                        if(f->relation.payload)if(const auto* data=f->relation.payload->h_relation_for_recording())
+                            if(const auto representation=data->representation();const auto* h=std::get_if<sets::HRepresentation>(&representation))relation=*h;
+                    }
+                }
+                // HRepresentation views must remain alive while serialized below.
+                std::cout<<"{\"schema\":\"csl.mpc08-horizon-family/1\",\"query_id\":\""<<json_escape(fields[0])<<"\",\"horizon\":"<<n
+                    <<",\"original_quadratic\":"<<(original?"true":"false")<<",\"repetition\":"<<rep<<",\"warmup\":"<<(rep==0?"true":"false")
+                    <<",\"registry_verified\":"<<(verified?"true":"false")<<",\"complete\":"<<(complete?"true":"false")
+                    <<",\"termination\":"<<termination<<",\"outcome\":"<<outcome<<",\"elapsed_ns\":"<<std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now()-start).count();
+                if(relation) {
+                    const auto matrix=[](const auto& m){std::cout<<'[';for(std::size_t r=0;r<m.rows();++r){if(r)std::cout<<',';std::cout<<'[';for(std::size_t c=0;c<m.cols();++c){if(c)std::cout<<',';std::cout<<std::setprecision(17)<<m(r,c);}std::cout<<']';}std::cout<<']';};
+                    const auto vector=[](const auto& v0){std::cout<<'[';for(std::size_t i=0;i<v0.size();++i){if(i)std::cout<<',';std::cout<<std::setprecision(17)<<v0[i];}std::cout<<']';};
+                    std::cout<<",\"inequalities\":";matrix(relation->inequalities);std::cout<<",\"upper_bounds\":";vector(relation->upper_bounds);
+                    std::cout<<",\"equalities\":";matrix(relation->equalities);std::cout<<",\"equality_values\":";vector(relation->equality_values);
+                }
+                std::cout<<",\"error\":\"\"}\n";
+                continue;
+            } catch(const std::exception& e){error=e.what();}
+            std::cout<<"{\"schema\":\"csl.mpc08-horizon-family/1\",\"query_id\":\""<<json_escape(fields[0])<<"\",\"horizon\":"<<n
+                <<",\"original_quadratic\":"<<(original?"true":"false")<<",\"repetition\":"<<rep<<",\"warmup\":"<<(rep==0?"true":"false")
+                <<",\"registry_verified\":false,\"complete\":false,\"termination\":"<<termination<<",\"outcome\":"<<outcome
+                <<",\"elapsed_ns\":"<<std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now()-start).count()<<",\"error\":\""<<json_escape(error)<<"\"}\n";
+        }
+    }
+}
 }
 
 int main(int argc,char** argv) try {
+    if(argc==3&&std::string_view(argv[1])=="--horizon-family") {auto providers=make_providers();run_horizon_family(providers,argv[2]);return 0;}
     if(argc==3&&std::string_view(argv[1])=="--support") {auto providers=make_providers();run_support_csv(providers,argv[2]);return 0;}
     if (argc!=2) { std::cerr << "Usage: csl_mpc08_explicit_compare <exact-queries.csv>\n"; return 2; }
     const auto queries=read_queries(argv[1]);

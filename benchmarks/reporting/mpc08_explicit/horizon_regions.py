@@ -77,6 +77,8 @@ def check(record):
     if family!=produce_family(n):raise ValueError('complete control-fiber map/model differs')
     total=Q(0);checked=[]
     for cell in record['cells']:
+        if not all(tuple(h) in list(map(tuple,cell['rows'])) for h in E.X):
+            raise ValueError('bounded fixture cells require all canonical X box rows')
         polygon=E.vertices(cell['rows'])
         if E.hull(cell['vertices'])!=polygon or E.area(polygon)<=0:raise ValueError('cell H/V mismatch')
         for point in polygon:
