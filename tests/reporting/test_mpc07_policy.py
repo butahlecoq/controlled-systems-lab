@@ -152,6 +152,5 @@ class ProvenanceRegressionTests(unittest.TestCase):
             checked=json.loads((attempt/'check.json').read_text())
             checked['bindings']['receipt.json']=hashlib.sha256((attempt/'receipt.json').read_bytes()).hexdigest()
             (attempt/'check.json').write_text(json.dumps(checked))
-            (raw/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(raw).as_posix()}
-' for p in sorted(raw.rglob('*')) if p.is_file() and p!=raw/'SHA256SUMS'))
+            (raw/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(raw).as_posix()}\n' for p in sorted(raw.rglob('*')) if p.is_file() and p!=raw/'SHA256SUMS'))
             with self.assertRaisesRegex(ValueError,'disposition differs'):report.checked_records(raw)
