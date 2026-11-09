@@ -16,6 +16,29 @@ def load(path):return json.loads(path.read_text())
 def digest(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def check_package_sources(package):
+    binding=load(package/'source-binding.json')
+    for label,entry in binding['capture_sources'].items():
+        manifest=load(package/label/'manifest.json')
+        revision=entry['source_revision']
+        if manifest['source_revision']!=revision:raise ValueError('capture source revision mismatch')
+        snapshot=package/('source-'+revision[:8])
+        for name,expected in entry['snapshot_sha256'].items():
+            path=(snapshot/name).resolve()
+            if not path.is_relative_to(snapshot.resolve()) or digest(path)!=expected:raise ValueError('source snapshot binding mismatch')
+            committed=subprocess.check_output(['git','show',revision+':'+name],cwd=Path(__file__).resolve().parents[3])
+            if path.read_bytes()!=committed:raise ValueError('source snapshot differs from recorded git commit')
+        for name,expected in manifest['source_sha256'].items():
+            if entry['snapshot_sha256']['benchmarks/reporting/mpc11/'+name]!=expected:raise ValueError('native capture source binding mismatch')
+        if label=='accepted':
+            for case in ['lv','fuel']:
+                name=f'benchmarks/reporting/mpc11/scenarios/mesh-ni2/syn-nl-{case}-01.json'
+                if (snapshot/name).read_bytes()!=(package/label/f'syn-nl-{case}-01/scenario.json').read_bytes():raise ValueError('scenario snapshot binding mismatch')
+    for name,expected in binding['review_source_sha256'].items():
+        if digest(package/'review-source'/name)!=expected:raise ValueError('review source snapshot binding mismatch')
+    return binding
+
+
 def compare(baseline, refined):
     reports={'ni1':check(baseline),'ni2':check(refined)}
     cases=[]
@@ -70,8 +93,10 @@ def replay(bundle,bridge,output):
 
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--baseline',type=Path,required=True);p.add_argument('--refined',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--bridge',type=Path);p.add_argument('--fresh-replay',type=Path)
-    a=p.parse_args();write(a.output,compare(a.baseline,a.refined))
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--baseline',type=Path,required=True);p.add_argument('--refined',type=Path,required=True);p.add_argument('--output',type=Path,required=True);p.add_argument('--bridge',type=Path);p.add_argument('--fresh-replay',type=Path);p.add_argument('--package',type=Path)
+    a=p.parse_args()
+    if a.package:check_package_sources(a.package.resolve())
+    write(a.output,compare(a.baseline,a.refined))
     if a.bridge:
         if a.fresh_replay is None:p.error('--fresh-replay required with --bridge')
         replay(a.refined,a.bridge.resolve(),a.fresh_replay)
