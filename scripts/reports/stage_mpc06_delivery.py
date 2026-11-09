@@ -12,7 +12,7 @@ ROOT=Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:sys.path.insert(0,str(ROOT))
 from scripts.reports.mpc06_delivery import records,figures
 
-SOURCE=ROOT/'reports/algorithm-results/mpc06-completion-v1'
+SOURCE=ROOT/'reports/algorithm-results/mpc06-completion-v2'
 
 
 def digest(data):return hashlib.sha256(data).hexdigest()

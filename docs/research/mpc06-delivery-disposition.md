@@ -13,7 +13,7 @@ This is the completion handoff for issue [#602](https://github.com/butahlecoq/co
 | Sound representation direction and conservatism | Exact polytope/parallelotope/zonotope identities, the inflated outer tube and separately certified invariant ellipse retain their stated inclusion/RPI evidence. The outer coordinate box and emitted APP-04 ellipse fail RPI and are rejected, despite enclosing Z. No volume correctness, generic inner-ellipse producer or cross-class winner is claimed. Representation gates #99/#100 are closed. |
 | Offline/online/checker costs, figure and qualification | Saved native preparation/setup/solve, APP-04 construction, exact construction/checking and process intervals stay separate. Prescribed K has no gain optimization. The prior Z/terminal proof has no isolated construction timing; this is unavailable, not zero. New pinned shared-style figures show invariant/tightened sets, actual saved paths and the finite initial grid. Performance remains descriptive and inconclusive for ranking. |
 
-The original native v1/v2/v3 archives and their 180 QPs remain unchanged. The [new saved report](../../reports/algorithm-results/mpc06-completion-v1/index.html) carries the checked reference record, full upstream evidence, reviewing-source hashes, exact certificates and figure provenance. Plotting, checking and staging start no native solver.
+The original native v1/v2/v3 archives and their 180 QPs remain unchanged. The [new saved report](../../reports/algorithm-results/mpc06-completion-v2/index.html) carries the checked reference record, full upstream evidence, reviewing-source hashes, exact certificates and figure provenance. Plotting, checking and staging start no native solver.
 
 ## Platform, dependency and release/package impact
 
@@ -29,3 +29,7 @@ The new unit delivers source scripts, exact records and a versioned scientific r
 The dedicated adapter rechecks the exact references and held-plan extraction, the upstream checked-source/raw-response bindings, all file digests and deterministic Matplotlib output. It creates a content-derived route, publication manifest and deterministic offline ZIP. The existing cumulative Pages augmentation adds this route alongside MPC-01, B04-C and the earlier MPC-06 objective report. The original `algorithm-reports.yml` is byte-identical; the existing main-only workflow, reviewed upstream artifact, serialization and stale-head checks remain authoritative.
 
 Before reporting #602 complete: obtain independent code/results/standards completion review, pass exact-head reporting/platform checks, merge in dependency order, verify the deployed page/figures/manifests/raw records/offline ZIP and record the actual accessible URL. Do not close the issue from local staging success alone. There is no new owner-confirmation or installed-binary gate beyond the actual task and delivery scope.
+
+The v2 reading layer adds explicit authentication of copied checker snapshots
+against recorded source-file digests. The v1 report remains immutable; its
+numerical reference and native inputs are unchanged. This is a provenance fix.
