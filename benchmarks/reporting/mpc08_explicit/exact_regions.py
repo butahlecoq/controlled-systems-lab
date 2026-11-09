@@ -154,11 +154,23 @@ def fiber_ladder(limit=1000):
     return dict(rows=rows,scope='full optimal control cube slice at v0=0; even N vertices are balanced sign vectors; no region-explosion claim',
         nonunique_N2=dict(domain=[[-3,3],[-2,2]],negative_velocity=dict(v=[-2,0],lower='-v-1',upper='1'),
             positive_velocity=dict(v=[0,2],lower='-1',upper='1-v'),selector='u0=u1=-v/2',value=0,
+            parameter_coordinates=['v0','u0'],parameter_rows=[(1,0,2),(-1,0,2),(0,1,1),(0,-1,1),(1,1,1),(-1,-1,1)],
+            full_history='u1=-v0-u0; p1=p0+v0; v1=v0+u0; p2=p0+2*v0+u0; v2=0',
             proof='sum u=-v is feasible for all |v|<=2 and attains nonnegative terminal velocity squared zero',
             safety_limit='intermediate states are unconstrained; initial-domain X is not an invariant set under this selector'))
 
 
 def check_fibers(record):
+    family=record['nonunique_N2']
+    hs=[(1,0,2),(-1,0,2),(0,1,1),(0,-1,1),(1,1,1),(-1,-1,1)]
+    if family['domain']!=[[-3,3],[-2,2]] or list(map(tuple,family['parameter_rows']))!=hs or family['value']!=0:
+        raise ValueError('full parametric nonunique family changed')
+    if family['selector']!='u0=u1=-v/2' or family['full_history']!='u1=-v0-u0; p1=p0+v0; v1=v0+u0; p2=p0+2*v0+u0; v2=0':
+        raise ValueError('nonunique family/selector history map changed')
+    for v,u in vertices(hs):
+        if abs(u)>1 or abs(-v-u)>1 or v+u-v-u!=0:raise ValueError('nonunique parameter polytope is unsafe')
+    for v in (-2,0,2):
+        if abs(-Q(v)/2)>1:raise ValueError('nonunique selector not feasible')
     if [r['horizon'] for r in record['rows']]!=[1,2,4,8,12,16]:raise ValueError('fiber horizon inventory changed')
     for row in record['rows']:
         n=row['horizon'];count=1 if n==1 else comb(n,n//2)
