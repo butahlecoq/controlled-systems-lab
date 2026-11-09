@@ -36,6 +36,24 @@ class TimingTests(unittest.TestCase):
             self.assertEqual(orders,[['affine','nmpc'],['affine','nmpc'],['nmpc','affine'],['affine','nmpc'],['nmpc','affine'],['affine','nmpc']])
             self.assertEqual(len(calls),18)
 
+    def test_copied_source_mutation_rejects_after_inventory_rebound(self):
+        import hashlib,inspect
+        import do_mpc
+        from unittest import mock
+        from check_timing import checked_sources
+        from run_timing import sha
+        source=ROOT/'benchmarks/reporting/mpc11/nmpc.py'
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);snapshot=root/'sources';snapshot.mkdir()
+            copied=snapshot/'nmpc.py';copied.write_bytes(source.read_bytes())
+            environment={'source_revision':'fixture','identity':{'source_sha256':{'nmpc.py':sha(source)},'do_mpc_controller_source_sha256':sha(Path(inspect.getfile(do_mpc.controller.MPC)))}}
+            (root/'environment.json').write_text(json.dumps(environment))
+            with mock.patch('check_timing.subprocess.check_output',return_value=source.read_bytes()):
+                checked_sources(root,snapshot)
+                copied.write_bytes(copied.read_bytes()+b'\n# mutation\n')
+                (snapshot/'SHA256SUMS').write_text(hashlib.sha256(copied.read_bytes()).hexdigest()+'  nmpc.py\n')
+                with self.assertRaisesRegex(ValueError,'copied source snapshot binding'):checked_sources(root,snapshot)
+
     def test_interrupted_attempt_is_preserved(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);old=root/'trial/attempt-000';old.mkdir(parents=True);(old/'partial').write_text('keep')
