@@ -38,5 +38,9 @@ def fixtures():
     for name,cancel,limit in [('hybrid-path-budget',False,1),('hybrid-cancelled',True,256)]:
         f=copy.deepcopy(result[11]);f.update(id=name,cancel=cancel,max_branches=limit);result.append(f)
     for name,kind in [('unsupported-dimension-change','dimension-changing'),('unsupported-relational-reset','relational-reset')]:
-        f=copy.deepcopy(result[10]);f.update(id=name,external_unsupported=kind);result.append(f)
+        f=copy.deepcopy(result[10]);f.update(id=name,external_unsupported=kind)
+        if kind=='dimension-changing':f['modes'][1]['state_dimension']=3
+        else:
+            f['edges'][0].pop('reset');f['edges'][0]['reset_relation']={'inequalities':[[-1,0,1,0]],'lower':[0],'upper':[None],'equalities':[[0,-1,0,1]],'values':[0]}
+        result.append(f)
     return result

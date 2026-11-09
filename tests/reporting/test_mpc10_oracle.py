@@ -2,9 +2,9 @@ from pathlib import Path
 import sys
 import unittest
 ROOT=Path(__file__).resolve().parents[2]
-sys.path.insert(0,str(ROOT/'benchmarks/reporting/mpc10'))
-from fixtures import fixtures
-from oracle import solve
+sys.path.insert(0,str(ROOT))
+from benchmarks.reporting.mpc10.fixtures import fixtures
+from benchmarks.reporting.mpc10.oracle import solve
 
 class OracleTests(unittest.TestCase):
     def case(self,name):return next(s for s in fixtures() if s['id']==name)
