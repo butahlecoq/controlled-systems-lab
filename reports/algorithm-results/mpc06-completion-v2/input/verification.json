@@ -1,0 +1,8 @@
+{
+  "schema": "csl.mpc06-delivery-check/1",
+  "status": "verified",
+  "result_sha256": "1b27fb909d9918b8c3fe90ab1b49f42dae4f54389ffd8c571b6ef13c1035e0cc",
+  "exact_reference_cases": 6,
+  "held_native_plans": 60,
+  "scope": "exact frozen-plan class minima and matched held-native-plan gaps; receding-prefix cost remains separate"
+}
