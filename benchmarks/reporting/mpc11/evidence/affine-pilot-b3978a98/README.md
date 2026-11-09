@@ -58,3 +58,12 @@ solver. The archive's outer hash is stored in `SHA256SUMS` and `summary.json`.
 There is no Pages deployment or nonlinear/NMPC claim in this evidence slice.
 Nonlinear execution, independent nonlinear replay, receding-horizon control,
 comparison figures and publication remain #607 work.
+
+The additive saved checker at `118d2d6ae0239a0554b2a6c9b41e195c78f75fc6` rebuilds both authored
+models and joint programs, then re-applies declared transforms and compares all
+coefficients, bounds, rows, reconstruction maps and retained source programs.
+An updated self-hash cannot substitute for this relationship check. The
+original capture source and archive bytes remain unchanged; this revision
+adds verification and does not rerun optimization. Exact serialized rebuilding
+uses the locked numerical environment and fails closed when a different
+implementation produces different binary64 coefficients.

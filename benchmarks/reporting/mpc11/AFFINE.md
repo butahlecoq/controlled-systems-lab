@@ -93,3 +93,11 @@ The two existing scenarios and their physical identities remain distinct from
 historical fuel/LV artifacts. Later independent nonlinear replay and saved-data
 figures remain #607 work. No library release is required for this optional
 public-API consumer and report tooling.
+
+The saved checker rebuilds the fixed authored model and full joint program
+from scenario definitions before accepting a transform. It re-applies the
+positive objective multiplier, variable permutation or equality elimination
+and compares all coefficients, bounds, rows, reconstruction maps and retained
+source programs. Canonical self-hashes alone do not establish these relations.
+The rebuild uses the locked numerical environment; different binary64 rounding
+fails closed rather than silently asserting equivalence.
