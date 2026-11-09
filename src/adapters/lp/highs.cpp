@@ -33,8 +33,15 @@ constexpr std::string_view clock_event_prefix = "CSL_HIGHS_CLOCK/1 ";
 std::atomic<std::uint64_t> next_clock_call_index{};
 
 bool clock_capture_enabled() noexcept {
+#if defined(_MSC_VER)
+    char value[2]{};
+    std::size_t required{};
+    return ::getenv_s(&required, value, sizeof(value), "CSL_HIGHS_INTERNAL_CLOCKS") == 0
+        && required == 2 && value[0] == '1';
+#else
     const char* value = std::getenv("CSL_HIGHS_INTERNAL_CLOCKS");
     return value && std::string_view(value) == "1";
+#endif
 }
 
 void write_json_string(std::ostream& out, std::string_view value) {
