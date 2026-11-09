@@ -808,7 +808,7 @@ TEST_CASE("post-solve allocation failure returns a resource stop and retains col
 }
 
 namespace {
-OptimalFamily horizon_family(std::size_t horizon,bool constant) {
+OptimalFamily horizon_family(std::size_t horizon,bool constant,bool use_a=true) {
     auto authored=source();authored.id={"selector-horizon-"+std::to_string(horizon)+(constant?"-constant":"-zero")};
     authored.times.clear();
     std::vector<AdmissibleSet> controls;
@@ -818,11 +818,21 @@ OptimalFamily horizon_family(std::size_t horizon,bool constant) {
     authored.states=decltype(authored.states)(horizon+1,UniversalSet{1});
     authored.objective=LinearTerminal{{constant?0.0:1.0},constant?3.0:0.0};
     auto synthesis_request=request(resolve(std::move(authored)));
-    synthesis_request.family.profile=synthesis::strategy_a::nominal_linear_exact_profile;
-    synthesis_request.configuration.strategy={"csl.synthesis.reach-back"};
+    synthesis_request.family.profile=use_a?synthesis::strategy_a::nominal_linear_exact_profile:
+        synthesis::strategy_b::nominal_linear_exact_profile;
+    synthesis_request.configuration.strategy={use_a?"csl.synthesis.reach-back":"csl.synthesis.strategy-b"};
     synthesis_request.configuration.lp={"csl.lp.highs"};
     synthesis_request.configuration.convex={"csl.convex.highs"};
-    auto prepared=strategy_a(synthesis_request);auto workspace=prepared.create();
+    auto prepared=[&]() {
+        if(use_a)return strategy_a(synthesis_request);
+        Registry<LPPort> lp;REQUIRE_FALSE(lp.add(take(adapters::lp::make_highs_registration())));
+        Registry<ConvexPort> convex;REQUIRE_FALSE(convex.add(take(adapters::convex::make_highs_registration())));
+        StrategyRegistry registry;REQUIRE_FALSE(registry.add(synthesis::strategy_b::make_registration(lp,convex)));
+        Requirements output;output.output.representation=synthesis_request.family.representation;
+        output.output.family=synthesis_request.family.target;output.output.completeness=Completeness::established;
+        return take(registry.prepare(synthesis_request,output));
+    }();
+    auto workspace=prepared.create();
     auto result=take(workspace->run(make_execution_context()));
     REQUIRE(result.family);REQUIRE(result.family->registry_verified());
     return *result.family;
@@ -831,9 +841,9 @@ OptimalFamily horizon_family(std::size_t horizon,bool constant) {
 TEST_CASE("scalar exact H direction queries replay horizons two four and eight") {
     auto provider=selected(take(adapters::lp::make_highs_registration()),"csl.program-result.v1");
     auto selector=synthesis::witness_selector::make_registration(provider);
-    for(const std::size_t horizon:{2,4,8})for(const bool constant:{false,true}) {
-        CAPTURE(horizon);CAPTURE(constant);
-        const auto family=horizon_family(horizon,constant);
+    for(const std::size_t horizon:{2,4,8})for(const bool constant:{false,true})for(const bool use_a:{true,false}) {
+        CAPTURE(horizon);CAPTURE(constant);CAPTURE(use_a);
+        const auto family=horizon_family(horizon,constant,use_a);
         Vector positive(horizon,1),negative(horizon,-1);
         SelectorRequest query{family,{2,1e-9,{positive,negative},97}};
         auto workspace=selector.factory(query);

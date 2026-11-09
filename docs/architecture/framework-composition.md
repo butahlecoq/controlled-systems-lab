@@ -169,8 +169,9 @@ path; it is not a replacement for either composed strategy.
 The implemented `csl.selector.ts01-directions` selector minimizes supplied
 `(u0,...,u(T-1))` directions over admitted registry-verified complete scalar H
 families using a selected LP provider. The canonical T-S01/T-S02/T-S03 profiles
-retain their stronger profile-specific membership checks. The Strategy A
-`strategy-a.nominal-linear-exact-v1` profile supports the scalar history layout
+retain their stronger profile-specific membership checks.
+The `strategy-a.nominal-linear-exact-v1` and `strategy-b.nominal-linear-exact-v1`
+profiles support the scalar history layout
 at other admitted horizons, including T=4 and T=8. Each direction must contain
 exactly T finite values. The H relation and returned primal must contain exactly
 `2*T+1` coordinates, ordered as `x0,...,xT,u0,...,u(T-1)`; width arithmetic is

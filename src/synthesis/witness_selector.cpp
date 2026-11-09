@@ -3,6 +3,7 @@
 #include <csl/synthesis/ts02_constant_integrator.hpp>
 #include <csl/synthesis/ts03_singular_integrator.hpp>
 #include <csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp>
+#include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/optimization/linear_program.hpp>
 #include <csl/execution/instrumented_operation.hpp>
 #include <cmath>
@@ -42,7 +43,7 @@ const sets::SetData* relation_set(const OptimalFamily& family) {
         const auto* relation=dynamic_cast<const Ts03SingularIntegratorRelation*>(complete->relation.payload.get());
         return relation?&relation->h_polyhedron():nullptr;
     }
-    if(profile==strategy_a::nominal_linear_exact_profile)
+    if(profile==strategy_a::nominal_linear_exact_profile||profile==strategy_b::nominal_linear_exact_profile)
         return complete->relation.payload
             ?complete->relation.payload->h_relation_for_recording():nullptr;
     return nullptr;
@@ -260,7 +261,7 @@ public:
                     if(ts01) member=ts01->contains(*result.primal);
                     else if(profile==ts03_singular_integrator_profile)
                         member=contains_ts03(*result.primal);
-                    else if(profile==strategy_a::nominal_linear_exact_profile) {
+                    else if(profile==strategy_a::nominal_linear_exact_profile||profile==strategy_b::nominal_linear_exact_profile) {
                         const auto* relation=relation_set(family);
                         member=relation&&contains_h(
                             std::get<sets::HRepresentation>(relation->representation()),
