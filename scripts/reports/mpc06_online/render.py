@@ -34,10 +34,13 @@ def render(bundle):
         row['matched_nominal_objective_gap']=[str(min(gaps)),str(max(gaps))] if gaps else None
         rows.append(row)
     summary=dict(schema='csl.mpc06-online-summary/1',rows=rows,verification=verified,
+        renderer_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         offline_grid_construction_and_check_ns=record['grid']['elapsed_ns'],
         offline_native_approximation_ns=[p['approximation']['construction_ns'] for p in record['processes'] if 'approximation' in p],
         offline_approximation_check_ns=[p['independent_approximation']['checker_ns'] for p in record['processes'] if 'independent_approximation' in p],
         verdict='descriptive restricted-policy study; no universal winner or real-time claim')
+    (bundle/'render-source').mkdir(exist_ok=True)
+    (bundle/'render-source/render.py').write_bytes(Path(__file__).read_bytes())
     (bundle/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
     # A genuine two-state phase plot from saved actual disturbance histories.
     colors={'finite-reference':'#89b4fa','polytope':'#a6e3a1','inflated-zonotope':'#f9e2af','ellipsoid-certified':'#f38ba8'}
@@ -68,6 +71,7 @@ def render(bundle):
         '<p>This bounded two-state LTI study solves actual CSL/HiGHS nominal QPs, compares matched fixed-K robust feasibility, and independently checks all continuous-box disturbance costs for the recorded deterministic nominal schedules. It does not compute fixed-plan minimax or general causal optimum.</p>',
         f'<p>Source <code>{html.escape(record["source_commit"])}</code>. Independent replay: {html.escape(verified["status"])}; {verified["completed_native_qps"]} completed native QPs. <a href="result.json">Raw mathematical/process records</a>, <a href="verification.json">checker receipt</a>, <a href="summary.json">cost/timing distributions</a>.</p>',
         '<p>At each step u=v+K(x-z), K=(-1,-2); z propagates with the applied nominal v. Full-state measurements affect only the fixed ancillary feedback. The nominal N=3 objective is sum(z²+v²), with terminal z3=0. The finite-error reference uses the same policy and global disturbance clock; invariant tubes are conservative restrictions. All original state/control bounds are checked without clipping. The actual reported objective is sum(x²+u²)+x3² over the three executed steps.</p>',
+        '<p>Minimal inputs: A=[[1,1],[0,1]], B=E=(0,1), W=[-1/8,1/8], X=[-1,1]², U=[-1,1]. Initial actual and nominal states coincide at (1/8,0), (3/8,-1/8), or (-1/4,1/8). Exact full-state feedback, independent stage disturbances and continuous actuators are required. <a href="base-scenario.json">Immutable base input</a>; <a href="source/README.md">derivation and reproduction commands</a>.</p>',
         '<h2>Matched feasible intervals and online cost</h2><p>The 17 by 17 initial grid is finite and is not a complete feedback-winning-set characterization. Times are medians [minimum, maximum] in microseconds over completed steps; process/IPC timing is separate from native solve. Actual worst cost ranges cover the same three initial states over all repetitions; exact fractions and matched nominal-objective gaps remain in JSON. No performance ranking is claimed.</p>',
         '<table><tr><th>Method</th><th>Grid feasible / lost</th><th>Actual worst cost range</th><th>Native setup</th><th>Native solve</th><th>Exact QP construction</th><th>Independent QP check</th></tr>']
     def duration(d):return 'unavailable' if d is None else f'{d["median"]/1000:.2f} [{d["min"]/1000:.2f}, {d["max"]/1000:.2f}]'
