@@ -99,6 +99,11 @@ target_include_directories(hybrid_path_program_tests PRIVATE ${CMAKE_CURRENT_SOU
 add_test(NAME hybrid_path_program_tests COMMAND hybrid_path_program_tests)
 csl_test_target(hybrid_path_program_tests synthesis)
 
+add_executable(hybrid_linear_h_coverage_tests tests/unit/synthesis/hybrid_linear_h_coverage_tests.cpp)
+target_link_libraries(hybrid_linear_h_coverage_tests PRIVATE CSL::hybrid_path_program doctest::doctest)
+add_test(NAME hybrid_linear_h_coverage_tests COMMAND hybrid_linear_h_coverage_tests)
+csl_test_target(hybrid_linear_h_coverage_tests synthesis)
+
 add_executable(hybrid_reachability_public_client tests/installed/hybrid_reachability_client.cpp)
 target_link_libraries(hybrid_reachability_public_client PRIVATE CSL::hybrid_path_program)
 add_test(NAME hybrid_reachability_public_client COMMAND hybrid_reachability_public_client)
