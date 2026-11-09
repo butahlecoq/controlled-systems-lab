@@ -85,7 +85,7 @@ def run(driver,output,repetitions):
         compiler=subprocess.check_output(['c++','--version'],text=True),architecture=platform.machine(),
         source_file_sha256={str(path.relative_to(root)):hashlib.sha256(path.read_bytes()).hexdigest() for path in [Path(__file__),Path(__file__).with_name('model.py'),Path(__file__).with_name('check.py'),root/'benchmarks/reporting/mpc06_online/driver.cpp']},
         build='Release required for comparative capture; explicit CMakeCache retained when available',
-        policy=dict(kind='propagated-anchor',gain=[-1,-2],initial_error='zero',nominal_horizon=3,terminal='z3=0',
+        policy=dict(kind='propagated-anchor',gain=[-1,-2],initial_error='zero',nominal_horizon=3,terminal='z3=0',native_optimum_absolute_tolerance='1/1000000',native_objective_absolute_tolerance='1/1000000',
             nominal_objective='sum(k=0..2,z_k^T z_k+v_k^2)',actual_objective='sum(t=0..2,x_t^T x_t+u_t^2)+x3^T x3',
             quantifier='deterministic nominal-anchor reoptimization with fixed ancillary K; all stagewise continuous disturbance sequences',
             exclusions=['measured-state reset','fixed-plan minimax optimum','general causal optimality','general feedback winning set']),
