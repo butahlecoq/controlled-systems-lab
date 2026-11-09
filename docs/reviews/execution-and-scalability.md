@@ -176,7 +176,7 @@ are later changes; final independent review and delivery remain pending.
 | Independent fixed-commit review | Source/evidence slices have independent specification and standards reviews. Final consolidated source/evidence review is still required before closure. |
 | TEST-23 batch isolation | Existing gated tests exercise isolation, failure, cancellation, ordering and provenance. Both executor and batch suites pass in the fresh nine-suite run. Outer concurrency and observed native width remain separate quantities. |
 
-The [complete-family/query capture](../../reports/algorithm-results/review05-family-query-20261110-3b98f5b0/README.md)
+The [complete-family/query capture](../../reports/algorithm-results/review05-family-query-20261110-3b98f5b0/REPRODUCE.md)
 retains 170 primary attempts: 168 verified and two deliberate resource or
 materialization stops. Forty separate gprof attempts are attribution diagnostics.
 The flat T=8 fixture requests 16 directions, obtains 16 witnesses and retains
@@ -184,7 +184,7 @@ nine distinct histories; duplicate optima do not imply a uniqueness claim.
 Exact checking proves both family inclusions and each requested direction's
 optimality, and binds the actual query/program spans to those requests.
 
-The [construction-phase capture](../../reports/algorithm-results/review05-build-phases-20261110-468cc0eb/README.md)
+The [construction-phase capture](../../reports/algorithm-results/review05-build-phases-20261110-468cc0eb/REPRODUCE.md)
 retains 86 attempts: 84 verified and two later resource stops. Actual assembly,
 objective lifting and owning program construction are timed separately. The
 remaining parent span includes admission, identity, map and observer work; it
