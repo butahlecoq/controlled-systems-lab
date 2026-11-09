@@ -152,6 +152,8 @@ def main():
     profile=bundle/'limiter-profile/profile.json'
     if profile.exists():
         value=json.loads(profile.read_text())
+        assessment=bundle/'limiter-profile/assessment.json'
+        if assessment.exists():value['verdict']=json.loads(assessment.read_text())['verdict']
         parts.append('<h2>Separate limiter diagnostic</h2><p>'+html.escape(value['scope'])+'. '+html.escape(value['verdict'])+'. The profile binary differs from the primary unprofiled binary; these attempts are excluded from the timing groups. See <a href="limiter-profile/profile.json">profile provenance/resources</a> and <a href="limiter-profile/gprof.txt">raw gprof symbols</a>.</p>')
     parts.append('</html>')
     (bundle/'index.html').write_text('\n'.join(parts)+'\n')
