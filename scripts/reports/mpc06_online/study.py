@@ -4,6 +4,7 @@ import argparse
 from fractions import Fraction as Q
 import hashlib
 import json
+import os
 from pathlib import Path
 import platform
 import selectors
@@ -60,6 +61,12 @@ def read_line(process,selector,transcript):
     return line,json.loads(line)
 
 
+def process_limits():
+    import resource
+    resource.setrlimit(resource.RLIMIT_AS,(8*1024**3,8*1024**3))
+    resource.setrlimit(resource.RLIMIT_CPU,(300,300))
+
+
 def run(driver,output,repetitions):
     if output.exists():raise ValueError('output directory must be new')
     output.mkdir(parents=True);root=Path(__file__).resolve().parents[3]
@@ -72,6 +79,9 @@ def run(driver,output,repetitions):
         source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip(),
         source_status=subprocess.check_output(['git','status','--porcelain'],cwd=root,text=True),
         binary_sha256=hashlib.sha256(driver.read_bytes()).hexdigest(),platform=platform.platform(),
+        logical_cpus=os.cpu_count(),load_before=os.getloadavg(),active_compiler_processes=subprocess.run(['pgrep','-c','cc1plus'],capture_output=True,text=True).stdout.strip(),
+        resources=dict(cpu_seconds=300,address_space_bytes=8*1024**3,per_response_timeout_seconds=15,mechanism='POSIX RLIMIT_CPU/RLIMIT_AS; response watchdog; no native heap/RSS cap'),
+        warmups=0,workspace_policy='fresh workspace per QP; process reused per repetition; first native call may initialize backend state',
         compiler=subprocess.check_output(['c++','--version'],text=True),architecture=platform.machine(),
         source_file_sha256={str(path.relative_to(root)):hashlib.sha256(path.read_bytes()).hexdigest() for path in [Path(__file__),Path(__file__).with_name('model.py'),Path(__file__).with_name('check.py'),root/'benchmarks/reporting/mpc06_online/driver.cpp']},
         build='Release required for comparative capture; explicit CMakeCache retained when available',
@@ -89,7 +99,7 @@ def run(driver,output,repetitions):
     for repetition in range(repetitions):
         folder=output/f'repetition-{repetition:02}';folder.mkdir();stdout=[];startup=time.perf_counter_ns()
         with (folder/'stderr.txt').open('w') as stderr:
-            process=subprocess.Popen([str(driver)],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=stderr,text=True,bufsize=1)
+            process=subprocess.Popen([str(driver)],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=stderr,text=True,bufsize=1,start_new_session=True,preexec_fn=process_limits)
             selector=selectors.DefaultSelector();selector.register(process.stdout,selectors.EVENT_READ)
             try:
                 line,approx=read_line(process,selector,stdout)
@@ -137,11 +147,12 @@ def run(driver,output,repetitions):
                 result['processes'].append(dict(repetition=repetition,status='inconclusive',reason=str(error)))
                 if result['attempts'] and result['attempts'][-1]['repetition']==repetition:
                     result['attempts'][-1].update(status='inconclusive',reason=str(error))
-                process.kill();process.wait()
+                os.killpg(process.pid,9);process.wait()
             finally:
                 selector.close();(folder/'stdout.txt').write_text(''.join(stdout))
                 process.stdout.close()
                 if not process.stdin.closed:process.stdin.close()
+    result['load_after']=os.getloadavg()
     result['limitations']=['bounded deterministic-anchor profile only','initial grid is finite','numerical QP optimum checked against exact fixture, not solver certified',
         'native supported toolchain/platform capture is Linux only until hosted checks','prior invariant plot and fixed zero-plan cost remain immutable',
         'no speedup or universal winner; resource/process limiter profile pending']

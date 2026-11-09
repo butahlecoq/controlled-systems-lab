@@ -87,7 +87,7 @@ pinned bundled notices. APP-04 uses existing core approximation code. This adds
 no required solver, parser or plotting dependency; acados, OSQP and HPIPM are not
 installed. Native QP evidence remains numerical; its original objective and safe
 first control are independently checked. No external controller-equivalence,
-hard real-time, prompt in-call QP cancellation, or process memory cap is claimed.
+hard real-time, prompt in-call QP cancellation, or native heap/RSS cap is claimed.
 
 The standalone CMake target uses the public headers/targets and standard C++20.
 Validate Release GCC/Clang and MSVC, sanitizer builds and installed-client linking
@@ -104,3 +104,5 @@ https://butahlecoq.github.io/controlled-systems-lab/mpc06-tube-405a8ac4eb2bea7eb
 It remains authoritative for that immutable pilot. New rendering reads saved
 online records only; issue #602 stays open until its full remaining evidence
 and publication gates pass.
+
+The timing verdict is inconclusive: this capture checks phase accounting and executed work, not an adoption or performance choice. No source-level limiter profile has been established. It excludes no warmup calls; the first native call in each reused process may initialize backend state, and every QP still creates a fresh workspace. Host load and active compiler counts are recorded.
