@@ -123,3 +123,15 @@ TEST_CASE("exact H coverage distinguishes unknown from disproven program "
   CHECK(verify(f).complete_family_coverage ==
         HybridVerificationStatus::refuted);
 }
+TEST_CASE("a disproven program refutes coverage even when another objective is "
+          "unsupported") {
+  auto f = fixture(true);
+  // The raw relation has three coordinates; the augmented objective requires
+  // four.
+  f.programs[0].relation_limits.max_variables = 3;
+  f.programs[1].joint_relation = point({1, 0, 0});
+  const auto result = verify(f);
+  CHECK(result.global_objective_optimality ==
+        HybridVerificationStatus::unsupported);
+  CHECK(result.complete_family_coverage == HybridVerificationStatus::refuted);
+}

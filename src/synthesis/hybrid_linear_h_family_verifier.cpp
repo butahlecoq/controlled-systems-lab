@@ -603,6 +603,12 @@ HybridFamilyVerificationResult ExactLinearHHybridFamilyVerifier::verify(
             : undecided ? HybridVerificationStatus::unsupported
                         : HybridVerificationStatus::refuted;
     }
+    // A disproven source-program relation is a coverage counterexample even
+    // when another path prevents deciding the global objective.
+    if (std::any_of(branches.begin(), branches.end(), [](const auto& branch) {
+            return branch.program_comparison == hx::InclusionState::not_included;
+        }))
+        report.complete_family_coverage = HybridVerificationStatus::refuted;
     return report;
 }
 
