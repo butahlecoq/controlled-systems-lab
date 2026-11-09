@@ -1955,6 +1955,16 @@
       "disposition": "reviewed-static-diagram-exception"
     },
     {
+      "source": "benchmarks/reporting/mpc08_explicit/capture_exact_regions.py",
+      "signal_count": 5,
+      "asset_name_literals": [
+        "critical-regions.png",
+        "critical-regions.svg"
+      ],
+      "disposition": "adopted-shared-quantitative-policy",
+      "role_and_disposition_reason": "Draws exact checked fixture regions and nominal/robust predecessors with shared numeric axes; numerical native observations remain separate from whole-set proof authority."
+    },
+    {
       "source": "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py",
       "signal_count": 2,
       "asset_name_literals": [

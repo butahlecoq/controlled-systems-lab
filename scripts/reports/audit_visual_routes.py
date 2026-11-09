@@ -54,6 +54,8 @@ PUBLICATION_EXPORT_ROUTES = {
     "scripts/reports/augment_pages_bundle.py",
 }
 VIZ10_ROLE_REASONS = {
+    "benchmarks/reporting/mpc08_explicit/capture_exact_regions.py":
+        "Draws exact checked fixture regions and nominal/robust predecessors with shared numeric axes; numerical native observations remain separate from whole-set proof authority.",
     "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py":
         "Generates one exact 2D critical-region diagram from the rational fixture, with labelled initial and terminal coordinates; it is not a general plotting path.",
     "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py":
@@ -246,7 +248,8 @@ def source_inventory(root: Path) -> list[dict]:
             elif relative.endswith(("/geometry_figures.py", "/approx_extension_companions.py",
                                     "/geometry_opt_companions.py", "/viz10_plot_companions.py")):
                 disposition = "shared-quantitative-policy-companion-renderer"
-            elif relative == "scripts/reports/stage_projection_figures.py":
+            elif relative in {"scripts/reports/stage_projection_figures.py",
+                              "benchmarks/reporting/mpc08_explicit/capture_exact_regions.py"}:
                 disposition = "adopted-shared-quantitative-policy"
             elif relative.endswith("/control_witness_companions.py"):
                 disposition = "saved-control-witness-gallery-companion-builder"
