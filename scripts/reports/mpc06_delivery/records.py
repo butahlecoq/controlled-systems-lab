@@ -145,7 +145,12 @@ def check(record,online,upstream_files):
 
 def validate(source):
     contents=inventory(source);online,upstream_files=upstream(source/'online')
-    record=evidence.json_value(contents['result.json']);verification=check(record,online,upstream_files)
+    record=evidence.json_value(contents['result.json'])
+    for name in SOURCE_FILES:
+        copied='source/'+Path(name).name
+        if copied not in contents or evidence.digest(contents[copied])!=record['source_files'].get(name):
+            raise ValueError('delivery copied source binding mismatch: '+name)
+    verification=check(record,online,upstream_files)
     if evidence.json_value(contents['verification.json'])!=verification:raise ValueError('delivery saved verification disposition mismatch')
     return record,online,verification,contents
 

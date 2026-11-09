@@ -42,6 +42,14 @@ class Mpc06DeliveryPublicationTests(unittest.TestCase):
             self.assertEqual(routes[0],routes[1]);self.assertEqual(archives[0],archives[1])
             self.assertEqual({p.relative_to(report):p.read_bytes() for p in report.rglob('*') if p.is_file()},before)
 
+    def test_rebound_copied_source_is_not_authenticated_by_inventory(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            folder=Path(temporary);source,_=self.build(folder)
+            path=source/'source/reference.py';path.write_text(path.read_text()+'\n# changed retained source\n')
+            self.sums(source)
+            with self.assertRaisesRegex(ValueError,'copied source binding'):
+                records.validate(source)
+
     def test_tampered_exact_cost_or_figure_cannot_be_blessed_by_checksums(self):
         with tempfile.TemporaryDirectory() as temporary:
             folder=Path(temporary);source,report=self.build(folder)
