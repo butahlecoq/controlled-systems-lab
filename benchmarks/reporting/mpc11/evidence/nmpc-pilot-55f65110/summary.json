@@ -81,5 +81,7 @@
   ],
   "claim": "actual local NMPC correctness outcomes only; no global/minimax/continuous-safety/reachable-set/performance claim",
   "post_capture_checker_revision": "7bdccb0d0bfc57146f88f9542e4578e12d18eb4a",
-  "post_capture_checker_scope": "Ordered unique full solve coverage; explicit30/40 transcription counts; consistent partial failure inventory; native EXIT, iteration summary/rows/exposed series versus structured outcomes; worker process/manifest/attempt/replay consistency. Original archive and numerical records unchanged."
+  "post_capture_checker_scope": "Ordered unique full solve coverage; explicit30/40 transcription counts; consistent partial failure inventory; native EXIT, iteration summary/rows/exposed series versus structured outcomes; worker process/manifest/attempt/replay consistency. Original archive and numerical records unchanged.",
+  "post_capture_native_replay_checker_revision": "b5909228cd1a74dcdbfe5e8bbf1da3bc111bab2b",
+  "shared_native_evidence_revision": "698e163511deacd0f05486f321dbec0b42dda0c4 (PR900 ancestry), cherry-picked a0a09b79 in NMPC ancestry"
 }

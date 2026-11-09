@@ -115,3 +115,16 @@ pass, including rebound empty histories, missing/duplicate/reordered inventory,
 valid failed-prefix policies, native failure/iteration mutations and manifest
 or process outcome disagreement. The original archive and source55 numerical
 capture remain unchanged. No optimization or ODE rerun occurred.
+
+Replay evidence validation at `b5909228cd1a74dcdbfe5e8bbf1da3bc111bab2b`
+also requires the complete supported native RK4 field set and exact full native
+projection equality with the annotated record. Process return code, status,
+deadline, stream availability and prefix/summary must agree. Empty or truncated
+native objects cannot bypass the check. Failed or timed-out processes without
+annotated trajectories remain explicit inconclusive outcomes, while returned
+native partial traces keep their prefix status. A completed controller whose
+independent replay is unavailable is reported as `inconclusive-replay`.
+Thirty-three qualified focused tests pass, including these residual mutations
+and valid failed/timeout/prefix boundary cases. The same shared boundary was
+fixed on PR900 ancestry at `698e163511deacd0f05486f321dbec0b42dda0c4` and
+cherry-picked into this branch. No numerical capture or archive changed.
