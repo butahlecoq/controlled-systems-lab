@@ -23,6 +23,14 @@ def hull(points):
     return sides[0][:-1]+sides[1][:-1]
 
 
+def is_bounded(rows):
+    """Reject a nonzero recession direction before interpreting finite vertices."""
+    directions=[(1,0),(-1,0),(0,1),(0,-1)]
+    directions += [(sign*b,-sign*a) for a,b,c in rows for sign in (-1,1) if a or b]
+    # A nonzero planar polyhedral cone contains an axis or a row-boundary ray.
+    return not any(all(a*x+b*y<=0 for a,b,c in rows) for x,y in directions)
+
+
 def vertices(rows):
     rows=[tuple(map(Q,row)) for row in rows]
     points=[]
@@ -74,6 +82,7 @@ def check_regions(record):
     if hull(record['feasible_vertices'])!=fv:raise ValueError('feasible-domain projection mismatch')
     total=Q(0)
     for r in record['regions']:
+        if not is_bounded(r['rows']):raise ValueError('unbounded critical region cannot be certified by finite vertices')
         vs=vertices(r['rows'])
         if vs!=hull(r['vertices']) or area(vs)<=0 or not contained(vs,domain):raise ValueError('region containment/vertices mismatch')
         total+=area(vs);a,b,c=r['control']
