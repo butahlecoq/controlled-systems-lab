@@ -101,17 +101,31 @@ def capture(driver,receipt,output):
     if status:raise ValueError('clean committed source required')
     build=json.loads(receipt.read_text())
     if C.sha(driver)!=build['binary_sha256'] or C.sha(C.ROOT/SOURCE_FILES[4])!=build['client_source_sha256']:raise ValueError('native binary/client mismatch')
-    output.mkdir(parents=True);records=[H.produce(n) for n in (2,4,8)];checks=[H.check(record) for record in records]
-    C.write(output/'reference.json',dict(records=records,checks=checks));(output/'queries.csv').write_text(queries());(output/'native-build-receipt.json').write_bytes(receipt.read_bytes())
+    output.mkdir(parents=True);records=[H.produce(n) for n in (2,4,8)];checks=[];costs=[]
+    for record in records:
+        check_start=time.perf_counter_ns();checks.append(H.check(record));check_ns=time.perf_counter_ns()-check_start
+        points=record['feasible_vertices']+[tuple(sum(v[k] for v in cell['vertices'])/len(cell['vertices']) for k in (0,1)) for cell in record['cells']]
+        samples=[]
+        for repetition in range(6):
+            start=time.perf_counter_ns()
+            for point in points:
+                maps=[[H.at(f,point) for f in cell['endpoint']] for cell in record['cells'] if H.E.contained([point],cell['rows'])]
+                if not maps or any(m!=maps[0] for m in maps):raise ValueError('point-location boundary mismatch')
+            samples.append(time.perf_counter_ns()-start)
+        costs.append(dict(horizon=record['horizon'],construction_ns=record['construction_ns'],independent_check_ns=check_ns,
+            serialized_reference_bytes=len(json.dumps(C.plain(record),separators=(',',':')).encode()),stored_H_rows=sum(len(c['rows']) for c in record['cells']),
+            polygon_edges=sum(len(c['vertices']) for c in record['cells']),location_queries_per_batch=len(points),point_location_and_endpoint_ns=samples,excluded_warmup_index=0))
+    C.write(output/'reference.json',dict(records=records,checks=checks,costs=costs));(output/'queries.csv').write_text(queries());(output/'native-build-receipt.json').write_bytes(receipt.read_bytes())
     command=[str(driver.resolve()),'--horizon-family',str((output/'queries.csv').resolve())]
     environment=dict(os.environ,OPENBLAS_NUM_THREADS='1',OMP_NUM_THREADS='1',MKL_NUM_THREADS='1')
     start=time.perf_counter_ns();rc,stopped,stdout,stderr,resources=C.run_with_resource_receipt(command,300,environment)
+    process_ns=time.perf_counter_ns()-start
     (output/'stdout.jsonl').write_bytes(stdout);(output/'stderr.txt').write_bytes(stderr)
     native=check_native([json.loads(line) for line in stdout.splitlines()]) if rc==0 and not stopped else dict(status='inconclusive-process')
     C.write(output/'summary.json',dict(exact=checks,native=native,performance='inconclusive; descriptive whole per-request native intervals, no ranking'))
     manifest=dict(source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=C.ROOT,text=True).strip(),source_status=status,
         source_sha256={name:C.sha(C.ROOT/name) for name in SOURCE_FILES},binary_sha256=C.sha(driver),
-        process=dict(command=command,return_code=rc,timed_out=stopped,whole_process_ns=time.perf_counter_ns()-start,resources=resources),
+        process=dict(command=command,return_code=rc,timed_out=stopped,whole_process_ns=process_ns,resources=resources),
         boundary='native widths8/14/26 below32; row/operation limits may still refuse; static libraries reused with actual receipt')
     C.write(output/'manifest.json',manifest);figure(records,output)
     (output/'SHA256SUMS').write_text(''.join(C.sha(p)+'  '+p.name+'\n' for p in sorted(output.iterdir()) if p.is_file() and p.name!='SHA256SUMS'))
