@@ -84,6 +84,7 @@ VIZ10_ROLE_REASONS = {
         "Generic report exporter validates and copies a supplied saved figure; it does not produce quantitative plot data.",
 }
 SAVED_COMPANION_ROUTES = {
+    "scripts/reports/mpc06_online/render.py",
     "scripts/reports/mpc01/summarize_repeated_comparison.py",
     "scripts/reports/app02/render_saved.py",
     "scripts/reports/app03/render_saved.py",

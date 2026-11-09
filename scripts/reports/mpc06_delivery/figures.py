@@ -42,7 +42,7 @@ def save(fig,output,stem):
 
 
 def plot(data,output):
-    os.environ.setdefault('MPLCONFIGDIR',str(output.parent/'mpc06-mpl-cache'))
+    os.environ.setdefault('MPLCONFIGDIR',str(ROOT/'build/mpc06-mpl-cache'))
     import matplotlib
     if matplotlib.__version__!='3.11.2':raise ValueError('Matplotlib 3.11.2 is required')
     matplotlib.use('Agg')
