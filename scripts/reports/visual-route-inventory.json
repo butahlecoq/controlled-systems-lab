@@ -1982,8 +1982,7 @@
       "source": "benchmarks/reporting/mpc11/figures.py",
       "signal_count": 2,
       "asset_name_literals": [],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 687
+      "disposition": "analytic-reference-checked-saved-run-renderer"
     },
     {
       "source": "benchmarks/reporting/review05/render_constraint_ladder.py",
