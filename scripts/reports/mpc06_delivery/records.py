@@ -156,10 +156,10 @@ def build(source,out):
     verification=check(record,online,upstream_files)
     out.mkdir(parents=True);shutil.copytree(source,out/'online');(out/'source').mkdir()
     for name in SOURCE_FILES:(out/'source'/Path(name).name).write_bytes((ROOT/name).read_bytes())
-    (out/'result.json').write_text(json.dumps(record,indent=2)+'\n')
-    (out/'verification.json').write_text(json.dumps(verification,indent=2)+'\n')
+    (out/'result.json').write_text(json.dumps(record,indent=2)+'\n',encoding='utf-8')
+    (out/'verification.json').write_text(json.dumps(verification,indent=2)+'\n',encoding='utf-8')
     paths=sorted(path for path in out.rglob('*') if path.is_file())
-    (out/'SHA256SUMS').write_text(''.join(f'{evidence.digest(path.read_bytes())}  {path.relative_to(out).as_posix()}\n' for path in paths))
+    (out/'SHA256SUMS').write_text(''.join(f'{evidence.digest(path.read_bytes())}  {path.relative_to(out).as_posix()}\n' for path in paths),encoding='utf-8')
     return verification
 
 

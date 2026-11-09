@@ -91,9 +91,9 @@ def plot(data,output):
                     values=[row['anchor'] for row in rows if row['feasible']==feasible]
                     axis.scatter([float(Q(p[0])) for p in values],[float(Q(p[1])) for p in values],s=15,marker=marker,color=color,label=label)
                 axis.set(xlim=(-1.08,1.08),ylim=(-1.08,1.08),xlabel='initial position p',ylabel='initial velocity q',title=method+': '+str(sum(r['feasible'] for r in rows))+'/289 feasible')
-                configure_numeric_axis(axis);axis.set_aspect('equal',adjustable='box');axis.legend(fontsize=8)
+                configure_numeric_axis(axis);axis.set_aspect('equal',adjustable='box')
             fig.suptitle('Same prescribed-K / nominal-terminal-zero planning; finite initial-state grid')
-            fig.supxlabel('These samples are not a complete feedback-winning set or a volume correctness certificate.',fontsize=9)
+            fig.supxlabel('Circles: feasible (panel color); crosses: infeasible. Samples are not a complete winning set or a volume certificate.',fontsize=9)
             save(fig,output,'feasibility-grid')
         finally:plt.close(fig)
 
@@ -125,17 +125,25 @@ def render(source,output):
     if output.exists() or output.resolve().is_relative_to(source.resolve()):raise ValueError('publication output must be new and separate')
     output.mkdir(parents=True);shutil.copytree(source,output/'input')
     data=figure_data(record,online)
-    (output/'figure-data.json').write_text(json.dumps(data,indent=2)+'\n')
+    (output/'figure-data.json').write_text(json.dumps(data,indent=2)+'\n',encoding='utf-8')
     plot(data,output)
-    (output/'index.html').write_text(reading_page(record,verification))
+    (output/'index.html').write_text(reading_page(record,verification),encoding='utf-8')
+    (output/'README.md').write_text('''# MPC-06 complete source/report delivery
+
+This reading layer preserves the existing native capture and adds exact finite-horizon fixed-policy references. The source commit and source-file digests are in input/result.json. The complete native archive, bound receipt and raw streams are under input/online/. No native experiment is rerun for publication.
+
+Check with python scripts/reports/mpc06_delivery/records.py --check <saved-report>/input from the recorded source checkout. Regenerate the reading layer with the pinned scripts/reports/requirements.txt environment and python scripts/reports/mpc06_delivery/figures.py --source <saved-report>/input --output <new-directory>. Staging independently rechecks mathematics, upstream bindings, all hashes and deterministic renderer output before producing an immutable route and ZIP.
+
+M0 and prescribed-K references have distinct policy classes and nominal z3=0. Only a first predicted native plan HELD for three steps has a matched fixed-K minimax gap. The actual receding prefix is separate. All prior finite-grid, unsupported-model, numerical/native-evidence and no-performance-winner limits remain. This is a source/report artifact, not an installed binary or new API; no standalone library release is needed. Main-only publication, independent completion review and live URL verification remain gates for issue closure.
+''',encoding='utf-8')
     export=dict(schema='csl.mpc06-publication-figures/1',matplotlib='3.11.2',quantitative_axis_policy=STYLE_ID,
         source_result_sha256=hashlib.sha256(contents['result.json']).hexdigest(),
         native_capture_receipt_sha256=hashlib.sha256((source/'online/verification-v2.json').read_bytes()).hexdigest(),
         figure_data_sha256=hashlib.sha256((output/'figure-data.json').read_bytes()).hexdigest(),
         files={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(output.iterdir()) if p.suffix in ('.svg','.png')})
-    (output/'figure-export.json').write_text(json.dumps(export,indent=2)+'\n')
+    (output/'figure-export.json').write_text(json.dumps(export,indent=2)+'\n',encoding='utf-8')
     paths=sorted(p for p in output.rglob('*') if p.is_file())
-    (output/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(output).as_posix()}\n' for p in paths))
+    (output/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(output).as_posix()}\n' for p in paths),encoding='utf-8')
     return export
 
 
