@@ -114,10 +114,38 @@ arrival at the native-call boundary for the exercised cases; it does not prove
 that the Qhull call bodies overlapped, establish race freedom, or guarantee
 general Qhull/HiGHS thread safety.
 
-The bounded Eigen, HiGHS, Qhull, and package reviews now have merged source and
-CI evidence, but issue #7 remains open. It still needs an initial geometry
-profile and capacity policy (including output/facet and memory limits), the
-broader operation algebra with operation-specific guarantees, stronger
-cross-platform race evidence, and equal-output comparison evidence. None of
-these component reviews decides the project license or the broader scientific
-numerical policy.
+## 2026-11-10 decision: initial geometry and capacity policy
+
+The initial native geometry profile is the registered bounded binary64 Qhull
+H/V conversion profile described above. Other geometry operations require their
+own registered capability and evidence contract; selecting Qhull does not admit
+a complete operation algebra. Exact complete-family claims follow
+[ADR 0003](0003-numerical-input-and-coverage-policy.md) and the selected compiled
+verifier, independently of numerical producer diagnostics.
+
+Capacity has two distinct boundaries:
+
+- Adapter admission checks the operation, supported arithmetic, native index
+  ranges and configured input limits before native work. Fixture dimensions
+  are regression requirements, not universal library capacity promises.
+- Comparison jobs use the [comparison-program resource policy](../comparison-program.md).
+  The initial enforced profile requests 300 seconds wall time and 8 GiB per
+  attempt, with a 16 GiB suite allocation and at most two concurrent jobs.
+  Requested, enforced and observed limits retain their mechanism and scope.
+  A platform without memory enforcement reports observation-only execution,
+  rather than claiming the same enforced profile.
+
+Qhull has no adapter-level output/facet cap or peak-allocation guarantee.
+Process supervision bounds a job only where the selected mechanism actually
+provides that bound; it does not add a facet-count contract. A resource stop,
+unsupported request or incomplete certificate remains an explicit outcome.
+Checker exhaustion is inconclusive. Neither partial output nor residual checks
+establish complete-family coverage.
+
+This selects bounded admission plus process-accounted experiment limits as the
+initial policy. Universal geometry output caps, hard limits inside every library
+call and general cross-platform race freedom are not prerequisites for this
+architecture decision. New operations and stronger guarantees require scoped
+implementation and independent review. REVIEW-05 #95 tracks the execution and
+scalability assessment; comparison tickets track equal-output experiments.
+The project license and historical B04 restoration remain separate decisions.
