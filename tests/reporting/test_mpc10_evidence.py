@@ -66,11 +66,12 @@ class ClosedSourceInventoryTests(unittest.TestCase):
     def test_saved_capture_rejects_empty_subset_unknown_and_self_rehashed_sources(self):
         import zipfile
         archive=SOURCE/'evidence/comparison-525871ea/capture.zip'
-        for mode in ('empty','subset','unknown','self-rehashed'):
+        for mode in ('missing','empty','subset','unknown','self-rehashed'):
             with self.subTest(mode=mode),tempfile.TemporaryDirectory() as tmp:
                 with zipfile.ZipFile(archive) as z:z.extractall(tmp)
                 capture=Path(tmp)/'capture';env=json.loads((capture/'environment.json').read_text())
-                if mode=='empty':env['source_sha256']={}
+                if mode=='missing':env.pop('source_sha256')
+                elif mode=='empty':env['source_sha256']={}
                 elif mode=='subset':env['source_sha256'].pop('oracle.py')
                 elif mode=='unknown':env['source_sha256']['unknown.py']='0'*64
                 else:
@@ -81,7 +82,7 @@ class ClosedSourceInventoryTests(unittest.TestCase):
     def test_saved_receipt_rejects_empty_subset_unknown_checker_maps(self):
         import zipfile
         archive=SOURCE/'evidence/comparison-525871ea/capture.zip'
-        for mode in ('empty','subset','unknown'):
+        for mode in ('missing','empty','subset','unknown'):
             with self.subTest(mode=mode),tempfile.TemporaryDirectory() as tmp:
                 with zipfile.ZipFile(archive) as z:z.extractall(tmp)
                 capture=Path(tmp)/'capture';receipt=Path(tmp)/'receipt.json'
@@ -89,5 +90,7 @@ class ClosedSourceInventoryTests(unittest.TestCase):
                 if mode=='empty':maps={}
                 elif mode=='subset':maps.pop('oracle.py')
                 else:maps['unknown.py']='0'*64
-                receipt.write_text(json.dumps({'schema':'csl.mpc10.check/1','input_files':inventory(capture),'checking_sources':maps}))
+                value={'schema':'csl.mpc10.check/1','input_files':inventory(capture),'checking_sources':maps}
+                if mode=='missing':value.pop('checking_sources')
+                receipt.write_text(json.dumps(value))
                 with self.assertRaises(ValueError):checked_verification(capture,receipt)
