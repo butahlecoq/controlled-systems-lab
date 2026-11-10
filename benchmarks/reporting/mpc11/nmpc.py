@@ -96,7 +96,10 @@ def initialize_guess(mpc,s,j,observation,previous):
             else:
                 # do-mpc stores interval k-1 collocation stages at _x[k,:-1].
                 if c==cols-1 or k==0:t=grid[j+k]
-                else:t=grid[j+k-1]+dt*([0.]+roots)[c]
+                else:
+                    degree=s['nmpc']['collocation']['degree'];elements=s['nmpc']['collocation']['elements_per_interval']
+                    element,local=divmod(c,degree+1)
+                    t=grid[j+k-1]+dt/elements*(element+([0.]+roots)[local])
                 value=physical_reference(s,t)/scales
             mpc.opt_x_num['_x',k,0,c,'z']=value
     refs=references(s)

@@ -39,6 +39,30 @@ class NMPCTests(unittest.TestCase):
         np.testing.assert_allclose(held,np.ones_like(held),atol=1e-12)
         self.assertAlmostEqual(meta2['original_interval_count'],3)
 
+    def test_fuel_two_element_reference_initializes_every_collocation_node(self):
+        import casadi as ca
+        s=json.loads((ROOT/'benchmarks/reporting/mpc11/scenarios/mesh-ni2/syn-nl-fuel-01.json').read_text())
+        s['time'].update(intervals=3,grid=[0.,.5,1.,1.5],final=1.5,dt=.5)
+        degree=s['nmpc']['collocation']['degree'];elements=2
+        mpc,_=build_controller(s,1)
+        scales=np.array([v['scale'] for v in s['states']])
+        observation=np.array([.95,.9,.8,.7])
+        initialize_guess(mpc,s,1,observation,None)
+        nodes=[0.]+ca.collocation_points(degree,'radau')
+        columns=(degree+1)*elements+1
+        self.assertEqual(len(mpc.opt_x_num['_x',1,0]),columns)
+        for k in range(1,3):
+            for element in range(elements):
+                for local,tau in enumerate(nodes):
+                    t=s['time']['grid'][k]+s['time']['dt']/elements*(element+tau)
+                    expected=np.array([100-2*t,30-.6*t,2.,.6])/scales
+                    value=np.asarray(mpc.opt_x_num['_x',k,0,element*(degree+1)+local,'z']).reshape(-1)
+                    np.testing.assert_allclose(value,expected,rtol=0,atol=1e-14)
+            t=s['time']['grid'][k+1]
+            expected=np.array([100-2*t,30-.6*t,2.,.6])/scales
+            np.testing.assert_allclose(np.asarray(mpc.opt_x_num['_x',k,0,-1,'z']).reshape(-1),expected,rtol=0,atol=1e-14)
+        np.testing.assert_array_equal(np.asarray(mpc.opt_x_num['_x',0,0,-1,'z']).reshape(-1),observation)
+
     def test_failed_local_solve_is_rejected(self):
         s=self.scenario();s['time']['intervals']=1;s['time']['grid']=[0,.1];s['time']['final']=.1
         s['nmpc']['solver']['max_iter']=0
@@ -46,6 +70,65 @@ class NMPCTests(unittest.TestCase):
         result,_=solve_update(mpc,s,0,np.array([1.2,.75]),guess,meta)
         self.assertFalse(result['accepted']);self.assertFalse(result['success'])
         self.assertEqual(result['status'],'Maximum_Iterations_Exceeded')
+
+class MeshReplayTests(unittest.TestCase):
+    def test_fresh_replay_allows_only_clock_difference(self):
+        import tempfile
+        from types import SimpleNamespace
+        from unittest import mock
+        from mesh_summary import replay
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);bridge=root/'bridge';bridge.write_bytes(b'fixture')
+            for case in ['lv','fuel']:
+                for mode in ['rk4','rk4-tight']:
+                    folder=root/'bundle'/f'syn-nl-{case}-01'/mode;folder.mkdir(parents=True)
+                    (folder/'request.json').write_text('{}')
+                    (folder/'stdout.json').write_text(json.dumps({'elapsed_seconds':1.,'states':[[1.,2.]],'status':'complete'}))
+            def process(states):return SimpleNamespace(returncode=0,stderr=b'',stdout=json.dumps({'elapsed_seconds':2.,'states':states,'status':'complete'}).encode())
+            with mock.patch('mesh_summary.subprocess.run',return_value=process([[1.,2.]])):
+                replay(root/'bundle',bridge,root/'valid')
+            receipt=json.loads((root/'valid/receipt.json').read_text())
+            self.assertEqual(len(receipt['records']),4)
+            with mock.patch('mesh_summary.subprocess.run',return_value=process([[1.,3.]])):
+                with self.assertRaisesRegex(ValueError,'numerical response'):replay(root/'bundle',bridge,root/'invalid')
+
+class MeshPackageTests(unittest.TestCase):
+    def test_source_symlink_rejects_before_reading_metadata(self):
+        import tempfile
+        from mesh_summary import check_package_sources
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary);package=root/'package';package.mkdir();outside=root/'outside';outside.mkdir()
+            try:(package/'review-source').symlink_to(outside,target_is_directory=True)
+            except OSError:self.skipTest('symlink creation unavailable')
+            with self.assertRaisesRegex(ValueError,'must not contain symlinks'):
+                check_package_sources(package)
+
+    def test_git_option_revision_rejects_before_external_write(self):
+        import tempfile
+        from mesh_summary import check_package_sources
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary);package=root/'package';package.mkdir();sentinel=root/'unexpected'
+            revision='--output='+str(sentinel)
+            binding={'review_revision':'a'*40,'capture_sources':{label:{'source_revision':revision} for label in ('accepted','refused-profile-attempt')}}
+            (package/'source-binding.json').write_text(json.dumps(binding))
+            with self.assertRaisesRegex(ValueError,'full hexadecimal commit'):
+                check_package_sources(package)
+            self.assertEqual(list(root.iterdir()),[package])
+
+    def test_rebound_review_snapshot_differs_from_recorded_commit(self):
+        import tempfile,zipfile,hashlib
+        from mesh_summary import check_package_sources
+        archive=ROOT/'benchmarks/reporting/mpc11/evidence/mesh-pilot-c0029ded/capture.zip'
+        with tempfile.TemporaryDirectory() as temporary:
+            package=Path(temporary)
+            with zipfile.ZipFile(archive) as saved:saved.extractall(package)
+            check_package_sources(package)
+            path=package/'review-source/mesh_summary.py';path.write_text(path.read_text()+'\n# rebound snapshot\n')
+            binding=json.loads((package/'source-binding.json').read_text())
+            binding['review_source_sha256']['mesh_summary.py']=hashlib.sha256(path.read_bytes()).hexdigest()
+            (package/'source-binding.json').write_text(json.dumps(binding))
+            with self.assertRaisesRegex(ValueError,'review source differs from recorded git commit'):
+                check_package_sources(package)
 
 class PrefixReplayTests(unittest.TestCase):
     def test_partial_controls_keep_original_N_and_no_completed_objective(self):

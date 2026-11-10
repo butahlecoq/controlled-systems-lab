@@ -1,0 +1,40 @@
+{
+  "schema": "csl.review05.build-phase-environment/1",
+  "source_commit": "468cc0eb2d3d8e3f7f3ade632db8a2e88cf2cd85",
+  "source_status": "",
+  "binary_sha256": "a119eb5f8d38d65a3426550fdc5001b0a163c66cba7eb48e508e2fd54566e4ef",
+  "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+  "host": "omarchy",
+  "logical_cpus": 8,
+  "load_before": [
+    0.99609375,
+    2.90673828125,
+    3.501953125
+  ],
+  "compiler": "c++ (GCC) 16.2.1 20260810\nCopyright (C) 2026 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+  "source_sha256": {
+    "family_query_ladder.cpp": "53211d1df3ea48a24638f84a70b9d5e5d20e397410774a3b1f395583c42d6a6f",
+    "check_family_query.py": "c2f70c2618b1a967dcda17b8509185e44e9c512d7237ce924d3741c7d063972a",
+    "check_build_phases.py": "2790dec860f34f563542f4c3acba3e556a61b2961749d2fdd83ed57b3eececf3",
+    "run_build_phases.py": "7042a5dd686d904c15942d1b6723309b0f660fcdec37de46423a7dfc0c1d4117",
+    "run_horizon_ladder.py": "3d9e1e212acd64d74e52cfdc38d0a26c87de2fbf52ef512796cb368c11811f29",
+    "render_family_query.py": "5aa39df19ebbde09784069e139481429a0cfee6b4b0868b9e137b9b3db617a15",
+    "scalar_query_oracle.py": "e962980de3665e8ce6d70b085700357e63bae1b08d341478cc0301063ebad03a",
+    "BUILD-PHASES.md": "49dff53cb3a612c357a207279610382aca12ea2a1087299b307d13f0ab7265a6",
+    "build_phase_probe.cmake": "cf09643e63e735c4cd55f6ead9526fa9c9785fd2453553c0623c1e709f92ecb2",
+    "direct_joint.cpp": "7da77fda0ad562cd9db91222ff6465e4884e1e7b0a198543488c8623f91fd4c1"
+  },
+  "limits": {
+    "cpu_seconds": 300,
+    "wall_seconds": 150,
+    "address_space_bytes": 8589934592,
+    "context_deadline_seconds": 120,
+    "total_threads": 1,
+    "native_heap_enforcement": false
+  },
+  "load_after": [
+    0.99609375,
+    2.90673828125,
+    3.501953125
+  ]
+}

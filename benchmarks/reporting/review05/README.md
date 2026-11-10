@@ -92,6 +92,44 @@ python3 benchmarks/reporting/review05/summarize_horizon_ladder.py --bundle /tmp/
 python3 benchmarks/reporting/review05/render_horizon_ladder.py --bundle /tmp/csl-review05-phase-results
 ```
 
+`--highs-internal-clocks` adds a separate opt-in capture of the pinned HiGHS
+timer registry immediately after each native `Highs::run()`. It requires
+`--phase-diagnostics`, emits versioned JSONL groups on stderr, preserves and
+hashes the raw stderr, and binds every group to the pinned archive and private
+source-patch hashes. The checker cross-validates structured groups against the
+retained stderr. Clock values use HiGHS' native elapsed-second readings and
+call counts; timer scopes can overlap, so summaries list clocks individually
+and never sum them. The extra capture is diagnostic and must not be compared
+with the uninstrumented timing ladder. `writeAllClocks()` output is not parsed:
+its text precision is too low for these short runs and it writes to stdout,
+which is reserved for the result protocol. Enabling native timer analysis also prints upstream timer tables
+to stdout; in this diagnostic mode the runner requires exactly one versioned
+result JSON line and retains all other stdout bytes. The adapter enables only
+the pinned solver-time and numerical-linear-algebra-time analysis flags (8 | 32).
+
+Run this as another isolated capture with a fresh output directory. Before
+rendering, place the actual Release build receipt in that directory as
+`build-provenance.json` (the renderer requires `build_type`, `cxx_compiler`,
+`cmake_version`, and `ninja_version`). Record these from the build used for
+the capture; do not copy provenance from an unrelated executable.
+
+```sh
+python3 benchmarks/reporting/review05/run_horizon_ladder.py \
+  --driver /tmp/csl-review05-horizon-build/csl_review05_horizon_ladder \
+  --scenarios benchmarks/reporting/review05/scenarios \
+  --output /tmp/csl-review05-highs-clocks \
+  --resource-receipts --phase-diagnostics --highs-internal-clocks
+python3 benchmarks/reporting/review05/check_horizon_ladder.py --bundle /tmp/csl-review05-highs-clocks
+python3 benchmarks/reporting/review05/summarize_phase_ladder.py \
+  --attempts /tmp/csl-review05-highs-clocks/attempts.jsonl \
+  --output /tmp/csl-review05-highs-clocks/phase-summary.json
+python3 benchmarks/reporting/review05/summarize_resource_ladder.py \
+  --attempts /tmp/csl-review05-highs-clocks/attempts.jsonl \
+  --output /tmp/csl-review05-highs-clocks/resource-summary.json
+python3 benchmarks/reporting/review05/summarize_horizon_ladder.py --bundle /tmp/csl-review05-highs-clocks
+python3 benchmarks/reporting/review05/render_horizon_ladder.py --bundle /tmp/csl-review05-highs-clocks
+```
+
 ## DIMENSION-01 vector pilot
 
 The follow-up pilot crosses state/control dimensions 1 and 2 with horizons 2

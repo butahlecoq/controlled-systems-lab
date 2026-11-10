@@ -66,6 +66,8 @@ jobs:
           run-id: ${{ needs.await.outputs.upstream_run_id }}
           github-token: ${{ github.token }}
           path: build/pages-download
+      - name: Install pinned report rendering dependencies
+        run: python -m pip install --requirement scripts/reports/requirements.txt
       - name: Stage and verify all Pages augmentations together
         run: >-
           python scripts/reports/augment_pages_bundle.py

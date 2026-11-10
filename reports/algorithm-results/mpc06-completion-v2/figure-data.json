@@ -1,0 +1,9460 @@
+{
+  "geometry": {
+    "exact_Z_vertices": [
+      [
+        "-1/8",
+        0
+      ],
+      [
+        "-1/8",
+        "1/4"
+      ],
+      [
+        "1/8",
+        0
+      ],
+      [
+        "1/8",
+        "-1/4"
+      ]
+    ],
+    "original_X": [
+      [
+        -1,
+        1
+      ],
+      [
+        -1,
+        1
+      ]
+    ],
+    "original_U": [
+      -1,
+      1
+    ],
+    "tightened_state_halfwidths": {
+      "polytope": [
+        "7/8",
+        "3/4"
+      ],
+      "inflated-zonotope": [
+        "13/16",
+        "5/8"
+      ],
+      "ellipsoid-certified": [
+        "1/2",
+        "3/8"
+      ]
+    },
+    "native_APP04": {
+      "schema": "csl.mpc06-online-approximation/1",
+      "method": "mpc06.app04.st",
+      "direction": "outer",
+      "radii": [
+        0.1767766952966369,
+        0.1767766952966369
+      ],
+      "center": [
+        0,
+        0
+      ],
+      "orientation": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "construction_ns": 317429
+    },
+    "scope": "analytical invariant/tightening illustration from the bound stored model; not replayed algorithm steps"
+  },
+  "actual_paths": [
+    {
+      "method": "finite-reference",
+      "repetition": 0,
+      "initial": [
+        "1/8",
+        "0"
+      ],
+      "disturbances": [
+        "1/8",
+        "-1/8",
+        "1/8"
+      ],
+      "states": [
+        [
+          "1/8",
+          "0"
+        ],
+        [
+          "1/8",
+          "250199979298361/4503599627370496"
+        ],
+        [
+          "813149932719673/4503599627370496",
+          "-649824946233243/2251799813685248"
+        ],
+        [
+          "-486499959746813/4503599627370496",
+          "4256488536705449/18014398509481984"
+        ]
+      ],
+      "cost": "69844081981161388275182445272145/162259276829213363391578010288128"
+    },
+    {
+      "method": "polytope",
+      "repetition": 0,
+      "initial": [
+        "1/8",
+        "0"
+      ],
+      "disturbances": [
+        "1/8",
+        "-1/8",
+        "1/8"
+      ],
+      "states": [
+        [
+          "1/8",
+          "0"
+        ],
+        [
+          "1/8",
+          "250199979298361/4503599627370496"
+        ],
+        [
+          "813149932719673/4503599627370496",
+          "-649824946233243/2251799813685248"
+        ],
+        [
+          "-486499959746813/4503599627370496",
+          "4256488536705449/18014398509481984"
+        ]
+      ],
+      "cost": "69844081981161388275182445272145/162259276829213363391578010288128"
+    },
+    {
+      "method": "inflated-zonotope",
+      "repetition": 0,
+      "initial": [
+        "1/8",
+        "0"
+      ],
+      "disturbances": [
+        "1/8",
+        "-1/8",
+        "1/8"
+      ],
+      "states": [
+        [
+          "1/8",
+          "0"
+        ],
+        [
+          "1/8",
+          "250199979298361/4503599627370496"
+        ],
+        [
+          "813149932719673/4503599627370496",
+          "-10397199139731885/36028797018963968"
+        ],
+        [
+          "-3891999677974501/36028797018963968",
+          "532061067088181/2251799813685248"
+        ]
+      ],
+      "cost": "139688163962322698744349106020673/324518553658426726783156020576256"
+    },
+    {
+      "method": "ellipsoid-certified",
+      "repetition": 0,
+      "initial": [
+        "1/8",
+        "0"
+      ],
+      "disturbances": [
+        "1/8",
+        "-1/8",
+        "1/8"
+      ],
+      "states": [
+        [
+          "1/8",
+          "0"
+        ],
+        [
+          "1/8",
+          "2001599834386887/36028797018963968"
+        ],
+        [
+          "6505199461757383/36028797018963968",
+          "-20794398279463773/72057594037927936"
+        ],
+        [
+          "-7783999355949007/72057594037927936",
+          "8512977073410897/36028797018963968"
+        ]
+      ],
+      "cost": "558752655849290930573429649261037/1298074214633706907132624082305024"
+    }
+  ],
+  "initial_grid": [
+    {
+      "anchor": [
+        "-1",
+        "-1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-5/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-1/2"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-3/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-1/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-1/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "-1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "0"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1",
+        "0"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "0"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "0"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1",
+        "1/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1",
+        "1/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1",
+        "3/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1",
+        "1/2"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1",
+        "5/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1",
+        "3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1",
+        "7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "1"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1",
+        "1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1",
+        "1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-5/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-1/2"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-3/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-1/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-1/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "-1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "0"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "0"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "0"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "0"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "1/2"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "5/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "3/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "1"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-7/8",
+        "1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-5/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-1/2"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-3/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-1/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "-1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "0"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "0"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "0"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "0"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "1/2"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "5/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "3/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "1"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/4",
+        "1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-5/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-1/2"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-3/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "-1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "0"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "0"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "0"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "0"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "1/2"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "5/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "3/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "1"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-5/8",
+        "1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-5/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-1/2"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "-1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "0"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "0"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "0"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "0"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "1/2"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "5/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "3/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "1"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/2",
+        "1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-5/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-1/2"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "-1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "0"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "0"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "0"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "0"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "1/2"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "5/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "3/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "1"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-3/8",
+        "1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-5/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-1/2"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "-1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "0"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "0"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "0"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "0"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "1/2"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "5/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-5/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-1/2"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "-1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "0"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "0"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "0"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "0"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "1/2"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "5/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "-1/8",
+        "1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "-1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "-1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "-1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "-1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "-7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "-7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "-7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "-7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "-3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "-3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "-3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "-3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "-5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "-5/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "-5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "-5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "-1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "-1/2"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "-1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "-1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "-3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "-3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "-3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "-3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "-1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "-1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "-1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "-1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "-1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "-1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "-1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "-1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "0"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "0"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "0"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "0"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "1/2"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "5/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "0",
+        "3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "0",
+        "1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-5/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-1/2"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "-1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "0"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "0"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "0"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "0"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "1/2"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "5/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/8",
+        "3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/8",
+        "1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-5/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-1/2"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "-1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "0"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "0"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "0"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "0"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "1/2"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/4",
+        "5/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/4",
+        "1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-1"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-3/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-5/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-1/2"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "0"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "0"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "0"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "0"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "1/2"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/8",
+        "5/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/8",
+        "1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-1"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-3/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-5/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-1/2"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "-1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "0"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "0"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "0"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "0"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1/2",
+        "1/2"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "5/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1/2",
+        "1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-1"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-3/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-5/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-1/2"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "-1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "0"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "0"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "0"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "0"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "5/8",
+        "3/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "1/2"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "5/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "5/8",
+        "1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-1"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-3/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-5/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-1/2"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "-1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "0"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "0"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "0"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "0"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "3/4",
+        "1/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "3/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "1/2"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "5/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "3/4",
+        "1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-1"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-3/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-5/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-1/2"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-3/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-1/4"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-1/8"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "-1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "0"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "7/8",
+        "0"
+      ],
+      "method": "polytope",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "7/8",
+        "0"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "0"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "7/8",
+        "1/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "1/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "3/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "1/2"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "5/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "7/8",
+        "1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-1"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1",
+        "-1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1",
+        "-7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1",
+        "-3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1",
+        "-5/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1",
+        "-1/2"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1",
+        "-3/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1",
+        "-1/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1",
+        "-1/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "-1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "0"
+      ],
+      "method": "finite-reference",
+      "feasible": true
+    },
+    {
+      "anchor": [
+        "1",
+        "0"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "0"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "0"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "1/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "1/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "1/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "1/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "1/4"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "1/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "1/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "1/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "3/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "3/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "3/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "3/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "1/2"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "1/2"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "1/2"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "1/2"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "5/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "5/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "5/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "5/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "3/4"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "3/4"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "3/4"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "3/4"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "7/8"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "7/8"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "7/8"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "7/8"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "1"
+      ],
+      "method": "finite-reference",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "1"
+      ],
+      "method": "polytope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "1"
+      ],
+      "method": "inflated-zonotope",
+      "feasible": false
+    },
+    {
+      "anchor": [
+        "1",
+        "1"
+      ],
+      "method": "ellipsoid-certified",
+      "feasible": false
+    }
+  ],
+  "scopes": {
+    "invariant": "analytical illustration of checked stored-model sets; not algorithm replay",
+    "paths": "actual saved three-step receding-controller worst histories for the first initial state",
+    "grid": "finite 17x17 initial-state feasibility samples under the same prescribed-K planning semantics; not a winning-set area"
+  }
+}
