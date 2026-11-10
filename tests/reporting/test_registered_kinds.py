@@ -174,6 +174,8 @@ class RegisteredKindTests(unittest.TestCase):
             self.assertTrue(publication.report_id.startswith("btulshor-source-faithful-"))
             shutil.copyfile(FIXTURES / "legacy-publications.json", bundle.parent / "legacy-publications.json")
             entry = btulshor_publication.catalogue_entry(bundle)
+            (bundle.parent / (publication.report_id + ".zip")).write_bytes(
+                btulshor_publication.offline_zip(bundle, publication))
             catalogue = {"schema": "csl.algorithm-report-catalog/3", "artifact_ref": "main", "reports": [entry]}
             catalog_path = bundle.parent / "catalog.json"
             catalog_path.write_text(json.dumps(catalogue), encoding="utf-8")
