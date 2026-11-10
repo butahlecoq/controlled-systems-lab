@@ -1,0 +1,15 @@
+{
+  "schema": "csl.mpc11.timing-archive-verification/1",
+  "archive_sha256": "91187fcbb7223944320c281c23fa6efb0010d98eb2cf050820592d4bdc77c02a",
+  "summary_sha256": "8d0855f1f13eb83aee4854944d65335352c7244d5fa395ceff10e827372f26b8",
+  "consumed_capture_files": 2840,
+  "all_18_units_status": "completed",
+  "all_420_nlp_transcriptions_checked": true,
+  "affine_qp_and_nonlinear_execution_checks": "all six arms including warmup checked",
+  "measured_samples_per_arm_and_case": 5,
+  "warmup_excluded": true,
+  "summary_input_map_equals_archived_capture_bytes": true,
+  "review_tool_sha256": "2979000da705ff5a972f99ce419146644221a13f56ee8c4b1da1efa965c0f21a",
+  "final_reader_adds_input_binding_without_changing_v2_numerical_or_timing_extraction": true,
+  "verdict": "inconclusive comparative performance: configured policy classes differ and native limiter profile is unavailable; descriptive repeated costs only"
+}
