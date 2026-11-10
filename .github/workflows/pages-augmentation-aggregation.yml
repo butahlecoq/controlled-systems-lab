@@ -66,13 +66,46 @@ jobs:
           run-id: ${{ needs.await.outputs.upstream_run_id }}
           github-token: ${{ github.token }}
           path: build/pages-download
-      - name: Install pinned report rendering dependencies
-        run: python -m pip install --requirement scripts/reports/requirements.txt
+      - name: Select the qualified optional report interpreter
+        id: mpc_python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11.14'
+          update-environment: false
+      - name: Install the hash-locked controller report environment
+        env:
+          MPC_REPORT_PYTHON: ${{ steps.mpc_python.outputs.python-path }}
+        run: |
+          "$MPC_REPORT_PYTHON" -m venv build/pages-mpc11-env
+          build/pages-mpc11-env/bin/python -m pip download --only-binary=:all: --require-hashes -r benchmarks/reporting/mpc11/environment/requirements-linux-cp311.lock --dest build/pages-mpc11-wheels
+          build/pages-mpc11-env/bin/python -m pip install --no-index --find-links build/pages-mpc11-wheels --require-hashes -r benchmarks/reporting/mpc11/environment/requirements-linux-cp311.lock
+          build/pages-mpc11-env/bin/python -m pip check
+          build/pages-mpc11-env/bin/python -m pip inspect > build/pages-mpc11-environment.json
+          build/pages-mpc11-env/bin/python -c 'import sys,json,hashlib,pathlib; p=pathlib.Path(sys.executable).resolve(); print(json.dumps({"python":sys.version,"executable":str(p),"sha256":hashlib.sha256(p.read_bytes()).hexdigest()}))' > build/pages-mpc11-interpreter.json
+          sha256sum build/pages-mpc11-wheels/*.whl > build/pages-mpc11-wheels.sha256
+      - name: Check cumulative staging with the qualified optional environment
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+          MPLCONFIGDIR: build/matplotlib-cache
+        run: build/pages-mpc11-env/bin/python -m tests.reporting.run_controller_publication_checks
       - name: Stage and verify all Pages augmentations together
+        env:
+          OPENBLAS_NUM_THREADS: '1'
+          OMP_NUM_THREADS: '1'
+          MKL_NUM_THREADS: '1'
+          MPLCONFIGDIR: build/matplotlib-cache
         run: >-
-          python scripts/reports/augment_pages_bundle.py
+          build/pages-mpc11-env/bin/python scripts/reports/augment_pages_bundle.py
           --download build/pages-download
           --site build/report-site
+      - name: Retain publication environment receipts with the complete site
+        run: |
+          for record in pages-mpc11-environment.json pages-mpc11-interpreter.json pages-mpc11-wheels.sha256; do
+            test ! -e "build/report-site/$record"
+            cp "build/$record" "build/report-site/$record"
+          done
       - name: Check that the complete artifact still targets current main
         id: head
         env:
