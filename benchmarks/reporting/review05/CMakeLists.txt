@@ -41,3 +41,19 @@ else()
   target_compile_options(csl_review05_dimension_ladder PRIVATE -Wall -Wextra -Wpedantic -Werror)
   target_compile_options(csl_review05_profile_matrix PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
+
+add_executable(csl_review05_family_query family_query_ladder.cpp)
+target_link_libraries(csl_review05_family_query PRIVATE
+  CSL::input CSL::application CSL::strategy_a CSL::strategy_b CSL::polyhedral CSL::affine_sum
+  CSL::qhull_conversion CSL::highs_lp CSL::highs_convex CSL::witness_selector)
+target_compile_features(csl_review05_family_query PRIVATE cxx_std_20)
+if(MSVC)
+  target_compile_options(csl_review05_family_query PRIVATE /W4 /WX /permissive-)
+else()
+  target_compile_options(csl_review05_family_query PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+
+if(CSL_REVIEW05_PROFILE_DRIVER AND NOT MSVC)
+  target_compile_options(csl_review05_family_query PRIVATE -pg)
+  target_link_options(csl_review05_family_query PRIVATE -pg)
+endif()

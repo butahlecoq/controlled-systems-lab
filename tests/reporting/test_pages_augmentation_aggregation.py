@@ -45,10 +45,12 @@ class PagesAugmentationAggregation(unittest.TestCase):
             self.assertIn(f'href="{routes["b04_c"]}.zip"', landing)
             self.assertIn(f'href="{routes["mpc06"]}/index.html"', landing)
             self.assertIn(f'href="{routes["mpc06"]}.zip"', landing)
+            self.assertIn(f'href="{routes["mpc06_complete"]}/index.html"', landing)
+            self.assertIn(f'href="{routes["mpc06_complete"]}.zip"', landing)
             self.assertEqual((site / "existing-route/index.html").read_text(), "existing")
             self.assertEqual((site / "examples/index.html").read_text(), "examples")
             self.assertTrue((site / "docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1/strategy-ab-ts03-summary.html").is_file())
-            for report_id in (routes["b04_c"], routes["mpc06"]):
+            for report_id in (routes["b04_c"], routes["mpc06"], routes["mpc06_complete"]):
                 with zipfile.ZipFile(site / f"{report_id}.zip") as archive:
                     self.assertIn(f"{report_id}/publication-manifest.json", archive.namelist())
 
@@ -87,6 +89,7 @@ class PagesAugmentationAggregation(unittest.TestCase):
         self.assertIn("augment_pages_bundle.py", workflow)
         self.assertIn("group: github-pages", workflow)
         self.assertIn("PAGES_SOURCE_RUN_ID", workflow)
+        self.assertLess(workflow.index("pip install"), workflow.index("name: Stage and verify all Pages augmentations together"))
 
 
 if __name__ == "__main__":

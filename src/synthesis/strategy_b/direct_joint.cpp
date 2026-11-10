@@ -20,6 +20,9 @@ namespace csl::synthesis::strategy_b {
 namespace {
 namespace ar=csl::artifacts;
 namespace ob=csl::execution::observability;
+constexpr const char* strategy_id="csl.synthesis.strategy-b";
+constexpr const char* strategy_version="1";
+Termination stopped_termination(StopReason);
 const RepresentationId h_polyhedron{"csl.polyhedron.h"};
 std::optional<ob::TimingScope> start_planned_run_scope(const ExecutionContext& context) noexcept {
     if(!context.timing||!context.timing->enabled())return {};
@@ -214,8 +217,8 @@ TerminalObjective lift(const TerminalObjective& objective,std::size_t width,std:
         }
     },objective);
 }
-} // namespace
-JointProgramOutcome build_joint_program(const problem::ResolvedProblem& p, const FamilyRequest& request) {
+JointProgramOutcome build_joint_program_impl(const problem::ResolvedProblem& p,const FamilyRequest& request,
+    const ExecutionContext* context) {
     auto diagnostics=capabilities(p,request); if(!diagnostics.empty()) return diagnostics;
     const auto source=p.description();const auto coords=p.constraints().coordinates();
     const auto width=p.constraints().joint_dimension();const auto n=coords.dimensions.state;
@@ -224,6 +227,8 @@ JointProgramOutcome build_joint_program(const problem::ResolvedProblem& p, const
     if(width!=0 && width>max/width) return Diagnostics{unsupported("joint.capacity","Objective storage width overflows size_t.")};
     if(const auto* residual=std::get_if<ResidualNormTerminal>(&source->objective); residual && width!=0 && residual->map.rows>max/width)
         return Diagnostics{unsupported("joint.capacity","Residual map storage overflows size_t.")};
+    auto assembly_scope=context?start_planned_operation_scope(*context,"strategy-b/joint-h-assembly",strategy_id,strategy_version):std::optional<ob::TimingScope>{};
+    if(assembly_scope)assembly_scope->observe_input_size(width);
     Assembly a(width);
     a.append_set(Singleton{std::get<KnownInitial>(source->initial).point},0,n,RowSource::initial,0);
     for(std::size_t t=0;t<=T;++t) a.append_set(source->states[t],t*n,n,RowSource::state,t);
@@ -242,29 +247,59 @@ JointProgramOutcome build_joint_program(const problem::ResolvedProblem& p, const
         Vector row(width);for(std::size_t j=0;j<width;++j)row[j]=temporal->joint_map(i,j);
         a.append(row,(*temporal->bounds)[i],RowSource::temporal,0,i);
     }
+    if(assembly_scope) {
+        assembly_scope->observe_output_size(a.matrix.values.size());
+        assembly_scope->close(Termination::completed);
+    }
+    auto objective_scope=context?start_planned_operation_scope(*context,"strategy-b/objective-lift",strategy_id,strategy_version):std::optional<ob::TimingScope>{};
+    if(objective_scope)objective_scope->observe_input_size(n);
     auto objective=lift(source->objective,width,T*n,n);
+    if(objective_scope) {
+        objective_scope->observe_output_size(width);
+        objective_scope->close(Termination::completed);
+    }
     const ProgramIdentity id{p.identity(),{"syn04-joint:"+p.identity().value}};
     std::optional<std::variant<LinearProgram,ConvexProgram>> program;
+    auto freeze_scope=context?start_planned_operation_scope(*context,"strategy-b/program-freeze",strategy_id,strategy_version):std::optional<ob::TimingScope>{};
+    if(freeze_scope)freeze_scope->observe_input_size(a.matrix.values.size());
     if(const auto* c=std::get_if<LinearTerminal>(&objective)) {
         auto built=optimization::make_linear_program({id,c->coefficients,c->offset,a.matrix,std::vector<Interval>(width),a.bounds});
-        if(const auto* d=std::get_if<Diagnostics>(&built)) return *d;
+        if(const auto* d=std::get_if<Diagnostics>(&built)) {
+            if(freeze_scope) {freeze_scope->mark_output_size_unavailable();freeze_scope->close(Termination::contract_rejected);}
+            return *d;
+        }
         program=std::get<LinearProgram>(std::move(built));
     } else {
         auto built=optimization::make_convex_program({id,objective,a.matrix,std::vector<Interval>(width),a.bounds,
             std::holds_alternative<ResidualNormTerminal>(objective)?std::optional<ProgramId>{{id.program.value+":squared"}}:std::nullopt},{request.assurance,request.numerical});
-        if(const auto* d=std::get_if<Diagnostics>(&built)) return *d;
-        if(const auto* stop=std::get_if<OperationStopped>(&built)) return *stop;
+        if(const auto* d=std::get_if<Diagnostics>(&built)) {
+            if(freeze_scope) {freeze_scope->mark_output_size_unavailable();freeze_scope->close(Termination::contract_rejected);}
+            return *d;
+        }
+        if(const auto* stop=std::get_if<OperationStopped>(&built)) {
+            if(freeze_scope) {freeze_scope->mark_output_size_unavailable();freeze_scope->close(stopped_termination(stop->reason));}
+            return *stop;
+        }
         program=std::get<ConvexProgram>(std::move(built));
+    }
+    if(freeze_scope) {
+        freeze_scope->observe_output_size(std::visit([](const auto& value) {
+            if constexpr(std::is_same_v<std::decay_t<decltype(value)>,LinearProgram>)return value.variables().size();
+            else return value.quadratic_program().variables().size();
+        },*program));
+        freeze_scope->close(Termination::completed);
     }
     std::vector<std::size_t> map(width);std::iota(map.begin(),map.end(),0);
     return JointProgram{coords,std::move(map),std::move(a.lineage),std::move(a.matrix),std::move(a.bounds),std::move(objective),std::move(*program)};
+}
+} // namespace
+JointProgramOutcome build_joint_program(const problem::ResolvedProblem& p,const FamilyRequest& request) {
+    return build_joint_program_impl(p,request,nullptr);
 }
 DirectJointPayload::DirectJointPayload(JointProgram p,sets::SetData r):construction(std::move(p)),relation(std::move(r)){}
 DirectJointWorkspace::DirectJointWorkspace(registry::PreparedProvider<registry::LPPort> lp,registry::PreparedProvider<registry::ConvexPort> qp)
     :lp_(std::move(lp)),convex_(std::move(qp)){}
 namespace {
-constexpr const char* strategy_id="csl.synthesis.strategy-b";
-constexpr const char* strategy_version="1";
 constexpr const char* complete_verifier_id="csl.verifier.ts01-analytic";
 constexpr const char* complete_verifier_version="1";
 Termination stopped_termination(StopReason reason) {
@@ -408,7 +443,7 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
             {{"syn04-build:"+p.identity().value},"strategy",{strategy_id},{},ModuleId{strategy_id},strategy_version},retained(result)};return result;
     }
     auto build_timing=start_planned_operation_scope(context,"strategy-b/program-build",strategy_id,strategy_version);
-    auto built=build_joint_program(p,request);
+    auto built=build_joint_program_impl(p,request,&context);
     if(build_timing)build_timing->close(std::holds_alternative<JointProgram>(built)?Termination::completed:
         std::holds_alternative<OperationStopped>(built)?stopped_termination(std::get<OperationStopped>(built).reason):Termination::contract_rejected);
     if(const auto* failure=std::get_if<Diagnostics>(&built)) {reject(*failure,Termination::contract_rejected);return result;}
