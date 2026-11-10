@@ -26,6 +26,18 @@ class EvidenceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             capture,_,source=self.make(Path(temporary));path=capture/'source/fixtures.py';path.write_bytes(source+b'\n# altered\n');self.write(capture/'file-hashes.json',inventory(capture))
             with self.assertRaisesRegex(ValueError,'copied source binding'):checked_capture(capture)
+    def test_failed_empty_native_stream_remains_inconclusive(self):
+        from benchmarks.reporting.mpc10.check import check
+        from benchmarks.reporting.mpc10.fixtures import fixtures
+        from benchmarks.reporting.mpc10.oracle import solve
+        s=fixtures()[0];s['fixture_sha256']=hashlib.sha256(json.dumps(s,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary);case=root/s['id'];case.mkdir();self.write(case/'fixture.json',s);self.write(case/'exact.json',solve(s))
+            for name in ['native','scip-process']:
+                folder=case/name;folder.mkdir();(folder/'stdout.txt').write_bytes(b'');(folder/'stderr.txt').write_bytes(b'worker failed')
+                self.write(folder/'process.json',{'status':'failed','return_code':1,'stdout_sha256':sha(folder/'stdout.txt'),'stderr_sha256':sha(folder/'stderr.txt')})
+            with mock.patch('benchmarks.reporting.mpc10.check.fixtures',return_value=[{k:v for k,v in s.items() if k!='fixture_sha256'}]),mock.patch('benchmarks.reporting.mpc10.check.checked_capture',return_value=inventory(root)):
+                self.assertEqual(check(root)['reports'][0]['status'],'inconclusive-process')
     def test_git_option_revision_refuses_before_git(self):
         with tempfile.TemporaryDirectory() as temporary:
             capture,_,_=self.make(Path(temporary));r=json.loads((capture/'environment.json').read_text());r['source_revision']='--output=/tmp/forged';self.write(capture/'environment.json',r);self.write(capture/'file-hashes.json',inventory(capture))

@@ -238,10 +238,11 @@ def check(bundle):
         if original!=fixture or hashlib.sha256(json.dumps(original,sort_keys=True,separators=(',',':')).encode()).hexdigest()!=declared:raise ValueError('scenario differs from authored registry')
         oracle=exact(s)
         if oracle!=load(folder/'exact.json'):raise ValueError('saved exact oracle differs')
-        raw_path=folder/'native/stdout.txt';native=load(raw_path);np=load(folder/'native/process.json');sp=load(folder/'scip-process/process.json')
+        raw_path=folder/'native/stdout.txt';np=load(folder/'native/process.json');sp=load(folder/'scip-process/process.json')
         for process,path in [(np,folder/'native'),(sp,folder/'scip-process')]:
             if process['stdout_sha256']!=sha(path/'stdout.txt') or process['stderr_sha256']!=sha(path/'stderr.txt'):raise ValueError('native process stream binding')
         if np['status']!='completed' or sp['status']!='completed' or np['return_code']!=0 or sp['return_code']!=0:reports.append({'id':s['id'],'status':'inconclusive-process','native_process':np,'scip_process':sp});continue
+        native=load(raw_path)
         if native.get('total_ns',0)/1e9>np['whole_process_seconds']+.001:raise ValueError('native whole-flow clock exceeds process span')
         if not s.get('external_unsupported'):
             attempts=load(folder/'scip/results.json')['attempts']
