@@ -11,21 +11,36 @@ from benchmarks.reporting.mpc10.evidence import checked_capture,checked_verifica
 class EvidenceTests(unittest.TestCase):
     def write(self,path,value):path.write_text(json.dumps(value,indent=2)+'\n')
     def make(self,root):
-        capture=root/'capture';capture.mkdir();(capture/'source').mkdir();source=SOURCE/'fixtures.py';(capture/'source/fixtures.py').write_bytes(source.read_bytes())
-        self.write(capture/'environment.json',{'source_revision':'a'*40,'source_sha256':{'fixtures.py':sha(source)}});self.write(capture/'raw.json',{'objective':.5});self.write(capture/'file-hashes.json',inventory(capture))
-        receipt=root/'verified.json';self.write(receipt,{'schema':'csl.mpc10.check/1','input_files':inventory(capture),'checking_sources':{'evidence.py':sha(SOURCE/'evidence.py')}})
-        return capture,receipt,source.read_bytes()
+        import zipfile
+        with zipfile.ZipFile(SOURCE/'evidence/comparison-525871ea/capture.zip') as z:z.extractall(root)
+        capture=root/'capture';receipt=root/'verified.json'
+        self.write(receipt,{'schema':'csl.mpc10.check/1','input_files':inventory(capture),'checking_revision':'a'*40,'checking_sources':{p.name:sha(p) for p in SOURCE.glob('*.py')}})
+        def committed(commit,name):
+            return (SOURCE/name).read_bytes() if commit=='a'*40 else (capture/'source'/name).read_bytes()
+        return capture,receipt,committed
     def test_rebound_raw_bytes_reject_stale_verification(self):
         with tempfile.TemporaryDirectory() as temporary:
             capture,receipt,source=self.make(Path(temporary))
-            with mock.patch('benchmarks.reporting.mpc10.evidence.subprocess.check_output',return_value=source):
+            with mock.patch('benchmarks.reporting.mpc10.evidence.git_bytes',side_effect=source):
                 checked_verification(capture,receipt)
                 self.write(capture/'raw.json',{'objective':1000});self.write(capture/'file-hashes.json',inventory(capture))
                 with self.assertRaisesRegex(ValueError,'verification input binding'):checked_verification(capture,receipt)
     def test_rebound_copied_source_rejects_recorded_source_binding(self):
         with tempfile.TemporaryDirectory() as temporary:
-            capture,_,source=self.make(Path(temporary));path=capture/'source/fixtures.py';path.write_bytes(source+b'\n# altered\n');self.write(capture/'file-hashes.json',inventory(capture))
+            capture,_,source=self.make(Path(temporary));path=capture/'source/fixtures.py';path.write_bytes(path.read_bytes()+b'\n# altered\n');self.write(capture/'file-hashes.json',inventory(capture))
             with self.assertRaisesRegex(ValueError,'copied source binding'):checked_capture(capture)
+    def test_checker_git_bytes_and_revision_are_mandatory(self):
+        for mode in ('option','self-rehashed'):
+            with self.subTest(mode=mode),tempfile.TemporaryDirectory() as temporary:
+                capture,receipt,source=self.make(Path(temporary));r=json.loads(receipt.read_text())
+                if mode=='option':r['checking_revision']='--output=forged'
+                self.write(receipt,r)
+                def committed(commit,name):
+                    value=source(commit,name)
+                    return value+b'changed' if mode=='self-rehashed' and commit=='a'*40 else value
+                with mock.patch('benchmarks.reporting.mpc10.evidence.git_bytes',side_effect=committed):
+                    with self.assertRaisesRegex(ValueError,'full hexadecimal|checking commit'):checked_verification(capture,receipt)
+
     def test_failed_empty_native_stream_remains_inconclusive(self):
         from benchmarks.reporting.mpc10.check import check
         from benchmarks.reporting.mpc10.fixtures import fixtures
@@ -46,3 +61,33 @@ class EvidenceTests(unittest.TestCase):
                 git.assert_not_called()
 
 if __name__=='__main__':unittest.main()
+
+class ClosedSourceInventoryTests(unittest.TestCase):
+    def test_saved_capture_rejects_empty_subset_unknown_and_self_rehashed_sources(self):
+        import zipfile
+        archive=SOURCE/'evidence/comparison-525871ea/capture.zip'
+        for mode in ('empty','subset','unknown','self-rehashed'):
+            with self.subTest(mode=mode),tempfile.TemporaryDirectory() as tmp:
+                with zipfile.ZipFile(archive) as z:z.extractall(tmp)
+                capture=Path(tmp)/'capture';env=json.loads((capture/'environment.json').read_text())
+                if mode=='empty':env['source_sha256']={}
+                elif mode=='subset':env['source_sha256'].pop('oracle.py')
+                elif mode=='unknown':env['source_sha256']['unknown.py']='0'*64
+                else:
+                    source=capture/'source/oracle.py';source.write_bytes(source.read_bytes()+b'\n# changed\n');env['source_sha256']['oracle.py']=sha(source)
+                (capture/'environment.json').write_text(json.dumps(env));(capture/'file-hashes.json').write_text(json.dumps(inventory(capture)))
+                with self.assertRaises(ValueError):checked_capture(capture)
+
+    def test_saved_receipt_rejects_empty_subset_unknown_checker_maps(self):
+        import zipfile
+        archive=SOURCE/'evidence/comparison-525871ea/capture.zip'
+        for mode in ('empty','subset','unknown'):
+            with self.subTest(mode=mode),tempfile.TemporaryDirectory() as tmp:
+                with zipfile.ZipFile(archive) as z:z.extractall(tmp)
+                capture=Path(tmp)/'capture';receipt=Path(tmp)/'receipt.json'
+                maps={p.name:sha(p) for p in SOURCE.glob('*.py')}
+                if mode=='empty':maps={}
+                elif mode=='subset':maps.pop('oracle.py')
+                else:maps['unknown.py']='0'*64
+                receipt.write_text(json.dumps({'schema':'csl.mpc10.check/1','input_files':inventory(capture),'checking_sources':maps}))
+                with self.assertRaises(ValueError):checked_verification(capture,receipt)
