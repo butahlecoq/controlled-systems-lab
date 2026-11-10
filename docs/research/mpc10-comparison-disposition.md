@@ -83,3 +83,11 @@ execution. No environment installation is required for staging, and no native
 or solver binary is redistributed. The main-only cumulative integration remains
 root-owned. The live immutable route, deployed hashes and completion audit are
 pending; this source adapter alone does not complete #606 delivery.
+
+The [local publication qualification](evidence/mpc10-local-publication-11c3fe96.json)
+records the staged route/source/object and ZIP identities, six passing publication
+boundary tests, and the full saved26-case recheck in an extracted directory outside
+a Git checkout. Its source and receipt checks use a sanitized Git environment;
+all119 native LPs,24 unrestricted SCIP models,131 fixed-history models and the
+node-limit outcome recheck without optimization/native execution. This is local
+verification evidence, not a published URL or completion claim.

@@ -1,0 +1,43 @@
+{
+  "deployment_status": "pending independent review, current CI, cumulative main-only staging, live URL/hash inspection and completion audit",
+  "local_route": "mpc10-comparison-b0707fd19f8afcf694e6",
+  "offline_zip_sha256": "61a387e3dfcba247094fe9fdbe211b2ae9827537421f2b90840359c02c239d14",
+  "outside_checkout_full_saved_check": {
+    "SCIP_fixed": 131,
+    "SCIP_global": 24,
+    "cases": 26,
+    "environment": "existing PySCIPOpt6.3.0 / SCIP10.0.2; source/receipt/metrics and full oracle/model comparison with sanitized Git environment",
+    "interrupted": 1,
+    "native_LPs": 119,
+    "optimization_or_native_execution": false,
+    "status": "checked"
+  },
+  "publication_boundary_tests": {
+    "cases": 6,
+    "seconds": 9.219,
+    "status": "passed"
+  },
+  "schema": "csl.mpc10.local-publication-check/1",
+  "source_receipt": {
+    "capture_revision": "525871ea658c3147f30c96e9cb7824b91ed410f2",
+    "checking_revision": "7373bd97192f83a3b0e03d6a073256ca230f3217",
+    "helper_revision": "11c3fe96dcbfaf2f042b013b4aaf8e1511923b2b",
+    "helper_sha256": {
+      "benchmarks/reporting/mpc10/CMakeLists.txt": "6421adc4296ac9f4e5f99670f4f574394c0928e86b322963641bb2ba5c7680f0",
+      "benchmarks/reporting/mpc10/bridge.cpp": "7a5d89baf8223a85c300162779f2bd1f61ce1448fd225964849b65057c9e10d7",
+      "benchmarks/reporting/mpc10/check.py": "79e686cdb818593b12d790b105a759301ad0660fcf08e71c9d485bd49738bb31",
+      "benchmarks/reporting/mpc10/evidence.py": "296c564f542fdb367f0e2e27d21c7b3be59cb6a7041792ed0ab891de7330cc46",
+      "benchmarks/reporting/mpc10/figures.py": "27d5e490a6b0572753d1c8b97b618e4ebc5414e1d470798804a9ae633f6ab74d",
+      "benchmarks/reporting/mpc10/fixtures.py": "afdca13af17f0b5249455bd667688445256818c2ed4afe2bcd8171025c70be85",
+      "benchmarks/reporting/mpc10/metrics.py": "13b0df87b5fb90ae31d4a3dca49af1c5279f61c5e43e0d44d9b3cac0162f8b75",
+      "benchmarks/reporting/mpc10/oracle.py": "dc9b50add0d6dde9da92315537847ba11e4cfc823bdab8280464102ddf820335",
+      "benchmarks/reporting/mpc10/run.py": "dd23511ce25a5e1fe7d8c84563841d8a02f4bcdbce00a524f261242d723605c2",
+      "benchmarks/reporting/mpc10/scip_reference.py": "a01c836e118b7a3b66b67f87f4f69139ad02041c1091cb633e1cf4f74de7e707",
+      "scripts/reports/figure_style.py": "c2f7078df95b9d75fe90f0f407023383cae4b58dd688dfa5fa5ac5b9d18664c6",
+      "scripts/reports/plot.py": "12403aa6d6c425636e7a8f1be11e1664955334267279484b5c672f129afbfa3a",
+      "scripts/reports/stage_mpc10_comparison.py": "06e56a018b5f71d2ebdb5561d8e4ef713fb5a5a55c609d6e752b395f5cadd985"
+    },
+    "object_count": 33
+  },
+  "source_revision": "11c3fe96dcbfaf2f042b013b4aaf8e1511923b2b"
+}
