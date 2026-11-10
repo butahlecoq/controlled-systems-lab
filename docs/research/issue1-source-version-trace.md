@@ -12,6 +12,8 @@ The selected-source register does not list L04 as an archive-selected algorithm 
 
 The archive also has an editable article manuscript at archive-relative path `Публикации/Минимакс/Unconstrained for AaRC/Paper/Shorikov_Kalev_AiT.tex` (37,412 bytes; SHA-256 `7dfcd12b5f946d459411ba7467d6a176d42ab33c20d56ce860fb8477c6ce956f`). Its lines 147 and 307 state the terminal criterion as the unweighted four-coordinate Euclidean norm to `(1200,0,450,0)`; its lines 320 and 335 reproduce the nonlinear terminal coordinates and reported `14.048`. This is primary article-manuscript evidence for the criterion and the printed row. It does not identify a MATLAB revision or saved run data. The already recorded displayed-row calculation gives approximately `16.42069149` for the printed nonlinear coordinates under that criterion; the original reported value remains unchanged (`docs/research/publication-source-matrix.md`, B08 row; `docs/research/baselines.md`, B08 section).
 
+The [2026-11-10 draft uncertainty follow-up](issue1-draft-uncertainty-revision.md) now distinguishes this manuscript and its matching PDF/embedded figure from published L04: they report a different uncertainty matrix and linear cost `56.433`, rather than the later time-varying-bound result `67.12`. The shared nonlinear row and `14.048` discrepancy remain unresolved; the follow-up supplies exact row-offset checks without claiming a generating-run link.
+
 The selected-source register contains W07, the separate notebook at SHA-256 `882ebb911cd495d5f724836653f8eeca93ef94d91282d5158d623441f8adbacd` (`docs/research/works-selected-sources.json`), whose data differ from L04. It is not a source-to-row match.
 
 ### Newly checked adaptive-project autosave candidate
