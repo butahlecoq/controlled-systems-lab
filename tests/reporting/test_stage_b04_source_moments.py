@@ -60,6 +60,10 @@ class StageB04SourceMomentsTests(unittest.TestCase):
         self.assertIn("30.899136030011613430", page)
         self.assertIn("31.121409450500400415", page)
         self.assertIn("14-dimensional", page)
+        family = page.split('<section id="complete-optimal-family">', 1)[1].split("</section>", 1)[0]
+        self.assertIn("B04-SOURCE-COMMENTED-X0-V1", family)
+        self.assertIn("separately gives the corresponding relation", family)
+        self.assertIn("B04-SOURCE-ACTIVE-X0-V1", family)
         self.assertIn("Performance was not measured", page)
         self.assertIn("aria-label=\"Seventeen exact witness states\"", page)
         self.assertIn("aria-label=\"Sixteen exact witness controls\"", page)

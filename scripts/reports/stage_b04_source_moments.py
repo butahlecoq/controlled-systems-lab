@@ -230,7 +230,8 @@ main{{max-width:1180px;margin:auto;padding:clamp(1rem,4vw,3rem)}}p,li{{overflow-
 <p>This strict-feasibility witness proves that the two independent optimality equalities retain a 14-dimensional family under the inequalities. It is one member, not the family itself.</p>
 <div class="table-wrap" role="region" aria-label="Sixteen exact witness controls" tabindex="0"><table><thead><tr><th>Control k</th><th>Time interval (s)</th><th>u[k]</th></tr></thead><tbody>{control_rows}</tbody></table></div>
 <div class="table-wrap" role="region" aria-label="Seventeen exact witness states" tabindex="0"><table><thead><tr><th>Stage k</th><th>Time (s)</th>{''.join(f'<th>{html.escape(n)} ({html.escape(u)})</th>' for n,u in zip(names,units))}</tr></thead><tbody>{state_rows}</tbody></table></div></section>
-<section><h2>Complete 14-dimensional optimal family</h2>
+<section id="complete-optimal-family"><h2>Complete 14-dimensional optimal family</h2>
+<p>The concrete relation below is for <code>{SCENARIO_IDS["commented_initial"]}</code>. The certificate separately gives the corresponding relation for <code>{SCENARIO_IDS["active_rounded_initial"]}</code>, using its own initial state, moment equalities and prefix bounds.</p>
 <p>Every global minimizer is exactly a control vector satisfying both moment equalities and all 64 listed halfspace inequalities. The affine equality rows are independent (columns 0 and 15 give determinant −15). Each such vector has one unique state history under the recurrence.</p>
 <div class="card"><p><strong>Moment equalities</strong><br><code>Σ[k=0..15] u[k] = {html.escape(case['sum_control'])}</code><br><code>Σ[k=0..15] (15−k)u[k] = {html.escape(case['weighted_control_sum'])}</code></p>
 <p><strong>Control bounds</strong> <code>−1 ≤ u[k] ≤ 1</code> for k=0,…,15.<br><strong>Prefix-flow bounds</strong> <code>{html.escape(case['prefix_bounds'][0])} ≤ Σ[j=0..k−1]u[j] ≤ {html.escape(case['prefix_bounds'][1])}</code> for k=1,…,16.</p>
