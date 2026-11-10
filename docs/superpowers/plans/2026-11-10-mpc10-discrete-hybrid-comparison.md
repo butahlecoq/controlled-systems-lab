@@ -59,3 +59,18 @@ adoption of author MATLAB code or a general hybrid-game solver.
 No new core API or required library dependency is planned. Optional report
 consumers require no library release. No acados execution, MATLAB purchase or
 unlicensed source adoption. Shared publication integration remains root-owned.
+
+## Bounded publication follow-up
+
+Stage a unique report/gallery hook without editing root-owned shared integration.
+Preserve comparison-525871ea byte-for-byte. Add a separately versioned current
+checker/metrics receipt after the source-binding correction, validate it before
+publication, and reuse the two saved figures. Include all26 complete fixture
+inputs, counts, actual proof/refusal statuses and descriptive cost scopes.
+Export the minimal authentic Git objects required by capture/current helper
+checks, selecting a stable last-helper-touch first-parent commit. The complete
+ZIP must check outside a checkout: Python/Git for source/receipt/metrics binding,
+and the existing qualified PySCIPOpt environment for full saved oracle/model
+rechecking without optimization. Test forgery, renewed empty receipt inventories,
+unsafe archives, unrelated commits/merged helper changes, and failure before site
+writes. Review/CI/main-only staging/live hash inspection remain separate gates.

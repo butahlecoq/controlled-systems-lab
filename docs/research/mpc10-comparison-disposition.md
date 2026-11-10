@@ -63,3 +63,23 @@ specification review, current CI, publication contract checks and a verified
 live route remain before any #606 closure. A completion audit must assess the
 bounded admitted profile and its explicit proof limits; this document does not
 silently broaden them into general hybrid control or a timing winner.
+
+## Publication adapter
+
+The unique `scripts/reports/stage_mpc10_comparison.py` hook stages the two saved
+figures and all26 complete minimal fixtures beside the unchanged original
+archive. A separately versioned current receipt/metrics reading layer records
+checker strengthening without rewriting measured records or their original
+source provenance. The complete offline ZIP includes a minimal authentic Git
+object store, not a full checkout or fabricated history. Current helper identity
+uses the last first-parent helper change, including merges, so unrelated commits
+preserve its route. Every actual helper byte must match the selected commit.
+
+Standard-library staging/offline validation checks all source/raw/receipt and
+metrics bindings. Full saved mathematical/model checking outside the checkout
+uses the existing qualified PySCIPOpt6.3.0/SCIP10.0.2 environment to reconstruct
+indicator models and compare raw records; it performs no optimization or native
+execution. No environment installation is required for staging, and no native
+or solver binary is redistributed. The main-only cumulative integration remains
+root-owned. The live immutable route, deployed hashes and completion audit are
+pending; this source adapter alone does not complete #606 delivery.
