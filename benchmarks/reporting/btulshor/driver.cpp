@@ -324,7 +324,7 @@ Json comparison(const Json& fixture) {
         for (const auto key : {"retained_indices", "retained_points", "retained_count", "modif_calls", "pivot_count"})
             if (raw_kpabep.contains(key)) result[key] = raw_kpabep.at(key);
     }
-    result["provider_order"] = json::array();
+    result["provider_order"] = Json::array();
     for (const auto& provider : result["providers"])
         result["provider_order"].push_back(provider.at("method_id"));
     result["comparison_scope"] = "method outputs are preserved; no equality is inferred from vertex counts";
