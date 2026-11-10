@@ -18,7 +18,9 @@ import sys
 import time
 import threading
 from fractions import Fraction as Q
-import policy
+if __package__ in (None,''):
+    sys.path.insert(0,str(Path(__file__).resolve().parents[3]))
+from benchmarks.reporting.mpc07 import policy
 
 ROOT=Path(__file__).resolve().parents[3]
 BRIDGE_SHA='266e1cda61b064b4603ff6499d76dc4db59106e4e673905f585c54caafa9c533'
