@@ -4,8 +4,8 @@ from fractions import Fraction as Q
 import sys
 import unittest
 ROOT=Path(__file__).resolve().parents[2]
-sys.path.insert(0,str(ROOT/'benchmarks/reporting/mpc07'))
-import joint_filter as J
+if str(ROOT) not in sys.path:sys.path.insert(0,str(ROOT))
+from benchmarks.reporting.mpc07 import joint_filter as J
 
 class JointFilterTests(unittest.TestCase):
     def test_physical_exact_lower_bound_and_filter_gain(self):
@@ -57,7 +57,7 @@ if __name__=='__main__':unittest.main()
 class JointSavedCaptureTests(unittest.TestCase):
     def test_renewed_source_or_timeout_metadata_cannot_bless_saved_capture(self):
         import tempfile,zipfile,json,hashlib
-        import report
+        from benchmarks.reporting.mpc07 import report
         artifact=ROOT/'benchmarks/reporting/mpc07/evidence/joint-filter-04369201/offline.zip'
         for mode in ('source','timeout','repetitions'):
             with self.subTest(mode=mode),tempfile.TemporaryDirectory() as temporary:
@@ -82,7 +82,7 @@ class JointAttainmentRenderingTests(unittest.TestCase):
     @unittest.skipUnless(importlib.util.find_spec('matplotlib') is not None,'saved rendering requires optional pinned Matplotlib')
     def test_saved_valid_positive_gap_remains_an_upper_bound_in_rendered_report(self):
         import tempfile,zipfile,json,hashlib
-        import capture,report,joint_capture
+        from benchmarks.reporting.mpc07 import capture,report,joint_capture
         artifact=ROOT/'benchmarks/reporting/mpc07/evidence/joint-filter-04369201/offline.zip'
         with tempfile.TemporaryDirectory() as temporary:
             base=Path(temporary)
@@ -114,7 +114,7 @@ class JointAttainmentRenderingTests(unittest.TestCase):
 
 class ExactAttainmentTextTests(unittest.TestCase):
     def test_sub_float_positive_gap_is_never_rounded_into_attainment(self):
-        import report
+        from benchmarks.reporting.mpc07 import report
         lower=Q(65,64)**2;gap=Q(1,10**100)
         row=dict(receipt=dict(policy_class='joint'),current_check=dict(status='verified-joint-rational-policy',
                  virtual_terminal_squared=str(lower+gap),physical_unrestricted_lower_squared=str(lower),upper_minus_physical_lower_squared=str(gap)))
@@ -123,3 +123,30 @@ class ExactAttainmentTextTests(unittest.TestCase):
         self.assertEqual(Q(decision['maximum_gap']),gap)
         row['current_check']['virtual_terminal_squared']=str(lower);row['current_check']['upper_minus_physical_lower_squared']='0'
         self.assertTrue(report.joint_attainment([row])['all_attain_lower'])
+
+class JointModuleNamespaceTests(unittest.TestCase):
+    def test_saved_joint_dispatch_preserves_foreign_module_cache(self):
+        import subprocess,tempfile,textwrap
+        code=textwrap.dedent('''
+            from pathlib import Path
+            import sys,types,tempfile,zipfile
+            root=Path(sys.argv[1]);sys.path.insert(0,str(root))
+            names=('report','capture','policy','joint_capture','joint_filter')
+            sentinels={name:types.ModuleType(name) for name in names};sys.modules.update(sentinels)
+            from benchmarks.reporting.mpc07 import report,capture,policy,joint_capture,joint_filter
+            assert joint_capture.capture is capture and joint_capture.J is joint_filter and joint_filter.policy is policy
+            with tempfile.TemporaryDirectory() as temporary:
+                with zipfile.ZipFile(root/'benchmarks/reporting/mpc07/evidence/joint-filter-04369201/offline.zip') as z:z.extractall(temporary)
+                _,records,_,_=report.checked_records(Path(temporary)/'mpc07-joint-report/RAW')
+                assert len(records)==72 and report.joint_attainment(records)['maximum_gap']=='0'
+            assert all(sys.modules[name] is module for name,module in sentinels.items())
+        ''')
+        with tempfile.TemporaryDirectory() as temporary:
+            result=subprocess.run([sys.executable,'-B','-c',code,str(ROOT)],cwd=temporary,capture_output=True,text=True,timeout=30)
+        self.assertEqual(result.returncode,0,result.stderr)
+
+    def test_joint_cli_bootstraps_outside_checkout(self):
+        import subprocess,tempfile
+        with tempfile.TemporaryDirectory() as temporary:
+            result=subprocess.run([sys.executable,'-B',str(ROOT/'benchmarks/reporting/mpc07/joint_capture.py'),'--help'],cwd=temporary,capture_output=True,text=True,timeout=10)
+        self.assertEqual(result.returncode,0,result.stderr);self.assertIn('usage:',result.stdout)

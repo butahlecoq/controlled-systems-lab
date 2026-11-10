@@ -1,11 +1,11 @@
 from pathlib import Path
-import importlib.util
+import sys
 from fractions import Fraction as Q
 import unittest
 
 ROOT=Path(__file__).resolve().parents[2]
-spec=importlib.util.spec_from_file_location('mpc07_policy',ROOT/'benchmarks/reporting/mpc07/policy.py')
-P=importlib.util.module_from_spec(spec);spec.loader.exec_module(P)
+if str(ROOT) not in sys.path:sys.path.insert(0,str(ROOT))
+from benchmarks.reporting.mpc07 import policy as P
 
 class PolicyTests(unittest.TestCase):
     def test_analytic_known_and_filter_oracles(self):
@@ -74,8 +74,7 @@ if __name__=='__main__':unittest.main()
 class SavedOutcomeTests(unittest.TestCase):
     def test_empty_stopped_process_is_inconclusive_before_parsing(self):
         import tempfile,json,sys
-        sys.path.insert(0,str(ROOT/'benchmarks/reporting/mpc07'))
-        import capture
+        from benchmarks.reporting.mpc07 import capture
         with tempfile.TemporaryDirectory() as temporary:
             folder=Path(temporary);(folder/'receipt.json').write_text(json.dumps(dict(status='wall-limit',returncode=-9,timed_out=True)))
             (folder/'stdout.json').write_bytes(b'')
@@ -83,8 +82,7 @@ class SavedOutcomeTests(unittest.TestCase):
 
     def test_summary_retains_unverified_attempts_in_denominator(self):
         import sys
-        sys.path.insert(0,str(ROOT/'benchmarks/reporting/mpc07'))
-        import report
+        from benchmarks.reporting.mpc07 import report
         receipt=dict(warmup=False,horizon=2,sigma='1',policy_class='adf',variables=20,rows=39,nonzeros=77,
                      python_prepare_ns=10,whole_process_ns=100)
         rows=[dict(receipt=receipt,current_check=dict(status='verified-rational-reconstruction',worst_terminal_squared='1'),native_setup_ns=20,native_port_run_ns=30),
@@ -95,8 +93,7 @@ class SavedOutcomeTests(unittest.TestCase):
 
     def test_spawn_failure_is_a_retained_process_outcome(self):
         import tempfile,sys
-        sys.path.insert(0,str(ROOT/'benchmarks/reporting/mpc07'))
-        import capture
+        from benchmarks.reporting.mpc07 import capture
         with tempfile.TemporaryDirectory() as temporary:
             folder=Path(temporary)
             receipt=capture.attempt(folder,folder/'missing-binary',P.program(2,Q(1),'adf'))
@@ -108,7 +105,7 @@ class SavedOutcomeTests(unittest.TestCase):
 class ProvenanceRegressionTests(unittest.TestCase):
     def test_timeout_flag_cannot_bless_completed_zero_return(self):
         import tempfile,json,sys
-        sys.path.insert(0,str(ROOT/'benchmarks/reporting/mpc07'));import capture
+        from benchmarks.reporting.mpc07 import capture
         with tempfile.TemporaryDirectory() as temporary:
             folder=Path(temporary)
             (folder/'receipt.json').write_text(json.dumps(dict(status='completed',returncode=0,timed_out=True,whole_process_ns=100)))
@@ -118,7 +115,7 @@ class ProvenanceRegressionTests(unittest.TestCase):
 
     def test_self_rehashed_source_snapshot_requires_git_identity(self):
         import tempfile,json,zipfile,hashlib,sys
-        sys.path.insert(0,str(ROOT/'benchmarks/reporting/mpc07'));import report
+        from benchmarks.reporting.mpc07 import report
         artifact=ROOT/'benchmarks/reporting/mpc07/evidence/bounded-policy-0e821c2a/offline.zip'
         with tempfile.TemporaryDirectory() as temporary:
             with zipfile.ZipFile(artifact) as saved:saved.extractall(temporary)
@@ -132,7 +129,7 @@ class ProvenanceRegressionTests(unittest.TestCase):
 
     def test_missing_inventory_and_option_revision_refuse_before_source_io(self):
         import tempfile,sys
-        sys.path.insert(0,str(ROOT/'benchmarks/reporting/mpc07'));import report
+        from benchmarks.reporting.mpc07 import report
         with tempfile.TemporaryDirectory() as temporary:
             folder=Path(temporary)
             for revision,inventory,error in [('--output='+str(folder/'outside'),{},'full pinned'),('a'*40,{},'mandatory')]:
@@ -142,7 +139,7 @@ class ProvenanceRegressionTests(unittest.TestCase):
 
     def test_rebound_timeout_receipt_cannot_retain_saved_verified_disposition(self):
         import tempfile,json,zipfile,hashlib,sys
-        sys.path.insert(0,str(ROOT/'benchmarks/reporting/mpc07'));import report
+        from benchmarks.reporting.mpc07 import report
         artifact=ROOT/'benchmarks/reporting/mpc07/evidence/bounded-policy-0e821c2a/offline.zip'
         with tempfile.TemporaryDirectory() as temporary:
             with zipfile.ZipFile(artifact) as saved:saved.extractall(temporary)
@@ -154,3 +151,32 @@ class ProvenanceRegressionTests(unittest.TestCase):
             (attempt/'check.json').write_text(json.dumps(checked))
             (raw/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(raw).as_posix()}\n' for p in sorted(raw.rglob('*')) if p.is_file() and p!=raw/'SHA256SUMS'))
             with self.assertRaisesRegex(ValueError,'disposition differs'):report.checked_records(raw)
+
+class ModuleNamespaceRegressionTests(unittest.TestCase):
+    def test_saved_recheck_ignores_and_preserves_unrelated_module_names(self):
+        import subprocess,sys,textwrap
+        code=textwrap.dedent('''
+            from pathlib import Path
+            import sys,types,tempfile,zipfile
+            root=Path(sys.argv[1]);sys.path.insert(0,str(root))
+            sentinels={name:types.ModuleType(name) for name in ('report','capture','policy')}
+            sys.modules.update(sentinels)
+            from benchmarks.reporting.mpc07 import report,capture,policy
+            assert report.capture is capture and report.policy is policy and capture.policy is policy
+            with tempfile.TemporaryDirectory() as temporary:
+                with zipfile.ZipFile(root/'benchmarks/reporting/mpc07/evidence/bounded-policy-0e821c2a/offline.zip') as z:z.extractall(temporary)
+                _,records,_,_=report.checked_records(Path(temporary)/'mpc07-report/RAW')
+                assert len(records)==146 and report.metrics(records)
+            assert all(sys.modules[name] is module for name,module in sentinels.items())
+        ''')
+        with __import__('tempfile').TemporaryDirectory() as temporary:
+            result=subprocess.run([sys.executable,'-B','-c',code,str(ROOT)],cwd=temporary,capture_output=True,text=True,timeout=30)
+        self.assertEqual(result.returncode,0,result.stderr)
+
+    def test_standalone_cli_bootstraps_from_outside_checkout(self):
+        import subprocess,sys,tempfile
+        with tempfile.TemporaryDirectory() as temporary:
+            for name in ('capture.py','report.py'):
+                result=subprocess.run([sys.executable,'-B',str(ROOT/'benchmarks/reporting/mpc07'/name),'--help'],cwd=temporary,capture_output=True,text=True,timeout=10)
+                self.assertEqual(result.returncode,0,result.stderr)
+                self.assertIn('usage:',result.stdout)
