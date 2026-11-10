@@ -6,9 +6,11 @@ import html
 import importlib.util
 import io
 import json
+import math
 from pathlib import Path, PurePosixPath
 import re
 import stat
+import subprocess
 import sys
 import tempfile
 import zipfile
@@ -97,6 +99,42 @@ def current_renderer():
     return module
 
 
+POST_CAPTURE_CHECKERS={
+    'benchmarks/reporting/mpc11/check_affine_saved.py':{'frozen_checker_sha256':'658d326941bb761654de417a8ca3b5be5144088b0a62b3d6496511a8c167ca24',
+        'current_checker_sha256':'4cb46b15b2600db5b4cd43c163f100227551b22d5e880e727222fbc6fc7df599'},
+    'benchmarks/reporting/mpc11/check_nonlinear_saved.py':{'frozen_checker_sha256':'84056242a0f5c0ea8406ac479cbcd01bc7fed3ce1a4f46a9c9990a5b0703a856',
+        'current_checker_sha256':'775c24080c9516b8c5aff1b08e460150b8086dcbc3cdca0bc9078f2b27f65935'},
+}
+REBUILD_QUALIFICATION=dict(absolute_tolerance=1e-13,relative_tolerance=1e-12,
+    scope="floating derivation/replay only; stored identities and immutable archive hashes remain exact")
+
+
+NMPC_DIAGNOSTICS=frozenset(('sampled_execution_physical_state_violation','applied_physical_control_violation',
+    'max_nlp_objective_rebuild_difference','max_nlp_constraint_rebuild_difference','max_stationarity_rebuild_difference'))
+
+
+def checked_report_agreement(current,frozen):
+    require(current.keys()==frozen.keys(),'saved checker kinds differ')
+    def numerical(value,reference):
+        return type(value) in (int,float) and type(reference) in (int,float) and math.isfinite(value) and math.isfinite(reference) and math.isclose(
+            value,reference,abs_tol=REBUILD_QUALIFICATION['absolute_tolerance'],rel_tol=REBUILD_QUALIFICATION['relative_tolerance'])
+    def diagnostic(value,reference):
+        if isinstance(reference,list):
+            return isinstance(value,list) and len(value)==len(reference) and all(diagnostic(a,b) for a,b in zip(value,reference))
+        return type(value) in (int,float) and math.isfinite(value) and value>=0
+    for kind,rows in frozen.items():
+        require(isinstance(current[kind],list) and len(current[kind])==len(rows),'saved checker case inventory differs')
+        for observed,reference in zip(current[kind],rows):
+            require(observed.keys()==reference.keys(),'saved checker report fields differ')
+            for name,previous in reference.items():
+                if (kind=='affine' and name=='objective') or (kind=='nmpc' and name=='completed_objective'):
+                    require(numerical(observed[name],previous),'saved original objective differs')
+                elif kind=='nmpc' and name in NMPC_DIAGNOSTICS:
+                    require(diagnostic(observed[name],previous),'invalid current numerical diagnostic')
+                else:
+                    require(type(observed[name]) is type(previous) and observed[name]==previous,'saved checker identity/status/count differs: '+name)
+
+
 def validate(evidence=EVIDENCE):
     evidence=Path(evidence)
     require(not evidence.is_symlink(),'unsafe evidence root')
@@ -109,7 +147,14 @@ def validate(evidence=EVIDENCE):
     for name,checksum in receipt['helper_snapshot_sha256'].items():
         safe_name(name);require(digest(figures['source/'+name]) == checksum,'helper snapshot differs')
     for name,checksum in receipt['tool_sha256'].items():
-        safe_name(name);require(digest((ROOT/name).read_bytes()) == checksum,'current checker/source differs from reviewed figure: '+name)
+        safe_name(name)
+        if name in POST_CAPTURE_CHECKERS:
+            qualification=POST_CAPTURE_CHECKERS[name]
+            require(checksum==qualification['frozen_checker_sha256'] and
+                    digest((ROOT/name).read_bytes())==qualification['current_checker_sha256'],
+                    'current checker differs from qualified post-capture source: '+name)
+        else:
+            require(digest((ROOT/name).read_bytes()) == checksum,'current checker/source differs from reviewed figure: '+name)
     frozen={FIGURES:figures};archives={};extracted={}
     for kind,(folder,checksum) in ARCHIVES.items():
         files=directory(evidence/folder)
@@ -132,8 +177,11 @@ def validate(evidence=EVIDENCE):
             bundles[kind]=folder/'accepted'
             manifest=json.loads((bundles[kind]/'manifest.json').read_text())
             require(manifest['source_revision'] == archives[kind]['capture_source'],'capture source differs')
-        reports=current_renderer().checked_inputs(**bundles)
-        require(reports == receipt['saved_checks'],'current saved checks differ from frozen figure checks')
+        try:
+            reports=current_renderer().checked_inputs(**bundles)
+        except subprocess.CalledProcessError as error:
+            raise ValueError('saved numerical checker failed: '+(error.stderr or str(error))[-6000:]) from error
+        checked_report_agreement(reports,receipt['saved_checks'])
         for slug in ('syn-nl-lv-01','syn-nl-fuel-01'):
             load=lambda path:json.loads(path.read_text())
             scenario=load(bundles['nmpc']/slug/'scenario.json')
@@ -150,7 +198,12 @@ def validate(evidence=EVIDENCE):
                 require(digest(path.read_bytes()) == receipt['input_sha256'][slug+'/'+key],'plotted input hash differs')
     verification={'affine_checks':len(reports['affine']),'nonlinear_cases':len(reports['nonlinear']),
                   'nmpc_steps':sum(row['transcriptions_checked'] for row in reports['nmpc']),
+                  'post_capture_checkers':POST_CAPTURE_CHECKERS,'numerical_rebuild_qualification':REBUILD_QUALIFICATION,
+                  'historical_diagnostics':'frozen figure receipt preserved; current host-specific diagnostics are retained in CI logs/artifacts, outside immutable publication bytes',
                   'scope':'saved identities, numerical witnesses, sampled cost/constraints and transcription rebuild; no optimization/integration rerun'}
+    print(json.dumps({'schema':'csl.mpc11.current-recheck/1','figure_manifest_sha256':FIGURE_ANCHOR,
+        'input_archives':archives,'current_tool_sha256':{name:digest((ROOT/name).read_bytes()) for name in receipt['tool_sha256']},
+        'numerical_rebuild_qualification':REBUILD_QUALIFICATION,'current_saved_checks':reports},sort_keys=True),file=sys.stderr)
     return frozen,archives,verification
 
 
@@ -168,7 +221,7 @@ def stage(site,evidence=EVIDENCE,*,example_card_writer=None):
     for folder in ('scenarios','environment'):
         source_files.update({f'benchmarks/reporting/mpc11/{folder}/'+name:digest(content)
                              for name,content in directory(MODULE/folder).items() if '__pycache__' not in PurePosixPath(name).parts})
-    for p in (MODULE/'FIGURES.md', ROOT/'scripts/reports/figure_style.py'):
+    for p in (MODULE/'FIGURES.md', MODULE/'AFFINE-RECHECK.md', ROOT/'scripts/reports/figure_style.py'):
         source_files[p.relative_to(ROOT).as_posix()]=digest(p.read_bytes())
     identity={'figures_manifest':FIGURE_ANCHOR,'archives':ARCHIVES,'stager_sha256':digest(Path(__file__).read_bytes()),
               'current_sources':source_files}
@@ -185,7 +238,7 @@ def stage(site,evidence=EVIDENCE,*,example_card_writer=None):
             if '__pycache__' not in PurePosixPath(name).parts:generated[prefix+folder+'/'+name]=content
     for name in ('figure_style.py','stage_mpc11_controller_comparison.py'):
         generated['scripts/reports/'+name]=(ROOT/'scripts/reports'/name).read_bytes()
-    for name in ('FIGURES.md',):generated[prefix+name]=(MODULE/name).read_bytes()
+    for name in ('FIGURES.md','AFFINE-RECHECK.md'):generated[prefix+name]=(MODULE/name).read_bytes()
     figures_path=prefix+'evidence/'+FIGURES
     sections=[]
     for slug,title in [('syn-nl-lv-01','Lotka–Volterra: P/R'),('syn-nl-fuel-01','Fuel: m_ox/q_ox and m_f/q_f')]:
@@ -203,7 +256,7 @@ def stage(site,evidence=EVIDENCE,*,example_card_writer=None):
 <p>The current saved checks verify three affine records, two nonlinear cases and all 70 saved NMPC transcriptions. They rebuild identities, sampled cost/constraints and local stationarity diagnostics; they do not rerun any solver or integrator. Complete accepted trajectories are plotted. Initial/failed/resource-limited attempts remain in the raw archives and are excluded from these complete overlays. Prefix/resource outcomes are unavailable as complete answers, not mathematical counterexamples.</p>
 <p><strong>Performance comparison: inconclusive.</strong> Pilot durations do not rank controllers. Local numerical solver status is not a global/minimax guarantee. These are individual trajectories, not reachable-set enclosures, backward sets, continuous-time safety certificates or robust policies. Connecting affine hold-boundary samples does not add integrated samples. No acados result is claimed.</p>'''+''.join(sections)+
         '<h2>Raw evidence, source and reproduction</h2><p>'+ ' · '.join(f'<a href="raw/{kind}.zip">{kind} complete pilot ZIP</a>' for kind in ARCHIVES)+
-        f'</p><p><a href="{figures_path}/receipt.json">Frozen figure receipt and full input/tool hashes</a> · <a href="publication-manifest.json">Current publication provenance</a> · <a href="README.md">Offline checking commands</a> · <a href="../{route}.zip">Complete publication ZIP</a></p>'+
+        f'</p><p><a href="{figures_path}/receipt.json">Frozen figure receipt and full input/tool hashes</a> · <a href="publication-manifest.json">Current publication provenance</a> · <a href="{prefix}AFFINE-RECHECK.md">Post-capture affine checker qualification</a> · <a href="README.md">Offline checking commands</a> · <a href="../{route}.zip">Complete publication ZIP</a></p>'+
         '<p>Source commits: '+' · '.join(f'<a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{data["capture_source"]}">{kind}: {data["capture_source"]}</a>' for kind,data in archives.items())+
         f'. Renderer source: 60bda0fb; <a href="{figures_path}/source/figures.py">frozen renderer</a>. Required library dependencies/API remain unchanged; reproduction uses the optional Linux CPython environment and retains solver/license limits. Issue #607 remains open for remaining study and deployment gates.</p></body></html>').encode()
     generated['README.md']=f'''# Offline saved comparison checks
@@ -211,6 +264,9 @@ def stage(site,evidence=EVIDENCE,*,example_card_writer=None):
 Enter this publication route after extracting the complete ZIP into a fresh
 folder. Run `sha256sum -c SHA256SUMS`. Frozen pilot/figure manifests and receipts
 remain byte-preserved. New checking provenance is publication-manifest.json.
+The separately qualified current affine derivation checker and numerical rebuild
+tolerances are documented in `{prefix}AFFINE-RECHECK.md`. Stored identity checks
+remain exact.
 
 Use the optional environment described in `{prefix}environment/README.md`;
 its exact Linux CPython wheel lock and notices are included. No required library

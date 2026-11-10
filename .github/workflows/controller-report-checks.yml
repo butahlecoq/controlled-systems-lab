@@ -8,6 +8,7 @@ on:
       - 'benchmarks/reporting/mpc11/**'
       - 'scripts/reports/**'
       - 'reports/algorithm-results/**'
+      - 'tests/reporting/test_mpc11_affine_saved.py'
       - 'tests/reporting/test_mpc11_publication.py'
       - 'tests/reporting/test_pages_augmentation_aggregation.py'
       - 'tests/reporting/run_controller_publication_checks.py'
@@ -20,6 +21,7 @@ on:
       - 'benchmarks/reporting/mpc11/**'
       - 'scripts/reports/**'
       - 'reports/algorithm-results/**'
+      - 'tests/reporting/test_mpc11_affine_saved.py'
       - 'tests/reporting/test_mpc11_publication.py'
       - 'tests/reporting/test_pages_augmentation_aggregation.py'
       - 'tests/reporting/run_controller_publication_checks.py'
@@ -57,4 +59,14 @@ jobs:
       - name: Require actual controller dependencies before selecting full tests
         run: build/controller-report-env/bin/python -c 'import sys,numpy,scipy,casadi,do_mpc; assert sys.version_info[:3] == (3,11,14)'
       - name: Recheck saved transcriptions and complete cumulative staging
-        run: build/controller-report-env/bin/python -m tests.reporting.run_controller_publication_checks
+        run: |
+          set -o pipefail
+          build/controller-report-env/bin/python -m tests.reporting.run_controller_publication_checks 2>&1 | tee build/controller-publication-checks.log
+      - name: Retain current host checking diagnostics separately from Pages
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: controller-publication-checks-${{ github.sha }}-${{ github.run_id }}
+          path: build/controller-publication-checks.log
+          if-no-files-found: ignore
+          retention-days: 30
