@@ -161,3 +161,5 @@ augmentation stages this immutable bundle under
 `docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1/` and adds it to the
 reports landing page; live URL verification remains pending after deployment.
 The remaining #597 comparison matrix is also pending.
+
+- [Faithful BTULSHOR modules and measured hull comparison](btulshor-source-faithful-comparison.md): 45 source-oracle cases, ten measured clouds, exact hull checks and reproduction commands.

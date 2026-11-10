@@ -380,6 +380,18 @@
       "measured_scope": "External exact mathematical audit of the owner-authorized corrected-track B04-C profile",
       "evidence_limits": "Research evidence only: no compiled verifier or prepared Strategy A result; does not satisfy the registered complete-family requirement; not a historical reproduction; A40 unit scaling remains unresolved",
       "zip_sha256": "a0186e4c04383ad2c8c0f9b5bf516eccd7df544b4121257493d5ac8a315b92a6"
+    },
+    {
+      "report_id": "btulshor-source-faithful-4adbb0ed60b8c2f2d5f83ebef2ee1bb75e0dcb8c627f369e18f7826e438e8d39",
+      "report_kind": "btulshor-source-faithful",
+      "source_report_id": "btulshor-source-faithful-20261110-v1",
+      "payload_schema": "csl.btulshor-source-faithful-bundle/1",
+      "payload_sha256": "208136b1e1ee555c1714853528aeea6f3265c595f929f6e70e19ecdb1329403a",
+      "native_payload_sha256": "8d3bc25fb8dfd75b1c43bfffe86b794750e2f16dd712d9be84aa141a9c1c6a05",
+      "source_commit": "9979bec7ce7c72ddb6d15f35a7bf7b16e7d124d2",
+      "measured_scope": "Saved multi-fixture BTULSHOR comparison; five alternating measured driver runs per fixture; method statuses, exact-check results, and elapsed nanoseconds retained in raw JSON.",
+      "evidence_limits": "Source-faithful legacy implementation compared with independent methods on the saved fixture set; exact-check outcomes are preserved per fixture, including near-tolerance failures; timings are descriptive observations and establish no performance winner.",
+      "zip_sha256": "304e58d437ee80860c3d7e3ce52929ccdcd91fee2258a3515ebef496b851fe0b"
     }
   ]
 }
