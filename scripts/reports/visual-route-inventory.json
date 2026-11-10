@@ -1517,6 +1517,18 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_mpc10_comparison.py",
+      "signal_count": 11,
+      "asset_name_literals": [
+        "branches.png",
+        "branches.svg",
+        "paths.png",
+        "paths.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route",
+      "role_and_disposition_reason": "Authenticates the finite/mixed/hybrid capture, reading receipt and copied two-dimensional path figures; no solver or renderer runs during staging."
+    },
+    {
       "source": "scripts/reports/stage_projection_figures.py",
       "signal_count": 4,
       "asset_name_literals": [],
