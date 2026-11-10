@@ -1,5 +1,7 @@
 # R29 corrected scalar-input reachability reference
 
+The [2026-11-10 owner decision](owner-reference-decisions-2026-11-10.md) accepts this scalar-input construction as the working R29 reference. It does not establish historical author intent or reproduce the old timing.
+
 Date: 2026-10-16. Status: **editorial mathematical reference**, not a
 reproduction of the historical executable or its timings. This case is
 separate from B04 and does not specify an objective or optimal control family.

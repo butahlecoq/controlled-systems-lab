@@ -1,5 +1,7 @@
 # Research dossier
 
+The [owner-selected working references](owner-reference-decisions-2026-11-10.md) record the accepted B04, R29, L04 and L13 choices, the revised historical-reproduction acceptance policy, and the requested source-faithful legacy C++ modules.
+
 Assessment date: 2026-10-11. Rolling literature window: 2021-10-11 through 2026-10-11. Status: initial investigation.
 
 ## Reading order
