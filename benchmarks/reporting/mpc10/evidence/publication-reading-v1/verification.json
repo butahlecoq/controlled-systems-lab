@@ -1,0 +1,2691 @@
+{
+  "schema": "csl.mpc10.check/1",
+  "reports": [
+    {
+      "id": "finite-T0",
+      "native": {
+        "candidate_face_check": "not-applicable",
+        "status": "verified-bounded-branches",
+        "branch_count": 1,
+        "all_optimal_paths": [],
+        "complete_continuous_family": false
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 1,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": null,
+      "exact_all_optimal_paths": []
+    },
+    {
+      "id": "finite-T1",
+      "native": {
+        "candidate_face_check": "not-applicable",
+        "status": "verified-bounded-branches",
+        "branch_count": 3,
+        "all_optimal_paths": [
+          {
+            "actions": [
+              1
+            ]
+          },
+          {
+            "actions": [
+              2
+            ]
+          }
+        ],
+        "complete_continuous_family": false
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 3,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": "0",
+      "exact_all_optimal_paths": [
+        {
+          "actions": [
+            1
+          ]
+        },
+        {
+          "actions": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finite-T2",
+      "native": {
+        "candidate_face_check": "not-applicable",
+        "status": "verified-bounded-branches",
+        "branch_count": 9,
+        "all_optimal_paths": [
+          {
+            "actions": [
+              0,
+              1
+            ]
+          },
+          {
+            "actions": [
+              0,
+              2
+            ]
+          },
+          {
+            "actions": [
+              1,
+              0
+            ]
+          },
+          {
+            "actions": [
+              2,
+              0
+            ]
+          }
+        ],
+        "complete_continuous_family": false
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 9,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": "0",
+      "exact_all_optimal_paths": [
+        {
+          "actions": [
+            0,
+            1
+          ]
+        },
+        {
+          "actions": [
+            0,
+            2
+          ]
+        },
+        {
+          "actions": [
+            1,
+            0
+          ]
+        },
+        {
+          "actions": [
+            2,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finite-T3",
+      "native": {
+        "candidate_face_check": "not-applicable",
+        "status": "verified-bounded-branches",
+        "branch_count": 27,
+        "all_optimal_paths": [
+          {
+            "actions": [
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "actions": [
+              0,
+              0,
+              2
+            ]
+          },
+          {
+            "actions": [
+              0,
+              1,
+              0
+            ]
+          },
+          {
+            "actions": [
+              0,
+              2,
+              0
+            ]
+          },
+          {
+            "actions": [
+              1,
+              0,
+              0
+            ]
+          },
+          {
+            "actions": [
+              2,
+              0,
+              0
+            ]
+          }
+        ],
+        "complete_continuous_family": false
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 27,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": "0",
+      "exact_all_optimal_paths": [
+        {
+          "actions": [
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "actions": [
+            0,
+            0,
+            2
+          ]
+        },
+        {
+          "actions": [
+            0,
+            1,
+            0
+          ]
+        },
+        {
+          "actions": [
+            0,
+            2,
+            0
+          ]
+        },
+        {
+          "actions": [
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "actions": [
+            2,
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mixed-T0",
+      "native": {
+        "candidate_face_check": "not-applicable",
+        "status": "verified-bounded-branches",
+        "branch_count": 1,
+        "all_optimal_paths": [
+          {
+            "actions": []
+          }
+        ],
+        "complete_continuous_family": false
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 1,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": "0",
+      "exact_all_optimal_paths": [
+        {
+          "actions": []
+        }
+      ]
+    },
+    {
+      "id": "mixed-T1",
+      "native": {
+        "candidate_face_check": "not-applicable",
+        "status": "verified-bounded-branches",
+        "branch_count": 3,
+        "all_optimal_paths": [
+          {
+            "actions": [
+              0
+            ]
+          },
+          {
+            "actions": [
+              1
+            ]
+          },
+          {
+            "actions": [
+              2
+            ]
+          }
+        ],
+        "complete_continuous_family": false
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 3,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": "0",
+      "exact_all_optimal_paths": [
+        {
+          "actions": [
+            0
+          ]
+        },
+        {
+          "actions": [
+            1
+          ]
+        },
+        {
+          "actions": [
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mixed-T2",
+      "native": {
+        "candidate_face_check": "not-applicable",
+        "status": "verified-bounded-branches",
+        "branch_count": 9,
+        "all_optimal_paths": [
+          {
+            "actions": [
+              0,
+              0
+            ]
+          },
+          {
+            "actions": [
+              0,
+              1
+            ]
+          },
+          {
+            "actions": [
+              0,
+              2
+            ]
+          },
+          {
+            "actions": [
+              1,
+              0
+            ]
+          },
+          {
+            "actions": [
+              1,
+              1
+            ]
+          },
+          {
+            "actions": [
+              1,
+              2
+            ]
+          },
+          {
+            "actions": [
+              2,
+              0
+            ]
+          },
+          {
+            "actions": [
+              2,
+              1
+            ]
+          },
+          {
+            "actions": [
+              2,
+              2
+            ]
+          }
+        ],
+        "complete_continuous_family": false
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 9,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": "0",
+      "exact_all_optimal_paths": [
+        {
+          "actions": [
+            0,
+            0
+          ]
+        },
+        {
+          "actions": [
+            0,
+            1
+          ]
+        },
+        {
+          "actions": [
+            0,
+            2
+          ]
+        },
+        {
+          "actions": [
+            1,
+            0
+          ]
+        },
+        {
+          "actions": [
+            1,
+            1
+          ]
+        },
+        {
+          "actions": [
+            1,
+            2
+          ]
+        },
+        {
+          "actions": [
+            2,
+            0
+          ]
+        },
+        {
+          "actions": [
+            2,
+            1
+          ]
+        },
+        {
+          "actions": [
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mixed-T3",
+      "native": {
+        "candidate_face_check": "not-applicable",
+        "status": "verified-bounded-branches",
+        "branch_count": 27,
+        "all_optimal_paths": [
+          {
+            "actions": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "actions": [
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "actions": [
+              0,
+              0,
+              2
+            ]
+          },
+          {
+            "actions": [
+              0,
+              1,
+              0
+            ]
+          },
+          {
+            "actions": [
+              0,
+              1,
+              1
+            ]
+          },
+          {
+            "actions": [
+              0,
+              1,
+              2
+            ]
+          },
+          {
+            "actions": [
+              0,
+              2,
+              0
+            ]
+          },
+          {
+            "actions": [
+              0,
+              2,
+              1
+            ]
+          },
+          {
+            "actions": [
+              0,
+              2,
+              2
+            ]
+          },
+          {
+            "actions": [
+              1,
+              0,
+              0
+            ]
+          },
+          {
+            "actions": [
+              1,
+              0,
+              1
+            ]
+          },
+          {
+            "actions": [
+              1,
+              0,
+              2
+            ]
+          },
+          {
+            "actions": [
+              1,
+              1,
+              0
+            ]
+          },
+          {
+            "actions": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "actions": [
+              1,
+              1,
+              2
+            ]
+          },
+          {
+            "actions": [
+              1,
+              2,
+              0
+            ]
+          },
+          {
+            "actions": [
+              1,
+              2,
+              1
+            ]
+          },
+          {
+            "actions": [
+              1,
+              2,
+              2
+            ]
+          },
+          {
+            "actions": [
+              2,
+              0,
+              0
+            ]
+          },
+          {
+            "actions": [
+              2,
+              0,
+              1
+            ]
+          },
+          {
+            "actions": [
+              2,
+              0,
+              2
+            ]
+          },
+          {
+            "actions": [
+              2,
+              1,
+              0
+            ]
+          },
+          {
+            "actions": [
+              2,
+              1,
+              1
+            ]
+          },
+          {
+            "actions": [
+              2,
+              1,
+              2
+            ]
+          },
+          {
+            "actions": [
+              2,
+              2,
+              0
+            ]
+          },
+          {
+            "actions": [
+              2,
+              2,
+              1
+            ]
+          },
+          {
+            "actions": [
+              2,
+              2,
+              2
+            ]
+          }
+        ],
+        "complete_continuous_family": false
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 27,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": "0",
+      "exact_all_optimal_paths": [
+        {
+          "actions": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "actions": [
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "actions": [
+            0,
+            0,
+            2
+          ]
+        },
+        {
+          "actions": [
+            0,
+            1,
+            0
+          ]
+        },
+        {
+          "actions": [
+            0,
+            1,
+            1
+          ]
+        },
+        {
+          "actions": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "actions": [
+            0,
+            2,
+            0
+          ]
+        },
+        {
+          "actions": [
+            0,
+            2,
+            1
+          ]
+        },
+        {
+          "actions": [
+            0,
+            2,
+            2
+          ]
+        },
+        {
+          "actions": [
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "actions": [
+            1,
+            0,
+            1
+          ]
+        },
+        {
+          "actions": [
+            1,
+            0,
+            2
+          ]
+        },
+        {
+          "actions": [
+            1,
+            1,
+            0
+          ]
+        },
+        {
+          "actions": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "actions": [
+            1,
+            1,
+            2
+          ]
+        },
+        {
+          "actions": [
+            1,
+            2,
+            0
+          ]
+        },
+        {
+          "actions": [
+            1,
+            2,
+            1
+          ]
+        },
+        {
+          "actions": [
+            1,
+            2,
+            2
+          ]
+        },
+        {
+          "actions": [
+            2,
+            0,
+            0
+          ]
+        },
+        {
+          "actions": [
+            2,
+            0,
+            1
+          ]
+        },
+        {
+          "actions": [
+            2,
+            0,
+            2
+          ]
+        },
+        {
+          "actions": [
+            2,
+            1,
+            0
+          ]
+        },
+        {
+          "actions": [
+            2,
+            1,
+            1
+          ]
+        },
+        {
+          "actions": [
+            2,
+            1,
+            2
+          ]
+        },
+        {
+          "actions": [
+            2,
+            2,
+            0
+          ]
+        },
+        {
+          "actions": [
+            2,
+            2,
+            1
+          ]
+        },
+        {
+          "actions": [
+            2,
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finite-empty-T0",
+      "native": {
+        "candidate_face_check": "not-applicable",
+        "status": "verified-bounded-branches",
+        "branch_count": 1,
+        "all_optimal_paths": [],
+        "complete_continuous_family": false
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 1,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": null,
+      "exact_all_optimal_paths": []
+    },
+    {
+      "id": "finite-empty-T1",
+      "native": {
+        "candidate_face_check": "not-applicable",
+        "status": "verified-bounded-branches",
+        "branch_count": 0,
+        "all_optimal_paths": [],
+        "complete_continuous_family": false
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 0,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": null,
+      "exact_all_optimal_paths": []
+    },
+    {
+      "id": "published-2d-identity",
+      "native": {
+        "candidate_face_check": "exact-profile-candidate-face-relations-checked",
+        "status": "verified-bounded-branches",
+        "branch_count": 1,
+        "all_optimal_paths": [
+          {
+            "modes": [
+              "source",
+              "target"
+            ],
+            "edges": [
+              "switch"
+            ]
+          }
+        ],
+        "complete_continuous_family": true
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 1,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": "0",
+      "exact_all_optimal_paths": [
+        {
+          "modes": [
+            "source",
+            "target"
+          ],
+          "edges": [
+            "switch"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "guard-negative-reset",
+      "native": {
+        "candidate_face_check": "exact-profile-candidate-face-relations-checked",
+        "status": "verified-bounded-branches",
+        "branch_count": 2,
+        "all_optimal_paths": [
+          {
+            "modes": [
+              "source",
+              "target"
+            ],
+            "edges": [
+              "switch-a"
+            ]
+          },
+          {
+            "modes": [
+              "source",
+              "target"
+            ],
+            "edges": [
+              "switch-b"
+            ]
+          }
+        ],
+        "complete_continuous_family": true
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 2,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": "1/2",
+      "exact_all_optimal_paths": [
+        {
+          "modes": [
+            "source",
+            "target"
+          ],
+          "edges": [
+            "switch-a"
+          ]
+        },
+        {
+          "modes": [
+            "source",
+            "target"
+          ],
+          "edges": [
+            "switch-b"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "source-pre-invariant-fails",
+      "native": {
+        "candidate_face_check": "exact-profile-candidate-face-relations-checked",
+        "status": "verified-bounded-branches",
+        "branch_count": 1,
+        "all_optimal_paths": [],
+        "complete_continuous_family": false
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 1,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": null,
+      "exact_all_optimal_paths": []
+    },
+    {
+      "id": "guard-fails",
+      "native": {
+        "candidate_face_check": "exact-profile-candidate-face-relations-checked",
+        "status": "verified-bounded-branches",
+        "branch_count": 1,
+        "all_optimal_paths": [],
+        "complete_continuous_family": false
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 1,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": null,
+      "exact_all_optimal_paths": []
+    },
+    {
+      "id": "destination-invariant-fails",
+      "native": {
+        "candidate_face_check": "exact-profile-candidate-face-relations-checked",
+        "status": "verified-bounded-branches",
+        "branch_count": 1,
+        "all_optimal_paths": [],
+        "complete_continuous_family": false
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 1,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": null,
+      "exact_all_optimal_paths": []
+    },
+    {
+      "id": "forbidden-transition",
+      "native": {
+        "status": "verified-empty-branch-inventory",
+        "branch_count": 0,
+        "complete_continuous_family": false,
+        "native_construction": {
+          "diagnostics": [
+            {
+              "code": 3,
+              "explanation": "No allowed hybrid path exists for the requested terminal modes",
+              "field": "hybrid.portfolio.paths"
+            }
+          ],
+          "status": "public-api-refused",
+          "variant_index": 1
+        }
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 0,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": null,
+      "exact_all_optimal_paths": []
+    },
+    {
+      "id": "hybrid-T0",
+      "native": {
+        "candidate_face_check": "exact-profile-candidate-face-relations-checked",
+        "status": "verified-bounded-branches",
+        "branch_count": 1,
+        "all_optimal_paths": [
+          {
+            "modes": [
+              "A"
+            ],
+            "edges": []
+          }
+        ],
+        "complete_continuous_family": true
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 1,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": "-1",
+      "exact_all_optimal_paths": [
+        {
+          "modes": [
+            "A"
+          ],
+          "edges": []
+        }
+      ]
+    },
+    {
+      "id": "hybrid-T1",
+      "native": {
+        "candidate_face_check": "exact-profile-candidate-face-relations-checked",
+        "status": "verified-bounded-branches",
+        "branch_count": 3,
+        "all_optimal_paths": [
+          {
+            "modes": [
+              "A",
+              "A"
+            ],
+            "edges": [
+              "stay-A"
+            ]
+          }
+        ],
+        "complete_continuous_family": true
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 3,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": "-1",
+      "exact_all_optimal_paths": [
+        {
+          "modes": [
+            "A",
+            "A"
+          ],
+          "edges": [
+            "stay-A"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hybrid-T2",
+      "native": {
+        "candidate_face_check": "exact-profile-candidate-face-relations-checked",
+        "status": "verified-bounded-branches",
+        "branch_count": 7,
+        "all_optimal_paths": [
+          {
+            "modes": [
+              "A",
+              "A",
+              "A"
+            ],
+            "edges": [
+              "stay-A",
+              "stay-A"
+            ]
+          }
+        ],
+        "complete_continuous_family": false
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 7,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": "-1",
+      "exact_all_optimal_paths": [
+        {
+          "modes": [
+            "A",
+            "A",
+            "A"
+          ],
+          "edges": [
+            "stay-A",
+            "stay-A"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hybrid-T3",
+      "native": {
+        "candidate_face_check": "exact-profile-candidate-face-relations-checked",
+        "status": "verified-bounded-branches",
+        "branch_count": 17,
+        "all_optimal_paths": [
+          {
+            "modes": [
+              "A",
+              "A",
+              "A",
+              "A"
+            ],
+            "edges": [
+              "stay-A",
+              "stay-A",
+              "stay-A"
+            ]
+          },
+          {
+            "modes": [
+              "A",
+              "A",
+              "B",
+              "A"
+            ],
+            "edges": [
+              "stay-A",
+              "switch-a",
+              "return"
+            ]
+          },
+          {
+            "modes": [
+              "A",
+              "A",
+              "B",
+              "A"
+            ],
+            "edges": [
+              "stay-A",
+              "switch-b",
+              "return"
+            ]
+          },
+          {
+            "modes": [
+              "A",
+              "B",
+              "A",
+              "B"
+            ],
+            "edges": [
+              "switch-a",
+              "return",
+              "switch-a"
+            ]
+          },
+          {
+            "modes": [
+              "A",
+              "B",
+              "A",
+              "B"
+            ],
+            "edges": [
+              "switch-a",
+              "return",
+              "switch-b"
+            ]
+          },
+          {
+            "modes": [
+              "A",
+              "B",
+              "B",
+              "A"
+            ],
+            "edges": [
+              "switch-a",
+              "stay-B",
+              "return"
+            ]
+          },
+          {
+            "modes": [
+              "A",
+              "B",
+              "A",
+              "B"
+            ],
+            "edges": [
+              "switch-b",
+              "return",
+              "switch-a"
+            ]
+          },
+          {
+            "modes": [
+              "A",
+              "B",
+              "A",
+              "B"
+            ],
+            "edges": [
+              "switch-b",
+              "return",
+              "switch-b"
+            ]
+          },
+          {
+            "modes": [
+              "A",
+              "B",
+              "B",
+              "A"
+            ],
+            "edges": [
+              "switch-b",
+              "stay-B",
+              "return"
+            ]
+          }
+        ],
+        "complete_continuous_family": false
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 17,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": "-1",
+      "exact_all_optimal_paths": [
+        {
+          "modes": [
+            "A",
+            "A",
+            "A",
+            "A"
+          ],
+          "edges": [
+            "stay-A",
+            "stay-A",
+            "stay-A"
+          ]
+        },
+        {
+          "modes": [
+            "A",
+            "A",
+            "B",
+            "A"
+          ],
+          "edges": [
+            "stay-A",
+            "switch-a",
+            "return"
+          ]
+        },
+        {
+          "modes": [
+            "A",
+            "A",
+            "B",
+            "A"
+          ],
+          "edges": [
+            "stay-A",
+            "switch-b",
+            "return"
+          ]
+        },
+        {
+          "modes": [
+            "A",
+            "B",
+            "A",
+            "B"
+          ],
+          "edges": [
+            "switch-a",
+            "return",
+            "switch-a"
+          ]
+        },
+        {
+          "modes": [
+            "A",
+            "B",
+            "A",
+            "B"
+          ],
+          "edges": [
+            "switch-a",
+            "return",
+            "switch-b"
+          ]
+        },
+        {
+          "modes": [
+            "A",
+            "B",
+            "B",
+            "A"
+          ],
+          "edges": [
+            "switch-a",
+            "stay-B",
+            "return"
+          ]
+        },
+        {
+          "modes": [
+            "A",
+            "B",
+            "A",
+            "B"
+          ],
+          "edges": [
+            "switch-b",
+            "return",
+            "switch-a"
+          ]
+        },
+        {
+          "modes": [
+            "A",
+            "B",
+            "A",
+            "B"
+          ],
+          "edges": [
+            "switch-b",
+            "return",
+            "switch-b"
+          ]
+        },
+        {
+          "modes": [
+            "A",
+            "B",
+            "B",
+            "A"
+          ],
+          "edges": [
+            "switch-b",
+            "stay-B",
+            "return"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "flat-continuous-ties",
+      "native": {
+        "candidate_face_check": "exact-profile-candidate-face-relations-checked",
+        "status": "verified-bounded-branches",
+        "branch_count": 3,
+        "all_optimal_paths": [
+          {
+            "modes": [
+              "A",
+              "A"
+            ],
+            "edges": [
+              "stay-A"
+            ]
+          },
+          {
+            "modes": [
+              "A",
+              "B"
+            ],
+            "edges": [
+              "switch-a"
+            ]
+          },
+          {
+            "modes": [
+              "A",
+              "B"
+            ],
+            "edges": [
+              "switch-b"
+            ]
+          }
+        ],
+        "complete_continuous_family": true
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 3,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": "0",
+      "exact_all_optimal_paths": [
+        {
+          "modes": [
+            "A",
+            "A"
+          ],
+          "edges": [
+            "stay-A"
+          ]
+        },
+        {
+          "modes": [
+            "A",
+            "B"
+          ],
+          "edges": [
+            "switch-a"
+          ]
+        },
+        {
+          "modes": [
+            "A",
+            "B"
+          ],
+          "edges": [
+            "switch-b"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mixed-prefix-budget",
+      "native": {
+        "candidate_face_check": "not-applicable",
+        "status": "inconclusive-prefix",
+        "branch_count": 1,
+        "all_optimal_paths": null,
+        "complete_continuous_family": false
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 9,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": "0",
+      "exact_all_optimal_paths": [
+        {
+          "actions": [
+            0,
+            0
+          ]
+        },
+        {
+          "actions": [
+            0,
+            1
+          ]
+        },
+        {
+          "actions": [
+            0,
+            2
+          ]
+        },
+        {
+          "actions": [
+            1,
+            0
+          ]
+        },
+        {
+          "actions": [
+            1,
+            1
+          ]
+        },
+        {
+          "actions": [
+            1,
+            2
+          ]
+        },
+        {
+          "actions": [
+            2,
+            0
+          ]
+        },
+        {
+          "actions": [
+            2,
+            1
+          ]
+        },
+        {
+          "actions": [
+            2,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hybrid-path-budget",
+      "native": {
+        "status": "inconclusive-refused",
+        "construction": {
+          "diagnostics": [
+            {
+              "code": 1,
+              "explanation": "The complete hybrid path family exceeds the caller's path limit",
+              "field": "hybrid.paths.limit"
+            }
+          ],
+          "status": "public-api-refused",
+          "variant_index": 1
+        }
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 2,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": "1/2",
+      "exact_all_optimal_paths": [
+        {
+          "modes": [
+            "source",
+            "target"
+          ],
+          "edges": [
+            "switch-a"
+          ]
+        },
+        {
+          "modes": [
+            "source",
+            "target"
+          ],
+          "edges": [
+            "switch-b"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hybrid-cancelled",
+      "native": {
+        "status": "inconclusive-refused",
+        "construction": {
+          "status": "public-api-refused",
+          "stop_diagnostics": "Hybrid portfolio construction was cancelled before profile admission",
+          "stop_reason": 0,
+          "variant_index": 2
+        }
+      },
+      "scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 2,
+        "complete_continuous_family": false
+      },
+      "exact_optimum": "1/2",
+      "exact_all_optimal_paths": [
+        {
+          "modes": [
+            "source",
+            "target"
+          ],
+          "edges": [
+            "switch-a"
+          ]
+        },
+        {
+          "modes": [
+            "source",
+            "target"
+          ],
+          "edges": [
+            "switch-b"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "unsupported-dimension-change",
+      "native": {
+        "status": "unsupported"
+      },
+      "scip": {
+        "status": "unsupported"
+      },
+      "exact_optimum": null,
+      "exact_all_optimal_paths": null
+    },
+    {
+      "id": "unsupported-relational-reset",
+      "native": {
+        "status": "unsupported"
+      },
+      "scip": {
+        "status": "unsupported"
+      },
+      "exact_optimum": null,
+      "exact_all_optimal_paths": null
+    }
+  ],
+  "input_files": {
+    "destination-invariant-fails/exact-process.json": "07a4fabeb3d359dc55cbe449ed33673ecddee3778e25c466deb88cf822ec9e9e",
+    "destination-invariant-fails/exact.json": "d720fda29d47cc0ff321fb95fa2957084e036a04343028d89b8e4f0874c3c59d",
+    "destination-invariant-fails/fixture.json": "c6187ba04f90d9e7d2d785cfced12f15b8f7a7cc9ae141d8ea5fab8b521f64b8",
+    "destination-invariant-fails/native/process.json": "e7b589ea4452866ec628306f10a6eb6dd8f6990da6730da9b919406b8260577c",
+    "destination-invariant-fails/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "destination-invariant-fails/native/stdout.txt": "6b2947e697ff997a229ec261522507d49fac563277035d0a869ddbd561e0330a",
+    "destination-invariant-fails/scip/branch-000/model.cip": "0a1b61236b2849ec9a4317d7a4d899b82bd8fcc94394b40dba3a3b5839d0531b",
+    "destination-invariant-fails/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "destination-invariant-fails/scip/branch-000/result.json": "0b33dd76cc97058b9fe9e004522cc088f28f8a325fd495e0aa2475291559e8b0",
+    "destination-invariant-fails/scip/branch-000/solver.log": "0405849cdd942bcaaf428507f71dd2a6db6479e18c030e920abb2547031a48c5",
+    "destination-invariant-fails/scip/global/model.cip": "c7f7809d27d13737fbc213816c754a0f8d5bf34e78f66a6f0344c3d99794e438",
+    "destination-invariant-fails/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "destination-invariant-fails/scip/global/result.json": "9c673e144c41c0bb8189b64e0e555fe916dc68b8bf43d38e47e667f2d3ba6226",
+    "destination-invariant-fails/scip/global/solver.log": "c7e8e6d96775c6a40fb1562f3b83c66802096b6aa245eee7afad06f287846121",
+    "destination-invariant-fails/scip/results.json": "072f767126efb6798fb07f093ab322e9bfbfc4b097f065f2056fc6059df68e77",
+    "destination-invariant-fails/scip-process/process.json": "cf534a9ab2bb72e08f017f12bfaaa6b382170aeb838d1071d4353cad9cebfe9a",
+    "destination-invariant-fails/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "destination-invariant-fails/scip-process/stdout.txt": "04866d039a0129dc052f14c7e434c27fc2403e5aff2df24064fe6715bdec78db",
+    "environment.json": "7f5767192487a640d2bbcf9e4749674295ceee1ca04bca2e5a150e3b09dc5d78",
+    "finite-T0/exact-process.json": "ed0021cf67086251edeb36f702851cfa6e6af589a650fc1a6f67638532b47a7e",
+    "finite-T0/exact.json": "4b064d6e18c8ee77aff1ce4bf3c462b3fb51c356fc5f7013db1cca66acd6078c",
+    "finite-T0/fixture.json": "a56c8e126daf97cbe5ab1a223d20e8d286498291f88de1e1a69d9599491f8cd9",
+    "finite-T0/native/process.json": "0b17b602078d2ecd1c1270e8417482bd336b4f8a2dd6942fa79376cb44ecbe36",
+    "finite-T0/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "finite-T0/native/stdout.txt": "3b3bc5896d473cb259d174d91c48a9aef66b665df68fa0e1a956b01284649497",
+    "finite-T0/scip/branch-000/model.cip": "4e74cdd6a964cb2d800989612f3867023f3ab8514be170743e070920c03c47d0",
+    "finite-T0/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T0/scip/branch-000/result.json": "ef47957f9341a97d79c2517b6f13b7c526ac4bf9d9af6691d28bae439271962a",
+    "finite-T0/scip/branch-000/solver.log": "4ea30f22e3d6cd669cd4af4da69e184ac0d54a98717c1bf1fe34443301a9da04",
+    "finite-T0/scip/global/model.cip": "4e74cdd6a964cb2d800989612f3867023f3ab8514be170743e070920c03c47d0",
+    "finite-T0/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T0/scip/global/result.json": "fc67dc2631fb7ca5d2cbd5a08be13e60e2813864ef888519726e322611229472",
+    "finite-T0/scip/global/solver.log": "4ea30f22e3d6cd669cd4af4da69e184ac0d54a98717c1bf1fe34443301a9da04",
+    "finite-T0/scip/results.json": "a4211067d196cdbb440e0bd3e810b7cbbb4102e2d41a0f4647ca14b8daea96e7",
+    "finite-T0/scip-process/process.json": "9e724b2cb3bfdcb4af509bdd2b96ba9abb173196e6df980086761e34f20736f2",
+    "finite-T0/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "finite-T0/scip-process/stdout.txt": "3ec369b6893b7aa3fbe0f5c7620deee9a59c1af5b41553375861a79b32136618",
+    "finite-T1/exact-process.json": "5deaa91f449746538c1ab7f9a55eafa2247b11fcc9665fa6350df04f68929ca6",
+    "finite-T1/exact.json": "3589800e9f02e3e6fad059fb375e1e37b1f558beb2db5886f098d42d70e3c71c",
+    "finite-T1/fixture.json": "09c7e23440528539e855e0d1f5091e675e39f4357fb56c0e27a270a4e3ed9603",
+    "finite-T1/native/process.json": "233e2059132cdacc3cc61ae730ca3a8bdfe0d785b6dbe51ac9a87ee4a7436d09",
+    "finite-T1/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "finite-T1/native/stdout.txt": "2f8cbcfa67109e16e4da99d3fc4c8c4f135eb9331bc18f810bcd33f3993744df",
+    "finite-T1/scip/branch-000/model.cip": "662ee3df61f262462ee887268919067c37824203df78a73c4ff192fe9165d477",
+    "finite-T1/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T1/scip/branch-000/result.json": "5d23770f54202a94429d1498987e7d7b5fc4cb6c8d3d389ae8c6e64270b6c284",
+    "finite-T1/scip/branch-000/solver.log": "b5ccc40fc4759e7abe17a881520e50f92c179b444a92e9a130f4ea7b7ce18458",
+    "finite-T1/scip/branch-001/model.cip": "e87f4551cda0aa146d36bb4b884fdc07ca1d807674c716f54c0c82579849c66c",
+    "finite-T1/scip/branch-001/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T1/scip/branch-001/result.json": "1c2868dde5bd5bb4b538f5a53af4c51103459c04f14786811e23ad2fc0f67696",
+    "finite-T1/scip/branch-001/solution.sol": "412202b5e8702df6c8662f3fc42abe6c7528e2a660a8b1bcfb75678152c3a045",
+    "finite-T1/scip/branch-001/solver.log": "b433439155dc13ee96b2ca22e66367f410b4b0992385b176b3527f0ea8abd676",
+    "finite-T1/scip/branch-002/model.cip": "9ec89047380c539e336dded38ea2eaeca2202eb9022afcda257dbb73f3e2c24d",
+    "finite-T1/scip/branch-002/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T1/scip/branch-002/result.json": "34f9a2c717ae6973e5b95298105318f58136e11a584dd160968ca7164b518ea7",
+    "finite-T1/scip/branch-002/solution.sol": "280e473d6c4b8b32faf46b6f488e7fbef7aba405a2be21f6eb814913f9e17d45",
+    "finite-T1/scip/branch-002/solver.log": "8434f63cee053df11092729b791dc8a2272e4b3754120fbaa0cc2631bb3bb265",
+    "finite-T1/scip/global/model.cip": "2d5981f80e76efa146f5cf674cb6d014ea0392c5091e1c2efad973b391473398",
+    "finite-T1/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T1/scip/global/result.json": "c56226fa8e06fa0a88898ff3a038e6f6ad84c0070bdd699b302a424104af8ad1",
+    "finite-T1/scip/global/solution.sol": "9552f6789d8bae756790c47c2660633384aa4684f907c6ad43500bd87497816c",
+    "finite-T1/scip/global/solver.log": "21b4ee224aaa4cc15de016b1882035285dd0527cdb8c8525d58e988f88def91a",
+    "finite-T1/scip/results.json": "32ea7c2f9bc711ebc2b9d07fb7bb4de35db831fe303548b99cb94299630e0f6d",
+    "finite-T1/scip-process/process.json": "2669771880ca27cbad3d7a352e5d49167147950b084ce8e506393ed2bf11d43c",
+    "finite-T1/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "finite-T1/scip-process/stdout.txt": "5c13dc5c7997d7f252a2459cb06d63922a3412e001d31e28985c955ed6783b81",
+    "finite-T2/exact-process.json": "861e8c24c48eaae49cd0c1603e8735ef53465cb88701666e42c217f1dc6f2095",
+    "finite-T2/exact.json": "6106c04f136bd4ba09d5486231e51aac8b5e33dc0b29c5b297d3b57eadc496f1",
+    "finite-T2/fixture.json": "c816e8a714319106ec32cb19012b6d6ceafd24d89a8bed3e8c08d2ae6c281bc5",
+    "finite-T2/native/process.json": "a678c9d4228767ae1da66b396e71cf7084d56b3237fc5d19280caf591343bf1b",
+    "finite-T2/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "finite-T2/native/stdout.txt": "d02c2f0ed4516ce038439ccc6b866db78536f8b3cfc7cc76ffe1eab6aaff4c7f",
+    "finite-T2/scip/branch-000/model.cip": "6338793b2d17d7c018917d13cf4c8a7bf641e69e3d879dff68f3a3c82b19712b",
+    "finite-T2/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T2/scip/branch-000/result.json": "10167834c421f376a815565f476689abdff158176e806cf7d8a0abbd81cee261",
+    "finite-T2/scip/branch-000/solver.log": "e3a0e8e524a99455fa17a98464f0facc1232f8821a03e98aff037c2c19b9e4fe",
+    "finite-T2/scip/branch-001/model.cip": "7f51146a05ba78bf27accb75e698d9cb09b5eef3c910ea457b4c096973962222",
+    "finite-T2/scip/branch-001/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T2/scip/branch-001/result.json": "441bb10c0cb51cbdd36c35b9d435761cab9616093f3426b579f7aff7a6e6d267",
+    "finite-T2/scip/branch-001/solution.sol": "ffd3e9a7c72305ae9e606313657d12e0ce7e76acf3d6edae305b16bc6a09909c",
+    "finite-T2/scip/branch-001/solver.log": "64c7682f93af7ba142921e41697faa7ba98fa414508b529d406a8eec60944d3e",
+    "finite-T2/scip/branch-002/model.cip": "0c9631b03fd8da3c7d0093bfaa631f03a3989fae96dc1b06c6ce59bd69d44ab2",
+    "finite-T2/scip/branch-002/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T2/scip/branch-002/result.json": "c89c76a7d9811cdfee356777f818e2a6caf2c902aa2d50cbd0c40a46a75cdb71",
+    "finite-T2/scip/branch-002/solution.sol": "7d7ac78352e59a47a3c1c07342bf45cf5799ea704326aafaab902cf52fa72cb6",
+    "finite-T2/scip/branch-002/solver.log": "5d9be7df7d3f674549f957dc7d844252617da40c23abca65dc411d3750f283e2",
+    "finite-T2/scip/branch-003/model.cip": "e2f7a3f8fd1bb400861ec5ea56b9f7f271edcc257481e59b16e422f3ad571938",
+    "finite-T2/scip/branch-003/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T2/scip/branch-003/result.json": "2b6bfb166a60b9b0c0b789ba64bb8899cdb57a793763be380e662dec850fa98e",
+    "finite-T2/scip/branch-003/solution.sol": "6762b0b1fd4a3830dd5acca3933385224eb1ed1e3fb045caaafe4720325437c6",
+    "finite-T2/scip/branch-003/solver.log": "3080be3befed71064cd4d88b87e3d69b071184572db2941115459024558dae77",
+    "finite-T2/scip/branch-004/model.cip": "5eb2d14e4e510bf05958715db972cd17dc312519aa4c489dce7e682e049d2897",
+    "finite-T2/scip/branch-004/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T2/scip/branch-004/result.json": "095fea4a346d0c31efa718a54b7d877ec2bb3ff81b1ebf582730bd6693340f29",
+    "finite-T2/scip/branch-004/solution.sol": "2dbc540f2c4d053b32a751f8db47234e4251e2bb4e5df31f5e8fdb2fb4ea8008",
+    "finite-T2/scip/branch-004/solver.log": "f2deb026c7e436f57e3cf8b4dbab2bcb19251472fe96f468b98a69fe521921c0",
+    "finite-T2/scip/branch-005/model.cip": "04b705c311a8a9a98ba658946effed2ac00890c15b6c2ef5029d66d89ffa4db3",
+    "finite-T2/scip/branch-005/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T2/scip/branch-005/result.json": "d685ec09b46f2dbb28be4919df39f97419a0b6a0673c3fbf5b9c2272f69b0131",
+    "finite-T2/scip/branch-005/solution.sol": "6fe65b2a874ee716f6f9626daf5e510d359b860cbde5ad740b0b37f3127feaf4",
+    "finite-T2/scip/branch-005/solver.log": "788a552e23a419f58b9a821943a311ae1bc0faf54819975b8608b846690f069f",
+    "finite-T2/scip/branch-006/model.cip": "b66324f59db8057257f3bf5729742d0cf3578333b19a29065b647b6669240f65",
+    "finite-T2/scip/branch-006/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T2/scip/branch-006/result.json": "fa4e21a7cbd8f7a03c45824a1bbfa64171f83cc3ec4543507bbd690c0a076a10",
+    "finite-T2/scip/branch-006/solution.sol": "a3d4424a5485d4eb10e1c26d5ccad63bc8b08961bbec7157af6c22dc84682d52",
+    "finite-T2/scip/branch-006/solver.log": "804e90b698153978d2a41851db0d43a50715e50adce9c0c22f9e2061a443fe28",
+    "finite-T2/scip/branch-007/model.cip": "668eefd12f7ef4ae49d38fec04fd552d7bf03eefd618afa95c19d0789428ca0e",
+    "finite-T2/scip/branch-007/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T2/scip/branch-007/result.json": "1a596ad0118a4b1ce6fd0ff5473857d2ae2ec822348c44aa6abce965b8da342b",
+    "finite-T2/scip/branch-007/solution.sol": "1b8c9b7d57adeaab44652435aba62f602ac38296f6ad4b08c331baa94bb6db1a",
+    "finite-T2/scip/branch-007/solver.log": "9b5a1d3d123745b7b60bf36c98f1694c780720f7147f4dd1de7e466e7c8087cc",
+    "finite-T2/scip/branch-008/model.cip": "6aa61338a3759cac079bf3f4839f0a33bc038f0272b3f45d546d40604ee1e337",
+    "finite-T2/scip/branch-008/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T2/scip/branch-008/result.json": "130b82b82c6a2412a9c8af27299380de45cfb1e73b31307cc31ac95cf026e7a1",
+    "finite-T2/scip/branch-008/solution.sol": "4a1121627d950286d94f200a88744f5e4f10ad9e55032eb5fabb089b978751cf",
+    "finite-T2/scip/branch-008/solver.log": "5cc9adea8ffa953577ab733a9ee38554fd024216949aeb217a920e22a5137a49",
+    "finite-T2/scip/global/model.cip": "17274f7a5bdf44f40e1c91c2430dbc7b203214ef96f67580156072df3a785c74",
+    "finite-T2/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T2/scip/global/result.json": "4fa42a3de70adbd57bbb15aa6a4e5c5338704126bfcaa2778aedcdcd7e8346a2",
+    "finite-T2/scip/global/solution.sol": "e944dd4ca4ea34bc74bff9aa63b3dffe00781b3cc1f123b9a1b674c9b16276f8",
+    "finite-T2/scip/global/solver.log": "db81c26a51f0420f453279a245a99af5ea83adffda5cabd4dc6c51af00198228",
+    "finite-T2/scip/results.json": "448a088ca14ccc422484a21bb85b2b4fa3df06bfd7f5cef73930cf928d1f3451",
+    "finite-T2/scip-process/process.json": "a5b7ebd9ee99821b825934eb8bb6901ecb400061f482c85489d2c05be2c38256",
+    "finite-T2/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "finite-T2/scip-process/stdout.txt": "f8e277c7fdcaa272b9a9f83a7fc23ebc6c6ca0356ca27fecc90a8bc3c4b4f203",
+    "finite-T3/exact-process.json": "ea59ad4cf55e5ba992d88d0fc2fc379e7f863d07d80f404c941b9dcf3c66a4b4",
+    "finite-T3/exact.json": "a6f969bf9a12548c4dbf2851661443a14ebda6b7aaaf2bdebf08fd1e221ec5aa",
+    "finite-T3/fixture.json": "b755a610b55059b4efa6db0a9b31ad10e701218ac606001394ee484886f7ee2b",
+    "finite-T3/native/process.json": "bbaddf0cbe12decb44581b478018512ff2aed0dfa41b608f0b39a8aba49e92c5",
+    "finite-T3/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "finite-T3/native/stdout.txt": "78560881edf96d3c8b7d3a7b6e6fc87caed0e91c43d0fe3e78da59ad1e31d175",
+    "finite-T3/scip/branch-000/model.cip": "62ff881e85fd7e879e9071b5054ee172df9a36a66dbee2fdc3bf38cc610c345b",
+    "finite-T3/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-000/result.json": "66dc256934de524dde1803c2c244cfa741107f1615f190e5f9c2d693eb83a4aa",
+    "finite-T3/scip/branch-000/solver.log": "31bada6e73d11e2b7906880a7035f8593827e674a5e10c9190e5e3590cd1f04b",
+    "finite-T3/scip/branch-001/model.cip": "9d80e115c1748f444375859a020b5ac91e95908da4a72878eeb128cd114d4d5c",
+    "finite-T3/scip/branch-001/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-001/result.json": "0c08bdac7c8d46a2a6d3366fbcaa9f7487063072d36563052203cff49d825f6f",
+    "finite-T3/scip/branch-001/solution.sol": "4e0ddd01d7cff8c708e29414345a2a10badea87a3568dcc0ba760b05f5ea7181",
+    "finite-T3/scip/branch-001/solver.log": "9fa0172c8eb6890f6814941acf6fd5bfebd5aab0d39120aabbc72629e39b3f51",
+    "finite-T3/scip/branch-002/model.cip": "fbc521a45b9938f06ca7dd856bb496e776dcb3f2d486ef0ce6ba8a7afe76a60a",
+    "finite-T3/scip/branch-002/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-002/result.json": "fc208613bcbced901bb60889bfd5e2bc03ea0a2e5c93224174aa647bc5656805",
+    "finite-T3/scip/branch-002/solution.sol": "15af4be6df21094bb67c447f38ecc6561d7316380e33c8d1af8a8bd06fffa6e5",
+    "finite-T3/scip/branch-002/solver.log": "226101580c38a07786fd7e64410545f924424edac5982283c1e059ff8e96d453",
+    "finite-T3/scip/branch-003/model.cip": "86313517d2e72bbab6820a14ff284d845f941e06a1ef2ef0cffe4a1aa1a14be4",
+    "finite-T3/scip/branch-003/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-003/result.json": "97d622e866460abbd1de212c47d59849a0167be8ad886383a53e714efa8099a5",
+    "finite-T3/scip/branch-003/solution.sol": "500383af352c722815414eb8cec485ad51e994edb912602eedb5ea763b0565b8",
+    "finite-T3/scip/branch-003/solver.log": "b6626c1f1d1a160531667f91076f1473ee29ad5e1b023d19d6d83aa0a30e0a1b",
+    "finite-T3/scip/branch-004/model.cip": "f0139a2e07a4861b724c1b751bea08bbe3eb8c2453da1fd0359233e36ab868cc",
+    "finite-T3/scip/branch-004/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-004/result.json": "83ef2b1f1f594116d78e792ecb5a50a6c4d7d9f2cb77f060bfb2a3c881342536",
+    "finite-T3/scip/branch-004/solution.sol": "2c00fbea69b0a8209e0f47e9078c72b612b9549c4b6f98e87d3cd9891f966584",
+    "finite-T3/scip/branch-004/solver.log": "80a490f6b2f35bb3fd243e50a89a969f0c2492910bb566c1c6232247061d7d32",
+    "finite-T3/scip/branch-005/model.cip": "26acf7bd419289aaf1384234547d8de689583f927cd34e19d39d10d80ae9464f",
+    "finite-T3/scip/branch-005/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-005/result.json": "b8a379ab9d908d6f3212fa9d39d765e99de692165a04523e898347793b02483e",
+    "finite-T3/scip/branch-005/solution.sol": "63cbd1eee10d8f89bc56f99ad08a927bad1fb88e2faf312d382f0cf1ec9d42e0",
+    "finite-T3/scip/branch-005/solver.log": "0535b5de534edc43baf4ed1bc0b9f9eaee20c291e789b2c92cacf340e67ccee4",
+    "finite-T3/scip/branch-006/model.cip": "cae0dc2ea1c41c9546450c66e4699e85aabff5387f0bf83b33db8d3d4fbbed15",
+    "finite-T3/scip/branch-006/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-006/result.json": "d74973128934c2854c06d532985d09ac721bfe8b084391c1d9dff8b13cbc7d39",
+    "finite-T3/scip/branch-006/solution.sol": "06e430d47b69458a2bf84c7f1f0fa663c663788f00075bfa1abe190da87a01ec",
+    "finite-T3/scip/branch-006/solver.log": "25195eb8c9eccc8990b8a6ad594785e48fe7d80be49a64413f885d0ebce019d2",
+    "finite-T3/scip/branch-007/model.cip": "409a97058b03b89a124b79352db92b008b5d283f8f5b35ed4e8ece9e4dd44c9f",
+    "finite-T3/scip/branch-007/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-007/result.json": "3a297f77dbd7e657f7af5d96655209bacbb0f1027e517b44fa4502b93cdecb98",
+    "finite-T3/scip/branch-007/solution.sol": "04cad2e9fd5781e3344d66fec812c343823358b3d8ced164348d19a88d4a0caa",
+    "finite-T3/scip/branch-007/solver.log": "3ea09c9a468b77ceaeeda4b806a45081c6377ba48c09ecb05a98590f9759fcee",
+    "finite-T3/scip/branch-008/model.cip": "b02a9e25787e4ca8995b3706a18d021a0f7fc8f8f784b6d00e1378522ec9c79d",
+    "finite-T3/scip/branch-008/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-008/result.json": "8d499a010083b33970625229fb4ccc3f05d4ef9b6519e84702c2de6d95cc650c",
+    "finite-T3/scip/branch-008/solution.sol": "acfea7f596f23fac1914e54cfec30af3caa544639d2d16a6a55b684d62e10316",
+    "finite-T3/scip/branch-008/solver.log": "1eb9a65a94d966346a7a28b82040aaa6429a4037c9c2636cebce40770d6b5427",
+    "finite-T3/scip/branch-009/model.cip": "9d436a309ed5cbb0563a835c8f1a087fef206b0a74b9c827433f68d5868ddee2",
+    "finite-T3/scip/branch-009/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-009/result.json": "2a82e8de165c9e51032f6f98116319c54cf0eeaaa7c1d015f79908305ff69481",
+    "finite-T3/scip/branch-009/solution.sol": "b5a7232a0d37948f9a1d79e60e257350751618a2e97392f5ecf256a50a9c88de",
+    "finite-T3/scip/branch-009/solver.log": "5d594f319d133a8531e43bc67b1603267d3b6eba0d7c458d33472b613c777621",
+    "finite-T3/scip/branch-010/model.cip": "62b073d36b4f1ebb69185c08e5f6758bf667cfdcf4984680465dd45cb7c5c155",
+    "finite-T3/scip/branch-010/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-010/result.json": "83fee50c61f1aa68150db64d17f8476e5fc937237f9fd0599caa0c05f7b672db",
+    "finite-T3/scip/branch-010/solution.sol": "b32917177c6626ba65bfd25144bbb7035526a4de42a479008433c295de8c64d2",
+    "finite-T3/scip/branch-010/solver.log": "ed20195a6290bb50b0dbc6a0b9de69e7bca01526447110d3b57dc4ca180bbfbf",
+    "finite-T3/scip/branch-011/model.cip": "5e24cef3561900bdef6f911568c5778e1503d3c5106f1c9716bfadc1545d5b08",
+    "finite-T3/scip/branch-011/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-011/result.json": "24b952b37939a6ff4cf518a7f76ee0a4c755bf764486c468e9ab780ed9f82498",
+    "finite-T3/scip/branch-011/solution.sol": "9ce84eeea6d1fc0bc6e56bbea2ce62cb3484325231a21a951caf339ede0700ad",
+    "finite-T3/scip/branch-011/solver.log": "39d98dfe584d741481512f638837f4f7e7863d1fd56e952ecca2ee0d28fab72e",
+    "finite-T3/scip/branch-012/model.cip": "274d16c1d97ec8557dc6cb350e3045ac32a09301924312cc0ce0baa69ea22694",
+    "finite-T3/scip/branch-012/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-012/result.json": "c4573d8a9e9be267b7004e24a749e23f1ec8f136cd548af6e29e9f915af0ca36",
+    "finite-T3/scip/branch-012/solution.sol": "bff174c5a2dc1931cb8cd15427159bd2fb0b3be2b4d3cd69f3490985441d9c28",
+    "finite-T3/scip/branch-012/solver.log": "293d9026d79d8d50b3adcb4a75ab49198efa2048e85c9d2916cb509effa1f972",
+    "finite-T3/scip/branch-013/model.cip": "65875f9e54073b42d7fc3df1b12011e174c70d13d3a38651b2b6e264b75dc081",
+    "finite-T3/scip/branch-013/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-013/result.json": "32887848e408cc864ba438c28b09f7bd37f4abaa2a579c40dc1ca3c1f9b7603c",
+    "finite-T3/scip/branch-013/solution.sol": "5820127a2561f172897e39c8219164d2430fd3889e1dd4dfd7cd1941bb0b961e",
+    "finite-T3/scip/branch-013/solver.log": "465703752fb854eb664346cf8ae49543b8f5a8d586d2d1bb82c4a5f7aa9e9aa0",
+    "finite-T3/scip/branch-014/model.cip": "24c505f883d951f55fd22badcff4570a0aeeda98dbd01ba23ff28132be3be110",
+    "finite-T3/scip/branch-014/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-014/result.json": "bde3d5cfe3758bfd8690c74e44289814b9ab41a1a0858fa2e3c5edfde91fc1ec",
+    "finite-T3/scip/branch-014/solution.sol": "70181a416678afdc4635067fa3207214f76f0d958d31af6615862efcc02c3223",
+    "finite-T3/scip/branch-014/solver.log": "53417b43f9668a6159ad5efbd3440790681997ffca9c862617b01d16d8b9e28a",
+    "finite-T3/scip/branch-015/model.cip": "37de11f51d5b4265fe0f7bcc5a91b4458f45f95a27f3a474387125099e16a353",
+    "finite-T3/scip/branch-015/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-015/result.json": "6e9745ad8c6b754e5f2b998e642aba00ca4343259327652e298623d00ec4b46b",
+    "finite-T3/scip/branch-015/solution.sol": "33240c054386d2703fef0c6da7fdd30d42345f650179230edb3ae2335e8099ac",
+    "finite-T3/scip/branch-015/solver.log": "59f707c1e224dfe4e41454fcf446983af33b996905c53bb16e1fe0511dd24560",
+    "finite-T3/scip/branch-016/model.cip": "c999f97db93fd058ede7e17ba65ae30e7568faeb2f84a3f31e05c95255993504",
+    "finite-T3/scip/branch-016/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-016/result.json": "2cc4616b6fd16ca5a87ab1abfe5f72810a024303546bccc8dc1d60809bb5d2b9",
+    "finite-T3/scip/branch-016/solution.sol": "fa86948660e017338b33e8465b46339efa43b09b77454b02d6bf43ffdfe41655",
+    "finite-T3/scip/branch-016/solver.log": "b5c48a5d7d9cedc7240b9dc7c6effeb6b25aeba5ea779103c7864ef62c3ec564",
+    "finite-T3/scip/branch-017/model.cip": "1745c179507099a140f7b8346f58ef52269f4eb889e36e0ca5d4e9259ebbb7c7",
+    "finite-T3/scip/branch-017/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-017/result.json": "5856fc01db2af4e0ad31c045a668fb457b93c4f566c7e8655e74963d9a2bb7b3",
+    "finite-T3/scip/branch-017/solution.sol": "bc2f24fea85abfcada671883cf72b9c5376a8edb66572d0fc9f4bf2deeb87938",
+    "finite-T3/scip/branch-017/solver.log": "16611f41a84e15b407729c90f94ce1e84e7fd6ea2d88fc498c64953c1dffcabe",
+    "finite-T3/scip/branch-018/model.cip": "750efd5c453adebff8e48d27d0c572dc6f957432f3b1976dc80206cb6e1303ac",
+    "finite-T3/scip/branch-018/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-018/result.json": "858b5de9d83685a3c36a208e5e98cf0e3566d273297ecc44ccbf1a2190596c23",
+    "finite-T3/scip/branch-018/solution.sol": "681439de621f2051f3e2e35fbb1c6e97d7a566fcedec9142fe382f088ea68e2e",
+    "finite-T3/scip/branch-018/solver.log": "1f6b01c4a2b9d418ab4eea84bde9125df39a83a54dc01b28af65ae10c2fc47d5",
+    "finite-T3/scip/branch-019/model.cip": "37bde322da00eb09a0861ba86ecbabbd279c7e9d04afba1f154c44bb7a7b632a",
+    "finite-T3/scip/branch-019/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-019/result.json": "2756db335cc0fba507b6d220e81e6d50ef47a69fee97016909ff27edec6eafb7",
+    "finite-T3/scip/branch-019/solution.sol": "8553552a39a3d8feed57f57c62b4ff7a84288877340d4bcdf42ebfc4f5f9db77",
+    "finite-T3/scip/branch-019/solver.log": "6b1a0acb2b6f81551cc190b6533371c63914e0320769ff2099a11bd31b013131",
+    "finite-T3/scip/branch-020/model.cip": "916b546107440c424a3233a8690bd3584e48e203ce01ea15e6273e18ee0bfeb7",
+    "finite-T3/scip/branch-020/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-020/result.json": "40cfb05a56411cb026ba94c9700cb990a030b3bb7d3ccef760190d343e1aaa2a",
+    "finite-T3/scip/branch-020/solution.sol": "59ff3fcb9d885cd838fc629e5a4757f53c6d2dc318ec7f26bcce13e9ac31090a",
+    "finite-T3/scip/branch-020/solver.log": "814ed11d56ffc97c8e7cb170dcd6969dff00c404ab19e7d82f5da956dddb81ef",
+    "finite-T3/scip/branch-021/model.cip": "6b041793fd06104a237c8ea7d08c429d86795d5fa97db97f220221703e03882c",
+    "finite-T3/scip/branch-021/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-021/result.json": "694bc2a46de3104fd6c3e4b6ce73ba130463af587f8bfdea0416ed81b96e20e0",
+    "finite-T3/scip/branch-021/solution.sol": "b419b91bc007c6fd3b33064cd097c1267bf991588e4aaf7c9bcdc184b5ec0592",
+    "finite-T3/scip/branch-021/solver.log": "50d1c6e9202dd5617596da925c1ce35a573ad1ce013d970c05a9019064cb175b",
+    "finite-T3/scip/branch-022/model.cip": "2da2d4c5e651d9add1cee7f1d3975456ccc7b171d8e1938482bd78a9f4529f9a",
+    "finite-T3/scip/branch-022/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-022/result.json": "051225abec395e165a43348f614595fd20b095d7b83fe269e988110429a659fc",
+    "finite-T3/scip/branch-022/solution.sol": "2f2c7042e65219997067e03dd251f5a36ac0c84a99438356ea02886322430978",
+    "finite-T3/scip/branch-022/solver.log": "1a29f5b984359f686a94ae689717cb533d9ff221df80a5d6e2f70614045e110e",
+    "finite-T3/scip/branch-023/model.cip": "71ed97da7ebf4cad6901a27be9480edf71dbeff964b08d7289588b4668ed739f",
+    "finite-T3/scip/branch-023/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-023/result.json": "e39277352bd80f76a2e9a5e69301d3bee2bdc397fe1158705f13af320d6201d5",
+    "finite-T3/scip/branch-023/solution.sol": "ff6926292ec128a1cd6bf28ec67c9c7487f203dcd4641d5ad19aa0a9d67d6d26",
+    "finite-T3/scip/branch-023/solver.log": "e2a00b1bc4c2e93c21d084a4f0b8e7564e70f1e291258cb63c92ff54de908092",
+    "finite-T3/scip/branch-024/model.cip": "6b311de54d159b16fe863c5b7ef5b4712387beea8ad785d332348f8ed1cfdb75",
+    "finite-T3/scip/branch-024/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-024/result.json": "feb123654fade8c740353b0a0f15183bbc3f69198f0ac49731338659bf225eff",
+    "finite-T3/scip/branch-024/solution.sol": "c1efaf44c32fc7e235e342ab0473cfc0811c28b13be8c0fd625d224eed7343e5",
+    "finite-T3/scip/branch-024/solver.log": "44c4831cd8b0735b7154aab673a8c641989c8d5536a285558f982b39e9b956b6",
+    "finite-T3/scip/branch-025/model.cip": "40eb84e31ab58a0487356f6d5eeb0a3848770aabefca5048ab21a7f51650225c",
+    "finite-T3/scip/branch-025/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-025/result.json": "2465abeed8c56d523a1df0baa36e4cec045e75d30f013b96dbcb1a63dcbf6697",
+    "finite-T3/scip/branch-025/solution.sol": "882d7c080bf650abbe779894b8bde8293fb4859698cb329dcfb76b03f4354165",
+    "finite-T3/scip/branch-025/solver.log": "9911e65216f867e6334f2cd45e7f57539f4c8e81e3be9e105617357d550d5b89",
+    "finite-T3/scip/branch-026/model.cip": "35eb92130be832d88d231f8b932db88ef88c61c741a4dd9242882aa761c766e6",
+    "finite-T3/scip/branch-026/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/branch-026/result.json": "a0185fe7f1064b3ee7d6b4831ae1cbe9b764b1a396a26178e1f895b31c3d24c9",
+    "finite-T3/scip/branch-026/solution.sol": "d9362cc9f180dd057bc8d61b5bdb46bf5a25df0bfd68023083cde4a62b143c57",
+    "finite-T3/scip/branch-026/solver.log": "7e4d79d1d32cf3b03caf109e3cdcf71030ebc52111b3303131f12e428b1f2314",
+    "finite-T3/scip/global/model.cip": "bc612f4db9ecce6378bd1f86d3787d7ad12438d8c0904b295dae3bb2381b3aac",
+    "finite-T3/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-T3/scip/global/result.json": "198739f35f3514629e878224215922ce91f546bd122298ce6470429b9b378635",
+    "finite-T3/scip/global/solution.sol": "4c9b8297b972e85fd6d010e905013d32e017075981d2bc3ce53c3de9e0ad9295",
+    "finite-T3/scip/global/solver.log": "b5c6c4f0466fc5e780c4a5fa0af34b4332e3ad18903d0bc4d2f3049be255fe38",
+    "finite-T3/scip/results.json": "21b3886490a1a5ef7384402a20183ae7dc1b648cad3cc25a3e91d143cee9b499",
+    "finite-T3/scip-process/process.json": "9b6ba3620f139fbc24be3c058136ca4e6c4af8397373e19a17ef543f26492562",
+    "finite-T3/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "finite-T3/scip-process/stdout.txt": "5a673413d3c2c544213981958af26a7b7d4d696dc7234f88c5fd03b22f6cae95",
+    "finite-empty-T0/exact-process.json": "741c22df99590bfd86b6608c4473ed02fb7a46907721dff12039966d2c6cea87",
+    "finite-empty-T0/exact.json": "4b064d6e18c8ee77aff1ce4bf3c462b3fb51c356fc5f7013db1cca66acd6078c",
+    "finite-empty-T0/fixture.json": "a179f476b022c6b1a9d078ca7e3ec2ba86a18c8a069c00a2e65aa454801abadb",
+    "finite-empty-T0/native/process.json": "5f3e625176523d4f479eee020f4a4ed335cb74f21a239c9d6b598df4ff96cf1d",
+    "finite-empty-T0/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "finite-empty-T0/native/stdout.txt": "2308adebe2b318f1c942e8018e52cc9151be73a1bc96bdbc15d00bd8b04882ff",
+    "finite-empty-T0/scip/branch-000/model.cip": "1e4bc1009c9a9075c6f4508004899bf9035dfa52623079b79e252bfe8b773820",
+    "finite-empty-T0/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-empty-T0/scip/branch-000/result.json": "489910db4c45a3b79936646f59d3524c264cb7fcf66f7fd99de621d75548a2b3",
+    "finite-empty-T0/scip/branch-000/solver.log": "257c4848923295607ddc1a95b73a6374388a6d6ca49c9876e16e1653e9a14b94",
+    "finite-empty-T0/scip/global/model.cip": "1e4bc1009c9a9075c6f4508004899bf9035dfa52623079b79e252bfe8b773820",
+    "finite-empty-T0/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-empty-T0/scip/global/result.json": "7e5836cf554d1983e456bad8eb6d9da2a100f945a5a843c5716619b86e4b6456",
+    "finite-empty-T0/scip/global/solver.log": "257c4848923295607ddc1a95b73a6374388a6d6ca49c9876e16e1653e9a14b94",
+    "finite-empty-T0/scip/results.json": "fed30f4fca942654b309d225ed0ff9ddface92e78ef924e9b4a40016d88bfabe",
+    "finite-empty-T0/scip-process/process.json": "5f97f913ebd61061d579f85d357759a0351a59350036e6b814b39f8c9d5a1238",
+    "finite-empty-T0/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "finite-empty-T0/scip-process/stdout.txt": "4a563b239c8efb16a7bdd3a7d6c71e6ab267ebe65b8595471900895ca05c85f7",
+    "finite-empty-T1/exact-process.json": "c251c34b40b06e81bff34cdeb2352d0b5066dda915ed2f011beb98b739dfb274",
+    "finite-empty-T1/exact.json": "a838c183398635be971e2697e3146f080a857b97ace5e5e931e956664a2da430",
+    "finite-empty-T1/fixture.json": "55d1d7eb2365ce2317c152778fe38650253f4c3b7784073e3689ff3dc81a7f54",
+    "finite-empty-T1/native/process.json": "752e190fd33eef61269f0dc40b7368256cf1958b18f3c045369958cddcce2ff8",
+    "finite-empty-T1/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "finite-empty-T1/native/stdout.txt": "5177d59eb3b23720e37ab22fc5569b89a5d7311d6e5395b31fc8b3aa652873f1",
+    "finite-empty-T1/scip/global/model.cip": "a3b0006805208e61fc5c167d30c2b94cc5864acff974e750e062de42d593558a",
+    "finite-empty-T1/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "finite-empty-T1/scip/global/result.json": "602a83ea2eb155585df7467357aab441d2b5275a4438c3f67b2d8b067d7cf072",
+    "finite-empty-T1/scip/global/solver.log": "de4eb1988424c9dc6dd76347e4c1e049f337bb77119d5b9f1cd061c5f4c893aa",
+    "finite-empty-T1/scip/results.json": "e7bfed87c7a25b1e1a0559dbe8c2d9dcb44dda6b6921d65644013b4048cc6cca",
+    "finite-empty-T1/scip-process/process.json": "45b2be7af3e4cf7f95e7f3eb4fcd147433cb0e4932dfb8014afe2b20ce71049a",
+    "finite-empty-T1/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "finite-empty-T1/scip-process/stdout.txt": "7cec5e97aed5c6f5f46cfaefa198db9df6f755abb38aac7441d39e207dc7bde0",
+    "flat-continuous-ties/exact-process.json": "a86cc299788d5b4f9eaebc742985fa4df04d733068ca35846187e7c654400c63",
+    "flat-continuous-ties/exact.json": "4a40433e9062b930e14ded407933042701e1a3cc1464da8026eef58ef1463e8c",
+    "flat-continuous-ties/fixture.json": "9497750edea35ab48c490459bac123c4b5d5efbfe8efd039765e1e02562ecd05",
+    "flat-continuous-ties/native/process.json": "4a036d1520b81be9e0fe375b200fee640c7ad1e9a2ef4846fcd2aaaa9cfd2e4d",
+    "flat-continuous-ties/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "flat-continuous-ties/native/stdout.txt": "28fc661843ba82626cc02bd8ddcaa6e962bac8f793b8c38c92daa6971dd15960",
+    "flat-continuous-ties/scip/branch-000/model.cip": "1fc48b5b2660cb31dd5666df449cce06eed77c471948c14b951ae5aebb57cb5a",
+    "flat-continuous-ties/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "flat-continuous-ties/scip/branch-000/result.json": "47a37f93d46449b4f6d2353e9c0324cde11dd680378a659e81368dd922afe123",
+    "flat-continuous-ties/scip/branch-000/solution.sol": "a80c793a91aefa7a8a86cc4688e97bbbd90c180bbdfdb9e8e69de64c9e4e3a9d",
+    "flat-continuous-ties/scip/branch-000/solver.log": "99dcf7b74a0fdc9d7e3341e482d50fb5f0a77bae12b589a8b6da8719627d3031",
+    "flat-continuous-ties/scip/branch-001/model.cip": "516944e9d04cd4e0b8bc815f81ce8ca4fc7618a6be28f1a27a357204e0df1f25",
+    "flat-continuous-ties/scip/branch-001/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "flat-continuous-ties/scip/branch-001/result.json": "d93058c5ee9885494aa6f0f97267079d024e425a049b5de1e6d229166fbc8951",
+    "flat-continuous-ties/scip/branch-001/solution.sol": "ab941017066343e0a448f966db57d3c0ac11cc4ee0f5cf2cc51be4f48a5b6804",
+    "flat-continuous-ties/scip/branch-001/solver.log": "f7121d97e1ab686490800525aaaa3aea3cf47018c116f4a983b25d41ef0d8dd4",
+    "flat-continuous-ties/scip/branch-002/model.cip": "7a2fdcbca420cd457cfa77f073b61aa768a8789bb28fe9157929c803b6e6eeeb",
+    "flat-continuous-ties/scip/branch-002/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "flat-continuous-ties/scip/branch-002/result.json": "435aac6192a6e26ef41688e3518522bfde2bea1e215e3b1172c220a349a089ae",
+    "flat-continuous-ties/scip/branch-002/solution.sol": "bd62724a2f4a1442ada06c999d5d6dea083211e2f869b8df15b325e1118aec91",
+    "flat-continuous-ties/scip/branch-002/solver.log": "fab0d69ef1eed97a07384b7b8c69a0cddea1b781c75e1d9413059fc0d8ce2e15",
+    "flat-continuous-ties/scip/global/model.cip": "2cfa2604aedb941415636805e7966ff3997129d6ef72f560ec09630aa0ae8783",
+    "flat-continuous-ties/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "flat-continuous-ties/scip/global/result.json": "c15e1d3cc7e8d7c0f48c467328ceaecae797cb8ee8b8e0e62d7f18018e09d61d",
+    "flat-continuous-ties/scip/global/solution.sol": "4c3fd2d51b514905e05de9398a7b3d294e25ebd1074200878b7fbdc1dd4667ad",
+    "flat-continuous-ties/scip/global/solver.log": "077d43b76c0601237354a612760400be71040282c03043a16c3301f6fdf3f3c9",
+    "flat-continuous-ties/scip/results.json": "8323b6047ecba9f1f34f00386529080adb7246cf1b3be6ef9fc2cd2a519364e8",
+    "flat-continuous-ties/scip-process/process.json": "97cd91110c29130170009668421cd19099045d57a17d8dab9d42fd8875eee12c",
+    "flat-continuous-ties/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "flat-continuous-ties/scip-process/stdout.txt": "0d82e51a274cad686f1d883d719a9f85f5ec251d4ef8b9abb4245cded27b705b",
+    "forbidden-transition/exact-process.json": "308f70c62dd88e6a1bbcd3fdb2fea66ba8dec5efffb9924f9e09fc241f2b36e4",
+    "forbidden-transition/exact.json": "a838c183398635be971e2697e3146f080a857b97ace5e5e931e956664a2da430",
+    "forbidden-transition/fixture.json": "6e88d7b98ed738acfebd61b4c5d12b2cd7d1b883ef0db533f36afae02c307408",
+    "forbidden-transition/native/process.json": "554f9d45296274e4eaa36a7144fb8dac77af3c1d3ec4077befc8ece04371b7d4",
+    "forbidden-transition/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "forbidden-transition/native/stdout.txt": "bac344c12c1225cc5150a119c1d6a751e96a77227b27dac1471fc71e42d9118b",
+    "forbidden-transition/scip/global/model.cip": "022578d04130cff573e64bf5197c893ddd1d9c702a8e05d541dc081d15425eb7",
+    "forbidden-transition/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "forbidden-transition/scip/global/result.json": "a29093bba47913e450df6eb615b47505713e4cac3b98a70b57ec5d728fc6d349",
+    "forbidden-transition/scip/global/solver.log": "6763984b4782187415807be266c51134b91cba95036e2728677920afbe1e61fb",
+    "forbidden-transition/scip/results.json": "f69ac4677f70c5a973962c8af6afba8004a982772a351443a3b65b0ed500b500",
+    "forbidden-transition/scip-process/process.json": "39d2767cf80d3e29b8c641cff243c731146d29f9fbbc22e63101067b5eeae20b",
+    "forbidden-transition/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "forbidden-transition/scip-process/stdout.txt": "19ae3bc9ce3602939eb4807e1d6bafdd781845f80b8c90604a5766f1e6667714",
+    "guard-fails/exact-process.json": "fa4d691bb6cda7a028827584625f47ebce58eca6212368a329d70bb3a7fd5652",
+    "guard-fails/exact.json": "cf689d3f3f2d1c9bbbc65aa866bcc52ebd9a749775770d35688f283b8da5afc8",
+    "guard-fails/fixture.json": "7c682cf30490a3fe086a9e260a6807d70fd306488d526f3eb03b0fa7926b96e4",
+    "guard-fails/native/process.json": "99ecdaf745ae1373a895d9af604e6c2dfac350f1247b068fd1b64a7bc3c9769a",
+    "guard-fails/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "guard-fails/native/stdout.txt": "fcf102f62ea8b22f07e5cb88b55a5908595f30ce6568436298cdd5659fd45440",
+    "guard-fails/scip/branch-000/model.cip": "ceaa44fb99f3edece54767646b9626ce15d7c61728733089f9b74bf50f883568",
+    "guard-fails/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "guard-fails/scip/branch-000/result.json": "6ae9d842d31b4ec7a3b9318c473152cbe6fad1ada2f0d246abcf29774f61fd7b",
+    "guard-fails/scip/branch-000/solver.log": "7bacd150e056b339ea3c3139536c071d8226fcc69163934d9a7b2dc828f2aa2c",
+    "guard-fails/scip/global/model.cip": "1506bbd3bd4bb78df5deb16dde88048ad0dbd28ea161a572351f4743db4d9e2a",
+    "guard-fails/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "guard-fails/scip/global/result.json": "311de2f954b4972a77a29dc904b9c9ebb121b13d21dd4543a79bd91e2b06aca7",
+    "guard-fails/scip/global/solver.log": "05ea309c0f0f3bc9efc1260383872c12313a2325e1b319f0cc155fc2f456c6c0",
+    "guard-fails/scip/results.json": "9646fc0af4320e2c56222d9f230bab5d14b0ac0add189ed7e8c13ec57f3311d2",
+    "guard-fails/scip-process/process.json": "17fa14d8edd0bb641e1b73e2c085e377edc606b0f7d6261ad7d19ff4c17cdad8",
+    "guard-fails/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "guard-fails/scip-process/stdout.txt": "c46838d5f4eae4117ec6cfc3ed6eaf7424c703a93f952786845473d4f86d8e5b",
+    "guard-negative-reset/exact-process.json": "b487e2ad82d97a155aadc75b69d501010245e0b4d8c72fa3b67260259966f6fe",
+    "guard-negative-reset/exact.json": "dc024046c2a4d687fd37b38f88c39b59af1fe630bd014a28b57d9f8b9f0bf1c9",
+    "guard-negative-reset/fixture.json": "70ddea1d42cd33e114745e0cc305d33542de9da4ad98a41c413b8fa90fe62056",
+    "guard-negative-reset/native/process.json": "68b7f5e139f0777dc92657c884aeb6914aab6cc81addfc329d318f2d552be9f9",
+    "guard-negative-reset/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "guard-negative-reset/native/stdout.txt": "9bae591d6820387393c8341416e7dc81706791a0df89a56bb80c006ae7accd84",
+    "guard-negative-reset/scip/branch-000/model.cip": "d323986be53de450b4f8badd152d94c4a0c89fe05c47d28d9ad2f0738aa10d23",
+    "guard-negative-reset/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "guard-negative-reset/scip/branch-000/result.json": "d39206d190e1a49a8c329102480758fd5a5341a94365732048ceddc2d397bd18",
+    "guard-negative-reset/scip/branch-000/solution.sol": "0e5b9a5514ba7921f8531f49280500698caf7629afa6d950b5e0af8ef0566099",
+    "guard-negative-reset/scip/branch-000/solver.log": "228ca234dd0590a82f91e5772cf6a956e9185e3bb4ddb88f3f030e13b5776ca7",
+    "guard-negative-reset/scip/branch-001/model.cip": "76338d91102f13b4e98515e76d7b191aa5261fccccda4cfa880264846567abb8",
+    "guard-negative-reset/scip/branch-001/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "guard-negative-reset/scip/branch-001/result.json": "3ba8718073e6b9f9e9d150a9f238ad3b89dcb64686b73355914261034fdbae2f",
+    "guard-negative-reset/scip/branch-001/solution.sol": "86d351c1f19ef0ac607644e433e9dac5e5cc93304c093899c710e6ef0defd4b2",
+    "guard-negative-reset/scip/branch-001/solver.log": "e9278d0ba7d161d9b330009042308486df4966389ed57e44fc26fdaf275774ae",
+    "guard-negative-reset/scip/global/model.cip": "42e7f9b6ffbdd1b79ffee625d8ce0f281ed5ea31ca9be983e96ae8ea62fb33d8",
+    "guard-negative-reset/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "guard-negative-reset/scip/global/result.json": "bfc4dce7c14ebfdb5ddaa9e8b0eb99075a5c4575ba429b31b86b1fc331e88cc3",
+    "guard-negative-reset/scip/global/solution.sol": "acbde4d0ebed0fc41df04956ab8e5528d55f7fb43a4405bddd9397a97f610b06",
+    "guard-negative-reset/scip/global/solver.log": "8e6d05cd0246697fbbf8dad738703e29df6d9fb115ff2f2228940130c5dc82fa",
+    "guard-negative-reset/scip/results.json": "2664fb803fa835f3ba01b243aff28942c4cde0b9f28e7b3aef9c0365f1395edc",
+    "guard-negative-reset/scip-process/process.json": "b0c239fccce9a2680c6e3c26f4424ac4e6aa66e065aa84fc24ab6da936f14689",
+    "guard-negative-reset/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "guard-negative-reset/scip-process/stdout.txt": "a01e40d0627b3e8c76ba4a71f6b681c63a900cca7ad3f802a5f7b11aed34a0c5",
+    "hybrid-T0/exact-process.json": "a135538b7ee8cb9f65da781ae386a3934162b1d5f2a05f2621e72f480971bcfc",
+    "hybrid-T0/exact.json": "e4fc1489964597fc5760e627cd64ab38f75d7870618a80fd0455555df6545590",
+    "hybrid-T0/fixture.json": "6ddd529b273ca50d335938a85d19089c617c8f36ab458a4f160c0bf1a973fd60",
+    "hybrid-T0/native/process.json": "5c1acad1131baada44230e547aa5ffba2004cb3b882c72eb6f720927b81214b6",
+    "hybrid-T0/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "hybrid-T0/native/stdout.txt": "85f23f4dc24b5ad9dde23d746b7237ee58e9c302bd0aeb4c984ef381dd7eef7d",
+    "hybrid-T0/scip/branch-000/model.cip": "03dba65484d3e2d3b868953cdefd7755d6b66cd959f74bd1df9450ba8bc2a120",
+    "hybrid-T0/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T0/scip/branch-000/result.json": "52209fac47a84f84d95adf0721984c722d0c97defbdd157193aa6de286d4d3b2",
+    "hybrid-T0/scip/branch-000/solution.sol": "b4e5818ce71533d280e96b224d0e9b5ee751f44f773518558c377b84a1fa5a7a",
+    "hybrid-T0/scip/branch-000/solver.log": "bc5bdf284760bb0af173e8e6f28bde7b43aa744af285cc49c0da2c866bfe0a68",
+    "hybrid-T0/scip/global/model.cip": "866c36cf171942acf66941c205018075f57dcb89955f0cdb7b47b5b38a618b9a",
+    "hybrid-T0/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T0/scip/global/result.json": "ed1c5be8f13cf9a93a04114ec88f61cd7fa5026b938f732d2eaa7b09aedbb88d",
+    "hybrid-T0/scip/global/solution.sol": "c84f02a1519b514563d09c493cf7dd33037be3651ceb05a02a5682f0c99e87b7",
+    "hybrid-T0/scip/global/solver.log": "29ad91914a4f9b43a17fa33ce1905d107fddd3d44e0832c6a2ab7ac19353c00d",
+    "hybrid-T0/scip/results.json": "41b6e83731c07e4e9bcd642e9a8ee35db12a51672ca4ad720e19f108ccee7905",
+    "hybrid-T0/scip-process/process.json": "0509b37bbf4ae4e93d4d41dd9eb497d0d3bf3c0f816569815f6397506cf7ba3e",
+    "hybrid-T0/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "hybrid-T0/scip-process/stdout.txt": "085dc20ff33aae276efe91bc6b7f3ddf1f162fbc5b462b9aab08bc4724b7f547",
+    "hybrid-T1/exact-process.json": "9f3c4957ce30373247b07dd25425cea3e1562b55c0ab1f8b6ff14c32ff78caae",
+    "hybrid-T1/exact.json": "c7db92165db54ef5f201175a984a03f26be543b448cdaf797e960da63fed603f",
+    "hybrid-T1/fixture.json": "3c21a990b52ae79ccc32e29f2a2b082b3f8081be8acad06568ba7efb22f9dffc",
+    "hybrid-T1/native/process.json": "dd29e4aa905d871f854b66444992987c2d564d398d2ee42bbc658ce05e3c4038",
+    "hybrid-T1/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "hybrid-T1/native/stdout.txt": "21379ca5eb67fade8623720a6bbf1b3081208c2afa878cf9519aa53fcdcb8773",
+    "hybrid-T1/scip/branch-000/model.cip": "f94bd5bfa4d0a0c3d12ff759219e648ef89069cd24f91c96896767ddf0758f8b",
+    "hybrid-T1/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T1/scip/branch-000/result.json": "e6be89afe3e968399a6e4fb5957e692edde7d7513e0448a68352217823feff92",
+    "hybrid-T1/scip/branch-000/solution.sol": "a1b4bb9158f454516f2a83396509ad0d09bae7d9ed4627d86c41b1e25da0b5bc",
+    "hybrid-T1/scip/branch-000/solver.log": "7912140c1ac86a4d5b744ed134b83be0d4e69267cb83f66894c689581bb7a5db",
+    "hybrid-T1/scip/branch-001/model.cip": "e915a8916dfde85937e1c42866b96ef73eb1545cec84f62dfbb40649f1d9af95",
+    "hybrid-T1/scip/branch-001/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T1/scip/branch-001/result.json": "113134afb08e981f8d7c9ced1709ac78e1c1263f37bcb575efa67e936c25d675",
+    "hybrid-T1/scip/branch-001/solution.sol": "56c5858aab7ebdb4d09f9c4af6e5203f93f1d45083a9bedffc59d314d54d6243",
+    "hybrid-T1/scip/branch-001/solver.log": "0f5d1f68f295be2d9cd49f451510a81b5d50a95cda721ecdede5f469bab10a74",
+    "hybrid-T1/scip/branch-002/model.cip": "766a27371cf0d55c09539f68de913e0916652ff6a4890a99e474771c23999f2a",
+    "hybrid-T1/scip/branch-002/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T1/scip/branch-002/result.json": "89b95579d976c5ef68ecacf188a8826e86c3c6842f73da94f381524f1cc0683e",
+    "hybrid-T1/scip/branch-002/solution.sol": "00c7eca16b8b9773fff45049a13c1681d153b9a17a4857d4bc2cca3dc3ddc03a",
+    "hybrid-T1/scip/branch-002/solver.log": "86de84cdcd88a694642e1bc80e5aa6bf5cef8c6cc32c1d5058eed9e140bb237d",
+    "hybrid-T1/scip/global/model.cip": "1b11f587486f7d7ff7854316bf4f2566bbb8c12ad1eb5213a64e224f84da1813",
+    "hybrid-T1/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T1/scip/global/result.json": "b9a4ee6fadc834e6cb80fcc9845149b6babb11e180aa96dbe4fd63727a180858",
+    "hybrid-T1/scip/global/solution.sol": "a957a4283c2a162ed2e162459aa6e63effe7b6a05e322924d7ee2fd8005ee364",
+    "hybrid-T1/scip/global/solver.log": "19d32c8b5d70d04679c1e7d38d760ac14b67e0218a0337fbe2dd202fadf9c3d0",
+    "hybrid-T1/scip/results.json": "158d1b9576fc21cbc36f107c676cea2d2d65e3f6beadb76631fa867e85db23ea",
+    "hybrid-T1/scip-process/process.json": "d4866efc682ad0cff061f0d0573f1cb81d242a3767b3d8652525b878e0bbf206",
+    "hybrid-T1/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "hybrid-T1/scip-process/stdout.txt": "110f9b98c1f8e6e4b9ac50b20a206f1f2690e1ca105a1dbf8c09f73624911400",
+    "hybrid-T2/exact-process.json": "def923865dde53ce47af806c0d08ce5d4425d48006139c6bf6eaf05d3ee6db4b",
+    "hybrid-T2/exact.json": "9dc6ba2d9bb7527f53623f32459a0a5dd57020ed2e4c9db4a490aa5160e9cd39",
+    "hybrid-T2/fixture.json": "9d923afa3da0f88bbd868de2bc54a0c569e091f8223ba8402eb4999638b9c99e",
+    "hybrid-T2/native/process.json": "c081a854920e9a04687353dd2633f759073d1a1d296eeb1006fbe5fa79979645",
+    "hybrid-T2/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "hybrid-T2/native/stdout.txt": "9ab4335db949c8b49cd4fcc6f78549722c8d335c52b8d4e4331672c3fec4a313",
+    "hybrid-T2/scip/branch-000/model.cip": "357b1fd510c3243f28874c22604b6d27a301102cb7fc4cbd5812fec6a40a5046",
+    "hybrid-T2/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T2/scip/branch-000/result.json": "913fe6056fa1704c641e4416a574d248838133102a5c2d9dd4796a17b70061b4",
+    "hybrid-T2/scip/branch-000/solution.sol": "389291733bec4ee8ceacb98727c1535307eaca785a36a5fa2156b2c05f0c375c",
+    "hybrid-T2/scip/branch-000/solver.log": "fcec63ba7b9be52a772fb28cb50b7b8517b55a907b00edb08b91cf9d93b36994",
+    "hybrid-T2/scip/branch-001/model.cip": "8318b5f79c8004281e3f2ad62ea83d69b6bb01773e76642c6c4caf9a7f5d204f",
+    "hybrid-T2/scip/branch-001/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T2/scip/branch-001/result.json": "8b79f418bf188bb0aa0b5496186de60a0cede4d8a5135fda9f80ede16970fd9a",
+    "hybrid-T2/scip/branch-001/solution.sol": "dde64c7658ef0eeecd092310843e44e855e0b8f85ed3bf8b89b49beb34f64b74",
+    "hybrid-T2/scip/branch-001/solver.log": "ab7a9679958e71c68cdc07e1aa7c64a785c20589ef78d41398b2dfc3cb161c53",
+    "hybrid-T2/scip/branch-002/model.cip": "b74efb213b726ff2c3f21f8b1559dac1dd7ebf9fe254d3f74a40f6a8c0327f08",
+    "hybrid-T2/scip/branch-002/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T2/scip/branch-002/result.json": "44c615420401f98b3d46cedc524a125f17ea1fce9a30d36f2c475911c20e98ea",
+    "hybrid-T2/scip/branch-002/solution.sol": "729b28eb93dab7d7fd3b2ad899a3aa7bf8efe4d2f7a438707b16494987eab3a1",
+    "hybrid-T2/scip/branch-002/solver.log": "84bb612a1f3299f113996e99cd76e0528be4321e0f62b72820aab7bca7705aa0",
+    "hybrid-T2/scip/branch-003/model.cip": "f6d649d25b7127734ab5db30912a51fb5a51b2516ba90c2beb6034fba9d79b9d",
+    "hybrid-T2/scip/branch-003/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T2/scip/branch-003/result.json": "0a16f8b2886df915803d2daa7a66977aede5f0785e90bd635f23ba54f28e31ab",
+    "hybrid-T2/scip/branch-003/solution.sol": "510338502e09e0dc3993904981a445738ba07e3be92dc16db37d7dd99978fa1e",
+    "hybrid-T2/scip/branch-003/solver.log": "7b4115674c924037746b01201170401c7194de04826d7768dff447da421fe970",
+    "hybrid-T2/scip/branch-004/model.cip": "c5521d7092e07bce73dd5f8309fce026b3beb2cec78d88b7481e269bc764dc69",
+    "hybrid-T2/scip/branch-004/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T2/scip/branch-004/result.json": "bbee7def31d0d81be15e9aebfba13f69236f0491b259f9c76d8a4ad58a644d4d",
+    "hybrid-T2/scip/branch-004/solution.sol": "ca36b47629cebec309a02b9dd1e32540a022dbf0e13ab489021d4e535c57b2d0",
+    "hybrid-T2/scip/branch-004/solver.log": "00c919b561b835954899beb8c360a3197967597739182db1c628cb80fb95c321",
+    "hybrid-T2/scip/branch-005/model.cip": "03494301f38a43e05bf0209a324896ebd4af609aa94e5185348ccd56805950c4",
+    "hybrid-T2/scip/branch-005/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T2/scip/branch-005/result.json": "b794947ef087c576516d8ac2ac2036001794615bc0a828f8a3c979591209ce6c",
+    "hybrid-T2/scip/branch-005/solution.sol": "2c10f13ab0053aaa128baf6a5d0d5a0a02cab61783e1401799e41b3f936b5b1c",
+    "hybrid-T2/scip/branch-005/solver.log": "908220b8897b58c9e01f979ce5b683eb1b27e70db97d50f1c884d0d2617647e1",
+    "hybrid-T2/scip/branch-006/model.cip": "76d328210b0de936abf6969d06a496576c266908a6fbbffe6fe8e03ddb99b3c5",
+    "hybrid-T2/scip/branch-006/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T2/scip/branch-006/result.json": "90519138fa012bbd993d0df04e0bd72eaf4da904c32ddf986527b9e211b855b6",
+    "hybrid-T2/scip/branch-006/solution.sol": "0b5d89c699b037e6b7c5ad2d6b68dd43cfb47807d06f7296ef3e6b4780c81022",
+    "hybrid-T2/scip/branch-006/solver.log": "eff46dee5b1154a992b3883a28c151ccce9bc900cf0cbd9d2d0ed7b2dcb4031e",
+    "hybrid-T2/scip/global/model.cip": "ac20e03b1f4d8b27196c0901f2718a5529c57f1aa50ede0836f6d61c2c009eb7",
+    "hybrid-T2/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T2/scip/global/result.json": "aa49e90b66b0e13bf0ce3209a337017343109ed243142a3ff93bfa603e6a20ca",
+    "hybrid-T2/scip/global/solution.sol": "381c01e0c8f65f0533d4c9c3b3e9c2e8fb956c34eb3d04c809d11e2a149445be",
+    "hybrid-T2/scip/global/solver.log": "96722da84e1fa7c12f4d7dd0ab7d7b8eac3f65dcda29807e4270f087ecb64dc1",
+    "hybrid-T2/scip/results.json": "e76eef7345c39faef37fa0babcb0b1c1fabc8436fe60e34ad44b2c37259697d5",
+    "hybrid-T2/scip-process/process.json": "da0f455cc20b09500e027a989f81174496bb0e84af4dadeb3ce0251c4dc2fb5d",
+    "hybrid-T2/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "hybrid-T2/scip-process/stdout.txt": "a50add46ba9396ac2040ad60e280dbc42e317da82e142405960aaa8da5126550",
+    "hybrid-T3/exact-process.json": "dbc561bcb14f23f7bf590166c212401dcaa6e50555ce4a4612481af2266204e3",
+    "hybrid-T3/exact.json": "add16872fd0eb93e0c532e91996f83ff69fbf69c424ec64b922292f930a0f09a",
+    "hybrid-T3/fixture.json": "06bd8deafbecf3b9d8a8f6034c7cb31272a706fd3867932ebca73a0afb9b6d69",
+    "hybrid-T3/native/process.json": "249b1f72d22a04f6db7583f4f8133d561fce82d2fec009d02f117d4eccf09d2a",
+    "hybrid-T3/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "hybrid-T3/native/stdout.txt": "f71d7be5c1edbfc6bbb7a6a820c76947aa28a8b3aa296364936ea5da89c45161",
+    "hybrid-T3/scip/branch-000/model.cip": "7bf7738d346e77641994d06a0e4bc224da1722e52a69d00602edfa05666879df",
+    "hybrid-T3/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T3/scip/branch-000/result.json": "5c13a646edc15667390484908bff49cae666a3f080b405d79cad62b197276057",
+    "hybrid-T3/scip/branch-000/solution.sol": "05f59f50153d41d7c282c55fb130cfab0976102b4651baac851b62a18a17cf57",
+    "hybrid-T3/scip/branch-000/solver.log": "40b390e849b73083980bb1ca0c08007d571224b5e0b0c7f8c00717f00ce69813",
+    "hybrid-T3/scip/branch-001/model.cip": "3513c486e5e5df424267bf8b87a8b2be5ddb9cd696580cb1ff492fd5d56c0958",
+    "hybrid-T3/scip/branch-001/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T3/scip/branch-001/result.json": "c8be23bfedf907973076996e18344d9cc2feb080c39f84952a90285f87e8654e",
+    "hybrid-T3/scip/branch-001/solution.sol": "84b2131d769f4dd1143f93daa0229ff1cf416854a3859260318b2093c96e6042",
+    "hybrid-T3/scip/branch-001/solver.log": "eaa0d5f15834b1e0c75f05d31fc502c53974262bd7fcf6e97e5dee92af915e23",
+    "hybrid-T3/scip/branch-002/model.cip": "9440fbc6b81487dd82885ee6da332b7abdceb8117f2133231a44f6a3da99cfb3",
+    "hybrid-T3/scip/branch-002/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T3/scip/branch-002/result.json": "69faf6dc59e08fb9dfcb0080969920730f54adcfb462f372d461674bc637bb81",
+    "hybrid-T3/scip/branch-002/solution.sol": "9f09e76c608ebf65b5fd7e0de7c16be9088f79c16d35ad9b80723f0a9dc50647",
+    "hybrid-T3/scip/branch-002/solver.log": "e195b8349b62d53f77a41198a28150f27b4bc9cd178a2e50e558c49cda034eea",
+    "hybrid-T3/scip/branch-003/model.cip": "aae9b701fa62e141ea5d4212214f8dd4d261aa1c0dcab159fff69f19d42fe9ba",
+    "hybrid-T3/scip/branch-003/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T3/scip/branch-003/result.json": "81ad0143584b1a50462bd339ee83a2ff37755abb28f9a242bec527314be7bb18",
+    "hybrid-T3/scip/branch-003/solution.sol": "05f5bd4c6e16f37f52cbe17994a9a968000d9483f15b2d04dfe4e3462af5efa2",
+    "hybrid-T3/scip/branch-003/solver.log": "113cb283ec3c6db57ab93f715012b91e5f50aa1f002c6d12492a9216b60e45a4",
+    "hybrid-T3/scip/branch-004/model.cip": "9230622142e1bf2938bcb2e6167fcd43f27808208c6b51f1c980fe5ecaabd1b1",
+    "hybrid-T3/scip/branch-004/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T3/scip/branch-004/result.json": "304477562f74881d0179eba244f18a2c331570e33c5e15d4be68dedb43667be4",
+    "hybrid-T3/scip/branch-004/solution.sol": "eb35f849a4d54f9adbffea51c0c22397961c039c3e7911f69f17778acc75e2c2",
+    "hybrid-T3/scip/branch-004/solver.log": "261a00018c12c67f6bcfb997c945e004e35f967dfd62bd26a9161afd1933077e",
+    "hybrid-T3/scip/branch-005/model.cip": "4d2839be4b1a446f917dd23198d5e48f419b624c78caaef6ad42e3f567870c38",
+    "hybrid-T3/scip/branch-005/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T3/scip/branch-005/result.json": "ee4aed11691e01a213967d7cf5f35ec2fee1a2fd428e967b7857449951bb7124",
+    "hybrid-T3/scip/branch-005/solution.sol": "1145bcc4203944ad2d3c9a9b773c5b94c5fbeeb6d1f3ce46d0849a2592d46088",
+    "hybrid-T3/scip/branch-005/solver.log": "51e23bb78af8b674e26dc5777ad978b6b14215566603470673a00e1ad7b39ecc",
+    "hybrid-T3/scip/branch-006/model.cip": "e57bc8ad41a1b1ba74e80c6abcf94e184627375a834e0261deb67dd2f0624470",
+    "hybrid-T3/scip/branch-006/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T3/scip/branch-006/result.json": "efbc679cb858e7cf228b903fdd9f9907db31b5e70229f7dfc98cd2a62d057116",
+    "hybrid-T3/scip/branch-006/solution.sol": "dbf70092d3622a94e90d0093bf2f357b192a19979a1106be3b8774a9c1997fa0",
+    "hybrid-T3/scip/branch-006/solver.log": "4c1a6bd536081c205cce4443448217004fa1385a0332f06eb8a80e911ade4a3b",
+    "hybrid-T3/scip/branch-007/model.cip": "0c09ae38186a024c0cdd1d4a3255818b23bde96cd2ca369b5c7ad36d9d92b37e",
+    "hybrid-T3/scip/branch-007/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T3/scip/branch-007/result.json": "58071c98e9671d3941b64d46bd0c19d839951f1fa96c80bb406664aca041b5e8",
+    "hybrid-T3/scip/branch-007/solution.sol": "cec39c55958c441c01f4be54c935f487c9233e652b94a878d1b9f809a8f09568",
+    "hybrid-T3/scip/branch-007/solver.log": "c5ba9fc0e1d4126a163951b296bff840e7ede3b13758a5acafa60791e3bf19b0",
+    "hybrid-T3/scip/branch-008/model.cip": "8f5986f9467afa3523758c2fdc4f769ff37492f30f872b3d9f30286d647516d5",
+    "hybrid-T3/scip/branch-008/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T3/scip/branch-008/result.json": "d7debc0a6bee275953238d454d76093d6ed8fb5a5bd385890ad53690690ee444",
+    "hybrid-T3/scip/branch-008/solution.sol": "761cd3efacd05628127d67cca386035a0b6a0909cb692f9a47c11d5141894370",
+    "hybrid-T3/scip/branch-008/solver.log": "52745c874a10b69259c1bdbe4e99c43b1a7ea7b7e103672a229085ab81ad5e33",
+    "hybrid-T3/scip/branch-009/model.cip": "06a56d80a9b40962d0f541cebec420506e042059d43a3e4bc25ea0aa1c2959c4",
+    "hybrid-T3/scip/branch-009/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T3/scip/branch-009/result.json": "4597cbfe75e6d66310d0f066ee86f51903f8ad6a62fc605788de31d6143451e9",
+    "hybrid-T3/scip/branch-009/solution.sol": "122d16603c49dc1f2f5e86902542713a22d9591d01910fc7b45254df6eee82e0",
+    "hybrid-T3/scip/branch-009/solver.log": "c36902a263398024f60723ea1a3c72e3449df3017f7ea50f117e277578d7eca0",
+    "hybrid-T3/scip/branch-010/model.cip": "24eaee6f02c253b52d3c572d69dc65a1f1f08fa6c46407f4fb015766f0f91289",
+    "hybrid-T3/scip/branch-010/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T3/scip/branch-010/result.json": "3362f9a42009d56f67badf956fc4f0b82bb99c88e24a1f1f92b8a8045aa8a8a7",
+    "hybrid-T3/scip/branch-010/solution.sol": "9a383ad93b9dad5ec159f80bddee4ff049f4f6297695bd02a0ee1880d51bfccc",
+    "hybrid-T3/scip/branch-010/solver.log": "47afac2619cf92cfa43a2226044f11eaae77e16b4536d182c2d22c3975e41bc2",
+    "hybrid-T3/scip/branch-011/model.cip": "d0bfed50a2f6e5876aab61dda3919fc4dcbf95c8da69f43c80ae9e5a12dcf297",
+    "hybrid-T3/scip/branch-011/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T3/scip/branch-011/result.json": "300e3402cfb9c0ca613599bd7fb5a41d7569b1c43bb8ca60d07da8d39ee30444",
+    "hybrid-T3/scip/branch-011/solution.sol": "3173857ca47e0b4af83dd07e47a40ab99b13b75d056caa9ea3e20d2b0e53090e",
+    "hybrid-T3/scip/branch-011/solver.log": "f2ff0d3fcdb1b1036c8853a0b503d719ed20b993c7fb8e114a3c08152e0c8246",
+    "hybrid-T3/scip/branch-012/model.cip": "e46b275f09743e67a82efbbbf554c0a5d74b3e64b8bf9f0a15cd61b46927b455",
+    "hybrid-T3/scip/branch-012/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T3/scip/branch-012/result.json": "73de415f688787345c27eaddd4154adf6df9630207d34b1bcc72cf5dc0ed7c07",
+    "hybrid-T3/scip/branch-012/solution.sol": "90f3346a4bf4bc7292aa31b68651276ca7c4353c776edd8ba00ecd0ab137716c",
+    "hybrid-T3/scip/branch-012/solver.log": "b4ad971e997a5c6bbdc4584661f4be2e296d7b9be1792bbfe45eadd7c90cd51c",
+    "hybrid-T3/scip/branch-013/model.cip": "6aa4ff0a168b1c404436fd78adc2eacc83169a58c63114f92743b04ebcca9c2a",
+    "hybrid-T3/scip/branch-013/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T3/scip/branch-013/result.json": "568b301cb1dd99a609acfee1c6fd2ee5cef8ae93d7966d602864fdcb3c82a936",
+    "hybrid-T3/scip/branch-013/solution.sol": "8fc4ad3ccdb1c1ca8e393a9283b3fcad7a397cc72e0498bb129c0369a46ce12d",
+    "hybrid-T3/scip/branch-013/solver.log": "71d534396f9e833904d595117bf523022c0d0c882fe80f6b8be17dcecb352f7e",
+    "hybrid-T3/scip/branch-014/model.cip": "24e39d2d487c4c97fbf75e97d2dec1a435eac7d804f2b93c14b328adf9dfe77a",
+    "hybrid-T3/scip/branch-014/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T3/scip/branch-014/result.json": "9465a1b25d80c6c6539706d1405c137fbdad630f16b941e344504d4b3879224f",
+    "hybrid-T3/scip/branch-014/solution.sol": "2b0ba75c28a947386fe114ce6ab5dc78774d2159e4c3ae1807b806deb96caaea",
+    "hybrid-T3/scip/branch-014/solver.log": "2c171e9ecfb3b31497cabfee13b979523f9de7757ae766ae1ff2366763e64fd4",
+    "hybrid-T3/scip/branch-015/model.cip": "ba8304d023c746d198da4da57c2c037b3a239dcc95867c2e19d16ae65d93e05e",
+    "hybrid-T3/scip/branch-015/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T3/scip/branch-015/result.json": "451dec49c7339ad14b929d3259ea5d275565db0487be426c7ebc19e36dd746d0",
+    "hybrid-T3/scip/branch-015/solution.sol": "3fbe583c62e34cf6b9fc4f28657bad0f74edf3fa737a578f6ae5ee2a78be1531",
+    "hybrid-T3/scip/branch-015/solver.log": "d288a3c17bf29c9a5ae2e414fc8a4331267bd610868d6de002ff42104c17c407",
+    "hybrid-T3/scip/branch-016/model.cip": "0c98185431b766fef869bf6965d696df59fee0333f1b6c191d02ed9ca8eb6f4e",
+    "hybrid-T3/scip/branch-016/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T3/scip/branch-016/result.json": "dd210130226128e76b47d0cebb4b2a037db3356d2c8959807efd6150405ab010",
+    "hybrid-T3/scip/branch-016/solution.sol": "db1b7dfb5c432b0a25193bb18745eca9edbcb9330adb65c831aa4d16138e9445",
+    "hybrid-T3/scip/branch-016/solver.log": "4629e63abdb00d3979dcb2f1cb58c0c4dac6031893c46a8bc20a9550209339ee",
+    "hybrid-T3/scip/global/model.cip": "2a4b4b36d0efaffa42865055dc64bc0a568c4eb5884cf2c201744a0f96b8e38e",
+    "hybrid-T3/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-T3/scip/global/result.json": "2727d788fe1390b5790405f20cc5f7558d53821dc01d3c4021e87761e98333a1",
+    "hybrid-T3/scip/global/solution.sol": "0a3192f80c3846f725feb53204d8b2da66b3a1667ab4b1079d00a239a457c625",
+    "hybrid-T3/scip/global/solver.log": "9e4a9942dfa51b0fce61a575c397d6965a36004e55e71bd15d244d71a3c430cc",
+    "hybrid-T3/scip/node-limit/model.cip": "2a4b4b36d0efaffa42865055dc64bc0a568c4eb5884cf2c201744a0f96b8e38e",
+    "hybrid-T3/scip/node-limit/parameters.set": "a58d345facaf34fb510236fa8a977b1b877db557d21b56dae289a566d142c0d7",
+    "hybrid-T3/scip/node-limit/result.json": "260eaf4116a98c999a57b6c5eb5f9314770223e9385fc1041fbf01d6b7d82f3a",
+    "hybrid-T3/scip/node-limit/solver.log": "ef728e694d8873ef91cee662c1086faa216279fcfbd44af71d275d5e632948c5",
+    "hybrid-T3/scip/results.json": "1b61ddcae0ec72f248f44cc1dd219831b090cc25044a47b36de6ac9fa8f3cc2f",
+    "hybrid-T3/scip-process/process.json": "af06af811ee577ef5c4d7d4888e208e3b0fcceb68b26905ba6b54084962ea63b",
+    "hybrid-T3/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "hybrid-T3/scip-process/stdout.txt": "0ddca6065cc6d5fcd52e3edf22b712098aa11fc099cf256fab395116c8a83c9d",
+    "hybrid-cancelled/exact-process.json": "5de0ef191570f7c54d3fa9629b65ee1030f055cf4c4eedb4e957e71a48895659",
+    "hybrid-cancelled/exact.json": "dc024046c2a4d687fd37b38f88c39b59af1fe630bd014a28b57d9f8b9f0bf1c9",
+    "hybrid-cancelled/fixture.json": "9de4deda8225c0268bfb008336eeabd0a9a6d41a5c3f8e6850571ef1a6f7a73b",
+    "hybrid-cancelled/native/process.json": "93ad998f634f12a82d541486645635741885ce8de2bc0b1ae9a7afb23a5bae22",
+    "hybrid-cancelled/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "hybrid-cancelled/native/stdout.txt": "ebc1ec30e3b926a3b11e7fdb1a68526e5bf3b16e383f46a3ea7f048b79abd89e",
+    "hybrid-cancelled/scip/branch-000/model.cip": "a1f4286bab26f49efa1efdb7d92353f3d71ad32c17fe94393b4bc4666290a091",
+    "hybrid-cancelled/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-cancelled/scip/branch-000/result.json": "77cb940911dce6c1e86bf42f80e26b1b0f48eb23b91fb0bb92d85c2e445a8cfc",
+    "hybrid-cancelled/scip/branch-000/solution.sol": "0e5b9a5514ba7921f8531f49280500698caf7629afa6d950b5e0af8ef0566099",
+    "hybrid-cancelled/scip/branch-000/solver.log": "a649a6c327f07529e85b26a28445f90aac33dd327745a8d4f28ebcdbd1f97b30",
+    "hybrid-cancelled/scip/branch-001/model.cip": "d37b9e43f3b8e7a6ad34c1781446c2fc509758f27b1b90bdce92c87551a97673",
+    "hybrid-cancelled/scip/branch-001/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-cancelled/scip/branch-001/result.json": "c88a3aa3cfe65089131beb1744737fe85353a77fc0963822973e66825857142b",
+    "hybrid-cancelled/scip/branch-001/solution.sol": "86d351c1f19ef0ac607644e433e9dac5e5cc93304c093899c710e6ef0defd4b2",
+    "hybrid-cancelled/scip/branch-001/solver.log": "4a4cd3ac0ef069c7e4b016081d44e607278374ac7aae846e26eee9840080b6f6",
+    "hybrid-cancelled/scip/global/model.cip": "b87db01d8cf5b079cada880a2fa6cefc185c9352d60f587d50c602b1871d5483",
+    "hybrid-cancelled/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-cancelled/scip/global/result.json": "98d2170db400f466e561074db9c58ca78ad27d1655a471a43a5b929d6902bd22",
+    "hybrid-cancelled/scip/global/solution.sol": "acbde4d0ebed0fc41df04956ab8e5528d55f7fb43a4405bddd9397a97f610b06",
+    "hybrid-cancelled/scip/global/solver.log": "e84dfb5d640e13099381c186889163ecfe68b25ed827902ede828d4fb11c699a",
+    "hybrid-cancelled/scip/results.json": "d43cbce9d17e0183741c9dba93e66e12f001aa78f900279e1f49a60ae6b6a20f",
+    "hybrid-cancelled/scip-process/process.json": "b3c91a52afdc8d99ff9e5a1a6c296cc144006372d3f42ef52128c1f05787483c",
+    "hybrid-cancelled/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "hybrid-cancelled/scip-process/stdout.txt": "46e0c701856ff18783a654022052c222ea18354fa91080020d562e4d02c66989",
+    "hybrid-path-budget/exact-process.json": "6bf701749416a1cdec60dba316d1bb6c43bc7a29789d88e2bdb36c9b98bd251f",
+    "hybrid-path-budget/exact.json": "dc024046c2a4d687fd37b38f88c39b59af1fe630bd014a28b57d9f8b9f0bf1c9",
+    "hybrid-path-budget/fixture.json": "11a6e1699d6e9a4f56c0c0f51f4f15d6da1053d59019073e7476a57e5b2f467f",
+    "hybrid-path-budget/native/process.json": "7a5cda7dff36defd99f32597b92ca577b9a47945733ce1df0aaec6d454d12a4a",
+    "hybrid-path-budget/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "hybrid-path-budget/native/stdout.txt": "e64725de823c583a5a5da0be4ea57b650b9045d94e385f8aa6266258e0277398",
+    "hybrid-path-budget/scip/branch-000/model.cip": "6606abd4d98b936630ad625a909f3d4dd2aa31e73e4c40fa194d4f345af36ff7",
+    "hybrid-path-budget/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-path-budget/scip/branch-000/result.json": "47c8b6386ffdfd01576795a92eba9692b019a7fafe7a8b8866cbebcd1c738ce2",
+    "hybrid-path-budget/scip/branch-000/solution.sol": "0e5b9a5514ba7921f8531f49280500698caf7629afa6d950b5e0af8ef0566099",
+    "hybrid-path-budget/scip/branch-000/solver.log": "742682efd825dc39d847dc4ff73f718871b975b3b72c6ff1589985ef69815c33",
+    "hybrid-path-budget/scip/branch-001/model.cip": "70692fb576402c092ab77f4d5d2de980758ceb178e106b91b6994d9fdea4d5ac",
+    "hybrid-path-budget/scip/branch-001/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-path-budget/scip/branch-001/result.json": "95d007fdb6c819ef7b469e29b03b9a97a5827e56b50981aa74c73eb4a87d0d1f",
+    "hybrid-path-budget/scip/branch-001/solution.sol": "86d351c1f19ef0ac607644e433e9dac5e5cc93304c093899c710e6ef0defd4b2",
+    "hybrid-path-budget/scip/branch-001/solver.log": "bcf9e66fda0326581514756dc8ee4f0e57e10381690d0682f2e35ee98f032bc9",
+    "hybrid-path-budget/scip/global/model.cip": "be9f0e5afde645bfe5568326804d80269281c864dd22b53c8188de233ccb12b9",
+    "hybrid-path-budget/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "hybrid-path-budget/scip/global/result.json": "6407c81bb98cd807bfafa27d52bc4af50d34fec8406fb263dcd80652855bebb2",
+    "hybrid-path-budget/scip/global/solution.sol": "acbde4d0ebed0fc41df04956ab8e5528d55f7fb43a4405bddd9397a97f610b06",
+    "hybrid-path-budget/scip/global/solver.log": "a0f2e809acffe4fac1179d5cce5295a6e16cea375645c4599e6a1ec7413ca205",
+    "hybrid-path-budget/scip/results.json": "1fe957e45755e4e564c345846b6ce2a57e3603c420759d18700a95838d2e4052",
+    "hybrid-path-budget/scip-process/process.json": "2934ed81e280a3fb3c560b93dd472994448ff5f40fb9d8a2fc7ff46cc2bc0f42",
+    "hybrid-path-budget/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "hybrid-path-budget/scip-process/stdout.txt": "62bda45c66ab48461a1aa4f32dd475e2172ba28fd168d46c5916952b1ad4e039",
+    "manifest.json": "e52193c98bbb6279f1dc0b9791742a2ba182dc8d4133cad617173e1892124136",
+    "mixed-T0/exact-process.json": "b4a35b4edfbbc2537c6abcac0d04c2c8551926b65c06d8832ad0449fc6249c04",
+    "mixed-T0/exact.json": "6d82854055a615c941818cf8b267c8f575d8c49e01b747eb334a76136a8d48a7",
+    "mixed-T0/fixture.json": "3a7c80d81271fd3efcbe84b61eb59e553ce523b80ffab06660ebc3874982d953",
+    "mixed-T0/native/process.json": "3a5a0d20d8f4d584548003aab849286959ef3d43305017e54be3756880f029bc",
+    "mixed-T0/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mixed-T0/native/stdout.txt": "897b89149a5cd8d96b6e4d350db54b8217382e3143e0f040ecc92dfb90e3554b",
+    "mixed-T0/scip/branch-000/model.cip": "9f64a266a100c2299dba9d3dc6ef297bd006c5e4cc3398e64d641a84a01f215b",
+    "mixed-T0/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T0/scip/branch-000/result.json": "f541894c29000bcd6d4284560a09201b7bd1a862d26501f31e86e57d5e1da02e",
+    "mixed-T0/scip/branch-000/solution.sol": "58a8c06efefb4db902b5f7d82fe4f7c2c3d55e552ab4f55be6dea04ec584cff3",
+    "mixed-T0/scip/branch-000/solver.log": "b84f246358c3c9148090c4bd1de179bd8dcb233ccabaf9e211ab4651b9b9e424",
+    "mixed-T0/scip/global/model.cip": "9f64a266a100c2299dba9d3dc6ef297bd006c5e4cc3398e64d641a84a01f215b",
+    "mixed-T0/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T0/scip/global/result.json": "4ae32a465589134e6841cb9a6172f5aa316a2d11b3d41914884d2bb7ff47c8d5",
+    "mixed-T0/scip/global/solution.sol": "58a8c06efefb4db902b5f7d82fe4f7c2c3d55e552ab4f55be6dea04ec584cff3",
+    "mixed-T0/scip/global/solver.log": "b84f246358c3c9148090c4bd1de179bd8dcb233ccabaf9e211ab4651b9b9e424",
+    "mixed-T0/scip/results.json": "c8856fdcb30857420870f047714146b3eb5fbd76e8cffde7ce4b8a91683e6917",
+    "mixed-T0/scip-process/process.json": "b8c1d71fbb75bcbdb789538758a58121f10e72d09e9b8fdb776eab43b5ea9a9a",
+    "mixed-T0/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mixed-T0/scip-process/stdout.txt": "9e6fce6464a59c7846482135d56f6156c7c030eac42360c5ba9c854fac1dafae",
+    "mixed-T1/exact-process.json": "0423b98f7b81d630cd2780fba1e9d8659bdc865a9e68f53d485a6c38d8fa585c",
+    "mixed-T1/exact.json": "23c2fa25864c2b37fc4c8ad1eb88b13c16b95fa91f2aaf86ecee34479d52dda5",
+    "mixed-T1/fixture.json": "33a7fdd4bc75bb0d0dddcb3b298d1836f3f42afd476c73756dfc3b7dd8347f42",
+    "mixed-T1/native/process.json": "e366f6872166633ca01ee9d0248eed435b0aa9b9ee510228cb4ed62f5bbc198c",
+    "mixed-T1/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mixed-T1/native/stdout.txt": "17e42bb0aec7059de280fc7a54e1a45893d080b8b49563861da172f96491cb62",
+    "mixed-T1/scip/branch-000/model.cip": "13b15cbcb48fffbd3d1aee414ffbe9e7bbd2094a7c3ff3caed47858c374b9b2b",
+    "mixed-T1/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T1/scip/branch-000/result.json": "9d614a41cc8c4d3ffa126f6a3d1e2561710ec2269e88851133f45cd92721825f",
+    "mixed-T1/scip/branch-000/solution.sol": "faaadce641c2e9e9c628a1af00dced6f47681ab3f46df3b1ce1e8cab521cbdc1",
+    "mixed-T1/scip/branch-000/solver.log": "1d5a9f77876e6de2faae10b4c36c7cc8e45eaad5ce438219da4923a0f5f1d255",
+    "mixed-T1/scip/branch-001/model.cip": "b87a3dea6fc0633fba98a66c759ae2b4b45f39077b7b3b7da6ab79d5d1f3db49",
+    "mixed-T1/scip/branch-001/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T1/scip/branch-001/result.json": "7d870556bb43e5087beef5ba09f5f8f1462cd0f6fd350b948a80a0fcde3a1a42",
+    "mixed-T1/scip/branch-001/solution.sol": "e281c54900a02419eaa46246203390999aa78e702af4e16474eb8cb4ed364a5e",
+    "mixed-T1/scip/branch-001/solver.log": "ad8df10a18dd10d9e96cc59cb851e5af7a5308c66fd1d7fb599755e3be460ca4",
+    "mixed-T1/scip/branch-002/model.cip": "87bc8966b767a55f2e30d0285f5a9e13a67793a6dcd37b02e18557bd05d1accd",
+    "mixed-T1/scip/branch-002/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T1/scip/branch-002/result.json": "271fe6d84af4fb58914f3816eacb59f5971cb83efb648cfdd31010a556ae6241",
+    "mixed-T1/scip/branch-002/solution.sol": "33b2f9b3c2ef0717a7ed367d6042271ea742b7749957b6191445e2a027c05e6e",
+    "mixed-T1/scip/branch-002/solver.log": "beaece778a798f5d04b9612ce13ec9ccd4f1c6a82e78797c5d7441eeeb68a4ec",
+    "mixed-T1/scip/global/model.cip": "dd4fab6137e84a5f21a428619075bd368c5439355a426d3ce2abb45031baba2a",
+    "mixed-T1/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T1/scip/global/result.json": "685be3c8223a6ebaaf4d4269eaa034f0b3ee188dc3e8a667f22576a77af5f764",
+    "mixed-T1/scip/global/solution.sol": "faaadce641c2e9e9c628a1af00dced6f47681ab3f46df3b1ce1e8cab521cbdc1",
+    "mixed-T1/scip/global/solver.log": "13986a882c22f31b0d6404679aa71bf8952587f356a5b631b07b7ab6391d0bae",
+    "mixed-T1/scip/results.json": "b50bd96a480e986ea2e8b7fb00120ca33180cc679b297ad93e449ee2f1c60daa",
+    "mixed-T1/scip-process/process.json": "9c95dfdf862d34bf22266df8cd2c4cdffe06b81ef5c6235ee0941cbba3b66178",
+    "mixed-T1/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mixed-T1/scip-process/stdout.txt": "06363cad851228d13f427eb6acb3f4af8097f2180c006b5730b73000615626d8",
+    "mixed-T2/exact-process.json": "3a31bf555d2912c6e17f9d1773bdbf1774a50046a80c8fafe7f2df9b4957eb65",
+    "mixed-T2/exact.json": "0bbac1d9999ec75d5a40321ec19b0094c2cc32ec3e1006704994f28dee043e2f",
+    "mixed-T2/fixture.json": "fa60b824e2a2c54091177664a2967050b24cfa4fdb3c7e7e875928cb027adef6",
+    "mixed-T2/native/process.json": "8c7bcfef673a02921d103dea27b0610d78f3398f08dd2f1cfaa8e6ec035d7c8b",
+    "mixed-T2/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mixed-T2/native/stdout.txt": "03df01de955620bd3cd00de0656861f1c6823fbad45e65f5218046b0db4a9d56",
+    "mixed-T2/scip/branch-000/model.cip": "8f501ba5cd048f4de24860458e77518a592379c8bbb4fa63186cbb29da21ed40",
+    "mixed-T2/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T2/scip/branch-000/result.json": "aab7a34228105e5cf2c6fcbfc62c869ea7120f67a85a5fc94283895cbc09ae14",
+    "mixed-T2/scip/branch-000/solution.sol": "d34fe307e54f75601556c9eb380cfcf6a2660d04f4c67d29cbe3e2eed26fb031",
+    "mixed-T2/scip/branch-000/solver.log": "7d2f2c8f6bdf8039fa5aea8a9de9d4872299c25bd93101436b0da1bc7fadafc5",
+    "mixed-T2/scip/branch-001/model.cip": "a0a98050938de8065c5b70044f5204b087c6a826fe19230edb7cc97c0877d8a1",
+    "mixed-T2/scip/branch-001/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T2/scip/branch-001/result.json": "be3de0b398c1dca053cce6176f159f609a2cc21ff6cf5bbf082b5d77458b80a5",
+    "mixed-T2/scip/branch-001/solution.sol": "d2c51e32853345c2fe868327e9bbe8a9fe049f6ed76356271a32962bd16ba393",
+    "mixed-T2/scip/branch-001/solver.log": "d9749bb0865d6cde60734bc11e9c4cb13421c03b363016503be04cc8d0a3168c",
+    "mixed-T2/scip/branch-002/model.cip": "4db13b3e985a68700f96d7a203f0140b20014d6737c5e0bb247d4349e15eca71",
+    "mixed-T2/scip/branch-002/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T2/scip/branch-002/result.json": "704e710ce93c9ab1bc5049a0d9b152eed3eca6aed5db258d7f3097e83c95facd",
+    "mixed-T2/scip/branch-002/solution.sol": "c9600b76dd2c43c98d7bcde88757dc52602c0d74d2f1eab9e150b4c64fd7f9bb",
+    "mixed-T2/scip/branch-002/solver.log": "d22d4d01304a316ea0792b101d472df2aee03a5beee85aaa4fb155dab21dac95",
+    "mixed-T2/scip/branch-003/model.cip": "baa4b897f7c0de815bd7953c950afa2ff5704ec8637ea68a14f565fb4b757c16",
+    "mixed-T2/scip/branch-003/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T2/scip/branch-003/result.json": "a897d84810bfcafd3d14ff5ff5ae1dce4bd136bd6166ebcd28b30d17cf12ec41",
+    "mixed-T2/scip/branch-003/solution.sol": "ae9dea881146b9b076dfde933a1a284a0e2280d796be626d651133d62c3774b5",
+    "mixed-T2/scip/branch-003/solver.log": "9638eaf8ff97f5b7d514e0b58c1f26cf34ac86a2fce6fad8bd33fcb2b1a8941d",
+    "mixed-T2/scip/branch-004/model.cip": "7ed01350a05f9fe09097a30e6e2a81a398552ae1c0b0d75a63862bfbd7d28994",
+    "mixed-T2/scip/branch-004/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T2/scip/branch-004/result.json": "cfb7f7416c7ed8f2166a3e789a67d5cce4b123d6d7037cef305b3144d5e12e84",
+    "mixed-T2/scip/branch-004/solution.sol": "446b598b523cdc45057fe4fe5604ad27e031ad59133003af6ec3b90fcd18f01b",
+    "mixed-T2/scip/branch-004/solver.log": "be32f31ee3b8224aa1c3ff2bb75fff3a4c17e699c54286db8c5162500c61d498",
+    "mixed-T2/scip/branch-005/model.cip": "f570010ba212c8da6b402b9e59a3d54b9f0cf6e28b2f2f523b3f6171ec19d07a",
+    "mixed-T2/scip/branch-005/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T2/scip/branch-005/result.json": "6eb806031c9b729c938d77fa225e125e6ae17ae426bd4d07960671eca6b9a58d",
+    "mixed-T2/scip/branch-005/solution.sol": "9891e183f1762ac16be4b5a567a8f5d7885a910d82d66755d2220c5e5cd68440",
+    "mixed-T2/scip/branch-005/solver.log": "dde2c78d85a4978aa05b8db39b0bbc9cdbadeff6b6783351397b77f2899cc57d",
+    "mixed-T2/scip/branch-006/model.cip": "4a9395c0032efd479085103878d509a9bdb97c772ad168ac1d1c94c7af1dc727",
+    "mixed-T2/scip/branch-006/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T2/scip/branch-006/result.json": "e10fb50e8fc1a87423262b9b32fe0deeea7e63636f98ea00ff0ab3e90cdf3539",
+    "mixed-T2/scip/branch-006/solution.sol": "35c9e4729bbe0f73f4000f5a0c316f4eee46bf658a5b1eca3cfbab559d78dccb",
+    "mixed-T2/scip/branch-006/solver.log": "a0d584b5e279022b234ae908b51c95c5ad51a999f3bfe1bfe49426e373c4f0b9",
+    "mixed-T2/scip/branch-007/model.cip": "0f9de738177919e1d7d44e3287e5de950c7a66353ab3ccf55771639a98e345d5",
+    "mixed-T2/scip/branch-007/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T2/scip/branch-007/result.json": "c50abdf95e28786e330d259b9b83426cdc1cf1a96e3b5de4ced2e1f40a133d95",
+    "mixed-T2/scip/branch-007/solution.sol": "db1bcedcc964eeda5e647773c143d0890fc0bd0dda056ee911c4ef0dc35f602c",
+    "mixed-T2/scip/branch-007/solver.log": "7d13836829589a721fccaf4fbc5b04e906f2729a32fc4b4790fd946389971c29",
+    "mixed-T2/scip/branch-008/model.cip": "34c413409e96dd97526bb2ba883fe0d1ec51745bf148f48932456d259f0b00ba",
+    "mixed-T2/scip/branch-008/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T2/scip/branch-008/result.json": "4f9bbf3d70d8cc27fa73d4c79ad8fe49f7569a0f771b1797dc5670634ae9fedb",
+    "mixed-T2/scip/branch-008/solution.sol": "0d196b04bd48ba75804b272912decbe3623ea9e46b184bd53fe2339253c17a04",
+    "mixed-T2/scip/branch-008/solver.log": "baf6129c2c30cab3c39c49fc6afe94d83ca537ada6d70544529a3c77988d9a98",
+    "mixed-T2/scip/global/model.cip": "5ecb585ceaacd5e5d27dfe95dce468fe8556962d79a803ecd61e11f15615ccef",
+    "mixed-T2/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T2/scip/global/result.json": "f39d24da2e8030dc9f9d3d1232657e3934ac313f6f941905f06b48f65214e0d8",
+    "mixed-T2/scip/global/solution.sol": "48c7dce756c463c23caea978ce1a67f3b1d7df0a3047439c64d4e2cd256ea247",
+    "mixed-T2/scip/global/solver.log": "9c3a69e1e85c77708077e7ec13c8155d79474d647d2fc003d42037a9acf5d9fa",
+    "mixed-T2/scip/results.json": "0bbcc1360a79e3dd7af8eb764aa930880a7871e06f905b89d723db4376f97b85",
+    "mixed-T2/scip-process/process.json": "978bdff27d896959b40416e633e64b70e9685384345591549873b028b839bb19",
+    "mixed-T2/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mixed-T2/scip-process/stdout.txt": "15986585f40a350c99416262a915b2e78a4a1d68a2ed260f9b8ed3e2bbf41250",
+    "mixed-T3/exact-process.json": "03c438f6ace7dde752a5023130a544d8fda233aee361fd5d39f01448b98104dc",
+    "mixed-T3/exact.json": "16e11447bbb4e15f08c441b670a75ebb03ecb2be6ad0b62a4039cde128c1df80",
+    "mixed-T3/fixture.json": "6e2be089939cf1bcb93e020b64fdea54e35108719559aca07fcc5dcd84e58efc",
+    "mixed-T3/native/process.json": "033d3a41541a86830bf1891e6557d12ce230f02061178d8af8c6b0f5b00e1e74",
+    "mixed-T3/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mixed-T3/native/stdout.txt": "7192ec7366803c3d7318b2beb4b97fb70c9599b8c9eed9aab02dd6dea6f3381f",
+    "mixed-T3/scip/branch-000/model.cip": "e81fdfe2a5c525caf472e645b03fb5739ec272997a38b016ce870aa1f3a029c1",
+    "mixed-T3/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-000/result.json": "1542910c2c1d7dd474721c8943a5b0f68561806e05cd565c56ce669bd9252657",
+    "mixed-T3/scip/branch-000/solution.sol": "b7b7c01a1d589bd42ca0d628d333cfc1de8d7ee4bc2c8c22831488c9f6d951a3",
+    "mixed-T3/scip/branch-000/solver.log": "f759535351c5d46d7141a3fa7b8e9b7dc217509e0ef524be088fc0d94caebbde",
+    "mixed-T3/scip/branch-001/model.cip": "8518da565b059706599be3da724161870a649e92d28c31c99dc91c77e1bcb3b7",
+    "mixed-T3/scip/branch-001/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-001/result.json": "682e2f1edcf6e39c2a3aaf79b0fe590fae9eef8a96348e024728276feed9e1fd",
+    "mixed-T3/scip/branch-001/solution.sol": "bf37506ef8cfb8945b7df5408c9548a26a1997729871810adf442a1adc132e6a",
+    "mixed-T3/scip/branch-001/solver.log": "d3c2638477c0647cc17a7794c4b083812e953d5e93c6fb20e238a559f90853d9",
+    "mixed-T3/scip/branch-002/model.cip": "c8242f7203b8f97c8d0e7d7d15415305631dee039fb20aa2332cd3e31fa27367",
+    "mixed-T3/scip/branch-002/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-002/result.json": "78c198f62402dabfcc19b33d2b5a3c09330d011fd6e30eef772d50d3a36c63df",
+    "mixed-T3/scip/branch-002/solution.sol": "6633114b3f98cf7ea53a3c79679991de70694a104c1b2d24d60d6708a8d1f3c2",
+    "mixed-T3/scip/branch-002/solver.log": "0a1882112890e684271b67e7144accd6361f305766fae82581c677ff178aa21a",
+    "mixed-T3/scip/branch-003/model.cip": "1c5bcd7a36b9bb93738dbbf115a9c8f3fe46d00c31ec7418adb6c452ef96922b",
+    "mixed-T3/scip/branch-003/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-003/result.json": "80efea84f0da223f86d5049f265a1be56141f95b0fcdeef4ae650e5a783bd5a7",
+    "mixed-T3/scip/branch-003/solution.sol": "5b0f2f17e4e2a9a4b5f72f09a94b7d9f38b2f4cb47263af54786804fe39caa5e",
+    "mixed-T3/scip/branch-003/solver.log": "f27153e4985e4e2443658d6a81b89f070beb2fd2a2684edaa857420ba63c5af5",
+    "mixed-T3/scip/branch-004/model.cip": "f752196c58fbb6ee59e59f3a6456fffb932eecbc28c7eb6f86c8a54f940d6981",
+    "mixed-T3/scip/branch-004/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-004/result.json": "a8c9b4cf2d4094667b5dc8eac296168e38a0fce94cd17053fdef5f156aad21c6",
+    "mixed-T3/scip/branch-004/solution.sol": "73ef0553b23abb85e5dc009b4f900f6af61c5334c1b49d3bc4ed87b578c8dadc",
+    "mixed-T3/scip/branch-004/solver.log": "75f0e21d0771ba3ecce83ed1f941ab3600bf4b668829fc688b08f364dc02d4b7",
+    "mixed-T3/scip/branch-005/model.cip": "f9ab039a9518a8d656f7a9cab10cd70e8cf0b6de85d18bb0516caace359eb567",
+    "mixed-T3/scip/branch-005/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-005/result.json": "901050f52cb304f1ea2e8eac357f502d9f441b63bcbfe64b382661c53334a4f0",
+    "mixed-T3/scip/branch-005/solution.sol": "e1bba0890f99f8785f38f7a574d8eff71508394f314a4d8163bcc06194cb0272",
+    "mixed-T3/scip/branch-005/solver.log": "fc188cc77f9adcfd69806d024b32dd7e883a28d7f11acff8fad2c69448599fa6",
+    "mixed-T3/scip/branch-006/model.cip": "0fd2ef1bb974e5543d7117619df88c042dc1046eab63983d821e952402865689",
+    "mixed-T3/scip/branch-006/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-006/result.json": "a0f4753a66ece4b94f72afdf7ab927decfa58da3beb7905199b451b6482f9367",
+    "mixed-T3/scip/branch-006/solution.sol": "276abc487276f81b60f597045aaf0a675e0a1bb3ee643032236f6c3d29f5d2bb",
+    "mixed-T3/scip/branch-006/solver.log": "efdbf64d203e199e85b5dfa94f3c123aef2533f731c2c0d0888048e42d5432f4",
+    "mixed-T3/scip/branch-007/model.cip": "2df65e75c461ea631a2c2674c442a6ef3f7afa582768a0b30d6516c67c996f6d",
+    "mixed-T3/scip/branch-007/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-007/result.json": "0229d3980e1171a1c2ef0dd5d2780b7a6c3bdac0eb62fb4477bcd59b03a0ac54",
+    "mixed-T3/scip/branch-007/solution.sol": "623e4dc2227661f0302811408dcb5f1ed5204825a4dbb35c4e131daff309b935",
+    "mixed-T3/scip/branch-007/solver.log": "086e2634a4d0311140fffea6e420602b64db589a7d1eeefa2e03f9a830c4bb81",
+    "mixed-T3/scip/branch-008/model.cip": "9656bdf0b46fa1bca4f296d5a0a1d7ccade606290c7d1d88a772c178b2024f5e",
+    "mixed-T3/scip/branch-008/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-008/result.json": "35b8466f2b95f1df0015a870091db58ad2f6acc414c140fee69576660742775f",
+    "mixed-T3/scip/branch-008/solution.sol": "e5eaa146e2368dd46d4c558d4363cb83115d8cb67f197f2d4f7cd9dd17900945",
+    "mixed-T3/scip/branch-008/solver.log": "703d6d4762be92f408a28ff2bf2f80a8f3ce83784c2c19529cd6d2cf1b994d28",
+    "mixed-T3/scip/branch-009/model.cip": "1182507385875598b44f1cb5392a36f8b4a34226cf5bac80784bec0a1e1067e7",
+    "mixed-T3/scip/branch-009/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-009/result.json": "786738b8006dea34773f32d06328aecd5dda4d39afd7760b506257b93e878a30",
+    "mixed-T3/scip/branch-009/solution.sol": "e6c24bb5c77402ec34b82d3597e228c6628f4c965e0726b6392c70c092410a5b",
+    "mixed-T3/scip/branch-009/solver.log": "d3b8010f6ab69cf5b7c9b7192eba23ba539879869b10b0de6f386f3da3cffd63",
+    "mixed-T3/scip/branch-010/model.cip": "a651af3e32148b62dd60f15385d1009406e367aca3c72f3d86f263b295131bb8",
+    "mixed-T3/scip/branch-010/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-010/result.json": "066a2216a97371813965b256261defb69878c59945cb50aefabf43e3b1643b57",
+    "mixed-T3/scip/branch-010/solution.sol": "cf51e0d1969ae4bd442de5682e1fa22b10d5d2026bce3c65d7ea171779b57b5a",
+    "mixed-T3/scip/branch-010/solver.log": "705c8af9312cfed4a967a81641a16524ead7e4f6926fb7bdc15ebc45f90c57bb",
+    "mixed-T3/scip/branch-011/model.cip": "e570dbc9ca2f5b7fd1e19e5967bc35e82a607a0b1866baa76971bd09974b447d",
+    "mixed-T3/scip/branch-011/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-011/result.json": "6e78e6bde7921cf7ecf2422b4c487713451e29b97acb9ce1c91c14459c1b6d67",
+    "mixed-T3/scip/branch-011/solution.sol": "23a7370798fef7643b227f74afcdbaf855d175bb03e3d72f4ecbf476360e4ee5",
+    "mixed-T3/scip/branch-011/solver.log": "e62f3172076502a0faf2d95e41aa1f2ab48b7f861633a8a2a04ba14a344aed30",
+    "mixed-T3/scip/branch-012/model.cip": "c86176069e026c818d1e293233b45fc0b1cc92515046625d5b822511fc3ef6c5",
+    "mixed-T3/scip/branch-012/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-012/result.json": "6fd1fe2b0b492872f5382b6cd888df16d58c3afd1fd89a57f0af0178b138bd62",
+    "mixed-T3/scip/branch-012/solution.sol": "f4bf964a98fa83da932428687b837474670cf77fc8b425b8e86eaea18378db35",
+    "mixed-T3/scip/branch-012/solver.log": "3c0ab8ca39c2f19aee34819e41d81cc8cf3734e322d02dfb49a8eb9338c03892",
+    "mixed-T3/scip/branch-013/model.cip": "84c2a9166d26b5c3e876d468499d5fec107bfc7deef6b2ba9bab0f29cc5f87f0",
+    "mixed-T3/scip/branch-013/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-013/result.json": "46f37dc382b843034a9fc6d906b600de5e2e505c58487d35f4035ebbaf8b16b6",
+    "mixed-T3/scip/branch-013/solution.sol": "905562741f65e925801ad59f52c0fbcfec13c1e691933c9f8c792deb517f04cc",
+    "mixed-T3/scip/branch-013/solver.log": "c957dd8f6486d4a7611138962506e3630977b8bde80bbd079cd538d8acf3794d",
+    "mixed-T3/scip/branch-014/model.cip": "2492edefffb103180803790b9db353857d729dbbe3c78c7bf78ce08c8084270b",
+    "mixed-T3/scip/branch-014/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-014/result.json": "ecd7e3e9433f59fdcb56670f8b5f4c0af8aeeacd840853d94e4daa41f87058fd",
+    "mixed-T3/scip/branch-014/solution.sol": "5ce35ea4d0317ec5c58c01cf764c9acf07210bc9bf6e2b3dc8d73d7f510df208",
+    "mixed-T3/scip/branch-014/solver.log": "e97945b9e00c09ceaaf053d95c2c0f930b30ae5a87831ad44e07cb401ee2decd",
+    "mixed-T3/scip/branch-015/model.cip": "b88d9b90bc241a1a336c22bd110105dc7d0ebde7703cf5b1b2c582d7385e656d",
+    "mixed-T3/scip/branch-015/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-015/result.json": "a610b055d3245fc21e9236c75c54be30a784267159ed75889eb0979a71ecbe57",
+    "mixed-T3/scip/branch-015/solution.sol": "803b15ebf2b618b5c39db02d14ca553aeb5f01a73645e4ad713cd965b5bb99f5",
+    "mixed-T3/scip/branch-015/solver.log": "2b254f54fbb35fa7be0d8ef72aeafedf10d1fe8d61c2d5a9a1928e16ecff3408",
+    "mixed-T3/scip/branch-016/model.cip": "a879691ec8bb9cffae472a174286cac6fd73bc24b9adce7bf0c2305fd324a8e8",
+    "mixed-T3/scip/branch-016/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-016/result.json": "63c498fbe175871e14ba3df5f17f90b41d3128bba0cc52f3dd5f86dcad5a1d58",
+    "mixed-T3/scip/branch-016/solution.sol": "147cdb18c69726be74e7d48502f8db23de3e3e6753aa9602bdd0dc4f1a8ba6ef",
+    "mixed-T3/scip/branch-016/solver.log": "63dd89d87616e5316484b234e8902316e528153ef77c9a94d015b28f55ca4006",
+    "mixed-T3/scip/branch-017/model.cip": "d78ea7b0dce966787b086dea0c809eadb2103aabe29f3ff279640fe404d6bcb4",
+    "mixed-T3/scip/branch-017/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-017/result.json": "1e96bb35dae13e24c9e4d506b7c36c28c886875e3be22c97bfcff361bb8b04d5",
+    "mixed-T3/scip/branch-017/solution.sol": "a0eb2fe47e36e0059780c3c331979dd7d44195aaddbc48b3e36e135361789733",
+    "mixed-T3/scip/branch-017/solver.log": "ca02636854c9e7650e24292649fa800663d485cecdceb5a0b9a44dd5c423c642",
+    "mixed-T3/scip/branch-018/model.cip": "1a90055caff5935b2db9adf798d778ec8cac7465c6aaf4e842555a8b90aec0c3",
+    "mixed-T3/scip/branch-018/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-018/result.json": "7b9217b5fdd9fc4dd41c0dad87658ebc186f8ea6591e058c51354714c88e7d68",
+    "mixed-T3/scip/branch-018/solution.sol": "eec8b2d5b6f101e9d56f8d3a1bcd68bcb44b2d8c61108bcc900bd13e51642eda",
+    "mixed-T3/scip/branch-018/solver.log": "7e98969978a0a64b31ff7af0d6e7684ba3a79039961e09fa6922cec78f59de0b",
+    "mixed-T3/scip/branch-019/model.cip": "9442a1c15167b1c36e526e8d8437b7550d90db3a1159b8f3611977f881e2aba4",
+    "mixed-T3/scip/branch-019/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-019/result.json": "c306e858127c87e549fdb6cdaef0362b1b7bdea8b2aeb7c491bc5574c7612166",
+    "mixed-T3/scip/branch-019/solution.sol": "59349c11794e58149d0a10ea3e6f8b9b4ca3645e7bd886d7a04cce556f6f0cdd",
+    "mixed-T3/scip/branch-019/solver.log": "946e85f85d2833daf1bf59d64702733b207180578cbb205e5f847834740b0250",
+    "mixed-T3/scip/branch-020/model.cip": "1d2dbb527a03fa5d1d1a3995e426d15bd07561a1e478963dc56e8583e0e4e6eb",
+    "mixed-T3/scip/branch-020/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-020/result.json": "324c0599f901473bbb47d605b054fcdc33393a1f49dc1fa3c83605096c1d6a0a",
+    "mixed-T3/scip/branch-020/solution.sol": "17d2b81b2d89954eb67ed75657ec6e9fbb5423159e48be82127ccf94bbe02641",
+    "mixed-T3/scip/branch-020/solver.log": "9932b7569cce68346d4d5f115ecf35bfd79bb103d487394f66fdfe095b84df67",
+    "mixed-T3/scip/branch-021/model.cip": "1ab9248cf410872c0a7886f6c2fc302526ec3942c9bb8c949885861a1c29b591",
+    "mixed-T3/scip/branch-021/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-021/result.json": "5421d6f819e74df20001b1e81b9fdc62c64261fa82a8788c20a558a326640fe9",
+    "mixed-T3/scip/branch-021/solution.sol": "a0f0288ddab7cdef3a349416f7489f366618c0627384e3e7609807fc5a6f69fb",
+    "mixed-T3/scip/branch-021/solver.log": "1eaeeb6cbf30a8f08eb6100f07fd3641fde92af79206644e2e562ec2954c6315",
+    "mixed-T3/scip/branch-022/model.cip": "5b6b95e3d6b89b94e6f0ee45cb0e6554606be8cc3b761c253d5e45183bd70cf8",
+    "mixed-T3/scip/branch-022/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-022/result.json": "527dd899f8ce6627b214069efcc4fb8df8d233287c248793aed83594faf62be2",
+    "mixed-T3/scip/branch-022/solution.sol": "a0c448a51fa8fe1ca33ef51bc61e005a2d46a6a81f4db495b281f858eb51584a",
+    "mixed-T3/scip/branch-022/solver.log": "2032427b811b270b4d7733f243a7d8ceff465273691c5b5980ea76184fb98b85",
+    "mixed-T3/scip/branch-023/model.cip": "b2591c3fdc6d0052caab43d3c3f7b258f53893f22574224560569f179ce861e9",
+    "mixed-T3/scip/branch-023/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-023/result.json": "071ebae514081e99b3046025c9c478598e5c565e02c369256079ac111800d68c",
+    "mixed-T3/scip/branch-023/solution.sol": "576b89be9a4a3a6ac873fd08b66ca23e2c513e8bda053bd0dbe54bd0eef47c4c",
+    "mixed-T3/scip/branch-023/solver.log": "9435f55b0fe5e64398880fff83a011dc047df656b45c5c20f2ec36678e38be89",
+    "mixed-T3/scip/branch-024/model.cip": "50564301d89dcca6f7a6b7ff0acdd0d8206dca1d0aceba2d86ccc3c625b34095",
+    "mixed-T3/scip/branch-024/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-024/result.json": "26938ee234f7527140d21677b080ae5f2fecd8dafd147b67ce40ab9081fa8f80",
+    "mixed-T3/scip/branch-024/solution.sol": "c68c22ad2610b806c13f54c3614026497c46f44d759b8f6726ca0ff4e1a65b23",
+    "mixed-T3/scip/branch-024/solver.log": "67c76fc0c5054fb702c26380993c39e042d6ec3f4cf7dc4efce1e8f64e964a3e",
+    "mixed-T3/scip/branch-025/model.cip": "8a9daeb07f1a80a9e2e22165e2fc94dc9aa9c6b456139ebe6cdf2283fc24a7f6",
+    "mixed-T3/scip/branch-025/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-025/result.json": "daf4f3bc4f94004c0a7b96a2a008a68c3115b89378eb3b10552f9194b6f3c845",
+    "mixed-T3/scip/branch-025/solution.sol": "af7e19d2c57c5ab69f900408e8434d2f1c0c1261ee8ad435b9e5219cd10fb549",
+    "mixed-T3/scip/branch-025/solver.log": "ce9da203d418ea06d1885091c9743f37f569ba79eb6fe47b5a596f703ea8ca85",
+    "mixed-T3/scip/branch-026/model.cip": "38fe347e2f98d8fcdfd36ed31b5bdfe7b408adecad8fc0564e473f825a0d8025",
+    "mixed-T3/scip/branch-026/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/branch-026/result.json": "02a01b4bd8fb3a79506ef2281ad3e75cebc6594b2ff1282f1004021ea87f5d6c",
+    "mixed-T3/scip/branch-026/solution.sol": "68345433940d932f17e7a1e19577fa5894300d8bbcad6bf35164a19a3e57c8ef",
+    "mixed-T3/scip/branch-026/solver.log": "d8a90e88e7c9de8d9b728c52f1a358ada1589ca49eb0899401cdd2440af11943",
+    "mixed-T3/scip/global/model.cip": "0283f850e8f677ba883f6adeacdc8c7bb85dd9b850e0ab03d97dade56000e50a",
+    "mixed-T3/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-T3/scip/global/result.json": "22793a97ce431f3eb53707500d71539d48736180fd27fe1e76f6b60e79fbee98",
+    "mixed-T3/scip/global/solution.sol": "449cbc6744a59ae6105729c1e850b2d85eac814704d921fdee330f5dce1ad4e7",
+    "mixed-T3/scip/global/solver.log": "39ce05dc08675a5f83ea8b0c07aca979f3b8e27e3f5d7d9b13f8202aea939755",
+    "mixed-T3/scip/results.json": "d22465dbdd380da760786f0bf84cf48c281d7327f20259f572a1c83549e6e69a",
+    "mixed-T3/scip-process/process.json": "e71e4afb2d1931f50f4409a14d3af02c787d51416ce1b292ea4450b6a0e786a8",
+    "mixed-T3/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mixed-T3/scip-process/stdout.txt": "ded710795416571be46a4f40e36f9f51f66021ace9aca3932db99fed233e5e99",
+    "mixed-prefix-budget/exact-process.json": "d5f9cb7ec109963db9d1d66f396f062b907ff78f5aaa0148fef694b17eb5542a",
+    "mixed-prefix-budget/exact.json": "0bbac1d9999ec75d5a40321ec19b0094c2cc32ec3e1006704994f28dee043e2f",
+    "mixed-prefix-budget/fixture.json": "692773107bf488869c4ea0643ee161cb0cef943ea943dd360c56da1df199b3f2",
+    "mixed-prefix-budget/native/process.json": "19477414070d70217bfcdf321fc9ad779460f051e612ed4e8a60c31777337814",
+    "mixed-prefix-budget/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mixed-prefix-budget/native/stdout.txt": "dc40047727311b4321f07423f0a2d729900099776b625f868d4c04d6768e6a7f",
+    "mixed-prefix-budget/scip/branch-000/model.cip": "217747c8fb60bd1fc6b09c648da1ae144b10d5a9e20cc281ab11f437e5ade692",
+    "mixed-prefix-budget/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-prefix-budget/scip/branch-000/result.json": "6ef945fee1a91d38e7b3018f0a73e5cc1f1f21b005dcb694ffefcf51ecf2b904",
+    "mixed-prefix-budget/scip/branch-000/solution.sol": "d34fe307e54f75601556c9eb380cfcf6a2660d04f4c67d29cbe3e2eed26fb031",
+    "mixed-prefix-budget/scip/branch-000/solver.log": "e1066a2b57133a91cb111ab81683201032a1b1196c7427f7d1eb245551762438",
+    "mixed-prefix-budget/scip/branch-001/model.cip": "b26d919804b8c5362e10f163f5a6be1cdf4a9146ee30f6c37b9fe51c91863b94",
+    "mixed-prefix-budget/scip/branch-001/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-prefix-budget/scip/branch-001/result.json": "524f3ba6f4663a73d589a613a5ca7806d30cfad83a5bd10d7bf45c03c2cfd6ae",
+    "mixed-prefix-budget/scip/branch-001/solution.sol": "d2c51e32853345c2fe868327e9bbe8a9fe049f6ed76356271a32962bd16ba393",
+    "mixed-prefix-budget/scip/branch-001/solver.log": "f12b88ed682938996a3d3da917511806f6d1f9e4be4a7c4de10b6626a11ef048",
+    "mixed-prefix-budget/scip/branch-002/model.cip": "16cc0c9bc8d99c5f389aa3b2068c38fe08c27680c008f39836e6f763a06acff0",
+    "mixed-prefix-budget/scip/branch-002/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-prefix-budget/scip/branch-002/result.json": "cb0ed14bd4ed9eb33448a36a556767998d8b3ae21920512bdb114c65218ebcfa",
+    "mixed-prefix-budget/scip/branch-002/solution.sol": "c9600b76dd2c43c98d7bcde88757dc52602c0d74d2f1eab9e150b4c64fd7f9bb",
+    "mixed-prefix-budget/scip/branch-002/solver.log": "f096a52e90751b1af38cb87212105cdb8ad280008661eb91756c2794a48ab985",
+    "mixed-prefix-budget/scip/branch-003/model.cip": "239b55869073d29946d21336c8d17d3558ea054f4989591981faa87490d7abe3",
+    "mixed-prefix-budget/scip/branch-003/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-prefix-budget/scip/branch-003/result.json": "315d75c2b43e2a37887572b96e3b1f8869e909217582c9261b87c02083238a15",
+    "mixed-prefix-budget/scip/branch-003/solution.sol": "ae9dea881146b9b076dfde933a1a284a0e2280d796be626d651133d62c3774b5",
+    "mixed-prefix-budget/scip/branch-003/solver.log": "0ec0cd5cd5d3b3023b4904c2c8b5a891df44195cd049c6fea103de43af45e5f2",
+    "mixed-prefix-budget/scip/branch-004/model.cip": "9b938f4e9cc8dfbd1b59ce0ce539d9ecea4446116725acfaccf94c54e1f4c54d",
+    "mixed-prefix-budget/scip/branch-004/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-prefix-budget/scip/branch-004/result.json": "2e8ecf61a8db7e821a9b0982f612133d05939cec341252857e1589b8244ec338",
+    "mixed-prefix-budget/scip/branch-004/solution.sol": "446b598b523cdc45057fe4fe5604ad27e031ad59133003af6ec3b90fcd18f01b",
+    "mixed-prefix-budget/scip/branch-004/solver.log": "8cad4ff60fe9fd3052bc03bb003b3cdf31dc73017ecc89b16d39d891f76ec157",
+    "mixed-prefix-budget/scip/branch-005/model.cip": "db4cea7e974038b10289b078dbfc52734ff5894f0cde8d64359e733787f6baf4",
+    "mixed-prefix-budget/scip/branch-005/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-prefix-budget/scip/branch-005/result.json": "170ce894e087ed978f940173a6e7891af54b9f8f07acc1d075d9d56fad44c7af",
+    "mixed-prefix-budget/scip/branch-005/solution.sol": "9891e183f1762ac16be4b5a567a8f5d7885a910d82d66755d2220c5e5cd68440",
+    "mixed-prefix-budget/scip/branch-005/solver.log": "7e1fba265dff96928e5395836a2f4c7a8de91db2b1b8262448effa104e4aba6d",
+    "mixed-prefix-budget/scip/branch-006/model.cip": "956b150d9aaa032711584859aee2f71611770acd54d530c011cc368b47ab5f02",
+    "mixed-prefix-budget/scip/branch-006/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-prefix-budget/scip/branch-006/result.json": "623592329597a3b1e49895d727eb5bba4c9cbaf4656f3154d51d35867744c882",
+    "mixed-prefix-budget/scip/branch-006/solution.sol": "35c9e4729bbe0f73f4000f5a0c316f4eee46bf658a5b1eca3cfbab559d78dccb",
+    "mixed-prefix-budget/scip/branch-006/solver.log": "6a12da5ab2840f0070f650467bffe4a23d67bca7415918deef48d522e845382d",
+    "mixed-prefix-budget/scip/branch-007/model.cip": "3b7a062ece608e1465bbdd9f69ac16ee8d121d01e00fb1144ff5704ba3e679ea",
+    "mixed-prefix-budget/scip/branch-007/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-prefix-budget/scip/branch-007/result.json": "b805bb9d666c0e3a64b88abb600a2b5946b9e75eb94f363dfe0a8e5fd82fdcea",
+    "mixed-prefix-budget/scip/branch-007/solution.sol": "db1bcedcc964eeda5e647773c143d0890fc0bd0dda056ee911c4ef0dc35f602c",
+    "mixed-prefix-budget/scip/branch-007/solver.log": "7b598ac71b38d257af94b2a7f2a4b56e7cbef82ddab6a7cf53d24ec8b9ba7c73",
+    "mixed-prefix-budget/scip/branch-008/model.cip": "43ddb0629235420144bf86d6b9130470d45e29d88cdde79e4d39c2f7867a4eb0",
+    "mixed-prefix-budget/scip/branch-008/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-prefix-budget/scip/branch-008/result.json": "da5d2438397912c4a38e37b94eeb8eaf6fca42ff9a68f2c2b525b5ec49b40878",
+    "mixed-prefix-budget/scip/branch-008/solution.sol": "0d196b04bd48ba75804b272912decbe3623ea9e46b184bd53fe2339253c17a04",
+    "mixed-prefix-budget/scip/branch-008/solver.log": "b3d7f65aaf7ced68b1f33b1ac8afdb566bf2b52151688188cfdddd933d159818",
+    "mixed-prefix-budget/scip/global/model.cip": "8a1d42e77117c9a1b9595e442b1709060f68f086a9cccae135cda591c9a97867",
+    "mixed-prefix-budget/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "mixed-prefix-budget/scip/global/result.json": "9cb84c9519ddf5a50c0389ed2f5d5a8b204731e0fdbb0796ea0e25c693e59a1d",
+    "mixed-prefix-budget/scip/global/solution.sol": "48c7dce756c463c23caea978ce1a67f3b1d7df0a3047439c64d4e2cd256ea247",
+    "mixed-prefix-budget/scip/global/solver.log": "bd2e47648ce522b81a04883d7eceec470c25f033ebe7136d8336aafad84db12c",
+    "mixed-prefix-budget/scip/results.json": "aaab554ae6f796139a3374901f51df5e4ef6d1017f9b0aacdf8552789cbb0a13",
+    "mixed-prefix-budget/scip-process/process.json": "b42c6fa00fabe00eac8ea9ecf09c27389ac4dac07770e6ca524d7958a5ed834d",
+    "mixed-prefix-budget/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mixed-prefix-budget/scip-process/stdout.txt": "d8e1e43b2764e367a8c790f7d55260ccec599d1231948810924733ce7287ba96",
+    "published-2d-identity/exact-process.json": "313b4426a94ea2df700160a59f6bd74c4a4b3c9503971085beaa272b15d2238f",
+    "published-2d-identity/exact.json": "80b9e41c1821514fdc4aef6abe702313938e7195c8f64e7ce8ab092bc030f364",
+    "published-2d-identity/fixture.json": "3b024b5dab458485e3fd87023e8ac4ccf81d55f182de440742419e5158ec08da",
+    "published-2d-identity/native/process.json": "578f6ce0da8f54b2cf10e2d0ea0918590432c7302e54532f0cafb38e3ed9a864",
+    "published-2d-identity/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "published-2d-identity/native/stdout.txt": "ddae6c503b76e5a14cd30db7db73fd9f881538df1ff8883b5651bd424db3547d",
+    "published-2d-identity/scip/branch-000/model.cip": "8bf27d6a879ec90868ffdf27f2775e56cd684ba62d2e659b19cf267ca63b190b",
+    "published-2d-identity/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "published-2d-identity/scip/branch-000/result.json": "15114a2430e705d384444b9d7ff88245640f1b1c2a8eceb3dcc53c5bbbc60e1f",
+    "published-2d-identity/scip/branch-000/solution.sol": "2e4a28fcbc4f5e56a30b1aa32ea66cf30e6bdc72565a503ab8e597861989bb0e",
+    "published-2d-identity/scip/branch-000/solver.log": "d4bd41766113bbb7464c4313c17ce3eeead986b70945d62277a65182ecb7bef2",
+    "published-2d-identity/scip/global/model.cip": "0c60e0046716a89de1c1a40bf6dd470682b2309c54a2255f924c75af5838c172",
+    "published-2d-identity/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "published-2d-identity/scip/global/result.json": "df768690958f4604c2bc493110fc75f3a78e999b367cf10376dedb5fe95bac00",
+    "published-2d-identity/scip/global/solution.sol": "88e3fcf60d6b829f801a0261a984ab56dc9499c3913e8bb167ab7ff5df9e254a",
+    "published-2d-identity/scip/global/solver.log": "48296d7bd1ba2b982d14de7635077f04190998d0a6adc9df97ef96db67f2f27c",
+    "published-2d-identity/scip/results.json": "8c65d17f3e6a0070e5b846a6fbbf56d7ab82502aaee767d6d0a7a8c242b3f745",
+    "published-2d-identity/scip-process/process.json": "eb3a3f211da7cc450264eed67a022c5917850a111d458e0c17dd0e58980ebdd0",
+    "published-2d-identity/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "published-2d-identity/scip-process/stdout.txt": "c7ff81d07c86c6706a876a50a9ce4d3d02faef4b7ea20fa601c9fec3411278c9",
+    "source/CMakeLists.txt": "6421adc4296ac9f4e5f99670f4f574394c0928e86b322963641bb2ba5c7680f0",
+    "source/bridge.cpp": "7a5d89baf8223a85c300162779f2bd1f61ce1448fd225964849b65057c9e10d7",
+    "source/check.py": "75167c5517b1a4b979754f84bcf3eb072015d7eb788790c23f3967308328a046",
+    "source/evidence.py": "376f0caa2640168a719b8ee8b587127e640e9dd25e29d9d879cdf0641e17b0a8",
+    "source/figures.py": "b1da12694d793be6b053810860f163eecd4f16c96fc943f6aa9dd674adc4f936",
+    "source/fixtures.py": "afdca13af17f0b5249455bd667688445256818c2ed4afe2bcd8171025c70be85",
+    "source/oracle.py": "dc9b50add0d6dde9da92315537847ba11e4cfc823bdab8280464102ddf820335",
+    "source/run.py": "dd23511ce25a5e1fe7d8c84563841d8a02f4bcdbce00a524f261242d723605c2",
+    "source/scip_reference.py": "a01c836e118b7a3b66b67f87f4f69139ad02041c1091cb633e1cf4f74de7e707",
+    "source-pre-invariant-fails/exact-process.json": "c38615bf4e012d3818f4fbe54673d3664b75574da2fd46e3d89cc8071580ace7",
+    "source-pre-invariant-fails/exact.json": "cf689d3f3f2d1c9bbbc65aa866bcc52ebd9a749775770d35688f283b8da5afc8",
+    "source-pre-invariant-fails/fixture.json": "0ebc335817b376541f16b7ba1e1819213808c3cfe9f981a51447607c01a5a9e3",
+    "source-pre-invariant-fails/native/process.json": "5eeb38135c5b06b5ef49c39cd5408d65499173aedbb668733425a9102055470d",
+    "source-pre-invariant-fails/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source-pre-invariant-fails/native/stdout.txt": "a065896e2cdb4bdc3525aebfd3c1329375804490561e42eea8670bc9bc19660e",
+    "source-pre-invariant-fails/scip/branch-000/model.cip": "2d58cdf2e8445a96f8c7b4860fe20926ca4b44d2d5fc688f1a1966dd7e6416da",
+    "source-pre-invariant-fails/scip/branch-000/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "source-pre-invariant-fails/scip/branch-000/result.json": "08a930bbdd7b76129a68fe68375fe1dce0d37a144b8b4763375c0c02345822bf",
+    "source-pre-invariant-fails/scip/branch-000/solver.log": "a70b34daffd31bf120b0eb69fb83140ca913922f79ab831c70308ee219279c73",
+    "source-pre-invariant-fails/scip/global/model.cip": "ec218313667fd2700c35d148ed7e6a370df2449f4740838a47f0d562d5f3177d",
+    "source-pre-invariant-fails/scip/global/parameters.set": "78399bafe53c07f012d52a02ab2ff0b9784cd494f3238a311bcdfc4451a1285d",
+    "source-pre-invariant-fails/scip/global/result.json": "0c7f2acad703d8fd1ed6a7bc6339883cee199ff537ebfd0d7c10cb0bde17671f",
+    "source-pre-invariant-fails/scip/global/solver.log": "153c154ca5b68f3414b5b1fb3b3959335659cfe0ae86b591aff82d200592cd16",
+    "source-pre-invariant-fails/scip/results.json": "420fce3edcd416c7f29d3fe33ef3116103b00ae26e036f4ed8f7b5ab8284ed7b",
+    "source-pre-invariant-fails/scip-process/process.json": "3e60284361ee01a6fe7d8e0729a8b6de6ed8a5a2e85cb3408128270b6dbb72f3",
+    "source-pre-invariant-fails/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source-pre-invariant-fails/scip-process/stdout.txt": "737e9e360c108e80d9000e7b04b1f0c84a0670a0bd7f234a1b0fe50b422a7b43",
+    "unsupported-dimension-change/exact-process.json": "85ebbc152463a92fd490d1f1daae335603fb80374509d37f142d7a2baefcda06",
+    "unsupported-dimension-change/exact.json": "5d68f353954481e6f1cc84ba90c8f69d16aedb228bfd1fa4814f69622b7f15b2",
+    "unsupported-dimension-change/fixture.json": "a1ed154476136e8267f8023808a46674f159b912af8abe5bcbd346d0eafd0084",
+    "unsupported-dimension-change/native/process.json": "abd0b5e53f20f0e795dea1cc95a52e76499fec9c9ca2808f3fdc8e9f16468cf5",
+    "unsupported-dimension-change/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unsupported-dimension-change/native/stdout.txt": "cd6de1284b38a413f52b8a62e809a7c028d9c757f0701cc4d1eb83252532491e",
+    "unsupported-dimension-change/scip/results.json": "5d68f353954481e6f1cc84ba90c8f69d16aedb228bfd1fa4814f69622b7f15b2",
+    "unsupported-dimension-change/scip-process/process.json": "ddc8bef7d6dad8af3e742d066b5fbed1b389e015380c2146d64bc929b5df23ed",
+    "unsupported-dimension-change/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unsupported-dimension-change/scip-process/stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unsupported-relational-reset/exact-process.json": "78c4c0bedfa3358c257794cdd65dce588d3aa84f4d87935d1f1c35914f3325be",
+    "unsupported-relational-reset/exact.json": "7e7d8f3dc14b251a0390423286bde2cdac8f14f2bd0a7db4fbfb3581db0b010a",
+    "unsupported-relational-reset/fixture.json": "42d73231d8c17bc77cb5854d670a2be9980dc58626a14b8b86336e66bcba8990",
+    "unsupported-relational-reset/native/process.json": "502ded12b2ffbbe3bab2b4d9e42d3b4243b23aaa873a2777b02ffda388040bd7",
+    "unsupported-relational-reset/native/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unsupported-relational-reset/native/stdout.txt": "72c392b98c0797bcd5d83649807f07dc63a27f225ba8663a969aa1498050b285",
+    "unsupported-relational-reset/scip/results.json": "7e7d8f3dc14b251a0390423286bde2cdac8f14f2bd0a7db4fbfb3581db0b010a",
+    "unsupported-relational-reset/scip-process/process.json": "7f6d10986c90ef48ea1f65e0fd098b407c119f52a167ec595b43c1f935b9cc5e",
+    "unsupported-relational-reset/scip-process/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "unsupported-relational-reset/scip-process/stdout.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "checking_sources": {
+    "oracle.py": "dc9b50add0d6dde9da92315537847ba11e4cfc823bdab8280464102ddf820335",
+    "figures.py": "27d5e490a6b0572753d1c8b97b618e4ebc5414e1d470798804a9ae633f6ab74d",
+    "check.py": "79e686cdb818593b12d790b105a759301ad0660fcf08e71c9d485bd49738bb31",
+    "run.py": "dd23511ce25a5e1fe7d8c84563841d8a02f4bcdbce00a524f261242d723605c2",
+    "evidence.py": "296c564f542fdb367f0e2e27d21c7b3be59cb6a7041792ed0ab891de7330cc46",
+    "metrics.py": "13b0df87b5fb90ae31d4a3dca49af1c5279f61c5e43e0d44d9b3cac0162f8b75",
+    "fixtures.py": "afdca13af17f0b5249455bd667688445256818c2ed4afe2bcd8171025c70be85",
+    "scip_reference.py": "a01c836e118b7a3b66b67f87f4f69139ad02041c1091cb633e1cf4f74de7e707"
+  },
+  "checking_revision": "7373bd97192f83a3b0e03d6a073256ca230f3217",
+  "scope": "exact independently reconstructed branch LP rows/objectives and interval oracle; numerical external witnesses/bounds; continuous family claims only where actual CSL verifier establishes them"
+}
