@@ -55,8 +55,10 @@
     },
     {
       "source": "scripts/reports/augment_pages_bundle.py",
-      "signal_count": 16,
+      "signal_count": 18,
       "asset_name_literals": [
+        "b04-all-stage-reachability.png",
+        "b04-all-stage-reachability.svg",
         "branches.svg",
         "exact-critical-regions.svg",
         "feasibility-grid.png",
@@ -1179,6 +1181,16 @@
         "trajectory.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_b04_source_moments.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "b04-all-stage-reachability.png",
+        "b04-all-stage-reachability.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route",
+      "role_and_disposition_reason": "Verifies exact source-candidate moment and all-stage set certificates, then copies source-bound saved physical-plane figures; no original program, optimization or rendering runs during staging."
     },
     {
       "source": "scripts/reports/stage_env717.py",

@@ -49,6 +49,7 @@ FROZEN_DIAGRAM_EXCEPTIONS = {
     "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py",
 }
 PUBLICATION_EXPORT_ROUTES = {
+    "scripts/reports/stage_b04_source_moments.py",
     "scripts/reports/stage_mpc06_offline_costs.py",
     "scripts/reports/stage_mpc07_comparison.py",
     "scripts/reports/stage_mpc10_comparison.py",
@@ -60,6 +61,8 @@ PUBLICATION_EXPORT_ROUTES = {
     "benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/figures.py",
 }
 VIZ10_ROLE_REASONS = {
+    "scripts/reports/stage_b04_source_moments.py":
+        "Verifies exact source-candidate moment and all-stage set certificates, then copies source-bound saved physical-plane figures; no original program, optimization or rendering runs during staging.",
     "scripts/reports/b04_source_moments/figures.py":
         "Draws all 17 exact source-candidate forward, backward and intersection sets in the two physical state planes, with one labelled optimal witness and shared quantitative styles; it makes no historical-run or timing claim.",
     "scripts/reports/stage_mpc06_offline_costs.py":

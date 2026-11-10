@@ -14,7 +14,7 @@ if str(ROOT / "scripts/reports") not in sys.path:
     sys.path.insert(0, str(ROOT / "scripts/reports"))
 
 from scripts.reports import (
-    stage_b04_c_strategy_a, stage_mpc06_tube_objective, stage_mpc06_delivery,
+    stage_b04_c_strategy_a, stage_b04_source_moments, stage_mpc06_tube_objective, stage_mpc06_delivery,
     stage_mpc06_offline_costs,
     stage_review05_family_query, stage_mpc11_controller_comparison,
     stage_mpc08_complete, stage_mpc07_comparison, stage_mpc10_comparison, stage_mpc11_mesh_timing,
@@ -43,6 +43,7 @@ def stage_all(site: Path) -> dict[str, str]:
     stage_per_attempt._insert_landing_link(site,mpc07+"-archive",mpc07+".zip","Download the complete robust-policy comparison evidence")
     mpc10 = stage_mpc10_comparison.stage(site)
     mpc11_studies = stage_mpc11_mesh_timing.stage(site)
+    b04_source = stage_b04_source_moments.stage(site)
 
     stage_per_attempt.validate(site)
     landing = site / "index.html"
@@ -70,12 +71,16 @@ def stage_all(site: Path) -> dict[str, str]:
         f'href="{mpc10}.zip"',
         f'href="{mpc11_studies}/index.html"',
         f'href="{mpc11_studies}.zip"',
+        f'href="{b04_source}/index.html"',
+        f'href="{b04_source}.zip"',
     )
     if any(link not in landing_html for link in expected_links):
         raise ValueError("combined Pages landing page is missing an augmentation link")
 
     for route, required in (
         (b04_route, ("index.html", "publication-manifest.json", "trajectory.svg")),
+        (b04_source, ("index.html", "publication-manifest.json", "minimal-inputs.json", "offline_check.py",
+                      "figures/b04-all-stage-reachability.svg", "figures/b04-all-stage-reachability.png")),
         (mpc06_route, ("index.html", "publication-manifest.json", "trajectory.svg")),
         (mpc06_complete, ("index.html", "publication-manifest.json", "invariant-tightenings.svg", "feasibility-grid.png")),
         (mpc06_offline, ("index.html", "publication-manifest.json", "minimal-inputs.json", "offline_check.py", "invariant-tightenings.svg")),
@@ -105,7 +110,7 @@ def stage_all(site: Path) -> dict[str, str]:
     strategy_page = site / STRATEGY_AB_ROUTE / "strategy-ab-ts03-summary.html"
     if strategy_page.is_symlink() or not strategy_page.is_file():
         raise ValueError("combined Pages site is missing the Strategy A/B T-S03 report")
-    return {"mpc01": per_attempt.name, "b04_c": b04_route, "mpc06": mpc06_route, "mpc06_complete": mpc06_complete, "mpc06_offline": mpc06_offline, "review05": review05, "mpc11": mpc11, "mpc08": mpc08, "mpc07": mpc07, "mpc10": mpc10, "mpc11_studies": mpc11_studies}
+    return {"mpc01": per_attempt.name, "b04_c": b04_route, "mpc06": mpc06_route, "mpc06_complete": mpc06_complete, "mpc06_offline": mpc06_offline, "review05": review05, "mpc11": mpc11, "mpc08": mpc08, "mpc07": mpc07, "mpc10": mpc10, "mpc11_studies": mpc11_studies, "b04_source": b04_source}
 
 
 def augment(download: Path, destination: Path) -> dict[str, str]:

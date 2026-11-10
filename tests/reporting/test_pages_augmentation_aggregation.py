@@ -65,7 +65,7 @@ class PagesAugmentationAggregation(unittest.TestCase):
             self.assertTrue((site / "docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1/strategy-ab-ts03-summary.html").is_file())
             self.assertIn(routes["mpc08"]+"/index.html#minimal-example", (site/"examples/index.html").read_text())
             self.assertIn(routes["mpc08"]+"/index.html", landing)
-            for name in ('mpc07','mpc10'):
+            for name in ('mpc07','mpc10','b04_source'):
                 self.assertIn(routes[name]+'/index.html#minimal-example',(site/'examples/index.html').read_text())
                 self.assertIn(routes[name]+'/index.html',landing)
             online = json.loads((site/routes["mpc07"]/"online-verification.json").read_text())
@@ -74,7 +74,7 @@ class PagesAugmentationAggregation(unittest.TestCase):
             self.assertIn("figures/online-policy-traces.svg", (site/routes["mpc07"]/"index.html").read_text())
             self.assertIn(routes["mpc11_studies"]+"/index.html#mesh-example",(site/"examples/index.html").read_text())
             self.assertIn(routes["mpc11_studies"]+"/index.html",landing)
-            for report_id in (routes["b04_c"], routes["mpc06"], routes["mpc06_complete"], routes["mpc06_offline"], routes["review05"], routes["mpc11"], routes["mpc08"], routes["mpc07"], routes["mpc10"], routes["mpc11_studies"]):
+            for report_id in (routes["b04_c"], routes["mpc06"], routes["mpc06_complete"], routes["mpc06_offline"], routes["review05"], routes["mpc11"], routes["mpc08"], routes["mpc07"], routes["mpc10"], routes["mpc11_studies"], routes["b04_source"]):
                 with zipfile.ZipFile(site / f"{report_id}.zip") as archive:
                     self.assertIn(f"{report_id}/publication-manifest.json", archive.namelist())
 
