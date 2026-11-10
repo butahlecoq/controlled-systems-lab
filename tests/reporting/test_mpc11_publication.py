@@ -11,11 +11,13 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location('mpc11_publication', ROOT/'scripts/reports/stage_mpc11_controller_comparison.py')
+HAS_MPC11 = all(importlib.util.find_spec(name) is not None for name in ('numpy','scipy','casadi','do_mpc'))
 STAGER = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(STAGER)
 
 
 class PublicationTests(unittest.TestCase):
+    @unittest.skipUnless(HAS_MPC11,'full publication is checked in the hash-locked optional controller CI profile')
     def test_real_stage_preserves_sources_and_discovers_both_cases(self):
         before = {p:hashlib.sha256(p.read_bytes()).hexdigest() for p in STAGER.EVIDENCE.rglob('*') if p.is_file()}
         with tempfile.TemporaryDirectory() as temporary:

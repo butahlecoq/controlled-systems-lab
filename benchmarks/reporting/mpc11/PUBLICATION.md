@@ -51,3 +51,18 @@ and parse its returned route in the shared augmentation owner. Leave the ordinar
 3.12 report environment and existing freshness/upload/deploy gates intact. The
 same qualified venv must run this unit's end-to-end tests in CI before integration.
 Do not wire a fallback to cached statuses or an unpinned dependency install.
+
+## Qualified CI integration
+
+The cumulative publisher now creates the dedicated hash-locked Python 3.11.14
+environment and uses it for saved-data staging. A read-only pre-merge workflow,
+`controller-report-checks.yml`, exercises the same publication and aggregation
+modules in that environment. Its runner fails if any selected check is skipped.
+Ordinary reporting CI keeps the lightweight hash/path checks and skips only the
+two full staging cases when the optional controller dependencies are absent.
+Production staging has no dependency bypass or fallback to saved statuses.
+
+Local validation ran all nine full-profile tests without skips; the ordinary
+profile ran its lightweight checks with the two intentional dependency skips.
+The source-bound mathematical checks and existing current-main deployment
+gates remain unchanged. Hosted exact-head CI is still required before merge.

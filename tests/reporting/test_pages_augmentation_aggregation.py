@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import importlib.util
 from pathlib import Path
 import tempfile
 import tarfile
@@ -22,7 +23,11 @@ def run(run_id: int, created: str, updated: str, *, head: str,
             "status": status, "conclusion": conclusion}
 
 
+HAS_MPC11 = all(importlib.util.find_spec(name) is not None for name in ('numpy','scipy','casadi','do_mpc'))
+
+
 class PagesAugmentationAggregation(unittest.TestCase):
+    @unittest.skipUnless(HAS_MPC11,'full cumulative staging is checked in the hash-locked optional controller CI profile')
     def test_combines_mpc01_b04_and_mpc06_routes_into_one_site(self):
         with tempfile.TemporaryDirectory(prefix="pages-augmentation-aggregation-") as temporary:
             site = Path(temporary) / "site"

@@ -89,7 +89,7 @@ jobs:
           OMP_NUM_THREADS: '1'
           MKL_NUM_THREADS: '1'
           MPLCONFIGDIR: build/matplotlib-cache
-        run: build/pages-mpc11-env/bin/python -m unittest tests.reporting.test_pages_augmentation_aggregation
+        run: build/pages-mpc11-env/bin/python -m tests.reporting.run_controller_publication_checks
       - name: Stage and verify all Pages augmentations together
         env:
           OPENBLAS_NUM_THREADS: '1'
