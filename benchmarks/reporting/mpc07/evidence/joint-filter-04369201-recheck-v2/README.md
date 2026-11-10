@@ -1,0 +1,9 @@
+# MPC07 joint-filter corrected reading layer
+
+This separate reading layer uses checker/render source `60f034a2253c6faab8f4e0183c0721a3a4444f7e`. The original `joint-filter-04369201` evidence directory remains unchanged. `offline.zip` and `earlier-attempts.zip` are byte-identical copies of the original archives, including original checks and report. No native binary or algorithm was run again.
+
+The 72 saved attempts independently recheck as verified; all retained joint candidates have exact zero gap to the stated toy physical lower bound. Attainment wording now derives from exact rational gaps for every candidate. A valid repaired candidate with positive gap remains a verified upper bound, without an attainment claim; table ranges preserve differing returned bounds. The actual saved-policy mutation and tiny positive-gap regression are in the repository tests. Performance remains inconclusive. This diagonal-filter restriction does not establish general MPC or full-filter acceptance. Keep #603 open.
+
+## Offline checking
+
+Extract `offline.zip` into scratch and locate its RAW directory. Extract `post-capture-checker.zip` separately. Use Python with the corrected checker directory on sys.path, import report, and call `report.checked_records(Path("<RAW>"), repository=Path("<FULL_GIT_CHECKOUT>"))`. The full checkout must contain capture source `0436920193b6c13218623375a0b6429f61e5e211` and pinned native source `b3978a98a8bfb30e21841466244ed7f78e987886`; source authentication compares committed Git bytes, not self hashes. Use Python -B; do not rewrite archived evidence. Rendering additionally requires qualified Matplotlib3.11.2 and the repository figure_style helper. Original source/build receipts and all raw failures remain in the original archives. No algorithm executable is needed.

@@ -1,0 +1,21 @@
+{
+  "schema": "csl.mpc07.joint-evidence/1",
+  "capture_source": "0436920193b6c13218623375a0b6429f61e5e211",
+  "native_source": "b3978a98a8bfb30e21841466244ed7f78e987886",
+  "native_binary_sha256": "266e1cda61b064b4603ff6499d76dc4db59106e4e673905f585c54caafa9c533",
+  "primary_attempts": 72,
+  "warmups": 12,
+  "measured": 60,
+  "repetitions": 5,
+  "verified": 72,
+  "original_report_manifest_sha256": "d99b610f62a1dc8934a2b11e9e6d2aa8c7b5d4a633d572d23af280346327e0bc",
+  "raw_manifest_sha256": "e80138d8d67caefc9f462a7b6b3959fbc57c3a11652d432ca3abf94fdf06b6ac",
+  "reading_layer_change": "Exact rational per-policy gap determines attainment wording; table ranges retain varying valid upper bounds. Selected filter figure label avoids unsupported optimization claim.",
+  "earlier_attempts": "12WIP diagnostics, initially11verified+one exact-response rounding rejection. Additional72clean0075400d attempts retained with misnamed-oracle-field erratum; no numeric LP value changed. Neither enters corrected60measured rows.",
+  "qualification": "joint optimized diagonal-filter restriction of Chen v3; no full-filter/uncertainB/general MPC-latency/global-controller claims",
+  "checker_source": "60f034a2253c6faab8f4e0183c0721a3a4444f7e",
+  "original_evidence_commit": "a86d6b529f098e15a33a897638f2a220df35d17a",
+  "original_offline_sha256": "7136dc7d442a81dde99110bef84ef1f16ea30391e2a345072bcceb6eb366119e",
+  "original_archive_preserved": true,
+  "algorithm_rerun": false
+}

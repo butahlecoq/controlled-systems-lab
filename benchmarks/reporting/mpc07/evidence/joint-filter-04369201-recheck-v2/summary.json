@@ -1,0 +1,542 @@
+{
+  "environment": {
+    "schema": "csl.mpc07.joint-filter.capture/1",
+    "source_commit": "0436920193b6c13218623375a0b6429f61e5e211",
+    "source_status": "",
+    "native_source_commit": "b3978a98a8bfb30e21841466244ed7f78e987886",
+    "source_sha256": {
+      "PLAN.md": "3791ccdfaa1b068cabaa474eef83263f2e0ec49bcb0e2a338cce5b6ac915b4f8",
+      "README.md": "631c84d73f1b228bd6797a0e2ccf5e4d409fafcf6ef9a3cf820be69f89cd40cb",
+      "JOINT-FILTER.md": "1257703336fe452401fd5a32ce18f99e60d5a21917da26100dbc6c717d1b3ce5",
+      "policy.py": "203e423d61bdb1a3250296c444fa85992a88ff38933d9c53ac1e3153b87e0b32",
+      "capture.py": "73f493e9bf91504f0c88489cb56d5be30e8872e415e50f793920c9e5ebac1af6",
+      "report.py": "eeb1caa00ba35e544e2e23c6cd133e98e9f330ff774f94cf32a4fff3c2dd5985",
+      "joint_filter.py": "4b1824a75c1765089284c8c717686d37e3f6437ec976d26b5269a7f8da3cbeb7",
+      "joint_capture.py": "6be834f7085098c3c43893c8c5a709e4d706bdd492e44de492970361fce5fe34",
+      "native-build-receipt.json": "90be3129416e7ac334cbde969244a7b9574b11bee3a00f1aef3958c0300fd0f1",
+      "test_mpc07_policy.py": "8f086523123748149b0d3e5083697f2f75f48d2240c1b19f918b25fb76764ad3",
+      "test_mpc07_joint_filter.py": "5dfb7f0f33e389e8e2ff5594452474e73bc4bba2572b6d5b568cd99c3483d913",
+      "joint-gain-fixture.json": "3177a6caa5e67701170c069000941f0a44f5c303951a7a085cb50f639bbb6051",
+      "figure_style.py": "c2f7078df95b9d75fe90f0f407023383cae4b58dd688dfa5fa5ac5b9d18664c6",
+      "native-affine_bridge.cpp": "15154a260bd0088d15b911b1398741f0800d8008c820b210ee864330ee06ca42",
+      "native-CMakeLists.txt": "b1e95e6963e843eaa96ef1022daffaa876a73ec2e1da2a5b63a6f0a089840310"
+    },
+    "bridge_sha256": "266e1cda61b064b4603ff6499d76dc4db59106e4e673905f585c54caafa9c533",
+    "repetitions": 5,
+    "python": "3.11.14 (main, Feb 12 2026, 00:42:50) [Clang 21.1.4 ]",
+    "logical_cpus": 8,
+    "load_start": [
+      0.72998046875,
+      0.5869140625,
+      0.9189453125
+    ],
+    "physical": {
+      "A_nominal": [
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      "B": [
+        0.5,
+        1
+      ],
+      "delta_q_bound": "1/64",
+      "W": [
+        [
+          0,
+          0
+        ],
+        [
+          -1,
+          1
+        ]
+      ],
+      "X": [
+        [
+          -64,
+          64
+        ],
+        [
+          -16,
+          16
+        ]
+      ],
+      "U": [
+        -1,
+        1
+      ],
+      "x0": [
+        0,
+        0
+      ],
+      "u0": 0
+    },
+    "filter": "optimized diagonal2x2 positive blocks, positionfloor1/1024; fixed-filter comparator q5/4",
+    "scope": "Chen v3 joint diagonal-filter sufficient counterpart; terminal-only authored cost; no full-filter/uncertainB/recursive-feasibility claim",
+    "load_end": [
+      0.72998046875,
+      0.5869140625,
+      0.9189453125
+    ]
+  },
+  "groups": {
+    "T2-sigmaoptimized-diagonal-fixed-plan": {
+      "attempts": 5,
+      "verified": 5,
+      "outcomes": {
+        "verified-joint-rational-policy": 5
+      },
+      "variables": 48,
+      "rows": 79,
+      "nonzeros": 156,
+      "exact_virtual_worst_squared": "16641/4096",
+      "virtual_policy_bound_range": {
+        "minimum": "16641/4096",
+        "maximum": "16641/4096"
+      },
+      "times_ns": {
+        "python_prepare_ns": {
+          "median": 1514452,
+          "minimum": 1363663,
+          "maximum": 1862894
+        },
+        "whole_process_ns": {
+          "median": 12702570,
+          "minimum": 8941512,
+          "maximum": 13212834
+        },
+        "native_setup_ns": {
+          "median": 738299,
+          "minimum": 371559,
+          "maximum": 788376
+        },
+        "native_port_run_ns": {
+          "median": 1959415,
+          "minimum": 996924,
+          "maximum": 1983231
+        }
+      }
+    },
+    "T2-sigmaoptimized-diagonal-fixed-gain": {
+      "attempts": 5,
+      "verified": 5,
+      "outcomes": {
+        "verified-joint-rational-policy": 5
+      },
+      "variables": 48,
+      "rows": 81,
+      "nonzeros": 160,
+      "exact_virtual_worst_squared": "15625/4096",
+      "virtual_policy_bound_range": {
+        "minimum": "15625/4096",
+        "maximum": "15625/4096"
+      },
+      "times_ns": {
+        "python_prepare_ns": {
+          "median": 1396629,
+          "minimum": 1383359,
+          "maximum": 1456553
+        },
+        "whole_process_ns": {
+          "median": 8711103,
+          "minimum": 7366367,
+          "maximum": 13485777
+        },
+        "native_setup_ns": {
+          "median": 378264,
+          "minimum": 354937,
+          "maximum": 801995
+        },
+        "native_port_run_ns": {
+          "median": 1269377,
+          "minimum": 1002581,
+          "maximum": 2211055
+        }
+      }
+    },
+    "T2-sigmaoptimized-diagonal-joint": {
+      "attempts": 5,
+      "verified": 5,
+      "outcomes": {
+        "verified-joint-rational-policy": 5
+      },
+      "variables": 48,
+      "rows": 79,
+      "nonzeros": 156,
+      "exact_virtual_worst_squared": "4225/4096",
+      "virtual_policy_bound_range": {
+        "minimum": "4225/4096",
+        "maximum": "4225/4096"
+      },
+      "times_ns": {
+        "python_prepare_ns": {
+          "median": 1451734,
+          "minimum": 1376165,
+          "maximum": 4227322
+        },
+        "whole_process_ns": {
+          "median": 8403380,
+          "minimum": 7315173,
+          "maximum": 13278975
+        },
+        "native_setup_ns": {
+          "median": 741093,
+          "minimum": 346765,
+          "maximum": 774268
+        },
+        "native_port_run_ns": {
+          "median": 1287326,
+          "minimum": 954460,
+          "maximum": 2033657
+        }
+      }
+    },
+    "T2-sigmafixed5over4-fixed-filter": {
+      "attempts": 5,
+      "verified": 5,
+      "outcomes": {
+        "verified-joint-rational-policy": 5
+      },
+      "variables": 48,
+      "rows": 79,
+      "nonzeros": 156,
+      "exact_virtual_worst_squared": "9/4",
+      "virtual_policy_bound_range": {
+        "minimum": "9/4",
+        "maximum": "9/4"
+      },
+      "times_ns": {
+        "python_prepare_ns": {
+          "median": 1576052,
+          "minimum": 1560687,
+          "maximum": 1598961
+        },
+        "whole_process_ns": {
+          "median": 9191267,
+          "minimum": 7542718,
+          "maximum": 13025867
+        },
+        "native_setup_ns": {
+          "median": 485052,
+          "minimum": 356753,
+          "maximum": 762534
+        },
+        "native_port_run_ns": {
+          "median": 1231383,
+          "minimum": 971571,
+          "maximum": 2086807
+        }
+      }
+    },
+    "T4-sigmaoptimized-diagonal-fixed-plan": {
+      "attempts": 5,
+      "verified": 5,
+      "outcomes": {
+        "verified-joint-rational-policy": 5
+      },
+      "variables": 150,
+      "rows": 235,
+      "nonzeros": 524,
+      "exact_virtual_worst_squared": "1152206881281/68719476736",
+      "virtual_policy_bound_range": {
+        "minimum": "1152206881281/68719476736",
+        "maximum": "1152206881281/68719476736"
+      },
+      "times_ns": {
+        "python_prepare_ns": {
+          "median": 5233814,
+          "minimum": 4387050,
+          "maximum": 5287173
+        },
+        "whole_process_ns": {
+          "median": 16568809,
+          "minimum": 10415526,
+          "maximum": 18460058
+        },
+        "native_setup_ns": {
+          "median": 2267418,
+          "minimum": 1190385,
+          "maximum": 2335793
+        },
+        "native_port_run_ns": {
+          "median": 4381882,
+          "minimum": 2123823,
+          "maximum": 4910166
+        }
+      }
+    },
+    "T4-sigmaoptimized-diagonal-fixed-gain": {
+      "attempts": 5,
+      "verified": 5,
+      "outcomes": {
+        "verified-joint-rational-policy": 5
+      },
+      "variables": 150,
+      "rows": 247,
+      "nonzeros": 548,
+      "exact_virtual_worst_squared": "954773265625/68719476736",
+      "virtual_policy_bound_range": {
+        "minimum": "954773265625/68719476736",
+        "maximum": "954773265625/68719476736"
+      },
+      "times_ns": {
+        "python_prepare_ns": {
+          "median": 4660761,
+          "minimum": 4615782,
+          "maximum": 6042583
+        },
+        "whole_process_ns": {
+          "median": 11952886,
+          "minimum": 11336671,
+          "maximum": 19029199
+        },
+        "native_setup_ns": {
+          "median": 1430503,
+          "minimum": 1014035,
+          "maximum": 2380981
+        },
+        "native_port_run_ns": {
+          "median": 2433083,
+          "minimum": 2328320,
+          "maximum": 5802257
+        }
+      }
+    },
+    "T4-sigmaoptimized-diagonal-joint": {
+      "attempts": 5,
+      "verified": 5,
+      "outcomes": {
+        "verified-joint-rational-policy": 5
+      },
+      "variables": 150,
+      "rows": 235,
+      "nonzeros": 524,
+      "exact_virtual_worst_squared": "75418890625/68719476736",
+      "virtual_policy_bound_range": {
+        "minimum": "75418890625/68719476736",
+        "maximum": "75418890625/68719476736"
+      },
+      "times_ns": {
+        "python_prepare_ns": {
+          "median": 4512626,
+          "minimum": 4399622,
+          "maximum": 4719847
+        },
+        "whole_process_ns": {
+          "median": 11558070,
+          "minimum": 10899600,
+          "maximum": 16495544
+        },
+        "native_setup_ns": {
+          "median": 1453131,
+          "minimum": 1030797,
+          "maximum": 2298707
+        },
+        "native_port_run_ns": {
+          "median": 2200999,
+          "minimum": 2170618,
+          "maximum": 4522823
+        }
+      }
+    },
+    "T4-sigmafixed5over4-fixed-filter": {
+      "attempts": 5,
+      "verified": 5,
+      "outcomes": {
+        "verified-joint-rational-policy": 5
+      },
+      "variables": 150,
+      "rows": 235,
+      "nonzeros": 524,
+      "exact_virtual_worst_squared": "4",
+      "virtual_policy_bound_range": {
+        "minimum": "4",
+        "maximum": "4"
+      },
+      "times_ns": {
+        "python_prepare_ns": {
+          "median": 4646164,
+          "minimum": 4511928,
+          "maximum": 5318741
+        },
+        "whole_process_ns": {
+          "median": 10987251,
+          "minimum": 10583915,
+          "maximum": 18624117
+        },
+        "native_setup_ns": {
+          "median": 1363803,
+          "minimum": 1167618,
+          "maximum": 2317354
+        },
+        "native_port_run_ns": {
+          "median": 2326993,
+          "minimum": 2129271,
+          "maximum": 5359460
+        }
+      }
+    },
+    "T8-sigmaoptimized-diagonal-fixed-plan": {
+      "attempts": 5,
+      "verified": 5,
+      "outcomes": {
+        "verified-joint-rational-policy": 5
+      },
+      "variables": 522,
+      "rows": 787,
+      "nonzeros": 1908,
+      "exact_virtual_worst_squared": "1381596721645732462556840961/19342813113834066795298816",
+      "virtual_policy_bound_range": {
+        "minimum": "1381596721645732462556840961/19342813113834066795298816",
+        "maximum": "1381596721645732462556840961/19342813113834066795298816"
+      },
+      "times_ns": {
+        "python_prepare_ns": {
+          "median": 16352787,
+          "minimum": 15612253,
+          "maximum": 16627406
+        },
+        "whole_process_ns": {
+          "median": 33817179,
+          "minimum": 26426297,
+          "maximum": 36527185
+        },
+        "native_setup_ns": {
+          "median": 12288896,
+          "minimum": 6150070,
+          "maximum": 13265774
+        },
+        "native_port_run_ns": {
+          "median": 9883191,
+          "minimum": 9772282,
+          "maximum": 10952749
+        }
+      }
+    },
+    "T8-sigmaoptimized-diagonal-fixed-gain": {
+      "attempts": 5,
+      "verified": 5,
+      "outcomes": {
+        "verified-joint-rational-policy": 5
+      },
+      "variables": 522,
+      "rows": 843,
+      "nonzeros": 2020,
+      "exact_virtual_worst_squared": "895359272061953632683765625/19342813113834066795298816",
+      "virtual_policy_bound_range": {
+        "minimum": "895359272061953632683765625/19342813113834066795298816",
+        "maximum": "895359272061953632683765625/19342813113834066795298816"
+      },
+      "times_ns": {
+        "python_prepare_ns": {
+          "median": 16808156,
+          "minimum": 16478712,
+          "maximum": 18118810
+        },
+        "whole_process_ns": {
+          "median": 35731686,
+          "minimum": 28421681,
+          "maximum": 45083239
+        },
+        "native_setup_ns": {
+          "median": 12322768,
+          "minimum": 6858267,
+          "maximum": 14861452
+        },
+        "native_port_run_ns": {
+          "median": 11964899,
+          "minimum": 11697125,
+          "maximum": 18355994
+        }
+      }
+    },
+    "T8-sigmaoptimized-diagonal-joint": {
+      "attempts": 5,
+      "verified": 5,
+      "outcomes": {
+        "verified-joint-rational-policy": 5
+      },
+      "variables": 522,
+      "rows": 787,
+      "nonzeros": 1908,
+      "exact_virtual_worst_squared": "24031838291621636962890625/19342813113834066795298816",
+      "virtual_policy_bound_range": {
+        "minimum": "24031838291621636962890625/19342813113834066795298816",
+        "maximum": "24031838291621636962890625/19342813113834066795298816"
+      },
+      "times_ns": {
+        "python_prepare_ns": {
+          "median": 15821919,
+          "minimum": 15620285,
+          "maximum": 16545970
+        },
+        "whole_process_ns": {
+          "median": 35556172,
+          "minimum": 28399960,
+          "maximum": 38216382
+        },
+        "native_setup_ns": {
+          "median": 11921667,
+          "minimum": 6001796,
+          "maximum": 13640895
+        },
+        "native_port_run_ns": {
+          "median": 12137409,
+          "minimum": 11934099,
+          "maximum": 12759770
+        }
+      }
+    },
+    "T8-sigmafixed5over4-fixed-filter": {
+      "attempts": 5,
+      "verified": 5,
+      "outcomes": {
+        "verified-joint-rational-policy": 5
+      },
+      "variables": 522,
+      "rows": 787,
+      "nonzeros": 1908,
+      "exact_virtual_worst_squared": "9",
+      "virtual_policy_bound_range": {
+        "minimum": "9",
+        "maximum": "9"
+      },
+      "times_ns": {
+        "python_prepare_ns": {
+          "median": 16505741,
+          "minimum": 15622031,
+          "maximum": 17939386
+        },
+        "whole_process_ns": {
+          "median": 27573101,
+          "minimum": 27491736,
+          "maximum": 30677295
+        },
+        "native_setup_ns": {
+          "median": 6316992,
+          "minimum": 6165924,
+          "maximum": 8378236
+        },
+        "native_port_run_ns": {
+          "median": 11635524,
+          "minimum": 11605073,
+          "maximum": 12787707
+        }
+      }
+    }
+  },
+  "capture_manifest_sha256": "e80138d8d67caefc9f462a7b6b3959fbc57c3a11652d432ca3abf94fdf06b6ac",
+  "joint_attainment": {
+    "verified_policies": 18,
+    "minimum_gap": "0",
+    "maximum_gap": "0",
+    "all_attain_lower": true,
+    "statement": "The exact reconstructed physical upper/lower gaps are zero for all 18 verified joint policies in this toy. Policy-level attainment follows from the independent lower bound; no general SLS minimax equality is inferred."
+  },
+  "performance": "inconclusive; descriptive source scopes and no native limiter/tuning claim"
+}
