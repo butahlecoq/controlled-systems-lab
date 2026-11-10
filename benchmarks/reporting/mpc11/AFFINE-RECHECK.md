@@ -44,7 +44,10 @@ unchanged.
 The publication checks case identities, statuses, completed counts and original
 objectives against the frozen figure receipt. Current NMPC numerical diagnostic
 arrays and rebuild residuals are checked by the actual saved checker and recorded
-separately in the publication manifest. They are not required to reproduce the
+separately in the CI checking log. The qualified premerge job retains that log
+as a source/run-bound Actions artifact for 30 days; publisher logs retain their
+own checking evidence. Host-specific diagnostics never enter immutable Pages
+bytes or route identity. They are not required to reproduce the
 historical diagnostic bits. The original receipt, sampled histories and plotted
 arrays retain exact byte/value binding. Nonfinite or negative current diagnostics
 and changed identities, status, counts or materially different objectives refuse

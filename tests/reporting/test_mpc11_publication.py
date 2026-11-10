@@ -17,6 +17,23 @@ spec.loader.exec_module(STAGER)
 
 
 class PublicationTests(unittest.TestCase):
+    def test_host_diagnostics_do_not_change_immutable_publication_bytes(self):
+        import contextlib,copy,io
+        from types import SimpleNamespace
+        from unittest import mock
+        frozen=json.loads((STAGER.EVIDENCE/STAGER.FIGURES/'receipt.json').read_text())['saved_checks']
+        results=[]
+        for value in (1e-14,2e-14):
+            reports=copy.deepcopy(frozen);reports['nmpc'][0]['max_nlp_objective_rebuild_difference']=value
+            log=io.StringIO()
+            with tempfile.TemporaryDirectory() as temporary:
+                site=Path(temporary);(site/'examples').mkdir();(site/'index.html').write_text('<body></body>');(site/'examples/index.html').write_text('<body></body>')
+                with mock.patch.object(STAGER,'current_renderer',return_value=SimpleNamespace(checked_inputs=lambda **kwargs:reports)),contextlib.redirect_stderr(log):
+                    route=STAGER.stage(site)
+                results.append((route,(site/route/'publication-manifest.json').read_bytes(),(site/(route+'.zip')).read_bytes(),log.getvalue()))
+        self.assertEqual(results[0][:3],results[1][:3])
+        self.assertNotEqual(results[0][3],results[1][3])
+
     def test_current_diagnostics_do_not_replace_frozen_identity_or_scope(self):
         import copy
         frozen=json.loads((STAGER.EVIDENCE/STAGER.FIGURES/'receipt.json').read_text())['saved_checks']

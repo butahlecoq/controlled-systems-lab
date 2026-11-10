@@ -199,8 +199,11 @@ def validate(evidence=EVIDENCE):
     verification={'affine_checks':len(reports['affine']),'nonlinear_cases':len(reports['nonlinear']),
                   'nmpc_steps':sum(row['transcriptions_checked'] for row in reports['nmpc']),
                   'post_capture_checkers':POST_CAPTURE_CHECKERS,'numerical_rebuild_qualification':REBUILD_QUALIFICATION,
-                  'current_saved_checks':reports,'historical_diagnostics':'frozen figure receipt preserved; current floating rebuild diagnostics recorded separately',
+                  'historical_diagnostics':'frozen figure receipt preserved; current host-specific diagnostics are retained in CI logs/artifacts, outside immutable publication bytes',
                   'scope':'saved identities, numerical witnesses, sampled cost/constraints and transcription rebuild; no optimization/integration rerun'}
+    print(json.dumps({'schema':'csl.mpc11.current-recheck/1','figure_manifest_sha256':FIGURE_ANCHOR,
+        'input_archives':archives,'current_tool_sha256':{name:digest((ROOT/name).read_bytes()) for name in receipt['tool_sha256']},
+        'numerical_rebuild_qualification':REBUILD_QUALIFICATION,'current_saved_checks':reports},sort_keys=True),file=sys.stderr)
     return frozen,archives,verification
 
 
