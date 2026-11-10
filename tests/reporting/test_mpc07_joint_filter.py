@@ -74,3 +74,49 @@ class JointSavedCaptureTests(unittest.TestCase):
                     (folder/'check.json').write_text(json.dumps(c));error='current exact disposition'
                 (raw/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(raw).as_posix()}\n' for p in sorted(raw.rglob('*')) if p.is_file() and p!=raw/'SHA256SUMS'))
                 with self.assertRaisesRegex(ValueError,error):report.checked_records(raw)
+
+class JointAttainmentRenderingTests(unittest.TestCase):
+    @unittest.skipUnless(importlib.util.find_spec('matplotlib') is not None,'saved rendering requires optional pinned Matplotlib')
+    def test_saved_valid_positive_gap_remains_an_upper_bound_in_rendered_report(self):
+        import tempfile,zipfile,json,hashlib
+        import capture,report,joint_capture
+        artifact=ROOT/'benchmarks/reporting/mpc07/evidence/joint-filter-04369201/offline.zip'
+        with tempfile.TemporaryDirectory() as temporary:
+            base=Path(temporary)
+            with zipfile.ZipFile(artifact) as z:z.extractall(base)
+            raw=base/'mpc07-joint-report/RAW'
+            folder=[p for p in sorted((raw/'attempts').iterdir())
+                    if (lambda r:r['horizon']==2 and r['policy_class']=='joint')(json.loads((p/'receipt.json').read_text()))][-1]
+            payload=json.loads((folder/'program.json').read_text());native=json.loads((folder/'stdout.json').read_text())
+            index=payload['coordinates']['control'][1][1];native['primal'][index]+=2**-40
+            (folder/'stdout.json').write_text(json.dumps(native))
+            checked=joint_capture.recheck(folder)
+            self.assertGreater(checked['upper_minus_physical_lower_squared'],0)
+            self.assertEqual(checked['status'],'verified-joint-rational-policy')
+            checked['independent_check_ns']=0
+            checked['bindings']={name:capture.sha(folder/name) for name in ('program.json','receipt.json','stdout.json','stderr.txt','process-resource.txt')}
+            capture.write(folder/'check.json',checked)
+            (raw/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(raw).as_posix()}\n' for p in sorted(raw.rglob('*')) if p.is_file() and p!=raw/'SHA256SUMS'))
+            output=base/'correct-report';report.render_joint(raw,output)
+            text=(output/'index.html').read_text()
+            self.assertIn('positive exact gap',text)
+            self.assertNotIn('returned joint upper bound attains',text)
+            summary=json.loads((output/'summary.json').read_text())
+            self.assertGreater(Q(summary['joint_attainment']['maximum_gap']),0)
+            group=summary['groups']['T2-sigmaoptimized-diagonal-joint']
+            self.assertIsNone(group['exact_virtual_worst_squared'])
+            bounds=group['virtual_policy_bound_range']
+            self.assertLess(Q(bounds['minimum']),Q(bounds['maximum']))
+
+
+class ExactAttainmentTextTests(unittest.TestCase):
+    def test_sub_float_positive_gap_is_never_rounded_into_attainment(self):
+        import report
+        lower=Q(65,64)**2;gap=Q(1,10**100)
+        row=dict(receipt=dict(policy_class='joint'),current_check=dict(status='verified-joint-rational-policy',
+                 virtual_terminal_squared=str(lower+gap),physical_unrestricted_lower_squared=str(lower),upper_minus_physical_lower_squared=str(gap)))
+        decision=report.joint_attainment([row])
+        self.assertFalse(decision['all_attain_lower'])
+        self.assertEqual(Q(decision['maximum_gap']),gap)
+        row['current_check']['virtual_terminal_squared']=str(lower);row['current_check']['upper_minus_physical_lower_squared']='0'
+        self.assertTrue(report.joint_attainment([row])['all_attain_lower'])

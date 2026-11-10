@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 from fractions import Fraction as Q
 import hashlib
+import html
 import json
 from pathlib import Path
 import re
@@ -123,6 +124,7 @@ def metrics(records):
         group['attempts']+=1;status=row['current_check']['status'];group['outcomes'][status]=group['outcomes'].get(status,0)+1
         if status not in ('verified-rational-reconstruction','verified-joint-rational-policy'):continue
         group['verified']+=1;group['exact_virtual_worst_squared']=row['current_check'].get('worst_terminal_squared',row['current_check'].get('virtual_terminal_squared'))
+        group.setdefault('virtual_policy_bounds',[]).append(group['exact_virtual_worst_squared'])
         values=dict(python_prepare_ns=r['python_prepare_ns'],whole_process_ns=r['whole_process_ns'],
             native_setup_ns=row['native_setup_ns'],native_port_run_ns=row['native_port_run_ns'])
         if type(values['native_setup_ns']) is not int or type(values['native_port_run_ns']) is not int or values['native_setup_ns']+values['native_port_run_ns']>values['whole_process_ns']:
@@ -131,6 +133,9 @@ def metrics(records):
             if type(value) is not int or value<0:raise ValueError('invalid measured clock')
             group['samples'].setdefault(name,[]).append(value)
     for group in groups.values():
+        bounds=sorted(set(map(Q,group.pop('virtual_policy_bounds',[]))))
+        group['virtual_policy_bound_range']=dict(minimum=str(bounds[0]),maximum=str(bounds[-1])) if bounds else None
+        group['exact_virtual_worst_squared']=str(bounds[0]) if len(bounds)==1 else None
         group['times_ns']={name:dict(median=statistics.median(values),minimum=min(values),maximum=max(values)) for name,values in group.pop('samples').items()}
     return groups
 
@@ -202,9 +207,26 @@ def render(root,output):
     return groups
 
 
+def joint_attainment(records):
+    gaps=[]
+    for row in records:
+        if row['receipt']['policy_class']!='joint' or row['current_check']['status']!='verified-joint-rational-policy':continue
+        checked=row['current_check']
+        gap=Q(checked['virtual_terminal_squared'])-Q(checked['physical_unrestricted_lower_squared'])
+        if gap<0 or gap!=Q(checked['upper_minus_physical_lower_squared']):raise ValueError('incoherent exact physical upper/lower gap')
+        gaps.append(gap)
+    if not gaps:raise ValueError('no verified joint policies for attainment statement')
+    minimum,maximum=min(gaps),max(gaps)
+    if maximum==0:
+        statement=f'The exact reconstructed physical upper/lower gaps are zero for all {len(gaps)} verified joint policies in this toy. Policy-level attainment follows from the independent lower bound; no general SLS minimax equality is inferred.'
+    else:
+        statement=f'Verified joint policies include a positive exact gap. Their physical worst-cost upper/lower gaps range from {minimum} to {maximum}. A feasible policy with a positive gap supplies an upper bound; its physical minimax attainment is not established.'
+    return dict(verified_policies=len(gaps),minimum_gap=str(minimum),maximum_gap=str(maximum),all_attain_lower=maximum==0,statement=statement)
+
+
 def render_joint(root,output):
     if output.exists():raise ValueError('joint report must be new')
-    env,records,policies,hashes=checked_records(root);groups=metrics(records)
+    env,records,policies,hashes=checked_records(root);groups=metrics(records);attainment=joint_attainment(records)
     if 'joint' not in policies or 'fixed-filter' not in policies:raise ValueError('no exact joint/fixed policies for figure')
     output.mkdir(parents=True);shutil.copytree(root,output/'RAW')
     import matplotlib
@@ -225,7 +247,7 @@ def render_joint(root,output):
         fig,axes=plt.subplots(1,2,figsize=(12,5),layout='constrained')
         q=[-1.,0.,1.];upper=[65/64,1.,65/64];lower=[-65/64,-1.,-65/64]
         axes[0].add_patch(Rectangle((-1,-1.25),2,2.5,facecolor='#89b4fa',alpha=.25,label='previous fixed filter5/4'))
-        height=float(s[1][1]);axes[0].add_patch(Rectangle((-1,-height),2,2*height,fill=False,edgecolor='#f9e2af',linewidth=2,label='optimized s1,q='+str(s[1][1])))
+        height=float(s[1][1]);axes[0].add_patch(Rectangle((-1,-height),2,2*height,fill=False,edgecolor='#f9e2af',linewidth=2,label='selected s1,q='+str(s[1][1])))
         axes[0].fill_between(q,lower,upper,color='#a6e3a1',alpha=.55,label='physical eta1=delta*q1+w1')
         axes[0].set(xlabel='observed stage1 velocity q1',ylabel='lumped disturbance eta1',title='Joint controller-dependent enclosure, T2',xlim=(-1.1,1.1),ylim=(-1.35,1.35))
         for bounds,color,label in [(bounds_fixed,'#89b4fa','fixed-filter support box'),(bounds_joint,'#f9e2af','joint-filter support box')]:
@@ -239,14 +261,17 @@ def render_joint(root,output):
             if extension=='svg':path.write_text('\n'.join(line.rstrip() for line in path.read_text().splitlines())+'\n')
         plt.close(fig)
     capture.write(output/'current-rechecks.json',records);capture.write(output/'summary.json',dict(environment=env,groups=groups,
-        capture_manifest_sha256=digest(root/'SHA256SUMS'),performance='inconclusive; descriptive source scopes and no native limiter/tuning claim'))
+        capture_manifest_sha256=digest(root/'SHA256SUMS'),joint_attainment=attainment,performance='inconclusive; descriptive source scopes and no native limiter/tuning claim'))
     capture.write(output/'figure-data.json',dict(joint_policy=joint,fixed_policy=fixed,position_filter_floor='1/1024',
         physical_T2_optimum='4225/4096',physical_vertices=physical,axis_policy=STYLE_ID,scope='support boxes, not asserted full reachable/winning sets; physical points are extreme samples only'))
     for name in ('JOINT-FILTER.md','README.md'):(output/name).write_bytes((root/'source'/name).read_bytes())
     table=[]
-    for key,g in groups.items():table.append(f'<tr><td>{key}</td><td>{g["verified"]}/{g["attempts"]}</td><td>{g.get("exact_virtual_worst_squared","unavailable")}</td><td>{g["variables"]}/{g["rows"]}/{g["nonzeros"]}</td><td>{g["times_ns"].get("native_port_run_ns",{}).get("median","unavailable")}</td></tr>')
-    page='<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MPC07 joint-filter specialization</title><style>body{font:16px/1.6 system-ui;background:#1e1e2e;color:#cdd6f4;max-width:1200px;margin:2rem auto;padding:1rem}a{color:#89b4fa}img{max-width:100%;height:auto}table{display:block;overflow:auto}td,th{padding:.4rem;text-align:left}</style><h1>Joint diagonal-filter SLS specialization</h1><p>This independently authored profile implements the jointly affine scaled-response identity and controller-dependent uncertainty-overapproximation constraints from Chen v3(24),(26),(36), restricted to block-diagonal positive filters and one uncertain A entry. No author code, full-filter/uncertain-B capability, recursive-feasibility or general causal minimax claim. Physical position disturbance is zero; the virtual position-filter floor1/1024 makes the two-state filter invertible and conservatively enlarges its response set.</p><p>The native LP minimizes a virtual worst-terminal-absolute upper bound, squared for the original toy cost. Exact rational reconstruction checks source, causality, every filter/support row and the physical cost lower bound. For this particular loose-constraint toy, the returned joint upper bound attains the independent physical lower bound (65/64)^(2(T−1)); that equality does not generalize to SLS bounds. Prescribed-gain and symmetry-optimal zero fixed-plan baselines use the same physical controls/uncertainty. The previous fixed5/4 filter is a separate conservative comparison.</p><img src="joint-filter-policy.svg" alt="Two-state optimized disturbance filter and terminal support-box comparison"><p><a href="JOINT-FILTER.md">Complete equations, proof and information order</a> · <a href="figure-data.json">Exact saved figure inputs</a> · <a href="summary.json">Source, counts and all timing ranges</a> · <a href="current-rechecks.json">Independent checks</a> · <a href="RAW/">Complete raw records/source/CPU/RSS</a>.</p><table><tr><th>Profile</th><th>Verified/attempts</th><th>Exact virtual qT² upper bound</th><th>LP vars/rows/nnz</th><th>Median native port-run ns</th></tr>'+''.join(table)+'</table><p>Performance verdict: inconclusive. One warmup plus five alternating repeats are descriptive; native setup and ConvexPort run include documented parse/registry/adapter checks and are not isolated LP time or MPC-update latency. A separate Python diagnostic does not establish the native limiter. Failed/resource/reconstruction outcomes stay in denominators. No core API, required dependency, native rebuild or library release. Existing HiGHS/Matplotlib qualifications remain. Independent review and root-owned checked publication remain required; this unit does not close603.</p></html>'
-    (output/'index.html').write_text(page)
+    for key,g in groups.items():
+        bounds=g['virtual_policy_bound_range']
+        display='unavailable' if bounds is None else (bounds['minimum'] if bounds['minimum']==bounds['maximum'] else bounds['minimum']+' to '+bounds['maximum'])
+        table.append(f'<tr><td>{html.escape(key)}</td><td>{g["verified"]}/{g["attempts"]}</td><td>{display}</td><td>{g["variables"]}/{g["rows"]}/{g["nonzeros"]}</td><td>{g["times_ns"].get("native_port_run_ns",{}).get("median","unavailable")}</td></tr>')
+    page='<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MPC07 joint-filter specialization</title><style>body{font:16px/1.6 system-ui;background:#1e1e2e;color:#cdd6f4;max-width:1200px;margin:2rem auto;padding:1rem}a{color:#89b4fa}img{max-width:100%;height:auto}table{display:block;overflow:auto}td,th{padding:.4rem;text-align:left}</style><h1>Joint diagonal-filter SLS specialization</h1><p>This independently authored profile implements the jointly affine scaled-response identity and controller-dependent uncertainty-overapproximation constraints from Chen v3(24),(26),(36), restricted to block-diagonal positive filters and one uncertain A entry. No author code, full-filter/uncertain-B capability, recursive-feasibility or general causal minimax claim. Physical position disturbance is zero; the virtual position-filter floor1/1024 makes the two-state filter invertible and conservatively enlarges its response set.</p><p>The native LP minimizes a virtual worst-terminal-absolute upper bound, squared for the original toy cost. Exact rational reconstruction checks source, causality, every filter/support row and the physical cost lower bound. $JOINT_ATTAINMENT$ Prescribed-gain and symmetry-optimal zero fixed-plan baselines use the same physical controls/uncertainty. The previous fixed5/4 filter is a separate conservative comparison.</p><img src="joint-filter-policy.svg" alt="Two-state optimized disturbance filter and terminal support-box comparison"><p><a href="JOINT-FILTER.md">Complete equations, proof and information order</a> · <a href="figure-data.json">Exact saved figure inputs</a> · <a href="summary.json">Source, counts and all timing ranges</a> · <a href="current-rechecks.json">Independent checks</a> · <a href="RAW/">Complete raw records/source/CPU/RSS</a>.</p><table><tr><th>Profile</th><th>Verified/attempts</th><th>Exact virtual qT² upper bound</th><th>LP vars/rows/nnz</th><th>Median native port-run ns</th></tr>'+''.join(table)+'</table><p>Performance verdict: inconclusive. One warmup plus five alternating repeats are descriptive; native setup and ConvexPort run include documented parse/registry/adapter checks and are not isolated LP time or MPC-update latency. A separate Python diagnostic does not establish the native limiter. Failed/resource/reconstruction outcomes stay in denominators. No core API, required dependency, native rebuild or library release. Existing HiGHS/Matplotlib qualifications remain. Independent review and root-owned checked publication remain required; this unit does not close603.</p></html>'
+    (output/'index.html').write_text(page.replace('$JOINT_ATTAINMENT$',html.escape(attainment['statement'])))
     capture.write(output/'figure-export.json',dict(input_manifest_sha256=digest(root/'SHA256SUMS'),figure_data_sha256=digest(output/'figure-data.json'),
         images={name:digest(output/name) for name in ('joint-filter-policy.svg','joint-filter-policy.png')}))
     (output/'SHA256SUMS').write_text(''.join(f'{digest(p)}  {p.relative_to(output).as_posix()}\n' for p in sorted(output.rglob('*')) if p.is_file()))

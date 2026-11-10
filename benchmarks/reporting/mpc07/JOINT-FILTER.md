@@ -100,3 +100,16 @@ capture used the misleading physical_lower_oracle_squared field name for the
 class/virtual oracle; its native inputs/results are retained with that metadata
 erratum, and it is not the corrected reading layer. No numeric values or LPs
 changed with this field correction.
+
+
+## Per-policy attainment reporting
+
+Exact feasibility of a repaired policy does not by itself prove attainment.
+The renderer computes each joint policy's physical upper-minus-lower gap using
+exact rationals. Zero-gap policies can inherit the explicit toy lower-bound
+certificate. A positive gap remains a valid robust worst-cost upper bound and
+is retained as such, without a minimax-attainment statement. The report records
+the minimum/maximum exact gaps and the range of policy bounds across repetitions.
+A saved T2 native-witness mutation exercises this distinction without native
+execution. The original04369201 policies have zero gaps; their frozen artifacts
+remain unchanged while the post-capture renderer handles both cases honestly.

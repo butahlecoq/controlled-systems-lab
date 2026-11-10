@@ -55,6 +55,8 @@ def checked_records(root,repository,hashes):
         except Exception as error:current=dict(status='incorrect-or-unverified',error_type=type(error).__name__,reason=str(error))
         for key,value in json.loads(json.dumps(current,default=capture.encode)).items():
             if saved.get(key)!=value:raise ValueError('joint current exact disposition differs')
+        expected_sigma='fixed5over4' if receipt['policy_class']=='fixed-filter' else 'optimized-diagonal'
+        if receipt['sigma']!=expected_sigma or type(receipt['repetition']) is not int:raise ValueError('joint profile label/repetition type differs')
         key=(receipt['repetition'],receipt['horizon'],receipt['policy_class'])
         if key in seen or receipt['warmup']!=(receipt['repetition']==-1):raise ValueError('joint repetition coverage differs')
         seen.add(key);p=json.loads((folder/'program.json').read_text())
