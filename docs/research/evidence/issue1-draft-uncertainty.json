@@ -1,0 +1,165 @@
+{
+  "literal_affine_nominal_terminal": [
+    "12001397/10000",
+    "-931/400",
+    "4504063/10000",
+    "-6509/400"
+  ],
+  "literal_minus_older_nonlinear": [
+    "7/10000",
+    "-67/2000",
+    "3/10000",
+    "-37/2000"
+  ],
+  "older": {
+    "applied_flow_corner": [
+      [
+        "1/5",
+        "1/5"
+      ],
+      [
+        "1/5",
+        "1/5"
+      ],
+      [
+        "1/5",
+        "1/5"
+      ],
+      [
+        "1/5",
+        "1/5"
+      ]
+    ],
+    "linear_criterion": {
+      "norm_decimal": "56.432890312299262916263639713989822",
+      "squared": "3184671109/1000000"
+    },
+    "linear_row": [
+      "1200939/1000",
+      "-16147/500",
+      "225603/500",
+      "-23127/500"
+    ],
+    "nonlinear_criterion": {
+      "norm_decimal": "16.420691489702862083913121159881908",
+      "squared": "269639109/1000000"
+    },
+    "nonlinear_row": [
+      "1200139/1000",
+      "-1147/500",
+      "225203/500",
+      "-8127/500"
+    ],
+    "reported_linear_cost": "56.433",
+    "reported_nonlinear_cost": "14.048",
+    "row_difference": [
+      "4/5",
+      "-30",
+      "4/5",
+      "-30"
+    ],
+    "uncertainty_scope": "Printed D has flow entries .2,-.2. A unit-box realization (+1,-1) gives these flow increments; numerical W1 is not instantiated in the draft example."
+  },
+  "recorded_private_image_identity": {
+    "decoded_pixel_sha256": "b2f29b56337fb046cade94b9699ebbeda017533b6dcfb513b121f9eeea3e38c0",
+    "mode": "RGB",
+    "scope": "Recorded private inspection; recomputed only with --pixel-check.",
+    "size": [
+      1481,
+      675
+    ]
+  },
+  "revised": {
+    "applied_flow_corner": [
+      [
+        "1/10",
+        "1/10"
+      ],
+      [
+        "1/5",
+        "2/5"
+      ],
+      [
+        "3/10",
+        "7/10"
+      ],
+      [
+        "2/5",
+        "1"
+      ]
+    ],
+    "linear_criterion": {
+      "norm_decimal": "67.114963309235296042504945443420160",
+      "squared": "45044183/10000"
+    },
+    "linear_row": [
+      "60057/50",
+      "-2729/100",
+      "45261/100",
+      "-245/4"
+    ],
+    "nonlinear_criterion": {
+      "norm_decimal": "16.416281552166434502194151316432033",
+      "squared": "2694943/10000"
+    },
+    "nonlinear_row": [
+      "60007/50",
+      "-229/100",
+      "45041/100",
+      "-65/4"
+    ],
+    "reported_linear_cost": "67.12",
+    "reported_nonlinear_cost": "14.05",
+    "row_difference": [
+      "1",
+      "-25",
+      "11/5",
+      "-45"
+    ],
+    "uncertainty_scope": "Printed unit flow D and bounds .1+.1*t / .1+.3*t; realization saturates positive flow error in both channels."
+  },
+  "schema": "csl.issue1.draft-uncertainty-certificate/1",
+  "scope": "Exact arithmetic on displayed rows and one printed plan; conditional uncertainty-image identities, not a recovered MATLAB run, nonlinear integration, minimax search or historical reproduction.",
+  "source_bindings": {
+    "draft_pdf": {
+      "bytes": 455509,
+      "papers_relative_path": "Minimax/Unconstrained for AaRC/Paper/Shorikov_Kalev_AiT.pdf",
+      "sha256": "fae5f04fdc7686206d4fdca7dc9891bdf219ed60422a0b1a09e9fc015c449eb9"
+    },
+    "draft_png": {
+      "bytes": 78648,
+      "papers_relative_path": "Minimax/Unconstrained for AaRC/Paper/first.png",
+      "sha256": "bd528602ab944bc734d7847c7c9aa3106869581edb3896e1d0f3073ebf43da05"
+    },
+    "draft_tex": {
+      "bytes": 37412,
+      "papers_relative_path": "Minimax/Unconstrained for AaRC/Paper/Shorikov_Kalev_AiT.tex",
+      "sha256": "7dfcd12b5f946d459411ba7467d6a176d42ab33c20d56ce860fb8477c6ce956f"
+    },
+    "nearby_fig": {
+      "bytes": 108014,
+      "papers_relative_path": "Minimax/Unconstrained for AaRC/second.fig",
+      "sha256": "f0ca6b5a7bf5297a0771284f46e811b04fbf0aba7b4597d23b4f37b95edeea5e"
+    },
+    "other_fig_copy": {
+      "bytes": 108014,
+      "papers_relative_path": "Minimax/Unconstrained/second.fig",
+      "sha256": "f0ca6b5a7bf5297a0771284f46e811b04fbf0aba7b4597d23b4f37b95edeea5e"
+    },
+    "published_pdf": {
+      "bytes": 390884,
+      "papers_relative_path": "Minimax/Unconstrained for AaRC/Shorikov_Kalev_A\u0438T_New.pdf",
+      "sha256": "6e07c9a2fac2d112885a495c9fe7f13acec9d990d947017b1701a4b95538cd5f"
+    },
+    "revised_png": {
+      "bytes": 30938,
+      "papers_relative_path": "Minimax/Unconstrained for AaRC/tex/first.png",
+      "sha256": "2c8cdc9865002ec0c5cebd3d940dbb824997714066cc9857798d5e6cf0e70293"
+    },
+    "revised_tex": {
+      "bytes": 39881,
+      "papers_relative_path": "Minimax/Unconstrained for AaRC/tex/Shorikov_Kalev_A\u0438T_New.tex",
+      "sha256": "6bbbf3968862720c6ff90687428a8dac6fe4681998c697ac402650c07be2fa7c"
+    }
+  }
+}
