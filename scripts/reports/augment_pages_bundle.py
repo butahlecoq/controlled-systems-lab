@@ -38,6 +38,7 @@ def stage_all(site: Path) -> dict[str, str]:
     mpc11 = stage_mpc11_controller_comparison.stage(site)
     mpc08 = stage_mpc08_complete.stage(site)
     mpc07 = stage_mpc07_comparison.stage(site)
+    stage_per_attempt._insert_landing_link(site,mpc07+"-archive",mpc07+".zip","Download the complete robust-policy comparison evidence")
     mpc10 = stage_mpc10_comparison.stage(site)
 
     stage_per_attempt.validate(site)
