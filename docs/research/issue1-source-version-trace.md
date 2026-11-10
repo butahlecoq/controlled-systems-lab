@@ -14,6 +14,8 @@ The archive also has an editable article manuscript at archive-relative path `П
 
 The [2026-11-10 draft uncertainty follow-up](issue1-draft-uncertainty-revision.md) now distinguishes this manuscript and its matching PDF/embedded figure from published L04: they report a different uncertainty matrix and linear cost `56.433`, rather than the later time-varying-bound result `67.12`. The shared nonlinear row and `14.048` discrepancy remain unresolved; the follow-up supplies exact row-offset checks without claiming a generating-run link.
 
+The [fuller-dissertation archive follow-up](issue1-dissertation-archive-followup.md) records a distinct 38,966-byte AaRC manuscript variant that contains the published `67.12` linear row, plus nearby MATLAB candidates and a bounded saved-figure scan. It does not link the manuscript or candidates to the published nonlinear run; `14.048` remains unexplained.
+
 The selected-source register contains W07, the separate notebook at SHA-256 `882ebb911cd495d5f724836653f8eeca93ef94d91282d5158d623441f8adbacd` (`docs/research/works-selected-sources.json`), whose data differ from L04. It is not a source-to-row match.
 
 ### Newly checked adaptive-project autosave candidate
