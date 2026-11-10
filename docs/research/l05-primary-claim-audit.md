@@ -31,3 +31,5 @@ For future comparisons, use the same named reference set and coordinates, and re
 ## Effect on issue #4
 
 This audit sharpens the article-level contract: exact reachability is defined for the linear surrogate; the modified construction is an unproved reduction in this paper with a conditional inner-set interpretation; the reported nonlinear comparison has no validated relation to the physical reachable set. It does not establish the cited reduction's proof, recover the Table 1 driver or coordinate map, or supply evaluated nonlinear error bounds. Issue #4 remains open for those historical and physical-model gates.
+
+A [2026-11-10 clarification](l05-affine-invariant-clarification.md) separately identifies the supplied/publisher `1063.pdf` bytes and adds conditional parity, initial-state translation and full-Jacobian qualifications with an exact 2D toy checker. It does not identify the modified Table 1 driver or alter the historical source hashes.
