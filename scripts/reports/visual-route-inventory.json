@@ -1500,6 +1500,20 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_mpc08_complete.py",
+      "signal_count": 11,
+      "asset_name_literals": [
+        "critical-regions.png",
+        "critical-regions.svg",
+        "exact-critical-regions.png",
+        "exact-critical-regions.svg",
+        "horizon-regions.png",
+        "horizon-regions.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route",
+      "role_and_disposition_reason": "Rechecks both immutable MPC08 captures and copies their saved labelled figures into one bounded report/example; it runs no solver or figure producer."
+    },
+    {
       "source": "scripts/reports/stage_mpc08_nonunique.py",
       "signal_count": 7,
       "asset_name_literals": [

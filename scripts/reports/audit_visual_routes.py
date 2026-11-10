@@ -49,11 +49,14 @@ FROZEN_DIAGRAM_EXCEPTIONS = {
     "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py",
 }
 PUBLICATION_EXPORT_ROUTES = {
+    "scripts/reports/stage_mpc08_complete.py",
     "scripts/reports/render.py", "scripts/reports/mpc05/check_smoke.py",
     "scripts/reports/exp824/finalize_limited_report.py",
     "scripts/reports/augment_pages_bundle.py",
 }
 VIZ10_ROLE_REASONS = {
+    "scripts/reports/stage_mpc08_complete.py":
+        "Rechecks both immutable MPC08 captures and copies their saved labelled figures into one bounded report/example; it runs no solver or figure producer.",
     "benchmarks/reporting/mpc08_explicit/capture_horizon_regions.py":
         "Draws independently checked exact original-quadratic endpoint cells for matched N2/4/8 with shared numeric axes; full optimizer fibers and native resource refusals remain separate products.",
     "benchmarks/reporting/mpc08_explicit/capture_exact_regions.py":
