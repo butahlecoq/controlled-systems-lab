@@ -1,0 +1,16 @@
+{
+  "schema": "csl.mpc06-publication-figures/1",
+  "matplotlib": "3.11.2",
+  "quantitative_axis_policy": "csl-report-quantitative-v1",
+  "source_result_sha256": "129386f9bb9af2e9eb2dde48b801b2df3c98126290c31e9af3f618df1b4454a9",
+  "native_capture_receipt_sha256": "359f4274a19d75f8e9a15b221c7c30953156e35f34b997d3141385d31fae8cbe",
+  "figure_data_sha256": "65654c8f5ed5d91ee2bbe6322afe19a23dc278fcd78f60874c1fa16de6fba4fc",
+  "files": {
+    "actual-state-paths.png": "67c1445cde775e4869d5e1ad007f391b09c70aac4f35296088221c052c75ada0",
+    "actual-state-paths.svg": "f20ac7b72fcc88b0374df12de6f70053d339f92bf1337e0d08beedae19a12189",
+    "feasibility-grid.png": "7e1fd6feb5b9e8772ba043ff1d82c6321da10886a479c04659cd113320619a10",
+    "feasibility-grid.svg": "faf2e939e3f5e5861c32f4cf22da789443c3a22e3c4ff683a8276ad5eaf3a70e",
+    "invariant-tightenings.png": "1993a03850ecd244edb7d3bef8709362ee3050969823209c863c86ee15c3f816",
+    "invariant-tightenings.svg": "a41340078df2332822e201f6529f4bb9ad49c3182a451cd33d47c6522a5a9ebe"
+  }
+}

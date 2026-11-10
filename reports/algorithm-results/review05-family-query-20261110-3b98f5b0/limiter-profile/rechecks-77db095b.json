@@ -1,0 +1,285 @@
+{
+  "checker_commit": "77db095b85675a783f6dd51a44a5a54545722ad2",
+  "attempts": [
+    {
+      "attempt": "limiter-profile/0000",
+      "status": "verified",
+      "family_check_ns": 404493552,
+      "independent_query_replay_ns": 1127036,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0001",
+      "status": "verified",
+      "family_check_ns": 339686399,
+      "independent_query_replay_ns": 1421140,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0002",
+      "status": "verified",
+      "family_check_ns": 353284657,
+      "independent_query_replay_ns": 1471845,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0003",
+      "status": "verified",
+      "family_check_ns": 398583187,
+      "independent_query_replay_ns": 1625358,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0004",
+      "status": "verified",
+      "family_check_ns": 416473574,
+      "independent_query_replay_ns": 1283133,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0005",
+      "status": "verified",
+      "family_check_ns": 347412216,
+      "independent_query_replay_ns": 1780756,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0006",
+      "status": "verified",
+      "family_check_ns": 361743745,
+      "independent_query_replay_ns": 1454594,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0007",
+      "status": "verified",
+      "family_check_ns": 381790495,
+      "independent_query_replay_ns": 1276288,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0008",
+      "status": "verified",
+      "family_check_ns": 355891141,
+      "independent_query_replay_ns": 1406613,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0009",
+      "status": "verified",
+      "family_check_ns": 356028659,
+      "independent_query_replay_ns": 1105036,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0010",
+      "status": "verified",
+      "family_check_ns": 347594145,
+      "independent_query_replay_ns": 1110205,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0011",
+      "status": "verified",
+      "family_check_ns": 327654530,
+      "independent_query_replay_ns": 1340682,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0012",
+      "status": "verified",
+      "family_check_ns": 345362140,
+      "independent_query_replay_ns": 2275235,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0013",
+      "status": "verified",
+      "family_check_ns": 346173629,
+      "independent_query_replay_ns": 2306175,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0014",
+      "status": "verified",
+      "family_check_ns": 350229687,
+      "independent_query_replay_ns": 1251564,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0015",
+      "status": "verified",
+      "family_check_ns": 317609743,
+      "independent_query_replay_ns": 1131297,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0016",
+      "status": "verified",
+      "family_check_ns": 297209310,
+      "independent_query_replay_ns": 1213500,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0017",
+      "status": "verified",
+      "family_check_ns": 300657607,
+      "independent_query_replay_ns": 1127177,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0018",
+      "status": "verified",
+      "family_check_ns": 346556355,
+      "independent_query_replay_ns": 1346060,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0019",
+      "status": "verified",
+      "family_check_ns": 370460812,
+      "independent_query_replay_ns": 1190802,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0020",
+      "status": "verified",
+      "family_check_ns": 347575760,
+      "independent_query_replay_ns": 1152809,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0021",
+      "status": "verified",
+      "family_check_ns": 368339786,
+      "independent_query_replay_ns": 1353882,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0022",
+      "status": "verified",
+      "family_check_ns": 329630336,
+      "independent_query_replay_ns": 1101614,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0023",
+      "status": "verified",
+      "family_check_ns": 324189103,
+      "independent_query_replay_ns": 1114116,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0024",
+      "status": "verified",
+      "family_check_ns": 322745753,
+      "independent_query_replay_ns": 1105036,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0025",
+      "status": "verified",
+      "family_check_ns": 350172608,
+      "independent_query_replay_ns": 1136255,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0026",
+      "status": "verified",
+      "family_check_ns": 344763573,
+      "independent_query_replay_ns": 1358911,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0027",
+      "status": "verified",
+      "family_check_ns": 351639633,
+      "independent_query_replay_ns": 1124243,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0028",
+      "status": "verified",
+      "family_check_ns": 352726018,
+      "independent_query_replay_ns": 1980782,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0029",
+      "status": "verified",
+      "family_check_ns": 345768382,
+      "independent_query_replay_ns": 1939156,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0030",
+      "status": "verified",
+      "family_check_ns": 353327912,
+      "independent_query_replay_ns": 1145614,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0031",
+      "status": "verified",
+      "family_check_ns": 346985369,
+      "independent_query_replay_ns": 1146103,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0032",
+      "status": "verified",
+      "family_check_ns": 308077434,
+      "independent_query_replay_ns": 1140656,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0033",
+      "status": "verified",
+      "family_check_ns": 348776250,
+      "independent_query_replay_ns": 1311209,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0034",
+      "status": "verified",
+      "family_check_ns": 315806748,
+      "independent_query_replay_ns": 2241013,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0035",
+      "status": "verified",
+      "family_check_ns": 316230058,
+      "independent_query_replay_ns": 1236898,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0036",
+      "status": "verified",
+      "family_check_ns": 345806644,
+      "independent_query_replay_ns": 2012770,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0037",
+      "status": "verified",
+      "family_check_ns": 311341272,
+      "independent_query_replay_ns": 2046643,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0038",
+      "status": "verified",
+      "family_check_ns": 323290497,
+      "independent_query_replay_ns": 1100217,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    },
+    {
+      "attempt": "limiter-profile/0039",
+      "status": "verified",
+      "family_check_ns": 310916284,
+      "independent_query_replay_ns": 1113277,
+      "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+    }
+  ]
+}
