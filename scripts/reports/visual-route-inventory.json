@@ -1973,6 +1973,18 @@
       "role_and_disposition_reason": "Draws the exact initial-state rectangle and one full two-control optimal fiber with a distinct minimum-norm selector; solver candidates are not presented as complete-family evidence."
     },
     {
+      "source": "benchmarks/reporting/mpc10/figures.py",
+      "signal_count": 10,
+      "asset_name_literals": [
+        "branches.png",
+        "branches.svg",
+        "paths.png",
+        "paths.svg"
+      ],
+      "disposition": "adopted-shared-quantitative-policy",
+      "role_and_disposition_reason": "Plots authenticated saved two-dimensional native hybrid paths with distinct parallel-edge identities and shared quantitative styles; no family claim follows from sampled anchors."
+    },
+    {
       "source": "benchmarks/reporting/review05/render_constraint_ladder.py",
       "signal_count": 4,
       "asset_name_literals": [
