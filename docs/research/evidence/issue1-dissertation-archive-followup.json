@@ -1,20 +1,32 @@
 {
   "schema_version": 1,
   "purpose": "Bounded source identity and content observations for issue #1. No private source files are included.",
+  "collections": {
+    "phd-archive": {
+      "description": "Extracted PhD.zip collection.",
+      "source_archive_sha256": "d13b82f848002137cfab4682f1d6f69b9411b360f4078dec27fa0f54566c8453"
+    },
+    "dissertation-working-collection": {
+      "description": "Separate fuller dissertation working copy supplied by the owner. The owner described it as probably newest; this record makes no chronology claim."
+    }
+  },
   "manuscript_variants": [
     {
+      "collection_id": "phd-archive",
       "archive_relative_path": "Публикации/Минимакс/Unconstrained for AaRC/Paper/Shorikov_Kalev_AiT.tex",
       "bytes": 37412,
       "sha256": "7dfcd12b5f946d459411ba7467d6a176d42ab33c20d56ce860fb8477c6ce956f",
       "content_observation": "Earlier variant reports linear result 56.433 and state (1200.939, -32.294, 451.206, -46.254), and retains nonlinear result 14.048."
     },
     {
+      "collection_id": "dissertation-working-collection",
       "archive_relative_path": "Публикации/Минимакс/Unconstrained for AaRC/Paper/Shorikov_Kalev_AiT.tex",
       "bytes": 38966,
       "sha256": "b1cbcac49b50282784ba9819fa792ae9c09b0049faa0e694da65ec89a9962891",
       "content_observation": "Distinct variant reports linear result 67.12 and state (1201.139, -27.294, 452.606, -61.254), and retains nonlinear state (1200.139, -2.294, 450.406, -16.254) and result 14.048."
     },
     {
+      "collection_id": "dissertation-working-collection",
       "archive_relative_path": "Публикации/Минимакс/Unconstrained for AaRC/tex/Shorikov_Kalev_AиT_New.tex",
       "bytes": 39898,
       "sha256": "6a79451d2be9ca9a9d4caaab288bf3761cfab200f7729e6d7e54662511b948a5",
@@ -23,24 +35,28 @@
   ],
   "candidate_sources": [
     {
+      "collection_id": "dissertation-working-collection",
       "archive_relative_path": "Публикации/Минимакс/Constrained/Minmaxopenloop.m",
       "bytes": 3243,
       "sha256": "0f650a7db58028d7479644546094067268d87f79bcad8c9653408c97175d5c9d",
       "observation": "Static source has the published L04 linear initial state, four stages, action set, and Euclidean terminal score. No linked run output was found in the checked artifacts."
     },
     {
+      "collection_id": "dissertation-working-collection",
       "archive_relative_path": "Публикации/Минимакс/Unconstrained for Space Research/Minmaxopenloop.m",
       "bytes": 3689,
       "sha256": "d997f0479413d452e7ef6e1673c4cace47f627b0a4e611ef014480f6070534cd",
       "observation": "Static source has an L04-scale initial state, four stages, a five-action set, stage-indexed disturbance vertices, and a Euclidean terminal score. Its initial state and action set differ from published L04."
     },
     {
+      "collection_id": "dissertation-working-collection",
       "archive_relative_path": "Публикации/Минимакс/Unconstrained for Space Research/program.m",
       "bytes": 1290,
       "sha256": "3125634e0c60d02e93984de1a37e81c2df9f4504e19925764701aad09b6759fd",
       "observation": "Static nonlinear replay source prints a J expression with an unsquared (mg(end)-450) term. No attributable output connects it to the published row."
     },
     {
+      "collection_id": "dissertation-working-collection",
       "archive_relative_path": "Публикации/Минимакс/Unconstrained for Space Research/second.fig",
       "bytes": 514923,
       "sha256": "a5116458f760dca192f21d5a0091685d2a43717e0329d91c6a660a1862994b02",
