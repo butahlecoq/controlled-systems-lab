@@ -107,6 +107,27 @@ def replay(profile,record,tolerance):
     return dict(status='verified-numerical-evaluation',stages=n,exact_terminal_cost=str(state[1]**2),exact_policy_upper_bound=str(bound),maximum_absolute_action_state_error=maximum)
 
 
+def reader_identity():
+    from benchmarks.reporting.mpc07.online.capture import source_files
+    files=source_files();revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
+    if not re.fullmatch('[0-9a-f]{40}',revision):raise ValueError('full checker revision required')
+    for name,data in files.items():
+        if data!=subprocess.check_output(['git','show','--end-of-options',revision+':'+name],cwd=ROOT):raise ValueError('uncommitted checking source')
+    return revision,{name:digest(data) for name,data in files.items()}
+
+
+def checked_verification(folder,path):
+    receipt=load(path);revision=receipt.get('checking_revision')
+    if not isinstance(revision,str) or not re.fullmatch('[0-9a-f]{40}',revision):raise ValueError('full checking revision required')
+    _,current=reader_identity()
+    if receipt.get('checking_sources')!=current:raise ValueError('mandatory checking source binding differs')
+    for name,checksum in current.items():
+        if digest(subprocess.check_output(['git','show','--end-of-options',revision+':'+name],cwd=ROOT))!=checksum:raise ValueError('checker differs from recorded Git source')
+    rebuilt=check(folder)
+    if {k:v for k,v in rebuilt.items() if k!='checking_revision'}!={k:v for k,v in receipt.items() if k!='checking_revision'}:raise ValueError('verification differs from independent saved replay')
+    return receipt
+
+
 def check(folder):
     env,inputs,hashes=authenticated(folder);profiles={p['id']:p for p in inputs['profiles']};reports=[];expected=[]
     for rep in range(-1,inputs['measured_repetitions']):
@@ -134,7 +155,8 @@ def check(folder):
             rows=[r for r in measured if r['profile']==name and r['family']==family and not r['warmup']];completed=[r for r in rows if r['status']=='completed']
             groups.append(dict(profile=name,family=family,attempts=len(rows),completed=len(completed),preparation=stats([r['preparation_ns'] for r in completed]),episode=stats([r['episode_ns'] for r in completed]),query=stats([s['query_ns'] for r in completed for s in r['steps']]),initial_observation=stats([r['steps'][0]['residual_update_ns'] for r in completed]),past_residual_update=stats([s['residual_update_ns'] for r in completed for s in r['steps'][1:]])))
     if inventory(folder)!=hashes:raise ValueError('capture changed during check')
-    return dict(schema='csl.mpc07.online-check/1',status='checked' if all(r['status']=='checked' and set(r.get('outcomes',{}))=={'verified-numerical-evaluation'} for r in reports) else 'inconclusive',input_files=hashes,source_revision=env['source_revision'],profiles=len(profiles),scheduled_episodes=len(expected),scheduled_stages=sum(profiles[n]['horizon'] for n,f,r in expected),reports=reports,groups=groups,tolerance=inputs['tolerance'],verdict='initial configured Python feedback evaluation costs; no comparative winner, real-time bound or LP/MPC-replanning latency',scope='exact stored rational policy/source/bound replay compared to binary64 observations/actions; physical traces are samples, not new robustness proofs')
+    checking_revision,checking_sources=reader_identity()
+    return dict(schema='csl.mpc07.online-check/1',checking_revision=checking_revision,checking_sources=checking_sources,status='checked' if all(r['status']=='checked' and set(r.get('outcomes',{}))=={'verified-numerical-evaluation'} for r in reports) else 'inconclusive',input_files=hashes,source_revision=env['source_revision'],profiles=len(profiles),scheduled_episodes=len(expected),scheduled_stages=sum(profiles[n]['horizon'] for n,f,r in expected),reports=reports,groups=groups,tolerance=inputs['tolerance'],verdict='initial configured Python feedback evaluation costs; no comparative winner, real-time bound or LP/MPC-replanning latency',scope='exact stored rational policy/source/bound replay compared to binary64 observations/actions; physical traces are samples, not new robustness proofs')
 
 
 if __name__=='__main__':

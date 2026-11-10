@@ -7,14 +7,14 @@ import os
 from pathlib import Path
 import sys
 from benchmarks.reporting.mpc07.online.inputs import encoded,digest
-from benchmarks.reporting.mpc07.online.check import inventory
+from benchmarks.reporting.mpc07.online.check import checked_verification
 
 ROOT=Path(__file__).resolve().parents[4]
 
 
 def render(capture,verification,output):
-    checked=json.loads(verification.read_bytes())
-    if checked['status']!='checked' or checked['input_files']!=inventory(capture):raise ValueError('checked capture binding differs')
+    checked=checked_verification(capture,verification)
+    if checked['status']!='checked':raise ValueError('checked capture binding differs')
     if output.exists():raise ValueError('new figure directory required')
     import matplotlib
     if matplotlib.__version__!='3.11.2':raise ValueError('publication Matplotlib3.11.2 required')

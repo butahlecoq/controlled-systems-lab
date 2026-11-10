@@ -51,3 +51,12 @@ core/public API or library release is introduced. Failures remain in denominator
 only independently checked completed episodes contribute evaluation latencies.
 All old archives/sidecars remain unchanged; independent review and managed live
 publication remain separate. Keep #603 open until completion is established.
+
+The captured empty timer-pair span is a resolution/overhead diagnostic, not a
+quantity subtracted from query timings. When it is a substantial share of the
+query span, intrinsic query latency is not independently resolved. Report the
+raw instrumented spans and clock floor together; no policy ranking follows.
+The renderer reruns the independent saved rational/source check and authenticates
+the complete current checking-source map against its separate Git revision before
+using a receipt. Historical capture source and current checking source remain
+distinct; current checking does not rewrite measured records.
