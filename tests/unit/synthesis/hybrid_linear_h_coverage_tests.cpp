@@ -30,7 +30,7 @@ struct Fixture {
   std::vector<HybridPathProgram> programs;
   std::vector<HybridPathOptimalFaceCandidate> candidates;
 };
-Fixture fixture(bool parallel = false) {
+Fixture fixture(bool parallel = false, bool with_worse = false) {
   const std::size_t horizon = parallel ? 1 : 0;
   model::HybridMode mode{
       {"mode"},
@@ -49,24 +49,35 @@ Fixture fixture(bool parallel = false) {
                               {"mode"},
                               {UniversalSet{1}},
                               {point({0, 0}).as_handle()}});
-  model::HybridRequest request{
-      {{"mode"}, {0}},
-      {{"mode"}},
-      {{{"mode"}, LinearTerminal{{0}, 0}, "constant", "units"}}};
+  if (with_worse)
+    system.edges.push_back({{"edge-worse"},
+                            {"mode"},
+                            {"mode"},
+                            {UniversalSet{1}},
+                            {point({0, 1}).as_handle()}});
+  model::HybridRequest request{{{"mode"}, {0}},
+                               {{"mode"}},
+                               {{{"mode"},
+                                 LinearTerminal{{with_worse ? 1. : 0.}, 0},
+                                 "terminal",
+                                 "units"}}};
   auto programs = take(build_hybrid_portfolio_programs(
       system, request, {"coverage-status"}, {1, 4}, {16, 128, 4096}));
   std::vector<HybridPathOptimalFaceCandidate> candidates;
   for (const auto &program : programs) {
     const auto &linear = std::get<LinearProgram>(program.program);
-    ProgramResult solved{
-        Termination::completed,
-        {linear.identity(),
-         MathematicalOutcome::optimal,
-         SymbolicArgument{"literal zero trajectory", "constant objective"},
-         {}},
-        Vector(linear.variables().size(), 0),
-        {},
-        "literal exact singleton"};
+    Vector anchor(linear.variables().size(), 0);
+    if (with_worse && program.path.edges.front().value == "edge-worse")
+      anchor.back() = 1;
+    ProgramResult solved{Termination::completed,
+                         {linear.identity(),
+                          MathematicalOutcome::optimal,
+                          SymbolicArgument{"literal singleton trajectory",
+                                           "singleton objective evaluation"},
+                          {}},
+                         anchor,
+                         {},
+                         "literal exact singleton"};
     candidates.push_back(take(
         build_hybrid_path_optimal_face_candidate(program, solved, {0, 0})));
   }
@@ -131,6 +142,21 @@ TEST_CASE("a disproven program refutes coverage even when another objective is "
   f.programs[0].relation_limits.max_variables = 3;
   f.programs[1].joint_relation = point({1, 0, 0});
   const auto result = verify(f);
+  CHECK(result.global_objective_optimality ==
+        HybridVerificationStatus::unsupported);
+  CHECK(result.complete_family_coverage == HybridVerificationStatus::refuted);
+}
+
+TEST_CASE("a proven suboptimal candidate refutes coverage across an unknown "
+          "objective") {
+  auto f = fixture(true, true);
+  f.programs[0].relation_limits.max_variables = 3;
+  const auto result = verify(f);
+  REQUIRE(result.branches.size() == 3);
+  CHECK(result.branches[2].objective_optimality ==
+        HybridVerificationStatus::refuted);
+  CHECK(result.branches[2].continuous_coverage ==
+        HybridVerificationStatus::refuted);
   CHECK(result.global_objective_optimality ==
         HybridVerificationStatus::unsupported);
   CHECK(result.complete_family_coverage == HybridVerificationStatus::refuted);
