@@ -59,6 +59,8 @@ PUBLICATION_EXPORT_ROUTES = {
     "benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/figures.py",
 }
 VIZ10_ROLE_REASONS = {
+    "scripts/reports/stage_mpc11_mesh_timing.py":
+        "Rechecks immutable mesh and repeated-controller archives, builds labelled saved-data study companions and copies complete source/raw inputs; no optimization or integration runs.",
     "scripts/reports/stage_mpc07_comparison.py":
         "Authenticates both robust-policy capture families and copied two-state figures; rechecks saved exact policies without optimization or plotting.",
     "scripts/reports/stage_mpc10_comparison.py":

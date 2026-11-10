@@ -55,7 +55,7 @@
     },
     {
       "source": "scripts/reports/augment_pages_bundle.py",
-      "signal_count": 10,
+      "signal_count": 13,
       "asset_name_literals": [
         "branches.svg",
         "exact-critical-regions.svg",
@@ -64,7 +64,10 @@
         "horizon-regions.svg",
         "invariant-tightenings.svg",
         "joint-filter-policy.svg",
+        "mesh-differences.svg",
+        "mesh-phase-overlays.svg",
         "paths.svg",
+        "timing-phases.svg",
         "trajectory.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
@@ -1597,7 +1600,8 @@
         "mesh-phase-overlays.svg",
         "timing-phases.svg"
       ],
-      "disposition": "publication-validation-or-frozen-route"
+      "disposition": "publication-validation-or-frozen-route",
+      "role_and_disposition_reason": "Rechecks immutable mesh and repeated-controller archives, builds labelled saved-data study companions and copies complete source/raw inputs; no optimization or integration runs."
     },
     {
       "source": "scripts/reports/stage_projection_figures.py",

@@ -64,7 +64,9 @@ class PagesAugmentationAggregation(unittest.TestCase):
             for name in ('mpc07','mpc10'):
                 self.assertIn(routes[name]+'/index.html#minimal-example',(site/'examples/index.html').read_text())
                 self.assertIn(routes[name]+'/index.html',landing)
-            for report_id in (routes["b04_c"], routes["mpc06"], routes["mpc06_complete"], routes["review05"], routes["mpc11"], routes["mpc08"], routes["mpc07"], routes["mpc10"]):
+            self.assertIn(routes["mpc11_studies"]+"/index.html#mesh-example",(site/"examples/index.html").read_text())
+            self.assertIn(routes["mpc11_studies"]+"/index.html",landing)
+            for report_id in (routes["b04_c"], routes["mpc06"], routes["mpc06_complete"], routes["review05"], routes["mpc11"], routes["mpc08"], routes["mpc07"], routes["mpc10"], routes["mpc11_studies"]):
                 with zipfile.ZipFile(site / f"{report_id}.zip") as archive:
                     self.assertIn(f"{report_id}/publication-manifest.json", archive.namelist())
 
