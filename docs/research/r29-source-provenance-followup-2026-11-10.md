@@ -56,6 +56,14 @@ R29's author identity/contact corroborates the known repository owner; no specul
 
 The three public repository descriptions and creation chronology provide no separate historical MATLAB project lead. A local all-ref path-history query for `**/Zonotope.m` and `**/Shorikov_Kalev_Paper.tex` returned no tracked source-path history in the controlled-systems repository. This is a current-public-account/local-ref result: deleted repositories, private repositories, other accounts, unpushed branches, and the unmounted original dissertation archive are outside its scope. Public web searches by paper title/author/code terms led back to CEUR or bibliographic copies; unrelated modern zonotope packages supply no provenance for this historical example and were not adopted.
 
+## Exact test of the already-mapped-input interpretation
+
+A separate hypothesis is that the four-component control objects label the already mapped state-space input `B P`, rather than primitive control `P`. The earlier input audit already notes that the displayed generator is not `B`; the following exact certificate rules out **any** scalar generator yielding that column, rather than only the unit scalar choice.
+
+For the printed `B=(4,0,2,0)^T`, `rank(B)=1`: its primitive control space is scalar, not two-dimensional. The displayed center `c=(0,0,0,0)^T` is in `image(B)` and uniquely pulls back to scalar center0. But the displayed single generator `g=(1,1,1,1)^T` is outside `image(B)`. The exact separating row `a=(0,1,0,0)` satisfies `a B=0` and `a g=1`; the fourth-coordinate row supplies another certificate. A left inverse `L=(1/4,0,0,0)` satisfies `L B=1`; it proposes generator `L g=1/4`, whose mapped residual is `g−B(Lg)=(0,1,1/2,1)^T`, not zero. All these identities were checked with Python `Fraction`.
+
+Thus a full-column-rank inverse does recover the zero center but **cannot** recover a primitive control set consistent with the printed generator. Reading the displayed set as an independent state-space disturbance would change the printed plant/input relation, not resolve the label while preserving its inputs. Reading it as an erroneous scalar-label duplication remains an editorial hypothesis requiring the same explicit source-variant disposition. No numerical historical correspondence or authorial intention follows from this algebraic exclusion.
+
 ## Actionable disposition
 
 1. **Canonical recovery remains absent.** A useful next artifact is the original MATLAB R2014a driver/configuration or archived project/export that identifies `c_P`, `G_P`, the implemented input matrix and the sixteen-stage run together. Another copy of the same PDF or byte-identical Word manuscript does not add that evidence.
