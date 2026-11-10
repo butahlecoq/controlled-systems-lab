@@ -1,0 +1,188 @@
+{
+  "input_archives": {
+    "affine": {
+      "archive": "benchmarks/reporting/mpc11/evidence/affine-pilot-b3978a98/capture.zip",
+      "sha256": "98c6d9663bad80757ddef1adb150706ca8f7e19633267dc436bc4b84f09fe9b3",
+      "capture_source": "b3978a98a8bfb30e21841466244ed7f78e987886"
+    },
+    "nonlinear": {
+      "archive": "benchmarks/reporting/mpc11/evidence/nonlinear-pilot-0092081b/capture.zip",
+      "sha256": "c8be3f89a377c5f9be3c0da4c818df26475c17ae282186cd16869c9a923f437e",
+      "capture_source": "0092081b4d94b533c8811245c7309e50a434de9f"
+    },
+    "nmpc": {
+      "archive": "benchmarks/reporting/mpc11/evidence/nmpc-pilot-55f65110/capture.zip",
+      "sha256": "c13fb2db4f5492f5be85d42b3d5866c2a07ec24f78eb3a6a457d37ac15186253",
+      "capture_source": "55f651105ecf9d19216ab45814614e59b05be4f2"
+    }
+  },
+  "schema": "csl.mpc11.figure-receipt/1",
+  "style": "csl-report-quantitative-v1",
+  "matplotlib": "3.11.2",
+  "input_sha256": {
+    "syn-nl-lv-01/scenario": "1a608a0a38f9c1d60d9272b948189e48f9f294048ddf9726aaa0ed8b5cee8464",
+    "syn-nl-lv-01/affine": "7f564a086e1dc60472a72ff954b6bc041201dc7490036872d785cdec1d78977d",
+    "syn-nl-lv-01/nonlinear": "6b24cb200bb8f137476e4f09697ce0d22638e95e5f6c5a66c93c578ad8985aa3",
+    "syn-nl-lv-01/nmpc": "82f1cbafaec6dc69c025fc4278bb9c77c977012b5dbc5ebddcfc6c58601e64d4",
+    "syn-nl-fuel-01/scenario": "5dd38a65f5ad6c5f90b8616fbc866eb9ef2735b1b7f7279bca0b2b0d05f9dce1",
+    "syn-nl-fuel-01/affine": "1f236c421bcb8995d15c955962cbd005ac57c4c8a7daa5b9cbe0e181ffca4239",
+    "syn-nl-fuel-01/nonlinear": "39456e9a23988e61dd9ab37034e6b2fe7a7f5f750a49e898f1029227d9e047ed",
+    "syn-nl-fuel-01/nmpc": "25730635d69907df7581f14de669dd1b8f76d1e4fcbe9e694c340c60bbb25357"
+  },
+  "saved_checks": {
+    "affine": [
+      {
+        "case_id": "ANALYTIC-JOINT-QP-01",
+        "status": "verified-numerical-witness"
+      },
+      {
+        "case_id": "SYN-NL-FUEL-01",
+        "status": "verified-numerical-witness",
+        "objective": 0.010570464036763268
+      },
+      {
+        "case_id": "SYN-NL-LV-01",
+        "status": "verified-numerical-witness",
+        "objective": 0.0782955745731609
+      }
+    ],
+    "nonlinear": [
+      {
+        "case_id": "SYN-NL-LV-01",
+        "statuses": {
+          "cvodes": "complete",
+          "cvodes-tight": "complete",
+          "rk4": "complete",
+          "rk4-tight": "complete"
+        },
+        "process_statuses": {
+          "cvodes": "completed",
+          "cvodes-tight": "completed",
+          "rk4": "completed",
+          "rk4-tight": "completed"
+        },
+        "scope": "bound identities, source rebuild, sampled trace shape/cost/constraints; integration correctness requires replay"
+      },
+      {
+        "case_id": "SYN-NL-FUEL-01",
+        "statuses": {
+          "cvodes": "complete",
+          "cvodes-tight": "complete",
+          "rk4": "complete",
+          "rk4-tight": "complete"
+        },
+        "process_statuses": {
+          "cvodes": "completed",
+          "cvodes-tight": "completed",
+          "rk4": "completed",
+          "rk4-tight": "completed"
+        },
+        "scope": "bound identities, source rebuild, sampled trace shape/cost/constraints; integration correctness requires replay"
+      }
+    ],
+    "nmpc": [
+      {
+        "case_id": "SYN-NL-LV-01",
+        "status": "complete",
+        "controller_status": "complete",
+        "replay_processes": {
+          "rk4": "completed",
+          "rk4-tight": "completed"
+        },
+        "completed_holds": 30,
+        "transcriptions_checked": 30,
+        "completed_objective": 0.09168477962868322,
+        "sampled_execution_physical_state_violation": [
+          0.0,
+          0.0
+        ],
+        "applied_physical_control_violation": [
+          0.0
+        ],
+        "max_nlp_objective_rebuild_difference": 0.0,
+        "max_nlp_constraint_rebuild_difference": 0.0,
+        "max_stationarity_rebuild_difference": 0.0,
+        "claim": "saved transcript/controls/cost/replay association and NLP rebuild; no solver rerun, global guarantee or ODE error certificate"
+      },
+      {
+        "case_id": "SYN-NL-FUEL-01",
+        "status": "complete",
+        "controller_status": "complete",
+        "replay_processes": {
+          "rk4": "completed",
+          "rk4-tight": "completed"
+        },
+        "completed_holds": 40,
+        "transcriptions_checked": 40,
+        "completed_objective": 0.0038259850540860742,
+        "sampled_execution_physical_state_violation": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "applied_physical_control_violation": [
+          0.0,
+          0.0
+        ],
+        "max_nlp_objective_rebuild_difference": 0.0,
+        "max_nlp_constraint_rebuild_difference": 0.0,
+        "max_stationarity_rebuild_difference": 0.0,
+        "claim": "saved transcript/controls/cost/replay association and NLP rebuild; no solver rerun, global guarantee or ODE error certificate"
+      }
+    ]
+  },
+  "claim": "saved individual numerical trajectories only; no set or performance guarantee",
+  "tool_sha256": {
+    "benchmarks/reporting/mpc11/figures.py": "1f6d57ba4dbfa233600a0c489a90c1018e3f35ed085fb9fa7d0400fc4d54d13f",
+    "scripts/reports/figure_style.py": "c2f7078df95b9d75fe90f0f407023383cae4b58dd688dfa5fa5ac5b9d18664c6",
+    "benchmarks/reporting/mpc11/check_affine_saved.py": "658d326941bb761654de417a8ca3b5be5144088b0a62b3d6496511a8c167ca24",
+    "benchmarks/reporting/mpc11/check_nonlinear_saved.py": "84056242a0f5c0ea8406ac479cbcd01bc7fed3ce1a4f46a9c9990a5b0703a856",
+    "benchmarks/reporting/mpc11/check_nmpc_saved.py": "dc785a2e00a4ff122845f5bb1a64dfa664e0af14e80aaf6892b5b6fcc048a14c"
+  },
+  "bundle_manifest_sha256": {
+    "affine": "b8a1f79453e7e262fa4471b5bc6e4d181be4c218202adc2483636114eb3d0bd6",
+    "nonlinear": "85529a1505fc2a792ca48b3c4ae0c75ef69925f7712c040e9674b56edff440b5",
+    "nmpc": "7a450936f905e7ed6ba0eccecd77f7843a05aa021fe634369738b73df6f691bd"
+  },
+  "helper_snapshot_sha256": {
+    "affine.py": "f6c34b2ffa53fd96f366e84cc1e3ac244bdb1fe4b2f16da8b25a927324cee2dd",
+    "check_affine_saved.py": "658d326941bb761654de417a8ca3b5be5144088b0a62b3d6496511a8c167ca24",
+    "check_nmpc_saved.py": "dc785a2e00a4ff122845f5bb1a64dfa664e0af14e80aaf6892b5b6fcc048a14c",
+    "check_nonlinear_saved.py": "84056242a0f5c0ea8406ac479cbcd01bc7fed3ce1a4f46a9c9990a5b0703a856",
+    "check_scenarios.py": "ae6f12f0c3986c73a1840ce4ab9fe9f9f390a2aa99b0c996c750b8a18717728f",
+    "figure_style.py": "c2f7078df95b9d75fe90f0f407023383cae4b58dd688dfa5fa5ac5b9d18664c6",
+    "figures.py": "1f6d57ba4dbfa233600a0c489a90c1018e3f35ed085fb9fa7d0400fc4d54d13f",
+    "nmpc.py": "8d769a66011c546d20d796ea7424536eb7c8c09a9143b6f97fb5bc01bbec4777",
+    "nonlinear.py": "5e0c97ae2da5164acebfd6219e127a88cba12130169a22efbb3a0849df6133b0",
+    "replay_evidence.py": "3913e92d4f9e3d4b731ed216393ce84bbd1db373383f3505bff046b2c5fea43b",
+    "run_affine.py": "aa7663b488d220b01faf16f4de543d928bbdc28f76c3d216cb8f38c0ec4bfd6e",
+    "run_nmpc.py": "dcc5d198e5cf41a62132695dbf6261b77546277d07a2d87019636a97b3ae8134",
+    "run_nonlinear.py": "f235cfe233f2fb74905c7b34843671381045f2e4950012e35f1af84298f8d013"
+  },
+  "output_sha256": {
+    "source/affine.py": "f6c34b2ffa53fd96f366e84cc1e3ac244bdb1fe4b2f16da8b25a927324cee2dd",
+    "source/check_affine_saved.py": "658d326941bb761654de417a8ca3b5be5144088b0a62b3d6496511a8c167ca24",
+    "source/check_nmpc_saved.py": "dc785a2e00a4ff122845f5bb1a64dfa664e0af14e80aaf6892b5b6fcc048a14c",
+    "source/check_nonlinear_saved.py": "84056242a0f5c0ea8406ac479cbcd01bc7fed3ce1a4f46a9c9990a5b0703a856",
+    "source/check_scenarios.py": "ae6f12f0c3986c73a1840ce4ab9fe9f9f390a2aa99b0c996c750b8a18717728f",
+    "source/figure_style.py": "c2f7078df95b9d75fe90f0f407023383cae4b58dd688dfa5fa5ac5b9d18664c6",
+    "source/figures.py": "1f6d57ba4dbfa233600a0c489a90c1018e3f35ed085fb9fa7d0400fc4d54d13f",
+    "source/nmpc.py": "8d769a66011c546d20d796ea7424536eb7c8c09a9143b6f97fb5bc01bbec4777",
+    "source/nonlinear.py": "5e0c97ae2da5164acebfd6219e127a88cba12130169a22efbb3a0849df6133b0",
+    "source/replay_evidence.py": "3913e92d4f9e3d4b731ed216393ce84bbd1db373383f3505bff046b2c5fea43b",
+    "source/run_affine.py": "aa7663b488d220b01faf16f4de543d928bbdc28f76c3d216cb8f38c0ec4bfd6e",
+    "source/run_nmpc.py": "dcc5d198e5cf41a62132695dbf6261b77546277d07a2d87019636a97b3ae8134",
+    "source/run_nonlinear.py": "f235cfe233f2fb74905c7b34843671381045f2e4950012e35f1af84298f8d013",
+    "syn-nl-fuel-01-phase.png": "d46e95fa82b1073488ba7fbf4c171266ab25f9c1056b2943001f6ee967427ae4",
+    "syn-nl-fuel-01-phase.svg": "8f3a250b3376980a2f3a46b2c2c5ae591b0f877570a2e8682e454d4a3b818f93",
+    "syn-nl-fuel-01-plotted-data.json": "626998255648b3ce8f62d8889fe6914f48502f4ee4b03960e07bf78f553ed215",
+    "syn-nl-fuel-01-traces.png": "e8c22fbaaf2cd26d4cd289842320390f8ff26589dba4c042b4d77d27df1052c7",
+    "syn-nl-fuel-01-traces.svg": "1b787ff35819beeff73231ad7ebeff5d06aae1180f499d394f5dce170e2dfec2",
+    "syn-nl-lv-01-phase.png": "3dcfc2e3095bd858b86b777068a2b144b25c945bf14b79020d8f1ed87655009f",
+    "syn-nl-lv-01-phase.svg": "eb20b1c426b6d944be79b7dd00ef7c9269600562eb147d0780ddacdc54e382ed",
+    "syn-nl-lv-01-plotted-data.json": "c958b8af3f933a077a53b1fe87872788f6c459b01794a5e7e1941204f165ad8d",
+    "syn-nl-lv-01-traces.png": "ac882d6ba4fa29f5e50d1dfd5ca008bef3d1aa95c4a6ded4d19788baee65216b",
+    "syn-nl-lv-01-traces.svg": "5a2f056035401b25fc982d923550fead3825a2874179ab0586400b354162d446"
+  }
+}

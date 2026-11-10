@@ -52,6 +52,7 @@ PUBLICATION_EXPORT_ROUTES = {
     "scripts/reports/render.py", "scripts/reports/mpc05/check_smoke.py",
     "scripts/reports/exp824/finalize_limited_report.py",
     "scripts/reports/augment_pages_bundle.py",
+    "benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/figures.py",
 }
 VIZ10_ROLE_REASONS = {
     "scripts/reports/mpc06_online/render.py":
@@ -120,6 +121,7 @@ SAVED_COMPANION_ROUTES = {
 }
 SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
 SAVED_DATA_COMPANION_RENDERERS = {
+    "benchmarks/reporting/mpc11/figures.py",
     "scripts/reports/mpc06_online/render.py",
     "scripts/reports/mpc06_delivery/figures.py",
     "scripts/reports/render_adaptive_ode_example.py",
