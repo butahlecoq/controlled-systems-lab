@@ -54,6 +54,8 @@ PUBLICATION_EXPORT_ROUTES = {
     "scripts/reports/augment_pages_bundle.py",
 }
 VIZ10_ROLE_REASONS = {
+    "benchmarks/reporting/mpc10/figures.py":
+        "Plots authenticated saved two-dimensional native hybrid paths with distinct parallel-edge identities and shared quantitative styles; no family claim follows from sampled anchors.",
     "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py":
         "Generates one exact 2D critical-region diagram from the rational fixture, with labelled initial and terminal coordinates; it is not a general plotting path.",
     "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py":
@@ -248,8 +250,7 @@ def source_inventory(root: Path) -> list[dict]:
             elif relative.endswith(("/geometry_figures.py", "/approx_extension_companions.py",
                                     "/geometry_opt_companions.py", "/viz10_plot_companions.py")):
                 disposition = "shared-quantitative-policy-companion-renderer"
-            elif relative in {"scripts/reports/stage_projection_figures.py",
-                              "benchmarks/reporting/review05/render_family_query.py"}:
+            elif relative in {'scripts/reports/stage_projection_figures.py', 'benchmarks/reporting/review05/render_family_query.py', 'benchmarks/reporting/mpc10/figures.py'}:
                 disposition = "adopted-shared-quantitative-policy"
             elif relative.endswith("/control_witness_companions.py"):
                 disposition = "saved-control-witness-gallery-companion-builder"
