@@ -273,7 +273,8 @@ def source_inventory(root: Path) -> list[dict]:
                               "benchmarks/reporting/review05/render_family_query.py",
                               "benchmarks/reporting/mpc11/figures.py",
                               "benchmarks/reporting/mpc08_explicit/capture_exact_regions.py",
-                              "benchmarks/reporting/mpc08_explicit/capture_horizon_regions.py"}:
+                              "benchmarks/reporting/mpc08_explicit/capture_horizon_regions.py",
+                              "benchmarks/reporting/mpc07/report.py"}:
                 disposition = "adopted-shared-quantitative-policy"
             elif relative.endswith("/control_witness_companions.py"):
                 disposition = "saved-control-witness-gallery-companion-builder"

@@ -1,0 +1,197 @@
+{
+  "schema": "csl.mpc07.figure/1",
+  "matplotlib": "3.11.2",
+  "quantitative_axis_policy": "csl-report-quantitative-v1",
+  "virtual_terminal_vertices": [
+    [
+      "-3/4",
+      "-3/2"
+    ],
+    [
+      "3/4",
+      "-1"
+    ],
+    [
+      "3/4",
+      "3/2"
+    ],
+    [
+      "-3/4",
+      "1"
+    ]
+  ],
+  "physical_vertices": [
+    {
+      "w0": "-1",
+      "delta1": "-1/64",
+      "w1": "-1",
+      "control": "4/5",
+      "terminal": [
+        "-3/5",
+        "-379/320"
+      ],
+      "cost": "143641/102400"
+    },
+    {
+      "w0": "-1",
+      "delta1": "-1/64",
+      "w1": "1",
+      "control": "4/5",
+      "terminal": [
+        "-3/5",
+        "261/320"
+      ],
+      "cost": "68121/102400"
+    },
+    {
+      "w0": "-1",
+      "delta1": "1/64",
+      "w1": "-1",
+      "control": "4/5",
+      "terminal": [
+        "-3/5",
+        "-389/320"
+      ],
+      "cost": "151321/102400"
+    },
+    {
+      "w0": "-1",
+      "delta1": "1/64",
+      "w1": "1",
+      "control": "4/5",
+      "terminal": [
+        "-3/5",
+        "251/320"
+      ],
+      "cost": "63001/102400"
+    },
+    {
+      "w0": "1",
+      "delta1": "-1/64",
+      "w1": "-1",
+      "control": "-4/5",
+      "terminal": [
+        "3/5",
+        "-261/320"
+      ],
+      "cost": "68121/102400"
+    },
+    {
+      "w0": "1",
+      "delta1": "-1/64",
+      "w1": "1",
+      "control": "-4/5",
+      "terminal": [
+        "3/5",
+        "379/320"
+      ],
+      "cost": "143641/102400"
+    },
+    {
+      "w0": "1",
+      "delta1": "1/64",
+      "w1": "-1",
+      "control": "-4/5",
+      "terminal": [
+        "3/5",
+        "-251/320"
+      ],
+      "cost": "63001/102400"
+    },
+    {
+      "w0": "1",
+      "delta1": "1/64",
+      "w1": "1",
+      "control": "-4/5",
+      "terminal": [
+        "3/5",
+        "389/320"
+      ],
+      "cost": "151321/102400"
+    }
+  ],
+  "source_policy": {
+    "status": "verified-rational-reconstruction",
+    "policy_v": [
+      "0",
+      "0"
+    ],
+    "policy_M": [
+      [
+        "0",
+        "0"
+      ],
+      [
+        "-4/5",
+        "0"
+      ]
+    ],
+    "oracle_squared": "9/4",
+    "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+    "worst_terminal_absolute": "3/2",
+    "worst_terminal_squared": "9/4",
+    "terminal_offset": [
+      "0",
+      "0"
+    ],
+    "terminal_response": [
+      [
+        "3/5",
+        "0"
+      ],
+      [
+        "1/5",
+        "1"
+      ]
+    ],
+    "state_offsets": [
+      [
+        "0",
+        "0"
+      ],
+      [
+        "0",
+        "0"
+      ],
+      [
+        "0",
+        "0"
+      ]
+    ],
+    "state_responses": [
+      [
+        [
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0"
+        ]
+      ],
+      [
+        [
+          "0",
+          "0"
+        ],
+        [
+          "1",
+          "0"
+        ]
+      ],
+      [
+        [
+          "3/5",
+          "0"
+        ],
+        [
+          "1/5",
+          "1"
+        ]
+      ]
+    ]
+  },
+  "exact_physical_t2_worst": "151321/102400",
+  "true_physical_t2_optimum": "4225/4096",
+  "scope": "exact virtual affine-box set; physical points are vertices only, not a general winning set/continuous-safety proof"
+}
