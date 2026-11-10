@@ -14,8 +14,9 @@ import sys
 import subprocess
 import tempfile
 import time
-import capture
-import policy
+if __package__ in (None,''):
+    sys.path.insert(0,str(Path(__file__).resolve().parents[3]))
+from benchmarks.reporting.mpc07 import capture,policy
 
 
 def plain(value):return json.loads(json.dumps(value,default=capture.encode))
