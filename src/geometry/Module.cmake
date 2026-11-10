@@ -13,6 +13,13 @@ target_link_libraries(csl_hull PUBLIC CSL::optimization CSL::registry PRIVATE CS
 
 csl_add_library(csl_quickhull_2d STATIC src/geometry/hull/quickhull_2d.cpp)
 
+csl_add_library(csl_legacy_btulshor STATIC src/geometry/legacy_btulshor.cpp)
+if(MSVC)
+  target_compile_options(csl_legacy_btulshor PRIVATE /fp:strict)
+else()
+  target_compile_options(csl_legacy_btulshor PRIVATE -ffp-contract=off -fno-fast-math)
+endif()
+
 csl_add_library(csl_bounded_hull_checker STATIC src/geometry/bounded_hull_checker.cpp)
 target_link_libraries(csl_bounded_hull_checker PUBLIC CSL::resolved_problem PRIVATE CSL::quickhull_2d)
 
@@ -53,6 +60,7 @@ install(FILES docs/contracts/polyhedral-support.md DESTINATION ${CMAKE_INSTALL_D
 install(FILES docs/contracts/hull-reduction.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 
 install(FILES docs/contracts/quickhull-2d.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
+install(FILES docs/contracts/legacy-btulshor.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 install(FILES docs/contracts/bounded-hull-checker.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
 
 install(FILES docs/contracts/affine-sum-operations.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
