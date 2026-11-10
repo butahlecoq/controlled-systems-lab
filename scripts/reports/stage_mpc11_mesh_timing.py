@@ -54,7 +54,7 @@ def frozen(source,identity):
     require(digest(files['SHA256SUMS'])==SPECS[identity][0],'study manifest differs from reviewed immutable evidence')
     inventory=checksums(files['SHA256SUMS'])
     if identity==BASELINE:
-        require(set(files)=={'README.md','summary.json','capture.zip','SHA256SUMS'} and set(inventory)=={'capture.zip'},'baseline evidence inventory differs')
+        require(set(files) in ({'README.md','summary.json','capture.zip','SHA256SUMS'},{'capture.zip','SHA256SUMS'}) and set(inventory)=={'capture.zip'},'baseline evidence inventory differs')
         # Historical baseline's outer manifest authenticates only its ZIP. Do not
         # publish or consume its unbound adjacent reading-layer files.
         files={n:files[n] for n in ('capture.zip','SHA256SUMS')}

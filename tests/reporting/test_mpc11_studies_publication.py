@@ -33,6 +33,15 @@ class StudyPublicationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'immutable'):S.stage(site,evidence)
             self.assertEqual(before,{p:p.read_bytes() for p in site.rglob('*') if p.is_file()})
 
+    def test_published_baseline_can_be_authenticated_and_unpacked_offline(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary);files=S.frozen(S.EVIDENCE/S.BASELINE,S.BASELINE)
+            self.assertEqual(set(files),{'capture.zip','SHA256SUMS'})
+            S.materialize(files,root/S.BASELINE)
+            self.assertEqual(S.frozen(root/S.BASELINE,S.BASELINE),files)
+            members=S.archive_files(files['capture.zip'],S.SPECS[S.BASELINE][1])
+            self.assertIn('accepted/syn-nl-lv-01/attempt.json',members)
+
     def test_unsafe_duplicate_or_symlink_zip_is_refused(self):
         import io,stat
         for names,mode in [(['../outside'],0o100644),(['one','one'],0o100644),(['link'],stat.S_IFLNK|0o777)]:
