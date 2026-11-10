@@ -1,0 +1,11 @@
+{
+  "generator_sha256": "3e39e19e17977b4a31d428133bd957eb76ddb928e33072e1622fd130feb3e7f8",
+  "images": {
+    "online-policy-traces.png": "0fbc6fc233dcb8bf34d11491af18177728bb95dd7782edfacc87989c69674e53",
+    "online-policy-traces.svg": "c5e878e0a3cbb9a64496114e23d58b8da40afaf1e1c66244447aa071489afe43"
+  },
+  "input_data_sha256": "351e60f90f49f95569181e6f62bd53ae671a13742d31ef83aedafad12761a922",
+  "matplotlib": "3.11.2",
+  "shared_style_sha256": "c2f7078df95b9d75fe90f0f407023383cae4b58dd688dfa5fa5ac5b9d18664c6",
+  "verification_sha256": "407d4e0de52394c5038f781b2fa8731b7db94c5ee34a0153e3eaccc33d4f2035"
+}
