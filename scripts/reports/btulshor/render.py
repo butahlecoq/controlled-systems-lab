@@ -127,7 +127,8 @@ def make_projection(document: dict) -> tuple[bytes, dict]:
             output = StringIO()
             figure.savefig(output, format="svg", metadata={"Date": None, "Format": None,
                 "Type": None, "Creator": None})
-            svg = output.getvalue().encode("utf-8")
+            svg_text = output.getvalue()
+            svg = svg_text[svg_text.index("<svg"):].encode("utf-8")
         finally:
             plt.close(figure)
     return svg, {"matplotlib": matplotlib.__version__,

@@ -82,6 +82,9 @@ def main() -> None:
         _, visual_metadata = renderer.make_projection(document)
         svg_path = output_dir / "point-projections.svg"
         svg = svg_path.read_text(encoding="utf-8")
+        sys.path.insert(0, str(source.parents[1]))
+        import report_data
+        report_data.validate_svg(svg.encode("utf-8"))
         assert svg_path.is_file() and "Coordinate 1" in svg and "Coordinate 2" in svg
         assert "Input points; labels are original IDs" in svg
         assert "Extreme vertex" in svg and "Interior point" in svg
