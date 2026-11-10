@@ -118,7 +118,7 @@ def replay_prefix(s,record,folder,bridge):
 
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--worker',action='store_true');p.add_argument('--scenario',type=Path);p.add_argument('--output',type=Path,required=True);p.add_argument('--bridge',type=Path)
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--worker',action='store_true');p.add_argument('--scenario',type=Path);p.add_argument('--output',type=Path,required=True);p.add_argument('--bridge',type=Path);p.add_argument('--scenario-directory',type=Path)
     a=p.parse_args();folder=a.output.resolve();root=Path(__file__).resolve().parent
     if a.worker:
         return 0 if worker(json.loads(a.scenario.read_text()),folder)['status']=='complete' else 1
@@ -127,7 +127,7 @@ def main():
     for key in ['OPENBLAS_NUM_THREADS','OMP_NUM_THREADS','MKL_NUM_THREADS']:environment[key]='1'
     cases=[]
     for case in ['lv','fuel']:
-        source=root/f'scenarios/syn-nl-{case}-01.json';target=folder/f'syn-nl-{case}-01';target.mkdir();start=time.monotonic();stdout=b'';stderr=b'';code=None;status='failed'
+        source=(a.scenario_directory.resolve() if a.scenario_directory else root/'scenarios')/f'syn-nl-{case}-01.json';target=folder/f'syn-nl-{case}-01';target.mkdir();start=time.monotonic();stdout=b'';stderr=b'';code=None;status='failed'
         try:
             proc=subprocess.run([sys.executable,str(Path(__file__).resolve()),'--worker','--scenario',str(source),'--output',str(target)],capture_output=True,timeout=300,preexec_fn=limits,env=environment)
             stdout,stderr,code=proc.stdout,proc.stderr,proc.returncode;status='completed' if code==0 else 'failed'

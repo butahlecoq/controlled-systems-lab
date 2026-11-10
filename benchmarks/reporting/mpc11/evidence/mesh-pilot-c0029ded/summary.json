@@ -1,0 +1,457 @@
+{
+  "schema": "csl.mpc11.mesh-comparison/1",
+  "scope": "Different discretized local NLPs; original physical objective/grid/plant and held execution semantics unchanged. Numerical samples are not an ODE enclosure or global optimality proof. Single pilot durations do not establish a timing ranking.",
+  "cases": [
+    {
+      "case_id": "SYN-NL-LV-01",
+      "ni1_scenario_sha256": "1a608a0a38f9c1d60d9272b948189e48f9f294048ddf9726aaa0ed8b5cee8464",
+      "ni2_scenario_sha256": "173ef948c6e4a30d3d2402651e8742492477c35d5724393d8cd95f5c84b7f987",
+      "max_abs_control_difference_by_component": [
+        1.4342486711477198e-07
+      ],
+      "max_abs_executed_physical_state_difference_by_component": [
+        4.310706174237566e-06,
+        1.2419660464502158e-06
+      ],
+      "ni1": {
+        "executed_objective_J0": 0.09168477962868322,
+        "checked": {
+          "case_id": "SYN-NL-LV-01",
+          "status": "complete",
+          "controller_status": "complete",
+          "replay_processes": {
+            "rk4": "completed",
+            "rk4-tight": "completed"
+          },
+          "completed_holds": 30,
+          "transcriptions_checked": 30,
+          "completed_objective": 0.09168477962868322,
+          "sampled_execution_physical_state_violation": [
+            0.0,
+            0.0
+          ],
+          "applied_physical_control_violation": [
+            0.0
+          ],
+          "max_nlp_objective_rebuild_difference": 0.0,
+          "max_nlp_constraint_rebuild_difference": 0.0,
+          "max_stationarity_rebuild_difference": 0.0,
+          "claim": "saved transcript/controls/cost/replay association and NLP rebuild; no solver rerun, global guarantee or ODE error certificate"
+        },
+        "max_stationarity_infinity_norm": 6.786591224422483e-11,
+        "max_scaled_primal_violation": 6.43062235405889e-11,
+        "max_optimization_node_physical_state_violation_by_component": [
+          0.0,
+          0.0
+        ],
+        "iterations": {
+          "sum": 258,
+          "max": 9
+        },
+        "descriptive_pilot_seconds": {
+          "setup_sum": 5.191124826669693,
+          "solve_sum": 0.21558559918776155,
+          "execution_sum": 0.02250499208457768
+        },
+        "independent_replay": {
+          "rk4": {
+            "status": "complete",
+            "completed_objective": 0.09168478516305174,
+            "max_physical_execution_difference": [
+              6.804822561434776e-06,
+              5.106356468331796e-06
+            ]
+          },
+          "rk4-tight": {
+            "status": "complete",
+            "completed_objective": 0.09168478516305174,
+            "max_physical_execution_difference": [
+              6.804822561434776e-06,
+              5.106356468331796e-06
+            ]
+          },
+          "max_physical_tolerance_sensitivity": [
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "ni2": {
+        "executed_objective_J0": 0.09168477962863394,
+        "checked": {
+          "case_id": "SYN-NL-LV-01",
+          "status": "complete",
+          "controller_status": "complete",
+          "replay_processes": {
+            "rk4": "completed",
+            "rk4-tight": "completed"
+          },
+          "completed_holds": 30,
+          "transcriptions_checked": 30,
+          "completed_objective": 0.09168477962863394,
+          "sampled_execution_physical_state_violation": [
+            0.0,
+            0.0
+          ],
+          "applied_physical_control_violation": [
+            0.0
+          ],
+          "max_nlp_objective_rebuild_difference": 0.0,
+          "max_nlp_constraint_rebuild_difference": 0.0,
+          "max_stationarity_rebuild_difference": 0.0,
+          "claim": "saved transcript/controls/cost/replay association and NLP rebuild; no solver rerun, global guarantee or ODE error certificate"
+        },
+        "max_stationarity_infinity_norm": 4.3370201962897616e-11,
+        "max_scaled_primal_violation": 2.1182488055271342e-11,
+        "max_optimization_node_physical_state_violation_by_component": [
+          0.0,
+          0.0
+        ],
+        "iterations": {
+          "sum": 259,
+          "max": 10
+        },
+        "descriptive_pilot_seconds": {
+          "setup_sum": 8.900776428403333,
+          "solve_sum": 0.33487799973227084,
+          "execution_sum": 0.024613211629912257
+        },
+        "independent_replay": {
+          "rk4": {
+            "status": "complete",
+            "completed_objective": 0.09168478516299819,
+            "max_physical_execution_difference": [
+              6.804822348271955e-06,
+              5.106355970951881e-06
+            ]
+          },
+          "rk4-tight": {
+            "status": "complete",
+            "completed_objective": 0.09168478516299819,
+            "max_physical_execution_difference": [
+              6.804822348271955e-06,
+              5.106355970951881e-06
+            ]
+          },
+          "max_physical_tolerance_sensitivity": [
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "ni2_minus_ni1_executed_objective": -4.9280024505549136e-14
+    },
+    {
+      "case_id": "SYN-NL-FUEL-01",
+      "ni1_scenario_sha256": "5dd38a65f5ad6c5f90b8616fbc866eb9ef2735b1b7f7279bca0b2b0d05f9dce1",
+      "ni2_scenario_sha256": "b7efc84508bfc52abdaed14d73d0894807c54ca5ddf9c14c656992623ee25092",
+      "max_abs_control_difference_by_component": [
+        5.201160143797345e-06,
+        9.633984833001819e-06
+      ],
+      "max_abs_executed_physical_state_difference_by_component": [
+        5.400789260079364e-05,
+        3.067926371969065e-05,
+        9.440054823839361e-06,
+        5.662062771083498e-06
+      ],
+      "ni1": {
+        "executed_objective_J0": 0.0038259850540860742,
+        "checked": {
+          "case_id": "SYN-NL-FUEL-01",
+          "status": "complete",
+          "controller_status": "complete",
+          "replay_processes": {
+            "rk4": "completed",
+            "rk4-tight": "completed"
+          },
+          "completed_holds": 40,
+          "transcriptions_checked": 40,
+          "completed_objective": 0.0038259850540860742,
+          "sampled_execution_physical_state_violation": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "applied_physical_control_violation": [
+            0.0,
+            0.0
+          ],
+          "max_nlp_objective_rebuild_difference": 0.0,
+          "max_nlp_constraint_rebuild_difference": 0.0,
+          "max_stationarity_rebuild_difference": 0.0,
+          "claim": "saved transcript/controls/cost/replay association and NLP rebuild; no solver rerun, global guarantee or ODE error certificate"
+        },
+        "max_stationarity_infinity_norm": 7.426543607307497e-11,
+        "max_scaled_primal_violation": 5.150126908270991e-09,
+        "max_optimization_node_physical_state_violation_by_component": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "iterations": {
+          "sum": 252,
+          "max": 9
+        },
+        "descriptive_pilot_seconds": {
+          "setup_sum": 10.287400592118502,
+          "solve_sum": 0.37040549446828663,
+          "execution_sum": 0.04018614231608808
+        },
+        "independent_replay": {
+          "rk4": {
+            "status": "complete",
+            "completed_objective": 0.0038259850872449114,
+            "max_physical_execution_difference": [
+              1.1075835004703549e-07,
+              2.9522222888545002e-08,
+              3.1974372483034585e-08,
+              1.1023266854870428e-08
+            ]
+          },
+          "rk4-tight": {
+            "status": "complete",
+            "completed_objective": 0.0038259850872449114,
+            "max_physical_execution_difference": [
+              1.1075835004703549e-07,
+              2.9522222888545002e-08,
+              3.1974372483034585e-08,
+              1.1023266854870428e-08
+            ]
+          },
+          "max_physical_tolerance_sensitivity": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "ni2": {
+        "executed_objective_J0": 0.0038259850561094162,
+        "checked": {
+          "case_id": "SYN-NL-FUEL-01",
+          "status": "complete",
+          "controller_status": "complete",
+          "replay_processes": {
+            "rk4": "completed",
+            "rk4-tight": "completed"
+          },
+          "completed_holds": 40,
+          "transcriptions_checked": 40,
+          "completed_objective": 0.0038259850561094162,
+          "sampled_execution_physical_state_violation": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "applied_physical_control_violation": [
+            0.0,
+            0.0
+          ],
+          "max_nlp_objective_rebuild_difference": 0.0,
+          "max_nlp_constraint_rebuild_difference": 0.0,
+          "max_stationarity_rebuild_difference": 0.0,
+          "claim": "saved transcript/controls/cost/replay association and NLP rebuild; no solver rerun, global guarantee or ODE error certificate"
+        },
+        "max_stationarity_infinity_norm": 1.7074711849585027e-10,
+        "max_scaled_primal_violation": 9.915604552712676e-09,
+        "max_optimization_node_physical_state_violation_by_component": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "iterations": {
+          "sum": 267,
+          "max": 10
+        },
+        "descriptive_pilot_seconds": {
+          "setup_sum": 18.671609371667728,
+          "solve_sum": 0.6815331436228007,
+          "execution_sum": 0.04190272535197437
+        },
+        "independent_replay": {
+          "rk4": {
+            "status": "complete",
+            "completed_objective": 0.0038259850894025236,
+            "max_physical_execution_difference": [
+              1.1316021186758007e-07,
+              3.0305322695767245e-08,
+              3.1973000025331544e-08,
+              1.1022838475316377e-08
+            ]
+          },
+          "rk4-tight": {
+            "status": "complete",
+            "completed_objective": 0.0038259850894025236,
+            "max_physical_execution_difference": [
+              1.1316021186758007e-07,
+              3.0305322695767245e-08,
+              3.1973000025331544e-08,
+              1.1022838475316377e-08
+            ]
+          },
+          "max_physical_tolerance_sensitivity": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      },
+      "ni2_minus_ni1_executed_objective": 2.0233419974202693e-12
+    }
+  ],
+  "capture_revision": "c0029ded52b7ae3f2965a9f54c3efdbb3e625e2b",
+  "checker_revision": "62e92cb3d9ebf10c58f76d2b2263750e752edec0",
+  "capture_sha256": "484ce413c26703b213f82cc6acf0da28ac44ea0ca7d3a08e4e8d0f899270a94b",
+  "ni1_archive_sha256": "c13fb2db4f5492f5be85d42b3d5866c2a07ec24f78eb3a6a457d37ac15186253",
+  "fresh_native_replay": {
+    "bridge_sha256": "269b9975b465986d3a702132b73001680d64e683013b2cf4cba80f4eff82e215",
+    "records": [
+      {
+        "case": "lv",
+        "mode": "rk4",
+        "request_sha256": "b9dc1123dc867158a38618ece4da4e443241d68661b06ccb5fdf5b70be02521a",
+        "stdout_sha256": "f0e589a83e5e23dd0c8af57e969f8925926406b78172a9cd1a2125cf6b31e017",
+        "return_code": 0,
+        "all_fields_except_elapsed_seconds_equal": true,
+        "saved_elapsed_seconds": 0.000824205,
+        "fresh_elapsed_seconds": 0.001914926
+      },
+      {
+        "case": "lv",
+        "mode": "rk4-tight",
+        "request_sha256": "f4eb0e514de70470099300b494fde0cbf000d383a8e24da89a39ebf1210a3941",
+        "stdout_sha256": "fcc90077e489074dce1ff47636a2932448eb5a1d9d60cbfc99a8484d8c2dd4d0",
+        "return_code": 0,
+        "all_fields_except_elapsed_seconds_equal": true,
+        "saved_elapsed_seconds": 0.000910948,
+        "fresh_elapsed_seconds": 0.001897954
+      },
+      {
+        "case": "fuel",
+        "mode": "rk4",
+        "request_sha256": "29442d66dff88039a5972d52ff6efa8db06acb4a070ffe1544c92759e13c256e",
+        "stdout_sha256": "18585109be26b9047b6d5735e0d772a1516b4ae14ce1c95a97212b98ff3a6335",
+        "return_code": 0,
+        "all_fields_except_elapsed_seconds_equal": true,
+        "saved_elapsed_seconds": 0.002384125,
+        "fresh_elapsed_seconds": 0.00405607
+      },
+      {
+        "case": "fuel",
+        "mode": "rk4-tight",
+        "request_sha256": "09ab6b310d9a1b41d5e858d864ea62493b0967950a29dd044dd10ed592cd7c65",
+        "stdout_sha256": "03b946318eaef20c3d63ffc187403f58e584329742c088d42e34792a50fc8f7c",
+        "return_code": 0,
+        "all_fields_except_elapsed_seconds_equal": true,
+        "saved_elapsed_seconds": 0.001912343,
+        "fresh_elapsed_seconds": 0.003962062
+      }
+    ],
+    "scope": "Fresh execution of existing CSL native replay binary, no controller solve or rebuild."
+  },
+  "source_binding": {
+    "capture_sources": {
+      "refused-profile-attempt": {
+        "source_revision": "55d7865dd3a9f06b6e260f6fa7dfb1ad5121de0c",
+        "snapshot_sha256": {
+          "benchmarks/reporting/mpc11/AFFINE.md": "b164db27d765b009e8e2a050733cdf0c432ed9a8b65146a1ca4c172ccd6ab50c",
+          "benchmarks/reporting/mpc11/CMakeLists.txt": "893117a876a6800edcaaf45942ad32815f6ab5283e90d940e016bbaa730210ad",
+          "benchmarks/reporting/mpc11/MESH.md": "9ee5ec3fdfe116c5517ecc33dd8743f3c88c78a1eb05959daa6f12ad54b9368c",
+          "benchmarks/reporting/mpc11/NMPC.md": "b60fdf0187e12fd9e7a9a2086f7cc632db857f591b3f44d00d4127c2a0858db0",
+          "benchmarks/reporting/mpc11/NONLINEAR.md": "a08861569b33638b51ee404e59272947e2ded1f2ff65fbe945cada74c54d9db1",
+          "benchmarks/reporting/mpc11/Replay.cmake": "cdc173f7931d87b74639950aa2efe066e0b0e2fc80c1273b51a53b75cb4b502f",
+          "benchmarks/reporting/mpc11/affine.py": "f6c34b2ffa53fd96f366e84cc1e3ac244bdb1fe4b2f16da8b25a927324cee2dd",
+          "benchmarks/reporting/mpc11/affine_bridge.cpp": "15154a260bd0088d15b911b1398741f0800d8008c820b210ee864330ee06ca42",
+          "benchmarks/reporting/mpc11/check_affine_saved.py": "658d326941bb761654de417a8ca3b5be5144088b0a62b3d6496511a8c167ca24",
+          "benchmarks/reporting/mpc11/check_nmpc_saved.py": "dc785a2e00a4ff122845f5bb1a64dfa664e0af14e80aaf6892b5b6fcc048a14c",
+          "benchmarks/reporting/mpc11/check_nonlinear_saved.py": "84056242a0f5c0ea8406ac479cbcd01bc7fed3ce1a4f46a9c9990a5b0703a856",
+          "benchmarks/reporting/mpc11/check_scenarios.py": "ae6f12f0c3986c73a1840ce4ab9fe9f9f390a2aa99b0c996c750b8a18717728f",
+          "benchmarks/reporting/mpc11/environment/README.md": "cb6ba1ee49fa53e88a2a16bb1173ab1fd64df4e20d5e68f5d6e6ba1f00d7c137",
+          "benchmarks/reporting/mpc11/environment/lock_wheels.py": "96eee5cd923b6524f1dce187a200a85e72e07736a08bc545c96c15c457eef464",
+          "benchmarks/reporting/mpc11/environment/pip-check.txt": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09",
+          "benchmarks/reporting/mpc11/environment/smoke-receipt.json": "00e5722ad8c2b5955444df228622bd30c311b22a42fe23c770be00dac2a94d80",
+          "benchmarks/reporting/mpc11/environment/smoke-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "benchmarks/reporting/mpc11/environment/smoke.py": "2b151b6ecac335d283106fc32b365cc73e82ae27f8f8438dacc39afb6db3be49",
+          "benchmarks/reporting/mpc11/environment/smoke_requirements.py": "143ff89e08a8493e7e129dbbc7dc9e80b54923bd22d51032b05311d87aa855f2",
+          "benchmarks/reporting/mpc11/environment/upstream-mumps-license.json": "6c28766c5d54a9eb19de4870a045bbb5e243ae41f31105714b2fb4c7497d4d13",
+          "benchmarks/reporting/mpc11/environment/wheel-manifest.json": "642ede82d4dbc5936b05523c3d10c31d03d2fa9943289c452cc2edec662f1f27",
+          "benchmarks/reporting/mpc11/nmpc.py": "8d769a66011c546d20d796ea7424536eb7c8c09a9143b6f97fb5bc01bbec4777",
+          "benchmarks/reporting/mpc11/nonlinear.py": "5e0c97ae2da5164acebfd6219e127a88cba12130169a22efbb3a0849df6133b0",
+          "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp": "99123e456357c729754beb630370394fcf782a0e44b1d455980f1018136d7a45",
+          "benchmarks/reporting/mpc11/replay_evidence.py": "3913e92d4f9e3d4b731ed216393ce84bbd1db373383f3505bff046b2c5fea43b",
+          "benchmarks/reporting/mpc11/run_affine.py": "aa7663b488d220b01faf16f4de543d928bbdc28f76c3d216cb8f38c0ec4bfd6e",
+          "benchmarks/reporting/mpc11/run_nmpc.py": "df1029456f6d2e52b4f12adec97fde4d44cd852e16c2a45fde2d556f397e4f35",
+          "benchmarks/reporting/mpc11/run_nonlinear.py": "f235cfe233f2fb74905c7b34843671381045f2e4950012e35f1af84298f8d013",
+          "benchmarks/reporting/mpc11/scenarios/mesh-ni2/syn-nl-fuel-01.json": "b7efc84508bfc52abdaed14d73d0894807c54ca5ddf9c14c656992623ee25092",
+          "benchmarks/reporting/mpc11/scenarios/mesh-ni2/syn-nl-lv-01.json": "173ef948c6e4a30d3d2402651e8742492477c35d5724393d8cd95f5c84b7f987",
+          "benchmarks/reporting/mpc11/scenarios/syn-nl-fuel-01.json": "5dd38a65f5ad6c5f90b8616fbc866eb9ef2735b1b7f7279bca0b2b0d05f9dce1",
+          "benchmarks/reporting/mpc11/scenarios/syn-nl-lv-01.json": "1a608a0a38f9c1d60d9272b948189e48f9f294048ddf9726aaa0ed8b5cee8464"
+        },
+        "manifest_source_hashes_checked": true,
+        "scenario_bytes_equal_git_config": false
+      },
+      "accepted": {
+        "source_revision": "c0029ded52b7ae3f2965a9f54c3efdbb3e625e2b",
+        "snapshot_sha256": {
+          "benchmarks/reporting/mpc11/AFFINE.md": "b164db27d765b009e8e2a050733cdf0c432ed9a8b65146a1ca4c172ccd6ab50c",
+          "benchmarks/reporting/mpc11/CMakeLists.txt": "893117a876a6800edcaaf45942ad32815f6ab5283e90d940e016bbaa730210ad",
+          "benchmarks/reporting/mpc11/MESH.md": "9ee5ec3fdfe116c5517ecc33dd8743f3c88c78a1eb05959daa6f12ad54b9368c",
+          "benchmarks/reporting/mpc11/NMPC.md": "b60fdf0187e12fd9e7a9a2086f7cc632db857f591b3f44d00d4127c2a0858db0",
+          "benchmarks/reporting/mpc11/NONLINEAR.md": "a08861569b33638b51ee404e59272947e2ded1f2ff65fbe945cada74c54d9db1",
+          "benchmarks/reporting/mpc11/Replay.cmake": "cdc173f7931d87b74639950aa2efe066e0b0e2fc80c1273b51a53b75cb4b502f",
+          "benchmarks/reporting/mpc11/affine.py": "f6c34b2ffa53fd96f366e84cc1e3ac244bdb1fe4b2f16da8b25a927324cee2dd",
+          "benchmarks/reporting/mpc11/affine_bridge.cpp": "15154a260bd0088d15b911b1398741f0800d8008c820b210ee864330ee06ca42",
+          "benchmarks/reporting/mpc11/check_affine_saved.py": "658d326941bb761654de417a8ca3b5be5144088b0a62b3d6496511a8c167ca24",
+          "benchmarks/reporting/mpc11/check_nmpc_saved.py": "dc785a2e00a4ff122845f5bb1a64dfa664e0af14e80aaf6892b5b6fcc048a14c",
+          "benchmarks/reporting/mpc11/check_nonlinear_saved.py": "84056242a0f5c0ea8406ac479cbcd01bc7fed3ce1a4f46a9c9990a5b0703a856",
+          "benchmarks/reporting/mpc11/check_scenarios.py": "c1a29f755a8d3fa63f495c7ad15ad0c138e57bdc1e2b8f85e7b0217ef7bc16fb",
+          "benchmarks/reporting/mpc11/environment/README.md": "cb6ba1ee49fa53e88a2a16bb1173ab1fd64df4e20d5e68f5d6e6ba1f00d7c137",
+          "benchmarks/reporting/mpc11/environment/lock_wheels.py": "96eee5cd923b6524f1dce187a200a85e72e07736a08bc545c96c15c457eef464",
+          "benchmarks/reporting/mpc11/environment/pip-check.txt": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09",
+          "benchmarks/reporting/mpc11/environment/smoke-receipt.json": "00e5722ad8c2b5955444df228622bd30c311b22a42fe23c770be00dac2a94d80",
+          "benchmarks/reporting/mpc11/environment/smoke-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "benchmarks/reporting/mpc11/environment/smoke.py": "2b151b6ecac335d283106fc32b365cc73e82ae27f8f8438dacc39afb6db3be49",
+          "benchmarks/reporting/mpc11/environment/smoke_requirements.py": "143ff89e08a8493e7e129dbbc7dc9e80b54923bd22d51032b05311d87aa855f2",
+          "benchmarks/reporting/mpc11/environment/upstream-mumps-license.json": "6c28766c5d54a9eb19de4870a045bbb5e243ae41f31105714b2fb4c7497d4d13",
+          "benchmarks/reporting/mpc11/environment/wheel-manifest.json": "642ede82d4dbc5936b05523c3d10c31d03d2fa9943289c452cc2edec662f1f27",
+          "benchmarks/reporting/mpc11/nmpc.py": "41462f02fac817012a0884f176fbac617320fadc0eb945638cb1b7678b9ef11e",
+          "benchmarks/reporting/mpc11/nonlinear.py": "5e0c97ae2da5164acebfd6219e127a88cba12130169a22efbb3a0849df6133b0",
+          "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp": "99123e456357c729754beb630370394fcf782a0e44b1d455980f1018136d7a45",
+          "benchmarks/reporting/mpc11/replay_evidence.py": "3913e92d4f9e3d4b731ed216393ce84bbd1db373383f3505bff046b2c5fea43b",
+          "benchmarks/reporting/mpc11/run_affine.py": "aa7663b488d220b01faf16f4de543d928bbdc28f76c3d216cb8f38c0ec4bfd6e",
+          "benchmarks/reporting/mpc11/run_nmpc.py": "df1029456f6d2e52b4f12adec97fde4d44cd852e16c2a45fde2d556f397e4f35",
+          "benchmarks/reporting/mpc11/run_nonlinear.py": "f235cfe233f2fb74905c7b34843671381045f2e4950012e35f1af84298f8d013",
+          "benchmarks/reporting/mpc11/scenarios/mesh-ni2/syn-nl-fuel-01.json": "b7efc84508bfc52abdaed14d73d0894807c54ca5ddf9c14c656992623ee25092",
+          "benchmarks/reporting/mpc11/scenarios/mesh-ni2/syn-nl-lv-01.json": "173ef948c6e4a30d3d2402651e8742492477c35d5724393d8cd95f5c84b7f987",
+          "benchmarks/reporting/mpc11/scenarios/syn-nl-fuel-01.json": "5dd38a65f5ad6c5f90b8616fbc866eb9ef2735b1b7f7279bca0b2b0d05f9dce1",
+          "benchmarks/reporting/mpc11/scenarios/syn-nl-lv-01.json": "1a608a0a38f9c1d60d9272b948189e48f9f294048ddf9726aaa0ed8b5cee8464"
+        },
+        "manifest_source_hashes_checked": true,
+        "scenario_bytes_equal_git_config": true
+      }
+    },
+    "review_revision": "62e92cb3d9ebf10c58f76d2b2263750e752edec0",
+    "review_source_sha256": {
+      "mesh_summary.py": "b90ff4eb4cc47bcc1804f7c6d2c4b7add8bc41695e5e8c595e2ea0363de142f6",
+      "check_nmpc_saved.py": "dc785a2e00a4ff122845f5bb1a64dfa664e0af14e80aaf6892b5b6fcc048a14c",
+      "nmpc.py": "41462f02fac817012a0884f176fbac617320fadc0eb945638cb1b7678b9ef11e",
+      "check_scenarios.py": "c1a29f755a8d3fa63f495c7ad15ad0c138e57bdc1e2b8f85e7b0217ef7bc16fb",
+      "replay_evidence.py": "3913e92d4f9e3d4b731ed216393ce84bbd1db373383f3505bff046b2c5fea43b",
+      "run_nmpc.py": "df1029456f6d2e52b4f12adec97fde4d44cd852e16c2a45fde2d556f397e4f35",
+      "nonlinear.py": "5e0c97ae2da5164acebfd6219e127a88cba12130169a22efbb3a0849df6133b0",
+      "run_affine.py": "aa7663b488d220b01faf16f4de543d928bbdc28f76c3d216cb8f38c0ec4bfd6e",
+      "affine.py": "f6c34b2ffa53fd96f366e84cc1e3ac244bdb1fe4b2f16da8b25a927324cee2dd",
+      "test_mpc11_nmpc.py": "a53246e95aa36815aa4192565335a0714f2b4f967169b386da0721f6b93cd3fa"
+    },
+    "actual_existing_bridge_sha256": "269b9975b465986d3a702132b73001680d64e683013b2cf4cba80f4eff82e215",
+    "bridge_provenance": "Binary hash equals prior NMPC environment receipt. Prior build receipt supplied as historical provenance, not a new build.",
+    "preserved_attempts": "all raw bytes including profile refusal, both accepted controller attempts and all native solver/replay logs"
+  }
+}
