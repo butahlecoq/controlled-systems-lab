@@ -76,7 +76,7 @@ def figure_data(mesh,baseline,compared,measured):
         import numpy as np
         states=[np.asarray(a['physical_states'],dtype=float) for a in attempt];controls=[np.asarray(a['controls'],dtype=float) for a in attempt]
         cases.append(dict(case_id=scenario[0]['case_id'],states=scenario[0]['states'],controls=scenario[0]['controls'],phase_pairs=pairs,
-            times=attempt[0]['times'],hold_times=scenario[0]['time']['grid'],
+            times=attempt[0]['times'],hold_times=scenario[0]['time']['grid'],time_unit=scenario[0]['time']['unit'],
             ni1_states=states[0].tolist(),ni2_states=states[1].tolist(),state_difference=(states[1]-states[0]).tolist(),
             ni1_controls=controls[0].tolist(),ni2_controls=controls[1].tolist(),control_difference=(controls[1]-controls[0]).tolist(),
             scenario_sha256=[digest(p/'scenario.json') for p in folders],attempt_sha256=[digest(p/'attempt.json') for p in folders],
@@ -114,12 +114,15 @@ def figures(data,output):
             indices=[all_names.index(name) for name in names];delta_state=np.asarray(case['state_difference'])[:,indices]
             scale=10.**np.floor(np.log10(np.max(np.abs(delta_state)))) if np.any(delta_state) else 1.
             for i,name in enumerate(names):axes[0,column].plot(case['times'],delta_state[:,i]/scale,label='Δ'+name)
-            unit=case['states'][indices[0]]['unit'];axes[0,column].set(xlabel='physical time (s)',ylabel=f'(NI2−NI1) / ({scale:g} {unit})',title=' / '.join(names));axes[0,column].legend()
+            unit=case['states'][indices[0]]['unit'];axes[0,column].set(xlabel=f"physical time ({case['time_unit']})",ylabel=f'(NI2−NI1) / ({scale:g} {unit})',title=' / '.join(names));axes[0,column].legend()
             if column<2:
                 case=data['cases'][column];delta=np.asarray(case['control_difference']);grid=case['hold_times']
                 scale=10.**np.floor(np.log10(np.max(np.abs(delta)))) if np.any(delta) else 1.
+                control_units={c['unit'] for c in case['controls']}
+                if len(control_units)!=1:raise ValueError('control difference panel requires common physical units')
+                control_unit=next(iter(control_units))
                 for i,control in enumerate(case['controls']):axes[1,column].step(grid,np.r_[delta[:,i],delta[-1,i]]/scale,where='post',label='Δ'+control['name'])
-                axes[1,column].set(xlabel='physical time (s)',ylabel=f'(NI2−NI1) / ({scale:g} control units)',title=case['case_id']);axes[1,column].legend()
+                axes[1,column].set(xlabel=f"physical time ({case['time_unit']})",ylabel=f'(NI2−NI1) / ({scale:g} {control_unit})',title=case['case_id']);axes[1,column].legend()
             else:
                 axes[1,column].axis('off');axes[1,column].text(.02,.9,'Different discretized local NLPs.\nSmall differences are diagnostics.\nNo mesh-convergence, global-optimum\nor nonlinear-safety certificate.',va='top',transform=axes[1,column].transAxes)
         for ax in axes.flat:

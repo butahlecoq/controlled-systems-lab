@@ -57,6 +57,26 @@ class StudyPublicationTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError,'saved numerical failure'):S.stage(site)
             self.assertEqual(before,{p:p.read_bytes() for p in site.rglob('*') if p.is_file()})
 
+    @unittest.skipUnless(importlib.util.find_spec('matplotlib') and importlib.util.find_spec('numpy'),'figure labels require the existing report stack')
+    def test_actual_lv_and_fuel_figures_preserve_physical_time_and_control_units(self):
+        import sys
+        sys.path.insert(0,str(ROOT/'benchmarks/reporting/mpc11'))
+        import study_report
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary)
+            for key in (S.MESH,S.BASELINE):
+                files=S.frozen(S.EVIDENCE/key,key)
+                S.materialize(S.archive_files(files['capture.zip'],S.SPECS[key][1]),root/key)
+            measured=json.loads((S.EVIDENCE/S.TIMING/'summary.json').read_bytes())
+            data=study_report.figure_data(root/S.MESH,root/S.BASELINE,{},measured)
+            self.assertEqual([c['time_unit'] for c in data['cases']],['day','s'])
+            self.assertEqual([c['controls'][0]['unit'] for c in data['cases']],['1/day','1'])
+            output=root/'figures';output.mkdir();study_report.figures(data,output)
+            svg=(output/'mesh-differences.svg').read_text()
+            for label in ('physical time (day)','physical time (s)','1/day'):
+                self.assertIn(label,svg)
+            self.assertNotIn('control units',svg)
+
     @unittest.skipUnless(HAS_STACK,'full 560 saved checks require the existing locked MPC11 profile')
     def test_real_stage_preserves_raw_and_exports_complete_studies(self):
         before={p:S.digest(p.read_bytes()) for key in S.SPECS for p in (S.EVIDENCE/key).iterdir()}
