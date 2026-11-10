@@ -203,9 +203,13 @@ def stage(site,sources=None):
 
 def minimal_inputs():
     return dict(state_dimension=2,coordinates=['position p','velocity q'],horizons=[2,4,8],initial=[0,0],
+        A=[[1,1],[0,1]],B=['1/2',1],physical_disturbance_direction=[0,1],
         dynamics='p_next=p+q+u/2; q_next=(1+delta)*q+u+w',controls='continuous |u|<=1; u0=0',
         state_bounds='|p|<=64, |q|<=16',terminal_cost='qT^2; no running cost',
         additive_profile='delta=0, w in[-1,1]',uncertain_A_profile='delta in[-1/64,1/64], w in[-1,1]',
+        fixed_policies=['fixed-plan','fixed-gain','adf','response'],joint_policies=['fixed-plan','fixed-gain','joint','fixed-filter'],
+        gains=dict(additive='u=-q',fixed_filter='u=-q/16',joint_uncertain_A='u=-q/16'),
+        repetitions=dict(warmups_per_profile=1,measured_per_profile=5,fixed_primary=144,fixed_separate_probes=2,joint_primary=72),
         fixed_filter='uniform lumped disturbance bound5/4 via |q|<=16',joint_filter='positive diagonal virtual filter; position floor1/1024; s[t,q]>=1+(1/64)*sum(abs(R[t,q,:]))',
         information='exact full state; reconstruct only past lumped disturbances; normalized innovations after each observed transition',
         physical_causal_lower='(65/64)^(2*(T-1)) for this terminal-only uncertain-A toy',
