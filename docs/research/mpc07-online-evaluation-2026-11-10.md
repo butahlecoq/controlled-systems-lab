@@ -70,3 +70,20 @@ actual evaluation of already synthesized causal feedback. Independent review,
 root-owned shared producer/publication integration, current CI and live route/
 download/example verification remain pending. Keep #603 open until completion
 is proven; this source/evidence unit is not a deployment or completion claim.
+
+## Corrected source qualification
+
+PR922's source-profile review found that deriving the capture file inventory
+only from its claimed Git tree admitted a pre-online revision with no controller
+or online algorithms. Current checking source aed7a98b requires all six actual
+schema1 online files before applying the complete Git-derived inventory. It also
+binds the captured inputs.json bytes to the authenticated committed profiles.json.
+The pre-module revision and separately rehashed input-byte regressions fail the
+original reader and pass the corrected boundary. No tolerance was relaxed.
+
+The separately versioned `online-evaluation-0524f7e4-recheck-aed7a98b` reading
+layer records the corrected receipt/source qualification. All864 episodes,
+source/input hashes, exact replay reports and original integer timing groups
+match the original receipt; its archive, timings and figures remain unchanged.
+Only checking provenance changes. Current consumers must use the corrected
+receipt rather than treating the historical receipt as fresh validation.

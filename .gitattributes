@@ -4,3 +4,4 @@ tests/reporting/fixtures/registered/** -text whitespace=-blank-at-eol,-blank-at-
 reports/algorithm-results/** -text whitespace=-blank-at-eol,-blank-at-eof
 # MPC07 online evidence has exact-byte manifests; do not rewrite captured records.
 benchmarks/reporting/mpc07/evidence/online-evaluation-0524f7e4/** -text whitespace=-blank-at-eol,-blank-at-eof
+benchmarks/reporting/mpc07/evidence/online-evaluation-0524f7e4-recheck-aed7a98b/** -text whitespace=-blank-at-eol,-blank-at-eof
