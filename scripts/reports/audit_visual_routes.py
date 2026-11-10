@@ -52,6 +52,7 @@ PUBLICATION_EXPORT_ROUTES = {
     "scripts/reports/render.py", "scripts/reports/mpc05/check_smoke.py",
     "scripts/reports/exp824/finalize_limited_report.py",
     "scripts/reports/augment_pages_bundle.py",
+    "scripts/reports/stage_mpc11_mesh_timing.py",
     "benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/figures.py",
 }
 VIZ10_ROLE_REASONS = {
@@ -264,7 +265,8 @@ def source_inventory(root: Path) -> list[dict]:
                 disposition = "shared-quantitative-policy-companion-renderer"
             elif relative in {"scripts/reports/stage_projection_figures.py",
                               "benchmarks/reporting/review05/render_family_query.py",
-                              "benchmarks/reporting/mpc11/figures.py"}:
+                              "benchmarks/reporting/mpc11/figures.py",
+                              "benchmarks/reporting/mpc11/study_report.py"}:
                 disposition = "adopted-shared-quantitative-policy"
             elif relative.endswith("/control_witness_companions.py"):
                 disposition = "saved-control-witness-gallery-companion-builder"

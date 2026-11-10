@@ -50,10 +50,13 @@ def check(mesh,baseline,timing,mesh_summary_path,timing_summary_path):
     mesh_count=sum(case[label]['checked']['transcriptions_checked'] for case in compared['cases'] for label in ('ni1','ni2'))
     timing_count=sum(c['checked']['transcriptions_checked'] for row in measured['records'] if row['arm']=='nmpc' for c in row['cases'])
     if (mesh_count,timing_count)!=(140,420):raise ValueError('full saved transcription inventory differs')
-    return compared,stable_timing(measured),dict(status='checked',mesh_transcriptions=mesh_count,timing_transcriptions=timing_count,
+    print(json.dumps(dict(schema='csl.mpc11.study-current-diagnostics/1',mesh_current=compared,timing_current=measured),sort_keys=True),file=sys.stderr)
+    compared=stable_timing(compared,{'checked'})
+    measured=stable_timing(measured,{'checked','offline_saved_checker_seconds'})
+    return compared,measured,dict(status='checked',mesh_transcriptions=mesh_count,timing_transcriptions=timing_count,
         timing_record_count=12,measured_cells=4,measured_samples_per_cell=5,versions=versions,
         scope='current saved NLP/QP/replay checks only; no optimizer/integrator/native execution; fresh checker durations excluded',
-        comparison='archive-derived clocks/counts/objectives compared exactly; fresh numerical checker diagnostics satisfy their own current policy and are retained separately, not compared by a floating digest')
+        comparison='archive-derived clocks/counts/objectives compared exactly; fresh numerical checker diagnostics satisfy their own current policy and stay in stderr/CI receipts, outside immutable publication bytes')
 
 
 def figure_data(mesh,baseline,compared,measured):
@@ -126,7 +129,7 @@ def figures(data,output):
             else:entries=[('sum controller setup',group['cost_seconds']['controller_setup_seconds']),('sum local NLP solves',group['cost_seconds']['optimization_seconds']),('sum held CVODES',group['cost_seconds']['held_cvodes_execution_seconds'])]
             for i,(label,values) in enumerate(entries):
                 ax.errorbar(i,values['median'],yerr=[[values['median']-values['min']],[values['max']-values['median']]],fmt='o',capsize=6,color='#89b4fa')
-            ax.set_xticks(range(len(entries)),[label for label,_ in entries],rotation=18,ha='right');ax.set_yscale('log');ax.set(ylabel='seconds, log scale',title=group['arm']+' / '+group['case']+'; n=5');configure_numeric_axis(ax,direction='y')
+            ax.set_xticks(range(len(entries)),[label.replace('Python config','Python\nconfiguration').replace('native QP setup','native QP\nsetup').replace('native QP + checks','native QP\n+ checks').replace('CVODES incl setup','CVODES\nincl setup').replace('sum controller setup','sum controller\nsetup').replace('sum local NLP solves','sum local\nNLP solves').replace('sum held CVODES','sum held\nCVODES') for label,_ in entries],ha='center');ax.set_yscale('log');ax.set(ylabel='seconds, log scale',title=group['arm']+' / '+group['case']+'; n=5');configure_numeric_axis(ax,direction='y')
             from matplotlib.ticker import LogLocator, NullFormatter
             ax.yaxis.set_major_locator(LogLocator(base=10,numticks=6));ax.yaxis.set_minor_formatter(NullFormatter());ax.tick_params(axis='x',labelsize=8)
         fig.suptitle('Recorded NI1 phase costs: median and min/max, five alternating measured repetitions\nDifferent model/policy scopes; no summing nested spans or solver ranking; warmup/checker clocks excluded')
