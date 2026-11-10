@@ -91,3 +91,12 @@ a Git checkout. Its source and receipt checks use a sanitized Git environment;
 all119 native LPs,24 unrestricted SCIP models,131 fixed-history models and the
 node-limit outcome recheck without optimization/native execution. This is local
 verification evidence, not a published URL or completion claim.
+
+The publication reader accepts the Python3.11 sequential-versus-Python3.12+
+compensated `sum(float)` rounding difference only for four derived nonnegative
+clock aggregates: native LP load/run sums and extra fixed-history SCIP setup/solve
+sums. The allowance is four ULPs per independently counted term; unavailable/zero
+aggregates and every other field (raw clocks, counts, objectives and hashes) stay
+exact. Actual3.11/3.14 recomputation of the frozen capture differs in nine such
+fields by at most1.734723475976807e-18 seconds. The immutable reading-layer metrics
+and archive bytes are published unchanged; rebuilt host values never replace them.

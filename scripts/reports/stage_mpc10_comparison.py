@@ -1,9 +1,11 @@
 """Stage immutable MPC10 evidence and a separate checked reading layer; no solves."""
 from __future__ import annotations
 import argparse
+import copy
 import hashlib
 import io
 import json
+import math
 from pathlib import Path, PurePosixPath
 import re
 import stat
@@ -124,6 +126,37 @@ def verify_source(root,receipt):
         require(data==subprocess.check_output(['git','show','--end-of-options',revision+':'+name],cwd=root),'helper differs from authentic Git object')
 
 
+def metrics_agree(saved,rebuilt):
+    """Allow accumulation rounding only in the four derived nonnegative sums.
+
+    Python3.12 changed sum(float). Each sum has a known number of nonnegative
+    terms; four ULPs per term covers sequential versus compensated accumulation.
+    The frozen reading bytes remain the published authority, never this rebuild.
+    """
+    if not isinstance(saved,dict) or not isinstance(rebuilt,dict):return False
+    if not isinstance(saved.get('cases'),list) or not isinstance(rebuilt.get('cases'),list):return False
+    if len(saved['cases'])!=len(rebuilt['cases']):return False
+    normalized=copy.deepcopy(rebuilt)
+    for expected,observed in zip(saved['cases'],normalized['cases']):
+        if not isinstance(expected,dict) or not isinstance(observed,dict):return False
+        groups=(('native_seconds',('native_lp_load_sum','native_lp_solve_sum'),expected.get('native_branches')),
+                ('scip_fixed_branch_totals',('formulation_and_setup_seconds','optimization_seconds'),expected.get('scip_fixed_branch_totals',{}).get('count')))
+        for group,names,count in groups:
+            if type(count) is not int or count<0 or not isinstance(expected.get(group),dict) or not isinstance(observed.get(group),dict):return False
+            for name in names:
+                if name not in expected[group] or name not in observed[group]:return False
+                left,right=expected[group][name],observed[group][name]
+                if left is None or right is None:
+                    if left is not right:return False
+                else:
+                    if any(type(v) not in (int,float) or not math.isfinite(v) or v<0 for v in (left,right)):return False
+                    if count==0 or left==0 or right==0:
+                        if left!=right:return False
+                    elif abs(left-right)>4*count*max(math.ulp(left),math.ulp(right)):return False
+                observed[group][name]=left
+    return saved==normalized
+
+
 def validate(frozen=FROZEN,reading=READING,*,repository=ROOT):
     original=reviewed(Path(frozen),FROZEN_SHA);current=reviewed(Path(reading),READING_SHA);capture=capture_files(original['capture.zip'])
     with tempfile.TemporaryDirectory(prefix='mpc10-publication-check-') as temporary:
@@ -131,7 +164,7 @@ def validate(frozen=FROZEN,reading=READING,*,repository=ROOT):
         command=[sys.executable,'-B','-c',"import json,sys; from pathlib import Path; from benchmarks.reporting.mpc10.evidence import checked_verification; from benchmarks.reporting.mpc10.metrics import metrics; b=Path(sys.argv[1]); v=Path(sys.argv[2]); checked_verification(b,v); print(json.dumps(metrics(b,v),sort_keys=True))",str(folder/'capture'),str(folder/'verification.json')]
         result=subprocess.run(command,cwd=repository,capture_output=True,text=True,timeout=30)
         require(result.returncode==0,'saved bindings/metrics check failed: '+result.stderr[-2000:])
-        require(json.loads(result.stdout)==json.loads(current['metrics.json']),'current metrics differ from checked raw inputs')
+        require(metrics_agree(json.loads(current['metrics.json']),json.loads(result.stdout)),'current metrics differ from checked raw inputs')
     receipt=json.loads(current['verification.json']);rows=json.loads(current['metrics.json'])['cases']
     require(len(receipt['reports'])==len(rows)==26,'case count differs')
     require(sum(r['native_branches'] for r in rows)==119,'native LP count differs')
