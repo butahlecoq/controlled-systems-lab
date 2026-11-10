@@ -61,6 +61,8 @@ VIZ10_ROLE_REASONS = {
         "Draws independently checked exact original-quadratic endpoint cells for matched N2/4/8 with shared numeric axes; full optimizer fibers and native resource refusals remain separate products.",
     "benchmarks/reporting/mpc08_explicit/capture_exact_regions.py":
         "Draws exact checked fixture regions and nominal/robust predecessors with shared numeric axes; numerical native observations remain separate from whole-set proof authority.",
+    "scripts/reports/mpc06_online/render.py":
+        "Renders checked-source-bound native outcomes and saved actual paths; the shared Matplotlib publication companion remains in issue #602. This is not a benchmark producer.",
     "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py":
         "Generates one exact 2D critical-region diagram from the rational fixture, with labelled initial and terminal coordinates; it is not a general plotting path.",
     "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py":
@@ -125,6 +127,8 @@ SAVED_COMPANION_ROUTES = {
 }
 SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
 SAVED_DATA_COMPANION_RENDERERS = {
+    "scripts/reports/mpc06_online/render.py",
+    "scripts/reports/mpc06_delivery/figures.py",
     "scripts/reports/render_adaptive_ode_example.py",
     "scripts/reports/ext02/render_saved.py",
     "scripts/reports/mpc06/render_tube_objective.py",
@@ -134,6 +138,11 @@ SAVED_DATA_COMPANION_RENDERERS = {
     "benchmarks/reporting/review05/render_constraint_ladder.py",
 }
 FROZEN_COMPANIONS = {
+    "mpc06-online-anchor-v1": "mpc06-complete-6b7059d62473d32d4210/index.html",
+    "mpc06-online-anchor-checked-v2": "mpc06-complete-6b7059d62473d32d4210/index.html",
+    "mpc06-online-anchor-portable-v3": "mpc06-complete-6b7059d62473d32d4210/index.html",
+    "mpc06-completion-v1": "mpc06-complete-6b7059d62473d32d4210/index.html",
+    "mpc06-completion-v2": "mpc06-complete-6b7059d62473d32d4210/index.html",
     "app01-plan-20261016-22d406fd": "examples/app01-plan-timing-v1.html",
     "exp02-paired-profiles-20261027-r1": "examples/control-witness-v1.html#exp02-ts02-control-family",
     "mpc03-open-loop-pilot-v1": "examples/index.html",
@@ -152,10 +161,14 @@ FROZEN_COMPANIONS = {
     "lotka-volterra-sampled-20261023": "examples/lotka-volterra-sampled-v1.html",
 }
 FROZEN_REVIEWED_ROUTES = {
+    "review05-family-query-20261110-3b98f5b0":
+        "reviewed: root inspected the shared-policy scalar control projection and recorded state paths; exact family coverage is checked separately",
     "exp02-paired-profiles-20261027-r1":
         "reviewed: frozen control-family report preserved with shared-policy saved-data companion",
 }
 FROZEN_ROUTE_FOLLOW_UP_ISSUES = {
+    "mpc06-completion-v1": 602,
+    "mpc06-completion-v2": 602,
     "issue824-two-points-nominal-v1": 824,
     "issue824-two-points-nominal-v2": 824,
     "issue824-two-points-zonotope-minimax-v1": 824,
@@ -255,7 +268,8 @@ def source_inventory(root: Path) -> list[dict]:
                 disposition = "shared-quantitative-policy-companion-renderer"
             elif relative in {"scripts/reports/stage_projection_figures.py",
                               "benchmarks/reporting/mpc08_explicit/capture_exact_regions.py",
-                              "benchmarks/reporting/mpc08_explicit/capture_horizon_regions.py"}:
+                              "benchmarks/reporting/mpc08_explicit/capture_horizon_regions.py",
+                              "benchmarks/reporting/review05/render_family_query.py"}:
                 disposition = "adopted-shared-quantitative-policy"
             elif relative.endswith("/control_witness_companions.py"):
                 disposition = "saved-control-witness-gallery-companion-builder"

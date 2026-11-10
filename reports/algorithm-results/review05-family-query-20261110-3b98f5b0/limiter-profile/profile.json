@@ -1,0 +1,859 @@
+{
+  "schema": "csl.review05.query-limiter/1",
+  "source_commit": "3b98f5b02838909981b7ce70378f58dc25c74457",
+  "profile_binary_sha256": "2820528b2dcd04e2da31fc99651cccf5d7b897e89259384c668b3ef665a3cd49",
+  "primary_binary_sha256": "c5da12e86833b5c2ff8e52a00c1a2974da321b7f714b7a8fcc173a36cb0d4cf5",
+  "profile_files": 40,
+  "attempts": [
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "repetition": 0,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.06390699999999999,
+        "system_cpu_seconds": 0.023596,
+        "child_cpu_seconds": 0.087503,
+        "peak_rss_kib": 22244,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 371459311,
+        "independent_query_replay_ns": 1401948,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "repetition": 0,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.054786999999999995,
+        "system_cpu_seconds": 0.014941999999999999,
+        "child_cpu_seconds": 0.069729,
+        "peak_rss_kib": 19536,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 369899369,
+        "independent_query_replay_ns": 1366608,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "repetition": 1,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.081715,
+        "system_cpu_seconds": 0.026906,
+        "child_cpu_seconds": 0.108621,
+        "peak_rss_kib": 22424,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 394332850,
+        "independent_query_replay_ns": 1355992,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "repetition": 1,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.056899,
+        "system_cpu_seconds": 0.018966,
+        "child_cpu_seconds": 0.075865,
+        "peak_rss_kib": 21660,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 373234614,
+        "independent_query_replay_ns": 1349357,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "repetition": 2,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.08402899999999999,
+        "system_cpu_seconds": 0.024007999999999998,
+        "child_cpu_seconds": 0.108037,
+        "peak_rss_kib": 22156,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 367391174,
+        "independent_query_replay_ns": 1360811,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "repetition": 2,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.037552999999999996,
+        "system_cpu_seconds": 0.011857999999999999,
+        "child_cpu_seconds": 0.049411,
+        "peak_rss_kib": 22012,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 366294704,
+        "independent_query_replay_ns": 1345096,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "repetition": 3,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.067771,
+        "system_cpu_seconds": 0.020929,
+        "child_cpu_seconds": 0.0887,
+        "peak_rss_kib": 20272,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 416493003,
+        "independent_query_replay_ns": 2091991,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "repetition": 3,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.035842,
+        "system_cpu_seconds": 0.015929,
+        "child_cpu_seconds": 0.051771,
+        "peak_rss_kib": 21952,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 451852695,
+        "independent_query_replay_ns": 1392170,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "repetition": 4,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.08258499999999999,
+        "system_cpu_seconds": 0.028855,
+        "child_cpu_seconds": 0.11143999999999998,
+        "peak_rss_kib": 20136,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 417188131,
+        "independent_query_replay_ns": 2581308,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "repetition": 4,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.051795,
+        "system_cpu_seconds": 0.019920999999999998,
+        "child_cpu_seconds": 0.071716,
+        "peak_rss_kib": 14376,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 389497883,
+        "independent_query_replay_ns": 1357877,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "repetition": 5,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.06983299999999999,
+        "system_cpu_seconds": 0.026934999999999997,
+        "child_cpu_seconds": 0.09676799999999999,
+        "peak_rss_kib": 14956,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 407889709,
+        "independent_query_replay_ns": 1363046,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "repetition": 5,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.054833,
+        "system_cpu_seconds": 0.015951,
+        "child_cpu_seconds": 0.070784,
+        "peak_rss_kib": 14168,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 377453818,
+        "independent_query_replay_ns": 1392309,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "repetition": 6,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.084559,
+        "system_cpu_seconds": 0.022146,
+        "child_cpu_seconds": 0.106705,
+        "peak_rss_kib": 14624,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 400803969,
+        "independent_query_replay_ns": 1368075,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "repetition": 6,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.048791999999999995,
+        "system_cpu_seconds": 0.010953,
+        "child_cpu_seconds": 0.05974499999999999,
+        "peak_rss_kib": 14024,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 411629608,
+        "independent_query_replay_ns": 2195358,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "repetition": 7,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.07978099999999999,
+        "system_cpu_seconds": 0.015148,
+        "child_cpu_seconds": 0.09492899999999999,
+        "peak_rss_kib": 14704,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 399835799,
+        "independent_query_replay_ns": 1340277,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "repetition": 7,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.044629999999999996,
+        "system_cpu_seconds": 0.010909,
+        "child_cpu_seconds": 0.055539,
+        "peak_rss_kib": 14192,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 410868173,
+        "independent_query_replay_ns": 1398037,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "repetition": 8,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.075823,
+        "system_cpu_seconds": 0.022945999999999998,
+        "child_cpu_seconds": 0.098769,
+        "peak_rss_kib": 14800,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 395178970,
+        "independent_query_replay_ns": 1484082,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "repetition": 8,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.055049999999999995,
+        "system_cpu_seconds": 0.018016,
+        "child_cpu_seconds": 0.07306599999999999,
+        "peak_rss_kib": 22048,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 494256072,
+        "independent_query_replay_ns": 1645139,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "repetition": 9,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.067573,
+        "system_cpu_seconds": 0.023849,
+        "child_cpu_seconds": 0.09142199999999999,
+        "peak_rss_kib": 16396,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 402941946,
+        "independent_query_replay_ns": 1609519,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "repetition": 9,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.056337,
+        "system_cpu_seconds": 0.011066,
+        "child_cpu_seconds": 0.06740299999999999,
+        "peak_rss_kib": 14284,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 412743134,
+        "independent_query_replay_ns": 1917594,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "repetition": 10,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.07681,
+        "system_cpu_seconds": 0.020947999999999998,
+        "child_cpu_seconds": 0.097758,
+        "peak_rss_kib": 14572,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 376554266,
+        "independent_query_replay_ns": 1637037,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "repetition": 10,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.042449,
+        "system_cpu_seconds": 0.013819999999999999,
+        "child_cpu_seconds": 0.056269,
+        "peak_rss_kib": 14320,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 384171832,
+        "independent_query_replay_ns": 1392729,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "repetition": 11,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.065417,
+        "system_cpu_seconds": 0.025769999999999998,
+        "child_cpu_seconds": 0.091187,
+        "peak_rss_kib": 14912,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 427164259,
+        "independent_query_replay_ns": 2248298,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "repetition": 11,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.038613999999999996,
+        "system_cpu_seconds": 0.017821999999999998,
+        "child_cpu_seconds": 0.05643599999999999,
+        "peak_rss_kib": 14308,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 384929122,
+        "independent_query_replay_ns": 1695496,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "repetition": 12,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.082132,
+        "system_cpu_seconds": 0.023320999999999998,
+        "child_cpu_seconds": 0.10545299999999999,
+        "peak_rss_kib": 20332,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 391141185,
+        "independent_query_replay_ns": 1354874,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "repetition": 12,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.057135,
+        "system_cpu_seconds": 0.015035,
+        "child_cpu_seconds": 0.07217,
+        "peak_rss_kib": 17988,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 497797160,
+        "independent_query_replay_ns": 2278191,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "repetition": 13,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.10486899999999999,
+        "system_cpu_seconds": 0.026216999999999997,
+        "child_cpu_seconds": 0.13108599999999998,
+        "peak_rss_kib": 14432,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 466240940,
+        "independent_query_replay_ns": 1974865,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "repetition": 13,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.061806999999999994,
+        "system_cpu_seconds": 0.019937,
+        "child_cpu_seconds": 0.081744,
+        "peak_rss_kib": 14308,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 464601304,
+        "independent_query_replay_ns": 1387420,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "repetition": 14,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.092875,
+        "system_cpu_seconds": 0.020971,
+        "child_cpu_seconds": 0.113846,
+        "peak_rss_kib": 14600,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 450237224,
+        "independent_query_replay_ns": 2623631,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "repetition": 14,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.040931999999999996,
+        "system_cpu_seconds": 0.01198,
+        "child_cpu_seconds": 0.052911999999999994,
+        "peak_rss_kib": 14256,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 521305460,
+        "independent_query_replay_ns": 1448602,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "repetition": 15,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.09987599999999999,
+        "system_cpu_seconds": 0.024211999999999997,
+        "child_cpu_seconds": 0.12408799999999999,
+        "peak_rss_kib": 15892,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 557045292,
+        "independent_query_replay_ns": 1633475,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "repetition": 15,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.056054,
+        "system_cpu_seconds": 0.015014,
+        "child_cpu_seconds": 0.07106799999999999,
+        "peak_rss_kib": 14080,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 405202722,
+        "independent_query_replay_ns": 1912356,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "repetition": 16,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.096721,
+        "system_cpu_seconds": 0.023930999999999997,
+        "child_cpu_seconds": 0.120652,
+        "peak_rss_kib": 14676,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 452928911,
+        "independent_query_replay_ns": 1374220,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "repetition": 16,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.056715999999999996,
+        "system_cpu_seconds": 0.015191,
+        "child_cpu_seconds": 0.071907,
+        "peak_rss_kib": 14040,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 432147362,
+        "independent_query_replay_ns": 1444551,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "repetition": 17,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.09448,
+        "system_cpu_seconds": 0.022874,
+        "child_cpu_seconds": 0.11735399999999999,
+        "peak_rss_kib": 14584,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 414503264,
+        "independent_query_replay_ns": 1368703,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "repetition": 17,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.056939,
+        "system_cpu_seconds": 0.01798,
+        "child_cpu_seconds": 0.074919,
+        "peak_rss_kib": 13864,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 382648967,
+        "independent_query_replay_ns": 1377153,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "repetition": 18,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.089909,
+        "system_cpu_seconds": 0.020978,
+        "child_cpu_seconds": 0.110887,
+        "peak_rss_kib": 14360,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 382343464,
+        "independent_query_replay_ns": 1368074,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "repetition": 18,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.035834,
+        "system_cpu_seconds": 0.013935,
+        "child_cpu_seconds": 0.049768999999999994,
+        "peak_rss_kib": 14060,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 391593884,
+        "independent_query_replay_ns": 1361508,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.reach-back",
+      "repetition": 19,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.07632,
+        "system_cpu_seconds": 0.017841,
+        "child_cpu_seconds": 0.094161,
+        "peak_rss_kib": 14452,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 398757820,
+        "independent_query_replay_ns": 1361299,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    },
+    {
+      "strategy": "csl.synthesis.strategy-b",
+      "repetition": 19,
+      "returncode": 0,
+      "timed_out": false,
+      "resources": {
+        "source": "POSIX wait4 for the isolated strategy process",
+        "user_cpu_seconds": 0.039022,
+        "system_cpu_seconds": 0.013007,
+        "child_cpu_seconds": 0.052029,
+        "peak_rss_kib": 13860,
+        "timed_out": false
+      },
+      "independent_check": {
+        "status": "verified",
+        "family_check_ns": 409295016,
+        "independent_query_replay_ns": 1388188,
+        "scope": "exact dyadic both-direction optimizer-family inclusion plus literal history and associated direction minimum; numerical driver assurance remains numerical"
+      }
+    }
+  ],
+  "scope": "separate whole-process gprof CPU sampling; driver compiled -pg, static-library symbols sampled; uninstrumented library call graph incomplete",
+  "timing_use": "excluded from primary groups; no strategy ranking or isolated verifier claim",
+  "verdict": "inconclusive until sample density and source attribution reviewed",
+  "gprof_returncode": 0,
+  "gprof_command": [
+    "gprof",
+    "-b",
+    "-p",
+    "/home/butahlecoq/.local/share/codex/build/review05-family-query-driver-20261109/csl_review05_family_query",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0000/gmon.2747278",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0001/gmon.2747279",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0002/gmon.2747280",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0003/gmon.2747281",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0004/gmon.2747282",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0005/gmon.2747283",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0006/gmon.2747284",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0007/gmon.2747290",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0008/gmon.2747291",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0009/gmon.2747292",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0010/gmon.2747293",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0011/gmon.2747294",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0012/gmon.2747302",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0013/gmon.2747309",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0014/gmon.2747320",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0015/gmon.2747321",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0016/gmon.2747331",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0017/gmon.2747335",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0018/gmon.2747337",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0019/gmon.2747338",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0020/gmon.2747339",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0021/gmon.2747340",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0022/gmon.2747341",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0023/gmon.2747343",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0024/gmon.2747344",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0025/gmon.2747346",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0026/gmon.2747363",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0027/gmon.2747369",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0028/gmon.2747371",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0029/gmon.2747375",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0030/gmon.2747377",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0031/gmon.2747378",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0032/gmon.2747379",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0033/gmon.2747394",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0034/gmon.2747395",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0035/gmon.2747399",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0036/gmon.2747400",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0037/gmon.2747401",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0038/gmon.2747402",
+    "/home/butahlecoq/.local/share/codex/captures/review05-family-query-20261110-v1/limiter-profile/0039/gmon.2747415"
+  ]
+}

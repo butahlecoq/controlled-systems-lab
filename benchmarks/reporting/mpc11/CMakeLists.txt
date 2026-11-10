@@ -16,3 +16,5 @@ if(MSVC)
 else()
   target_compile_options(csl_mpc11_affine PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
+
+include(Replay.cmake)

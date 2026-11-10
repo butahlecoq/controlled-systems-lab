@@ -1,0 +1,13 @@
+{
+  "capture_source_commit": "3b98f5b02838909981b7ce70378f58dc25c74457",
+  "post_capture_checker_commit": "77db095b85675a783f6dd51a44a5a54545722ad2",
+  "reason": "Independent review: stopped-empty processes remain inconclusive; rendering binds exact checked raw/receipt/scenario bytes. No algorithm rerun.",
+  "files": {
+    "check_family_query.py": "c2f70c2618b1a967dcda17b8509185e44e9c512d7237ce924d3741c7d063972a",
+    "render_family_query.py": "5aa39df19ebbde09784069e139481429a0cfee6b4b0868b9e137b9b3db617a15",
+    "scalar_query_oracle.py": "e962980de3665e8ce6d70b085700357e63bae1b08d341478cc0301063ebad03a",
+    "profile_family_query.py": "e0e24ccab6a22891d669a0265df9ad03151d78cc472cd776bbef3c44fa2a073c",
+    "package_family_query.py": "9eac3a84cc05f48994d91e6d6e9c730dfd010ad243b746a471d88b7c451f3079"
+  },
+  "packaging_commit": "da46dc67401db2df651f1806f86735b59a2630b6"
+}
