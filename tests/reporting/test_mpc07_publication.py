@@ -38,6 +38,13 @@ class PublicationTests(unittest.TestCase):
                 site=self.site(root);before=(site/'index.html').read_bytes()
                 with self.assertRaises(ValueError):S.stage(site,sources)
                 self.assertEqual((site/'index.html').read_bytes(),before);self.assertEqual(len(list(site.iterdir())),2)
+    def test_checker_uses_private_namespace_without_touching_generic_modules(self):
+        import textwrap
+        code=textwrap.dedent("\n            from pathlib import Path\n            import sys,types\n            root=Path(sys.argv[1]);sys.path.insert(0,str(root))\n            sentinels={name:types.ModuleType(name) for name in ('report','capture','policy','joint_filter','joint_capture')}\n            sys.modules.update(sentinels)\n            from scripts.reports import stage_mpc07_comparison as stage\n            from benchmarks.reporting.mpc07 import report\n            assert stage._checker(root) is report\n            assert all(sys.modules[name] is module for name,module in sentinels.items())\n")
+        with tempfile.TemporaryDirectory() as temporary:
+            result=subprocess.run([sys.executable,'-B','-c',code,str(ROOT)],cwd=temporary,capture_output=True,text=True,timeout=10)
+        self.assertEqual(result.returncode,0,result.stderr)
+
     def test_unsafe_paths_and_zip_members(self):
         for name in ('../escape','/absolute','a/../b','a//b','a\\b'):
             with self.subTest(name=name),self.assertRaises(ValueError):S.safe_name(name)

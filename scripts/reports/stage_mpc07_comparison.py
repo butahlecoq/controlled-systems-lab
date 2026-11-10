@@ -69,9 +69,9 @@ def materialize(files,folder):
         p=folder.joinpath(*safe_name(name).parts);p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(data)
 
 def _checker(repository):
-    folder=repository/'benchmarks/reporting/mpc07';sys.path.insert(0,str(folder))
-    # A subprocess owns these imports; no cached helpers from another checkout.
-    import report
+    sys.path.insert(0,str(repository))
+    # A subprocess owns these imports; generic names belong to other consumers.
+    from benchmarks.reporting.mpc07 import report
     return report
 
 def recheck_raw(root,repository):
