@@ -13,7 +13,8 @@ profiles, authenticating the four original/corrected evidence folders using the
 existing strict source/process/exact policy checks. Store the selected complete
 rational policies, source-record hashes and original inventories separately.
 Use horizons2/4/8; additive delta0 or uncertain-A delta=±1/64, w=±1.
-Two deterministic physical traces per profile: positive and alternating signs.
+Two deterministic physical traces per profile: w positive and alternating signs;
+delta is the same constant +epsilon in both (zero in the additive profile).
 Each has one excluded warmup and five measured episodes, reversed profile/trace
 order on alternate repetitions. Derive inventory from selected profiles.
 

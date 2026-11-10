@@ -1,0 +1,8695 @@
+{
+  "measured_repetitions": 5,
+  "model": {
+    "control_bound": "1",
+    "cost": "terminal q^2",
+    "initial": [
+      "0",
+      "0"
+    ],
+    "position_update": "p+q+u/2",
+    "state_bounds": [
+      "64",
+      "16"
+    ],
+    "velocity_update": "(1+delta)*q+u+w"
+  },
+  "profile_counts": {
+    "past-eta": 24,
+    "past-zeta": 12
+  },
+  "profiles": [
+    {
+      "encoding": "past-eta",
+      "epsilon": "0",
+      "horizon": 2,
+      "id": "fixed-T2-1-adf",
+      "policy": {
+        "oracle_squared": "1",
+        "policy_M": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "-1",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "0"
+            ],
+            [
+              "0",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "1/2",
+            "0"
+          ],
+          [
+            "0",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "1",
+        "worst_terminal_squared": "1"
+      },
+      "policy_class": "adf",
+      "sigma": "1",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0026",
+      "source_record_sha256": "a9989b5e350b5b5d09fa55d9f777c6edd6f46c5c98d5104f42f37c7d688091ae",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "0",
+      "horizon": 2,
+      "id": "fixed-T2-1-fixed-gain",
+      "policy": {
+        "oracle_squared": "1",
+        "policy_M": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "-1",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "0"
+            ],
+            [
+              "0",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "1/2",
+            "0"
+          ],
+          [
+            "0",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "1",
+        "worst_terminal_squared": "1"
+      },
+      "policy_class": "fixed-gain",
+      "sigma": "1",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0025",
+      "source_record_sha256": "33e4270d80b53098c7047f023a86dc6b49609479d558e9261bfa19e015a0775f",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "0",
+      "horizon": 2,
+      "id": "fixed-T2-1-fixed-plan",
+      "policy": {
+        "oracle_squared": "4",
+        "policy_M": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1",
+              "0"
+            ],
+            [
+              "1",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "1",
+            "0"
+          ],
+          [
+            "1",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "2",
+        "worst_terminal_squared": "4"
+      },
+      "policy_class": "fixed-plan",
+      "sigma": "1",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0024",
+      "source_record_sha256": "cb593970e261d2cf6b234215eed441e25c3bb6c8cafbac0947d78d8908aa6807",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "0",
+      "horizon": 2,
+      "id": "fixed-T2-1-response",
+      "policy": {
+        "oracle_squared": "1",
+        "policy_M": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "-1",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "0"
+            ],
+            [
+              "0",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "1/2",
+            "0"
+          ],
+          [
+            "0",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "1",
+        "worst_terminal_squared": "1"
+      },
+      "policy_class": "response",
+      "sigma": "1",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0027",
+      "source_record_sha256": "2ca03a329c4e3a214f4bd6038f1a1ab49b2b0f82ecf397c99f25360b34fee8ad",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "1/64",
+      "horizon": 2,
+      "id": "fixed-T2-5over4-adf",
+      "policy": {
+        "oracle_squared": "9/4",
+        "policy_M": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "-4/5",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "3/5",
+              "0"
+            ],
+            [
+              "1/5",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "3/5",
+            "0"
+          ],
+          [
+            "1/5",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "3/2",
+        "worst_terminal_squared": "9/4"
+      },
+      "policy_class": "adf",
+      "sigma": "5/4",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0030",
+      "source_record_sha256": "ecfda08cdd97ffe364d3adcb8c55af62006f5afe135384f422586a8e5b964a1e",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "1/64",
+      "horizon": 2,
+      "id": "fixed-T2-5over4-fixed-gain",
+      "policy": {
+        "oracle_squared": "24025/4096",
+        "policy_M": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "-1/16",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "31/32",
+              "0"
+            ],
+            [
+              "15/16",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "31/32",
+            "0"
+          ],
+          [
+            "15/16",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "155/64",
+        "worst_terminal_squared": "24025/4096"
+      },
+      "policy_class": "fixed-gain",
+      "sigma": "5/4",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0029",
+      "source_record_sha256": "858488a0b5602deb6a3ffd9650799771eef1221c8b63c2d2793b6e5caf1e4c8c",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "1/64",
+      "horizon": 2,
+      "id": "fixed-T2-5over4-fixed-plan",
+      "policy": {
+        "oracle_squared": "25/4",
+        "policy_M": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1",
+              "0"
+            ],
+            [
+              "1",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "1",
+            "0"
+          ],
+          [
+            "1",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "5/2",
+        "worst_terminal_squared": "25/4"
+      },
+      "policy_class": "fixed-plan",
+      "sigma": "5/4",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0028",
+      "source_record_sha256": "4e192509d4a08153cbfd91df0600c0347eb918aafde4f4936a508602524aec39",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "1/64",
+      "horizon": 2,
+      "id": "fixed-T2-5over4-response",
+      "policy": {
+        "oracle_squared": "9/4",
+        "policy_M": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "-4/5",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "3/5",
+              "0"
+            ],
+            [
+              "1/5",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "3/5",
+            "0"
+          ],
+          [
+            "1/5",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "3/2",
+        "worst_terminal_squared": "9/4"
+      },
+      "policy_class": "response",
+      "sigma": "5/4",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0031",
+      "source_record_sha256": "2f42182eba0af24fd0edaeb03c10d552b1cfcf0934d3252cb2c8d21fa699aaab",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "0",
+      "horizon": 4,
+      "id": "fixed-T4-1-adf",
+      "policy": {
+        "oracle_squared": "1",
+        "policy_M": [
+          [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-1",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-1",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "-1",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "1/2",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "1/2",
+            "1/2",
+            "1/2",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "1",
+        "worst_terminal_squared": "1"
+      },
+      "policy_class": "adf",
+      "sigma": "1",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0034",
+      "source_record_sha256": "4cc5fa21b278edb29fe97b8107235a5a46b4e251a8602c821b75c858926faaaa",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "0",
+      "horizon": 4,
+      "id": "fixed-T4-1-fixed-gain",
+      "policy": {
+        "oracle_squared": "1",
+        "policy_M": [
+          [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-1",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-1",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "-1",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "1/2",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "1/2",
+            "1/2",
+            "1/2",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "1",
+        "worst_terminal_squared": "1"
+      },
+      "policy_class": "fixed-gain",
+      "sigma": "1",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0033",
+      "source_record_sha256": "f5a138176461c32992bacbd616da6c4c9665d741422d120a9b7e713b13aefc7e",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "0",
+      "horizon": 4,
+      "id": "fixed-T4-1-fixed-plan",
+      "policy": {
+        "oracle_squared": "16",
+        "policy_M": [
+          [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "1",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "2",
+              "1",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "1",
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "3",
+              "2",
+              "1",
+              "0"
+            ],
+            [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "3",
+            "2",
+            "1",
+            "0"
+          ],
+          [
+            "1",
+            "1",
+            "1",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "4",
+        "worst_terminal_squared": "16"
+      },
+      "policy_class": "fixed-plan",
+      "sigma": "1",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0032",
+      "source_record_sha256": "f1b59d2e5ad6f44547cf4f98fdf52561443cf329194e058175ba15573ba847f8",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "0",
+      "horizon": 4,
+      "id": "fixed-T4-1-response",
+      "policy": {
+        "oracle_squared": "1",
+        "policy_M": [
+          [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-1",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-1",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "-1",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "1/2",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "1/2",
+            "1/2",
+            "1/2",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "1",
+        "worst_terminal_squared": "1"
+      },
+      "policy_class": "response",
+      "sigma": "1",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0035",
+      "source_record_sha256": "bc5713b70a3eefe879a49b28188169ed473d0b8bedfc845f426a34e5f8363a94",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "1/64",
+      "horizon": 4,
+      "id": "fixed-T4-5over4-adf",
+      "policy": {
+        "oracle_squared": "4",
+        "policy_M": [
+          [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-4/5",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-1/5",
+            "-3/5",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-2/5",
+            "-2/5",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "3/5",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1/5",
+              "1",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "7/10",
+              "7/10",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "2/5",
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "7/10",
+              "9/10",
+              "4/5",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "3/5",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "7/10",
+            "9/10",
+            "4/5",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "3/5",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "2",
+        "worst_terminal_squared": "4"
+      },
+      "policy_class": "adf",
+      "sigma": "5/4",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0038",
+      "source_record_sha256": "791873efc53b5274f6fa2f115d538b05e984597112d4d635dcc0deb94333fdab",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "1/64",
+      "horizon": 4,
+      "id": "fixed-T4-5over4-fixed-gain",
+      "policy": {
+        "oracle_squared": "5558448025/268435456",
+        "policy_M": [
+          [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-1/16",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-15/256",
+            "-1/16",
+            "0",
+            "0"
+          ],
+          [
+            "-225/4096",
+            "-15/256",
+            "-1/16",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "31/32",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "15/16",
+              "1",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "961/512",
+              "31/32",
+              "0",
+              "0"
+            ],
+            [
+              "225/256",
+              "15/16",
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "22351/8192",
+              "961/512",
+              "31/32",
+              "0"
+            ],
+            [
+              "3375/4096",
+              "225/256",
+              "15/16",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "22351/8192",
+            "961/512",
+            "31/32",
+            "0"
+          ],
+          [
+            "3375/4096",
+            "225/256",
+            "15/16",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "74555/16384",
+        "worst_terminal_squared": "5558448025/268435456"
+      },
+      "policy_class": "fixed-gain",
+      "sigma": "5/4",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0037",
+      "source_record_sha256": "58cf7b2e7112469170ff7c3e97492057cee416c9783fef0610908ea90c92b021",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "1/64",
+      "horizon": 4,
+      "id": "fixed-T4-5over4-fixed-plan",
+      "policy": {
+        "oracle_squared": "25",
+        "policy_M": [
+          [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "1",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "2",
+              "1",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "1",
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "3",
+              "2",
+              "1",
+              "0"
+            ],
+            [
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "3",
+            "2",
+            "1",
+            "0"
+          ],
+          [
+            "1",
+            "1",
+            "1",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "5",
+        "worst_terminal_squared": "25"
+      },
+      "policy_class": "fixed-plan",
+      "sigma": "5/4",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0036",
+      "source_record_sha256": "eecd57d8b4e504cd3656e4326ed016eaa0907c14474a49873e23067f31313c0b",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "1/64",
+      "horizon": 4,
+      "id": "fixed-T4-5over4-response",
+      "policy": {
+        "oracle_squared": "4",
+        "policy_M": [
+          [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-4/5",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-1/5",
+            "-3/5",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "-4/5",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "3/5",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1/5",
+              "1",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "7/10",
+              "7/10",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "2/5",
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "7/10",
+              "11/10",
+              "3/5",
+              "0"
+            ],
+            [
+              "0",
+              "2/5",
+              "1/5",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "7/10",
+            "11/10",
+            "3/5",
+            "0"
+          ],
+          [
+            "0",
+            "2/5",
+            "1/5",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "2",
+        "worst_terminal_squared": "4"
+      },
+      "policy_class": "response",
+      "sigma": "5/4",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0039",
+      "source_record_sha256": "173ce5bb111309224cbae00d95be7ab769d105595c16dfeeae8a0b172f1fbfd4",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "0",
+      "horizon": 8,
+      "id": "fixed-T8-1-adf",
+      "policy": {
+        "oracle_squared": "1",
+        "policy_M": [
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "-1",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "-1",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "1/2",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "1",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "1",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "1/2",
+            "1/2",
+            "1/2",
+            "1/2",
+            "1/2",
+            "1/2",
+            "1/2",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "1",
+        "worst_terminal_squared": "1"
+      },
+      "policy_class": "adf",
+      "sigma": "1",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0042",
+      "source_record_sha256": "fe209590178090596a20694dc6a69e2f0810466fdc8d3f5a0b93a9c4a55f41e2",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "0",
+      "horizon": 8,
+      "id": "fixed-T8-1-fixed-gain",
+      "policy": {
+        "oracle_squared": "1",
+        "policy_M": [
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "-1",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "-1",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "1/2",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "1",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "1",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "1/2",
+            "1/2",
+            "1/2",
+            "1/2",
+            "1/2",
+            "1/2",
+            "1/2",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "1",
+        "worst_terminal_squared": "1"
+      },
+      "policy_class": "fixed-gain",
+      "sigma": "1",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0041",
+      "source_record_sha256": "a6bd8a08f45e308d933d2c8e2605ab4eb7e734bb12106b5ce5c80b251b9fc67e",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "0",
+      "horizon": 8,
+      "id": "fixed-T8-1-fixed-plan",
+      "policy": {
+        "oracle_squared": "64",
+        "policy_M": [
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "2",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "1",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "3",
+              "2",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "1",
+              "1",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "4",
+              "3",
+              "2",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "5",
+              "4",
+              "3",
+              "2",
+              "1",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "6",
+              "5",
+              "4",
+              "3",
+              "2",
+              "1",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "7",
+              "6",
+              "5",
+              "4",
+              "3",
+              "2",
+              "1",
+              "0"
+            ],
+            [
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "7",
+            "6",
+            "5",
+            "4",
+            "3",
+            "2",
+            "1",
+            "0"
+          ],
+          [
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "8",
+        "worst_terminal_squared": "64"
+      },
+      "policy_class": "fixed-plan",
+      "sigma": "1",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0040",
+      "source_record_sha256": "bbbd86277ce9e280c95f9c43de78ab176c0a3dc836c218bdeb07319079b39a0a",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "0",
+      "horizon": 8,
+      "id": "fixed-T8-1-response",
+      "policy": {
+        "oracle_squared": "1",
+        "policy_M": [
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "-1",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "-1",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "1/2",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "1",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "1",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "1/2",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "1/2",
+            "1/2",
+            "1/2",
+            "1/2",
+            "1/2",
+            "1/2",
+            "1/2",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "1",
+        "worst_terminal_squared": "1"
+      },
+      "policy_class": "response",
+      "sigma": "1",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0043",
+      "source_record_sha256": "529119d9a69e4e2a59defb367b70b2d770b7bbf327c75158165a52dce88c3c52",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "1/64",
+      "horizon": 8,
+      "id": "fixed-T8-5over4-adf",
+      "policy": {
+        "oracle_squared": "9",
+        "policy_M": [
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-4/5",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-4/5",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-1/5",
+            "-3/5",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "-4/5",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-1/5",
+            "0",
+            "0",
+            "-1/5",
+            "-2/5",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "-1/5",
+            "0",
+            "-3/5",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "-1/5",
+            "0",
+            "0",
+            "0",
+            "-3/5",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "3/5",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1/5",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "4/5",
+              "3/5",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1/5",
+              "1/5",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1",
+              "7/10",
+              "7/10",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1/5",
+              "0",
+              "2/5",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "6/5",
+              "7/10",
+              "11/10",
+              "3/5",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1/5",
+              "0",
+              "2/5",
+              "1/5",
+              "1",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "13/10",
+              "7/10",
+              "3/2",
+              "7/10",
+              "4/5",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "2/5",
+              "0",
+              "3/5",
+              "1",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "13/10",
+              "7/10",
+              "9/5",
+              "7/10",
+              "11/10",
+              "1",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "1/5",
+              "0",
+              "0",
+              "1",
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "13/10",
+              "7/10",
+              "19/10",
+              "7/10",
+              "11/10",
+              "2",
+              "7/10",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "1",
+              "2/5",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "13/10",
+            "7/10",
+            "19/10",
+            "7/10",
+            "11/10",
+            "2",
+            "7/10",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "1",
+            "2/5",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "3",
+        "worst_terminal_squared": "9"
+      },
+      "policy_class": "adf",
+      "sigma": "5/4",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0046",
+      "source_record_sha256": "87dbe320a9de477389081f2b101accb6fa7081d5025ebc987e072b756305d3dd",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "1/64",
+      "horizon": 8,
+      "id": "fixed-T8-5over4-fixed-gain",
+      "policy": {
+        "oracle_squared": "75002239855561056025/1152921504606846976",
+        "policy_M": [
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-1/16",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-15/256",
+            "-1/16",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-225/4096",
+            "-15/256",
+            "-1/16",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-3375/65536",
+            "-225/4096",
+            "-15/256",
+            "-1/16",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-50625/1048576",
+            "-3375/65536",
+            "-225/4096",
+            "-15/256",
+            "-1/16",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-759375/16777216",
+            "-50625/1048576",
+            "-3375/65536",
+            "-225/4096",
+            "-15/256",
+            "-1/16",
+            "0",
+            "0"
+          ],
+          [
+            "-11390625/268435456",
+            "-759375/16777216",
+            "-50625/1048576",
+            "-3375/65536",
+            "-225/4096",
+            "-15/256",
+            "-1/16",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "31/32",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "15/16",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "961/512",
+              "31/32",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "225/256",
+              "15/16",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "22351/8192",
+              "961/512",
+              "31/32",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "3375/4096",
+              "225/256",
+              "15/16",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "462241/131072",
+              "22351/8192",
+              "961/512",
+              "31/32",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "50625/65536",
+              "3375/4096",
+              "225/256",
+              "15/16",
+              "1",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "8965231/2097152",
+              "462241/131072",
+              "22351/8192",
+              "961/512",
+              "31/32",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "759375/1048576",
+              "50625/65536",
+              "3375/4096",
+              "225/256",
+              "15/16",
+              "1",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "166984321/33554432",
+              "8965231/2097152",
+              "462241/131072",
+              "22351/8192",
+              "961/512",
+              "31/32",
+              "0",
+              "0"
+            ],
+            [
+              "11390625/16777216",
+              "759375/1048576",
+              "50625/65536",
+              "3375/4096",
+              "225/256",
+              "15/16",
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "3024858511/536870912",
+              "166984321/33554432",
+              "8965231/2097152",
+              "462241/131072",
+              "22351/8192",
+              "961/512",
+              "31/32",
+              "0"
+            ],
+            [
+              "170859375/268435456",
+              "11390625/16777216",
+              "759375/1048576",
+              "50625/65536",
+              "3375/4096",
+              "225/256",
+              "15/16",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "3024858511/536870912",
+            "166984321/33554432",
+            "8965231/2097152",
+            "462241/131072",
+            "22351/8192",
+            "961/512",
+            "31/32",
+            "0"
+          ],
+          [
+            "170859375/268435456",
+            "11390625/16777216",
+            "759375/1048576",
+            "50625/65536",
+            "3375/4096",
+            "225/256",
+            "15/16",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "8660383355/1073741824",
+        "worst_terminal_squared": "75002239855561056025/1152921504606846976"
+      },
+      "policy_class": "fixed-gain",
+      "sigma": "5/4",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0045",
+      "source_record_sha256": "550b87ebdfe52de783e4d65a416b7b5a9b1cf43469cf5d27e6be8af7ce6b9944",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "1/64",
+      "horizon": 8,
+      "id": "fixed-T8-5over4-fixed-plan",
+      "policy": {
+        "oracle_squared": "100",
+        "policy_M": [
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "2",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "1",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "3",
+              "2",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "1",
+              "1",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "4",
+              "3",
+              "2",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "5",
+              "4",
+              "3",
+              "2",
+              "1",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "6",
+              "5",
+              "4",
+              "3",
+              "2",
+              "1",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "7",
+              "6",
+              "5",
+              "4",
+              "3",
+              "2",
+              "1",
+              "0"
+            ],
+            [
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "7",
+            "6",
+            "5",
+            "4",
+            "3",
+            "2",
+            "1",
+            "0"
+          ],
+          [
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "10",
+        "worst_terminal_squared": "100"
+      },
+      "policy_class": "fixed-plan",
+      "sigma": "5/4",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0044",
+      "source_record_sha256": "353e6cb0d619add61eb632ea1db7316ef4b98a9d100c1827da61dfe7505705b4",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-eta",
+      "epsilon": "1/64",
+      "horizon": 8,
+      "id": "fixed-T8-5over4-response",
+      "policy": {
+        "oracle_squared": "9",
+        "policy_M": [
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-4/5",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-4/5",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "-4/5",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "-1/5",
+            "-1/5",
+            "-1/5",
+            "-1/5",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "-4/5",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "-4/5",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "-3/5",
+            "-1/5",
+            "0",
+            "0"
+          ]
+        ],
+        "policy_v": [
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        "rationalization": "new candidate from limit_denominator(2**32), exact robust replay; raw binary64 unchanged",
+        "state_offsets": [
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0"
+          ]
+        ],
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "3/5",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1/5",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "4/5",
+              "3/5",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1/5",
+              "1/5",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1",
+              "4/5",
+              "3/5",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "1/5",
+              "1/5",
+              "1/5",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "11/10",
+              "9/10",
+              "7/10",
+              "9/10",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "4/5",
+              "1",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "11/10",
+              "9/10",
+              "7/10",
+              "13/10",
+              "1",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "1",
+              "1",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "11/10",
+              "9/10",
+              "7/10",
+              "13/10",
+              "2",
+              "3/5",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "1",
+              "1/5",
+              "1",
+              "0"
+            ]
+          ],
+          [
+            [
+              "11/10",
+              "9/10",
+              "7/10",
+              "13/10",
+              "27/10",
+              "7/10",
+              "1",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "2/5",
+              "0",
+              "1",
+              "1"
+            ]
+          ]
+        ],
+        "status": "verified-rational-reconstruction",
+        "terminal_offset": [
+          "0",
+          "0"
+        ],
+        "terminal_response": [
+          [
+            "11/10",
+            "9/10",
+            "7/10",
+            "13/10",
+            "27/10",
+            "7/10",
+            "1",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "2/5",
+            "0",
+            "1",
+            "1"
+          ]
+        ],
+        "worst_terminal_absolute": "3",
+        "worst_terminal_squared": "9"
+      },
+      "policy_class": "response",
+      "sigma": "5/4",
+      "source_folder": "bounded-policy-0e821c2a-recheck-v2",
+      "source_path": "attempts/0047",
+      "source_record_sha256": "122cfc553c2aa7757aee3e09928f1563b6aa88b74d0bf0f9b99c17d438231118",
+      "source_sidecar_sha256": "97929cad38ef1a2f11fbf21e81fc67894ef997eac118f4a0bb69ed341eb4b0be"
+    },
+    {
+      "encoding": "past-zeta",
+      "epsilon": "1/64",
+      "horizon": 2,
+      "id": "joint-T2-fixed5over4-fixed-filter",
+      "policy": {
+        "filter": [
+          [
+            "1/1024",
+            "5/4"
+          ],
+          [
+            "1/1024",
+            "5/4"
+          ]
+        ],
+        "maximum_native_response_adjustment": 0.0,
+        "normalized_policy": [
+          [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-1",
+            "0",
+            "0"
+          ]
+        ],
+        "physical_information": "zeta past=diag(s)^-1*(x_next-A*x-B*u); current/future zeta forbidden",
+        "physical_unrestricted_lower_squared": "4225/4096",
+        "rationalization": "new candidate limit_denominator(2**48), exact response/filter/support replay",
+        "response_reconstruction": "exact recurrence from reconstructed filter/control; raw response arrays unchanged",
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "5/4",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "3/4",
+              "1/1024",
+              "0"
+            ],
+            [
+              "0",
+              "1/4",
+              "0",
+              "5/4"
+            ]
+          ]
+        ],
+        "state_supports": [
+          [
+            "1/1024",
+            "5/4"
+          ],
+          [
+            "385/512",
+            "3/2"
+          ]
+        ],
+        "status": "verified-joint-rational-policy",
+        "upper_minus_physical_lower_squared": "4991/4096",
+        "upper_minus_virtual_profile_oracle_squared": "0",
+        "virtual_profile_oracle_squared": "9/4",
+        "virtual_terminal_absolute": "3/2",
+        "virtual_terminal_squared": "9/4"
+      },
+      "policy_class": "fixed-filter",
+      "sigma": "fixed5over4",
+      "source_folder": "joint-filter-04369201-recheck-v2",
+      "source_path": "attempts/0015",
+      "source_record_sha256": "c59ca3e86dd68b5fd0a34146cb5ff585269c3b80959f3eac563f57536403c7cf",
+      "source_sidecar_sha256": "3854b40ef43fce86a6c396dd1c19645426c66d0f43af362581935ab814eee9b9"
+    },
+    {
+      "encoding": "past-zeta",
+      "epsilon": "1/64",
+      "horizon": 2,
+      "id": "joint-T2-optimized-diagonal-fixed-gain",
+      "policy": {
+        "filter": [
+          [
+            "1/1024",
+            "1"
+          ],
+          [
+            "1/1024",
+            "65/64"
+          ]
+        ],
+        "maximum_native_response_adjustment": 0.0,
+        "normalized_policy": [
+          [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-1/16",
+            "0",
+            "0"
+          ]
+        ],
+        "physical_information": "zeta past=diag(s)^-1*(x_next-A*x-B*u); current/future zeta forbidden",
+        "physical_unrestricted_lower_squared": "4225/4096",
+        "rationalization": "new candidate limit_denominator(2**48), exact response/filter/support replay",
+        "response_reconstruction": "exact recurrence from reconstructed filter/control; raw response arrays unchanged",
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "31/32",
+              "1/1024",
+              "0"
+            ],
+            [
+              "0",
+              "15/16",
+              "0",
+              "65/64"
+            ]
+          ]
+        ],
+        "state_supports": [
+          [
+            "1/1024",
+            "1"
+          ],
+          [
+            "497/512",
+            "125/64"
+          ]
+        ],
+        "status": "verified-joint-rational-policy",
+        "upper_minus_physical_lower_squared": "1425/512",
+        "upper_minus_virtual_profile_oracle_squared": "0",
+        "virtual_profile_oracle_squared": "15625/4096",
+        "virtual_terminal_absolute": "125/64",
+        "virtual_terminal_squared": "15625/4096"
+      },
+      "policy_class": "fixed-gain",
+      "sigma": "optimized-diagonal",
+      "source_folder": "joint-filter-04369201-recheck-v2",
+      "source_path": "attempts/0013",
+      "source_record_sha256": "249437ff310d6b254aa6c8a069a7356362a7dabcdc711fae4f48c77f9b85a4b5",
+      "source_sidecar_sha256": "3854b40ef43fce86a6c396dd1c19645426c66d0f43af362581935ab814eee9b9"
+    },
+    {
+      "encoding": "past-zeta",
+      "epsilon": "1/64",
+      "horizon": 2,
+      "id": "joint-T2-optimized-diagonal-fixed-plan",
+      "policy": {
+        "filter": [
+          [
+            "1/1024",
+            "1"
+          ],
+          [
+            "1/1024",
+            "65/64"
+          ]
+        ],
+        "maximum_native_response_adjustment": 0.0,
+        "normalized_policy": [
+          [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "physical_information": "zeta past=diag(s)^-1*(x_next-A*x-B*u); current/future zeta forbidden",
+        "physical_unrestricted_lower_squared": "4225/4096",
+        "rationalization": "new candidate limit_denominator(2**48), exact response/filter/support replay",
+        "response_reconstruction": "exact recurrence from reconstructed filter/control; raw response arrays unchanged",
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "1",
+              "1/1024",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "65/64"
+            ]
+          ]
+        ],
+        "state_supports": [
+          [
+            "1/1024",
+            "1"
+          ],
+          [
+            "513/512",
+            "129/64"
+          ]
+        ],
+        "status": "verified-joint-rational-policy",
+        "upper_minus_physical_lower_squared": "97/32",
+        "upper_minus_virtual_profile_oracle_squared": "0",
+        "virtual_profile_oracle_squared": "16641/4096",
+        "virtual_terminal_absolute": "129/64",
+        "virtual_terminal_squared": "16641/4096"
+      },
+      "policy_class": "fixed-plan",
+      "sigma": "optimized-diagonal",
+      "source_folder": "joint-filter-04369201-recheck-v2",
+      "source_path": "attempts/0012",
+      "source_record_sha256": "147645a61d2a3353d6dd2d1a79a82c1efd02235a6de2212a07c81650db7fd6e0",
+      "source_sidecar_sha256": "3854b40ef43fce86a6c396dd1c19645426c66d0f43af362581935ab814eee9b9"
+    },
+    {
+      "encoding": "past-zeta",
+      "epsilon": "1/64",
+      "horizon": 2,
+      "id": "joint-T2-optimized-diagonal-joint",
+      "policy": {
+        "filter": [
+          [
+            "1/1024",
+            "1"
+          ],
+          [
+            "1/1024",
+            "65/64"
+          ]
+        ],
+        "maximum_native_response_adjustment": 0.0,
+        "normalized_policy": [
+          [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-1",
+            "0",
+            "0"
+          ]
+        ],
+        "physical_information": "zeta past=diag(s)^-1*(x_next-A*x-B*u); current/future zeta forbidden",
+        "physical_unrestricted_lower_squared": "4225/4096",
+        "rationalization": "new candidate limit_denominator(2**48), exact response/filter/support replay",
+        "response_reconstruction": "exact recurrence from reconstructed filter/control; raw response arrays unchanged",
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "1/2",
+              "1/1024",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "65/64"
+            ]
+          ]
+        ],
+        "state_supports": [
+          [
+            "1/1024",
+            "1"
+          ],
+          [
+            "257/512",
+            "65/64"
+          ]
+        ],
+        "status": "verified-joint-rational-policy",
+        "upper_minus_physical_lower_squared": "0",
+        "upper_minus_virtual_profile_oracle_squared": "0",
+        "virtual_profile_oracle_squared": "4225/4096",
+        "virtual_terminal_absolute": "65/64",
+        "virtual_terminal_squared": "4225/4096"
+      },
+      "policy_class": "joint",
+      "sigma": "optimized-diagonal",
+      "source_folder": "joint-filter-04369201-recheck-v2",
+      "source_path": "attempts/0014",
+      "source_record_sha256": "e3ba9f6e07a8b03e4633d435921439ee8c5633dd8fc4c229e5d6744bb59fe23d",
+      "source_sidecar_sha256": "3854b40ef43fce86a6c396dd1c19645426c66d0f43af362581935ab814eee9b9"
+    },
+    {
+      "encoding": "past-zeta",
+      "epsilon": "1/64",
+      "horizon": 4,
+      "id": "joint-T4-fixed5over4-fixed-filter",
+      "policy": {
+        "filter": [
+          [
+            "1/1024",
+            "5/4"
+          ],
+          [
+            "1/1024",
+            "5/4"
+          ],
+          [
+            "1/1024",
+            "5/4"
+          ],
+          [
+            "1/1024",
+            "5/4"
+          ]
+        ],
+        "maximum_native_response_adjustment": 1.734723475976807e-18,
+        "normalized_policy": [
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-1/4",
+            "0",
+            "-3/4",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "-1/2",
+            "0",
+            "-1/2",
+            "0",
+            "0"
+          ]
+        ],
+        "physical_information": "zeta past=diag(s)^-1*(x_next-A*x-B*u); current/future zeta forbidden",
+        "physical_unrestricted_lower_squared": "75418890625/68719476736",
+        "rationalization": "new candidate limit_denominator(2**48), exact response/filter/support replay",
+        "response_reconstruction": "exact recurrence from reconstructed filter/control; raw response arrays unchanged",
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "5/4",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "3/4",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1/4",
+              "0",
+              "5/4",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "7/8",
+              "1/1024",
+              "7/8",
+              "1/1024",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "1/2",
+              "0",
+              "5/4",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "7/8",
+              "1/1024",
+              "9/8",
+              "1/1024",
+              "1",
+              "1/1024",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "3/4",
+              "0",
+              "5/4"
+            ]
+          ]
+        ],
+        "state_supports": [
+          [
+            "1/1024",
+            "5/4"
+          ],
+          [
+            "385/512",
+            "3/2"
+          ],
+          [
+            "1795/1024",
+            "7/4"
+          ],
+          [
+            "769/256",
+            "2"
+          ]
+        ],
+        "status": "verified-joint-rational-policy",
+        "upper_minus_physical_lower_squared": "199459016319/68719476736",
+        "upper_minus_virtual_profile_oracle_squared": "0",
+        "virtual_profile_oracle_squared": "4",
+        "virtual_terminal_absolute": "2",
+        "virtual_terminal_squared": "4"
+      },
+      "policy_class": "fixed-filter",
+      "sigma": "fixed5over4",
+      "source_folder": "joint-filter-04369201-recheck-v2",
+      "source_path": "attempts/0019",
+      "source_record_sha256": "e2d5660f4e51e1d1d829334db857dbf10ee17757254c7810b8226f77c465976e",
+      "source_sidecar_sha256": "3854b40ef43fce86a6c396dd1c19645426c66d0f43af362581935ab814eee9b9"
+    },
+    {
+      "encoding": "past-zeta",
+      "epsilon": "1/64",
+      "horizon": 4,
+      "id": "joint-T4-optimized-diagonal-fixed-gain",
+      "policy": {
+        "filter": [
+          [
+            "1/1024",
+            "1"
+          ],
+          [
+            "1/1024",
+            "65/64"
+          ],
+          [
+            "1/1024",
+            "4221/4096"
+          ],
+          [
+            "1/1024",
+            "273865/262144"
+          ]
+        ],
+        "maximum_native_response_adjustment": 0.0,
+        "normalized_policy": [
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-1/16",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-15/256",
+            "0",
+            "-65/1024",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-225/4096",
+            "0",
+            "-975/16384",
+            "0",
+            "-4221/65536",
+            "0",
+            "0"
+          ]
+        ],
+        "physical_information": "zeta past=diag(s)^-1*(x_next-A*x-B*u); current/future zeta forbidden",
+        "physical_unrestricted_lower_squared": "75418890625/68719476736",
+        "rationalization": "new candidate limit_denominator(2**48), exact response/filter/support replay",
+        "response_reconstruction": "exact recurrence from reconstructed filter/control; raw response arrays unchanged",
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "31/32",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "15/16",
+              "0",
+              "65/64",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "961/512",
+              "1/1024",
+              "2015/2048",
+              "1/1024",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "225/256",
+              "0",
+              "975/1024",
+              "0",
+              "4221/4096",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "22351/8192",
+              "1/1024",
+              "62465/32768",
+              "1/1024",
+              "130851/131072",
+              "1/1024",
+              "0"
+            ],
+            [
+              "0",
+              "3375/4096",
+              "0",
+              "14625/16384",
+              "0",
+              "63315/65536",
+              "0",
+              "273865/262144"
+            ]
+          ]
+        ],
+        "state_supports": [
+          [
+            "1/1024",
+            "1"
+          ],
+          [
+            "497/512",
+            "125/64"
+          ],
+          [
+            "5865/2048",
+            "11721/4096"
+          ],
+          [
+            "738839/131072",
+            "977125/262144"
+          ]
+        ],
+        "status": "verified-joint-rational-policy",
+        "upper_minus_physical_lower_squared": "109919296875/8589934592",
+        "upper_minus_virtual_profile_oracle_squared": "0",
+        "virtual_profile_oracle_squared": "954773265625/68719476736",
+        "virtual_terminal_absolute": "977125/262144",
+        "virtual_terminal_squared": "954773265625/68719476736"
+      },
+      "policy_class": "fixed-gain",
+      "sigma": "optimized-diagonal",
+      "source_folder": "joint-filter-04369201-recheck-v2",
+      "source_path": "attempts/0017",
+      "source_record_sha256": "a94bfa9c23cc14ea892a297b6215853904f5cd13416a55f6410427edfcdc1e4e",
+      "source_sidecar_sha256": "3854b40ef43fce86a6c396dd1c19645426c66d0f43af362581935ab814eee9b9"
+    },
+    {
+      "encoding": "past-zeta",
+      "epsilon": "1/64",
+      "horizon": 4,
+      "id": "joint-T4-optimized-diagonal-fixed-plan",
+      "policy": {
+        "filter": [
+          [
+            "1/1024",
+            "1"
+          ],
+          [
+            "1/1024",
+            "65/64"
+          ],
+          [
+            "1/1024",
+            "4225/4096"
+          ],
+          [
+            "1/1024",
+            "274625/262144"
+          ]
+        ],
+        "maximum_native_response_adjustment": 0.0,
+        "normalized_policy": [
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "physical_information": "zeta past=diag(s)^-1*(x_next-A*x-B*u); current/future zeta forbidden",
+        "physical_unrestricted_lower_squared": "75418890625/68719476736",
+        "rationalization": "new candidate limit_denominator(2**48), exact response/filter/support replay",
+        "response_reconstruction": "exact recurrence from reconstructed filter/control; raw response arrays unchanged",
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "1",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "65/64",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "2",
+              "1/1024",
+              "65/64",
+              "1/1024",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "65/64",
+              "0",
+              "4225/4096",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "3",
+              "1/1024",
+              "65/32",
+              "1/1024",
+              "4225/4096",
+              "1/1024",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "65/64",
+              "0",
+              "4225/4096",
+              "0",
+              "274625/262144"
+            ]
+          ]
+        ],
+        "state_supports": [
+          [
+            "1/1024",
+            "1"
+          ],
+          [
+            "513/512",
+            "129/64"
+          ],
+          [
+            "3091/1024",
+            "12481/4096"
+          ],
+          [
+            "24849/4096",
+            "1073409/262144"
+          ]
+        ],
+        "status": "verified-joint-rational-policy",
+        "upper_minus_physical_lower_squared": "8412406177/536870912",
+        "upper_minus_virtual_profile_oracle_squared": "0",
+        "virtual_profile_oracle_squared": "1152206881281/68719476736",
+        "virtual_terminal_absolute": "1073409/262144",
+        "virtual_terminal_squared": "1152206881281/68719476736"
+      },
+      "policy_class": "fixed-plan",
+      "sigma": "optimized-diagonal",
+      "source_folder": "joint-filter-04369201-recheck-v2",
+      "source_path": "attempts/0016",
+      "source_record_sha256": "c47d9190f7dc7697fb6bd265a9f61e3928357d8a0b9fdea6f85142df98191fd0",
+      "source_sidecar_sha256": "3854b40ef43fce86a6c396dd1c19645426c66d0f43af362581935ab814eee9b9"
+    },
+    {
+      "encoding": "past-zeta",
+      "epsilon": "1/64",
+      "horizon": 4,
+      "id": "joint-T4-optimized-diagonal-joint",
+      "policy": {
+        "filter": [
+          [
+            "1/1024",
+            "1"
+          ],
+          [
+            "1/1024",
+            "65/64"
+          ],
+          [
+            "1/1024",
+            "4161/4096"
+          ],
+          [
+            "1/1024",
+            "266369/262144"
+          ]
+        ],
+        "maximum_native_response_adjustment": 1.734723475976807e-18,
+        "normalized_policy": [
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "-1/64",
+            "0",
+            "-63/64",
+            "0",
+            "0"
+          ]
+        ],
+        "physical_information": "zeta past=diag(s)^-1*(x_next-A*x-B*u); current/future zeta forbidden",
+        "physical_unrestricted_lower_squared": "75418890625/68719476736",
+        "rationalization": "new candidate limit_denominator(2**48), exact response/filter/support replay",
+        "response_reconstruction": "exact recurrence from reconstructed filter/control; raw response arrays unchanged",
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "1/2",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "65/64",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "1/2",
+              "1/1024",
+              "33/64",
+              "1/1024",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "1/64",
+              "0",
+              "4161/4096",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "1/2",
+              "1/1024",
+              "67/128",
+              "1/1024",
+              "2145/4096",
+              "1/1024",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "129/4096",
+              "0",
+              "266369/262144"
+            ]
+          ]
+        ],
+        "state_supports": [
+          [
+            "1/1024",
+            "1"
+          ],
+          [
+            "257/512",
+            "65/64"
+          ],
+          [
+            "1043/1024",
+            "4225/4096"
+          ],
+          [
+            "6353/4096",
+            "274625/262144"
+          ]
+        ],
+        "status": "verified-joint-rational-policy",
+        "upper_minus_physical_lower_squared": "0",
+        "upper_minus_virtual_profile_oracle_squared": "0",
+        "virtual_profile_oracle_squared": "75418890625/68719476736",
+        "virtual_terminal_absolute": "274625/262144",
+        "virtual_terminal_squared": "75418890625/68719476736"
+      },
+      "policy_class": "joint",
+      "sigma": "optimized-diagonal",
+      "source_folder": "joint-filter-04369201-recheck-v2",
+      "source_path": "attempts/0018",
+      "source_record_sha256": "5e1925149ef1675886d535ee617906cd25da475a20f30e1044f9ab68b906d8f7",
+      "source_sidecar_sha256": "3854b40ef43fce86a6c396dd1c19645426c66d0f43af362581935ab814eee9b9"
+    },
+    {
+      "encoding": "past-zeta",
+      "epsilon": "1/64",
+      "horizon": 8,
+      "id": "joint-T8-fixed5over4-fixed-filter",
+      "policy": {
+        "filter": [
+          [
+            "1/1024",
+            "5/4"
+          ],
+          [
+            "1/1024",
+            "5/4"
+          ],
+          [
+            "1/1024",
+            "5/4"
+          ],
+          [
+            "1/1024",
+            "5/4"
+          ],
+          [
+            "1/1024",
+            "5/4"
+          ],
+          [
+            "1/1024",
+            "5/4"
+          ],
+          [
+            "1/1024",
+            "5/4"
+          ],
+          [
+            "1/1024",
+            "5/4"
+          ]
+        ],
+        "maximum_native_response_adjustment": 8.673617379884035e-19,
+        "normalized_policy": [
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-1/4",
+            "0",
+            "-3/4",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "-1/2",
+            "0",
+            "-1/2",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "-3/4",
+            "0",
+            "-1/4",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "-1",
+            "0",
+            "0"
+          ]
+        ],
+        "physical_information": "zeta past=diag(s)^-1*(x_next-A*x-B*u); current/future zeta forbidden",
+        "physical_unrestricted_lower_squared": "24031838291621636962890625/19342813113834066795298816",
+        "rationalization": "new candidate limit_denominator(2**48), exact response/filter/support replay",
+        "response_reconstruction": "exact recurrence from reconstructed filter/control; raw response arrays unchanged",
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "5/4",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "3/4",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1/4",
+              "0",
+              "5/4",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "7/8",
+              "1/1024",
+              "7/8",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "1/2",
+              "0",
+              "5/4",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "7/8",
+              "1/1024",
+              "9/8",
+              "1/1024",
+              "1",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "3/4",
+              "0",
+              "5/4",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "7/8",
+              "1/1024",
+              "9/8",
+              "1/1024",
+              "7/4",
+              "1/1024",
+              "3/4",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "3/4",
+              "0",
+              "1/4",
+              "0",
+              "5/4",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "7/8",
+              "1/1024",
+              "9/8",
+              "1/1024",
+              "17/8",
+              "1/1024",
+              "7/8",
+              "1/1024",
+              "5/4",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "5/4",
+              "0",
+              "5/4",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "7/8",
+              "1/1024",
+              "9/8",
+              "1/1024",
+              "17/8",
+              "1/1024",
+              "7/8",
+              "1/1024",
+              "5/2",
+              "1/1024",
+              "3/4",
+              "1/1024",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "5/4",
+              "0",
+              "1/4",
+              "0",
+              "5/4",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "7/8",
+              "1/1024",
+              "9/8",
+              "1/1024",
+              "17/8",
+              "1/1024",
+              "7/8",
+              "1/1024",
+              "15/4",
+              "1/1024",
+              "1",
+              "1/1024",
+              "3/4",
+              "1/1024",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "5/4",
+              "0",
+              "1/4",
+              "0",
+              "1/4",
+              "0",
+              "5/4"
+            ]
+          ]
+        ],
+        "state_supports": [
+          [
+            "1/1024",
+            "5/4"
+          ],
+          [
+            "385/512",
+            "3/2"
+          ],
+          [
+            "1795/1024",
+            "7/4"
+          ],
+          [
+            "769/256",
+            "2"
+          ],
+          [
+            "4613/1024",
+            "9/4"
+          ],
+          [
+            "3203/512",
+            "5/2"
+          ],
+          [
+            "8455/1024",
+            "11/4"
+          ],
+          [
+            "1345/128",
+            "3"
+          ]
+        ],
+        "status": "verified-joint-rational-policy",
+        "upper_minus_physical_lower_squared": "150053479732884964194798719/19342813113834066795298816",
+        "upper_minus_virtual_profile_oracle_squared": "0",
+        "virtual_profile_oracle_squared": "9",
+        "virtual_terminal_absolute": "3",
+        "virtual_terminal_squared": "9"
+      },
+      "policy_class": "fixed-filter",
+      "sigma": "fixed5over4",
+      "source_folder": "joint-filter-04369201-recheck-v2",
+      "source_path": "attempts/0023",
+      "source_record_sha256": "85f7e518332ce24a4d530ac2fd4eee9a320f2dfc26ab76d7070667585504a55b",
+      "source_sidecar_sha256": "3854b40ef43fce86a6c396dd1c19645426c66d0f43af362581935ab814eee9b9"
+    },
+    {
+      "encoding": "past-zeta",
+      "epsilon": "1/64",
+      "horizon": 8,
+      "id": "joint-T8-optimized-diagonal-fixed-gain",
+      "policy": {
+        "filter": [
+          [
+            "1/1024",
+            "1"
+          ],
+          [
+            "1/1024",
+            "65/64"
+          ],
+          [
+            "1/1024",
+            "4221/4096"
+          ],
+          [
+            "1/1024",
+            "273865/262144"
+          ],
+          [
+            "1/1024",
+            "17754341/16777216"
+          ],
+          [
+            "1/1024",
+            "1150123665/1073741824"
+          ],
+          [
+            "1/1024",
+            "74452510861/68719476736"
+          ],
+          [
+            "1/1024",
+            "4816481069465/4398046511104"
+          ]
+        ],
+        "maximum_native_response_adjustment": 2.6020852139652106e-18,
+        "normalized_policy": [
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-1/16",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-15/256",
+            "0",
+            "-65/1024",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-225/4096",
+            "0",
+            "-975/16384",
+            "0",
+            "-4221/65536",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-3375/65536",
+            "0",
+            "-14625/262144",
+            "0",
+            "-63315/1048576",
+            "0",
+            "-273865/4194304",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-50625/1048576",
+            "0",
+            "-219375/4194304",
+            "0",
+            "-949725/16777216",
+            "0",
+            "-4107975/67108864",
+            "0",
+            "-17754341/268435456",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-759375/16777216",
+            "0",
+            "-3290625/67108864",
+            "0",
+            "-14245875/268435456",
+            "0",
+            "-61619625/1073741824",
+            "0",
+            "-266315115/4294967296",
+            "0",
+            "-1150123665/17179869184",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-11390625/268435456",
+            "0",
+            "-49359375/1073741824",
+            "0",
+            "-213688125/4294967296",
+            "0",
+            "-924294375/17179869184",
+            "0",
+            "-3994726725/68719476736",
+            "0",
+            "-17251854975/274877906944",
+            "0",
+            "-74452510861/1099511627776",
+            "0",
+            "0"
+          ]
+        ],
+        "physical_information": "zeta past=diag(s)^-1*(x_next-A*x-B*u); current/future zeta forbidden",
+        "physical_unrestricted_lower_squared": "24031838291621636962890625/19342813113834066795298816",
+        "rationalization": "new candidate limit_denominator(2**48), exact response/filter/support replay",
+        "response_reconstruction": "exact recurrence from reconstructed filter/control; raw response arrays unchanged",
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "31/32",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "15/16",
+              "0",
+              "65/64",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "961/512",
+              "1/1024",
+              "2015/2048",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "225/256",
+              "0",
+              "975/1024",
+              "0",
+              "4221/4096",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "22351/8192",
+              "1/1024",
+              "62465/32768",
+              "1/1024",
+              "130851/131072",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "3375/4096",
+              "0",
+              "14625/16384",
+              "0",
+              "63315/65536",
+              "0",
+              "273865/262144",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "462241/131072",
+              "1/1024",
+              "1452815/524288",
+              "1/1024",
+              "4056381/2097152",
+              "1/1024",
+              "8489815/8388608",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "50625/65536",
+              "0",
+              "219375/262144",
+              "0",
+              "949725/1048576",
+              "0",
+              "4107975/4194304",
+              "0",
+              "17754341/16777216",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "8965231/2097152",
+              "1/1024",
+              "30045665/8388608",
+              "1/1024",
+              "94343571/33554432",
+              "1/1024",
+              "263184265/134217728",
+              "1/1024",
+              "550384571/536870912",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "759375/1048576",
+              "0",
+              "3290625/4194304",
+              "0",
+              "14245875/16777216",
+              "0",
+              "61619625/67108864",
+              "0",
+              "266315115/268435456",
+              "0",
+              "1150123665/1073741824",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "166984321/33554432",
+              "1/1024",
+              "582740015/134217728",
+              "1/1024",
+              "1951119261/536870912",
+              "1/1024",
+              "6121156615/2147483648",
+              "1/1024",
+              "17061921701/8589934592",
+              "1/1024",
+              "35653833615/34359738368",
+              "1/1024",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "11390625/16777216",
+              "0",
+              "49359375/67108864",
+              "0",
+              "213688125/268435456",
+              "0",
+              "924294375/1073741824",
+              "0",
+              "3994726725/4294967296",
+              "0",
+              "17251854975/17179869184",
+              "0",
+              "74452510861/68719476736",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "3024858511/536870912",
+              "1/1024",
+              "10853980865/2147483648",
+              "1/1024",
+              "37842240051/8589934592",
+              "1/1024",
+              "126591631465/34359738368",
+              "1/1024",
+              "396827275691/137438953472",
+              "1/1024",
+              "1105268842065/549755813888",
+              "1/1024",
+              "2308027836691/2199023255552",
+              "1/1024",
+              "0"
+            ],
+            [
+              "0",
+              "170859375/268435456",
+              "0",
+              "740390625/1073741824",
+              "0",
+              "3205321875/4294967296",
+              "0",
+              "13864415625/17179869184",
+              "0",
+              "59920900875/68719476736",
+              "0",
+              "258777824625/274877906944",
+              "0",
+              "1116787662915/1099511627776",
+              "0",
+              "4816481069465/4398046511104"
+            ]
+          ]
+        ],
+        "state_supports": [
+          [
+            "1/1024",
+            "1"
+          ],
+          [
+            "497/512",
+            "125/64"
+          ],
+          [
+            "5865/2048",
+            "11721/4096"
+          ],
+          [
+            "738839/131072",
+            "977125/262144"
+          ],
+          [
+            "77584763/8388608",
+            "76381841/16777216"
+          ],
+          [
+            "7333786191/536870912",
+            "5733034125/1073741824"
+          ],
+          [
+            "647119928531/34359738368",
+            "418434558361/68719476736"
+          ],
+          [
+            "54389294218823/2199023255552",
+            "29922554571125/4398046511104"
+          ]
+        ],
+        "status": "verified-joint-rational-policy",
+        "upper_minus_physical_lower_squared": "108915929221291499465109375/2417851639229258349412352",
+        "upper_minus_virtual_profile_oracle_squared": "0",
+        "virtual_profile_oracle_squared": "895359272061953632683765625/19342813113834066795298816",
+        "virtual_terminal_absolute": "29922554571125/4398046511104",
+        "virtual_terminal_squared": "895359272061953632683765625/19342813113834066795298816"
+      },
+      "policy_class": "fixed-gain",
+      "sigma": "optimized-diagonal",
+      "source_folder": "joint-filter-04369201-recheck-v2",
+      "source_path": "attempts/0021",
+      "source_record_sha256": "22e927713f856355a16a86cc9ea42ebda7bfe7ce180d24df7a0dbac571a16908",
+      "source_sidecar_sha256": "3854b40ef43fce86a6c396dd1c19645426c66d0f43af362581935ab814eee9b9"
+    },
+    {
+      "encoding": "past-zeta",
+      "epsilon": "1/64",
+      "horizon": 8,
+      "id": "joint-T8-optimized-diagonal-fixed-plan",
+      "policy": {
+        "filter": [
+          [
+            "1/1024",
+            "1"
+          ],
+          [
+            "1/1024",
+            "65/64"
+          ],
+          [
+            "1/1024",
+            "4225/4096"
+          ],
+          [
+            "1/1024",
+            "274625/262144"
+          ],
+          [
+            "1/1024",
+            "17850625/16777216"
+          ],
+          [
+            "1/1024",
+            "1160290625/1073741824"
+          ],
+          [
+            "1/1024",
+            "75418890625/68719476736"
+          ],
+          [
+            "1/1024",
+            "4902227890625/4398046511104"
+          ]
+        ],
+        "maximum_native_response_adjustment": 2.168404344971009e-19,
+        "normalized_policy": [
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        ],
+        "physical_information": "zeta past=diag(s)^-1*(x_next-A*x-B*u); current/future zeta forbidden",
+        "physical_unrestricted_lower_squared": "24031838291621636962890625/19342813113834066795298816",
+        "rationalization": "new candidate limit_denominator(2**48), exact response/filter/support replay",
+        "response_reconstruction": "exact recurrence from reconstructed filter/control; raw response arrays unchanged",
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "1",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "65/64",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "2",
+              "1/1024",
+              "65/64",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "65/64",
+              "0",
+              "4225/4096",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "3",
+              "1/1024",
+              "65/32",
+              "1/1024",
+              "4225/4096",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "65/64",
+              "0",
+              "4225/4096",
+              "0",
+              "274625/262144",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "4",
+              "1/1024",
+              "195/64",
+              "1/1024",
+              "4225/2048",
+              "1/1024",
+              "274625/262144",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "65/64",
+              "0",
+              "4225/4096",
+              "0",
+              "274625/262144",
+              "0",
+              "17850625/16777216",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "5",
+              "1/1024",
+              "65/16",
+              "1/1024",
+              "12675/4096",
+              "1/1024",
+              "274625/131072",
+              "1/1024",
+              "17850625/16777216",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "65/64",
+              "0",
+              "4225/4096",
+              "0",
+              "274625/262144",
+              "0",
+              "17850625/16777216",
+              "0",
+              "1160290625/1073741824",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "6",
+              "1/1024",
+              "325/64",
+              "1/1024",
+              "4225/1024",
+              "1/1024",
+              "823875/262144",
+              "1/1024",
+              "17850625/8388608",
+              "1/1024",
+              "1160290625/1073741824",
+              "1/1024",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "65/64",
+              "0",
+              "4225/4096",
+              "0",
+              "274625/262144",
+              "0",
+              "17850625/16777216",
+              "0",
+              "1160290625/1073741824",
+              "0",
+              "75418890625/68719476736",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "7",
+              "1/1024",
+              "195/32",
+              "1/1024",
+              "21125/4096",
+              "1/1024",
+              "274625/65536",
+              "1/1024",
+              "53551875/16777216",
+              "1/1024",
+              "1160290625/536870912",
+              "1/1024",
+              "75418890625/68719476736",
+              "1/1024",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "65/64",
+              "0",
+              "4225/4096",
+              "0",
+              "274625/262144",
+              "0",
+              "17850625/16777216",
+              "0",
+              "1160290625/1073741824",
+              "0",
+              "75418890625/68719476736",
+              "0",
+              "4902227890625/4398046511104"
+            ]
+          ]
+        ],
+        "state_supports": [
+          [
+            "1/1024",
+            "1"
+          ],
+          [
+            "513/512",
+            "129/64"
+          ],
+          [
+            "3091/1024",
+            "12481/4096"
+          ],
+          [
+            "24849/4096",
+            "1073409/262144"
+          ],
+          [
+            "2664001/262144",
+            "86548801/16777216"
+          ],
+          [
+            "257061249/16777216",
+            "6699413889/1073741824"
+          ],
+          [
+            "23152382401/1073741824",
+            "504181379521/68719476736"
+          ],
+          [
+            "1986000962049/68719476736",
+            "37169836179969/4398046511104"
+          ]
+        ],
+        "status": "verified-joint-rational-policy",
+        "upper_minus_physical_lower_squared": "10605975651203990824952737/151115727451828646838272",
+        "upper_minus_virtual_profile_oracle_squared": "0",
+        "virtual_profile_oracle_squared": "1381596721645732462556840961/19342813113834066795298816",
+        "virtual_terminal_absolute": "37169836179969/4398046511104",
+        "virtual_terminal_squared": "1381596721645732462556840961/19342813113834066795298816"
+      },
+      "policy_class": "fixed-plan",
+      "sigma": "optimized-diagonal",
+      "source_folder": "joint-filter-04369201-recheck-v2",
+      "source_path": "attempts/0020",
+      "source_record_sha256": "d31e23792d222aa4d53d9b176479e9f3aafb0d5fc7469c639a97c09a3b66b36c",
+      "source_sidecar_sha256": "3854b40ef43fce86a6c396dd1c19645426c66d0f43af362581935ab814eee9b9"
+    },
+    {
+      "encoding": "past-zeta",
+      "epsilon": "1/64",
+      "horizon": 8,
+      "id": "joint-T8-optimized-diagonal-joint",
+      "policy": {
+        "filter": [
+          [
+            "1/1024",
+            "1"
+          ],
+          [
+            "1/1024",
+            "65/64"
+          ],
+          [
+            "1/1024",
+            "4161/4096"
+          ],
+          [
+            "1/1024",
+            "266369/262144"
+          ],
+          [
+            "1/1024",
+            "17051841/16777216"
+          ],
+          [
+            "1/1024",
+            "1091592449/1073741824"
+          ],
+          [
+            "1/1024",
+            "69879767361/68719476736"
+          ],
+          [
+            "1/1024",
+            "4473465401729/4398046511104"
+          ]
+        ],
+        "maximum_native_response_adjustment": 4.336808689942018e-19,
+        "normalized_policy": [
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "-1/64",
+            "0",
+            "-63/64",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "-129/4096",
+            "0",
+            "-4225/262144",
+            "0",
+            "-249663/262144",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "-1",
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          [
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "0",
+            "-1",
+            "0",
+            "0"
+          ]
+        ],
+        "physical_information": "zeta past=diag(s)^-1*(x_next-A*x-B*u); current/future zeta forbidden",
+        "physical_unrestricted_lower_squared": "24031838291621636962890625/19342813113834066795298816",
+        "rationalization": "new candidate limit_denominator(2**48), exact response/filter/support replay",
+        "response_reconstruction": "exact recurrence from reconstructed filter/control; raw response arrays unchanged",
+        "state_responses": [
+          [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "1",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "1/2",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "65/64",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "1/2",
+              "1/1024",
+              "33/64",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "1/64",
+              "0",
+              "4161/4096",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "1/2",
+              "1/1024",
+              "67/128",
+              "1/1024",
+              "2145/4096",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "129/4096",
+              "0",
+              "266369/262144",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "1/2",
+              "1/1024",
+              "67/128",
+              "1/1024",
+              "1137/2048",
+              "1/1024",
+              "135297/262144",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "129/4096",
+              "0",
+              "4225/262144",
+              "0",
+              "17051841/16777216",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "1/2",
+              "1/1024",
+              "67/128",
+              "1/1024",
+              "4677/8192",
+              "1/1024",
+              "274819/524288",
+              "1/1024",
+              "9062625/16777216",
+              "1/1024",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "1073409/16777216",
+              "0",
+              "1091592449/1073741824",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "1/2",
+              "1/1024",
+              "67/128",
+              "1/1024",
+              "4677/8192",
+              "1/1024",
+              "274819/524288",
+              "1/1024",
+              "5068017/8388608",
+              "1/1024",
+              "554721537/1073741824",
+              "1/1024",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "1073409/16777216",
+              "0",
+              "17850625/1073741824",
+              "0",
+              "69879767361/68719476736",
+              "0",
+              "0"
+            ]
+          ],
+          [
+            [
+              "1/1024",
+              "1/2",
+              "1/1024",
+              "67/128",
+              "1/1024",
+              "4677/8192",
+              "1/1024",
+              "274819/524288",
+              "1/1024",
+              "11209443/16777216",
+              "1/1024",
+              "286286081/536870912",
+              "1/1024",
+              "35520028993/68719476736",
+              "1/1024",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "1073409/16777216",
+              "0",
+              "17850625/1073741824",
+              "0",
+              "1160290625/68719476736",
+              "0",
+              "4473465401729/4398046511104"
+            ]
+          ]
+        ],
+        "state_supports": [
+          [
+            "1/1024",
+            "1"
+          ],
+          [
+            "257/512",
+            "65/64"
+          ],
+          [
+            "1043/1024",
+            "4225/4096"
+          ],
+          [
+            "6353/4096",
+            "274625/262144"
+          ],
+          [
+            "550401/262144",
+            "17850625/16777216"
+          ],
+          [
+            "44704065/16777216",
+            "1160290625/1073741824"
+          ],
+          [
+            "3485528449/1073741824",
+            "75418890625/68719476736"
+          ],
+          [
+            "264200081857/68719476736",
+            "4902227890625/4398046511104"
+          ]
+        ],
+        "status": "verified-joint-rational-policy",
+        "upper_minus_physical_lower_squared": "0",
+        "upper_minus_virtual_profile_oracle_squared": "0",
+        "virtual_profile_oracle_squared": "24031838291621636962890625/19342813113834066795298816",
+        "virtual_terminal_absolute": "4902227890625/4398046511104",
+        "virtual_terminal_squared": "24031838291621636962890625/19342813113834066795298816"
+      },
+      "policy_class": "joint",
+      "sigma": "optimized-diagonal",
+      "source_folder": "joint-filter-04369201-recheck-v2",
+      "source_path": "attempts/0022",
+      "source_record_sha256": "74a3ed1c8cb61c27b120def5219bc79fcbadcf2559d53e545267c1ca707e6d07",
+      "source_sidecar_sha256": "3854b40ef43fce86a6c396dd1c19645426c66d0f43af362581935ab814eee9b9"
+    }
+  ],
+  "schema": "csl.mpc07.online-inputs/1",
+  "scope": "causal binary64 evaluation of existing rational policies; no LP solve or MPC reoptimization; two physical sample traces do not prove robustness",
+  "tolerance": {
+    "absolute": 1e-10,
+    "relative": 1e-10
+  },
+  "trace_definition": "delta=epsilon constant in both families; w=+1 or w=(-1)^stage; controller never receives either",
+  "trace_families": [
+    "positive",
+    "alternating"
+  ],
+  "unavailable_profiles": [],
+  "upstream_anchors": {
+    "bounded-policy-0e821c2a": "5c50928b1650a5f665df415d7b9cd7750cafd81d8d12e28956b74bc7413b4afe",
+    "bounded-policy-0e821c2a-recheck-v2": "d03f44424e7df6bf5caf7caf0650ae1a7a69da2da12d3954a22f3d2e9a4c88d9",
+    "joint-filter-04369201": "f7ee7214ac3a9f3ca963fce474e1e8688a7e739156a416d3d8cf879709202169",
+    "joint-filter-04369201-recheck-v2": "37d34a5095825831eb6e8e8e9bba607a304a8d75a77c27a1115b26e36aaaf6ed"
+  },
+  "upstream_checked_outcomes": 218,
+  "warmup_repetitions": 1
+}
