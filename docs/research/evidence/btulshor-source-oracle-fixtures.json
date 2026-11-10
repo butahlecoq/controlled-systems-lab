@@ -2849,6 +2849,44 @@
         }
       },
       "stdin_sha256": "50aad50a033ab79be0dbce190e420e463499b30829f1a5ca239b87674f623c45"
+    },
+    {
+      "case": {
+        "id": "modif-entry-p1-objective-row",
+        "operation": "modif",
+        "rows": 3,
+        "cols": 1,
+        "a": [
+          1,
+          2,
+          -1
+        ],
+        "x": [
+          1,
+          2,
+          -1
+        ],
+        "initial_status": 1,
+        "epsilon": 1e-05
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "original_status": 1,
+          "x": [
+            1.0,
+            4.0,
+            0.0
+          ],
+          "basis": [
+            1,
+            -2,
+            -3
+          ]
+        }
+      },
+      "stdin_sha256": "7ea5ff10226a3ec3b39b1ec34ec99a6bcd1e51f4fd8911f280fc732c48ddfbe2"
     }
   ]
 }
