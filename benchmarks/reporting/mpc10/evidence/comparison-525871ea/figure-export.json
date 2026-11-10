@@ -1,0 +1,18 @@
+{
+  "schema": "csl.mpc10.figure-export/1",
+  "generator_sha256": "27d5e490a6b0572753d1c8b97b618e4ebc5414e1d470798804a9ae633f6ab74d",
+  "shared_style_sha256": "c2f7078df95b9d75fe90f0f407023383cae4b58dd688dfa5fa5ac5b9d18664c6",
+  "normalizer_sha256": "12403aa6d6c425636e7a8f1be11e1664955334267279484b5c672f129afbfa3a",
+  "verification_sha256": "05800025b152a01206959bf6a572067291f8d87956a75682b69abf38d135089f",
+  "packages": {
+    "matplotlib": "3.11.2",
+    "numpy": "2.5.4",
+    "pillow": "13.0.0"
+  },
+  "figures": {
+    "branches.png": "fb00b0c78a24539a2c95011e0909cd2b1e806ba02753a568893381dbdbf0ba71",
+    "branches.svg": "70b56d9e7e6eda62fb02522c4de40316fb957cd32eca5a230141e26e5f9d3eaa",
+    "paths.png": "2e4179fda5c4223df23cff155880507e5ef7e9f7585ee99e6cb01dd67a0d93cb",
+    "paths.svg": "13112b0fe720cfbe37e54dcf23193aac18f587e6646abef6ce1c682c6deb1cbf"
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "verification_sha256": "05800025b152a01206959bf6a572067291f8d87956a75682b69abf38d135089f",
+  "figure_style": "csl-report-quantitative-v1",
+  "scope": "saved actual CSL optimal anchors; y=0 is an exact invariant, not a general 2D scalability claim",
+  "cases": [
+    {
+      "id": "published-2d-identity",
+      "native_stream_sha256": "ddae6c503b76e5a14cd30db7db73fd9f881538df1ff8883b5651bd424db3547d",
+      "path": {
+        "edges": [
+          "switch"
+        ],
+        "modes": [
+          "source",
+          "target"
+        ]
+      },
+      "joint_anchor": [
+        -1.0,
+        -0.0,
+        1.0,
+        -0.0,
+        -0.0,
+        -0.0,
+        -0.0
+      ],
+      "terminal_objective": 0.0,
+      "core_family_verification": {
+        "branches": [
+          {
+            "coverage": 1,
+            "diagnostics": [],
+            "feasibility": 1,
+            "optimality": 1,
+            "path": {
+              "edges": [
+                "switch"
+              ],
+              "modes": [
+                "source",
+                "target"
+              ]
+            }
+          }
+        ],
+        "continuous_coverage": 1,
+        "global_optimality": 1,
+        "verifier": "csl.hybrid.exact-linear-h",
+        "version": "1"
+      }
+    },
+    {
+      "id": "guard-negative-reset",
+      "native_stream_sha256": "9bae591d6820387393c8341416e7dc81706791a0df89a56bb80c006ae7accd84",
+      "path": {
+        "edges": [
+          "switch-a"
+        ],
+        "modes": [
+          "source",
+          "target"
+        ]
+      },
+      "joint_anchor": [
+        -1.0,
+        -0.0,
+        1.5,
+        0.5,
+        -0.0,
+        0.5,
+        -0.0
+      ],
+      "terminal_objective": 0.5,
+      "core_family_verification": {
+        "branches": [
+          {
+            "coverage": 1,
+            "diagnostics": [],
+            "feasibility": 1,
+            "optimality": 1,
+            "path": {
+              "edges": [
+                "switch-a"
+              ],
+              "modes": [
+                "source",
+                "target"
+              ]
+            }
+          },
+          {
+            "coverage": 1,
+            "diagnostics": [],
+            "feasibility": 1,
+            "optimality": 1,
+            "path": {
+              "edges": [
+                "switch-b"
+              ],
+              "modes": [
+                "source",
+                "target"
+              ]
+            }
+          }
+        ],
+        "continuous_coverage": 1,
+        "global_optimality": 1,
+        "verifier": "csl.hybrid.exact-linear-h",
+        "version": "1"
+      }
+    }
+  ]
+}
