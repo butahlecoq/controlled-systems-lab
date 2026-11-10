@@ -11,10 +11,13 @@
 #include <atomic>
 #include <chrono>
 #include <cmath>
+#include <cstdlib>
 #include <iomanip>
 #include <limits>
 #include <sstream>
 #include <stdexcept>
+#include <string_view>
+#include <syncstream>
 
 namespace csl::adapters::lp {
 namespace {
@@ -25,6 +28,92 @@ std::atomic<std::stop_source*> cancel_on_simplex_interrupt_for_test{};
 using namespace optimization;
 constexpr const char* adapter_version = "1.1.0+highs.1.11.0";
 constexpr const char* archive_hash = "2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275";
+constexpr const char* clock_snapshot_patch_hash = CSL_HIGHS_CLOCK_SNAPSHOT_PATCH_SHA256;
+constexpr std::string_view clock_event_prefix = "CSL_HIGHS_CLOCK/1 ";
+std::atomic<std::uint64_t> next_clock_call_index{};
+
+bool clock_capture_enabled() noexcept {
+#if defined(_MSC_VER)
+    char value[2]{};
+    std::size_t required{};
+    return ::getenv_s(&required, value, sizeof(value), "CSL_HIGHS_INTERNAL_CLOCKS") == 0
+        && required == 2 && value[0] == '1';
+#else
+    const char* value = std::getenv("CSL_HIGHS_INTERNAL_CLOCKS");
+    return value && std::string_view(value) == "1";
+#endif
+}
+
+void write_json_string(std::ostream& out, std::string_view value) {
+    constexpr char hex[] = "0123456789abcdef";
+    out << '"';
+    for (const unsigned char character : value) {
+        switch (character) {
+        case '"': out << "\\\""; break;
+        case '\\': out << "\\\\"; break;
+        case '\b': out << "\\b"; break;
+        case '\f': out << "\\f"; break;
+        case '\n': out << "\\n"; break;
+        case '\r': out << "\\r"; break;
+        case '\t': out << "\\t"; break;
+        default:
+            if (character < 0x20) {
+                out << "\\u00" << hex[character >> 4] << hex[character & 0x0f];
+            } else {
+                out << static_cast<char>(character);
+            }
+        }
+    }
+    out << '"';
+}
+
+void emit_clock_event(const Highs& highs, std::uint64_t provider_call_index,
+                      int native_call_status) noexcept {
+    try {
+        const auto clocks = highs.getClockRecordsForDiagnostics();
+        std::ostringstream event;
+        event << std::setprecision(std::numeric_limits<double>::max_digits10)
+              << "{\"schema\":\"csl.highs-clock-group/1\",\"provider_call_index\":"
+              << provider_call_index
+              << ",\"capture_status\":\"captured\",\"highs_version\":";
+        write_json_string(event, highs.version());
+        event << ",\"highs_archive_sha256\":\"" << archive_hash
+              << "\",\"clock_patch_sha256\":\"" << clock_snapshot_patch_hash
+              << "\",\"native_call_status\":" << native_call_status
+              << ",\"clocks\":[";
+        for (std::size_t index = 0; index < clocks.size(); ++index) {
+            if (index) event << ',';
+            const auto& clock = clocks[index];
+            const bool duration_available = std::isfinite(clock.seconds) && clock.seconds >= 0;
+            const bool calls_available = clock.calls >= 0;
+            const auto status = !duration_available || !calls_available ? "unavailable"
+                              : clock.calls == 0 ? "uncalled" : "observed";
+            event << "{\"id\":" << clock.id << ",\"name\":";
+            write_json_string(event, clock.name);
+            event << ",\"calls\":";
+            if (duration_available && calls_available) event << clock.calls;
+            else event << "null";
+            event << ",\"elapsed_seconds\":";
+            if (duration_available && calls_available) event << clock.seconds;
+            else event << "null";
+            event << ",\"status\":\"" << status << "\"}";
+        }
+        event << "]}";
+        std::osyncstream output(std::cerr);
+        output << clock_event_prefix << event.str() << '\n';
+    } catch (...) {
+        std::osyncstream(std::cerr)
+            << clock_event_prefix
+            << "{\"schema\":\"csl.highs-clock-group/1\",\"provider_call_index\":"
+            << provider_call_index
+            << ",\"capture_status\":\"unavailable\",\"highs_version\":\""
+            << adapter_version << "\",\"highs_archive_sha256\":\"" << archive_hash
+            << "\",\"clock_patch_sha256\":\"" << clock_snapshot_patch_hash
+            << "\",\"native_call_status\":" << native_call_status
+            << ",\"clocks\":[]}\n";
+    }
+}
+
 Diagnostics diagnostic(DiagnosticCode code, std::string field, std::string message) {
     return {{code,std::move(field),std::move(message)}};
 }
@@ -233,6 +322,8 @@ class HighsLPWorkspace final : public LPWorkspace {
         highs_detail::CallbackGuard guard(h,state,require_option);
         highs_detail::configure_common(h,require_option);
         require_option(h.setOptionValue("solver","simplex"));
+        require_option(h.setOptionValue("highs_analysis_level", clock_capture_enabled()
+            ? kHighsAnalysisLevelSolverTime | kHighsAnalysisLevelNlaTime : 0));
         require_option(h.setOptionValue("primal_feasibility_tolerance",c.numerical.absolute_tolerance));
         require_option(h.setOptionValue("dual_feasibility_tolerance",c.numerical.absolute_tolerance));
         require_option(h.setOptionValue("simplex_iteration_limit",static_cast<HighsInt>(options_.simplex_iteration_limit.value_or(static_cast<std::size_t>(kHighsIInf)))));
@@ -297,8 +388,13 @@ class HighsLPWorkspace final : public LPWorkspace {
             result.raw_diagnostics = raw.str(); return result;
         }
         const auto solve_start=std::chrono::steady_clock::now();
+        const bool capture_clocks = clock_capture_enabled();
+        const auto provider_call_index = capture_clocks
+            ? next_clock_call_index.fetch_add(1, std::memory_order_relaxed) : 0;
         const auto api = h.run();
-        raw << "\nnative.solve_seconds=" << std::chrono::duration<double>(std::chrono::steady_clock::now()-solve_start).count();
+        const auto solve_end = std::chrono::steady_clock::now();
+        if (capture_clocks) emit_clock_event(h, provider_call_index, static_cast<int>(api));
+        raw << "\nnative.solve_seconds=" << std::chrono::duration<double>(solve_end-solve_start).count();
         highs_detail::observe_scheduler_threads(h,c,raw,"native");
         const auto model = h.getModelStatus();
         classify(result,api,model,state);

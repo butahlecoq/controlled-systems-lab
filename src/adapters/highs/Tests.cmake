@@ -37,6 +37,7 @@ if(TARGET CSL::highs_lp)
     ${csl_highs_SOURCE_DIR} ${csl_highs_SOURCE_DIR}/highs ${csl_highs_BINARY_DIR})
   target_compile_definitions(csl_highs_lp_test PRIVATE CSL_HIGHSLP_TESTING
     "CSL_HIGHS_PATCHED_SOURCE_SHA256=\"${CSL_HIGHS_PATCHED_SOURCE_SHA256}\""
+    "CSL_HIGHS_CLOCK_SNAPSHOT_PATCH_SHA256=\"${CSL_HIGHS_CLOCK_SNAPSHOT_PATCH_SHA256}\""
     "CSL_HIGHS_THREAD_OBSERVATION_PATCH_SHA256=\"${CSL_HIGHS_THREAD_OBSERVATION_PATCH_SHA256}\"")
   target_link_libraries(csl_highs_lp_test PUBLIC CSL::optimization CSL::registry PRIVATE highs)
   add_executable(highs_lp_tests tests/contract/lp/highs_tests.cpp)

@@ -28,3 +28,11 @@ match the saved numerical responses at both contract tolerances. The summary
 keeps physical control/trajectory differences, original J_0 and local diagnostics
 separate from descriptive single-pilot clocks. This does not prove mesh
 convergence, global optimality or a comparative timing result.
+
+The post-capture package checker at `3866dad1` validates full hexadecimal
+capture/review revisions before file or Git operations, rejects symlinked
+packages and missing source inventories, and authenticates copied review helpers
+against their recorded Git commit. Git option injection and rebound copied
+helper mutations are rejected. Five focused package/replay/initialization tests
+pass. The original mesh archive, numerical records and comparison remain
+unchanged; the capture/checker provenance is not relabelled as this later source.

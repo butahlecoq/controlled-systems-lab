@@ -1,0 +1,91 @@
+{
+  "schema": "csl.review05.family-query-environment/1",
+  "source_commit": "3b98f5b02838909981b7ce70378f58dc25c74457",
+  "source_status": "",
+  "binary_sha256": "c5da12e86833b5c2ff8e52a00c1a2974da321b7f714b7a8fcc173a36cb0d4cf5",
+  "binary_path": "/home/butahlecoq/.local/share/codex/build/review05-family-query-driver-20261109/csl_review05_family_query",
+  "build_cache_sha256": "1b6410111a3eb8e30b2df47b82dc5a60582ef95a082c2a1a412c06334990b7fd",
+  "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+  "host": "omarchy",
+  "machine": "x86_64",
+  "python": "3.14.8",
+  "logical_cpus": 8,
+  "cpu": {
+    "command": [
+      "lscpu"
+    ],
+    "returncode": 0,
+    "output": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           43 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  8\nOn-line CPU(s) list:                     0-7\nVendor ID:                               AuthenticAMD\nModel name:                              AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx\nCPU family:                              23\nModel:                                   24\nThread(s) per core:                      2\nCore(s) per socket:                      4\nSocket(s):                               1\nStepping:                                1\nMicrocode version:                       0x8108102\nFrequency boost:                         enabled\nCPU(s) scaling MHz:                      98%\nCPU max MHz:                             3700.0000\nCPU min MHz:                             1400.0000\nBogoMIPS:                                4191.96\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl nonstop_tsc cpuid extd_apicid aperfmperf rapl pni pclmulqdq monitor ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand lahf_lm cmp_legacy extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw skinit wdt tce topoext perfctr_core perfctr_nb bpext perfctr_llc mwaitx cpb hw_pstate ssbd ibpb vmmcall fsgsbase bmi1 avx2 smep bmi2 rdseed adx smap clflushopt sha_ni xsaveopt xsavec xgetbv1 clzero xsaveerptr arat npt lbrv svm_lock nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold avic v_vmsave_vmload vgif overflow_recov succor smca sev sev_es\nL1d cache:                               128 KiB (4 instances)\nL1i cache:                               256 KiB (4 instances)\nL2 cache:                                2 MiB (4 instances)\nL3 cache:                                4 MiB (1 instance)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-7\nVulnerability Gather data sampling:      Not affected\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Mitigation; untrained return thunk; SMT vulnerable\nVulnerability Spec rstack overflow:      Mitigation; Safe RET\nVulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Retpolines; IBPB conditional; STIBP disabled; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Not affected\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Mitigation; IBPB before exit to userspace\n"
+  },
+  "load_average_before": [
+    2.9375,
+    5.06396484375,
+    6.29541015625
+  ],
+  "compiler": {
+    "command": [
+      "c++",
+      "--version"
+    ],
+    "returncode": 0,
+    "output": "c++ (GCC) 16.2.1 20260810\nCopyright (C) 2026 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
+  },
+  "source_sha256": {
+    "family_query_ladder.cpp": "852a64bbeca5af283af1ac896deec98e780d5aa61245e284c70374bcff0a6fd5",
+    "CMakeLists.txt": "bad0f101f361673b6bf04d4c367b758e078cd86b963853d3bb82199d11ca4dd6",
+    "run_family_query.py": "fdff84f626097ed43226a2d67b35b712801fc60500074fe926604e956bd55cc2",
+    "check_family_query.py": "67c5ff4d30845edad6df349342e151e135f742d24de8accd615922ce5d9ed11b",
+    "scalar_query_oracle.py": "e962980de3665e8ce6d70b085700357e63bae1b08d341478cc0301063ebad03a",
+    "render_family_query.py": "ac1b9ce6c84dec39c5e63514e7afe1bdd307e2e52dc8a3a5c8130d506b87e7cd",
+    "run_horizon_ladder.py": "3d9e1e212acd64d74e52cfdc38d0a26c87de2fbf52ef512796cb368c11811f29",
+    "profile_family_query.py": "c9c6dbeebecc1618254fa834dd072b6710f35dfdd70457d1a912926723612dc4",
+    "FAMILY-QUERY.md": "a57b0460d828dc386a259eee7877e6eeaef5b31a1f64c76680ad5107b6e4ee75",
+    "figure_style.py": "c2f7078df95b9d75fe90f0f407023383cae4b58dd688dfa5fa5ac5b9d18664c6",
+    "plot.py": "12403aa6d6c425636e7a8f1be11e1664955334267279484b5c672f129afbfa3a",
+    "report_data.py": "76a52d00e05b5d3201c9ed92c4c384e36e2b26f5da7a0e4c4817db4a513edef5"
+  },
+  "scenario_sha256": {
+    "horizon01-t02.json": "056032df5c8a30e376e00c5a0743606211486a0e268b209919ba771bc2efeb76",
+    "horizon01-t04.json": "ba86e625b4a6daae09d3db8400551e23277400b20fdd78893c9fc9b9c98b2dd3",
+    "horizon01-t08.json": "af2b5471d85111d2225b5abf579c3b367bce18765763b567be0bc598290c73d4",
+    "family-query-flat-t02.json": "ebce8ead69caa895d0062bacd00564cd3dbd6844de23123d94900d6ff8a39990",
+    "family-query-flat-t04.json": "b593eaf4d559a3a13b9abf0bb4f2d8438130fbf6b0c8709caea30b1d4b98274f",
+    "family-query-flat-t08.json": "b5da8b3a3df684a888d1306acfc54c2d9d449fbf24caa546d60d1aabea6b414b"
+  },
+  "dependency_definition_sha256": {
+    "cmake/Dependencies.cmake": "d1729e6a70bbbad527729345313a1b3c9ff24d5b3a095e9b1fd5fead7f2f66d0",
+    "cmake/HighsDependencies.cmake": "b74256811154793c65d62fc9e094bfbf1ee7d3b8705193c138ee5686f888eb33",
+    "cmake/JsonDependencies.cmake": "8eb09cc55ada0a257ecdcde281b4957a84f52ba44242c800bfc3cb8cb552288e",
+    "cmake/Mpc01Dependencies.cmake": "d13a1f9f3432eac1ccb7e7f7286c9bb28ec5fc70f356710119c660a8fe07422e",
+    "cmake/ObjectivesDependencies.cmake": "ea05dceae37f023e7b84f7d6884e88446fe9eedb873c06f5913f1a2354f1f7bc",
+    "cmake/QhullDependencies.cmake": "683acb7855a276203cdba1a795e8e638592654bb42461f912fdc345affe40873"
+  },
+  "thread_environment": {
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1"
+  },
+  "resource_limits": {
+    "cpu_seconds": 300,
+    "address_space_bytes": 8589934592,
+    "wall_timeout_seconds": 150,
+    "mechanism": "POSIX RLIMIT_CPU/RLIMIT_AS and wait4; hard native heap budgeting unsupported"
+  },
+  "execution": "one fresh process per attempt; one requested outer worker and backend thread; alternating AB/BA within each fixture/mode",
+  "repetitions": 6,
+  "warmup_pairs_per_fixture_mode": 1,
+  "instrumentation": "OBS actual-operation collector enabled/disabled in same binary; native-clock instrumentation not part of this capture",
+  "comparison_claim": "inconclusive; descriptive matched-workload observations, no ranking, asymptotic or real-time claim",
+  "unavailable": [
+    "isolated verifier wall time",
+    "native heap high-water enforcement",
+    "generic membership/slice APIs",
+    "native-clock enabled/disabled overhead"
+  ],
+  "load_average_after": [
+    3.02099609375,
+    5.01171875,
+    6.2646484375
+  ],
+  "attempts": 170
+}

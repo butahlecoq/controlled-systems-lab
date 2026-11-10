@@ -1,0 +1,7 @@
+{
+  "schema": "csl.mpc06-reference-costs/1",
+  "clock": "time.monotonic_ns",
+  "construction_and_extraction_ns": 167041212,
+  "independent_check_ns": 120702143,
+  "scope": "one descriptive Python exact-reference construction plus geometry/native-history extraction and independent check; upstream loading excluded; no timing ranking"
+}

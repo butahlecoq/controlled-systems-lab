@@ -92,6 +92,44 @@ class MeshReplayTests(unittest.TestCase):
             with mock.patch('mesh_summary.subprocess.run',return_value=process([[1.,3.]])):
                 with self.assertRaisesRegex(ValueError,'numerical response'):replay(root/'bundle',bridge,root/'invalid')
 
+class MeshPackageTests(unittest.TestCase):
+    def test_source_symlink_rejects_before_reading_metadata(self):
+        import tempfile
+        from mesh_summary import check_package_sources
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary);package=root/'package';package.mkdir();outside=root/'outside';outside.mkdir()
+            try:(package/'review-source').symlink_to(outside,target_is_directory=True)
+            except OSError:self.skipTest('symlink creation unavailable')
+            with self.assertRaisesRegex(ValueError,'must not contain symlinks'):
+                check_package_sources(package)
+
+    def test_git_option_revision_rejects_before_external_write(self):
+        import tempfile
+        from mesh_summary import check_package_sources
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary);package=root/'package';package.mkdir();sentinel=root/'unexpected'
+            revision='--output='+str(sentinel)
+            binding={'review_revision':'a'*40,'capture_sources':{label:{'source_revision':revision} for label in ('accepted','refused-profile-attempt')}}
+            (package/'source-binding.json').write_text(json.dumps(binding))
+            with self.assertRaisesRegex(ValueError,'full hexadecimal commit'):
+                check_package_sources(package)
+            self.assertEqual(list(root.iterdir()),[package])
+
+    def test_rebound_review_snapshot_differs_from_recorded_commit(self):
+        import tempfile,zipfile,hashlib
+        from mesh_summary import check_package_sources
+        archive=ROOT/'benchmarks/reporting/mpc11/evidence/mesh-pilot-c0029ded/capture.zip'
+        with tempfile.TemporaryDirectory() as temporary:
+            package=Path(temporary)
+            with zipfile.ZipFile(archive) as saved:saved.extractall(package)
+            check_package_sources(package)
+            path=package/'review-source/mesh_summary.py';path.write_text(path.read_text()+'\n# rebound snapshot\n')
+            binding=json.loads((package/'source-binding.json').read_text())
+            binding['review_source_sha256']['mesh_summary.py']=hashlib.sha256(path.read_bytes()).hexdigest()
+            (package/'source-binding.json').write_text(json.dumps(binding))
+            with self.assertRaisesRegex(ValueError,'review source differs from recorded git commit'):
+                check_package_sources(package)
+
 class PrefixReplayTests(unittest.TestCase):
     def test_partial_controls_keep_original_N_and_no_completed_objective(self):
         import os,tempfile

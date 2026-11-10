@@ -594,6 +594,8 @@ std::shared_ptr<const CompiledCompleteFamilyVerifier> find_compiled_verifier(con
     if(id==ts02->id()&&version==ts02->version())return ts02;
     static const auto ts03=std::make_shared<const Ts03SingularIntegratorVerifier>();
     if(id==ts03->id()&&version==ts03->version())return ts03;
+    static const auto b_nominal=make_strategy_b_nominal_linear_exact_verifier();
+    if(id==b_nominal->id()&&version==b_nominal->version())return b_nominal;
     static const auto nominal_linear_exact=make_nominal_linear_exact_verifier();
     if(id==nominal_linear_exact->id()&&version==nominal_linear_exact->version())return nominal_linear_exact;
     static const auto b04_c_exact=make_b04_c_exact_family_verifier();

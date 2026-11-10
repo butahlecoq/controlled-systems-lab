@@ -7,6 +7,10 @@
 #include <csl/sets/data.hpp>
 
 namespace csl::synthesis::strategy_b {
+// Exact dyadic interpretation with the private bounded exact-H resource limits.
+inline constexpr char nominal_linear_exact_profile[] = "strategy-b.nominal-linear-exact-v1";
+inline constexpr char nominal_linear_exact_verifier[] = "csl.verifier.strategy-b.nominal-linear-exact";
+inline constexpr char nominal_linear_exact_proof[] = "strategy-b.nominal-linear-exact-v1";
 namespace timing {
 inline constexpr artifacts::SpanId run{0};
 inline constexpr artifacts::SpanId family_construction{1};
