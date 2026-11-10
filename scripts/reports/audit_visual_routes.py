@@ -49,6 +49,8 @@ FROZEN_DIAGRAM_EXCEPTIONS = {
     "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py",
 }
 PUBLICATION_EXPORT_ROUTES = {
+    "scripts/reports/stage_mpc07_comparison.py",
+    "scripts/reports/stage_mpc10_comparison.py",
     "scripts/reports/stage_mpc08_complete.py",
     "scripts/reports/render.py", "scripts/reports/mpc05/check_smoke.py",
     "scripts/reports/exp824/finalize_limited_report.py",
@@ -56,6 +58,12 @@ PUBLICATION_EXPORT_ROUTES = {
     "benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/figures.py",
 }
 VIZ10_ROLE_REASONS = {
+    "scripts/reports/stage_mpc07_comparison.py":
+        "Authenticates both robust-policy capture families and copied two-state figures; rechecks saved exact policies without optimization or plotting.",
+    "scripts/reports/stage_mpc10_comparison.py":
+        "Authenticates the finite/mixed/hybrid capture, reading receipt and copied two-dimensional path figures; no solver or renderer runs during staging.",
+    "benchmarks/reporting/mpc10/figures.py":
+        "Plots authenticated saved two-dimensional native hybrid paths with distinct parallel-edge identities and shared quantitative styles; no family claim follows from sampled anchors.",
     "scripts/reports/mpc06_online/render.py":
         "Renders checked-source-bound native outcomes and saved actual paths; the shared Matplotlib publication companion remains in issue #602. This is not a benchmark producer.",
     "scripts/reports/stage_mpc08_complete.py":
@@ -274,7 +282,8 @@ def source_inventory(root: Path) -> list[dict]:
                               "benchmarks/reporting/mpc11/figures.py",
                               "benchmarks/reporting/mpc08_explicit/capture_exact_regions.py",
                               "benchmarks/reporting/mpc08_explicit/capture_horizon_regions.py",
-                              "benchmarks/reporting/mpc07/report.py"}:
+                              "benchmarks/reporting/mpc07/report.py",
+                              "benchmarks/reporting/mpc10/figures.py"}:
                 disposition = "adopted-shared-quantitative-policy"
             elif relative.endswith("/control_witness_companions.py"):
                 disposition = "saved-control-witness-gallery-companion-builder"

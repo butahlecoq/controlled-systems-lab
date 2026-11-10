@@ -55,12 +55,16 @@
     },
     {
       "source": "scripts/reports/augment_pages_bundle.py",
-      "signal_count": 6,
+      "signal_count": 10,
       "asset_name_literals": [
+        "branches.svg",
         "exact-critical-regions.svg",
         "feasibility-grid.png",
+        "fixed-filter-policy.svg",
         "horizon-regions.svg",
         "invariant-tightenings.svg",
+        "joint-filter-policy.svg",
+        "paths.svg",
         "trajectory.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
@@ -1520,7 +1524,8 @@
         "fixed-filter-policy.svg",
         "joint-filter-policy.svg"
       ],
-      "disposition": "publication-validation-or-frozen-route"
+      "disposition": "publication-validation-or-frozen-route",
+      "role_and_disposition_reason": "Authenticates both robust-policy capture families and copied two-state figures; rechecks saved exact policies without optimization or plotting."
     },
     {
       "source": "scripts/reports/stage_mpc08.py",
@@ -1561,6 +1566,18 @@
         "projections.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_mpc10_comparison.py",
+      "signal_count": 11,
+      "asset_name_literals": [
+        "branches.png",
+        "branches.svg",
+        "paths.png",
+        "paths.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route",
+      "role_and_disposition_reason": "Authenticates the finite/mixed/hybrid capture, reading receipt and copied two-dimensional path figures; no solver or renderer runs during staging."
     },
     {
       "source": "scripts/reports/stage_mpc11_controller_comparison.py",
@@ -2067,6 +2084,18 @@
       ],
       "disposition": "reviewed-static-diagram-exception",
       "role_and_disposition_reason": "Draws the exact initial-state rectangle and one full two-control optimal fiber with a distinct minimum-norm selector; solver candidates are not presented as complete-family evidence."
+    },
+    {
+      "source": "benchmarks/reporting/mpc10/figures.py",
+      "signal_count": 10,
+      "asset_name_literals": [
+        "branches.png",
+        "branches.svg",
+        "paths.png",
+        "paths.svg"
+      ],
+      "disposition": "adopted-shared-quantitative-policy",
+      "role_and_disposition_reason": "Plots authenticated saved two-dimensional native hybrid paths with distinct parallel-edge identities and shared quantitative styles; no family claim follows from sampled anchors."
     },
     {
       "source": "benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/figures.py",
