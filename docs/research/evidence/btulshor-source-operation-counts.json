@@ -1,0 +1,237 @@
+{
+  "source_sha256": "06fa90d5977ab49174abbf866899000f511fad46eac4a1e72388bbe27090a442",
+  "scope": "Companion observer shim adds one integer MODIF-entry counter only; all numerical outputs/statuses/bases match the original verbatim shim on every fixture. Not an original source counter or historical runtime.",
+  "observer_changes": [
+    "Rename standalone unit/program",
+    "Add global integer ModifCalls, increment once at MODIF entry",
+    "Emit counter in wrapper JSON; original arithmetic/branches untouched"
+  ],
+  "observer_unit_sha256": "408ab7475bcc850928ca135e9127b8774f24a8555e5a6b8fb88ba2e4a34e4bf2",
+  "records": [
+    {
+      "case_id": "modif-p2-no-columns",
+      "operation": "modif",
+      "modif_calls": 1
+    },
+    {
+      "case_id": "modif-p1-no-columns",
+      "operation": "modif",
+      "modif_calls": 1
+    },
+    {
+      "case_id": "modif-p1-entry-mode",
+      "operation": "modif",
+      "modif_calls": 1
+    },
+    {
+      "case_id": "modif-p3-no-ratio",
+      "operation": "modif",
+      "modif_calls": 1
+    },
+    {
+      "case_id": "modif-enter-leave-ties",
+      "operation": "modif",
+      "modif_calls": 1
+    },
+    {
+      "case_id": "kpabep-single-negative",
+      "operation": "kpabep",
+      "modif_calls": 1
+    },
+    {
+      "case_id": "kpabep-1d-duplicate",
+      "operation": "kpabep",
+      "modif_calls": 5
+    },
+    {
+      "case_id": "kpabep-square-interior-duplicate",
+      "operation": "kpabep",
+      "modif_calls": 6
+    },
+    {
+      "case_id": "kpabep-square-edge",
+      "operation": "kpabep",
+      "modif_calls": 8
+    },
+    {
+      "case_id": "kpabep-collinear",
+      "operation": "kpabep",
+      "modif_calls": 4
+    },
+    {
+      "case_id": "kpabep-negative-square",
+      "operation": "kpabep",
+      "modif_calls": 5
+    },
+    {
+      "case_id": "kpabep-identical",
+      "operation": "kpabep",
+      "modif_calls": 2
+    },
+    {
+      "case_id": "kpabep-3d-simplex",
+      "operation": "kpabep",
+      "modif_calls": 5
+    },
+    {
+      "case_id": "kpabep-4d-simplex",
+      "operation": "kpabep",
+      "modif_calls": 6
+    },
+    {
+      "case_id": "reach-scalar",
+      "operation": "reach",
+      "modif_calls": 4
+    },
+    {
+      "case_id": "reach-padded-control",
+      "operation": "reach",
+      "modif_calls": 4
+    },
+    {
+      "case_id": "reach-two-filters",
+      "operation": "reach",
+      "modif_calls": 8
+    },
+    {
+      "case_id": "reach-last-control-first",
+      "operation": "reach",
+      "modif_calls": 3
+    },
+    {
+      "case_id": "kpabep-seeded-d1-case0",
+      "operation": "kpabep",
+      "modif_calls": 6
+    },
+    {
+      "case_id": "kpabep-seeded-d1-case1",
+      "operation": "kpabep",
+      "modif_calls": 6
+    },
+    {
+      "case_id": "kpabep-seeded-d1-case2",
+      "operation": "kpabep",
+      "modif_calls": 8
+    },
+    {
+      "case_id": "kpabep-seeded-d1-case3",
+      "operation": "kpabep",
+      "modif_calls": 8
+    },
+    {
+      "case_id": "kpabep-seeded-d1-case4",
+      "operation": "kpabep",
+      "modif_calls": 10
+    },
+    {
+      "case_id": "kpabep-seeded-d1-case5",
+      "operation": "kpabep",
+      "modif_calls": 10
+    },
+    {
+      "case_id": "kpabep-seeded-d2-case0",
+      "operation": "kpabep",
+      "modif_calls": 6
+    },
+    {
+      "case_id": "kpabep-seeded-d2-case1",
+      "operation": "kpabep",
+      "modif_calls": 6
+    },
+    {
+      "case_id": "kpabep-seeded-d2-case2",
+      "operation": "kpabep",
+      "modif_calls": 8
+    },
+    {
+      "case_id": "kpabep-seeded-d2-case3",
+      "operation": "kpabep",
+      "modif_calls": 8
+    },
+    {
+      "case_id": "kpabep-seeded-d2-case4",
+      "operation": "kpabep",
+      "modif_calls": 10
+    },
+    {
+      "case_id": "kpabep-seeded-d2-case5",
+      "operation": "kpabep",
+      "modif_calls": 10
+    },
+    {
+      "case_id": "kpabep-seeded-d3-case0",
+      "operation": "kpabep",
+      "modif_calls": 6
+    },
+    {
+      "case_id": "kpabep-seeded-d3-case1",
+      "operation": "kpabep",
+      "modif_calls": 6
+    },
+    {
+      "case_id": "kpabep-seeded-d3-case2",
+      "operation": "kpabep",
+      "modif_calls": 8
+    },
+    {
+      "case_id": "kpabep-seeded-d3-case3",
+      "operation": "kpabep",
+      "modif_calls": 8
+    },
+    {
+      "case_id": "kpabep-seeded-d3-case4",
+      "operation": "kpabep",
+      "modif_calls": 10
+    },
+    {
+      "case_id": "kpabep-seeded-d3-case5",
+      "operation": "kpabep",
+      "modif_calls": 10
+    },
+    {
+      "case_id": "kpabep-seeded-d4-case0",
+      "operation": "kpabep",
+      "modif_calls": 6
+    },
+    {
+      "case_id": "kpabep-seeded-d4-case1",
+      "operation": "kpabep",
+      "modif_calls": 6
+    },
+    {
+      "case_id": "kpabep-seeded-d4-case2",
+      "operation": "kpabep",
+      "modif_calls": 8
+    },
+    {
+      "case_id": "kpabep-seeded-d4-case3",
+      "operation": "kpabep",
+      "modif_calls": 8
+    },
+    {
+      "case_id": "kpabep-seeded-d4-case4",
+      "operation": "kpabep",
+      "modif_calls": 10
+    },
+    {
+      "case_id": "kpabep-seeded-d4-case5",
+      "operation": "kpabep",
+      "modif_calls": 10
+    },
+    {
+      "case_id": "modif-entry-p1-objective-row",
+      "operation": "modif",
+      "modif_calls": 1
+    },
+    {
+      "case_id": "tiny-top-extreme",
+      "operation": "kpabep",
+      "modif_calls": 5
+    },
+    {
+      "case_id": "tiny-bottom-extreme",
+      "operation": "kpabep",
+      "modif_calls": 5
+    }
+  ]
+}
