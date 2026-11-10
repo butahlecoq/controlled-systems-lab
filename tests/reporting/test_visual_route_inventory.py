@@ -14,6 +14,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
         inventory=audit_visual_routes.build(ROOT)
         committed=json.loads((ROOT/"scripts/reports/visual-route-inventory.json").read_text())
         self.assertEqual(committed,inventory)
+        delivery={entry["source"]:entry for entry in inventory["producers_and_routes"]}["scripts/reports/mpc06_delivery/figures.py"]
+        self.assertEqual(delivery["disposition"],"analytic-reference-checked-saved-run-renderer")
         self.assertEqual(inventory["schema"],"csl.visual-route-inventory/1")
         producers={entry["source"]:entry for entry in inventory["producers_and_routes"]}
         self.assertIn("scripts/reports/env717/check_two_points.py", producers)
@@ -167,6 +169,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertTrue(all(entry["follow_up_issue"] in follow_up_counts for entry in deferred))
         routes={entry["route"]:entry for entry in inventory["frozen_published_routes"]}
         self.assertGreater(len(routes),40)
+        self.assertEqual(routes["mpc06-completion-v1"]["companion_route"],"mpc06-complete-6b7059d62473d32d4210/index.html")
+        self.assertEqual(routes["mpc06-completion-v1"]["follow_up_issue"],602)
         self.assertEqual(routes["issue824-two-points-box-pilot-v2"]["assets"], ["projections.svg"])
         self.assertEqual(routes["issue824-two-points-box-pilot-v3"]["assets"], ["projections.svg"])
         self.assertEqual(routes["issue824-two-points-box-pilot-v4"]["assets"], ["projections.svg"])
