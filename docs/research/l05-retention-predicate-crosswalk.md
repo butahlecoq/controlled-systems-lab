@@ -35,3 +35,5 @@ The separate [T0 grouping check](evidence/l05-t0-grouping.json), delivered in [P
 ## Disposition for issue #4
 
 This crosswalk narrows candidate behavior and preserves the evidence boundary. It does not complete the historical construction/code correspondence gate. The versioned Table 1 driver and inputs, Example 2 modified-row driver, and exact source-to-run identity remain unavailable in the inspected chain. The physical-to-deviation coordinate map and evaluated nonlinear, discretization, and arithmetic error bounds over a justified region also remain unestablished. No nonlinear inclusion claim follows from these candidate replays or saved projections. Keep the reported Table 1 values unchanged and keep issue #4 open until its remaining source and enclosure obligations have evidence.
+
+The [2026-11-10 public simplex-pseudocode crosswalk](public-simplex-pseudocode-crosswalk.md) adds Bulaev/Osipov DOI 10.14529/ctcr180106 as a separately read operational specification. It explains the homogeneous-coordinate qualification without identifying that paper as the L05 Table 1 driver or changing prior capture provenance.
