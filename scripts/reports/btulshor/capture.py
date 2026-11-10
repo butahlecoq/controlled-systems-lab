@@ -290,6 +290,8 @@ def _provider_order(document: dict) -> list[str]:
 def capture(driver: Path, output: Path, *, render_python: Path | None = None,
             oracle_receipt: Path | None = None) -> None:
     root = Path(__file__).resolve().parents[3]
+    driver = driver.resolve()
+    output = output.resolve()
     if output.exists():
         raise FileExistsError(f"immutable output already exists: {output}")
     head, dirty = git_identity(root)
@@ -316,7 +318,13 @@ def capture(driver: Path, output: Path, *, render_python: Path | None = None,
                    "fixture_ids": [x[0] for x in FIXTURES], "method_ids": list(METHODS),
                    "comparison_files": {}, "method_statuses": {}, "exact_checks": {},
                    "elapsed_ns_samples": {}, "driver_runs": [], "host": _host_metadata(),
-                   "limiter_profile": {"status": "not_collected", "comparison_verdict": "inconclusive"}}
+                   "limiter_profile": {"status": "not_collected", "comparison_verdict": "inconclusive"},
+                   "execution_policy": {"process_reuse": "none; fresh driver process per repetition",
+                       "warmup": "none; first call retained",
+                       "cache_state": "uncontrolled OS and hardware caches; no cold-cache claim",
+                       "workspace_reuse": "new LP session per provider invocation; prepared workspace reused only within that reducer call",
+                       "provider_order": "forward, reverse, forward, reverse, forward",
+                       "host_load": "uncontrolled; concurrent validation may be active; descriptive timings only"}}
         for fixture_id, custom_points in FIXTURES:
             annotated_runs = []
             fixture_directory = temp / "raw/runs" / fixture_id
@@ -346,6 +354,12 @@ def capture(driver: Path, output: Path, *, render_python: Path | None = None,
                     raise
             representative = json.loads(json.dumps(annotated_runs[0]))
             representative["raw_file"] = f"raw/{fixture_id}.json"
+            representative["capture_metadata"] = {"host": summary["host"],
+                "execution_policy": summary["execution_policy"],
+                "limiter_profile": summary["limiter_profile"],
+                "source_tolerance": 1e-5, "modern_context_tolerances": [1e-8, 1e-8],
+                "arithmetic": "binary64; exact checker uses dyadic rational interpretations",
+                "inputs": "explicit coordinate lists; seeded-cloud is a fixed list, no random generator"}
             representative["input_manifest"] = [{"path": f"input/{fixture_id}-r{i}.json",
                 "sha256": sha256((temp / "input" / f"{fixture_id}-r{i}.json").read_bytes())} for i in range(1, 6)]
             for pi, provider in enumerate(representative["providers"]):
@@ -422,7 +436,10 @@ def capture(driver: Path, output: Path, *, render_python: Path | None = None,
                 archive.write(temp / name, f"{REPORT_ID}/{name}")
         if output.exists(): raise FileExistsError(f"immutable output appeared during capture: {output}")
         os.replace(temp, output)
-    except Exception:
+    except Exception as error:
+        (temp / "capture-error.txt").write_text(str(error), encoding="utf-8")
+        if isinstance(error, subprocess.CalledProcessError):
+            (temp / "renderer-stderr.txt").write_text(error.stderr or "", encoding="utf-8")
         # Failed outputs are private and clearly separated from report IDs.
         failed = output.parent / f".{REPORT_ID}.failed-{time.time_ns()}"
         if temp.exists(): os.replace(temp, failed)

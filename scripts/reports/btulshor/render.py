@@ -277,6 +277,9 @@ def render(document: dict, output_dir: Path | None = None,
     if extra:
         provenance_rows.append("<dt>Additional capture metadata</dt><dd><pre>{}</pre></dd>".format(
             html.escape(json.dumps(extra, indent=2, ensure_ascii=False, sort_keys=True))))
+    capture_metadata = document.get("capture_metadata")
+    capture_markup = ("<h2>Capture protocol and environment</h2><p><a href=\"raw/summary.json\">Complete capture summary and process memory readings</a></p><pre>" +
+                      html.escape(json.dumps(capture_metadata, indent=2, ensure_ascii=False, sort_keys=True)) + "</pre>") if capture_metadata else ""
     figure_note = (f"Matplotlib {figure_manifest['matplotlib']} · {figure_manifest['quantitative_axis_policy']}"
                    if "matplotlib" in figure_manifest else
                    "Static 2D asset is generated when rendered to a report directory."
@@ -290,7 +293,7 @@ def render(document: dict, output_dir: Path | None = None,
 <p><strong>Primary input:</strong> %%FIXTURE%% · dimension %%DIMENSION%% · %%INPUTCOUNT%% points. <strong>Figure policy:</strong> %%FIGURENOTE%%</p>%%FIGURE%%
 <h2>Fixture: %%FIXTURE%%</h2><p>Primary comparison records.%%RAWLINK%%</p>%%TABLE%%
 %%ADDITIONAL%%
-<h2>Provenance</h2><dl>%%PROVENANCE%%</dl><p>Exact-check irredundancy is shown separately from hull equality. An inconclusive result does not establish equality or failure. The display-only boundary is not a repair of source output.</p>%%ZIPLINK%%</main></body></html>"""
+%%CAPTURE%%<h2>Provenance</h2><dl>%%PROVENANCE%%</dl><p>Exact-check irredundancy is shown separately from hull equality. An inconclusive result does not establish equality or failure. The display-only boundary is not a repair of source output.</p>%%ZIPLINK%%</main></body></html>"""
     replacements = {
         "%%FIXTURE%%": html.escape(str(document.get("fixture_id", "unnamed"))),
         "%%DIMENSION%%": html.escape(str(dimension if dimension is not None else "unknown")),
@@ -298,6 +301,7 @@ def render(document: dict, output_dir: Path | None = None,
         "%%FIGURENOTE%%": html.escape(figure_note), "%%FIGURE%%": figure_html,
         "%%RAWLINK%%": _raw_link(document.get("raw_file")), "%%TABLE%%": table,
         "%%ADDITIONAL%%": additional_markup, "%%ZIPLINK%%": zip_markup,
+        "%%CAPTURE%%": capture_markup,
         "%%PROVENANCE%%": "".join(provenance_rows) or "<dt>Status</dt><dd>pending</dd>",
     }
     page = template

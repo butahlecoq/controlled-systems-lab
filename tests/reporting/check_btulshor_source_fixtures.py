@@ -70,7 +70,7 @@ def check_source_pairs(case, output):
     return errors
 
 
-def compare(record, output, modif_calls):
+def compare(record, output, modif_calls, pivot_count):
     case = record["case"]
     original = record["source_outcome"]["raw"]
     errors = []
@@ -83,6 +83,8 @@ def compare(record, output, modif_calls):
             errors.append(f"{field} differs: expected {expected!r}, got {output.get(field)!r}")
     if errors:
         return errors
+    if type(output.get("pivot_count")) is not int or output["pivot_count"] != pivot_count:
+        errors.append(f"pivot count differs: original={pivot_count}, C++={output.get('pivot_count')}")
     if case["operation"] == "modif":
         if type(output.get("original_status")) is not int or output["original_status"] != original["original_status"]:
             errors.append("original p differs")
@@ -118,10 +120,13 @@ def load_fixtures():
         raise ValueError("fixture source identity differs")
     records = documents[0]["records"] + documents[1]["records"]
     ids = [record["case"]["id"] for record in records]
-    counts = {record["case_id"]: record["modif_calls"] for record in documents[2]["records"]}
+    counts = {record["case_id"]: record for record in documents[2]["records"]}
     if (len(records) != 45 or len(set(ids)) != 45 or set(ids) != set(counts)
             or len(documents[2]["records"]) != 45):
         raise ValueError("expected 45 unique cases and matching companion counts")
+    if any(type(row.get(field)) is not int or row[field] < 0
+           for row in counts.values() for field in ("modif_calls", "pivot_count")):
+        raise ValueError("companion operation counts must be nonnegative integers")
     if any(record["source_outcome"]["execution"] != "completed" for record in records):
         raise ValueError("source fixture did not complete")
     return records, counts
@@ -144,7 +149,8 @@ def run(driver):
                     errors = [f"process exit {process.returncode}: {process.stderr}"]
                 else:
                     output = json.loads(process.stdout)
-                    errors = compare(record, output, counts[case["id"]])
+                    errors = compare(record, output, counts[case["id"]]["modif_calls"],
+                                     counts[case["id"]]["pivot_count"])
             except (OSError, subprocess.TimeoutExpired, json.JSONDecodeError) as error:
                 errors = [str(error)]
             records.append({"case_id": case["id"], "operation": case["operation"],
@@ -155,7 +161,7 @@ def run(driver):
         "driver_sha256": hashlib.sha256(driver.read_bytes()).hexdigest(),
         "source_sha256": SOURCE_SHA256,
         "numeric_tolerance": {"absolute": TOLERANCE, "relative": TOLERANCE},
-        "exact_fields": ["original status", "basis", "point ordering", "MODIF entry counts",
+        "exact_fields": ["original status", "basis", "point ordering", "MODIF entry counts", "completed MODIF pivot counts",
                          "valid original-index/source-pair shape"],
         "cases": len(records), "passed": len(records) - failed, "failed": failed, "records": records,
     }

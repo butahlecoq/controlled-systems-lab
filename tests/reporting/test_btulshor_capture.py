@@ -148,8 +148,8 @@ class CaptureHelpers(unittest.TestCase):
             parent = Path(temporary) / "bundles"
             parent.mkdir()
             bundle = parent / stage_btulshor.REPORT_ID
-            copied.capture(driver, bundle,
-                render_python=Path("/home/butahlecoq/.cache/csl-report-venv/bin/python"))
+            copied.capture(driver, Path(os.path.relpath(bundle)),
+                render_python=Path(sys.executable))
             copied.verify_bundle(bundle)
             checked = subprocess.run([sys.executable, str(bundle / "offline_check.py")],
                 cwd=temporary, check=True, capture_output=True, text=True)
@@ -160,6 +160,9 @@ class CaptureHelpers(unittest.TestCase):
             self.assertEqual(publication.source_report_id, stage_btulshor.REPORT_ID)
             self.assertIn("raw/runs/square/square-r1.json", admitted["files"])
             self.assertIn("input/square-r1.json", admitted["files"])
+            summary = json.loads(admitted["files"]["raw/summary.json"])
+            self.assertEqual(summary["execution_policy"]["warmup"], "none; first call retained")
+            self.assertIn(b"uncontrolled OS and hardware caches", admitted["files"]["index.html"])
 
 
 if __name__ == "__main__":
