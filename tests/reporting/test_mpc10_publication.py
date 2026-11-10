@@ -1,5 +1,7 @@
 """Publication boundary tests: saved evidence only; no optimization/native worker."""
 import hashlib
+import copy
+import math
 import json
 import os
 from pathlib import Path
@@ -60,6 +62,26 @@ class MPC10PublicationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'immutable'):S.stage(target)
             self.assertEqual(files(target),unchanged)
         self.assertEqual(files(S.FROZEN),before)
+
+    def test_only_derived_clock_sums_allow_accumulation_roundoff(self):
+        original=json.loads((S.READING/'metrics.json').read_bytes())
+        rounded=copy.deepcopy(original)
+        case=rounded['cases'][3]
+        for group,names in [('native_seconds',['native_lp_load_sum','native_lp_solve_sum']),
+                            ('scip_fixed_branch_totals',['formulation_and_setup_seconds','optimization_seconds'])]:
+            for name in names:case[group][name]=math.nextafter(case[group][name],math.inf)
+        self.assertTrue(S.metrics_agree(original,rounded))
+        for mode in ('clock','non-sum-clock','count','objective','hash','nonfinite','missing'):
+            mutated=copy.deepcopy(rounded);case=mutated['cases'][3]
+            if mode=='clock':case['native_seconds']['native_lp_solve_sum']+=1e-6
+            elif mode=='non-sum-clock':case['native_seconds']['whole_worker']=math.nextafter(case['native_seconds']['whole_worker'],math.inf)
+            elif mode=='count':case['native_branches']+=1
+            elif mode=='objective':case['exact_optimum']='1'
+            elif mode=='hash':mutated['verification_sha256']='0'*64
+            elif mode=='nonfinite':case['native_seconds']['native_lp_solve_sum']=float('nan')
+            else:del case['native_seconds']['native_lp_solve_sum']
+            with self.subTest(mode=mode):self.assertFalse(S.metrics_agree(original,mutated))
+        self.assertEqual(json.loads((S.READING/'metrics.json').read_bytes()),original)
 
     def test_frozen_rehash_mutation_refuses_and_preserves_site(self):
         with tempfile.TemporaryDirectory() as temporary:
