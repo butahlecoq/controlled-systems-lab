@@ -72,7 +72,7 @@ def authenticate_sources(root,environment,repository):
 def checked_records(root,repository=capture.ROOT):
     hashes=inventory(root);environment=json.loads((root/'environment.json').read_text())
     if environment.get('schema')=='csl.mpc07.joint-filter.capture/1':
-        import joint_capture
+        from benchmarks.reporting.mpc07 import joint_capture
         return joint_capture.checked_records(root,repository,hashes)
     if environment.get('schema')!='csl.mpc07.capture/1':raise ValueError('unsupported MPC07 capture schema')
     if type(environment.get('repetitions')) is not int or not 1<=environment['repetitions']<=5:raise ValueError('bounded repetition count differs')

@@ -12,8 +12,10 @@ import re
 import subprocess
 import sys
 import time
-import capture
-import joint_filter as J
+if __package__ in (None,''):
+    sys.path.insert(0,str(Path(__file__).resolve().parents[3]))
+from benchmarks.reporting.mpc07 import capture
+from benchmarks.reporting.mpc07 import joint_filter as J
 
 ROOT=Path(__file__).resolve().parents[3]
 NATIVE='b3978a98a8bfb30e21841466244ed7f78e987886'
