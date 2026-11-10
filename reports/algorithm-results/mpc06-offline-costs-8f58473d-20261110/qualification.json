@@ -1,0 +1,100 @@
+{
+  "attempts_including_warmup_per_arm": 6,
+  "capture_source": "8f58473d7ff8005c7b775706e1e1be8a7dfa7e57",
+  "capture_zip_sha256": "fb66fdcf5de670a6ad09180590b1c9538ec6d798d8f1e07a072d00cae6e90497",
+  "checking_source": "8f58473d7ff8005c7b775706e1e1be8a7dfa7e57",
+  "interpretation": "new exact canonical offline artifact construction, not retrospective old timing; substantial independent consumer/certificate work separately retained; no comparative winner, timer subtraction, gain optimizer or online latency claim",
+  "measured": {
+    "artifact_serialization_ns": {
+      "count": 5,
+      "maximum_ns": 36667,
+      "median_ns": 36666,
+      "minimum_ns": 28216,
+      "sum_ns": 166850
+    },
+    "certificate_and_consumer_check_ns": {
+      "count": 5,
+      "maximum_ns": 985040,
+      "median_ns": 948374,
+      "minimum_ns": 938108,
+      "sum_ns": 4788943
+    },
+    "construction_ns": {
+      "count": 5,
+      "maximum_ns": 62508,
+      "median_ns": 56292,
+      "minimum_ns": 53429,
+      "sum_ns": 284673
+    },
+    "episode_ns": {
+      "count": 5,
+      "maximum_ns": 1084704,
+      "median_ns": 1049294,
+      "minimum_ns": 1032952,
+      "sum_ns": 5295361
+    }
+  },
+  "measured_repetitions": 5,
+  "native_input_matches_per_attempt": 3,
+  "original_180_qps_rerun": false,
+  "process_receipts": {
+    "measured": {
+      "command": [
+        "/home/butahlecoq/.local/share/mise/installs/python/3.14.8/bin/python",
+        "-B",
+        "-m",
+        "scripts.reports.mpc06_offline.study",
+        "--worker",
+        "--inputs",
+        "/home/butahlecoq/.local/share/codex/tmp/mpc06-offline-capture-8f58473d/inputs.json"
+      ],
+      "error": null,
+      "limits": {
+        "address_space_bytes": 536870912,
+        "cpu_seconds": 15,
+        "wall_seconds": 30
+      },
+      "peak_rss_kib": 19924,
+      "return_code": 0,
+      "scope": "direct Linux worker wait4 CPU/RSS and POSIX CPU/address-space limits; wall includes startup/imports/serialization/polling; no native heap cap",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "3625391ca9cfc3d6d131d6bc4826c51a24475fe0b67f9f53a27f9405f9ce4ea7",
+      "system_cpu_seconds": 0.016982999999999998,
+      "timed_out": false,
+      "user_cpu_seconds": 0.069933,
+      "whole_process_ns": 89089396
+    },
+    "profiled": {
+      "command": [
+        "/home/butahlecoq/.local/share/mise/installs/python/3.14.8/bin/python",
+        "-B",
+        "-m",
+        "scripts.reports.mpc06_offline.study",
+        "--worker",
+        "--inputs",
+        "/home/butahlecoq/.local/share/codex/tmp/mpc06-offline-capture-8f58473d/inputs.json",
+        "--profile",
+        "/home/butahlecoq/.local/share/codex/tmp/mpc06-offline-capture-8f58473d/profile.pstats"
+      ],
+      "error": null,
+      "limits": {
+        "address_space_bytes": 536870912,
+        "cpu_seconds": 15,
+        "wall_seconds": 30
+      },
+      "peak_rss_kib": 20112,
+      "return_code": 0,
+      "scope": "direct Linux worker wait4 CPU/RSS and POSIX CPU/address-space limits; wall includes startup/imports/serialization/polling; no native heap cap",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "ab21ee895b74204aedfc6d90bee13f10e342b9b4156a9e2732c85467bd53e9ed",
+      "system_cpu_seconds": 0.226267,
+      "timed_out": false,
+      "user_cpu_seconds": 0.101119,
+      "whole_process_ns": 334010627
+    }
+  },
+  "profiled_arm_excluded": true,
+  "schema": "csl.mpc06.offline-qualification/1"
+}
