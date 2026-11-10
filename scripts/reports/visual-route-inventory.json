@@ -1491,6 +1491,15 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_mpc07_comparison.py",
+      "signal_count": 7,
+      "asset_name_literals": [
+        "fixed-filter-policy.svg",
+        "joint-filter-policy.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_mpc08.py",
       "signal_count": 12,
       "asset_name_literals": [
@@ -1953,6 +1962,12 @@
         "input-projections.svg"
       ],
       "disposition": "reviewed-static-diagram-exception"
+    },
+    {
+      "source": "benchmarks/reporting/mpc07/online/figures.py",
+      "signal_count": 1,
+      "asset_name_literals": [],
+      "disposition": "adopted-shared-quantitative-policy"
     },
     {
       "source": "benchmarks/reporting/mpc07/report.py",

@@ -247,7 +247,8 @@ def source_inventory(root: Path) -> list[dict]:
                                     "/geometry_opt_companions.py", "/viz10_plot_companions.py")):
                 disposition = "shared-quantitative-policy-companion-renderer"
             elif relative in {"scripts/reports/stage_projection_figures.py",
-                              "benchmarks/reporting/mpc07/report.py"}:
+                              "benchmarks/reporting/mpc07/report.py",
+                              "benchmarks/reporting/mpc07/online/figures.py"}:
                 disposition = "adopted-shared-quantitative-policy"
             elif relative.endswith("/control_witness_companions.py"):
                 disposition = "saved-control-witness-gallery-companion-builder"
