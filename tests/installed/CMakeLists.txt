@@ -65,6 +65,13 @@ add_test(NAME installed_lazy_geometry_client COMMAND installed_lazy_geometry_cli
 set_tests_properties(installed_lazy_geometry_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed lazy geometry client: sampled support and budgeted V output passed")
 
+add_executable(installed_legacy_btulshor_client legacy_btulshor_client.cpp)
+target_link_libraries(installed_legacy_btulshor_client PRIVATE CSL::legacy_btulshor)
+set_target_properties(installed_legacy_btulshor_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_legacy_btulshor_client COMMAND installed_legacy_btulshor_client)
+set_tests_properties(installed_legacy_btulshor_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed legacy BTULSHOR client: MODIF, KPABEP port and REACH source pairs passed")
+
 if(TARGET CSL::highs_lp AND TARGET CSL::qhull_conversion)
 add_executable(installed_conversion_client conversion_client.cpp)
 target_link_libraries(installed_conversion_client PRIVATE CSL::qhull_conversion CSL::highs_lp)
@@ -491,6 +498,7 @@ set(installed_contract_headers
   optimization/feasible_directions/smooth_convex.hpp
   geometry/contracts.hpp
   geometry/lazy.hpp
+  geometry/legacy_btulshor.hpp
   synthesis/contracts.hpp
   numeric/data.hpp
 )

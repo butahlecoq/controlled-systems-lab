@@ -1,0 +1,4199 @@
+{
+  "capture_metadata": {
+    "arithmetic": "binary64; exact checker uses dyadic rational interpretations",
+    "execution_policy": {
+      "cache_state": "uncontrolled OS and hardware caches; no cold-cache claim",
+      "host_load": "uncontrolled; concurrent validation may be active; descriptive timings only",
+      "process_reuse": "none; fresh driver process per repetition",
+      "provider_order": "forward, reverse, forward, reverse, forward",
+      "warmup": "none; first call retained",
+      "workspace_reuse": "new LP session per provider invocation; prepared workspace reused only within that reducer call"
+    },
+    "host": {
+      "architecture": "x86_64",
+      "backend_thread_policy_source": "src/adapters/highs_session.hpp",
+      "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+      "kernel": "7.2.8-9-omarchy",
+      "load_average_1_5_15": [
+        3.82470703125,
+        3.921875,
+        2.775390625
+      ],
+      "logical_cpu_count": 8,
+      "memory_total_kib": 7918180,
+      "observed_native_workers": {
+        "reason": "driver does not expose native worker count",
+        "status": "unavailable"
+      },
+      "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+      "python_version": "3.14.8",
+      "requested_backend_threads": 1,
+      "requested_parallelism": "off"
+    },
+    "inputs": "explicit coordinate lists; seeded-cloud is a fixed list, no random generator",
+    "limiter_profile": {
+      "comparison_verdict": "inconclusive",
+      "status": "not_collected"
+    },
+    "modern_context_tolerances": [
+      1e-08,
+      1e-08
+    ],
+    "source_tolerance": 1e-05
+  },
+  "comparison_scope": "method outputs are preserved; no equality is inferred from vertex counts",
+  "dimension": 2,
+  "fixture_id": "seeded-cloud",
+  "input_count": 9,
+  "input_manifest": [
+    {
+      "path": "input/seeded-cloud-r1.json",
+      "sha256": "48c406eabd240a35f6b061d0c579dde08660964a5a42c0d7300dcc78215ade24"
+    },
+    {
+      "path": "input/seeded-cloud-r2.json",
+      "sha256": "3616141e017cdd81e68d253ba7084b07310964e8cc2b1a6c46d2785e64e97bfc"
+    },
+    {
+      "path": "input/seeded-cloud-r3.json",
+      "sha256": "48c406eabd240a35f6b061d0c579dde08660964a5a42c0d7300dcc78215ade24"
+    },
+    {
+      "path": "input/seeded-cloud-r4.json",
+      "sha256": "3616141e017cdd81e68d253ba7084b07310964e8cc2b1a6c46d2785e64e97bfc"
+    },
+    {
+      "path": "input/seeded-cloud-r5.json",
+      "sha256": "48c406eabd240a35f6b061d0c579dde08660964a5a42c0d7300dcc78215ade24"
+    }
+  ],
+  "input_points": [
+    [
+      -3.0,
+      1.0
+    ],
+    [
+      -2.0,
+      -2.0
+    ],
+    [
+      0.0,
+      -3.0
+    ],
+    [
+      3.0,
+      -1.0
+    ],
+    [
+      4.0,
+      2.0
+    ],
+    [
+      2.0,
+      4.0
+    ],
+    [
+      -1.0,
+      3.0
+    ],
+    [
+      0.0,
+      0.0
+    ],
+    [
+      1.0,
+      1.0
+    ]
+  ],
+  "modif_calls": 9,
+  "pivot_count": 20,
+  "point_classes": [
+    "vertex",
+    "vertex",
+    "vertex",
+    "vertex",
+    "vertex",
+    "vertex",
+    "vertex",
+    "interior",
+    "interior"
+  ],
+  "provenance": {
+    "build_config": "Release",
+    "compiler_id": "GNU",
+    "compiler_version": "16.2.1",
+    "driver_id": "csl.btulshor.compare-driver.v1",
+    "raw_method_ids": [
+      "csl.legacy.btulshor.reach.source-v1",
+      "csl.legacy.btulshor.kpabep.source-v1",
+      "csl.legacy.btulshor.modif.source-v1"
+    ],
+    "source_commit": "9979bec7ce7c72ddb6d15f35a7bf7b16e7d124d2"
+  },
+  "provider_order": [
+    "csl.legacy.btulshor.kpabep.source-v1",
+    "csl.geometry.quickhull-2d",
+    "csl.hull.lp-membership",
+    "csl.hull.itis17.a43-artificial-basis",
+    "csl.hull.itis17.a43-largest-norm-tie",
+    "csl.hull.itis17.a44-paper-farthest-incremental-lp"
+  ],
+  "providers": [
+    {
+      "display_boundary_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "elapsed_ns": 25772,
+      "elapsed_ns_samples": [
+        25772,
+        15156,
+        45188,
+        16693,
+        62788
+      ],
+      "exact_check": {
+        "basis_tests": 342,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ],
+          "5": [
+            {
+              "index": 5,
+              "weight": "1"
+            }
+          ],
+          "6": [
+            {
+              "index": 6,
+              "weight": "1"
+            }
+          ],
+          "7": [
+            {
+              "index": 0,
+              "weight": "1/2"
+            },
+            {
+              "index": 3,
+              "weight": "1/2"
+            }
+          ],
+          "8": [
+            {
+              "index": 6,
+              "weight": "1/2"
+            },
+            {
+              "index": 3,
+              "weight": "1/2"
+            }
+          ]
+        },
+        "extra_indices": [],
+        "hull_equal": true,
+        "irredundancy": true,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {},
+        "status": "verified"
+      },
+      "exact_check_representative": {
+        "basis_tests": 342,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ],
+          "5": [
+            {
+              "index": 5,
+              "weight": "1"
+            }
+          ],
+          "6": [
+            {
+              "index": 6,
+              "weight": "1"
+            }
+          ],
+          "7": [
+            {
+              "index": 0,
+              "weight": "1/2"
+            },
+            {
+              "index": 3,
+              "weight": "1/2"
+            }
+          ],
+          "8": [
+            {
+              "index": 6,
+              "weight": "1/2"
+            },
+            {
+              "index": 3,
+              "weight": "1/2"
+            }
+          ]
+        },
+        "extra_indices": [],
+        "hull_equal": true,
+        "irredundancy": true,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {},
+        "status": "verified"
+      },
+      "exact_check_samples": [
+        {
+          "basis_tests": 342,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 6,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 342,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 6,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 342,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 6,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 342,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 6,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 342,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 6,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        }
+      ],
+      "input_count": 9,
+      "interval": "kpabep call only; input parsing and JSON serialization excluded",
+      "method_id": "csl.legacy.btulshor.kpabep.source-v1",
+      "modif_calls": 9,
+      "outputs_vary": false,
+      "pivot_count": 20,
+      "retained_count": 7,
+      "retained_indices": [
+        6,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "retained_points": [
+        [
+          -1.0,
+          3.0
+        ],
+        [
+          -3.0,
+          1.0
+        ],
+        [
+          -2.0,
+          -2.0
+        ],
+        [
+          0.0,
+          -3.0
+        ],
+        [
+          3.0,
+          -1.0
+        ],
+        [
+          4.0,
+          2.0
+        ],
+        [
+          2.0,
+          4.0
+        ]
+      ],
+      "sample_statuses": [
+        "completed",
+        "completed",
+        "completed",
+        "completed",
+        "completed"
+      ],
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 142617,
+      "elapsed_ns_samples": [
+        142617,
+        50147,
+        125506,
+        50425,
+        105391
+      ],
+      "exact_check": {
+        "basis_tests": 350,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ],
+          "5": [
+            {
+              "index": 5,
+              "weight": "1"
+            }
+          ],
+          "6": [
+            {
+              "index": 6,
+              "weight": "1"
+            }
+          ],
+          "7": [
+            {
+              "index": 0,
+              "weight": "1/2"
+            },
+            {
+              "index": 3,
+              "weight": "1/2"
+            }
+          ],
+          "8": [
+            {
+              "index": 3,
+              "weight": "1/2"
+            },
+            {
+              "index": 6,
+              "weight": "1/2"
+            }
+          ]
+        },
+        "extra_indices": [],
+        "hull_equal": true,
+        "irredundancy": true,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {},
+        "status": "verified"
+      },
+      "exact_check_representative": {
+        "basis_tests": 350,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ],
+          "5": [
+            {
+              "index": 5,
+              "weight": "1"
+            }
+          ],
+          "6": [
+            {
+              "index": 6,
+              "weight": "1"
+            }
+          ],
+          "7": [
+            {
+              "index": 0,
+              "weight": "1/2"
+            },
+            {
+              "index": 3,
+              "weight": "1/2"
+            }
+          ],
+          "8": [
+            {
+              "index": 3,
+              "weight": "1/2"
+            },
+            {
+              "index": 6,
+              "weight": "1/2"
+            }
+          ]
+        },
+        "extra_indices": [],
+        "hull_equal": true,
+        "irredundancy": true,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {},
+        "status": "verified"
+      },
+      "exact_check_samples": [
+        {
+          "basis_tests": 350,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 350,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 350,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 350,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 350,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        }
+      ],
+      "interval": "QuickHull2D call only; input parsing and JSON serialization excluded",
+      "method_id": "csl.geometry.quickhull-2d",
+      "outputs_vary": false,
+      "retained_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "sample_statuses": [
+        "completed",
+        "completed",
+        "completed",
+        "completed",
+        "completed"
+      ],
+      "status": "completed"
+    },
+    {
+      "attempt_count": 9,
+      "attempts": [
+        {
+          "candidate_index": 0,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 1,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 2,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 3,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 4,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 5,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 6,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 7,
+          "outcome": "malformed_result"
+        },
+        {
+          "candidate_index": 8,
+          "outcome": "malformed_result"
+        }
+      ],
+      "elapsed_ns": 3529529,
+      "elapsed_ns_samples": [
+        3529529,
+        2106361,
+        6957298,
+        2067389,
+        3313997
+      ],
+      "exact_check": {
+        "basis_tests": 729,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ],
+          "5": [
+            {
+              "index": 5,
+              "weight": "1"
+            }
+          ],
+          "6": [
+            {
+              "index": 6,
+              "weight": "1"
+            }
+          ],
+          "7": [
+            {
+              "index": 7,
+              "weight": "1"
+            }
+          ],
+          "8": [
+            {
+              "index": 8,
+              "weight": "1"
+            }
+          ]
+        },
+        "extra_indices": [
+          7,
+          8
+        ],
+        "hull_equal": true,
+        "irredundancy": false,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {
+          "7": [
+            {
+              "index": 0,
+              "weight": "1/2"
+            },
+            {
+              "index": 3,
+              "weight": "1/2"
+            }
+          ],
+          "8": [
+            {
+              "index": 3,
+              "weight": "1/2"
+            },
+            {
+              "index": 6,
+              "weight": "1/2"
+            }
+          ]
+        },
+        "status": "verified"
+      },
+      "exact_check_representative": {
+        "basis_tests": 729,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ],
+          "5": [
+            {
+              "index": 5,
+              "weight": "1"
+            }
+          ],
+          "6": [
+            {
+              "index": 6,
+              "weight": "1"
+            }
+          ],
+          "7": [
+            {
+              "index": 7,
+              "weight": "1"
+            }
+          ],
+          "8": [
+            {
+              "index": 8,
+              "weight": "1"
+            }
+          ]
+        },
+        "extra_indices": [
+          7,
+          8
+        ],
+        "hull_equal": true,
+        "irredundancy": false,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {
+          "7": [
+            {
+              "index": 0,
+              "weight": "1/2"
+            },
+            {
+              "index": 3,
+              "weight": "1/2"
+            }
+          ],
+          "8": [
+            {
+              "index": 3,
+              "weight": "1/2"
+            },
+            {
+              "index": 6,
+              "weight": "1/2"
+            }
+          ]
+        },
+        "status": "verified"
+      },
+      "exact_check_samples": [
+        {
+          "basis_tests": 729,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 7,
+                "weight": "1"
+              }
+            ],
+            "8": [
+              {
+                "index": 8,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [
+            7,
+            8
+          ],
+          "hull_equal": true,
+          "irredundancy": false,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "status": "verified"
+        },
+        {
+          "basis_tests": 729,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 7,
+                "weight": "1"
+              }
+            ],
+            "8": [
+              {
+                "index": 8,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [
+            7,
+            8
+          ],
+          "hull_equal": true,
+          "irredundancy": false,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "status": "verified"
+        },
+        {
+          "basis_tests": 729,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 7,
+                "weight": "1"
+              }
+            ],
+            "8": [
+              {
+                "index": 8,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [
+            7,
+            8
+          ],
+          "hull_equal": true,
+          "irredundancy": false,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "status": "verified"
+        },
+        {
+          "basis_tests": 729,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 7,
+                "weight": "1"
+              }
+            ],
+            "8": [
+              {
+                "index": 8,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [
+            7,
+            8
+          ],
+          "hull_equal": true,
+          "irredundancy": false,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "status": "verified"
+        },
+        {
+          "basis_tests": 729,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 7,
+                "weight": "1"
+              }
+            ],
+            "8": [
+              {
+                "index": 8,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [
+            7,
+            8
+          ],
+          "hull_equal": true,
+          "irredundancy": false,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "status": "verified"
+        }
+      ],
+      "input_count": 9,
+      "interval": "reducer invocation with prepared LP workspace; JSON serialization excluded",
+      "lp_calls": 9,
+      "method_id": "csl.hull.lp-membership",
+      "outputs_vary": false,
+      "retained_count": 9,
+      "retained_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "retained_points": [
+        [
+          -3.0,
+          1.0
+        ],
+        [
+          -2.0,
+          -2.0
+        ],
+        [
+          0.0,
+          -3.0
+        ],
+        [
+          3.0,
+          -1.0
+        ],
+        [
+          4.0,
+          2.0
+        ],
+        [
+          2.0,
+          4.0
+        ],
+        [
+          -1.0,
+          3.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0
+        ]
+      ],
+      "sample_statuses": [
+        "incomplete",
+        "incomplete",
+        "incomplete",
+        "incomplete",
+        "incomplete"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "a43_metrics": {
+        "candidate_solves": 9,
+        "largest_norm_tie_breaks": 0,
+        "phase_one_pivots": 26
+      },
+      "attempt_count": 17,
+      "attempts": [
+        {
+          "candidate_index": 0,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 1,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 2,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 3,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 4,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 5,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 6,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 7,
+          "outcome": "feasible"
+        },
+        {
+          "candidate_index": 8,
+          "outcome": "numerical_failure"
+        },
+        {
+          "candidate_index": 0,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 1,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 2,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 3,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 4,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 5,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 6,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 8,
+          "outcome": "malformed_result"
+        }
+      ],
+      "elapsed_ns": 1989306,
+      "elapsed_ns_samples": [
+        1989306,
+        2155530,
+        5611515,
+        2049789,
+        2250514
+      ],
+      "exact_check": {
+        "basis_tests": 513,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ],
+          "5": [
+            {
+              "index": 5,
+              "weight": "1"
+            }
+          ],
+          "6": [
+            {
+              "index": 6,
+              "weight": "1"
+            }
+          ],
+          "7": [
+            {
+              "index": 0,
+              "weight": "1/2"
+            },
+            {
+              "index": 3,
+              "weight": "1/2"
+            }
+          ],
+          "8": [
+            {
+              "index": 8,
+              "weight": "1"
+            }
+          ]
+        },
+        "extra_indices": [
+          8
+        ],
+        "hull_equal": true,
+        "irredundancy": false,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {
+          "8": [
+            {
+              "index": 3,
+              "weight": "1/2"
+            },
+            {
+              "index": 6,
+              "weight": "1/2"
+            }
+          ]
+        },
+        "status": "verified"
+      },
+      "exact_check_representative": {
+        "basis_tests": 513,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ],
+          "5": [
+            {
+              "index": 5,
+              "weight": "1"
+            }
+          ],
+          "6": [
+            {
+              "index": 6,
+              "weight": "1"
+            }
+          ],
+          "7": [
+            {
+              "index": 0,
+              "weight": "1/2"
+            },
+            {
+              "index": 3,
+              "weight": "1/2"
+            }
+          ],
+          "8": [
+            {
+              "index": 8,
+              "weight": "1"
+            }
+          ]
+        },
+        "extra_indices": [
+          8
+        ],
+        "hull_equal": true,
+        "irredundancy": false,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {
+          "8": [
+            {
+              "index": 3,
+              "weight": "1/2"
+            },
+            {
+              "index": 6,
+              "weight": "1/2"
+            }
+          ]
+        },
+        "status": "verified"
+      },
+      "exact_check_samples": [
+        {
+          "basis_tests": 513,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 8,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [
+            8
+          ],
+          "hull_equal": true,
+          "irredundancy": false,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "status": "verified"
+        },
+        {
+          "basis_tests": 513,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 8,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [
+            8
+          ],
+          "hull_equal": true,
+          "irredundancy": false,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "status": "verified"
+        },
+        {
+          "basis_tests": 513,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 8,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [
+            8
+          ],
+          "hull_equal": true,
+          "irredundancy": false,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "status": "verified"
+        },
+        {
+          "basis_tests": 513,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 8,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [
+            8
+          ],
+          "hull_equal": true,
+          "irredundancy": false,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "status": "verified"
+        },
+        {
+          "basis_tests": 513,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 8,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [
+            8
+          ],
+          "hull_equal": true,
+          "irredundancy": false,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "status": "verified"
+        }
+      ],
+      "input_count": 9,
+      "interval": "reducer invocation with prepared LP workspace; JSON serialization excluded",
+      "lp_calls": 17,
+      "method_id": "csl.hull.itis17.a43-artificial-basis",
+      "outputs_vary": false,
+      "retained_count": 8,
+      "retained_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        8
+      ],
+      "retained_points": [
+        [
+          -3.0,
+          1.0
+        ],
+        [
+          -2.0,
+          -2.0
+        ],
+        [
+          0.0,
+          -3.0
+        ],
+        [
+          3.0,
+          -1.0
+        ],
+        [
+          4.0,
+          2.0
+        ],
+        [
+          2.0,
+          4.0
+        ],
+        [
+          -1.0,
+          3.0
+        ],
+        [
+          1.0,
+          1.0
+        ]
+      ],
+      "sample_statuses": [
+        "incomplete",
+        "incomplete",
+        "incomplete",
+        "incomplete",
+        "incomplete"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "a43_metrics": {
+        "candidate_solves": 9,
+        "largest_norm_tie_breaks": 0,
+        "phase_one_pivots": 26
+      },
+      "attempt_count": 17,
+      "attempts": [
+        {
+          "candidate_index": 0,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 1,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 2,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 3,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 4,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 5,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 6,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 7,
+          "outcome": "feasible"
+        },
+        {
+          "candidate_index": 8,
+          "outcome": "numerical_failure"
+        },
+        {
+          "candidate_index": 0,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 1,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 2,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 3,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 4,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 5,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 6,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 8,
+          "outcome": "malformed_result"
+        }
+      ],
+      "elapsed_ns": 1927985,
+      "elapsed_ns_samples": [
+        1927985,
+        2044341,
+        2646658,
+        2802405,
+        2235010
+      ],
+      "exact_check": {
+        "basis_tests": 513,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ],
+          "5": [
+            {
+              "index": 5,
+              "weight": "1"
+            }
+          ],
+          "6": [
+            {
+              "index": 6,
+              "weight": "1"
+            }
+          ],
+          "7": [
+            {
+              "index": 0,
+              "weight": "1/2"
+            },
+            {
+              "index": 3,
+              "weight": "1/2"
+            }
+          ],
+          "8": [
+            {
+              "index": 8,
+              "weight": "1"
+            }
+          ]
+        },
+        "extra_indices": [
+          8
+        ],
+        "hull_equal": true,
+        "irredundancy": false,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {
+          "8": [
+            {
+              "index": 3,
+              "weight": "1/2"
+            },
+            {
+              "index": 6,
+              "weight": "1/2"
+            }
+          ]
+        },
+        "status": "verified"
+      },
+      "exact_check_representative": {
+        "basis_tests": 513,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ],
+          "5": [
+            {
+              "index": 5,
+              "weight": "1"
+            }
+          ],
+          "6": [
+            {
+              "index": 6,
+              "weight": "1"
+            }
+          ],
+          "7": [
+            {
+              "index": 0,
+              "weight": "1/2"
+            },
+            {
+              "index": 3,
+              "weight": "1/2"
+            }
+          ],
+          "8": [
+            {
+              "index": 8,
+              "weight": "1"
+            }
+          ]
+        },
+        "extra_indices": [
+          8
+        ],
+        "hull_equal": true,
+        "irredundancy": false,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {
+          "8": [
+            {
+              "index": 3,
+              "weight": "1/2"
+            },
+            {
+              "index": 6,
+              "weight": "1/2"
+            }
+          ]
+        },
+        "status": "verified"
+      },
+      "exact_check_samples": [
+        {
+          "basis_tests": 513,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 8,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [
+            8
+          ],
+          "hull_equal": true,
+          "irredundancy": false,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "status": "verified"
+        },
+        {
+          "basis_tests": 513,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 8,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [
+            8
+          ],
+          "hull_equal": true,
+          "irredundancy": false,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "status": "verified"
+        },
+        {
+          "basis_tests": 513,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 8,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [
+            8
+          ],
+          "hull_equal": true,
+          "irredundancy": false,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "status": "verified"
+        },
+        {
+          "basis_tests": 513,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 8,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [
+            8
+          ],
+          "hull_equal": true,
+          "irredundancy": false,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "status": "verified"
+        },
+        {
+          "basis_tests": 513,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 8,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [
+            8
+          ],
+          "hull_equal": true,
+          "irredundancy": false,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "status": "verified"
+        }
+      ],
+      "input_count": 9,
+      "interval": "reducer invocation with prepared LP workspace; JSON serialization excluded",
+      "lp_calls": 17,
+      "method_id": "csl.hull.itis17.a43-largest-norm-tie",
+      "outputs_vary": false,
+      "retained_count": 8,
+      "retained_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        8
+      ],
+      "retained_points": [
+        [
+          -3.0,
+          1.0
+        ],
+        [
+          -2.0,
+          -2.0
+        ],
+        [
+          0.0,
+          -3.0
+        ],
+        [
+          3.0,
+          -1.0
+        ],
+        [
+          4.0,
+          2.0
+        ],
+        [
+          2.0,
+          4.0
+        ],
+        [
+          -1.0,
+          3.0
+        ],
+        [
+          1.0,
+          1.0
+        ]
+      ],
+      "sample_statuses": [
+        "incomplete",
+        "incomplete",
+        "incomplete",
+        "incomplete",
+        "incomplete"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "attempt_count": 15,
+      "attempts": [
+        {
+          "candidate_index": 2,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 1,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 3,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 6,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 7,
+          "outcome": "malformed_result"
+        },
+        {
+          "candidate_index": 8,
+          "outcome": "malformed_result"
+        },
+        {
+          "candidate_index": 4,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 5,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 0,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 2,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 1,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 3,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 6,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 7,
+          "outcome": "feasible"
+        },
+        {
+          "candidate_index": 8,
+          "outcome": "malformed_result"
+        }
+      ],
+      "elapsed_ns": 3428468,
+      "elapsed_ns_samples": [
+        3428468,
+        3711397,
+        3582469,
+        5879917,
+        3544405
+      ],
+      "exact_check": {
+        "basis_tests": 529,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ],
+          "5": [
+            {
+              "index": 5,
+              "weight": "1"
+            }
+          ],
+          "6": [
+            {
+              "index": 6,
+              "weight": "1"
+            }
+          ],
+          "7": [
+            {
+              "index": 0,
+              "weight": "1/2"
+            },
+            {
+              "index": 3,
+              "weight": "1/2"
+            }
+          ],
+          "8": [
+            {
+              "index": 8,
+              "weight": "1"
+            }
+          ]
+        },
+        "extra_indices": [
+          8
+        ],
+        "hull_equal": true,
+        "irredundancy": false,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {
+          "8": [
+            {
+              "index": 3,
+              "weight": "1/2"
+            },
+            {
+              "index": 6,
+              "weight": "1/2"
+            }
+          ]
+        },
+        "status": "verified"
+      },
+      "exact_check_representative": {
+        "basis_tests": 529,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ],
+          "5": [
+            {
+              "index": 5,
+              "weight": "1"
+            }
+          ],
+          "6": [
+            {
+              "index": 6,
+              "weight": "1"
+            }
+          ],
+          "7": [
+            {
+              "index": 0,
+              "weight": "1/2"
+            },
+            {
+              "index": 3,
+              "weight": "1/2"
+            }
+          ],
+          "8": [
+            {
+              "index": 8,
+              "weight": "1"
+            }
+          ]
+        },
+        "extra_indices": [
+          8
+        ],
+        "hull_equal": true,
+        "irredundancy": false,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {
+          "8": [
+            {
+              "index": 3,
+              "weight": "1/2"
+            },
+            {
+              "index": 6,
+              "weight": "1/2"
+            }
+          ]
+        },
+        "status": "verified"
+      },
+      "exact_check_samples": [
+        {
+          "basis_tests": 529,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 8,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [
+            8
+          ],
+          "hull_equal": true,
+          "irredundancy": false,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "status": "verified"
+        },
+        {
+          "basis_tests": 529,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 8,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [
+            8
+          ],
+          "hull_equal": true,
+          "irredundancy": false,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "status": "verified"
+        },
+        {
+          "basis_tests": 529,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 8,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [
+            8
+          ],
+          "hull_equal": true,
+          "irredundancy": false,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "status": "verified"
+        },
+        {
+          "basis_tests": 529,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 8,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [
+            8
+          ],
+          "hull_equal": true,
+          "irredundancy": false,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "status": "verified"
+        },
+        {
+          "basis_tests": 529,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ],
+            "5": [
+              {
+                "index": 5,
+                "weight": "1"
+              }
+            ],
+            "6": [
+              {
+                "index": 6,
+                "weight": "1"
+              }
+            ],
+            "7": [
+              {
+                "index": 0,
+                "weight": "1/2"
+              },
+              {
+                "index": 3,
+                "weight": "1/2"
+              }
+            ],
+            "8": [
+              {
+                "index": 8,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [
+            8
+          ],
+          "hull_equal": true,
+          "irredundancy": false,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {
+            "8": [
+              {
+                "index": 3,
+                "weight": "1/2"
+              },
+              {
+                "index": 6,
+                "weight": "1/2"
+              }
+            ]
+          },
+          "status": "verified"
+        }
+      ],
+      "input_count": 9,
+      "interval": "reducer invocation with prepared LP workspace; JSON serialization excluded",
+      "lp_calls": 15,
+      "method_id": "csl.hull.itis17.a44-paper-farthest-incremental-lp",
+      "outputs_vary": false,
+      "retained_count": 8,
+      "retained_indices": [
+        4,
+        5,
+        0,
+        2,
+        1,
+        3,
+        6,
+        8
+      ],
+      "retained_points": [
+        [
+          4.0,
+          2.0
+        ],
+        [
+          2.0,
+          4.0
+        ],
+        [
+          -3.0,
+          1.0
+        ],
+        [
+          0.0,
+          -3.0
+        ],
+        [
+          -2.0,
+          -2.0
+        ],
+        [
+          3.0,
+          -1.0
+        ],
+        [
+          -1.0,
+          3.0
+        ],
+        [
+          1.0,
+          1.0
+        ]
+      ],
+      "sample_statuses": [
+        "incomplete",
+        "incomplete",
+        "incomplete",
+        "incomplete",
+        "incomplete"
+      ],
+      "status": "incomplete"
+    }
+  ],
+  "raw_file": "raw/seeded-cloud.json",
+  "retained_count": 7,
+  "retained_indices": [
+    6,
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "retained_points": [
+    [
+      -1.0,
+      3.0
+    ],
+    [
+      -3.0,
+      1.0
+    ],
+    [
+      -2.0,
+      -2.0
+    ],
+    [
+      0.0,
+      -3.0
+    ],
+    [
+      3.0,
+      -1.0
+    ],
+    [
+      4.0,
+      2.0
+    ],
+    [
+      2.0,
+      4.0
+    ]
+  ],
+  "schema": "csl.btulshor-comparison/1",
+  "status": "completed"
+}

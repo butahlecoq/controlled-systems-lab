@@ -31,6 +31,11 @@ target_link_libraries(quickhull_2d_test PRIVATE CSL::quickhull_2d doctest::docte
 add_test(NAME quickhull_2d_test COMMAND quickhull_2d_test)
 csl_test_target(quickhull_2d_test geometry)
 
+add_executable(legacy_btulshor_test tests/unit/geometry/legacy_btulshor_test.cpp)
+target_link_libraries(legacy_btulshor_test PRIVATE CSL::legacy_btulshor doctest::doctest)
+add_test(NAME legacy_btulshor_test COMMAND legacy_btulshor_test)
+csl_test_target(legacy_btulshor_test geometry)
+
 add_executable(bounded_hull_checker_test tests/contract/geometry/bounded_hull_checker_test.cpp)
 target_link_libraries(bounded_hull_checker_test PRIVATE CSL::bounded_hull_checker doctest::doctest)
 add_test(NAME bounded_hull_checker_test COMMAND bounded_hull_checker_test)

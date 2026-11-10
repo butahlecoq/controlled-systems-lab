@@ -1,0 +1,2114 @@
+{
+  "capture_metadata": {
+    "arithmetic": "binary64; exact checker uses dyadic rational interpretations",
+    "execution_policy": {
+      "cache_state": "uncontrolled OS and hardware caches; no cold-cache claim",
+      "host_load": "uncontrolled; concurrent validation may be active; descriptive timings only",
+      "process_reuse": "none; fresh driver process per repetition",
+      "provider_order": "forward, reverse, forward, reverse, forward",
+      "warmup": "none; first call retained",
+      "workspace_reuse": "new LP session per provider invocation; prepared workspace reused only within that reducer call"
+    },
+    "host": {
+      "architecture": "x86_64",
+      "backend_thread_policy_source": "src/adapters/highs_session.hpp",
+      "cpu_model": "AMD Ryzen 5 3550H with Radeon Vega Mobile Gfx",
+      "kernel": "7.2.8-9-omarchy",
+      "load_average_1_5_15": [
+        3.82470703125,
+        3.921875,
+        2.775390625
+      ],
+      "logical_cpu_count": 8,
+      "memory_total_kib": 7918180,
+      "observed_native_workers": {
+        "reason": "driver does not expose native worker count",
+        "status": "unavailable"
+      },
+      "os": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+      "python_version": "3.14.8",
+      "requested_backend_threads": 1,
+      "requested_parallelism": "off"
+    },
+    "inputs": "explicit coordinate lists; seeded-cloud is a fixed list, no random generator",
+    "limiter_profile": {
+      "comparison_verdict": "inconclusive",
+      "status": "not_collected"
+    },
+    "modern_context_tolerances": [
+      1e-08,
+      1e-08
+    ],
+    "source_tolerance": 1e-05
+  },
+  "comparison_scope": "method outputs are preserved; no equality is inferred from vertex counts",
+  "dimension": 2,
+  "fixture_id": "near-tolerance",
+  "input_count": 5,
+  "input_manifest": [
+    {
+      "path": "input/near-tolerance-r1.json",
+      "sha256": "a8e09ffa822e53b58b6ff02dd3c9779f0289a4671aeaafecd57a502c79f72d3d"
+    },
+    {
+      "path": "input/near-tolerance-r2.json",
+      "sha256": "8c6224966b36c25c111b192c4b8d2df08337e88db5920e18fad8902d63cbfbcf"
+    },
+    {
+      "path": "input/near-tolerance-r3.json",
+      "sha256": "a8e09ffa822e53b58b6ff02dd3c9779f0289a4671aeaafecd57a502c79f72d3d"
+    },
+    {
+      "path": "input/near-tolerance-r4.json",
+      "sha256": "8c6224966b36c25c111b192c4b8d2df08337e88db5920e18fad8902d63cbfbcf"
+    },
+    {
+      "path": "input/near-tolerance-r5.json",
+      "sha256": "a8e09ffa822e53b58b6ff02dd3c9779f0289a4671aeaafecd57a502c79f72d3d"
+    }
+  ],
+  "input_points": [
+    [
+      0.0,
+      0.0
+    ],
+    [
+      1.0,
+      0.0
+    ],
+    [
+      1.0,
+      1.0
+    ],
+    [
+      0.0,
+      1.0
+    ],
+    [
+      0.5,
+      1.00000001
+    ]
+  ],
+  "modif_calls": 5,
+  "pivot_count": 11,
+  "point_classes": [
+    "vertex",
+    "vertex",
+    "vertex",
+    "vertex",
+    "vertex"
+  ],
+  "provenance": {
+    "build_config": "Release",
+    "compiler_id": "GNU",
+    "compiler_version": "16.2.1",
+    "driver_id": "csl.btulshor.compare-driver.v1",
+    "raw_method_ids": [
+      "csl.legacy.btulshor.reach.source-v1",
+      "csl.legacy.btulshor.kpabep.source-v1",
+      "csl.legacy.btulshor.modif.source-v1"
+    ],
+    "source_commit": "9979bec7ce7c72ddb6d15f35a7bf7b16e7d124d2"
+  },
+  "provider_order": [
+    "csl.legacy.btulshor.kpabep.source-v1",
+    "csl.geometry.quickhull-2d",
+    "csl.hull.lp-membership",
+    "csl.hull.itis17.a43-artificial-basis",
+    "csl.hull.itis17.a43-largest-norm-tie",
+    "csl.hull.itis17.a44-paper-farthest-incremental-lp"
+  ],
+  "providers": [
+    {
+      "display_boundary_indices": [
+        0,
+        1,
+        2,
+        4,
+        3
+      ],
+      "elapsed_ns": 18857,
+      "elapsed_ns_samples": [
+        18857,
+        16622,
+        39950,
+        16343,
+        14178
+      ],
+      "exact_check": {
+        "basis_tests": 24,
+        "certificates": {},
+        "extra_indices": [],
+        "hull_equal": false,
+        "irredundancy": null,
+        "reason": "input point 4 is outside retained hull",
+        "redundancy_certificates": {},
+        "status": "rejected"
+      },
+      "exact_check_representative": {
+        "basis_tests": 24,
+        "certificates": {},
+        "extra_indices": [],
+        "hull_equal": false,
+        "irredundancy": null,
+        "reason": "input point 4 is outside retained hull",
+        "redundancy_certificates": {},
+        "status": "rejected"
+      },
+      "exact_check_samples": [
+        {
+          "basis_tests": 24,
+          "certificates": {},
+          "extra_indices": [],
+          "hull_equal": false,
+          "irredundancy": null,
+          "reason": "input point 4 is outside retained hull",
+          "redundancy_certificates": {},
+          "status": "rejected"
+        },
+        {
+          "basis_tests": 24,
+          "certificates": {},
+          "extra_indices": [],
+          "hull_equal": false,
+          "irredundancy": null,
+          "reason": "input point 4 is outside retained hull",
+          "redundancy_certificates": {},
+          "status": "rejected"
+        },
+        {
+          "basis_tests": 24,
+          "certificates": {},
+          "extra_indices": [],
+          "hull_equal": false,
+          "irredundancy": null,
+          "reason": "input point 4 is outside retained hull",
+          "redundancy_certificates": {},
+          "status": "rejected"
+        },
+        {
+          "basis_tests": 24,
+          "certificates": {},
+          "extra_indices": [],
+          "hull_equal": false,
+          "irredundancy": null,
+          "reason": "input point 4 is outside retained hull",
+          "redundancy_certificates": {},
+          "status": "rejected"
+        },
+        {
+          "basis_tests": 24,
+          "certificates": {},
+          "extra_indices": [],
+          "hull_equal": false,
+          "irredundancy": null,
+          "reason": "input point 4 is outside retained hull",
+          "redundancy_certificates": {},
+          "status": "rejected"
+        }
+      ],
+      "input_count": 5,
+      "interval": "kpabep call only; input parsing and JSON serialization excluded",
+      "method_id": "csl.legacy.btulshor.kpabep.source-v1",
+      "modif_calls": 5,
+      "outputs_vary": false,
+      "pivot_count": 11,
+      "retained_count": 4,
+      "retained_indices": [
+        3,
+        0,
+        1,
+        2
+      ],
+      "retained_points": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0
+        ]
+      ],
+      "sample_statuses": [
+        "completed",
+        "completed",
+        "completed",
+        "completed",
+        "completed"
+      ],
+      "status": "completed"
+    },
+    {
+      "elapsed_ns": 25283,
+      "elapsed_ns_samples": [
+        25283,
+        14388,
+        39600,
+        14108,
+        15156
+      ],
+      "exact_check": {
+        "basis_tests": 85,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ]
+        },
+        "extra_indices": [],
+        "hull_equal": true,
+        "irredundancy": true,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {},
+        "status": "verified"
+      },
+      "exact_check_representative": {
+        "basis_tests": 85,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ]
+        },
+        "extra_indices": [],
+        "hull_equal": true,
+        "irredundancy": true,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {},
+        "status": "verified"
+      },
+      "exact_check_samples": [
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        }
+      ],
+      "interval": "QuickHull2D call only; input parsing and JSON serialization excluded",
+      "method_id": "csl.geometry.quickhull-2d",
+      "outputs_vary": false,
+      "retained_indices": [
+        0,
+        1,
+        2,
+        4,
+        3
+      ],
+      "sample_statuses": [
+        "completed",
+        "completed",
+        "completed",
+        "completed",
+        "completed"
+      ],
+      "status": "completed"
+    },
+    {
+      "attempt_count": 5,
+      "attempts": [
+        {
+          "candidate_index": 0,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 1,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 2,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 3,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 4,
+          "outcome": "malformed_result"
+        }
+      ],
+      "elapsed_ns": 2184933,
+      "elapsed_ns_samples": [
+        2184933,
+        1049723,
+        4354082,
+        1018854,
+        1655741
+      ],
+      "exact_check": {
+        "basis_tests": 85,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ]
+        },
+        "extra_indices": [],
+        "hull_equal": true,
+        "irredundancy": true,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {},
+        "status": "verified"
+      },
+      "exact_check_representative": {
+        "basis_tests": 85,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ]
+        },
+        "extra_indices": [],
+        "hull_equal": true,
+        "irredundancy": true,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {},
+        "status": "verified"
+      },
+      "exact_check_samples": [
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        }
+      ],
+      "input_count": 5,
+      "interval": "reducer invocation with prepared LP workspace; JSON serialization excluded",
+      "lp_calls": 5,
+      "method_id": "csl.hull.lp-membership",
+      "outputs_vary": false,
+      "retained_count": 5,
+      "retained_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "retained_points": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.0,
+          1.0
+        ],
+        [
+          0.5,
+          1.00000001
+        ]
+      ],
+      "sample_statuses": [
+        "incomplete",
+        "incomplete",
+        "incomplete",
+        "incomplete",
+        "incomplete"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "a43_metrics": {
+        "candidate_solves": 5,
+        "largest_norm_tie_breaks": 0,
+        "phase_one_pivots": 17
+      },
+      "attempt_count": 10,
+      "attempts": [
+        {
+          "candidate_index": 0,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 1,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 2,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 3,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 4,
+          "outcome": "numerical_failure"
+        },
+        {
+          "candidate_index": 0,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 1,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 2,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 3,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 4,
+          "outcome": "malformed_result"
+        }
+      ],
+      "elapsed_ns": 1468146,
+      "elapsed_ns_samples": [
+        1468146,
+        1247166,
+        3582958,
+        1116632,
+        1208753
+      ],
+      "exact_check": {
+        "basis_tests": 85,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ]
+        },
+        "extra_indices": [],
+        "hull_equal": true,
+        "irredundancy": true,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {},
+        "status": "verified"
+      },
+      "exact_check_representative": {
+        "basis_tests": 85,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ]
+        },
+        "extra_indices": [],
+        "hull_equal": true,
+        "irredundancy": true,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {},
+        "status": "verified"
+      },
+      "exact_check_samples": [
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        }
+      ],
+      "input_count": 5,
+      "interval": "reducer invocation with prepared LP workspace; JSON serialization excluded",
+      "lp_calls": 10,
+      "method_id": "csl.hull.itis17.a43-artificial-basis",
+      "outputs_vary": false,
+      "retained_count": 5,
+      "retained_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "retained_points": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.0,
+          1.0
+        ],
+        [
+          0.5,
+          1.00000001
+        ]
+      ],
+      "sample_statuses": [
+        "incomplete",
+        "incomplete",
+        "incomplete",
+        "incomplete",
+        "incomplete"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "a43_metrics": {
+        "candidate_solves": 5,
+        "largest_norm_tie_breaks": 0,
+        "phase_one_pivots": 17
+      },
+      "attempt_count": 10,
+      "attempts": [
+        {
+          "candidate_index": 0,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 1,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 2,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 3,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 4,
+          "outcome": "numerical_failure"
+        },
+        {
+          "candidate_index": 0,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 1,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 2,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 3,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 4,
+          "outcome": "malformed_result"
+        }
+      ],
+      "elapsed_ns": 1192690,
+      "elapsed_ns_samples": [
+        1192690,
+        1129552,
+        1165312,
+        1126829,
+        1118517
+      ],
+      "exact_check": {
+        "basis_tests": 85,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ]
+        },
+        "extra_indices": [],
+        "hull_equal": true,
+        "irredundancy": true,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {},
+        "status": "verified"
+      },
+      "exact_check_representative": {
+        "basis_tests": 85,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ]
+        },
+        "extra_indices": [],
+        "hull_equal": true,
+        "irredundancy": true,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {},
+        "status": "verified"
+      },
+      "exact_check_samples": [
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        }
+      ],
+      "input_count": 5,
+      "interval": "reducer invocation with prepared LP workspace; JSON serialization excluded",
+      "lp_calls": 10,
+      "method_id": "csl.hull.itis17.a43-largest-norm-tie",
+      "outputs_vary": false,
+      "retained_count": 5,
+      "retained_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "retained_points": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.0,
+          1.0
+        ],
+        [
+          0.5,
+          1.00000001
+        ]
+      ],
+      "sample_statuses": [
+        "incomplete",
+        "incomplete",
+        "incomplete",
+        "incomplete",
+        "incomplete"
+      ],
+      "status": "incomplete"
+    },
+    {
+      "attempt_count": 7,
+      "attempts": [
+        {
+          "candidate_index": 3,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 4,
+          "outcome": "malformed_result"
+        },
+        {
+          "candidate_index": 0,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 1,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 2,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 3,
+          "outcome": "infeasible"
+        },
+        {
+          "candidate_index": 4,
+          "outcome": "malformed_result"
+        }
+      ],
+      "elapsed_ns": 1754498,
+      "elapsed_ns_samples": [
+        1754498,
+        1914855,
+        1573398,
+        3802261,
+        1417371
+      ],
+      "exact_check": {
+        "basis_tests": 85,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ]
+        },
+        "extra_indices": [],
+        "hull_equal": true,
+        "irredundancy": true,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {},
+        "status": "verified"
+      },
+      "exact_check_representative": {
+        "basis_tests": 85,
+        "certificates": {
+          "0": [
+            {
+              "index": 0,
+              "weight": "1"
+            }
+          ],
+          "1": [
+            {
+              "index": 1,
+              "weight": "1"
+            }
+          ],
+          "2": [
+            {
+              "index": 2,
+              "weight": "1"
+            }
+          ],
+          "3": [
+            {
+              "index": 3,
+              "weight": "1"
+            }
+          ],
+          "4": [
+            {
+              "index": 4,
+              "weight": "1"
+            }
+          ]
+        },
+        "extra_indices": [],
+        "hull_equal": true,
+        "irredundancy": true,
+        "reason": "hulls equal; redundancy search complete",
+        "redundancy_certificates": {},
+        "status": "verified"
+      },
+      "exact_check_samples": [
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        },
+        {
+          "basis_tests": 85,
+          "certificates": {
+            "0": [
+              {
+                "index": 0,
+                "weight": "1"
+              }
+            ],
+            "1": [
+              {
+                "index": 1,
+                "weight": "1"
+              }
+            ],
+            "2": [
+              {
+                "index": 2,
+                "weight": "1"
+              }
+            ],
+            "3": [
+              {
+                "index": 3,
+                "weight": "1"
+              }
+            ],
+            "4": [
+              {
+                "index": 4,
+                "weight": "1"
+              }
+            ]
+          },
+          "extra_indices": [],
+          "hull_equal": true,
+          "irredundancy": true,
+          "reason": "hulls equal; redundancy search complete",
+          "redundancy_certificates": {},
+          "status": "verified"
+        }
+      ],
+      "input_count": 5,
+      "interval": "reducer invocation with prepared LP workspace; JSON serialization excluded",
+      "lp_calls": 7,
+      "method_id": "csl.hull.itis17.a44-paper-farthest-incremental-lp",
+      "outputs_vary": false,
+      "retained_count": 5,
+      "retained_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "retained_points": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.0,
+          1.0
+        ],
+        [
+          0.5,
+          1.00000001
+        ]
+      ],
+      "sample_statuses": [
+        "incomplete",
+        "incomplete",
+        "incomplete",
+        "incomplete",
+        "incomplete"
+      ],
+      "status": "incomplete"
+    }
+  ],
+  "raw_file": "raw/near-tolerance.json",
+  "retained_count": 4,
+  "retained_indices": [
+    3,
+    0,
+    1,
+    2
+  ],
+  "retained_points": [
+    [
+      0.0,
+      1.0
+    ],
+    [
+      0.0,
+      0.0
+    ],
+    [
+      1.0,
+      0.0
+    ],
+    [
+      1.0,
+      1.0
+    ]
+  ],
+  "schema": "csl.btulshor-comparison/1",
+  "status": "completed"
+}

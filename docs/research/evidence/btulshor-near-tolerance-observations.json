@@ -1,0 +1,135 @@
+{
+  "scope": "Additional functional source observations, no performance measurement; unmodified raw outputs",
+  "records": [
+    {
+      "case": {
+        "id": "tiny-top-extreme",
+        "operation": "kpabep",
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0.5,
+            1.00000001
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 4,
+          "points": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "88915caf312af72273f0b68c9c1ef1b9d5e00b8fc4812d113ffa36d3fa7a054b",
+      "exact_separation": {
+        "row": [
+          0,
+          1
+        ],
+        "retained_hull_support": 1,
+        "excluded_input_index": 4,
+        "positive_gap": "11258999/1125899906842624",
+        "scope": "Exact dyadic separation of the input point from the returned square; raw source output is not repaired."
+      }
+    },
+    {
+      "case": {
+        "id": "tiny-bottom-extreme",
+        "operation": "kpabep",
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1e-08,
+            -1e-08
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 4,
+          "points": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "b624f9501b4876cf7c831cb7acefd5bef9620b340ed73dce356cde7af46ffc45",
+      "exact_separation": {
+        "row": [
+          0,
+          -1
+        ],
+        "retained_hull_support": 0,
+        "excluded_input_index": 4,
+        "positive_gap": "3022314549036573/302231454903657293676544",
+        "scope": "Exact dyadic separation of the input point from the returned square; raw source output is not repaired."
+      }
+    }
+  ],
+  "source_sha256": "06fa90d5977ab49174abbf866899000f511fad46eac4a1e72388bbe27090a442",
+  "oracle": "Same original-procedure Double FPC3.2.2 shim recorded in btulshor-source-oracle-fixtures.json"
+}

@@ -29,6 +29,27 @@
       ]
     },
     {
+      "id": "btulshor-source-faithful",
+      "name": "Source-faithful BTULSHOR hull comparison",
+      "composition": "standalone-legacy-source-comparison",
+      "modules": [
+        "CSL::hull"
+      ],
+      "support": "supported-2d",
+      "limit": "The measured comparison covers its saved fixtures. The planar figure is a visualization of saved input points and method outputs; exact-check and timing evidence stays in the linked native record.",
+      "catalog_kinds": [
+        "btulshor-source-faithful"
+      ],
+      "report_routes": [],
+      "examples": [
+        "saved-figure-btulshor-source-faithful"
+      ],
+      "implementation_issues": [
+        2,
+        6
+      ]
+    },
+    {
       "id": "affine-minkowski",
       "name": "Affine image and Minkowski sum",
       "composition": "shared-geometry-port",

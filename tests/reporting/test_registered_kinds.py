@@ -11,6 +11,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 import zipfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'scripts' / 'reports'))
@@ -29,6 +30,8 @@ import syn02_registered_reports as syn02_publication
 import syn_ts01_paired_registered_reports as syn_ts01_paired_publication
 import opt12_registered_reports as opt12_publication
 import opt11_registered_reports as opt11_publication
+import btulshor_registered_reports as btulshor_publication
+import stage_btulshor
 SITE_PATH = Path(__file__).resolve().parents[2] / 'scripts' / 'reports' / 'site.py'
 SITE_SPEC = importlib.util.spec_from_file_location('csl_report_site', SITE_PATH)
 site = importlib.util.module_from_spec(SITE_SPEC)
@@ -38,6 +41,181 @@ FIXTURES = Path(__file__).resolve().parents[2] / 'reports' / 'algorithm-results'
 
 
 class RegisteredKindTests(unittest.TestCase):
+
+    def test_btulshor_registered_identity_and_catalogue_links(self):
+        self.assertEqual(btulshor_publication.KIND, "btulshor-source-faithful")
+        self.assertEqual(btulshor_publication.SOURCE_ID, "btulshor-source-faithful-20261110-v1")
+        tree, archive, _ = btulshor_publication.artifact_links(
+            "btulshor-source-faithful-20261110-v1", "main")
+        self.assertIn("btulshor-source-faithful-20261110-v1", tree)
+        self.assertTrue(archive.endswith(".zip"))
+        public_id = "btulshor-source-faithful-" + "a" * 64
+        self.assertTrue(btulshor_publication.artifact_links(public_id, "main")[1].endswith(".zip"))
+        commit = "b" * 40
+        self.assertEqual(btulshor_publication.artifact_links(public_id, commit), (
+            "https://github.com/butahlecoq/controlled-systems-lab/tree/" + commit +
+            "/reports/algorithm-results/" + public_id,
+            "https://github.com/butahlecoq/controlled-systems-lab/blob/" + commit +
+            "/reports/algorithm-results/" + public_id + ".zip", "artifact commit " + commit))
+        for invalid_id in ("../escape", public_id + "/extra", public_id[:-1],
+                           "btulshor-source-faithful-" + "A" * 64, "other-family", None):
+            with self.subTest(report_id=invalid_id), self.assertRaises(ValueError):
+                btulshor_publication.artifact_links(invalid_id)
+        with self.assertRaises(ValueError):
+            btulshor_publication.artifact_links(public_id, "../../main")
+        entry = {"report_id": public_id, "source_report_id": btulshor_publication.SOURCE_ID,
+                 "report_kind": btulshor_publication.KIND, "source_commit": "1" * 40,
+                 "measured_scope": "Saved fixture comparison", "evidence_limits": "Descriptive timings"}
+        html = site.catalogue_index({"schema": "csl.algorithm-report-catalog/3",
+                                     "artifact_ref": "main", "reports": [entry]})
+        self.assertIn(public_id + "/raw/summary.json", html)
+        self.assertIn(public_id + "/point-projections.svg", html)
+        self.assertIn(public_id + "/btulshor-source-faithful-20261110-v1.zip", html)
+        self.assertIn(public_id + ".zip", html)
+
+    def test_btulshor_adapter_accepts_a_valid_ephemeral_native_bundle(self):
+        source_id = btulshor_publication.SOURCE_ID
+        methods = ["csl.legacy.btulshor.kpabep.source-v1", "csl.geometry.quickhull-2d",
+                   "csl.hull.lp-membership", "csl.hull.itis17.a43-artificial-basis",
+                   "csl.hull.itis17.a43-largest-norm-tie",
+                   "csl.hull.itis17.a44-paper-farthest-incremental-lp"]
+        with tempfile.TemporaryDirectory() as temporary:
+            bundle = Path(temporary) / source_id
+            bundle.mkdir()
+            files = {
+                "index.html": b'<!doctype html><html lang="en"><body><img src="point-projections.svg" alt="Saved projections"></body></html>',
+                "point-projections.svg": b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><circle cx="5" cy="5" r="2"/></svg>',
+                "offline_check.py": b"# synthetic fixture only\n",
+                "input/near-tolerance.json": json.dumps({"fixture_id": "near-tolerance", "points": [[0,0],[1,0],[1,1],[0,1]]}).encode(),
+            }
+            providers = []
+            for method in methods:
+                providers.append({"method_id": method, "status": "completed", "retained_indices": [0,1,2,3],
+                    "elapsed_ns_samples": [10,11,12,13,14], "sample_statuses": ["completed"] * 5,
+                    "exact_check": {"status": "verified", "hull_equal": True, "irredundancy": True},
+                    "exact_check_samples": [{"status": "verified", "hull_equal": True, "irredundancy": True}] * 5,
+                    "display_boundary_indices": [0,1,2,3]})
+            document = {"schema": "csl.btulshor-comparison/1", "fixture_id": "near-tolerance",
+                "dimension": 2, "input_count": 4, "input_points": [[0,0],[1,0],[1,1],[0,1]],
+                "provenance": {"source_commit": "a" * 40, "compiler_id": "test-compiler",
+                    "compiler_version": "test-version", "build_config": "Release"}, "providers": providers,
+                "provider_order": methods}
+            raw_path = "raw/near-tolerance.json"
+            files[raw_path] = json.dumps(document, separators=(",", ":")).encode()
+            runs = []
+            for sample in range(1, 6):
+                path = f"raw/runs/near-tolerance-r{sample}.json"
+                run_document = copy.deepcopy(document)
+                for provider in run_document["providers"]:
+                    provider["elapsed_ns"] = provider["elapsed_ns_samples"][sample - 1]
+                    for field in ("elapsed_ns_samples", "sample_statuses", "exact_check",
+                                  "exact_check_samples", "display_boundary_indices"):
+                        provider.pop(field, None)
+                files[path] = json.dumps(run_document, separators=(",", ":")).encode()
+                runs.append({"fixture_id": "near-tolerance", "sample": sample, "path": path,
+                             "provider_order": methods})
+            summary = {"schema": "csl.btulshor-summary/1", "source_commit": "a" * 40,
+                "compiler_id": "test-compiler", "compiler_version": "test-version", "build_config": "Release",
+                "driver_sha256": "b" * 64,
+                "sample_count_per_fixture": 5, "fixture_ids": ["near-tolerance"], "method_ids": methods,
+                "comparison_files": {"near-tolerance": raw_path}, "driver_runs": runs,
+                "method_statuses": {"near-tolerance": {method: ["completed"] * 5 for method in methods}},
+                "exact_checks": {"near-tolerance": {method: [{"status": "verified", "hull_equal": True,
+                    "irredundancy": True}] * 5 for method in methods}},
+                "elapsed_ns_samples": {"near-tolerance": {method: [10,11,12,13,14] for method in methods}}}
+            files["raw/summary.json"] = json.dumps(summary, separators=(",", ":")).encode()
+            files["raw/oracle-differential.json"] = json.dumps({
+                "source_sha256": stage_btulshor.ORIGINAL_SOURCE_SHA256,
+                "driver_sha256": "b" * 64, "cases": 45, "passed": 45, "failed": 0}).encode()
+            files.update({"source/" + name: b"synthetic source snapshot\n" for name in stage_btulshor.SOURCE_ALLOWLIST})
+            manifest = {"schema": stage_btulshor.SCHEMA, "capture_source_commit": "a" * 40,
+                        "source_sha256": stage_btulshor.ORIGINAL_SOURCE_SHA256,
+                        "files": {name: hashlib.sha256(data).hexdigest() for name, data in files.items()}}
+            manifest_bytes = json.dumps(manifest, separators=(",", ":")).encode()
+            (bundle / "manifest.json").write_bytes(manifest_bytes)
+            (bundle / "SHA256SUMS").write_text("".join(
+                f"{hashlib.sha256(data).hexdigest()}  {name}\n" for name, data in sorted(files.items())) +
+                f"{hashlib.sha256(manifest_bytes).hexdigest()}  manifest.json\n", encoding="ascii")
+            for name, data in files.items():
+                target = bundle / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(data)
+            import zipfile
+            with zipfile.ZipFile(bundle / stage_btulshor.ZIP_NAME, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+                for name in sorted((*files, "manifest.json", "SHA256SUMS")):
+                    archive.writestr(source_id + "/" + name, (bundle / name).read_bytes())
+            publication = btulshor_publication.adapt(bundle)
+            for mutation in ("timing", "input", "order", "unindexed", "oracle", "oracle-driver"):
+                altered = dict(files)
+                run_path = runs[0]["path"]
+                run_doc = json.loads(altered[run_path])
+                if mutation == "timing":
+                    run_doc["providers"][0]["elapsed_ns"] += 1
+                elif mutation == "input":
+                    run_doc["input_points"][0][0] = 99
+                elif mutation == "order":
+                    run_doc["providers"].reverse()
+                elif mutation == "unindexed":
+                    altered["raw/unindexed.json"] = b"{}"
+                else:
+                    receipt = json.loads(altered["raw/oracle-differential.json"])
+                    if mutation == "oracle-driver":
+                        receipt["driver_sha256"] = "c" * 64
+                    else:
+                        receipt["failed"] = 1
+                    altered["raw/oracle-differential.json"] = json.dumps(receipt).encode()
+                altered[run_path] = json.dumps(run_doc).encode()
+                with self.subTest(derived_binding=mutation), self.assertRaises(ValueError):
+                    btulshor_publication._validate_comparisons(bundle, altered, manifest_bytes)
+            artifacts = btulshor_publication.publication_artifacts(bundle, publication)
+            self.assertEqual(artifacts["index.html"], files["index.html"])
+            self.assertEqual(artifacts[stage_btulshor.ZIP_NAME], (bundle / stage_btulshor.ZIP_NAME).read_bytes())
+            self.assertIn("publication-manifest.json", artifacts)
+            self.assertTrue(publication.report_id.startswith("btulshor-source-faithful-"))
+            shutil.copyfile(FIXTURES / "legacy-publications.json", bundle.parent / "legacy-publications.json")
+            entry = btulshor_publication.catalogue_entry(bundle)
+            (bundle.parent / (publication.report_id + ".zip")).write_bytes(
+                btulshor_publication.offline_zip(bundle, publication))
+            catalogue = {"schema": "csl.algorithm-report-catalog/3", "artifact_ref": "main", "reports": [entry]}
+            catalog_path = bundle.parent / "catalog.json"
+            catalog_path.write_text(json.dumps(catalogue), encoding="utf-8")
+            with patch.object(site, "legacy_pins", return_value={}):
+                staged = site.stage(catalog_path, bundle.parent / "staged", check=False)
+            route = staged / publication.report_id
+            self.assertEqual((route / "index.html").read_bytes(), files["index.html"])
+            self.assertEqual((route / stage_btulshor.ZIP_NAME).read_bytes(),
+                             (bundle / stage_btulshor.ZIP_NAME).read_bytes())
+            with zipfile.ZipFile(staged / (publication.report_id + ".zip")) as archive:
+                self.assertIn(publication.report_id + "/" + stage_btulshor.ZIP_NAME, archive.namelist())
+                self.assertIn(publication.report_id + "/publication-manifest.json", archive.namelist())
+            self.assertIn(publication.report_id + "/raw/summary.json", (staged / "index.html").read_text())
+            pristine = bundle.parent / "pristine"
+            shutil.copytree(bundle, pristine)
+            corruptions = {
+                "raw": ("raw/near-tolerance.json", b" "),
+                "manifest": ("manifest.json", b" "),
+                "sums": ("SHA256SUMS", b"invalid\n"),
+                stage_btulshor.ZIP_NAME: (stage_btulshor.ZIP_NAME, b"invalid"),
+            }
+            for label, (name, suffix) in corruptions.items():
+                candidate = bundle.parent / ("corrupt-" + label)
+                shutil.copytree(pristine, candidate)
+                with (candidate / name).open("ab") as stream:
+                    stream.write(suffix)
+                with self.subTest(corruption=label), self.assertRaises(ValueError):
+                    btulshor_publication.adapt(candidate)
+            unsafe_root = bundle.parent / "corrupt-unsafe-zip"
+            unsafe_root.mkdir()
+            unsafe_zip = unsafe_root / source_id
+            shutil.copytree(pristine, unsafe_zip)
+            with zipfile.ZipFile(unsafe_zip / stage_btulshor.ZIP_NAME, "w") as archive:
+                archive.writestr("../escape", b"not allowed")
+            with self.assertRaisesRegex(ValueError, "unsafe bundle path"):
+                btulshor_publication.adapt(unsafe_zip)
+            (bundle / "index.html").write_bytes(files["index.html"] + b" ")
+            with self.assertRaisesRegex(ValueError, "manifest hash mismatch: index.html"):
+                btulshor_publication.adapt(bundle)
+
     def test_b04_catalogue_entry_is_research_only_and_uses_exact_saved_bundle(self):
         catalogue = json.loads((FIXTURES / 'catalog.json').read_text(encoding='utf-8'))
         rows = [row for row in catalogue['reports'] if row.get('report_kind') == 'b04-c-research-dossier']
@@ -536,7 +714,7 @@ class RegisteredKindTests(unittest.TestCase):
         root=repo/'reports'/'algorithm-results'
         catalogue=json.loads((root/'catalog.json').read_text(encoding='utf-8'))
         self.assertEqual(catalogue['schema'],'csl.algorithm-report-catalog/3')
-        self.assertEqual({item['report_kind'] for item in catalogue['reports']},{'lp','convex','opt04-phase-one','opt05-hull','opt06-basis-reuse','opt07-ordered-hull','opt11-recursive-hull','geo03-hv','geo04-intersection','geo02-affine-sum','geo05-projection-predecessor','geo06-quickhull','b08-displayed-exact','issue3-finite-catalogue','issue3-validated-minimax','issue6-b06-reference','issue6-b06-manifest-correction','issue6-b07-reference','issue6-b09-reference','syn01-nominal-forward','syn02-terminal-minimizers','syn07-ts01-analytic','syn04-strategy-b-ts01','syn04-strategy-b-ts02','syn04-strategy-b-ts03','syn03-strategy-a-ts01','syn03-strategy-a-ts02','syn-ts01-paired-comparison','opt12-warm-start','ext03-temporal-transform','b04-c-research-dossier'})
+        self.assertEqual({item['report_kind'] for item in catalogue['reports']},{'lp','convex','opt04-phase-one','opt05-hull','opt06-basis-reuse','opt07-ordered-hull','opt11-recursive-hull','geo03-hv','geo04-intersection','geo02-affine-sum','geo05-projection-predecessor','geo06-quickhull','b08-displayed-exact','issue3-finite-catalogue','issue3-validated-minimax','issue6-b06-reference','issue6-b06-manifest-correction','issue6-b07-reference','issue6-b09-reference','syn01-nominal-forward','syn02-terminal-minimizers','syn07-ts01-analytic','syn04-strategy-b-ts01','syn04-strategy-b-ts02','syn04-strategy-b-ts03','syn03-strategy-a-ts01','syn03-strategy-a-ts02','syn-ts01-paired-comparison','opt12-warm-start','ext03-temporal-transform','b04-c-research-dossier','btulshor-source-faithful'})
         shared={'report_id','report_kind','payload_sha256','source_commit','zip_sha256'}
         for report in catalogue['reports']:
             self.assertTrue(shared <= set(report))

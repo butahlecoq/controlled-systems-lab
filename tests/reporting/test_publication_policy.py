@@ -26,7 +26,7 @@ class PublicationPolicyTests(unittest.TestCase):
                 "geo04-intersection", "geo05-projection-predecessor", "geo06-quickhull",
                 "issue3-finite-catalogue", "issue3-validated-minimax", "issue6-b06-reference",
                 "issue6-b06-manifest-correction",
-                "issue6-b07-reference", "issue6-b09-reference", "opt04-phase-one", "opt05-hull",
+                "issue6-b07-reference", "issue6-b09-reference", "btulshor-source-faithful", "opt04-phase-one", "opt05-hull",
                 "opt06-basis-reuse", "opt07-ordered-hull", "opt11-recursive-hull", "opt12-warm-start",
                 "syn-ts01-paired-comparison", "syn01-nominal-forward", "syn02-terminal-minimizers",
                 "syn03-strategy-a-ts01", "syn03-strategy-a-ts02", "syn04-strategy-b-ts01",
@@ -41,6 +41,7 @@ class PublicationPolicyTests(unittest.TestCase):
             ("geo04-intersection", "geo04-20261012T224946Z-c37852bcc80d", "geo05-20261012T224946Z-c37852bcc80d"),
             ("geo05-projection-predecessor", "geo05-4dc3c0557570a52e", "geo04-4dc3c0557570a52e"),
             ("issue6-b09-reference", "b09-a08-source-reference-4818ddde", "b09-wrong-source"),
+            ("btulshor-source-faithful", "btulshor-source-faithful-20261110-v1", "btulshor-source-faithful-other"),
         )
         for kind, accepted, rejected in cases:
             with self.subTest(kind=kind):
@@ -59,6 +60,16 @@ class PublicationPolicyTests(unittest.TestCase):
         self.assertEqual(policy.svg_files, ("projections-lambda0.svg", "projections-lambda1.svg"))
         self.assertTrue(policy.include_parent_archive)
         self.assertTrue(policy.committed_archive)
+
+
+    def test_btulshor_policy_preserves_native_zip_and_saved_projection(self):
+        policy = publication_policy.for_kind("btulshor-source-faithful")
+        self.assertTrue(policy.native_digest)
+        self.assertEqual(policy.svg_files, ("point-projections.svg",))
+        self.assertTrue(policy.include_parent_archive)
+        self.assertTrue(policy.committed_archive)
+        self.assertEqual(policy.csv_name, "raw/summary.json")
+        self.assertIn(("Native offline ZIP", "btulshor-source-faithful-20261110-v1.zip"), policy.extra_links)
 
     def test_geo04_keeps_the_staging_svg_check(self):
         self.assertEqual(publication_policy.for_kind("geo04-intersection").svg_files,

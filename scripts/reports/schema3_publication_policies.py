@@ -14,6 +14,7 @@ import issue6_b06_publication_policy
 import b06_manifest_correction_publication_policy
 import issue6_b07_publication_policy
 import issue6_b09_publication_policy
+import btulshor_publication_policy
 import issue3_publication_policy
 import issue3_validated_publication_policy
 import syn02_publication_policy

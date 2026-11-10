@@ -124,10 +124,22 @@ class Ext07ResourceObservationTests(unittest.TestCase):
     def test_shared_landing_source_hash_for_frozen_b04_bundle_is_preserved(self) -> None:
         bundle = ROOT / "reports/algorithm-results/b04-c-exact-dyadic-v1"
         manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
-        expected = manifest["source_files"]["scripts/reports/landing.py"]
-        actual = hashlib.sha256(
-            (ROOT / "scripts/reports/landing.py").read_bytes()).hexdigest()
-        self.assertEqual(actual, expected)
+        publisher = load_module("csl_ext07_b04_publication_test", ROOT /
+                                "scripts/reports/b04_c_exact_registered_reports.py")
+        source_name = "scripts/reports/landing.py"
+        snapshot = ROOT / "docs/research/evidence/b04-c-publication-source-snapshot" / source_name
+        self.assertIn(source_name, publisher.SNAPSHOT_FILES)
+        self.assertEqual(ROOT / publisher.SNAPSHOT_ROOT / source_name, snapshot)
+        expected = manifest["source_files"][source_name]
+        self.assertEqual(hashlib.sha256(snapshot.read_bytes()).hexdigest(), expected)
+        self.assertEqual(hashlib.sha256((bundle / "manifest.json").read_bytes()).hexdigest(),
+                         publisher.MANIFEST_SHA256)
+        publication = publisher.adapt(bundle)
+        catalogue = json.loads((bundle.parent / "catalog.json").read_text(encoding="utf-8"))
+        entry = next(row for row in catalogue["reports"]
+                     if row.get("source_report_id") == bundle.name)
+        self.assertEqual(publication.report_id, entry["report_id"])
+        self.assertEqual(publication.source_report_id, bundle.name)
 
     def test_saved_bundle_rejects_changed_capture_file(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

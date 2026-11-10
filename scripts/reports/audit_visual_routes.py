@@ -24,6 +24,7 @@ FOLLOW_UP_ISSUE_OVERRIDES = {
     "scripts/reports/exp824/make_ellipsoid_minimax_report.py": 824,
 }
 COMPOSED_SAVED_ROUTES = {
+    "scripts/reports/btulshor/capture.py",
     "scripts/reports/mpc01/summarize_per_attempt.py",
     "scripts/reports/exp824/make_nominal_report.py",
     "scripts/reports/ext03_transform/report.py",
@@ -50,6 +51,8 @@ FROZEN_DIAGRAM_EXCEPTIONS = {
 }
 PUBLICATION_EXPORT_ROUTES = {
     "scripts/reports/stage_b04_source_moments.py",
+    "scripts/reports/stage_btulshor.py",
+    "scripts/reports/btulshor/render.py",
     "scripts/reports/stage_mpc06_offline_costs.py",
     "scripts/reports/stage_mpc07_comparison.py",
     "scripts/reports/stage_mpc10_comparison.py",

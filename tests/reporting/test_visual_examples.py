@@ -97,6 +97,9 @@ class GalleryTests(unittest.TestCase):
             source_id = saved.get("source_report_id", saved.get("source_bundle", report_id))
             source = ROOT / "reports/algorithm-results" / source_id
             records_name = saved.get("records", "records.json")
+            for name in (records_name, saved["page"], saved["image"], saved.get("check")):
+                if name:
+                    (target / name).parent.mkdir(parents=True, exist_ok=True)
             if not (target / records_name).exists():
                 if (source / records_name).is_file():
                     shutil.copyfile(source / records_name, target / records_name)
@@ -120,9 +123,11 @@ class GalleryTests(unittest.TestCase):
         for report in catalog["reports"]:
             target = self.site / report["report_id"]
             target.mkdir(exist_ok=True)
-            raw_name = ("results.jsonl" if report["report_kind"] == "issue6-b07-reference" else
+            raw_name = ("raw/summary.json" if report["report_kind"] == "btulshor-source-faithful" else
+                        "results.jsonl" if report["report_kind"] == "issue6-b07-reference" else
                         "manifest-correction.json" if report["report_kind"] == "issue6-b06-manifest-correction" else
                         "records.json")
+            (target / raw_name).parent.mkdir(parents=True, exist_ok=True)
             if not (target / raw_name).exists():
                 (target / raw_name).write_text("{}", encoding="utf-8")
             if not (target / "index.html").exists():
@@ -413,6 +418,13 @@ class GalleryTests(unittest.TestCase):
             self.assertEqual((self.site / rid / "index.html").read_bytes(), content)
         self.assertIn('href="examples/index.html"', (self.site / "index.html").read_text())
         page = (self.site / "examples/index.html").read_text(encoding="utf-8")
+        btulshor = next(report for report in self.catalog_reports
+                         if report["report_kind"] == "btulshor-source-faithful")
+        self.assertIn('id="saved-figure-btulshor-source-faithful"', page)
+        self.assertIn(f'../{btulshor["report_id"]}/raw/summary.json', page)
+        self.assertEqual((self.site / btulshor["report_id"] / "raw/summary.json").read_bytes(),
+                         (ROOT / "reports/algorithm-results" / btulshor["source_report_id"] /
+                          "raw/summary.json").read_bytes())
         self.assertIn("TwoPoints reachable sets and approximations", page)
         self.assertIn("independently scaled with numeric ticks and grids", page)
         self.assertIn("exp03-two-points-approx-publication-v1/run.json", page)

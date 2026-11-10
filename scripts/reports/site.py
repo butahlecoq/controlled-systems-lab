@@ -39,7 +39,7 @@ class OfflineHTML(HTMLParser):
         super().__init__(convert_charrefs=True);self.files=files;self.in_style=False;self.in_svg=False
     def handle_starttag(self,tag,attrs):
         html={t:set() for t in ("head","title","body","header","main","footer","section","h1","h2","h3","p","small","strong","table","caption","thead","tbody","tr","th","td","code","pre","details","summary","dl","dt","dd","figcaption","ul","li","style")}
-        html.update({"html":{"lang"},"meta":{"charset","name","content"},"a":{"href"},"img":{"src","alt"},"div":{"class","role","aria-label","tabindex"},"span":{"class"},"figure":{"aria-label"}})
+        html.update({"html":{"lang"},"meta":{"charset","name","content"},"a":{"href","download"},"img":{"src","alt"},"div":{"class","role","aria-label","tabindex"},"span":{"class"},"figure":{"aria-label"}})
         html["th"]={"scope"};html["p"]={"class"}
         svg_tags={"svg","g","defs","path","clippath","use","rect","line","polyline","polygon","circle","ellipse","text","tspan","style","title","desc"}
         svg_attrs={"xmlns","xmlns:xlink","id","class","role","aria-label","aria-labelledby","width","height","viewbox","version","x","y","x1","x2","y1","y2","cx","cy","rx","ry","r","d","points","transform","style","clip-path","clippathunits","fill","stroke","stroke-width","stroke-linecap","stroke-linejoin","stroke-dasharray","stroke-dashoffset","stroke-opacity","fill-opacity","opacity","font-size","font-family","font-style","font-weight","text-anchor","type","href","xlink:href"}
@@ -187,8 +187,10 @@ def catalogue_index(catalogue):
     for report in catalogue["reports"]:
         rid=report["report_id"]
         source_id=report.get("source_report_id",rid)
-        tree,_,label=data.artifact_links(source_id,artifact_ref)
-        _,archive,_=data.artifact_links(rid,artifact_ref)
+        policy = publication_policies.maybe_for_kind(report.get("report_kind"))
+        artifact_links = getattr(policy.publisher, "artifact_links", data.artifact_links) if policy else data.artifact_links
+        tree,_,label=artifact_links(source_id,artifact_ref)
+        _,archive,_=artifact_links(rid,artifact_ref)
         scope='HiGHS reference LP, five analytic microfixtures';limits=""
         if catalogue.get("schema","csl.algorithm-report-catalog/1") in ("csl.algorithm-report-catalog/2","csl.algorithm-report-catalog/3"):
             if catalogue["schema"]=="csl.algorithm-report-catalog/3":

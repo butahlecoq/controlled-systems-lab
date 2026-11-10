@@ -1,0 +1,2892 @@
+{
+  "schema_version": 1,
+  "source_sha256": "06fa90d5977ab49174abbf866899000f511fad46eac4a1e72388bbe27090a442",
+  "source_procedures": {
+    "REACH": [
+      41,
+      72
+    ],
+    "KPABEP": [
+      73,
+      127
+    ],
+    "MODIF": [
+      128,
+      213
+    ]
+  },
+  "scope": "Original extracted procedure behavior under an explicit Double compatibility shim; not a recovered full historical project or historical bit-identity claim. No original source bodies included.",
+  "oracle": {
+    "compiler": "Free Pascal 3.2.2",
+    "mode": "Delphi",
+    "array_scalar": "Double",
+    "real_bytes": 8,
+    "flags": [
+      "-O-",
+      "-Sg",
+      "-Cr",
+      "-Co"
+    ],
+    "shim_changes": [
+      "Minimal standalone unit/program and missing type aliases",
+      "Explicit Double fixed arrays with 65536 entries",
+      "Delphi mode for inherited implementation headers and goto support",
+      "Original procedure statements extracted verbatim; no arithmetic, branch or loop edits"
+    ],
+    "extracted_body_utf8_lf_sha256": "1a3ea7322592bbab09e61fe054e70c478f83a2ef7b66bae0d0aa78c48c228089",
+    "compiler_package_url": "https://stable-mirror.omarchy.org/extra/os/x86_64/fpc-3.2.2-11-x86_64.pkg.tar.zst",
+    "compiler_package_sha256": "13345961c4d77e4498d60905cee958af3814c71b6953dbe4c57765c5bc9a307a"
+  },
+  "numeric_comparison": "exact status/basis/point order; numerical tolerance 1e-12 abs plus 1e-12 rel",
+  "records": [
+    {
+      "case": {
+        "id": "modif-p2-no-columns",
+        "operation": "modif",
+        "rows": 3,
+        "cols": 0,
+        "a": [],
+        "x": [
+          1,
+          0,
+          -1
+        ],
+        "initial_status": 0,
+        "epsilon": 1e-05
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "original_status": 2,
+          "x": [
+            1.0,
+            0.0,
+            -1.0
+          ],
+          "basis": [
+            -1,
+            -2,
+            -3
+          ]
+        }
+      },
+      "stdin_sha256": "61c0c1f3a15a43be2561442885a0125505936cf1d55d8a74099365ae24011305"
+    },
+    {
+      "case": {
+        "id": "modif-p1-no-columns",
+        "operation": "modif",
+        "rows": 3,
+        "cols": 0,
+        "a": [],
+        "x": [
+          1,
+          2,
+          0
+        ],
+        "initial_status": 0,
+        "epsilon": 1e-05
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "original_status": 1,
+          "x": [
+            1.0,
+            -2.0,
+            0.0
+          ],
+          "basis": [
+            -1,
+            -2,
+            -3
+          ]
+        }
+      },
+      "stdin_sha256": "fc8188907d0550be7d01a78e07be8fbf9893a92ce6f4c7d6e625813e15ce177f"
+    },
+    {
+      "case": {
+        "id": "modif-p1-entry-mode",
+        "operation": "modif",
+        "rows": 3,
+        "cols": 0,
+        "a": [],
+        "x": [
+          1,
+          2,
+          0
+        ],
+        "initial_status": 1,
+        "epsilon": 1e-05
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "original_status": 1,
+          "x": [
+            1.0,
+            2.0,
+            0.0
+          ],
+          "basis": [
+            -1,
+            -2,
+            -3
+          ]
+        }
+      },
+      "stdin_sha256": "39a67bb7fa78ae7c579a058a0aaff04de07baa58441aad332c94bc978f7e359b"
+    },
+    {
+      "case": {
+        "id": "modif-p3-no-ratio",
+        "operation": "modif",
+        "rows": 3,
+        "cols": 1,
+        "a": [
+          -1,
+          0,
+          -1
+        ],
+        "x": [
+          1,
+          0,
+          -1
+        ],
+        "initial_status": 0,
+        "epsilon": 1e-05
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "original_status": 3,
+          "x": [
+            1.0,
+            0.0,
+            -1.0
+          ],
+          "basis": [
+            -1,
+            -2,
+            -3
+          ]
+        }
+      },
+      "stdin_sha256": "e92d225cc46380d8bc57412237adfa64064d825692b855132a71e99cf1135a86"
+    },
+    {
+      "case": {
+        "id": "modif-enter-leave-ties",
+        "operation": "modif",
+        "rows": 4,
+        "cols": 2,
+        "a": [
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          -2,
+          -2
+        ],
+        "x": [
+          1,
+          1,
+          0,
+          -2
+        ],
+        "initial_status": 0,
+        "epsilon": 1e-05
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "original_status": 1,
+          "x": [
+            1.0,
+            0.0,
+            -0.0,
+            0.0
+          ],
+          "basis": [
+            1,
+            -2,
+            -3,
+            -4
+          ]
+        }
+      },
+      "stdin_sha256": "0e26b5db3555186ef1f9dfdae26f3de9389dfeae669a7a6ac0da00b54d31c7ed"
+    },
+    {
+      "case": {
+        "id": "kpabep-single-negative",
+        "operation": "kpabep",
+        "points": [
+          [
+            3,
+            -2
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 1,
+          "points": [
+            [
+              3.0,
+              -2.0
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "e933fa07d2c699b16c41ef128d1d33d7a1f70ad95e778e8de661739278cc7899"
+    },
+    {
+      "case": {
+        "id": "kpabep-1d-duplicate",
+        "operation": "kpabep",
+        "points": [
+          [
+            0
+          ],
+          [
+            1
+          ],
+          [
+            0.5
+          ],
+          [
+            0
+          ],
+          [
+            1
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 2,
+          "points": [
+            [
+              1.0
+            ],
+            [
+              0.0
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "906c5c216d6ce5c592e465ffc053774dd1d6113440890e8ad97198b2582abf16"
+    },
+    {
+      "case": {
+        "id": "kpabep-square-interior-duplicate",
+        "operation": "kpabep",
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            1,
+            0
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 4,
+          "points": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "368b78c8df6f3bb6a26a2e8d14557630ad6feaf95cc5346db3b9e07da603b999"
+    },
+    {
+      "case": {
+        "id": "kpabep-square-edge",
+        "operation": "kpabep",
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0.5,
+            0
+          ],
+          [
+            0,
+            0.5
+          ],
+          [
+            1,
+            0.5
+          ],
+          [
+            0.5,
+            1
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 4,
+          "points": [
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "82d223d1e8f12ab2fc60c71c131e2b2ba30bce621534b2d15e56e78d1fc15d66"
+    },
+    {
+      "case": {
+        "id": "kpabep-collinear",
+        "operation": "kpabep",
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 2,
+          "points": [
+            [
+              2.0,
+              2.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "7331d775867a208374b378c9f91558ef0139ff2acb77f1f81071df7a63ff435c"
+    },
+    {
+      "case": {
+        "id": "kpabep-negative-square",
+        "operation": "kpabep",
+        "points": [
+          [
+            -1,
+            -1
+          ],
+          [
+            1,
+            -1
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            -1,
+            1
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 4,
+          "points": [
+            [
+              -1.0,
+              1.0
+            ],
+            [
+              -1.0,
+              -1.0
+            ],
+            [
+              1.0,
+              -1.0
+            ],
+            [
+              1.0,
+              1.0
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "ca54b4a700e9ea0a4f263526f83e15616f443d1d67ea7cb0bd1c54e84858012d"
+    },
+    {
+      "case": {
+        "id": "kpabep-identical",
+        "operation": "kpabep",
+        "points": [
+          [
+            2,
+            -3
+          ],
+          [
+            2,
+            -3
+          ],
+          [
+            2,
+            -3
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 1,
+          "points": [
+            [
+              2.0,
+              -3.0
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "b138db34f321de4d8fcd295fce9f4372b20fb100007e24b93d09aba283513a25"
+    },
+    {
+      "case": {
+        "id": "kpabep-3d-simplex",
+        "operation": "kpabep",
+        "points": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1
+          ],
+          [
+            0.125,
+            0.125,
+            0.125
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 4,
+          "points": [
+            [
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "9654183239276c693ce5c814ad9b9177c5d0e01cf2e71db799dddcae50c7725b"
+    },
+    {
+      "case": {
+        "id": "kpabep-4d-simplex",
+        "operation": "kpabep",
+        "points": [
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0.125,
+            0.125,
+            0.125,
+            0.125
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 5,
+          "points": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              0.0
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "f29fbe11d3ddb778eb2907fa272c6f8a15887c5300b7f8f0e9a4395444512b47"
+    },
+    {
+      "case": {
+        "id": "reach-scalar",
+        "operation": "reach",
+        "a": [
+          [
+            2
+          ]
+        ],
+        "b": [
+          [
+            1
+          ]
+        ],
+        "initial_points": [
+          [
+            0
+          ],
+          [
+            1
+          ]
+        ],
+        "control_points": [
+          [
+            0
+          ],
+          [
+            1
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 2,
+          "points": [
+            [
+              0.0
+            ],
+            [
+              3.0
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "85e0b441e2660a4cb6eb7fcebb789eacbced555639efb7a59e2f4730c23fc9e4"
+    },
+    {
+      "case": {
+        "id": "reach-padded-control",
+        "operation": "reach",
+        "a": [
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "b": [
+          [
+            1
+          ],
+          [
+            2
+          ]
+        ],
+        "initial_points": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ]
+        ],
+        "control_points": [
+          [
+            0
+          ],
+          [
+            1
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 4,
+          "points": [
+            [
+              1.0,
+              0.0
+            ],
+            [
+              1.0,
+              2.0
+            ],
+            [
+              2.0,
+              2.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "8bdccfd87ccd9fcb707fcb811e45a3772d706c71649ff1441352d3f35975e309"
+    },
+    {
+      "case": {
+        "id": "reach-two-filters",
+        "operation": "reach",
+        "a": [
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "b": [
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "initial_points": [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "control_points": [
+          [
+            0,
+            0
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 4,
+          "points": [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              0.0
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "2d4632c4b444ebaf1b58d0f3e257f6f536d55236b68a5e3fd6f0cbf885a15899"
+    },
+    {
+      "case": {
+        "id": "reach-last-control-first",
+        "operation": "reach",
+        "a": [
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "b": [
+          [
+            1
+          ],
+          [
+            2
+          ]
+        ],
+        "initial_points": [
+          [
+            0,
+            0
+          ]
+        ],
+        "control_points": [
+          [
+            -1
+          ],
+          [
+            0
+          ],
+          [
+            1
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 2,
+          "points": [
+            [
+              -1.0,
+              -2.0
+            ],
+            [
+              1.0,
+              2.0
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "4338f7ce2bb74d1f6d159efd0f84375288ba2a1e2497a82da791a098c6d29155"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d1-case0",
+        "operation": "kpabep",
+        "points": [
+          [
+            0.25
+          ],
+          [
+            -0.75
+          ],
+          [
+            1.75
+          ],
+          [
+            0.75
+          ],
+          [
+            0.5
+          ],
+          [
+            0.25
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 2,
+          "points": [
+            [
+              1.75
+            ],
+            [
+              -0.75
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "248d0f0c18e5564f707e71696752a80257f9a4927839be1687708edfb8babed2"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d1-case1",
+        "operation": "kpabep",
+        "points": [
+          [
+            -0.75
+          ],
+          [
+            0.5
+          ],
+          [
+            -0.25
+          ],
+          [
+            0.5
+          ],
+          [
+            1.0
+          ],
+          [
+            -1.0
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 2,
+          "points": [
+            [
+              -1.0
+            ],
+            [
+              1.0
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "9aee5bc6d6c0331356fd88d54b4df02dbbecab5a2ca006004808c8508abcd239"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d1-case2",
+        "operation": "kpabep",
+        "points": [
+          [
+            0.75
+          ],
+          [
+            1.5
+          ],
+          [
+            1.0
+          ],
+          [
+            -0.25
+          ],
+          [
+            -0.75
+          ],
+          [
+            1.75
+          ],
+          [
+            -0.5
+          ],
+          [
+            0.75
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 2,
+          "points": [
+            [
+              1.75
+            ],
+            [
+              -0.75
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "6414ed3151fdcdbbdbb2b244c952c8d0617612e0e4224c149b750b38c122159f"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d1-case3",
+        "operation": "kpabep",
+        "points": [
+          [
+            -1.0
+          ],
+          [
+            -0.75
+          ],
+          [
+            -0.5
+          ],
+          [
+            0.0
+          ],
+          [
+            -1.5
+          ],
+          [
+            -1.5
+          ],
+          [
+            0.25
+          ],
+          [
+            1.75
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 2,
+          "points": [
+            [
+              1.75
+            ],
+            [
+              -1.5
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "8708ac80d9160060eb4142530c55007779e68537b5de244e7cf536d918e207b2"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d1-case4",
+        "operation": "kpabep",
+        "points": [
+          [
+            -1.75
+          ],
+          [
+            -1.5
+          ],
+          [
+            -0.75
+          ],
+          [
+            1.0
+          ],
+          [
+            -0.25
+          ],
+          [
+            1.75
+          ],
+          [
+            -0.75
+          ],
+          [
+            -1.5
+          ],
+          [
+            -0.5
+          ],
+          [
+            -1.75
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 2,
+          "points": [
+            [
+              1.75
+            ],
+            [
+              -1.75
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "5234f03762d93b69fa33daa1b06ce98532c60e63166b1f2206fce5cf3f42fba2"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d1-case5",
+        "operation": "kpabep",
+        "points": [
+          [
+            1.5
+          ],
+          [
+            1.25
+          ],
+          [
+            -1.5
+          ],
+          [
+            -1.0
+          ],
+          [
+            -2.0
+          ],
+          [
+            -1.5
+          ],
+          [
+            0.0
+          ],
+          [
+            0.75
+          ],
+          [
+            -1.0
+          ],
+          [
+            -0.5
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 2,
+          "points": [
+            [
+              -2.0
+            ],
+            [
+              1.5
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "dc2ce4ebed9e0d35cd1ebbbf5a0c9809436b0adbfc01e7ad661d8975598b829d"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d2-case0",
+        "operation": "kpabep",
+        "points": [
+          [
+            1.75,
+            0.25
+          ],
+          [
+            -1.0,
+            -1.5
+          ],
+          [
+            -0.5,
+            -1.75
+          ],
+          [
+            0.25,
+            -2.0
+          ],
+          [
+            0.5,
+            -2.0
+          ],
+          [
+            1.75,
+            0.25
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 5,
+          "points": [
+            [
+              0.5,
+              -2.0
+            ],
+            [
+              1.75,
+              0.25
+            ],
+            [
+              -1.0,
+              -1.5
+            ],
+            [
+              -0.5,
+              -1.75
+            ],
+            [
+              0.25,
+              -2.0
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "b38218968eeff87e93cc146631ada765b4d9cba67e6b1dfcd1ec0822c7a305e7"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d2-case1",
+        "operation": "kpabep",
+        "points": [
+          [
+            1.5,
+            -0.5
+          ],
+          [
+            -0.25,
+            1.5
+          ],
+          [
+            1.0,
+            -0.75
+          ],
+          [
+            1.5,
+            -0.5
+          ],
+          [
+            1.5,
+            -2.0
+          ],
+          [
+            0.0,
+            -2.0
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 4,
+          "points": [
+            [
+              0.0,
+              -2.0
+            ],
+            [
+              1.5,
+              -2.0
+            ],
+            [
+              -0.25,
+              1.5
+            ],
+            [
+              1.5,
+              -0.5
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "3884f6d03dedc1d16eef07ba5afcfa44d3e50d7593c733e5e6d1e2fe17a1cb81"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d2-case2",
+        "operation": "kpabep",
+        "points": [
+          [
+            0.25,
+            0.5
+          ],
+          [
+            1.25,
+            -0.75
+          ],
+          [
+            2.0,
+            0.75
+          ],
+          [
+            -1.75,
+            -1.75
+          ],
+          [
+            -2.0,
+            1.5
+          ],
+          [
+            -1.75,
+            -1.0
+          ],
+          [
+            -1.5,
+            1.25
+          ],
+          [
+            0.25,
+            0.5
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 4,
+          "points": [
+            [
+              -2.0,
+              1.5
+            ],
+            [
+              -1.75,
+              -1.75
+            ],
+            [
+              1.25,
+              -0.75
+            ],
+            [
+              2.0,
+              0.75
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "5facda138d30c92da5a02721f2b55965ddc9ee92b712a202a73924d6641e50e0"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d2-case3",
+        "operation": "kpabep",
+        "points": [
+          [
+            -1.5,
+            -2.0
+          ],
+          [
+            -0.25,
+            2.0
+          ],
+          [
+            -1.0,
+            1.0
+          ],
+          [
+            -1.75,
+            1.75
+          ],
+          [
+            -0.25,
+            -0.75
+          ],
+          [
+            -0.25,
+            0.5
+          ],
+          [
+            1.0,
+            -1.5
+          ],
+          [
+            1.5,
+            -1.5
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 4,
+          "points": [
+            [
+              1.5,
+              -1.5
+            ],
+            [
+              -1.5,
+              -2.0
+            ],
+            [
+              -0.25,
+              2.0
+            ],
+            [
+              -1.75,
+              1.75
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "3962be22417bc8b13f8f5a61df80432d6442722574aedf23cd9508f2d91e3d11"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d2-case4",
+        "operation": "kpabep",
+        "points": [
+          [
+            -1.75,
+            -1.25
+          ],
+          [
+            1.0,
+            -0.25
+          ],
+          [
+            -0.25,
+            0.5
+          ],
+          [
+            -1.25,
+            -1.5
+          ],
+          [
+            1.0,
+            -0.5
+          ],
+          [
+            1.25,
+            -1.25
+          ],
+          [
+            -0.5,
+            -0.75
+          ],
+          [
+            -1.5,
+            1.75
+          ],
+          [
+            -0.25,
+            -0.75
+          ],
+          [
+            -1.75,
+            -1.25
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 5,
+          "points": [
+            [
+              -1.5,
+              1.75
+            ],
+            [
+              -1.75,
+              -1.25
+            ],
+            [
+              1.0,
+              -0.25
+            ],
+            [
+              1.25,
+              -1.25
+            ],
+            [
+              -1.25,
+              -1.5
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "9260ab3a5a17e863ff65a60f42009b797b401cc3c5fb53f6a86a5697f4aa3098"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d2-case5",
+        "operation": "kpabep",
+        "points": [
+          [
+            1.25,
+            -1.75
+          ],
+          [
+            -0.75,
+            1.0
+          ],
+          [
+            2.0,
+            -2.0
+          ],
+          [
+            -0.25,
+            -1.75
+          ],
+          [
+            0.75,
+            -1.5
+          ],
+          [
+            0.75,
+            0.5
+          ],
+          [
+            1.75,
+            1.25
+          ],
+          [
+            1.25,
+            -1.0
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            2.0,
+            -1.5
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 5,
+          "points": [
+            [
+              2.0,
+              -1.5
+            ],
+            [
+              1.75,
+              1.25
+            ],
+            [
+              -0.75,
+              1.0
+            ],
+            [
+              2.0,
+              -2.0
+            ],
+            [
+              -0.25,
+              -1.75
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "7e8899a7701cbbbcfc065de8cc29eadbf34c259ee3d32e6be18eb335067aad9a"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d3-case0",
+        "operation": "kpabep",
+        "points": [
+          [
+            -0.25,
+            1.75,
+            -0.25
+          ],
+          [
+            0.0,
+            -1.75,
+            -1.75
+          ],
+          [
+            0.25,
+            2.0,
+            -1.0
+          ],
+          [
+            2.0,
+            0.25,
+            0.75
+          ],
+          [
+            0.25,
+            -0.25,
+            -1.5
+          ],
+          [
+            -0.25,
+            1.75,
+            -0.25
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 5,
+          "points": [
+            [
+              0.25,
+              -0.25,
+              -1.5
+            ],
+            [
+              -0.25,
+              1.75,
+              -0.25
+            ],
+            [
+              0.0,
+              -1.75,
+              -1.75
+            ],
+            [
+              0.25,
+              2.0,
+              -1.0
+            ],
+            [
+              2.0,
+              0.25,
+              0.75
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "08cffaa51abf37f4bd474a718654d0c12c722df638572fae33082e3d7b7d644d"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d3-case1",
+        "operation": "kpabep",
+        "points": [
+          [
+            1.0,
+            2.0,
+            1.5
+          ],
+          [
+            1.75,
+            -1.25,
+            1.0
+          ],
+          [
+            2.0,
+            0.25,
+            1.5
+          ],
+          [
+            -1.5,
+            -2.0,
+            -2.0
+          ],
+          [
+            1.75,
+            1.0,
+            -0.25
+          ],
+          [
+            0.75,
+            -1.75,
+            1.25
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 6,
+          "points": [
+            [
+              0.75,
+              -1.75,
+              1.25
+            ],
+            [
+              1.0,
+              2.0,
+              1.5
+            ],
+            [
+              1.75,
+              -1.25,
+              1.0
+            ],
+            [
+              2.0,
+              0.25,
+              1.5
+            ],
+            [
+              -1.5,
+              -2.0,
+              -2.0
+            ],
+            [
+              1.75,
+              1.0,
+              -0.25
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "9a1aeb69a4ca615c23851bbc2e84e61d537dcb4ff250858254e7b8950d36974b"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d3-case2",
+        "operation": "kpabep",
+        "points": [
+          [
+            1.0,
+            -1.0,
+            -2.0
+          ],
+          [
+            1.5,
+            -0.25,
+            -0.5
+          ],
+          [
+            -0.5,
+            1.25,
+            -0.75
+          ],
+          [
+            -1.25,
+            0.0,
+            -1.0
+          ],
+          [
+            1.25,
+            1.25,
+            -0.75
+          ],
+          [
+            -1.25,
+            -0.25,
+            2.0
+          ],
+          [
+            -0.5,
+            1.0,
+            1.0
+          ],
+          [
+            1.0,
+            -1.0,
+            -2.0
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 7,
+          "points": [
+            [
+              -0.5,
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              -1.0,
+              -2.0
+            ],
+            [
+              1.5,
+              -0.25,
+              -0.5
+            ],
+            [
+              -0.5,
+              1.25,
+              -0.75
+            ],
+            [
+              -1.25,
+              0.0,
+              -1.0
+            ],
+            [
+              1.25,
+              1.25,
+              -0.75
+            ],
+            [
+              -1.25,
+              -0.25,
+              2.0
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "fe810a95f55f115008972335bb8b7f9381bdb8af306ba3e5c24629a43e334257"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d3-case3",
+        "operation": "kpabep",
+        "points": [
+          [
+            1.0,
+            0.0,
+            -1.25
+          ],
+          [
+            2.0,
+            0.25,
+            -1.25
+          ],
+          [
+            -1.75,
+            1.75,
+            1.25
+          ],
+          [
+            0.25,
+            -0.25,
+            -2.0
+          ],
+          [
+            -0.5,
+            -0.75,
+            -1.75
+          ],
+          [
+            2.0,
+            -2.0,
+            -1.5
+          ],
+          [
+            0.75,
+            1.5,
+            -0.25
+          ],
+          [
+            -2.0,
+            1.25,
+            1.5
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 7,
+          "points": [
+            [
+              -2.0,
+              1.25,
+              1.5
+            ],
+            [
+              0.75,
+              1.5,
+              -0.25
+            ],
+            [
+              2.0,
+              0.25,
+              -1.25
+            ],
+            [
+              -1.75,
+              1.75,
+              1.25
+            ],
+            [
+              0.25,
+              -0.25,
+              -2.0
+            ],
+            [
+              -0.5,
+              -0.75,
+              -1.75
+            ],
+            [
+              2.0,
+              -2.0,
+              -1.5
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "153dd0ba2fd558af1743c16ab38a0113769973e591da5a98239a10a466aad07f"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d3-case4",
+        "operation": "kpabep",
+        "points": [
+          [
+            1.25,
+            0.5,
+            1.75
+          ],
+          [
+            2.0,
+            2.0,
+            -0.5
+          ],
+          [
+            0.5,
+            1.75,
+            -1.25
+          ],
+          [
+            1.25,
+            -0.75,
+            1.25
+          ],
+          [
+            -1.0,
+            -0.75,
+            -1.0
+          ],
+          [
+            0.75,
+            -0.75,
+            0.5
+          ],
+          [
+            -1.75,
+            -1.25,
+            -0.5
+          ],
+          [
+            2.0,
+            1.25,
+            0.75
+          ],
+          [
+            -1.5,
+            -1.25,
+            -0.75
+          ],
+          [
+            1.25,
+            0.5,
+            1.75
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 9,
+          "points": [
+            [
+              -1.5,
+              -1.25,
+              -0.75
+            ],
+            [
+              1.25,
+              0.5,
+              1.75
+            ],
+            [
+              2.0,
+              2.0,
+              -0.5
+            ],
+            [
+              0.5,
+              1.75,
+              -1.25
+            ],
+            [
+              1.25,
+              -0.75,
+              1.25
+            ],
+            [
+              -1.0,
+              -0.75,
+              -1.0
+            ],
+            [
+              0.75,
+              -0.75,
+              0.5
+            ],
+            [
+              -1.75,
+              -1.25,
+              -0.5
+            ],
+            [
+              2.0,
+              1.25,
+              0.75
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "d9deeda3fe2c64d2f044358be842cdd013962e10a9d0d785b33ca49274dd3b89"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d3-case5",
+        "operation": "kpabep",
+        "points": [
+          [
+            -0.25,
+            0.5,
+            0.25
+          ],
+          [
+            0.75,
+            1.75,
+            2.0
+          ],
+          [
+            -2.0,
+            -1.75,
+            -1.0
+          ],
+          [
+            -1.25,
+            -1.0,
+            1.0
+          ],
+          [
+            -1.0,
+            1.0,
+            0.25
+          ],
+          [
+            1.75,
+            -0.75,
+            -1.0
+          ],
+          [
+            0.0,
+            0.5,
+            1.25
+          ],
+          [
+            1.5,
+            0.0,
+            -0.25
+          ],
+          [
+            1.0,
+            1.25,
+            0.25
+          ],
+          [
+            1.75,
+            -2.0,
+            -0.5
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 8,
+          "points": [
+            [
+              1.75,
+              -2.0,
+              -0.5
+            ],
+            [
+              1.0,
+              1.25,
+              0.25
+            ],
+            [
+              0.75,
+              1.75,
+              2.0
+            ],
+            [
+              -2.0,
+              -1.75,
+              -1.0
+            ],
+            [
+              -1.25,
+              -1.0,
+              1.0
+            ],
+            [
+              -1.0,
+              1.0,
+              0.25
+            ],
+            [
+              1.75,
+              -0.75,
+              -1.0
+            ],
+            [
+              1.5,
+              0.0,
+              -0.25
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "e905211e93260d820134193fca000711d5103fe7f97aecd49364689f1fef1086"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d4-case0",
+        "operation": "kpabep",
+        "points": [
+          [
+            -2.0,
+            -1.5,
+            1.75,
+            -0.75
+          ],
+          [
+            -1.0,
+            -1.5,
+            -0.75,
+            1.25
+          ],
+          [
+            -1.25,
+            1.75,
+            -2.0,
+            -1.0
+          ],
+          [
+            0.75,
+            0.0,
+            0.5,
+            2.0
+          ],
+          [
+            -1.75,
+            0.0,
+            0.5,
+            1.25
+          ],
+          [
+            -2.0,
+            -1.5,
+            1.75,
+            -0.75
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 5,
+          "points": [
+            [
+              -1.75,
+              0.0,
+              0.5,
+              1.25
+            ],
+            [
+              -2.0,
+              -1.5,
+              1.75,
+              -0.75
+            ],
+            [
+              -1.0,
+              -1.5,
+              -0.75,
+              1.25
+            ],
+            [
+              -1.25,
+              1.75,
+              -2.0,
+              -1.0
+            ],
+            [
+              0.75,
+              0.0,
+              0.5,
+              2.0
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "af1d561ef566e9b7b38b6646e2038aaeda93d0a42b98eedc06e35eb5ad4469f3"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d4-case1",
+        "operation": "kpabep",
+        "points": [
+          [
+            -0.75,
+            -1.25,
+            -2.0,
+            -1.75
+          ],
+          [
+            1.75,
+            0.75,
+            -0.5,
+            0.5
+          ],
+          [
+            1.25,
+            -1.75,
+            1.75,
+            -1.25
+          ],
+          [
+            1.0,
+            0.5,
+            0.75,
+            1.25
+          ],
+          [
+            -1.0,
+            -0.75,
+            -1.5,
+            0.75
+          ],
+          [
+            0.5,
+            0.5,
+            1.75,
+            1.75
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 6,
+          "points": [
+            [
+              0.5,
+              0.5,
+              1.75,
+              1.75
+            ],
+            [
+              -0.75,
+              -1.25,
+              -2.0,
+              -1.75
+            ],
+            [
+              1.75,
+              0.75,
+              -0.5,
+              0.5
+            ],
+            [
+              1.25,
+              -1.75,
+              1.75,
+              -1.25
+            ],
+            [
+              1.0,
+              0.5,
+              0.75,
+              1.25
+            ],
+            [
+              -1.0,
+              -0.75,
+              -1.5,
+              0.75
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "08838b90d41660becad71ca4da6586cad7e920e8116ba9236b20862035c4fc5d"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d4-case2",
+        "operation": "kpabep",
+        "points": [
+          [
+            1.5,
+            -0.5,
+            -1.0,
+            -1.5
+          ],
+          [
+            0.25,
+            0.75,
+            -1.25,
+            2.0
+          ],
+          [
+            -0.75,
+            -1.25,
+            -1.5,
+            -1.5
+          ],
+          [
+            -1.5,
+            -1.0,
+            0.5,
+            -1.5
+          ],
+          [
+            1.25,
+            1.75,
+            0.75,
+            -0.25
+          ],
+          [
+            -0.75,
+            0.0,
+            -0.25,
+            1.5
+          ],
+          [
+            -1.25,
+            -1.75,
+            1.25,
+            -2.0
+          ],
+          [
+            1.5,
+            -0.5,
+            -1.0,
+            -1.5
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 7,
+          "points": [
+            [
+              -1.25,
+              -1.75,
+              1.25,
+              -2.0
+            ],
+            [
+              1.5,
+              -0.5,
+              -1.0,
+              -1.5
+            ],
+            [
+              0.25,
+              0.75,
+              -1.25,
+              2.0
+            ],
+            [
+              -0.75,
+              -1.25,
+              -1.5,
+              -1.5
+            ],
+            [
+              -1.5,
+              -1.0,
+              0.5,
+              -1.5
+            ],
+            [
+              1.25,
+              1.75,
+              0.75,
+              -0.25
+            ],
+            [
+              -0.75,
+              0.0,
+              -0.25,
+              1.5
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "a8c63c8935aecb1a529a41842e97e2075e233aa5e826f72b85565ed2b7412585"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d4-case3",
+        "operation": "kpabep",
+        "points": [
+          [
+            0.75,
+            0.75,
+            -1.0,
+            -1.0
+          ],
+          [
+            0.0,
+            -0.5,
+            0.75,
+            -1.5
+          ],
+          [
+            -0.25,
+            1.0,
+            1.25,
+            0.25
+          ],
+          [
+            1.75,
+            -2.0,
+            -1.25,
+            -0.5
+          ],
+          [
+            1.5,
+            -1.0,
+            0.75,
+            -0.5
+          ],
+          [
+            0.75,
+            -1.75,
+            1.75,
+            -1.25
+          ],
+          [
+            -1.75,
+            0.5,
+            1.75,
+            -1.5
+          ],
+          [
+            1.25,
+            0.5,
+            -1.5,
+            -0.5
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 8,
+          "points": [
+            [
+              1.25,
+              0.5,
+              -1.5,
+              -0.5
+            ],
+            [
+              0.75,
+              0.75,
+              -1.0,
+              -1.0
+            ],
+            [
+              0.0,
+              -0.5,
+              0.75,
+              -1.5
+            ],
+            [
+              -0.25,
+              1.0,
+              1.25,
+              0.25
+            ],
+            [
+              1.75,
+              -2.0,
+              -1.25,
+              -0.5
+            ],
+            [
+              1.5,
+              -1.0,
+              0.75,
+              -0.5
+            ],
+            [
+              0.75,
+              -1.75,
+              1.75,
+              -1.25
+            ],
+            [
+              -1.75,
+              0.5,
+              1.75,
+              -1.5
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "f0251cf84bf019ee97de3fd643471e124522cf33058014d3c0609a5ef3e76788"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d4-case4",
+        "operation": "kpabep",
+        "points": [
+          [
+            -0.75,
+            -0.75,
+            -1.5,
+            -2.0
+          ],
+          [
+            1.0,
+            1.5,
+            1.5,
+            -1.5
+          ],
+          [
+            1.75,
+            -1.75,
+            -1.5,
+            1.75
+          ],
+          [
+            0.5,
+            1.5,
+            -1.0,
+            2.0
+          ],
+          [
+            -1.0,
+            -1.5,
+            1.75,
+            -0.5
+          ],
+          [
+            2.0,
+            -1.0,
+            1.5,
+            1.75
+          ],
+          [
+            1.0,
+            1.75,
+            2.0,
+            0.75
+          ],
+          [
+            -0.5,
+            0.25,
+            0.75,
+            2.0
+          ],
+          [
+            -0.75,
+            0.5,
+            2.0,
+            -0.5
+          ],
+          [
+            -0.75,
+            -0.75,
+            -1.5,
+            -2.0
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 9,
+          "points": [
+            [
+              -0.75,
+              0.5,
+              2.0,
+              -0.5
+            ],
+            [
+              -0.75,
+              -0.75,
+              -1.5,
+              -2.0
+            ],
+            [
+              1.0,
+              1.5,
+              1.5,
+              -1.5
+            ],
+            [
+              1.75,
+              -1.75,
+              -1.5,
+              1.75
+            ],
+            [
+              0.5,
+              1.5,
+              -1.0,
+              2.0
+            ],
+            [
+              -1.0,
+              -1.5,
+              1.75,
+              -0.5
+            ],
+            [
+              2.0,
+              -1.0,
+              1.5,
+              1.75
+            ],
+            [
+              1.0,
+              1.75,
+              2.0,
+              0.75
+            ],
+            [
+              -0.5,
+              0.25,
+              0.75,
+              2.0
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "0b91c2376ef8db05c83555bf3649db38373ae5fcec28c037cf45680abed30744"
+    },
+    {
+      "case": {
+        "id": "kpabep-seeded-d4-case5",
+        "operation": "kpabep",
+        "points": [
+          [
+            1.5,
+            -1.0,
+            -0.75,
+            2.0
+          ],
+          [
+            1.75,
+            -1.25,
+            2.0,
+            -1.5
+          ],
+          [
+            -1.5,
+            2.0,
+            0.75,
+            0.75
+          ],
+          [
+            -1.5,
+            -2.0,
+            0.75,
+            -1.75
+          ],
+          [
+            -1.5,
+            0.5,
+            -1.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.25,
+            -0.25,
+            0.5
+          ],
+          [
+            0.25,
+            -0.5,
+            0.75,
+            0.25
+          ],
+          [
+            0.0,
+            0.25,
+            -0.75,
+            -0.5
+          ],
+          [
+            -1.0,
+            -1.5,
+            0.25,
+            1.75
+          ],
+          [
+            1.0,
+            1.5,
+            -1.0,
+            0.25
+          ]
+        ]
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "retained_count": 8,
+          "points": [
+            [
+              1.0,
+              1.5,
+              -1.0,
+              0.25
+            ],
+            [
+              1.5,
+              -1.0,
+              -0.75,
+              2.0
+            ],
+            [
+              1.75,
+              -1.25,
+              2.0,
+              -1.5
+            ],
+            [
+              -1.5,
+              2.0,
+              0.75,
+              0.75
+            ],
+            [
+              -1.5,
+              -2.0,
+              0.75,
+              -1.75
+            ],
+            [
+              -1.5,
+              0.5,
+              -1.5,
+              -0.5
+            ],
+            [
+              -1.0,
+              -1.5,
+              0.25,
+              1.75
+            ],
+            [
+              0.0,
+              0.25,
+              -0.75,
+              -0.5
+            ]
+          ]
+        }
+      },
+      "stdin_sha256": "50aad50a033ab79be0dbce190e420e463499b30829f1a5ca239b87674f623c45"
+    },
+    {
+      "case": {
+        "id": "modif-entry-p1-objective-row",
+        "operation": "modif",
+        "rows": 3,
+        "cols": 1,
+        "a": [
+          1,
+          2,
+          -1
+        ],
+        "x": [
+          1,
+          2,
+          -1
+        ],
+        "initial_status": 1,
+        "epsilon": 1e-05
+      },
+      "source_outcome": {
+        "execution": "completed",
+        "raw": {
+          "real_bytes": 8,
+          "original_status": 1,
+          "x": [
+            1.0,
+            4.0,
+            0.0
+          ],
+          "basis": [
+            1,
+            -2,
+            -3
+          ]
+        }
+      },
+      "stdin_sha256": "7ea5ff10226a3ec3b39b1ec34ec99a6bcd1e51f4fd8911f280fc732c48ddfbe2"
+    }
+  ]
+}

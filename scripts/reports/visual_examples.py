@@ -164,6 +164,20 @@ SAVED_FIGURES = (
          summary="Five order-rotated Release repetitions per method ran inside an enforced 300-second and 8 GiB process-tree profile. The report records cgroup peak memory, exact-rational replay checks, and the separate zonotope limiter profile. This finite adaptation makes no general winner claim."),
 )
 
+_BTULSHOR_FIGURE = dict(
+    anchor="saved-figure-btulshor-source-faithful",
+    source_report_id="btulshor-source-faithful-20261110-v1", image="point-projections.svg",
+    page="index.html", records="raw/summary.json", family="Convex hulls · source comparison",
+    title="Inspect saved BTULSHOR hull projections",
+    alt="Saved two-dimensional input points and method hull projections for the BTULSHOR comparison.",
+    summary="The figure uses saved input and output coordinates from the measured source-faithful comparison. The linked report preserves exact-check statuses, including any near-tolerance failure.")
+_catalog_path = Path(__file__).parents[2] / "reports/algorithm-results/catalog.json"
+if _catalog_path.is_file():
+    _catalog = json.loads(_catalog_path.read_text(encoding="utf-8"))
+    if any(row.get("source_report_id") == _BTULSHOR_FIGURE["source_report_id"]
+           for row in _catalog.get("reports", [])):
+        SAVED_FIGURES = (*SAVED_FIGURES, _BTULSHOR_FIGURE)
+
 
 require = report_data.require
 
@@ -374,7 +388,7 @@ def saved_figure_sections(catalog, site):
         page = f"../{report_id}/{entry['page']}"
         records = f"../{report_id}/{records_name}"
         cards.append(
-            f'<article id="saved-figure-{number}" class="saved-figure"><p class="eyebrow">' + escape(entry["family"]) +
+            f'<article id="{escape(entry.get("anchor", f"saved-figure-{number}"), quote=True)}" class="saved-figure"><p class="eyebrow">' + escape(entry["family"]) +
             '</p><h3><a href="' + escape(page, quote=True) + '">' + escape(entry["title"]) +
             '</a></h3><a href="' + escape(page, quote=True) + '"><img src="' +
             escape(image, quote=True) + '" alt="' + escape(entry["alt"], quote=True) +
@@ -382,7 +396,8 @@ def saved_figure_sections(catalog, site):
             '<p><a href="' + escape(page, quote=True) + '">Inputs, answer and reproduction details ↗</a> · '
             '<a href="' + escape(records, quote=True) + '">Raw record ↗</a></p></article>')
         inventory_item = {"family": entry["family"], "title": entry["title"], "report_id": report_id,
-                          "figure": entry["image"], "page": entry["page"], "records": records_name}
+                          "figure": entry["image"], "page": entry["page"], "records": records_name,
+                          "anchor": entry.get("anchor", f"saved-figure-{number}")}
         if check_name:
             inventory_item["check"] = check_name
         inventory.append(inventory_item)
@@ -474,6 +489,7 @@ def algorithm_coverage(catalog, site, gallery_inventory):
         raw_name = ("record.json" if report["report_kind"] in evidence_only else
                     "results.jsonl" if report["report_kind"] == "issue6-b07-reference" else
                     "manifest-correction.json" if report["report_kind"] == "issue6-b06-manifest-correction" else
+                    "raw/summary.json" if report["report_kind"] == "btulshor-source-faithful" else
                     "records.json")
         require((route / "index.html").is_file() and (route / raw_name).is_file(),
                 "algorithm coverage catalog report is not staged: " + report["report_id"])
@@ -494,7 +510,8 @@ def algorithm_coverage(catalog, site, gallery_inventory):
             {"report_kind": entry["report_kind"], "report_id": entry["report_id"],
              "page": "../" + entry["report_id"] + "/index.html",
              "raw_record": "../" + entry["report_id"] + "/" +
-                           ("results.jsonl" if entry["report_kind"] == "issue6-b07-reference" else
+                           ("raw/summary.json" if entry["report_kind"] == "btulshor-source-faithful" else
+                            "results.jsonl" if entry["report_kind"] == "issue6-b07-reference" else
                             "manifest-correction.json" if entry["report_kind"] == "issue6-b06-manifest-correction" else
                             "records.json")}
             for entry in reports if entry["report_kind"] in family["catalog_kinds"]]
@@ -705,7 +722,7 @@ def build(catalog, site):
         report_page = entry["page"]
         report_figure = entry["figure"]
         report_record = entry["records"]
-        entry["anchor"] = f"saved-figure-{figure_index+1}"
+        entry.setdefault("anchor", f"saved-figure-{figure_index+1}")
         entry["page"] = "index.html#saved-report-figures"
         entry["figure"] = f"../{entry['report_id']}/{report_figure}"
         entry["source_page"] = f"../{entry['report_id']}/{report_page}"

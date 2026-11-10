@@ -1,0 +1,285 @@
+{
+  "source_sha256": "06fa90d5977ab49174abbf866899000f511fad46eac4a1e72388bbe27090a442",
+  "scope": "Separate companion observer counts MODIF entries and completed basis-pivot updates. All numerical outputs/statuses/bases match the original verbatim shim on all 45 fixtures; MODIF entry counts also match the earlier entry-only observer. Not original source counters or historical runtime.",
+  "observer_changes": [
+    "Rename standalone unit/program",
+    "Add global integer ModifCalls, increment once at MODIF entry",
+    "Add global integer PivotCount, increment immediately after each original basis update before the next iteration",
+    "Emit counters in wrapper JSON; original arithmetic, comparisons, branch targets and operation order untouched"
+  ],
+  "pivot_count_scope": "Completed MODIF basis updates summed across all nested MODIF invocations for KPABEP and REACH; excludes objective sign changes and phase changes.",
+  "observer_unit_sha256": "37e3f9ab9ccff67742e6cb15194bdb466d16c5b21bdcdb78012d41ccd7f7fe6e",
+  "observer_wrapper_sha256": "3cbe341363ed081ddece5d77b1058bd99f7bf51ed61146bc8e1722748d9c106e",
+  "records": [
+    {
+      "case_id": "modif-p2-no-columns",
+      "operation": "modif",
+      "modif_calls": 1,
+      "pivot_count": 0
+    },
+    {
+      "case_id": "modif-p1-no-columns",
+      "operation": "modif",
+      "modif_calls": 1,
+      "pivot_count": 0
+    },
+    {
+      "case_id": "modif-p1-entry-mode",
+      "operation": "modif",
+      "modif_calls": 1,
+      "pivot_count": 0
+    },
+    {
+      "case_id": "modif-p3-no-ratio",
+      "operation": "modif",
+      "modif_calls": 1,
+      "pivot_count": 0
+    },
+    {
+      "case_id": "modif-enter-leave-ties",
+      "operation": "modif",
+      "modif_calls": 1,
+      "pivot_count": 1
+    },
+    {
+      "case_id": "kpabep-single-negative",
+      "operation": "kpabep",
+      "modif_calls": 1,
+      "pivot_count": 0
+    },
+    {
+      "case_id": "kpabep-1d-duplicate",
+      "operation": "kpabep",
+      "modif_calls": 5,
+      "pivot_count": 8
+    },
+    {
+      "case_id": "kpabep-square-interior-duplicate",
+      "operation": "kpabep",
+      "modif_calls": 6,
+      "pivot_count": 15
+    },
+    {
+      "case_id": "kpabep-square-edge",
+      "operation": "kpabep",
+      "modif_calls": 8,
+      "pivot_count": 21
+    },
+    {
+      "case_id": "kpabep-collinear",
+      "operation": "kpabep",
+      "modif_calls": 4,
+      "pivot_count": 7
+    },
+    {
+      "case_id": "kpabep-negative-square",
+      "operation": "kpabep",
+      "modif_calls": 5,
+      "pivot_count": 11
+    },
+    {
+      "case_id": "kpabep-identical",
+      "operation": "kpabep",
+      "modif_calls": 2,
+      "pivot_count": 2
+    },
+    {
+      "case_id": "kpabep-3d-simplex",
+      "operation": "kpabep",
+      "modif_calls": 5,
+      "pivot_count": 16
+    },
+    {
+      "case_id": "kpabep-4d-simplex",
+      "operation": "kpabep",
+      "modif_calls": 6,
+      "pivot_count": 25
+    },
+    {
+      "case_id": "reach-scalar",
+      "operation": "reach",
+      "modif_calls": 4,
+      "pivot_count": 7
+    },
+    {
+      "case_id": "reach-padded-control",
+      "operation": "reach",
+      "modif_calls": 4,
+      "pivot_count": 8
+    },
+    {
+      "case_id": "reach-two-filters",
+      "operation": "reach",
+      "modif_calls": 8,
+      "pivot_count": 18
+    },
+    {
+      "case_id": "reach-last-control-first",
+      "operation": "reach",
+      "modif_calls": 3,
+      "pivot_count": 2
+    },
+    {
+      "case_id": "kpabep-seeded-d1-case0",
+      "operation": "kpabep",
+      "modif_calls": 6,
+      "pivot_count": 9
+    },
+    {
+      "case_id": "kpabep-seeded-d1-case1",
+      "operation": "kpabep",
+      "modif_calls": 6,
+      "pivot_count": 10
+    },
+    {
+      "case_id": "kpabep-seeded-d1-case2",
+      "operation": "kpabep",
+      "modif_calls": 8,
+      "pivot_count": 14
+    },
+    {
+      "case_id": "kpabep-seeded-d1-case3",
+      "operation": "kpabep",
+      "modif_calls": 8,
+      "pivot_count": 14
+    },
+    {
+      "case_id": "kpabep-seeded-d1-case4",
+      "operation": "kpabep",
+      "modif_calls": 10,
+      "pivot_count": 18
+    },
+    {
+      "case_id": "kpabep-seeded-d1-case5",
+      "operation": "kpabep",
+      "modif_calls": 10,
+      "pivot_count": 18
+    },
+    {
+      "case_id": "kpabep-seeded-d2-case0",
+      "operation": "kpabep",
+      "modif_calls": 6,
+      "pivot_count": 12
+    },
+    {
+      "case_id": "kpabep-seeded-d2-case1",
+      "operation": "kpabep",
+      "modif_calls": 6,
+      "pivot_count": 11
+    },
+    {
+      "case_id": "kpabep-seeded-d2-case2",
+      "operation": "kpabep",
+      "modif_calls": 8,
+      "pivot_count": 18
+    },
+    {
+      "case_id": "kpabep-seeded-d2-case3",
+      "operation": "kpabep",
+      "modif_calls": 8,
+      "pivot_count": 21
+    },
+    {
+      "case_id": "kpabep-seeded-d2-case4",
+      "operation": "kpabep",
+      "modif_calls": 10,
+      "pivot_count": 24
+    },
+    {
+      "case_id": "kpabep-seeded-d2-case5",
+      "operation": "kpabep",
+      "modif_calls": 10,
+      "pivot_count": 22
+    },
+    {
+      "case_id": "kpabep-seeded-d3-case0",
+      "operation": "kpabep",
+      "modif_calls": 6,
+      "pivot_count": 11
+    },
+    {
+      "case_id": "kpabep-seeded-d3-case1",
+      "operation": "kpabep",
+      "modif_calls": 6,
+      "pivot_count": 14
+    },
+    {
+      "case_id": "kpabep-seeded-d3-case2",
+      "operation": "kpabep",
+      "modif_calls": 8,
+      "pivot_count": 25
+    },
+    {
+      "case_id": "kpabep-seeded-d3-case3",
+      "operation": "kpabep",
+      "modif_calls": 8,
+      "pivot_count": 25
+    },
+    {
+      "case_id": "kpabep-seeded-d3-case4",
+      "operation": "kpabep",
+      "modif_calls": 10,
+      "pivot_count": 33
+    },
+    {
+      "case_id": "kpabep-seeded-d3-case5",
+      "operation": "kpabep",
+      "modif_calls": 10,
+      "pivot_count": 31
+    },
+    {
+      "case_id": "kpabep-seeded-d4-case0",
+      "operation": "kpabep",
+      "modif_calls": 6,
+      "pivot_count": 14
+    },
+    {
+      "case_id": "kpabep-seeded-d4-case1",
+      "operation": "kpabep",
+      "modif_calls": 6,
+      "pivot_count": 16
+    },
+    {
+      "case_id": "kpabep-seeded-d4-case2",
+      "operation": "kpabep",
+      "modif_calls": 8,
+      "pivot_count": 28
+    },
+    {
+      "case_id": "kpabep-seeded-d4-case3",
+      "operation": "kpabep",
+      "modif_calls": 8,
+      "pivot_count": 25
+    },
+    {
+      "case_id": "kpabep-seeded-d4-case4",
+      "operation": "kpabep",
+      "modif_calls": 10,
+      "pivot_count": 31
+    },
+    {
+      "case_id": "kpabep-seeded-d4-case5",
+      "operation": "kpabep",
+      "modif_calls": 10,
+      "pivot_count": 34
+    },
+    {
+      "case_id": "modif-entry-p1-objective-row",
+      "operation": "modif",
+      "modif_calls": 1,
+      "pivot_count": 1
+    },
+    {
+      "case_id": "tiny-top-extreme",
+      "operation": "kpabep",
+      "modif_calls": 5,
+      "pivot_count": 11
+    },
+    {
+      "case_id": "tiny-bottom-extreme",
+      "operation": "kpabep",
+      "modif_calls": 5,
+      "pivot_count": 11
+    }
+  ]
+}
