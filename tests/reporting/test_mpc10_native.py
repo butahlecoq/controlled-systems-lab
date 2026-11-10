@@ -29,6 +29,10 @@ class NativeTests(unittest.TestCase):
     def test_row_mutation_rejects_even_when_anchor_still_satisfies_it(self):
         s,r=self.run_case('published-2d-identity');r['branches'][0]['program']['matrix'][0][0]*=2
         with self.assertRaisesRegex(ValueError,'native rows differ'):check_native(s,solve(s),r)
+    def test_impossible_native_cost_is_not_accepted_as_a_measurement(self):
+        s,r=self.run_case('published-2d-identity');r['total_ns']=10**18
+        r['provider_setup_ns']=10**19
+        with self.assertRaisesRegex(ValueError,'phase exceeds'):check_native(s,solve(s),r)
     def test_omitted_parallel_tie_and_changed_face_reject(self):
         s,r=self.run_case('guard-negative-reset');missing=copy.deepcopy(r);missing['branches'].pop()
         with self.assertRaisesRegex(ValueError,'branch inventory'):check_native(s,solve(s),missing)

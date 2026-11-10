@@ -99,7 +99,26 @@ def check_faces(s,oracle,raw):
     return 'exact-profile-candidate-face-relations-checked'
 
 
+def check_native_clocks(raw):
+    if 'total_ns' not in raw:return
+    total=raw['total_ns']
+    if isinstance(total,bool) or not isinstance(total,int) or total<0:raise ValueError('invalid native total clock')
+    for name,value in raw.items():
+        if name.endswith('_ns') and (isinstance(value,bool) or not isinstance(value,int) or value<0 or value>total):raise ValueError('native phase exceeds whole-flow span')
+    inner=0.
+    for branch in raw.get('branches',[]):
+        if 'result' not in branch:continue
+        for name in ['native.load_seconds','native.solve_seconds']:
+            matches=re.findall(r'^'+re.escape(name)+r'=(.+)$',branch['result']['raw_diagnostics'],re.MULTILINE)
+            if len(matches)!=1:raise ValueError('native cost diagnostic inventory')
+            value=float(matches[0])
+            if not math.isfinite(value) or value<0:raise ValueError('invalid native cost diagnostic')
+            inner+=value
+    if inner>raw.get('solve_portfolio_ns',0)/1e9+.001:raise ValueError('inner native costs exceed portfolio span')
+
+
 def check_native(s,oracle,raw):
+    check_native_clocks(raw)
     if raw['fixture_id']!=s['id'] or raw['fixture_sha256']!=s['fixture_sha256']:raise ValueError('native fixture association')
     if s.get('external_unsupported'):
         if raw['status']!='external-encoding-unsupported':raise ValueError('missing external unsupported status')
@@ -223,6 +242,11 @@ def check(bundle):
         for process,path in [(np,folder/'native'),(sp,folder/'scip-process')]:
             if process['stdout_sha256']!=sha(path/'stdout.txt') or process['stderr_sha256']!=sha(path/'stderr.txt'):raise ValueError('native process stream binding')
         if np['status']!='completed' or sp['status']!='completed' or np['return_code']!=0 or sp['return_code']!=0:reports.append({'id':s['id'],'status':'inconclusive-process','native_process':np,'scip_process':sp});continue
+        if native.get('total_ns',0)/1e9>np['whole_process_seconds']+.001:raise ValueError('native whole-flow clock exceeds process span')
+        if not s.get('external_unsupported'):
+            attempts=load(folder/'scip/results.json')['attempts']
+            duration=sum(a['result']['formulation_and_setup_seconds']+a['result']['optimization_seconds'] for a in attempts)
+            if any(a['result'][k]<0 or not math.isfinite(a['result'][k]) for a in attempts for k in ['formulation_and_setup_seconds','optimization_seconds']) or duration>sp['whole_process_seconds']+.001:raise ValueError('SCIP clocks exceed worker span')
         reports.append({'id':s['id'],'native':check_native(s,oracle,native),'scip':check_scip(s,oracle,folder/'scip'),'exact_optimum':oracle.get('optimum'),'exact_all_optimal_paths':oracle.get('all_optimal_paths')})
     if inventory(bundle)!=hashes:raise ValueError('capture changed during verification')
     return {'schema':'csl.mpc10.check/1','reports':reports,'input_files':hashes,'checking_sources':{p.name:sha(p) for p in Path(__file__).parent.glob('*.py')},'scope':'exact independently reconstructed branch LP rows/objectives and interval oracle; numerical external witnesses/bounds; continuous family claims only where actual CSL verifier establishes them'}
