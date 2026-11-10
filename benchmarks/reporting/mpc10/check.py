@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import re
 import tempfile
-from benchmarks.reporting.mpc10.evidence import load,sha,checked_capture,inventory
+from benchmarks.reporting.mpc10.evidence import load,sha,checked_capture,inventory,checking_identity
 from benchmarks.reporting.mpc10.fixtures import fixtures
 from benchmarks.reporting.mpc10.oracle import solve as exact
 
@@ -250,7 +250,8 @@ def check(bundle):
             if any(a['result'][k]<0 or not math.isfinite(a['result'][k]) for a in attempts for k in ['formulation_and_setup_seconds','optimization_seconds']) or duration>sp['whole_process_seconds']+.001:raise ValueError('SCIP clocks exceed worker span')
         reports.append({'id':s['id'],'native':check_native(s,oracle,native),'scip':check_scip(s,oracle,folder/'scip'),'exact_optimum':oracle.get('optimum'),'exact_all_optimal_paths':oracle.get('all_optimal_paths')})
     if inventory(bundle)!=hashes:raise ValueError('capture changed during verification')
-    return {'schema':'csl.mpc10.check/1','reports':reports,'input_files':hashes,'checking_sources':{p.name:sha(p) for p in Path(__file__).parent.glob('*.py')},'scope':'exact independently reconstructed branch LP rows/objectives and interval oracle; numerical external witnesses/bounds; continuous family claims only where actual CSL verifier establishes them'}
+    checking_revision,checking_sources=checking_identity()
+    return {'schema':'csl.mpc10.check/1','reports':reports,'input_files':hashes,'checking_sources':checking_sources,'checking_revision':checking_revision,'scope':'exact independently reconstructed branch LP rows/objectives and interval oracle; numerical external witnesses/bounds; continuous family claims only where actual CSL verifier establishes them'}
 
 
 if __name__=='__main__':
