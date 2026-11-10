@@ -1,5 +1,7 @@
 # MPC-08 exact explicit pilot
 
+The historical pilots below are preserved. The 2026-11-10 whole-domain/predecessor and matched original-quadratic N=2/4/8 continuation has a [six-criterion delivery disposition](../../../docs/research/mpc08-delivery-disposition.md). General-engine/MPT execution is outside its bounded scope; independent review, CI and verified live publication remain delivery gates.
+
 This is a bounded pilot for [issue #604](https://github.com/butahlecoq/controlled-systems-lab/issues/604), not a complete comparison-program result. It gives an exact parametric reference for one double-integrator step, separately identifies the invariant terminal set, and records fixed-initial CSL candidate checks and a condensed online-QP baseline.
 
 Saved HTML report and offline bundle: [MPC-08 explicit pilot](../../../reports/algorithm-results/mpc08-explicit-pilot-v1/index.html). Its verified public Pages route is [live](https://butahlecoq.github.io/controlled-systems-lab/mpc08-explicit-pilot-v1/).
