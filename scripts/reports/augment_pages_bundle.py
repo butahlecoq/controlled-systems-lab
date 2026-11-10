@@ -15,6 +15,7 @@ if str(ROOT / "scripts/reports") not in sys.path:
 
 from scripts.reports import (
     stage_b04_c_strategy_a, stage_mpc06_tube_objective, stage_mpc06_delivery,
+    stage_mpc06_offline_costs,
     stage_review05_family_query, stage_mpc11_controller_comparison,
     stage_mpc08_complete, stage_mpc07_comparison, stage_mpc10_comparison, stage_mpc11_mesh_timing,
 )
@@ -34,6 +35,7 @@ def stage_all(site: Path) -> dict[str, str]:
     b04_route = stage_b04_c_strategy_a.stage(B04_SOURCE, site)
     mpc06_route = stage_mpc06_tube_objective.stage(MPC06_SOURCE, site)
     mpc06_complete = stage_mpc06_delivery.stage(stage_mpc06_delivery.SOURCE, site)
+    mpc06_offline = stage_mpc06_offline_costs.stage(site, parent_route=mpc06_complete)
     review05 = stage_review05_family_query.stage(site)
     mpc11 = stage_mpc11_controller_comparison.stage(site)
     mpc08 = stage_mpc08_complete.stage(site)
@@ -56,6 +58,8 @@ def stage_all(site: Path) -> dict[str, str]:
         f'href="{mpc06_route}.zip"',
         f'href="{mpc06_complete}/index.html"',
         f'href="{mpc06_complete}.zip"',
+        f'href="{mpc06_offline}/index.html"',
+        f'href="{mpc06_offline}.zip"',
         f'href="{review05}/index.html"',
         f'href="{mpc11}/index.html"',
         f'href="{mpc08}/index.html"',
@@ -74,10 +78,14 @@ def stage_all(site: Path) -> dict[str, str]:
         (b04_route, ("index.html", "publication-manifest.json", "trajectory.svg")),
         (mpc06_route, ("index.html", "publication-manifest.json", "trajectory.svg")),
         (mpc06_complete, ("index.html", "publication-manifest.json", "invariant-tightenings.svg", "feasibility-grid.png")),
+        (mpc06_offline, ("index.html", "publication-manifest.json", "minimal-inputs.json", "offline_check.py", "invariant-tightenings.svg")),
         (review05, ("index.html", "publication-manifest.json")),
         (mpc11, ("index.html", "publication-manifest.json")),
         (mpc08, ("index.html", "publication-manifest.json", "minimal-inputs.json", "offline_check.py", "figures/exact-critical-regions.svg", "figures/horizon-regions.svg")),
-        (mpc07, ("index.html", "publication-manifest.json", "minimal-inputs.json", "figures/fixed-filter-policy.svg", "figures/joint-filter-policy.svg")),
+        (mpc07, ("index.html", "publication-manifest.json", "minimal-inputs.json", "offline_check.py",
+                 "figures/fixed-filter-policy.svg", "figures/joint-filter-policy.svg",
+                 "online-verification.json", "online-figure-data.json", "online-figure-export.json",
+                 "figures/online-policy-traces.svg", "figures/online-policy-traces.png")),
         (mpc10, ("index.html", "publication-manifest.json", "minimal-inputs.json", "figures/paths.svg", "figures/branches.svg")),
         (mpc11_studies, ("index.html", "publication-manifest.json", "minimal-inputs.json", "mesh-phase-overlays.svg", "mesh-differences.svg", "timing-phases.svg")),
     ):
@@ -97,7 +105,7 @@ def stage_all(site: Path) -> dict[str, str]:
     strategy_page = site / STRATEGY_AB_ROUTE / "strategy-ab-ts03-summary.html"
     if strategy_page.is_symlink() or not strategy_page.is_file():
         raise ValueError("combined Pages site is missing the Strategy A/B T-S03 report")
-    return {"mpc01": per_attempt.name, "b04_c": b04_route, "mpc06": mpc06_route, "mpc06_complete": mpc06_complete, "review05": review05, "mpc11": mpc11, "mpc08": mpc08, "mpc07": mpc07, "mpc10": mpc10, "mpc11_studies": mpc11_studies}
+    return {"mpc01": per_attempt.name, "b04_c": b04_route, "mpc06": mpc06_route, "mpc06_complete": mpc06_complete, "mpc06_offline": mpc06_offline, "review05": review05, "mpc11": mpc11, "mpc08": mpc08, "mpc07": mpc07, "mpc10": mpc10, "mpc11_studies": mpc11_studies}
 
 
 def augment(download: Path, destination: Path) -> dict[str, str]:

@@ -38,3 +38,7 @@ The new reference cost receipt records one exact construction plus history
 extraction interval and one independent-check interval, using monotonic
 nanoseconds and excluding upstream loading. These are descriptive Python
 observations, not a controller latency ranking.
+
+## Separate canonical offline construction-cost follow-up
+
+The previous standalone Z/terminal construction timing was unavailable; it is not retroactively reconstructed from the composite pilot. The [2026-11-10 follow-up](mpc06-offline-costs-2026-11-10.md) instead measures a new source-frozen canonical builder whose exact artifacts feed the same nominal-QP consumer and match actual saved native requests. Its construction, independent certificate/consumer checking and artifact serialization costs remain separate. Prescribed K has no optimization span. Original180QP records/sidecars stay unchanged; independent review/current CI/root publication/live acceptance remain gates for this supplement.

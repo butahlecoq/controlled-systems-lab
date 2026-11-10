@@ -23,10 +23,15 @@ class PublicationTests(unittest.TestCase):
             self.assertIn(route+'/index.html#minimal-example',(site/'examples/index.html').read_text())
             report=site/route;checks=json.loads((report/'verification.json').read_text())
             self.assertEqual(checks['attempts'],218);self.assertEqual(checks['joint_attainment']['maximum_gap'],'0')
-            result=subprocess.run([sys.executable,'-B',str(report/'offline_check.py')],cwd=Path(temporary),capture_output=True,text=True,timeout=45)
+            self.assertEqual((checks['online']['episodes'],checks['online']['stages']),(864,4032))
+            self.assertEqual((checks['online']['measured_episodes'],checks['online']['measured_stages']),(360,1680))
+            self.assertEqual(json.loads((report/'online-figure-data.json').read_bytes())['verification_sha256'],hashlib.sha256((report/'online-verification.json').read_bytes()).hexdigest())
+            self.assertIn('intrinsic latency',(report/'verification.json').read_text());self.assertIn('timestamp',(report/'index.html').read_text())
+            self.assertTrue((report/'figures/online-policy-traces.svg').is_file())
+            result=subprocess.run([sys.executable,'-B',str(report/'offline_check.py')],cwd=Path(temporary),capture_output=True,text=True,timeout=60)
             self.assertEqual(result.returncode,0,result.stderr);self.assertEqual(json.loads(result.stdout)['attempts'],218)
             proof=next((report/'source-root/.git/objects').glob('*/*'));proof.write_bytes(proof.read_bytes()+b'changed')
-            refused=subprocess.run([sys.executable,'-B',str(report/'offline_check.py')],cwd=Path(temporary),capture_output=True,text=True,timeout=45)
+            refused=subprocess.run([sys.executable,'-B',str(report/'offline_check.py')],cwd=Path(temporary),capture_output=True,text=True,timeout=60)
             self.assertNotEqual(refused.returncode,0);self.assertIn('invalid source object',refused.stderr)
             with self.assertRaisesRegex(ValueError,'exists'):S.stage(site)
     def test_tampered_frozen_inputs_refuse_before_site_writes(self):
@@ -44,6 +49,29 @@ class PublicationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             result=subprocess.run([sys.executable,'-B','-c',code,str(ROOT)],cwd=temporary,capture_output=True,text=True,timeout=10)
         self.assertEqual(result.returncode,0,result.stderr)
+
+    def test_missing_or_rehashed_online_assets_refuse_before_site_write(self):
+        for name in ('online-policy-traces.svg','capture.zip'):
+            with self.subTest(name=name),tempfile.TemporaryDirectory() as temporary:
+                root=Path(temporary);sources={}
+                for key,path in S.ONLINE_SOURCES.items():sources[key]=root/key;shutil.copytree(path,sources[key])
+                (sources[S.ONLINE]/name).unlink()
+                site=self.site(root);before={p:p.read_bytes() for p in site.rglob('*') if p.is_file()}
+                with self.assertRaises(ValueError):S.stage(site,online_sources=sources)
+                self.assertEqual(before,{p:p.read_bytes() for p in site.rglob('*') if p.is_file()})
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary);sources={}
+            for key,path in S.ONLINE_SOURCES.items():sources[key]=root/key;shutil.copytree(path,sources[key])
+            target=sources[S.ONLINE_CURRENT]/'verification.json';target.write_bytes(target.read_bytes()+b'\n')
+            folder=sources[S.ONLINE_CURRENT];(folder/'SHA256SUMS').write_text(''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.name+'\n' for p in sorted(folder.iterdir()) if p.name!='SHA256SUMS'))
+            with self.assertRaisesRegex(ValueError,'reviewed frozen'):S.online_inputs(sources)
+    def test_online_helper_and_committed_input_inventory_is_closed(self):
+        online=S.online_inputs();self.assertEqual(len(online['reading']['checking_sources']),12)
+        from unittest import mock
+        bad=dict(online['files'][S.ONLINE_CURRENT]);value=json.loads(bad['verification.json']);value['checking_sources']={};bad['verification.json']=S.encoded(value)
+        original=S.frozen
+        def forged(source,identity):return bad if identity==S.ONLINE_CURRENT else original(source,identity)
+        with mock.patch.object(S,'frozen',side_effect=forged),self.assertRaisesRegex(ValueError,'mandatory online'):S.online_inputs()
 
     def test_unsafe_paths_and_zip_members(self):
         for name in ('../escape','/absolute','a/../b','a//b','a\\b'):

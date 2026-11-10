@@ -1,0 +1,20 @@
+{
+  "all_reports_groups_inputs_unchanged": true,
+  "capture_source": "0524f7e4a2babefab50fd9a724cedda782f2c46f",
+  "checking_source": "aed7a98b23df7c08010568c6d92ad9b9e4cd6b0f",
+  "committed_input_binding": "inputs.json exact bytes equal authenticated source online/profiles.json",
+  "corrected_verification_sha256": "ed0e83fe124e24dd9196758eee45197c10b781da9652115b8af473f06a07737a",
+  "mandatory_online_sources": [
+    "controller.py",
+    "capture.py",
+    "check.py",
+    "inputs.py",
+    "figures.py",
+    "profiles.json"
+  ],
+  "original_capture_zip_sha256": "c4b2ecbacc936cdbf4761119d5fef1272b305013de6494724cd389fe6ec269f2",
+  "original_inventory_sha256": "540a04309384a32fb7e51861f78d0361d5d0cb50af1d6acd680ec01a4453373a",
+  "original_verification_sha256": "407d4e0de52394c5038f781b2fa8731b7db94c5ee34a0153e3eaccc33d4f2035",
+  "remeasurement": false,
+  "schema": "csl.mpc07.online-source-qualification/1"
+}

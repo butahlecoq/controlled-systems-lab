@@ -1,0 +1,60 @@
+{
+  "deployment": "pending independent review, exact-head CI, root-owned shared integration and live URL/download/example checks",
+  "helper_revision": "63d49440a9732cd2e70226c8a35be4b6bbbbaf69",
+  "local_route": "mpc07-comparison-d92b8af60839460c",
+  "online": {
+    "capture_source": "0524f7e4a2babefab50fd9a724cedda782f2c46f",
+    "clock_pair_ns": {
+      "maximum": 31428,
+      "median": 2375,
+      "minimum": 1467
+    },
+    "corrected_checking_source": "aed7a98b23df7c08010568c6d92ad9b9e4cd6b0f",
+    "corrected_verification_sha256": "ed0e83fe124e24dd9196758eee45197c10b781da9652115b8af473f06a07737a",
+    "episodes": 864,
+    "measured_episodes": 360,
+    "measured_stages": 1680,
+    "preparation": {
+      "count": 5,
+      "maximum_ns": 370721,
+      "median_ns": 353889,
+      "minimum_ns": 349908,
+      "sum_ns": 1781249
+    },
+    "primary_query": {
+      "count": 40,
+      "maximum_ns": 6146,
+      "median_ns": 4749.0,
+      "minimum_ns": 1816,
+      "sum_ns": 175025
+    },
+    "profiles": 36,
+    "scope": "instrumented stored-feedback evaluation only; substantial timestamp overhead, no intrinsic latency resolution/ranking or LP/MPC reoptimization",
+    "stages": 4032,
+    "status": "checked"
+  },
+  "original_synthesis_outcomes": 218,
+  "outside_checkout": {
+    "global_system_git_config_disabled": true,
+    "host_git_overrides_removed": true,
+    "solver_or_native_execution": false,
+    "status": "passed"
+  },
+  "publication_zip_sha256": "ae1ea1e899f75b7ad944a216df0137f832f286f7323b63773a005462f0cb4cf9",
+  "schema": "csl.mpc07.online-publication-local/1",
+  "source_helper_count": 14,
+  "source_object_count": 84,
+  "source_revision": "63d49440a9732cd2e70226c8a35be4b6bbbbaf69",
+  "tests": {
+    "Python311": {
+      "cases": 18,
+      "seconds": 37.299,
+      "status": "passed"
+    },
+    "Python314": {
+      "cases": 19,
+      "seconds": 34.253,
+      "status": "passed"
+    }
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "checking_revision": "8f58473d7ff8005c7b775706e1e1be8a7dfa7e57",
+  "checking_sources": {
+    "reports/algorithm-results/mpc06-online-anchor-v1/result.json": "a8ae1ea557907ceb2b5bcb41104de8ec81bfcef550e9eda6e4221db22f05be1a",
+    "scripts/reports/mpc06_offline/README.md": "775829470eae325f7ba704d46abd6ab7ae15281e6e851193b42df090fe98c789",
+    "scripts/reports/mpc06_offline/builder.py": "236d66e21c0011a5ff727c780fea10a6941b1dad1246331794f09fe20d8b4370",
+    "scripts/reports/mpc06_offline/check.py": "aae011d22f1cc86c09a07e6ee5aed9cfdb5fbe90789f7858db66f5d6505dde1b",
+    "scripts/reports/mpc06_offline/inputs.json": "7cd2be0d827c7a00df090725126aa94ff9a5d7ec5678f054f7a5fef48d68822d",
+    "scripts/reports/mpc06_offline/study.py": "70a163824085d840506b3861787a68ddfd36d2806d69da552f24ae373efe7c1e",
+    "scripts/reports/mpc06_online/model.py": "0b86d33d7b27cd7d9ae55f16b5cfbee8f53cbf9f135c77082c8b250a174c51c4"
+  },
+  "exclusions": "no gain optimization, native solve, old180QP/trajectory rerun or retrospective old timing; profiled arm excluded; no timer subtraction/ranking",
+  "input_files": {
+    "environment.json": "a710d49b223dc59d0b7edce4761818543f00d7920471d079112e1dedd5a3b5c0",
+    "inputs.json": "7cd2be0d827c7a00df090725126aa94ff9a5d7ec5678f054f7a5fef48d68822d",
+    "measured/process.json": "cec18d449879a39b958f18ed498b5d0fc1492d8db7407ce04ed3bd4403c9394e",
+    "measured/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "measured/stdout.jsonl": "3625391ca9cfc3d6d131d6bc4826c51a24475fe0b67f9f53a27f9405f9ce4ea7",
+    "profile.pstats": "ac42e4a5be6df347d573a918baea427bcb97e18515414e5a91dd7f21f0e6ab0d",
+    "profile.txt": "af57f5d5601271f0cfecac081d2abfaa89efba7aec843a6ce1abd92004d718be",
+    "profiled/process.json": "4f956733741c2ccbd2c6ee79ec928a690eeaf4cc1db5855cca7f409db4956128",
+    "profiled/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "profiled/stdout.jsonl": "ab21ee895b74204aedfc6d90bee13f10e342b9b4156a9e2732c85467bd53e9ed",
+    "source/reports/algorithm-results/mpc06-online-anchor-v1/result.json": "a8ae1ea557907ceb2b5bcb41104de8ec81bfcef550e9eda6e4221db22f05be1a",
+    "source/scripts/reports/mpc06_offline/README.md": "775829470eae325f7ba704d46abd6ab7ae15281e6e851193b42df090fe98c789",
+    "source/scripts/reports/mpc06_offline/builder.py": "236d66e21c0011a5ff727c780fea10a6941b1dad1246331794f09fe20d8b4370",
+    "source/scripts/reports/mpc06_offline/check.py": "aae011d22f1cc86c09a07e6ee5aed9cfdb5fbe90789f7858db66f5d6505dde1b",
+    "source/scripts/reports/mpc06_offline/inputs.json": "7cd2be0d827c7a00df090725126aa94ff9a5d7ec5678f054f7a5fef48d68822d",
+    "source/scripts/reports/mpc06_offline/study.py": "70a163824085d840506b3861787a68ddfd36d2806d69da552f24ae373efe7c1e",
+    "source/scripts/reports/mpc06_online/model.py": "0b86d33d7b27cd7d9ae55f16b5cfbee8f53cbf9f135c77082c8b250a174c51c4"
+  },
+  "measured": {
+    "artifact_serialization_ns": {
+      "count": 5,
+      "maximum_ns": 36667,
+      "median_ns": 36666,
+      "minimum_ns": 28216,
+      "sum_ns": 166850
+    },
+    "certificate_and_consumer_check_ns": {
+      "count": 5,
+      "maximum_ns": 985040,
+      "median_ns": 948374,
+      "minimum_ns": 938108,
+      "sum_ns": 4788943
+    },
+    "construction_ns": {
+      "count": 5,
+      "maximum_ns": 62508,
+      "median_ns": 56292,
+      "minimum_ns": 53429,
+      "sum_ns": 284673
+    },
+    "episode_ns": {
+      "count": 5,
+      "maximum_ns": 1084704,
+      "median_ns": 1049294,
+      "minimum_ns": 1032952,
+      "sum_ns": 5295361
+    }
+  },
+  "reports": [
+    {
+      "arm": "measured",
+      "attempts": 6,
+      "counter_control": {
+        "count": 1000,
+        "maximum_ns": 15715,
+        "median_ns": 1466.0,
+        "minimum_ns": 907,
+        "sum_ns": 1494590
+      },
+      "status": "verified",
+      "verified": 6
+    },
+    {
+      "arm": "profiled",
+      "attempts": 6,
+      "counter_control": {
+        "count": 1000,
+        "maximum_ns": 34292,
+        "median_ns": 4750.0,
+        "minimum_ns": 4120,
+        "sum_ns": 6687242
+      },
+      "status": "verified",
+      "verified": 6
+    }
+  ],
+  "schema": "csl.mpc06.offline-check/1",
+  "source_revision": "8f58473d7ff8005c7b775706e1e1be8a7dfa7e57",
+  "status": "verified",
+  "work": "fresh prescribed K/F/nilpotent Z/terminal/support construction; independent exact certificate plus3actual nominal-QP request identities; artifact JSON serialization"
+}

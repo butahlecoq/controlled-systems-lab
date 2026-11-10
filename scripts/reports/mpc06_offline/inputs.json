@@ -1,0 +1,130 @@
+{
+  "K": [
+    -1,
+    -2
+  ],
+  "horizon": 3,
+  "legacy_model_sha256": "0b86d33d7b27cd7d9ae55f16b5cfbee8f53cbf9f135c77082c8b250a174c51c4",
+  "native_qp_ledger": [
+    {
+      "anchor": [
+        "1/8",
+        "0"
+      ],
+      "method": "polytope",
+      "native_input": "9 1.25 0.09375 -0.375 0.25\n",
+      "qp": {
+        "feasible": true,
+        "linear": "5/4",
+        "lower": "-3/8",
+        "offset": "3/32",
+        "quadratic": "9",
+        "upper": "1/4"
+      },
+      "repetition": 0
+    },
+    {
+      "anchor": [
+        "3/8",
+        "-1/8"
+      ],
+      "method": "polytope",
+      "native_input": "9 0.5 0.28125 -0.3125 0.3125\n",
+      "qp": {
+        "feasible": true,
+        "linear": "1/2",
+        "lower": "-5/16",
+        "offset": "9/32",
+        "quadratic": "9",
+        "upper": "5/16"
+      },
+      "repetition": 0
+    },
+    {
+      "anchor": [
+        "-1/4",
+        "1/8"
+      ],
+      "method": "polytope",
+      "native_input": "9 0.75 0.125 -0.375 0.25\n",
+      "qp": {
+        "feasible": true,
+        "linear": "3/4",
+        "lower": "-3/8",
+        "offset": "1/8",
+        "quadratic": "9",
+        "upper": "1/4"
+      },
+      "repetition": 0
+    }
+  ],
+  "nominal_terminal": [
+    0,
+    0
+  ],
+  "plant": {
+    "A": [
+      [
+        1,
+        1
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "B": [
+      [
+        0
+      ],
+      [
+        1
+      ]
+    ],
+    "E": [
+      [
+        0
+      ],
+      [
+        1
+      ]
+    ],
+    "U": [
+      -1,
+      1
+    ],
+    "W": [
+      "-1/8",
+      "1/8"
+    ],
+    "X": [
+      [
+        -1,
+        1
+      ],
+      [
+        -1,
+        1
+      ]
+    ],
+    "actuators": "continuous",
+    "closed_loop_F": [
+      [
+        1,
+        1
+      ],
+      [
+        -1,
+        -1
+      ]
+    ],
+    "observation": "exact full state before input",
+    "stability": "F squared is zero; controllability matrix [B,AB] has nonzero determinant",
+    "uncertainty": "stagewise independent compact additive interval"
+  },
+  "schema": "csl.mpc06.offline-input/1",
+  "scope": "offline prescribed-K exact nilpotent tube/terminal/support construction; returned bounds feed the existing nominal-QP model; no gain optimization or native execution",
+  "upstream_manifest_sha256": "8edb28e2744b1b061a47971e5f0613c30be64e7c25727c70bd1ec52d4244034a",
+  "upstream_raw_path": "reports/algorithm-results/mpc06-online-anchor-v1/result.json",
+  "upstream_raw_sha256": "a8ae1ea557907ceb2b5bcb41104de8ec81bfcef550e9eda6e4221db22f05be1a"
+}
