@@ -59,7 +59,7 @@ class JointSavedCaptureTests(unittest.TestCase):
         import tempfile,zipfile,json,hashlib
         import report
         artifact=ROOT/'benchmarks/reporting/mpc07/evidence/joint-filter-04369201/offline.zip'
-        for mode in ('source','timeout'):
+        for mode in ('source','timeout','repetitions'):
             with self.subTest(mode=mode),tempfile.TemporaryDirectory() as temporary:
                 with zipfile.ZipFile(artifact) as z:z.extractall(temporary)
                 raw=Path(temporary)/'mpc07-joint-report/RAW'
@@ -67,6 +67,9 @@ class JointSavedCaptureTests(unittest.TestCase):
                     target=raw/'source/joint_filter.py';target.write_bytes(target.read_bytes()+b'\n# renewed copied source\n')
                     env=json.loads((raw/'environment.json').read_text());env['source_sha256']['joint_filter.py']=hashlib.sha256(target.read_bytes()).hexdigest()
                     (raw/'environment.json').write_text(json.dumps(env));error='recorded Git commit'
+                elif mode=='repetitions':
+                    env=json.loads((raw/'environment.json').read_text());env['repetitions']=True
+                    (raw/'environment.json').write_text(json.dumps(env));error='five repetitions'
                 else:
                     folder=raw/'attempts/0000';r=json.loads((folder/'receipt.json').read_text());r['timed_out']=True
                     (folder/'receipt.json').write_text(json.dumps(r));c=json.loads((folder/'check.json').read_text())

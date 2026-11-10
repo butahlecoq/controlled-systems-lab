@@ -36,6 +36,7 @@ def recheck(folder):
 
 def checked_records(root,repository,hashes):
     env=json.loads((root/'environment.json').read_text())
+    if type(env.get('repetitions')) is not int or env['repetitions']!=5:raise ValueError('joint capture requires five repetitions')
     revision=env['source_commit']
     if not isinstance(revision,str) or not re.fullmatch('[0-9a-f]{40}',revision) or env['source_status']!='' or \
             env['native_source_commit']!=NATIVE or env['bridge_sha256']!=capture.BRIDGE_SHA:
