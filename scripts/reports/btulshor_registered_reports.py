@@ -192,6 +192,7 @@ def _validate_comparisons(bundle: Path, files: dict[str, bytes], manifest_bytes:
     oracle = raw.get("raw/oracle-differential.json")
     if oracle is not None and (oracle.get("source_sha256") != stage_btulshor.ORIGINAL_SOURCE_SHA256 or
             oracle.get("cases") != 45 or oracle.get("passed") != 45 or oracle.get("failed") != 0 or
+            oracle.get("driver_sha256") != summary.get("driver_sha256") or
             not isinstance(oracle.get("driver_sha256"), str) or
             re.fullmatch(r"[0-9a-f]{64}", oracle["driver_sha256"]) is None):
         raise ValueError("BTULSHOR original-source differential receipt is invalid")

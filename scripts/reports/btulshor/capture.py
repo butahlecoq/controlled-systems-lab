@@ -519,7 +519,7 @@ def main(argv=None) -> int:
         else:
             if not args.driver or not args.output:
                 parser.error("--driver and --output are required for capture")
-            capture(args.driver.resolve(), args.output.resolve(), render_python=args.render_python.resolve() if args.render_python else None,
+            capture(args.driver.resolve(), args.output.resolve(), render_python=args.render_python.absolute() if args.render_python else None,
                     oracle_receipt=args.oracle_receipt.resolve() if args.oracle_receipt else None)
     except Exception as exc:
         print(f"btulshor capture: {exc}", file=sys.stderr)

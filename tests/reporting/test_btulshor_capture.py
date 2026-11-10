@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -79,6 +80,15 @@ class CaptureHelpers(unittest.TestCase):
             (bundle / "raw/summary.json").write_text("tampered")
             with self.assertRaisesRegex(ValueError, "hash mismatch"):
                 capture.verify_bundle(bundle)
+
+    def test_cli_preserves_virtualenv_interpreter_symlink(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            interpreter = Path(temporary) / "venv-python"
+            interpreter.symlink_to(Path(sys.executable).resolve())
+            with patch.object(capture, "capture") as invoked:
+                self.assertEqual(capture.main(["--driver", "driver", "--output", "bundle",
+                    "--render-python", str(interpreter)]), 0)
+            self.assertEqual(invoked.call_args.kwargs["render_python"], interpreter)
 
     def test_capture_refuses_existing_output_before_attempting_driver(self):
         with tempfile.TemporaryDirectory() as temporary:

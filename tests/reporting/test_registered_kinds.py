@@ -116,6 +116,7 @@ class RegisteredKindTests(unittest.TestCase):
                              "provider_order": methods})
             summary = {"schema": "csl.btulshor-summary/1", "source_commit": "a" * 40,
                 "compiler_id": "test-compiler", "compiler_version": "test-version", "build_config": "Release",
+                "driver_sha256": "b" * 64,
                 "sample_count_per_fixture": 5, "fixture_ids": ["near-tolerance"], "method_ids": methods,
                 "comparison_files": {"near-tolerance": raw_path}, "driver_runs": runs,
                 "method_statuses": {"near-tolerance": {method: ["completed"] * 5 for method in methods}},
@@ -144,7 +145,7 @@ class RegisteredKindTests(unittest.TestCase):
                 for name in sorted((*files, "manifest.json", "SHA256SUMS")):
                     archive.writestr(source_id + "/" + name, (bundle / name).read_bytes())
             publication = btulshor_publication.adapt(bundle)
-            for mutation in ("timing", "input", "order", "unindexed", "oracle"):
+            for mutation in ("timing", "input", "order", "unindexed", "oracle", "oracle-driver"):
                 altered = dict(files)
                 run_path = runs[0]["path"]
                 run_doc = json.loads(altered[run_path])
@@ -158,7 +159,10 @@ class RegisteredKindTests(unittest.TestCase):
                     altered["raw/unindexed.json"] = b"{}"
                 else:
                     receipt = json.loads(altered["raw/oracle-differential.json"])
-                    receipt["failed"] = 1
+                    if mutation == "oracle-driver":
+                        receipt["driver_sha256"] = "c" * 64
+                    else:
+                        receipt["failed"] = 1
                     altered["raw/oracle-differential.json"] = json.dumps(receipt).encode()
                 altered[run_path] = json.dumps(run_doc).encode()
                 with self.subTest(derived_binding=mutation), self.assertRaises(ValueError):
