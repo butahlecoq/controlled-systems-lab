@@ -1,0 +1,12 @@
+{
+  "schema": "csl.mpc10.post-capture-qualification/1",
+  "capture_revision": "525871ea658c3147f30c96e9cb7824b91ed410f2",
+  "checking_revision": "7373bd97192f83a3b0e03d6a073256ca230f3217",
+  "original_capture_zip_sha256": "c617fedc6b1ffd857187f11a043d4a9d341a889d69ef4d7f94b111fb6dbc7633",
+  "original_verification_sha256": "05800025b152a01206959bf6a572067291f8d87956a75682b69abf38d135089f",
+  "corrected_verification_sha256": "37f9e41fdd7aebf61a9d70cc06ba54c80d0b309d713c80796eaf14f482e9a377",
+  "reports_unchanged": true,
+  "input_files_unchanged": true,
+  "solver_reruns": false,
+  "original_evidence_directory": "comparison-525871ea"
+}
