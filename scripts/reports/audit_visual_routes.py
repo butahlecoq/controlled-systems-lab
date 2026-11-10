@@ -49,6 +49,7 @@ FROZEN_DIAGRAM_EXCEPTIONS = {
     "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py",
 }
 PUBLICATION_EXPORT_ROUTES = {
+    "scripts/reports/stage_mpc06_offline_costs.py",
     "scripts/reports/stage_mpc07_comparison.py",
     "scripts/reports/stage_mpc10_comparison.py",
     "scripts/reports/stage_mpc08_complete.py",
@@ -59,6 +60,8 @@ PUBLICATION_EXPORT_ROUTES = {
     "benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/figures.py",
 }
 VIZ10_ROLE_REASONS = {
+    "scripts/reports/stage_mpc06_offline_costs.py":
+        "Authenticates saved canonical tube-construction clocks and exact consumer identities, then copies the existing invariant figure; no solver, measurement or plotting runs during staging.",
     "scripts/reports/stage_mpc11_mesh_timing.py":
         "Rechecks immutable mesh and repeated-controller archives, builds labelled saved-data study companions and copies complete source/raw inputs; no optimization or integration runs.",
     "scripts/reports/stage_mpc07_comparison.py":

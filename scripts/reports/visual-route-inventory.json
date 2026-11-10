@@ -1505,6 +1505,15 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_mpc06_offline_costs.py",
+      "signal_count": 6,
+      "asset_name_literals": [
+        "invariant-tightenings.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route",
+      "role_and_disposition_reason": "Authenticates saved canonical tube-construction clocks and exact consumer identities, then copies the existing invariant figure; no solver, measurement or plotting runs during staging."
+    },
+    {
       "source": "scripts/reports/stage_mpc06_tube.py",
       "signal_count": 2,
       "asset_name_literals": [
