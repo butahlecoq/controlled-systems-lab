@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 import zipfile
 
 ROOT=Path(__file__).resolve().parents[2]
@@ -26,6 +27,34 @@ def files(folder):return {p.relative_to(folder).as_posix():p.read_bytes() for p 
 
 
 class MPC08PublicationTests(unittest.TestCase):
+    def test_source_identity_ignores_unrelated_commits_and_tracks_merged_helpers(self):
+        with tempfile.TemporaryDirectory(prefix='mpc08-helper-history-') as temporary:
+            repository=Path(temporary)
+            def git(*args):
+                return subprocess.check_output(['git',*args],cwd=repository,stderr=subprocess.PIPE,text=True).strip()
+            git('init','-b','main');git('config','user.name','Publication test');git('config','user.email','test@example.invalid')
+            def commit(name,content):
+                (repository/name).write_text(content);git('add',name);git('commit','-m',name)
+                return git('rev-parse','HEAD')
+            commit('first.py','initial first\n');initial=commit('second.py','initial second\n')
+            with patch.object(S,'ROOT',repository),patch.object(S,'HELPERS',['first.py','second.py']):
+                original=S.source_export({})
+                self.assertEqual(original[1]['helper_revision'],initial)
+                commit('unrelated.txt','unrelated repository change\n')
+                self.assertEqual(S.source_export({}),original)
+                git('branch','other')
+                commit('first.py','main helper change\n')
+                git('checkout','other');commit('second.py','side helper change\n')
+                git('checkout','main');git('merge','--no-ff','other','-m','combine helper changes')
+                merged=S.source_export({})
+                self.assertEqual(merged[1]['helper_revision'],git('rev-parse','HEAD'))
+                self.assertNotEqual(merged,original)
+                commit('another-unrelated.txt','unchanged merged helpers\n')
+                self.assertEqual(S.source_export({}),merged)
+                (repository/'first.py').write_text('uncommitted helper mutation\n')
+                with self.assertRaisesRegex(ValueError,'differs from committed source'):
+                    S.source_export({})
+
     def test_saved_checks_and_source_captures_remain_unchanged(self):
         before=(files(S.EXACT_SOURCE),files(S.HORIZON_SOURCE))
         frozen,captures,checks=S.validate()
