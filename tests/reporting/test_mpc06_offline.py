@@ -49,3 +49,51 @@ class TimingBoundaryTests(unittest.TestCase):
             path=Path(tmp)/'out'
             with self.assertRaisesRegex(ValueError,'POSIX'):study.capture(path)
             self.assertFalse(path.exists())
+
+class SavedEvidenceTests(unittest.TestCase):
+    def test_saved_work_and_forged_source_process_clock_inputs(self):
+        import hashlib,json,subprocess,tempfile,zipfile
+        from scripts.reports.mpc06_offline import check
+        artifact=Path(__file__).resolve().parents[2]/'reports/algorithm-results/mpc06-offline-costs-8f58473d-20261110'
+        for mode in ('original','source-map','inputs','clock','process'):
+            with self.subTest(mode=mode),tempfile.TemporaryDirectory() as tmp:
+                with zipfile.ZipFile(artifact/'capture.zip') as z:z.extractall(tmp)
+                root=Path(tmp)/'capture'
+                if mode=='source-map':
+                    p=root/'environment.json';r=json.loads(p.read_bytes());r['source_sha256']={};p.write_text(json.dumps(r))
+                elif mode=='inputs':
+                    p=root/'inputs.json';p.write_bytes(p.read_bytes()+b'\n');e=root/'environment.json';r=json.loads(e.read_bytes());r['input_sha256']=hashlib.sha256(p.read_bytes()).hexdigest();e.write_text(json.dumps(r))
+                elif mode=='clock':
+                    p=root/'measured/stdout.jsonl';rows=[json.loads(line) for line in p.read_text().splitlines()];rows[1]['construction_ns']=rows[1]['episode_ns']+1;p.write_text(''.join(json.dumps(v)+'\n' for v in rows));e=root/'measured/process.json';r=json.loads(e.read_bytes());r['stdout_sha256']=hashlib.sha256(p.read_bytes()).hexdigest();e.write_text(json.dumps(r))
+                elif mode=='process':
+                    p=root/'measured/process.json';r=json.loads(p.read_bytes());r['timed_out']=True;p.write_text(json.dumps(r))
+                (root/'SHA256SUMS').write_text(''.join(h+'  '+n+'\n' for n,h in check.inventory(root).items()))
+                if mode=='original':self.assertEqual(check.checked_receipt(root,artifact/'verification.json')['status'],'verified')
+                else:
+                    with self.assertRaises(ValueError):check.check(root)
+
+class PublicationTests(unittest.TestCase):
+    def test_checked_extension_and_outside_checkout_source_proof(self):
+        import json,subprocess,sys,tempfile,zipfile
+        from scripts.reports import stage_mpc06_offline_costs as publication
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);site=root/'site';(site/'examples').mkdir(parents=True)
+            for p in (site/'index.html',site/'examples/index.html'):p.write_text('<html><body>existing</body></html>')
+            route=publication.stage(site)
+            self.assertIn(route+'/index.html#offline-example',(site/'examples/index.html').read_text())
+            with zipfile.ZipFile(site/(route+'.zip')) as z:z.extractall(root/'outside')
+            offline=root/'outside'/route
+            result=subprocess.run([sys.executable,'-B','offline_check.py'],cwd=offline,capture_output=True,text=True,timeout=30)
+            self.assertEqual(result.returncode,0,result.stderr);self.assertEqual(json.loads(result.stdout)['status'],'verified')
+            proof=next((offline/'source-root/.git/objects').glob('*/*'));proof.write_bytes(proof.read_bytes()+b'changed')
+            refused=subprocess.run([sys.executable,'-B','offline_check.py'],cwd=offline,capture_output=True,text=True,timeout=30);self.assertNotEqual(refused.returncode,0)
+    def test_changed_report_refuses_before_writes(self):
+        import shutil,tempfile
+        from scripts.reports import stage_mpc06_offline_costs as publication
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);source=root/publication.SOURCE.name;shutil.copytree(publication.SOURCE,source);p=source/'verification.json';p.write_bytes(p.read_bytes()+b' ')
+            site=root/'site';(site/'examples').mkdir(parents=True)
+            for p in (site/'index.html',site/'examples/index.html'):p.write_text('<html><body>existing</body></html>')
+            before=(site/'index.html').read_bytes()
+            with self.assertRaises(ValueError):publication.stage(site,source=source)
+            self.assertEqual((site/'index.html').read_bytes(),before);self.assertEqual(len(list(site.iterdir())),2)
