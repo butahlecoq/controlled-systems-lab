@@ -81,7 +81,7 @@ def main():
     revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()
     manifest={'schema':'csl.mpc11.nonlinear-pilot/1','source_revision':revision,
               'source_worktree_dirty':bool(subprocess.check_output(['git','status','--porcelain'],cwd=root,text=True).strip()),
-              'affine_capture_source':'b3978a98a8bfb30e21841466244ed7f78e987886','bridge_sha256':hashlib.sha256(bridge.read_bytes()).hexdigest(),
+              'affine_capture_source':json.loads((source/'manifest.json').read_text())['source_revision'],'bridge_sha256':hashlib.sha256(bridge.read_bytes()).hexdigest(),
               'python':platform.python_version(),'platform':platform.platform(),'cases':cases,
               'limits':{'cpu_seconds':300,'wall_seconds':300,'address_space_bytes':8*1024**3,'mechanism':'POSIX RLIMIT_CPU/RLIMIT_AS + subprocess timeout','workers':1},
               'source_sha256':{name:hashlib.sha256((root/name).read_bytes()).hexdigest() for name in ['nonlinear.py','run_nonlinear.py','nonlinear_replay_bridge.cpp']}}
