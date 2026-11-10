@@ -153,8 +153,9 @@ def online_inputs(sources=None):
     return dict(files=files,raw=raw,environment=environment,inputs=inputs,reading=reading,checking_files=source_files,figure=figure)
 
 
-def validate_online(online,*,repository=ROOT):
-    reading=online['reading']
+def validate_online(online,*,repository=ROOT,sources=None):
+    reading=online['reading'];sources=SOURCES if sources is None else sources
+    require(set(sources)==set(ANCHORS),'online upstream source inventory differs')
     # Authenticate the historical corrected checker separately; then execute the
     # current exported checker rather than trusting a cached success receipt.
     for name,checksum in reading['checking_sources'].items():
@@ -162,11 +163,13 @@ def validate_online(online,*,repository=ROOT):
         require(data==online['checking_files'][name] and digest(data)==checksum,'online corrected source differs from authentic Git object')
     with tempfile.TemporaryDirectory(prefix='mpc07-online-publication-check-') as temporary:
         root=Path(temporary);materialize(online['raw'],root/'capture')
-        command=[sys.executable,'-B','-m','benchmarks.reporting.mpc07.online.check','--capture',str(root/'capture'),'--output',str(root/'current.json')]
+        bootstrap="import json,sys; from pathlib import Path; from scripts.reports import stage_mpc07_comparison as upstream; upstream.SOURCES={n:Path(p) for n,p in json.loads(sys.argv[1]).items()}; from benchmarks.reporting.mpc07.online.check import check; from benchmarks.reporting.mpc07.online.inputs import encoded; Path(sys.argv[3]).write_bytes(encoded(check(Path(sys.argv[2]))))"
+        command=[sys.executable,'-B','-c',bootstrap,json.dumps({n:str(Path(p).resolve()) for n,p in sources.items()}),str(root/'capture'),str(root/'current.json')]
         result=subprocess.run(command,cwd=repository,capture_output=True,text=True,timeout=60)
         require(result.returncode==0,'online saved source/policy replay failed: '+result.stderr[-2400:])
         current=json.loads((root/'current.json').read_bytes())
     stable=lambda value:{k:v for k,v in value.items() if k not in ('checking_revision','checking_sources')}
+    require(set(current['checking_sources'])==set(ONLINE_HELPERS) and all(digest((repository/n).read_bytes())==v for n,v in current['checking_sources'].items()),'current online checker/export source binding differs')
     require(stable(current)==stable(reading) and current['status']=='checked','online corrected receipt differs from actual current replay')
     require(current['scheduled_episodes']==432 and current['scheduled_stages']==2016 and len(current['reports'])==2,'online scheduled inventory differs')
     require(all(r['status']=='checked' and r['episodes']==432 and r['stages']==2016 and r['outcomes']=={'verified-numerical-evaluation':432} for r in current['reports']),'online complete replay inventory differs')
@@ -267,7 +270,7 @@ def stage(site,sources=None,*,online_sources=None):
     site=Path(site);require(site.is_dir() and not site.is_symlink() and not (site/'examples').is_symlink(),'regular Pages site required')
     landing=_index(site/'index.html');gallery=_index(site/'examples/index.html')
     files,captures,checks=validate(sources);online=online_inputs(online_sources)
-    proof,source_receipt=source_export(captures,online);checks['online']=validate_online(online,repository=ROOT)
+    proof,source_receipt=source_export(captures,online);checks['online']=validate_online(online,repository=ROOT,sources=sources)
     files.update(online['files'])
     route='mpc07-comparison-'+digest(encoded({**ANCHORS,**ONLINE_ANCHORS})+encoded(source_receipt))[:16]
     require(not (site/route).exists() and not (site/(route+'.zip')).exists() and route not in landing and route not in gallery,'immutable route exists')
@@ -278,7 +281,7 @@ def stage(site,sources=None,*,online_sources=None):
     generated['figures/fixed-filter-policy.svg']=files[FIXED_CURRENT]['fixed-filter-policy.svg'];generated['figures/joint-filter-policy.svg']=files[JOINT_CURRENT]['joint-filter-policy.svg']
     generated.update(online_reading(online))
     generated['disposition.md']=(ROOT/'docs/research/mpc07-delivery-disposition-2026-11-10.md').read_bytes()
-    generated['offline_check.py']=b'''from pathlib import Path\nimport importlib.util,json\nroot=Path(__file__).resolve().parent\nspec=importlib.util.spec_from_file_location('mpc07_stage',root/'source-root/scripts/reports/stage_mpc07_comparison.py')\nm=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)\nm.verify_export(root/'source-root',json.loads((root/'source-files.json').read_bytes()))\n_,_,checks=m.validate({name:root/'evidence'/name for name in m.ANCHORS},repository=root/'source-root')\nonline=m.online_inputs({name:root/'evidence'/name for name in m.ONLINE_ANCHORS})\nchecks['online']=m.validate_online(online,repository=root/'source-root')\nassert checks==json.loads((root/'verification.json').read_bytes()),'publication check sidecar differs'\nprint(json.dumps(checks))\n'''
+    generated['offline_check.py']=b'''from pathlib import Path\nimport importlib.util,json\nroot=Path(__file__).resolve().parent\nspec=importlib.util.spec_from_file_location('mpc07_stage',root/'source-root/scripts/reports/stage_mpc07_comparison.py')\nm=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)\nm.verify_export(root/'source-root',json.loads((root/'source-files.json').read_bytes()))\n_,_,checks=m.validate({name:root/'evidence'/name for name in m.ANCHORS},repository=root/'source-root')\nonline=m.online_inputs({name:root/'evidence'/name for name in m.ONLINE_ANCHORS})\nchecks['online']=m.validate_online(online,repository=root/'source-root',sources={name:root/'evidence'/name for name in m.ANCHORS})\nassert checks==json.loads((root/'verification.json').read_bytes()),'publication check sidecar differs'\nprint(json.dumps(checks))\n'''
     generated['README.md']=f'''# MPC07 offline checked comparison\n\nExtract ../{route}.zip into a fresh directory, enter {route}, then run `python -B offline_check.py`. Python3.11+ and Git are required; no source checkout, solver, native binary, Matplotlib, network or install is required. This rechecks218 original outcomes plus864online episodes/4032stages; it never optimizes. Minimal authentic selected Git commit/tree/blob objects are retained under source-root/.git with fixed empty configuration, no host config/credentials/hooks, and no full history. Missing/mutated objects refuse the check; no fallback exists.\n\nOriginal fixed/joint archives, historical receipts and separately corrected reading layers are all under evidence/ unchanged. Current helper revision and object count are in source-files.json. The helper revision is the last change to required helper files, independent of later documentation commits. Historical compiler/process paths are evidence, not portable executable paths. Performance is inconclusive. See disposition.md and index.html for equations, controls, information order, oracle and license/platform qualifications. No general-filter/uncertain-B/recursive-feasibility/online-latency claim. Publication requires reviewed current-main CI/freshness gates; this hook does not deploy.\n'''.encode()
     generated['publication-manifest.json']=encoded(dict(schema='csl.mpc07.publication/1',route=route,anchors={**ANCHORS,**ONLINE_ANCHORS},helper_revision=source_receipt['helper_revision'],files={n:digest(v) for n,v in generated.items()}))
     generated['SHA256SUMS']=(''.join(f'{digest(v)}  {n}\n' for n,v in sorted(generated.items()))).encode()
