@@ -7,7 +7,10 @@ import json
 import os
 from pathlib import Path
 import platform
-import resource
+try:
+    import resource
+except ImportError:
+    resource=None
 import signal
 import subprocess
 import sys
@@ -81,6 +84,7 @@ def supervised(command,folder):
 
 
 def capture(output):
+    if resource is None or not hasattr(os,'wait4'):raise ValueError('capture requires POSIX resource/wait4 support')
     if output.exists():raise ValueError('new capture directory required')
     if subprocess.check_output(['git','status','--porcelain'],cwd=ROOT).strip():raise ValueError('clean committed capture source required')
     revision=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip();sources=source_files()

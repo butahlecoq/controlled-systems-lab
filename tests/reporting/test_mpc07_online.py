@@ -1,13 +1,16 @@
 import copy
 from fractions import Fraction as Q
 import inspect
+import hashlib
+import tempfile
+import zipfile
 import json
 from pathlib import Path
 import unittest
 from unittest.mock import patch
 from benchmarks.reporting.mpc07.online.controller import prepare,CausalController
 from benchmarks.reporting.mpc07.online.capture import execute
-from benchmarks.reporting.mpc07.online.check import replay
+from benchmarks.reporting.mpc07.online.check import replay,check,checked_verification,inventory
 
 INPUT=Path(__file__).resolve().parents[2]/'benchmarks/reporting/mpc07/online/profiles.json'
 
@@ -44,6 +47,35 @@ class OnlinePolicyTests(unittest.TestCase):
         p=self.profile('fixed-T2-1-adf')
         with patch('benchmarks.reporting.mpc07.online.capture.plant',side_effect=ValueError('plant test refusal')):row=execute(p,'positive',0)
         self.assertEqual(row['status'],'failed');self.assertEqual(row['steps'][0]['control'],0);self.assertEqual(row['steps'][0]['observation'],[0,0]);self.assertIn('plant test refusal',row['error'])
+    def test_capture_refuses_missing_posix_support_without_creating_output(self):
+        from benchmarks.reporting.mpc07.online import capture
+        with tempfile.TemporaryDirectory() as tmp,patch.object(capture,'resource',None):
+            destination=Path(tmp)/'capture'
+            with self.assertRaisesRegex(ValueError,'POSIX'):capture.capture(destination)
+            self.assertFalse(destination.exists())
+    def test_archived_capture_refuses_rebound_source_and_returned_action(self):
+        artifact=INPUT.parents[1]/'evidence/online-evaluation-0524f7e4'
+        for mode in ('source-map','source','action'):
+            with self.subTest(mode=mode),tempfile.TemporaryDirectory() as tmp:
+                with zipfile.ZipFile(artifact/'capture.zip') as z:z.extractall(tmp)
+                root=Path(tmp)/'capture'
+                def write(path,value):path.write_text(json.dumps(value,sort_keys=True)+'\n')
+                if mode=='source-map':
+                    env=json.loads((root/'environment.json').read_bytes());env['source_sha256']={};write(root/'environment.json',env)
+                elif mode=='source':
+                    env=json.loads((root/'environment.json').read_bytes());name='benchmarks/reporting/mpc07/online/controller.py';path=root/'source'/name;path.write_bytes(path.read_bytes()+b'\n# mutated\n');env['source_sha256'][name]=hashlib.sha256(path.read_bytes()).hexdigest();write(root/'environment.json',env)
+                else:
+                    path=root/'measured/stdout.jsonl';rows=[json.loads(s) for s in path.read_text().splitlines()];rows[0]['steps'][0]['control']+=.01;path.write_text(''.join(json.dumps(r)+'\n' for r in rows));process=json.loads((root/'measured/process.json').read_bytes());process['stdout_sha256']=hashlib.sha256(path.read_bytes()).hexdigest();write(root/'measured/process.json',process)
+                (root/'SHA256SUMS').write_text(''.join(h+'  '+n+'\n' for n,h in inventory(root).items()))
+                with self.assertRaises(ValueError):check(root)
+    def test_figure_receipt_needs_full_checker_map_and_actual_replay(self):
+        artifact=INPUT.parents[1]/'evidence/online-evaluation-0524f7e4'
+        with tempfile.TemporaryDirectory() as tmp:
+            with zipfile.ZipFile(artifact/'capture.zip') as z:z.extractall(tmp)
+            root=Path(tmp)/'capture';path=Path(tmp)/'receipt.json';receipt=json.loads((artifact/'verification.json').read_bytes())
+            receipt['checking_sources']={};path.write_text(json.dumps(receipt))
+            with self.assertRaisesRegex(ValueError,'checking source'):checked_verification(root,path)
+
     def test_future_coefficients_are_refused_before_evaluation(self):
         p=copy.deepcopy(self.profile('fixed-T2-1-adf'));p['policy']['policy_M'][0][0]='1'
         with self.assertRaisesRegex(ValueError,'noncausal'):prepare(p)
