@@ -1,0 +1,50 @@
+{
+  "schema": "b04.source-candidate.exact-global-inputs/1",
+  "source": {
+    "ReachableSets.m": {
+      "collection": "dissertation-working-collection",
+      "sha256": "1f03dac9f0339dd7b518c9e0f0bae51047b766b1d9342e770b78d1563036e405",
+      "bytes": 8941
+    },
+    "program.m": {
+      "collection": "dissertation-working-collection",
+      "sha256": "43fa64b7539d2418512700fdbe83385a741f1615eee114b99cbde400d01dac78",
+      "bytes": 3815
+    },
+    "archive_collection_sha256": "d13b82f848002137cfab4682f1d6f69b9411b360f4078dec27fa0f54566c8453",
+    "archive_scope": "The archive hash and 45/45 registered-source identity matches attest the separately supplied original collection; they do not bind these changed dissertation-working-collection files to that ZIP or establish chronology.",
+    "registered_source_count": 45,
+    "identity_matches": 45,
+    "attribution": "Recovered dissertation article-folder source candidate; exact historical generator revision and canonical attribution remain unknown"
+  },
+  "assumptions": {
+    "arithmetic": "Source decimal inputs and coefficients are interpreted as exact rational numbers; this certifies a mathematical candidate model, not original floating-point execution.",
+    "dynamics": "For k=0..15: q_o[k+1]=q_o[k]+(2208/110)u[k]; m_o[k+1]=m_o[k]-(25/4)q_o[k]; q_f[k+1]=q_f[k]-(1152/110)u[k]; m_f[k+1]=m_f[k]-(25/4)q_f[k].",
+    "constraints": "Every one of 17 states has q_o in [1176,1224] and q_f in [432,468]; each of 16 shared controls is in [-1,1]. No stock-state constraints are included.",
+    "criterion": "sqrt((1200-q_o[16])^2+m_o[16]^2+(64/9)(450-q_f[16])^2+(64/9)m_f[16]^2+(m_o[16]-(8/3)m_f[16])^2).",
+    "initialization_identity": "The source-commented decimal initialization and active rounded initialization are separate candidate cases. The commented values are not attributed as the historical active run.",
+    "rounding_band": "For a printed objective 30.899 rounded to 3 decimals, the exact predicate is 30.8985^2 <= minimum_squared < 30.8995^2; decimal square-root display is not an interval certificate.",
+    "provenance_limit": "No claim is made about original floating solver optimality, original U values or row mapping, historical generator identity, publication-author intent, physical scaling authority, or nonlinear dynamics enclosure."
+  },
+  "model": {
+    "horizon": 16,
+    "state_order": ["q_o", "m_o", "q_f", "m_f"],
+    "state_units": ["kg/s", "kg", "kg/s", "kg"],
+    "time_unit": "s",
+    "step": "25/4",
+    "B": ["2208/110", "0", "-1152/110", "0"],
+    "control_bounds": ["-1", "1"],
+    "flow_bounds": {"oxidizer": ["1176", "1224"], "fuel": ["432", "468"]},
+    "stock_bounds": null,
+    "objective_weights": ["1", "1", "64/9", "64/9", "1"],
+    "objective_residuals": ["1200-q_o", "m_o", "450-q_f", "m_f", "m_o-(8/3)m_f"],
+    "case_ids": {
+      "commented_initial": "B04-SOURCE-COMMENTED-X0-V1",
+      "active_rounded_initial": "B04-SOURCE-ACTIVE-X0-V1"
+    },
+    "initializations": {
+      "commented_initial": ["1220.28265395983", "119500", "440.005764648976", "45300"],
+      "active_rounded_initial": ["1220.283", "119500", "440.007", "45300"]
+    }
+  }
+}

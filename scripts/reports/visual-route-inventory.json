@@ -55,8 +55,10 @@
     },
     {
       "source": "scripts/reports/augment_pages_bundle.py",
-      "signal_count": 16,
+      "signal_count": 18,
       "asset_name_literals": [
+        "b04-all-stage-reachability.png",
+        "b04-all-stage-reachability.svg",
         "branches.svg",
         "exact-critical-regions.svg",
         "feasibility-grid.png",
@@ -102,6 +104,16 @@
       "role": "saved-plot-renderer",
       "disposition": "shared-quantitative-policy-companion-renderer",
       "companion_ids": []
+    },
+    {
+      "source": "scripts/reports/b04_source_moments/figures.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "b04-all-stage-reachability.png",
+        "b04-all-stage-reachability.svg"
+      ],
+      "disposition": "adopted-shared-quantitative-policy",
+      "role_and_disposition_reason": "Draws all 17 exact source-candidate forward, backward and intersection sets in the two physical state planes, with one labelled optimal witness and shared quantitative styles; it makes no historical-run or timing claim."
     },
     {
       "source": "scripts/reports/b06_manifest_correction_publication_policy.py",
@@ -1169,6 +1181,16 @@
         "trajectory.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_b04_source_moments.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "b04-all-stage-reachability.png",
+        "b04-all-stage-reachability.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route",
+      "role_and_disposition_reason": "Verifies exact source-candidate moment and all-stage set certificates, then copies source-bound saved physical-plane figures; no original program, optimization or rendering runs during staging."
     },
     {
       "source": "scripts/reports/stage_env717.py",

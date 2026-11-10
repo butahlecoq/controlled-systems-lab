@@ -99,3 +99,14 @@ The historical 0.4-second runtime is contextual evidence, not a current performa
 ## Larger archive follow-up
 
 The owner supplied a second archive location. The [follow-up search](archive-followup.md) recovered B04 tables locally and related nominal MATLAB implementations. Subsequent [saved-witness evidence](b04-saved-witnesses.md) identifies three matching nominal/nonlinear pairs with changed x0/B, independently checked replay and an approximately 30.899136 nominal objective. The neighboring driver currently has T=12; exact T16 constraints, U rows and generating revision remain unresolved. The frozen saved norm 368.609780868 conflicts with printed 368.45, and replay ends at 99.99 seconds. The exact inconsistency above still applies to the displayed historical model; its manifest is unchanged.
+
+## Newly accessible dissertation source reference
+
+The [source-derived moment reconstruction](b04-source-moment-reconstruction.md)
+records the newly accessible T16 driver, a changed input matrix, the distinct
+commented and active initializations, exact global minima and complete optimal
+relations. It includes all-stage forward/backward/intersection plots. The
+commented-initial source reference attains the reported30.899 precision, while
+the active rounded-input source reference has a different value. These named
+references preserve the printed historical transcription and its invariant
+contradiction; they do not identify a canonical historical generating revision.

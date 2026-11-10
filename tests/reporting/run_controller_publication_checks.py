@@ -10,6 +10,8 @@ def main():
         'tests.reporting.test_mpc11_affine_saved',
         'tests.reporting.test_mpc11_publication',
         'tests.reporting.test_pages_augmentation_aggregation',
+        'tests.reporting.test_b04_source_moments',
+        'tests.reporting.test_stage_b04_source_moments',
     ])
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     return 0 if result.wasSuccessful() and result.testsRun and not result.skipped else 1
