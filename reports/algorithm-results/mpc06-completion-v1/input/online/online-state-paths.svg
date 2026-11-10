@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 600" role="img" aria-labelledby="title desc">
+<title id="title">Saved actual worst-disturbance state paths, state dimension two</title>
+<desc id="desc">Position versus velocity, three executed stages; original state constraint square, one stored maximizing path for each admitted restricted controller.</desc>
+<rect width="760" height="600" fill="#1e1e2e"/>
+<text x="380" y="26" text-anchor="middle" fill="#cdd6f4" font-family="sans-serif">n=2 state phase plane; three executed receding steps</text>
+<rect x="70" y="60" width="480" height="480" fill="none" stroke="#6c7086"/>
+<path d="M70 60V540 M70 540H550" stroke="#45475a"/>
+<text x="70" y="560" text-anchor="middle" fill="#cdd6f4">-1</text>
+<text x="60" y="545" text-anchor="end" fill="#cdd6f4">-1</text>
+<path d="M190.0 60V540 M70 420.0H550" stroke="#45475a"/>
+<text x="190.0" y="560" text-anchor="middle" fill="#cdd6f4">-0.5</text>
+<text x="60" y="425.0" text-anchor="end" fill="#cdd6f4">-0.5</text>
+<path d="M310 60V540 M70 300H550" stroke="#45475a"/>
+<text x="310" y="560" text-anchor="middle" fill="#cdd6f4">0</text>
+<text x="60" y="305" text-anchor="end" fill="#cdd6f4">0</text>
+<path d="M430.0 60V540 M70 180.0H550" stroke="#45475a"/>
+<text x="430.0" y="560" text-anchor="middle" fill="#cdd6f4">0.5</text>
+<text x="60" y="185.0" text-anchor="end" fill="#cdd6f4">0.5</text>
+<path d="M550 60V540 M70 60H550" stroke="#45475a"/>
+<text x="550" y="560" text-anchor="middle" fill="#cdd6f4">1</text>
+<text x="60" y="65" text-anchor="end" fill="#cdd6f4">1</text>
+<polyline points="340.000000,300.000000 340.000000,286.666667 353.333333,369.259259 284.074074,243.292181" fill="none" stroke="#89b4fa" stroke-width="2" opacity=".8"/>
+<circle cx="340.0" cy="300.0" r="3" fill="none" stroke="#89b4fa"/>
+<circle cx="340.0" cy="286.6666666666667" r="3" fill="none" stroke="#89b4fa"/>
+<circle cx="353.33333333333337" cy="369.25925925925924" r="3" fill="none" stroke="#89b4fa"/>
+<circle cx="284.0740740740741" cy="243.29218106995884" r="3" fill="none" stroke="#89b4fa"/>
+<text x="565" y="80" fill="#89b4fa" font-size="11">finite-reference</text>
+<polyline points="340.000000,300.000000 340.000000,286.666667 353.333333,369.259259 284.074074,243.292181" fill="none" stroke="#a6e3a1" stroke-width="3" opacity=".8"/>
+<circle cx="340.0" cy="300.0" r="4" fill="none" stroke="#a6e3a1"/>
+<circle cx="340.0" cy="286.6666666666667" r="4" fill="none" stroke="#a6e3a1"/>
+<circle cx="353.33333333333337" cy="369.25925925925924" r="4" fill="none" stroke="#a6e3a1"/>
+<circle cx="284.0740740740741" cy="243.29218106995884" r="4" fill="none" stroke="#a6e3a1"/>
+<text x="565" y="115" fill="#a6e3a1" font-size="11">polytope</text>
+<polyline points="340.000000,300.000000 340.000000,286.666667 353.333333,369.259259 284.074074,243.292181" fill="none" stroke="#f9e2af" stroke-width="4" opacity=".8"/>
+<circle cx="340.0" cy="300.0" r="5" fill="none" stroke="#f9e2af"/>
+<circle cx="340.0" cy="286.6666666666667" r="5" fill="none" stroke="#f9e2af"/>
+<circle cx="353.33333333333337" cy="369.25925925925924" r="5" fill="none" stroke="#f9e2af"/>
+<circle cx="284.0740740740741" cy="243.29218106995884" r="5" fill="none" stroke="#f9e2af"/>
+<text x="565" y="150" fill="#f9e2af" font-size="11">inflated-zonotope</text>
+<polyline points="340.000000,300.000000 340.000000,286.666667 353.333333,369.259259 284.074074,243.292181" fill="none" stroke="#f38ba8" stroke-width="5" opacity=".8"/>
+<circle cx="340.0" cy="300.0" r="6" fill="none" stroke="#f38ba8"/>
+<circle cx="340.0" cy="286.6666666666667" r="6" fill="none" stroke="#f38ba8"/>
+<circle cx="353.3333333333333" cy="369.25925925925924" r="6" fill="none" stroke="#f38ba8"/>
+<circle cx="284.0740740740741" cy="243.29218106995884" r="6" fill="none" stroke="#f38ba8"/>
+<text x="565" y="185" fill="#f38ba8" font-size="11">ellipsoid-certified</text>
+<text x="310" y="590" text-anchor="middle" fill="#cdd6f4">position x[0] (dimensionless)</text>
+<text x="20" y="300" transform="rotate(-90 20 300)" text-anchor="middle" fill="#cdd6f4">velocity x[1] (dimensionless)</text></svg>

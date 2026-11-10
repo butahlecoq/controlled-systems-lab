@@ -1,0 +1,36 @@
+{
+  "schema": "review05.integrated-ownership-tsan/2",
+  "source_revision": "7243ed353cbfdde3c897572c58cc6d6a244194ea",
+  "source_tree": "59c7e937aec83c5c5ec17b694becae645fe0e60d",
+  "ownership_baseline": "fd7641e6f106202eae4b5ebdf9ecc874ade0f63e",
+  "packaging_parent": "2d3b568605e6227e3ed9677b70e95f17ab0ffe35",
+  "source_binding": "Tracked src/include/cmake/tests working bytes match source_revision; current-source-sha256 binds all these files. Packaging parent adds only a separate report.",
+  "changed_product_paths": 85,
+  "tests": [
+    "quickhull_2d_lp_test",
+    "direct_joint_strategy_tests",
+    "witness_selector_tests",
+    "execution_tests",
+    "timing_collector_tests",
+    "highs_convex_tests",
+    "highs_lp_tests",
+    "hv_conversion_tests",
+    "batch_runner_tests"
+  ],
+  "passed": 9,
+  "failed": 0,
+  "ctest_output_sha256": "6cfdae66c1d3631c0ca8444d477d26f7f74404ca813ee846f75c31581de334e8",
+  "native_output_sha256": "2fbe558e6f94436d0c60692a7f5d1f04fef2c791273a1ce581999f4d6c29ea98",
+  "clock_prefix_occurrences": 1114,
+  "race_warning_occurrences": 0,
+  "reported_launch_environment": {
+    "CSL_HIGHS_INTERNAL_CLOCKS": "1",
+    "TSAN_OPTIONS": "halt_on_error=1"
+  },
+  "environment_evidence": "Launch values supplied by the execution orchestrator; no launch-time environment dump was retained. Native clock prefixes independently corroborate enabled clock capture, and ldd/cache corroborate TSan instrumentation.",
+  "build_history": "Existing dedicated build configured before source integration; current incremental build log records rebuilt source and new direct_joint_strategy_tests target. Initial configure/build logs are historical context, not fresh 7243 configuration.",
+  "packaged_utc": "2026-11-09T22:43:36.243697+00:00",
+  "scope": "Selected exercised stress paths only; no whole-library race proof, timing comparison, hard-memory enforcement claim or #95 completion.",
+  "archive_sha256": "eefa8df78a59c9490662ac0bea6ffc36d3b9763fe53884e4caa767e0b0eeda29",
+  "archive_members": 23
+}

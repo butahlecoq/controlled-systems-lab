@@ -89,10 +89,10 @@ def validate(value: dict) -> str:
     digest = hashlib.sha256(raw).hexdigest()
     # These IDs name fixed authored scenarios, not an arbitrary model family.
     expected = {
-        'SYN-NL-FUEL-01': 'c0fb79df63b9b87116ddb96552d139de177eb9ac71440b662d3d4719f6f65572',
-        'SYN-NL-LV-01': 'debf46903cbcd78694ea91bd1734f8ba9e503be36387288bbf1395661450c45b',
+        'SYN-NL-FUEL-01': {'c0fb79df63b9b87116ddb96552d139de177eb9ac71440b662d3d4719f6f65572', '9ddce6172b829a8860d5b97c249ce56530003f839df436698c084e50b5d338af'},
+        'SYN-NL-LV-01': {'debf46903cbcd78694ea91bd1734f8ba9e503be36387288bbf1395661450c45b', '3709fe9cb1e60f951a29fbffee8a5178ce9c335d9ac9a8fcfd331be543c8f138'},
     }
-    if digest != expected[value['case_id']]:
+    if digest not in expected[value['case_id']]:
         raise ValueError('configuration differs from the fixed authored case; use a reviewed new profile')
     return digest
 

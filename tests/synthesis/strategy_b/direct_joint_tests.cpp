@@ -831,7 +831,8 @@ struct PlannedStrategyTiming {
 };
 PlannedStrategyTiming planned_strategy_timing(const problem::ResolvedProblem& p,
     const FamilyRequest& q,const ProgramIdentity& program,const ar::ModuleIdentity& backend,
-    const std::vector<registry::Provenance>& provenance,const std::shared_ptr<StrategyTimingClock>& clock) {
+    const std::vector<registry::Provenance>& provenance,const std::shared_ptr<StrategyTimingClock>& clock,
+    bool split_build=false) {
     const ar::Unavailable missing{ar::MissingReason::not_instrumented,{}};
     const ar::ModuleIdentity strategy{{"csl.synthesis.strategy-b"},"1",missing};
     auto lp=ar::ModuleIdentity{{"csl.lp.highs"},"1",missing};
@@ -859,8 +860,20 @@ PlannedStrategyTiming planned_strategy_timing(const problem::ResolvedProblem& p,
     spans[1].backend=std::make_shared<const ar::ModuleIdentity>(backend);
     spans[1].program=std::make_shared<const ProgramIdentity>(program);spans[1].clock=test_wall_domain().id;
     spans[1].requested_assurance=q.assurance;spans[1].applied_assurance=ar::Available<Assurance>{q.assurance};
+    std::vector<std::string> operations{"run","program.solve"};
+    if(split_build) {
+        const std::array<std::string,4> names{"strategy-b/program-build","strategy-b/joint-h-assembly",
+            "strategy-b/objective-lift","strategy-b/program-freeze"};
+        for(std::size_t i=0;i<names.size();++i) {
+            ar::SpanDescriptor span{};span.id={503+i};
+            span.parent=ar::SpanParent{{i?503u:501u},ar::ParentKind::nested};
+            span.task="strategy";span.operation=names[i];span.module=strategy;span.clock=test_wall_domain().id;
+            span.requested_assurance=q.assurance;span.applied_assurance=ar::Available<Assurance>{q.assurance};
+            spans.push_back(std::move(span));operations.push_back(names[i]);
+        }
+    }
     const auto plan=accepted(ob::make_collection_plan({p,resolved,{"strategy-timing-run"},
-        {test_wall_domain()},std::move(spans),1,{"strategy"},{"run","program.solve"}}));
+        {test_wall_domain()},std::move(spans),1,{"strategy"},std::move(operations)}));
     return {accepted(ob::make_timing_collector(plan,clock,{501},{{502}})),std::move(resolved)};
 }
 void require_publishable_timing(const problem::ResolvedProblem& p,const SynthesisResult& result,
@@ -926,6 +939,72 @@ TEST_CASE("Strategy B closes the run and solver spans when the solver stops") {
     CHECK(std::holds_alternative<ar::ReturnedSpan>(records[1].status));
     CHECK(std::get<ar::Available<Termination>>(records[1].termination).value==Termination::cancelled);
     require_publishable_timing(p,result,timing,report);
+}
+TEST_CASE("Strategy B observes sparse assembly and program freeze without changing the joint problem") {
+    for(const bool linear:{false,true}) {
+        CAPTURE(linear);
+        const auto p=resolve(linear?integrator(LinearTerminal{{1},0}):integrator());
+        const auto q=request(p);const auto joint=accepted(build_joint_program(p,q));
+        const auto prepared=registered_prepared(p,q);const auto provenance=prepared.provenance();
+        const auto port=linear?"lp":"convex";
+        const auto provider=std::find_if(provenance.begin(),provenance.end(),[&](const auto& item){return item.port==port;});
+        REQUIRE(provider!=provenance.end());REQUIRE(provider->actual);
+        const auto program=std::visit([](const auto& value){return value.identity();},joint.program);
+        auto clock=std::make_shared<StrategyTimingClock>();
+        const auto timing=planned_strategy_timing(p,q,program,{provider->actual->id,provider->actual->version,
+            ar::Unavailable{ar::MissingReason::not_instrumented,{}}},provenance,clock,true);
+        ExecutionContext context;context.numerical=q.numerical;context.run_id="strategy-timing-run";
+        context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});context.timing=timing.collector;
+        const auto result=accepted(prepared.create()->run(context));
+        REQUIRE(result.termination==Termination::completed);
+        CHECK(result.outcome.value==MathematicalOutcome::undetermined);
+        REQUIRE(payload(result).optimization);
+        CHECK(payload(result).optimization->outcome.value==MathematicalOutcome::optimal);
+        const auto& retained=payload(result).construction;
+        CHECK(retained.constraints.row_offsets==joint.constraints.row_offsets);
+        CHECK(retained.constraints.column_indices==joint.constraints.column_indices);
+        CHECK(retained.constraints.values==joint.constraints.values);
+        CHECK(retained.source_to_program==joint.source_to_program);
+        REQUIRE_FALSE(result.incumbents.empty());
+        for(const auto& candidate:result.incumbents) {
+            const auto& w=candidate.witness;
+            REQUIRE(w.states.size()==3);REQUIRE(w.controls.size()==2);CHECK(w.states[0][0]==0);
+            for(std::size_t t=0;t<2;++t) {
+                CHECK(w.controls[t][0]>=0);CHECK(w.controls[t][0]<=1);
+                CHECK(w.states[t+1][0]==doctest::Approx(w.states[t][0]+w.controls[t][0]));
+            }
+            const auto original=linear?w.states[2][0]:std::pow(w.states[2][0]-1,2);
+            CHECK(original==doctest::Approx(0));CHECK(w.original_objective==doctest::Approx(original));
+        }
+        const auto report=accepted(context.timing->snapshot());const auto& records=report.observations.description().spans;
+        REQUIRE(records.size()==6);
+        for(std::size_t i=2;i<6;++i) {
+            REQUIRE(records[i].completion_observed);
+            CHECK(std::get<ar::ReturnedSpan>(records[i].status).termination==Termination::completed);
+            CHECK(std::get<ar::Available<std::uint64_t>>(report.spans[i].inclusive_wall_ticks).value>0);
+        }
+        CHECK(records[3].descriptor.input_size==joint.constraints.cols);
+        CHECK(records[3].descriptor.output_size==joint.constraints.values.size());
+        CHECK(records[5].descriptor.input_size==joint.constraints.values.size());
+        CHECK(records[5].descriptor.output_size==joint.constraints.cols);
+        require_publishable_timing(p,result,timing,report);
+    }
+}
+TEST_CASE("Strategy B split build observations retain a later resource stop") {
+    const auto p=resolve(integrator(LinearTerminal{{1},0}));auto q=request(p);q.materialization_limit=1;
+    const auto joint=accepted(build_joint_program(p,q));const auto prepared=registered_prepared(p,q);
+    const auto provenance=prepared.provenance();
+    const auto provider=std::find_if(provenance.begin(),provenance.end(),[](const auto& item){return item.port=="lp";});
+    REQUIRE(provider!=provenance.end());REQUIRE(provider->actual);
+    const auto program=std::get<LinearProgram>(joint.program).identity();auto clock=std::make_shared<StrategyTimingClock>();
+    const auto timing=planned_strategy_timing(p,q,program,{provider->actual->id,provider->actual->version,
+        ar::Unavailable{ar::MissingReason::not_instrumented,{}}},provenance,clock,true);
+    ExecutionContext context;context.numerical=q.numerical;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    context.timing=timing.collector;const auto result=accepted(prepared.create()->run(context));
+    CHECK(result.termination==Termination::resource_limit);CHECK(result.incumbents.empty());
+    const auto report=accepted(context.timing->snapshot());const auto& records=report.observations.description().spans;
+    REQUIRE(records.size()==6);CHECK_FALSE(records[1].completion_observed);
+    for(std::size_t i=2;i<6;++i)REQUIRE(records[i].completion_observed);
 }
 TEST_CASE("row-derived intervals are invariant under positive H-row scaling") {
     const Vector origin{0,0,0.5,0,0.5},direction{0,1,0,1,0};

@@ -55,8 +55,10 @@
     },
     {
       "source": "scripts/reports/augment_pages_bundle.py",
-      "signal_count": 2,
+      "signal_count": 4,
       "asset_name_literals": [
+        "feasibility-grid.png",
+        "invariant-tightenings.svg",
         "trajectory.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
@@ -967,6 +969,25 @@
       ],
       "disposition": "analytic-reference-checked-saved-run-renderer",
       "role_and_disposition_reason": "Renders the saved exact-rational tube-policy witness in a two-dimensional position/velocity projection; it does not rerun optimization or measure performance."
+    },
+    {
+      "source": "scripts/reports/mpc06_delivery/figures.py",
+      "signal_count": 9,
+      "asset_name_literals": [
+        "actual-state-paths.svg",
+        "feasibility-grid.svg",
+        "invariant-tightenings.svg"
+      ],
+      "disposition": "analytic-reference-checked-saved-run-renderer"
+    },
+    {
+      "source": "scripts/reports/mpc06_online/render.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "online-state-paths.svg"
+      ],
+      "disposition": "analytic-reference-checked-saved-run-renderer",
+      "role_and_disposition_reason": "Renders checked-source-bound native outcomes and saved actual paths; the shared Matplotlib publication companion remains in issue #602. This is not a benchmark producer."
     },
     {
       "source": "scripts/reports/mpc09/make_report.py",
@@ -1997,6 +2018,15 @@
         "state-space-illustration.svg"
       ],
       "disposition": "analytic-reference-checked-saved-run-renderer"
+    },
+    {
+      "source": "benchmarks/reporting/review05/render_family_query.py",
+      "signal_count": 7,
+      "asset_name_literals": [
+        "control-projection.png",
+        "control-projection.svg"
+      ],
+      "disposition": "adopted-shared-quantitative-policy"
     },
     {
       "source": "benchmarks/reporting/review05/render_profile_matrix.py",
@@ -3145,6 +3175,78 @@
       "follow_up_issue": 601
     },
     {
+      "route": "mpc06-completion-v1",
+      "source_bundle": "mpc06-completion-v1",
+      "assets": [
+        "actual-state-paths.png",
+        "actual-state-paths.svg",
+        "feasibility-grid.png",
+        "feasibility-grid.svg",
+        "invariant-tightenings.png",
+        "invariant-tightenings.svg"
+      ],
+      "index_sha256": "f66cab75bba6adaa534e1b1bfba413837262dc1d4279c4fc10fafe26dc24ef89",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 602,
+      "companion_route": "mpc06-complete-6b7059d62473d32d4210/index.html"
+    },
+    {
+      "route": "mpc06-completion-v1/input/online/checked-inputs/mpc06-online-anchor-v1",
+      "source_bundle": "mpc06-completion-v1/input/online/checked-inputs/mpc06-online-anchor-v1",
+      "assets": [
+        "online-state-paths.svg"
+      ],
+      "index_sha256": "de5b23cab244f6b5b8043e44fb23b3f69bcf4f2a1cbe47c4922f6dfeae5234aa",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "mpc06-completion-v1/input/online",
+      "source_bundle": "mpc06-completion-v1/input/online",
+      "assets": [
+        "online-state-paths.svg"
+      ],
+      "index_sha256": "b90ce19e5bb85dc741947b6fedaa00c3078d52486a3e038d0f87f52e8ca9a677",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "mpc06-completion-v2",
+      "source_bundle": "mpc06-completion-v2",
+      "assets": [
+        "actual-state-paths.png",
+        "actual-state-paths.svg",
+        "feasibility-grid.png",
+        "feasibility-grid.svg",
+        "invariant-tightenings.png",
+        "invariant-tightenings.svg"
+      ],
+      "index_sha256": "3698ce8d8866306a85beaaa65e44472ded4ae38f8b659e68ed786c522c15123e",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 602,
+      "companion_route": "mpc06-complete-6b7059d62473d32d4210/index.html"
+    },
+    {
+      "route": "mpc06-completion-v2/input/online/checked-inputs/mpc06-online-anchor-v1",
+      "source_bundle": "mpc06-completion-v2/input/online/checked-inputs/mpc06-online-anchor-v1",
+      "assets": [
+        "online-state-paths.svg"
+      ],
+      "index_sha256": "de5b23cab244f6b5b8043e44fb23b3f69bcf4f2a1cbe47c4922f6dfeae5234aa",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "mpc06-completion-v2/input/online",
+      "source_bundle": "mpc06-completion-v2/input/online",
+      "assets": [
+        "online-state-paths.svg"
+      ],
+      "index_sha256": "b90ce19e5bb85dc741947b6fedaa00c3078d52486a3e038d0f87f52e8ca9a677",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
       "route": "mpc06-nilpotent-tube-pilot-v1",
       "source_bundle": "mpc06-nilpotent-tube-pilot-v1",
       "assets": [
@@ -3153,6 +3255,59 @@
       "index_sha256": "5765eb200059b87727d505a8351b2137decbed7c760de8b539a019d9861ff106",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
+    },
+    {
+      "route": "mpc06-online-anchor-checked-v2/checked-inputs/mpc06-online-anchor-v1",
+      "source_bundle": "mpc06-online-anchor-checked-v2/checked-inputs/mpc06-online-anchor-v1",
+      "assets": [
+        "online-state-paths.svg"
+      ],
+      "index_sha256": "de5b23cab244f6b5b8043e44fb23b3f69bcf4f2a1cbe47c4922f6dfeae5234aa",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "mpc06-online-anchor-checked-v2",
+      "source_bundle": "mpc06-online-anchor-checked-v2",
+      "assets": [
+        "online-state-paths.svg"
+      ],
+      "index_sha256": "b90ce19e5bb85dc741947b6fedaa00c3078d52486a3e038d0f87f52e8ca9a677",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669,
+      "companion_route": "mpc06-complete-6b7059d62473d32d4210/index.html"
+    },
+    {
+      "route": "mpc06-online-anchor-portable-v3/checked-inputs/mpc06-online-anchor-v1",
+      "source_bundle": "mpc06-online-anchor-portable-v3/checked-inputs/mpc06-online-anchor-v1",
+      "assets": [
+        "online-state-paths.svg"
+      ],
+      "index_sha256": "de5b23cab244f6b5b8043e44fb23b3f69bcf4f2a1cbe47c4922f6dfeae5234aa",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "mpc06-online-anchor-portable-v3",
+      "source_bundle": "mpc06-online-anchor-portable-v3",
+      "assets": [
+        "online-state-paths.svg"
+      ],
+      "index_sha256": "b90ce19e5bb85dc741947b6fedaa00c3078d52486a3e038d0f87f52e8ca9a677",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669,
+      "companion_route": "mpc06-complete-6b7059d62473d32d4210/index.html"
+    },
+    {
+      "route": "mpc06-online-anchor-v1",
+      "source_bundle": "mpc06-online-anchor-v1",
+      "assets": [
+        "online-state-paths.svg"
+      ],
+      "index_sha256": "de5b23cab244f6b5b8043e44fb23b3f69bcf4f2a1cbe47c4922f6dfeae5234aa",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669,
+      "companion_route": "mpc06-complete-6b7059d62473d32d4210/index.html"
     },
     {
       "route": "mpc06-tube-objective-v1",
@@ -3334,6 +3489,16 @@
       "index_sha256": "b73913a8385fc2481b6f7b1a98b50b149761e336b4e277e31421748576dab66a",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
+    },
+    {
+      "route": "review05-family-query-20261110-3b98f5b0",
+      "source_bundle": "review05-family-query-20261110-3b98f5b0",
+      "assets": [
+        "control-projection.png",
+        "control-projection.svg"
+      ],
+      "index_sha256": "49902c79e0b9e39cb5f9b383649fe095b9206776293a89bbfdb019fdd80b5e06",
+      "disposition": "reviewed: root inspected the shared-policy scalar control projection and recorded state paths; exact family coverage is checked separately"
     },
     {
       "route": "review05-profile-matrix-20261031",
