@@ -5,6 +5,9 @@ if((CSL_BUILD_GEO02_REPORT OR CSL_BUILD_GEO03_REPORT OR CSL_BUILD_GEO04_REPORT O
     CSL_BUILD_REPORTS) AND NOT CSL_ENABLE_HIGHS)
   message(FATAL_ERROR "The selected report requires CSL_ENABLE_HIGHS")
 endif()
+if(CSL_BUILD_BTULSHOR_REPORT AND NOT CSL_ENABLE_HIGHS)
+  message(FATAL_ERROR "The BTULSHOR comparison report requires HiGHS for generic LP and paper providers")
+endif()
 if((CSL_BUILD_GEO02_REPORT OR CSL_BUILD_GEO03_REPORT OR CSL_BUILD_GEO04_REPORT OR
     CSL_BUILD_SYN01_REPORT OR CSL_BUILD_STAGE_PROJECTION_ROUTE OR
     CSL_BUILD_MPC08_REPORT OR CSL_BUILD_EXT02_REPORT) AND NOT CSL_ENABLE_QHULL)
@@ -1431,6 +1434,38 @@ target_compile_features(csl_it17_hull_4d_report PRIVATE cxx_std_20)
 target_compile_definitions(csl_it17_hull_4d_report PRIVATE
   $<$<CONFIG:Release>:NDEBUG> CSL_SOURCE_COMMIT="${IT17_HULL_SOURCE_COMMIT}")
 csl_strict_warnings(csl_it17_hull_4d_report)
+endif()
+
+if(CSL_BUILD_BTULSHOR_REPORT)
+add_executable(csl_btulshor_compare benchmarks/reporting/btulshor/driver.cpp)
+execute_process(COMMAND git rev-parse HEAD WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  OUTPUT_VARIABLE BTULSHOR_SOURCE_COMMIT OUTPUT_STRIP_TRAILING_WHITESPACE
+  COMMAND_ERROR_IS_FATAL ANY)
+target_link_libraries(csl_btulshor_compare PRIVATE
+  CSL::legacy_btulshor CSL::quickhull_2d CSL::hull CSL::highs_lp)
+target_include_directories(csl_btulshor_compare SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
+target_compile_features(csl_btulshor_compare PRIVATE cxx_std_20)
+target_compile_definitions(csl_btulshor_compare PRIVATE
+  CSL_SOURCE_COMMIT="${BTULSHOR_SOURCE_COMMIT}"
+  CSL_COMPILER_ID="${CMAKE_CXX_COMPILER_ID}"
+  CSL_COMPILER_VERSION="${CMAKE_CXX_COMPILER_VERSION}"
+  CSL_BUILD_CONFIG="$<CONFIG>")
+if(MSVC)
+target_compile_options(csl_btulshor_compare PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_btulshor_compare PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+if(BUILD_TESTING)
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+add_test(NAME btulshor_driver_contract COMMAND Python3::Interpreter
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/reporting/test_btulshor_report.py
+  $<TARGET_FILE:csl_btulshor_compare>)
+set_tests_properties(btulshor_driver_contract PROPERTIES LABELS reporting)
+add_test(NAME btulshor_source_differential COMMAND Python3::Interpreter
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/reporting/check_btulshor_source_fixtures.py
+  --driver $<TARGET_FILE:csl_btulshor_compare>)
+set_tests_properties(btulshor_source_differential PROPERTIES LABELS reporting)
+endif()
 endif()
 
 if(CSL_BUILD_GEO07_PORT_REPORT)
