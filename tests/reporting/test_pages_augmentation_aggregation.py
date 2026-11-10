@@ -52,6 +52,10 @@ class PagesAugmentationAggregation(unittest.TestCase):
             self.assertIn(f'href="{routes["mpc06"]}.zip"', landing)
             self.assertIn(f'href="{routes["mpc06_complete"]}/index.html"', landing)
             self.assertIn(f'href="{routes["mpc06_complete"]}.zip"', landing)
+            self.assertIn(f'href="{routes["mpc06_offline"]}/index.html"', landing)
+            self.assertIn(f'href="{routes["mpc06_offline"]}.zip"', landing)
+            self.assertIn(routes["mpc06_offline"]+"/index.html#offline-example", (site/"examples/index.html").read_text())
+            self.assertIn(routes["mpc06_complete"]+"/index.html", (site/routes["mpc06_offline"]/"index.html").read_text())
             self.assertEqual((site / "existing-route/index.html").read_text(), "existing")
             self.assertIn("examples", (site / "examples/index.html").read_text())
             self.assertIn(routes["review05"]+"/index.html#scalar-2d", (site/"examples/index.html").read_text())
@@ -66,7 +70,7 @@ class PagesAugmentationAggregation(unittest.TestCase):
                 self.assertIn(routes[name]+'/index.html',landing)
             self.assertIn(routes["mpc11_studies"]+"/index.html#mesh-example",(site/"examples/index.html").read_text())
             self.assertIn(routes["mpc11_studies"]+"/index.html",landing)
-            for report_id in (routes["b04_c"], routes["mpc06"], routes["mpc06_complete"], routes["review05"], routes["mpc11"], routes["mpc08"], routes["mpc07"], routes["mpc10"], routes["mpc11_studies"]):
+            for report_id in (routes["b04_c"], routes["mpc06"], routes["mpc06_complete"], routes["mpc06_offline"], routes["review05"], routes["mpc11"], routes["mpc08"], routes["mpc07"], routes["mpc10"], routes["mpc11_studies"]):
                 with zipfile.ZipFile(site / f"{report_id}.zip") as archive:
                     self.assertIn(f"{report_id}/publication-manifest.json", archive.namelist())
 
