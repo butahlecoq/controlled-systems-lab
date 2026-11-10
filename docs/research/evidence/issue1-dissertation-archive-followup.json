@@ -39,7 +39,7 @@
       "collection_relative_path": "Публикации/Минимакс/Constrained/Minmaxopenloop.m",
       "bytes": 3243,
       "sha256": "0f650a7db58028d7479644546094067268d87f79bcad8c9653408c97175d5c9d",
-      "observation": "Static source has the published L04 linear initial state, four stages, action set, and Euclidean terminal score. No linked run output was found in the checked artifacts."
+      "observation": "Static source uses X0=(1182.074, 119610, 459.832, 45220), T=4, actions {0.6, 0.3, 0.01, -0.3, -0.6}, B=(2208/110, 0, -1152/110, 0), fixed W entries 0.4 and -0.4, a Euclidean terminal score, and fixed state inequalities da*X<=db at each stage. Compared with published L04, x2 and x4 differ, 0.01 replaces action 0, exact B differs slightly, and fixed disturbance vertices replace the published stage-dependent disturbance bounds. No linked run output was found in the checked artifacts."
     },
     {
       "collection_id": "dissertation-working-collection",
