@@ -67,7 +67,7 @@ class PublicationPolicyTests(unittest.TestCase):
         self.assertTrue(policy.native_digest)
         self.assertEqual(policy.svg_files, ("point-projections.svg",))
         self.assertTrue(policy.include_parent_archive)
-        self.assertFalse(policy.committed_archive)
+        self.assertTrue(policy.committed_archive)
         self.assertEqual(policy.csv_name, "raw/summary.json")
         self.assertIn(("Native offline ZIP", "btulshor-source-faithful-20261110-v1.zip"), policy.extra_links)
 

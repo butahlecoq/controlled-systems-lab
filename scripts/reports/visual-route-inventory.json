@@ -55,7 +55,7 @@
     },
     {
       "source": "scripts/reports/augment_pages_bundle.py",
-      "signal_count": 19,
+      "signal_count": 18,
       "asset_name_literals": [
         "b04-all-stage-reachability.png",
         "b04-all-stage-reachability.svg",
@@ -71,7 +71,6 @@
         "online-policy-traces.png",
         "online-policy-traces.svg",
         "paths.svg",
-        "point-projections.svg",
         "timing-phases.svg",
         "trajectory.svg"
       ],
@@ -132,9 +131,25 @@
       "role_and_disposition_reason": "Produces a quantitative plot from saved fresh-process durations; the companion reads the immutable records and separates the excluded warmup."
     },
     {
-      "source": "scripts/reports/btulshor/render.py",
+      "source": "scripts/reports/btulshor/capture.py",
       "signal_count": 1,
       "asset_name_literals": [],
+      "disposition": "composes-or-copies-existing-saved-figure"
+    },
+    {
+      "source": "scripts/reports/btulshor/render.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "point-projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/btulshor_publication_policy.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "point-projections.svg"
+      ],
       "disposition": "publication-validation-or-frozen-route"
     },
     {
@@ -1201,7 +1216,7 @@
     },
     {
       "source": "scripts/reports/stage_btulshor.py",
-      "signal_count": 3,
+      "signal_count": 2,
       "asset_name_literals": [
         "point-projections.svg"
       ],
@@ -1959,7 +1974,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 82,
+      "signal_count": 83,
       "asset_name_literals": [
         "adaptive-ode-replay.svg",
         "app01-plan-timing-v1.svg",
@@ -2005,6 +2020,7 @@
         "mpc06-tube.svg",
         "optimal-face.svg",
         "planar-example.svg",
+        "point-projections.svg",
         "polygons.svg",
         "projections-lambda0.svg",
         "projections-lambda1.svg",
@@ -2344,6 +2360,16 @@
         "projections-lambda1.svg"
       ],
       "index_sha256": "39895f60c78d3ac110f8d6f9b3bbc81274c4825db6e7d303d4dbe860fed5c906",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "btulshor-source-faithful-20261110-v1",
+      "source_bundle": "btulshor-source-faithful-20261110-v1",
+      "assets": [
+        "point-projections.svg"
+      ],
+      "index_sha256": "f02785bb85f72e1d8260a34b80a08a87006d036ce6377a8ef88ddcba1beee75f",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },

@@ -24,6 +24,7 @@ FOLLOW_UP_ISSUE_OVERRIDES = {
     "scripts/reports/exp824/make_ellipsoid_minimax_report.py": 824,
 }
 COMPOSED_SAVED_ROUTES = {
+    "scripts/reports/btulshor/capture.py",
     "scripts/reports/mpc01/summarize_per_attempt.py",
     "scripts/reports/exp824/make_nominal_report.py",
     "scripts/reports/ext03_transform/report.py",
