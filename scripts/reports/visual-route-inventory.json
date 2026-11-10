@@ -1497,7 +1497,8 @@
         "fixed-filter-policy.svg",
         "joint-filter-policy.svg"
       ],
-      "disposition": "publication-validation-or-frozen-route"
+      "disposition": "publication-validation-or-frozen-route",
+      "role_and_disposition_reason": "Authenticates both robust-policy capture families and copied two-state figures; rechecks saved exact policies without optimization or plotting."
     },
     {
       "source": "scripts/reports/stage_mpc08.py",
