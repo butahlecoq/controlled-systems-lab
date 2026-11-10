@@ -93,7 +93,7 @@ def verify_export(root,receipt):
         name=p.relative_to(git).as_posix()
         if name in ('HEAD','config','refs/heads/evidence'):continue
         require(re.fullmatch('objects/[0-9a-f]{2}/[0-9a-f]{38}',name),'unexpected Git file');count+=1
-        dec=zlib.decompressobj();body=dec.decompress(p.read_bytes(),2*1024**2+1);require(len(body)<=2*1024**2 and dec.eof and not dec.unused_data and not dec.unconsumed_tail,'invalid source object');require(hashlib.sha1(body).hexdigest()==p.parent.name+p.name,'Git object SHA differs')
+        packed=p.open('rb').read(2*1024**2+1);require(len(packed)<=2*1024**2,'oversized source object');dec=zlib.decompressobj();body=dec.decompress(packed,2*1024**2+1);require(len(body)<=2*1024**2 and dec.eof and not dec.unused_data and not dec.unconsumed_tail,'invalid source object');require(hashlib.sha1(body).hexdigest()==p.parent.name+p.name,'Git object SHA differs')
     require(count==receipt['object_count']<=128,'source object inventory differs')
     for name,checksum in receipt['helper_sha256'].items():
         data=(root/name).read_bytes();require(digest(data)==checksum,'helper hash differs');require(data==subprocess.check_output(['git','show','--end-of-options',revision+':'+name],cwd=root),'helper differs from authentic Git')
