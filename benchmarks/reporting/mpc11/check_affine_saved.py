@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import math
 from pathlib import Path
 from affine import canonical_hash, check_solution, model, program, condense_program, permute_program, scale_objective
 from run_affine import tiny_program
@@ -10,29 +11,53 @@ from check_scenarios import validate
 
 
 
+# These tolerances apply only to an independently recomputed floating derivation.
+# Stored files, submitted-program identities and immutable archives remain exact.
+REBUILD_ATOL = 1e-13
+REBUILD_RTOL = 1e-12
+
+
+def matches_rebuild(saved, rebuilt):
+    if isinstance(rebuilt, dict):
+        return isinstance(saved, dict) and saved.keys()==rebuilt.keys() and all(
+            matches_rebuild(saved[key],value) for key,value in rebuilt.items())
+    if isinstance(rebuilt, list):
+        return isinstance(saved, list) and len(saved)==len(rebuilt) and all(
+            matches_rebuild(a,b) for a,b in zip(saved,rebuilt))
+    if isinstance(rebuilt, float):
+        return isinstance(saved,(int,float)) and not isinstance(saved,bool) and math.isfinite(saved) and math.isfinite(rebuilt) and math.isclose(
+            saved,rebuilt,abs_tol=REBUILD_ATOL,rel_tol=REBUILD_RTOL)
+    return type(saved) is type(rebuilt) and saved==rebuilt
+
+
+def matches_program_rebuild(saved, rebuilt):
+    return matches_rebuild({key:value for key,value in saved.items() if key!='program_sha256'},
+                           {key:value for key,value in rebuilt.items() if key!='program_sha256'})
+
+
 def verify_authored_transform(scenario, coefficients, qp, folder):
     # Rebuild from the fixed authored scenario, not the caller's rebound hashes.
     rebuilt_model=model(scenario)
-    if canonical_hash(coefficients)!=canonical_hash(rebuilt_model):
+    if not matches_rebuild(coefficients,rebuilt_model):
         raise ValueError('saved affine model differs from authored model rebuild')
-    expected=program(scenario,rebuilt_model)
+    expected=program(scenario,coefficients)
     if 'joint_reconstruction' in qp:
         original=json.loads((folder/'joint-program.json').read_text())
-        if canonical_hash(original)!=canonical_hash(expected):
+        if not matches_program_rebuild(original,expected):
             raise ValueError('retained joint program differs from authored rebuild')
-        expected=condense_program(scenario,rebuilt_model,expected)
+        expected=condense_program(scenario,coefficients,original)
     elif 'joint_indices' in qp.get('coordinates',{}):
         original=json.loads((folder/'joint-program.json').read_text())
-        if canonical_hash(original)!=canonical_hash(expected):
+        if not matches_program_rebuild(original,expected):
             raise ValueError('retained joint program differs from authored rebuild')
         n=len(scenario['states'])*(scenario['time']['intervals']+1)
-        expected=permute_program(expected,[*range(n,len(expected['variables'])),*range(n)])
+        expected=permute_program(original,[*range(n,len(expected['variables'])),*range(n)])
     if 'source_unscaled_program_sha256' in qp:
         unscaled=json.loads((folder/'unscaled-program.json').read_text())
-        if canonical_hash(unscaled)!=canonical_hash(expected):
+        if not matches_program_rebuild(unscaled,expected):
             raise ValueError('unscaled source differs from authored program/transform rebuild')
-        expected=scale_objective(expected,qp['objective_multiplier'])
-    if canonical_hash(qp)!=canonical_hash(expected):
+        expected=scale_objective(unscaled,qp['objective_multiplier'])
+    if not matches_program_rebuild(qp,expected):
         raise ValueError('submitted program differs from authored coefficient/bound/transform rebuild')
 
 

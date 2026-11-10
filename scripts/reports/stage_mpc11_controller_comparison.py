@@ -97,6 +97,16 @@ def current_renderer():
     return module
 
 
+AFFINE_RECHECK_QUALIFICATION={
+    'path':'benchmarks/reporting/mpc11/check_affine_saved.py',
+    'frozen_checker_sha256':'658d326941bb761654de417a8ca3b5be5144088b0a62b3d6496511a8c167ca24',
+    'current_checker_sha256':'f93b54995f3b1aa063ff927cc028e6fcb43bddd5ecfd2e74f04873fa69f29de2',
+    'derivation_absolute_tolerance':1e-13,
+    'derivation_relative_tolerance':1e-12,
+    'scope':'floating model/transform rebuild only; all stored input/output/program and immutable-archive hashes remain exact',
+}
+
+
 def validate(evidence=EVIDENCE):
     evidence=Path(evidence)
     require(not evidence.is_symlink(),'unsafe evidence root')
@@ -109,7 +119,13 @@ def validate(evidence=EVIDENCE):
     for name,checksum in receipt['helper_snapshot_sha256'].items():
         safe_name(name);require(digest(figures['source/'+name]) == checksum,'helper snapshot differs')
     for name,checksum in receipt['tool_sha256'].items():
-        safe_name(name);require(digest((ROOT/name).read_bytes()) == checksum,'current checker/source differs from reviewed figure: '+name)
+        safe_name(name)
+        if name==AFFINE_RECHECK_QUALIFICATION['path']:
+            require(checksum==AFFINE_RECHECK_QUALIFICATION['frozen_checker_sha256'] and
+                    digest((ROOT/name).read_bytes())==AFFINE_RECHECK_QUALIFICATION['current_checker_sha256'],
+                    'current affine checker differs from qualified post-capture source')
+        else:
+            require(digest((ROOT/name).read_bytes()) == checksum,'current checker/source differs from reviewed figure: '+name)
     frozen={FIGURES:figures};archives={};extracted={}
     for kind,(folder,checksum) in ARCHIVES.items():
         files=directory(evidence/folder)
@@ -150,6 +166,7 @@ def validate(evidence=EVIDENCE):
                 require(digest(path.read_bytes()) == receipt['input_sha256'][slug+'/'+key],'plotted input hash differs')
     verification={'affine_checks':len(reports['affine']),'nonlinear_cases':len(reports['nonlinear']),
                   'nmpc_steps':sum(row['transcriptions_checked'] for row in reports['nmpc']),
+                  'post_capture_affine_checker':AFFINE_RECHECK_QUALIFICATION,
                   'scope':'saved identities, numerical witnesses, sampled cost/constraints and transcription rebuild; no optimization/integration rerun'}
     return frozen,archives,verification
 
@@ -168,7 +185,7 @@ def stage(site,evidence=EVIDENCE,*,example_card_writer=None):
     for folder in ('scenarios','environment'):
         source_files.update({f'benchmarks/reporting/mpc11/{folder}/'+name:digest(content)
                              for name,content in directory(MODULE/folder).items() if '__pycache__' not in PurePosixPath(name).parts})
-    for p in (MODULE/'FIGURES.md', ROOT/'scripts/reports/figure_style.py'):
+    for p in (MODULE/'FIGURES.md', MODULE/'AFFINE-RECHECK.md', ROOT/'scripts/reports/figure_style.py'):
         source_files[p.relative_to(ROOT).as_posix()]=digest(p.read_bytes())
     identity={'figures_manifest':FIGURE_ANCHOR,'archives':ARCHIVES,'stager_sha256':digest(Path(__file__).read_bytes()),
               'current_sources':source_files}
@@ -185,7 +202,7 @@ def stage(site,evidence=EVIDENCE,*,example_card_writer=None):
             if '__pycache__' not in PurePosixPath(name).parts:generated[prefix+folder+'/'+name]=content
     for name in ('figure_style.py','stage_mpc11_controller_comparison.py'):
         generated['scripts/reports/'+name]=(ROOT/'scripts/reports'/name).read_bytes()
-    for name in ('FIGURES.md',):generated[prefix+name]=(MODULE/name).read_bytes()
+    for name in ('FIGURES.md','AFFINE-RECHECK.md'):generated[prefix+name]=(MODULE/name).read_bytes()
     figures_path=prefix+'evidence/'+FIGURES
     sections=[]
     for slug,title in [('syn-nl-lv-01','Lotka–Volterra: P/R'),('syn-nl-fuel-01','Fuel: m_ox/q_ox and m_f/q_f')]:

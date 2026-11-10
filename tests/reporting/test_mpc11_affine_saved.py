@@ -1,4 +1,6 @@
 import hashlib
+import os
+import subprocess
 import copy
 import importlib.util
 import json
@@ -26,6 +28,23 @@ def write(path, value):
 
 
 class SavedAffineTests(unittest.TestCase):
+    def test_rebuild_tolerance_preserves_structure_and_rejects_material_changes(self):
+        self.assertTrue(CHECKER.matches_rebuild({'coefficient':[1.0]}, {'coefficient':[1.0+1e-15]}))
+        for changed in ({'coefficient':[1.0+1e-8]}, {'coefficient':[float('nan')]},
+                        {'coefficient':[True]}, {'coefficient':[]}, {'wrong':[1.0]}):
+            self.assertFalse(CHECKER.matches_rebuild(changed,{'coefficient':[1.0]}))
+        self.assertFalse(CHECKER.matches_rebuild({'row_offsets':[False]}, {'row_offsets':[0]}))
+        self.assertFalse(CHECKER.matches_rebuild({'model_sha256':'changed'}, {'model_sha256':'original'}))
+
+    def test_original_archive_checks_across_blas_kernel_roundoff(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            with zipfile.ZipFile(ARCHIVE) as archive:archive.extractall(root)
+            result=subprocess.run([sys.executable,str(MODULE_DIR/'check_affine_saved.py'),
+                '--bundle',str(root/'accepted')],capture_output=True,text=True,
+                env=dict(os.environ,OPENBLAS_CORETYPE='Sandybridge',OPENBLAS_NUM_THREADS='1',OMP_NUM_THREADS='1'))
+            self.assertEqual(result.returncode,0,result.stderr)
+
     def test_original_archive_checks(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory)
