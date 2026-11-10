@@ -68,6 +68,10 @@ class PagesAugmentationAggregation(unittest.TestCase):
             for name in ('mpc07','mpc10'):
                 self.assertIn(routes[name]+'/index.html#minimal-example',(site/'examples/index.html').read_text())
                 self.assertIn(routes[name]+'/index.html',landing)
+            online = json.loads((site/routes["mpc07"]/"online-verification.json").read_text())
+            self.assertEqual(sum(row["episodes"] for row in online["reports"]), 864)
+            self.assertEqual(sum(row["stages"] for row in online["reports"]), 4032)
+            self.assertIn("figures/online-policy-traces.svg", (site/routes["mpc07"]/"index.html").read_text())
             self.assertIn(routes["mpc11_studies"]+"/index.html#mesh-example",(site/"examples/index.html").read_text())
             self.assertIn(routes["mpc11_studies"]+"/index.html",landing)
             for report_id in (routes["b04_c"], routes["mpc06"], routes["mpc06_complete"], routes["mpc06_offline"], routes["review05"], routes["mpc11"], routes["mpc08"], routes["mpc07"], routes["mpc10"], routes["mpc11_studies"]):

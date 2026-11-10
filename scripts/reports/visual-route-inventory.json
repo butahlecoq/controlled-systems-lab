@@ -55,7 +55,7 @@
     },
     {
       "source": "scripts/reports/augment_pages_bundle.py",
-      "signal_count": 14,
+      "signal_count": 16,
       "asset_name_literals": [
         "branches.svg",
         "exact-critical-regions.svg",
@@ -66,6 +66,8 @@
         "joint-filter-policy.svg",
         "mesh-differences.svg",
         "mesh-phase-overlays.svg",
+        "online-policy-traces.png",
+        "online-policy-traces.svg",
         "paths.svg",
         "timing-phases.svg",
         "trajectory.svg"

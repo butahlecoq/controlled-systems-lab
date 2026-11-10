@@ -82,7 +82,10 @@ def stage_all(site: Path) -> dict[str, str]:
         (review05, ("index.html", "publication-manifest.json")),
         (mpc11, ("index.html", "publication-manifest.json")),
         (mpc08, ("index.html", "publication-manifest.json", "minimal-inputs.json", "offline_check.py", "figures/exact-critical-regions.svg", "figures/horizon-regions.svg")),
-        (mpc07, ("index.html", "publication-manifest.json", "minimal-inputs.json", "figures/fixed-filter-policy.svg", "figures/joint-filter-policy.svg")),
+        (mpc07, ("index.html", "publication-manifest.json", "minimal-inputs.json", "offline_check.py",
+                 "figures/fixed-filter-policy.svg", "figures/joint-filter-policy.svg",
+                 "online-verification.json", "online-figure-data.json", "online-figure-export.json",
+                 "figures/online-policy-traces.svg", "figures/online-policy-traces.png")),
         (mpc10, ("index.html", "publication-manifest.json", "minimal-inputs.json", "figures/paths.svg", "figures/branches.svg")),
         (mpc11_studies, ("index.html", "publication-manifest.json", "minimal-inputs.json", "mesh-phase-overlays.svg", "mesh-differences.svg", "timing-phases.svg")),
     ):
