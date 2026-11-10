@@ -98,14 +98,14 @@ def current_renderer():
     return module
 
 
-AFFINE_RECHECK_QUALIFICATION={
-    'path':'benchmarks/reporting/mpc11/check_affine_saved.py',
-    'frozen_checker_sha256':'658d326941bb761654de417a8ca3b5be5144088b0a62b3d6496511a8c167ca24',
-    'current_checker_sha256':'f93b54995f3b1aa063ff927cc028e6fcb43bddd5ecfd2e74f04873fa69f29de2',
-    'derivation_absolute_tolerance':1e-13,
-    'derivation_relative_tolerance':1e-12,
-    'scope':'floating model/transform rebuild only; all stored input/output/program and immutable-archive hashes remain exact',
+POST_CAPTURE_CHECKERS={
+    'benchmarks/reporting/mpc11/check_affine_saved.py':{'frozen_checker_sha256':'658d326941bb761654de417a8ca3b5be5144088b0a62b3d6496511a8c167ca24',
+        'current_checker_sha256':'4cb46b15b2600db5b4cd43c163f100227551b22d5e880e727222fbc6fc7df599'},
+    'benchmarks/reporting/mpc11/check_nonlinear_saved.py':{'frozen_checker_sha256':'84056242a0f5c0ea8406ac479cbcd01bc7fed3ce1a4f46a9c9990a5b0703a856',
+        'current_checker_sha256':'94945453105fbe87169d59e8077e6139b9930afec3fb5f4442ec9adbef1ab8f8'},
 }
+REBUILD_QUALIFICATION=dict(absolute_tolerance=1e-13,relative_tolerance=1e-12,
+    scope="floating derivation/replay only; stored identities and immutable archive hashes remain exact")
 
 
 def validate(evidence=EVIDENCE):
@@ -121,10 +121,11 @@ def validate(evidence=EVIDENCE):
         safe_name(name);require(digest(figures['source/'+name]) == checksum,'helper snapshot differs')
     for name,checksum in receipt['tool_sha256'].items():
         safe_name(name)
-        if name==AFFINE_RECHECK_QUALIFICATION['path']:
-            require(checksum==AFFINE_RECHECK_QUALIFICATION['frozen_checker_sha256'] and
-                    digest((ROOT/name).read_bytes())==AFFINE_RECHECK_QUALIFICATION['current_checker_sha256'],
-                    'current affine checker differs from qualified post-capture source')
+        if name in POST_CAPTURE_CHECKERS:
+            qualification=POST_CAPTURE_CHECKERS[name]
+            require(checksum==qualification['frozen_checker_sha256'] and
+                    digest((ROOT/name).read_bytes())==qualification['current_checker_sha256'],
+                    'current checker differs from qualified post-capture source: '+name)
         else:
             require(digest((ROOT/name).read_bytes()) == checksum,'current checker/source differs from reviewed figure: '+name)
     frozen={FIGURES:figures};archives={};extracted={}
@@ -170,7 +171,7 @@ def validate(evidence=EVIDENCE):
                 require(digest(path.read_bytes()) == receipt['input_sha256'][slug+'/'+key],'plotted input hash differs')
     verification={'affine_checks':len(reports['affine']),'nonlinear_cases':len(reports['nonlinear']),
                   'nmpc_steps':sum(row['transcriptions_checked'] for row in reports['nmpc']),
-                  'post_capture_affine_checker':AFFINE_RECHECK_QUALIFICATION,
+                  'post_capture_checkers':POST_CAPTURE_CHECKERS,'numerical_rebuild_qualification':REBUILD_QUALIFICATION,
                   'scope':'saved identities, numerical witnesses, sampled cost/constraints and transcription rebuild; no optimization/integration rerun'}
     return frozen,archives,verification
 

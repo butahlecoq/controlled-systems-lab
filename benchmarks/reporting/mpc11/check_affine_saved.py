@@ -35,25 +35,34 @@ def matches_program_rebuild(saved, rebuilt):
                            {key:value for key,value in rebuilt.items() if key!='program_sha256'})
 
 
+def authenticate_program(value):
+    body=dict(value)
+    declared=body.pop('program_sha256',None)
+    if declared!=canonical_hash(body):
+        raise ValueError('stored program identity mismatch')
+    return value
+
+
 def verify_authored_transform(scenario, coefficients, qp, folder):
+    authenticate_program(qp)
     # Rebuild from the fixed authored scenario, not the caller's rebound hashes.
     rebuilt_model=model(scenario)
     if not matches_rebuild(coefficients,rebuilt_model):
         raise ValueError('saved affine model differs from authored model rebuild')
     expected=program(scenario,coefficients)
     if 'joint_reconstruction' in qp:
-        original=json.loads((folder/'joint-program.json').read_text())
+        original=authenticate_program(json.loads((folder/'joint-program.json').read_text()))
         if not matches_program_rebuild(original,expected):
             raise ValueError('retained joint program differs from authored rebuild')
         expected=condense_program(scenario,coefficients,original)
     elif 'joint_indices' in qp.get('coordinates',{}):
-        original=json.loads((folder/'joint-program.json').read_text())
+        original=authenticate_program(json.loads((folder/'joint-program.json').read_text()))
         if not matches_program_rebuild(original,expected):
             raise ValueError('retained joint program differs from authored rebuild')
         n=len(scenario['states'])*(scenario['time']['intervals']+1)
         expected=permute_program(original,[*range(n,len(expected['variables'])),*range(n)])
     if 'source_unscaled_program_sha256' in qp:
-        unscaled=json.loads((folder/'unscaled-program.json').read_text())
+        unscaled=authenticate_program(json.loads((folder/'unscaled-program.json').read_text()))
         if not matches_program_rebuild(unscaled,expected):
             raise ValueError('unscaled source differs from authored program/transform rebuild')
         expected=scale_objective(unscaled,qp['objective_multiplier'])
@@ -76,11 +85,11 @@ def check(bundle):
         if canonical_hash(authored)!=qp['program_sha256'] or qp['program_sha256']!=attempt['program_sha256']:
             raise ValueError('program identity mismatch')
         if 'source_unscaled_program_sha256' in qp:
-            unscaled=json.loads((folder/'unscaled-program.json').read_text());unscaled_hash=unscaled.pop('program_sha256')
+            unscaled=authenticate_program(json.loads((folder/'unscaled-program.json').read_text()));unscaled_hash=unscaled.pop('program_sha256')
             if canonical_hash(unscaled)!=unscaled_hash or unscaled_hash!=qp['source_unscaled_program_sha256']:
                 raise ValueError('unscaled program identity mismatch')
         if 'source_joint_program_sha256' in qp:
-            original=json.loads((folder/'joint-program.json').read_text()); original_hash=original.pop('program_sha256')
+            original=authenticate_program(json.loads((folder/'joint-program.json').read_text())); original_hash=original.pop('program_sha256')
             if canonical_hash(original)!=original_hash or original_hash!=qp['source_joint_program_sha256']:
                 raise ValueError('original joint-program identity mismatch')
         result=json.loads((folder/'stdout.json').read_text())

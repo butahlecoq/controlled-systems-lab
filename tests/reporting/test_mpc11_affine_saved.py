@@ -28,6 +28,31 @@ def write(path, value):
 
 
 class SavedAffineTests(unittest.TestCase):
+    def test_nonlinear_archive_checks_across_affine_replay_roundoff(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            with zipfile.ZipFile(MODULE_DIR/'evidence/nonlinear-pilot-0092081b/capture.zip') as archive:archive.extractall(root)
+            result=subprocess.run([sys.executable,str(MODULE_DIR/'check_nonlinear_saved.py'),
+                '--bundle',str(root/'accepted')],capture_output=True,text=True,
+                env=dict(os.environ,OPENBLAS_CORETYPE='Sandybridge',OPENBLAS_NUM_THREADS='1',OMP_NUM_THREADS='1'))
+            self.assertEqual(result.returncode,0,result.stderr)
+
+    def test_every_retained_transform_program_requires_its_exact_identity(self):
+        scenario=json.loads((MODULE_DIR/'scenarios/syn-nl-lv-01.json').read_text())
+        coefficients=model(scenario);joint=program(scenario,coefficients)
+        n=len(scenario['states'])*(scenario['time']['intervals']+1)
+        for kind in ('permutation','condensed','scaled'):
+            qp=(permute_program(joint,[*range(n,len(joint['variables'])),*range(n)]) if kind=='permutation'
+                else condense_program(scenario,coefficients,joint) if kind=='condensed' else scale_objective(joint,1000.))
+            with self.subTest(kind=kind),tempfile.TemporaryDirectory() as directory:
+                folder=Path(directory);bad=copy.deepcopy(joint);bad['program_sha256']='0'*64
+                write(folder/('unscaled-program.json' if kind=='scaled' else 'joint-program.json'),bad)
+                with self.assertRaisesRegex(ValueError,'stored program identity'):
+                    CHECKER.verify_authored_transform(scenario,coefficients,qp,folder)
+        bad=copy.deepcopy(joint);bad['program_sha256']='0'*64
+        with tempfile.TemporaryDirectory() as directory,self.assertRaisesRegex(ValueError,'stored program identity'):
+            CHECKER.verify_authored_transform(scenario,coefficients,bad,Path(directory))
+
     def test_rebuild_tolerance_preserves_structure_and_rejects_material_changes(self):
         self.assertTrue(CHECKER.matches_rebuild({'coefficient':[1.0]}, {'coefficient':[1.0+1e-15]}))
         for changed in ({'coefficient':[1.0+1e-8]}, {'coefficient':[float('nan')]},

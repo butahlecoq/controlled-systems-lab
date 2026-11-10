@@ -2,7 +2,7 @@
 
 The original pilot archives, plotted arrays, figure receipt and historical
 checker snapshots remain unchanged. The publication manifest separately pins
-the current affine checker and its historical counterpart.
+the current affine/nonlinear checkers and their historical counterparts.
 
 The original checker compared SHA-256 digests of independently recomputed
 floating coefficients. With the same locked NumPy/SciPy wheels and unchanged
@@ -19,6 +19,15 @@ match exactly. It then rebuilds each program/transform from the authenticated
 saved inputs, with the same numerical comparison for floating derivations.
 Derived program hash fields are checked by the stored-identity layer rather
 than compared to a hash of potentially different floating rounding.
+
+The nonlinear reader also checks the recomputed affine witness numerically
+against its exactly bound saved witness, then uses the saved identity for trace
+association. Under Sandybridge, 27 LV replay entries differ by at most
+2.842170943040401e-14; the physical state/control witness identity is unchanged.
+Recomputed sampled metrics use the same tolerance. The original witness/trace
+bytes, request associations and statuses remain unchanged. Every consumed
+submitted, joint or unscaled program validates its own exact canonical hash
+before any floating comparison.
 
 This is a numerical model/transform consistency check, not an exact arithmetic
 proof or a certified matrix-exponential error bound. Existing numerical witness,

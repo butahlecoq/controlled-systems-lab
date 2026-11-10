@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import numpy as np
 from affine import canonical_hash, check_solution
-from check_affine_saved import verify_authored_transform
+from check_affine_saved import verify_authored_transform, matches_rebuild
 from check_scenarios import validate
 from nonlinear import make_request, validate_request, evaluate
 from replay_evidence import read_native_attempt
@@ -27,8 +27,10 @@ def check(bundle):
         verify_authored_transform(s,coeff,qp,source)
         if native['program_sha256']!=qp['program_sha256']:raise ValueError('native program association')
         witness=check_solution(s,coeff,qp,native)
-        if witness['status']!='verified-numerical-witness' or witness!=load(folder/'affine-witness.json'):
+        saved_witness=load(folder/'affine-witness.json')
+        if witness['status']!='verified-numerical-witness' or not matches_rebuild(saved_witness,witness):
             raise ValueError('affine witness differs from source verification')
+        witness=saved_witness
         statuses={};objectives={};records={}
         for mode in ['cvodes','cvodes-tight','rk4','rk4-tight']:
             attempt=folder/mode;request=load(attempt/'request.json');validate_request(request)
@@ -52,7 +54,7 @@ def check(bundle):
             metrics=evaluate(s,physical,witness['physical_controls'])
             if not complete:metrics['objective']=None
             for key,value in metrics.items():
-                if value!=record[key]:raise ValueError('independent cost/violation reconstruction mismatch: '+key)
+                if not matches_rebuild(record[key],value):raise ValueError('independent cost/violation reconstruction mismatch: '+key)
             statuses[mode]=record['status'];objectives[mode]=record['objective'];records[mode]=record
         comparison=load(folder/'comparison.json')
         if comparison['statuses']!=statuses or comparison['objectives']!=objectives or comparison['affine_objective']!=witness['objective']:
