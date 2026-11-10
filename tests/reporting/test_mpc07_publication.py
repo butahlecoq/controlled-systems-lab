@@ -25,6 +25,9 @@ class PublicationTests(unittest.TestCase):
             self.assertEqual(checks['attempts'],218);self.assertEqual(checks['joint_attainment']['maximum_gap'],'0')
             result=subprocess.run([sys.executable,'-B',str(report/'offline_check.py')],cwd=Path(temporary),capture_output=True,text=True,timeout=45)
             self.assertEqual(result.returncode,0,result.stderr);self.assertEqual(json.loads(result.stdout)['attempts'],218)
+            proof=next((report/'source-root/.git/objects').glob('*/*'));proof.write_bytes(proof.read_bytes()+b'changed')
+            refused=subprocess.run([sys.executable,'-B',str(report/'offline_check.py')],cwd=Path(temporary),capture_output=True,text=True,timeout=45)
+            self.assertNotEqual(refused.returncode,0);self.assertIn('invalid source object',refused.stderr)
             with self.assertRaisesRegex(ValueError,'exists'):S.stage(site)
     def test_tampered_frozen_inputs_refuse_before_site_writes(self):
         for name in ('offline.zip','summary.json','current-rechecks.json'):
@@ -44,7 +47,7 @@ class PublicationTests(unittest.TestCase):
         with self.assertRaises(ValueError):S.checked_zip(data.getvalue())
     def test_stale_helper_bytes_cannot_be_exported(self):
         from unittest import mock
-        with mock.patch.object(S,'helper_revision',return_value='0'*40):
+        with mock.patch.object(S,'helper_revision',return_value='0'*40),mock.patch.object(S.subprocess,'check_output',side_effect=subprocess.CalledProcessError(128,'git')):
             with self.assertRaises((ValueError,subprocess.CalledProcessError)):S.source_export({})
 
 if __name__=='__main__':unittest.main()

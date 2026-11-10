@@ -58,7 +58,7 @@ def checked_zip(data):
     except (zipfile.BadZipFile,RuntimeError,EOFError) as error:raise ValueError('invalid evidence ZIP') from error
     # Every capture's inner RAW inventory is complete, not a selected file list.
     for name,body in files.items():
-        if name.endswith('/RAW/SHA256SUMS'):
+        if name=='SHA256SUMS' or name.endswith('/SHA256SUMS'):
             prefix=name[:-len('SHA256SUMS')]
             require(sums(body)=={n[len(prefix):]:digest(v) for n,v in files.items() if n.startswith(prefix) and n!=name},'inner RAW checksum differs')
     return files
