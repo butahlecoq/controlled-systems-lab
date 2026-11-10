@@ -28,6 +28,18 @@ def write(path, value):
 
 
 class SavedAffineTests(unittest.TestCase):
+    def test_nonlinear_stored_witness_requires_exact_own_body_hash(self):
+        import check_nonlinear_saved
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            with zipfile.ZipFile(MODULE_DIR/'evidence/nonlinear-pilot-0092081b/capture.zip') as archive:archive.extractall(root)
+            bundle=root/'accepted';path=bundle/'syn-nl-lv-01/affine-witness.json'
+            witness=json.loads(path.read_text());witness['physical_states'][0][0]+=5e-14;write(path,witness)
+            hashes=json.loads((bundle/'file-hashes.json').read_text())
+            hashes[path.relative_to(bundle).as_posix()]=hashlib.sha256(path.read_bytes()).hexdigest();write(bundle/'file-hashes.json',hashes)
+            with self.assertRaisesRegex(ValueError,'stored affine witness identity'):
+                check_nonlinear_saved.check(bundle)
+
     def test_nonlinear_archive_checks_across_affine_replay_roundoff(self):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory)

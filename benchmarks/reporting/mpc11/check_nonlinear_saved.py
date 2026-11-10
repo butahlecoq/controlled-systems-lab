@@ -28,6 +28,8 @@ def check(bundle):
         if native['program_sha256']!=qp['program_sha256']:raise ValueError('native program association')
         witness=check_solution(s,coeff,qp,native)
         saved_witness=load(folder/'affine-witness.json')
+        if saved_witness['witness_sha256']!=canonical_hash({'states':saved_witness['physical_states'],'controls':saved_witness['physical_controls']}):
+            raise ValueError('stored affine witness identity mismatch')
         if witness['status']!='verified-numerical-witness' or not matches_rebuild(saved_witness,witness):
             raise ValueError('affine witness differs from source verification')
         witness=saved_witness

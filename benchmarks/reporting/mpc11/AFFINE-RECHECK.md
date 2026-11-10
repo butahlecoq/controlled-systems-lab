@@ -40,3 +40,12 @@ and exercise the unchanged original archive under a different BLAS kernel.
 No solver/integrator rerun, new numerical result, required dependency, public API
 or library release is introduced. The optional Linux CPython wheel lock remains
 unchanged.
+
+The publication checks case identities, statuses, completed counts and original
+objectives against the frozen figure receipt. Current NMPC numerical diagnostic
+arrays and rebuild residuals are checked by the actual saved checker and recorded
+separately in the publication manifest. They are not required to reproduce the
+historical diagnostic bits. The original receipt, sampled histories and plotted
+arrays retain exact byte/value binding. Nonfinite or negative current diagnostics
+and changed identities, status, counts or materially different objectives refuse
+publication.

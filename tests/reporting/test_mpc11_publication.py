@@ -17,6 +17,19 @@ spec.loader.exec_module(STAGER)
 
 
 class PublicationTests(unittest.TestCase):
+    def test_current_diagnostics_do_not_replace_frozen_identity_or_scope(self):
+        import copy
+        frozen=json.loads((STAGER.EVIDENCE/STAGER.FIGURES/'receipt.json').read_text())['saved_checks']
+        current=copy.deepcopy(frozen);current['nmpc'][0]['max_nlp_objective_rebuild_difference']=1e-14
+        STAGER.checked_report_agreement(current,frozen)
+        changes=[('status','incomplete'),('transcriptions_checked',999),('completed_objective',999.),
+                 ('max_nlp_objective_rebuild_difference',-1.),('max_stationarity_rebuild_difference',float('nan')),
+                 ('sampled_execution_physical_state_violation',[])]
+        for field,value in changes:
+            altered=copy.deepcopy(current);altered['nmpc'][0][field]=value
+            with self.subTest(field=field),self.assertRaises(ValueError):
+                STAGER.checked_report_agreement(altered,frozen)
+
     def test_saved_checker_failure_exposes_underlying_diagnostic(self):
         from unittest import mock
         from types import SimpleNamespace

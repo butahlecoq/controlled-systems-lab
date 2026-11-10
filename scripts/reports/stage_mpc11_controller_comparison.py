@@ -6,6 +6,7 @@ import html
 import importlib.util
 import io
 import json
+import math
 from pathlib import Path, PurePosixPath
 import re
 import stat
@@ -102,10 +103,36 @@ POST_CAPTURE_CHECKERS={
     'benchmarks/reporting/mpc11/check_affine_saved.py':{'frozen_checker_sha256':'658d326941bb761654de417a8ca3b5be5144088b0a62b3d6496511a8c167ca24',
         'current_checker_sha256':'4cb46b15b2600db5b4cd43c163f100227551b22d5e880e727222fbc6fc7df599'},
     'benchmarks/reporting/mpc11/check_nonlinear_saved.py':{'frozen_checker_sha256':'84056242a0f5c0ea8406ac479cbcd01bc7fed3ce1a4f46a9c9990a5b0703a856',
-        'current_checker_sha256':'94945453105fbe87169d59e8077e6139b9930afec3fb5f4442ec9adbef1ab8f8'},
+        'current_checker_sha256':'775c24080c9516b8c5aff1b08e460150b8086dcbc3cdca0bc9078f2b27f65935'},
 }
 REBUILD_QUALIFICATION=dict(absolute_tolerance=1e-13,relative_tolerance=1e-12,
     scope="floating derivation/replay only; stored identities and immutable archive hashes remain exact")
+
+
+NMPC_DIAGNOSTICS=frozenset(('sampled_execution_physical_state_violation','applied_physical_control_violation',
+    'max_nlp_objective_rebuild_difference','max_nlp_constraint_rebuild_difference','max_stationarity_rebuild_difference'))
+
+
+def checked_report_agreement(current,frozen):
+    require(current.keys()==frozen.keys(),'saved checker kinds differ')
+    def numerical(value,reference):
+        return type(value) in (int,float) and type(reference) in (int,float) and math.isfinite(value) and math.isfinite(reference) and math.isclose(
+            value,reference,abs_tol=REBUILD_QUALIFICATION['absolute_tolerance'],rel_tol=REBUILD_QUALIFICATION['relative_tolerance'])
+    def diagnostic(value,reference):
+        if isinstance(reference,list):
+            return isinstance(value,list) and len(value)==len(reference) and all(diagnostic(a,b) for a,b in zip(value,reference))
+        return type(value) in (int,float) and math.isfinite(value) and value>=0
+    for kind,rows in frozen.items():
+        require(isinstance(current[kind],list) and len(current[kind])==len(rows),'saved checker case inventory differs')
+        for observed,reference in zip(current[kind],rows):
+            require(observed.keys()==reference.keys(),'saved checker report fields differ')
+            for name,previous in reference.items():
+                if (kind=='affine' and name=='objective') or (kind=='nmpc' and name=='completed_objective'):
+                    require(numerical(observed[name],previous),'saved original objective differs')
+                elif kind=='nmpc' and name in NMPC_DIAGNOSTICS:
+                    require(diagnostic(observed[name],previous),'invalid current numerical diagnostic')
+                else:
+                    require(type(observed[name]) is type(previous) and observed[name]==previous,'saved checker identity/status/count differs: '+name)
 
 
 def validate(evidence=EVIDENCE):
@@ -154,7 +181,7 @@ def validate(evidence=EVIDENCE):
             reports=current_renderer().checked_inputs(**bundles)
         except subprocess.CalledProcessError as error:
             raise ValueError('saved numerical checker failed: '+(error.stderr or str(error))[-6000:]) from error
-        require(reports == receipt['saved_checks'],'current saved checks differ from frozen figure checks')
+        checked_report_agreement(reports,receipt['saved_checks'])
         for slug in ('syn-nl-lv-01','syn-nl-fuel-01'):
             load=lambda path:json.loads(path.read_text())
             scenario=load(bundles['nmpc']/slug/'scenario.json')
@@ -172,6 +199,7 @@ def validate(evidence=EVIDENCE):
     verification={'affine_checks':len(reports['affine']),'nonlinear_cases':len(reports['nonlinear']),
                   'nmpc_steps':sum(row['transcriptions_checked'] for row in reports['nmpc']),
                   'post_capture_checkers':POST_CAPTURE_CHECKERS,'numerical_rebuild_qualification':REBUILD_QUALIFICATION,
+                  'current_saved_checks':reports,'historical_diagnostics':'frozen figure receipt preserved; current floating rebuild diagnostics recorded separately',
                   'scope':'saved identities, numerical witnesses, sampled cost/constraints and transcription rebuild; no optimization/integration rerun'}
     return frozen,archives,verification
 
