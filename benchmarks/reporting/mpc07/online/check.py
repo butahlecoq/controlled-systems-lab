@@ -13,6 +13,10 @@ from benchmarks.reporting.mpc07 import policy,joint_filter
 from benchmarks.reporting.mpc07.online.inputs import select,encoded,digest
 
 ROOT=Path(__file__).resolve().parents[4]
+ONLINE_PREFIX='benchmarks/reporting/mpc07/online/'
+# Schema1's actual0524 capture includes all five algorithms/readers plus profiles.
+MINIMUM_ONLINE_SOURCES=frozenset(ONLINE_PREFIX+name for name in
+    ('controller.py','capture.py','check.py','inputs.py','figures.py','profiles.json'))
 
 
 def load(path):
@@ -41,11 +45,13 @@ def authenticated(folder):
     names=subprocess.check_output(['git','ls-tree','-r','--name-only',revision,'--',prefix],cwd=ROOT,text=True).splitlines()
     required={n for n in names if (n.startswith(prefix+'online/') and n.endswith(('.py','/profiles.json'))) or (n.startswith(prefix) and n.count('/')==3 and n.endswith('.py'))}
     required.add('scripts/reports/stage_mpc07_comparison.py')
+    if not MINIMUM_ONLINE_SOURCES<=required:raise ValueError('capture revision lacks mandatory online source profile')
     if set(env['source_sha256'])!=required:raise ValueError('mandatory captured source inventory differs')
     if {n.removeprefix('source/') for n in actual if n.startswith('source/')}!=required:raise ValueError('copied source inventory differs')
     for name,checksum in env['source_sha256'].items():
         data=(folder/'source'/name).read_bytes()
         if digest(data)!=checksum or data!=subprocess.check_output(['git','show','--end-of-options',revision+':'+name],cwd=ROOT):raise ValueError('source differs from recorded commit')
+    if (folder/'inputs.json').read_bytes()!=(folder/'source'/ONLINE_PREFIX/'profiles.json').read_bytes():raise ValueError('captured committed input bytes differ')
     inputs=load(folder/'inputs.json')
     if digest((folder/'inputs.json').read_bytes())!=env['input_sha256'] or inputs!=select():raise ValueError('selected policy/source input binding differs')
     return env,inputs,actual

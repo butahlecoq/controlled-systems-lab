@@ -3,6 +3,8 @@ from fractions import Fraction as Q
 import inspect
 import hashlib
 import tempfile
+import shutil
+import subprocess
 import zipfile
 import json
 from pathlib import Path
@@ -68,6 +70,30 @@ class OnlinePolicyTests(unittest.TestCase):
                     path=root/'measured/stdout.jsonl';rows=[json.loads(s) for s in path.read_text().splitlines()];rows[0]['steps'][0]['control']+=.01;path.write_text(''.join(json.dumps(r)+'\n' for r in rows));process=json.loads((root/'measured/process.json').read_bytes());process['stdout_sha256']=hashlib.sha256(path.read_bytes()).hexdigest();write(root/'measured/process.json',process)
                 (root/'SHA256SUMS').write_text(''.join(h+'  '+n+'\n' for n,h in inventory(root).items()))
                 with self.assertRaises(ValueError):check(root)
+    def test_pre_online_commit_cannot_authenticate_online_capture(self):
+        artifact=INPUT.parents[1]/'evidence/online-evaluation-0524f7e4'
+        with tempfile.TemporaryDirectory() as tmp:
+            with zipfile.ZipFile(artifact/'capture.zip') as z:z.extractall(tmp)
+            root=Path(tmp)/'capture';env=json.loads((root/'environment.json').read_bytes())
+            revision='f4950e7ee72c00809340ff316f572952bb142802';env['source_revision']=revision
+            names=[n for n in env['source_sha256'] if '/online/' not in n]
+            shutil.rmtree(root/'source');env['source_sha256']={}
+            for name in names:
+                data=subprocess.check_output(['git','show','--end-of-options',revision+':'+name],cwd=INPUT.parents[4]);path=root/'source'/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(data);env['source_sha256'][name]=hashlib.sha256(data).hexdigest()
+            (root/'environment.json').write_text(json.dumps(env))
+            (root/'SHA256SUMS').write_text(''.join(h+'  '+n+'\n' for n,h in inventory(root).items()))
+            from benchmarks.reporting.mpc07.online.check import authenticated
+            with self.assertRaisesRegex(ValueError,'online source profile'):authenticated(root)
+    def test_captured_input_bytes_must_match_committed_profile(self):
+        artifact=INPUT.parents[1]/'evidence/online-evaluation-0524f7e4'
+        with tempfile.TemporaryDirectory() as tmp:
+            with zipfile.ZipFile(artifact/'capture.zip') as z:z.extractall(tmp)
+            root=Path(tmp)/'capture';path=root/'inputs.json';path.write_bytes(path.read_bytes()+b'\n')
+            env=json.loads((root/'environment.json').read_bytes());env['input_sha256']=hashlib.sha256(path.read_bytes()).hexdigest();(root/'environment.json').write_text(json.dumps(env))
+            (root/'SHA256SUMS').write_text(''.join(h+'  '+n+'\n' for n,h in inventory(root).items()))
+            from benchmarks.reporting.mpc07.online.check import authenticated
+            with self.assertRaisesRegex(ValueError,'committed input'):authenticated(root)
+
     def test_figure_receipt_needs_full_checker_map_and_actual_replay(self):
         artifact=INPUT.parents[1]/'evidence/online-evaluation-0524f7e4'
         with tempfile.TemporaryDirectory() as tmp:
