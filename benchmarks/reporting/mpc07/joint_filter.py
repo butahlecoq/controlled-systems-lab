@@ -3,7 +3,7 @@ from fractions import Fraction as Q
 import hashlib
 import json
 import math
-import policy
+from benchmarks.reporting.mpc07 import policy
 
 EPS=Q(1,64)
 RHO=Q(1,1024)
