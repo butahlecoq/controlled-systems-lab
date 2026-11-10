@@ -23,7 +23,13 @@ ANCHORS={FIXED:'5c50928b1650a5f665df415d7b9cd7750cafd81d8d12e28956b74bc7413b4afe
  JOINT:'f7ee7214ac3a9f3ca963fce474e1e8688a7e739156a416d3d8cf879709202169',
  JOINT_CURRENT:'37d34a5095825831eb6e8e8e9bba607a304a8d75a77c27a1115b26e36aaaf6ed'}
 SOURCES={name:ROOT/'benchmarks/reporting/mpc07/evidence'/name for name in ANCHORS}
+ONLINE='online-evaluation-0524f7e4';ONLINE_CURRENT=ONLINE+'-recheck-aed7a98b'
+ONLINE_ANCHORS={ONLINE:'540a04309384a32fb7e51861f78d0361d5d0cb50af1d6acd680ec01a4453373a',ONLINE_CURRENT:'3fe4006cf6d9513e9f94250d3d3cbdb369aa44f6838ca1649de03514db0b02b3'}
+ONLINE_SOURCES={name:ROOT/'benchmarks/reporting/mpc07/evidence'/name for name in ONLINE_ANCHORS}
 HELPERS=['benchmarks/reporting/mpc07/'+name for name in ('capture.py','policy.py','report.py','joint_filter.py','joint_capture.py')]+['scripts/reports/stage_mpc07_comparison.py','docs/research/mpc07-delivery-disposition-2026-11-10.md']
+ONLINE_HELPERS=[n for n in HELPERS if n.endswith('.py')]+['benchmarks/reporting/mpc07/online/'+n for n in ('capture.py','check.py','controller.py','figures.py','inputs.py','profiles.json')]
+HELPERS+= [n for n in ONLINE_HELPERS if n not in HELPERS]
+HELPERS+=['scripts/reports/figure_style.py']
 
 def require(condition,message):
     if not condition:raise ValueError(message)
@@ -43,7 +49,7 @@ def sums(data):
 def frozen(source,identity):
     source=Path(source);require(source.name==identity and source.is_dir() and not source.is_symlink(),'unexpected frozen source path')
     entries=list(source.iterdir());require(all(p.is_file() and not p.is_symlink() for p in entries),'frozen inputs must be regular flat files')
-    files={p.name:p.read_bytes() for p in entries};require(digest(files['SHA256SUMS'])==ANCHORS[identity],'not the reviewed frozen manifest')
+    files={p.name:p.read_bytes() for p in entries};require(digest(files['SHA256SUMS'])=={**ANCHORS,**ONLINE_ANCHORS}[identity],'not the reviewed frozen manifest')
     require(sums(files['SHA256SUMS'])=={n:digest(v) for n,v in files.items() if n!='SHA256SUMS'},'frozen file hash/inventory differs');return files
 
 def checked_zip(data):
@@ -118,10 +124,89 @@ def validate(sources=None,*,repository=ROOT):
         joint_attainment=checks['joint']['attainment'],groups={k:v['groups'] for k,v in checks.items()},
         scope='current source/process/exact policy/containment/oracle/clock checks; no algorithm execution; descriptive timing only')
 
+def online_inputs(sources=None):
+    sources=ONLINE_SOURCES if sources is None else sources
+    require(set(sources)==set(ONLINE_ANCHORS),'mandatory online evidence inventory differs')
+    files={name:frozen(sources[name],name) for name in ONLINE_ANCHORS};original=files[ONLINE];corrected=files[ONLINE_CURRENT]
+    packed=checked_zip(original['capture.zip'])
+    require(len(packed)==24 and 'capture/SHA256SUMS' in packed and all(n=='SHA256SUMS' or n.startswith('capture/') for n in packed),'online raw member inventory differs')
+    raw={n[len('capture/'):]:v for n,v in packed.items() if n.startswith('capture/')}
+    environment=json.loads(raw['environment.json']);inputs=json.loads(raw['inputs.json']);reading=json.loads(corrected['verification.json'])
+    require(set(environment['source_sha256'])==set(reading['checking_sources'])==set(ONLINE_HELPERS),'mandatory online helper/source inventory differs')
+    require(raw['inputs.json']==raw['source/benchmarks/reporting/mpc07/online/profiles.json'] and digest(raw['inputs.json'])==environment['input_sha256'],'online committed input binding differs')
+    for revision in (environment['source_revision'],reading['checking_revision']):require(isinstance(revision,str) and re.fullmatch('[0-9a-f]{40}',revision),'invalid online source revision')
+    qualification=json.loads(corrected['qualification.json'])
+    require(qualification['capture_source']==environment['source_revision'] and qualification['checking_source']==reading['checking_revision'],'online qualification source differs')
+    require(qualification['original_inventory_sha256']==ONLINE_ANCHORS[ONLINE] and qualification['original_capture_zip_sha256']==digest(original['capture.zip']) and qualification['corrected_verification_sha256']==digest(corrected['verification.json']),'online qualification/archive binding differs')
+    source_files=checked_zip(corrected['checking-source.zip'])
+    require(set(source_files)==set(ONLINE_HELPERS)|{'SHA256SUMS'},'online corrected source ZIP inventory differs')
+    for name,checksum in reading['checking_sources'].items():require(digest(source_files[name])==checksum,'online corrected source fingerprint differs')
+    old=json.loads(original['verification.json']);stable=lambda value:{k:v for k,v in value.items() if k not in ('checking_revision','checking_sources')}
+    require(stable(old)==stable(reading),'online correction changed original numeric reports/inputs/timings')
+    figure=json.loads(original['figure-data.json']);export=json.loads(original['figure-export.json'])
+    require(export['input_data_sha256']==digest(original['figure-data.json']) and export['verification_sha256']==figure['verification_sha256']==digest(original['verification.json']),'online historical figure/receipt binding differs')
+    require(set(export['images'])=={'online-policy-traces.svg','online-policy-traces.png'},'online figure inventory differs')
+    for name,checksum in export['images'].items():require(digest(original[name])==checksum,'online figure image hash differs')
+    records=[json.loads(line) for line in raw['measured/stdout.jsonl'].decode().splitlines()]
+    selected=[r for r in records if r['profile'].startswith('joint-T8-') and r['family']=='positive' and r['repetition']==0]
+    require(len(selected)==4 and figure['rows']==selected,'online figure differs from actual consumed N8 trace records')
+    return dict(files=files,raw=raw,environment=environment,inputs=inputs,reading=reading,checking_files=source_files,figure=figure)
+
+
+def validate_online(online,*,repository=ROOT,sources=None):
+    reading=online['reading'];sources=SOURCES if sources is None else sources
+    require(set(sources)==set(ANCHORS),'online upstream source inventory differs')
+    # Authenticate the historical corrected checker separately; then execute the
+    # current exported checker rather than trusting a cached success receipt.
+    for name,checksum in reading['checking_sources'].items():
+        data=subprocess.check_output(['git','show','--end-of-options',reading['checking_revision']+':'+name],cwd=repository)
+        require(data==online['checking_files'][name] and digest(data)==checksum,'online corrected source differs from authentic Git object')
+    with tempfile.TemporaryDirectory(prefix='mpc07-online-publication-check-') as temporary:
+        root=Path(temporary);materialize(online['raw'],root/'capture')
+        bootstrap="import json,sys; from pathlib import Path; from scripts.reports import stage_mpc07_comparison as upstream; upstream.SOURCES={n:Path(p) for n,p in json.loads(sys.argv[1]).items()}; from benchmarks.reporting.mpc07.online.check import check; from benchmarks.reporting.mpc07.online.inputs import encoded; Path(sys.argv[3]).write_bytes(encoded(check(Path(sys.argv[2]))))"
+        command=[sys.executable,'-B','-c',bootstrap,json.dumps({n:str(Path(p).resolve()) for n,p in sources.items()}),str(root/'capture'),str(root/'current.json')]
+        result=subprocess.run(command,cwd=repository,capture_output=True,text=True,timeout=60)
+        require(result.returncode==0,'online saved source/policy replay failed: '+result.stderr[-2400:])
+        current=json.loads((root/'current.json').read_bytes())
+    stable=lambda value:{k:v for k,v in value.items() if k not in ('checking_revision','checking_sources')}
+    require(set(current['checking_sources'])==set(ONLINE_HELPERS) and all(digest((repository/n).read_bytes())==v for n,v in current['checking_sources'].items()),'current online checker/export source binding differs')
+    require(stable(current)==stable(reading) and current['status']=='checked','online corrected receipt differs from actual current replay')
+    require(current['scheduled_episodes']==432 and current['scheduled_stages']==2016 and len(current['reports'])==2,'online scheduled inventory differs')
+    require(all(r['status']=='checked' and r['episodes']==432 and r['stages']==2016 and r['outcomes']=={'verified-numerical-evaluation':432} for r in current['reports']),'online complete replay inventory differs')
+    print(json.dumps(dict(schema='csl.mpc07.online-current-publication-check/1',capture_source=current['source_revision'],checking_revision=current['checking_revision'],checking_sources=current['checking_sources'],status=current['status']),sort_keys=True),file=sys.stderr)
+    clock=online['environment']['clock'];measured=[g for g in reading['groups'] if g['family']=='positive' and g['profile']=='joint-T8-optimized-diagonal-joint']
+    require(len(measured)==1,'online primary profile inventory differs')
+    return dict(status='checked',episodes=864,stages=4032,profiles=reading['profiles'],measured_episodes=sum(g['completed'] for g in reading['groups']),measured_stages=sum(g['query']['count'] for g in reading['groups']),
+        capture_source=online['environment']['source_revision'],corrected_checking_source=reading['checking_revision'],corrected_verification_sha256=digest(online['files'][ONLINE_CURRENT]['verification.json']),
+        clock_pair_ns=clock['empty_pair_ns'],primary_query=measured[0]['query'],preparation=measured[0]['preparation'],
+        scope='instrumented stored-feedback evaluation only; substantial timestamp overhead, no intrinsic latency resolution/ranking or LP/MPC reoptimization')
+
+
+def online_reading(online):
+    original=online['files'][ONLINE];corrected=online['files'][ONLINE_CURRENT]
+    data=dict(online['figure']);data['historical_figure_data_sha256']=digest(original['figure-data.json']);data['verification_sha256']=digest(corrected['verification.json'])
+    bound=encoded(data)
+    export=dict(schema='csl.mpc07.online-publication-figure/1',corrected_verification_sha256=digest(corrected['verification.json']),input_data_sha256=digest(bound),historical_export_sha256=digest(original['figure-export.json']),capture_zip_sha256=digest(original['capture.zip']),
+        images={n:digest(original[n]) for n in ('online-policy-traces.svg','online-policy-traces.png')},scope='unchanged original image bytes; actual raw trace rows and corrected complete replay bound separately')
+    return {'figures/online-policy-traces.svg':original['online-policy-traces.svg'],'figures/online-policy-traces.png':original['online-policy-traces.png'],
+        'online-verification.json':corrected['verification.json'],'online-figure-data.json':bound,'online-figure-export.json':encoded(export)}
+
+
+def online_section(online):
+    query=online['primary_query'];clock=online['clock_pair_ns']
+    return f'''<section id="online-evaluation"><h2>Actual causal feedback evaluation, separate from synthesis/replanning</h2>
+<p>All36 existing verified profiles run two physical trace families: w=+1 or alternating signs, with constant delta=+epsilon (0 additive,1/64 uncertain-A) in both. The controller API receives only observed states and its own past controls. It reconstructs the previous transition residual or normalized innovation, returns an action, and only then does the plant apply current uncertainty. The returned actions are consumed in the saved physical traces.</p>
+<p>One excluded warmup plus five measured repetitions derive432episodes/2016stages per arm;360episodes/1680stages enter statistics. A separate instrumented profile arm is entirely excluded from latency statistics. Current source/rational/policy/physical/bound checks verify all864episodes/4032stages. These sample paths do not add a robustness, global-optimality or reachable-set guarantee.</p>
+<img src="figures/online-policy-traces.svg" alt="Actual N8 positive physical trace for four stored causal policy classes, with phase/state/control panels and q=0 cost reference">
+<p>The displayed N8positive trace is selected, not asserted worst-case. Circles identify initial state and crosses terminal state; q=0 marks zero terminal q-squared cost as a reference, not claimed attainment. Full matrices, rational policies, causal information, physical bounds and both trace definitions are in <a href="minimal-inputs.json">complete inputs</a>.</p>
+<p><strong>Instrumented query spans, not resolved intrinsic latency.</strong> The N8joint/positive profile has median{query['median_ns']}ns and range{query['minimum_ns']}–{query['maximum_ns']}ns across{query['count']}queries. Empty timestamp-pair median{clock['median']}ns (range{clock['minimum']}–{clock['maximum']}ns) is substantial; no overhead is subtracted. Initial observation, past-residual update, query, rational-to-binary64 policy preparation, episode and process/CPU/RSS scopes remain distinct. This generic dense Python evaluator is not sparsity-tuned. No policy ranking, native/real-time bound, LP-solve or MPC-reoptimization latency is inferred.</p>
+<p><a href="online-verification.json">Corrected complete replay and all integer timing groups</a> · <a href="online-figure-data.json">Bound actual trace arrays</a> · <a href="online-figure-export.json">Figure/current-receipt binding</a> · <a href="evidence/{ONLINE}/capture.zip">Unchanged original online capture</a> · <a href="evidence/{ONLINE_CURRENT}/qualification.json">Corrected source qualification</a>. Capture source0524 and corrected checking sourceaed remain distinct; original archives/figures/timings are unchanged. The online source profile and committed inputs are authenticated, including during the exported outside-checkout replay.</p></section>'''
+
+
 def helper_revision():
     return subprocess.check_output(['git','log','-1','--format=%H','--',*HELPERS],cwd=ROOT,text=True).strip()
 
-def source_export(captures):
+def source_export(captures,online=None):
     revision=helper_revision();require(re.fullmatch('[0-9a-f]{40}',revision),'invalid helper revision')
     files={};objects=set();sources=[]
     for name in HELPERS:
@@ -137,6 +222,10 @@ def source_export(captures):
         for commit in (env['source_commit'],native):
             require(re.fullmatch('[0-9a-f]{40}',commit),'invalid capture source revision')
             sources.append((commit,{path:env['source_sha256'][name] for name,path in maps.items() if (name.startswith('native-') and name!='native-build-receipt.json')==(commit==native)}))
+    if online is not None:
+        environment=online['environment'];reading=online['reading']
+        sources.extend([(environment['source_revision'],environment['source_sha256']),
+                        (reading['checking_revision'],reading['checking_sources'])])
     def include(oid):
         require(re.fullmatch('[0-9a-f]{40}',oid),'invalid object revision')
         if oid in objects:return
@@ -148,6 +237,13 @@ def source_export(captures):
             safe_name(name);content=subprocess.check_output(['git','show','--end-of-options',commit+':'+name],cwd=ROOT);require(digest(content)==checksum,'Git source digest differs')
             parts=PurePosixPath(name).parts
             for size in range(1,len(parts)+1):include(subprocess.check_output(['git','rev-parse',commit+':'+str(PurePosixPath(*parts[:size]))],cwd=ROOT,text=True).strip())
+    if online is not None:
+        # The capture authenticator lists this entire prefix, requiring trees,
+        # including historical evidence-directory trees, but not their blobs.
+        lines=subprocess.check_output(['git','ls-tree','-r','-t',online['environment']['source_revision'],'--','benchmarks/reporting/mpc07'],cwd=ROOT,text=True).splitlines()
+        for line in lines:
+            fields=line.split(None,3)
+            if fields[1]=='tree':include(fields[2])
     files['.git/config']=b'[core]\nrepositoryformatversion = 0\nbare = false\n';files['.git/HEAD']=b'ref: refs/heads/evidence\n';files['.git/refs/heads/evidence']=(revision+'\n').encode()
     return files,dict(helper_revision=revision,helper_sha256={name:digest(files[name]) for name in HELPERS},object_count=len(objects))
 
@@ -170,21 +266,24 @@ def verify_export(root,receipt):
 def _index(path):
     require(path.is_file() and not path.is_symlink(),'regular Pages index required');text=path.read_text();require(len(re.findall(r'<body\b',text,re.I))==1 and text.count('</body>')==1,'one body insertion point required');return text
 
-def stage(site,sources=None):
+def stage(site,sources=None,*,online_sources=None):
     site=Path(site);require(site.is_dir() and not site.is_symlink() and not (site/'examples').is_symlink(),'regular Pages site required')
     landing=_index(site/'index.html');gallery=_index(site/'examples/index.html')
-    files,captures,checks=validate(sources);proof,source_receipt=source_export(captures)
-    route='mpc07-comparison-'+digest(encoded(ANCHORS)+encoded(source_receipt))[:16]
+    files,captures,checks=validate(sources);online=online_inputs(online_sources)
+    proof,source_receipt=source_export(captures,online);checks['online']=validate_online(online,repository=ROOT,sources=sources)
+    files.update(online['files'])
+    route='mpc07-comparison-'+digest(encoded({**ANCHORS,**ONLINE_ANCHORS})+encoded(source_receipt))[:16]
     require(not (site/route).exists() and not (site/(route+'.zip')).exists() and route not in landing and route not in gallery,'immutable route exists')
-    generated={'verification.json':encoded(checks),'source-files.json':encoded(source_receipt),'minimal-inputs.json':encoded(minimal_inputs()),'index.html':page(route).encode()}
+    generated={'verification.json':encoded(checks),'source-files.json':encoded(source_receipt),'minimal-inputs.json':encoded(dict(**minimal_inputs(),online_policy_evaluation=online['inputs'])),'index.html':page(route,checks['online']).encode()}
     for identity,contents in files.items():
         for name,data in contents.items():generated['evidence/'+identity+'/'+name]=data
     for name,data in proof.items():generated['source-root/'+name]=data
     generated['figures/fixed-filter-policy.svg']=files[FIXED_CURRENT]['fixed-filter-policy.svg'];generated['figures/joint-filter-policy.svg']=files[JOINT_CURRENT]['joint-filter-policy.svg']
+    generated.update(online_reading(online))
     generated['disposition.md']=(ROOT/'docs/research/mpc07-delivery-disposition-2026-11-10.md').read_bytes()
-    generated['offline_check.py']=b'''from pathlib import Path\nimport importlib.util,json\nroot=Path(__file__).resolve().parent\nspec=importlib.util.spec_from_file_location('mpc07_stage',root/'source-root/scripts/reports/stage_mpc07_comparison.py')\nm=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)\nm.verify_export(root/'source-root',json.loads((root/'source-files.json').read_bytes()))\n_,_,checks=m.validate({name:root/'evidence'/name for name in m.ANCHORS},repository=root/'source-root')\nassert checks==json.loads((root/'verification.json').read_bytes()),'publication check sidecar differs'\nprint(json.dumps(checks))\n'''
-    generated['README.md']=f'''# MPC07 offline checked comparison\n\nExtract ../{route}.zip into a fresh directory, enter {route}, then run `python -B offline_check.py`. Python3.11+ and Git are required; no source checkout, solver, native binary, Matplotlib, network or install is required. This rechecks218 saved outcomes; it never optimizes. Minimal authentic selected Git commit/tree/blob objects are retained under source-root/.git with fixed empty configuration, no host config/credentials/hooks, and no full history. Missing/mutated objects refuse the check; no fallback exists.\n\nOriginal fixed/joint archives, historical receipts and separately corrected reading layers are all under evidence/ unchanged. Current helper revision and object count are in source-files.json. The helper revision is the last change to required helper files, independent of later documentation commits. Historical compiler/process paths are evidence, not portable executable paths. Performance is inconclusive. See disposition.md and index.html for equations, controls, information order, oracle and license/platform qualifications. No general-filter/uncertain-B/recursive-feasibility/online-latency claim. Publication requires reviewed current-main CI/freshness gates; this hook does not deploy.\n'''.encode()
-    generated['publication-manifest.json']=encoded(dict(schema='csl.mpc07.publication/1',route=route,anchors=ANCHORS,helper_revision=source_receipt['helper_revision'],files={n:digest(v) for n,v in generated.items()}))
+    generated['offline_check.py']=b'''from pathlib import Path\nimport importlib.util,json\nroot=Path(__file__).resolve().parent\nspec=importlib.util.spec_from_file_location('mpc07_stage',root/'source-root/scripts/reports/stage_mpc07_comparison.py')\nm=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)\nm.verify_export(root/'source-root',json.loads((root/'source-files.json').read_bytes()))\n_,_,checks=m.validate({name:root/'evidence'/name for name in m.ANCHORS},repository=root/'source-root')\nonline=m.online_inputs({name:root/'evidence'/name for name in m.ONLINE_ANCHORS})\nchecks['online']=m.validate_online(online,repository=root/'source-root',sources={name:root/'evidence'/name for name in m.ANCHORS})\nassert checks==json.loads((root/'verification.json').read_bytes()),'publication check sidecar differs'\nprint(json.dumps(checks))\n'''
+    generated['README.md']=f'''# MPC07 offline checked comparison\n\nExtract ../{route}.zip into a fresh directory, enter {route}, then run `python -B offline_check.py`. Python3.11+ and Git are required; no source checkout, solver, native binary, Matplotlib, network or install is required. This rechecks218 original outcomes plus864online episodes/4032stages; it never optimizes. Minimal authentic selected Git commit/tree/blob objects are retained under source-root/.git with fixed empty configuration, no host config/credentials/hooks, and no full history. Missing/mutated objects refuse the check; no fallback exists.\n\nOriginal fixed/joint archives, historical receipts and separately corrected reading layers are all under evidence/ unchanged. Current helper revision and object count are in source-files.json. The helper revision is the last change to required exported helpers, independent of unrelated commits. Historical compiler/process paths are evidence, not portable executable paths. Performance is inconclusive. See disposition.md and index.html for equations, controls, information order, oracle and license/platform qualifications. No general-filter/uncertain-B/recursive-feasibility/online-latency claim. Publication requires reviewed current-main CI/freshness gates; this hook does not deploy.\n'''.encode()
+    generated['publication-manifest.json']=encoded(dict(schema='csl.mpc07.publication/1',route=route,anchors={**ANCHORS,**ONLINE_ANCHORS},helper_revision=source_receipt['helper_revision'],files={n:digest(v) for n,v in generated.items()}))
     generated['SHA256SUMS']=(''.join(f'{digest(v)}  {n}\n' for n,v in sorted(generated.items()))).encode()
     from scripts.reports.mpc01.stage_per_attempt import _insert_landing_link
     with tempfile.TemporaryDirectory(prefix='mpc07-stage-') as temporary:
@@ -215,8 +314,11 @@ def minimal_inputs():
         physical_causal_lower='(65/64)^(2*(T-1)) for this terminal-only uncertain-A toy',
         minimal_T2=dict(joint_physical_upper_and_lower='4225/4096',fixed_filter_virtual_optimum='9/4',additive_optimum='1'))
 
-def page(route):
-    return f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MPC07 causal policies and joint filters</title><style>body{{font:16px/1.6 system-ui;background:#1e1e2e;color:#cdd6f4;max-width:1200px;margin:2rem auto;padding:1rem}}a{{color:#89b4fa}}img{{max-width:100%;height:auto}}code{{color:#f9e2af}}</style><body><h1>Checked causal policies and joint diagonal filters</h1><p>Two-state continuous-control model; T2/4/8. Independent restricted-policy implementations of published equations, not author-code reproduction. Performance: <strong>inconclusive</strong>. All218 saved outcomes, including two native refusal/infeasibility probes, retain their literal status.</p><p><a href="minimal-inputs.json">Complete inputs</a> · <a href="verification.json">Current218 checks and timing/count ranges</a> · <a href="disposition.md">Six-criterion disposition</a> · <a href="publication-manifest.json">Source/raw identities</a> · <a href="../{route}.zip">Full offline raw/source ZIP</a> · <a href="README.md">Offline recheck</a></p><section id="minimal-example"><h2>One two-state model, distinct uncertainty bounds</h2><p>x=(p,q), x0=(0,0), p_next=p+q+u/2, q_next=(1+delta)q+u+w, |u|≤1 and u0=0, |p|≤64, |q|≤16. Minimize terminal qT². The additive case has delta=0, |w|≤1. The uncertain-A case has |delta|≤1/64 and |w|≤1. Full states are observed; eta_t=q_next−q−u is reconstructed after the transition, never observed in advance.</p><p>Affine feedback uses u_t=v_t+sum(j&lt;t)M_tj eta_j. A fixed5/4 box conservatively encloses the physical lumped disturbance through |q|≤16. Its T2 virtual optimum9/4 is distinct from both the returned policy's physical cost and the physical optimum4225/4096. The fixed-gain and M=0 baselines share continuous actuator domains; their robust feasible costs are upper bounds, not finite-action rankings.</p><img src="figures/fixed-filter-policy.svg" alt="Saved two-state fixed-filter disturbance enclosure and terminal policy set"><p>The joint specialization optimizes scaled responses and a positive diagonal filter from Chen v3(24),(26),(36)–(39). R_next=A R+B H+diag(s); H is strictly causal; s[t,q]≥1+(1/64)sum|R[t,q,:]|. Position filter floor1/1024 conservatively makes the virtual filter invertible. Observed residuals reconstruct only past normalized innovations.</p><img src="figures/joint-filter-policy.svg" alt="Saved joint diagonal-filter enclosure and terminal support boxes"><p>In the saved T2/4/8 joint policies, independent exact upper/lower gaps are zero for the stated terminal-only toy. The lower bound is (65/64)^(2(T−1)); at T2 it is4225/4096. This proves policy-level attainment for these verified policies. Valid positive-gap repaired policies remain upper bounds and receive no attainment claim. It does not establish general SLS minimax equality. Support boxes and uncertainty vertices are not complete winning/reachable sets.</p></section><h2>Evidence, objective and timing scope</h2><p>Exact robust counterparts use affine-box support sums, squared terminal absolute bounds, independently replayed uncertainty containment and complete tiny analytic/vertex references. No transfer to arbitrary piecewise/replanned policies. Current checks independently authenticate native/capture source objects, original feasibility, causality, process outcomes and nested clocks. Preparation and batch native setup/port-run spans are available; port-run includes adapter checks. No isolated LP solve or executed MPC-update latency was measured.</p><p><a href="evidence/{FIXED_CURRENT}/index.html">Fixed-filter reading layer</a> · <a href="evidence/{JOINT_CURRENT}/index.html">Joint-filter reading layer</a>. All four historical/corrected folders and original offline/diagnostic ZIPs remain under evidence/. No timing winner, full non-diagonal filter, uncertain-B, recursive-feasibility or general controller claim.</p><h2>Paper, software and release qualification</h2><p>Chen arXiv2203.11375v3(2023-09-26); author repository ShaoruChen/Polytopic-SLSMPC at3f6873299ec5d0d2d87630a66486f723788390a4, no license grant visible at the recorded2026-11-10 audit, zero releases and last push2024-05-03. Author-code adoption refused; MATLAB/YALMIP/MPT3/MOSEK stack not adopted. Goulart2006's nominal quadratic formulation is not relabelled exact minimax. Our independently authored diagonal restriction uses the published equations and an existing optional CSL ConvexPort/HiGHS1.11.0 numerical LP bridge.</p><p>Linuxx86-64 saved ReleaseGCC16.2.1/CMake3.31.6; exact source/build/binary receipts retained. Historical author/software facts are audit snapshots. No redistributed solver/runtime, core API or required dependency change, install or standalone library release. Offline checking uses Python/Git only; original rendering used Matplotlib3.11.2 and shared quantitative styles. Live publication follows independent review, current CI and managed main-only stale-head gates.</p></body></html>'''
+def page(route,online=None):
+    body=f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MPC07 causal policies and joint filters</title><style>body{{font:16px/1.6 system-ui;background:#1e1e2e;color:#cdd6f4;max-width:1200px;margin:2rem auto;padding:1rem}}a{{color:#89b4fa}}img{{max-width:100%;height:auto}}code{{color:#f9e2af}}</style><body><h1>Checked causal policies and joint diagonal filters</h1><p>Two-state continuous-control model; T2/4/8. Independent restricted-policy implementations of published equations, not author-code reproduction. Performance: <strong>inconclusive</strong>. All218 original synthesis outcomes, including two native refusal/infeasibility probes, retain their literal status.</p><p><a href="minimal-inputs.json">Complete inputs</a> · <a href="verification.json">Current218 checks and timing/count ranges</a> · <a href="disposition.md">Six-criterion disposition</a> · <a href="publication-manifest.json">Source/raw identities</a> · <a href="../{route}.zip">Full offline raw/source ZIP</a> · <a href="README.md">Offline recheck</a></p><section id="minimal-example"><h2>One two-state model, distinct uncertainty bounds</h2><p>x=(p,q), x0=(0,0), p_next=p+q+u/2, q_next=(1+delta)q+u+w, |u|≤1 and u0=0, |p|≤64, |q|≤16. Minimize terminal qT². The additive case has delta=0, |w|≤1. The uncertain-A case has |delta|≤1/64 and |w|≤1. Full states are observed; eta_t=q_next−q−u is reconstructed after the transition, never observed in advance.</p><p>Affine feedback uses u_t=v_t+sum(j&lt;t)M_tj eta_j. A fixed5/4 box conservatively encloses the physical lumped disturbance through |q|≤16. Its T2 virtual optimum9/4 is distinct from both the returned policy's physical cost and the physical optimum4225/4096. The fixed-gain and M=0 baselines share continuous actuator domains; their robust feasible costs are upper bounds, not finite-action rankings.</p><img src="figures/fixed-filter-policy.svg" alt="Saved two-state fixed-filter disturbance enclosure and terminal policy set"><p>The joint specialization optimizes scaled responses and a positive diagonal filter from Chen v3(24),(26),(36)–(39). R_next=A R+B H+diag(s); H is strictly causal; s[t,q]≥1+(1/64)sum|R[t,q,:]|. Position filter floor1/1024 conservatively makes the virtual filter invertible. Observed residuals reconstruct only past normalized innovations.</p><img src="figures/joint-filter-policy.svg" alt="Saved joint diagonal-filter enclosure and terminal support boxes"><p>In the saved T2/4/8 joint policies, independent exact upper/lower gaps are zero for the stated terminal-only toy. The lower bound is (65/64)^(2(T−1)); at T2 it is4225/4096. This proves policy-level attainment for these verified policies. Valid positive-gap repaired policies remain upper bounds and receive no attainment claim. It does not establish general SLS minimax equality. Support boxes and uncertainty vertices are not complete winning/reachable sets.</p></section><h2>Evidence, objective and timing scope</h2><p>Exact robust counterparts use affine-box support sums, squared terminal absolute bounds, independently replayed uncertainty containment and complete tiny analytic/vertex references. No transfer to arbitrary piecewise/replanned policies. Current checks independently authenticate native/capture source objects, original feasibility, causality, process outcomes and nested clocks. Preparation and batch native setup/port-run spans are available; port-run includes adapter checks. The original synthesis units measured neither isolated LP solve nor MPC-reoptimization latency.</p><p><a href="evidence/{FIXED_CURRENT}/index.html">Fixed-filter reading layer</a> · <a href="evidence/{JOINT_CURRENT}/index.html">Joint-filter reading layer</a>. All four historical/corrected folders and original offline/diagnostic ZIPs remain under evidence/. No timing winner, full non-diagonal filter, uncertain-B, recursive-feasibility or general controller claim.</p><h2>Paper, software and release qualification</h2><p>Chen arXiv2203.11375v3(2023-09-26); author repository ShaoruChen/Polytopic-SLSMPC at3f6873299ec5d0d2d87630a66486f723788390a4, no license grant visible at the recorded2026-11-10 audit, zero releases and last push2024-05-03. Author-code adoption refused; MATLAB/YALMIP/MPT3/MOSEK stack not adopted. Goulart2006's nominal quadratic formulation is not relabelled exact minimax. Our independently authored diagonal restriction uses the published equations and an existing optional CSL ConvexPort/HiGHS1.11.0 numerical LP bridge.</p><p>Linuxx86-64 saved ReleaseGCC16.2.1/CMake3.31.6; exact source/build/binary receipts retained. Historical author/software facts are audit snapshots. No redistributed solver/runtime, core API or required dependency change, install or standalone library release. Offline checking uses Python/Git only; original rendering used Matplotlib3.11.2 and shared quantitative styles. Live publication follows independent review, current CI and managed main-only stale-head gates.</p></body></html>'''
+    if online is not None:body=body.replace('<h2>Paper, software and release qualification</h2>',online_section(online)+'<h2>Paper, software and release qualification</h2>')
+    return body
+
 
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--site',type=Path);p.add_argument('--check-raw',type=Path);p.add_argument('--repository',type=Path,default=ROOT);a=p.parse_args()

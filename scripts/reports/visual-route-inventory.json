@@ -55,7 +55,7 @@
     },
     {
       "source": "scripts/reports/augment_pages_bundle.py",
-      "signal_count": 13,
+      "signal_count": 14,
       "asset_name_literals": [
         "branches.svg",
         "exact-critical-regions.svg",
@@ -1531,10 +1531,12 @@
     },
     {
       "source": "scripts/reports/stage_mpc07_comparison.py",
-      "signal_count": 7,
+      "signal_count": 16,
       "asset_name_literals": [
         "fixed-filter-policy.svg",
-        "joint-filter-policy.svg"
+        "joint-filter-policy.svg",
+        "online-policy-traces.png",
+        "online-policy-traces.svg"
       ],
       "disposition": "publication-validation-or-frozen-route",
       "role_and_disposition_reason": "Authenticates both robust-policy capture families and copied two-state figures; rechecks saved exact policies without optimization or plotting."
@@ -2058,6 +2060,12 @@
         "input-projections.svg"
       ],
       "disposition": "reviewed-static-diagram-exception"
+    },
+    {
+      "source": "benchmarks/reporting/mpc07/online/figures.py",
+      "signal_count": 1,
+      "asset_name_literals": [],
+      "disposition": "adopted-shared-quantitative-policy"
     },
     {
       "source": "benchmarks/reporting/mpc07/report.py",

@@ -1,0 +1,800 @@
+{
+  "family": "positive physical uncertainty trace",
+  "rows": [
+    {
+      "episode_ns": 502932,
+      "family": "positive",
+      "preparation_ns": 362339,
+      "profile": "joint-T8-fixed5over4-fixed-filter",
+      "repetition": 0,
+      "status": "completed",
+      "steps": [
+        {
+          "control": 0.0,
+          "delta": 0.015625,
+          "next_state": [
+            0.0,
+            1.0
+          ],
+          "observation": [
+            0.0,
+            0.0
+          ],
+          "past_innovation": null,
+          "past_residual": null,
+          "query_ns": 3911,
+          "residual_update_ns": 2934,
+          "stage": 0,
+          "w": 1.0
+        },
+        {
+          "control": -0.8,
+          "delta": 0.015625,
+          "next_state": [
+            0.6,
+            1.215625
+          ],
+          "observation": [
+            0.0,
+            1.0
+          ],
+          "past_innovation": [
+            0.0,
+            0.8
+          ],
+          "past_residual": [
+            0.0,
+            1.0
+          ],
+          "query_ns": 4679,
+          "residual_update_ns": 4749,
+          "stage": 1,
+          "w": 1.0
+        },
+        {
+          "control": -0.809375,
+          "delta": 0.015625,
+          "next_state": [
+            1.4109374999999997,
+            1.425244140625
+          ],
+          "observation": [
+            0.6,
+            1.215625
+          ],
+          "past_innovation": [
+            0.0,
+            0.8125
+          ],
+          "past_residual": [
+            0.0,
+            1.015625
+          ],
+          "query_ns": 4820,
+          "residual_update_ns": 4680,
+          "stage": 2,
+          "w": 1.0
+        },
+        {
+          "control": -0.81384765625,
+          "delta": 0.015625,
+          "next_state": [
+            2.4292578125,
+            1.6336659240722655
+          ],
+          "observation": [
+            1.4109374999999997,
+            1.425244140625
+          ],
+          "past_innovation": [
+            -2.2737367544323206e-13,
+            0.8151953125
+          ],
+          "past_residual": [
+            -2.220446049250313e-16,
+            1.018994140625
+          ],
+          "query_ns": 4680,
+          "residual_update_ns": 4330,
+          "stage": 3,
+          "w": 1.0
+        },
+        {
+          "control": -0.8178155517578123,
+          "delta": 0.015625,
+          "next_state": [
+            3.6540159606933598,
+            1.8413764023780823
+          ],
+          "observation": [
+            2.4292578125,
+            1.6336659240722655
+          ],
+          "past_innovation": [
+            1.7053025658242404e-13,
+            0.8178155517578123
+          ],
+          "past_residual": [
+            1.6653345369377348e-16,
+            1.0222694396972654
+          ],
+          "query_ns": 4819,
+          "residual_update_ns": 4819,
+          "stage": 4,
+          "w": 1.0
+        },
+        {
+          "control": -0.815850372314453,
+          "delta": 0.015625,
+          "next_state": [
+            5.087467176914216,
+            2.054297536350787
+          ],
+          "observation": [
+            3.6540159606933598,
+            1.8413764023780823
+          ],
+          "past_innovation": [
+            4.547473508864641e-13,
+            0.8204208240509032
+          ],
+          "past_residual": [
+            4.440892098500626e-16,
+            1.025526030063629
+          ],
+          "query_ns": 4679,
+          "residual_update_ns": 4749,
+          "stage": 5,
+          "w": 1.0
+        },
+        {
+          "control": -0.8230172050297261,
+          "delta": 0.015625,
+          "next_state": [
+            6.7302561107501395,
+            2.263378730326542
+          ],
+          "observation": [
+            5.087467176914216,
+            2.054297536350787
+          ],
+          "past_innovation": [
+            3.410605131648481e-13,
+            0.8230172050297261
+          ],
+          "past_residual": [
+            3.3306690738754696e-16,
+            1.0287715062871576
+          ],
+          "query_ns": 4819,
+          "residual_update_ns": 4819,
+          "stage": 6,
+          "w": 1.0
+        },
+        {
+          "control": -0.8256787192043848,
+          "delta": 0.015625,
+          "next_state": [
+            8.580795481474489,
+            2.473065303783509
+          ],
+          "observation": [
+            6.7302561107501395,
+            2.263378730326542
+          ],
+          "past_innovation": [
+            -2.8421709430404007e-13,
+            0.8256787192043848
+          ],
+          "past_residual": [
+            -2.7755575615628914e-16,
+            1.032098399005481
+          ],
+          "query_ns": 4680,
+          "residual_update_ns": 4331,
+          "stage": 7,
+          "w": 1.0
+        }
+      ],
+      "terminal_cost": 6.11605199677782,
+      "warmup": false
+    },
+    {
+      "episode_ns": 519624,
+      "family": "positive",
+      "preparation_ns": 379731,
+      "profile": "joint-T8-optimized-diagonal-fixed-gain",
+      "repetition": 0,
+      "status": "completed",
+      "steps": [
+        {
+          "control": 0.0,
+          "delta": 0.015625,
+          "next_state": [
+            0.0,
+            1.0
+          ],
+          "observation": [
+            0.0,
+            0.0
+          ],
+          "past_innovation": null,
+          "past_residual": null,
+          "query_ns": 3771,
+          "residual_update_ns": 2445,
+          "stage": 0,
+          "w": 1.0
+        },
+        {
+          "control": -0.0625,
+          "delta": 0.015625,
+          "next_state": [
+            0.96875,
+            1.953125
+          ],
+          "observation": [
+            0.0,
+            1.0
+          ],
+          "past_innovation": [
+            0.0,
+            1.0
+          ],
+          "past_residual": [
+            0.0,
+            1.0
+          ],
+          "query_ns": 4750,
+          "residual_update_ns": 4819,
+          "stage": 1,
+          "w": 1.0
+        },
+        {
+          "control": -0.1220703125,
+          "delta": 0.015625,
+          "next_state": [
+            2.86083984375,
+            2.861572265625
+          ],
+          "observation": [
+            0.96875,
+            1.953125
+          ],
+          "past_innovation": [
+            0.0,
+            1.0
+          ],
+          "past_residual": [
+            0.0,
+            1.015625
+          ],
+          "query_ns": 4679,
+          "residual_update_ns": 4889,
+          "stage": 2,
+          "w": 1.0
+        },
+        {
+          "control": -0.1788482666015625,
+          "delta": 0.015625,
+          "next_state": [
+            5.632987976074219,
+            3.727436065673828
+          ],
+          "observation": [
+            2.86083984375,
+            2.861572265625
+          ],
+          "past_innovation": [
+            0.0,
+            1.0
+          ],
+          "past_residual": [
+            0.0,
+            1.030517578125
+          ],
+          "query_ns": 4749,
+          "residual_update_ns": 4819,
+          "stage": 3,
+          "w": 1.0
+        },
+        {
+          "control": -0.23296475410461426,
+          "delta": 0.015625,
+          "next_state": [
+            9.24394166469574,
+            4.552712500095367
+          ],
+          "observation": [
+            5.632987976074219,
+            3.727436065673828
+          ],
+          "past_innovation": [
+            0.0,
+            1.0
+          ],
+          "past_residual": [
+            0.0,
+            1.0447120666503906
+          ],
+          "query_ns": 4680,
+          "residual_update_ns": 4819,
+          "stage": 4,
+          "w": 1.0
+        },
+        {
+          "control": -0.28454453125596046,
+          "delta": 0.015625,
+          "next_state": [
+            13.654381899163127,
+            5.339304101653397
+          ],
+          "observation": [
+            9.24394166469574,
+            4.552712500095367
+          ],
+          "past_innovation": [
+            0.0,
+            1.0
+          ],
+          "past_residual": [
+            0.0,
+            1.0582411885261536
+          ],
+          "query_ns": 4819,
+          "residual_update_ns": 4819,
+          "stage": 5,
+          "w": 1.0
+        },
+        {
+          "control": -0.3337065063533373,
+          "delta": 0.015625,
+          "next_state": [
+            18.826832747639855,
+            6.089024221888394
+          ],
+          "observation": [
+            13.654381899163127,
+            5.339304101653397
+          ],
+          "past_innovation": [
+            0.0,
+            1.0
+          ],
+          "past_residual": [
+            0.0,
+            1.0711361328139901
+          ],
+          "query_ns": 4679,
+          "residual_update_ns": 4749,
+          "stage": 6,
+          "w": 1.0
+        },
+        {
+          "control": -0.38056401386802463,
+          "delta": 0.015625,
+          "next_state": [
+            24.725574962594237,
+            6.803601211487376
+          ],
+          "observation": [
+            18.826832747639855,
+            6.089024221888394
+          ],
+          "past_innovation": [
+            0.0,
+            1.0
+          ],
+          "past_residual": [
+            0.0,
+            1.0834266265883343
+          ],
+          "query_ns": 4889,
+          "residual_update_ns": 4819,
+          "stage": 7,
+          "w": 1.0
+        }
+      ],
+      "terminal_cost": 46.288989444952485,
+      "warmup": false
+    },
+    {
+      "episode_ns": 492246,
+      "family": "positive",
+      "preparation_ns": 349419,
+      "profile": "joint-T8-optimized-diagonal-fixed-plan",
+      "repetition": 0,
+      "status": "completed",
+      "steps": [
+        {
+          "control": 0.0,
+          "delta": 0.015625,
+          "next_state": [
+            0.0,
+            1.0
+          ],
+          "observation": [
+            0.0,
+            0.0
+          ],
+          "past_innovation": null,
+          "past_residual": null,
+          "query_ns": 3772,
+          "residual_update_ns": 2445,
+          "stage": 0,
+          "w": 1.0
+        },
+        {
+          "control": 0.0,
+          "delta": 0.015625,
+          "next_state": [
+            1.0,
+            2.015625
+          ],
+          "observation": [
+            0.0,
+            1.0
+          ],
+          "past_innovation": [
+            0.0,
+            1.0
+          ],
+          "past_residual": [
+            0.0,
+            1.0
+          ],
+          "query_ns": 4749,
+          "residual_update_ns": 4679,
+          "stage": 1,
+          "w": 1.0
+        },
+        {
+          "control": 0.0,
+          "delta": 0.015625,
+          "next_state": [
+            3.015625,
+            3.047119140625
+          ],
+          "observation": [
+            1.0,
+            2.015625
+          ],
+          "past_innovation": [
+            0.0,
+            1.0
+          ],
+          "past_residual": [
+            0.0,
+            1.015625
+          ],
+          "query_ns": 4679,
+          "residual_update_ns": 4749,
+          "stage": 2,
+          "w": 1.0
+        },
+        {
+          "control": 0.0,
+          "delta": 0.015625,
+          "next_state": [
+            6.062744140625,
+            4.094730377197266
+          ],
+          "observation": [
+            3.015625,
+            3.047119140625
+          ],
+          "past_innovation": [
+            0.0,
+            1.0
+          ],
+          "past_residual": [
+            0.0,
+            1.031494140625
+          ],
+          "query_ns": 4679,
+          "residual_update_ns": 4749,
+          "stage": 3,
+          "w": 1.0
+        },
+        {
+          "control": 0.0,
+          "delta": 0.015625,
+          "next_state": [
+            10.157474517822266,
+            5.158710539340973
+          ],
+          "observation": [
+            6.062744140625,
+            4.094730377197266
+          ],
+          "past_innovation": [
+            0.0,
+            1.0
+          ],
+          "past_residual": [
+            0.0,
+            1.0476112365722656
+          ],
+          "query_ns": 4749,
+          "residual_update_ns": 4330,
+          "stage": 4,
+          "w": 1.0
+        },
+        {
+          "control": 0.0,
+          "delta": 0.015625,
+          "next_state": [
+            15.316185057163239,
+            6.239315391518176
+          ],
+          "observation": [
+            10.157474517822266,
+            5.158710539340973
+          ],
+          "past_innovation": [
+            0.0,
+            1.0
+          ],
+          "past_residual": [
+            0.0,
+            1.0639801621437073
+          ],
+          "query_ns": 4819,
+          "residual_update_ns": 4679,
+          "stage": 5,
+          "w": 1.0
+        },
+        {
+          "control": 0.0,
+          "delta": 0.015625,
+          "next_state": [
+            21.555500448681414,
+            7.336804694510647
+          ],
+          "observation": [
+            15.316185057163239,
+            6.239315391518176
+          ],
+          "past_innovation": [
+            0.0,
+            1.0
+          ],
+          "past_residual": [
+            0.0,
+            1.0806048521772027
+          ],
+          "query_ns": 4680,
+          "residual_update_ns": 4819,
+          "stage": 6,
+          "w": 1.0
+        },
+        {
+          "control": 0.0,
+          "delta": 0.015625,
+          "next_state": [
+            28.89230514319206,
+            8.451442267862376
+          ],
+          "observation": [
+            21.555500448681414,
+            7.336804694510647
+          ],
+          "past_innovation": [
+            0.0,
+            1.0
+          ],
+          "past_residual": [
+            0.0,
+            1.0974893029924715
+          ],
+          "query_ns": 4819,
+          "residual_update_ns": 4749,
+          "stage": 7,
+          "w": 1.0
+        }
+      ],
+      "terminal_cost": 71.42687640701074,
+      "warmup": false
+    },
+    {
+      "episode_ns": 512570,
+      "family": "positive",
+      "preparation_ns": 354867,
+      "profile": "joint-T8-optimized-diagonal-joint",
+      "repetition": 0,
+      "status": "completed",
+      "steps": [
+        {
+          "control": 0.0,
+          "delta": 0.015625,
+          "next_state": [
+            0.0,
+            1.0
+          ],
+          "observation": [
+            0.0,
+            0.0
+          ],
+          "past_innovation": null,
+          "past_residual": null,
+          "query_ns": 3841,
+          "residual_update_ns": 2375,
+          "stage": 0,
+          "w": 1.0
+        },
+        {
+          "control": -1.0,
+          "delta": 0.015625,
+          "next_state": [
+            0.5,
+            1.015625
+          ],
+          "observation": [
+            0.0,
+            1.0
+          ],
+          "past_innovation": [
+            0.0,
+            1.0
+          ],
+          "past_residual": [
+            0.0,
+            1.0
+          ],
+          "query_ns": 4679,
+          "residual_update_ns": 4679,
+          "stage": 1,
+          "w": 1.0
+        },
+        {
+          "control": -1.0,
+          "delta": 0.015625,
+          "next_state": [
+            1.015625,
+            1.031494140625
+          ],
+          "observation": [
+            0.5,
+            1.015625
+          ],
+          "past_innovation": [
+            0.0,
+            1.0
+          ],
+          "past_residual": [
+            0.0,
+            1.015625
+          ],
+          "query_ns": 4819,
+          "residual_update_ns": 4819,
+          "stage": 2,
+          "w": 1.0
+        },
+        {
+          "control": -1.0,
+          "delta": 0.015625,
+          "next_state": [
+            1.547119140625,
+            1.0476112365722656
+          ],
+          "observation": [
+            1.015625,
+            1.031494140625
+          ],
+          "past_innovation": [
+            0.0,
+            1.0
+          ],
+          "past_residual": [
+            0.0,
+            1.015869140625
+          ],
+          "query_ns": 4679,
+          "residual_update_ns": 4749,
+          "stage": 3,
+          "w": 1.0
+        },
+        {
+          "control": -1.0,
+          "delta": 0.015625,
+          "next_state": [
+            2.0947303771972656,
+            1.0639801621437073
+          ],
+          "observation": [
+            1.547119140625,
+            1.0476112365722656
+          ],
+          "past_innovation": [
+            0.0,
+            1.0
+          ],
+          "past_residual": [
+            0.0,
+            1.0161170959472656
+          ],
+          "query_ns": 4749,
+          "residual_update_ns": 4401,
+          "stage": 4,
+          "w": 1.0
+        },
+        {
+          "control": -1.0,
+          "delta": 0.015625,
+          "next_state": [
+            2.658710539340973,
+            1.0806048521772027
+          ],
+          "observation": [
+            2.0947303771972656,
+            1.0639801621437073
+          ],
+          "past_innovation": [
+            0.0,
+            1.0
+          ],
+          "past_residual": [
+            0.0,
+            1.0163689255714417
+          ],
+          "query_ns": 4749,
+          "residual_update_ns": 4260,
+          "stage": 5,
+          "w": 1.0
+        },
+        {
+          "control": -1.0,
+          "delta": 0.015625,
+          "next_state": [
+            3.2393153915181756,
+            1.0974893029924715
+          ],
+          "observation": [
+            2.658710539340973,
+            1.0806048521772027
+          ],
+          "past_innovation": [
+            0.0,
+            1.0
+          ],
+          "past_residual": [
+            0.0,
+            1.0166246900334954
+          ],
+          "query_ns": 4679,
+          "residual_update_ns": 4400,
+          "stage": 6,
+          "w": 1.0
+        },
+        {
+          "control": -1.0,
+          "delta": 0.015625,
+          "next_state": [
+            3.836804694510647,
+            1.1146375733517289
+          ],
+          "observation": [
+            3.2393153915181756,
+            1.0974893029924715
+          ],
+          "past_innovation": [
+            0.0,
+            1.0
+          ],
+          "past_residual": [
+            0.0,
+            1.0168844508152688
+          ],
+          "query_ns": 4750,
+          "residual_update_ns": 4889,
+          "stage": 7,
+          "w": 1.0
+        }
+      ],
+      "terminal_cost": 1.2424169199274306,
+      "warmup": false
+    }
+  ],
+  "schema": "csl.mpc07.online-figures/1",
+  "scope": "actual consumed binary64 feedback actions and observed physical states; q=0 is a zero terminal-cost reference, not claimed attainment along this trace",
+  "verification_sha256": "407d4e0de52394c5038f781b2fa8731b7db94c5ee34a0153e3eaccc33d4f2035"
+}

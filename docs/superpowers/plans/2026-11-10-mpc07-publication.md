@@ -15,3 +15,21 @@ No general-filter, uncertain-B, recursive-feasibility or MPC-update-latency capa
 Unique hook implemented and independent review requested; shared integration remains root-owned. Four publication tests pass, including complete saved/offline218-outcome checks and rejection of changed raw/summary/checks/unsafe ZIP paths and corrupted authentic-source objects. No solver, Matplotlib, external package or install is needed for staging/rechecking. Current helper source ad9a5b35 exports53 authentic selected Git objects. An unrelated documentation commit does not change its helper identity or route.
 
 Preview: `/home/butahlecoq/.local/share/codex/tmp/mpc07-publication-preview-ad9a5b35/mpc07-comparison-a693d861e36c30df/` with sibling full ZIP. This is local evidence, not a deployed route. Root integration should call `stage_mpc07_comparison.stage(site)` and add the returned report/ZIP/example to cumulative assertions, register this one producer in the shared visual inventory, and retain existing CI/main-only stale-head guards. The publication test is `python -B -m unittest tests.reporting.test_mpc07_publication` (no skipped optional profile). All original fixed/joint evidence folders are unchanged.
+
+## Stored-feedback evaluation extension
+
+Keep the original four-source validator/ANCHORS contract unchanged: the committed
+online input ledger depends on it. Add two separately pinned online artifact
+folders and validate their complete ZIP/source/figure inventories. Authenticate
+the corrected aed checking source against its stored Git objects, rerun the
+current online checker and compare every stable report/input/timing field to the
+corrected receipt. Current checker revision/hash diagnostics stay in stderr.
+Export current online helpers plus actual0524 and corrected-aed Git objects;
+include tree objects needed by the closed source-inventory query. Bind the saved
+figure's actual four N8positive-trace records to the raw stream, and publish a
+new reading metadata layer tied to the corrected receipt while preserving all
+original image/archive bytes. Add complete online policy inputs, counts, query/
+update/preparation scopes and substantial timestamp-overhead qualifications.
+Offline ZIP checks execute218 original outcomes plus864online episodes outside
+a checkout, without a solver/Matplotlib/install. Preserve main-only integration
+ownership and add mutation/missing-asset/source-object regressions before staging.

@@ -1,0 +1,24 @@
+{
+  "capture_source": "0524f7e4a2babefab50fd9a724cedda782f2c46f",
+  "capture_zip_sha256": "c4b2ecbacc936cdbf4761119d5fef1272b305013de6494724cd389fe6ec269f2",
+  "captured_profiles": 36,
+  "checking_source": "5de8910f119d645e5c6bbd0eb678e70e0988f4fe",
+  "counter_pair_ns": {
+    "maximum": 31428,
+    "median": 2375,
+    "minimum": 1467
+  },
+  "failed_episodes": 0,
+  "interpretation": "Instrumented query spans are comparable to clock-pair overhead; intrinsic-call latency is not independently resolved. No subtraction, policy winner, real-time bound or LP/MPC reoptimization timing.",
+  "measured_arm_episodes_including_warmup": 432,
+  "measured_arm_stages_including_warmup": 2016,
+  "measured_episodes": 360,
+  "measured_stages": 1680,
+  "profile_query_median_range_ns": [
+    3282.5,
+    4749.0
+  ],
+  "profiled_arm_excluded": true,
+  "schema": "csl.mpc07.online-qualification/1",
+  "source_receipt_sha256": "407d4e0de52394c5038f781b2fa8731b7db94c5ee34a0153e3eaccc33d4f2035"
+}

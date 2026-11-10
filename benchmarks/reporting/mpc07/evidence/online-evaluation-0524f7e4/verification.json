@@ -1,0 +1,3029 @@
+{
+  "checking_revision": "5de8910f119d645e5c6bbd0eb678e70e0988f4fe",
+  "checking_sources": {
+    "benchmarks/reporting/mpc07/capture.py": "c6206d2f52612f2348396b85112c1b534fc1cbceaf33883c78c038aaab890f61",
+    "benchmarks/reporting/mpc07/joint_capture.py": "7476da68861c26c4ad0532b3f65200c6f61f9624c94872252e99554af557787f",
+    "benchmarks/reporting/mpc07/joint_filter.py": "7cf5bed6fd31bb51bc91642b1244f2df8ae579129fc2bc3908ca6f928cd630fd",
+    "benchmarks/reporting/mpc07/online/capture.py": "12d77a03697389cf511a16ac1235b861b9b4e1a85e6378c3c95f3782f572f442",
+    "benchmarks/reporting/mpc07/online/check.py": "774d495f3b2455aec866ec45ef042a54286ac3412751176184dc8aea788611e6",
+    "benchmarks/reporting/mpc07/online/controller.py": "081543bf375d45508a02827b101c7dacd365a3b784c55ee2a08f1ba40b7b39f8",
+    "benchmarks/reporting/mpc07/online/figures.py": "3e39e19e17977b4a31d428133bd957eb76ddb928e33072e1622fd130feb3e7f8",
+    "benchmarks/reporting/mpc07/online/inputs.py": "a9e1b811ed0c9590f2ce1e051c44c1f40fb3b1303823784705d6f21abf9414e8",
+    "benchmarks/reporting/mpc07/online/profiles.json": "9b41f574206f23f569d7dff63d225a07af191f8eb8010b140a37eeead89bbc59",
+    "benchmarks/reporting/mpc07/policy.py": "203e423d61bdb1a3250296c444fa85992a88ff38933d9c53ac1e3153b87e0b32",
+    "benchmarks/reporting/mpc07/report.py": "e0a151ca5a209461b40d7176038237e430411d46b68f23f779f83cace70f6235",
+    "scripts/reports/stage_mpc07_comparison.py": "a405cea885d9d068b477fe4c48223c88379470fe46f9af821324e3660c8518c0"
+  },
+  "groups": [
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 82484,
+        "median_ns": 62020,
+        "minimum_ns": 61111,
+        "sum_ns": 330074
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 24584,
+        "median_ns": 2444,
+        "minimum_ns": 2374,
+        "sum_ns": 34221
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4750,
+        "median_ns": 4749,
+        "minimum_ns": 4261,
+        "sum_ns": 23118
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 25283,
+        "median_ns": 23956,
+        "minimum_ns": 23817,
+        "sum_ns": 121735
+      },
+      "profile": "fixed-T2-1-adf",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4889,
+        "median_ns": 3318.0,
+        "minimum_ns": 2305,
+        "sum_ns": 34852
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 62229,
+        "median_ns": 61252,
+        "minimum_ns": 59994,
+        "sum_ns": 306537
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2445,
+        "median_ns": 2375,
+        "minimum_ns": 2374,
+        "sum_ns": 12013
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4889,
+        "median_ns": 4679,
+        "minimum_ns": 4400,
+        "sum_ns": 23397
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 24514,
+        "median_ns": 23955,
+        "minimum_ns": 23746,
+        "sum_ns": 120405
+      },
+      "profile": "fixed-T2-1-adf",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4819,
+        "median_ns": 3282.5,
+        "minimum_ns": 2375,
+        "sum_ns": 35410
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 76826,
+        "median_ns": 61111,
+        "minimum_ns": 58248,
+        "sum_ns": 317919
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2375,
+        "median_ns": 2374,
+        "minimum_ns": 1886,
+        "sum_ns": 11384
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4889,
+        "median_ns": 4749,
+        "minimum_ns": 4331,
+        "sum_ns": 23398
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 39601,
+        "median_ns": 24166,
+        "minimum_ns": 23816,
+        "sum_ns": 135914
+      },
+      "profile": "fixed-T2-1-fixed-gain",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4819,
+        "median_ns": 3282.5,
+        "minimum_ns": 2304,
+        "sum_ns": 33456
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 64883,
+        "median_ns": 63836,
+        "minimum_ns": 60204,
+        "sum_ns": 315895
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2445,
+        "median_ns": 2375,
+        "minimum_ns": 1956,
+        "sum_ns": 11596
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4889,
+        "median_ns": 4819,
+        "minimum_ns": 4680,
+        "sum_ns": 23887
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 26679,
+        "median_ns": 25283,
+        "minimum_ns": 24375,
+        "sum_ns": 126554
+      },
+      "profile": "fixed-T2-1-fixed-gain",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4819,
+        "median_ns": 4260.0,
+        "minimum_ns": 2445,
+        "sum_ns": 39950
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 61740,
+        "median_ns": 61461,
+        "minimum_ns": 59785,
+        "sum_ns": 305558
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2375,
+        "median_ns": 2375,
+        "minimum_ns": 1956,
+        "sum_ns": 11455
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4819,
+        "median_ns": 4680,
+        "minimum_ns": 3353,
+        "sum_ns": 22280
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 23816,
+        "median_ns": 23467,
+        "minimum_ns": 23117,
+        "sum_ns": 117335
+      },
+      "profile": "fixed-T2-1-fixed-plan",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4819,
+        "median_ns": 3597.0,
+        "minimum_ns": 2375,
+        "sum_ns": 37855
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 62928,
+        "median_ns": 61042,
+        "minimum_ns": 57760,
+        "sum_ns": 303115
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2445,
+        "median_ns": 2375,
+        "minimum_ns": 2304,
+        "sum_ns": 11942
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4819,
+        "median_ns": 4749,
+        "minimum_ns": 3911,
+        "sum_ns": 22628
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 24235,
+        "median_ns": 23397,
+        "minimum_ns": 23257,
+        "sum_ns": 118242
+      },
+      "profile": "fixed-T2-1-fixed-plan",
+      "query": {
+        "count": 10,
+        "maximum_ns": 5099,
+        "median_ns": 3771.5,
+        "minimum_ns": 1396,
+        "sum_ns": 37085
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 62928,
+        "median_ns": 61880,
+        "minimum_ns": 60902,
+        "sum_ns": 309470
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2444,
+        "median_ns": 2374,
+        "minimum_ns": 2305,
+        "sum_ns": 11872
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4819,
+        "median_ns": 4819,
+        "minimum_ns": 4680,
+        "sum_ns": 23887
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 24864,
+        "median_ns": 23886,
+        "minimum_ns": 23327,
+        "sum_ns": 120477
+      },
+      "profile": "fixed-T2-1-response",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4819,
+        "median_ns": 3562.0,
+        "minimum_ns": 2375,
+        "sum_ns": 36248
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 87023,
+        "median_ns": 61531,
+        "minimum_ns": 60833,
+        "sum_ns": 334753
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2863,
+        "median_ns": 2375,
+        "minimum_ns": 2304,
+        "sum_ns": 12292
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4749,
+        "median_ns": 4680,
+        "minimum_ns": 4400,
+        "sum_ns": 23257
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 26191,
+        "median_ns": 24375,
+        "minimum_ns": 23816,
+        "sum_ns": 124250
+      },
+      "profile": "fixed-T2-1-response",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4889,
+        "median_ns": 3911.0,
+        "minimum_ns": 2375,
+        "sum_ns": 39322
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 62928,
+        "median_ns": 62858,
+        "minimum_ns": 61950,
+        "sum_ns": 312614
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2794,
+        "median_ns": 2374,
+        "minimum_ns": 2305,
+        "sum_ns": 12222
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4889,
+        "median_ns": 4750,
+        "minimum_ns": 4749,
+        "sum_ns": 23957
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 24864,
+        "median_ns": 24794,
+        "minimum_ns": 24375,
+        "sum_ns": 123341
+      },
+      "profile": "fixed-T2-5over4-adf",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4750,
+        "median_ns": 3527.0,
+        "minimum_ns": 2374,
+        "sum_ns": 34993
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 66280,
+        "median_ns": 64395,
+        "minimum_ns": 62438,
+        "sum_ns": 320715
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2794,
+        "median_ns": 2375,
+        "minimum_ns": 2305,
+        "sum_ns": 12293
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4889,
+        "median_ns": 4819,
+        "minimum_ns": 4330,
+        "sum_ns": 23606
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 27169,
+        "median_ns": 25562,
+        "minimum_ns": 24794,
+        "sum_ns": 128999
+      },
+      "profile": "fixed-T2-5over4-adf",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4819,
+        "median_ns": 3667.0,
+        "minimum_ns": 2374,
+        "sum_ns": 36876
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 83042,
+        "median_ns": 62439,
+        "minimum_ns": 62019,
+        "sum_ns": 333495
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2445,
+        "median_ns": 2444,
+        "minimum_ns": 2374,
+        "sum_ns": 12083
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4819,
+        "median_ns": 4679,
+        "minimum_ns": 4331,
+        "sum_ns": 23257
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 25283,
+        "median_ns": 24794,
+        "minimum_ns": 24305,
+        "sum_ns": 123550
+      },
+      "profile": "fixed-T2-5over4-fixed-gain",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4750,
+        "median_ns": 3561.5,
+        "minimum_ns": 2374,
+        "sum_ns": 34712
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 75639,
+        "median_ns": 62998,
+        "minimum_ns": 60553,
+        "sum_ns": 325046
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 15156,
+        "median_ns": 2375,
+        "minimum_ns": 2375,
+        "sum_ns": 24656
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4819,
+        "median_ns": 4749,
+        "minimum_ns": 4680,
+        "sum_ns": 23678
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 26330,
+        "median_ns": 24793,
+        "minimum_ns": 24375,
+        "sum_ns": 125784
+      },
+      "profile": "fixed-T2-5over4-fixed-gain",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4819,
+        "median_ns": 4085.5,
+        "minimum_ns": 2375,
+        "sum_ns": 38345
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 62858,
+        "median_ns": 61950,
+        "minimum_ns": 59575,
+        "sum_ns": 306048
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2445,
+        "median_ns": 2375,
+        "minimum_ns": 1886,
+        "sum_ns": 11456
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4820,
+        "median_ns": 4680,
+        "minimum_ns": 4261,
+        "sum_ns": 23259
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 24235,
+        "median_ns": 23677,
+        "minimum_ns": 23397,
+        "sum_ns": 118662
+      },
+      "profile": "fixed-T2-5over4-fixed-plan",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4750,
+        "median_ns": 4260.0,
+        "minimum_ns": 2374,
+        "sum_ns": 39184
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 75150,
+        "median_ns": 63696,
+        "minimum_ns": 62438,
+        "sum_ns": 328676
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2863,
+        "median_ns": 2375,
+        "minimum_ns": 2374,
+        "sum_ns": 12361
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4749,
+        "median_ns": 4749,
+        "minimum_ns": 4260,
+        "sum_ns": 22837
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 36946,
+        "median_ns": 24096,
+        "minimum_ns": 23467,
+        "sum_ns": 133469
+      },
+      "profile": "fixed-T2-5over4-fixed-plan",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4889,
+        "median_ns": 3597.0,
+        "minimum_ns": 2374,
+        "sum_ns": 38623
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 63696,
+        "median_ns": 62020,
+        "minimum_ns": 61880,
+        "sum_ns": 312473
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2444,
+        "median_ns": 2375,
+        "minimum_ns": 2374,
+        "sum_ns": 12012
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4749,
+        "median_ns": 4679,
+        "minimum_ns": 4260,
+        "sum_ns": 23116
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 25213,
+        "median_ns": 24864,
+        "minimum_ns": 24236,
+        "sum_ns": 124320
+      },
+      "profile": "fixed-T2-5over4-response",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4819,
+        "median_ns": 3597.0,
+        "minimum_ns": 2374,
+        "sum_ns": 35900
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 66280,
+        "median_ns": 63765,
+        "minimum_ns": 61670,
+        "sum_ns": 319945
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2375,
+        "median_ns": 2374,
+        "minimum_ns": 2374,
+        "sum_ns": 11872
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4749,
+        "median_ns": 4749,
+        "minimum_ns": 4679,
+        "sum_ns": 23675
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 26750,
+        "median_ns": 24794,
+        "minimum_ns": 24235,
+        "sum_ns": 127183
+      },
+      "profile": "fixed-T2-5over4-response",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4819,
+        "median_ns": 3387.5,
+        "minimum_ns": 2375,
+        "sum_ns": 36598
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 176421,
+        "median_ns": 128090,
+        "minimum_ns": 126763,
+        "sum_ns": 687245
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 4750,
+        "median_ns": 2375,
+        "minimum_ns": 2374,
+        "sum_ns": 14248
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4819,
+        "median_ns": 2793,
+        "minimum_ns": 2374,
+        "sum_ns": 50426
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 101690,
+        "median_ns": 59086,
+        "minimum_ns": 58179,
+        "sum_ns": 336289
+      },
+      "profile": "fixed-T4-1-adf",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4749,
+        "median_ns": 3422.0,
+        "minimum_ns": 2374,
+        "sum_ns": 70187
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 144922,
+        "median_ns": 130674,
+        "minimum_ns": 129836,
+        "sum_ns": 666012
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2863,
+        "median_ns": 2445,
+        "minimum_ns": 2374,
+        "sum_ns": 12920
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 5099,
+        "median_ns": 2794,
+        "minimum_ns": 2374,
+        "sum_ns": 51264
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 61041,
+        "median_ns": 60134,
+        "minimum_ns": 58038,
+        "sum_ns": 298992
+      },
+      "profile": "fixed-T4-1-adf",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4750,
+        "median_ns": 3701.5,
+        "minimum_ns": 2794,
+        "sum_ns": 75638
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 141989,
+        "median_ns": 127392,
+        "minimum_ns": 126903,
+        "sum_ns": 651487
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2375,
+        "median_ns": 2374,
+        "minimum_ns": 2374,
+        "sum_ns": 11872
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4819,
+        "median_ns": 2864,
+        "minimum_ns": 2305,
+        "sum_ns": 53221
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 72007,
+        "median_ns": 59226,
+        "minimum_ns": 58597,
+        "sum_ns": 308003
+      },
+      "profile": "fixed-T4-1-fixed-gain",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4679,
+        "median_ns": 3352.5,
+        "minimum_ns": 2305,
+        "sum_ns": 65163
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 151627,
+        "median_ns": 131652,
+        "minimum_ns": 124808,
+        "sum_ns": 678655
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 3842,
+        "median_ns": 2444,
+        "minimum_ns": 2375,
+        "sum_ns": 13830
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4819,
+        "median_ns": 2793,
+        "minimum_ns": 2304,
+        "sum_ns": 50214
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 77664,
+        "median_ns": 61321,
+        "minimum_ns": 58039,
+        "sum_ns": 328746
+      },
+      "profile": "fixed-T4-1-fixed-gain",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4819,
+        "median_ns": 3562.5,
+        "minimum_ns": 2445,
+        "sum_ns": 72356
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 169506,
+        "median_ns": 127811,
+        "minimum_ns": 125646,
+        "sum_ns": 699676
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 3353,
+        "median_ns": 2445,
+        "minimum_ns": 2375,
+        "sum_ns": 13482
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4819,
+        "median_ns": 4260,
+        "minimum_ns": 2374,
+        "sum_ns": 55106
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 96452,
+        "median_ns": 58109,
+        "minimum_ns": 56921,
+        "sum_ns": 329026
+      },
+      "profile": "fixed-T4-1-fixed-plan",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4819,
+        "median_ns": 3771.5,
+        "minimum_ns": 2444,
+        "sum_ns": 77174
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 131512,
+        "median_ns": 127880,
+        "minimum_ns": 127182,
+        "sum_ns": 641846
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2445,
+        "median_ns": 2444,
+        "minimum_ns": 2374,
+        "sum_ns": 12082
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4819,
+        "median_ns": 2794,
+        "minimum_ns": 2375,
+        "sum_ns": 49102
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 59087,
+        "median_ns": 57899,
+        "minimum_ns": 56852,
+        "sum_ns": 289148
+      },
+      "profile": "fixed-T4-1-fixed-plan",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4820,
+        "median_ns": 3736.5,
+        "minimum_ns": 3282,
+        "sum_ns": 77595
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 127881,
+        "median_ns": 127601,
+        "minimum_ns": 125576,
+        "sum_ns": 636051
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2863,
+        "median_ns": 2375,
+        "minimum_ns": 2374,
+        "sum_ns": 12431
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4819,
+        "median_ns": 2794,
+        "minimum_ns": 2374,
+        "sum_ns": 48820
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 59156,
+        "median_ns": 58667,
+        "minimum_ns": 57410,
+        "sum_ns": 292568
+      },
+      "profile": "fixed-T4-1-response",
+      "query": {
+        "count": 20,
+        "maximum_ns": 3911,
+        "median_ns": 3353.0,
+        "minimum_ns": 2305,
+        "sum_ns": 65301
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 144294,
+        "median_ns": 129766,
+        "minimum_ns": 125017,
+        "sum_ns": 658679
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2375,
+        "median_ns": 2374,
+        "minimum_ns": 2304,
+        "sum_ns": 11802
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4750,
+        "median_ns": 2863,
+        "minimum_ns": 2305,
+        "sum_ns": 50633
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 60902,
+        "median_ns": 59016,
+        "minimum_ns": 57759,
+        "sum_ns": 296059
+      },
+      "profile": "fixed-T4-1-response",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4819,
+        "median_ns": 3562.0,
+        "minimum_ns": 2374,
+        "sum_ns": 74522
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 143664,
+        "median_ns": 132001,
+        "minimum_ns": 129627,
+        "sum_ns": 668735
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2794,
+        "median_ns": 2444,
+        "minimum_ns": 2375,
+        "sum_ns": 12502
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4889,
+        "median_ns": 4330,
+        "minimum_ns": 2375,
+        "sum_ns": 55037
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 73893,
+        "median_ns": 60553,
+        "minimum_ns": 60064,
+        "sum_ns": 316034
+      },
+      "profile": "fixed-T4-5over4-adf",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4750,
+        "median_ns": 3772.0,
+        "minimum_ns": 2793,
+        "sum_ns": 75847
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 164687,
+        "median_ns": 133468,
+        "minimum_ns": 131513,
+        "sum_ns": 706801
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 4331,
+        "median_ns": 2375,
+        "minimum_ns": 2374,
+        "sum_ns": 13899
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4750,
+        "median_ns": 2794,
+        "minimum_ns": 2235,
+        "sum_ns": 50566
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 84369,
+        "median_ns": 61530,
+        "minimum_ns": 60762,
+        "sum_ns": 341945
+      },
+      "profile": "fixed-T4-5over4-adf",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4888,
+        "median_ns": 3422.0,
+        "minimum_ns": 2375,
+        "sum_ns": 75706
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 153722,
+        "median_ns": 133747,
+        "minimum_ns": 131443,
+        "sum_ns": 698140
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2794,
+        "median_ns": 2375,
+        "minimum_ns": 2374,
+        "sum_ns": 12293
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4819,
+        "median_ns": 2793,
+        "minimum_ns": 2374,
+        "sum_ns": 47977
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 75429,
+        "median_ns": 62369,
+        "minimum_ns": 61740,
+        "sum_ns": 324973
+      },
+      "profile": "fixed-T4-5over4-fixed-gain",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4819,
+        "median_ns": 3771.0,
+        "minimum_ns": 2444,
+        "sum_ns": 74730
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 140522,
+        "median_ns": 134306,
+        "minimum_ns": 131163,
+        "sum_ns": 676488
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2933,
+        "median_ns": 2444,
+        "minimum_ns": 2305,
+        "sum_ns": 12500
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4750,
+        "median_ns": 2794,
+        "minimum_ns": 2374,
+        "sum_ns": 50846
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 66210,
+        "median_ns": 62927,
+        "minimum_ns": 62229,
+        "sum_ns": 318200
+      },
+      "profile": "fixed-T4-5over4-fixed-gain",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4819,
+        "median_ns": 3771.5,
+        "minimum_ns": 2933,
+        "sum_ns": 77521
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 146807,
+        "median_ns": 129207,
+        "minimum_ns": 128579,
+        "sum_ns": 663707
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2444,
+        "median_ns": 2375,
+        "minimum_ns": 2374,
+        "sum_ns": 11943
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4889,
+        "median_ns": 2864,
+        "minimum_ns": 2305,
+        "sum_ns": 54269
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 75499,
+        "median_ns": 58178,
+        "minimum_ns": 57479,
+        "sum_ns": 307513
+      },
+      "profile": "fixed-T4-5over4-fixed-plan",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4889,
+        "median_ns": 3772.0,
+        "minimum_ns": 2374,
+        "sum_ns": 77804
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 134446,
+        "median_ns": 130744,
+        "minimum_ns": 126903,
+        "sum_ns": 652185
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2864,
+        "median_ns": 2375,
+        "minimum_ns": 2375,
+        "sum_ns": 12434
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4819,
+        "median_ns": 2934,
+        "minimum_ns": 2305,
+        "sum_ns": 54755
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 60065,
+        "median_ns": 59226,
+        "minimum_ns": 55734,
+        "sum_ns": 292219
+      },
+      "profile": "fixed-T4-5over4-fixed-plan",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4819,
+        "median_ns": 3841.0,
+        "minimum_ns": 2374,
+        "sum_ns": 77943
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 153093,
+        "median_ns": 132141,
+        "minimum_ns": 129766,
+        "sum_ns": 679212
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2375,
+        "median_ns": 2375,
+        "minimum_ns": 2305,
+        "sum_ns": 11804
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4819,
+        "median_ns": 2863,
+        "minimum_ns": 2304,
+        "sum_ns": 53009
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 61950,
+        "median_ns": 60553,
+        "minimum_ns": 59645,
+        "sum_ns": 303742
+      },
+      "profile": "fixed-T4-5over4-response",
+      "query": {
+        "count": 20,
+        "maximum_ns": 24724,
+        "median_ns": 3771.5,
+        "minimum_ns": 2375,
+        "sum_ns": 97778
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 136052,
+        "median_ns": 132979,
+        "minimum_ns": 130534,
+        "sum_ns": 668596
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2793,
+        "median_ns": 2375,
+        "minimum_ns": 1886,
+        "sum_ns": 11873
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4750,
+        "median_ns": 2864,
+        "minimum_ns": 2305,
+        "sum_ns": 48402
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 63417,
+        "median_ns": 61531,
+        "minimum_ns": 60623,
+        "sum_ns": 308632
+      },
+      "profile": "fixed-T4-5over4-response",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4819,
+        "median_ns": 3422.5,
+        "minimum_ns": 3212,
+        "sum_ns": 76198
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 304301,
+        "median_ns": 301996,
+        "minimum_ns": 300390,
+        "sum_ns": 1510051
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2445,
+        "median_ns": 2375,
+        "minimum_ns": 2375,
+        "sum_ns": 12015
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 4819,
+        "median_ns": 2444,
+        "minimum_ns": 2374,
+        "sum_ns": 103083
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 170484,
+        "median_ns": 167970,
+        "minimum_ns": 166852,
+        "sum_ns": 840757
+      },
+      "profile": "fixed-T8-1-adf",
+      "query": {
+        "count": 40,
+        "maximum_ns": 4889,
+        "median_ns": 3422.0,
+        "minimum_ns": 2375,
+        "sum_ns": 143174
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 323159,
+        "median_ns": 306327,
+        "minimum_ns": 295920,
+        "sum_ns": 1545253
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 3842,
+        "median_ns": 2444,
+        "minimum_ns": 2305,
+        "sum_ns": 14738
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 4889,
+        "median_ns": 2444,
+        "minimum_ns": 2305,
+        "sum_ns": 105390
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 187945,
+        "median_ns": 168668,
+        "minimum_ns": 164268,
+        "sum_ns": 858496
+      },
+      "profile": "fixed-T8-1-adf",
+      "query": {
+        "count": 40,
+        "maximum_ns": 16343,
+        "median_ns": 3736.5,
+        "minimum_ns": 2794,
+        "sum_ns": 162037
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 324555,
+        "median_ns": 314079,
+        "minimum_ns": 298085,
+        "sum_ns": 1556566
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2864,
+        "median_ns": 2375,
+        "minimum_ns": 2374,
+        "sum_ns": 12851
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 18508,
+        "median_ns": 2444,
+        "minimum_ns": 2305,
+        "sum_ns": 122850
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 188992,
+        "median_ns": 168878,
+        "minimum_ns": 164059,
+        "sum_ns": 857379
+      },
+      "profile": "fixed-T8-1-fixed-gain",
+      "query": {
+        "count": 40,
+        "maximum_ns": 4819,
+        "median_ns": 3771.0,
+        "minimum_ns": 1885,
+        "sum_ns": 148973
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 320016,
+        "median_ns": 303324,
+        "minimum_ns": 298225,
+        "sum_ns": 1530516
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 3771,
+        "median_ns": 2375,
+        "minimum_ns": 2305,
+        "sum_ns": 13619
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 4889,
+        "median_ns": 2445,
+        "minimum_ns": 2304,
+        "sum_ns": 108116
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 183405,
+        "median_ns": 169226,
+        "minimum_ns": 166572,
+        "sum_ns": 857936
+      },
+      "profile": "fixed-T8-1-fixed-gain",
+      "query": {
+        "count": 40,
+        "maximum_ns": 4820,
+        "median_ns": 3771.0,
+        "minimum_ns": 2794,
+        "sum_ns": 151135
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 321064,
+        "median_ns": 300879,
+        "minimum_ns": 294873,
+        "sum_ns": 1525139
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2375,
+        "median_ns": 2374,
+        "minimum_ns": 2305,
+        "sum_ns": 11734
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 4819,
+        "median_ns": 2375,
+        "minimum_ns": 2304,
+        "sum_ns": 104203
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 186618,
+        "median_ns": 165386,
+        "minimum_ns": 163220,
+        "sum_ns": 845228
+      },
+      "profile": "fixed-T8-1-fixed-plan",
+      "query": {
+        "count": 40,
+        "maximum_ns": 4820,
+        "median_ns": 3772.0,
+        "minimum_ns": 2445,
+        "sum_ns": 152745
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 316593,
+        "median_ns": 304231,
+        "minimum_ns": 299971,
+        "sum_ns": 1537150
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 4819,
+        "median_ns": 2445,
+        "minimum_ns": 2374,
+        "sum_ns": 14877
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 4819,
+        "median_ns": 2375,
+        "minimum_ns": 2305,
+        "sum_ns": 106302
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 166084,
+        "median_ns": 165735,
+        "minimum_ns": 164618,
+        "sum_ns": 827627
+      },
+      "profile": "fixed-T8-1-fixed-plan",
+      "query": {
+        "count": 40,
+        "maximum_ns": 4819,
+        "median_ns": 3772.0,
+        "minimum_ns": 3212,
+        "sum_ns": 153934
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 332168,
+        "median_ns": 306815,
+        "minimum_ns": 299622,
+        "sum_ns": 1556217
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 4749,
+        "median_ns": 3771,
+        "minimum_ns": 2374,
+        "sum_ns": 17109
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 6565,
+        "median_ns": 2445,
+        "minimum_ns": 1956,
+        "sum_ns": 112657
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 183126,
+        "median_ns": 169017,
+        "minimum_ns": 166014,
+        "sum_ns": 866389
+      },
+      "profile": "fixed-T8-1-response",
+      "query": {
+        "count": 40,
+        "maximum_ns": 6286,
+        "median_ns": 3771.5,
+        "minimum_ns": 2864,
+        "sum_ns": 157634
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 326372,
+        "median_ns": 317781,
+        "minimum_ns": 301787,
+        "sum_ns": 1572910
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2794,
+        "median_ns": 2444,
+        "minimum_ns": 2305,
+        "sum_ns": 12362
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 5308,
+        "median_ns": 2793,
+        "minimum_ns": 2304,
+        "sum_ns": 116360
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 172300,
+        "median_ns": 170275,
+        "minimum_ns": 166852,
+        "sum_ns": 848091
+      },
+      "profile": "fixed-T8-1-response",
+      "query": {
+        "count": 40,
+        "maximum_ns": 16133,
+        "median_ns": 3806.5,
+        "minimum_ns": 3282,
+        "sum_ns": 169856
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 360315,
+        "median_ns": 310587,
+        "minimum_ns": 305348,
+        "sum_ns": 1615094
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 3771,
+        "median_ns": 2445,
+        "minimum_ns": 2375,
+        "sum_ns": 13760
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 4819,
+        "median_ns": 2863,
+        "minimum_ns": 2304,
+        "sum_ns": 117748
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 222167,
+        "median_ns": 173488,
+        "minimum_ns": 170904,
+        "sum_ns": 931833
+      },
+      "profile": "fixed-T8-5over4-adf",
+      "query": {
+        "count": 40,
+        "maximum_ns": 4889,
+        "median_ns": 3841.0,
+        "minimum_ns": 3282,
+        "sum_ns": 159099
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 330701,
+        "median_ns": 314359,
+        "minimum_ns": 309330,
+        "sum_ns": 1596028
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 3842,
+        "median_ns": 2444,
+        "minimum_ns": 2374,
+        "sum_ns": 13479
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 24305,
+        "median_ns": 2863,
+        "minimum_ns": 2305,
+        "sum_ns": 140381
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 189202,
+        "median_ns": 174186,
+        "minimum_ns": 172370,
+        "sum_ns": 885735
+      },
+      "profile": "fixed-T8-5over4-adf",
+      "query": {
+        "count": 40,
+        "maximum_ns": 4819,
+        "median_ns": 3841.0,
+        "minimum_ns": 3282,
+        "sum_ns": 158747
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 349350,
+        "median_ns": 338314,
+        "minimum_ns": 319108,
+        "sum_ns": 1684169
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 3911,
+        "median_ns": 2375,
+        "minimum_ns": 2374,
+        "sum_ns": 13967
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 4819,
+        "median_ns": 2863,
+        "minimum_ns": 2305,
+        "sum_ns": 115171
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 213297,
+        "median_ns": 184313,
+        "minimum_ns": 180890,
+        "sum_ns": 962560
+      },
+      "profile": "fixed-T8-5over4-fixed-gain",
+      "query": {
+        "count": 40,
+        "maximum_ns": 24585,
+        "median_ns": 3771.0,
+        "minimum_ns": 3213,
+        "sum_ns": 178516
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 369743,
+        "median_ns": 320574,
+        "minimum_ns": 318199,
+        "sum_ns": 1664332
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 3423,
+        "median_ns": 2374,
+        "minimum_ns": 2304,
+        "sum_ns": 12919
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 4819,
+        "median_ns": 2794,
+        "minimum_ns": 2305,
+        "sum_ns": 113979
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 230339,
+        "median_ns": 183824,
+        "minimum_ns": 181170,
+        "sum_ns": 977857
+      },
+      "profile": "fixed-T8-5over4-fixed-gain",
+      "query": {
+        "count": 40,
+        "maximum_ns": 4889,
+        "median_ns": 3841.0,
+        "minimum_ns": 3283,
+        "sum_ns": 160426
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 330143,
+        "median_ns": 306117,
+        "minimum_ns": 300949,
+        "sum_ns": 1564738
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2864,
+        "median_ns": 2444,
+        "minimum_ns": 1886,
+        "sum_ns": 12362
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 23746,
+        "median_ns": 2864,
+        "minimum_ns": 2374,
+        "sum_ns": 142757
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 171881,
+        "median_ns": 168319,
+        "minimum_ns": 164617,
+        "sum_ns": 841455
+      },
+      "profile": "fixed-T8-5over4-fixed-plan",
+      "query": {
+        "count": 40,
+        "maximum_ns": 24305,
+        "median_ns": 3841.5,
+        "minimum_ns": 3213,
+        "sum_ns": 182153
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 322180,
+        "median_ns": 308631,
+        "minimum_ns": 303812,
+        "sum_ns": 1550278
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2794,
+        "median_ns": 2375,
+        "minimum_ns": 2374,
+        "sum_ns": 12362
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 4820,
+        "median_ns": 2794,
+        "minimum_ns": 2305,
+        "sum_ns": 115798
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 184942,
+        "median_ns": 169856,
+        "minimum_ns": 166154,
+        "sum_ns": 861920
+      },
+      "profile": "fixed-T8-5over4-fixed-plan",
+      "query": {
+        "count": 40,
+        "maximum_ns": 4819,
+        "median_ns": 3841.0,
+        "minimum_ns": 3282,
+        "sum_ns": 156937
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 325394,
+        "median_ns": 313521,
+        "minimum_ns": 305908,
+        "sum_ns": 1575844
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2864,
+        "median_ns": 2444,
+        "minimum_ns": 2374,
+        "sum_ns": 12502
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 4819,
+        "median_ns": 2444,
+        "minimum_ns": 2235,
+        "sum_ns": 112585
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 187944,
+        "median_ns": 174465,
+        "minimum_ns": 169646,
+        "sum_ns": 880915
+      },
+      "profile": "fixed-T8-5over4-response",
+      "query": {
+        "count": 40,
+        "maximum_ns": 18647,
+        "median_ns": 3772.0,
+        "minimum_ns": 2863,
+        "sum_ns": 171109
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 326441,
+        "median_ns": 314498,
+        "minimum_ns": 305210,
+        "sum_ns": 1577798
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2864,
+        "median_ns": 2444,
+        "minimum_ns": 1466,
+        "sum_ns": 11594
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 4820,
+        "median_ns": 2794,
+        "minimum_ns": 1467,
+        "sum_ns": 112865
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 189760,
+        "median_ns": 174396,
+        "minimum_ns": 170415,
+        "sum_ns": 883781
+      },
+      "profile": "fixed-T8-5over4-response",
+      "query": {
+        "count": 40,
+        "maximum_ns": 4819,
+        "median_ns": 3772.0,
+        "minimum_ns": 2794,
+        "sum_ns": 157213
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 93030,
+        "median_ns": 90515,
+        "minimum_ns": 87721,
+        "sum_ns": 450899
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2863,
+        "median_ns": 2374,
+        "minimum_ns": 2305,
+        "sum_ns": 12291
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 5169,
+        "median_ns": 4750,
+        "minimum_ns": 4679,
+        "sum_ns": 24166
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 53359,
+        "median_ns": 50985,
+        "minimum_ns": 48750,
+        "sum_ns": 254993
+      },
+      "profile": "joint-T2-fixed5over4-fixed-filter",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4819,
+        "median_ns": 4086.0,
+        "minimum_ns": 3423,
+        "sum_ns": 41766
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 90515,
+        "median_ns": 89608,
+        "minimum_ns": 80876,
+        "sum_ns": 439724
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2444,
+        "median_ns": 2374,
+        "minimum_ns": 1466,
+        "sum_ns": 10963
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4819,
+        "median_ns": 4749,
+        "minimum_ns": 4400,
+        "sum_ns": 23396
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 50984,
+        "median_ns": 50147,
+        "minimum_ns": 47772,
+        "sum_ns": 249265
+      },
+      "profile": "joint-T2-fixed5over4-fixed-filter",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4749,
+        "median_ns": 4260.0,
+        "minimum_ns": 1886,
+        "sum_ns": 40647
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 91632,
+        "median_ns": 89607,
+        "minimum_ns": 88560,
+        "sum_ns": 449362
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2864,
+        "median_ns": 2375,
+        "minimum_ns": 2375,
+        "sum_ns": 12434
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4820,
+        "median_ns": 4609,
+        "minimum_ns": 4400,
+        "sum_ns": 23048
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 52521,
+        "median_ns": 50566,
+        "minimum_ns": 50356,
+        "sum_ns": 254714
+      },
+      "profile": "joint-T2-optimized-diagonal-fixed-gain",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4819,
+        "median_ns": 4225.5,
+        "minimum_ns": 3283,
+        "sum_ns": 41138
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 104274,
+        "median_ns": 89537,
+        "minimum_ns": 84089,
+        "sum_ns": 456835
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2444,
+        "median_ns": 2375,
+        "minimum_ns": 1397,
+        "sum_ns": 10966
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 16971,
+        "median_ns": 4749,
+        "minimum_ns": 3771,
+        "sum_ns": 35060
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 51822,
+        "median_ns": 50147,
+        "minimum_ns": 46654,
+        "sum_ns": 249544
+      },
+      "profile": "joint-T2-optimized-diagonal-fixed-gain",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4889,
+        "median_ns": 4679.5,
+        "minimum_ns": 3283,
+        "sum_ns": 43232
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 102667,
+        "median_ns": 89049,
+        "minimum_ns": 86674,
+        "sum_ns": 456347
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2444,
+        "median_ns": 2444,
+        "minimum_ns": 2375,
+        "sum_ns": 12082
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4750,
+        "median_ns": 4749,
+        "minimum_ns": 4331,
+        "sum_ns": 23259
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 62928,
+        "median_ns": 50007,
+        "minimum_ns": 49029,
+        "sum_ns": 262187
+      },
+      "profile": "joint-T2-optimized-diagonal-fixed-plan",
+      "query": {
+        "count": 10,
+        "maximum_ns": 5098,
+        "median_ns": 4714.5,
+        "minimum_ns": 3282,
+        "sum_ns": 43581
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 92261,
+        "median_ns": 89048,
+        "minimum_ns": 87791,
+        "sum_ns": 448106
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2444,
+        "median_ns": 2375,
+        "minimum_ns": 2305,
+        "sum_ns": 11873
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4819,
+        "median_ns": 4749,
+        "minimum_ns": 4400,
+        "sum_ns": 23467
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 50216,
+        "median_ns": 49937,
+        "minimum_ns": 48749,
+        "sum_ns": 248357
+      },
+      "profile": "joint-T2-optimized-diagonal-fixed-plan",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4819,
+        "median_ns": 4086.0,
+        "minimum_ns": 3422,
+        "sum_ns": 41973
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 150859,
+        "median_ns": 90166,
+        "minimum_ns": 88699,
+        "sum_ns": 510824
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 3353,
+        "median_ns": 2444,
+        "minimum_ns": 2374,
+        "sum_ns": 13340
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4819,
+        "median_ns": 4679,
+        "minimum_ns": 4261,
+        "sum_ns": 22908
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 110420,
+        "median_ns": 51054,
+        "minimum_ns": 49657,
+        "sum_ns": 313170
+      },
+      "profile": "joint-T2-optimized-diagonal-joint",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4819,
+        "median_ns": 4295.5,
+        "minimum_ns": 3771,
+        "sum_ns": 42814
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 104343,
+        "median_ns": 91563,
+        "minimum_ns": 89258,
+        "sum_ns": 469268
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2445,
+        "median_ns": 2375,
+        "minimum_ns": 2374,
+        "sum_ns": 12012
+      },
+      "past_residual_update": {
+        "count": 5,
+        "maximum_ns": 4889,
+        "median_ns": 4750,
+        "minimum_ns": 4680,
+        "sum_ns": 23887
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 52661,
+        "median_ns": 50147,
+        "minimum_ns": 49587,
+        "sum_ns": 254992
+      },
+      "profile": "joint-T2-optimized-diagonal-joint",
+      "query": {
+        "count": 10,
+        "maximum_ns": 4819,
+        "median_ns": 4086.0,
+        "minimum_ns": 3282,
+        "sum_ns": 41277
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 192065,
+        "median_ns": 191647,
+        "minimum_ns": 188503,
+        "sum_ns": 955297
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2794,
+        "median_ns": 2375,
+        "minimum_ns": 2305,
+        "sum_ns": 12223
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4889,
+        "median_ns": 4749,
+        "minimum_ns": 4260,
+        "sum_ns": 70959
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 119639,
+        "median_ns": 117614,
+        "minimum_ns": 115659,
+        "sum_ns": 588000
+      },
+      "profile": "joint-T4-fixed5over4-fixed-filter",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4819,
+        "median_ns": 4680.0,
+        "minimum_ns": 3352,
+        "sum_ns": 89258
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 231945,
+        "median_ns": 194928,
+        "minimum_ns": 191577,
+        "sum_ns": 1021298
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 3772,
+        "median_ns": 2445,
+        "minimum_ns": 2375,
+        "sum_ns": 13412
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4889,
+        "median_ns": 4749,
+        "minimum_ns": 4609,
+        "sum_ns": 71170
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 156796,
+        "median_ns": 121386,
+        "minimum_ns": 117544,
+        "sum_ns": 649741
+      },
+      "profile": "joint-T4-fixed5over4-fixed-filter",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4889,
+        "median_ns": 4714.5,
+        "minimum_ns": 3422,
+        "sum_ns": 90097
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 226987,
+        "median_ns": 195628,
+        "minimum_ns": 190668,
+        "sum_ns": 1018575
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 17111,
+        "median_ns": 2445,
+        "minimum_ns": 2375,
+        "sum_ns": 27240
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4819,
+        "median_ns": 4749,
+        "minimum_ns": 4260,
+        "sum_ns": 70401
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 153582,
+        "median_ns": 122991,
+        "minimum_ns": 118731,
+        "sum_ns": 640520
+      },
+      "profile": "joint-T4-optimized-diagonal-fixed-gain",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4889,
+        "median_ns": 4679.5,
+        "minimum_ns": 3771,
+        "sum_ns": 89749
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 241513,
+        "median_ns": 194231,
+        "minimum_ns": 194091,
+        "sum_ns": 1022207
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 3283,
+        "median_ns": 2864,
+        "minimum_ns": 2305,
+        "sum_ns": 14109
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4889,
+        "median_ns": 4749,
+        "minimum_ns": 4330,
+        "sum_ns": 69983
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 152116,
+        "median_ns": 121246,
+        "minimum_ns": 120896,
+        "sum_ns": 639332
+      },
+      "profile": "joint-T4-optimized-diagonal-fixed-gain",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4889,
+        "median_ns": 4749.0,
+        "minimum_ns": 3702,
+        "sum_ns": 89751
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 218605,
+        "median_ns": 189690,
+        "minimum_ns": 187805,
+        "sum_ns": 975481
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 4889,
+        "median_ns": 2375,
+        "minimum_ns": 2374,
+        "sum_ns": 14456
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4889,
+        "median_ns": 4749,
+        "minimum_ns": 4330,
+        "sum_ns": 70330
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 136541,
+        "median_ns": 117334,
+        "minimum_ns": 114401,
+        "sum_ns": 602038
+      },
+      "profile": "joint-T4-optimized-diagonal-fixed-plan",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4889,
+        "median_ns": 4679.5,
+        "minimum_ns": 3352,
+        "sum_ns": 89605
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 210713,
+        "median_ns": 190040,
+        "minimum_ns": 186338,
+        "sum_ns": 969126
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2864,
+        "median_ns": 2375,
+        "minimum_ns": 2375,
+        "sum_ns": 12364
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4889,
+        "median_ns": 4749,
+        "minimum_ns": 4260,
+        "sum_ns": 70054
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 135075,
+        "median_ns": 118033,
+        "minimum_ns": 113423,
+        "sum_ns": 601620
+      },
+      "profile": "joint-T4-optimized-diagonal-fixed-plan",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4889,
+        "median_ns": 4714.0,
+        "minimum_ns": 3772,
+        "sum_ns": 89960
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 210434,
+        "median_ns": 193043,
+        "minimum_ns": 190319,
+        "sum_ns": 994689
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 3841,
+        "median_ns": 2794,
+        "minimum_ns": 2444,
+        "sum_ns": 15364
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4889,
+        "median_ns": 4680,
+        "minimum_ns": 3353,
+        "sum_ns": 69216
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 137728,
+        "median_ns": 120197,
+        "minimum_ns": 117754,
+        "sum_ns": 631300
+      },
+      "profile": "joint-T4-optimized-diagonal-joint",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4889,
+        "median_ns": 4470.0,
+        "minimum_ns": 2375,
+        "sum_ns": 84299
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 200865,
+        "median_ns": 191716,
+        "minimum_ns": 189901,
+        "sum_ns": 971083
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 3772,
+        "median_ns": 2374,
+        "minimum_ns": 2305,
+        "sum_ns": 13131
+      },
+      "past_residual_update": {
+        "count": 15,
+        "maximum_ns": 4819,
+        "median_ns": 4750,
+        "minimum_ns": 4330,
+        "sum_ns": 70192
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 123131,
+        "median_ns": 118731,
+        "minimum_ns": 116636,
+        "sum_ns": 596450
+      },
+      "profile": "joint-T4-optimized-diagonal-joint",
+      "query": {
+        "count": 20,
+        "maximum_ns": 4819,
+        "median_ns": 4749.0,
+        "minimum_ns": 3283,
+        "sum_ns": 89397
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 572076,
+        "median_ns": 502932,
+        "minimum_ns": 489522,
+        "sum_ns": 2575911
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2934,
+        "median_ns": 2863,
+        "minimum_ns": 2305,
+        "sum_ns": 13340
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 5168,
+        "median_ns": 4749,
+        "minimum_ns": 4260,
+        "sum_ns": 164407
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 427921,
+        "median_ns": 362339,
+        "minimum_ns": 349000,
+        "sum_ns": 1856117
+      },
+      "profile": "joint-T8-fixed5over4-fixed-filter",
+      "query": {
+        "count": 40,
+        "maximum_ns": 8521,
+        "median_ns": 4714.5,
+        "minimum_ns": 3772,
+        "sum_ns": 188020
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 514735,
+        "median_ns": 498392,
+        "minimum_ns": 490290,
+        "sum_ns": 2507324
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 3771,
+        "median_ns": 2375,
+        "minimum_ns": 2305,
+        "sum_ns": 13201
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 4889,
+        "median_ns": 4749,
+        "minimum_ns": 4260,
+        "sum_ns": 163989
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 363527,
+        "median_ns": 351585,
+        "minimum_ns": 344600,
+        "sum_ns": 1764696
+      },
+      "profile": "joint-T8-fixed5over4-fixed-filter",
+      "query": {
+        "count": 40,
+        "maximum_ns": 4888,
+        "median_ns": 4749.0,
+        "minimum_ns": 3423,
+        "sum_ns": 182561
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 545256,
+        "median_ns": 525351,
+        "minimum_ns": 519624,
+        "sum_ns": 2646101
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2863,
+        "median_ns": 2375,
+        "minimum_ns": 2305,
+        "sum_ns": 12363
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 4889,
+        "median_ns": 4750,
+        "minimum_ns": 4330,
+        "sum_ns": 165596
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 394886,
+        "median_ns": 384479,
+        "minimum_ns": 379311,
+        "sum_ns": 1923166
+      },
+      "profile": "joint-T8-optimized-diagonal-fixed-gain",
+      "query": {
+        "count": 40,
+        "maximum_ns": 5169,
+        "median_ns": 4749.0,
+        "minimum_ns": 3702,
+        "sum_ns": 185014
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 533033,
+        "median_ns": 523954,
+        "minimum_ns": 515224,
+        "sum_ns": 2621935
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 3841,
+        "median_ns": 2863,
+        "minimum_ns": 2305,
+        "sum_ns": 15224
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 4820,
+        "median_ns": 4749,
+        "minimum_ns": 4400,
+        "sum_ns": 164966
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 391255,
+        "median_ns": 381616,
+        "minimum_ns": 374003,
+        "sum_ns": 1914367
+      },
+      "profile": "joint-T8-optimized-diagonal-fixed-gain",
+      "query": {
+        "count": 40,
+        "maximum_ns": 5098,
+        "median_ns": 4749.0,
+        "minimum_ns": 3701,
+        "sum_ns": 182844
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 504678,
+        "median_ns": 492246,
+        "minimum_ns": 480652,
+        "sum_ns": 2471077
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2933,
+        "median_ns": 2445,
+        "minimum_ns": 2375,
+        "sum_ns": 12922
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 4889,
+        "median_ns": 4749,
+        "minimum_ns": 3352,
+        "sum_ns": 163079
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 366461,
+        "median_ns": 348232,
+        "minimum_ns": 341317,
+        "sum_ns": 1753172
+      },
+      "profile": "joint-T8-optimized-diagonal-fixed-plan",
+      "query": {
+        "count": 40,
+        "maximum_ns": 19137,
+        "median_ns": 4749.0,
+        "minimum_ns": 3772,
+        "sum_ns": 198842
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 515014,
+        "median_ns": 504328,
+        "minimum_ns": 492246,
+        "sum_ns": 2513959
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 2864,
+        "median_ns": 2445,
+        "minimum_ns": 2444,
+        "sum_ns": 12642
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 11943,
+        "median_ns": 4749,
+        "minimum_ns": 4260,
+        "sum_ns": 172441
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 364924,
+        "median_ns": 352562,
+        "minimum_ns": 349698,
+        "sum_ns": 1782784
+      },
+      "profile": "joint-T8-optimized-diagonal-fixed-plan",
+      "query": {
+        "count": 40,
+        "maximum_ns": 5098,
+        "median_ns": 4749.0,
+        "minimum_ns": 3772,
+        "sum_ns": 184804
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 522348,
+        "median_ns": 512570,
+        "minimum_ns": 483096,
+        "sum_ns": 2520945
+      },
+      "family": "positive",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 3283,
+        "median_ns": 2375,
+        "minimum_ns": 1466,
+        "sum_ns": 11454
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 6286,
+        "median_ns": 4749,
+        "minimum_ns": 3353,
+        "sum_ns": 164969
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 370721,
+        "median_ns": 353889,
+        "minimum_ns": 349908,
+        "sum_ns": 1781249
+      },
+      "profile": "joint-T8-optimized-diagonal-joint",
+      "query": {
+        "count": 40,
+        "maximum_ns": 6146,
+        "median_ns": 4749.0,
+        "minimum_ns": 1816,
+        "sum_ns": 175025
+      }
+    },
+    {
+      "attempts": 5,
+      "completed": 5,
+      "episode": {
+        "count": 5,
+        "maximum_ns": 553567,
+        "median_ns": 515293,
+        "minimum_ns": 512919,
+        "sum_ns": 2639674
+      },
+      "family": "alternating",
+      "initial_observation": {
+        "count": 5,
+        "maximum_ns": 4749,
+        "median_ns": 3353,
+        "minimum_ns": 2793,
+        "sum_ns": 17949
+      },
+      "past_residual_update": {
+        "count": 35,
+        "maximum_ns": 4889,
+        "median_ns": 4749,
+        "minimum_ns": 4260,
+        "sum_ns": 163288
+      },
+      "preparation": {
+        "count": 5,
+        "maximum_ns": 407318,
+        "median_ns": 372048,
+        "minimum_ns": 354517,
+        "sum_ns": 1902564
+      },
+      "profile": "joint-T8-optimized-diagonal-joint",
+      "query": {
+        "count": 40,
+        "maximum_ns": 4820,
+        "median_ns": 4680.0,
+        "minimum_ns": 3283,
+        "sum_ns": 182010
+      }
+    }
+  ],
+  "input_files": {
+    "environment.json": "d037ddf02aee96699a6b875572437944d64f2fa87fcb327130102afe014886a2",
+    "inputs.json": "9b41f574206f23f569d7dff63d225a07af191f8eb8010b140a37eeead89bbc59",
+    "measured/process.json": "4cda3b134b4d937b0010882ebcca0ef7837cf3a06e963c49bdd14231a139d62d",
+    "measured/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "measured/stdout.jsonl": "f9d6f0a666244bc5743b7930228e0d63171087fc5c6fee6a684fabe5c9a48810",
+    "profile.pstats": "d37393578342e822ee13607bdf02bd999bc9c6e72bf0196d9a2a33693558a84f",
+    "profile.txt": "17ff8d92a71c77fd6b1c3638daac09e67f96817c9c3f786764a384bf8727cd3f",
+    "profiled/process.json": "b7c78e9099d295920e54694d881b0290fbe346e89721740085d9a91c5f197b87",
+    "profiled/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "profiled/stdout.jsonl": "34664d64b07b217709d74dc6bbf720e7b0fb25a26ea2cad5fe6fa7d94c812d2f",
+    "source/benchmarks/reporting/mpc07/capture.py": "c6206d2f52612f2348396b85112c1b534fc1cbceaf33883c78c038aaab890f61",
+    "source/benchmarks/reporting/mpc07/joint_capture.py": "7476da68861c26c4ad0532b3f65200c6f61f9624c94872252e99554af557787f",
+    "source/benchmarks/reporting/mpc07/joint_filter.py": "7cf5bed6fd31bb51bc91642b1244f2df8ae579129fc2bc3908ca6f928cd630fd",
+    "source/benchmarks/reporting/mpc07/online/capture.py": "9a922969df288a4389d00df2b20d2db9010d76e01fac779914d3a969b8967dc7",
+    "source/benchmarks/reporting/mpc07/online/check.py": "0c2a6d828c41b8aff986f28add984caf003016b34480d610cb725ab404ee149c",
+    "source/benchmarks/reporting/mpc07/online/controller.py": "081543bf375d45508a02827b101c7dacd365a3b784c55ee2a08f1ba40b7b39f8",
+    "source/benchmarks/reporting/mpc07/online/figures.py": "2117a55450f6b6515c0b372e252bb5835c7b9096db0cc630dc873e7e9ddec11d",
+    "source/benchmarks/reporting/mpc07/online/inputs.py": "a9e1b811ed0c9590f2ce1e051c44c1f40fb3b1303823784705d6f21abf9414e8",
+    "source/benchmarks/reporting/mpc07/online/profiles.json": "9b41f574206f23f569d7dff63d225a07af191f8eb8010b140a37eeead89bbc59",
+    "source/benchmarks/reporting/mpc07/policy.py": "203e423d61bdb1a3250296c444fa85992a88ff38933d9c53ac1e3153b87e0b32",
+    "source/benchmarks/reporting/mpc07/report.py": "e0a151ca5a209461b40d7176038237e430411d46b68f23f779f83cace70f6235",
+    "source/scripts/reports/stage_mpc07_comparison.py": "a405cea885d9d068b477fe4c48223c88379470fe46f9af821324e3660c8518c0"
+  },
+  "profiles": 36,
+  "reports": [
+    {
+      "arm": "measured",
+      "episodes": 432,
+      "maximum_absolute_action_state_error": 1.7763568394002505e-15,
+      "outcomes": {
+        "verified-numerical-evaluation": 432
+      },
+      "stages": 2016,
+      "status": "checked"
+    },
+    {
+      "arm": "profiled",
+      "episodes": 432,
+      "maximum_absolute_action_state_error": 1.7763568394002505e-15,
+      "outcomes": {
+        "verified-numerical-evaluation": 432
+      },
+      "stages": 2016,
+      "status": "checked"
+    }
+  ],
+  "scheduled_episodes": 432,
+  "scheduled_stages": 2016,
+  "schema": "csl.mpc07.online-check/1",
+  "scope": "exact stored rational policy/source/bound replay compared to binary64 observations/actions; physical traces are samples, not new robustness proofs",
+  "source_revision": "0524f7e4a2babefab50fd9a724cedda782f2c46f",
+  "status": "checked",
+  "tolerance": {
+    "absolute": 1e-10,
+    "relative": 1e-10
+  },
+  "verdict": "initial configured Python feedback evaluation costs; no comparative winner, real-time bound or LP/MPC-replanning latency"
+}
