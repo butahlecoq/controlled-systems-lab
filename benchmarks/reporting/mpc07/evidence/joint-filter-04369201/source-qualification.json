@@ -1,0 +1,25 @@
+{
+  "paper": "https://arxiv.org/abs/2203.11375v3",
+  "paper_revision_date": "2023-09-26",
+  "equations": [
+    24,
+    26,
+    36,
+    37,
+    38,
+    39
+  ],
+  "author_repository": "https://github.com/ShaoruChen/Polytopic-SLSMPC",
+  "author_commit": "3f6873299ec5d0d2d87630a66486f723788390a4",
+  "author_last_push": "2024-05-03T14:10:44Z",
+  "rechecked": "2026-11-10",
+  "github_license": null,
+  "github_releases": 0,
+  "adoption": "refused: no author-code license grant; no copy/port of that implementation",
+  "author_stack": "MATLAB/YALMIP/MPT3, default MOSEK; not installed or adopted",
+  "independent_implementation": "published scaled-response equations with explicitly restricted diagonal filter and authored terminal-only toy",
+  "implemented_scope": "2 state coordinates, continuous scalar action, full exact states, one uncertain A entry +/-1/64, scalar physical additive disturbance; positive virtual position floor1/1024",
+  "native_provider": "existing optional CSL ConvexPort + HiGHS1.11.0 numerical LP, MIT/bundled-notice qualifications retained",
+  "required_core_dependency_change": false,
+  "release": "no standalone library release; source/report only"
+}

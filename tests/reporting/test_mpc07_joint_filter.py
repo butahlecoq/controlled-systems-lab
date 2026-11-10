@@ -53,3 +53,24 @@ class JointFilterTests(unittest.TestCase):
         self.assertEqual(p['profile']['physical_delta_bound'],'1/64')
 
 if __name__=='__main__':unittest.main()
+
+class JointSavedCaptureTests(unittest.TestCase):
+    def test_renewed_source_or_timeout_metadata_cannot_bless_saved_capture(self):
+        import tempfile,zipfile,json,hashlib
+        import report
+        artifact=ROOT/'benchmarks/reporting/mpc07/evidence/joint-filter-04369201/offline.zip'
+        for mode in ('source','timeout'):
+            with self.subTest(mode=mode),tempfile.TemporaryDirectory() as temporary:
+                with zipfile.ZipFile(artifact) as z:z.extractall(temporary)
+                raw=Path(temporary)/'mpc07-joint-report/RAW'
+                if mode=='source':
+                    target=raw/'source/joint_filter.py';target.write_bytes(target.read_bytes()+b'\n# renewed copied source\n')
+                    env=json.loads((raw/'environment.json').read_text());env['source_sha256']['joint_filter.py']=hashlib.sha256(target.read_bytes()).hexdigest()
+                    (raw/'environment.json').write_text(json.dumps(env));error='recorded Git commit'
+                else:
+                    folder=raw/'attempts/0000';r=json.loads((folder/'receipt.json').read_text());r['timed_out']=True
+                    (folder/'receipt.json').write_text(json.dumps(r));c=json.loads((folder/'check.json').read_text())
+                    c['bindings']['receipt.json']=hashlib.sha256((folder/'receipt.json').read_bytes()).hexdigest()
+                    (folder/'check.json').write_text(json.dumps(c));error='current exact disposition'
+                (raw/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(raw).as_posix()}\n' for p in sorted(raw.rglob('*')) if p.is_file() and p!=raw/'SHA256SUMS'))
+                with self.assertRaisesRegex(ValueError,error):report.checked_records(raw)
