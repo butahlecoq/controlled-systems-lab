@@ -13,9 +13,9 @@ Live issue #603 remains canonical. Its historical no-benchmark sentence was supe
 
 The complete admitted study is the two-state, scalar continuous-action, T2/4/8 authored bounded policy intersection, with one uncertain A entry, additive disturbance and diagonal positive filters. Full non-diagonal filters, uncertain B, other dimensions, terminal backup/recursive feasibility and executed receding-horizon MPC are not supplied or claimed. These are explicit formulation boundaries, not new acceptance gates invented for #603. Preparation/online timing terminology must remain honest about what actually ran.
 
-The publication hook validates four immutable outer manifests, every inner raw checksum, archived source identities and current strict mathematical/process/clock checks before writing. Current helper source is separately identified using the stable last helper-changing commit. Selected authentic Git objects permit the same strong source authentication offline outside a source checkout; missing objects refuse rather than using cached checks. Original archives and corrected sidecars remain unchanged.
+The publication hook preserves the original four-source validator and additionally pins the original online capture plus its corrected aed reading layer: six immutable outer manifests. It validates every inner checksum, authenticates captured and corrected/current helper Git sources, and reruns all218 original outcomes plus864online episodes/4032stages before writing. Stable replay reports/input/timing groups must equal the corrected receipt; current checker-run provenance stays outside immutable publication bytes. Current helper source is separately identified using the stable last helper-changing commit. Selected authentic Git objects permit the same strong source authentication offline outside a source checkout; missing objects refuse rather than using cached checks. Original archives and corrected sidecars remain unchanged.
 
-Root owns shared augmentation/catalogue wiring. Required integration: import stage_mpc07_comparison, call stage(site) once in cumulative staging, require its index/publication manifest/minimal-inputs/offline-check/two figures and ZIP, add returned route to cumulative discovery assertions, and regenerate the visual inventory. Reuse current qualified Python/Git saved-check runner; this hook does not need solver imports, Matplotlib or installs. Preserve existing main-only current-head/freshness and single-publisher gates. No deployment is authorized by a local successful stage alone.
+Root owns shared augmentation/catalogue wiring. Required integration: import stage_mpc07_comparison, call stage(site) once in cumulative staging, require its index/publication manifest/minimal-inputs/offline-check/three figures, online-verification/figure-data/export and ZIP, add returned route to cumulative discovery assertions, and regenerate the visual inventory. Reuse current qualified Python/Git saved-check runner; this hook does not need solver imports, Matplotlib or installs. Preserve existing main-only current-head/freshness and single-publisher gates. No deployment is authorized by a local successful stage alone.
 
 Keep #603 open until independent exact-head publication review, meaningful CI, root acceptance of this six-row bounded scope/explicit timing limitation, managed publication and verified live route/download/example are complete. Repository artifacts alone are not live publication evidence.
 
@@ -25,3 +25,10 @@ The separate online completion unit is documented in
 It adds actual stored-feedback execution timing, never LP/MPC reoptimization.
 All original archives/sidecars remain unchanged. Its standalone reader/figure
 producer still needs independent review and root-owned publication integration.
+
+The online illustration is bound to the actual four N8positive-trace records and
+the corrected complete replay, while original image/archive bytes remain exact.
+Complete policy matrices and both physical trace definitions are exported with
+minimal inputs. Instrumented query spans remain explicitly qualified by the
+substantial empty-counter-pair overhead; no intrinsic-latency resolution, timing
+winner, native guarantee or LP/MPC reoptimization measurement follows.
