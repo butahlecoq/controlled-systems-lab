@@ -49,14 +49,32 @@ FROZEN_DIAGRAM_EXCEPTIONS = {
     "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py",
 }
 PUBLICATION_EXPORT_ROUTES = {
+    "scripts/reports/stage_mpc07_comparison.py",
+    "scripts/reports/stage_mpc10_comparison.py",
+    "scripts/reports/stage_mpc08_complete.py",
     "scripts/reports/render.py", "scripts/reports/mpc05/check_smoke.py",
     "scripts/reports/exp824/finalize_limited_report.py",
     "scripts/reports/augment_pages_bundle.py",
+    "scripts/reports/stage_mpc11_mesh_timing.py",
     "benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/figures.py",
 }
 VIZ10_ROLE_REASONS = {
+    "scripts/reports/stage_mpc11_mesh_timing.py":
+        "Rechecks immutable mesh and repeated-controller archives, builds labelled saved-data study companions and copies complete source/raw inputs; no optimization or integration runs.",
+    "scripts/reports/stage_mpc07_comparison.py":
+        "Authenticates both robust-policy capture families and copied two-state figures; rechecks saved exact policies without optimization or plotting.",
+    "scripts/reports/stage_mpc10_comparison.py":
+        "Authenticates the finite/mixed/hybrid capture, reading receipt and copied two-dimensional path figures; no solver or renderer runs during staging.",
+    "benchmarks/reporting/mpc10/figures.py":
+        "Plots authenticated saved two-dimensional native hybrid paths with distinct parallel-edge identities and shared quantitative styles; no family claim follows from sampled anchors.",
     "scripts/reports/mpc06_online/render.py":
         "Renders checked-source-bound native outcomes and saved actual paths; the shared Matplotlib publication companion remains in issue #602. This is not a benchmark producer.",
+    "scripts/reports/stage_mpc08_complete.py":
+        "Rechecks both immutable MPC08 captures and copies their saved labelled figures into one bounded report/example; it runs no solver or figure producer.",
+    "benchmarks/reporting/mpc08_explicit/capture_horizon_regions.py":
+        "Draws independently checked exact original-quadratic endpoint cells for matched N2/4/8 with shared numeric axes; full optimizer fibers and native resource refusals remain separate products.",
+    "benchmarks/reporting/mpc08_explicit/capture_exact_regions.py":
+        "Draws exact checked fixture regions and nominal/robust predecessors with shared numeric axes; numerical native observations remain separate from whole-set proof authority.",
     "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py":
         "Generates one exact 2D critical-region diagram from the rational fixture, with labelled initial and terminal coordinates; it is not a general plotting path.",
     "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py":
@@ -121,7 +139,6 @@ SAVED_COMPANION_ROUTES = {
 }
 SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
 SAVED_DATA_COMPANION_RENDERERS = {
-    "benchmarks/reporting/mpc11/figures.py",
     "scripts/reports/mpc06_online/render.py",
     "scripts/reports/mpc06_delivery/figures.py",
     "scripts/reports/render_adaptive_ode_example.py",
@@ -138,6 +155,8 @@ FROZEN_COMPANIONS = {
     "mpc06-online-anchor-portable-v3": "mpc06-complete-6b7059d62473d32d4210/index.html",
     "mpc06-completion-v1": "mpc06-complete-6b7059d62473d32d4210/index.html",
     "mpc06-completion-v2": "mpc06-complete-6b7059d62473d32d4210/index.html",
+    "review05-family-query-20261110-3b98f5b0": "review05-family-query-d6af180b0e398d78ebd2/index.html",
+    "review05-build-phases-20261110-468cc0eb": "review05-family-query-d6af180b0e398d78ebd2/index.html",
     "app01-plan-20261016-22d406fd": "examples/app01-plan-timing-v1.html",
     "exp02-paired-profiles-20261027-r1": "examples/control-witness-v1.html#exp02-ts02-control-family",
     "mpc03-open-loop-pilot-v1": "examples/index.html",
@@ -262,7 +281,13 @@ def source_inventory(root: Path) -> list[dict]:
                                     "/geometry_opt_companions.py", "/viz10_plot_companions.py")):
                 disposition = "shared-quantitative-policy-companion-renderer"
             elif relative in {"scripts/reports/stage_projection_figures.py",
-                              "benchmarks/reporting/review05/render_family_query.py"}:
+                              "benchmarks/reporting/review05/render_family_query.py",
+                              "benchmarks/reporting/mpc11/figures.py",
+                              "benchmarks/reporting/mpc08_explicit/capture_exact_regions.py",
+                              "benchmarks/reporting/mpc08_explicit/capture_horizon_regions.py",
+                              "benchmarks/reporting/mpc07/report.py",
+                              "benchmarks/reporting/mpc10/figures.py",
+                              "benchmarks/reporting/mpc11/study_report.py"}:
                 disposition = "adopted-shared-quantitative-policy"
             elif relative.endswith("/control_witness_companions.py"):
                 disposition = "saved-control-witness-gallery-companion-builder"

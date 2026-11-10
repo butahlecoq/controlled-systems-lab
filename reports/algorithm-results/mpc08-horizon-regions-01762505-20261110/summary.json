@@ -1,0 +1,224 @@
+{
+  "exact": [
+    {
+      "status": "verified-exact-fixture",
+      "horizon": 2,
+      "cells": 9,
+      "area": "47/3",
+      "shared_boundaries": 18,
+      "proof": "exact feasible-domain Minkowski construction; closed KKT cells cover by area with disjoint interiors; strict convex endpoint gives complete affine control slice",
+      "scope": "endpoint-map cells, not necessarily minimal maximal critical regions; no CSL original-quadratic verifier claim"
+    },
+    {
+      "status": "verified-exact-fixture",
+      "horizon": 4,
+      "cells": 7,
+      "area": "23",
+      "shared_boundaries": 8,
+      "proof": "exact feasible-domain Minkowski construction; closed KKT cells cover by area with disjoint interiors; strict convex endpoint gives complete affine control slice",
+      "scope": "endpoint-map cells, not necessarily minimal maximal critical regions; no CSL original-quadratic verifier claim"
+    },
+    {
+      "status": "verified-exact-fixture",
+      "horizon": 8,
+      "cells": 1,
+      "area": "24",
+      "shared_boundaries": 0,
+      "proof": "exact feasible-domain Minkowski construction; closed KKT cells cover by area with disjoint interiors; strict convex endpoint gives complete affine control slice",
+      "scope": "endpoint-map cells, not necessarily minimal maximal critical regions; no CSL original-quadratic verifier claim"
+    }
+  ],
+  "native": {
+    "counts": [
+      {
+        "horizon": 2,
+        "status": "unsupported-original-quadratic-profile",
+        "count": 12
+      },
+      {
+        "horizon": 2,
+        "status": "verified-complete-reduced-linear-family",
+        "count": 12
+      },
+      {
+        "horizon": 4,
+        "status": "resource-inconclusive-reduced-family",
+        "count": 12
+      },
+      {
+        "horizon": 4,
+        "status": "unsupported-original-quadratic-profile",
+        "count": 12
+      },
+      {
+        "horizon": 8,
+        "status": "resource-inconclusive-reduced-family",
+        "count": 12
+      },
+      {
+        "horizon": 8,
+        "status": "unsupported-original-quadratic-profile",
+        "count": 12
+      }
+    ],
+    "measured_intervals_ns": [
+      {
+        "horizon": 2,
+        "status": "unsupported-original-quadratic-profile",
+        "samples": [
+          40579,
+          26680,
+          24235,
+          23677,
+          23397,
+          30590,
+          59226,
+          47702,
+          26120,
+          24305
+        ]
+      },
+      {
+        "horizon": 2,
+        "status": "verified-complete-reduced-linear-family",
+        "samples": [
+          11974537,
+          12461334,
+          12774296,
+          12888558,
+          12756696,
+          12271783,
+          11811036,
+          14433740,
+          12083839,
+          12229529
+        ]
+      },
+      {
+        "horizon": 4,
+        "status": "resource-inconclusive-reduced-family",
+        "samples": [
+          1501112,
+          1513264,
+          1529957,
+          1468776,
+          1479251,
+          1665939,
+          1609227,
+          1582408,
+          1600568,
+          1840195
+        ]
+      },
+      {
+        "horizon": 4,
+        "status": "unsupported-original-quadratic-profile",
+        "samples": [
+          40648,
+          37086,
+          36807,
+          37016,
+          36528,
+          35760,
+          31010,
+          31009,
+          30102,
+          30870
+        ]
+      },
+      {
+        "horizon": 8,
+        "status": "resource-inconclusive-reduced-family",
+        "samples": [
+          7679608,
+          6825232,
+          6628557,
+          7322855,
+          6521140,
+          6765656,
+          6784304,
+          7470082,
+          6674792,
+          6840177
+        ]
+      },
+      {
+        "horizon": 8,
+        "status": "unsupported-original-quadratic-profile",
+        "samples": [
+          68585,
+          43511,
+          40648,
+          63416,
+          45118,
+          54966,
+          42045,
+          55874,
+          38972,
+          42604
+        ]
+      }
+    ],
+    "scope": "exact reduced relation equality at six dyadic parameters only; quadratic profile explicitly unsupported; no general quadratic CSL verifier or timing ranking"
+  },
+  "performance": "inconclusive; descriptive whole per-request native intervals, no ranking",
+  "costs": [
+    {
+      "horizon": 2,
+      "construction_ns": 25417848,
+      "independent_check_ns": 240200040,
+      "serialized_reference_bytes": 3881,
+      "stored_H_rows": 120,
+      "polygon_edges": 34,
+      "location_queries_per_batch": 15,
+      "point_location_and_endpoint_ns": [
+        4028132,
+        3874900,
+        3907236,
+        3825312,
+        3883979,
+        3909681
+      ],
+      "excluded_warmup_index": 0
+    },
+    {
+      "horizon": 4,
+      "construction_ns": 67449621,
+      "independent_check_ns": 204019692,
+      "serialized_reference_bytes": 3680,
+      "stored_H_rows": 122,
+      "polygon_edges": 28,
+      "location_queries_per_batch": 13,
+      "point_location_and_endpoint_ns": [
+        3006904,
+        3050905,
+        4668863,
+        3460527,
+        2982390,
+        3176550
+      ],
+      "excluded_warmup_index": 0
+    },
+    {
+      "horizon": 8,
+      "construction_ns": 185848292,
+      "independent_check_ns": 15994637,
+      "serialized_reference_bytes": 1119,
+      "stored_H_rows": 24,
+      "polygon_edges": 4,
+      "location_queries_per_batch": 5,
+      "point_location_and_endpoint_ns": [
+        424988,
+        505027,
+        409343,
+        427014,
+        407668,
+        432182
+      ],
+      "excluded_warmup_index": 0
+    }
+  ],
+  "capture_source": "017625057d253ae191405ca163bbda85729af3aa",
+  "saved_checker_revision": "e5010d6c",
+  "capture_sha256": "1553ddb806ee4ac7b71c93bfa6a31f42efa177b4f800a30e391263174287c4ff"
+}

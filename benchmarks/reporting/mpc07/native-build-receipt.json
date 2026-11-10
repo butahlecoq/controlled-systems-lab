@@ -1,0 +1,12 @@
+{
+  "schema": "csl.mpc11.affine-build-receipt/1",
+  "source_revision": "b3978a98a8bfb30e21841466244ed7f78e987886",
+  "source_scope": "bridge and model-generator source hashes bound by accepted manifest; core source is stacked PR893 dependency",
+  "cxx_compiler": "c++ (GCC) 16.2.1 20260810",
+  "build_type": "Release",
+  "cmake_version": "3.31.6",
+  "ninja_version": "1.13.2",
+  "requested_build_parallel_jobs": 2,
+  "bridge_sha256": "266e1cda61b064b4603ff6499d76dc4db59106e4e673905f585c54caafa9c533",
+  "scope": "bounded correctness pilots only; no performance comparison"
+}

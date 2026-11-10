@@ -1,0 +1,278 @@
+{
+  "joint_policy": {
+    "status": "verified-joint-rational-policy",
+    "maximum_native_response_adjustment": 0.0,
+    "response_reconstruction": "exact recurrence from reconstructed filter/control; raw response arrays unchanged",
+    "rationalization": "new candidate limit_denominator(2**48), exact response/filter/support replay",
+    "virtual_terminal_absolute": "65/64",
+    "virtual_terminal_squared": "4225/4096",
+    "virtual_profile_oracle_squared": "4225/4096",
+    "physical_unrestricted_lower_squared": "4225/4096",
+    "upper_minus_virtual_profile_oracle_squared": "0",
+    "upper_minus_physical_lower_squared": "0",
+    "state_responses": [
+      [
+        [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ],
+      [
+        [
+          "1/1024",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "1",
+          "0",
+          "0"
+        ]
+      ],
+      [
+        [
+          "1/1024",
+          "1/2",
+          "1/1024",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "65/64"
+        ]
+      ]
+    ],
+    "state_supports": [
+      [
+        "1/1024",
+        "1"
+      ],
+      [
+        "257/512",
+        "65/64"
+      ]
+    ],
+    "filter": [
+      [
+        "1/1024",
+        "1"
+      ],
+      [
+        "1/1024",
+        "65/64"
+      ]
+    ],
+    "normalized_policy": [
+      [
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      [
+        "0",
+        "-1",
+        "0",
+        "0"
+      ]
+    ],
+    "physical_information": "zeta past=diag(s)^-1*(x_next-A*x-B*u); current/future zeta forbidden"
+  },
+  "fixed_policy": {
+    "status": "verified-joint-rational-policy",
+    "maximum_native_response_adjustment": 0.0,
+    "response_reconstruction": "exact recurrence from reconstructed filter/control; raw response arrays unchanged",
+    "rationalization": "new candidate limit_denominator(2**48), exact response/filter/support replay",
+    "virtual_terminal_absolute": "3/2",
+    "virtual_terminal_squared": "9/4",
+    "virtual_profile_oracle_squared": "9/4",
+    "physical_unrestricted_lower_squared": "4225/4096",
+    "upper_minus_virtual_profile_oracle_squared": "0",
+    "upper_minus_physical_lower_squared": "4991/4096",
+    "state_responses": [
+      [
+        [
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      ],
+      [
+        [
+          "1/1024",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "0",
+          "5/4",
+          "0",
+          "0"
+        ]
+      ],
+      [
+        [
+          "1/1024",
+          "3/4",
+          "1/1024",
+          "0"
+        ],
+        [
+          "0",
+          "1/4",
+          "0",
+          "5/4"
+        ]
+      ]
+    ],
+    "state_supports": [
+      [
+        "1/1024",
+        "5/4"
+      ],
+      [
+        "385/512",
+        "3/2"
+      ]
+    ],
+    "filter": [
+      [
+        "1/1024",
+        "5/4"
+      ],
+      [
+        "1/1024",
+        "5/4"
+      ]
+    ],
+    "normalized_policy": [
+      [
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      [
+        "0",
+        "-1",
+        "0",
+        "0"
+      ]
+    ],
+    "physical_information": "zeta past=diag(s)^-1*(x_next-A*x-B*u); current/future zeta forbidden"
+  },
+  "position_filter_floor": "1/1024",
+  "physical_T2_optimum": "4225/4096",
+  "physical_vertices": [
+    {
+      "w0": "-1",
+      "delta1": "-1/64",
+      "w1": "-1",
+      "control": "1",
+      "terminal": [
+        "-1/2",
+        "-63/64"
+      ],
+      "cost": "3969/4096"
+    },
+    {
+      "w0": "-1",
+      "delta1": "-1/64",
+      "w1": "1",
+      "control": "1",
+      "terminal": [
+        "-1/2",
+        "65/64"
+      ],
+      "cost": "4225/4096"
+    },
+    {
+      "w0": "-1",
+      "delta1": "1/64",
+      "w1": "-1",
+      "control": "1",
+      "terminal": [
+        "-1/2",
+        "-65/64"
+      ],
+      "cost": "4225/4096"
+    },
+    {
+      "w0": "-1",
+      "delta1": "1/64",
+      "w1": "1",
+      "control": "1",
+      "terminal": [
+        "-1/2",
+        "63/64"
+      ],
+      "cost": "3969/4096"
+    },
+    {
+      "w0": "1",
+      "delta1": "-1/64",
+      "w1": "-1",
+      "control": "-1",
+      "terminal": [
+        "1/2",
+        "-65/64"
+      ],
+      "cost": "4225/4096"
+    },
+    {
+      "w0": "1",
+      "delta1": "-1/64",
+      "w1": "1",
+      "control": "-1",
+      "terminal": [
+        "1/2",
+        "63/64"
+      ],
+      "cost": "3969/4096"
+    },
+    {
+      "w0": "1",
+      "delta1": "1/64",
+      "w1": "-1",
+      "control": "-1",
+      "terminal": [
+        "1/2",
+        "-63/64"
+      ],
+      "cost": "3969/4096"
+    },
+    {
+      "w0": "1",
+      "delta1": "1/64",
+      "w1": "1",
+      "control": "-1",
+      "terminal": [
+        "1/2",
+        "65/64"
+      ],
+      "cost": "4225/4096"
+    }
+  ],
+  "axis_policy": "csl-report-quantitative-v1",
+  "scope": "support boxes, not asserted full reachable/winning sets; physical points are extreme samples only"
+}

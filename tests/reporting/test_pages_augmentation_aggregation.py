@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import importlib.util
 from pathlib import Path
 import tempfile
 import tarfile
@@ -22,7 +23,11 @@ def run(run_id: int, created: str, updated: str, *, head: str,
             "status": status, "conclusion": conclusion}
 
 
+HAS_MPC11 = all(importlib.util.find_spec(name) is not None for name in ('numpy','scipy','casadi','do_mpc'))
+
+
 class PagesAugmentationAggregation(unittest.TestCase):
+    @unittest.skipUnless(HAS_MPC11,'full cumulative staging is checked in the hash-locked optional controller CI profile')
     def test_combines_mpc01_b04_and_mpc06_routes_into_one_site(self):
         with tempfile.TemporaryDirectory(prefix="pages-augmentation-aggregation-") as temporary:
             site = Path(temporary) / "site"
@@ -33,7 +38,7 @@ class PagesAugmentationAggregation(unittest.TestCase):
             (site / "existing-route").mkdir()
             (site / "existing-route/index.html").write_text("existing", encoding="utf-8")
             (site / "examples").mkdir()
-            (site / "examples/index.html").write_text("examples", encoding="utf-8")
+            (site / "examples/index.html").write_text("<html><body>examples</body></html>", encoding="utf-8")
 
             routes = augment_pages_bundle.stage_all(site)
 
@@ -48,9 +53,20 @@ class PagesAugmentationAggregation(unittest.TestCase):
             self.assertIn(f'href="{routes["mpc06_complete"]}/index.html"', landing)
             self.assertIn(f'href="{routes["mpc06_complete"]}.zip"', landing)
             self.assertEqual((site / "existing-route/index.html").read_text(), "existing")
-            self.assertEqual((site / "examples/index.html").read_text(), "examples")
+            self.assertIn("examples", (site / "examples/index.html").read_text())
+            self.assertIn(routes["review05"]+"/index.html#scalar-2d", (site/"examples/index.html").read_text())
+            self.assertIn(routes["review05"]+"/index.html", landing)
+            self.assertIn(routes["mpc11"]+"/index.html", landing)
+            self.assertIn(routes["mpc11"]+"/index.html", (site/"examples/index.html").read_text())
             self.assertTrue((site / "docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1/strategy-ab-ts03-summary.html").is_file())
-            for report_id in (routes["b04_c"], routes["mpc06"], routes["mpc06_complete"]):
+            self.assertIn(routes["mpc08"]+"/index.html#minimal-example", (site/"examples/index.html").read_text())
+            self.assertIn(routes["mpc08"]+"/index.html", landing)
+            for name in ('mpc07','mpc10'):
+                self.assertIn(routes[name]+'/index.html#minimal-example',(site/'examples/index.html').read_text())
+                self.assertIn(routes[name]+'/index.html',landing)
+            self.assertIn(routes["mpc11_studies"]+"/index.html#mesh-example",(site/"examples/index.html").read_text())
+            self.assertIn(routes["mpc11_studies"]+"/index.html",landing)
+            for report_id in (routes["b04_c"], routes["mpc06"], routes["mpc06_complete"], routes["review05"], routes["mpc11"], routes["mpc08"], routes["mpc07"], routes["mpc10"], routes["mpc11_studies"]):
                 with zipfile.ZipFile(site / f"{report_id}.zip") as archive:
                     self.assertIn(f"{report_id}/publication-manifest.json", archive.namelist())
 

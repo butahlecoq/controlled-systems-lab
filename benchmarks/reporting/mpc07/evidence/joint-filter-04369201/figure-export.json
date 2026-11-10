@@ -1,0 +1,8 @@
+{
+  "input_manifest_sha256": "e80138d8d67caefc9f462a7b6b3959fbc57c3a11652d432ca3abf94fdf06b6ac",
+  "figure_data_sha256": "1c5082825425ceb4f69c8781d51aa56a42c924aec087c8dd836986ecb3b57df3",
+  "images": {
+    "joint-filter-policy.svg": "c83120be06bf49c1bd5156fd151cfa49b215aa2b17d4ce1771e397db7ccbeeb4",
+    "joint-filter-policy.png": "f0e72e05f13472292e2dab11a21f0ed8683762e92074e4f0ed466f0c120bf921"
+  }
+}

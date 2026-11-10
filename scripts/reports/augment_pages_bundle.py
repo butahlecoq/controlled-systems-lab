@@ -13,7 +13,11 @@ if str(ROOT) not in sys.path:
 if str(ROOT / "scripts/reports") not in sys.path:
     sys.path.insert(0, str(ROOT / "scripts/reports"))
 
-from scripts.reports import stage_b04_c_strategy_a, stage_mpc06_tube_objective, stage_mpc06_delivery
+from scripts.reports import (
+    stage_b04_c_strategy_a, stage_mpc06_tube_objective, stage_mpc06_delivery,
+    stage_review05_family_query, stage_mpc11_controller_comparison,
+    stage_mpc08_complete, stage_mpc07_comparison, stage_mpc10_comparison, stage_mpc11_mesh_timing,
+)
 from scripts.reports.mpc01 import augment_pages, stage_per_attempt
 
 B04_SOURCE = ROOT / "reports/algorithm-results/b04-c-strategy-a-verification-v1"
@@ -30,6 +34,13 @@ def stage_all(site: Path) -> dict[str, str]:
     b04_route = stage_b04_c_strategy_a.stage(B04_SOURCE, site)
     mpc06_route = stage_mpc06_tube_objective.stage(MPC06_SOURCE, site)
     mpc06_complete = stage_mpc06_delivery.stage(stage_mpc06_delivery.SOURCE, site)
+    review05 = stage_review05_family_query.stage(site)
+    mpc11 = stage_mpc11_controller_comparison.stage(site)
+    mpc08 = stage_mpc08_complete.stage(site)
+    mpc07 = stage_mpc07_comparison.stage(site)
+    stage_per_attempt._insert_landing_link(site,mpc07+"-archive",mpc07+".zip","Download the complete robust-policy comparison evidence")
+    mpc10 = stage_mpc10_comparison.stage(site)
+    mpc11_studies = stage_mpc11_mesh_timing.stage(site)
 
     stage_per_attempt.validate(site)
     landing = site / "index.html"
@@ -45,6 +56,16 @@ def stage_all(site: Path) -> dict[str, str]:
         f'href="{mpc06_route}.zip"',
         f'href="{mpc06_complete}/index.html"',
         f'href="{mpc06_complete}.zip"',
+        f'href="{review05}/index.html"',
+        f'href="{mpc11}/index.html"',
+        f'href="{mpc08}/index.html"',
+        f'href="{mpc08}.zip"',
+        f'href="{mpc07}/index.html"',
+        f'href="{mpc07}.zip"',
+        f'href="{mpc10}/index.html"',
+        f'href="{mpc10}.zip"',
+        f'href="{mpc11_studies}/index.html"',
+        f'href="{mpc11_studies}.zip"',
     )
     if any(link not in landing_html for link in expected_links):
         raise ValueError("combined Pages landing page is missing an augmentation link")
@@ -53,6 +74,12 @@ def stage_all(site: Path) -> dict[str, str]:
         (b04_route, ("index.html", "publication-manifest.json", "trajectory.svg")),
         (mpc06_route, ("index.html", "publication-manifest.json", "trajectory.svg")),
         (mpc06_complete, ("index.html", "publication-manifest.json", "invariant-tightenings.svg", "feasibility-grid.png")),
+        (review05, ("index.html", "publication-manifest.json")),
+        (mpc11, ("index.html", "publication-manifest.json")),
+        (mpc08, ("index.html", "publication-manifest.json", "minimal-inputs.json", "offline_check.py", "figures/exact-critical-regions.svg", "figures/horizon-regions.svg")),
+        (mpc07, ("index.html", "publication-manifest.json", "minimal-inputs.json", "figures/fixed-filter-policy.svg", "figures/joint-filter-policy.svg")),
+        (mpc10, ("index.html", "publication-manifest.json", "minimal-inputs.json", "figures/paths.svg", "figures/branches.svg")),
+        (mpc11_studies, ("index.html", "publication-manifest.json", "minimal-inputs.json", "mesh-phase-overlays.svg", "mesh-differences.svg", "timing-phases.svg")),
     ):
         report = site / route
         if report.is_symlink() or not report.is_dir() or any(
@@ -70,7 +97,7 @@ def stage_all(site: Path) -> dict[str, str]:
     strategy_page = site / STRATEGY_AB_ROUTE / "strategy-ab-ts03-summary.html"
     if strategy_page.is_symlink() or not strategy_page.is_file():
         raise ValueError("combined Pages site is missing the Strategy A/B T-S03 report")
-    return {"mpc01": per_attempt.name, "b04_c": b04_route, "mpc06": mpc06_route, "mpc06_complete": mpc06_complete}
+    return {"mpc01": per_attempt.name, "b04_c": b04_route, "mpc06": mpc06_route, "mpc06_complete": mpc06_complete, "review05": review05, "mpc11": mpc11, "mpc08": mpc08, "mpc07": mpc07, "mpc10": mpc10, "mpc11_studies": mpc11_studies}
 
 
 def augment(download: Path, destination: Path) -> dict[str, str]:

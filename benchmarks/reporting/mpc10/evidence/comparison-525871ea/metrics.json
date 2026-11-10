@@ -1,0 +1,4468 @@
+{
+  "schema": "csl.mpc10.initial-observations/1",
+  "verification_sha256": "05800025b152a01206959bf6a572067291f8d87956a75682b69abf38d135089f",
+  "generator_sha256": "13b0df87b5fb90ae31d4a3dca49af1c5279f61c5e43e0d44d9b3cac0162f8b75",
+  "cases": [
+    {
+      "id": "finite-T0",
+      "product": "finite",
+      "horizon": 0,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "complete",
+      "checked_native": {
+        "candidate_face_check": "not-applicable",
+        "status": "verified-bounded-branches",
+        "branch_count": 1,
+        "all_optimal_paths": [],
+        "complete_continuous_family": false
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 1,
+        "complete_continuous_family": false
+      },
+      "native_branches": 1,
+      "native_total_lp_variables": 2,
+      "native_total_lp_rows": 5,
+      "native_simplex_iterations_sum": 2,
+      "observed_scheduler_threads": [
+        1
+      ],
+      "exact_optimum": null,
+      "all_tie_count": 0,
+      "native_core_family_verification": null,
+      "native_seconds": {
+        "provider_registration": 4.6584e-05,
+        "history_enumeration": 1.9136e-05,
+        "hybrid_enumeration_probe": null,
+        "formulation_with_internal_enumeration": 0.000130395,
+        "portfolio_prepare_run_and_record": 0.001269168,
+        "native_lp_load_sum": 6.8445e-05,
+        "native_lp_solve_sum": 0.000665664,
+        "family_verification": null,
+        "whole_worker": 0.010997029021382332
+      },
+      "scip_global": {
+        "status": "infeasible",
+        "formulation_and_setup_seconds": 0.003224670886993408,
+        "optimization_seconds": 0.0012686778791248798,
+        "counts": {
+          "variables": 1,
+          "constraints": 1,
+          "binary_variables": 0
+        },
+        "nodes": 0,
+        "primal_bound": null,
+        "dual_bound": null,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ]
+      },
+      "scip_fixed_branch_totals": {
+        "count": 1,
+        "formulation_and_setup_seconds": 0.0023644990287721157,
+        "optimization_seconds": 0.0011319981422275305
+      },
+      "scip_whole_worker_seconds": 0.18660650704987347,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/finite-T0/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.010997029021382332,
+          "user_cpu_seconds": 0.0018539999999999997,
+          "system_cpu_seconds": 0.007412999999999996,
+          "cumulative_children_max_rss_kib": 31244,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "3b3bc5896d473cb259d174d91c48a9aef66b665df68fa0e1a956b01284649497",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/finite-T0/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/finite-T0/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.18660650704987347,
+          "user_cpu_seconds": 0.14740399999999998,
+          "system_cpu_seconds": 0.037101999999999996,
+          "cumulative_children_max_rss_kib": 54576,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "3ec369b6893b7aa3fbe0f5c7620deee9a59c1af5b41553375861a79b32136618",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "finite-T1",
+      "product": "finite",
+      "horizon": 1,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "complete",
+      "checked_native": {
+        "candidate_face_check": "not-applicable",
+        "status": "verified-bounded-branches",
+        "branch_count": 3,
+        "all_optimal_paths": [
+          {
+            "actions": [
+              1
+            ]
+          },
+          {
+            "actions": [
+              2
+            ]
+          }
+        ],
+        "complete_continuous_family": false
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 3,
+        "complete_continuous_family": false
+      },
+      "native_branches": 3,
+      "native_total_lp_variables": 12,
+      "native_total_lp_rows": 30,
+      "native_simplex_iterations_sum": 15,
+      "observed_scheduler_threads": [
+        1
+      ],
+      "exact_optimum": "0",
+      "all_tie_count": 2,
+      "native_core_family_verification": null,
+      "native_seconds": {
+        "provider_registration": 2.5771e-05,
+        "history_enumeration": 1.2991e-05,
+        "hybrid_enumeration_probe": null,
+        "formulation_with_internal_enumeration": 0.000119011,
+        "portfolio_prepare_run_and_record": 0.001289283,
+        "native_lp_load_sum": 6.2438e-05,
+        "native_lp_solve_sum": 0.000745632,
+        "family_verification": null,
+        "whole_worker": 0.007577847922220826
+      },
+      "scip_global": {
+        "status": "optimal",
+        "formulation_and_setup_seconds": 0.0038014960009604692,
+        "optimization_seconds": 0.002604475012049079,
+        "counts": {
+          "variables": 6,
+          "constraints": 3,
+          "binary_variables": 3
+        },
+        "nodes": 1,
+        "primal_bound": 0.0,
+        "dual_bound": 0.0,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ],
+        "objective": 0.0,
+        "states": [
+          -1.0,
+          0.0
+        ],
+        "controls": [
+          0.0
+        ],
+        "path": {
+          "actions": [
+            2
+          ]
+        }
+      },
+      "scip_fixed_branch_totals": {
+        "count": 3,
+        "formulation_and_setup_seconds": 0.006269779056310654,
+        "optimization_seconds": 0.005071502178907394
+      },
+      "scip_whole_worker_seconds": 0.20252040796913207,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/finite-T1/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.007577847922220826,
+          "user_cpu_seconds": 0.001819000000000015,
+          "system_cpu_seconds": 0.0036380000000000023,
+          "cumulative_children_max_rss_kib": 54576,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "2f8cbcfa67109e16e4da99d3fc4c8c4f135eb9331bc18f810bcd33f3993744df",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/finite-T1/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/finite-T1/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.20252040796913207,
+          "user_cpu_seconds": 0.15460100000000002,
+          "system_cpu_seconds": 0.04488399999999999,
+          "cumulative_children_max_rss_kib": 55076,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "5c13dc5c7997d7f252a2459cb06d63922a3412e001d31e28985c955ed6783b81",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "finite-T2",
+      "product": "finite",
+      "horizon": 2,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "complete",
+      "checked_native": {
+        "candidate_face_check": "not-applicable",
+        "status": "verified-bounded-branches",
+        "branch_count": 9,
+        "all_optimal_paths": [
+          {
+            "actions": [
+              0,
+              1
+            ]
+          },
+          {
+            "actions": [
+              0,
+              2
+            ]
+          },
+          {
+            "actions": [
+              1,
+              0
+            ]
+          },
+          {
+            "actions": [
+              2,
+              0
+            ]
+          }
+        ],
+        "complete_continuous_family": false
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 9,
+        "complete_continuous_family": false
+      },
+      "native_branches": 9,
+      "native_total_lp_variables": 54,
+      "native_total_lp_rows": 135,
+      "native_simplex_iterations_sum": 67,
+      "observed_scheduler_threads": [
+        1
+      ],
+      "exact_optimum": "0",
+      "all_tie_count": 4,
+      "native_core_family_verification": null,
+      "native_seconds": {
+        "provider_registration": 3.7016e-05,
+        "history_enumeration": 1.1943e-05,
+        "hybrid_enumeration_probe": null,
+        "formulation_with_internal_enumeration": 0.000332518,
+        "portfolio_prepare_run_and_record": 0.003898786,
+        "native_lp_load_sum": 0.000148345,
+        "native_lp_solve_sum": 0.0023034550000000003,
+        "family_verification": null,
+        "whole_worker": 0.011988854967057705
+      },
+      "scip_global": {
+        "status": "optimal",
+        "formulation_and_setup_seconds": 0.003664814867079258,
+        "optimization_seconds": 0.003586940933018923,
+        "counts": {
+          "variables": 11,
+          "constraints": 5,
+          "binary_variables": 6
+        },
+        "nodes": 0,
+        "primal_bound": 0.0,
+        "dual_bound": 0.0,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ],
+        "objective": 0.0,
+        "states": [
+          -1.0,
+          0.0,
+          0.0
+        ],
+        "controls": [
+          0.0,
+          0.0
+        ],
+        "path": {
+          "actions": [
+            1,
+            0
+          ]
+        }
+      },
+      "scip_fixed_branch_totals": {
+        "count": 9,
+        "formulation_and_setup_seconds": 0.01885277684777975,
+        "optimization_seconds": 0.016657717991620302
+      },
+      "scip_whole_worker_seconds": 0.24898798391222954,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/finite-T2/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.011988854967057705,
+          "user_cpu_seconds": 0.006061999999999956,
+          "system_cpu_seconds": 0.004041000000000017,
+          "cumulative_children_max_rss_kib": 55076,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "d02c2f0ed4516ce038439ccc6b866db78536f8b3cfc7cc76ffe1eab6aaff4c7f",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/finite-T2/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/finite-T2/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.24898798391222954,
+          "user_cpu_seconds": 0.174776,
+          "system_cpu_seconds": 0.07190799999999997,
+          "cumulative_children_max_rss_kib": 55324,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "f8e277c7fdcaa272b9a9f83a7fc23ebc6c6ca0356ca27fecc90a8bc3c4b4f203",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "finite-T3",
+      "product": "finite",
+      "horizon": 3,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "complete",
+      "checked_native": {
+        "candidate_face_check": "not-applicable",
+        "status": "verified-bounded-branches",
+        "branch_count": 27,
+        "all_optimal_paths": [
+          {
+            "actions": [
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "actions": [
+              0,
+              0,
+              2
+            ]
+          },
+          {
+            "actions": [
+              0,
+              1,
+              0
+            ]
+          },
+          {
+            "actions": [
+              0,
+              2,
+              0
+            ]
+          },
+          {
+            "actions": [
+              1,
+              0,
+              0
+            ]
+          },
+          {
+            "actions": [
+              2,
+              0,
+              0
+            ]
+          }
+        ],
+        "complete_continuous_family": false
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 27,
+        "complete_continuous_family": false
+      },
+      "native_branches": 27,
+      "native_total_lp_variables": 216,
+      "native_total_lp_rows": 540,
+      "native_simplex_iterations_sum": 290,
+      "observed_scheduler_threads": [
+        1
+      ],
+      "exact_optimum": "0",
+      "all_tie_count": 6,
+      "native_core_family_verification": null,
+      "native_seconds": {
+        "provider_registration": 3.1918e-05,
+        "history_enumeration": 1.2293e-05,
+        "hybrid_enumeration_probe": null,
+        "formulation_with_internal_enumeration": 0.0009143,
+        "portfolio_prepare_run_and_record": 0.010205233,
+        "native_lp_load_sum": 0.000308903,
+        "native_lp_solve_sum": 0.006580712,
+        "family_verification": null,
+        "whole_worker": 0.022568020038306713
+      },
+      "scip_global": {
+        "status": "optimal",
+        "formulation_and_setup_seconds": 0.0033904770389199257,
+        "optimization_seconds": 0.004284592112526298,
+        "counts": {
+          "variables": 16,
+          "constraints": 7,
+          "binary_variables": 9
+        },
+        "nodes": 0,
+        "primal_bound": 0.0,
+        "dual_bound": 0.0,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ],
+        "objective": 0.0,
+        "states": [
+          -1.0,
+          -1.0,
+          -1.0,
+          0.0
+        ],
+        "controls": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "path": {
+          "actions": [
+            0,
+            0,
+            2
+          ]
+        }
+      },
+      "scip_fixed_branch_totals": {
+        "count": 27,
+        "formulation_and_setup_seconds": 0.059026830131188035,
+        "optimization_seconds": 0.05440036067739129
+      },
+      "scip_whole_worker_seconds": 0.4013041341677308,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/finite-T3/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.022568020038306713,
+          "user_cpu_seconds": 0.009081999999999979,
+          "system_cpu_seconds": 0.009082000000000007,
+          "cumulative_children_max_rss_kib": 55324,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "78560881edf96d3c8b7d3a7b6e6fc87caed0e91c43d0fe3e78da59ad1e31d175",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/finite-T3/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/finite-T3/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.4013041341677308,
+          "user_cpu_seconds": 0.24505500000000002,
+          "system_cpu_seconds": 0.15141600000000002,
+          "cumulative_children_max_rss_kib": 55664,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "5a673413d3c2c544213981958af26a7b7d4d696dc7234f88c5fd03b22f6cae95",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "mixed-T0",
+      "product": "mixed",
+      "horizon": 0,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "complete",
+      "checked_native": {
+        "candidate_face_check": "not-applicable",
+        "status": "verified-bounded-branches",
+        "branch_count": 1,
+        "all_optimal_paths": [
+          {
+            "actions": []
+          }
+        ],
+        "complete_continuous_family": false
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 1,
+        "complete_continuous_family": false
+      },
+      "native_branches": 1,
+      "native_total_lp_variables": 2,
+      "native_total_lp_rows": 5,
+      "native_simplex_iterations_sum": 2,
+      "observed_scheduler_threads": [
+        1
+      ],
+      "exact_optimum": "0",
+      "all_tie_count": 1,
+      "native_core_family_verification": null,
+      "native_seconds": {
+        "provider_registration": 2.4584e-05,
+        "history_enumeration": 9.219e-06,
+        "hybrid_enumeration_probe": null,
+        "formulation_with_internal_enumeration": 6.8166e-05,
+        "portfolio_prepare_run_and_record": 0.000620127,
+        "native_lp_load_sum": 4.826e-05,
+        "native_lp_solve_sum": 0.00032246,
+        "family_verification": null,
+        "whole_worker": 0.007920841919258237
+      },
+      "scip_global": {
+        "status": "optimal",
+        "formulation_and_setup_seconds": 0.003258054843172431,
+        "optimization_seconds": 0.0013561910018324852,
+        "counts": {
+          "variables": 1,
+          "constraints": 1,
+          "binary_variables": 0
+        },
+        "nodes": 0,
+        "primal_bound": 0.0,
+        "dual_bound": 0.0,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ],
+        "objective": 0.0,
+        "states": [
+          0.0
+        ],
+        "controls": [],
+        "path": {
+          "actions": []
+        }
+      },
+      "scip_fixed_branch_totals": {
+        "count": 1,
+        "formulation_and_setup_seconds": 0.0023447328712791204,
+        "optimization_seconds": 0.0012287991121411324
+      },
+      "scip_whole_worker_seconds": 0.17764502088539302,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/mixed-T0/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.007920841919258237,
+          "user_cpu_seconds": 0.001910999999999996,
+          "system_cpu_seconds": 0.002866999999999953,
+          "cumulative_children_max_rss_kib": 55664,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "897b89149a5cd8d96b6e4d350db54b8217382e3143e0f040ecc92dfb90e3554b",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/mixed-T0/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/mixed-T0/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.17764502088539302,
+          "user_cpu_seconds": 0.130564,
+          "system_cpu_seconds": 0.042857000000000034,
+          "cumulative_children_max_rss_kib": 55664,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "9e6fce6464a59c7846482135d56f6156c7c030eac42360c5ba9c854fac1dafae",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "mixed-T1",
+      "product": "mixed",
+      "horizon": 1,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "complete",
+      "checked_native": {
+        "candidate_face_check": "not-applicable",
+        "status": "verified-bounded-branches",
+        "branch_count": 3,
+        "all_optimal_paths": [
+          {
+            "actions": [
+              0
+            ]
+          },
+          {
+            "actions": [
+              1
+            ]
+          },
+          {
+            "actions": [
+              2
+            ]
+          }
+        ],
+        "complete_continuous_family": false
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 3,
+        "complete_continuous_family": false
+      },
+      "native_branches": 3,
+      "native_total_lp_variables": 15,
+      "native_total_lp_rows": 36,
+      "native_simplex_iterations_sum": 19,
+      "observed_scheduler_threads": [
+        1
+      ],
+      "exact_optimum": "0",
+      "all_tie_count": 3,
+      "native_core_family_verification": null,
+      "native_seconds": {
+        "provider_registration": 5.2451e-05,
+        "history_enumeration": 2.3397e-05,
+        "hybrid_enumeration_probe": null,
+        "formulation_with_internal_enumeration": 0.000248288,
+        "portfolio_prepare_run_and_record": 0.002786414,
+        "native_lp_load_sum": 0.000130185,
+        "native_lp_solve_sum": 0.001593863,
+        "family_verification": null,
+        "whole_worker": 0.014683425892144442
+      },
+      "scip_global": {
+        "status": "optimal",
+        "formulation_and_setup_seconds": 0.0036104079335927963,
+        "optimization_seconds": 0.0025205949787050486,
+        "counts": {
+          "variables": 6,
+          "constraints": 3,
+          "binary_variables": 3
+        },
+        "nodes": 0,
+        "primal_bound": 0.0,
+        "dual_bound": 0.0,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ],
+        "objective": 0.0,
+        "states": [
+          0.0,
+          0.0
+        ],
+        "controls": [
+          1.0
+        ],
+        "path": {
+          "actions": [
+            0
+          ]
+        }
+      },
+      "scip_fixed_branch_totals": {
+        "count": 3,
+        "formulation_and_setup_seconds": 0.006019676104187965,
+        "optimization_seconds": 0.0057841690722852945
+      },
+      "scip_whole_worker_seconds": 0.1981554280500859,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/mixed-T1/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.014683425892144442,
+          "user_cpu_seconds": 0.006136999999999948,
+          "system_cpu_seconds": 0.005114000000000007,
+          "cumulative_children_max_rss_kib": 55664,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "17e42bb0aec7059de280fc7a54e1a45893d080b8b49563861da172f96491cb62",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/mixed-T1/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/mixed-T1/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.1981554280500859,
+          "user_cpu_seconds": 0.14632299999999998,
+          "system_cpu_seconds": 0.04710399999999998,
+          "cumulative_children_max_rss_kib": 55664,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "06363cad851228d13f427eb6acb3f4af8097f2180c006b5730b73000615626d8",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "mixed-T2",
+      "product": "mixed",
+      "horizon": 2,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "complete",
+      "checked_native": {
+        "candidate_face_check": "not-applicable",
+        "status": "verified-bounded-branches",
+        "branch_count": 9,
+        "all_optimal_paths": [
+          {
+            "actions": [
+              0,
+              0
+            ]
+          },
+          {
+            "actions": [
+              0,
+              1
+            ]
+          },
+          {
+            "actions": [
+              0,
+              2
+            ]
+          },
+          {
+            "actions": [
+              1,
+              0
+            ]
+          },
+          {
+            "actions": [
+              1,
+              1
+            ]
+          },
+          {
+            "actions": [
+              1,
+              2
+            ]
+          },
+          {
+            "actions": [
+              2,
+              0
+            ]
+          },
+          {
+            "actions": [
+              2,
+              1
+            ]
+          },
+          {
+            "actions": [
+              2,
+              2
+            ]
+          }
+        ],
+        "complete_continuous_family": false
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 9,
+        "complete_continuous_family": false
+      },
+      "native_branches": 9,
+      "native_total_lp_variables": 72,
+      "native_total_lp_rows": 171,
+      "native_simplex_iterations_sum": 78,
+      "observed_scheduler_threads": [
+        1
+      ],
+      "exact_optimum": "0",
+      "all_tie_count": 9,
+      "native_core_family_verification": null,
+      "native_seconds": {
+        "provider_registration": 2.3258e-05,
+        "history_enumeration": 9.15e-06,
+        "hybrid_enumeration_probe": null,
+        "formulation_with_internal_enumeration": 0.000284254,
+        "portfolio_prepare_run_and_record": 0.003312881,
+        "native_lp_load_sum": 0.00012823,
+        "native_lp_solve_sum": 0.00207542,
+        "family_verification": null,
+        "whole_worker": 0.01136572496034205
+      },
+      "scip_global": {
+        "status": "optimal",
+        "formulation_and_setup_seconds": 0.003670122940093279,
+        "optimization_seconds": 0.0036183709744364023,
+        "counts": {
+          "variables": 11,
+          "constraints": 5,
+          "binary_variables": 6
+        },
+        "nodes": 1,
+        "primal_bound": 0.0,
+        "dual_bound": 0.0,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ],
+        "objective": 0.0,
+        "states": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "controls": [
+          0.0,
+          0.0
+        ],
+        "path": {
+          "actions": [
+            1,
+            1
+          ]
+        }
+      },
+      "scip_fixed_branch_totals": {
+        "count": 9,
+        "formulation_and_setup_seconds": 0.018493581796064973,
+        "optimization_seconds": 0.018242010846734047
+      },
+      "scip_whole_worker_seconds": 0.2449977060314268,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/mixed-T2/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.01136572496034205,
+          "user_cpu_seconds": 0.0031290000000001594,
+          "system_cpu_seconds": 0.005215999999999998,
+          "cumulative_children_max_rss_kib": 55664,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "03df01de955620bd3cd00de0656861f1c6823fbad45e65f5218046b0db4a9d56",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/mixed-T2/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/mixed-T2/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.2449977060314268,
+          "user_cpu_seconds": 0.17381599999999997,
+          "system_cpu_seconds": 0.06792699999999996,
+          "cumulative_children_max_rss_kib": 55664,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "15986585f40a350c99416262a915b2e78a4a1d68a2ed260f9b8ed3e2bbf41250",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "mixed-T3",
+      "product": "mixed",
+      "horizon": 3,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "complete",
+      "checked_native": {
+        "candidate_face_check": "not-applicable",
+        "status": "verified-bounded-branches",
+        "branch_count": 27,
+        "all_optimal_paths": [
+          {
+            "actions": [
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "actions": [
+              0,
+              0,
+              1
+            ]
+          },
+          {
+            "actions": [
+              0,
+              0,
+              2
+            ]
+          },
+          {
+            "actions": [
+              0,
+              1,
+              0
+            ]
+          },
+          {
+            "actions": [
+              0,
+              1,
+              1
+            ]
+          },
+          {
+            "actions": [
+              0,
+              1,
+              2
+            ]
+          },
+          {
+            "actions": [
+              0,
+              2,
+              0
+            ]
+          },
+          {
+            "actions": [
+              0,
+              2,
+              1
+            ]
+          },
+          {
+            "actions": [
+              0,
+              2,
+              2
+            ]
+          },
+          {
+            "actions": [
+              1,
+              0,
+              0
+            ]
+          },
+          {
+            "actions": [
+              1,
+              0,
+              1
+            ]
+          },
+          {
+            "actions": [
+              1,
+              0,
+              2
+            ]
+          },
+          {
+            "actions": [
+              1,
+              1,
+              0
+            ]
+          },
+          {
+            "actions": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "actions": [
+              1,
+              1,
+              2
+            ]
+          },
+          {
+            "actions": [
+              1,
+              2,
+              0
+            ]
+          },
+          {
+            "actions": [
+              1,
+              2,
+              1
+            ]
+          },
+          {
+            "actions": [
+              1,
+              2,
+              2
+            ]
+          },
+          {
+            "actions": [
+              2,
+              0,
+              0
+            ]
+          },
+          {
+            "actions": [
+              2,
+              0,
+              1
+            ]
+          },
+          {
+            "actions": [
+              2,
+              0,
+              2
+            ]
+          },
+          {
+            "actions": [
+              2,
+              1,
+              0
+            ]
+          },
+          {
+            "actions": [
+              2,
+              1,
+              1
+            ]
+          },
+          {
+            "actions": [
+              2,
+              1,
+              2
+            ]
+          },
+          {
+            "actions": [
+              2,
+              2,
+              0
+            ]
+          },
+          {
+            "actions": [
+              2,
+              2,
+              1
+            ]
+          },
+          {
+            "actions": [
+              2,
+              2,
+              2
+            ]
+          }
+        ],
+        "complete_continuous_family": false
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 27,
+        "complete_continuous_family": false
+      },
+      "native_branches": 27,
+      "native_total_lp_variables": 297,
+      "native_total_lp_rows": 702,
+      "native_simplex_iterations_sum": 378,
+      "observed_scheduler_threads": [
+        1
+      ],
+      "exact_optimum": "0",
+      "all_tie_count": 27,
+      "native_core_family_verification": null,
+      "native_seconds": {
+        "provider_registration": 3.6737e-05,
+        "history_enumeration": 1.2362e-05,
+        "hybrid_enumeration_probe": null,
+        "formulation_with_internal_enumeration": 0.001090722,
+        "portfolio_prepare_run_and_record": 0.010778916,
+        "native_lp_load_sum": 0.00032449,
+        "native_lp_solve_sum": 0.0072438,
+        "family_verification": null,
+        "whole_worker": 0.023766716942191124
+      },
+      "scip_global": {
+        "status": "optimal",
+        "formulation_and_setup_seconds": 0.0034573839511722326,
+        "optimization_seconds": 0.0039772880263626575,
+        "counts": {
+          "variables": 16,
+          "constraints": 7,
+          "binary_variables": 9
+        },
+        "nodes": 1,
+        "primal_bound": 0.0,
+        "dual_bound": 0.0,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ],
+        "objective": 0.0,
+        "states": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "controls": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "path": {
+          "actions": [
+            1,
+            1,
+            1
+          ]
+        }
+      },
+      "scip_fixed_branch_totals": {
+        "count": 27,
+        "formulation_and_setup_seconds": 0.05695413472130895,
+        "optimization_seconds": 0.061487078899517655
+      },
+      "scip_whole_worker_seconds": 0.4034290739800781,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/mixed-T3/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.023766716942191124,
+          "user_cpu_seconds": 0.00878000000000001,
+          "system_cpu_seconds": 0.010732000000000075,
+          "cumulative_children_max_rss_kib": 55664,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "7192ec7366803c3d7318b2beb4b97fb70c9599b8c9eed9aab02dd6dea6f3381f",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/mixed-T3/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/mixed-T3/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.4034290739800781,
+          "user_cpu_seconds": 0.23904799999999993,
+          "system_cpu_seconds": 0.16103199999999995,
+          "cumulative_children_max_rss_kib": 55700,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "ded710795416571be46a4f40e36f9f51f66021ace9aca3932db99fed233e5e99",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "finite-empty-T0",
+      "product": "finite",
+      "horizon": 0,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "complete",
+      "checked_native": {
+        "candidate_face_check": "not-applicable",
+        "status": "verified-bounded-branches",
+        "branch_count": 1,
+        "all_optimal_paths": [],
+        "complete_continuous_family": false
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 1,
+        "complete_continuous_family": false
+      },
+      "native_branches": 1,
+      "native_total_lp_variables": 2,
+      "native_total_lp_rows": 5,
+      "native_simplex_iterations_sum": 2,
+      "observed_scheduler_threads": [
+        1
+      ],
+      "exact_optimum": null,
+      "all_tie_count": 0,
+      "native_core_family_verification": null,
+      "native_seconds": {
+        "provider_registration": 2.5771e-05,
+        "history_enumeration": 8.661e-06,
+        "hybrid_enumeration_probe": null,
+        "formulation_with_internal_enumeration": 5.9505e-05,
+        "portfolio_prepare_run_and_record": 0.000660216,
+        "native_lp_load_sum": 3.8972e-05,
+        "native_lp_solve_sum": 0.000331749,
+        "family_verification": null,
+        "whole_worker": 0.007541601080447435
+      },
+      "scip_global": {
+        "status": "infeasible",
+        "formulation_and_setup_seconds": 0.0032190841156989336,
+        "optimization_seconds": 0.0012423479929566383,
+        "counts": {
+          "variables": 1,
+          "constraints": 1,
+          "binary_variables": 0
+        },
+        "nodes": 0,
+        "primal_bound": null,
+        "dual_bound": null,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ]
+      },
+      "scip_fixed_branch_totals": {
+        "count": 1,
+        "formulation_and_setup_seconds": 0.0023045039270073175,
+        "optimization_seconds": 0.0011995350942015648
+      },
+      "scip_whole_worker_seconds": 0.17641705996356905,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/finite-empty-T0/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.007541601080447435,
+          "user_cpu_seconds": 0.0009350000000001302,
+          "system_cpu_seconds": 0.003742000000000023,
+          "cumulative_children_max_rss_kib": 55700,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "2308adebe2b318f1c942e8018e52cc9151be73a1bc96bdbc15d00bd8b04882ff",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/finite-empty-T0/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/finite-empty-T0/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.17641705996356905,
+          "user_cpu_seconds": 0.13345399999999996,
+          "system_cpu_seconds": 0.03983700000000001,
+          "cumulative_children_max_rss_kib": 55700,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "4a563b239c8efb16a7bdd3a7d6c71e6ab267ebe65b8595471900895ca05c85f7",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "finite-empty-T1",
+      "product": "finite",
+      "horizon": 1,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "complete",
+      "checked_native": {
+        "candidate_face_check": "not-applicable",
+        "status": "verified-bounded-branches",
+        "branch_count": 0,
+        "all_optimal_paths": [],
+        "complete_continuous_family": false
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 0,
+        "complete_continuous_family": false
+      },
+      "native_branches": 0,
+      "native_total_lp_variables": 0,
+      "native_total_lp_rows": 0,
+      "native_simplex_iterations_sum": null,
+      "observed_scheduler_threads": [],
+      "exact_optimum": null,
+      "all_tie_count": 0,
+      "native_core_family_verification": null,
+      "native_seconds": {
+        "provider_registration": 2.5213e-05,
+        "history_enumeration": 7.193e-06,
+        "hybrid_enumeration_probe": null,
+        "formulation_with_internal_enumeration": 0.0,
+        "portfolio_prepare_run_and_record": 0.0,
+        "native_lp_load_sum": null,
+        "native_lp_solve_sum": null,
+        "family_verification": null,
+        "whole_worker": 0.00712233898229897
+      },
+      "scip_global": {
+        "status": "infeasible",
+        "formulation_and_setup_seconds": 0.0036479830741882324,
+        "optimization_seconds": 0.0012573639396578074,
+        "counts": {
+          "variables": 3,
+          "constraints": 3,
+          "binary_variables": 0
+        },
+        "nodes": 0,
+        "primal_bound": null,
+        "dual_bound": null,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ]
+      },
+      "scip_fixed_branch_totals": {
+        "count": 0,
+        "formulation_and_setup_seconds": 0,
+        "optimization_seconds": 0
+      },
+      "scip_whole_worker_seconds": 0.17214378179050982,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/finite-empty-T1/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.00712233898229897,
+          "user_cpu_seconds": 0.001274999999999915,
+          "system_cpu_seconds": 0.00255099999999997,
+          "cumulative_children_max_rss_kib": 55700,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "5177d59eb3b23720e37ab22fc5569b89a5d7311d6e5395b31fc8b3aa652873f1",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/finite-empty-T1/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/finite-empty-T1/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.17214378179050982,
+          "user_cpu_seconds": 0.13801200000000002,
+          "system_cpu_seconds": 0.031001999999999974,
+          "cumulative_children_max_rss_kib": 55700,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "7cec5e97aed5c6f5f46cfaefa198db9df6f755abb38aac7441d39e207dc7bde0",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "published-2d-identity",
+      "product": "hybrid",
+      "horizon": 1,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "complete",
+      "checked_native": {
+        "candidate_face_check": "exact-profile-candidate-face-relations-checked",
+        "status": "verified-bounded-branches",
+        "branch_count": 1,
+        "all_optimal_paths": [
+          {
+            "modes": [
+              "source",
+              "target"
+            ],
+            "edges": [
+              "switch"
+            ]
+          }
+        ],
+        "complete_continuous_family": true
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 1,
+        "complete_continuous_family": false
+      },
+      "native_branches": 1,
+      "native_total_lp_variables": 7,
+      "native_total_lp_rows": 20,
+      "native_simplex_iterations_sum": 10,
+      "observed_scheduler_threads": [
+        1
+      ],
+      "exact_optimum": "0",
+      "all_tie_count": 1,
+      "native_core_family_verification": {
+        "branches": [
+          {
+            "coverage": 1,
+            "diagnostics": [],
+            "feasibility": 1,
+            "optimality": 1,
+            "path": {
+              "edges": [
+                "switch"
+              ],
+              "modes": [
+                "source",
+                "target"
+              ]
+            }
+          }
+        ],
+        "continuous_coverage": 1,
+        "global_optimality": 1,
+        "verifier": "csl.hybrid.exact-linear-h",
+        "version": "1"
+      },
+      "native_seconds": {
+        "provider_registration": 2.6749e-05,
+        "history_enumeration": null,
+        "hybrid_enumeration_probe": 1.9626e-05,
+        "formulation_with_internal_enumeration": 0.000147017,
+        "portfolio_prepare_run_and_record": 0.000734667,
+        "native_lp_load_sum": 4.1417e-05,
+        "native_lp_solve_sum": 0.000403756,
+        "family_verification": 0.008590277,
+        "whole_worker": 0.016476825810968876
+      },
+      "scip_global": {
+        "status": "optimal",
+        "formulation_and_setup_seconds": 0.004015211947262287,
+        "optimization_seconds": 0.0029957289807498455,
+        "counts": {
+          "variables": 38,
+          "constraints": 66,
+          "binary_variables": 5
+        },
+        "nodes": 0,
+        "primal_bound": 0.0,
+        "dual_bound": 0.0,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ],
+        "objective": 0.0,
+        "states": [
+          -1.0,
+          0.0
+        ],
+        "controls": [
+          1.0
+        ],
+        "path": {
+          "modes": [
+            "source",
+            "target"
+          ],
+          "edges": [
+            "switch"
+          ]
+        }
+      },
+      "scip_fixed_branch_totals": {
+        "count": 1,
+        "formulation_and_setup_seconds": 0.0025263919960707426,
+        "optimization_seconds": 0.002665936015546322
+      },
+      "scip_whole_worker_seconds": 0.19442475121468306,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/published-2d-identity/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.016476825810968876,
+          "user_cpu_seconds": 0.007699000000000122,
+          "system_cpu_seconds": 0.005774000000000057,
+          "cumulative_children_max_rss_kib": 55700,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "ddae6c503b76e5a14cd30db7db73fd9f881538df1ff8883b5651bd424db3547d",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/published-2d-identity/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/published-2d-identity/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.19442475121468306,
+          "user_cpu_seconds": 0.14749999999999996,
+          "system_cpu_seconds": 0.043852,
+          "cumulative_children_max_rss_kib": 55700,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "c7ff81d07c86c6706a876a50a9ce4d3d02faef4b7ea20fa601c9fec3411278c9",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "guard-negative-reset",
+      "product": "hybrid",
+      "horizon": 1,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "complete",
+      "checked_native": {
+        "candidate_face_check": "exact-profile-candidate-face-relations-checked",
+        "status": "verified-bounded-branches",
+        "branch_count": 2,
+        "all_optimal_paths": [
+          {
+            "modes": [
+              "source",
+              "target"
+            ],
+            "edges": [
+              "switch-a"
+            ]
+          },
+          {
+            "modes": [
+              "source",
+              "target"
+            ],
+            "edges": [
+              "switch-b"
+            ]
+          }
+        ],
+        "complete_continuous_family": true
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 2,
+        "complete_continuous_family": false
+      },
+      "native_branches": 2,
+      "native_total_lp_variables": 14,
+      "native_total_lp_rows": 40,
+      "native_simplex_iterations_sum": 16,
+      "observed_scheduler_threads": [
+        1
+      ],
+      "exact_optimum": "1/2",
+      "all_tie_count": 2,
+      "native_core_family_verification": {
+        "branches": [
+          {
+            "coverage": 1,
+            "diagnostics": [],
+            "feasibility": 1,
+            "optimality": 1,
+            "path": {
+              "edges": [
+                "switch-a"
+              ],
+              "modes": [
+                "source",
+                "target"
+              ]
+            }
+          },
+          {
+            "coverage": 1,
+            "diagnostics": [],
+            "feasibility": 1,
+            "optimality": 1,
+            "path": {
+              "edges": [
+                "switch-b"
+              ],
+              "modes": [
+                "source",
+                "target"
+              ]
+            }
+          }
+        ],
+        "continuous_coverage": 1,
+        "global_optimality": 1,
+        "verifier": "csl.hybrid.exact-linear-h",
+        "version": "1"
+      },
+      "native_seconds": {
+        "provider_registration": 3.6807e-05,
+        "history_enumeration": null,
+        "hybrid_enumeration_probe": 1.6692e-05,
+        "formulation_with_internal_enumeration": 0.000226008,
+        "portfolio_prepare_run_and_record": 0.001207008,
+        "native_lp_load_sum": 6.2578e-05,
+        "native_lp_solve_sum": 0.0006740450000000001,
+        "family_verification": 0.017623491,
+        "whole_worker": 0.026295972056686878
+      },
+      "scip_global": {
+        "status": "optimal",
+        "formulation_and_setup_seconds": 0.004064170876517892,
+        "optimization_seconds": 0.0045874270144850016,
+        "counts": {
+          "variables": 43,
+          "constraints": 74,
+          "binary_variables": 6
+        },
+        "nodes": 1,
+        "primal_bound": 0.5,
+        "dual_bound": 0.5,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ],
+        "objective": 0.5,
+        "states": [
+          -1.0,
+          0.5
+        ],
+        "controls": [
+          1.5
+        ],
+        "path": {
+          "modes": [
+            "source",
+            "target"
+          ],
+          "edges": [
+            "switch-b"
+          ]
+        }
+      },
+      "scip_fixed_branch_totals": {
+        "count": 2,
+        "formulation_and_setup_seconds": 0.005052434280514717,
+        "optimization_seconds": 0.0068072129506617785
+      },
+      "scip_whole_worker_seconds": 0.2151454531121999,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/guard-negative-reset/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.026295972056686878,
+          "user_cpu_seconds": 0.014206999999999859,
+          "system_cpu_seconds": 0.009132999999999947,
+          "cumulative_children_max_rss_kib": 55700,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "9bae591d6820387393c8341416e7dc81706791a0df89a56bb80c006ae7accd84",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/guard-negative-reset/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/guard-negative-reset/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.2151454531121999,
+          "user_cpu_seconds": 0.14693699999999987,
+          "system_cpu_seconds": 0.06497200000000003,
+          "cumulative_children_max_rss_kib": 55780,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "a01e40d0627b3e8c76ba4a71f6b681c63a900cca7ad3f802a5f7b11aed34a0c5",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "source-pre-invariant-fails",
+      "product": "hybrid",
+      "horizon": 1,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "complete",
+      "checked_native": {
+        "candidate_face_check": "exact-profile-candidate-face-relations-checked",
+        "status": "verified-bounded-branches",
+        "branch_count": 1,
+        "all_optimal_paths": [],
+        "complete_continuous_family": false
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 1,
+        "complete_continuous_family": false
+      },
+      "native_branches": 1,
+      "native_total_lp_variables": 7,
+      "native_total_lp_rows": 20,
+      "native_simplex_iterations_sum": 10,
+      "observed_scheduler_threads": [
+        1
+      ],
+      "exact_optimum": null,
+      "all_tie_count": 0,
+      "native_core_family_verification": {
+        "branches": [
+          {
+            "coverage": 1,
+            "diagnostics": [],
+            "feasibility": 2,
+            "optimality": 2,
+            "path": {
+              "edges": [
+                "switch"
+              ],
+              "modes": [
+                "source",
+                "target"
+              ]
+            }
+          }
+        ],
+        "continuous_coverage": 2,
+        "global_optimality": 2,
+        "verifier": "csl.hybrid.exact-linear-h",
+        "version": "1"
+      },
+      "native_seconds": {
+        "provider_registration": 2.6749e-05,
+        "history_enumeration": null,
+        "hybrid_enumeration_probe": 2.3327e-05,
+        "formulation_with_internal_enumeration": 0.00013682,
+        "portfolio_prepare_run_and_record": 0.000796686,
+        "native_lp_load_sum": 6.9073e-05,
+        "native_lp_solve_sum": 0.000433439,
+        "family_verification": 0.003505086,
+        "whole_worker": 0.011548361973837018
+      },
+      "scip_global": {
+        "status": "infeasible",
+        "formulation_and_setup_seconds": 0.004029110074043274,
+        "optimization_seconds": 0.0021666360553354025,
+        "counts": {
+          "variables": 38,
+          "constraints": 66,
+          "binary_variables": 5
+        },
+        "nodes": 0,
+        "primal_bound": null,
+        "dual_bound": null,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ]
+      },
+      "scip_fixed_branch_totals": {
+        "count": 1,
+        "formulation_and_setup_seconds": 0.002398999873548746,
+        "optimization_seconds": 0.0018998400773853064
+      },
+      "scip_whole_worker_seconds": 0.19178849807940423,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/source-pre-invariant-fails/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.011548361973837018,
+          "user_cpu_seconds": 0.004237000000000268,
+          "system_cpu_seconds": 0.004236999999999935,
+          "cumulative_children_max_rss_kib": 55780,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "a065896e2cdb4bdc3525aebfd3c1329375804490561e42eea8670bc9bc19660e",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/source-pre-invariant-fails/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/source-pre-invariant-fails/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.19178849807940423,
+          "user_cpu_seconds": 0.14075999999999977,
+          "system_cpu_seconds": 0.047918000000000016,
+          "cumulative_children_max_rss_kib": 55780,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "737e9e360c108e80d9000e7b04b1f0c84a0670a0bd7f234a1b0fe50b422a7b43",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "guard-fails",
+      "product": "hybrid",
+      "horizon": 1,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "complete",
+      "checked_native": {
+        "candidate_face_check": "exact-profile-candidate-face-relations-checked",
+        "status": "verified-bounded-branches",
+        "branch_count": 1,
+        "all_optimal_paths": [],
+        "complete_continuous_family": false
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 1,
+        "complete_continuous_family": false
+      },
+      "native_branches": 1,
+      "native_total_lp_variables": 7,
+      "native_total_lp_rows": 20,
+      "native_simplex_iterations_sum": 10,
+      "observed_scheduler_threads": [
+        1
+      ],
+      "exact_optimum": null,
+      "all_tie_count": 0,
+      "native_core_family_verification": {
+        "branches": [
+          {
+            "coverage": 1,
+            "diagnostics": [],
+            "feasibility": 2,
+            "optimality": 2,
+            "path": {
+              "edges": [
+                "switch"
+              ],
+              "modes": [
+                "source",
+                "target"
+              ]
+            }
+          }
+        ],
+        "continuous_coverage": 2,
+        "global_optimality": 2,
+        "verifier": "csl.hybrid.exact-linear-h",
+        "version": "1"
+      },
+      "native_seconds": {
+        "provider_registration": 2.7099e-05,
+        "history_enumeration": null,
+        "hybrid_enumeration_probe": 1.9765e-05,
+        "formulation_with_internal_enumeration": 0.000137379,
+        "portfolio_prepare_run_and_record": 0.000824204,
+        "native_lp_load_sum": 5.1473e-05,
+        "native_lp_solve_sum": 0.000471224,
+        "family_verification": 0.003479734,
+        "whole_worker": 0.011562749044969678
+      },
+      "scip_global": {
+        "status": "infeasible",
+        "formulation_and_setup_seconds": 0.004088266985490918,
+        "optimization_seconds": 0.0020307940430939198,
+        "counts": {
+          "variables": 38,
+          "constraints": 66,
+          "binary_variables": 5
+        },
+        "nodes": 0,
+        "primal_bound": null,
+        "dual_bound": null,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ]
+      },
+      "scip_fixed_branch_totals": {
+        "count": 1,
+        "formulation_and_setup_seconds": 0.002635485026985407,
+        "optimization_seconds": 0.0018749069422483444
+      },
+      "scip_whole_worker_seconds": 0.18943447712808847,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/guard-fails/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.011562749044969678,
+          "user_cpu_seconds": 0.006402000000000019,
+          "system_cpu_seconds": 0.0021339999999999693,
+          "cumulative_children_max_rss_kib": 55780,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "fcf102f62ea8b22f07e5cb88b55a5908595f30ce6568436298cdd5659fd45440",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/guard-fails/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/guard-fails/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.18943447712808847,
+          "user_cpu_seconds": 0.13623699999999994,
+          "system_cpu_seconds": 0.05008699999999999,
+          "cumulative_children_max_rss_kib": 55780,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "c46838d5f4eae4117ec6cfc3ed6eaf7424c703a93f952786845473d4f86d8e5b",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "destination-invariant-fails",
+      "product": "hybrid",
+      "horizon": 1,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "complete",
+      "checked_native": {
+        "candidate_face_check": "exact-profile-candidate-face-relations-checked",
+        "status": "verified-bounded-branches",
+        "branch_count": 1,
+        "all_optimal_paths": [],
+        "complete_continuous_family": false
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 1,
+        "complete_continuous_family": false
+      },
+      "native_branches": 1,
+      "native_total_lp_variables": 7,
+      "native_total_lp_rows": 20,
+      "native_simplex_iterations_sum": 9,
+      "observed_scheduler_threads": [
+        1
+      ],
+      "exact_optimum": null,
+      "all_tie_count": 0,
+      "native_core_family_verification": {
+        "branches": [
+          {
+            "coverage": 1,
+            "diagnostics": [],
+            "feasibility": 2,
+            "optimality": 2,
+            "path": {
+              "edges": [
+                "switch"
+              ],
+              "modes": [
+                "source",
+                "target"
+              ]
+            }
+          }
+        ],
+        "continuous_coverage": 2,
+        "global_optimality": 2,
+        "verifier": "csl.hybrid.exact-linear-h",
+        "version": "1"
+      },
+      "native_seconds": {
+        "provider_registration": 3.6388e-05,
+        "history_enumeration": null,
+        "hybrid_enumeration_probe": 1.9626e-05,
+        "formulation_with_internal_enumeration": 0.000178377,
+        "portfolio_prepare_run_and_record": 0.000770287,
+        "native_lp_load_sum": 4.449e-05,
+        "native_lp_solve_sum": 0.00042862,
+        "family_verification": 0.004277817,
+        "whole_worker": 0.012627559015527368
+      },
+      "scip_global": {
+        "status": "infeasible",
+        "formulation_and_setup_seconds": 0.004311761120334268,
+        "optimization_seconds": 0.002032051095739007,
+        "counts": {
+          "variables": 38,
+          "constraints": 66,
+          "binary_variables": 5
+        },
+        "nodes": 0,
+        "primal_bound": null,
+        "dual_bound": null,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ]
+      },
+      "scip_fixed_branch_totals": {
+        "count": 1,
+        "formulation_and_setup_seconds": 0.00233481521718204,
+        "optimization_seconds": 0.0018726009875535965
+      },
+      "scip_whole_worker_seconds": 0.20305064786225557,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/destination-invariant-fails/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.012627559015527368,
+          "user_cpu_seconds": 0.005333000000000254,
+          "system_cpu_seconds": 0.004267000000000021,
+          "cumulative_children_max_rss_kib": 55780,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "6b2947e697ff997a229ec261522507d49fac563277035d0a869ddbd561e0330a",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/destination-invariant-fails/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/destination-invariant-fails/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.20305064786225557,
+          "user_cpu_seconds": 0.15298699999999998,
+          "system_cpu_seconds": 0.04699600000000004,
+          "cumulative_children_max_rss_kib": 55780,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "04866d039a0129dc052f14c7e434c27fc2403e5aff2df24064fe6715bdec78db",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "forbidden-transition",
+      "product": "hybrid",
+      "horizon": 1,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "construction-refused",
+      "checked_native": {
+        "status": "verified-empty-branch-inventory",
+        "branch_count": 0,
+        "complete_continuous_family": false,
+        "native_construction": {
+          "diagnostics": [
+            {
+              "code": 3,
+              "explanation": "No allowed hybrid path exists for the requested terminal modes",
+              "field": "hybrid.portfolio.paths"
+            }
+          ],
+          "status": "public-api-refused",
+          "variant_index": 1
+        }
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 0,
+        "complete_continuous_family": false
+      },
+      "native_branches": 0,
+      "native_total_lp_variables": 0,
+      "native_total_lp_rows": 0,
+      "native_simplex_iterations_sum": null,
+      "observed_scheduler_threads": [],
+      "exact_optimum": null,
+      "all_tie_count": 0,
+      "native_core_family_verification": null,
+      "native_seconds": {
+        "provider_registration": 2.4933e-05,
+        "history_enumeration": null,
+        "hybrid_enumeration_probe": 1.4946e-05,
+        "formulation_with_internal_enumeration": 1.8508e-05,
+        "portfolio_prepare_run_and_record": null,
+        "native_lp_load_sum": null,
+        "native_lp_solve_sum": null,
+        "family_verification": null,
+        "whole_worker": 0.006547959055751562
+      },
+      "scip_global": {
+        "status": "infeasible",
+        "formulation_and_setup_seconds": 0.004238914931192994,
+        "optimization_seconds": 0.0015305860433727503,
+        "counts": {
+          "variables": 33,
+          "constraints": 58,
+          "binary_variables": 4
+        },
+        "nodes": 0,
+        "primal_bound": null,
+        "dual_bound": null,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ]
+      },
+      "scip_fixed_branch_totals": {
+        "count": 0,
+        "formulation_and_setup_seconds": 0,
+        "optimization_seconds": 0
+      },
+      "scip_whole_worker_seconds": 0.17724859807640314,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/forbidden-transition/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.006547959055751562,
+          "user_cpu_seconds": 0.0012300000000000644,
+          "system_cpu_seconds": 0.0024600000000001288,
+          "cumulative_children_max_rss_kib": 55780,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "bac344c12c1225cc5150a119c1d6a751e96a77227b27dac1471fc71e42d9118b",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/forbidden-transition/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/forbidden-transition/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.17724859807640314,
+          "user_cpu_seconds": 0.13512799999999991,
+          "system_cpu_seconds": 0.03903699999999999,
+          "cumulative_children_max_rss_kib": 55780,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "19ae3bc9ce3602939eb4807e1d6bafdd781845f80b8c90604a5766f1e6667714",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "hybrid-T0",
+      "product": "hybrid",
+      "horizon": 0,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "complete",
+      "checked_native": {
+        "candidate_face_check": "exact-profile-candidate-face-relations-checked",
+        "status": "verified-bounded-branches",
+        "branch_count": 1,
+        "all_optimal_paths": [
+          {
+            "modes": [
+              "A"
+            ],
+            "edges": []
+          }
+        ],
+        "complete_continuous_family": true
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 1,
+        "complete_continuous_family": false
+      },
+      "native_branches": 1,
+      "native_total_lp_variables": 2,
+      "native_total_lp_rows": 5,
+      "native_simplex_iterations_sum": 3,
+      "observed_scheduler_threads": [
+        1
+      ],
+      "exact_optimum": "-1",
+      "all_tie_count": 1,
+      "native_core_family_verification": {
+        "branches": [
+          {
+            "coverage": 1,
+            "diagnostics": [],
+            "feasibility": 1,
+            "optimality": 1,
+            "path": {
+              "edges": [],
+              "modes": [
+                "A"
+              ]
+            }
+          }
+        ],
+        "continuous_coverage": 1,
+        "global_optimality": 1,
+        "verifier": "csl.hybrid.exact-linear-h",
+        "version": "1"
+      },
+      "native_seconds": {
+        "provider_registration": 2.5493e-05,
+        "history_enumeration": null,
+        "hybrid_enumeration_probe": 1.9556e-05,
+        "formulation_with_internal_enumeration": 8.2903e-05,
+        "portfolio_prepare_run_and_record": 0.000648202,
+        "native_lp_load_sum": 4.1486e-05,
+        "native_lp_solve_sum": 0.000338593,
+        "family_verification": 0.000806674,
+        "whole_worker": 0.008864826057106256
+      },
+      "scip_global": {
+        "status": "optimal",
+        "formulation_and_setup_seconds": 0.003751348936930299,
+        "optimization_seconds": 0.0023403330706059933,
+        "counts": {
+          "variables": 12,
+          "constraints": 19,
+          "binary_variables": 2
+        },
+        "nodes": 0,
+        "primal_bound": -1.0,
+        "dual_bound": -1.0,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ],
+        "objective": -1.0,
+        "states": [
+          -1.0
+        ],
+        "controls": [],
+        "path": {
+          "modes": [
+            "A"
+          ],
+          "edges": []
+        }
+      },
+      "scip_fixed_branch_totals": {
+        "count": 1,
+        "formulation_and_setup_seconds": 0.0021486871410161257,
+        "optimization_seconds": 0.0021964588668197393
+      },
+      "scip_whole_worker_seconds": 0.18478740379214287,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/hybrid-T0/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.008864826057106256,
+          "user_cpu_seconds": 0.0009739999999998084,
+          "system_cpu_seconds": 0.004870999999999848,
+          "cumulative_children_max_rss_kib": 55780,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "85f23f4dc24b5ad9dde23d746b7237ee58e9c302bd0aeb4c984ef381dd7eef7d",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/hybrid-T0/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/hybrid-T0/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.18478740379214287,
+          "user_cpu_seconds": 0.154636,
+          "system_cpu_seconds": 0.027112000000000025,
+          "cumulative_children_max_rss_kib": 55780,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "085dc20ff33aae276efe91bc6b7f3ddf1f162fbc5b462b9aab08bc4724b7f547",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "hybrid-T1",
+      "product": "hybrid",
+      "horizon": 1,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "complete",
+      "checked_native": {
+        "candidate_face_check": "exact-profile-candidate-face-relations-checked",
+        "status": "verified-bounded-branches",
+        "branch_count": 3,
+        "all_optimal_paths": [
+          {
+            "modes": [
+              "A",
+              "A"
+            ],
+            "edges": [
+              "stay-A"
+            ]
+          }
+        ],
+        "complete_continuous_family": true
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 3,
+        "complete_continuous_family": false
+      },
+      "native_branches": 3,
+      "native_total_lp_variables": 21,
+      "native_total_lp_rows": 60,
+      "native_simplex_iterations_sum": 28,
+      "observed_scheduler_threads": [
+        1
+      ],
+      "exact_optimum": "-1",
+      "all_tie_count": 1,
+      "native_core_family_verification": {
+        "branches": [
+          {
+            "coverage": 1,
+            "diagnostics": [],
+            "feasibility": 1,
+            "optimality": 1,
+            "path": {
+              "edges": [
+                "stay-A"
+              ],
+              "modes": [
+                "A",
+                "A"
+              ]
+            }
+          },
+          {
+            "coverage": 1,
+            "diagnostics": [],
+            "feasibility": 1,
+            "optimality": 2,
+            "path": {
+              "edges": [
+                "switch-a"
+              ],
+              "modes": [
+                "A",
+                "B"
+              ]
+            }
+          },
+          {
+            "coverage": 1,
+            "diagnostics": [],
+            "feasibility": 1,
+            "optimality": 2,
+            "path": {
+              "edges": [
+                "switch-b"
+              ],
+              "modes": [
+                "A",
+                "B"
+              ]
+            }
+          }
+        ],
+        "continuous_coverage": 1,
+        "global_optimality": 1,
+        "verifier": "csl.hybrid.exact-linear-h",
+        "version": "1"
+      },
+      "native_seconds": {
+        "provider_registration": 2.7657e-05,
+        "history_enumeration": null,
+        "hybrid_enumeration_probe": 2.1511e-05,
+        "formulation_with_internal_enumeration": 0.000306816,
+        "portfolio_prepare_run_and_record": 0.001503068,
+        "native_lp_load_sum": 6.1949e-05,
+        "native_lp_solve_sum": 0.000940771,
+        "family_verification": 0.015271076,
+        "whole_worker": 0.024458013009279966
+      },
+      "scip_global": {
+        "status": "optimal",
+        "formulation_and_setup_seconds": 0.00422068708576262,
+        "optimization_seconds": 0.008233594940975308,
+        "counts": {
+          "variables": 58,
+          "constraints": 97,
+          "binary_variables": 9
+        },
+        "nodes": 1,
+        "primal_bound": -1.0,
+        "dual_bound": -1.0,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ],
+        "objective": -1.0,
+        "states": [
+          -1.0,
+          -1.0
+        ],
+        "controls": [
+          0.0
+        ],
+        "path": {
+          "modes": [
+            "A",
+            "A"
+          ],
+          "edges": [
+            "stay-A"
+          ]
+        }
+      },
+      "scip_fixed_branch_totals": {
+        "count": 3,
+        "formulation_and_setup_seconds": 0.007569046691060066,
+        "optimization_seconds": 0.011174009181559086
+      },
+      "scip_whole_worker_seconds": 0.24471421702764928,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/hybrid-T1/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.024458013009279966,
+          "user_cpu_seconds": 0.009178000000000353,
+          "system_cpu_seconds": 0.012237999999999971,
+          "cumulative_children_max_rss_kib": 55780,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "21379ca5eb67fade8623720a6bbf1b3081208c2afa878cf9519aa53fcdcb8773",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/hybrid-T1/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/hybrid-T1/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.24471421702764928,
+          "user_cpu_seconds": 0.1639419999999996,
+          "system_cpu_seconds": 0.07744400000000007,
+          "cumulative_children_max_rss_kib": 56260,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "110f9b98c1f8e6e4b9ac50b20a206f1f2690e1ca105a1dbf8c09f73624911400",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "hybrid-T2",
+      "product": "hybrid",
+      "horizon": 2,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "complete",
+      "checked_native": {
+        "candidate_face_check": "exact-profile-candidate-face-relations-checked",
+        "status": "verified-bounded-branches",
+        "branch_count": 7,
+        "all_optimal_paths": [
+          {
+            "modes": [
+              "A",
+              "A",
+              "A"
+            ],
+            "edges": [
+              "stay-A",
+              "stay-A"
+            ]
+          }
+        ],
+        "complete_continuous_family": false
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 7,
+        "complete_continuous_family": false
+      },
+      "native_branches": 7,
+      "native_total_lp_variables": 84,
+      "native_total_lp_rows": 245,
+      "native_simplex_iterations_sum": 119,
+      "observed_scheduler_threads": [
+        1
+      ],
+      "exact_optimum": "-1",
+      "all_tie_count": 1,
+      "native_core_family_verification": {
+        "branches": [
+          {
+            "coverage": 3,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              },
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_face_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 1,
+            "path": {
+              "edges": [
+                "stay-A",
+                "stay-A"
+              ],
+              "modes": [
+                "A",
+                "A",
+                "A"
+              ]
+            }
+          },
+          {
+            "coverage": 1,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 2,
+            "path": {
+              "edges": [
+                "stay-A",
+                "switch-a"
+              ],
+              "modes": [
+                "A",
+                "A",
+                "B"
+              ]
+            }
+          },
+          {
+            "coverage": 1,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 2,
+            "path": {
+              "edges": [
+                "stay-A",
+                "switch-b"
+              ],
+              "modes": [
+                "A",
+                "A",
+                "B"
+              ]
+            }
+          },
+          {
+            "coverage": 1,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 2,
+            "path": {
+              "edges": [
+                "switch-a",
+                "return"
+              ],
+              "modes": [
+                "A",
+                "B",
+                "A"
+              ]
+            }
+          },
+          {
+            "coverage": 1,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 2,
+            "path": {
+              "edges": [
+                "switch-a",
+                "stay-B"
+              ],
+              "modes": [
+                "A",
+                "B",
+                "B"
+              ]
+            }
+          },
+          {
+            "coverage": 1,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 2,
+            "path": {
+              "edges": [
+                "switch-b",
+                "return"
+              ],
+              "modes": [
+                "A",
+                "B",
+                "A"
+              ]
+            }
+          },
+          {
+            "coverage": 1,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 2,
+            "path": {
+              "edges": [
+                "switch-b",
+                "stay-B"
+              ],
+              "modes": [
+                "A",
+                "B",
+                "B"
+              ]
+            }
+          }
+        ],
+        "continuous_coverage": 3,
+        "global_optimality": 1,
+        "verifier": "csl.hybrid.exact-linear-h",
+        "version": "1"
+      },
+      "native_seconds": {
+        "provider_registration": 6.3416e-05,
+        "history_enumeration": null,
+        "hybrid_enumeration_probe": 7.8921e-05,
+        "formulation_with_internal_enumeration": 0.001816798,
+        "portfolio_prepare_run_and_record": 0.007671227,
+        "native_lp_load_sum": 0.000277763,
+        "native_lp_solve_sum": 0.004950675,
+        "family_verification": 0.011770109,
+        "whole_worker": 0.034585998160764575
+      },
+      "scip_global": {
+        "status": "optimal",
+        "formulation_and_setup_seconds": 0.004661947954446077,
+        "optimization_seconds": 0.023013122845441103,
+        "counts": {
+          "variables": 104,
+          "constraints": 175,
+          "binary_variables": 16
+        },
+        "nodes": 1,
+        "primal_bound": -1.0000000000000009,
+        "dual_bound": -1.0000000000000009,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ],
+        "objective": -1.0000000000000009,
+        "states": [
+          -1.0,
+          -1.0,
+          -1.0000000000000009
+        ],
+        "controls": [
+          0.0,
+          0.0
+        ],
+        "path": {
+          "modes": [
+            "A",
+            "A",
+            "A"
+          ],
+          "edges": [
+            "stay-A",
+            "stay-A"
+          ]
+        }
+      },
+      "scip_fixed_branch_totals": {
+        "count": 7,
+        "formulation_and_setup_seconds": 0.02109058597125113,
+        "optimization_seconds": 0.034908178029581904
+      },
+      "scip_whole_worker_seconds": 0.40598961897194386,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/hybrid-T2/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.034585998160764575,
+          "user_cpu_seconds": 0.020694999999999908,
+          "system_cpu_seconds": 0.0108410000000001,
+          "cumulative_children_max_rss_kib": 56260,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "9ab4335db949c8b49cd4fcc6f78549722c8d335c52b8d4e4331672c3fec4a313",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/hybrid-T2/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/hybrid-T2/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.40598961897194386,
+          "user_cpu_seconds": 0.1972350000000005,
+          "system_cpu_seconds": 0.20524399999999998,
+          "cumulative_children_max_rss_kib": 57168,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "a50add46ba9396ac2040ad60e280dbc42e317da82e142405960aaa8da5126550",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "hybrid-T3",
+      "product": "hybrid",
+      "horizon": 3,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "complete",
+      "checked_native": {
+        "candidate_face_check": "exact-profile-candidate-face-relations-checked",
+        "status": "verified-bounded-branches",
+        "branch_count": 17,
+        "all_optimal_paths": [
+          {
+            "modes": [
+              "A",
+              "A",
+              "A",
+              "A"
+            ],
+            "edges": [
+              "stay-A",
+              "stay-A",
+              "stay-A"
+            ]
+          },
+          {
+            "modes": [
+              "A",
+              "A",
+              "B",
+              "A"
+            ],
+            "edges": [
+              "stay-A",
+              "switch-a",
+              "return"
+            ]
+          },
+          {
+            "modes": [
+              "A",
+              "A",
+              "B",
+              "A"
+            ],
+            "edges": [
+              "stay-A",
+              "switch-b",
+              "return"
+            ]
+          },
+          {
+            "modes": [
+              "A",
+              "B",
+              "A",
+              "B"
+            ],
+            "edges": [
+              "switch-a",
+              "return",
+              "switch-a"
+            ]
+          },
+          {
+            "modes": [
+              "A",
+              "B",
+              "A",
+              "B"
+            ],
+            "edges": [
+              "switch-a",
+              "return",
+              "switch-b"
+            ]
+          },
+          {
+            "modes": [
+              "A",
+              "B",
+              "B",
+              "A"
+            ],
+            "edges": [
+              "switch-a",
+              "stay-B",
+              "return"
+            ]
+          },
+          {
+            "modes": [
+              "A",
+              "B",
+              "A",
+              "B"
+            ],
+            "edges": [
+              "switch-b",
+              "return",
+              "switch-a"
+            ]
+          },
+          {
+            "modes": [
+              "A",
+              "B",
+              "A",
+              "B"
+            ],
+            "edges": [
+              "switch-b",
+              "return",
+              "switch-b"
+            ]
+          },
+          {
+            "modes": [
+              "A",
+              "B",
+              "B",
+              "A"
+            ],
+            "edges": [
+              "switch-b",
+              "stay-B",
+              "return"
+            ]
+          }
+        ],
+        "complete_continuous_family": false
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 17,
+        "complete_continuous_family": false
+      },
+      "native_branches": 17,
+      "native_total_lp_variables": 289,
+      "native_total_lp_rows": 850,
+      "native_simplex_iterations_sum": 408,
+      "observed_scheduler_threads": [
+        1
+      ],
+      "exact_optimum": "-1",
+      "all_tie_count": 9,
+      "native_core_family_verification": {
+        "branches": [
+          {
+            "coverage": 3,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              },
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_face_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 1,
+            "path": {
+              "edges": [
+                "stay-A",
+                "stay-A",
+                "stay-A"
+              ],
+              "modes": [
+                "A",
+                "A",
+                "A",
+                "A"
+              ]
+            }
+          },
+          {
+            "coverage": 1,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 2,
+            "path": {
+              "edges": [
+                "stay-A",
+                "stay-A",
+                "switch-a"
+              ],
+              "modes": [
+                "A",
+                "A",
+                "A",
+                "B"
+              ]
+            }
+          },
+          {
+            "coverage": 1,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 2,
+            "path": {
+              "edges": [
+                "stay-A",
+                "stay-A",
+                "switch-b"
+              ],
+              "modes": [
+                "A",
+                "A",
+                "A",
+                "B"
+              ]
+            }
+          },
+          {
+            "coverage": 3,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              },
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_face_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 1,
+            "path": {
+              "edges": [
+                "stay-A",
+                "switch-a",
+                "return"
+              ],
+              "modes": [
+                "A",
+                "A",
+                "B",
+                "A"
+              ]
+            }
+          },
+          {
+            "coverage": 1,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 2,
+            "path": {
+              "edges": [
+                "stay-A",
+                "switch-a",
+                "stay-B"
+              ],
+              "modes": [
+                "A",
+                "A",
+                "B",
+                "B"
+              ]
+            }
+          },
+          {
+            "coverage": 3,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              },
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_face_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 1,
+            "path": {
+              "edges": [
+                "stay-A",
+                "switch-b",
+                "return"
+              ],
+              "modes": [
+                "A",
+                "A",
+                "B",
+                "A"
+              ]
+            }
+          },
+          {
+            "coverage": 1,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 2,
+            "path": {
+              "edges": [
+                "stay-A",
+                "switch-b",
+                "stay-B"
+              ],
+              "modes": [
+                "A",
+                "A",
+                "B",
+                "B"
+              ]
+            }
+          },
+          {
+            "coverage": 1,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 2,
+            "path": {
+              "edges": [
+                "switch-a",
+                "return",
+                "stay-A"
+              ],
+              "modes": [
+                "A",
+                "B",
+                "A",
+                "A"
+              ]
+            }
+          },
+          {
+            "coverage": 3,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              },
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_face_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 1,
+            "path": {
+              "edges": [
+                "switch-a",
+                "return",
+                "switch-a"
+              ],
+              "modes": [
+                "A",
+                "B",
+                "A",
+                "B"
+              ]
+            }
+          },
+          {
+            "coverage": 3,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              },
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_face_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 1,
+            "path": {
+              "edges": [
+                "switch-a",
+                "return",
+                "switch-b"
+              ],
+              "modes": [
+                "A",
+                "B",
+                "A",
+                "B"
+              ]
+            }
+          },
+          {
+            "coverage": 3,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              },
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_face_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 1,
+            "path": {
+              "edges": [
+                "switch-a",
+                "stay-B",
+                "return"
+              ],
+              "modes": [
+                "A",
+                "B",
+                "B",
+                "A"
+              ]
+            }
+          },
+          {
+            "coverage": 1,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 2,
+            "path": {
+              "edges": [
+                "switch-a",
+                "stay-B",
+                "stay-B"
+              ],
+              "modes": [
+                "A",
+                "B",
+                "B",
+                "B"
+              ]
+            }
+          },
+          {
+            "coverage": 1,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 2,
+            "path": {
+              "edges": [
+                "switch-b",
+                "return",
+                "stay-A"
+              ],
+              "modes": [
+                "A",
+                "B",
+                "A",
+                "A"
+              ]
+            }
+          },
+          {
+            "coverage": 3,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              },
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_face_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 1,
+            "path": {
+              "edges": [
+                "switch-b",
+                "return",
+                "switch-a"
+              ],
+              "modes": [
+                "A",
+                "B",
+                "A",
+                "B"
+              ]
+            }
+          },
+          {
+            "coverage": 3,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              },
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_face_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 1,
+            "path": {
+              "edges": [
+                "switch-b",
+                "return",
+                "switch-b"
+              ],
+              "modes": [
+                "A",
+                "B",
+                "A",
+                "B"
+              ]
+            }
+          },
+          {
+            "coverage": 3,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              },
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_face_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 1,
+            "path": {
+              "edges": [
+                "switch-b",
+                "stay-B",
+                "return"
+              ],
+              "modes": [
+                "A",
+                "B",
+                "B",
+                "A"
+              ]
+            }
+          },
+          {
+            "coverage": 1,
+            "diagnostics": [
+              {
+                "code": 1,
+                "explanation": "Exact feasibility could not decide relation inclusion",
+                "field": "hybrid.verification.exact_linear_h_program_mismatch"
+              }
+            ],
+            "feasibility": 1,
+            "optimality": 2,
+            "path": {
+              "edges": [
+                "switch-b",
+                "stay-B",
+                "stay-B"
+              ],
+              "modes": [
+                "A",
+                "B",
+                "B",
+                "B"
+              ]
+            }
+          }
+        ],
+        "continuous_coverage": 3,
+        "global_optimality": 1,
+        "verifier": "csl.hybrid.exact-linear-h",
+        "version": "1"
+      },
+      "native_seconds": {
+        "provider_registration": 4.6166e-05,
+        "history_enumeration": null,
+        "hybrid_enumeration_probe": 6.5302e-05,
+        "formulation_with_internal_enumeration": 0.004540703,
+        "portfolio_prepare_run_and_record": 0.011649981,
+        "native_lp_load_sum": 0.000352212,
+        "native_lp_solve_sum": 0.008112208,
+        "family_verification": 0.022741088,
+        "whole_worker": 0.05502174491994083
+      },
+      "scip_global": {
+        "status": "optimal",
+        "formulation_and_setup_seconds": 0.005090218968689442,
+        "optimization_seconds": 0.07279420900158584,
+        "counts": {
+          "variables": 150,
+          "constraints": 253,
+          "binary_variables": 23
+        },
+        "nodes": 15,
+        "primal_bound": -1.0,
+        "dual_bound": -1.0,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ],
+        "objective": -1.0,
+        "states": [
+          -1.0,
+          -1.0,
+          -1.0,
+          -1.0
+        ],
+        "controls": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "path": {
+          "modes": [
+            "A",
+            "A",
+            "A",
+            "A"
+          ],
+          "edges": [
+            "stay-A",
+            "stay-A",
+            "stay-A"
+          ]
+        }
+      },
+      "scip_fixed_branch_totals": {
+        "count": 17,
+        "formulation_and_setup_seconds": 0.06044007954187691,
+        "optimization_seconds": 0.10778724518604577
+      },
+      "scip_whole_worker_seconds": 0.9356031399220228,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/hybrid-T3/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.05502174491994083,
+          "user_cpu_seconds": 0.02906999999999993,
+          "system_cpu_seconds": 0.022052999999999878,
+          "cumulative_children_max_rss_kib": 57168,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "f71d7be5c1edbfc6bbb7a6a820c76947aa28a8b3aa296364936ea5da89c45161",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/hybrid-T3/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/hybrid-T3/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.9356031399220228,
+          "user_cpu_seconds": 0.3320149999999997,
+          "system_cpu_seconds": 0.5990279999999999,
+          "cumulative_children_max_rss_kib": 60108,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "0ddca6065cc6d5fcd52e3edf22b712098aa11fc099cf256fab395116c8a83c9d",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "flat-continuous-ties",
+      "product": "hybrid",
+      "horizon": 1,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "complete",
+      "checked_native": {
+        "candidate_face_check": "exact-profile-candidate-face-relations-checked",
+        "status": "verified-bounded-branches",
+        "branch_count": 3,
+        "all_optimal_paths": [
+          {
+            "modes": [
+              "A",
+              "A"
+            ],
+            "edges": [
+              "stay-A"
+            ]
+          },
+          {
+            "modes": [
+              "A",
+              "B"
+            ],
+            "edges": [
+              "switch-a"
+            ]
+          },
+          {
+            "modes": [
+              "A",
+              "B"
+            ],
+            "edges": [
+              "switch-b"
+            ]
+          }
+        ],
+        "complete_continuous_family": true
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 3,
+        "complete_continuous_family": false
+      },
+      "native_branches": 3,
+      "native_total_lp_variables": 21,
+      "native_total_lp_rows": 60,
+      "native_simplex_iterations_sum": 9,
+      "observed_scheduler_threads": [
+        1
+      ],
+      "exact_optimum": "0",
+      "all_tie_count": 3,
+      "native_core_family_verification": {
+        "branches": [
+          {
+            "coverage": 1,
+            "diagnostics": [],
+            "feasibility": 1,
+            "optimality": 1,
+            "path": {
+              "edges": [
+                "stay-A"
+              ],
+              "modes": [
+                "A",
+                "A"
+              ]
+            }
+          },
+          {
+            "coverage": 1,
+            "diagnostics": [],
+            "feasibility": 1,
+            "optimality": 1,
+            "path": {
+              "edges": [
+                "switch-a"
+              ],
+              "modes": [
+                "A",
+                "B"
+              ]
+            }
+          },
+          {
+            "coverage": 1,
+            "diagnostics": [],
+            "feasibility": 1,
+            "optimality": 1,
+            "path": {
+              "edges": [
+                "switch-b"
+              ],
+              "modes": [
+                "A",
+                "B"
+              ]
+            }
+          }
+        ],
+        "continuous_coverage": 1,
+        "global_optimality": 1,
+        "verifier": "csl.hybrid.exact-linear-h",
+        "version": "1"
+      },
+      "native_seconds": {
+        "provider_registration": 2.7239e-05,
+        "history_enumeration": null,
+        "hybrid_enumeration_probe": 2.2e-05,
+        "formulation_with_internal_enumeration": 0.000293825,
+        "portfolio_prepare_run_and_record": 0.001286977,
+        "native_lp_load_sum": 5.8039e-05,
+        "native_lp_solve_sum": 0.000707008,
+        "family_verification": 0.023675084,
+        "whole_worker": 0.0332196110393852
+      },
+      "scip_global": {
+        "status": "optimal",
+        "formulation_and_setup_seconds": 0.004180527990683913,
+        "optimization_seconds": 0.005503333872184157,
+        "counts": {
+          "variables": 58,
+          "constraints": 97,
+          "binary_variables": 9
+        },
+        "nodes": 1,
+        "primal_bound": 0.0,
+        "dual_bound": 0.0,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ],
+        "objective": 0.0,
+        "states": [
+          -1.0,
+          0.0
+        ],
+        "controls": [
+          1.0
+        ],
+        "path": {
+          "modes": [
+            "A",
+            "A"
+          ],
+          "edges": [
+            "stay-A"
+          ]
+        }
+      },
+      "scip_fixed_branch_totals": {
+        "count": 3,
+        "formulation_and_setup_seconds": 0.007908828789368272,
+        "optimization_seconds": 0.01139456988312304
+      },
+      "scip_whole_worker_seconds": 0.2421391459647566,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/flat-continuous-ties/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.0332196110393852,
+          "user_cpu_seconds": 0.021959000000000284,
+          "system_cpu_seconds": 0.007985000000000131,
+          "cumulative_children_max_rss_kib": 60108,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "28fc661843ba82626cc02bd8ddcaa6e962bac8f793b8c38c92daa6971dd15960",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/flat-continuous-ties/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/flat-continuous-ties/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.2421391459647566,
+          "user_cpu_seconds": 0.15216499999999966,
+          "system_cpu_seconds": 0.08565600000000018,
+          "cumulative_children_max_rss_kib": 60108,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "0d82e51a274cad686f1d883d719a9f85f5ec251d4ef8b9abb4245cded27b705b",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "mixed-prefix-budget",
+      "product": "mixed",
+      "horizon": 2,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "incomplete-history-prefix",
+      "checked_native": {
+        "candidate_face_check": "not-applicable",
+        "status": "inconclusive-prefix",
+        "branch_count": 1,
+        "all_optimal_paths": null,
+        "complete_continuous_family": false
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 9,
+        "complete_continuous_family": false
+      },
+      "native_branches": 1,
+      "native_total_lp_variables": 8,
+      "native_total_lp_rows": 19,
+      "native_simplex_iterations_sum": 10,
+      "observed_scheduler_threads": [
+        1
+      ],
+      "exact_optimum": "0",
+      "all_tie_count": 9,
+      "native_core_family_verification": null,
+      "native_seconds": {
+        "provider_registration": 2.3397e-05,
+        "history_enumeration": 6.845e-06,
+        "hybrid_enumeration_probe": null,
+        "formulation_with_internal_enumeration": 0.000102388,
+        "portfolio_prepare_run_and_record": 0.000694509,
+        "native_lp_load_sum": 5.0146e-05,
+        "native_lp_solve_sum": 0.000400753,
+        "family_verification": null,
+        "whole_worker": 0.008297778898850083
+      },
+      "scip_global": {
+        "status": "optimal",
+        "formulation_and_setup_seconds": 0.0037445048801600933,
+        "optimization_seconds": 0.003601818112656474,
+        "counts": {
+          "variables": 11,
+          "constraints": 5,
+          "binary_variables": 6
+        },
+        "nodes": 1,
+        "primal_bound": 0.0,
+        "dual_bound": 0.0,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ],
+        "objective": 0.0,
+        "states": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "controls": [
+          0.0,
+          0.0
+        ],
+        "path": {
+          "actions": [
+            1,
+            1
+          ]
+        }
+      },
+      "scip_fixed_branch_totals": {
+        "count": 9,
+        "formulation_and_setup_seconds": 0.0185638430994004,
+        "optimization_seconds": 0.018260658252984285
+      },
+      "scip_whole_worker_seconds": 0.24605029309168458,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/mixed-prefix-budget/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.008297778898850083,
+          "user_cpu_seconds": 0.0020220000000001903,
+          "system_cpu_seconds": 0.0030329999999998414,
+          "cumulative_children_max_rss_kib": 60108,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "dc40047727311b4321f07423f0a2d729900099776b625f868d4c04d6768e6a7f",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/mixed-prefix-budget/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/mixed-prefix-budget/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.24605029309168458,
+          "user_cpu_seconds": 0.17658500000000021,
+          "system_cpu_seconds": 0.06584499999999993,
+          "cumulative_children_max_rss_kib": 60108,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "d8e1e43b2764e367a8c790f7d55260ccec599d1231948810924733ce7287ba96",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "hybrid-path-budget",
+      "product": "hybrid",
+      "horizon": 1,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "construction-refused",
+      "checked_native": {
+        "status": "inconclusive-refused",
+        "construction": {
+          "diagnostics": [
+            {
+              "code": 1,
+              "explanation": "The complete hybrid path family exceeds the caller's path limit",
+              "field": "hybrid.paths.limit"
+            }
+          ],
+          "status": "public-api-refused",
+          "variant_index": 1
+        }
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 2,
+        "complete_continuous_family": false
+      },
+      "native_branches": 0,
+      "native_total_lp_variables": 0,
+      "native_total_lp_rows": 0,
+      "native_simplex_iterations_sum": null,
+      "observed_scheduler_threads": [],
+      "exact_optimum": "1/2",
+      "all_tie_count": 2,
+      "native_core_family_verification": null,
+      "native_seconds": {
+        "provider_registration": 2.633e-05,
+        "history_enumeration": null,
+        "hybrid_enumeration_probe": 2.1441e-05,
+        "formulation_with_internal_enumeration": 2.0533e-05,
+        "portfolio_prepare_run_and_record": null,
+        "native_lp_load_sum": null,
+        "native_lp_solve_sum": null,
+        "family_verification": null,
+        "whole_worker": 0.007483632070943713
+      },
+      "scip_global": {
+        "status": "optimal",
+        "formulation_and_setup_seconds": 0.004157829098403454,
+        "optimization_seconds": 0.004589800955727696,
+        "counts": {
+          "variables": 43,
+          "constraints": 74,
+          "binary_variables": 6
+        },
+        "nodes": 1,
+        "primal_bound": 0.5,
+        "dual_bound": 0.5,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ],
+        "objective": 0.5,
+        "states": [
+          -1.0,
+          0.5
+        ],
+        "controls": [
+          1.5
+        ],
+        "path": {
+          "modes": [
+            "source",
+            "target"
+          ],
+          "edges": [
+            "switch-b"
+          ]
+        }
+      },
+      "scip_fixed_branch_totals": {
+        "count": 2,
+        "formulation_and_setup_seconds": 0.004984617931768298,
+        "optimization_seconds": 0.006767821963876486
+      },
+      "scip_whole_worker_seconds": 0.2224797618109733,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/hybrid-path-budget/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.007483632070943713,
+          "user_cpu_seconds": 0.0008759999999998769,
+          "system_cpu_seconds": 0.0035039999999999516,
+          "cumulative_children_max_rss_kib": 60108,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "e64725de823c583a5a5da0be4ea57b650b9045d94e385f8aa6266258e0277398",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/hybrid-path-budget/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/hybrid-path-budget/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.2224797618109733,
+          "user_cpu_seconds": 0.15200100000000027,
+          "system_cpu_seconds": 0.06700100000000031,
+          "cumulative_children_max_rss_kib": 60108,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "62bda45c66ab48461a1aa4f32dd475e2172ba28fd168d46c5916952b1ad4e039",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "hybrid-cancelled",
+      "product": "hybrid",
+      "horizon": 1,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "construction-refused",
+      "checked_native": {
+        "status": "inconclusive-refused",
+        "construction": {
+          "status": "public-api-refused",
+          "stop_diagnostics": "Hybrid portfolio construction was cancelled before profile admission",
+          "stop_reason": 0,
+          "variant_index": 2
+        }
+      },
+      "checked_scip": {
+        "status": "verified-bounded-global-and-fixed-branches",
+        "branch_count": 2,
+        "complete_continuous_family": false
+      },
+      "native_branches": 0,
+      "native_total_lp_variables": 0,
+      "native_total_lp_rows": 0,
+      "native_simplex_iterations_sum": null,
+      "observed_scheduler_threads": [],
+      "exact_optimum": "1/2",
+      "all_tie_count": 2,
+      "native_core_family_verification": null,
+      "native_seconds": {
+        "provider_registration": 2.8146e-05,
+        "history_enumeration": null,
+        "hybrid_enumeration_probe": 4.75e-06,
+        "formulation_with_internal_enumeration": 6.077e-06,
+        "portfolio_prepare_run_and_record": null,
+        "native_lp_load_sum": null,
+        "native_lp_solve_sum": null,
+        "family_verification": null,
+        "whole_worker": 0.007181007182225585
+      },
+      "scip_global": {
+        "status": "optimal",
+        "formulation_and_setup_seconds": 0.004190864972770214,
+        "optimization_seconds": 0.004588404903188348,
+        "counts": {
+          "variables": 43,
+          "constraints": 74,
+          "binary_variables": 6
+        },
+        "nodes": 1,
+        "primal_bound": 0.5,
+        "dual_bound": 0.5,
+        "gap": 0.0,
+        "fixed_path": null,
+        "interrupted_request": false,
+        "assurance": "SCIP numerical incumbent/bound, not complete continuous-family evidence",
+        "scip_version": [
+          10,
+          0,
+          2
+        ],
+        "objective": 0.5,
+        "states": [
+          -1.0,
+          0.5
+        ],
+        "controls": [
+          1.5
+        ],
+        "path": {
+          "modes": [
+            "source",
+            "target"
+          ],
+          "edges": [
+            "switch-b"
+          ]
+        }
+      },
+      "scip_fixed_branch_totals": {
+        "count": 2,
+        "formulation_and_setup_seconds": 0.004904507892206311,
+        "optimization_seconds": 0.006746100960299373
+      },
+      "scip_whole_worker_seconds": 0.2288006660528481,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/hybrid-cancelled/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.007181007182225585,
+          "user_cpu_seconds": 0.0010239999999992477,
+          "system_cpu_seconds": 0.003069999999999684,
+          "cumulative_children_max_rss_kib": 60108,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "ebc1ec30e3b926a3b11e7fdb1a68526e5bf3b16e383f46a3ea7f048b79abd89e",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/hybrid-cancelled/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/hybrid-cancelled/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.2288006660528481,
+          "user_cpu_seconds": 0.16137900000000016,
+          "system_cpu_seconds": 0.063755,
+          "cumulative_children_max_rss_kib": 60108,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "46e0c701856ff18783a654022052c222ea18354fa91080020d562e4d02c66989",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "unsupported-dimension-change",
+      "product": "hybrid",
+      "horizon": 1,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "external-encoding-unsupported",
+      "checked_native": {
+        "status": "unsupported"
+      },
+      "checked_scip": {
+        "status": "unsupported"
+      },
+      "native_branches": 0,
+      "native_total_lp_variables": 0,
+      "native_total_lp_rows": 0,
+      "native_simplex_iterations_sum": null,
+      "observed_scheduler_threads": [],
+      "exact_optimum": null,
+      "all_tie_count": 0,
+      "native_core_family_verification": null,
+      "native_seconds": {
+        "provider_registration": null,
+        "history_enumeration": null,
+        "hybrid_enumeration_probe": null,
+        "formulation_with_internal_enumeration": null,
+        "portfolio_prepare_run_and_record": null,
+        "native_lp_load_sum": null,
+        "native_lp_solve_sum": null,
+        "family_verification": null,
+        "whole_worker": 0.01091119390912354
+      },
+      "scip_global": null,
+      "scip_fixed_branch_totals": {
+        "count": 0,
+        "formulation_and_setup_seconds": 0,
+        "optimization_seconds": 0
+      },
+      "scip_whole_worker_seconds": 0.1789823540020734,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/unsupported-dimension-change/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.01091119390912354,
+          "user_cpu_seconds": 0.0032560000000003697,
+          "system_cpu_seconds": 0.00434200000000029,
+          "cumulative_children_max_rss_kib": 60108,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "cd6de1284b38a413f52b8a62e809a7c028d9c757f0701cc4d1eb83252532491e",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/unsupported-dimension-change/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/unsupported-dimension-change/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.1789823540020734,
+          "user_cpu_seconds": 0.13763300000000012,
+          "system_cpu_seconds": 0.037898999999999905,
+          "cumulative_children_max_rss_kib": 60108,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    },
+    {
+      "id": "unsupported-relational-reset",
+      "product": "hybrid",
+      "horizon": 1,
+      "physical_dimension": 2,
+      "active_scalar_coordinate": 1,
+      "native_status": "external-encoding-unsupported",
+      "checked_native": {
+        "status": "unsupported"
+      },
+      "checked_scip": {
+        "status": "unsupported"
+      },
+      "native_branches": 0,
+      "native_total_lp_variables": 0,
+      "native_total_lp_rows": 0,
+      "native_simplex_iterations_sum": null,
+      "observed_scheduler_threads": [],
+      "exact_optimum": null,
+      "all_tie_count": 0,
+      "native_core_family_verification": null,
+      "native_seconds": {
+        "provider_registration": null,
+        "history_enumeration": null,
+        "hybrid_enumeration_probe": null,
+        "formulation_with_internal_enumeration": null,
+        "portfolio_prepare_run_and_record": null,
+        "native_lp_load_sum": null,
+        "native_lp_solve_sum": null,
+        "family_verification": null,
+        "whole_worker": 0.008993683848530054
+      },
+      "scip_global": null,
+      "scip_fixed_branch_totals": {
+        "count": 0,
+        "formulation_and_setup_seconds": 0,
+        "optimization_seconds": 0
+      },
+      "scip_whole_worker_seconds": 0.17640337091870606,
+      "resource_receipts": {
+        "native": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-public-build/csl_mpc10",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/unsupported-relational-reset/fixture.json"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.008993683848530054,
+          "user_cpu_seconds": 0.0009079999999999089,
+          "system_cpu_seconds": 0.006352999999999831,
+          "cumulative_children_max_rss_kib": 60108,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "72c392b98c0797bcd5d83649807f07dc63a27f225ba8663a969aa1498050b285",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "scip": {
+          "command": [
+            "/home/butahlecoq/.local/share/codex/tmp/mpc03-pyscipopt/bin/python",
+            "-m",
+            "benchmarks.reporting.mpc10.run",
+            "--worker",
+            "--fixture",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/unsupported-relational-reset/fixture.json",
+            "--output",
+            "/home/butahlecoq/.local/share/codex/tmp/mpc10-final-capture-20261110/unsupported-relational-reset/scip"
+          ],
+          "status": "completed",
+          "return_code": 0,
+          "whole_process_seconds": 0.17640337091870606,
+          "user_cpu_seconds": 0.1361119999999998,
+          "system_cpu_seconds": 0.03803200000000029,
+          "cumulative_children_max_rss_kib": 60108,
+          "memory_scope": "cumulative process-child high-water maximum, not per-worker isolated RSS or native heap accounting",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      }
+    }
+  ],
+  "verdict": "single bounded configured observations only; no performance ranking, timing ratio or general scalability claim",
+  "clock_scopes": "Provider registration, independent enumeration probe, portfolio construction and solve wrapper, inner HiGHS load/run, independent family check, unrestricted SCIP model setup/optimization and extra fixed-branch checks are distinct or nested. Whole workers include startup and serialization. No absent phase is relabelled zero. Dimension2 has one active scalar coordinate."
+}
