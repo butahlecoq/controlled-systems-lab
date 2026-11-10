@@ -104,6 +104,16 @@
       "companion_ids": []
     },
     {
+      "source": "scripts/reports/b04_source_moments/figures.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "b04-all-stage-reachability.png",
+        "b04-all-stage-reachability.svg"
+      ],
+      "disposition": "adopted-shared-quantitative-policy",
+      "role_and_disposition_reason": "Draws all 17 exact source-candidate forward, backward and intersection sets in the two physical state planes, with one labelled optimal witness and shared quantitative styles; it makes no historical-run or timing claim."
+    },
+    {
       "source": "scripts/reports/b06_manifest_correction_publication_policy.py",
       "signal_count": 3,
       "asset_name_literals": [

@@ -1,0 +1,33 @@
+{
+  "schema": "b04.source-candidate.figure-export/1",
+  "source_relation": {
+    "source_model_sha256": "1f03dac9f0339dd7b518c9e0f0bae51047b766b1d9342e770b78d1563036e405",
+    "certificate_sha256": "dea7e24892a50b17debe541cce525492193c7951bfd4254a0c9b2faf68e94173",
+    "stage_sets_path": "docs/research/evidence/b04-source-moment-stage-sets.json",
+    "stage_sets_sha256": "d91dadf0d9de1fd27bd43ef3380941c6a554c5d8c933ff4b175d01e0def9aa32",
+    "verified_stage_data_canonical_sha256": "e0162cc8e03e6e72c9b5308d4eb4c2a706fb2b49af71ea3a39cdf2e9913ee5e6",
+    "scope": "Exact nominal source candidate with commented decimal initial condition; no historical run attribution"
+  },
+  "producer_sha256": "f080be5620482b35af4368b87a366869cc3fd93d3705a33265da6ab949a045e8",
+  "geometry_sha256": "eb74d5a1aa5561ad33a98f9dab494022817169338e3d7b0592a336a7c80047b1",
+  "checker_sha256": "78bc6bfada186dfb3e3cd078ea8d300708edd96c49893d30876de30762336946",
+  "helper": {
+    "path": "scripts/reports/figure_style.py",
+    "sha256": "c2f7078df95b9d75fe90f0f407023383cae4b58dd688dfa5fa5ac5b9d18664c6",
+    "style_id": "csl-report-quantitative-v1"
+  },
+  "matplotlib_version": "3.11.2",
+  "float_conversion": "renderer only; stage data remains rational strings",
+  "outputs": [
+    {
+      "path": "b04-all-stage-reachability.svg",
+      "sha256": "331a1755e65a8cf7ba1fc46ae0909b6cfc314f313b54cefe00957f205a582a15",
+      "bytes": 104539
+    },
+    {
+      "path": "b04-all-stage-reachability.png",
+      "sha256": "a878e3ade862885ca52a47dc386030c173eac8fbd0356bc4bfcb51196f98301e",
+      "bytes": 580306
+    }
+  ]
+}

@@ -60,6 +60,8 @@ PUBLICATION_EXPORT_ROUTES = {
     "benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/figures.py",
 }
 VIZ10_ROLE_REASONS = {
+    "scripts/reports/b04_source_moments/figures.py":
+        "Draws all 17 exact source-candidate forward, backward and intersection sets in the two physical state planes, with one labelled optimal witness and shared quantitative styles; it makes no historical-run or timing claim.",
     "scripts/reports/stage_mpc06_offline_costs.py":
         "Authenticates saved canonical tube-construction clocks and exact consumer identities, then copies the existing invariant figure; no solver, measurement or plotting runs during staging.",
     "scripts/reports/stage_mpc11_mesh_timing.py":
@@ -283,7 +285,8 @@ def source_inventory(root: Path) -> list[dict]:
             elif relative.endswith(("/geometry_figures.py", "/approx_extension_companions.py",
                                     "/geometry_opt_companions.py", "/viz10_plot_companions.py")):
                 disposition = "shared-quantitative-policy-companion-renderer"
-            elif relative in {"scripts/reports/stage_projection_figures.py",
+            elif relative in {"scripts/reports/b04_source_moments/figures.py",
+                              "scripts/reports/stage_projection_figures.py",
                               "benchmarks/reporting/review05/render_family_query.py",
                               "benchmarks/reporting/mpc11/figures.py",
                               "benchmarks/reporting/mpc08_explicit/capture_exact_regions.py",
