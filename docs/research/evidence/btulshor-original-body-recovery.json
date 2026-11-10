@@ -1,0 +1,68 @@
+{
+  "date": "2026-11-10",
+  "scope": "Read-only inspection of owner-supplied archives. No archived code was executed, compiled, installed, or benchmarked.",
+  "sources": {
+    "A06": {
+      "registered_path": "Статьи/А.Ф. Шориков/btulshor.pas",
+      "bytes": 43261,
+      "sha256": "06fa90d5977ab49174abbf866899000f511fad46eac4a1e72388bbe27090a442",
+      "archive_member": "btulshor.pas",
+      "archive_member_sha256_matches_loose_file": true,
+      "procedure_body_line_ranges": {
+        "REACH": [41, 72],
+        "KPABEP": [73, 127],
+        "MODIF": [128, 214]
+      },
+      "interface_dependencies": ["BIBTUSH", "DIALOGS"],
+      "implementation_dependencies": ["term", "funfnx"],
+      "complete_project_recovered": false
+    },
+    "A07": {
+      "registered_path": "Scientific Research/BTULSHOR/BTULSHOR.m",
+      "bytes": 592,
+      "sha256": "59c7849bb4ad79bd910f79343583de60552cb5a939d0bf19874a3e91a07bf004"
+    },
+    "A07_neighbour_hashes": {
+      "CRAPOV.m": "7b761877ba3b37a248807960050991d77b28d4670ef371c5ed7629b07f59c2b8",
+      "KPABEP.m": "ede50fc0d27819f00d8fa466a0d84028c118b58def15821efa1a02722376222c",
+      "MODIF.m": "eaf901388afa95a749cb68ef9048e9f4a6474b899f62a185b1db581847e9391e",
+      "REACH.m": "05417c6e5892058d1bf75e0535a13e06f5cbab597179dd4147374b86e17cc3d9",
+      "REACH1.m": "706d0a4991c355dc51dc297f83e9392ee1f01eec42f3031f1929a79dafaeec0c",
+      "test.m": "24e2e74795edc4beeb7d5d878c10586af6f2530ae9638fe166defb34645bec82"
+    },
+    "registration16_listing": {
+      "archive_member": "Свидетельство_16/6 Listing.doc",
+      "bytes": 118784,
+      "sha256": "0755acff9dc10064f2afa57f9e4830b2b62f543352f8be70c334a8989b213204",
+      "unit": "identif",
+      "copyright_year": 2016,
+      "copyright_holder": "UrFU",
+      "source_body_is_BTULSHOR_hull_implementation": false
+    },
+    "registration16_container_copies": {
+      "count": 3,
+      "sha256_each": "0c67e0839fc0dc86cfc70dc071637c65779791fdf0b1c7b061fa5c137aab19cd",
+      "member_count": 8
+    }
+  },
+  "bounded_archive_inventory": {
+    "matching_source_or_container_paths": 59,
+    "compressed_container_listings": 52,
+    "named_missing_units_found": [],
+    "standalone_OpenLoopControl_py_found_in_this_search": false,
+    "does_not_retract_previously_recovered_W09": true
+  },
+  "matlab_source_differences_observed": [
+    "KPABEP tests local ip although MODIF returns p.",
+    "MODIF returns X as its second output.",
+    "MATLAB MODIF sets m=n3-3; the Pascal call uses m=n3.",
+    "The MATLAB auxiliary-sum update indexes BERG(n3+j); Pascal uses A[n3*j]."
+  ],
+  "limits": [
+    "No runtime behavior or numerical correctness was tested.",
+    "The missing BIBTUSH, term, and funfnx dependencies and complete project remain unrecovered.",
+    "Source correspondence to the 1993 or 1999 release and to ITIS17 is unproved.",
+    "Canonical experiment inputs and source redistribution permission remain unresolved.",
+    "Container inventory is bounded to the supplied archive trees and inspected members."
+  ]
+}
