@@ -31,15 +31,15 @@ def render(bundle,verification,output):
             source=bundle/name;s=load(source/'fixture.json');native=load(source/'native/stdout.txt');branch=native['branches'][0];point=branch['result']['primal'];x0,pre,post=point[0],point[3],point[5]
             configure_numeric_axis(ax);ax.plot([x0,pre],[0,0],'-o',label='source flow',color='#0072B2');ax.scatter([post],[0],s=120,facecolors='none',edgecolors='#D55E00',linewidths=2,label='post-reset state')
             ax.annotate(branch['path']['edges'][0],xy=(post,0),xytext=(post,.25),arrowprops={'arrowstyle':'->'},ha='center');ax.text(x0,-.15,'source @ 0',ha='center');ax.text(post,-.3,'target @ 1',ha='center')
-            ax.set(xlabel='x',ylabel='y',ylim=(-.6,.6),title=name);ax.legend(loc='upper left',fontsize=8)
+            ax.set(xlabel='x',ylabel='y',xlim=(min(x0,pre,post)-.35,max(x0,pre,post)+.4),ylim=(-.6,.6),title=name);ax.legend(loc='upper left',fontsize=8)
             data['cases'].append({'id':name,'native_stream_sha256':sha(source/'native/stdout.txt'),'path':branch['path'],'joint_anchor':point,'terminal_objective':branch['result']['primal_check']['objective'],'core_family_verification':native.get('family_verification')})
         fig.suptitle('MPC-10 supported 2D paths: flow, edge and reset timing');fig.tight_layout()
         svg=io.StringIO();fig.savefig(svg,format='svg',metadata={'Date':None,'Creator':None,'Format':None,'Type':None});(output/'paths.svg').write_bytes(normalize_owned_svg(svg.getvalue()));fig.savefig(output/'paths.png',dpi=160)
         plt.close(fig)
         name='guard-negative-reset';native=load(bundle/name/'native/stdout.txt');exact=load(bundle/name/'exact.json');optimal={json.dumps(p,sort_keys=True) for p in exact['all_optimal_paths']}
-        fig,ax=plt.subplots(figsize=(8,4));ax.axis('off');ax.scatter([0,1],[0,0],s=900,color=['#0072B2','#009E73']);ax.text(0,0,'source\nt=0',ha='center',va='center',color='white');ax.text(1,0,'target\nt=1',ha='center',va='center',color='white')
+        fig,ax=plt.subplots(figsize=(8,4));ax.axis('off');ax.scatter([0,1],[0,0],s=2200,color=['#0072B2','#009E73']);ax.text(0,0,'source\nt=0',ha='center',va='center',color='white');ax.text(1,0,'target\nt=1',ha='center',va='center',color='white')
         for i,branch in enumerate(native['branches']):
-            bend=.35 if i==0 else -.35;path=branch['path'];ax.annotate('',xy=(.94,0),xytext=(.06,0),arrowprops={'arrowstyle':'->','connectionstyle':f'arc3,rad={bend}','color':'#D55E00','lw':2});ax.text(.5,-bend*.6,path['edges'][0]+' — tied optimum '+exact['optimum'],ha='center')
+            bend=.35 if i==0 else -.35;path=branch['path'];ax.annotate('',xy=(.88,0),xytext=(.12,0),arrowprops={'arrowstyle':'->','connectionstyle':f'arc3,rad={bend}','color':'#D55E00','lw':2});ax.text(.5,-bend*1.1,path['edges'][0]+' — tied optimum '+exact['optimum'],ha='center',bbox={'facecolor':'white','edgecolor':'none','pad':1})
         ax.set(xlim=(-.3,1.3),ylim=(-.5,.5));ax.set_title('Parallel edges retain two distinct optimal branches\nguard on pre-reset x; reset x⁺=1−x⁻; complete continuous families checked')
         fig.tight_layout()
         svg=io.StringIO();fig.savefig(svg,format='svg',metadata={'Date':None,'Creator':None,'Format':None,'Type':None});(output/'branches.svg').write_bytes(normalize_owned_svg(svg.getvalue()));fig.savefig(output/'branches.png',dpi=160)
