@@ -107,6 +107,10 @@ def check_native(s,oracle,raw):
     if s['cancel'] or (s['product']=='hybrid' and len(oracle['branches'])>s['max_branches']):
         if raw['status']!='construction-refused' or raw.get('branches'):raise ValueError('hybrid refusal exposes successful portfolio')
         return {'status':'inconclusive-refused','construction':raw['construction']}
+    if s['product']=='hybrid' and not oracle['branches']:
+        errors=raw.get('construction',{}).get('diagnostics',[])
+        if raw['status']!='construction-refused' or raw.get('branches') or not any(d['field']=='hybrid.portfolio.paths' and d['code']==3 for d in errors):raise ValueError('empty hybrid inventory lacks public no-path refusal')
+        return {'status':'verified-empty-branch-inventory','branch_count':0,'complete_continuous_family':False,'native_construction':raw['construction']}
     expected=oracle['branches'][:s['max_branches']];branches=raw['branches']
     if [b['path'] for b in branches]!=[b['path'] for b in expected]:raise ValueError('native branch inventory/order differs')
     complete=len(expected)==len(oracle['branches'])

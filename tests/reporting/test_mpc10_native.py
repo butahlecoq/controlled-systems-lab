@@ -23,6 +23,9 @@ class NativeTests(unittest.TestCase):
         for name in ['published-2d-identity','guard-negative-reset','finite-T1','mixed-T1','hybrid-T0','flat-continuous-ties']:
             with self.subTest(name=name):
                 s,r=self.run_case(name);checked=check_native(s,solve(s),r);self.assertEqual(checked['status'],'verified-bounded-branches')
+    def test_public_no_path_refusal_is_a_complete_empty_inventory(self):
+        s,r=self.run_case('forbidden-transition');self.assertEqual(r['status'],'construction-refused')
+        self.assertEqual(check_native(s,solve(s),r)['status'],'verified-empty-branch-inventory')
     def test_row_mutation_rejects_even_when_anchor_still_satisfies_it(self):
         s,r=self.run_case('published-2d-identity');r['branches'][0]['program']['matrix'][0][0]*=2
         with self.assertRaisesRegex(ValueError,'native rows differ'):check_native(s,solve(s),r)
