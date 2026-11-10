@@ -49,6 +49,7 @@ FROZEN_DIAGRAM_EXCEPTIONS = {
     "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py",
 }
 PUBLICATION_EXPORT_ROUTES = {
+    "scripts/reports/stage_mpc08_complete.py",
     "scripts/reports/render.py", "scripts/reports/mpc05/check_smoke.py",
     "scripts/reports/exp824/finalize_limited_report.py",
     "scripts/reports/augment_pages_bundle.py",
@@ -57,6 +58,12 @@ PUBLICATION_EXPORT_ROUTES = {
 VIZ10_ROLE_REASONS = {
     "scripts/reports/mpc06_online/render.py":
         "Renders checked-source-bound native outcomes and saved actual paths; the shared Matplotlib publication companion remains in issue #602. This is not a benchmark producer.",
+    "scripts/reports/stage_mpc08_complete.py":
+        "Rechecks both immutable MPC08 captures and copies their saved labelled figures into one bounded report/example; it runs no solver or figure producer.",
+    "benchmarks/reporting/mpc08_explicit/capture_horizon_regions.py":
+        "Draws independently checked exact original-quadratic endpoint cells for matched N2/4/8 with shared numeric axes; full optimizer fibers and native resource refusals remain separate products.",
+    "benchmarks/reporting/mpc08_explicit/capture_exact_regions.py":
+        "Draws exact checked fixture regions and nominal/robust predecessors with shared numeric axes; numerical native observations remain separate from whole-set proof authority.",
     "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py":
         "Generates one exact 2D critical-region diagram from the rational fixture, with labelled initial and terminal coordinates; it is not a general plotting path.",
     "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py":
@@ -264,7 +271,9 @@ def source_inventory(root: Path) -> list[dict]:
                 disposition = "shared-quantitative-policy-companion-renderer"
             elif relative in {"scripts/reports/stage_projection_figures.py",
                               "benchmarks/reporting/review05/render_family_query.py",
-                              "benchmarks/reporting/mpc11/figures.py"}:
+                              "benchmarks/reporting/mpc11/figures.py",
+                              "benchmarks/reporting/mpc08_explicit/capture_exact_regions.py",
+                              "benchmarks/reporting/mpc08_explicit/capture_horizon_regions.py"}:
                 disposition = "adopted-shared-quantitative-policy"
             elif relative.endswith("/control_witness_companions.py"):
                 disposition = "saved-control-witness-gallery-companion-builder"

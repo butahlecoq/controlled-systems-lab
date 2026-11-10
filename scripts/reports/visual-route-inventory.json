@@ -1521,6 +1521,20 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_mpc08_complete.py",
+      "signal_count": 11,
+      "asset_name_literals": [
+        "critical-regions.png",
+        "critical-regions.svg",
+        "exact-critical-regions.png",
+        "exact-critical-regions.svg",
+        "horizon-regions.png",
+        "horizon-regions.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route",
+      "role_and_disposition_reason": "Rechecks both immutable MPC08 captures and copies their saved labelled figures into one bounded report/example; it runs no solver or figure producer."
+    },
+    {
       "source": "scripts/reports/stage_mpc08_nonunique.py",
       "signal_count": 7,
       "asset_name_literals": [
@@ -1993,6 +2007,26 @@
         "input-projections.svg"
       ],
       "disposition": "reviewed-static-diagram-exception"
+    },
+    {
+      "source": "benchmarks/reporting/mpc08_explicit/capture_exact_regions.py",
+      "signal_count": 5,
+      "asset_name_literals": [
+        "critical-regions.png",
+        "critical-regions.svg"
+      ],
+      "disposition": "adopted-shared-quantitative-policy",
+      "role_and_disposition_reason": "Draws exact checked fixture regions and nominal/robust predecessors with shared numeric axes; numerical native observations remain separate from whole-set proof authority."
+    },
+    {
+      "source": "benchmarks/reporting/mpc08_explicit/capture_horizon_regions.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "horizon-regions.png",
+        "horizon-regions.svg"
+      ],
+      "disposition": "adopted-shared-quantitative-policy",
+      "role_and_disposition_reason": "Draws independently checked exact original-quadratic endpoint cells for matched N2/4/8 with shared numeric axes; full optimizer fibers and native resource refusals remain separate products."
     },
     {
       "source": "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py",

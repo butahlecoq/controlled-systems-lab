@@ -1,0 +1,145 @@
+{
+  "source_commit": "79ec2978bb18a77abf5817b6f940aa3a89b0e488",
+  "exact": {
+    "regions": {
+      "status": "verified-exact-fixture",
+      "regions": 9,
+      "shared_boundaries": 22,
+      "area": "21/2",
+      "coverage": "closed finite union, containment, exact area and disjoint interiors; no finite-sample inference"
+    },
+    "geometry": {
+      "status": "verified-exact-fixture",
+      "whole_set_inclusions": [
+        [
+          "T_robust",
+          "T"
+        ],
+        [
+          "inner_target_box",
+          "T_robust"
+        ],
+        [
+          "T_robust",
+          "outer_target_box"
+        ],
+        [
+          "robust_pre_inner",
+          "robust_pre_T_robust"
+        ],
+        [
+          "robust_pre_T_robust",
+          "robust_pre_outer"
+        ],
+        [
+          "robust_pre_T_robust",
+          "nominal_pre_T_robust"
+        ],
+        [
+          "nominal_pre_T_robust",
+          "nominal_pre_T"
+        ]
+      ],
+      "invariant": [
+        "T under nominal K",
+        "T_robust under K forall w"
+      ],
+      "target_box_policy": "only inner/outer containment; boxes not certified invariant"
+    },
+    "fibers": {
+      "status": "verified-exact-fixture",
+      "scope": "even-dimensional cube slice: at least N-1 active box faces force the last coordinate to +/-1; balanced sign count proves completeness at v0=0"
+    }
+  },
+  "native": {
+    "status_counts": [
+      {
+        "strategy": "csl.synthesis.reach-back",
+        "status": "candidate_contains_analytic_reference_history",
+        "count": 90
+      },
+      {
+        "strategy": "csl.synthesis.reach-back",
+        "status": "noncompleted_candidate_contains_analytic_reference_history",
+        "count": 30
+      },
+      {
+        "strategy": "csl.synthesis.strategy-b",
+        "status": "candidate_contains_analytic_reference_history",
+        "count": 120
+      },
+      {
+        "strategy": "online-condensed-qp",
+        "status": "online_qp_matches_exact_reference",
+        "count": 120
+      }
+    ],
+    "timings": [
+      {
+        "fixture": "nonunique_horizon_2",
+        "method": "csl.synthesis.reach-back",
+        "status": "noncompleted_candidate_contains_analytic_reference_history",
+        "n": 25,
+        "median_ns": 4987553,
+        "min_ns": 4788084,
+        "max_ns": 5538047
+      },
+      {
+        "fixture": "nonunique_horizon_2",
+        "method": "csl.synthesis.strategy-b",
+        "status": "candidate_contains_analytic_reference_history",
+        "n": 25,
+        "median_ns": 478976,
+        "min_ns": 408296,
+        "max_ns": 546862
+      },
+      {
+        "fixture": "nonunique_horizon_2",
+        "method": "online-condensed-qp",
+        "status": "online_qp_matches_exact_reference",
+        "n": 25,
+        "median_ns": 330073,
+        "min_ns": 311356,
+        "max_ns": 366391
+      },
+      {
+        "fixture": "unique_horizon_1",
+        "method": "csl.synthesis.reach-back",
+        "status": "candidate_contains_analytic_reference_history",
+        "n": 75,
+        "median_ns": 2063480,
+        "min_ns": 1926031,
+        "max_ns": 3544827
+      },
+      {
+        "fixture": "unique_horizon_1",
+        "method": "csl.synthesis.strategy-b",
+        "status": "candidate_contains_analytic_reference_history",
+        "n": 75,
+        "median_ns": 473877,
+        "min_ns": 390626,
+        "max_ns": 775944
+      },
+      {
+        "fixture": "unique_horizon_1",
+        "method": "online-condensed-qp",
+        "status": "online_qp_matches_exact_reference",
+        "n": 75,
+        "median_ns": 316803,
+        "min_ns": 300949,
+        "max_ns": 578711
+      }
+    ],
+    "assurance": "online results are independently replayed numerical witnesses; strategy rows are candidate samples/refusals, not complete-family equality",
+    "timing_scope": "existing C++ client interval includes per-query resolve/prepare/workspace/run and candidate or primal checks; not isolated solver time",
+    "lp_support": {
+      "counts": {
+        "numerical-support-witness": 432
+      },
+      "queries": 72,
+      "scope": "actual registered LPPort; exact H/V reference plus independent numerical primal/support checks; no sampled containment proof",
+      "timings": "prepare includes program/provider/workspace; run includes backend setup/solve/result construction; separate raw intervals, no ranking"
+    }
+  },
+  "capture_sha256": "6487e8c642efc2f4c4ea9ab5cc83719c511022d4a1ee0e4fd2a9429a7ff29e76"
+}

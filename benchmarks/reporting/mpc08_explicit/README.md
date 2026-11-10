@@ -1,5 +1,7 @@
 # MPC-08 exact explicit pilot
 
+The historical pilots below are preserved. The 2026-11-10 whole-domain/predecessor and matched original-quadratic N=2/4/8 continuation has a [six-criterion delivery disposition](../../../docs/research/mpc08-delivery-disposition.md). General-engine/MPT execution is outside its bounded scope; independent review, CI and verified live publication remain delivery gates.
+
 This is a bounded pilot for [issue #604](https://github.com/butahlecoq/controlled-systems-lab/issues/604), not a complete comparison-program result. It gives an exact parametric reference for one double-integrator step, separately identifies the invariant terminal set, and records fixed-initial CSL candidate checks and a condensed online-QP baseline.
 
 Saved HTML report and offline bundle: [MPC-08 explicit pilot](../../../reports/algorithm-results/mpc08-explicit-pilot-v1/index.html). Its verified public Pages route is [live](https://butahlecoq.github.io/controlled-systems-lab/mpc08-explicit-pilot-v1/).
@@ -125,3 +127,12 @@ The preserved build used GCC 16.2.1, CMake 3.31.6, Ninja 1.12.1, HiGHS 1.11.0, a
 ## Scope still open
 
 This pilot does not provide a MPT3/PPOPT replay, a general multiparametric-QP implementation, a complete-family CSL proof, a nonunique optimum for the new two-state fixture, a feasible-set equality checker for general cases, region-count/resource growth, or minimax/feedback/disturbance comparisons. The new fixture has a strictly convex scalar control objective and unique first action; its tied active formulas agree on shared boundaries. The existing T-S01 complete relation remains the separate nonunique-history reference, but was not rerun by this pilot. Approximate representation comparisons and shared set-inclusion infrastructure remain dependencies of other issues. Keep #604 open until its remaining acceptance and dependency work is complete.
+
+The exact-region checker at `d6720ecd` verifies that each authored H-region has
+no nonzero recession direction before using its finite vertices for whole-set
+containment and coverage. A regression preserves the original vertices while
+adding an escaping ray; it fails under the earlier checker and is now rejected.
+All six focused tests and the unchanged saved capture pass, including nine
+regions, 22 shared boundaries, seven inclusions, 360 strategy/QP observations
+and 432 LP support observations. The original capture source and raw archive
+remain immutable; this is a later proof-checking revision, not a new run.
