@@ -17,6 +17,15 @@ spec.loader.exec_module(STAGER)
 
 
 class PublicationTests(unittest.TestCase):
+    def test_saved_checker_failure_exposes_underlying_diagnostic(self):
+        from unittest import mock
+        from types import SimpleNamespace
+        import subprocess
+        checker=mock.Mock(side_effect=subprocess.CalledProcessError(1,['checker'],stderr='checker diagnostic marker'))
+        with mock.patch.object(STAGER,'current_renderer',return_value=SimpleNamespace(checked_inputs=checker)):
+            with self.assertRaisesRegex(ValueError,'checker diagnostic marker'):
+                STAGER.validate()
+
     @unittest.skipUnless(HAS_MPC11,'full publication is checked in the hash-locked optional controller CI profile')
     def test_real_stage_preserves_sources_and_discovers_both_cases(self):
         before = {p:hashlib.sha256(p.read_bytes()).hexdigest() for p in STAGER.EVIDENCE.rglob('*') if p.is_file()}

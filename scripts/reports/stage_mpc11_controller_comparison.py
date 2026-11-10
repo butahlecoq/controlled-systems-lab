@@ -9,6 +9,7 @@ import json
 from pathlib import Path, PurePosixPath
 import re
 import stat
+import subprocess
 import sys
 import tempfile
 import zipfile
@@ -148,7 +149,10 @@ def validate(evidence=EVIDENCE):
             bundles[kind]=folder/'accepted'
             manifest=json.loads((bundles[kind]/'manifest.json').read_text())
             require(manifest['source_revision'] == archives[kind]['capture_source'],'capture source differs')
-        reports=current_renderer().checked_inputs(**bundles)
+        try:
+            reports=current_renderer().checked_inputs(**bundles)
+        except subprocess.CalledProcessError as error:
+            raise ValueError('saved numerical checker failed: '+(error.stderr or str(error))[-6000:]) from error
         require(reports == receipt['saved_checks'],'current saved checks differ from frozen figure checks')
         for slug in ('syn-nl-lv-01','syn-nl-fuel-01'):
             load=lambda path:json.loads(path.read_text())
@@ -220,7 +224,7 @@ def stage(site,evidence=EVIDENCE,*,example_card_writer=None):
 <p>The current saved checks verify three affine records, two nonlinear cases and all 70 saved NMPC transcriptions. They rebuild identities, sampled cost/constraints and local stationarity diagnostics; they do not rerun any solver or integrator. Complete accepted trajectories are plotted. Initial/failed/resource-limited attempts remain in the raw archives and are excluded from these complete overlays. Prefix/resource outcomes are unavailable as complete answers, not mathematical counterexamples.</p>
 <p><strong>Performance comparison: inconclusive.</strong> Pilot durations do not rank controllers. Local numerical solver status is not a global/minimax guarantee. These are individual trajectories, not reachable-set enclosures, backward sets, continuous-time safety certificates or robust policies. Connecting affine hold-boundary samples does not add integrated samples. No acados result is claimed.</p>'''+''.join(sections)+
         '<h2>Raw evidence, source and reproduction</h2><p>'+ ' · '.join(f'<a href="raw/{kind}.zip">{kind} complete pilot ZIP</a>' for kind in ARCHIVES)+
-        f'</p><p><a href="{figures_path}/receipt.json">Frozen figure receipt and full input/tool hashes</a> · <a href="publication-manifest.json">Current publication provenance</a> · <a href="README.md">Offline checking commands</a> · <a href="../{route}.zip">Complete publication ZIP</a></p>'+
+        f'</p><p><a href="{figures_path}/receipt.json">Frozen figure receipt and full input/tool hashes</a> · <a href="publication-manifest.json">Current publication provenance</a> · <a href="{prefix}AFFINE-RECHECK.md">Post-capture affine checker qualification</a> · <a href="README.md">Offline checking commands</a> · <a href="../{route}.zip">Complete publication ZIP</a></p>'+
         '<p>Source commits: '+' · '.join(f'<a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{data["capture_source"]}">{kind}: {data["capture_source"]}</a>' for kind,data in archives.items())+
         f'. Renderer source: 60bda0fb; <a href="{figures_path}/source/figures.py">frozen renderer</a>. Required library dependencies/API remain unchanged; reproduction uses the optional Linux CPython environment and retains solver/license limits. Issue #607 remains open for remaining study and deployment gates.</p></body></html>').encode()
     generated['README.md']=f'''# Offline saved comparison checks
@@ -228,6 +232,9 @@ def stage(site,evidence=EVIDENCE,*,example_card_writer=None):
 Enter this publication route after extracting the complete ZIP into a fresh
 folder. Run `sha256sum -c SHA256SUMS`. Frozen pilot/figure manifests and receipts
 remain byte-preserved. New checking provenance is publication-manifest.json.
+The separately qualified current affine derivation checker and numerical rebuild
+tolerances are documented in `{prefix}AFFINE-RECHECK.md`. Stored identity checks
+remain exact.
 
 Use the optional environment described in `{prefix}environment/README.md`;
 its exact Linux CPython wheel lock and notices are included. No required library
