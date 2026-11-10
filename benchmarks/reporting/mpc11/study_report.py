@@ -50,7 +50,11 @@ def check(mesh,baseline,timing,mesh_summary_path,timing_summary_path):
     mesh_count=sum(case[label]['checked']['transcriptions_checked'] for case in compared['cases'] for label in ('ni1','ni2'))
     timing_count=sum(c['checked']['transcriptions_checked'] for row in measured['records'] if row['arm']=='nmpc' for c in row['cases'])
     if (mesh_count,timing_count)!=(140,420):raise ValueError('full saved transcription inventory differs')
-    print(json.dumps(dict(schema='csl.mpc11.study-current-diagnostics/1',mesh_current=compared,timing_current=measured),sort_keys=True),file=sys.stderr)
+    diagnostics=dict(schema='csl.mpc11.study-current-diagnostics/1',
+        mesh=[dict(case_id=c['case_id'],**{label:c[label]['checked'] for label in ('ni1','ni2')}) for c in compared['cases']],
+        timing=[dict(arm=r['arm'],repetition=r['repetition'],offline_saved_checker_seconds=r['offline_saved_checker_seconds'],
+                     cases=[dict(case=c['case'],checked=c['checked']) for c in r['cases'] if 'checked' in c]) for r in measured['records']])
+    print(json.dumps(diagnostics,sort_keys=True),file=sys.stderr)
     compared=stable_timing(compared,{'checked'})
     measured=stable_timing(measured,{'checked','offline_saved_checker_seconds'})
     return compared,measured,dict(status='checked',mesh_transcriptions=mesh_count,timing_transcriptions=timing_count,

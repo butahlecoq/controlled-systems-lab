@@ -2,6 +2,7 @@
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import shutil
 import tempfile
@@ -76,6 +77,8 @@ class StudyPublicationTests(unittest.TestCase):
                 self.assertIsNone(archive.testzip());self.assertEqual(len(archive.namelist()),len(set(archive.namelist())))
                 self.assertEqual(archive.read(route+'/index.html'),(report/'index.html').read_bytes())
             with self.assertRaisesRegex(ValueError,'immutable'):S.stage(site)
+            if os.environ.get('CSL_MPC11_STUDY_PREVIEW'):
+                shutil.copytree(site,Path(os.environ['CSL_MPC11_STUDY_PREVIEW']))
         self.assertEqual(before,{p:S.digest(p.read_bytes()) for key in S.SPECS for p in (S.EVIDENCE/key).iterdir()})
 
 
