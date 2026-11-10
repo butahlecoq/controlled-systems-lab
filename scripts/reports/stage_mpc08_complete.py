@@ -221,7 +221,7 @@ def stage(site,exact_source=EXACT_SOURCE,horizon_source=HORIZON_SOURCE,*,example
     generated['source-files.json']=_json(source_receipt);generated['minimal-inputs.json']=_json(minimal_inputs());generated['verification.json']=_json(checks)
     generated['figures/exact-critical-regions.svg']=captures[EXACT_ID]['critical-regions.svg'];generated['figures/exact-critical-regions.png']=captures[EXACT_ID]['critical-regions.png']
     generated['figures/horizon-regions.svg']=captures[HORIZON_ID]['horizon-regions.svg'];generated['figures/horizon-regions.png']=captures[HORIZON_ID]['horizon-regions.png']
-    identity=digest(_json({name:digest(data) for name,data in sorted(generated.items())}))[:20];route='mpc08-complete-'+identity
+    identity=digest(_json({name:digest(data) for name,data in sorted((generated|offline_objects).items())}))[:20];route='mpc08-complete-'+identity
     require(not any(p.exists() or p.is_symlink() for p in (site/route,site/(route+'.zip'))) and route not in landing and route not in gallery,'immutable MPC08 route already exists')
     generated['index.html']=_page(route)
     generated['offline_check.py']=f'''"""Saved-only offline checks; no native executable, optimizer or renderer."""
