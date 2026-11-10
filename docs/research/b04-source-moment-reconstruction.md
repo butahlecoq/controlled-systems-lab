@@ -1,5 +1,7 @@
 # B04 source-derived exact moment reference
 
+The [2026-11-10 owner decision](owner-reference-decisions-2026-11-10.md) selects the commented precise initialization as the primary working reference and the active rounded initialization as a separate sensitivity case. Historical generating-run identity remains unproved and is no longer an acceptance gate.
+
 The newly accessible dissertation working collection contains a nominal four-state, sixteen-step source model whose exact-decimal reference has minimum **30.8991360300116…**. Its complete optimal state/control family has dimension **14**. The active rounded initialization defines a different problem with minimum **31.1214094505004…**. Both conclusions have exact rational certificates.
 
 These are separately identified source references. They do not designate a canonical historical generator or change the [B04 historical transcription](../../benchmarks/scenarios/b04-historical.json). Source access, mathematical verification, historical attribution and permission to redistribute original software remain different facts. The printed model's earlier invariant contradiction remains valid for its own inputs.

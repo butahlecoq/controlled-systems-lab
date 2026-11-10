@@ -1,5 +1,7 @@
 # Issue #1 source and criterion version trace
 
+The [2026-11-10 owner decision](owner-reference-decisions-2026-11-10.md) supersedes the historical-reproduction closure gate. L04 uses the Euclidean objective without a `14.048` target; L13 uses the squared synchronization objective without a `22.657` target. The source-to-run limitations documented below remain historical facts.
+
 Initial audit date: 2026-10-18. Scope: bounded source/version follow-up for B08/L04 and B09/L13. This is not a reproduction of either publication run. No historical MATLAB source was executed, no continuous nonlinear plant was integrated, and no benchmark was run. The 2026-11-02 follow-up independently enumerates and replays one local discrete-model candidate; that transcription is separately scoped below.
 
 ## Result
