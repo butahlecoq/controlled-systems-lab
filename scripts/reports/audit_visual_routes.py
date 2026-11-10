@@ -50,6 +50,8 @@ FROZEN_DIAGRAM_EXCEPTIONS = {
 }
 PUBLICATION_EXPORT_ROUTES = {
     "scripts/reports/stage_b04_source_moments.py",
+    "scripts/reports/stage_btulshor.py",
+    "scripts/reports/btulshor/render.py",
     "scripts/reports/stage_mpc06_offline_costs.py",
     "scripts/reports/stage_mpc07_comparison.py",
     "scripts/reports/stage_mpc10_comparison.py",

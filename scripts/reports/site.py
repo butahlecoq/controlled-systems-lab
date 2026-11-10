@@ -187,8 +187,10 @@ def catalogue_index(catalogue):
     for report in catalogue["reports"]:
         rid=report["report_id"]
         source_id=report.get("source_report_id",rid)
-        tree,_,label=data.artifact_links(source_id,artifact_ref)
-        _,archive,_=data.artifact_links(rid,artifact_ref)
+        policy = publication_policies.maybe_for_kind(report.get("report_kind"))
+        artifact_links = getattr(policy.publisher, "artifact_links", data.artifact_links) if policy else data.artifact_links
+        tree,_,label=artifact_links(source_id,artifact_ref)
+        _,archive,_=artifact_links(rid,artifact_ref)
         scope='HiGHS reference LP, five analytic microfixtures';limits=""
         if catalogue.get("schema","csl.algorithm-report-catalog/1") in ("csl.algorithm-report-catalog/2","csl.algorithm-report-catalog/3"):
             if catalogue["schema"]=="csl.algorithm-report-catalog/3":

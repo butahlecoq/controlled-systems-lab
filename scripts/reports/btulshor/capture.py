@@ -201,7 +201,7 @@ def _annotate(document: dict, check_hull) -> dict:
         if isinstance(indices, list) and all(isinstance(i, int) and not isinstance(i, bool) and
                                             0 <= i < len(points) for i in indices):
             retained_points = provider.get("retained_points")
-            if retained_points is not None and retained_points:
+            if retained_points is not None:
                 if len(retained_points) != len(indices) or retained_points != [points[i] for i in indices]:
                     raise ValueError(f"{provider.get('method_id')} retained_points disagree with source indices")
             provider["exact_check"] = check_hull(points, indices)

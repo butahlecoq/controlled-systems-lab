@@ -55,7 +55,7 @@
     },
     {
       "source": "scripts/reports/augment_pages_bundle.py",
-      "signal_count": 18,
+      "signal_count": 19,
       "asset_name_literals": [
         "b04-all-stage-reachability.png",
         "b04-all-stage-reachability.svg",
@@ -71,6 +71,7 @@
         "online-policy-traces.png",
         "online-policy-traces.svg",
         "paths.svg",
+        "point-projections.svg",
         "timing-phases.svg",
         "trajectory.svg"
       ],
@@ -129,6 +130,12 @@
       "asset_name_literals": [],
       "disposition": "frozen-renderer-preserved-with-shared-policy-companion",
       "role_and_disposition_reason": "Produces a quantitative plot from saved fresh-process durations; the companion reads the immutable records and separates the excluded warmup."
+    },
+    {
+      "source": "scripts/reports/btulshor/render.py",
+      "signal_count": 1,
+      "asset_name_literals": [],
+      "disposition": "publication-validation-or-frozen-route"
     },
     {
       "source": "scripts/reports/control_figures.py",
@@ -1191,6 +1198,14 @@
       ],
       "disposition": "publication-validation-or-frozen-route",
       "role_and_disposition_reason": "Verifies exact source-candidate moment and all-stage set certificates, then copies source-bound saved physical-plane figures; no original program, optimization or rendering runs during staging."
+    },
+    {
+      "source": "scripts/reports/stage_btulshor.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "point-projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
     },
     {
       "source": "scripts/reports/stage_env717.py",

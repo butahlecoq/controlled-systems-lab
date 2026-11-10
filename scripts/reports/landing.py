@@ -313,6 +313,11 @@ FAMILIES = {
         "Compares eight owner-approved five-stage fuel reconstructions and includes 2D flow and stock "
         "projections of the computed 4D terminal sets. These are not historical reproductions; the "
         "modeled horizon is 10 seconds while the paper states 100 seconds."),
+    "btulshor-source-faithful": Family(
+        r"btulshor-source-faithful-[0-9a-f]{64}", "geometry", "BTULSHOR source-faithful hull comparison",
+        "Compares the source-faithful legacy hull implementation with independent methods on saved fixtures. "
+        "An exact checker evaluates hull equality and irredundancy; any near-tolerance source failure remains "
+        "visible. Timings are descriptive and do not claim a performance winner."),
     "issue6-b09-reference": Family(
         r"issue6-b09-reference-[0-9a-f]{64}", "synthesis", "A08 source-reference fuel minimax",
         "Exhaustively searches four-stage finite action plans and publishes flow and stock projections "

@@ -16,6 +16,16 @@ from docs.research.tools.render_b04_c_exact_fiber_report import render
 
 KIND = "b04-c-research-dossier"
 SOURCE_ID = "b04-c-exact-dyadic-v1"
+MANIFEST_SHA256 = "8ee378c901c36a148166fa5dd5a2bf2747352847ff1510869bd9babaaf32aee8"
+SNAPSHOT_ROOT = Path("docs/research/evidence/b04-c-publication-source-snapshot")
+SNAPSHOT_FILES = frozenset({
+    "scripts/reports/b04_c_exact_registered_reports.py",
+    "scripts/reports/schema3_publication_policies.py",
+    "scripts/reports/site.py",
+    "scripts/reports/landing.py",
+    "scripts/reports/visual_examples.py",
+    "scripts/reports/algorithm_visual_coverage.json",
+})
 SOURCE_FILES = ("docs/research/tools/b04_c_exact_profile.py",
     "docs/research/tools/build_b04_c_exact_fiber.py",
     "docs/research/tools/check_b04_c_exact_fiber.py",
@@ -55,6 +65,8 @@ def _pretty(value) -> bytes:
 def _verify_bundle(bundle: Path):
     if bundle.is_symlink() or any(item.is_symlink() for item in bundle.rglob("*")):
         raise ValueError("B04-C bundle cannot contain symlinks")
+    if hashlib.sha256((bundle / "manifest.json").read_bytes()).hexdigest() != MANIFEST_SHA256:
+        raise ValueError("B04-C manifest hash mismatch")
     manifest = _json(bundle / "manifest.json")
     if (manifest.get("schema") != "csl.b04-c-exact-dyadic-manifest/1" or
             manifest.get("scenario_id") != "B04-c-exact-dyadic-20261102" or
@@ -74,7 +86,7 @@ def _verify_bundle(bundle: Path):
         relative = Path(name)
         if relative.is_absolute() or ".." in relative.parts:
             raise ValueError("unsafe B04-C source path")
-        source = ROOT / relative
+        source = ROOT / SNAPSHOT_ROOT / relative if name in SNAPSHOT_FILES else ROOT / relative
         if source.is_symlink() or not source.is_file() or hashlib.sha256(source.read_bytes()).hexdigest() != expected:
             raise ValueError("B04-C source hash mismatch: " + name)
     record = _json(bundle / "record.json")
