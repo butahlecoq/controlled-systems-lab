@@ -124,6 +124,21 @@ RequestOutcome make_degenerate_request(const FiniteActionNominalRequest& request
         return unsupported("finite_nominal.dimensions", "Nominal state, controls, disturbances, safe sets, or objective do not match the system.");
     if(horizon != 0 && request.actions.catalogue.empty())
         return unsupported("finite_nominal.actions", "A nonempty finite action catalogue is required.");
+    if(request.candidate_action_indices && request.candidate_action_indices->empty())
+        return unsupported("finite_nominal.candidate_plans",
+            "An explicit candidate-history catalogue must contain at least one full-horizon plan.");
+    std::vector<std::vector<std::size_t>> checked_plans;
+    if(request.candidate_action_indices) {
+        checked_plans.reserve(request.candidate_action_indices->size());
+        for(const auto& plan:*request.candidate_action_indices) {
+            if(plan.size()!=horizon || std::any_of(plan.begin(),plan.end(),[&](auto action) {
+                    return action>=request.actions.catalogue.size();}) ||
+               std::find(checked_plans.begin(),checked_plans.end(),plan)!=checked_plans.end())
+                return unsupported("finite_nominal.candidate_plans",
+                    "Candidate action histories must be unique, full-horizon, and index the unchanged action catalogue.");
+            checked_plans.push_back(plan);
+        }
+    }
     if(auto cost_error = validate_running_cost(request.running_cost, request.absolute_stage_offset,
             horizon, dimensions.control); !cost_error.diagnostics.empty()) return cost_error;
     if(!std::ranges::all_of(request.initial_state, [](double value) { return std::isfinite(value); }))
@@ -142,18 +157,23 @@ RequestOutcome make_degenerate_request(const FiniteActionNominalRequest& request
     }
     return FiniteActionMinimaxRequest{request.problem, request.request, request.system,
         std::get<sets::SetData>(std::move(initial)), request.actions,
-        std::move(disturbances), request.admissible_states, request.objective};
+        std::move(disturbances), request.admissible_states, request.objective,
+        request.candidate_action_indices};
 }
 
 std::size_t expected_plan_count(const FiniteActionMinimaxRequest& request) {
-    std::size_t count = 1;
-    const auto horizon = request.system.horizon();
-    for(std::size_t stage = 0; stage < horizon; ++stage) {
-        if(request.actions.catalogue.empty() || count > std::numeric_limits<std::size_t>::max() /
-                request.actions.catalogue.size()) return std::numeric_limits<std::size_t>::max();
-        count *= request.actions.catalogue.size();
-    }
-    return count;
+    return detail::full_action_plan_count(request);
+}
+
+NominalSearchCoverage coverage_from(CandidateSearchCoverage coverage);
+
+NominalSearchCoverage coverage_for_candidates(const FiniteActionMinimaxRequest& request,
+        CandidateSearchCoverage coverage) {
+    if(coverage==CandidateSearchCoverage::incomplete || !request.candidate_action_indices)
+        return coverage_from(coverage);
+    if(request.candidate_action_indices->size()<detail::full_action_plan_count(request))
+        return NominalSearchCoverage::incomplete;
+    return NominalSearchCoverage::complete;
 }
 
 std::vector<Vector> controls_for(const FiniteActionNominalRequest& request,
@@ -349,7 +369,7 @@ NominalTrackOutcome box_track(const FiniteActionNominalRequest& nominal,
             attempts.emplace_back(NominalPlanStopped{stopped.action_indices, stopped.reason});
         }
     }
-    const auto coverage = coverage_from(result.candidate_search);
+    const auto coverage = coverage_for_candidates(request,result.candidate_search);
     if(const auto selected_index = best_scored_attempt(attempts)) {
         if(*selected_index >= result.plan_attempts.size())
             return NominalTrackUnsupported{std::move(attempts), coverage,
@@ -402,7 +422,7 @@ NominalTrackOutcome zonotope_track(const FiniteActionNominalRequest& nominal,
             attempts.emplace_back(NominalPlanStopped{stopped.action_indices, stopped.outcome});
         }
     }
-    const auto coverage = coverage_from(result.candidate_search);
+    const auto coverage = coverage_for_candidates(request,result.candidate_search);
     if(const auto selected_index = best_scored_attempt(attempts)) {
         const auto index = *selected_index;
         if(index >= result.plan_attempts.size() || !std::holds_alternative<ZonotopePlanScored>(result.plan_attempts[index]))
@@ -457,7 +477,7 @@ NominalTrackOutcome parallelotope_track(const FiniteActionNominalRequest& nomina
             attempts.emplace_back(NominalPlanStopped{stopped.action_indices, stopped.outcome});
         }
     }
-    const auto coverage = coverage_from(result.candidate_search);
+    const auto coverage = coverage_for_candidates(request,result.candidate_search);
     if(const auto selected_index = best_scored_attempt(attempts)) {
         const auto index = *selected_index;
         if(index >= result.plan_attempts.size() || !std::holds_alternative<ParallelotopePlanScored>(result.plan_attempts[index]))
@@ -510,7 +530,7 @@ NominalTrackOutcome ellipsoid_track(const FiniteActionNominalRequest& nominal,
             attempts.emplace_back(NominalPlanStopped{stopped.action_indices, stopped.outcome});
         }
     }
-    const auto coverage = coverage_from(result.candidate_search);
+    const auto coverage = coverage_for_candidates(request,result.candidate_search);
     if(const auto selected_index = best_scored_attempt(attempts)) {
         const auto index = *selected_index;
         if(index >= result.plan_attempts.size() || !std::holds_alternative<EllipsoidPlanScored>(result.plan_attempts[index]))

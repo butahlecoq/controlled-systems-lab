@@ -18,6 +18,7 @@
 #include <array>
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include <numeric>
 #include <stdexcept>
 #include <string>
@@ -433,18 +434,18 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
     const auto control_optimizer=method_selection(input.at("control_optimizer"),"control_optimizer");
     if(control_optimizer.id!="csl.optimization.finite-action-stage-layered-graph" ||
             control_optimizer.version!="1.0.0")
-        return query_failure(input,"unsupported","The explicitly requested control optimizer is unavailable.");
+        return query_failure(input,"unavailable","The explicitly requested control optimizer is not registered in this executable.");
     auto registration = geometry::polyhedral::make_projection_registration();
     registry::Registry<registry::GeometryPort> providers;
     if(const auto error = providers.add(registration))
-        return {{"status", "unsupported"}, {"reason", error->diagnostics.empty() ? "projection registration rejected" : error->diagnostics.front().explanation}};
+        return query_failure(input,"unavailable", error->diagnostics.empty() ? "projection registration rejected" : error->diagnostics.front().explanation);
     registry::Requirements requirements;
     requirements.output.representation = {"csl.polyhedron.h"};
     requirements.output.relation = SetRelation::equivalent;
     auto prepared = registry::prepare_provider(registry::select_provider(providers,
         {registration.identity.id, registration.identity.version}, requirements));
     if(!std::holds_alternative<registry::PreparedProvider<registry::GeometryPort>>(prepared))
-        return {{"status", "unsupported"}, {"reason", "exact-H projection provider failed preparation"}};
+        return query_failure(input,"unavailable","Exact-H projection provider failed preparation in this executable.");
     auto provider = std::get<registry::PreparedProvider<registry::GeometryPort>>(std::move(prepared));
     const auto reachable_provider = affine_sum_provider(input);
     Json geometry_calls=Json::array();
@@ -682,6 +683,16 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
 }
 
 Json query(const Json& in) {
+    if(in.contains("candidate_action_indices") &&
+            (!in.at("candidate_action_indices").is_array() || in.at("candidate_action_indices").empty())) {
+        auto result=query_failure(in,"rejected",
+            "An explicit candidate_action_indices catalogue must be a nonempty array of full-horizon histories.");
+        result["mathematical_support"]="not_evaluated";
+        result["candidate_plan_search"]={{"policy_id",in.value("candidate_search_policy",std::string("caller-declared-history-subset/1"))},
+            {"candidate_count",0},{"search_coverage","not_evaluated"},
+            {"reason","no candidate histories were supplied; exhaustive search was not substituted"}};
+        return result;
+    }
     const auto& coefficient_stages = in.at("predictor_stages");
     const auto horizon = coefficient_stages.size();
     const auto initial = vector(in.at("observed_physical_state"));
@@ -723,6 +734,11 @@ Json query(const Json& in) {
         {in.at("problem_id").get<std::string>()}, {in.at("request_id").get<std::string>()},
         std::move(system), initial, {action_dimension, std::move(actions)}, std::move(external),
         std::move(safe), objective, cost, absolute_stage};
+    if(in.contains("candidate_action_indices")) {
+        request.candidate_action_indices.emplace();
+        for(const auto& candidate:in.at("candidate_action_indices"))
+            request.candidate_action_indices->push_back(candidate.get<std::vector<std::size_t>>());
+    }
     const auto representation_index = in.at("representation_index").get<std::size_t>();
     const std::array<optimization::NominalRepresentation, 5> representations{
         optimization::NominalRepresentation::exact_polytope,
@@ -761,6 +777,21 @@ Json query(const Json& in) {
         if constexpr(std::is_same_v<T, optimization::NominalTrackUnsupported>) return "unsupported";
         return "stopped";
     }, track.outcome);
+    const auto candidate_evaluation_coverage = std::visit([](const auto& row) -> std::string {
+        using T = std::decay_t<decltype(row)>;
+        if constexpr(std::is_same_v<T, optimization::NominalTrackSelected>) {
+            if(row.coverage==optimization::NominalSearchCoverage::complete) return "complete";
+            if(row.coverage==optimization::NominalSearchCoverage::stopped) return "stopped";
+            return "incomplete";
+        }
+        if constexpr(std::is_same_v<T, optimization::NominalTrackNoScoredCandidate>) {
+            if(row.coverage==optimization::NominalSearchCoverage::complete) return "complete";
+            if(row.coverage==optimization::NominalSearchCoverage::stopped) return "stopped";
+            return "incomplete";
+        }
+        if constexpr(std::is_same_v<T, optimization::NominalTrackStopped>) return "stopped";
+        return "incomplete";
+    }, track.outcome);
     Json invocations = Json::array({{{"module_id", "csl::optimization::finite_action_nominal_profile"},
         {"operation", operations.at(representation_index)},
         {"provider", "public-function"},
@@ -769,6 +800,29 @@ Json query(const Json& in) {
         {"action_profile_id", in.at("action_profile_id")},
         {"policy_id", in.at("controller_id").get<std::string>() + "/receding-fixed-plan-mpc/1"},
         {"representation", representation_index}, {"invocations", invocations}};
+    Json candidate_plan_search=nullptr;
+    if(in.contains("candidate_action_indices") && request.candidate_action_indices) {
+        const auto action_count=in.at("actions").size();
+        std::size_t full_count=1;
+        bool overflow=false;
+        for(std::size_t stage=0;stage<horizon;++stage) {
+            if(action_count!=0 && full_count>std::numeric_limits<std::size_t>::max()/action_count) {
+                overflow=true;
+                break;
+            }
+            full_count*=action_count;
+        }
+        candidate_plan_search={{"policy_id",in.value("candidate_search_policy",std::string("caller-declared-history-subset/1"))},
+            {"full_authored_horizon",horizon},{"original_horizon",in.at("original_horizon")},
+            {"action_catalogue_size",action_count},{"candidate_count",request.candidate_action_indices->size()},
+            {"candidate_action_indices",*request.candidate_action_indices},
+            {"candidate_budget",in.at("limits").at("max_plans")},
+            {"all_rows_span_full_prediction_horizon",true},{"indices_refer_to_untouched_source_action_catalogue",true},
+            {"full_action_history_count",overflow?Json("exceeds_size_t"):Json(full_count)},
+            {"search_coverage",!overflow&&full_count==request.candidate_action_indices->size()?"complete":"incomplete"},
+            {"candidate_evaluation_coverage",candidate_evaluation_coverage}};
+        base["candidate_plan_search"]=candidate_plan_search;
+    }
     if(!selected) {
         const auto [status, reason] = std::visit([](const auto& row) -> std::pair<std::string,std::string> {
             using T = std::decay_t<decltype(row)>;
@@ -816,8 +870,12 @@ Json query(const Json& in) {
         {"absolute_stage_offset", result.absolute_stage_offset}, {"selected_control", selected->replay.controls.front()},
         {"terminal_objective", selected->replay.terminal_objective},
         {"running_objective", selected->replay.running_objective}, {"total_replay_objective", selected->replay.total_objective},
-        {"policy_semantics", "receding-horizon nominal finite-action fixed-plan selection; first action reapplied after observation"},
-        {"optimality_scope", "finite action catalogue and declared numerical affine predictor; no nonlinear global-feedback claim"}};
+        {"policy_semantics", in.contains("candidate_action_indices") ?
+            "receding-horizon finite-action fixed-plan MPC over a declared bounded set of full-remaining-horizon action-index histories; selected first action is reapplied after observation" :
+            "receding-horizon nominal finite-action fixed-plan selection; first action reapplied after observation"},
+        {"optimality_scope", in.contains("candidate_action_indices") ?
+            "declared full-horizon candidate histories only; coverage against the complete action product is reported separately; no nonlinear global-feedback claim" :
+            "finite action catalogue and declared numerical affine predictor; no nonlinear global-feedback claim"}};
     base["query_receipt"] = {{"schema", "csl.closed-loop.native-policy-query-receipt/1"},
         {"task_id", in.at("task_id")}, {"task_sha256", in.at("task_sha256")},
         {"source_model_id", in.at("source_model_id")}, {"predictor_model_id", in.at("predictor_model_id")},
@@ -827,7 +885,8 @@ Json query(const Json& in) {
         {"controller_id", in.at("controller_id")}, {"representation", in.at("representation_name")},
         {"search_coverage", coverage}, {"candidate_score", selected->candidate_score},
         {"score_kind", base["selector"]["score_kind"]}, {"selected_control", selected->replay.controls.front()},
-        {"predicted_set_role", "fixed-plan-trajectory-enclosure"}, {"invocations", base["invocations"]}};
+        {"predicted_set_role", "fixed-plan-trajectory-enclosure"},
+        {"candidate_plan_search",candidate_plan_search}, {"invocations", base["invocations"]}};
     return base;
 }
 } // namespace
