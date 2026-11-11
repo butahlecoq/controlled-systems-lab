@@ -4,6 +4,8 @@
 #include "two_points_fixture.hpp"
 
 #include <cmath>
+#include <algorithm>
+#include <limits>
 
 using namespace csl;
 using namespace csl::optimization;
@@ -116,6 +118,49 @@ TEST_CASE("nominal scoring skips zero-weight overflow coordinates and rejects no
         NominalRepresentation::exact_polytope);
     REQUIRE(std::holds_alternative<FiniteActionNominalResult>(outcome));
     CHECK(std::holds_alternative<NominalTrackUnsupported>(std::get<FiniteActionNominalResult>(outcome).tracks.front().outcome));
+}
+
+TEST_CASE("nominal selection preserves a positive quadratic cost when coefficient division underflows") {
+    const SystemModel authored{{{1,1,0}, TimeDomain::discrete,
+        LinearStage{{1,1,{1}}, {1,1,{0}}, {1,0,{}}, {0}}}, {}};
+    const auto system = take_nominal(model::snapshot(authored, Vector{0,1}));
+    const Matrix inequalities{2,1,{1,-1}};
+    const Vector upper_bounds{10,10};
+    const Matrix equalities{0,1,{}};
+    const Vector equality_values{};
+    const auto av = numeric::snapshot(inequalities);
+    const auto bv = numeric::snapshot_vector(upper_bounds);
+    const auto ev = numeric::snapshot(equalities);
+    const auto fv = numeric::snapshot_vector(equality_values);
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(av));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(bv));
+    REQUIRE(std::holds_alternative<numeric::MatrixView>(ev));
+    REQUIRE(std::holds_alternative<numeric::VectorView>(fv));
+    const auto safe = take_nominal(sets::make_h({{"tiny-nominal-safe"},1,{"x"}},
+        {std::get<numeric::MatrixView>(av),std::get<numeric::VectorView>(bv),
+         std::get<numeric::MatrixView>(ev),std::get<numeric::VectorView>(fv)}));
+    const auto objective = std::get<Objective>(snapshot(LinearTerminal{{0},0}));
+    FiniteActionNominalRequest request{{"tiny-cost-nominal"},{"tiny-cost-nominal-run"},system,
+        {0}, {1, {{1},{0}}}, {{}}, {safe,safe}, objective,
+        {"tiny-cost-objective",2,{{0, {QuadraticControlPenalty{{0},{1e-150},{1},
+            std::numeric_limits<double>::denorm_min(),2}}}}}};
+    const auto result = finite_action_nominal_profile(request,{4,16,100,16,0.0},
+        NominalRepresentation::exact_polytope);
+    if(const auto* error=std::get_if<Unsupported>(&result))
+        for(const auto& diagnostic:error->diagnostics) MESSAGE(diagnostic.field << ": " << diagnostic.explanation);
+    REQUIRE(std::holds_alternative<FiniteActionNominalResult>(result));
+    const auto& track = std::get<FiniteActionNominalResult>(result).tracks.front().outcome;
+    REQUIRE(std::holds_alternative<NominalTrackSelected>(track));
+    const auto& selected = std::get<NominalTrackSelected>(track);
+    CHECK(selected.replay.controls.front()[0] == 0.0);
+    CHECK(selected.candidate_score == 0.0);
+    const auto costly = std::find_if(selected.attempts.begin(),selected.attempts.end(),[](const auto& attempt) {
+        const auto* scored = std::get_if<NominalPlanScored>(&attempt);
+        return scored && !scored->action_indices.empty() && scored->action_indices.front() == 0;
+    });
+    REQUIRE(costly != selected.attempts.end());
+    CHECK(std::get<NominalPlanScored>(*costly).exact_running_cost ==
+        doctest::Approx(2.4703282292062326e-24).epsilon(1e-15));
 }
 
 TEST_CASE("selected nominal profile executes one representation route") {

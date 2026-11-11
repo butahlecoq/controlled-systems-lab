@@ -7,6 +7,8 @@
 #include <csl/optimization/finite_action_graph.hpp>
 
 #include <array>
+#include <algorithm>
+#include <limits>
 
 using namespace csl;
 using namespace csl::optimization;
@@ -261,4 +263,30 @@ TEST_CASE("finite but individually valid edge costs cannot overflow accumulated 
     REQUIRE(std::holds_alternative<Unsupported>(outcome));
     const auto field=std::get<Unsupported>(outcome).diagnostics.front().field;
     CHECK((field == "finite_graph.ranking.overflow" || field == "finite_graph.bellman.overflow"));
+}
+
+TEST_CASE("graph ranking preserves a positive quadratic cost when coefficient division underflows") {
+    const SystemModel authored{{{2,1,0}, TimeDomain::discrete,
+        LinearStage{{2,2,{1,0,0,1}}, {2,1,{1,0}}, {2,0,{}}, {0,0}}}, {}};
+    const auto system = std::get<model::LinearSystem>(model::snapshot(authored, Vector{0,1}));
+    const auto safe = h_box({-10,-10},{10,10},"tiny-cost-safe");
+    const auto objective = std::get<Objective>(snapshot(LinearTerminal{{0,0},0}));
+    FiniteActionNominalRequest request{{"tiny-cost-graph"},{"tiny-cost-graph-run"},system,
+        {0,0}, {1, {{1},{0}}}, {{}}, {safe,safe}, objective,
+        {"tiny-cost-objective",2,{{0, {QuadraticControlPenalty{{0},{1e-150},{1},
+            std::numeric_limits<double>::denorm_min(),2}}}}}};
+    const auto result = finite_action_stage_layered_graph(request,{4,16},projection_provider());
+    if(const auto* error=std::get_if<Unsupported>(&result))
+        for(const auto& diagnostic:error->diagnostics) MESSAGE(diagnostic.field << ": " << diagnostic.explanation);
+    REQUIRE(std::holds_alternative<FiniteActionGraphResult>(result));
+    const auto& graph = std::get<FiniteActionGraphResult>(result);
+    REQUIRE(graph.has_viable_path);
+    CHECK(graph.nodes[graph.selected_nodes[1]].action_index == 1);
+    CHECK(graph.total_objective == 0.0);
+    const auto costly = std::find_if(graph.nodes.begin(),graph.nodes.end(),[](const auto& node) {
+        return node.stage == 1 && node.action_index == 0;
+    });
+    REQUIRE(costly != graph.nodes.end());
+    // Independent binary-input evaluation: denorm_min * (1 / 1e-150)^2 / 2.
+    CHECK(costly->edge_running_cost == doctest::Approx(2.4703282292062326e-24).epsilon(1e-15));
 }

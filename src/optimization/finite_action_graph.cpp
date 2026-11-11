@@ -9,6 +9,8 @@
 #include <csl/sets/data.hpp>
 #include <csl/model/linear_system.hpp>
 
+#include "running_cost_evaluation.hpp"
+
 #include <algorithm>
 #include <cmath>
 #include <functional>
@@ -151,13 +153,9 @@ double stage_cost(const RunningControlCost& cost, std::size_t stage, std::span<c
     for(const auto& term : found->terms) {
         if(const auto* quadratic = std::get_if<QuadraticControlPenalty>(&term)) {
             if(quadratic->coefficient == 0.0) continue;
-            double sum = 0.0;
-            for(std::size_t j = 0; j < control.size(); ++j) {
-                if(quadratic->weights[j] == 0.0) continue;
-                const double residual = (control[j] - quadratic->reference[j]) / quadratic->scales[j];
-                sum += quadratic->weights[j] * residual * residual;
-            }
-            total += (quadratic->coefficient / static_cast<double>(quadratic->normalization_horizon)) * sum;
+            const auto quadratic_cost = detail::quadratic_stage_cost(*quadratic, control);
+            if(!quadratic_cost) return std::numeric_limits<double>::quiet_NaN();
+            total += *quadratic_cost;
         } else {
             const auto& norm = std::get<EuclideanControlPenalty>(term);
             if(norm.coefficient == 0.0) continue;
