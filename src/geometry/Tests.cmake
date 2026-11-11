@@ -1,4 +1,10 @@
 if(TARGET CSL::highs_lp)
+  add_executable(composition_catalogue_tests tests/contract/geometry/composition_catalogue_tests.cpp)
+  target_link_libraries(composition_catalogue_tests PRIVATE
+    CSL::hull CSL::highs_lp CSL::phase_one CSL::quickhull_2d doctest::doctest)
+  add_test(NAME composition_catalogue_tests COMMAND composition_catalogue_tests)
+  csl_test_target(composition_catalogue_tests geometry)
+
   add_executable(historical_hull_differential_test tests/unit/geometry/historical_hull_differential_test.cpp)
   target_link_libraries(historical_hull_differential_test PRIVATE CSL::hull CSL::quickhull_2d CSL::highs_lp doctest::doctest)
   add_test(NAME historical_hull_differential_test COMMAND historical_hull_differential_test)

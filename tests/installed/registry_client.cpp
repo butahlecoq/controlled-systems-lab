@@ -28,6 +28,10 @@ int main() try {
         Registry<FixturePort> registry;
         require(!registry.add({{{"fixture"},"1"},[](int,const Requirements&) -> Capability { return Offer{}; },
             [](int) { return std::make_unique<Fixture>(); }}),"registration failed");
+        const auto identities = registry.identities();
+        require(identities.size() == 1,"provider inventory omitted a registration");
+        require(identities[0].id.value == "fixture" && identities[0].version == "1",
+            "provider inventory changed the registered identity");
         int request = 41;
         Requirements invalid; invalid.scalar = Scalar::exact;
         auto rejected = prepare_pipeline(select(registry,Method{{"fixture"},{}},request,invalid));

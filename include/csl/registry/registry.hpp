@@ -134,6 +134,15 @@ template<class Port> class Registry {
     friend struct detail::PipelineAccess;
     friend struct detail::ProviderAccess;
 public:
+    std::vector<Identity> identities() const {
+        std::vector<Identity> result;
+        result.reserve(entries_.size());
+        for (const auto& [id, entry] : entries_) {
+            static_cast<void>(id);
+            result.push_back(entry.identity);
+        }
+        return result;
+    }
     std::optional<Rejection> add(Registration<Port> entry) {
         const Method requested{entry.identity.id,entry.identity.version};
         Provenance provenance{Port::name,requested,entry.identity};
@@ -457,6 +466,15 @@ class StrategyRegistry {
     std::variant<PreparedStrategy,Rejection> prepare_impl(const StrategyRequest&,
         const Requirements&,std::optional<std::string>,StrategyPreparationObservation*) const;
 public:
+    std::vector<Identity> identities() const {
+        std::vector<Identity> result;
+        result.reserve(entries_.size());
+        for (const auto& [id, entry] : entries_) {
+            static_cast<void>(id);
+            result.push_back(entry.identity);
+        }
+        return result;
+    }
     std::optional<Rejection> add(StrategyRegistration);
     std::variant<PreparedStrategy,Rejection> prepare(const StrategyRequest&, const Requirements& = {},
         std::optional<std::string> version = {}) const;
