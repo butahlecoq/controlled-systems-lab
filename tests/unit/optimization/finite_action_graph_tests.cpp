@@ -295,6 +295,52 @@ TEST_CASE("shape membership rejects points admitted only by a coordinate boundin
     const auto zonotope_membership=finite_graph_action_cloud_membership(zonotope,outside_zonotope);
     CHECK(zonotope_membership.supported);
     CHECK_FALSE(zonotope_membership.contained);
+
+    zonotope.selected_outer_shape=FiniteGraphZonotopeShape{{0,0},Matrix{2,4,{1,0,1,0,0,1,0,1}}};
+    const auto repeated_generators=finite_graph_action_cloud_membership(zonotope,Vector{1.5,0.0});
+    CHECK(repeated_generators.supported);
+    CHECK(repeated_generators.contained);
+    REQUIRE(repeated_generators.witness_coordinates.size()==4);
+    CHECK(repeated_generators.witness_coordinates[0]==doctest::Approx(1.0));
+    CHECK(repeated_generators.witness_coordinates[2]==doctest::Approx(0.5));
+    zonotope.selected_outer_shape=FiniteGraphZonotopeShape{{0,0},Matrix{2,2,{1,1,1,-1}}};
+    const auto unsupported_rotated=finite_graph_action_cloud_membership(zonotope,Vector{0,0});
+    CHECK_FALSE(unsupported_rotated.supported);
+    CHECK_FALSE(unsupported_rotated.contained);
+    CHECK(unsupported_rotated.method.find("inconclusive")!=std::string::npos);
+}
+
+TEST_CASE("public shape membership refuses malformed and non-finite shape payloads") {
+    const auto nan=std::numeric_limits<double>::quiet_NaN();
+    const auto inf=std::numeric_limits<double>::infinity();
+    FiniteGraphActionCloudEnvelope cloud;
+    cloud.outer_lower={-2,-2};cloud.outer_upper={2,2};
+    const Vector point{0,0};
+    const auto refused=[&](FiniteGraphActionCloudShape shape) {
+        cloud.selected_outer_shape=std::move(shape);
+        const auto membership=finite_graph_action_cloud_membership(cloud,point);
+        CHECK_FALSE(membership.supported);
+        CHECK_FALSE(membership.contained);
+        CHECK_FALSE(membership.method.empty());
+    };
+    refused(FiniteGraphBoxShape{{nan,-1},{1,1}});
+    refused(FiniteGraphParallelotopeShape{Matrix{2,2,{1,0,0,inf}},{-1,-1},{1,1}});
+    refused(FiniteGraphEllipsoidShape{{nan,0},{1,1}});
+    refused(FiniteGraphZonotopeShape{{nan,0},Matrix{2,0,{}}});
+    refused(FiniteGraphZonotopeShape{{0,0},Matrix{2,1,{inf,0}}});
+}
+
+TEST_CASE("a zero-generator zonotope is a singleton with an explicit witness") {
+    FiniteGraphActionCloudEnvelope cloud;
+    cloud.outer_lower={-1,-1};cloud.outer_upper={1,1};
+    cloud.selected_outer_shape=FiniteGraphZonotopeShape{{0,0},Matrix{2,0,{}}};
+    const auto contained=finite_graph_action_cloud_membership(cloud,Vector{0,0});
+    CHECK(contained.supported);
+    CHECK(contained.contained);
+    CHECK(contained.witness_coordinates.empty());
+    const auto excluded=finite_graph_action_cloud_membership(cloud,Vector{0.1,0});
+    CHECK(excluded.supported);
+    CHECK_FALSE(excluded.contained);
 }
 
 TEST_CASE("action-cloud lift preserves the source nominal external E*w contribution") {

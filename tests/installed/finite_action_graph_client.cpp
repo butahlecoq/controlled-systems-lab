@@ -4,6 +4,7 @@
 #include <csl/optimization/phase_one.hpp>
 
 #include <variant>
+#include <limits>
 
 using namespace csl;
 
@@ -107,5 +108,12 @@ int main() {
     cloud.selected_outer_shape=optimization::FiniteGraphZonotopeShape{{0,0},Matrix{2,1,{1,1}}};
     if(!optimization::finite_graph_action_cloud_membership(cloud,Vector{1,-1}).supported ||
        optimization::finite_graph_action_cloud_membership(cloud,Vector{1,-1}).contained) return 13;
+    cloud.selected_outer_shape=optimization::FiniteGraphZonotopeShape{{0,0},Matrix{2,4,{1,0,1,0,0,1,0,1}}};
+    const auto repeated=optimization::finite_graph_action_cloud_membership(cloud,Vector{1.5,0});
+    if(!repeated.supported || !repeated.contained || repeated.witness_coordinates.size()!=4) return 14;
+    cloud.selected_outer_shape=optimization::FiniteGraphZonotopeShape{
+        {std::numeric_limits<double>::quiet_NaN(),0},Matrix{2,0,{}}};
+    const auto malformed=optimization::finite_graph_action_cloud_membership(cloud,Vector{0,0});
+    if(malformed.supported || malformed.contained) return 15;
     return 0;
 }

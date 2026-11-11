@@ -1031,13 +1031,50 @@ FiniteGraphCloudMembership finite_graph_action_cloud_membership(
         result.method="dimension-or-finiteness-invalid";
         return result;
     }
+    if(!finite(std::span<const double>(cloud.outer_lower)) || !finite(std::span<const double>(cloud.outer_upper))) {
+        result.method="non-finite-coordinate-outer-bounds";
+        return result;
+    }
+    for(std::size_t i=0;i<point.size();++i)if(cloud.outer_lower[i]>cloud.outer_upper[i]) {
+        result.method="reversed-coordinate-outer-bounds";
+        return result;
+    }
+    const auto valid_shape=std::visit([&](const auto& shape) {
+        using T=std::decay_t<decltype(shape)>;
+        if constexpr(std::is_same_v<T,FiniteGraphBoxShape>) {
+            if(shape.lower.size()!=point.size() || shape.upper.size()!=point.size() ||
+               !finite(std::span<const double>(shape.lower)) || !finite(std::span<const double>(shape.upper)))return false;
+            for(std::size_t i=0;i<point.size();++i)if(shape.lower[i]>shape.upper[i])return false;
+            return true;
+        } else if constexpr(std::is_same_v<T,FiniteGraphParallelotopeShape>) {
+            if(shape.frame.rows!=point.size() || shape.frame.cols!=point.size() ||
+               shape.frame.values.size()!=point.size()*point.size() ||
+               shape.lower.size()!=point.size() || shape.upper.size()!=point.size() ||
+               !finite(std::span<const double>(shape.frame.values)) ||
+               !finite(std::span<const double>(shape.lower)) || !finite(std::span<const double>(shape.upper)))return false;
+            for(std::size_t i=0;i<point.size();++i)if(shape.lower[i]>shape.upper[i])return false;
+            return true;
+        } else if constexpr(std::is_same_v<T,FiniteGraphEllipsoidShape>) {
+            if(shape.center.size()!=point.size() || shape.radii.size()!=point.size() ||
+               !finite(std::span<const double>(shape.center)) || !finite(std::span<const double>(shape.radii)))return false;
+            return std::all_of(shape.radii.begin(),shape.radii.end(),[](double radius){return radius>=0.0;});
+        } else {
+            return shape.center.size()==point.size() && shape.generators.rows==point.size() &&
+                shape.generators.values.size()==shape.generators.rows*shape.generators.cols &&
+                finite(std::span<const double>(shape.center)) && finite(std::span<const double>(shape.generators.values));
+        }
+    },cloud.selected_outer_shape);
+    if(!valid_shape) {
+        result.method="malformed-or-non-finite-selected-shape";
+        return result;
+    }
     double scale=0.0;
     for(const auto value:point)scale=std::max(scale,std::abs(value));
     for(const auto value:cloud.outer_lower)scale=std::max(scale,std::abs(value));
     for(const auto value:cloud.outer_upper)scale=std::max(scale,std::abs(value));
     result.tolerance=std::max(64.0*std::numeric_limits<double>::epsilon()*scale,
         64.0*std::numeric_limits<double>::denorm_min());
-    return std::visit([&](const auto& shape)->FiniteGraphCloudMembership {
+    auto membership=std::visit([&](const auto& shape)->FiniteGraphCloudMembership {
         using T=std::decay_t<decltype(shape)>;
         auto membership=result;
         membership.supported=true;
@@ -1125,22 +1162,19 @@ FiniteGraphCloudMembership finite_graph_action_cloud_membership(
             membership.contained=metric<=1.0+64.0*std::numeric_limits<double>::epsilon()*
                 static_cast<double>(std::max<std::size_t>(1,point.size()));
         } else {
-            membership.method="bounded-generator-coefficients-and-rounding-residual";
+            membership.method="bounded-axis-aligned-generator-coefficients";
             const auto n=point.size(),g=shape.generators.cols;
-            if(shape.center.size()!=n || shape.generators.rows!=n || shape.generators.values.size()!=n*g) {
-                membership.supported=false;membership.method="zonotope-dimension-unsupported";return membership;
-            }
             membership.witness_coordinates.assign(g,0.0);
             double generator_scale=0.0;
             for(const auto value:shape.generators.values)generator_scale=std::max(generator_scale,std::abs(value));
             const auto generator_tolerance=std::max(64.0*std::numeric_limits<double>::epsilon()*generator_scale,
                 64.0*std::numeric_limits<double>::denorm_min());
-            const auto coefficient_tolerance=[](double coefficient) {
-                return 64.0*std::numeric_limits<double>::epsilon()*std::max(1.0,std::abs(coefficient));
-            };
             if(g==0) {
                 double residual2=0.0;
-                for(std::size_t i=0;i<n;++i) {const auto r=point[i]-shape.center[i];residual2+=r*r;}
+                for(std::size_t i=0;i<n;++i) {
+                    const auto residual=point[i]-shape.center[i];
+                    residual2+=residual*residual;
+                }
                 membership.reconstruction_residual=std::sqrt(residual2);
                 membership.contained=membership.reconstruction_residual<=result.tolerance;
                 return membership;
@@ -1165,50 +1199,89 @@ FiniteGraphCloudMembership finite_graph_action_cloud_membership(
                     membership.reconstruction_residual<=result.tolerance;
                 return membership;
             }
-            if(g<n) {membership.supported=false;membership.method="zonotope-generator-layout-unsupported";return membership;}
-            const auto input_columns=g-n;
-            Vector delta(n);
-            for(std::size_t row=0;row<n;++row)delta[row]=point[row]-shape.center[row];
-            bool axes=true;
-            for(std::size_t row=0;row<n;++row) {
+            std::vector<std::vector<std::size_t>> columns_by_axis(n);
+            for(std::size_t col=0;col<g;++col) {
                 std::optional<std::size_t> axis;
-                for(std::size_t col=0;col<input_columns;++col) {
+                for(std::size_t row=0;row<n;++row) {
                     const auto value=shape.generators.values[row*g+col];
-                    bool other_rows_zero=true;
-                    for(std::size_t other=0;other<n;++other)if(other!=row)
-                        other_rows_zero=other_rows_zero && std::abs(shape.generators.values[other*g+col])<=generator_tolerance;
-                    if(std::abs(value)>generator_tolerance && other_rows_zero) {axis=col;break;}
+                    if(std::abs(value)>generator_tolerance) {
+                        if(axis) {
+                            membership.supported=false;
+                            membership.method="non-axis-aligned-multiple-zonotope-generators-inconclusive";
+                            return membership;
+                        }
+                        axis=row;
+                    }
                 }
-                if(axis) {
-                    const auto generator=shape.generators.values[row*g+*axis];
-                    membership.witness_coordinates[*axis]=delta[row]/generator;
-                } else if(std::abs(delta[row])>result.tolerance) axes=false;
+                if(axis)columns_by_axis[*axis].push_back(col);
             }
-            if(!axes) {membership.supported=false;membership.method="zonotope-input-generators-not-axis-aligned";return membership;}
+            bool within_capacity=true;
+            Vector delta(n),capacity(n,0.0);
+            for(std::size_t row=0;row<n;++row) {
+                delta[row]=point[row]-shape.center[row];
+                for(const auto col:columns_by_axis[row])capacity[row]+=std::abs(shape.generators.values[row*g+col]);
+                if(!std::isfinite(delta[row]) || !std::isfinite(capacity[row])) {
+                    membership.supported=false;
+                    membership.method="axis-aligned-zonotope-capacity-overflow-inconclusive";
+                    return membership;
+                }
+                if(std::abs(delta[row])>capacity[row]+result.tolerance)within_capacity=false;
+            }
+            if(!within_capacity) {
+                membership.contained=false;
+                membership.method="axis-aligned-generator-capacity-exclusion";
+                double distance2=0.0;
+                for(std::size_t row=0;row<n;++row) {
+                    const auto excess=std::max(0.0,std::abs(delta[row])-capacity[row]);
+                    distance2+=excess*excess;
+                }
+                membership.reconstruction_residual=std::sqrt(distance2);
+                return membership;
+            }
+            for(std::size_t row=0;row<n;++row) {
+                double remaining=delta[row];
+                for(const auto col:columns_by_axis[row]) {
+                    const auto generator=shape.generators.values[row*g+col];
+                    const auto magnitude=std::min(1.0,std::abs(remaining)/std::abs(generator));
+                    const auto coefficient=(std::signbit(remaining)!=std::signbit(generator))?-magnitude:magnitude;
+                    membership.witness_coordinates[col]=coefficient;
+                    remaining-=generator*coefficient;
+                }
+                if(std::abs(remaining)>result.tolerance) {
+                    membership.supported=false;
+                    membership.method="axis-aligned-zonotope-witness-rounding-inconclusive";
+                    return membership;
+                }
+            }
             double residual2=0.0;
             for(std::size_t row=0;row<n;++row) {
                 double reconstructed=shape.center[row];
-                for(std::size_t col=0;col<input_columns;++col)
+                for(std::size_t col=0;col<g;++col)
                     reconstructed+=shape.generators.values[row*g+col]*membership.witness_coordinates[col];
                 const auto residual=point[row]-reconstructed;
                 residual2+=residual*residual;
-                const auto rounding=shape.generators.values[row*g+input_columns+row];
-                for(std::size_t other=0;other<n;++other)if(other!=row)
-                    if(std::abs(shape.generators.values[other*g+input_columns+row])>generator_tolerance)axes=false;
-                if(std::abs(rounding)>generator_tolerance)
-                    membership.witness_coordinates[input_columns+row]=residual/rounding;
-                if(std::abs(residual)>std::abs(rounding)+result.tolerance ||
-                   std::abs(membership.witness_coordinates[input_columns+row])>1.0+
-                       coefficient_tolerance(membership.witness_coordinates[input_columns+row]))axes=false;
             }
-            for(std::size_t col=0;col<input_columns;++col)
+            for(std::size_t col=0;col<g;++col)
                 if(std::abs(membership.witness_coordinates[col])>1.0+64.0*std::numeric_limits<double>::epsilon()*
-                    std::max(1.0,std::abs(membership.witness_coordinates[col])))axes=false;
+                    std::max(1.0,std::abs(membership.witness_coordinates[col]))) {
+                    membership.supported=false;
+                    membership.contained=false;
+                    membership.method="axis-aligned-zonotope-coefficient-overflow-inconclusive";
+                    return membership;
+                }
             membership.reconstruction_residual=std::sqrt(residual2);
-            membership.contained=axes;
+            membership.contained=membership.reconstruction_residual<=result.tolerance;
         }
         return membership;
     },cloud.selected_outer_shape);
+    if(membership.supported &&
+       (!std::isfinite(membership.reconstruction_residual) || !std::isfinite(membership.tolerance) ||
+        !finite(std::span<const double>(membership.witness_coordinates)))) {
+        membership.supported=false;
+        membership.contained=false;
+        membership.method="non-finite-membership-arithmetic-inconclusive";
+    }
+    return membership;
 }
 
 FiniteActionGraphOutcome finite_action_stage_layered_graph(const FiniteActionNominalRequest& request,
