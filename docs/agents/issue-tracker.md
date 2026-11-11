@@ -2,9 +2,9 @@
 
 Use GitHub issues and pull requests in [butahlecoq/controlled-systems-lab](https://github.com/butahlecoq/controlled-systems-lab). Always pass the repository explicitly to GitHub CLI commands.
 
-Stable task keys, requirements, acceptance criteria and prerequisites are recorded in the [backlog](../superpowers/plans/backlog.json). Fetch the live issue before starting; closed dependencies and merged code are authoritative. Publication snapshots record the initial state, not current completion.
+The live GitHub issue is the source of truth for its current requirements, acceptance criteria, assignment and prerequisites. Fetch it before starting; closed dependencies and merged code are authoritative. Local backlog snapshots and task mirrors are historical context only.
 
-For issue triage, use the five canonical labels and the category/state rules in [triage labels](triage-labels.md).
+For issue triage, use these five canonical state labels exactly: `needs-triage` means maintainer evaluation is needed; `needs-info` means work awaits specific information; `ready-for-agent` means criteria and inputs are clear with no open prerequisite or active implementation; `ready-for-human` means the next step needs human judgment, external access or manual verification; `wontfix` means the request will not be actioned. Each triaged issue has exactly one category label (`bug` or `enhancement`) and one state label. Other labels describe its work area, phase or execution status; `in-progress` records active execution and does not replace the triage state.
 
 ## Discover and claim work
 
@@ -20,7 +20,7 @@ Before editing, claim an unblocked issue using the repository's human assignment
 
 ### Comparison-program discovery index
 
-The [comparison-program spec](../architecture/comparison-program.md) defines intended scope and evidence rules. Current implementation work spawned from its decisions is indexed in [comparison-jobs.json](../superpowers/plans/comparison-jobs.json) by stable task key, GitHub issue number and native blockers. This supplemental index complements rather than rewrites the historical [backlog snapshot](../superpowers/plans/backlog.json). The issue tracker remains canonical; query GitHub each time, since issue state and newly created jobs can change independently of either file. Wayfinder decision/map tickets are planning work, not implementation jobs.
+The [comparison-program spec](../architecture/comparison-program.md) defines intended scope and evidence rules. Query GitHub for current jobs, issue state, dependencies and blockers; planning snapshots are historical and never supersede the live tracker. Wayfinder decision/map tickets are planning work, not implementation jobs.
 
 For each task, create an isolated branch and PR. Put `Closes #N` in the PR only when its complete acceptance checklist is satisfied. Post independent standards and specification reviews as PR comments with reviewed base/head commits, actionable findings, severity and verification evidence. Post fix responses and scoped re-review results so the next agent can continue from the PR itself.
 

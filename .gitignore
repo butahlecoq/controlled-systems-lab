@@ -2,6 +2,14 @@
 /papers/
 /Свидетельства/
 /docs/research/extracted/
+/docs/superpowers/
+/docs/reviews/
+/docs/**/*.md
+!/docs/agents/issue-tracker.md
+!/docs/agents/delivery.md
+!/docs/architecture/comparison-program.md
+!/docs/architecture/published-algorithm-results.md
+!/docs/architecture/decisions/[0-9][0-9][0-9][0-9]-*.md
 /tmp/
 /build/
 /.ci-cache/

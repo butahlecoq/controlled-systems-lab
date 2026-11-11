@@ -82,13 +82,8 @@ The archive supports reachable-set computation, terminal optimization and minima
 | [Published baselines](docs/research/baselines.md) | Numerical experiments to reproduce and compare |
 | [Legacy implementation audit](docs/research/legacy-audit.md) | Source findings and isolated executable checks |
 | [Research developments, 2021–2026](docs/research/recent-research.md) | Relevant recent methods and software analogues |
-| [Implementation backlog](docs/superpowers/plans/2026-10-11-controlled-systems-backlog.md) | Dependency-ordered GitHub tickets, separate unit-test expansions, review gates and proposed ownership |
 | [Algorithm inventory](docs/research/algorithm-module-inventory.md) | Archival LP/hull variants, Pascal Zoutendijk, exact operations and implementation assumptions |
-| [Skill routing](docs/agents/skill-routing.md) | Roles for Matt Pocock, Superpowers and selectively installed pstack skills |
-| [Consolidated specification](docs/superpowers/specs/2026-10-11-controlled-systems-master-design.md) | Conversation decisions, requirement IDs, acceptance tests and future subagent work breakdown |
-| [C++ core contracts](docs/superpowers/specs/2026-10-11-cpp-core-contracts-design.md) | Draft native interfaces, ownership, extension boundaries and first usage scenarios |
 | [Native build and installed client](docs/build/native.md) | Repeatable C++20 configure/build/test/install, dependency pins and platform evidence |
-| [Scenario-file design](docs/superpowers/specs/2026-10-11-scenario-files-design.md) | Simple user-authored inputs, templates, validation and optional run settings |
 | [Language decision](docs/architecture/decisions/0001-cpp20-core.md) | Accepted C++ direction and its consequences |
 | [Modular algorithms and optimal families](docs/architecture/modular-algorithms-and-solution-sets.md) | Concrete C++20 ports, interchangeable solvers/geometry, complete solution relations |
 | [Set representations and Ellipsoidal Toolbox](docs/architecture/set-representations-and-ellipsoidal-toolbox.md) | Ellipsoidal methods, newer representations, recovered owner-authored zonotope paper |
@@ -106,7 +101,7 @@ The archive's finite-action minimax solver enumerates control sequences; changin
 
 Published experiments are the starting baselines, as requested by the research owner. Their numbers are recorded as reported results, not new reproductions. Several source and implementation inconsistencies must be resolved before they become acceptance criteria.
 
-Owner decision: use C++ as the main implementation language, with C++20 as the working standard and Python for independent verification/reference computations. The general first user workflow must return an optimal solution family for nominal planning with continuous actions and without process disturbances; the model contract retains disturbance/adversarial and observation channels. See the [linear-system contract](docs/architecture/linear-system-contract.md) and [implementation backlog](docs/superpowers/plans/2026-10-11-controlled-systems-backlog.md). The required comparison is reachability/terminal minimization/backward recovery versus direct joint-trajectory optimization on the same immutable problem. The T-S01/T-S02 registered profiles are bounded analytic cases, not general workflow completion; single witnesses, two backend calls or sampled endpoints do not fulfill the full-family requirement. The [composition map](docs/architecture/framework-composition.md) distinguishes delivered components from remaining work.
+Owner decision: use C++ as the main implementation language, with C++20 as the working standard and Python for independent verification/reference computations. The general first user workflow must return an optimal solution family for nominal planning with continuous actions and without process disturbances; the model contract retains disturbance/adversarial and observation channels. See the [linear-system contract](docs/architecture/linear-system-contract.md). The required comparison is reachability/terminal minimization/backward recovery versus direct joint-trajectory optimization on the same immutable problem. The T-S01/T-S02 registered profiles are bounded analytic cases, not general workflow completion; single witnesses, two backend calls or sampled endpoints do not fulfill the full-family requirement. The [composition map](docs/architecture/framework-composition.md) distinguishes delivered components from remaining work.
 
 ## Evidence and preservation
 

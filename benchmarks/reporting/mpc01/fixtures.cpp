@@ -210,7 +210,7 @@ MpcCase make_ts01() {
     result.id = "ts01-exact-v1";
     result.version = "1";
     result.source_kind = "analytic-contract";
-    result.source_ref = "docs/superpowers/specs/2026-10-12-class-level-system-architecture.md#ts01";
+    result.source_ref = "https://github.com/butahlecoq/controlled-systems-lab/blob/a32b9b6aaf5b8e4d9bbbabb4526df2134efb3632/docs/superpowers/specs/2026-10-12-class-level-system-architecture.md#ts01";
     result.canonical_input_bytes = R"({"schema":"csl.mpc01-fixture/1","id":"ts01-exact-v1","x0":[0],"A":[[1],[1]],"B":[[1],[1]],"u":[[0,1],[0,1]],"cost":{"kind":"quadratic","Q":[[2]],"linear":[-2],"offset":1}})";
     result.canonical_input_sha256 = digest_text(result.canonical_input_bytes);
     result.initial_state = {0.0};
