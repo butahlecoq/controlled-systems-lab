@@ -21,6 +21,7 @@ archive without an explanation.
 from __future__ import annotations
 
 import argparse
+import importlib.util
 from html import escape
 from html.parser import HTMLParser
 import json
@@ -28,7 +29,20 @@ from pathlib import Path
 import re
 from typing import NamedTuple
 
-import site_design
+try:
+    import site_design
+except ModuleNotFoundError as error:
+    if error.name != "site_design":
+        raise
+    # A few publication validators load this file by path, outside the
+    # scripts/reports import context. Resolve the helper beside this file so
+    # those standalone imports use the same canonical page framing.
+    design_path = Path(__file__).with_name("site_design.py")
+    design_spec = importlib.util.spec_from_file_location("site_design", design_path)
+    if design_spec is None or design_spec.loader is None:
+        raise ImportError(f"cannot load shared page design from {design_path}")
+    site_design = importlib.util.module_from_spec(design_spec)
+    design_spec.loader.exec_module(site_design)
 
 
 class Family(NamedTuple):
