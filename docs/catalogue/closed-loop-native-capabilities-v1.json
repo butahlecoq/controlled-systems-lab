@@ -32,9 +32,9 @@
             "version": "1.0.0"
           },
           "limits": {
-            "max_beam_width": 16,
+            "max_beam_width": 8,
             "max_generators_per_stage": 64,
-            "max_graph_nodes": 128,
+            "max_graph_nodes": 512,
             "max_plans": 32,
             "max_points_per_stage": 128,
             "max_score_evaluations": 128
@@ -50,6 +50,14 @@
           }
         },
         "id": "native-exact-polytope-backward-graph/1",
+        "limit_usage": {
+          "max_beam_width": "used",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "used",
+          "max_plans": "not_used_by_graph_search",
+          "max_points_per_stage": "not_used_by_graph_search",
+          "max_score_evaluations": "not_used_by_graph_search"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -57,14 +65,11 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
+          "include/csl/optimization/finite_action_graph.hpp",
+          "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
           "src/reachability/nominal_predecessor.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
@@ -86,8 +91,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "954c7bf1b958661e836a89833a1fa1c40129b4d2329f930aefb9cd453004d5e2",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-backward-graph/1/cfg-954c7bf1b958661e",
+      "graph_fingerprint": "b49d5f757cd42f1e5e21c65f1eca12c5ebbb8fd285f3621d91b7a3c61c8ff467",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-backward-graph/1/cfg-b49d5f757cd42f1e",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -118,7 +123,6 @@
           "version": "1.0.0"
         },
         "representation": {
-          "module_id": null,
           "name": "exact-polytope",
           "status": "integrated-h-polytope"
         },
@@ -139,7 +143,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -162,10 +166,6 @@
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
-          "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
-        },
-        {
           "path": "src/geometry/affine_sum.cpp",
           "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
         },
@@ -176,14 +176,6 @@
         {
           "path": "src/optimization/finite_action_graph.cpp",
           "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
-        },
-        {
-          "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
-        },
-        {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
@@ -203,7 +195,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -239,9 +231,9 @@
             "version": "1.0.0"
           },
           "limits": {
-            "max_beam_width": 16,
+            "max_beam_width": 8,
             "max_generators_per_stage": 64,
-            "max_graph_nodes": 128,
+            "max_graph_nodes": 512,
             "max_plans": 32,
             "max_points_per_stage": 128,
             "max_score_evaluations": 128
@@ -257,6 +249,14 @@
           }
         },
         "id": "native-box-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "used",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "used",
+          "max_plans": "not_used_by_graph_search",
+          "max_points_per_stage": "not_used_by_graph_search",
+          "max_score_evaluations": "not_used_by_graph_search"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -264,17 +264,14 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_box.cpp",
+          "include/csl/optimization/finite_action_graph.hpp",
+          "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
           "src/reachability/nominal_predecessor.cpp",
+          "src/reachability/finite_plan_box.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/geometry/affine_sum.cpp",
           "src/geometry/hull_reducer.cpp",
@@ -294,8 +291,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "7ea0c4b0834ab7beed86c210bbbd3efe65b5e74a540ebcad5d3349a8a1b6c066",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-box-mpc/1/cfg-7ea0c4b0834ab7be",
+      "graph_fingerprint": "c6216f4e80e6fa84d0b6cebd479d1e67613060f38f70ed58b469b5574761afed",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-box-mpc/1/cfg-c6216f4e80e6fa84",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -347,7 +344,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -370,10 +367,6 @@
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
-          "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
-        },
-        {
           "path": "src/geometry/affine_sum.cpp",
           "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
         },
@@ -384,14 +377,6 @@
         {
           "path": "src/optimization/finite_action_graph.cpp",
           "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
-        },
-        {
-          "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
-        },
-        {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
@@ -415,7 +400,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -451,9 +436,9 @@
             "version": "1.0.0"
           },
           "limits": {
-            "max_beam_width": 16,
+            "max_beam_width": 8,
             "max_generators_per_stage": 64,
-            "max_graph_nodes": 128,
+            "max_graph_nodes": 512,
             "max_plans": 32,
             "max_points_per_stage": 128,
             "max_score_evaluations": 128
@@ -469,6 +454,14 @@
           }
         },
         "id": "native-zonotope-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "used",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "used",
+          "max_plans": "not_used_by_graph_search",
+          "max_points_per_stage": "not_used_by_graph_search",
+          "max_score_evaluations": "not_used_by_graph_search"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -476,17 +469,14 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_zonotope.cpp",
+          "include/csl/optimization/finite_action_graph.hpp",
+          "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
           "src/reachability/nominal_predecessor.cpp",
+          "src/reachability/finite_plan_zonotope.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/geometry/affine_sum.cpp",
           "src/geometry/hull_reducer.cpp",
@@ -506,8 +496,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "16fe3eb9b236c63d5116b3e6677ba83871f33bce02e82863178af643e4ecd471",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-mpc/1/cfg-16fe3eb9b236c63d",
+      "graph_fingerprint": "68e27d82ac212fef29ef540148be193c9f7d2e1b980ad9fde3a9dfa5ffe4ddec",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-mpc/1/cfg-68e27d82ac212fef",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -559,7 +549,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -582,10 +572,6 @@
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
-          "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
-        },
-        {
           "path": "src/geometry/affine_sum.cpp",
           "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
         },
@@ -596,14 +582,6 @@
         {
           "path": "src/optimization/finite_action_graph.cpp",
           "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
-        },
-        {
-          "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
-        },
-        {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
@@ -627,7 +605,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -663,9 +641,9 @@
             "version": "1.0.0"
           },
           "limits": {
-            "max_beam_width": 16,
+            "max_beam_width": 8,
             "max_generators_per_stage": 64,
-            "max_graph_nodes": 128,
+            "max_graph_nodes": 512,
             "max_plans": 32,
             "max_points_per_stage": 128,
             "max_score_evaluations": 128
@@ -681,6 +659,14 @@
           }
         },
         "id": "native-parallelotope-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "used",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "used",
+          "max_plans": "not_used_by_graph_search",
+          "max_points_per_stage": "not_used_by_graph_search",
+          "max_score_evaluations": "not_used_by_graph_search"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -688,17 +674,14 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_parallelotope.cpp",
+          "include/csl/optimization/finite_action_graph.hpp",
+          "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
           "src/reachability/nominal_predecessor.cpp",
+          "src/reachability/finite_plan_parallelotope.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/geometry/affine_sum.cpp",
           "src/geometry/hull_reducer.cpp",
@@ -718,8 +701,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "09a2ff14fa432a3707d46d8c86675270a44592e06e4a611633b3f694e85f5a8a",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-mpc/1/cfg-09a2ff14fa432a37",
+      "graph_fingerprint": "680e8e10d805f87097ccd90fd4077269b8b0c23d7455d9440cc7877bc63b6620",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-mpc/1/cfg-680e8e10d805f870",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -771,7 +754,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -794,10 +777,6 @@
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
-          "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
-        },
-        {
           "path": "src/geometry/affine_sum.cpp",
           "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
         },
@@ -808,14 +787,6 @@
         {
           "path": "src/optimization/finite_action_graph.cpp",
           "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
-        },
-        {
-          "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
-        },
-        {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
@@ -839,7 +810,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -875,9 +846,9 @@
             "version": "1.0.0"
           },
           "limits": {
-            "max_beam_width": 16,
+            "max_beam_width": 8,
             "max_generators_per_stage": 64,
-            "max_graph_nodes": 128,
+            "max_graph_nodes": 512,
             "max_plans": 32,
             "max_points_per_stage": 128,
             "max_score_evaluations": 128
@@ -893,6 +864,14 @@
           }
         },
         "id": "native-ellipsoid-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "used",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "used",
+          "max_plans": "not_used_by_graph_search",
+          "max_points_per_stage": "not_used_by_graph_search",
+          "max_score_evaluations": "not_used_by_graph_search"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -900,17 +879,14 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_ellipsoid.cpp",
+          "include/csl/optimization/finite_action_graph.hpp",
+          "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
           "src/reachability/nominal_predecessor.cpp",
+          "src/reachability/finite_plan_ellipsoid.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/geometry/affine_sum.cpp",
           "src/geometry/hull_reducer.cpp",
@@ -930,8 +906,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "1cadb8343d36e65a45e4f33ce756e7561caaf745bf5946377dbc9b6d9ba0474c",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-mpc/1/cfg-1cadb8343d36e65a",
+      "graph_fingerprint": "bfd9fb04b274e4b2aa79f8b6b02fba9dd25fa64d1ee2b042f4f47c77c77ff7a8",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-mpc/1/cfg-bfd9fb04b274e4b2",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -983,7 +959,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -1006,10 +982,6 @@
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
-          "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
-        },
-        {
           "path": "src/geometry/affine_sum.cpp",
           "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
         },
@@ -1020,14 +992,6 @@
         {
           "path": "src/optimization/finite_action_graph.cpp",
           "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
-        },
-        {
-          "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
-        },
-        {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
@@ -1051,7 +1015,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -1063,6 +1027,7 @@
         "basis": "source-bound task, finite action profile, and declared native policy factory",
         "status": "admitted"
       },
+      "candidate_search_policy": "constant-and-single-switch-full-horizon/1",
       "claim_scope": "Observed-state finite-action fixed-plan MPC; bounded candidate coverage recorded per query; no adaptive or global optimality guarantee",
       "controller": {
         "adapter": "native_graph_policy",
@@ -1084,6 +1049,14 @@
           "representation": "exact-polytope"
         },
         "id": "native-exact-polytope-fixed-plan-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "not_used_by_fixed_plan_search",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "not_used_by_fixed_plan_search",
+          "max_plans": "used_as_candidate_history_budget",
+          "max_points_per_stage": "used",
+          "max_score_evaluations": "used"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -1091,14 +1064,17 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
-          "src/optimization/running_cost_evaluation.hpp"
+          "src/optimization/running_cost_evaluation.hpp",
+          "include/csl/optimization/finite_action_nominal.hpp",
+          "include/csl/optimization/finite_action_minimax.hpp",
+          "src/optimization/finite_action_nominal.cpp",
+          "src/optimization/finite_action_plans.hpp",
+          "src/optimization/finite_action_replay.hpp",
+          "src/optimization/finite_action_replay.cpp",
+          "include/csl/optimization/finite_action_minimax.hpp",
+          "src/optimization/finite_action_minimax.cpp"
         ],
         "version": "1"
       },
@@ -1114,8 +1090,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "6cb6a3313d679f36b31f815508486ddbf43d2905d72085514f3f35d310a893bd",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-fixed-plan-mpc/1/cfg-6cb6a3313d679f36",
+      "graph_fingerprint": "ecd7c4d41511b25ad22784b693c4f28dd0aeb879cee017c5ee050c7dbb4e6923",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-fixed-plan-mpc/1/cfg-ecd7c4d41511b25a",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1136,7 +1112,6 @@
         "hull_provider": "not_used",
         "reachable_set_method": "not_used",
         "representation": {
-          "module_id": null,
           "name": "exact-polytope",
           "status": "integrated-h-polytope"
         },
@@ -1151,7 +1126,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -1170,24 +1145,32 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
-          "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
+          "path": "include/csl/optimization/finite_action_minimax.hpp",
+          "sha256": "6c8bdba0ab961b9d7378fc98140bd2f83ff56e06c61500194b40a5737db5e1be"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
+          "sha256": "a0daeea2dc8adbb42e873d50e0a56100779a927d64a4b2ebad13b0a266f74815"
         },
         {
-          "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
+          "path": "src/optimization/finite_action_minimax.cpp",
+          "sha256": "b4596f11fab960cdee1392c10f02edf1e47913975787b91e2d8a1a7b92c22ebd"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
+          "sha256": "d0ef2ce103388b0b159edc9e8a583327c1b6877d8b99f0a926a992919f28fdbb"
         },
         {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
+          "path": "src/optimization/finite_action_plans.hpp",
+          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.cpp",
+          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.hpp",
+          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
@@ -1199,7 +1182,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -1211,6 +1194,7 @@
         "basis": "source-bound task, finite action profile, and declared native policy factory",
         "status": "admitted"
       },
+      "candidate_search_policy": "constant-and-single-switch-full-horizon/1",
       "claim_scope": "Observed-state finite-action fixed-plan MPC; bounded candidate coverage recorded per query; no adaptive or global optimality guarantee",
       "controller": {
         "adapter": "native_graph_policy",
@@ -1232,6 +1216,14 @@
           "representation": "box"
         },
         "id": "native-box-fixed-plan-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "not_used_by_fixed_plan_search",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "not_used_by_fixed_plan_search",
+          "max_plans": "used_as_candidate_history_budget",
+          "max_points_per_stage": "used",
+          "max_score_evaluations": "used"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -1239,15 +1231,17 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_box.cpp"
+          "include/csl/optimization/finite_action_nominal.hpp",
+          "include/csl/optimization/finite_action_minimax.hpp",
+          "src/optimization/finite_action_nominal.cpp",
+          "src/optimization/finite_action_plans.hpp",
+          "src/optimization/finite_action_replay.hpp",
+          "src/optimization/finite_action_replay.cpp",
+          "include/csl/optimization/finite_action_box_minimax.hpp",
+          "src/optimization/finite_action_box_minimax.cpp"
         ],
         "version": "1"
       },
@@ -1263,8 +1257,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "e5629f0991734b3e2b856a65b9281d7ca26ab9f08e59acd0a64aa5b6ffbca584",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-box-fixed-plan-mpc/1/cfg-e5629f0991734b3e",
+      "graph_fingerprint": "317ebd07980f596eebe05aa4fbedd1b9f5ef9e91354d50196b78bf72d6b6c8c5",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-box-fixed-plan-mpc/1/cfg-317ebd07980f596e",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1285,9 +1279,8 @@
         "hull_provider": "not_used",
         "reachable_set_method": "not_used",
         "representation": {
-          "module_id": "csl::reachability::finite_plan_box",
           "name": "box",
-          "status": "selected"
+          "status": "selected-in-nominal-profile"
         },
         "set_reducer": "not_used",
         "terminal_solver": "integrated in selected nominal planner",
@@ -1300,7 +1293,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -1319,32 +1312,40 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
-          "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
+          "path": "include/csl/optimization/finite_action_box_minimax.hpp",
+          "sha256": "15e569c195f3f916366c7934e6a152a8ec92195d2ef7cd2537201a794ffe96c4"
+        },
+        {
+          "path": "include/csl/optimization/finite_action_minimax.hpp",
+          "sha256": "6c8bdba0ab961b9d7378fc98140bd2f83ff56e06c61500194b40a5737db5e1be"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
+          "sha256": "a0daeea2dc8adbb42e873d50e0a56100779a927d64a4b2ebad13b0a266f74815"
         },
         {
-          "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
+          "path": "src/optimization/finite_action_box_minimax.cpp",
+          "sha256": "b26de16f255116382cf1d43ea2ec8d51a488a7ab90f86c7a68df957cbd32b5cf"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
+          "sha256": "d0ef2ce103388b0b159edc9e8a583327c1b6877d8b99f0a926a992919f28fdbb"
         },
         {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
+          "path": "src/optimization/finite_action_plans.hpp",
+          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.cpp",
+          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.hpp",
+          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
           "sha256": "312bddbfc57c0ade36a8667d5b87f5006750f607f925043d0604a37d74fffa6f"
-        },
-        {
-          "path": "src/reachability/finite_plan_box.cpp",
-          "sha256": "5eef0149385240b48d41728b6dc24ac3d72195d63b627f1e0d2c1b2f9ab46464"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
@@ -1352,7 +1353,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -1364,6 +1365,7 @@
         "basis": "source-bound task, finite action profile, and declared native policy factory",
         "status": "admitted"
       },
+      "candidate_search_policy": "constant-and-single-switch-full-horizon/1",
       "claim_scope": "Observed-state finite-action fixed-plan MPC; bounded candidate coverage recorded per query; no adaptive or global optimality guarantee",
       "controller": {
         "adapter": "native_graph_policy",
@@ -1385,6 +1387,14 @@
           "representation": "zonotope"
         },
         "id": "native-zonotope-fixed-plan-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "not_used_by_fixed_plan_search",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "not_used_by_fixed_plan_search",
+          "max_plans": "used_as_candidate_history_budget",
+          "max_points_per_stage": "used",
+          "max_score_evaluations": "used"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -1392,15 +1402,17 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_zonotope.cpp"
+          "include/csl/optimization/finite_action_nominal.hpp",
+          "include/csl/optimization/finite_action_minimax.hpp",
+          "src/optimization/finite_action_nominal.cpp",
+          "src/optimization/finite_action_plans.hpp",
+          "src/optimization/finite_action_replay.hpp",
+          "src/optimization/finite_action_replay.cpp",
+          "include/csl/optimization/finite_action_zonotope_minimax.hpp",
+          "src/optimization/finite_action_zonotope_minimax.cpp"
         ],
         "version": "1"
       },
@@ -1416,8 +1428,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "57403e5ed804bfa1dc458ad364a3d8a1910c2bce2ab8e7c57fe8ac19b0840107",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-fixed-plan-mpc/1/cfg-57403e5ed804bfa1",
+      "graph_fingerprint": "3b8745fbdb8b5580401d941edb5c06b7ae7843d2a70acd70856b3ca813216622",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-fixed-plan-mpc/1/cfg-3b8745fbdb8b5580",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1438,9 +1450,8 @@
         "hull_provider": "not_used",
         "reachable_set_method": "not_used",
         "representation": {
-          "module_id": "csl::reachability::finite_plan_zonotope",
           "name": "zonotope",
-          "status": "selected"
+          "status": "selected-in-nominal-profile"
         },
         "set_reducer": "not_used",
         "terminal_solver": "integrated in selected nominal planner",
@@ -1453,7 +1464,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -1472,32 +1483,40 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
-          "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
+          "path": "include/csl/optimization/finite_action_minimax.hpp",
+          "sha256": "6c8bdba0ab961b9d7378fc98140bd2f83ff56e06c61500194b40a5737db5e1be"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
+          "sha256": "a0daeea2dc8adbb42e873d50e0a56100779a927d64a4b2ebad13b0a266f74815"
         },
         {
-          "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
+          "path": "include/csl/optimization/finite_action_zonotope_minimax.hpp",
+          "sha256": "f541ddbfbe4469589efb4a6996dc4ea4f174f7477d53b6e1cd60dd838ed51302"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
+          "sha256": "d0ef2ce103388b0b159edc9e8a583327c1b6877d8b99f0a926a992919f28fdbb"
         },
         {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
+          "path": "src/optimization/finite_action_plans.hpp",
+          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.cpp",
+          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.hpp",
+          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
+        },
+        {
+          "path": "src/optimization/finite_action_zonotope_minimax.cpp",
+          "sha256": "dbeb25c975904905ea08ba5e99f3cd13ddf40469dfa9a9f1cec5ed87fc9c786f"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
           "sha256": "312bddbfc57c0ade36a8667d5b87f5006750f607f925043d0604a37d74fffa6f"
-        },
-        {
-          "path": "src/reachability/finite_plan_zonotope.cpp",
-          "sha256": "91c1b0c3a6643bdd886e0831790f10e098bdab05b1c5abe7b088a79be24abaff"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
@@ -1505,7 +1524,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -1517,6 +1536,7 @@
         "basis": "source-bound task, finite action profile, and declared native policy factory",
         "status": "admitted"
       },
+      "candidate_search_policy": "constant-and-single-switch-full-horizon/1",
       "claim_scope": "Observed-state finite-action fixed-plan MPC; bounded candidate coverage recorded per query; no adaptive or global optimality guarantee",
       "controller": {
         "adapter": "native_graph_policy",
@@ -1538,6 +1558,14 @@
           "representation": "parallelotope"
         },
         "id": "native-parallelotope-fixed-plan-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "not_used_by_fixed_plan_search",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "not_used_by_fixed_plan_search",
+          "max_plans": "used_as_candidate_history_budget",
+          "max_points_per_stage": "used",
+          "max_score_evaluations": "used"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -1545,15 +1573,17 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_parallelotope.cpp"
+          "include/csl/optimization/finite_action_nominal.hpp",
+          "include/csl/optimization/finite_action_minimax.hpp",
+          "src/optimization/finite_action_nominal.cpp",
+          "src/optimization/finite_action_plans.hpp",
+          "src/optimization/finite_action_replay.hpp",
+          "src/optimization/finite_action_replay.cpp",
+          "include/csl/optimization/finite_action_parallelotope_minimax.hpp",
+          "src/optimization/finite_action_parallelotope_minimax.cpp"
         ],
         "version": "1"
       },
@@ -1569,8 +1599,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "5fbada44df35ed1463f3272c3a01e757147d62cb556110b4805e77a011bdb9c2",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-fixed-plan-mpc/1/cfg-5fbada44df35ed14",
+      "graph_fingerprint": "230c4025296d3bf440338696c91d355e740761090b324fab6ba98a6071a7a00c",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-fixed-plan-mpc/1/cfg-230c4025296d3bf4",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1591,9 +1621,8 @@
         "hull_provider": "not_used",
         "reachable_set_method": "not_used",
         "representation": {
-          "module_id": "csl::reachability::finite_plan_parallelotope",
           "name": "parallelotope",
-          "status": "selected"
+          "status": "selected-in-nominal-profile"
         },
         "set_reducer": "not_used",
         "terminal_solver": "integrated in selected nominal planner",
@@ -1606,7 +1635,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -1625,32 +1654,40 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
-          "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
+          "path": "include/csl/optimization/finite_action_minimax.hpp",
+          "sha256": "6c8bdba0ab961b9d7378fc98140bd2f83ff56e06c61500194b40a5737db5e1be"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
+          "sha256": "a0daeea2dc8adbb42e873d50e0a56100779a927d64a4b2ebad13b0a266f74815"
         },
         {
-          "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
+          "path": "include/csl/optimization/finite_action_parallelotope_minimax.hpp",
+          "sha256": "e3002536cab1c3216293f7f70fd08bcb308addde53b58029b57898edb8296b3f"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
+          "sha256": "d0ef2ce103388b0b159edc9e8a583327c1b6877d8b99f0a926a992919f28fdbb"
         },
         {
           "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
+          "sha256": "6d889401d15c66437c1cbd5e839e0b0fd7f1f8623afff86f7cf2411a60c8bf76"
+        },
+        {
+          "path": "src/optimization/finite_action_plans.hpp",
+          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.cpp",
+          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.hpp",
+          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
           "sha256": "312bddbfc57c0ade36a8667d5b87f5006750f607f925043d0604a37d74fffa6f"
-        },
-        {
-          "path": "src/reachability/finite_plan_parallelotope.cpp",
-          "sha256": "df7a576150be9cc84c12e5708801b7826e9247b6a988593da35cd4c07145f5bd"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
@@ -1658,7 +1695,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -1670,6 +1707,7 @@
         "basis": "source-bound task, finite action profile, and declared native policy factory",
         "status": "admitted"
       },
+      "candidate_search_policy": "constant-and-single-switch-full-horizon/1",
       "claim_scope": "Observed-state finite-action fixed-plan MPC; bounded candidate coverage recorded per query; no adaptive or global optimality guarantee",
       "controller": {
         "adapter": "native_graph_policy",
@@ -1691,6 +1729,14 @@
           "representation": "ellipsoid"
         },
         "id": "native-ellipsoid-fixed-plan-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "not_used_by_fixed_plan_search",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "not_used_by_fixed_plan_search",
+          "max_plans": "used_as_candidate_history_budget",
+          "max_points_per_stage": "used",
+          "max_score_evaluations": "used"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -1698,15 +1744,17 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_ellipsoid.cpp"
+          "include/csl/optimization/finite_action_nominal.hpp",
+          "include/csl/optimization/finite_action_minimax.hpp",
+          "src/optimization/finite_action_nominal.cpp",
+          "src/optimization/finite_action_plans.hpp",
+          "src/optimization/finite_action_replay.hpp",
+          "src/optimization/finite_action_replay.cpp",
+          "include/csl/optimization/finite_action_ellipsoid_minimax.hpp",
+          "src/optimization/finite_action_ellipsoid_minimax.cpp"
         ],
         "version": "1"
       },
@@ -1722,8 +1770,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "e2895366078731609ae91a8ad51edc9e815a911b754193b4baba63b0c2b2d546",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-fixed-plan-mpc/1/cfg-e289536607873160",
+      "graph_fingerprint": "fd14cc63a6c256ac6ea84700adeeecbb6a0e1ca80416aa397abd7ebc87579717",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-fixed-plan-mpc/1/cfg-fd14cc63a6c256ac",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1744,9 +1792,8 @@
         "hull_provider": "not_used",
         "reachable_set_method": "not_used",
         "representation": {
-          "module_id": "csl::reachability::finite_plan_ellipsoid",
           "name": "ellipsoid",
-          "status": "selected"
+          "status": "selected-in-nominal-profile"
         },
         "set_reducer": "not_used",
         "terminal_solver": "integrated in selected nominal planner",
@@ -1759,7 +1806,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -1778,32 +1825,40 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
-          "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
+          "path": "include/csl/optimization/finite_action_ellipsoid_minimax.hpp",
+          "sha256": "78a5974e5dd4dffed486bf26bebebf6376fa6a525e8fbca1aa35010bc2123f5e"
+        },
+        {
+          "path": "include/csl/optimization/finite_action_minimax.hpp",
+          "sha256": "6c8bdba0ab961b9d7378fc98140bd2f83ff56e06c61500194b40a5737db5e1be"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
+          "sha256": "a0daeea2dc8adbb42e873d50e0a56100779a927d64a4b2ebad13b0a266f74815"
         },
         {
-          "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
+          "path": "src/optimization/finite_action_ellipsoid_minimax.cpp",
+          "sha256": "958cb41245718c51121566929917a9e81b895fa15b16efcbf467ae0e0e951bb2"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
+          "sha256": "d0ef2ce103388b0b159edc9e8a583327c1b6877d8b99f0a926a992919f28fdbb"
         },
         {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
+          "path": "src/optimization/finite_action_plans.hpp",
+          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.cpp",
+          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.hpp",
+          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
           "sha256": "312bddbfc57c0ade36a8667d5b87f5006750f607f925043d0604a37d74fffa6f"
-        },
-        {
-          "path": "src/reachability/finite_plan_ellipsoid.cpp",
-          "sha256": "c15b612dcaac50d201ca763c4c3a38d627c4b160df3703e42ea49e67742db2b7"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
@@ -1811,7 +1866,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -1847,9 +1902,9 @@
             "version": "1.0.0"
           },
           "limits": {
-            "max_beam_width": 16,
+            "max_beam_width": 8,
             "max_generators_per_stage": 64,
-            "max_graph_nodes": 128,
+            "max_graph_nodes": 512,
             "max_plans": 32,
             "max_points_per_stage": 128,
             "max_score_evaluations": 128
@@ -1865,6 +1920,14 @@
           }
         },
         "id": "native-exact-polytope-backward-graph/1",
+        "limit_usage": {
+          "max_beam_width": "used",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "used",
+          "max_plans": "not_used_by_graph_search",
+          "max_points_per_stage": "not_used_by_graph_search",
+          "max_score_evaluations": "not_used_by_graph_search"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -1872,14 +1935,11 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
+          "include/csl/optimization/finite_action_graph.hpp",
+          "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
           "src/reachability/nominal_predecessor.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
@@ -1901,8 +1961,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "a94748f4f89742e9b790b41e18a83929e7f8571fdf5a2d81537568bba5c30b3c",
-      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-backward-graph/1/cfg-a94748f4f89742e9",
+      "graph_fingerprint": "9ac2d80302abc2101ba8195796b9b84806dc8595239990c791e3b34e67ad35c5",
+      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-backward-graph/1/cfg-9ac2d80302abc210",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -1933,7 +1993,6 @@
           "version": "1.0.0"
         },
         "representation": {
-          "module_id": null,
           "name": "exact-polytope",
           "status": "integrated-h-polytope"
         },
@@ -1954,7 +2013,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -1977,10 +2036,6 @@
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
-          "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
-        },
-        {
           "path": "src/geometry/affine_sum.cpp",
           "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
         },
@@ -1991,14 +2046,6 @@
         {
           "path": "src/optimization/finite_action_graph.cpp",
           "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
-        },
-        {
-          "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
-        },
-        {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
@@ -2018,7 +2065,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -2054,9 +2101,9 @@
             "version": "1.0.0"
           },
           "limits": {
-            "max_beam_width": 16,
+            "max_beam_width": 8,
             "max_generators_per_stage": 64,
-            "max_graph_nodes": 128,
+            "max_graph_nodes": 512,
             "max_plans": 32,
             "max_points_per_stage": 128,
             "max_score_evaluations": 128
@@ -2072,6 +2119,14 @@
           }
         },
         "id": "native-box-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "used",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "used",
+          "max_plans": "not_used_by_graph_search",
+          "max_points_per_stage": "not_used_by_graph_search",
+          "max_score_evaluations": "not_used_by_graph_search"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -2079,17 +2134,14 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_box.cpp",
+          "include/csl/optimization/finite_action_graph.hpp",
+          "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
           "src/reachability/nominal_predecessor.cpp",
+          "src/reachability/finite_plan_box.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/geometry/affine_sum.cpp",
           "src/geometry/hull_reducer.cpp",
@@ -2109,8 +2161,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "d0b9ba7112cab7720c89a0661aa6e9c6a417f7a6f05f9d5369beb35c920d47d1",
-      "graph_id": "closed-loop/earth-orbit/native-box-mpc/1/cfg-d0b9ba7112cab772",
+      "graph_fingerprint": "d52c82ea0d9098f95b10eb944b97fe5543a58ac2fefd22fdc8c1cf4377323002",
+      "graph_id": "closed-loop/earth-orbit/native-box-mpc/1/cfg-d52c82ea0d9098f9",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2162,7 +2214,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -2185,10 +2237,6 @@
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
-          "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
-        },
-        {
           "path": "src/geometry/affine_sum.cpp",
           "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
         },
@@ -2199,14 +2247,6 @@
         {
           "path": "src/optimization/finite_action_graph.cpp",
           "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
-        },
-        {
-          "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
-        },
-        {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
@@ -2230,7 +2270,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -2266,9 +2306,9 @@
             "version": "1.0.0"
           },
           "limits": {
-            "max_beam_width": 16,
+            "max_beam_width": 8,
             "max_generators_per_stage": 64,
-            "max_graph_nodes": 128,
+            "max_graph_nodes": 512,
             "max_plans": 32,
             "max_points_per_stage": 128,
             "max_score_evaluations": 128
@@ -2284,6 +2324,14 @@
           }
         },
         "id": "native-zonotope-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "used",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "used",
+          "max_plans": "not_used_by_graph_search",
+          "max_points_per_stage": "not_used_by_graph_search",
+          "max_score_evaluations": "not_used_by_graph_search"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -2291,17 +2339,14 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_zonotope.cpp",
+          "include/csl/optimization/finite_action_graph.hpp",
+          "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
           "src/reachability/nominal_predecessor.cpp",
+          "src/reachability/finite_plan_zonotope.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/geometry/affine_sum.cpp",
           "src/geometry/hull_reducer.cpp",
@@ -2321,8 +2366,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "db353ec86d3cbaa059c05faeca9b8e9a2b155d9a374cb816b2b62d9b2bd6ed1c",
-      "graph_id": "closed-loop/earth-orbit/native-zonotope-mpc/1/cfg-db353ec86d3cbaa0",
+      "graph_fingerprint": "cd677f2e673a818346571ebadb205b9a5674bddc0da97aecfa360017891206b3",
+      "graph_id": "closed-loop/earth-orbit/native-zonotope-mpc/1/cfg-cd677f2e673a8183",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2374,7 +2419,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -2397,10 +2442,6 @@
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
-          "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
-        },
-        {
           "path": "src/geometry/affine_sum.cpp",
           "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
         },
@@ -2411,14 +2452,6 @@
         {
           "path": "src/optimization/finite_action_graph.cpp",
           "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
-        },
-        {
-          "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
-        },
-        {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
@@ -2442,7 +2475,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -2478,9 +2511,9 @@
             "version": "1.0.0"
           },
           "limits": {
-            "max_beam_width": 16,
+            "max_beam_width": 8,
             "max_generators_per_stage": 64,
-            "max_graph_nodes": 128,
+            "max_graph_nodes": 512,
             "max_plans": 32,
             "max_points_per_stage": 128,
             "max_score_evaluations": 128
@@ -2496,6 +2529,14 @@
           }
         },
         "id": "native-parallelotope-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "used",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "used",
+          "max_plans": "not_used_by_graph_search",
+          "max_points_per_stage": "not_used_by_graph_search",
+          "max_score_evaluations": "not_used_by_graph_search"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -2503,17 +2544,14 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_parallelotope.cpp",
+          "include/csl/optimization/finite_action_graph.hpp",
+          "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
           "src/reachability/nominal_predecessor.cpp",
+          "src/reachability/finite_plan_parallelotope.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/geometry/affine_sum.cpp",
           "src/geometry/hull_reducer.cpp",
@@ -2533,8 +2571,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "1f7c1476a0a7c307b1c23493870de194c12965df8bffd08bc8fb020879c493b0",
-      "graph_id": "closed-loop/earth-orbit/native-parallelotope-mpc/1/cfg-1f7c1476a0a7c307",
+      "graph_fingerprint": "8b93c5c7409b434177b30e0cd9464c93c9450aebaeee096dba6ce25c5f105764",
+      "graph_id": "closed-loop/earth-orbit/native-parallelotope-mpc/1/cfg-8b93c5c7409b4341",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2586,7 +2624,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -2609,10 +2647,6 @@
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
-          "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
-        },
-        {
           "path": "src/geometry/affine_sum.cpp",
           "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
         },
@@ -2623,14 +2657,6 @@
         {
           "path": "src/optimization/finite_action_graph.cpp",
           "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
-        },
-        {
-          "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
-        },
-        {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
@@ -2654,7 +2680,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -2690,9 +2716,9 @@
             "version": "1.0.0"
           },
           "limits": {
-            "max_beam_width": 16,
+            "max_beam_width": 8,
             "max_generators_per_stage": 64,
-            "max_graph_nodes": 128,
+            "max_graph_nodes": 512,
             "max_plans": 32,
             "max_points_per_stage": 128,
             "max_score_evaluations": 128
@@ -2708,6 +2734,14 @@
           }
         },
         "id": "native-ellipsoid-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "used",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "used",
+          "max_plans": "not_used_by_graph_search",
+          "max_points_per_stage": "not_used_by_graph_search",
+          "max_score_evaluations": "not_used_by_graph_search"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -2715,17 +2749,14 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_ellipsoid.cpp",
+          "include/csl/optimization/finite_action_graph.hpp",
+          "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
           "src/reachability/nominal_predecessor.cpp",
+          "src/reachability/finite_plan_ellipsoid.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/geometry/affine_sum.cpp",
           "src/geometry/hull_reducer.cpp",
@@ -2745,8 +2776,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "bb0bf3584abae3b3883cb8e8a0e913ee5201b1aa67528bd5a184735636171df8",
-      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-mpc/1/cfg-bb0bf3584abae3b3",
+      "graph_fingerprint": "bb9faf5a05870686883a8c0bc2ff7e8e80d182005b330810a4c9660e05384bca",
+      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-mpc/1/cfg-bb9faf5a05870686",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2798,7 +2829,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -2821,10 +2852,6 @@
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
-          "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
-        },
-        {
           "path": "src/geometry/affine_sum.cpp",
           "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
         },
@@ -2835,14 +2862,6 @@
         {
           "path": "src/optimization/finite_action_graph.cpp",
           "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
-        },
-        {
-          "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
-        },
-        {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
@@ -2866,7 +2885,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -2878,6 +2897,7 @@
         "basis": "source-bound task, finite action profile, and declared native policy factory",
         "status": "admitted"
       },
+      "candidate_search_policy": "constant-and-single-switch-full-horizon/1",
       "claim_scope": "Observed-state finite-action fixed-plan MPC; bounded candidate coverage recorded per query; no adaptive or global optimality guarantee",
       "controller": {
         "adapter": "native_graph_policy",
@@ -2899,6 +2919,14 @@
           "representation": "exact-polytope"
         },
         "id": "native-exact-polytope-fixed-plan-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "not_used_by_fixed_plan_search",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "not_used_by_fixed_plan_search",
+          "max_plans": "used_as_candidate_history_budget",
+          "max_points_per_stage": "used",
+          "max_score_evaluations": "used"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -2906,14 +2934,17 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
-          "src/optimization/running_cost_evaluation.hpp"
+          "src/optimization/running_cost_evaluation.hpp",
+          "include/csl/optimization/finite_action_nominal.hpp",
+          "include/csl/optimization/finite_action_minimax.hpp",
+          "src/optimization/finite_action_nominal.cpp",
+          "src/optimization/finite_action_plans.hpp",
+          "src/optimization/finite_action_replay.hpp",
+          "src/optimization/finite_action_replay.cpp",
+          "include/csl/optimization/finite_action_minimax.hpp",
+          "src/optimization/finite_action_minimax.cpp"
         ],
         "version": "1"
       },
@@ -2929,8 +2960,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "4b20088c466528b161f3192be1b1eae2efb969fcf4bac599f4059dda7bed3541",
-      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-fixed-plan-mpc/1/cfg-4b20088c466528b1",
+      "graph_fingerprint": "58063d0197ef835cbe4722ad27178eb372bc99ab0142df8c9d44ee3dc0462601",
+      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-fixed-plan-mpc/1/cfg-58063d0197ef835c",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2951,7 +2982,6 @@
         "hull_provider": "not_used",
         "reachable_set_method": "not_used",
         "representation": {
-          "module_id": null,
           "name": "exact-polytope",
           "status": "integrated-h-polytope"
         },
@@ -2966,7 +2996,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -2985,24 +3015,32 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
-          "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
+          "path": "include/csl/optimization/finite_action_minimax.hpp",
+          "sha256": "6c8bdba0ab961b9d7378fc98140bd2f83ff56e06c61500194b40a5737db5e1be"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
+          "sha256": "a0daeea2dc8adbb42e873d50e0a56100779a927d64a4b2ebad13b0a266f74815"
         },
         {
-          "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
+          "path": "src/optimization/finite_action_minimax.cpp",
+          "sha256": "b4596f11fab960cdee1392c10f02edf1e47913975787b91e2d8a1a7b92c22ebd"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
+          "sha256": "d0ef2ce103388b0b159edc9e8a583327c1b6877d8b99f0a926a992919f28fdbb"
         },
         {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
+          "path": "src/optimization/finite_action_plans.hpp",
+          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.cpp",
+          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.hpp",
+          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
@@ -3014,7 +3052,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -3026,6 +3064,7 @@
         "basis": "source-bound task, finite action profile, and declared native policy factory",
         "status": "admitted"
       },
+      "candidate_search_policy": "constant-and-single-switch-full-horizon/1",
       "claim_scope": "Observed-state finite-action fixed-plan MPC; bounded candidate coverage recorded per query; no adaptive or global optimality guarantee",
       "controller": {
         "adapter": "native_graph_policy",
@@ -3047,6 +3086,14 @@
           "representation": "box"
         },
         "id": "native-box-fixed-plan-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "not_used_by_fixed_plan_search",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "not_used_by_fixed_plan_search",
+          "max_plans": "used_as_candidate_history_budget",
+          "max_points_per_stage": "used",
+          "max_score_evaluations": "used"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -3054,15 +3101,17 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_box.cpp"
+          "include/csl/optimization/finite_action_nominal.hpp",
+          "include/csl/optimization/finite_action_minimax.hpp",
+          "src/optimization/finite_action_nominal.cpp",
+          "src/optimization/finite_action_plans.hpp",
+          "src/optimization/finite_action_replay.hpp",
+          "src/optimization/finite_action_replay.cpp",
+          "include/csl/optimization/finite_action_box_minimax.hpp",
+          "src/optimization/finite_action_box_minimax.cpp"
         ],
         "version": "1"
       },
@@ -3078,8 +3127,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "3dc31863cf3f0339fc49fa88ed4fce9fcc56c33e0c3a30e3219b2b858254ec63",
-      "graph_id": "closed-loop/earth-orbit/native-box-fixed-plan-mpc/1/cfg-3dc31863cf3f0339",
+      "graph_fingerprint": "03bae4d3f9c3d5edf61b6b9be80083231a822c09daa5ffbf2f1b0d2b5dd18935",
+      "graph_id": "closed-loop/earth-orbit/native-box-fixed-plan-mpc/1/cfg-03bae4d3f9c3d5ed",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3100,9 +3149,8 @@
         "hull_provider": "not_used",
         "reachable_set_method": "not_used",
         "representation": {
-          "module_id": "csl::reachability::finite_plan_box",
           "name": "box",
-          "status": "selected"
+          "status": "selected-in-nominal-profile"
         },
         "set_reducer": "not_used",
         "terminal_solver": "integrated in selected nominal planner",
@@ -3115,7 +3163,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -3134,32 +3182,40 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
-          "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
+          "path": "include/csl/optimization/finite_action_box_minimax.hpp",
+          "sha256": "15e569c195f3f916366c7934e6a152a8ec92195d2ef7cd2537201a794ffe96c4"
+        },
+        {
+          "path": "include/csl/optimization/finite_action_minimax.hpp",
+          "sha256": "6c8bdba0ab961b9d7378fc98140bd2f83ff56e06c61500194b40a5737db5e1be"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
+          "sha256": "a0daeea2dc8adbb42e873d50e0a56100779a927d64a4b2ebad13b0a266f74815"
         },
         {
-          "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
+          "path": "src/optimization/finite_action_box_minimax.cpp",
+          "sha256": "b26de16f255116382cf1d43ea2ec8d51a488a7ab90f86c7a68df957cbd32b5cf"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
+          "sha256": "d0ef2ce103388b0b159edc9e8a583327c1b6877d8b99f0a926a992919f28fdbb"
         },
         {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
+          "path": "src/optimization/finite_action_plans.hpp",
+          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.cpp",
+          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.hpp",
+          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
           "sha256": "312bddbfc57c0ade36a8667d5b87f5006750f607f925043d0604a37d74fffa6f"
-        },
-        {
-          "path": "src/reachability/finite_plan_box.cpp",
-          "sha256": "5eef0149385240b48d41728b6dc24ac3d72195d63b627f1e0d2c1b2f9ab46464"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
@@ -3167,7 +3223,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -3179,6 +3235,7 @@
         "basis": "source-bound task, finite action profile, and declared native policy factory",
         "status": "admitted"
       },
+      "candidate_search_policy": "constant-and-single-switch-full-horizon/1",
       "claim_scope": "Observed-state finite-action fixed-plan MPC; bounded candidate coverage recorded per query; no adaptive or global optimality guarantee",
       "controller": {
         "adapter": "native_graph_policy",
@@ -3200,6 +3257,14 @@
           "representation": "zonotope"
         },
         "id": "native-zonotope-fixed-plan-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "not_used_by_fixed_plan_search",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "not_used_by_fixed_plan_search",
+          "max_plans": "used_as_candidate_history_budget",
+          "max_points_per_stage": "used",
+          "max_score_evaluations": "used"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -3207,15 +3272,17 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_zonotope.cpp"
+          "include/csl/optimization/finite_action_nominal.hpp",
+          "include/csl/optimization/finite_action_minimax.hpp",
+          "src/optimization/finite_action_nominal.cpp",
+          "src/optimization/finite_action_plans.hpp",
+          "src/optimization/finite_action_replay.hpp",
+          "src/optimization/finite_action_replay.cpp",
+          "include/csl/optimization/finite_action_zonotope_minimax.hpp",
+          "src/optimization/finite_action_zonotope_minimax.cpp"
         ],
         "version": "1"
       },
@@ -3231,8 +3298,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "5f97af2c0c3b21e1f2c4550a1eeb370e88a678bf1e46fa65b69d5befe37f55a5",
-      "graph_id": "closed-loop/earth-orbit/native-zonotope-fixed-plan-mpc/1/cfg-5f97af2c0c3b21e1",
+      "graph_fingerprint": "a6b3d9821c7cfd968f980418acee24fb0673c4b99c8674fecb14f7eb99c63adc",
+      "graph_id": "closed-loop/earth-orbit/native-zonotope-fixed-plan-mpc/1/cfg-a6b3d9821c7cfd96",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3253,9 +3320,8 @@
         "hull_provider": "not_used",
         "reachable_set_method": "not_used",
         "representation": {
-          "module_id": "csl::reachability::finite_plan_zonotope",
           "name": "zonotope",
-          "status": "selected"
+          "status": "selected-in-nominal-profile"
         },
         "set_reducer": "not_used",
         "terminal_solver": "integrated in selected nominal planner",
@@ -3268,7 +3334,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -3287,32 +3353,40 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
-          "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
+          "path": "include/csl/optimization/finite_action_minimax.hpp",
+          "sha256": "6c8bdba0ab961b9d7378fc98140bd2f83ff56e06c61500194b40a5737db5e1be"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
+          "sha256": "a0daeea2dc8adbb42e873d50e0a56100779a927d64a4b2ebad13b0a266f74815"
         },
         {
-          "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
+          "path": "include/csl/optimization/finite_action_zonotope_minimax.hpp",
+          "sha256": "f541ddbfbe4469589efb4a6996dc4ea4f174f7477d53b6e1cd60dd838ed51302"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
+          "sha256": "d0ef2ce103388b0b159edc9e8a583327c1b6877d8b99f0a926a992919f28fdbb"
         },
         {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
+          "path": "src/optimization/finite_action_plans.hpp",
+          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.cpp",
+          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.hpp",
+          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
+        },
+        {
+          "path": "src/optimization/finite_action_zonotope_minimax.cpp",
+          "sha256": "dbeb25c975904905ea08ba5e99f3cd13ddf40469dfa9a9f1cec5ed87fc9c786f"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
           "sha256": "312bddbfc57c0ade36a8667d5b87f5006750f607f925043d0604a37d74fffa6f"
-        },
-        {
-          "path": "src/reachability/finite_plan_zonotope.cpp",
-          "sha256": "91c1b0c3a6643bdd886e0831790f10e098bdab05b1c5abe7b088a79be24abaff"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
@@ -3320,7 +3394,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -3332,6 +3406,7 @@
         "basis": "source-bound task, finite action profile, and declared native policy factory",
         "status": "admitted"
       },
+      "candidate_search_policy": "constant-and-single-switch-full-horizon/1",
       "claim_scope": "Observed-state finite-action fixed-plan MPC; bounded candidate coverage recorded per query; no adaptive or global optimality guarantee",
       "controller": {
         "adapter": "native_graph_policy",
@@ -3353,6 +3428,14 @@
           "representation": "parallelotope"
         },
         "id": "native-parallelotope-fixed-plan-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "not_used_by_fixed_plan_search",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "not_used_by_fixed_plan_search",
+          "max_plans": "used_as_candidate_history_budget",
+          "max_points_per_stage": "used",
+          "max_score_evaluations": "used"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -3360,15 +3443,17 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_parallelotope.cpp"
+          "include/csl/optimization/finite_action_nominal.hpp",
+          "include/csl/optimization/finite_action_minimax.hpp",
+          "src/optimization/finite_action_nominal.cpp",
+          "src/optimization/finite_action_plans.hpp",
+          "src/optimization/finite_action_replay.hpp",
+          "src/optimization/finite_action_replay.cpp",
+          "include/csl/optimization/finite_action_parallelotope_minimax.hpp",
+          "src/optimization/finite_action_parallelotope_minimax.cpp"
         ],
         "version": "1"
       },
@@ -3384,8 +3469,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "a5080410589232d935c1b1d6666d7f825f71a85d47f89b9c74f1846f1a5e2705",
-      "graph_id": "closed-loop/earth-orbit/native-parallelotope-fixed-plan-mpc/1/cfg-a5080410589232d9",
+      "graph_fingerprint": "f150dabec12904a1463d7f36ea671a5cbdd91bffbe271d6902bc55a96fc8ccaf",
+      "graph_id": "closed-loop/earth-orbit/native-parallelotope-fixed-plan-mpc/1/cfg-f150dabec12904a1",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3406,9 +3491,8 @@
         "hull_provider": "not_used",
         "reachable_set_method": "not_used",
         "representation": {
-          "module_id": "csl::reachability::finite_plan_parallelotope",
           "name": "parallelotope",
-          "status": "selected"
+          "status": "selected-in-nominal-profile"
         },
         "set_reducer": "not_used",
         "terminal_solver": "integrated in selected nominal planner",
@@ -3421,7 +3505,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -3440,32 +3524,40 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
-          "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
+          "path": "include/csl/optimization/finite_action_minimax.hpp",
+          "sha256": "6c8bdba0ab961b9d7378fc98140bd2f83ff56e06c61500194b40a5737db5e1be"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
+          "sha256": "a0daeea2dc8adbb42e873d50e0a56100779a927d64a4b2ebad13b0a266f74815"
         },
         {
-          "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
+          "path": "include/csl/optimization/finite_action_parallelotope_minimax.hpp",
+          "sha256": "e3002536cab1c3216293f7f70fd08bcb308addde53b58029b57898edb8296b3f"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
+          "sha256": "d0ef2ce103388b0b159edc9e8a583327c1b6877d8b99f0a926a992919f28fdbb"
         },
         {
           "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
+          "sha256": "6d889401d15c66437c1cbd5e839e0b0fd7f1f8623afff86f7cf2411a60c8bf76"
+        },
+        {
+          "path": "src/optimization/finite_action_plans.hpp",
+          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.cpp",
+          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.hpp",
+          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
           "sha256": "312bddbfc57c0ade36a8667d5b87f5006750f607f925043d0604a37d74fffa6f"
-        },
-        {
-          "path": "src/reachability/finite_plan_parallelotope.cpp",
-          "sha256": "df7a576150be9cc84c12e5708801b7826e9247b6a988593da35cd4c07145f5bd"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
@@ -3473,7 +3565,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -3485,6 +3577,7 @@
         "basis": "source-bound task, finite action profile, and declared native policy factory",
         "status": "admitted"
       },
+      "candidate_search_policy": "constant-and-single-switch-full-horizon/1",
       "claim_scope": "Observed-state finite-action fixed-plan MPC; bounded candidate coverage recorded per query; no adaptive or global optimality guarantee",
       "controller": {
         "adapter": "native_graph_policy",
@@ -3506,6 +3599,14 @@
           "representation": "ellipsoid"
         },
         "id": "native-ellipsoid-fixed-plan-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "not_used_by_fixed_plan_search",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "not_used_by_fixed_plan_search",
+          "max_plans": "used_as_candidate_history_budget",
+          "max_points_per_stage": "used",
+          "max_score_evaluations": "used"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -3513,15 +3614,17 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_ellipsoid.cpp"
+          "include/csl/optimization/finite_action_nominal.hpp",
+          "include/csl/optimization/finite_action_minimax.hpp",
+          "src/optimization/finite_action_nominal.cpp",
+          "src/optimization/finite_action_plans.hpp",
+          "src/optimization/finite_action_replay.hpp",
+          "src/optimization/finite_action_replay.cpp",
+          "include/csl/optimization/finite_action_ellipsoid_minimax.hpp",
+          "src/optimization/finite_action_ellipsoid_minimax.cpp"
         ],
         "version": "1"
       },
@@ -3537,8 +3640,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "2b0c6e9677160e296ba9e062c959476b3553dc90e2cf149ad1347f3bd8994004",
-      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-fixed-plan-mpc/1/cfg-2b0c6e9677160e29",
+      "graph_fingerprint": "205e3d0dfea84516766878c4e19adc630493b69336fd6f7e6c3f4d132bb9c49e",
+      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-fixed-plan-mpc/1/cfg-205e3d0dfea84516",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3559,9 +3662,8 @@
         "hull_provider": "not_used",
         "reachable_set_method": "not_used",
         "representation": {
-          "module_id": "csl::reachability::finite_plan_ellipsoid",
           "name": "ellipsoid",
-          "status": "selected"
+          "status": "selected-in-nominal-profile"
         },
         "set_reducer": "not_used",
         "terminal_solver": "integrated in selected nominal planner",
@@ -3574,7 +3676,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -3593,32 +3695,40 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
-          "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
+          "path": "include/csl/optimization/finite_action_ellipsoid_minimax.hpp",
+          "sha256": "78a5974e5dd4dffed486bf26bebebf6376fa6a525e8fbca1aa35010bc2123f5e"
+        },
+        {
+          "path": "include/csl/optimization/finite_action_minimax.hpp",
+          "sha256": "6c8bdba0ab961b9d7378fc98140bd2f83ff56e06c61500194b40a5737db5e1be"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
+          "sha256": "a0daeea2dc8adbb42e873d50e0a56100779a927d64a4b2ebad13b0a266f74815"
         },
         {
-          "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
+          "path": "src/optimization/finite_action_ellipsoid_minimax.cpp",
+          "sha256": "958cb41245718c51121566929917a9e81b895fa15b16efcbf467ae0e0e951bb2"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
+          "sha256": "d0ef2ce103388b0b159edc9e8a583327c1b6877d8b99f0a926a992919f28fdbb"
         },
         {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
+          "path": "src/optimization/finite_action_plans.hpp",
+          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.cpp",
+          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.hpp",
+          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
           "sha256": "312bddbfc57c0ade36a8667d5b87f5006750f607f925043d0604a37d74fffa6f"
-        },
-        {
-          "path": "src/reachability/finite_plan_ellipsoid.cpp",
-          "sha256": "c15b612dcaac50d201ca763c4c3a38d627c4b160df3703e42ea49e67742db2b7"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
@@ -3626,7 +3736,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -3662,9 +3772,9 @@
             "version": "1.0.0"
           },
           "limits": {
-            "max_beam_width": 16,
+            "max_beam_width": 8,
             "max_generators_per_stage": 64,
-            "max_graph_nodes": 128,
+            "max_graph_nodes": 512,
             "max_plans": 32,
             "max_points_per_stage": 128,
             "max_score_evaluations": 128
@@ -3680,6 +3790,14 @@
           }
         },
         "id": "native-exact-polytope-backward-graph/1",
+        "limit_usage": {
+          "max_beam_width": "used",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "used",
+          "max_plans": "not_used_by_graph_search",
+          "max_points_per_stage": "not_used_by_graph_search",
+          "max_score_evaluations": "not_used_by_graph_search"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -3687,14 +3805,11 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
+          "include/csl/optimization/finite_action_graph.hpp",
+          "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
           "src/reachability/nominal_predecessor.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
@@ -3716,8 +3831,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "1df5dab5032d31046efa5d5c278d04a122626c42bd8301ac26656e76a12f6536",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-backward-graph/1/cfg-1df5dab5032d3104",
+      "graph_fingerprint": "a2527f17c4551303eac7ab8f0f8daba6d79043b822f1899e9f365464e23bb847",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-backward-graph/1/cfg-a2527f17c4551303",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -3748,7 +3863,6 @@
           "version": "1.0.0"
         },
         "representation": {
-          "module_id": null,
           "name": "exact-polytope",
           "status": "integrated-h-polytope"
         },
@@ -3769,7 +3883,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -3792,10 +3906,6 @@
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
-          "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
-        },
-        {
           "path": "src/geometry/affine_sum.cpp",
           "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
         },
@@ -3806,14 +3916,6 @@
         {
           "path": "src/optimization/finite_action_graph.cpp",
           "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
-        },
-        {
-          "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
-        },
-        {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
@@ -3833,7 +3935,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -3869,9 +3971,9 @@
             "version": "1.0.0"
           },
           "limits": {
-            "max_beam_width": 16,
+            "max_beam_width": 8,
             "max_generators_per_stage": 64,
-            "max_graph_nodes": 128,
+            "max_graph_nodes": 512,
             "max_plans": 32,
             "max_points_per_stage": 128,
             "max_score_evaluations": 128
@@ -3887,6 +3989,14 @@
           }
         },
         "id": "native-box-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "used",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "used",
+          "max_plans": "not_used_by_graph_search",
+          "max_points_per_stage": "not_used_by_graph_search",
+          "max_score_evaluations": "not_used_by_graph_search"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -3894,17 +4004,14 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_box.cpp",
+          "include/csl/optimization/finite_action_graph.hpp",
+          "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
           "src/reachability/nominal_predecessor.cpp",
+          "src/reachability/finite_plan_box.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/geometry/affine_sum.cpp",
           "src/geometry/hull_reducer.cpp",
@@ -3924,8 +4031,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "9da1b71499dc2c518815072805e511049bf060ed135b0068ad039e41e92fbc60",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-mpc/1/cfg-9da1b71499dc2c51",
+      "graph_fingerprint": "275b9ea204f0aa1b0eee8a447bec7caa8ee58fe171e4bade5d3d2acc74d06365",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-mpc/1/cfg-275b9ea204f0aa1b",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -3977,7 +4084,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -4000,10 +4107,6 @@
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
-          "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
-        },
-        {
           "path": "src/geometry/affine_sum.cpp",
           "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
         },
@@ -4014,14 +4117,6 @@
         {
           "path": "src/optimization/finite_action_graph.cpp",
           "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
-        },
-        {
-          "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
-        },
-        {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
@@ -4045,7 +4140,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -4081,9 +4176,9 @@
             "version": "1.0.0"
           },
           "limits": {
-            "max_beam_width": 16,
+            "max_beam_width": 8,
             "max_generators_per_stage": 64,
-            "max_graph_nodes": 128,
+            "max_graph_nodes": 512,
             "max_plans": 32,
             "max_points_per_stage": 128,
             "max_score_evaluations": 128
@@ -4099,6 +4194,14 @@
           }
         },
         "id": "native-zonotope-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "used",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "used",
+          "max_plans": "not_used_by_graph_search",
+          "max_points_per_stage": "not_used_by_graph_search",
+          "max_score_evaluations": "not_used_by_graph_search"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -4106,17 +4209,14 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_zonotope.cpp",
+          "include/csl/optimization/finite_action_graph.hpp",
+          "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
           "src/reachability/nominal_predecessor.cpp",
+          "src/reachability/finite_plan_zonotope.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/geometry/affine_sum.cpp",
           "src/geometry/hull_reducer.cpp",
@@ -4136,8 +4236,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "75852e21155f25166775a4b57d77f8d22125b7cca7d68dab4de35d376008b75d",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-mpc/1/cfg-75852e21155f2516",
+      "graph_fingerprint": "b9bb5c984174e94f7fe3fc9f967d8620fa920759772192269518ff171b47e856",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-mpc/1/cfg-b9bb5c984174e94f",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4189,7 +4289,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -4212,10 +4312,6 @@
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
-          "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
-        },
-        {
           "path": "src/geometry/affine_sum.cpp",
           "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
         },
@@ -4226,14 +4322,6 @@
         {
           "path": "src/optimization/finite_action_graph.cpp",
           "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
-        },
-        {
-          "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
-        },
-        {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
@@ -4257,7 +4345,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -4293,9 +4381,9 @@
             "version": "1.0.0"
           },
           "limits": {
-            "max_beam_width": 16,
+            "max_beam_width": 8,
             "max_generators_per_stage": 64,
-            "max_graph_nodes": 128,
+            "max_graph_nodes": 512,
             "max_plans": 32,
             "max_points_per_stage": 128,
             "max_score_evaluations": 128
@@ -4311,6 +4399,14 @@
           }
         },
         "id": "native-parallelotope-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "used",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "used",
+          "max_plans": "not_used_by_graph_search",
+          "max_points_per_stage": "not_used_by_graph_search",
+          "max_score_evaluations": "not_used_by_graph_search"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -4318,17 +4414,14 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_parallelotope.cpp",
+          "include/csl/optimization/finite_action_graph.hpp",
+          "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
           "src/reachability/nominal_predecessor.cpp",
+          "src/reachability/finite_plan_parallelotope.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/geometry/affine_sum.cpp",
           "src/geometry/hull_reducer.cpp",
@@ -4348,8 +4441,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "a75383f4e81b4f10baeeb7fbddc3147ff90d69352011cfc1a00ff4462cf68ea7",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-mpc/1/cfg-a75383f4e81b4f10",
+      "graph_fingerprint": "b39403a0687ef485a971bb76b209063dc5c96a612f8a53cd69600b7ba93f81c2",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-mpc/1/cfg-b39403a0687ef485",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4401,7 +4494,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -4424,10 +4517,6 @@
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
-          "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
-        },
-        {
           "path": "src/geometry/affine_sum.cpp",
           "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
         },
@@ -4438,14 +4527,6 @@
         {
           "path": "src/optimization/finite_action_graph.cpp",
           "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
-        },
-        {
-          "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
-        },
-        {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
@@ -4469,7 +4550,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -4505,9 +4586,9 @@
             "version": "1.0.0"
           },
           "limits": {
-            "max_beam_width": 16,
+            "max_beam_width": 8,
             "max_generators_per_stage": 64,
-            "max_graph_nodes": 128,
+            "max_graph_nodes": 512,
             "max_plans": 32,
             "max_points_per_stage": 128,
             "max_score_evaluations": 128
@@ -4523,6 +4604,14 @@
           }
         },
         "id": "native-ellipsoid-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "used",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "used",
+          "max_plans": "not_used_by_graph_search",
+          "max_points_per_stage": "not_used_by_graph_search",
+          "max_score_evaluations": "not_used_by_graph_search"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -4530,17 +4619,14 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_ellipsoid.cpp",
+          "include/csl/optimization/finite_action_graph.hpp",
+          "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
           "src/reachability/nominal_predecessor.cpp",
+          "src/reachability/finite_plan_ellipsoid.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/geometry/affine_sum.cpp",
           "src/geometry/hull_reducer.cpp",
@@ -4560,8 +4646,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "ed21a7f3a5962165605af3176dc9487825fad170e9be26fd34e14e865865e71e",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-mpc/1/cfg-ed21a7f3a5962165",
+      "graph_fingerprint": "0c6b4dd99fe62367786891399c338e8e0d8022bac48eee3da61dc1b6229a0e7e",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-mpc/1/cfg-0c6b4dd99fe62367",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4613,7 +4699,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -4636,10 +4722,6 @@
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
-          "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
-        },
-        {
           "path": "src/geometry/affine_sum.cpp",
           "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
         },
@@ -4650,14 +4732,6 @@
         {
           "path": "src/optimization/finite_action_graph.cpp",
           "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
-        },
-        {
-          "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
-        },
-        {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
         },
         {
           "path": "src/optimization/phase_one/simplex.cpp",
@@ -4681,7 +4755,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -4693,6 +4767,7 @@
         "basis": "source-bound task, finite action profile, and declared native policy factory",
         "status": "admitted"
       },
+      "candidate_search_policy": "constant-and-single-switch-full-horizon/1",
       "claim_scope": "Observed-state finite-action fixed-plan MPC; bounded candidate coverage recorded per query; no adaptive or global optimality guarantee",
       "controller": {
         "adapter": "native_graph_policy",
@@ -4714,6 +4789,14 @@
           "representation": "exact-polytope"
         },
         "id": "native-exact-polytope-fixed-plan-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "not_used_by_fixed_plan_search",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "not_used_by_fixed_plan_search",
+          "max_plans": "used_as_candidate_history_budget",
+          "max_points_per_stage": "used",
+          "max_score_evaluations": "used"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -4721,14 +4804,17 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
-          "src/optimization/running_cost_evaluation.hpp"
+          "src/optimization/running_cost_evaluation.hpp",
+          "include/csl/optimization/finite_action_nominal.hpp",
+          "include/csl/optimization/finite_action_minimax.hpp",
+          "src/optimization/finite_action_nominal.cpp",
+          "src/optimization/finite_action_plans.hpp",
+          "src/optimization/finite_action_replay.hpp",
+          "src/optimization/finite_action_replay.cpp",
+          "include/csl/optimization/finite_action_minimax.hpp",
+          "src/optimization/finite_action_minimax.cpp"
         ],
         "version": "1"
       },
@@ -4744,8 +4830,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "10352c252e65f99e8a8aa1355813fa57663f7647ce3f3d892c3f9126d4dd8de1",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-fixed-plan-mpc/1/cfg-10352c252e65f99e",
+      "graph_fingerprint": "a6d7655702a0a976028c139b749c179bc18926b32339068344271c56a4a21dd1",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-fixed-plan-mpc/1/cfg-a6d7655702a0a976",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4766,7 +4852,6 @@
         "hull_provider": "not_used",
         "reachable_set_method": "not_used",
         "representation": {
-          "module_id": null,
           "name": "exact-polytope",
           "status": "integrated-h-polytope"
         },
@@ -4781,7 +4866,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -4800,24 +4885,32 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
-          "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
+          "path": "include/csl/optimization/finite_action_minimax.hpp",
+          "sha256": "6c8bdba0ab961b9d7378fc98140bd2f83ff56e06c61500194b40a5737db5e1be"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
+          "sha256": "a0daeea2dc8adbb42e873d50e0a56100779a927d64a4b2ebad13b0a266f74815"
         },
         {
-          "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
+          "path": "src/optimization/finite_action_minimax.cpp",
+          "sha256": "b4596f11fab960cdee1392c10f02edf1e47913975787b91e2d8a1a7b92c22ebd"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
+          "sha256": "d0ef2ce103388b0b159edc9e8a583327c1b6877d8b99f0a926a992919f28fdbb"
         },
         {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
+          "path": "src/optimization/finite_action_plans.hpp",
+          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.cpp",
+          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.hpp",
+          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
@@ -4829,7 +4922,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -4841,6 +4934,7 @@
         "basis": "source-bound task, finite action profile, and declared native policy factory",
         "status": "admitted"
       },
+      "candidate_search_policy": "constant-and-single-switch-full-horizon/1",
       "claim_scope": "Observed-state finite-action fixed-plan MPC; bounded candidate coverage recorded per query; no adaptive or global optimality guarantee",
       "controller": {
         "adapter": "native_graph_policy",
@@ -4862,6 +4956,14 @@
           "representation": "box"
         },
         "id": "native-box-fixed-plan-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "not_used_by_fixed_plan_search",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "not_used_by_fixed_plan_search",
+          "max_plans": "used_as_candidate_history_budget",
+          "max_points_per_stage": "used",
+          "max_score_evaluations": "used"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -4869,15 +4971,17 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_box.cpp"
+          "include/csl/optimization/finite_action_nominal.hpp",
+          "include/csl/optimization/finite_action_minimax.hpp",
+          "src/optimization/finite_action_nominal.cpp",
+          "src/optimization/finite_action_plans.hpp",
+          "src/optimization/finite_action_replay.hpp",
+          "src/optimization/finite_action_replay.cpp",
+          "include/csl/optimization/finite_action_box_minimax.hpp",
+          "src/optimization/finite_action_box_minimax.cpp"
         ],
         "version": "1"
       },
@@ -4893,8 +4997,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "b0e1454ceea93a81273f62351b7e547cb20dc9b969bba5648512f0251ea35972",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-fixed-plan-mpc/1/cfg-b0e1454ceea93a81",
+      "graph_fingerprint": "399fd1a58386933023d0672ee780dd58b016979fc0ecc03d8193ce5c5b3c5d8c",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-fixed-plan-mpc/1/cfg-399fd1a583869330",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4915,9 +5019,8 @@
         "hull_provider": "not_used",
         "reachable_set_method": "not_used",
         "representation": {
-          "module_id": "csl::reachability::finite_plan_box",
           "name": "box",
-          "status": "selected"
+          "status": "selected-in-nominal-profile"
         },
         "set_reducer": "not_used",
         "terminal_solver": "integrated in selected nominal planner",
@@ -4930,7 +5033,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -4949,32 +5052,40 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
-          "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
+          "path": "include/csl/optimization/finite_action_box_minimax.hpp",
+          "sha256": "15e569c195f3f916366c7934e6a152a8ec92195d2ef7cd2537201a794ffe96c4"
+        },
+        {
+          "path": "include/csl/optimization/finite_action_minimax.hpp",
+          "sha256": "6c8bdba0ab961b9d7378fc98140bd2f83ff56e06c61500194b40a5737db5e1be"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
+          "sha256": "a0daeea2dc8adbb42e873d50e0a56100779a927d64a4b2ebad13b0a266f74815"
         },
         {
-          "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
+          "path": "src/optimization/finite_action_box_minimax.cpp",
+          "sha256": "b26de16f255116382cf1d43ea2ec8d51a488a7ab90f86c7a68df957cbd32b5cf"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
+          "sha256": "d0ef2ce103388b0b159edc9e8a583327c1b6877d8b99f0a926a992919f28fdbb"
         },
         {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
+          "path": "src/optimization/finite_action_plans.hpp",
+          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.cpp",
+          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.hpp",
+          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
           "sha256": "312bddbfc57c0ade36a8667d5b87f5006750f607f925043d0604a37d74fffa6f"
-        },
-        {
-          "path": "src/reachability/finite_plan_box.cpp",
-          "sha256": "5eef0149385240b48d41728b6dc24ac3d72195d63b627f1e0d2c1b2f9ab46464"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
@@ -4982,7 +5093,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -4994,6 +5105,7 @@
         "basis": "source-bound task, finite action profile, and declared native policy factory",
         "status": "admitted"
       },
+      "candidate_search_policy": "constant-and-single-switch-full-horizon/1",
       "claim_scope": "Observed-state finite-action fixed-plan MPC; bounded candidate coverage recorded per query; no adaptive or global optimality guarantee",
       "controller": {
         "adapter": "native_graph_policy",
@@ -5015,6 +5127,14 @@
           "representation": "zonotope"
         },
         "id": "native-zonotope-fixed-plan-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "not_used_by_fixed_plan_search",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "not_used_by_fixed_plan_search",
+          "max_plans": "used_as_candidate_history_budget",
+          "max_points_per_stage": "used",
+          "max_score_evaluations": "used"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -5022,15 +5142,17 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_zonotope.cpp"
+          "include/csl/optimization/finite_action_nominal.hpp",
+          "include/csl/optimization/finite_action_minimax.hpp",
+          "src/optimization/finite_action_nominal.cpp",
+          "src/optimization/finite_action_plans.hpp",
+          "src/optimization/finite_action_replay.hpp",
+          "src/optimization/finite_action_replay.cpp",
+          "include/csl/optimization/finite_action_zonotope_minimax.hpp",
+          "src/optimization/finite_action_zonotope_minimax.cpp"
         ],
         "version": "1"
       },
@@ -5046,8 +5168,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "3eb7bf60a6f3b550c5ed12069b42ac02f07334fa142cbecb488a2c9d051e199a",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-fixed-plan-mpc/1/cfg-3eb7bf60a6f3b550",
+      "graph_fingerprint": "891067c581eea8c7d16a3724135d1feb36aac76d3667ea0c3ff8211297963030",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-fixed-plan-mpc/1/cfg-891067c581eea8c7",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5068,9 +5190,8 @@
         "hull_provider": "not_used",
         "reachable_set_method": "not_used",
         "representation": {
-          "module_id": "csl::reachability::finite_plan_zonotope",
           "name": "zonotope",
-          "status": "selected"
+          "status": "selected-in-nominal-profile"
         },
         "set_reducer": "not_used",
         "terminal_solver": "integrated in selected nominal planner",
@@ -5083,7 +5204,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -5102,32 +5223,40 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
-          "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
+          "path": "include/csl/optimization/finite_action_minimax.hpp",
+          "sha256": "6c8bdba0ab961b9d7378fc98140bd2f83ff56e06c61500194b40a5737db5e1be"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
+          "sha256": "a0daeea2dc8adbb42e873d50e0a56100779a927d64a4b2ebad13b0a266f74815"
         },
         {
-          "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
+          "path": "include/csl/optimization/finite_action_zonotope_minimax.hpp",
+          "sha256": "f541ddbfbe4469589efb4a6996dc4ea4f174f7477d53b6e1cd60dd838ed51302"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
+          "sha256": "d0ef2ce103388b0b159edc9e8a583327c1b6877d8b99f0a926a992919f28fdbb"
         },
         {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
+          "path": "src/optimization/finite_action_plans.hpp",
+          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.cpp",
+          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.hpp",
+          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
+        },
+        {
+          "path": "src/optimization/finite_action_zonotope_minimax.cpp",
+          "sha256": "dbeb25c975904905ea08ba5e99f3cd13ddf40469dfa9a9f1cec5ed87fc9c786f"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
           "sha256": "312bddbfc57c0ade36a8667d5b87f5006750f607f925043d0604a37d74fffa6f"
-        },
-        {
-          "path": "src/reachability/finite_plan_zonotope.cpp",
-          "sha256": "91c1b0c3a6643bdd886e0831790f10e098bdab05b1c5abe7b088a79be24abaff"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
@@ -5135,7 +5264,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -5147,6 +5276,7 @@
         "basis": "source-bound task, finite action profile, and declared native policy factory",
         "status": "admitted"
       },
+      "candidate_search_policy": "constant-and-single-switch-full-horizon/1",
       "claim_scope": "Observed-state finite-action fixed-plan MPC; bounded candidate coverage recorded per query; no adaptive or global optimality guarantee",
       "controller": {
         "adapter": "native_graph_policy",
@@ -5168,6 +5298,14 @@
           "representation": "parallelotope"
         },
         "id": "native-parallelotope-fixed-plan-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "not_used_by_fixed_plan_search",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "not_used_by_fixed_plan_search",
+          "max_plans": "used_as_candidate_history_budget",
+          "max_points_per_stage": "used",
+          "max_score_evaluations": "used"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -5175,15 +5313,17 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_parallelotope.cpp"
+          "include/csl/optimization/finite_action_nominal.hpp",
+          "include/csl/optimization/finite_action_minimax.hpp",
+          "src/optimization/finite_action_nominal.cpp",
+          "src/optimization/finite_action_plans.hpp",
+          "src/optimization/finite_action_replay.hpp",
+          "src/optimization/finite_action_replay.cpp",
+          "include/csl/optimization/finite_action_parallelotope_minimax.hpp",
+          "src/optimization/finite_action_parallelotope_minimax.cpp"
         ],
         "version": "1"
       },
@@ -5199,8 +5339,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "11ef3d4fd12910bf5f91588f2aef0174c3725dd1ee01d2248ddc617a25b416f3",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-fixed-plan-mpc/1/cfg-11ef3d4fd12910bf",
+      "graph_fingerprint": "dcb696d4103c5dd98c5c56839e9c7a5d2870036a38a9b06d0dcf7712f6354b9a",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-fixed-plan-mpc/1/cfg-dcb696d4103c5dd9",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5221,9 +5361,8 @@
         "hull_provider": "not_used",
         "reachable_set_method": "not_used",
         "representation": {
-          "module_id": "csl::reachability::finite_plan_parallelotope",
           "name": "parallelotope",
-          "status": "selected"
+          "status": "selected-in-nominal-profile"
         },
         "set_reducer": "not_used",
         "terminal_solver": "integrated in selected nominal planner",
@@ -5236,7 +5375,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -5255,32 +5394,40 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
-          "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
+          "path": "include/csl/optimization/finite_action_minimax.hpp",
+          "sha256": "6c8bdba0ab961b9d7378fc98140bd2f83ff56e06c61500194b40a5737db5e1be"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
+          "sha256": "a0daeea2dc8adbb42e873d50e0a56100779a927d64a4b2ebad13b0a266f74815"
         },
         {
-          "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
+          "path": "include/csl/optimization/finite_action_parallelotope_minimax.hpp",
+          "sha256": "e3002536cab1c3216293f7f70fd08bcb308addde53b58029b57898edb8296b3f"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
+          "sha256": "d0ef2ce103388b0b159edc9e8a583327c1b6877d8b99f0a926a992919f28fdbb"
         },
         {
           "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
+          "sha256": "6d889401d15c66437c1cbd5e839e0b0fd7f1f8623afff86f7cf2411a60c8bf76"
+        },
+        {
+          "path": "src/optimization/finite_action_plans.hpp",
+          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.cpp",
+          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.hpp",
+          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
           "sha256": "312bddbfc57c0ade36a8667d5b87f5006750f607f925043d0604a37d74fffa6f"
-        },
-        {
-          "path": "src/reachability/finite_plan_parallelotope.cpp",
-          "sha256": "df7a576150be9cc84c12e5708801b7826e9247b6a988593da35cd4c07145f5bd"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
@@ -5288,7 +5435,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -5300,6 +5447,7 @@
         "basis": "source-bound task, finite action profile, and declared native policy factory",
         "status": "admitted"
       },
+      "candidate_search_policy": "constant-and-single-switch-full-horizon/1",
       "claim_scope": "Observed-state finite-action fixed-plan MPC; bounded candidate coverage recorded per query; no adaptive or global optimality guarantee",
       "controller": {
         "adapter": "native_graph_policy",
@@ -5321,6 +5469,14 @@
           "representation": "ellipsoid"
         },
         "id": "native-ellipsoid-fixed-plan-mpc/1",
+        "limit_usage": {
+          "max_beam_width": "not_used_by_fixed_plan_search",
+          "max_generators_per_stage": "used",
+          "max_graph_nodes": "not_used_by_fixed_plan_search",
+          "max_plans": "used_as_candidate_history_budget",
+          "max_points_per_stage": "used",
+          "max_score_evaluations": "used"
+        },
         "policy_factory": "native_graph_policy:create_policy",
         "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
         "source_files": [
@@ -5328,15 +5484,17 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "benchmarks/reporting/mpc11/affine.py",
           "tools/closed_loop_native_policy.cpp",
-          "include/csl/optimization/finite_action_graph.hpp",
-          "src/optimization/finite_action_graph.cpp",
-          "include/csl/optimization/finite_action_nominal.hpp",
-          "src/optimization/finite_action_nominal.cpp",
-          "src/optimization/finite_action_parallelotope_minimax.cpp",
           "CMakeLists.txt",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/optimization/running_cost_evaluation.hpp",
-          "src/reachability/finite_plan_ellipsoid.cpp"
+          "include/csl/optimization/finite_action_nominal.hpp",
+          "include/csl/optimization/finite_action_minimax.hpp",
+          "src/optimization/finite_action_nominal.cpp",
+          "src/optimization/finite_action_plans.hpp",
+          "src/optimization/finite_action_replay.hpp",
+          "src/optimization/finite_action_replay.cpp",
+          "include/csl/optimization/finite_action_ellipsoid_minimax.hpp",
+          "src/optimization/finite_action_ellipsoid_minimax.cpp"
         ],
         "version": "1"
       },
@@ -5352,8 +5510,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "08207cf1de41c95bf56daa32157b4d1b512c932034ac99a8509d151dcad82b08",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-fixed-plan-mpc/1/cfg-08207cf1de41c95b",
+      "graph_fingerprint": "9a7183306bab9fe0fed5809acce04f6766eaea0605da98b64d4d9e6bce4904e0",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-fixed-plan-mpc/1/cfg-9a7183306bab9fe0",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5374,9 +5532,8 @@
         "hull_provider": "not_used",
         "reachable_set_method": "not_used",
         "representation": {
-          "module_id": "csl::reachability::finite_plan_ellipsoid",
           "name": "ellipsoid",
-          "status": "selected"
+          "status": "selected-in-nominal-profile"
         },
         "set_reducer": "not_used",
         "terminal_solver": "integrated in selected nominal planner",
@@ -5389,7 +5546,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "65dd6bf7d0ee8f7897758dfa2ab616b9893ce2f33efda53f3a6a2dda1cbffd96"
+          "sha256": "99e984747c83511882baf10c5e0c784c8ba547232daa7aa65d043c7974147b70"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -5408,32 +5565,40 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
-          "path": "include/csl/optimization/finite_action_graph.hpp",
-          "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
+          "path": "include/csl/optimization/finite_action_ellipsoid_minimax.hpp",
+          "sha256": "78a5974e5dd4dffed486bf26bebebf6376fa6a525e8fbca1aa35010bc2123f5e"
+        },
+        {
+          "path": "include/csl/optimization/finite_action_minimax.hpp",
+          "sha256": "6c8bdba0ab961b9d7378fc98140bd2f83ff56e06c61500194b40a5737db5e1be"
         },
         {
           "path": "include/csl/optimization/finite_action_nominal.hpp",
-          "sha256": "bf88087e029283f348d6eac5bceec93f78bbdc7d5b0e31547f9686abab29819a"
+          "sha256": "a0daeea2dc8adbb42e873d50e0a56100779a927d64a4b2ebad13b0a266f74815"
         },
         {
-          "path": "src/optimization/finite_action_graph.cpp",
-          "sha256": "f743b0d696d4e51f20d8e07f0fd7b0607b8b8cf8e87ad81e87ef3b9e285657f9"
+          "path": "src/optimization/finite_action_ellipsoid_minimax.cpp",
+          "sha256": "958cb41245718c51121566929917a9e81b895fa15b16efcbf467ae0e0e951bb2"
         },
         {
           "path": "src/optimization/finite_action_nominal.cpp",
-          "sha256": "fa62efcff812a7a783a9b5decb369bb8096f75a952a6c5b111e028bd69ea1701"
+          "sha256": "d0ef2ce103388b0b159edc9e8a583327c1b6877d8b99f0a926a992919f28fdbb"
         },
         {
-          "path": "src/optimization/finite_action_parallelotope_minimax.cpp",
-          "sha256": "f929f10b819514eb6d95b29816022b844833136048de51d35ed79ed535922471"
+          "path": "src/optimization/finite_action_plans.hpp",
+          "sha256": "ee11aaa0e9583df1fe4937ecccba37adcf495771079e3c2f913a63bb480ee685"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.cpp",
+          "sha256": "b4dfbf3ee0323cd11a3e97c11114e5daa16b5d0096bc21cc84f27ed77675f918"
+        },
+        {
+          "path": "src/optimization/finite_action_replay.hpp",
+          "sha256": "f1c1a675ca0a27f9e8e3929587650ee07bcf096b6f1f6f0546a088715ff3640e"
         },
         {
           "path": "src/optimization/running_cost_evaluation.hpp",
           "sha256": "312bddbfc57c0ade36a8667d5b87f5006750f607f925043d0604a37d74fffa6f"
-        },
-        {
-          "path": "src/reachability/finite_plan_ellipsoid.cpp",
-          "sha256": "c15b612dcaac50d201ca763c4c3a38d627c4b160df3703e42ea49e67742db2b7"
         },
         {
           "path": "src/simulation/nonlinear_replay.cpp",
@@ -5441,7 +5606,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "a8c682f0eab93230b5ec21bd2fd47f62fbed03a69fa206c64ac0b4b344c84070"
+          "sha256": "3486d2acfcbdfbb8afa3aa4b8636edc9732b4b0a7c84378f4c0c7f83a5c3ed90"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -5450,6 +5615,6 @@
   ],
   "manifest_id": "source-bound-native-finite-action-profiles/1",
   "purpose": "Source-bound native finite-action graph and fixed-plan profiles for the same three closed-loop task contracts.",
-  "registration_status": "provisional-pending-native-source-freeze",
+  "registration_status": "source-frozen",
   "schema": "csl.closed-loop-capability-manifest/2"
 }

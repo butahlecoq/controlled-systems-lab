@@ -18,7 +18,7 @@ class NativeCapabilityTests(unittest.TestCase):
     def test_native_profiles_bind_all_tasks_to_finite_action_domains(self):
         manifest = capabilities.build_native_manifest()
         self.assertEqual(len(manifest["graphs"]), 30)
-        self.assertEqual(manifest["registration_status"], "provisional-pending-native-source-freeze")
+        self.assertEqual(manifest["registration_status"], "source-frozen")
         expected_profiles = set(capabilities.NATIVE_PROFILES)
         by_task: dict[str, set[str]] = {}
         for graph in manifest["graphs"]:
@@ -41,13 +41,20 @@ class NativeCapabilityTests(unittest.TestCase):
         self.assertEqual(roles["vertex_lp"], "not_used")
         self.assertEqual(roles["converter"], "not_used")
         self.assertEqual(roles["representation"], {"name": "box",
-            "module_id": "csl::reachability::finite_plan_box", "status": "selected"})
+            "status": "selected-in-nominal-profile"})
         self.assertEqual(graph["controller"]["control_semantics"], "fixed-plan-mpc")
         self.assertEqual(roles["control_optimizer"], {"module_id": "csl::optimization::finite_action_nominal_profile",
             "provider": "public-function", "operation": "box-plan-select",
             "profile_id": "native-box-fixed-plan-mpc/1"})
         self.assertEqual(graph["controller"]["factory_options"]["build_backend_profile"],
             {"build_type": "Release", "CSL_ENABLE_HIGHS": True, "CSL_ENABLE_QHULL": True})
+        source_paths = {source["path"] for source in graph["source_files"]}
+        self.assertIn("src/optimization/finite_action_plans.hpp", source_paths)
+        self.assertIn("src/optimization/finite_action_box_minimax.cpp", source_paths)
+        self.assertNotIn("src/reachability/finite_plan_box.cpp", source_paths)
+        self.assertEqual(graph["candidate_search_policy"], "constant-and-single-switch-full-horizon/1")
+        self.assertEqual(graph["controller"]["limit_usage"]["max_plans"], "used_as_candidate_history_budget")
+        self.assertEqual(graph["controller"]["limit_usage"]["max_graph_nodes"], "not_used_by_fixed_plan_search")
 
     def test_graph_profiles_separate_vertex_lp_from_control_solver_roles(self):
         graph = next(row for row in capabilities.build_native_manifest()["graphs"]
@@ -56,6 +63,10 @@ class NativeCapabilityTests(unittest.TestCase):
         self.assertEqual(roles["vertex_lp"]["id"], "phase-one-bland")
         self.assertEqual(roles["control_optimizer"]["id"],
             "csl.optimization.finite-action-stage-layered-graph")
+        self.assertEqual(graph["controller"]["factory_options"]["limits"]["max_beam_width"], 8)
+        self.assertEqual(graph["controller"]["factory_options"]["limits"]["max_graph_nodes"], 512)
+        self.assertEqual(graph["controller"]["limit_usage"]["max_graph_nodes"], "used")
+        self.assertEqual(graph["controller"]["limit_usage"]["max_plans"], "not_used_by_graph_search")
         source_paths = {source["path"] for source in graph["source_files"]}
         self.assertIn("src/geometry/hull_reducer.cpp", source_paths)
         self.assertIn("src/optimization/phase_one/simplex.cpp", source_paths)
@@ -105,10 +116,12 @@ class NativeCapabilityTests(unittest.TestCase):
         self.assertIn("CSL_NATIVE_POLICY_BRIDGE", receipt["preparation_failure"]["reason"])
 
     def test_provider_unavailability_is_a_distinct_non_mathematical_policy_outcome(self):
-        query = {"task_sha256": "task-hash", "action_profile_id": "finite/1",
-            "status": "unavailable", "policy_id": "native/1", "invocations": [],
-            "reason": "selected provider registration unavailable"}
-        self.assertEqual(run_closed_loop.validate_policy_response({}, "task-hash", "finite/1", query), query)
+        for status in ("unavailable", "incompatible"):
+            with self.subTest(status=status):
+                query = {"task_sha256": "task-hash", "action_profile_id": "finite/1",
+                    "status": status, "policy_id": "native/1", "invocations": [],
+                    "reason": "selected provider registration unavailable"}
+                self.assertEqual(run_closed_loop.validate_policy_response({}, "task-hash", "finite/1", query), query)
 
     def test_role_trace_keeps_actual_invocations_and_declared_roles(self):
         graph = {"role_bindings": {"control_optimizer": {"id": "optimizer"},

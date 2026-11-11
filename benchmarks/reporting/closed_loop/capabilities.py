@@ -100,7 +100,7 @@ def build_manifest() -> dict:
 
 def _native_factory_options(profile_id: str, representation: str,
                             search: str) -> dict:
-    limits = ({"max_beam_width": 16, "max_graph_nodes": 128, "max_plans": 32,
+    limits = ({"max_beam_width": 8, "max_graph_nodes": 512, "max_plans": 32,
         "max_points_per_stage": 128, "max_score_evaluations": 128,
         "max_generators_per_stage": 64} if search == "backward-graph" else
         {"max_beam_width": 1, "max_graph_nodes": 1, "max_plans": 512, "max_score_evaluations": 100000,
@@ -144,11 +144,8 @@ def _native_definitions() -> list[dict]:
     rows = []
     source_paths = ["benchmarks/reporting/closed_loop/native_graph_policy.py",
         "benchmarks/reporting/closed_loop/task_models.py", "benchmarks/reporting/mpc11/affine.py",
-        "tools/closed_loop_native_policy.cpp", "include/csl/optimization/finite_action_graph.hpp",
-        "src/optimization/finite_action_graph.cpp", "include/csl/optimization/finite_action_nominal.hpp",
-        "src/optimization/finite_action_nominal.cpp", "src/optimization/finite_action_parallelotope_minimax.cpp",
-        "CMakeLists.txt", str(MODULE_INVENTORY.relative_to(ROOT)),
-        "src/optimization/running_cost_evaluation.hpp"]
+        "tools/closed_loop_native_policy.cpp", "CMakeLists.txt",
+        str(MODULE_INVENTORY.relative_to(ROOT)), "src/optimization/running_cost_evaluation.hpp"]
     execution_id = "CSL::simulation/adaptive-rk4-step-doubling/1"
     for task_name in ("syn-nl-lv-01", "earth-orbit", "syn-nl-fuel-01"):
         task = load_task(task_name)
@@ -163,14 +160,41 @@ def _native_definitions() -> list[dict]:
                 "zonotope": "csl::reachability::finite_plan_zonotope",
                 "parallelotope": "csl::reachability::finite_plan_parallelotope",
                 "ellipsoid": "csl::reachability::finite_plan_ellipsoid"}
-            representation_source = {"box": "src/reachability/finite_plan_box.cpp",
-                "zonotope": "src/reachability/finite_plan_zonotope.cpp",
-                "parallelotope": "src/reachability/finite_plan_parallelotope.cpp",
-                "ellipsoid": "src/reachability/finite_plan_ellipsoid.cpp"}.get(representation)
-            controller_sources = source_paths + ([representation_source] if representation_source else [])
             if search == "backward-graph":
-                controller_sources += ["src/geometry/affine_sum.cpp", "src/reachability/nominal_predecessor.cpp"]
+                representation_source = {"box": "src/reachability/finite_plan_box.cpp",
+                    "zonotope": "src/reachability/finite_plan_zonotope.cpp",
+                    "parallelotope": "src/reachability/finite_plan_parallelotope.cpp",
+                    "ellipsoid": "src/reachability/finite_plan_ellipsoid.cpp"}.get(representation)
+                controller_sources = source_paths + ["include/csl/optimization/finite_action_graph.hpp",
+                    "src/optimization/finite_action_graph.cpp", "src/geometry/affine_sum.cpp",
+                    "src/reachability/nominal_predecessor.cpp"]
+                if representation_source:
+                    controller_sources.append(representation_source)
                 controller_sources += _catalogue_sources(options)
+            else:
+                optimizer_sources = {
+                    "exact-polytope": ["include/csl/optimization/finite_action_minimax.hpp",
+                        "src/optimization/finite_action_minimax.cpp"],
+                    "box": ["include/csl/optimization/finite_action_box_minimax.hpp",
+                        "src/optimization/finite_action_box_minimax.cpp"],
+                    "zonotope": ["include/csl/optimization/finite_action_zonotope_minimax.hpp",
+                        "src/optimization/finite_action_zonotope_minimax.cpp"],
+                    "parallelotope": ["include/csl/optimization/finite_action_parallelotope_minimax.hpp",
+                        "src/optimization/finite_action_parallelotope_minimax.cpp"],
+                    "ellipsoid": ["include/csl/optimization/finite_action_ellipsoid_minimax.hpp",
+                        "src/optimization/finite_action_ellipsoid_minimax.cpp"]}[representation]
+                controller_sources = source_paths + ["include/csl/optimization/finite_action_nominal.hpp",
+                    "include/csl/optimization/finite_action_minimax.hpp",
+                    "src/optimization/finite_action_nominal.cpp", "src/optimization/finite_action_plans.hpp",
+                    "src/optimization/finite_action_replay.hpp", "src/optimization/finite_action_replay.cpp"]
+                controller_sources += optimizer_sources
+            limit_usage = ({"max_beam_width": "used", "max_graph_nodes": "used",
+                "max_generators_per_stage": "used", "max_plans": "not_used_by_graph_search",
+                "max_points_per_stage": "not_used_by_graph_search",
+                "max_score_evaluations": "not_used_by_graph_search"} if search == "backward-graph" else
+                {"max_beam_width": "not_used_by_fixed_plan_search", "max_graph_nodes": "not_used_by_fixed_plan_search",
+                 "max_plans": "used_as_candidate_history_budget", "max_points_per_stage": "used",
+                 "max_score_evaluations": "used", "max_generators_per_stage": "used"})
             graph = {"task_id": task["task_id"], "task_sha256": manifest_sha256(task),
                 "model_id": task["model"]["model_id"], "objective_id": task["objective"]["objective_id"],
                 "action_profile_id": task["control_domains"]["finite"]["problem_id"],
@@ -178,7 +202,7 @@ def _native_definitions() -> list[dict]:
                     "policy_factory": "native_graph_policy:create_policy", "source_files": controller_sources,
                     "factory_options": options,
                     "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
-                    "control_semantics": search},
+                    "control_semantics": search, "limit_usage": limit_usage},
                 "execution": {"id": execution_id, "version": "1", "provider": "CSL::simulation",
                     "source_files": ["benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
                         "src/simulation/nonlinear_replay.cpp"],
@@ -193,8 +217,10 @@ def _native_definitions() -> list[dict]:
                         "status": "budget-declared; not consumed by selected affine-sum profile",
                         "budget": options["checker_budget"]},
                     "representation": {"name": representation,
-                        "module_id": representation_modules.get(representation),
-                        "status": "selected" if representation in representation_modules else "integrated-h-polytope"},
+                        **({"module_id": representation_modules[representation], "status": "selected"}
+                           if search == "backward-graph" and representation in representation_modules else
+                           {"status": "integrated-h-polytope" if representation == "exact-polytope"
+                            else "selected-in-nominal-profile"})},
                     "control_optimizer": control_optimizer,
                     "bellman_solver": ("integrated in selected graph optimizer" if search == "backward-graph" else "not_used"),
                     "terminal_solver": ("direct authored objective evaluation" if search == "backward-graph"
@@ -202,6 +228,8 @@ def _native_definitions() -> list[dict]:
                 "operation_roles": {"affine-image": "reachable_set_method", "minkowski-sum": "reachable_set_method",
                     "controller.solve": "control_optimizer"},
                 "admission": {"status": "admitted", "basis": "source-bound task, finite action profile, and declared native policy factory"},
+                **({"candidate_search_policy": "constant-and-single-switch-full-horizon/1"}
+                   if search == "fixed-plan-mpc" else {}),
                 "claim_scope": ("Observed-state finite-action receding-horizon backward graph policy; numerical predecessor membership and discrete transition witnesses; no global guarantee"
                     if search == "backward-graph" else
                     "Observed-state finite-action fixed-plan MPC; bounded candidate coverage recorded per query; no adaptive or global optimality guarantee")}
@@ -216,7 +244,7 @@ def _native_definitions() -> list[dict]:
 def build_native_manifest() -> dict:
     return {"schema": "csl.closed-loop-capability-manifest/2",
         "manifest_id": "source-bound-native-finite-action-profiles/1",
-        "registration_status": "provisional-pending-native-source-freeze",
+        "registration_status": "source-frozen",
         "purpose": "Source-bound native finite-action graph and fixed-plan profiles for the same three closed-loop task contracts.",
         "catalogue_parent": "csl.module-composition-inventory/1",
         "claim_scope": "Observed-state policy trajectories; no global optimality, reachability, safety, or robustness guarantee.",

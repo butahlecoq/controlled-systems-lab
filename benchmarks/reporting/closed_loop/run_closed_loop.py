@@ -269,11 +269,15 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
             row["controller_status"] = query["status"]
             if query["status"] in {"unavailable", "incompatible"}:
                 row["failure_category"] = "backend_unavailable_or_incompatible"
-                row["mathematical_support_status"] = "not_evaluated"
             elif query["status"] == "failed":
                 row["failure_category"] = "controller_execution_failed"
+            if query.get("mathematical_support"):
+                row["mathematical_support_status"] = query["mathematical_support"]
+            elif query["status"] in {"unavailable", "incompatible"}:
                 row["mathematical_support_status"] = "not_evaluated"
-            elif query["status"] == "unsupported":
+            elif query["status"] == "failed":
+                row["mathematical_support_status"] = "not_evaluated"
+            elif query["status"] in {"unsupported", "rejected"}:
                 row["mathematical_support_status"] = "not_established"
             receipt = query.get("solve_receipt", query.get("query_receipt"))
             if receipt is not None: row["solve_receipt"] = receipt
@@ -283,8 +287,11 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
             for field in ("predicted_sets", "recovered_control", "composition_id", "profile_id", "query_receipt",
                           "policy_semantics", "prediction_profile", "coverage", "geometry_selection",
                           "geometry_invocations", "action_cloud_rows", "selected_representation",
-                          "finite_action_nominal_profile", "build_backend_profile"):
+                          "finite_action_nominal_profile", "build_backend_profile", "candidate_plan_search",
+                          "selector", "selected_plan", "representation"):
                 if field in query: row[field] = query[field]
+            if "selected_representation" not in row and "representation" in query:
+                row["selected_representation"] = query["representation"]
             row["module_call_roles"] = trace_call_roles(query, graph)
             ledger["geometry_work"]["set_operations"] += len(query.get("geometry_invocations", []))
             if query["status"] != "accepted" or query["control"] is None:

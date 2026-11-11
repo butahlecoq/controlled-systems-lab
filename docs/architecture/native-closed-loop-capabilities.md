@@ -8,9 +8,8 @@ and its adjacent `.sha256` file. The native manifest contains five backward-grap
 profiles and five fixed-plan MPC profiles for each of the three source-bound task
 contracts. Every graph binds the full task hash, the task's finite-action profile,
 the controller factory options, native implementation sources and the common
-physical execution source. The current seal is provisional while the native
-fixed-plan source is being finalized; regenerate it after that source freeze
-before running registered episodes.
+physical execution source. The manifest is source-frozen against the current
+native policy and selected optimizer implementations.
 
 Run a profile through the same resolver, prepare stage, worker, episode runner and
 independent postchecks as the baseline pilot. For example:
@@ -31,6 +30,13 @@ At query time, a provider or optimizer that cannot be resolved is recorded as
 `unavailable`; a resolved method that rejects a profile or dimension is
 `incompatible`. Both leave mathematical support `not_evaluated` and do not count as
 a task infeasibility result.
+
+The graph profiles use the demonstrated beam width 8 and 512-node graph budget.
+Fixed-plan profiles use a 512-history candidate cap; if the full action product
+exceeds that budget, each update searches deterministic full-horizon constant and
+single-switch histories and records incomplete coverage with the candidate indices.
+Each capability row marks which declared limits its selected family consumes;
+the remaining request fields are explicitly labeled `not_used_by_*`.
 
 The graph profiles identify the selected reachable-set, hull, vertex-LP,
 representation and finite-action control-optimizer roles. Fixed-plan profiles
