@@ -63,6 +63,49 @@ class LearningBookTests(unittest.TestCase):
         self.assertIn("#943", pending["summary"])
         self.assertFalse(pending["command"])
 
+    def test_runnable_lesson_inputs_are_math_first_and_match_source_fixtures(self):
+        chapters = learning_book.validate(self.manifest, self.inventory, self.figures)
+        by_id = {chapter["id"]: chapter for chapter in chapters}
+        for chapter in (item for item in chapters if item["status"] == "ready"):
+            chapter_id = chapter["id"]
+            self.assertTrue(by_id[chapter_id].get("mathematical_displays") or
+                            by_id[chapter_id].get("mathematical_tables"), chapter_id)
+            html = learning_book._chapter_page(by_id[chapter_id], chapters,
+                (learning_book.CHAPTER_ROOT / by_id[chapter_id]["source"]).read_text(),
+                self.figures, self.inventory)
+            self.assertIn('<h2>Mathematical input</h2>', html)
+            if chapter.get("mathematical_displays"):
+                self.assertIn('class="math-matrix"', html)
+            else:
+                self.assertIn('<table>', html)
+            self.assertIn('<details class="lesson-input-details">', html)
+            self.assertNotIn('<h3>Input</h3><pre', html)
+
+        terminal = by_id["terminal-optimization"]
+        self.assertIn("{(x,y)=(s,1−s) : 0≤s≤1}", terminal["mathematical_conclusion"])
+        terminal_source = (learning_book.CHAPTER_ROOT / terminal["source"]).read_text()
+        self.assertNotIn("selects (0,1)", terminal_source)
+        operations = by_id["set-operations"]
+        self.assertIn("[0,1]+[0,1]=[0,2]", operations["mathematical_conclusion"])
+        self.assertIn("=[1,3]", operations["mathematical_conclusion"])
+        operation_source = (learning_book.CHAPTER_ROOT / operations["source"]).read_text()
+        self.assertNotIn("[1,3]×[0,1]", operation_source)
+
+        finite = by_id["finite-controller-consumers"]
+        self.assertEqual(len(finite["mathematical_tables"]), 6)
+        self.assertIn("finite reachability game", finite["mathematical_conclusion"])
+        self.assertIn("finite causal minimax cost game", finite["mathematical_conclusion"])
+        broken = json.loads(json.dumps(self.manifest))
+        game = next(item for item in broken["chapters"] if item["id"] == "finite-controller-consumers")
+        game["mathematical_tables"][0]["rows"][0][2] = "0"
+        with self.assertRaisesRegex(ValueError, "transition table differs from its executable fixture"):
+            learning_book.validate(broken, self.inventory, self.figures)
+        broken = json.loads(json.dumps(self.manifest))
+        game = next(item for item in broken["chapters"] if item["id"] == "finite-controller-consumers")
+        game["source_witnesses"][0]["contains"][0] = "Game{states, actions, inputs}"
+        with self.assertRaisesRegex(ValueError, "source fixture changed"):
+            learning_book.validate(broken, self.inventory, self.figures)
+
     def test_ready_figure_page_shows_scope_gaps_and_data_links(self):
         chapters = learning_book.validate(self.manifest, self.inventory, self.figures)
         chapter = next(item for item in chapters if item["id"] == "lotka-capstone")

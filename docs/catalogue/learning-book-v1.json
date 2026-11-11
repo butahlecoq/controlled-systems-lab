@@ -61,7 +61,49 @@
         "examples/registered_lp.cpp",
         "examples/CMakeLists.txt"
       ],
-      "kind": "installed consumer"
+      "kind": "installed consumer",
+      "mathematical_displays": [
+        {
+          "label": "Constraint matrix A for Ax ≤ b",
+          "rows": [
+            [
+              -1,
+              0
+            ],
+            [
+              0,
+              -1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Constraint bounds b",
+          "rows": [
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Objective coefficients c, with constant 7",
+          "rows": [
+            [
+              -1,
+              -2
+            ]
+          ]
+        }
+      ]
     },
     {
       "id": "coordinates-and-outcomes",
@@ -182,7 +224,55 @@
         "tests/installed/hull_reducer_client.cpp",
         "tests/installed/CMakeLists.txt"
       ],
-      "kind": "installed consumer"
+      "kind": "installed consumer",
+      "mathematical_displays": [
+        {
+          "label": "Ordered V input. Row 4 is the midpoint candidate",
+          "rows": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0.5,
+              0.5
+            ]
+          ]
+        },
+        {
+          "label": "Retained source rows",
+          "rows": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ]
+        }
+      ]
     },
     {
       "id": "simplex-and-comparators",
@@ -234,7 +324,77 @@
         "tests/installed/legacy_btulshor_client.cpp",
         "tests/installed/CMakeLists.txt"
       ],
-      "kind": "installed consumer"
+      "kind": "installed consumer",
+      "mathematical_displays": [
+        {
+          "label": "Ordered source cloud, one point per row",
+          "rows": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0.5,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0.3333333333333333,
+              0.3333333333333333
+            ]
+          ]
+        },
+        {
+          "label": "Affine map matrix A",
+          "rows": [
+            [
+              1,
+              0
+            ],
+            [
+              0.5,
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Affine offset b",
+          "rows": [
+            [
+              0.25
+            ],
+            [
+              -0.5
+            ]
+          ]
+        },
+        {
+          "label": "One-step sum translation x₀",
+          "rows": [
+            [
+              0.25
+            ],
+            [
+              0.5
+            ]
+          ]
+        }
+      ]
     },
     {
       "id": "terminal-optimization",
@@ -251,8 +411,8 @@
         "csl.synthesis.reach-back"
       ],
       "source": "terminal-optimization.html",
-      "summary": "A terminal linear program selects a minimum-cost face. A separate convex residual-norm terminal program uses the registered QP adapter. Neither operation is a vertex membership query.",
-      "mathematical_input": "Linear terminal program: choose (x,y)∈[0,1]² with x+y≥1 and minimize x+y. Convex terminal program: minimize ||(z−3,4)|| over 0≤z≤2; the registered adapter solves the equivalent squared objective (z−3)²+16.",
+      "summary": "A Strategy A linear terminal program returns the complete minimum-cost segment. A separate convex residual-norm terminal program returns one numerical minimizer. Neither result is a vertex membership decision.",
+      "mathematical_input": "Linear terminal program: choose (x,y)∈[0,1]² with x+y≥1 and minimize x+y. Convex program: minimize ||[1,0]ᵀx−[3,−4]ᵀ|| for scalar 0≤x≤2; the adapter minimizes the squared norm.",
       "command": "ctest --test-dir build/dev -C Release -R \"^installed_public_client$\" --output-on-failure\nbuild/dev/installed-consumer/examples-build/nominal_linear_exact_2d\nbuild/dev/installed-consumer/examples-build/registered_convex",
       "expected_output": "profile=strategy-a.nominal-linear-exact-v1\nstate_dimension=2 control_dimension=2 horizon=1\nterminal_constraint=x+y>=1; 0<=x,y<=1\nobjective=minimize x+y\nexact_optimum=1 optimal_face={(x,y): x+y=1, 0<=x,y<=1}\nverified_complete_family=true assurance=numerical\nbackend=csl.convex.highs version=1.0.0+highs.1.11.0\nx=2 original_cost=4.123105626 squared_cost=17\ntermination=completed outcome=optimal evidence=unestablished\nNo certified bounds or optimal-family result.",
       "intermediate_geometry": "The linear feasible set is the unit square clipped by x+y≥1. Its minimum-cost face is the segment from (1,0) to (0,1). The convex residual-norm problem has a scalar feasible interval [0,2] and selects its right endpoint z=2.",
@@ -274,7 +434,115 @@
         "examples/registered_convex.cpp",
         "tests/installed/convex_client.cpp"
       ],
-      "kind": "installed consumer"
+      "kind": "installed consumer",
+      "mathematical_displays": [
+        {
+          "label": "Terminal constraints Ax ≤ b in variables (x,y)",
+          "rows": [
+            [
+              -1,
+              0
+            ],
+            [
+              0,
+              -1
+            ],
+            [
+              -1,
+              -1
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Terminal constraint bounds b",
+          "rows": [
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              -1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Terminal LP objective coefficients c",
+          "rows": [
+            [
+              1,
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Convex residual map A",
+          "rows": [
+            [
+              1
+            ],
+            [
+              0
+            ]
+          ]
+        },
+        {
+          "label": "Convex residual target r",
+          "rows": [
+            [
+              3
+            ],
+            [
+              -4
+            ]
+          ]
+        },
+        {
+          "label": "Convex scalar bounds",
+          "rows": [
+            [
+              0
+            ],
+            [
+              2
+            ]
+          ]
+        }
+      ],
+      "mathematical_conclusion": "LP result: {(x,y)=(s,1−s) : 0≤s≤1}, with x+y=1. The program and CTest verify the complete optimal face, not one selected point. The convex consumer returns x=2 for the squared residual objective.",
+      "source_witnesses": [
+        {
+          "source": "examples/nominal_linear_exact_2d.cpp",
+          "contains": [
+            "LinearTerminal{{1, 1}, 0}",
+            "exact_optimum=1 optimal_face={(x,y): x+y=1, 0<=x,y<=1}",
+            "expected registered complete optimal face with objective 1"
+          ]
+        },
+        {
+          "source": "examples/registered_convex.cpp",
+          "contains": [
+            "ResidualNormTerminal{{2, 1, {1, 0}}, {3, -4}}",
+            "std::abs(check.original_objective - std::sqrt(17.0))",
+            "std::abs(check.solver_objective - 17)"
+          ]
+        }
+      ]
     },
     {
       "id": "same-geometry-five-representations",
@@ -305,7 +573,107 @@
       "example_sources": [
         "scripts/reports/learning_geometry_toy.py"
       ],
-      "kind": "analytic illustration"
+      "kind": "analytic illustration",
+      "mathematical_displays": [
+        {
+          "label": "H representation: rows aᵢᵀ in Ax ≤ b",
+          "rows": [
+            [
+              1,
+              0
+            ],
+            [
+              -1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              -1
+            ]
+          ]
+        },
+        {
+          "label": "H bounds b",
+          "rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ]
+        },
+        {
+          "label": "V representation: square vertices",
+          "rows": [
+            [
+              -1,
+              -1
+            ],
+            [
+              1,
+              -1
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              -1,
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Zonotope generator columns G",
+          "rows": [
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Parallelotope map A",
+          "rows": [
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Ellipsoid shape matrix Q for xᵀQ⁻¹x ≤ 1",
+          "rows": [
+            [
+              2,
+              0
+            ],
+            [
+              0,
+              2
+            ]
+          ]
+        }
+      ]
     },
     {
       "id": "representation-consumers",
@@ -357,6 +725,121 @@
           "label": "tests/installed/ellipsoidal_client.cpp",
           "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/ellipsoidal_client.cpp"
         }
+      ],
+      "mathematical_displays": [
+        {
+          "label": "Shared diamond V input for box and parallelotope clients",
+          "rows": [
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              0,
+              -2
+            ],
+            [
+              -2,
+              0
+            ]
+          ]
+        },
+        {
+          "label": "Rotated parallelotope generator columns",
+          "rows": [
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              -1
+            ]
+          ]
+        },
+        {
+          "label": "Zonotope generator columns before reduction",
+          "rows": [
+            [
+              1,
+              0,
+              0.5
+            ],
+            [
+              0,
+              1,
+              0.5
+            ]
+          ]
+        },
+        {
+          "label": "Zonotope center",
+          "rows": [
+            [
+              0
+            ],
+            [
+              0
+            ]
+          ]
+        },
+        {
+          "label": "Square V input for ellipsoid family",
+          "rows": [
+            [
+              -1,
+              -1
+            ],
+            [
+              1,
+              -1
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              -1,
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Returned axis-cover generator columns",
+          "rows": [
+            [
+              1.5,
+              0
+            ],
+            [
+              0,
+              1.5
+            ]
+          ]
+        }
+      ],
+      "mathematical_tables": [
+        {
+          "label": "Ellipsoid direction matrices",
+          "columns": [
+            "member",
+            "matrix rows"
+          ],
+          "rows": [
+            [
+              "axis",
+              "[[1,0],[0,1]]"
+            ],
+            [
+              "rotated",
+              "[[1,1],[1,−1]]"
+            ]
+          ]
+        }
       ]
     },
     {
@@ -383,7 +866,61 @@
       "example_sources": [
         "scripts/reports/learning_closed_loop_toy.py"
       ],
-      "kind": "analytic illustration"
+      "kind": "analytic illustration",
+      "mathematical_displays": [
+        {
+          "label": "Scalar plant state update x[k+1]=Ax[k]+Bu[k]",
+          "rows": [
+            [
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Control input map B",
+          "rows": [
+            [
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Initial state and one-stage target",
+          "rows": [
+            [
+              0
+            ],
+            [
+              1
+            ]
+          ]
+        }
+      ],
+      "mathematical_tables": [
+        {
+          "label": "Two observed updates",
+          "columns": [
+            "k",
+            "observed x[k]",
+            "u[k]=1−x[k]",
+            "predicted and observed x[k+1]"
+          ],
+          "rows": [
+            [
+              "0",
+              "0",
+              "1",
+              "1"
+            ],
+            [
+              "1",
+              "1",
+              "0",
+              "1"
+            ]
+          ]
+        }
+      ]
     },
     {
       "id": "finite-controller-consumers",
@@ -407,7 +944,7 @@
       ],
       "source": "finite-controller-consumers.html",
       "summary": "Two installed clients execute finite feedback and finite causal minimax ports on small declared action tables.",
-      "mathematical_input": "The finite-feedback client registers a winning action for a bounded finite state/action game. The causal-minimax client supplies a finite terminal-choice table and a finite action table.",
+      "mathematical_input": "Finite feedback game: two stage states, one stage, one action, one disturbance, two safe terminal states, and terminal target {1}. The causal-minimax example has one initial state, one stage, two actions, one disturbance, two safe terminal states, and terminal costs (2,1).",
       "command": "ctest --test-dir build/dev -C Release -R \"^installed_public_client$\" --output-on-failure\nbuild/dev/installed-consumer/build/installed_finite_feedback_client\nbuild/dev/installed-consumer/build/installed_finite_causal_minimax_client",
       "expected_output": "Installed finite feedback client: registered winning action passed\nInstalled causal minimax client: terminal choice and action passed",
       "intermediate_geometry": "The feedback client selects a registered winning action. The causal-minimax client compares the finite terminal choices and returns the selected action.",
@@ -421,6 +958,142 @@
         {
           "label": "tests/installed/finite_causal_minimax_client.cpp",
           "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/finite_causal_minimax_client.cpp"
+        }
+      ],
+      "mathematical_tables": [
+        {
+          "label": "Finite feedback game. The disturbance is selected after the action.",
+          "columns": [
+            "state at stage 0",
+            "safe at stage 0",
+            "action 0 successor"
+          ],
+          "rows": [
+            [
+              "0",
+              "yes",
+              "1"
+            ],
+            [
+              "1",
+              "yes",
+              "1"
+            ]
+          ]
+        },
+        {
+          "label": "Finite feedback terminal layer",
+          "columns": [
+            "state",
+            "safe",
+            "target"
+          ],
+          "rows": [
+            [
+              "0",
+              "yes",
+              "no"
+            ],
+            [
+              "1",
+              "yes",
+              "yes"
+            ]
+          ]
+        },
+        {
+          "label": "Finite causal-minimax cost game. Each action has one disturbance outcome.",
+          "columns": [
+            "action at state 0",
+            "terminal successor",
+            "terminal cost"
+          ],
+          "rows": [
+            [
+              "0",
+              "0",
+              "2"
+            ],
+            [
+              "1",
+              "1",
+              "1"
+            ]
+          ]
+        },
+        {
+          "label": "Causal-minimax stage 0 state",
+          "columns": [
+            "state",
+            "safe",
+            "initial"
+          ],
+          "rows": [
+            [
+              "0",
+              "yes",
+              "yes"
+            ]
+          ]
+        },
+        {
+          "label": "Causal-minimax terminal layer",
+          "columns": [
+            "terminal state",
+            "safe",
+            "cost"
+          ],
+          "rows": [
+            [
+              "0",
+              "yes",
+              "2"
+            ],
+            [
+              "1",
+              "yes",
+              "1"
+            ]
+          ]
+        },
+        {
+          "label": "Decisions returned by the clients",
+          "columns": [
+            "consumer",
+            "initial decision",
+            "result"
+          ],
+          "rows": [
+            [
+              "finite feedback",
+              "action 0 from state 0",
+              "state 0 is winning at stage 0"
+            ],
+            [
+              "causal minimax",
+              "action 1 from state 0",
+              "minimum terminal cost is 1"
+            ]
+          ]
+        }
+      ],
+      "mathematical_conclusion": "The first table is a finite reachability game. The second is a finite causal minimax cost game. These examples are not the three nominal continuous nonlinear capstones; those capstones use separate source-bound closed-loop records and leave native substitutions pending.",
+      "source_witnesses": [
+        {
+          "source": "tests/installed/finite_feedback_client.cpp",
+          "contains": [
+            "Game{2,{Stage{{true,true},1,1,",
+            "{{StateIndex{1}}},{{StateIndex{1}}}",
+            "{true,true},{false,true}"
+          ]
+        },
+        {
+          "source": "tests/installed/finite_causal_minimax_client.cpp",
+          "contains": [
+            "Stage{1, 2, 1, {true}, {{{StateId{0}}, {StateId{1}}}}}",
+            "Terminal{2, {true, true}, {2.0, 1.0}}",
+            "optimal_actions != std::vector<ActionId>{ActionId{1}}"
+          ]
         }
       ]
     },
@@ -461,7 +1134,49 @@
         "examples/CMakeLists.txt",
         "examples/scenarios/two-stage-integrator.json"
       ],
-      "kind": "installed consumer"
+      "kind": "installed consumer",
+      "mathematical_displays": [
+        {
+          "label": "Two-stage integrator state equation x[k+1]=Ax[k]+Bu[k]",
+          "rows": [
+            [
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Control input map B",
+          "rows": [
+            [
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Initial state x₀ and target x₂",
+          "rows": [
+            [
+              0
+            ],
+            [
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Complete optimal control family (u₀,u₁)=(s,1−s)",
+          "rows": [
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        }
+      ]
     },
     {
       "id": "set-operations",
@@ -484,8 +1199,8 @@
         "csl::reachability::prepare_nominal_predecessor"
       ],
       "source": "set-operations.html",
-      "summary": "The affine image is [1,3]×[0,1]. Adding R gives [0,4]×[0,1]; projection gives [0,4]. A projected overlap does not prove a full-state intersection. Operations keep their documented representation and numerical limits.",
-      "mathematical_input": "Convert H={x∈R²: 0≤x≤1} to V and a unit-square V set back to H. Affine sum: [0,1]+[0,1]. H intersection: A={x:x≤1}, B={x:-x≤0}. Predecessor: x+=x+u, u∈[-1,1], target {2}.",
+      "summary": "Four installed consumers convert the unit square, sum unit intervals, intersect scalar half-spaces, and compute a nominal predecessor. The results are the unit square, [0,2], [0,1], and [1,3], respectively.",
+      "mathematical_input": "Convert the unit square between H and V forms. Compute [0,1]+[0,1]. Intersect x≤1 with −x≤0. Compute the nominal predecessor {x : ∃u∈[−1,1], x+u=2}.",
       "command": "ctest --test-dir build/dev -C Release -R \"^installed_public_client$\" --output-on-failure\nbuild/dev/installed-consumer/build/installed_conversion_client\nbuild/dev/installed-consumer/build/installed_affine_sum_client\nbuild/dev/installed-consumer/build/installed_polyhedral_intersection_client\nbuild/dev/installed-consumer/build/installed_projection_predecessor_client",
       "expected_output": "Installed Qhull conversion client: H-to-V square vertices passed\nInstalled Qhull conversion client: V-to-H square inequalities passed\nInstalled affine/sum client: selected LP and hull providers produced a numerical set result\nInstalled polyhedral client: public H intersection passed\nInstalled predecessor client: existential integrator interval and unestablished support passed",
       "intermediate_geometry": "H-to-V returns the four unit-square corners. V-to-H returns the four unit-square bounds. The interval sum is [0,2]. The H intersection is [0,1] with two rows. The existential predecessor is [1,3]; the consumer accepts 1 and 3 but rejects 0.875 and 3.125.",
@@ -516,7 +1231,179 @@
         "tests/installed/projection_predecessor_client.cpp",
         "tests/installed/CMakeLists.txt"
       ],
-      "kind": "installed consumer"
+      "kind": "installed consumer",
+      "mathematical_displays": [
+        {
+          "label": "Unit-square H matrix A in Ax ≤ b",
+          "rows": [
+            [
+              1,
+              0
+            ],
+            [
+              -1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              -1
+            ]
+          ]
+        },
+        {
+          "label": "Unit-square H bounds b",
+          "rows": [
+            [
+              1
+            ],
+            [
+              0
+            ],
+            [
+              1
+            ],
+            [
+              0
+            ]
+          ]
+        },
+        {
+          "label": "Unit-square V vertices. The V-to-H client uses the same rows.",
+          "rows": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Interval-sum V endpoints for [0,1]",
+          "rows": [
+            [
+              0
+            ],
+            [
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Integrator state map A",
+          "rows": [
+            [
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Integrator control map B",
+          "rows": [
+            [
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Target state",
+          "rows": [
+            [
+              2
+            ]
+          ]
+        },
+        {
+          "label": "Admissible control interval endpoints",
+          "rows": [
+            [
+              -1
+            ],
+            [
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Existential predecessor interval endpoints",
+          "rows": [
+            [
+              1
+            ],
+            [
+              3
+            ]
+          ]
+        }
+      ],
+      "mathematical_tables": [
+        {
+          "label": "Scalar H intersection input",
+          "columns": [
+            "inequality row",
+            "bound"
+          ],
+          "rows": [
+            [
+              "x ≤ 1",
+              "1"
+            ],
+            [
+              "−x ≤ 0",
+              "0"
+            ]
+          ]
+        }
+      ],
+      "mathematical_conclusion": "The four installed clients return: H-to-V and V-to-H conversion of [0,1]²; the Minkowski sum [0,1]+[0,1]=[0,2]; the H intersection [0,1]; and the nominal predecessor {x : ∃u∈[−1,1], x+u=2}=[1,3].",
+      "source_witnesses": [
+        {
+          "source": "tests/installed/conversion_client.cpp",
+          "contains": [
+            "Matrix{4,2,{1,0,-1,0,0,1,0,-1}}",
+            "Vector{1,0,1,0}",
+            "Matrix{4,2,{0,0,1,0,1,1,0,1}}"
+          ]
+        },
+        {
+          "source": "tests/installed/affine_sum_client.cpp",
+          "contains": [
+            "Matrix{2,1,{0,1}}",
+            "std::abs(low)<1e-8&&std::abs(high-2)<1e-8"
+          ]
+        },
+        {
+          "source": "tests/installed/polyhedral_intersection_client.cpp",
+          "contains": [
+            "Matrix{1,1,{1}}",
+            "Matrix{1,1,{-1}}",
+            "inequalities.rows() == 2"
+          ]
+        },
+        {
+          "source": "tests/installed/projection_predecessor_client.cpp",
+          "contains": [
+            "Vector{1,1}",
+            "Vector{2}",
+            "!contains(h,1)||!contains(h,3)",
+            "contains(h,0.875)||contains(h,3.125)"
+          ]
+        }
+      ]
     },
     {
       "id": "optimization-backends",
@@ -534,7 +1421,7 @@
       ],
       "source": "optimization-backends.html",
       "summary": "An LP returns one optimizer; a membership query returns a predicate; finite minimax is scoped to its finite table. HiGHS is optional. Numerical solver output is not a certificate unless a separate verifier says so.",
-      "mathematical_input": "The installed convex client sends a convex objective through the public HiGHS adapter and checks the original objective and KKT residuals.",
+      "mathematical_input": "The primary installed convex input minimizes ||[1,0]ᵀx−[3,−4]ᵀ|| for scalar 0≤x≤2. The client also checks a second problem with one authored explicit-zero row.",
       "command": "ctest --test-dir build/dev -C Release -R \"^installed_public_client$\" --output-on-failure\nbuild/dev/installed-consumer/build/installed_convex_client",
       "expected_output": "Installed convex client: original norm, squared provenance and numerical KKT passed",
       "intermediate_geometry": "The client retains a numerical solution and checks its objective provenance and KKT conditions. It is not the vertex-membership query, which uses the LP port.",
@@ -550,7 +1437,72 @@
         "tests/installed/convex_client.cpp",
         "tests/installed/CMakeLists.txt"
       ],
-      "kind": "installed consumer"
+      "kind": "installed consumer",
+      "mathematical_displays": [
+        {
+          "label": "Residual map A for r(x)=Ax−b",
+          "rows": [
+            [
+              1
+            ],
+            [
+              0
+            ]
+          ]
+        },
+        {
+          "label": "Residual target b",
+          "rows": [
+            [
+              3
+            ],
+            [
+              -4
+            ]
+          ]
+        },
+        {
+          "label": "Scalar decision bounds",
+          "rows": [
+            [
+              0
+            ],
+            [
+              2
+            ]
+          ]
+        },
+        {
+          "label": "Explicit-zero row coefficients in the second client input",
+          "rows": [
+            [
+              0
+            ]
+          ]
+        }
+      ],
+      "mathematical_tables": [
+        {
+          "label": "Two backend roles",
+          "columns": [
+            "program",
+            "objective sent to backend",
+            "consumer check"
+          ],
+          "rows": [
+            [
+              "LP",
+              "linear objective over constraints",
+              "completed primal and original-row residuals"
+            ],
+            [
+              "convex adapter",
+              "squared residual norm, 17 at x=2",
+              "original norm √17, solver objective 17, KKT residuals"
+            ]
+          ]
+        }
+      ]
     },
     {
       "id": "lotka-capstone",
@@ -587,7 +1539,31 @@
       "example_sources": [
         "docs/contracts/closed-loop/syn-nl-lv-01.json"
       ],
-      "kind": "saved evidence"
+      "kind": "saved evidence",
+      "mathematical_displays": [
+        {
+          "label": "Initial population state x₀=[P,R]ᵀ in thousand individuals",
+          "rows": [
+            [
+              120
+            ],
+            [
+              60
+            ]
+          ]
+        },
+        {
+          "label": "Continuous control bound for u in 1/day",
+          "rows": [
+            [
+              0
+            ],
+            [
+              0.05
+            ]
+          ]
+        }
+      ]
     },
     {
       "id": "orbit-capstone",
@@ -624,7 +1600,37 @@
       "example_sources": [
         "docs/contracts/closed-loop/earth-orbit.json"
       ],
-      "kind": "saved evidence"
+      "kind": "saved evidence",
+      "mathematical_displays": [
+        {
+          "label": "Initial orbit state x₀=[r,v,θ,ω]ᵀ",
+          "rows": [
+            [
+              7000
+            ],
+            [
+              0
+            ],
+            [
+              0
+            ],
+            [
+              0.0010780614796240577
+            ]
+          ]
+        },
+        {
+          "label": "Force bounds [uᵣ,uₜ]ᵀ in N",
+          "rows": [
+            [
+              -0.5
+            ],
+            [
+              0.5
+            ]
+          ]
+        }
+      ]
     },
     {
       "id": "fuel-capstone",
@@ -737,7 +1743,8 @@
             ]
           ]
         }
-      ]
+      ],
+      "mathematical_conclusion": "The source-bound replay uses 40 control holds. Initial physical projections are P_ox x₀=(2 kg/s,100 kg) and P_f x₀=(0.6 kg/s,30 kg). The replay is one observed policy path."
     },
     {
       "id": "native-substitution-matrix",

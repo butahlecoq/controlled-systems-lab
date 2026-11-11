@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 from html import escape
 import json
 from pathlib import Path
@@ -57,6 +58,90 @@ def _module_has_source_witness(module_id: str, sources: list[Path]) -> bool:
         namespace = module_id.rsplit("::", 1)[0]
         return namespace in code and re.search(r"\bsolve\s*\(", code) is not None
     return re.search(r"\b" + re.escape(symbol) + r"\b", code) is not None
+
+
+def _cpp_game_initializer(path: Path, declaration: str):
+    source = path.read_text(encoding="utf-8")
+    start = source.index(declaration) + len(declaration) - 1
+    depth = 0
+    for end in range(start, len(source)):
+        if source[end] == "{":
+            depth += 1
+        elif source[end] == "}":
+            depth -= 1
+            if depth == 0:
+                break
+    else:
+        raise ValueError(f"unclosed game fixture in {path}")
+    text = re.sub(r"\b(?:Stage|StateIndex|StateId|Terminal)\s*", "", source[start:end + 1])
+    text = text.translate(str.maketrans({"{": "[", "}": "]"}))
+    text = re.sub(r"\btrue\b", "True", text)
+    text = re.sub(r"\bfalse\b", "False", text)
+    try:
+        return ast.literal_eval(text)
+    except (SyntaxError, ValueError) as error:
+        raise ValueError(f"invalid game fixture in {path}") from error
+
+
+def _validate_finite_controller_tables(chapter: dict) -> None:
+    if chapter.get("id") != "finite-controller-consumers":
+        return
+    sources = {entry["source"]: (ROOT / entry["source"]).resolve()
+               for entry in chapter.get("source_witnesses", [])}
+    feedback = _cpp_game_initializer(
+        sources["tests/installed/finite_feedback_client.cpp"], "Game{")
+    if len(feedback) != 4:
+        raise ValueError("finite feedback fixture must contain states, stages, safety and target")
+    state_count, stages, terminal_safe, terminal_target = feedback
+    if len(stages) != 1:
+        raise ValueError("finite feedback lesson expects one stage")
+    stage_safe, action_count, disturbance_count, successors = stages[0]
+    if action_count != 1 or disturbance_count != 1:
+        raise ValueError("finite feedback lesson expects one action and one disturbance")
+    tables = {table["label"]: table["rows"] for table in chapter.get("mathematical_tables", [])}
+    def number_text(value) -> str:
+        return str(int(value)) if isinstance(value, float) and value.is_integer() else str(value)
+    expected_transition = [[str(state), "yes" if stage_safe[state] else "no",
+                            str(successors[state][0][0][0])]
+                           for state in range(state_count)]
+    expected_terminal = [[str(state), "yes" if terminal_safe[state] else "no",
+                          "yes" if terminal_target[state] else "no"]
+                         for state in range(state_count)]
+    if tables.get("Finite feedback game. The disturbance is selected after the action.") != expected_transition:
+        raise ValueError("finite feedback transition table differs from its executable fixture")
+    if tables.get("Finite feedback terminal layer") != expected_terminal:
+        raise ValueError("finite feedback terminal table differs from its executable fixture")
+
+    minimax = _cpp_game_initializer(
+        sources["tests/installed/finite_causal_minimax_client.cpp"], "Game game{")
+    stages, terminal, initial = minimax
+    if len(stages) != 1:
+        raise ValueError("causal minimax lesson expects one stage")
+    state_count, action_count, disturbance_count, stage_safe, successors = stages[0]
+    terminal_count, terminal_safe, costs = terminal
+    if state_count != 1 or action_count != 2 or disturbance_count != 1 or initial != [0]:
+        raise ValueError("causal minimax lesson expects the checked one-state, two-action fixture")
+    expected_costs = [[str(action), str(successors[0][action][0][0]),
+                       number_text(costs[successors[0][action][0][0]])]
+                      for action in range(action_count)]
+    expected_terminal_costs = [[str(state), "yes" if terminal_safe[state] else "no", number_text(costs[state])]
+                               for state in range(terminal_count)]
+    if tables.get("Finite causal-minimax cost game. Each action has one disturbance outcome.") != expected_costs:
+        raise ValueError("causal minimax action table differs from its executable fixture")
+    expected_stage = [["0", "yes" if stage_safe[0] else "no", "yes"]]
+    if tables.get("Causal-minimax stage 0 state") != expected_stage:
+        raise ValueError("causal minimax stage table differs from its executable fixture")
+    if tables.get("Causal-minimax terminal layer") != expected_terminal_costs:
+        raise ValueError("causal minimax terminal table differs from its executable fixture")
+    best_action = min(range(action_count),
+                      key=lambda action: costs[successors[0][action][0][0]])
+    best_successor = successors[0][best_action][0][0]
+    expected_decisions = [
+        ["finite feedback", "action 0 from state 0", "state 0 is winning at stage 0"],
+        ["causal minimax", f"action {best_action} from state 0",
+         f"minimum terminal cost is {number_text(costs[best_successor])}"]]
+    if tables.get("Decisions returned by the clients") != expected_decisions:
+        raise ValueError("finite controller decisions differ from the executable fixtures")
 
 
 def validate(manifest: dict, inventory: dict, figure_index: dict | None = None) -> list[dict]:
@@ -135,6 +220,17 @@ def validate(manifest: dict, inventory: dict, figure_index: dict | None = None) 
             for field in ("mathematical_input", "command", "expected_output", "intermediate_geometry", "support_limits"):
                 if not chapter.get(field):
                     raise ValueError(f"{chapter['id']}: ready chapter missing {field}")
+            if not chapter.get("mathematical_displays") and not chapter.get("mathematical_tables"):
+                raise ValueError(f"{chapter['id']}: ready chapter needs a primary mathematical display")
+        for witness in chapter.get("source_witnesses", []):
+            witness_path = (ROOT / witness["source"]).resolve()
+            if not witness_path.is_relative_to(ROOT.resolve()) or not witness_path.is_file():
+                raise ValueError(f"{chapter['id']}: missing or unsafe source witness {witness['source']}")
+            witness_text = witness_path.read_text(encoding="utf-8")
+            for fragment in witness.get("contains", []):
+                if fragment not in witness_text:
+                    raise ValueError(f"{chapter['id']}: source fixture changed in {witness['source']}: {fragment}")
+        _validate_finite_controller_tables(chapter)
         for figure_id in chapter.get("figure_ids", []):
             item = known_figures.get(figure_id)
             if item is None:
@@ -170,8 +266,9 @@ def _chapter_page(chapter: dict, chapters: list[dict], chapter_html: str,
     parts.append(f'<p class="learning-status">{escape(chapter["status_label"])}</p>')
     parts.append(chapter_html)
     displays = chapter.get("mathematical_displays", [])
-    if displays:
-        parts.append('<section class="learning-math"><h2>Coordinates and maps</h2>')
+    tables = chapter.get("mathematical_tables", [])
+    if displays or tables or chapter.get("mathematical_conclusion"):
+        parts.append('<section class="learning-math"><h2>Mathematical input</h2>')
         for display in displays:
             rows = display.get("rows")
             if not isinstance(rows, list) or not rows:
@@ -181,6 +278,22 @@ def _chapter_page(chapter: dict, chapters: list[dict], chapter_html: str,
                          '</figcaption><div class="scroll" tabindex="0" role="region" aria-label="' +
                          escape(display["label"], quote=True) + '">' +
                          mathematical_notation.matrix_html(rows, display["label"]) + '</div></figure>')
+        for table in tables:
+            columns = table.get("columns")
+            rows = table.get("rows")
+            if not columns or not isinstance(rows, list) or any(len(row) != len(columns) for row in rows):
+                raise ValueError(f"{chapter['id']}: mathematical table needs matching columns and rows")
+            parts.append('<div class="scroll" tabindex="0" role="region" aria-label="' +
+                         escape(table["label"], quote=True) + '"><table><caption>' +
+                         escape(table["label"]) + '</caption><thead><tr>' +
+                         ''.join('<th scope="col">' + escape(str(column)) + '</th>' for column in columns) +
+                         '</tr></thead><tbody>')
+            for row in rows:
+                parts.append('<tr>' + ''.join('<td>' + escape(str(value)) + '</td>' for value in row) + '</tr>')
+            parts.append('</tbody></table></div>')
+        if chapter.get("mathematical_conclusion"):
+            parts.append('<p class="math-input"><strong>Result.</strong> ' +
+                         escape(chapter["mathematical_conclusion"]) + '</p>')
         parts.append('</section>')
     if chapter.get("module_ids"):
         module_numbers = {}
@@ -194,8 +307,9 @@ def _chapter_page(chapter: dict, chapters: list[dict], chapter_html: str,
         parts.append('</ul></section>')
     if chapter.get("status") == "ready":
         parts.append('<section class="lesson-reproduction"><h2>Reproduce this result</h2>')
-        parts.append('<h3>Input</h3><pre tabindex="0" role="region" aria-label="Mathematical input"><code>'
-                     + escape(chapter["mathematical_input"]) + '</code></pre>')
+        parts.append('<details class="lesson-input-details"><summary>Full input description and JSON</summary><p>'
+                     + escape(chapter["mathematical_input"]) +
+                     '</p><p><a href="chapter-manifest.json">Open the structured chapter manifest JSON</a></p></details>')
         parts.append('<h3>Command</h3><pre tabindex="0" role="region" aria-label="Copyable command"><code>'
                      + escape(chapter["command"]) + '</code></pre>')
         parts.append('<h3>Expected output</h3><pre tabindex="0" role="region" aria-label="Expected visible output"><code>'
