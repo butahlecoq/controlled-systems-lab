@@ -1,4 +1,5 @@
 #include <csl/reachability/finite_plan_zonotope.hpp>
+#include "fixed_plan_admission.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -237,16 +238,15 @@ std::variant<FinitePlanZonotopeTrace::Stage, Unsupported, OperationStopped> prop
 
 FinitePlanZonotopeOutcome finite_plan_zonotope(const FixedPlanRequest& request,
     FinitePlanZonotopeLimits limits, const ExecutionContext& context) {
-    const auto n = request.system.dimensions().state;
     const auto horizon = request.system.horizon();
-    if(request.controls.size() != horizon || request.disturbances.size() != horizon ||
-       request.admissible_states.size() != horizon + 1)
+    if(!detail::has_fixed_plan_horizon_shape(request))
         return unsupported("finite_plan_zonotope.horizon", "Controls, disturbances and safe sets must match the model horizon.");
-    if(request.initial.metadata()->set.dimension != n)
+    if(!detail::fixed_plan_initial_matches_model(request))
         return unsupported("finite_plan_zonotope.initial", "Initial set dimension differs from model.");
+    if(!detail::fixed_plan_safe_dimensions_match_model(request))
+        return unsupported("finite_plan_zonotope.safe_sets", "Universal state constraints are the only supported profile.");
     for(const auto& safe : request.admissible_states)
-        if(safe.metadata()->set.dimension != n ||
-           !std::holds_alternative<sets::UniversalRepresentation>(safe.representation()))
+        if(!std::holds_alternative<sets::UniversalRepresentation>(safe.representation()))
             return unsupported("finite_plan_zonotope.safe_sets", "Universal state constraints are the only supported profile.");
 
     auto initial = axis_zonotope(request.initial, "finite_plan_zonotope.initial",

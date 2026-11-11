@@ -79,3 +79,28 @@ TEST_CASE("ellipsoid propagation refuses bounded safety constraints it cannot pr
   REQUIRE(std::holds_alternative<Unsupported>(result));
   CHECK(std::get<Unsupported>(result).diagnostics[0].field == "finite_plan_ellipsoid.safe_sets");
 }
+
+TEST_CASE("ellipsoid admission preserves horizon precedence over initial dimension errors") {
+  auto input = points_request();
+  input.disturbances.pop_back();
+  input.initial = take(sets::make_universal({{"wrong-initial-dimension"}, 2, {}}));
+  const auto result = finite_plan_ellipsoid(input);
+  REQUIRE(std::holds_alternative<Unsupported>(result));
+  const auto& diagnostic = std::get<Unsupported>(result).diagnostics[0];
+  CHECK(diagnostic.field == "finite_plan_ellipsoid.horizon");
+  CHECK(diagnostic.explanation == "Controls, disturbances and safe sets must match the model horizon.");
+}
+
+TEST_CASE("ellipsoid admission reports initial and safe-set dimension mismatches") {
+  auto bad_initial = points_request();
+  bad_initial.initial = take(sets::make_universal({{"wrong-initial-dimension"}, 2, {}}));
+  auto initial_result = finite_plan_ellipsoid(bad_initial);
+  REQUIRE(std::holds_alternative<Unsupported>(initial_result));
+  CHECK(std::get<Unsupported>(initial_result).diagnostics[0].field == "finite_plan_ellipsoid.initial");
+
+  auto bad_safe = points_request();
+  bad_safe.admissible_states[1] = take(sets::make_universal({{"wrong-safe-dimension"}, 2, {}}));
+  auto safe_result = finite_plan_ellipsoid(bad_safe);
+  REQUIRE(std::holds_alternative<Unsupported>(safe_result));
+  CHECK(std::get<Unsupported>(safe_result).diagnostics[0].field == "finite_plan_ellipsoid.safe_sets");
+}
