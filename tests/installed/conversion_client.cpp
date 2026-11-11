@@ -45,6 +45,38 @@ int main() {
         upper=upper||(std::abs(vertices(i,0)-1)<1e-7&&std::abs(vertices(i,1)-1)<1e-7);
     }
     if (!origin||!upper) return 6;
-    std::cout << "Installed Qhull conversion client: registered square conversion and literal vertices passed\n";
+    std::cout << "Installed Qhull conversion client: H-to-V square vertices passed\n";
+
+    const auto square_vertices = take(numeric::snapshot(Matrix{4,2,{0,0,1,0,1,1,0,1}}));
+    const auto square_rays = take(numeric::snapshot(Matrix{0,2,{}}));
+    const auto square_v = take(sets::make_v({{"installed-square-v"},2,{}},
+        {square_vertices,square_rays})).as_handle();
+    auto reverse = take(adapters::polyhedral::make_qhull_registration(
+        take(adapters::lp::make_highs_registration())));
+    registry::Registry<registry::ConversionPort> reverse_registry;
+    if (reverse_registry.add(std::move(reverse))) return 7;
+    ConversionRequest reverse_request{{{"installed"},{"square-v-to-h"},{"square-h"}},
+        square_v,{"csl.polyhedron.h"},Assurance::numerical};
+    registry::Requirements reverse_requirements;
+    reverse_requirements.output.representation={"csl.polyhedron.h"};
+    reverse_requirements.output.assurance=Assurance::numerical;
+    reverse_requirements.output.relation=SetRelation::equivalent;
+    auto reverse_pipeline=registry::prepare_pipeline(registry::select(reverse_registry,
+        {{"csl.conversion.qhull"},std::nullopt},reverse_request,reverse_requirements));
+    if (!std::holds_alternative<registry::PreparedPipeline<registry::ConversionPort>>(reverse_pipeline)) return 8;
+    auto [reverse_worker]=std::get<registry::PreparedPipeline<registry::ConversionPort>>(reverse_pipeline).create();
+    auto reverse_outcome=reverse_worker->run(context);
+    if (!std::holds_alternative<OperationResult>(reverse_outcome)) return 9;
+    const auto reverse_data=take(sets::from_handle(std::get<OperationResult>(reverse_outcome).output));
+    const auto reverse_representation=reverse_data.representation();
+    const auto* inequalities=std::get_if<sets::HRepresentation>(&reverse_representation);
+    if (!inequalities || inequalities->inequalities.rows()!=4 || inequalities->upper_bounds.size()!=4) return 10;
+    for (std::size_t row=0;row<4;++row) {
+        const double a=inequalities->inequalities(row,0), b=inequalities->inequalities(row,1);
+        const double expected_bound = a == -1.0 || b == -1.0 ? 0.0 : 1.0;
+        if (inequalities->upper_bounds[row]!=expected_bound ||
+            !((std::abs(a)==1.0 && b==0.0) || (a==0.0 && std::abs(b)==1.0))) return 11;
+    }
+    std::cout << "Installed Qhull conversion client: V-to-H square inequalities passed\n";
     return 0;
 }

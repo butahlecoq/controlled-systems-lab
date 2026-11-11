@@ -224,6 +224,24 @@ class PagesRouteRetirementTests(unittest.TestCase):
             self.assertEqual((site / "examples/index.html").read_bytes(), gallery_before)
             self.assertFalse((site / "archive.html").exists())
 
+    def test_learning_book_navigation_appears_when_the_bundle_is_staged(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            site, _ = self.make_site(Path(temporary))
+            (site / "learn").mkdir()
+            (site / "learn/index.html").write_text("<html><body>Book</body></html>")
+            retirement.finalize(site, source_commit="fixture")
+            root = (site / "index.html").read_text()
+            self.assertIn('<a href="learn/index.html">Learning book</a>', root)
+
+    def test_module_catalogue_route_has_a_real_source_owner(self) -> None:
+        repo = Path(__file__).resolve().parents[2]
+        with tempfile.TemporaryDirectory() as temporary:
+            site, _ = self.make_site(Path(temporary))
+            record = retirement._producer_record(site, "learn/module-catalogue.html", {}, "fixture")
+            self.assertIn("scripts/reports/learning_book.py", record["files"])
+            self.assertIn("docs/catalogue/module-composition-inventory-v1.json", record["files"])
+            self.assertTrue(all((repo / source).is_file() for source in record["files"]))
+
     def test_archive_navigation_is_added_when_gallery_has_no_legacy_label(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             site, _ = self.make_site(
