@@ -330,19 +330,22 @@ def point_table(example):
 def section(example, number, previous=None, following=None):
     owner = CASE_OWNERS[example["kind"]]
     content = owner.presentation(example)
-    return (f'<section id="{example["slug"]}"><p class="eyebrow">Example {number:02d} / {content["example_type"]}</p>'
+    markup = (f'<section id="{example["slug"]}"><p class="eyebrow">Example {number:02d} / {content["example_type"]}</p>'
             f'<h2>{example["title"]}</h2><p>{content["explanation"]}</p>'
             f'<figure><img src="{example["slug"]}.svg" alt="{escape(content["explanation"], quote=True)}">'
             f'<figcaption>{content["caption"]}</figcaption></figure>'
             f'<p class="answer">{content["result"]}</p>{point_table(example)}'
-            '<details><summary>Complete minimal input</summary><pre><code>' + escape(json.dumps(example["inputs"], indent=2)) + '</code></pre></details>'
+            '<details><summary>Complete minimal input</summary>'
+            + site_design.code_block(json.dumps(example["inputs"], indent=2), "Complete minimal input")
+            + '</details>'
             + content["extra"] + '<details><summary>Reproduce the functional example</summary>' + content["reproduction"] +
-            '<pre><code>' + escape(content["command"]) + '</code></pre>'
-            '<p>' + content["platform_note"] + '</p>'
+            site_design.code_block(content["command"], "Functional example reproduction commands")
+            + '<p>' + content["platform_note"] + '</p>'
             f'<p><a href="{content["source_url"]}">Complete native fixture/driver ↗</a></p></details>'
             f'<p class="limits">{content["notes"]}</p>' + content["source_provenance"] +
             content["raw_record_link"] + content["report_links"] +
             site_design.lesson_neighbors(previous, following) + '</section>')
+    return site_design.focusable_code_blocks(markup, "Scrollable example code")
 
 
 def saved_figure_sections(catalog, site):

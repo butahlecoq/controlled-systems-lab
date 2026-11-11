@@ -170,6 +170,16 @@ class GalleryTests(unittest.TestCase):
             self.assertEqual(owner["files"],["scripts/reports/visual_examples.py",
                 "docs/examples/source-index-geometry-2d.html"])
 
+    def test_generated_example_code_regions_are_keyboard_focusable(self):
+        page = gallery.section(self.examples[0], 1)
+        code_regions = page.count('role="region" aria-label=')
+        self.assertGreaterEqual(code_regions, 2)
+        self.assertGreaterEqual(page.count('pre tabindex="0"'), 2)
+        self.assertNotIn("<pre><code>", page)
+        future_block = gallery.site_design.focusable_code_blocks(
+            '<pre tabindex="-1"><code>future code</code></pre>')
+        self.assertIn('<pre tabindex="0" role="region" aria-label="Scrollable code example">', future_block)
+
     def test_saved_outputs_match_literal_geometry(self):
         cases = {example["slug"]: example for example in self.examples}
         square = cases["square_duplicates"]
