@@ -255,7 +255,8 @@ def source_inventory(root: Path) -> list[dict]:
     for base in bases:
         for path in sorted(base.rglob("*.py")):
             relative = path.relative_to(root)
-            if path.name == "audit_visual_routes.py" or any(part.startswith("test") for part in relative.parts):
+            if path.name in {"audit_visual_routes.py", "pages_route_retirement.py"} or any(
+                    part.startswith("test") for part in relative.parts):
                 continue
             source = path.read_text(encoding="utf-8")
             matches = VISUAL_SIGNAL.findall(source)

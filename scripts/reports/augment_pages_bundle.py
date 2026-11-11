@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import sys
 import zipfile
@@ -19,6 +20,7 @@ from scripts.reports import (
     stage_review05_family_query, stage_mpc11_controller_comparison,
     stage_mpc08_complete, stage_mpc07_comparison, stage_mpc10_comparison, stage_mpc11_mesh_timing,
 )
+from scripts.reports import pages_route_retirement
 from scripts.reports.mpc01 import augment_pages, stage_per_attempt
 
 B04_SOURCE = ROOT / "reports/algorithm-results/b04-c-strategy-a-verification-v1"
@@ -110,6 +112,19 @@ def stage_all(site: Path) -> dict[str, str]:
     strategy_page = site / STRATEGY_AB_ROUTE / "strategy-ab-ts03-summary.html"
     if strategy_page.is_symlink() or not strategy_page.is_file():
         raise ValueError("combined Pages site is missing the Strategy A/B T-S03 report")
+    route_inventory = pages_route_retirement.finalize(
+        site, source_commit=os.environ.get("GITHUB_SHA", "unknown"))
+    primary = (site / "index.html").read_text(encoding="utf-8")
+    if "archive.html" not in primary or "examples/index.html" not in primary:
+        raise ValueError("primary learning page must link to the gallery and evidence archive")
+    for route, (visibility, _) in pages_route_retirement.BARE_ROUTE_LESSONS.items():
+        if route in route_inventory["html_routes"] and visibility == "archive":
+            if route in primary:
+                raise ValueError("bare report route returned to primary learning navigation: " + route)
+            if route not in (site / "archive.html").read_text(encoding="utf-8"):
+                raise ValueError("bare evidence route is missing from the retained archive: " + route)
+    if len(route_inventory["html_routes"]) != route_inventory["html_route_count"]:
+        raise ValueError("final route inventory does not cover every HTML route")
     return {"mpc01": per_attempt.name, "b04_c": b04_route, "mpc06": mpc06_route, "mpc06_complete": mpc06_complete, "mpc06_offline": mpc06_offline, "review05": review05, "mpc11": mpc11, "mpc08": mpc08, "mpc07": mpc07, "mpc10": mpc10, "mpc11_studies": mpc11_studies, "b04_source": b04_source}
 
 

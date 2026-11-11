@@ -1,0 +1,85 @@
+from __future__ import annotations
+
+import hashlib
+import json
+from pathlib import Path
+import tempfile
+import unittest
+import zipfile
+
+from scripts.reports import pages_route_retirement as retirement
+
+
+class PagesRouteRetirementTests(unittest.TestCase):
+    def make_site(self, root: Path, *, gallery: str | None = None) -> tuple[Path, str]:
+        site = root / "site"
+        (site / "examples").mkdir(parents=True)
+        (site / "examples/examples.css").write_text("body{color:inherit}")
+        route = next(iter(retirement.BARE_ROUTE_LESSONS))
+        (site / "catalog.json").write_text(json.dumps({
+            "schema": "csl.algorithm-report-catalog/3",
+            "reports": [{"report_id": route.split("/", 1)[0], "report_kind": "finite-feedback"}],
+        }))
+        (site / route).parent.mkdir(parents=True)
+        (site / route).write_text("<!doctype html><html><body><h1>Saved report</h1></body></html>")
+        (site / "index.html").write_text(
+            f'<!doctype html><html><body><ul><li><a href="{route}">Bare report</a></li></ul></body></html>')
+        (site / "examples/index.html").write_text(gallery or
+            f'<!doctype html><html><body><a href="../index.html">All numerical reports ↗</a>'
+            f'<a href="../{route}">Saved report</a></body></html>')
+        with zipfile.ZipFile(site / (route.split("/", 1)[0] + ".zip"), "w") as archive:
+            archive.writestr("result.json", '{"saved":true}\n')
+        return site, route
+
+    def test_finalization_is_idempotent_and_keeps_evidence_bytes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            site, route = self.make_site(Path(temporary))
+            original_root = (site / "index.html").read_bytes()
+            report_page = site / route
+            report_hash = hashlib.sha256(report_page.read_bytes()).hexdigest()
+            archive_path = site / (route.split("/", 1)[0] + ".zip")
+            zip_hash = hashlib.sha256(archive_path.read_bytes()).hexdigest()
+
+            first = retirement.finalize(site, source_commit="fixture")
+            legacy = (site / "legacy-index.html").read_bytes()
+            second = retirement.finalize(site, source_commit="fixture")
+
+            self.assertEqual(legacy, original_root)
+            self.assertEqual((site / "legacy-index.html").read_bytes(), legacy)
+            self.assertEqual(hashlib.sha256(archive_path.read_bytes()).hexdigest(), zip_hash)
+            self.assertEqual(hashlib.sha256(report_page.read_bytes()).hexdigest(), report_hash)
+            self.assertEqual(first["html_route_count"], second["html_route_count"])
+            self.assertEqual(second["navigation_transition"]["new_root_report_link_count"], 0)
+            self.assertIn(route, (site / "archive.html").read_text())
+            self.assertIn("../archive.html#", (site / "examples/index.html").read_text())
+            self.assertNotIn("../" + route, (site / "examples/index.html").read_text())
+            self.assertIn(route, second["html_routes"])
+            self.assertEqual(second["artifact_transition"]["preserved_immutable_html"], [route])
+            self.assertEqual(second["artifact_transition"]["preserved_zip_routes"], [archive_path.name])
+
+            (site / "late-report").mkdir()
+            (site / "late-report/index.html").write_text("<!doctype html><html><body>Late</body></html>")
+            catalog = json.loads((site / "catalog.json").read_text())
+            catalog["reports"].append({"report_id": "late-report", "report_kind": "finite-feedback"})
+            (site / "catalog.json").write_text(json.dumps(catalog))
+            third = retirement.finalize(site, source_commit="fixture")
+            self.assertIn("late-report/index.html", third["html_routes"])
+            self.assertIn("late-report/index.html", (site / "archive.html").read_text())
+
+    def test_bad_figure_link_fails_before_writing_navigation(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            site, _ = self.make_site(Path(temporary), gallery=
+                '<!doctype html><html><body><img src="missing.svg" alt="missing"></body></html>')
+            root_before = (site / "index.html").read_bytes()
+            gallery_before = (site / "examples/index.html").read_bytes()
+
+            with self.assertRaisesRegex(ValueError, "broken local figure references"):
+                retirement.finalize(site, source_commit="fixture")
+
+            self.assertEqual((site / "index.html").read_bytes(), root_before)
+            self.assertEqual((site / "examples/index.html").read_bytes(), gallery_before)
+            self.assertFalse((site / "archive.html").exists())
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -132,6 +132,10 @@ jobs:
           print(route)
           PY
 
+      - name: Apply the shared Pages route policy before upload
+        if: steps.artifact.outputs.found == 'true'
+        run: python scripts/reports/pages_route_retirement.py --site build/report-site
+
       - name: Check that the augmented artifact still targets current main
         if: steps.artifact.outputs.found == 'true' && hashFiles('reports/algorithm-results/b04-c-strategy-a-verification-v1/record.json') != ''
         id: head

@@ -28,6 +28,14 @@ SOURCE_MODULES = {
 }
 FILES = {"README.md", "index.html", "manifest.json", "result.json", "scenario.json",
          "base-result.json", "base-scenario.json", "trajectory.svg", "verification.json", "SHA256SUMS"}
+SOURCE_SNAPSHOT_ROOT = Path("docs/research/evidence/mpc06-tube-objective-source-snapshot")
+MANIFEST_SHA256 = "a4c5fc40dbb4ea72bc29d10fd72b1559abff01edbd26c0f380825fefb32c6f9e"
+SOURCE_SNAPSHOT_SHA256 = {
+    ".github/workflows/algorithm-reports.yml": "321feccc93d8402af6e8acd39c578bdf92882483353ab692b38ef8ef7df5dc9f",
+    ".github/workflows/mpc06-tube-objective-pages-augmentation.yml": "973be97cb17d0b5cf09fe51a6e38ecf3230c93f07398a05947739658cb6f4475",
+    "scripts/reports/stage_mpc06_tube_objective.py": "99710a4a6a5399d64cf741ce63fad89f61b836681fbccd494c45c53fc818bfef",
+    "tests/reporting/test_mpc06_tube_objective.py": "519c00e0e1530bbd33b8f195972fa7efab32d521c5ee7375cb7a4343f7483613",
+}
 sys.path.insert(0, str(ROOT / "scripts/reports/mpc06"))
 import render_tube_objective
 
@@ -51,6 +59,8 @@ def validate(source: Path) -> dict[str, bytes]:
     if sums != {name: digest(data) for name, data in files.items() if name != "SHA256SUMS"}:
         raise ValueError("MPC-06 objective report checksum mismatch")
     manifest = json.loads(files["manifest.json"])
+    if digest(files["manifest.json"]) != MANIFEST_SHA256:
+        raise ValueError("MPC-06 objective frozen manifest identity differs")
     if (manifest.get("schema") != "csl.mpc06-tube-objective-manifest/1" or
             manifest.get("report_id") != source.name or set(manifest.get("files", {})) != set(files) - {"manifest.json", "SHA256SUMS"} or
             set(manifest.get("source_files", {})) != SOURCE_MODULES):
@@ -59,8 +69,9 @@ def validate(source: Path) -> dict[str, bytes]:
         if digest(files[name]) != expected:
             raise ValueError("MPC-06 objective manifest file hash differs: " + name)
     for name, expected in manifest["source_files"].items():
-        path = ROOT / name
-        if path.is_symlink() or not path.is_file() or digest(path.read_bytes()) != expected:
+        snapshot_hash = SOURCE_SNAPSHOT_SHA256.get(name)
+        path = ROOT / SOURCE_SNAPSHOT_ROOT / name if snapshot_hash else ROOT / name
+        if (snapshot_hash and expected != snapshot_hash) or path.is_symlink() or not path.is_file() or digest(path.read_bytes()) != expected:
             raise ValueError("MPC-06 objective source hash differs: " + name)
     result = json.loads(files["result.json"])
     verification = json.loads(files["verification.json"])

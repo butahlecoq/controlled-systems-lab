@@ -25,6 +25,7 @@ SNAPSHOT_FILES = frozenset({
     "scripts/reports/landing.py",
     "scripts/reports/visual_examples.py",
     "scripts/reports/algorithm_visual_coverage.json",
+    ".github/workflows/algorithm-reports.yml",
 })
 SOURCE_FILES = ("docs/research/tools/b04_c_exact_profile.py",
     "docs/research/tools/build_b04_c_exact_fiber.py",

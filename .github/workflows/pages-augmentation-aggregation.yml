@@ -106,6 +106,8 @@ jobs:
             test ! -e "build/report-site/$record"
             cp "build/$record" "build/report-site/$record"
           done
+      - name: Recheck final Pages routes after every augmentation and receipt
+        run: python scripts/reports/pages_route_retirement.py --site build/report-site
       - name: Check that the complete artifact still targets current main
         id: head
         env:

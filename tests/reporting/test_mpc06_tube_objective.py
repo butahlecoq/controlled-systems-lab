@@ -23,9 +23,10 @@ class Mpc06TubeObjectiveTests(unittest.TestCase):
 
         self.assertEqual(Q(result["nominal_surrogate_cost"]), Q(9, 64))
 
-    def test_rebuild_and_independently_check_saved_report(self):
-        build_tube_objective.main()
-
+    def test_analyze_and_independently_check_saved_report(self):
+        analyzed = build_tube_objective.analyze()
+        saved_result = json.loads(build_tube_objective.OUTPUT.joinpath("result.json").read_text(encoding="utf-8"))
+        self.assertEqual(saved_result, analyzed)
         expected = check_tube_objective.check()
         saved = json.loads(check_tube_objective.OUTPUT.read_text(encoding="utf-8"))
         self.assertEqual(saved, expected)
