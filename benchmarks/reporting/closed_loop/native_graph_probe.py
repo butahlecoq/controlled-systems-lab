@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import hashlib
 import itertools
 import json
 import subprocess
@@ -17,7 +18,7 @@ def request(*, middle_bound: list[list[float]], controller: str,
     bounds = [[[0.0, 0.0], [0.0, 0.0]], middle_bound, [[0.0, 2.0], [0.0, 0.0]]]
     return {
         "schema": "csl.closed-loop.native-policy-query/1", "task_id": "analytic-2d-graph",
-        "task_sha256": "a" * 64, "source_model_id": "analytic-2d/1", "controller_id": controller,
+        "task_sha256": "", "source_model_id": "analytic-2d/1", "controller_id": controller,
         "action_profile_id": "analytic-actions/1", "problem_id": "analytic-problem", "request_id": controller,
         "absolute_update_index": 0, "observed_physical_state": [0.0, 0.0], "original_horizon": 2, "dt": 1.0,
         "predictor_model_id": "analytic-affine/1", "predictor_assurance": "exact analytic affine map",
@@ -40,7 +41,28 @@ def request(*, middle_bound: list[list[float]], controller: str,
     }
 
 
+def bind_task_hash(query: dict) -> None:
+    task_contract = {
+        "schema": "csl.closed-loop.analytic-source-task/1",
+        "task_id": query["task_id"],
+        "source_model_id": query["source_model_id"],
+        "predictor_model_id": query["predictor_model_id"],
+        "predictor_stages": query["predictor_stages"],
+        "action_profile_id": query["action_profile_id"],
+        "actions": query["actions"],
+        "original_horizon": query["original_horizon"],
+        "dt": query["dt"],
+        "state_bounds": query["state_bounds"],
+        "stage_state_bounds": query["stage_state_bounds"],
+        "terminal_objective": query["terminal_objective"],
+        "running_cost": query["running_cost"],
+    }
+    query["task_sha256"] = hashlib.sha256(json.dumps(task_contract, sort_keys=True,
+        separators=(",", ":")).encode("utf-8")).hexdigest()
+
+
 def execute(bridge: Path, query: dict) -> dict:
+    bind_task_hash(query)
     result = subprocess.run([str(bridge)], input=json.dumps(query) + "\n", text=True,
                             capture_output=True, check=True)
     return json.loads(result.stdout)
