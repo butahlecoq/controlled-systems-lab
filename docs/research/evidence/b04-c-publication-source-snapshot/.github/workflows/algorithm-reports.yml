@@ -1,0 +1,622 @@
+name: Algorithm report records and site
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  route:
+    uses: ./.github/workflows/validation-routing.yml
+
+  validate:
+    needs: route
+    if: needs.route.outputs.reports == 'true'
+    runs-on: ubuntu-24.04
+    outputs:
+      has_reports: ${{ steps.catalog.outputs.has_reports }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      # Frozen #824 bundles name source commits from two historical PR branches;
+      # fetch both retained refs so source hashes are checked against their trees.
+      - name: Fetch historical issue 824 source trees for frozen report verification
+        run: |
+          git fetch --no-tags origin refs/pull/846/head
+          git fetch --no-tags origin refs/pull/849/head
+      - name: Install report-only validation and plotting tools
+        run: python -m pip install --cache-dir build/report-pip-cache -r scripts/reports/requirements.txt
+      - name: Validate literal records, safe export and real pinned plotting pipeline
+        env:
+          MPLCONFIGDIR: ${{ github.workspace }}/build/report-mpl-config
+        run: python -m unittest discover -s tests/reporting -p 'test_*.py'
+      - name: Validate frozen issue 3 saved measurement and projections
+        run: python scripts/reports/issue3/render_saved.py --bundle reports/algorithm-results/issue3-finite-catalogue-b4632ce76510aa4f --check
+      - name: Build the ITIS17 3D hull pilot driver
+        if: needs.route.outputs.native == 'true'
+        shell: bash
+        run: |
+          cmake -S . -B build/it17-hull-3d-ci -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release \
+            -DCSL_BUILD_IT17_HULL_REPORT=ON -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=OFF
+          cmake --build build/it17-hull-3d-ci --config Release \
+            --target csl_it17_hull_3d_report --parallel 2
+      - name: Build the ITIS17 4D hull pilot driver
+        if: needs.route.outputs.native == 'true'
+        shell: bash
+        run: |
+          cmake -S . -B build/it17-hull-4d-ci -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release \
+            -DCSL_BUILD_IT17_HULL_REPORT=ON -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=OFF
+          cmake --build build/it17-hull-4d-ci --config Release \
+            --target csl_it17_hull_4d_report --parallel 2
+      - name: Build and smoke the EXP-06 paired geometry tools
+        if: needs.route.outputs.native == 'true'
+        shell: bash
+        run: |
+          cmake -S . -B build/exp06-pilot-ci -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release \
+            -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_EXP06_PILOT=ON
+          cmake --build build/exp06-pilot-ci --config Release \
+            --target csl_exp06_quickhull csl_exp06_pack_comparison --parallel 2
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          fixture = json.loads(Path('tools/legacy-ports/A29/fixtures/square.json').read_text())
+          fixture['schema'] = 'csl.geometry-hull-input/1'
+          Path('build/exp06-pilot-ci/square.json').write_text(
+              json.dumps(fixture, sort_keys=True, separators=(',', ':')) + '\n')
+          PY
+          build/exp06-pilot-ci/csl_exp06_quickhull --run build/exp06-pilot-ci/square.json
+      - name: Build and smoke the APP-01 public plan-check driver
+        if: needs.route.outputs.native == 'true'
+        shell: bash
+        run: |
+          cmake -S . -B build/app01-report-ci -DBUILD_TESTING=OFF -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_APP01_REPORT=ON
+          cmake --build build/app01-report-ci --config Release --target csl_app01_plan_report --parallel 2
+          build/app01-report-ci/csl_app01_plan_report 2 1 1 > build/app01-report-ci/smoke.jsonl
+          PYTHONPATH=scripts/reports python -c 'from pathlib import Path; import stage_app01 as report; assert len(report.raw_projection(Path("build/app01-report-ci/smoke.jsonl").read_bytes(), 2, 1, 1)) == 3'
+      - name: Build and smoke the ENV-717 environment drivers
+        if: needs.route.outputs.native == 'true'
+        shell: bash
+        run: |
+          cmake -S . -B build/env717-report-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release \
+            -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_ENV717_REPORT=ON
+          cmake --build build/env717-report-ci --config Release \
+            --target csl_env717_simple_control csl_env717_two_points csl_env717_unequal_game csl_env717_max_coordinate csl_env717_air_to_air csl_env717_sphere_game csl_env717_point_on_plane csl_env717_time_sphere csl_env717_time_sphere_minimax csl_env717_two_particle_minimax csl_env717_homicidal_chauffeur csl_env717_multipoint_cost_game csl_env717_broken_triangle csl_env717_pendulum_terminal csl_env717_earth_orbit csl_env717_unlimited_bolza --parallel 2
+          ctest --test-dir build/env717-report-ci -C Release --output-on-failure \
+            -R '^env717_(simple_control|two_points|unequal_game|max_coordinate|air_to_air|sphere_game|point_on_plane|time_sphere|time_sphere_minimax|two_particle_minimax|homicidal_chauffeur|multipoint_cost_game|broken_triangle|pendulum_terminal|earth_orbit|unlimited_bolza)_smoke$'
+          cmake -S benchmarks/reporting/env717/dubins-car-build -B build/env717-dubins-car-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build build/env717-dubins-car-ci --config Release --target csl_env717_dubins_car --parallel 2
+          ctest --test-dir build/env717-dubins-car-ci -C Release --output-on-failure -R '^env717_dubins_car_smoke$'
+          cmake -S benchmarks/reporting/env717/vanderpol-build -B build/env717-vanderpol-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build build/env717-vanderpol-ci --config Release --target csl_env717_vanderpol --parallel 2
+          ctest --test-dir build/env717-vanderpol-ci -C Release --output-on-failure -R '^env717_vanderpol_smoke$'
+          cmake -S benchmarks/reporting/env717/pendulum-build -B build/env717-pendulum-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build build/env717-pendulum-ci --config Release --target csl_env717_pendulum --parallel 2
+          ctest --test-dir build/env717-pendulum-ci -C Release --output-on-failure -R '^env717_pendulum_smoke$'
+          cmake -S benchmarks/reporting/env717/cartpole-build -B build/env717-cartpole-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build build/env717-cartpole-ci --config Release --target csl_env717_cartpole --parallel 2
+          ctest --test-dir build/env717-cartpole-ci -C Release --output-on-failure -R '^env717_cartpole_smoke$'
+      - name: Build and smoke the EXT-04 affine synthesis example
+        if: needs.route.outputs.native == 'true'
+        shell: bash
+        run: |
+          cmake -S . -B build/ext04-affine-synthesis-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release \
+            -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_EXT04_AFFINE_SYNTHESIS_REPORT=ON
+          cmake --build build/ext04-affine-synthesis-ci --config Release \
+            --target csl_ext04_affine_synthesis_report --parallel 2
+          ctest --test-dir build/ext04-affine-synthesis-ci -C Release --output-on-failure \
+            -R '^ext04_affine_synthesis_report_smoke$'
+      - name: Build and verify the MPC-04 closed-loop QP comparison
+        if: needs.route.outputs.native == 'true'
+        shell: bash
+        run: |
+          cmake -S . -B build/mpc04-report-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release \
+            -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_MPC04_REPORT=ON
+          cmake --build build/mpc04-report-ci --config Release \
+            --target csl_mpc04_max_coordinate_replanning --parallel 2
+          ctest --test-dir build/mpc04-report-ci -C Release --output-on-failure \
+            -R '^mpc04_native_replanning_(pilot|replay)$'
+      - name: Build and smoke the EXT-04 H-domain policy report
+        if: needs.route.outputs.native == 'true'
+        shell: bash
+        run: |
+          cmake -S . -B build/ext04-h-policy-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release \
+            -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_EXT04_H_POLICY_REPORT=ON
+          cmake --build build/ext04-h-policy-ci --config Release \
+            --target csl_ext04_h_policy_report --parallel 2
+          ctest --test-dir build/ext04-h-policy-ci -C Release --output-on-failure \
+            -R '^ext04_h_policy_report_smoke$'
+      - name: Build and check MPC-05 causal minimax report driver
+        if: needs.route.outputs.native == 'true' && hashFiles('reports/algorithm-results/mpc05-causal-tree-pilot-v2/result.json') != ''
+        shell: bash
+        run: |
+          cmake -S . -B build/mpc05-report-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release \
+            -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_MPC05_REPORT=ON
+          cmake --build build/mpc05-report-ci --config Release \
+            --target csl_mpc05_causal_tree_report finite_causal_minimax_tests --parallel 2
+          ctest --test-dir build/mpc05-report-ci -C Release --output-on-failure \
+            -R '^(mpc05_causal_tree_report_smoke|finite_causal_minimax_tests)$'
+      - name: Build and check MPC-09 output-feedback report driver
+        if: needs.route.outputs.native == 'true' && hashFiles('reports/algorithm-results/mpc09-two-particle-output-feedback-v1/result.json') != ''
+        shell: bash
+        run: |
+          cmake -S . -B build/mpc09-report-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release \
+            -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_MPC09_REPORT=ON
+          cmake --build build/mpc09-report-ci --config Release \
+            --target csl_mpc09_output_feedback_report --parallel 2
+          ctest --test-dir build/mpc09-report-ci -C Release --output-on-failure \
+            -R '^(mpc09_output_feedback_native_check|mpc09_output_feedback_publication)$'
+      - name: Build and smoke the issue 824 zonotope minimax selector
+        if: needs.route.outputs.native == 'true'
+        shell: bash
+        run: |
+          cmake -S . -B build/issue824-zonotope-minimax-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release \
+            -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_ISSUE824_ZONOTOPE_MINIMAX_REPORT=ON
+          cmake --build build/issue824-zonotope-minimax-ci --config Release \
+            --target finite_action_box_minimax_tests finite_action_zonotope_minimax_tests csl_issue824_zonotope_minimax_report --parallel 2
+          ctest --test-dir build/issue824-zonotope-minimax-ci -C Release --output-on-failure \
+            -R '^(finite_action_box_minimax_tests|finite_action_zonotope_minimax_tests|issue824_zonotope_minimax_report_smoke)$'
+      - name: Build and smoke the issue 824 ellipsoid minimax selector
+        if: needs.route.outputs.native == 'true'
+        shell: bash
+        run: |
+          cmake -S . -B build/issue824-ellipsoid-minimax-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release \
+            -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_ISSUE824_ELLIPSOID_MINIMAX_REPORT=ON
+          cmake --build build/issue824-ellipsoid-minimax-ci --config Release \
+            --target finite_plan_ellipsoid_tests finite_action_ellipsoid_minimax_tests csl_issue824_ellipsoid_minimax_report --parallel 2
+          ctest --test-dir build/issue824-ellipsoid-minimax-ci -C Release --output-on-failure \
+            -R '^(finite_plan_ellipsoid_tests|finite_action_ellipsoid_minimax_tests|issue824_ellipsoid_minimax_report_smoke)$'
+      - name: Build and smoke the matched issue 824 minimax benchmark
+        if: needs.route.outputs.native == 'true'
+        shell: bash
+        run: |
+          cmake -S . -B build/issue824-matched-minimax-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release \
+            -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_ISSUE824_MATCHED_MINIMAX_REPORT=ON
+          cmake --build build/issue824-matched-minimax-ci --config Release \
+            --target csl_issue824_matched_minimax_report --parallel 2
+          ctest --test-dir build/issue824-matched-minimax-ci -C Release --output-on-failure \
+            -R '^issue824_matched_minimax_(report_smoke|publication)$'
+      - name: Build and independently check the issue 824 nominal comparison
+        if: needs.route.outputs.native == 'true'
+        shell: bash
+        run: |
+          cmake -S . -B build/issue824-nominal-ci -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release \
+            -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF -DCSL_BUILD_ISSUE824_NOMINAL_REPORT=ON
+          cmake --build build/issue824-nominal-ci --config Release \
+            --target finite_action_nominal_tests csl_issue824_nominal_report --parallel 2
+          ctest --test-dir build/issue824-nominal-ci -C Release --output-on-failure \
+            -R '^(finite_action_nominal_tests|issue824_nominal_report_smoke|issue824_nominal_publication)$'
+      - name: Check reviewed catalogue and stage only allowlisted files
+        id: catalog
+        shell: bash
+        run: |
+          if test -f reports/algorithm-results/catalog.json; then
+            python scripts/reports/site.py --catalog reports/algorithm-results/catalog.json --check --out build/report-site
+            if test -f reports/algorithm-results/syn06-publications.json; then
+              python scripts/reports/stage_syn06.py --catalog reports/algorithm-results/syn06-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/app01-publications.json; then
+              python scripts/reports/stage_app01.py --catalog reports/algorithm-results/app01-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/app02-publications.json; then
+              python scripts/reports/stage_app02.py --catalog reports/algorithm-results/app02-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/app03-publications.json; then
+              python scripts/reports/stage_app03.py --catalog reports/algorithm-results/app03-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/app04-publications.json; then
+              python scripts/reports/stage_app04.py --catalog reports/algorithm-results/app04-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/ext01-publications.json; then
+              python scripts/reports/stage_ext01.py --catalog reports/algorithm-results/ext01-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/ext04-publications.json; then
+              python scripts/reports/stage_ext04.py --catalog reports/algorithm-results/ext04-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/ext04-continuous-publications.json; then
+              python scripts/reports/stage_ext04_continuous.py --catalog reports/algorithm-results/ext04-continuous-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/ext04-affine-synthesis-publications.json; then
+              python scripts/reports/stage_ext04_affine_synthesis.py --catalog reports/algorithm-results/ext04-affine-synthesis-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/ext04-h-policy-publications.json; then
+              python scripts/reports/stage_ext04_h_policy.py --catalog reports/algorithm-results/ext04-h-policy-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/ext05-publications.json; then
+              python scripts/reports/stage_ext05.py --catalog reports/algorithm-results/ext05-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/ext07-publications.json; then
+              python scripts/reports/stage_ext07.py --catalog reports/algorithm-results/ext07-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/ext02-publications.json; then
+              python scripts/reports/stage_ext02.py --catalog reports/algorithm-results/ext02-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/opt10-publications.json; then
+              python scripts/reports/stage_opt10.py --catalog reports/algorithm-results/opt10-publications.json --site build/report-site
+            fi
+            if test -d reports/algorithm-results/issue4-volterra-7dce05b47c50c27a; then
+              python scripts/reports/stage_issue4_volterra.py \
+                --source reports/algorithm-results/issue4-volterra-7dce05b47c50c27a \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/lotka-volterra-sampled-20261023; then
+              python scripts/reports/stage_lotka_volterra_sampled.py \
+                --source reports/algorithm-results/lotka-volterra-sampled-20261023 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/quickhull-it17-paper-adaptations-20261024-r1; then
+              python scripts/reports/stage_it17_hull_adaptations.py \
+                --source reports/algorithm-results/quickhull-it17-paper-adaptations-20261024-r1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/exp02-it17-dyadic-interior-20261027-r1; then
+              python scripts/reports/stage_exp02_it17_dyadic.py \
+                --source reports/algorithm-results/exp02-it17-dyadic-interior-20261027-r1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/exp02-it17-a44-paper-order-20261027-r2; then
+              python scripts/reports/stage_exp02_it17_dyadic.py \
+                --source reports/algorithm-results/exp02-it17-a44-paper-order-20261027-r2 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/exp02-it17-a44-paper-order-20261028-r3; then
+              python scripts/reports/stage_exp02_it17_dyadic.py \
+                --source reports/algorithm-results/exp02-it17-a44-paper-order-20261028-r3 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/exp02-it17-dyadic-250-20261029-r1; then
+              python scripts/reports/stage_exp02_it17_dyadic.py \
+                --source reports/algorithm-results/exp02-it17-dyadic-250-20261029-r1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/syn03-nominal-exact-2d-8b94095; then
+              python scripts/reports/stage_syn03_nominal_exact_example.py \
+                --source reports/algorithm-results/syn03-nominal-exact-2d-8b94095 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-simple-control-pilot-v1; then
+              python scripts/reports/stage_env717.py \
+                --source reports/algorithm-results/env717-simple-control-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-two-points-pilot-v1; then
+              python scripts/reports/stage_env717_two_points.py \
+                --source reports/algorithm-results/env717-two-points-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-two-points-feedback-v1; then
+              python scripts/reports/stage_env717_two_points.py \
+                --source reports/algorithm-results/env717-two-points-feedback-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/exp03-two-points-approx-pilot-v1; then
+              python scripts/reports/stage_exp03_two_points_approx.py \
+                --source reports/algorithm-results/exp03-two-points-approx-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/exp03-two-points-approx-pilot-v2; then
+              python scripts/reports/stage_exp03_two_points_approx.py \
+                --source reports/algorithm-results/exp03-two-points-approx-pilot-v2 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/mpc05-causal-tree-pilot-v2; then
+              if test -x build/mpc05-report-ci/csl_mpc05_causal_tree_report; then
+                python scripts/reports/stage_mpc05_causal_tree.py \
+                  --source reports/algorithm-results/mpc05-causal-tree-pilot-v2 \
+                  --executable build/mpc05-report-ci/csl_mpc05_causal_tree_report \
+                  --site build/report-site
+              else
+                python scripts/reports/stage_mpc05_causal_tree.py \
+                  --source reports/algorithm-results/mpc05-causal-tree-pilot-v2 \
+                  --site build/report-site
+              fi
+            fi
+            if test -d reports/algorithm-results/mpc09-two-particle-output-feedback-v1; then
+              python scripts/reports/stage_mpc09_output_feedback.py \
+                --source reports/algorithm-results/mpc09-two-particle-output-feedback-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/mpc04-max-coordinate-replanning-pilot-20261030; then
+              python scripts/reports/stage_mpc04_max_coordinate.py \
+                --source reports/algorithm-results/mpc04-max-coordinate-replanning-pilot-20261030 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-unequal-game-pilot-v1; then
+              python scripts/reports/stage_env717_unequal_game.py \
+                --source reports/algorithm-results/env717-unequal-game-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-max-coordinate-pilot-v1; then
+              python scripts/reports/stage_env717_max_coordinate.py \
+                --source reports/algorithm-results/env717-max-coordinate-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-air-to-air-pilot-v1; then
+              python scripts/reports/stage_env717_air_to_air.py \
+                --source reports/algorithm-results/env717-air-to-air-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-sphere-game-pilot-v1; then
+              python scripts/reports/stage_env717_sphere_game.py \
+                --source reports/algorithm-results/env717-sphere-game-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-point-on-plane-pilot-v1; then
+              python scripts/reports/stage_env717_point_on_plane.py \
+                --source reports/algorithm-results/env717-point-on-plane-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-dubins-car-pilot-v1; then
+              python scripts/reports/stage_env717_dubins_car.py \
+                --source reports/algorithm-results/env717-dubins-car-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-vanderpol-pilot-v1; then
+              python scripts/reports/stage_env717_vanderpol.py \
+                --source reports/algorithm-results/env717-vanderpol-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-pendulum-pilot-v1; then
+              python scripts/reports/stage_env717_pendulum.py \
+                --source reports/algorithm-results/env717-pendulum-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-cartpole-pilot-v1; then
+              python scripts/reports/stage_env717_cartpole.py \
+                --source reports/algorithm-results/env717-cartpole-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-time-sphere-pilot-v1; then
+              python scripts/reports/stage_env717_time_sphere.py \
+                --source reports/algorithm-results/env717-time-sphere-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-time-sphere-minimax-v1; then
+              python scripts/reports/stage_env717_time_sphere_minimax.py \
+                --source reports/algorithm-results/env717-time-sphere-minimax-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-two-particle-minimax-v1; then
+              python scripts/reports/stage_env717_two_particle_minimax.py \
+                --source reports/algorithm-results/env717-two-particle-minimax-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-homicidal-chauffeur-v1; then
+              python scripts/reports/stage_env717_homicidal_chauffeur.py \
+                --source reports/algorithm-results/env717-homicidal-chauffeur-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-multipoint-cost-game-pilot-v1; then
+              python scripts/reports/stage_env717_multipoint_cost_game.py \
+                --source reports/algorithm-results/env717-multipoint-cost-game-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-broken-triangle-pilot-v1; then
+              python scripts/reports/stage_env717_broken_triangle.py \
+                --source reports/algorithm-results/env717-broken-triangle-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-pendulum-terminal-pilot-v1; then
+              python scripts/reports/stage_env717_pendulum_terminal.py \
+                --source reports/algorithm-results/env717-pendulum-terminal-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-earth-orbit-pilot-v1; then
+              python scripts/reports/stage_env717_earth_orbit.py \
+                --source reports/algorithm-results/env717-earth-orbit-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/env717-unlimited-bolza-pilot-v1; then
+              python scripts/reports/stage_env717_unlimited_bolza.py \
+                --source reports/algorithm-results/env717-unlimited-bolza-pilot-v1 \
+                --site build/report-site
+            fi
+            if test -f reports/algorithm-results/exp04-publications.json; then
+              python scripts/reports/stage_exp04.py --catalog reports/algorithm-results/exp04-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/geo07-publications.json; then
+              python scripts/reports/stage_geo07.py --catalog reports/algorithm-results/geo07-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/geo07-port-publications.json; then
+              python scripts/reports/stage_geo07_port.py --catalog reports/algorithm-results/geo07-port-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/geo07-dependent-publications.json; then
+              python scripts/reports/stage_geo07_dependent.py --catalog reports/algorithm-results/geo07-dependent-publications.json --site build/report-site
+            fi
+            if test -f reports/algorithm-results/geo08-publications.json; then
+              python scripts/reports/stage_geo08.py --catalog reports/algorithm-results/geo08-publications.json --site build/report-site
+            fi
+            if test -d reports/algorithm-results/exp06-geometry-pilot-20261029; then
+              python scripts/reports/stage_exp06.py \
+                --source reports/algorithm-results/exp06-geometry-pilot-20261029 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/exp06-it17-paper-reducers-20261029-r3; then
+              python scripts/reports/stage_exp06.py \
+                --source reports/algorithm-results/exp06-it17-paper-reducers-20261029-r3 \
+                --site build/report-site --paper-followup
+            fi
+            if test -f reports/algorithm-results/finite-feedback-publications.json; then
+              python scripts/reports/stage_finite_feedback.py --catalog reports/algorithm-results/finite-feedback-publications.json --site build/report-site
+            fi
+            if test -d reports/algorithm-results/perf03-ts01-single-process-correlation-20261014; then
+              python scripts/reports/stage_perf03.py \
+                --source reports/algorithm-results/perf03-ts01-single-process-correlation-20261014 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/exp02-it17-hull-3d-simplex-20261028-r1; then
+              python scripts/reports/exp02_it17_hull3d.py \
+                --primary reports/algorithm-results/exp02-it17-hull-3d-simplex-20261028-r1 \
+                --initial reports/algorithm-results/exp02-it17-hull-3d-halton-cloud-20261028-r1 \
+                --site build/report-site
+            fi
+            if test -d reports/algorithm-results/exp02-it17-hull-4d-simplex-20261028-r1; then
+              python scripts/reports/exp02_it17_hull4d.py \
+                --source reports/algorithm-results/exp02-it17-hull-4d-simplex-20261028-r1 \
+                --site build/report-site
+            fi
+            echo 'has_reports=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'No measured catalogue has been committed; publication remains pending.'
+            echo 'has_reports=false' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Stage the issue 824 zonotope report and planar companion
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-zonotope-pilot-v2/result.json') != ''
+        run: python scripts/reports/stage_issue824_zonotope.py --source reports/algorithm-results/issue824-two-points-zonotope-pilot-v2 --site build/report-site
+      - name: Stage the issue 824 box minimax report
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-box-pilot-v4/result.json') != ''
+        run: python scripts/reports/stage_issue824_box_minimax.py --source reports/algorithm-results/issue824-two-points-box-pilot-v4 --site build/report-site
+      - name: Stage the issue 824 zonotope minimax report
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-zonotope-minimax-v1/result.json') != ''
+        run: python scripts/reports/stage_issue824_zonotope_minimax.py --source reports/algorithm-results/issue824-two-points-zonotope-minimax-v1 --site build/report-site
+      - name: Stage the issue 824 zonotope minimax v2 report
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-zonotope-minimax-v2/result.json') != ''
+        run: python scripts/reports/stage_issue824_zonotope_minimax.py --source reports/algorithm-results/issue824-two-points-zonotope-minimax-v2 --site build/report-site
+      - name: Stage the issue 824 ellipsoid minimax report
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-ellipsoid-minimax-v1/result.json') != ''
+        run: python scripts/reports/stage_issue824_ellipsoid_minimax.py --source reports/algorithm-results/issue824-two-points-ellipsoid-minimax-v1 --site build/report-site
+      - name: Stage the issue 824 ellipsoid minimax v2 report
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-ellipsoid-minimax-v2/result.json') != ''
+        run: python scripts/reports/stage_issue824_ellipsoid_minimax.py --source reports/algorithm-results/issue824-two-points-ellipsoid-minimax-v2 --site build/report-site
+      - name: Stage the issue 824 nominal comparison report
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-nominal-v1/result.json') != ''
+        run: python scripts/reports/stage_issue824_nominal.py --source reports/algorithm-results/issue824-two-points-nominal-v1 --site build/report-site
+      - name: Stage the issue 824 nominal comparison limiter report
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-nominal-v2/result.json') != ''
+        run: python scripts/reports/stage_issue824_nominal.py --source reports/algorithm-results/issue824-two-points-nominal-v2 --site build/report-site
+      - name: Stage the matched issue 824 minimax comparison
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-matched-minimax-v1/result.json') != ''
+        run: python scripts/reports/stage_issue824_matched_minimax.py --source reports/algorithm-results/issue824-two-points-matched-minimax-v1 --site build/report-site
+      - name: Stage the resource-limited issue 824 minimax comparison
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-matched-minimax-resource-v1/result.json') != ''
+        run: python scripts/reports/stage_issue824_limited_minimax.py --source reports/algorithm-results/issue824-two-points-matched-minimax-resource-v1 --site build/report-site
+      - name: Validate the resource-limited issue 824 publication bundle
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-matched-minimax-resource-v1/result.json') != ''
+        run: python tests/reporting/test_issue824_limited_minimax_publication.py
+      - name: Stage minimal 2D visual examples from reviewed saved results
+        if: steps.catalog.outputs.has_reports == 'true'
+        run: python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site
+      - name: Stage the saved MPC-03 pilot report and gallery link
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/mpc03-open-loop-pilot-v1/record.json') != ''
+        run: python scripts/reports/stage_mpc03.py --source reports/algorithm-results/mpc03-open-loop-pilot-v1 --site build/report-site
+      - name: Stage the saved MPC-08 explicit pilot report and gallery link
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/mpc08-explicit-pilot-v1/record.json') != ''
+        run: python scripts/reports/stage_mpc08.py --source reports/algorithm-results/mpc08-explicit-pilot-v1 --site build/report-site
+      - name: Stage the saved B08 MIQCP report and gallery link
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/mpc03-b08-l04-miQCP-v1/record.json') != ''
+        run: python scripts/reports/stage_mpc03_b08.py --source reports/algorithm-results/mpc03-b08-l04-miQCP-v1 --site build/report-site
+      - name: Render the readable archive landing page
+        if: steps.catalog.outputs.has_reports == 'true'
+        run: python scripts/reports/landing.py --site build/report-site
+      - name: Stage the saved MPC-08 nonunique optimizer-family report and figure
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/mpc08-explicit-nonunique-v1/record.json') != ''
+        run: python scripts/reports/stage_mpc08_nonunique.py --site build/report-site
+      - name: Stage the saved MPC-06 tube feasibility report
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/mpc06-nilpotent-tube-pilot-v1/result.json') != ''
+        run: python scripts/reports/stage_mpc06_tube.py --site build/report-site
+      - name: Upload reviewed static site on main only
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && steps.catalog.outputs.has_reports == 'true'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: build/report-site
+
+  report-status:
+    name: Reporting validation
+    if: always()
+    needs: [route, validate]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require routing and complete requested reporting validation
+        env:
+          ROUTE_RESULT: ${{ needs.route.result }}
+          REPORTS: ${{ needs.route.outputs.reports }}
+          VALIDATE_RESULT: ${{ needs.validate.result }}
+        run: |
+          test "$ROUTE_RESULT" = success
+          if [ "$REPORTS" = true ]; then
+            test "$VALIDATE_RESULT" = success
+          else
+            test "$REPORTS" = false
+          fi
+
+  obs04-perf-probe:
+    name: OBS-04 acknowledged perf capability probe
+    if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'run-obs04-perf-probe')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned CMake
+        run: python -m pip install cmake==3.31.6
+      - name: Install Linux perf when the image does not provide it
+        shell: bash
+        run: |
+          if ! perf --version >/dev/null 2>&1; then
+            sudo apt-get update || true
+            sudo apt-get install -y linux-tools-common linux-tools-generic || true
+          fi
+      - name: Build the bounded OBS-04 profiling driver
+        run: |
+          cmake -S benchmarks/reporting/obs04 -B build/obs04-perf-probe \
+            -DCSL_SOURCE_ROOT="$GITHUB_WORKSPACE" -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_FLAGS_RELEASE="-O3 -DNDEBUG -fdebug-prefix-map=$GITHUB_WORKSPACE=/tmp/csl-src -ffile-prefix-map=$GITHUB_WORKSPACE=/tmp/csl-src"
+          cmake --build build/obs04-perf-probe --config Release --target csl_obs04_instrumentation_comparison --parallel 2
+      - name: Verify perf sample validation
+        run: python tests/obs04/perf_probe_tests.py
+      - name: Verify acknowledged FIFO protocol without perf privileges
+        run: python tests/obs04/perf_control_mock.py build/obs04-perf-probe/csl_obs04_instrumentation_comparison
+      - name: Attempt bounded perf capture and retain capability result
+        run: python scripts/obs04_perf_probe.py --binary build/obs04-perf-probe/csl_obs04_instrumentation_comparison --output-dir build/obs04-perf-probe-result --calls 8 --timeout-seconds 120
+      - name: Preserve probe result, logs, and profile
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: obs04-perf-capability-${{ github.run_id }}
+          path: build/obs04-perf-probe-result/
+          if-no-files-found: warn
+          retention-days: 14
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.validate.outputs.has_reports == 'true'
+    needs: validate
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+      # Preserve reverse-finished validations; GitHub caps this queue at 100 pending jobs.
+      queue: max
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0; root configures Pages first
+      - name: Check that the staged report still belongs to current main
+        id: head
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 scripts/reports/check_deploy_head.py
+      - name: Deploy reviewed reports
+        if: steps.head.outputs.current == 'true'
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

@@ -523,6 +523,9 @@ jobs:
       - name: Stage the saved MPC-06 tube feasibility report
         if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/mpc06-nilpotent-tube-pilot-v1/result.json') != ''
         run: python scripts/reports/stage_mpc06_tube.py --site build/report-site
+      - name: Apply the shared Pages route policy before upload
+        if: steps.catalog.outputs.has_reports == 'true'
+        run: python scripts/reports/pages_route_retirement.py --site build/report-site
       - name: Upload reviewed static site on main only
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && steps.catalog.outputs.has_reports == 'true'
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
