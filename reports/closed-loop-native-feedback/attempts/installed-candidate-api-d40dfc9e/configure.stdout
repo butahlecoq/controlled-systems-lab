@@ -1,0 +1,7 @@
+-- Installed complete-family publisher replacement was rejected by the compiler
+-- Installed caller-supplied verifier callback was rejected by the compiler
+-- Installed downstream relation factory definition was rejected by the compiler
+-- Installed downstream ExactFarkasEvidence construction was rejected by the compiler
+-- Configuring done (10.1s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/butahlecoq/.local/share/codex/worktrees/native-feedback-composition-943-20261111/build/core/installed-candidate-api-isolated/installed-consumer/build
