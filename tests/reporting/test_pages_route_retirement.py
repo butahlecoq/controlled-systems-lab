@@ -88,6 +88,15 @@ class PagesRouteRetirementTests(unittest.TestCase):
 
             self.assertEqual((site / "legacy-index.html").read_bytes(), original_root)
 
+    def test_pinned_legacy_root_snapshot_has_source_bound_provenance(self) -> None:
+        snapshot = retirement.legacy_root_snapshot()
+        self.assertEqual(len(snapshot), 176366)
+        self.assertEqual(hashlib.sha256(snapshot).hexdigest(),
+                         "29376974f806ad83816be9b42bda19fbeccaebc9a7ca79c291ed3d9ea3d522d2")
+        with self.assertRaisesRegex(ValueError, "snapshot provenance or bytes differ"):
+            with patch.object(retirement, "sha256", return_value="0" * 64):
+                retirement.legacy_root_snapshot()
+
     def test_archive_links_orphaned_named_report_after_root_replacement(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             site, _ = self.make_site(Path(temporary))

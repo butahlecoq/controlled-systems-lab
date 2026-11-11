@@ -21,6 +21,7 @@ from scripts.reports import (
     stage_mpc08_complete, stage_mpc07_comparison, stage_mpc10_comparison, stage_mpc11_mesh_timing,
 )
 from scripts.reports import pages_route_retirement
+from scripts.reports import replay_mpc11_published_variants
 from scripts.reports.mpc01 import augment_pages, stage_per_attempt
 
 B04_SOURCE = ROOT / "reports/algorithm-results/b04-c-strategy-a-verification-v1"
@@ -36,7 +37,7 @@ def stage_all(site: Path) -> dict[str, str]:
     root_before_augmentation = site / "index.html"
     if root_before_augmentation.is_symlink() or not root_before_augmentation.is_file():
         raise ValueError("extracted Pages site has no regular root index")
-    original_root_bytes = root_before_augmentation.read_bytes()
+    original_root_bytes = pages_route_retirement.legacy_root_snapshot()
 
     per_attempt = stage_per_attempt.stage(site)
     b04_route = stage_b04_c_strategy_a.stage(B04_SOURCE, site)
@@ -51,6 +52,7 @@ def stage_all(site: Path) -> dict[str, str]:
     mpc10 = stage_mpc10_comparison.stage(site)
     mpc11_studies = stage_mpc11_mesh_timing.stage(site)
     b04_source = stage_b04_source_moments.stage(site)
+    retained_mpc11 = replay_mpc11_published_variants.preserve(site)
 
     stage_per_attempt.validate(site)
     landing = site / "index.html"
@@ -131,7 +133,7 @@ def stage_all(site: Path) -> dict[str, str]:
                 raise ValueError("bare evidence route is missing from the retained archive: " + route)
     if len(route_inventory["html_routes"]) != route_inventory["html_route_count"]:
         raise ValueError("final route inventory does not cover every HTML route")
-    return {"mpc01": per_attempt.name, "b04_c": b04_route, "mpc06": mpc06_route, "mpc06_complete": mpc06_complete, "mpc06_offline": mpc06_offline, "review05": review05, "mpc11": mpc11, "mpc08": mpc08, "mpc07": mpc07, "mpc10": mpc10, "mpc11_studies": mpc11_studies, "b04_source": b04_source}
+    return {"mpc01": per_attempt.name, "b04_c": b04_route, "mpc06": mpc06_route, "mpc06_complete": mpc06_complete, "mpc06_offline": mpc06_offline, "review05": review05, "mpc11": mpc11, "mpc08": mpc08, "mpc07": mpc07, "mpc10": mpc10, "mpc11_studies": mpc11_studies, "b04_source": b04_source, "retained_mpc11_variants": retained_mpc11}
 
 
 def augment(download: Path, destination: Path) -> dict[str, str]:
