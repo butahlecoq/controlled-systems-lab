@@ -6,6 +6,7 @@ import copy
 import hashlib
 import json
 import sys
+import argparse
 import tempfile
 from pathlib import Path
 
@@ -104,8 +105,14 @@ def task_binding_negative_checks(root: Path) -> None:
 
 
 def main() -> int:
-    output = json.loads(Path(sys.argv[1]).read_text())
-    root = Path(sys.argv[2]).resolve()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("output", type=Path)
+    parser.add_argument("root", type=Path)
+    parser.add_argument("--mpc11-unavailable", action="store_true",
+        help="expect source-bound MPC11 rows retained as backend_unavailable")
+    args = parser.parse_args()
+    output = json.loads(args.output.read_text())
+    root = args.root.resolve()
     assert output["schema"] == "csl.module-composition-output/2"
     contracts = {}
     for name in ("syn-nl-lv-01", "earth-orbit", "syn-nl-fuel-01"):
@@ -209,11 +216,18 @@ def main() -> int:
         ("syn-nl-lv-01/continuous-receding/1", "continuous"),
         ("syn-nl-fuel-01/continuous-receding/1", "continuous"),
     }
-    assert {(row["task_id"], row["action_domain_kind"]) for row in mpc11 if row["status"] == "admitted"} == expected_mpc11_admitted
+    expected_mpc11_status = "backend_unavailable" if args.mpc11_unavailable else "admitted"
+    assert {(row["task_id"], row["action_domain_kind"]) for row in mpc11
+        if row["status"] == expected_mpc11_status} == expected_mpc11_admitted
     receipts = output["external_preparation_receipts"]["routes"]
     assert {row["task_id"] for row in receipts} == {task for task, _ in expected_mpc11_admitted}
     assert all(row["source_binding_validated"] is True and row["solve_performed"] is False
-        and row["runtime"]["solver_interface_prepared"] == "IpoptInterface" for row in receipts)
+        and row["status"] == expected_mpc11_status for row in receipts)
+    if args.mpc11_unavailable:
+        assert all(row["first_unmet"]["field"].startswith("python.dependency.")
+            and row["first_unmet"]["reason"] for row in receipts)
+    else:
+        assert all(row["runtime"]["solver_interface_prepared"] == "IpoptInterface" for row in receipts)
     for row in mpc11:
         if row["status"] == "admitted":
             receipt = row["external_prepare_receipt"]
@@ -222,11 +236,15 @@ def main() -> int:
             assert receipt["controller_id"] == row["module_tuple"]["controller"]
             assert row["module_tuple"]["vertex_lp_provider"].startswith("not_used")
             assert row["module_tuple"]["terminal_optimizer"]["prepared_interface"] == "IpoptInterface"
+        elif row["status"] == "backend_unavailable":
+            assert row["external_prepare_receipt"]["task_id"] == row["task_id"]
+            assert row["first_unmet"]["field"].startswith("python.dependency.")
 
     status_rows = {status: [row for row in controllers if row["status"] == status]
         for status in ("admitted", "incompatible", "implementation_missing", "backend_unavailable", "excluded")}
-    assert len(status_rows["admitted"]) == 2
-    assert len(status_rows["backend_unavailable"]) == 0  # This build has HiGHS and Qhull enabled.
+    assert len(status_rows["admitted"]) == (0 if args.mpc11_unavailable else 2)
+    expected_backend_unavailable = 2 if args.mpc11_unavailable else 0
+    assert len(status_rows["backend_unavailable"]) == expected_backend_unavailable
     assert all(row["first_unmet"]["field"] and row["first_unmet"]["reason"]
         for row in controllers if row["first_unmet"])
 
@@ -309,7 +327,8 @@ def main() -> int:
     assert all((record["identity"].get("id") or record["identity"].get("symbol")) in observed_identities
         for record in source_group4)
     task_binding_negative_checks(root)
-    print("full finite catalogue passed: 3,318 controller tuples, 45 predecessor/representation/terminal-LP tuples, 24 full-task legacy/QuickHull choices, 2 source-bound external prepares")
+    mpc11_count = "2 source-bound external unavailable rows" if args.mpc11_unavailable else "2 source-bound external prepares"
+    print(f"full finite catalogue passed: 3,318 controller tuples, 45 predecessor/representation/terminal-LP tuples, 24 full-task legacy/QuickHull choices, {mpc11_count}")
     return 0
 
 

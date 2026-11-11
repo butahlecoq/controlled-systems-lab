@@ -214,15 +214,18 @@ def controller_graphs(root: Path, inventory: dict, receipts: dict, compiled_back
                         if key == "benchmarks/reporting/mpc11/run_nmpc.py":
                             receipt = receipt_by_task.get(contract["task_id"])
                             if receipt is not None and domain_name == "continuous":
-                                row["status"] = "admitted"
-                                row["module_tuple"].update({
-                                    "controller": receipt["controller_id"],
-                                    "terminal_optimizer": {
-                                        "configured_id": f"{receipt['runtime']['solver']}/{receipt['runtime']['linear_solver']}",
-                                        "prepared_interface": receipt["runtime"]["solver_interface_prepared"],
-                                    },
-                                })
-                                row["solver_profile"] = receipt["solver_profile"]
+                                row["status"] = receipt["status"]
+                                if receipt["status"] == "admitted":
+                                    row["module_tuple"].update({
+                                        "controller": receipt["controller_id"],
+                                        "terminal_optimizer": {
+                                            "configured_id": f"{receipt['runtime']['solver']}/{receipt['runtime']['linear_solver']}",
+                                            "prepared_interface": receipt["runtime"]["solver_interface_prepared"],
+                                        },
+                                    })
+                                    row["solver_profile"] = receipt["solver_profile"]
+                                else:
+                                    row["first_unmet"] = receipt["first_unmet"]
                                 row["external_prepare_receipt"] = receipt
                             elif receipt is not None:
                                 row["status"] = "incompatible"
@@ -502,13 +505,20 @@ def main() -> int:
         environment[key] = "1"
     external = subprocess.run([
         str(args.mpc11_python.absolute()), str(root / "scripts/catalogue/qualify_mpc11_routes.py")
-    ], check=True, capture_output=True, text=True, env=environment, preexec_fn=limited_process)
+    ], check=False, capture_output=True, text=True, env=environment, preexec_fn=limited_process)
+    if external.returncode != 0:
+        raise RuntimeError(f"MPC11 preparation failed unexpectedly ({external.returncode}): {external.stderr.strip()}")
     receipts = json.loads(external.stdout)
     assert receipts["schema"] == "csl.catalogue.external-prepare/1"
     expected_receipts = {"syn-nl-lv-01/continuous-receding/1", "syn-nl-fuel-01/continuous-receding/1"}
     assert {row["task_id"] for row in receipts["routes"]} == expected_receipts
-    assert all(row["status"] == "admitted" and row["solve_performed"] is False
-        and row["runtime"]["solver_interface_prepared"] == "IpoptInterface" for row in receipts["routes"])
+    for row in receipts["routes"]:
+        assert row["source_binding_validated"] is True and row["solve_performed"] is False
+        if row["status"] == "admitted":
+            assert row["runtime"]["solver_interface_prepared"] == "IpoptInterface"
+        else:
+            assert row["status"] == "backend_unavailable"
+            assert row["first_unmet"]["field"] and row["first_unmet"]["reason"]
     controllers = controller_graphs(root, inventory, receipts, native["compiled_backends"])
     predecessors = predecessor_graphs(controllers, inventory, native["compiled_backends"])
     contract_records = [json.loads((root / f"docs/contracts/closed-loop/{name}.json").read_text())
