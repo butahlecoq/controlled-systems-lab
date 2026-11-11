@@ -235,6 +235,102 @@ def make_replay_request(task: dict, controls, witness_sha256: str, *, sensitivit
             "report_subintervals_per_hold": sub}
 
 
+def make_held_step_request(task: dict, observed_physical_state, control,
+                           absolute_update_index: int, witness_sha256: str,
+                           *, action_profile_id: str | None = None, sensitivity=False) -> dict:
+    """Bind one actually applied hold to its immutable full-task contract.
+
+    The replay bridge accepts complete scenarios.  This adapter derives a
+    one-interval scenario for the call while retaining the original task hash,
+    horizon, fixed terminal time, and absolute stage in an explicit parent
+    identity.  The derived scenario hash is never used for objective scaling.
+    """
+    import copy
+    import numpy as np
+
+    n = task["episode"]["intervals"]
+    if isinstance(absolute_update_index, bool) or not isinstance(absolute_update_index, int) or not 0 <= absolute_update_index < n:
+        raise ValueError("absolute update index must identify an original task interval")
+    physical = np.asarray(observed_physical_state, dtype=float)
+    scales = np.asarray([state["scale"] for state in task["model"]["states"]], dtype=float)
+    if physical.shape != scales.shape or not np.isfinite(physical).all():
+        raise ValueError("observed physical state has wrong width or nonfinite values")
+    if task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01" and physical[0] <= 0:
+        raise ValueError("observed orbit state must have positive radius")
+    profile = action_profile_id or task["control_domains"]["continuous"]["problem_id"]
+    continuous = task["control_domains"]["continuous"]
+    finite = task["control_domains"]["finite"]
+    values = _validate_control(task, control)
+    if profile == finite["problem_id"]:
+        if values not in finite["actions"]:
+            raise ValueError("control is not an action in the selected finite per-step profile")
+    elif profile != continuous["problem_id"]:
+        raise ValueError("selected action profile is not declared by the original task")
+    source = copy.deepcopy(replay_scenario(task))
+    start = absolute_update_index * task["episode"]["dt"]
+    end = start + task["episode"]["dt"]
+    source["time"].update({"intervals": 1, "final": end, "grid": [start, end]})
+    source_hash = canonical_sha256(source)
+    settings = source["independent_replay"]
+    sub = settings["report_subintervals_per_hold"]
+    tol = settings["sensitivity"] if sensitivity else settings
+    times = [start + (end - start) * j / sub for j in range(sub)] + [end]
+    task_hash = manifest_sha256(task)
+    slice_identity = {"schema": "csl.closed-loop.execution-slice/1", "task_sha256": task_hash,
+                      "absolute_update_index": absolute_update_index, "absolute_time_start": start,
+                      "absolute_time_end": end, "observed_physical_state": physical.tolist(),
+                      "control": values, "scenario_sha256": source_hash}
+    return {"schema": "csl.closed-loop.held-step-request/1", "task_id": task["task_id"],
+            "task_sha256": task_hash, "model_id": task["model"]["model_id"],
+            "action_profile_id": profile,
+            "original_interval_count": n, "original_final_time": task["episode"]["final_time"],
+            "absolute_update_index": absolute_update_index, "absolute_time": start,
+            "observed_state": {"physical": physical.tolist(), "scaled": (physical / scales).tolist(),
+                                "scales": scales.tolist()},
+            "control": values, "execution_profile_id": task["episode"]["execution"].get("profile_id", "common-adaptive-replay/CSL-simulation-rk4-step-doubling/1"),
+            "witness_sha256": witness_sha256, "derived_slice": slice_identity,
+            "bridge_request": {"schema": "csl.mpc11.nonlinear-request/1", "scenario": source,
+                "scenario_sha256": source_hash, "task_sha256": task_hash, "witness_sha256": witness_sha256,
+                "controls_sha256": canonical_sha256([values]), "hold": "constant-on-original-interval",
+                "original_controls": [values], "controls": [values[:] for _ in range(sub)],
+                "times": times, "initial_scaled": (physical / scales).tolist(),
+                "abstol": tol["scaled_abstol"], "reltol": tol["reltol"],
+                "max_attempts": settings["step_attempts_per_hold_interval"] // sub,
+                "report_subintervals_per_hold": sub}}
+
+
+def validate_held_step_response(request: dict, response: dict) -> dict:
+    """Reject a bridge result that cannot advance the closed-loop observation."""
+    import numpy as np
+    expected = request["observed_state"]["physical"]
+    width = len(expected)
+    if response.get("status") != "complete":
+        raise ValueError(f"held-step execution returned {response.get('status')!r}")
+    bridge_request = request["bridge_request"]
+    if (response.get("task_sha256") != request["task_sha256"] or
+            response.get("scenario_sha256") != request["derived_slice"]["scenario_sha256"] or
+            response.get("witness_sha256") != bridge_request["witness_sha256"] or
+            response.get("controls_sha256") != bridge_request["controls_sha256"]):
+        raise ValueError("held-step response identity differs from its original task or derived slice")
+    states = np.asarray(response.get("physical_states"), dtype=float)
+    if states.ndim != 2 or states.shape != (request["bridge_request"]["report_subintervals_per_hold"] + 1, width) or not np.isfinite(states).all():
+        raise ValueError("held-step response has incomplete or nonfinite physical states")
+    diagnostics = response.get("diagnostics", [])
+    if diagnostics:
+        raise ValueError("held-step response contains execution diagnostics")
+    if not np.allclose(states[0], np.asarray(expected), rtol=1e-14, atol=1e-14):
+        raise ValueError("held-step response initial state differs from the requested observation")
+    times = np.asarray(response.get("times"), dtype=float)
+    if times.shape != (len(states),) or not np.allclose(times, bridge_request["times"], rtol=0, atol=1e-13):
+        raise ValueError("held-step response time grid differs from the derived absolute interval")
+    return {"task_sha256": request["task_sha256"], "slice_sha256": canonical_sha256(request["derived_slice"]),
+            "scenario_sha256": request["derived_slice"]["scenario_sha256"],
+            "physical_states": states.tolist(), "scaled_states": (states / np.asarray(request["observed_state"]["scales"])).tolist(),
+            "times": response["times"], "integration_receipts": response["integration_receipts"],
+            "diagnostics": diagnostics, "status": response["status"],
+            "elapsed_seconds": response.get("elapsed_seconds")}
+
+
 def manifest_sha256(task: dict) -> str:
     return canonical_sha256(task)
 

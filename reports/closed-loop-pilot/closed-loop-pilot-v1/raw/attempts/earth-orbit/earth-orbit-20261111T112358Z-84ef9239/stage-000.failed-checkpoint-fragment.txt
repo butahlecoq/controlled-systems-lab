@@ -1,0 +1,47 @@
+{
+  "update_index": 0,
+  "absolute_time": 0.0,
+  "observed_physical": [
+    7000.0,
+    0.0,
+    0.0,
+    0.0010780614796240577
+  ],
+  "observed_scaled": [
+    7.0,
+    0.0,
+    0.0,
+    1.0780614796240577
+  ],
+  "original_task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+  "status": "applied-and-observed",
+  "module_calls": [
+    {
+      "operation": "execution.advance",
+      "provider": "CSL::simulation",
+      "module_id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+      "profile_id": "common-adaptive-replay/CSL-simulation-rk4-step-doubling/1",
+      "status": "complete",
+      "accepted_steps": 20,
+      "rejected_steps": 0
+    }
+  ],
+  "requested_modules": {
+    "controller": "syn-nl-orbit-01/source-cost-direct-shooting/1",
+    "vertex_lp": "not_used",
+    "set_reducer": "not_used",
+    "representation": "not_used",
+    "converter": "not_used",
+    "execution": "CSL::simulation"
+  },
+  "policy_id": "syn-nl-orbit-01/source-cost-direct-shooting/1",
+  "controller_invocations": [
+    {
+      "operation": "controller.solve",
+      "module_id": "syn-nl-orbit-01/source-cost-direct-shooting/1",
+      "provider": "CasADi/IPOPT",
+      "profile_id": "casadi-ipopt/direct-shooting-rk4-1-step/epigraph-exact-euclidean/1"
+    }
+  ],
+  "solve_receipt": {
+    "accepted": 

@@ -1,0 +1,37 @@
+{
+  "schema": "csl.closed-loop.render/1",
+  "render_id": "render-retry-e0e789ef",
+  "attempt_id": "earth-orbit-20261111T112612Z-8d9a98e3",
+  "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+  "controls_sha256": "8ef57e98c70c1df0e46c7276e2ef5a9c2d11680ed736e186161d486d7127bd08",
+  "source_commit": "cd4e7778eaad9451594210351cbc382ce8719d72",
+  "renderer_source_hashes": {
+    "benchmarks/reporting/closed_loop/run_closed_loop.py": "983ad196b2c2947c24b6fa99e7b60bb31fce98bdebd90ac7de885bade637ffc6",
+    "benchmarks/reporting/closed_loop/task_models.py": "41268676a408b2af4de63dcbf1425e405341963f5f98a3e0020db28bb40434e9"
+  },
+  "render": {
+    "status": "complete",
+    "plots": [
+      "render-retry-e0e789ef-trajectory.png",
+      "render-retry-e0e789ef-phase.png",
+      "render-retry-e0e789ef-controls.png"
+    ],
+    "phase_projections": [
+      {
+        "coordinates": [
+          "r",
+          "omega"
+        ],
+        "units": [
+          "km",
+          "rad/s"
+        ],
+        "indices": [
+          0,
+          3
+        ]
+      }
+    ],
+    "target_marker": "soft objective reference, not a terminal constraint"
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "update_index": 19,
+  "absolute_time": 1900.0,
+  "observed_physical": [
+    6967.46631231343,
+    -0.03527586157645574,
+    2.051748382077102,
+    0.001085477977039785
+  ],
+  "observed_scaled": [
+    6.967466312313429,
+    -0.03527586157645574,
+    2.051748382077102,
+    1.085477977039785
+  ],
+  "original_task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+  "status": "failed",
+  "module_calls": [],
+  "requested_modules": {
+    "controller": "syn-nl-orbit-01/source-cost-direct-shooting/1",
+    "vertex_lp": "not_used",
+    "set_reducer": "not_used",
+    "representation": "not_used",
+    "converter": "not_used",
+    "execution": "CSL::simulation"
+  },
+  "policy_id": "syn-nl-orbit-01/source-cost-direct-shooting/1",
+  "controller_invocations": [
+    {
+      "operation": "controller.solve",
+      "module_id": "syn-nl-orbit-01/source-cost-direct-shooting/1",
+      "provider": "CasADi/IPOPT",
+      "profile_id": "casadi-ipopt/direct-shooting-rk4-1-step/epigraph-exact-euclidean/1"
+    }
+  ],
+  "solve_receipt": {
+    "accepted": true,
+    "success": true,
+    "status": "Solve_Succeeded",
+    "objective": 63.89918497482577,
+    "objective_recomputed": 63.89918497473471,
+    "objective_reconstruction_difference": 9.106315701501444e-11,
+    "solve_seconds": 0.016191724920645356,
+    "predicted_controls": [
+      -0.4999999990904315,
+      -0.49999998614978564
+    ],
+    "predicted_mesh_physical": [
+      [
+        6967.46631231343,
+        -0.03527586157645574,
+        2.051748382077102,
+        0.001085477977039785
+      ],
+      [
+        6963.881269973966,
+        -0.03639076916470009,
+        2.160344591555478,
+        0.0010864522489083038
+      ]
+    ],
+    "solver_iterations": 8,
+    "warm_start_policy": "shift-prior-primal-drop-first-stage-no-terminal-repeat;zero-duals",
+    "assurance": "local NLP diagnostics only; direct RK4 transcription; exact source norms represented by epigraphs; no global nonlinear certificate",
+    "solver_profile": "casadi-ipopt/direct-shooting-rk4-1-step/epigraph-exact-euclidean/1"
+  },
+  "invoked_modules": [
+    "syn-nl-orbit-01/source-cost-direct-shooting/1"
+  ],
+  "failure": "TypeError: 'float' object is not iterable",
+  "stage_elapsed_seconds": 0.018443078035488725
+}

@@ -114,6 +114,10 @@ VIZ10_ROLE_REASONS = {
         "Renders the saved exact-rational tube-policy witness in a two-dimensional position/velocity projection; it does not rerun optimization or measure performance.",
     "scripts/reports/render.py":
         "Generic report exporter validates and copies a supplied saved figure; it does not produce quantitative plot data.",
+    "benchmarks/reporting/closed_loop/run_closed_loop.py":
+        "Runs source-bound observed-state episodes and can render a completed saved attempt without another policy query; phase plots show the single observed trajectory and do not synthesize reachable sets.",
+    "scripts/reports/render_closed_loop_pilot.py":
+        "Validates and renders the fixed source-bound attempt, replay, and coverage records into a versioned standalone report and 2D example; it does not execute a solver or plant.",
 }
 SAVED_COMPANION_ROUTES = {
     "scripts/reports/mpc01/summarize_repeated_comparison.py",
@@ -150,6 +154,8 @@ SAVED_COMPANION_ROUTES = {
 }
 SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
 SAVED_DATA_COMPANION_RENDERERS = {
+    "benchmarks/reporting/closed_loop/run_closed_loop.py",
+    "scripts/reports/render_closed_loop_pilot.py",
     "scripts/reports/mpc06_online/render.py",
     "scripts/reports/mpc06_delivery/figures.py",
     "scripts/reports/render_adaptive_ode_example.py",
