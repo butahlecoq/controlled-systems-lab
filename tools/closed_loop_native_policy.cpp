@@ -28,6 +28,22 @@ namespace {
 using Json = nlohmann::json;
 using namespace csl;
 
+#ifndef CSL_NATIVE_HAS_HIGHS
+#define CSL_NATIVE_HAS_HIGHS 0
+#endif
+#ifndef CSL_NATIVE_HAS_QHULL
+#define CSL_NATIVE_HAS_QHULL 0
+#endif
+#ifndef CSL_NATIVE_BUILD_TYPE
+#define CSL_NATIVE_BUILD_TYPE "unknown"
+#endif
+
+Json native_build_backend_profile() {
+    return {{"build_type", CSL_NATIVE_BUILD_TYPE},
+        {"CSL_ENABLE_HIGHS", CSL_NATIVE_HAS_HIGHS != 0},
+        {"CSL_ENABLE_QHULL", CSL_NATIVE_HAS_QHULL != 0}};
+}
+
 template<class T> T take(std::variant<T, Diagnostic> result, const char* field) {
     if(const auto* error = std::get_if<Diagnostic>(&result))
         throw std::runtime_error(std::string(field) + ": " + error->explanation);
@@ -822,9 +838,13 @@ int main() {
         Json input;
         try {
             input=Json::parse(line);
-            std::cout << query(input).dump() << '\n';
+            auto output=query(input);
+            output["build_backend_profile"]=native_build_backend_profile();
+            std::cout << output.dump() << '\n';
         } catch(const std::exception& error) {
-            std::cout << query_failure(input, "failed", error.what()).dump() << '\n';
+            auto output=query_failure(input, "failed", error.what());
+            output["build_backend_profile"]=native_build_backend_profile();
+            std::cout << output.dump() << '\n';
         }
         std::cout.flush();
     }
