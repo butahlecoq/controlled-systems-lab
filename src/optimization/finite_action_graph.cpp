@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <functional>
 #include <limits>
 #include <numeric>
 
@@ -144,14 +145,17 @@ double stage_cost(const RunningControlCost& cost, std::size_t stage, std::span<c
     double total = 0.0;
     for(const auto& term : found->terms) {
         if(const auto* quadratic = std::get_if<QuadraticControlPenalty>(&term)) {
+            if(quadratic->coefficient == 0.0) continue;
             double sum = 0.0;
             for(std::size_t j = 0; j < control.size(); ++j) {
+                if(quadratic->weights[j] == 0.0) continue;
                 const double residual = (control[j] - quadratic->reference[j]) / quadratic->scales[j];
                 sum += quadratic->weights[j] * residual * residual;
             }
-            total += quadratic->coefficient * sum / static_cast<double>(quadratic->normalization_horizon);
+            total += (quadratic->coefficient / static_cast<double>(quadratic->normalization_horizon)) * sum;
         } else {
             const auto& norm = std::get<EuclideanControlPenalty>(term);
+            if(norm.coefficient == 0.0) continue;
             double squared = 0.0;
             for(std::size_t row = 0; row < norm.map.rows; ++row) {
                 double value = norm.offset[row];
@@ -280,56 +284,76 @@ SetOutcome action_state_hull(const FiniteActionNominalRequest& request, std::siz
     return std::get<sets::SetData>(made);
 }
 
-bool contains_v_2d(const sets::SetData& set, std::span<const double> point,
+bool contains_v(const sets::SetData& set, std::span<const double> point,
         double absolute_tolerance = 1e-9, double relative_tolerance = 1e-10) {
     const auto representation = set.representation();
     const auto* v = std::get_if<sets::VRepresentation>(&representation);
-    if(!v || point.size() != 2 || v->vertices.cols() != 2 || v->rays.rows() != 0 || v->vertices.rows() == 0) return false;
-    const auto n = v->vertices.rows();
-    auto tolerance = [&](double scale) { return absolute_tolerance + relative_tolerance * scale; };
-    if(n == 1) {
-        const double dx = point[0] - v->vertices(0,0), dy = point[1] - v->vertices(0,1);
-        return std::hypot(dx,dy) <= tolerance(std::max(std::abs(point[0]), std::abs(point[1])));
-    }
-    bool noncollinear = false;
-    for(std::size_t i = 0; i < n && !noncollinear; ++i)
-        for(std::size_t j = i + 1; j < n && !noncollinear; ++j)
-            for(std::size_t k = j + 1; k < n; ++k) {
-                const double cross = (v->vertices(j,0)-v->vertices(i,0))*(v->vertices(k,1)-v->vertices(i,1))-
-                    (v->vertices(j,1)-v->vertices(i,1))*(v->vertices(k,0)-v->vertices(i,0));
-                if(std::abs(cross) > tolerance(std::abs(cross))) { noncollinear=true; break; }
+    if(!v || point.empty() || point.size() != v->vertices.cols() || v->rays.rows() != 0 || v->vertices.rows() == 0)
+        return false;
+    const auto dimension=point.size(), count=v->vertices.rows();
+    const auto tolerance=[&](double scale) { return absolute_tolerance+relative_tolerance*scale; };
+    const auto max_vertices=std::min(count,dimension+1);
+    std::vector<std::size_t> selected;
+    for(std::size_t subset_size=1;subset_size<=max_vertices;++subset_size) {
+        bool found=false;
+        std::function<void(std::size_t)> visit=[&](std::size_t next) {
+            if(found)return;
+            if(selected.size()==subset_size) {
+                const auto rows=dimension+1,cols=subset_size;
+                std::vector<double> matrix(rows*(cols+1),0.0);
+                double scale=1.0;
+                for(std::size_t row=0;row<dimension;++row) {
+                    for(std::size_t col=0;col<cols;++col) {
+                        const auto value=v->vertices(selected[col],row);
+                        matrix[row*(cols+1)+col]=value;
+                        scale=std::max(scale,std::abs(value));
+                    }
+                    matrix[row*(cols+1)+cols]=point[row];
+                    scale=std::max(scale,std::abs(point[row]));
+                }
+                for(std::size_t col=0;col<cols;++col)matrix[dimension*(cols+1)+col]=1.0;
+                matrix[dimension*(cols+1)+cols]=1.0;
+                const auto pivot_tolerance=std::max(1e-13,relative_tolerance*scale);
+                std::vector<std::size_t> pivot_rows(cols,rows);
+                std::size_t rank=0;
+                for(std::size_t col=0;col<cols;++col) {
+                    std::size_t pivot=rank;
+                    for(std::size_t row=rank;row<rows;++row)
+                        if(std::abs(matrix[row*(cols+1)+col])>std::abs(matrix[pivot*(cols+1)+col]))pivot=row;
+                    if(rank==rows || std::abs(matrix[pivot*(cols+1)+col])<=pivot_tolerance)return;
+                    for(std::size_t j=0;j<=cols;++j)std::swap(matrix[rank*(cols+1)+j],matrix[pivot*(cols+1)+j]);
+                    const auto divisor=matrix[rank*(cols+1)+col];
+                    for(std::size_t j=col;j<=cols;++j)matrix[rank*(cols+1)+j]/=divisor;
+                    for(std::size_t row=0;row<rows;++row)if(row!=rank) {
+                        const auto factor=matrix[row*(cols+1)+col];
+                        for(std::size_t j=col;j<=cols;++j)matrix[row*(cols+1)+j]-=factor*matrix[rank*(cols+1)+j];
+                    }
+                    pivot_rows[col]=rank++;
+                }
+                for(std::size_t row=rank;row<rows;++row) {
+                    double coefficient_scale=0.0;
+                    for(std::size_t col=0;col<cols;++col)coefficient_scale=std::max(coefficient_scale,std::abs(matrix[row*(cols+1)+col]));
+                    if(coefficient_scale<=pivot_tolerance && std::abs(matrix[row*(cols+1)+cols])>tolerance(scale))return;
+                }
+                double sum=0.0;
+                for(std::size_t col=0;col<cols;++col) {
+                    const auto weight=matrix[pivot_rows[col]*(cols+1)+cols];
+                    if(weight < -tolerance(1.0))return;
+                    sum+=weight;
+                }
+                found=std::abs(sum-1.0)<=tolerance(1.0);
+                return;
             }
-    if(!noncollinear) {
-        std::size_t a=0,b=1;
-        double max_distance=-1.0;
-        for(std::size_t i=0;i<n;++i)for(std::size_t j=i+1;j<n;++j) {
-            const double dx=v->vertices(j,0)-v->vertices(i,0),dy=v->vertices(j,1)-v->vertices(i,1);
-            const double distance=dx*dx+dy*dy;
-            if(distance>max_distance){max_distance=distance;a=i;b=j;}
-        }
-        const double dx=v->vertices(b,0)-v->vertices(a,0),dy=v->vertices(b,1)-v->vertices(a,1);
-        const double px=point[0]-v->vertices(a,0),py=point[1]-v->vertices(a,1);
-        const double cross=dx*py-dy*px;
-        const double scale=std::abs(dx*py)+std::abs(dy*px);
-        const double projection=px*dx+py*dy;
-        return std::abs(cross)<=tolerance(scale) && projection>=-tolerance(max_distance) &&
-            projection<=max_distance+tolerance(max_distance);
+            const auto remaining=subset_size-selected.size();
+            for(std::size_t i=next;i+remaining<=count;++i) {
+                selected.push_back(i);visit(i+1);selected.pop_back();
+                if(found)return;
+            }
+        };
+        visit(0);
+        if(found)return true;
     }
-    for(std::size_t i=0;i<n;++i)for(std::size_t j=i+1;j<n;++j) {
-        const double dx=v->vertices(j,0)-v->vertices(i,0),dy=v->vertices(j,1)-v->vertices(i,1);
-        double min_cross=0.0,max_cross=0.0;
-        for(std::size_t k=0;k<n;++k) {
-            const double cross=dx*(v->vertices(k,1)-v->vertices(i,1))-dy*(v->vertices(k,0)-v->vertices(i,0));
-            min_cross=std::min(min_cross,cross);max_cross=std::max(max_cross,cross);
-        }
-        const double edge_tolerance=tolerance(std::max(std::abs(min_cross),std::abs(max_cross)));
-        if(min_cross>=-edge_tolerance || max_cross<=edge_tolerance) {
-            const double point_cross=dx*(point[1]-v->vertices(i,1))-dy*(point[0]-v->vertices(i,0));
-            if(min_cross>=-edge_tolerance && point_cross < -tolerance(std::abs(point_cross))) return false;
-            if(max_cross<=edge_tolerance && point_cross > tolerance(std::abs(point_cross))) return false;
-        }
-    }
-    return true;
+    return false;
 }
 
 GeometryCallOutcome parent_reachable_envelope(
@@ -377,8 +401,8 @@ static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(const Fin
     const auto horizon = request.system.horizon();
     if(limits.beam_width == 0 || limits.max_nodes == 0)
         return unsupported("finite_graph.limits", "Beam width and maximum node count must be positive.");
-    if(dimensions.state != 2 || dimensions.external != 0)
-        return unsupported("finite_graph.model", "The first graph implementation admits 2D nominal systems without external inputs.");
+    if((dimensions.state != 2 && dimensions.state != 4) || dimensions.external != 0)
+        return unsupported("finite_graph.model", "The finite-action graph admits 2D or 4D nominal systems without external inputs.");
     if(request.initial_state.size() != dimensions.state || request.actions.dimension != dimensions.control ||
        request.actions.catalogue.empty() || request.admissible_states.size() != horizon + 1 ||
        request.nominal_disturbances.size() != horizon || request.objective.dimension() != dimensions.state)
@@ -455,15 +479,20 @@ static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(const Fin
                 const bool state_ok = contains_with_tolerance(std::get<sets::SetData>(intersection), next);
                 std::optional<bool> envelope_ok;
                 if(reachable_envelope) {
-                    envelope_ok = contains_v_2d(*reachable_envelope, next);
+                    envelope_ok = contains_v(*reachable_envelope, next);
                     if(!*envelope_ok)
                         return unsupported("finite_graph.reachable.witness", "The registered forward outer set failed to contain a child generated by the same authored affine dynamics and discrete action.");
                 }
                 const auto absolute = request.absolute_stage_offset + stage;
                 const auto edge_cost = stage_cost(request.running_cost, absolute, request.actions.catalogue[action_index]);
+                if(!std::isfinite(edge_cost))
+                    return unsupported("finite_graph.running_cost.overflow", "Authored running cost overflowed for a finite discrete edge; graph scores are not ranked.");
                 const auto terminal_value = evaluate(request.objective, next);
                 if(const auto* error = std::get_if<Diagnostic>(&terminal_value)) return unsupported(error->field, error->explanation);
-                const double heuristic = parent.heuristic_score + edge_cost + std::get<double>(terminal_value);
+                const double terminal = std::get<double>(terminal_value);
+                const double heuristic = parent.heuristic_score + edge_cost + terminal;
+                if(!std::isfinite(terminal) || !std::isfinite(heuristic))
+                    return unsupported("finite_graph.ranking.overflow", "Terminal or accumulated heuristic score is non-finite; graph candidates are not sorted.");
                 auto lineage = parent.action_lineage;
                 lineage.push_back(action_index);
                 candidates.push_back({parent_id, action_index, std::move(next), edge_cost, heuristic,
@@ -554,6 +583,8 @@ static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(const Fin
                 parent.state_admissible && child.reachable_envelope_contains.value_or(true);
             if(!child.backward_viable) continue;
             const double candidate = child.edge_running_cost + *child.backward_value;
+            if(!std::isfinite(candidate))
+                return unsupported("finite_graph.bellman.overflow", "Accumulated backward Bellman value is non-finite; no policy is selected.");
             if(!parent.backward_value || candidate < *parent.backward_value) {
                 parent.backward_value = candidate;
                 parent.backward_viable = true;

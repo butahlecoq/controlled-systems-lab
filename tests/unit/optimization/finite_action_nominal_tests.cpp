@@ -99,6 +99,25 @@ TEST_CASE("nominal running-cost schedule rejects wrong full-horizon normalizatio
         "finite_nominal.running_cost.quadratic");
 }
 
+TEST_CASE("nominal scoring skips zero-weight overflow coordinates and rejects non-finite combined scores") {
+    const auto source = csl::issue824::fixture::two_points_request("nominal-running-overflow-source");
+    auto request = FiniteActionNominalRequest{source.problem, {"nominal-zero-weight"}, source.system,
+        {4.5, 0.0, 0.0, 0.0}, source.actions, {{1.0}, {1.0}, {1.0}},
+        source.admissible_states, source.objective,
+        {"source-cost/zero-weight", 3, {{0, {QuadraticControlPenalty{{0.0}, {1e-309}, {0.0}, 1.0, 3}}}}}};
+    auto outcome = finite_action_nominal_profile(request, {27,1000,100000,1000,0.0},
+        NominalRepresentation::exact_polytope);
+    REQUIRE(std::holds_alternative<FiniteActionNominalResult>(outcome));
+    REQUIRE(std::holds_alternative<NominalTrackSelected>(std::get<FiniteActionNominalResult>(outcome).tracks.front().outcome));
+    CHECK(std::isfinite(std::get<NominalTrackSelected>(std::get<FiniteActionNominalResult>(outcome).tracks.front().outcome).candidate_score));
+
+    request.running_cost = {"source-cost/overflow", 3, {{0, {QuadraticControlPenalty{{0.0}, {1e-309}, {1.0}, 1.0, 3}}}}};
+    outcome = finite_action_nominal_profile(request, {27,1000,100000,1000,0.0},
+        NominalRepresentation::exact_polytope);
+    REQUIRE(std::holds_alternative<FiniteActionNominalResult>(outcome));
+    CHECK(std::holds_alternative<NominalTrackUnsupported>(std::get<FiniteActionNominalResult>(outcome).tracks.front().outcome));
+}
+
 TEST_CASE("selected nominal profile executes one representation route") {
     const auto source = csl::issue824::fixture::two_points_request("nominal-profile-source");
     FiniteActionNominalRequest request{source.problem, {"nominal-profile-run"}, source.system,

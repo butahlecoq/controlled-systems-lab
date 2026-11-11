@@ -97,7 +97,6 @@ Json set_json(const sets::SetData& set) {
 sets::SetData safe_box(const Json& bounds, std::size_t dimension, const std::string& id) {
     std::size_t count = 0;
     for(const auto& bound : bounds) if(!bound.is_null()) count += 2;
-    if(count == 0) return take(sets::make_universal({{id}, dimension, {}}), "universal-safe-set");
     Matrix a{count, dimension, Vector(count * dimension, 0.0)};
     Vector b; b.reserve(count);
     std::size_t row = 0;
@@ -194,6 +193,15 @@ Json trace_json(const optimization::NominalTrackSelected& selected) {
         {"relation", relation}, {"assurance", "numerical"}, {"stages", std::move(stages)}};
 }
 
+Json query_failure(const Json& input, const std::string& status, const std::string& reason) {
+    Json result{{"status", status}, {"reason", reason}, {"invocations", Json::array()}};
+    for(const auto* key : {"task_id", "task_sha256", "action_profile_id"})
+        if(input.is_object() && input.contains(key)) result[key] = input.at(key);
+    if(input.is_object() && input.contains("controller_id"))
+        result["policy_id"] = input.at("controller_id").get<std::string>() + "/query/1";
+    return result;
+}
+
 bool contains_with_tolerance(const sets::SetData& set, const Vector& point,
                              double absolute_tolerance = 1e-9,
                              double relative_tolerance = 1e-10) {
@@ -280,7 +288,7 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
                     std::size_t beam_width, std::size_t max_nodes) {
     const auto reachable_set_method = input.at("reachable_set_method").get<std::string>();
     if(reachable_set_method != "csl.geometry.affine-sum")
-        return {{"status", "unsupported"}, {"reason", "This build does not contain the explicitly requested reachable-set method."}};
+        return query_failure(input, "unsupported", "This build does not contain the explicitly requested reachable-set method.");
     auto registration = geometry::polyhedral::make_projection_registration();
     registry::Registry<registry::GeometryPort> providers;
     if(const auto error = providers.add(registration))
@@ -572,9 +580,12 @@ Json query(const Json& in) {
 int main() {
     std::string line;
     while(std::getline(std::cin, line)) {
-        try { std::cout << query(Json::parse(line)).dump() << '\n'; }
-        catch(const std::exception& error) {
-            std::cout << Json{{"status", "failed"}, {"reason", error.what()}}.dump() << '\n';
+        Json input;
+        try {
+            input=Json::parse(line);
+            std::cout << query(input).dump() << '\n';
+        } catch(const std::exception& error) {
+            std::cout << query_failure(input, "failed", error.what()).dump() << '\n';
         }
         std::cout.flush();
     }

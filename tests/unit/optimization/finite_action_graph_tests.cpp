@@ -188,3 +188,34 @@ TEST_CASE("graph rejects malformed source cost before numerical evaluation") {
     REQUIRE_FALSE(diagnostics.empty());
     CHECK(diagnostics.front().field == "finite_graph.running_cost.quadratic");
 }
+
+TEST_CASE("zero-weight overflow coordinates are skipped and non-finite scores never reach ranking") {
+    auto request = viability_request();
+    auto& zero_weight = std::get<QuadraticControlPenalty>(request.running_cost.stages.front().terms.front());
+    zero_weight.scales[0] = 1e-309;
+    zero_weight.weights[0] = 0.0;
+    auto provider = projection_provider();
+    auto outcome = finite_action_stage_layered_graph(request, {4,32}, provider);
+    REQUIRE(std::holds_alternative<FiniteActionGraphResult>(outcome));
+    CHECK(std::isfinite(std::get<FiniteActionGraphResult>(outcome).total_objective));
+
+    request = viability_request();
+    auto& overflow = std::get<QuadraticControlPenalty>(request.running_cost.stages.front().terms.front());
+    overflow.scales[0] = 1e-309;
+    outcome = finite_action_stage_layered_graph(request, {4,32}, provider);
+    REQUIRE(std::holds_alternative<Unsupported>(outcome));
+    CHECK(std::get<Unsupported>(outcome).diagnostics.front().field == "finite_graph.running_cost.overflow");
+}
+
+TEST_CASE("finite but individually valid edge costs cannot overflow accumulated Bellman values") {
+    auto request = viability_request();
+    for(auto& stage : request.running_cost.stages)
+        std::get<QuadraticControlPenalty>(stage.terms.front()).weights[0] = 2.0;
+    for(auto& stage : request.running_cost.stages)
+        std::get<QuadraticControlPenalty>(stage.terms.front()).coefficient = 1e308;
+    auto provider = projection_provider();
+    const auto outcome = finite_action_stage_layered_graph(request, {4,32}, provider);
+    REQUIRE(std::holds_alternative<Unsupported>(outcome));
+    const auto field=std::get<Unsupported>(outcome).diagnostics.front().field;
+    CHECK((field == "finite_graph.ranking.overflow" || field == "finite_graph.bellman.overflow"));
+}

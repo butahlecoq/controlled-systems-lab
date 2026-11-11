@@ -68,14 +68,17 @@ double stage_running_cost(const RunningControlCost& cost, std::size_t absolute_s
     double total = 0.0;
     for(const auto& term : found->terms) {
         if(const auto* quadratic = std::get_if<QuadraticControlPenalty>(&term)) {
+            if(quadratic->coefficient == 0.0) continue;
             double sum = 0.0;
             for(std::size_t j = 0; j < control.size(); ++j) {
+                if(quadratic->weights[j] == 0.0) continue;
                 const auto residual = (control[j] - quadratic->reference[j]) / quadratic->scales[j];
                 sum += quadratic->weights[j] * residual * residual;
             }
-            total += quadratic->coefficient * sum / static_cast<double>(quadratic->normalization_horizon);
+            total += (quadratic->coefficient / static_cast<double>(quadratic->normalization_horizon)) * sum;
         } else {
             const auto& norm = std::get<EuclideanControlPenalty>(term);
+            if(norm.coefficient == 0.0) continue;
             double squared = 0.0;
             for(std::size_t row = 0; row < norm.map.rows; ++row) {
                 double value = norm.offset[row];
@@ -187,6 +190,9 @@ ReplayOutcome replay_nominal(const FiniteActionNominalRequest& request,
     result.terminal_objective = std::get<double>(value);
     result.running_objective = running_cost_for(request, indices);
     result.total_objective = result.terminal_objective + result.running_objective;
+    if(!std::isfinite(result.terminal_objective) || !std::isfinite(result.running_objective) ||
+       !std::isfinite(result.total_objective))
+        return unsupported("finite_nominal.replay.score", "Terminal, running, or accumulated replay objective is non-finite.");
     return result;
 }
 
@@ -218,11 +224,15 @@ ExactOutcome exact_track(const FiniteActionNominalRequest& nominal,
     for(const auto& plan : optimal->plans) {
         if(const auto* scored = std::get_if<FinitePlanFeasible>(&plan)) {
             const auto running = running_cost_for(nominal, scored->action_indices);
+            const auto candidate = scored->worst_value + running;
+            if(!std::isfinite(scored->worst_value) || !std::isfinite(running) || !std::isfinite(candidate))
+                return NominalTrackUnsupported{std::move(attempts), NominalSearchCoverage::incomplete,
+                    unsupported("finite_nominal.score.overflow", "Terminal, running, or combined source score is non-finite; the plan is not ranked.")};
             attempts.emplace_back(NominalPlanScored{scored->action_indices, scored->worst_value,
                 NominalScoreKind::exact_deterministic_objective,
                 scored->worst_value, running});
             auto& row = std::get<NominalPlanScored>(attempts.back());
-            row.candidate_score += running;
+            row.candidate_score = candidate;
         } else {
             const auto& rejected = std::get<FinitePlanRejected>(plan);
             attempts.emplace_back(NominalPlanRejected{rejected.action_indices, rejected.stage,
@@ -330,6 +340,9 @@ NominalTrackOutcome box_track(const FiniteActionNominalRequest& nominal,
         if(const auto* scored = std::get_if<BoxPlanScored>(&attempt)) {
             const auto terminal = scored->terminal_box_maximum;
             const auto running = running_cost_for(nominal, scored->action_indices);
+            if(!std::isfinite(terminal) || !std::isfinite(running) || !std::isfinite(terminal + running))
+                return NominalTrackUnsupported{std::move(attempts), NominalSearchCoverage::incomplete,
+                    unsupported("finite_nominal.score.overflow", "Box terminal estimate or combined source score is non-finite; the plan is not ranked.")};
             attempts.emplace_back(NominalPlanScored{scored->action_indices,
                 terminal + running, approximate_score_kind(nominal), terminal, running});
         } else if(const auto* unscored = std::get_if<BoxPlanUnscored>(&attempt))
@@ -380,6 +393,9 @@ NominalTrackOutcome zonotope_track(const FiniteActionNominalRequest& nominal,
         if(const auto* scored = std::get_if<ZonotopePlanScored>(&attempt)) {
             const auto terminal = scored->score.terminal_factor_corner_maximum;
             const auto running = running_cost_for(nominal, scored->action_indices);
+            if(!std::isfinite(terminal) || !std::isfinite(running) || !std::isfinite(terminal + running))
+                return NominalTrackUnsupported{std::move(attempts), NominalSearchCoverage::incomplete,
+                    unsupported("finite_nominal.score.overflow", "Zonotope terminal estimate or combined source score is non-finite; the plan is not ranked.")};
             attempts.emplace_back(NominalPlanScored{scored->action_indices,
                 terminal + running, approximate_score_kind(nominal), terminal, running});
         } else if(const auto* unscored = std::get_if<ZonotopePlanUnscored>(&attempt))
@@ -432,6 +448,9 @@ NominalTrackOutcome parallelotope_track(const FiniteActionNominalRequest& nomina
         if(const auto* scored = std::get_if<ParallelotopePlanScored>(&attempt)) {
             const auto terminal = scored->score.terminal_frame_box_corner_maximum;
             const auto running = running_cost_for(nominal, scored->action_indices);
+            if(!std::isfinite(terminal) || !std::isfinite(running) || !std::isfinite(terminal + running))
+                return NominalTrackUnsupported{std::move(attempts), NominalSearchCoverage::incomplete,
+                    unsupported("finite_nominal.score.overflow", "Parallelotope terminal estimate or combined source score is non-finite; the plan is not ranked.")};
             attempts.emplace_back(NominalPlanScored{scored->action_indices,
                 terminal + running, approximate_score_kind(nominal), terminal, running});
         } else if(const auto* unscored = std::get_if<ParallelotopePlanUnscored>(&attempt))
@@ -482,6 +501,9 @@ NominalTrackOutcome ellipsoid_track(const FiniteActionNominalRequest& nominal,
         if(const auto* scored = std::get_if<EllipsoidPlanScored>(&attempt)) {
             const auto terminal = scored->score.terminal_support_estimate;
             const auto running = running_cost_for(nominal, scored->action_indices);
+            if(!std::isfinite(terminal) || !std::isfinite(running) || !std::isfinite(terminal + running))
+                return NominalTrackUnsupported{std::move(attempts), NominalSearchCoverage::incomplete,
+                    unsupported("finite_nominal.score.overflow", "Ellipsoid terminal estimate or combined source score is non-finite; the plan is not ranked.")};
             attempts.emplace_back(NominalPlanScored{scored->action_indices,
                 terminal + running, approximate_score_kind(nominal), terminal, running});
         } else if(const auto* unscored = std::get_if<EllipsoidPlanUnscored>(&attempt))
