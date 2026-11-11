@@ -382,7 +382,8 @@ registry::PreparedProvider<registry::GeometryPort> affine_sum_provider(const Jso
 Json geometry_invocation_json(const optimization::FiniteGraphGeometryInvocation& call) {
     const auto relation=call.relation ? Json(*call.relation==SetRelation::equivalent?"equivalent":
         *call.relation==SetRelation::outer?"outer":*call.relation==SetRelation::inner?"inner":"heuristic") : Json(nullptr);
-    return {{"request_id",call.request_id},{"ideal_output_id",call.ideal_output_id},
+    return {{"absolute_stage",call.absolute_stage},{"parent_node_id",call.parent_node_id},
+        {"request_id",call.request_id},{"ideal_output_id",call.ideal_output_id},
         {"input_ids",call.input_ids},{"operation",call.operation},
         {"requested_method_id",call.requested_method_id},{"actual_method_id",call.actual_method_id},
         {"actual_method_version",call.actual_method_version},{"outcome",call.outcome},
@@ -439,7 +440,6 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
         {"terminal_value_evaluation","direct authored objective evaluation"}};
     const auto outcome = optimization::finite_action_stage_layered_graph(request,
         {beam_width, max_nodes, representation==optimization::NominalRepresentation::exact_polytope ?
-            std::nullopt : std::optional{representation},max_generators,
             std::nullopt : std::optional{representation},max_generators,
             representation==optimization::NominalRepresentation::exact_polytope ?
                 std::nullopt : std::optional{representation}}, provider, reachable_provider, {},

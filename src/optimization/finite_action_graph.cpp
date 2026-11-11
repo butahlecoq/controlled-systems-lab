@@ -406,7 +406,8 @@ GeometryCallOutcome run_geometry(const registry::PreparedProvider<registry::Geom
         const FiniteActionNominalRequest& request, GeometryOperation operation,
         std::string suffix, const ExecutionContext& context,
         std::vector<FiniteGraphGeometryInvocation>* observations,
-        const FiniteGraphGeometryObserver& observer) {
+        const FiniteGraphGeometryObserver& observer,
+        std::size_t absolute_stage,std::size_t parent_node_id) {
     const auto provenance = provider.provenance();
     const auto implementation = provenance.actual ? provenance.actual->id : provenance.requested.id;
     GeometryRequestIdentity identity{request.problem,
@@ -421,6 +422,8 @@ GeometryCallOutcome run_geometry(const registry::PreparedProvider<registry::Geom
         const auto elapsed=std::chrono::duration_cast<std::chrono::nanoseconds>(
             std::chrono::steady_clock::now()-started);
         FiniteGraphGeometryInvocation record;
+        record.absolute_stage=absolute_stage;
+        record.parent_node_id=parent_node_id;
         record.request_id=geometry_request.identity.request.value;
         record.ideal_output_id=geometry_request.identity.ideal_output.value;
         for(const auto& id:reference.inputs) record.input_ids.push_back(id.value);
@@ -487,7 +490,9 @@ SetOutcome action_state_hull(const FiniteActionNominalRequest& request, std::siz
     auto ray_view = numeric::snapshot(Matrix{0, vertices.cols, {}});
     if(!std::holds_alternative<numeric::MatrixView>(vertex_view) || !std::holds_alternative<numeric::MatrixView>(ray_view))
         return unsupported("finite_graph.action_hull.snapshot", "Could not snapshot the authored state-space action hull.");
-    const auto made = sets::make_v({{"finite-graph-state-action-hull"}, vertices.cols, {}},
+    const auto action_hull_id="finite-graph-state-action-hull/"+request.request.value+"/stage-"+
+        std::to_string(request.absolute_stage_offset+stage);
+    const auto made = sets::make_v({{action_hull_id}, vertices.cols, {}},
         {std::get<numeric::MatrixView>(vertex_view), std::get<numeric::MatrixView>(ray_view)});
     if(const auto* error = std::get_if<Diagnostic>(&made)) return unsupported(error->field, error->explanation);
     return std::get<sets::SetData>(made);
@@ -632,16 +637,16 @@ ParentActionCloudOutcome parent_action_cloud(const FiniteActionNominalRequest& r
     const double times[]{0.0,1.0};
     const auto lifted_system=model::snapshot(lifted_model,times);
     if(const auto* error=std::get_if<Diagnostic>(&lifted_system))return unsupported(error->field,error->explanation);
+    const auto auxiliary_id=request.request.value+"/aux-action-cloud-"+
+        std::to_string(request.absolute_stage_offset+stage)+"-parent-"+std::to_string(parent_id);
     auto parent_view=numeric::snapshot_vector(parent);
     if(!std::holds_alternative<numeric::VectorView>(parent_view))
         return unsupported("finite_graph.action_cloud.parent","Could not snapshot retained parent state.");
-    auto parent_set=sets::make_singleton({{"parent-action-cloud"},dimensions.state,{}},
+    auto parent_set=sets::make_singleton({{auxiliary_id+"/parent"},dimensions.state,{}},
         std::get<numeric::VectorView>(parent_view));
     if(const auto* error=std::get_if<Diagnostic>(&parent_set))return unsupported(error->field,error->explanation);
-    const auto safe=sets::make_universal({{"auxiliary-action-cloud-safe"},dimensions.state,{}});
+    const auto safe=sets::make_universal({{auxiliary_id+"/safe"},dimensions.state,{}});
     if(const auto* error=std::get_if<Diagnostic>(&safe))return unsupported(error->field,error->explanation);
-    const auto auxiliary_id=request.request.value+"/aux-action-cloud-"+
-        std::to_string(request.absolute_stage_offset+stage)+"-parent-"+std::to_string(parent_id);
     reachability::FixedPlanRequest auxiliary{std::get<model::LinearSystem>(lifted_system),
         std::get<sets::SetData>(parent_set),{Vector(dimensions.control,0.0)},{effect_set},
         {std::get<sets::SetData>(safe),std::get<sets::SetData>(safe)},{auxiliary_id}};
@@ -784,7 +789,7 @@ ParentActionCloudOutcome parent_action_cloud(const FiniteActionNominalRequest& r
 GeometryCallOutcome parent_reachable_envelope(
         const FiniteActionNominalRequest& request,
         const registry::PreparedProvider<registry::GeometryPort>& provider,
-        std::size_t stage, const Vector& parent, const ExecutionContext& context,
+        std::size_t stage,std::size_t parent_node_id,const Vector& parent,const ExecutionContext& context,
         std::vector<FiniteGraphGeometryInvocation>* observations,
         const FiniteGraphGeometryObserver& observer) {
     const auto dynamics_value = request.system.stage({stage});
@@ -802,19 +807,24 @@ GeometryCallOutcome parent_reachable_envelope(
     auto point_view=numeric::snapshot_vector(parent);
     if(!std::holds_alternative<numeric::VectorView>(point_view))
         return unsupported("finite_graph.reachable.parent", "Could not snapshot the retained parent state.");
-    auto singleton=sets::make_singleton({{"finite-graph-parent"},dimension,
+    const auto absolute_stage=request.absolute_stage_offset+stage;
+    const auto singleton_id="finite-graph-parent/"+request.request.value+"/stage-"+
+        std::to_string(absolute_stage)+"-node-"+std::to_string(parent_node_id);
+    auto singleton=sets::make_singleton({{singleton_id},dimension,
         {}},std::get<numeric::VectorView>(point_view));
     if(const auto* error=std::get_if<Diagnostic>(&singleton))return unsupported(error->field,error->explanation);
     const auto base=run_geometry(provider,request,
         AffineImage{std::get<sets::SetData>(singleton).as_handle(),std::move(map),std::move(offset)},
-        "graph-forward-affine-"+std::to_string(stage),context,observations,observer);
+        "graph-forward-affine-stage-"+std::to_string(absolute_stage)+"-parent-"+std::to_string(parent_node_id),
+        context,observations,observer,absolute_stage,parent_node_id);
     if(const auto* error=std::get_if<Unsupported>(&base))return *error;
     if(const auto* stopped=std::get_if<OperationStopped>(&base))return *stopped;
     const auto action_set=action_state_hull(request,stage);
     if(const auto* error=std::get_if<Unsupported>(&action_set))return *error;
     return run_geometry(provider,request,
         MinkowskiSum{std::get<sets::SetData>(base).as_handle(),std::get<sets::SetData>(action_set).as_handle()},
-        "graph-forward-control-sum-"+std::to_string(stage),context,observations,observer);
+        "graph-forward-control-sum-stage-"+std::to_string(absolute_stage)+"-parent-"+std::to_string(parent_node_id),
+        context,observations,observer,absolute_stage,parent_node_id);
 }
 
 } // namespace
@@ -895,7 +905,7 @@ static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(const Fin
             if(reachable_set_provider) {
                 const auto calls_before=graph.reachable_geometry_invocations.size();
                 auto envelope = parent_reachable_envelope(request, *reachable_set_provider,
-                    stage, parent.state, context,&graph.reachable_geometry_invocations,geometry_observer);
+                    stage,parent_id,parent.state,context,&graph.reachable_geometry_invocations,geometry_observer);
                 graph.reachable_envelope_calls += graph.reachable_geometry_invocations.size()-calls_before;
                 if(const auto* error = std::get_if<Unsupported>(&envelope)) return *error;
                 if(const auto* stopped = std::get_if<OperationStopped>(&envelope)) return *stopped;

@@ -9,6 +9,8 @@
 #include <array>
 #include <algorithm>
 #include <limits>
+#include <set>
+#include <string>
 
 using namespace csl;
 using namespace csl::optimization;
@@ -126,6 +128,53 @@ TEST_CASE("backward viability changes the selected discrete first action") {
     }
     CHECK(best_actions == std::vector<std::size_t>{1,0});
     CHECK(best == doctest::Approx(result.total_objective));
+}
+
+TEST_CASE("forward GeometryPort receipts uniquely identify every parent at a shared stage") {
+    auto request=viability_request();
+    request.admissible_states[1]=h_box({-2,-2},{2,2},"multi-parent-middle");
+    request.admissible_states[2]=h_box({-3,-2},{3,2},"multi-parent-terminal");
+    std::vector<FiniteGraphGeometryInvocation> observed;
+    const auto outcome=finite_action_stage_layered_graph(request,
+        {4,32,std::nullopt,1000,std::nullopt},projection_provider(),reachable_set_provider(),{},
+        [&](const auto& call){observed.push_back(call);});
+    REQUIRE(std::holds_alternative<FiniteActionGraphResult>(outcome));
+    const auto& graph=std::get<FiniteActionGraphResult>(outcome);
+    REQUIRE(graph.has_viable_path);
+    REQUIRE(graph.layers.size()==3);
+    REQUIRE(graph.layers[1].size()>=2);
+    std::set<std::size_t> parent_ids;
+    std::set<std::string> request_ids,output_ids,affine_inputs,action_hull_inputs;
+    std::size_t affine_calls=0,sum_calls=0;
+    for(const auto& call:graph.reachable_geometry_invocations)if(call.absolute_stage==1) {
+        parent_ids.insert(call.parent_node_id);
+        request_ids.insert(call.request_id);
+        output_ids.insert(call.ideal_output_id);
+        if(call.operation=="affine-image") {
+            ++affine_calls;
+            REQUIRE(call.input_ids.size()==1);
+            affine_inputs.insert(call.input_ids.front());
+        } else if(call.operation=="minkowski-sum") {
+            ++sum_calls;
+            REQUIRE(call.input_ids.size()==2);
+            action_hull_inputs.insert(call.input_ids[1]);
+            CHECK(call.input_ids[0]==request.request.value+"/graph-forward-affine-stage-1-parent-"+
+                std::to_string(call.parent_node_id)+"/output");
+        }
+    }
+    CHECK(parent_ids.size()>=2);
+    CHECK(affine_calls==parent_ids.size());
+    CHECK(sum_calls==parent_ids.size());
+    CHECK(request_ids.size()==affine_calls+sum_calls);
+    CHECK(output_ids.size()==affine_calls+sum_calls);
+    CHECK(affine_inputs.size()==affine_calls);
+    CHECK(action_hull_inputs.size()==1);
+    REQUIRE(observed.size()==graph.reachable_geometry_invocations.size());
+    for(std::size_t i=0;i<observed.size();++i) {
+        CHECK(observed[i].absolute_stage==graph.reachable_geometry_invocations[i].absolute_stage);
+        CHECK(observed[i].parent_node_id==graph.reachable_geometry_invocations[i].parent_node_id);
+        CHECK(observed[i].request_id==graph.reachable_geometry_invocations[i].request_id);
+    }
 }
 
 TEST_CASE("continuous predecessor membership cannot invent a finite action") {

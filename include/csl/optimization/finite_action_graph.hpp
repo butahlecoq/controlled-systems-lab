@@ -120,6 +120,8 @@ struct FiniteGraphActionCloudEnvelope {
 // The graph stays independent of concrete geometry/reducer ports while making
 // the exact nested operation evidence available to the application layer.
 struct FiniteGraphGeometryInvocation {
+    std::size_t absolute_stage{};
+    std::size_t parent_node_id{};
     std::string request_id;
     std::string ideal_output_id;
     std::vector<std::string> input_ids;
