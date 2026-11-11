@@ -44,6 +44,10 @@ FUNCTIONAL_DOC_ASSETS = {
     "docs/research/figures/": {".png", ".svg"},
     "docs/research/tools/": {".py"},
 }
+EXPLICIT_WORKING_DIRECTORIES = {
+    "docs/drafts", "docs/notes", "docs/plans", "docs/reviews", "docs/specs",
+    "docs/superpowers",
+}
 
 
 def git(root: Path, *args: str) -> str:
@@ -91,14 +95,24 @@ def is_functional_doc_asset(path: str) -> bool:
                for prefix, suffixes in FUNCTIONAL_DOC_ASSETS.items())
 
 
+def is_explicit_working_directory(path: str) -> bool:
+    parts = path.split("/")
+    return any("/".join(parts[:index]).lower() in EXPLICIT_WORKING_DIRECTORIES
+               for index in range(2, len(parts) + 1))
+
+
 def is_retained_change(path: str, root: Path) -> bool:
     suffix = Path(path).suffix.lower()
     if suffix in MARKDOWN_SUFFIXES:
         return is_retained_markdown(path, root)
     if path.startswith("docs/"):
+        if is_explicit_working_directory(path):
+            return False
+        if is_functional_doc_asset(path):
+            return True
         if is_working_document_path(path):
             return False
-        return is_functional_doc_asset(path)
+        return False
     if is_working_document_path(path):
         return False
     return True

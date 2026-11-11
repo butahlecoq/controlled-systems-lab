@@ -74,6 +74,10 @@ class LocalOnlyDocsTests(unittest.TestCase):
                 "docs/catalogue/capabilities.json": "{}\n",
                 "docs/research/evidence/run-1/record.json": "{}\n",
                 "docs/research/evidence/run-1/stdout.txt": "solver output\n",
+                "docs/artifacts/schemas/comparison-spec-v1.schema.json": "{}\n",
+                "docs/artifacts/schemas/comparison-spec-v2.schema.json": "{}\n",
+                "docs/artifacts/schemas/comparison-spec-v3.schema.json": "{}\n",
+                "docs/research/evidence/issue1-draft-uncertainty.json": "{}\n",
                 "src/CMakeLists.txt": "cmake_minimum_required(VERSION 3.31)\n",
                 "src/reachability/fixed_plan_admission.hpp": "#pragma once\n",
             }
