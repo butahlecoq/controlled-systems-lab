@@ -14,17 +14,29 @@ The state counts include the initial sample and 20 reported CSL samples for each
 
 The plots show source-defined time/control views and 2D phase projections with start, end, and soft target markers. Fuel is shown in the source map `(q_ox,m_ox)` and `(q_f,m_f)` with source units. A single trajectory does not define a reachable set.
 
+The saved-record reading layer is [`closed-loop-pilot-v1/index.html`](closed-loop-pilot-v1/index.html), with a minimal Lotka–Volterra 2D example at [`closed-loop-pilot-v1/example-2d.html`](closed-loop-pilot-v1/example-2d.html) and an offline ZIP at [`closed-loop-pilot-v1.zip`](closed-loop-pilot-v1.zip). The report and example are versioned from the committed raw attempts; independent review, main-only Pages deployment, and live URL/hash verification remain pending.
+
 ## Reproduce
 
-The runner requires the qualified read-only environment and a build of `csl_mpc11_nonlinear_replay`. From the repository root:
+The run used the qualified Linux CPython 3.11.14 environment described in [`benchmarks/reporting/mpc11/environment/README.md`](../../../benchmarks/reporting/mpc11/environment/README.md). Create a separate environment from the pinned wheel lock with an installed CPython 3.11.14; set `MPC11_VENV`, `MPC11_WHEELS`, and `PYTHON` to user-owned paths. The saved run manifests contain the local interpreter, package versions, host allocation, and binary hash; they are local execution receipts, not inputs to the portable setup instructions.
 
 ```sh
+export MPC11_VENV="${MPC11_VENV:-$PWD/.venv-mpc11}"
+export MPC11_WHEELS="${MPC11_WHEELS:-$PWD/.wheels-mpc11}"
+python3.11 -m venv "$MPC11_VENV"
+"$MPC11_VENV/bin/python" -m pip download --only-binary=:all: \
+  --require-hashes -r benchmarks/reporting/mpc11/environment/requirements-linux-cp311.lock \
+  --dest "$MPC11_WHEELS"
+"$MPC11_VENV/bin/python" -m pip install --no-index --find-links "$MPC11_WHEELS" \
+  --require-hashes -r benchmarks/reporting/mpc11/environment/requirements-linux-cp311.lock
+export PYTHON="${PYTHON:-$MPC11_VENV/bin/python}"
+"$PYTHON" -m pip check
 cmake -S . -B build/closed-loop-pilot-945 -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build/closed-loop-pilot-945 --target csl_mpc11_nonlinear_replay
-/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/controller-env/bin/python \
-  benchmarks/reporting/closed_loop/run_closed_loop.py --task all \
+"$PYTHON" benchmarks/reporting/closed_loop/run_closed_loop.py --task all \
   --bridge build/closed-loop-pilot-945/csl_mpc11_nonlinear_replay \
   --output-root reports/closed-loop-pilot
+"$PYTHON" scripts/reports/render_closed_loop_pilot.py
 ```
 
 The runner executes tasks sequentially with one numerical worker. The worker requests a 300-second wall timeout, 300 seconds CPU, and 8 GiB `RLIMIT_AS`; it applies the CPU/address-space limits to the worker process and terminates the worker process group on wall timeout. The host observed at run start is recorded in each run manifest. Checker processes use separate 5-second wall/CPU and 1 GiB `RLIMIT_AS` limits; RSS sampling is per process, not a machine-wide or child-tree memory cap. The suite has no machine-wide memory enforcement.

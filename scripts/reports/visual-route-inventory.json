@@ -1158,6 +1158,17 @@
       "disposition": "analytic-reference-checked-saved-run-renderer"
     },
     {
+      "source": "scripts/reports/render_closed_loop_pilot.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "-phase.png",
+        "phase.png",
+        "syn-nl-lv-01-phase.png"
+      ],
+      "disposition": "analytic-reference-checked-saved-run-renderer",
+      "role_and_disposition_reason": "Validates and renders the fixed source-bound attempt, replay, and coverage records into a versioned standalone report and 2D example; it does not execute a solver or plant."
+    },
+    {
       "source": "scripts/reports/report_data.py",
       "signal_count": 1,
       "asset_name_literals": [],
@@ -2073,6 +2084,20 @@
       ],
       "disposition": "reviewed-static-diagram-exception",
       "role_and_disposition_reason": "Draws a reviewed static fixture diagram from authored input shapes and area formulas; it does not plot a saved run record."
+    },
+    {
+      "source": "benchmarks/reporting/closed_loop/run_closed_loop.py",
+      "signal_count": 9,
+      "asset_name_literals": [
+        "-controls.png",
+        "-phase.png",
+        "-trajectory.png",
+        "controls.png",
+        "phase.png",
+        "trajectory.png"
+      ],
+      "disposition": "analytic-reference-checked-saved-run-renderer",
+      "role_and_disposition_reason": "Runs source-bound observed-state episodes and can render a completed saved attempt without another policy query; phase plots show the single observed trajectory and do not synthesize reachable sets."
     },
     {
       "source": "benchmarks/reporting/issue6/b07_render_projection.py",

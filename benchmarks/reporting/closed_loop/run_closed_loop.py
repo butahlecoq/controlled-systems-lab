@@ -143,7 +143,7 @@ def validate_policy_response(task: dict, task_hash: str, action_profile_id: str,
     if not isinstance(query.get("invocations"), list):
         raise ValueError("policy response must include its actual invocation trace")
     for call in query["invocations"]:
-        if not isinstance(call, dict) or not all(call.get(key) for key in ("operation", "module_id", "provider", "profile_id")):
+        if not isinstance(call, dict) or not all(call.get(key) for key in ("operation", "module_id", "profile_id")) or not (call.get("provider") or call.get("provider_id")):
             raise ValueError("every policy invocation needs operation, module, provider, and profile identities")
     return query
 
@@ -230,8 +230,7 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
                 action_profile_id=action_profile_id)
             row["held_step_request"] = held
             req_path = attempt / f"execution-request-{j:03d}.json"; atomic_json(req_path, held["bridge_request"])
-            proc = subprocess.run([str(bridge), str(req_path)], capture_output=True, text=True, timeout=120)
-            response = json.loads(proc.stdout)
+            response = execute_held_step_bridge(bridge, req_path, attempt, j, row)
             execution = validate_held_step_response(held, response)
             row["execution"] = execution
             row["module_calls"].append({"operation": "execution.advance", "provider": graph["execution"]["provider"],
@@ -328,14 +327,42 @@ def run_limited(command: list[str], stdout_path: Path, stderr_path: Path, *, wal
 
 def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | None = None,
              controller_id: str | None = None, action_profile_id: str | None = None) -> dict:
-    task = load_task(task_name); validate_source_binding(task)
-    action_profile_id = action_profile_id or task["control_domains"]["continuous"]["problem_id"]
-    capability_manifest, graph = resolve_graph(task, action_profile_id, controller_id)
-    controller_id = graph["controller"]["id"]
     attempt_started = time.monotonic()
     attempt_id = f"{task_name}-{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}-{uuid.uuid4().hex[:8]}"
     attempt = root / task_name / "attempts" / attempt_id
     attempt.mkdir(parents=True, exist_ok=False)
+    requested = {"task_name": task_name, "controller_id": controller_id,
+        "action_profile_id": action_profile_id, "policy_adapter": policy_adapter,
+        "bridge": str(bridge)}
+    atomic_json(attempt / "request.json", {"schema": "csl.closed-loop.run-request/1",
+        "attempt_id": attempt_id, "requested": requested,
+        "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()})
+    initial = {"schema": "csl.closed-loop.attempt/1", "attempt_id": attempt_id,
+        "task_id": None, "status": "resolving", "algorithm_status": "not_started",
+        "overall_status": "incomplete", "completed_holds": 0, "requested": requested}
+    atomic_json(attempt / "attempt.json", initial)
+    try:
+        task = load_task(task_name); validate_source_binding(task)
+        requested_action_profile_id = action_profile_id
+        action_profile_id = action_profile_id or task["control_domains"]["continuous"]["problem_id"]
+        capability_manifest, graph = resolve_graph(task, action_profile_id, controller_id)
+        selected_controller_id = graph["controller"]["id"]
+        if policy_adapter and policy_adapter != graph["controller"].get("policy_factory"):
+            raise ValueError("requested policy adapter is not the factory selected by the admitted capability graph")
+        if not bridge.is_file(): raise ValueError(f"common execution bridge does not exist: {bridge}")
+    except Exception as error:
+        status = "refused" if isinstance(error, (ValueError, KeyError, FileNotFoundError)) else "preparation_failed"
+        refusal = {**initial, "task_id": task.get("task_id") if "task" in locals() else None,
+            "status": status, "algorithm_status": status, "overall_status": status,
+            "refusal": {"type": type(error).__name__, "reason": str(error)},
+            "completed_holds": 0, "actual_solver_invocations": 0}
+        atomic_json(attempt / "resolution-refusal.json", refusal["refusal"] | {
+            "schema": "csl.closed-loop.resolution-refusal/1", "requested": requested})
+        atomic_json(attempt / "attempt.json", refusal)
+        return {"task_id": refusal["task_id"] or task_name, "attempt": str(attempt),
+            "status": status, "algorithm_status": status, "postcheck_status": "not_run",
+            "render_status": "not_run", "overall_status": status, "completed_holds": 0}
+    controller_id = selected_controller_id
     source_hashes = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in [
         HERE / "run_closed_loop.py", HERE / "orbit_nmpc.py", HERE / "task_models.py", HERE / "check_episode.py",
         HERE / "check_replay.py", HERE / "capabilities.py", MPC11 / "nmpc.py", MPC11 / "affine.py"]}
@@ -358,6 +385,10 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
             "suite_worker_count": 1, "suite_memory_enforcement": "none; per-process RLIMIT_AS only; no machine-wide limiter"},
         "claim": "one-off correctness pilot; clocks descriptive, no speed comparison"}
     atomic_json(attempt / "run-manifest.json", manifest)
+    initial.update({"task_id": task["task_id"], "task_sha256": manifest_sha256(task),
+        "status": "prepared", "resolved_graph_id": graph["graph_id"],
+        "graph_fingerprint": graph["graph_fingerprint"]})
+    atomic_json(attempt / "attempt.json", initial)
     graph_path = attempt / "resolved-graph.json"
     atomic_json(graph_path, graph)
     atomic_json(attempt / "resolution-receipt.json", {
@@ -365,7 +396,8 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
         "capability_manifest_id": capability_manifest["manifest_id"],
         "capability_manifest_sha256": SIDECAR.read_text().split()[0],
         "task_id": task["task_id"], "task_sha256": manifest_sha256(task),
-        "requested_controller_id": controller_id, "requested_action_profile_id": action_profile_id,
+        "requested_controller_id": requested["controller_id"] or controller_id,
+        "requested_action_profile_id": requested_action_profile_id or action_profile_id,
         "selected_controller_id": graph["controller"]["id"],
         "selected_controller_version": graph["controller"]["version"],
         "selected_execution_id": graph["execution"]["id"],
@@ -395,7 +427,8 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
     final_path = attempt / "attempt.json"
     result = json.loads(final_path.read_text()) if final_path.exists() else {"status": "incomplete", "completed_holds": 0}
     prior_ledger_status = result.get("status")
-    if status != "completed" and prior_ledger_status == "in-progress": result["status"] = "incomplete"
+    if status != "completed" and prior_ledger_status not in {"complete", "incomplete", "refused", "preparation_failed"}:
+        result["status"] = "incomplete"
     if status != "completed":
         result["terminal_supervisor_failure"] = {"status": status, "return_code": proc.returncode,
             "prior_ledger_status": prior_ledger_status, "preserved_stage_records": True,
@@ -404,16 +437,75 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
         "wall_seconds": time.monotonic() - started, "termination_scope": "worker process group",
         "stdout": "worker-stdout.txt", "stderr": "worker-stderr.txt"}
     if status == "completed" and result.get("status") == "complete":
-        replay_attempt(task, result, attempt, bridge)
+        try:
+            replay_attempt(task, result, attempt, bridge)
+        except Exception as error:
+            result["independent_replay"] = {"common": {"status": "failed", "error": f"{type(error).__name__}: {error}"},
+                "tight": {"status": "not_run", "reason": "common postcheck could not be prepared"}}
+            result["postcheck_failure"] = {"type": type(error).__name__, "reason": str(error),
+                "retained_controls_and_episode": True}
+            try:
+                render_attempt(task, result, attempt)
+            except Exception as render_error:
+                result["render"] = {"status": "failed", "error": f"{type(render_error).__name__}: {render_error}"}
     elif result.get("physical_states"):
         result["sampled_constraint_diagnostics"] = physical_constraints(task, result["physical_states"], result["controls"])
     result["end_to_end"] = {"wall_seconds": time.monotonic() - attempt_started,
         "scope": "worker launch, execution, independent CSL replay, bounded checker processes, and rendering",
         "worker_wall_seconds": result["supervisor"]["wall_seconds"],
         "performance_claim": "descriptive single attempt; no speed comparison"}
+    result.update(derive_outcome_status(result))
     atomic_json(final_path, result)
     return {"task_id": task["task_id"], "attempt": str(attempt), "status": status,
+            "algorithm_status": result.get("algorithm_status"),
+            "postcheck_status": result.get("postcheck_status"), "render_status": result.get("render_status"),
+            "overall_status": result.get("overall_status"),
             "completed_holds": result.get("completed_holds", 0), "task_sha256": manifest_sha256(task)}
+
+
+def derive_outcome_status(result: dict) -> dict:
+    algorithm = result.get("algorithm_status", result.get("status", "incomplete"))
+    replay = result.get("independent_replay", {})
+    postcheck = "complete" if all(replay.get(name, {}).get("status") == "complete"
+                                   for name in ("common", "tight")) else ("failed" if replay else "not_run")
+    render = result.get("render", {}).get("status", "not_run")
+    overall = "complete" if algorithm == "complete" and postcheck == "complete" and render == "complete" else "incomplete"
+    return {"algorithm_status": algorithm, "postcheck_status": postcheck,
+            "render_status": render, "overall_status": overall}
+
+
+def execute_held_step_bridge(bridge: Path, request_path: Path, attempt: Path,
+                             stage_index: int, row: dict, timeout_seconds: int = 120) -> dict:
+    """Run one execution slice and persist both streams before parsing its response."""
+    started = time.monotonic()
+    stdout_path = attempt / f"execution-stdout-{stage_index:03d}.txt"
+    stderr_path = attempt / f"execution-stderr-{stage_index:03d}.txt"
+
+    def output_text(value):
+        if value is None: return ""
+        return value.decode("utf-8", errors="replace") if isinstance(value, bytes) else value
+
+    try:
+        proc = subprocess.run([str(bridge), str(request_path)], capture_output=True, text=True, timeout=timeout_seconds)
+        stdout_path.write_text(proc.stdout or "", encoding="utf-8")
+        stderr_path.write_text(proc.stderr or "", encoding="utf-8")
+        row["execution_process"] = {"status": "completed" if proc.returncode == 0 else "failed",
+            "return_code": proc.returncode, "wall_seconds": time.monotonic() - started,
+            "stdout": stdout_path.name, "stderr": stderr_path.name}
+        if proc.returncode != 0:
+            raise RuntimeError(f"held-step bridge exited {proc.returncode}; see {stderr_path.name}")
+    except subprocess.TimeoutExpired as error:
+        stdout_path.write_text(output_text(error.stdout), encoding="utf-8")
+        stderr_path.write_text(output_text(error.stderr), encoding="utf-8")
+        row["execution_process"] = {"status": "timed_out", "return_code": None,
+            "wall_seconds": time.monotonic() - started, "stdout": stdout_path.name,
+            "stderr": stderr_path.name, "timeout_seconds": timeout_seconds}
+        raise
+    try:
+        return json.loads(proc.stdout)
+    except (json.JSONDecodeError, TypeError) as error:
+        row["execution_process"]["response_parse_failure"] = f"{type(error).__name__}: {error}"
+        raise
 
 
 def physical_constraints(task: dict, states, controls) -> dict:
@@ -491,6 +583,8 @@ def replay_attempt(task: dict, result: dict, attempt: Path, bridge: Path, tag: s
         render_attempt(task, result, attempt, tag)
     except Exception as error:
         result["render"] = {"status": "failed", "error": str(error)}
+    outcome = derive_outcome_status(result)
+    result.update(outcome)
     source_hashes = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in [
         "benchmarks/reporting/closed_loop/run_closed_loop.py", "benchmarks/reporting/closed_loop/check_episode.py",
         "benchmarks/reporting/closed_loop/check_replay.py", "benchmarks/reporting/closed_loop/task_models.py"]}
@@ -501,7 +595,9 @@ def replay_attempt(task: dict, result: dict, attempt: Path, bridge: Path, tag: s
         "controls_sha256": result["controls_sha256"], "witness_sha256": witness,
         "checker_source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "checker_source_hashes": source_hashes, "bridge_sha256": hashlib.sha256(bridge.read_bytes()).hexdigest(),
-        "results": replay_rows, "requested_checker_budget": {"wall_seconds": 5, "cpu_seconds": 5,
+        "results": replay_rows, "postcheck_status": outcome["postcheck_status"],
+        "render_status": outcome["render_status"], "overall_status": outcome["overall_status"],
+        "requested_checker_budget": {"wall_seconds": 5, "cpu_seconds": 5,
             "address_space_bytes": 1024**3},
         "memory_scope": "each replay and independent Python checker process receives 1 GiB RLIMIT_AS; no machine-wide or descendant-tree memory counter",
         "postcheck_wall_seconds": time.monotonic() - postcheck_started,
@@ -578,18 +674,39 @@ def write_coverage(root: Path) -> Path:
         except (OSError, json.JSONDecodeError): continue
         replay = record.get("independent_replay", {})
         postchecks = []
-        for postcheck_path in sorted(path.parent.glob("postcheck-*.json")):
+        for postcheck_path in sorted(path.parent.glob("postcheck-*.json"), key=lambda item: item.stat().st_mtime_ns):
             try: postchecks.append(json.loads(postcheck_path.read_text()))
+            except (OSError, json.JSONDecodeError): continue
+        render_records = []
+        for render_path in sorted(path.parent.glob("render-retry-*.json"), key=lambda item: item.stat().st_mtime_ns):
+            try: render_records.append(json.loads(render_path.read_text()))
             except (OSError, json.JSONDecodeError): continue
         if postchecks:
             latest = postchecks[-1].get("results", {})
             replay = {"common": latest.get("common", {}), "tight": latest.get("tight", {})}
         reconciliation_path = path.parent / "supervisor-reconciliation.json"
         reconciliation = json.loads(reconciliation_path.read_text()) if reconciliation_path.exists() else None
+        algorithm_status = reconciliation.get("derived_terminal_status") if reconciliation else record.get("algorithm_status", record.get("status"))
+        replay_statuses = [replay.get(name, {}).get("status") for name in ("common", "tight")]
+        postcheck_status = ("complete" if replay_statuses == ["complete", "complete"] else
+                            ("failed" if any(status not in (None, "not_run") for status in replay_statuses) else "not_run"))
+        render_status = record.get("render", {}).get("status", "not_run")
+        if postchecks:
+            latest_check = postchecks[-1]
+            postcheck_status = latest_check.get("postcheck_status", postcheck_status)
+            render_status = latest_check.get("render_status", render_status)
+        if render_records:
+            render_status = render_records[-1].get("status", render_records[-1].get("render", {}).get("status", render_status))
+        overall_status = record.get("overall_status")
+        if overall_status is None:
+            overall_status = ("complete" if algorithm_status == "complete" and
+                postcheck_status == "complete" and render_status == "complete" else "incomplete")
         rows.append({"attempt_id": record.get("attempt_id"), "task_id": record.get("task_id"),
             "task_sha256": record.get("task_sha256"),
-            "status": reconciliation.get("derived_terminal_status") if reconciliation else record.get("status"),
-            "ledger_status": record.get("status"), "supervisor_reconciliation": reconciliation,
+            "status": overall_status, "overall_status": overall_status,
+            "algorithm_status": algorithm_status, "postcheck_status": postcheck_status,
+            "render_status": render_status, "ledger_status": record.get("status"),
+            "supervisor_reconciliation": reconciliation,
             "completed_holds": record.get("completed_holds", 0), "original_intervals": record.get("original_intervals"),
             "physical_objective": record.get("physical_objective"),
             "common_replay": replay.get("common", {}).get("status"), "tight_replay": replay.get("tight", {}).get("status"),
@@ -601,7 +718,9 @@ def write_coverage(root: Path) -> Path:
         try: failure = json.loads(path.read_text())
         except (OSError, json.JSONDecodeError): continue
         rows.append({"attempt_id": failure.get("attempt_id"), "task_id": failure.get("task_id"),
-            "status": failure.get("status"), "completed_holds": failure.get("completed_holds", 0),
+            "status": failure.get("status"), "overall_status": failure.get("status"),
+            "algorithm_status": failure.get("status"), "postcheck_status": "not_run",
+            "render_status": "not_run", "completed_holds": failure.get("completed_holds", 0),
             "failure": failure.get("failure"), "actual_solver_invocations": failure.get("actual_solver_invocations", 0),
             "attempt_record": str(path.relative_to(root))})
     rows.sort(key=lambda row: row.get("attempt_id", ""))
@@ -644,17 +763,24 @@ def main() -> int:
         if result.get("task_sha256") != manifest_sha256(task) or result.get("status") != "complete":
             parser.error("render-only requires a complete attempt bound to the current immutable task")
         tag = "render-retry-" + uuid.uuid4().hex[:8]
-        render_attempt(task, result, attempt, tag)
+        try:
+            render_attempt(task, result, attempt, tag)
+            render_status = "complete"
+            error = None
+        except Exception as failure:
+            result["render"] = {"status": "failed", "error": f"{type(failure).__name__}: {failure}"}
+            render_status = "failed"
+            error = result["render"]["error"]
         source_hashes = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in [
             "benchmarks/reporting/closed_loop/run_closed_loop.py", "benchmarks/reporting/closed_loop/task_models.py"]}
         render_record = {"schema": "csl.closed-loop.render/1", "render_id": tag,
             "attempt_id": result["attempt_id"], "task_sha256": result["task_sha256"],
             "controls_sha256": result["controls_sha256"], "source_commit": subprocess.check_output(
                 ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(), "renderer_source_hashes": source_hashes,
-            "render": result["render"]}
+            "render": result["render"], "status": render_status, "error": error}
         atomic_json(attempt / f"{tag}.json", render_record)
         print(json.dumps(render_record, indent=2))
-        return 0
+        return 0 if render_status == "complete" else 1
     if args.replay_only:
         attempt = args.replay_only.resolve(); result = json.loads((attempt / "attempt.json").read_text())
         task_name = {"syn-nl-lv-01/continuous-receding/1": "syn-nl-lv-01",
@@ -666,17 +792,22 @@ def main() -> int:
             parser.error("replay-only requires a complete attempt bound to the current immutable task")
         tag = "full-replay-retry-" + uuid.uuid4().hex[:8]
         replay_attempt(task, result, attempt, args.bridge.resolve(), tag)
-        print(json.dumps({"attempt": str(attempt), "replay_retry": tag, "status": result["status"],
+        print(json.dumps({"attempt": str(attempt), "replay_retry": tag, "status": result["overall_status"],
+                          "algorithm_status": result["algorithm_status"],
+                          "postcheck_status": result["postcheck_status"],
+                          "render_status": result["render_status"],
                           "independent_replay": result["independent_replay"]}, indent=2))
-        return 0
+        return 0 if result["overall_status"] == "complete" else 1
     names = ["syn-nl-lv-01", "earth-orbit", "syn-nl-fuel-01"] if args.task == "all" else [args.task]
     rows = [run_task(name, args.output_root.resolve(), args.bridge.resolve(), args.policy_adapter,
                      args.controller_id, args.action_profile_id) for name in names]
     coverage_path = write_coverage(args.output_root.resolve())
     print(json.dumps({"schema": "csl.closed-loop.coverage/1", "coverage_record": str(coverage_path), "attempts": rows,
-        "coverage": [{"task_id": row["task_id"], "status": row["status"], "completed_holds": row["completed_holds"],
-                      "actual_observed_state_updates": row["completed_holds"]} for row in rows]}, indent=2))
-    return 0 if all(row["status"] == "completed" for row in rows) else 1
+        "coverage": [{"task_id": row["task_id"], "algorithm_status": row.get("algorithm_status"),
+            "postcheck_status": row.get("postcheck_status"), "render_status": row.get("render_status"),
+            "overall_status": row.get("overall_status"), "completed_holds": row["completed_holds"],
+            "actual_observed_state_updates": row["completed_holds"]} for row in rows]}, indent=2))
+    return 0 if all(row.get("overall_status") == "complete" for row in rows) else 1
 
 
 if __name__ == "__main__":
