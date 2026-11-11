@@ -250,9 +250,9 @@ Json query(const Json& in) {
         if constexpr(std::is_same_v<T, optimization::NominalTrackUnsupported>) return "unsupported";
         return "stopped";
     }, track.outcome);
-    Json invocations = Json::array({{{"module_id", "csl.optimization.finite-action-nominal"},
+    Json invocations = Json::array({{{"module_id", "csl::optimization::finite_action_nominal_profile"},
         {"operation", operations.at(representation_index)},
-        {"provider_id", "csl.optimization.finite-action-nominal@1"},
+        {"provider", "public-function"},
         {"profile_id", in.at("controller_id")}, {"outcome", route_outcome}}});
     Json base{{"task_id", in.at("task_id")}, {"task_sha256", in.at("task_sha256")},
         {"action_profile_id", in.at("action_profile_id")},
