@@ -117,6 +117,50 @@ Json set_json(const sets::SetData& set) {
     }, set.representation());
 }
 
+struct TraceJsonVisitor {
+    Json& stages;
+    std::string& representation;
+    std::string& relation;
+
+    void operator()(const reachability::FixedPlanReachable& trace) const {
+        representation = "exact-polytope";
+        relation = "equivalent";
+        for(const auto& set : trace.stages) stages.push_back(set_json(set));
+    }
+
+    void operator()(const reachability::FinitePlanBoxTrace& trace) const {
+        representation = "box";
+        relation = "outer";
+        for(const auto& stage : trace.stages)
+            stages.push_back({{"lower", stage.lower}, {"upper", stage.upper}});
+    }
+
+    void operator()(const reachability::FinitePlanZonotopeTrace& trace) const {
+        representation = "zonotope";
+        relation = "outer";
+        for(const auto& stage : trace.stages)
+            stages.push_back({{"center", stage.center},
+                {"generators", matrix_json(stage.generators.rows, stage.generators.cols,
+                    [&](std::size_t i, std::size_t j) {
+                        return stage.generators.values[i * stage.generators.cols + j];
+                    })}});
+    }
+
+    void operator()(const reachability::FinitePlanParallelotopeTrace& trace) const {
+        representation = "parallelotope";
+        relation = "outer";
+        for(const auto& stage : trace.stages)
+            stages.push_back({{"lower", stage.lower}, {"upper", stage.upper}});
+    }
+
+    void operator()(const reachability::FinitePlanEllipsoidTrace& trace) const {
+        representation = "ellipsoid";
+        relation = "outer";
+        for(const auto& stage : trace.stages)
+            stages.push_back({{"center", stage.center}, {"radii", stage.radii}});
+    }
+};
+
 sets::SetData safe_box(const Json& bounds, std::size_t dimension, const std::string& id) {
     std::size_t count = 0;
     for(const auto& bound : bounds) if(!bound.is_null()) count += 2;
@@ -191,27 +235,7 @@ Json trace_json(const optimization::NominalTrackSelected& selected) {
     Json stages = Json::array();
     std::string representation;
     std::string relation;
-    std::visit([&](const auto& trace) {
-        using T = std::decay_t<decltype(trace)>;
-        if constexpr(std::is_same_v<T, reachability::FixedPlanReachable>) {
-            representation = "exact-polytope"; relation = "equivalent";
-            for(const auto& set : trace.stages) stages.push_back(set_json(set));
-        } else if constexpr(std::is_same_v<T, reachability::FinitePlanBoxTrace>) {
-            representation = "box"; relation = "outer";
-            for(const auto& stage : trace.stages) stages.push_back({{"lower", stage.lower}, {"upper", stage.upper}});
-        } else if constexpr(std::is_same_v<T, reachability::FinitePlanZonotopeTrace>) {
-            representation = "zonotope"; relation = "outer";
-            for(const auto& stage : trace.stages) stages.push_back({{"center", stage.center},
-                {"generators", matrix_json(stage.generators.rows, stage.generators.cols,
-                    [&](std::size_t i, std::size_t j) { return stage.generators.values[i * stage.generators.cols + j]; })}});
-        } else if constexpr(std::is_same_v<T, reachability::FinitePlanParallelotopeTrace>) {
-            representation = "parallelotope"; relation = "outer";
-            for(const auto& stage : trace.stages) stages.push_back({{"lower", stage.lower}, {"upper", stage.upper}});
-        } else {
-            representation = "ellipsoid"; relation = "outer";
-            for(const auto& stage : trace.stages) stages.push_back({{"center", stage.center}, {"radii", stage.radii}});
-        }
-    }, selected.selected_trace);
+    std::visit(TraceJsonVisitor{stages, representation, relation}, selected.selected_trace);
     return {{"role", "fixed-plan-trajectory-enclosure"}, {"representation", representation},
         {"relation", relation}, {"assurance", "numerical"}, {"stages", std::move(stages)}};
 }
