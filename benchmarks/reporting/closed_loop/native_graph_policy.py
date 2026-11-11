@@ -12,10 +12,10 @@ from task_models import prediction_receipt, source_scenario
 
 _PROFILES = {
     "native-exact-polytope-backward-graph/1": (0, True, "exact-polytope"),
-    "native-box-mpc/1": (1, False, "box"),
-    "native-zonotope-mpc/1": (2, False, "zonotope"),
-    "native-parallelotope-mpc/1": (3, False, "parallelotope"),
-    "native-ellipsoid-mpc/1": (4, False, "ellipsoid"),
+    "native-box-mpc/1": (1, True, "box"),
+    "native-zonotope-mpc/1": (2, True, "zonotope"),
+    "native-parallelotope-mpc/1": (3, True, "parallelotope"),
+    "native-ellipsoid-mpc/1": (4, True, "ellipsoid"),
 }
 
 
@@ -120,7 +120,7 @@ class NativeGraphPolicy:
             "objective_id": task["objective"]["objective_id"],
             "original_horizon": self.original_horizon, "action_profile_id": action_profile_id,
             "representation": self.representation_name,
-            "controller_semantics": "finite-action receding-horizon MPC; exact graph profile adds backward retained-graph filtering"}
+            "controller_semantics": "finite-action receding-horizon graph MPC with source-cost ranking, numerical H predecessor membership, discrete transition witnesses, and the explicitly selected representation's one-step outer edge filter"}
 
     def query(self, task_id: str, observed_physical_state: list[float], absolute_update_index: int) -> dict:
         if task_id != self.task["task_id"] or not 0 <= absolute_update_index < self.original_horizon:
@@ -157,6 +157,7 @@ class NativeGraphPolicy:
         if not line:
             raise RuntimeError(f"native policy bridge exited before returning a response (code {self.process.poll()})")
         response = json.loads(line)
+        native_response = dict(response)
         if response.get("task_id") != task_id or response.get("task_sha256") != self.task_sha256:
             raise ValueError(f"native controller response does not echo source task identity: {response}")
         if response.get("action_profile_id") != self.action_profile_id:
@@ -167,6 +168,13 @@ class NativeGraphPolicy:
             "remaining_prediction_steps": horizon, "original_update_index": absolute_update_index}
         response["coverage"] = response.get("selector", {}).get("search_coverage",
             response.get("graph_receipt", {}).get("search_coverage", "not_applicable"))
+        response["query_receipt"] = {"schema": "csl.closed-loop.native-query-capture/1",
+            "task_id": task_id, "task_sha256": self.task_sha256,
+            "action_profile_id": self.action_profile_id, "absolute_update_index": absolute_update_index,
+            "request": request,
+            "bridge_response_sha256": hashlib.sha256(json.dumps(native_response, sort_keys=True,
+                separators=(",", ":"), allow_nan=False).encode()).hexdigest(),
+            "bridge_response": native_response}
         return response
 
     def close(self) -> None:

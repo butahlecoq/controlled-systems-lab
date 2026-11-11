@@ -6,6 +6,8 @@
 #include <csl/optimization/phase_one.hpp>
 #include <csl/optimization/finite_action_graph.hpp>
 
+#include <array>
+
 using namespace csl;
 using namespace csl::optimization;
 
@@ -176,6 +178,47 @@ TEST_CASE("registered affine-sum reachable envelopes guard every discrete child"
     CHECK(result.nodes[result.selected_nodes[1]].reachable_envelope_contains == true);
     CHECK(result.nodes[result.selected_nodes[2]].reachable_envelope_contains == true);
     CHECK(result.nodes[result.selected_nodes[1]].action_index == 1);
+}
+
+TEST_CASE("each selected numerical set route filters original discrete edges before Bellman selection") {
+    const std::array routes{NominalRepresentation::box,NominalRepresentation::zonotope,
+        NominalRepresentation::parallelotope,NominalRepresentation::ellipsoid};
+    for(const auto route:routes) {
+        auto request=viability_request();
+        request.admissible_states[0]=h_box({-0.1,-0.1},{0.1,0.1},"graph-approximate-stage0");
+        request.admissible_states[1]=h_box({0.9,-0.1},{1.1,0.1},"graph-approximate-stage1");
+        request.admissible_states[2]=h_box({-0.1,-0.1},{2.1,0.1},"graph-approximate-stage2");
+        auto provider=projection_provider();
+        const auto outcome=finite_action_stage_layered_graph(request,{4,32,route,128},provider);
+        REQUIRE(std::holds_alternative<FiniteActionGraphResult>(outcome));
+        const auto& result=std::get<FiniteActionGraphResult>(outcome);
+        MESSAGE("representation=" << static_cast<int>(route) << " calls=" << result.representation_filter_calls
+            << " rejected=" << result.representation_filter_rejections);
+        for(const auto& node:result.nodes)
+            if(node.representation_filter_passed.has_value()) MESSAGE(node.representation_filter_outcome);
+        REQUIRE(result.has_viable_path);
+        CHECK(result.representation_filter_calls>0);
+        CHECK(result.nodes[result.selected_nodes[1]].action_index==1);
+        CHECK(result.nodes[result.selected_nodes[1]].representation_filter_passed==true);
+        CHECK(result.nodes[result.selected_nodes[2]].representation_filter_passed==true);
+        CHECK(result.nodes[result.selected_nodes[1]].representation_outer_lower.size()==2);
+        CHECK(result.nodes[result.selected_nodes[1]].representation_outer_upper.size()==2);
+    }
+}
+
+TEST_CASE("outer edge filter refusal stays distinct from discrete graph infeasibility") {
+    auto request=viability_request();
+    auto provider=projection_provider();
+    const auto outcome=finite_action_stage_layered_graph(request,
+        {4,32,NominalRepresentation::box,128},provider);
+    REQUIRE(std::holds_alternative<FiniteActionGraphResult>(outcome));
+    const auto& result=std::get<FiniteActionGraphResult>(outcome);
+    CHECK_FALSE(result.has_viable_path);
+    CHECK(result.representation_filter_calls>0);
+    CHECK(result.representation_filter_rejections>0);
+    CHECK(std::ranges::any_of(result.nodes,[](const auto& node) {
+        return node.representation_filter_outcome=="outer_enclosure_not_contained_in_stage_set";
+    }));
 }
 
 TEST_CASE("graph rejects malformed source cost before numerical evaluation") {

@@ -2,7 +2,12 @@
 
 #include <csl/geometry/polyhedral_intersection.hpp>
 #include <csl/reachability/nominal_predecessor.hpp>
+#include <csl/reachability/finite_plan_box.hpp>
+#include <csl/reachability/finite_plan_zonotope.hpp>
+#include <csl/reachability/finite_plan_parallelotope.hpp>
+#include <csl/reachability/finite_plan_ellipsoid.hpp>
 #include <csl/sets/data.hpp>
+#include <csl/model/linear_system.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -177,8 +182,144 @@ struct Candidate {
     double heuristic{};
     bool state_admissible{};
     std::optional<bool> reachable_envelope_contains;
+    std::optional<bool> representation_filter_passed;
+    std::string representation_filter_outcome;
+    Vector representation_outer_lower;
+    Vector representation_outer_upper;
     std::vector<std::size_t> lineage;
 };
+
+struct RepresentationFilter { bool passed{}; std::string outcome; Vector lower; Vector upper; };
+using RepresentationFilterOutcome = std::variant<RepresentationFilter, Unsupported, OperationStopped>;
+
+Matrix copy_matrix(const numeric::MatrixView& source) {
+    Matrix result{source.rows(), source.cols(), Vector(source.rows() * source.cols())};
+    for(std::size_t row=0;row<source.rows();++row)
+        for(std::size_t col=0;col<source.cols();++col)
+            result.values[row*result.cols+col]=source(row,col);
+    return result;
+}
+
+RepresentationFilterOutcome representation_edge_filter(const FiniteActionNominalRequest& request,
+        NominalRepresentation representation, std::size_t stage, const Vector& parent,
+        const Vector& action, const Vector& expected_child, std::size_t max_generators,
+        const std::string& edge_id, const ExecutionContext& context) {
+    const auto source_dynamics=request.system.stage({stage});
+    if(const auto* error=std::get_if<Diagnostic>(&source_dynamics))
+        return unsupported(error->field,error->explanation);
+    const auto& d=std::get<model::DynamicsStage>(source_dynamics);
+    const auto dimensions=request.system.dimensions();
+    const Matrix a=copy_matrix(d.A),b=copy_matrix(d.B),e{dimensions.state,dimensions.external,
+        Vector(dimensions.state*dimensions.external)};
+    Vector offset(dimensions.state);
+    for(std::size_t i=0;i<dimensions.state;++i) offset[i]=d.offset[i];
+    SystemModel one_step_model{{dimensions,TimeDomain::discrete,
+        std::vector<LinearStage>{{a,b,e,offset}}},{}};
+    const double times[]{0.0,1.0};
+    auto system=model::snapshot(one_step_model,times);
+    if(const auto* error=std::get_if<Diagnostic>(&system)) return unsupported(error->field,error->explanation);
+    const auto singleton=[&](const Vector& values,const std::string& id)->std::variant<sets::SetData,Unsupported> {
+        auto view=numeric::snapshot_vector(values);
+        if(const auto* error=std::get_if<Diagnostic>(&view)) return unsupported(error->field,error->explanation);
+        auto set=sets::make_singleton({{id},values.size(),{}},std::get<numeric::VectorView>(view));
+        if(const auto* error=std::get_if<Diagnostic>(&set)) return unsupported(error->field,error->explanation);
+        return std::get<sets::SetData>(std::move(set));
+    };
+    auto initial=singleton(parent,"graph-representation-parent");
+    if(const auto* error=std::get_if<Unsupported>(&initial)) return *error;
+    auto disturbance=singleton(request.nominal_disturbances[stage],"graph-representation-disturbance");
+    if(const auto* error=std::get_if<Unsupported>(&disturbance)) return *error;
+    reachability::FixedPlanRequest fixed{std::get<model::LinearSystem>(std::move(system)),
+        std::get<sets::SetData>(std::move(initial)),{action},
+        {std::get<sets::SetData>(std::move(disturbance))},
+        {request.admissible_states[stage],request.admissible_states[stage+1]},
+        {request.request.value+"/representation-edge-"+edge_id}};
+
+    Vector lower,upper;
+    const auto bounded=[&](const auto& trace)->bool {
+        const auto& last=trace.stages.back();
+        lower.assign(dimensions.state,0.0); upper.assign(dimensions.state,0.0);
+        if constexpr(std::is_same_v<std::decay_t<decltype(last)>,reachability::BoxStage>) {
+            lower=last.lower;upper=last.upper;
+        } else if constexpr(std::is_same_v<std::decay_t<decltype(last)>,reachability::FinitePlanZonotopeTrace::Stage>) {
+            lower=last.center;upper=last.center;
+            for(std::size_t row=0;row<dimensions.state;++row)
+                for(std::size_t col=0;col<last.generators.cols;++col) {
+                    const auto radius=std::abs(last.generators.values[row*last.generators.cols+col]);
+                    lower[row]-=radius;upper[row]+=radius;
+                }
+        } else if constexpr(std::is_same_v<std::decay_t<decltype(last)>,reachability::ParallelotopeStage>) {
+            for(std::size_t row=0;row<dimensions.state;++row)
+                for(std::size_t col=0;col<dimensions.state;++col) {
+                    const auto q=trace.frame.values[row*dimensions.state+col];
+                    const auto midpoint=(last.lower[col]+last.upper[col])*0.5;
+                    const auto radius=(last.upper[col]-last.lower[col])*0.5;
+                    lower[row]+=q*midpoint-std::abs(q)*radius;
+                    upper[row]+=q*midpoint+std::abs(q)*radius;
+                }
+        } else {
+            for(std::size_t row=0;row<dimensions.state;++row) {
+                lower[row]=last.center[row]-last.radii[row];
+                upper[row]=last.center[row]+last.radii[row];
+            }
+        }
+        return lower.size()==expected_child.size() && upper.size()==expected_child.size();
+    };
+    const auto member=[&]() {
+        for(std::size_t i=0;i<expected_child.size();++i)
+            if(expected_child[i]<lower[i]-1e-9-1e-10*std::abs(expected_child[i]) ||
+               expected_child[i]>upper[i]+1e-9+1e-10*std::abs(expected_child[i])) return false;
+        return true;
+    };
+    const auto not_outer_safe=[](const Unsupported& value) {
+        return !value.diagnostics.empty() && value.diagnostics.front().field.find("safe_sets")!=std::string::npos;
+    };
+    if(representation==NominalRepresentation::box) {
+        auto result=reachability::finite_plan_box(fixed,context);
+        if(const auto* stopped=std::get_if<OperationStopped>(&result))return *stopped;
+        if(const auto* error=std::get_if<Unsupported>(&result)) {
+            if(not_outer_safe(*error))return RepresentationFilter{false,"outer_enclosure_not_contained_in_stage_set",{}, {}};
+            return *error;
+        }
+        bounded(std::get<reachability::FinitePlanBoxTrace>(result));
+        const bool contains=member();
+        return RepresentationFilter{contains,contains?"box_outer_contains_discrete_child":"box_outer_misses_discrete_child",std::move(lower),std::move(upper)};
+    }
+    if(representation==NominalRepresentation::zonotope) {
+        auto result=reachability::finite_plan_zonotope(fixed,{max_generators},context);
+        if(const auto* stopped=std::get_if<OperationStopped>(&result))return *stopped;
+        if(const auto* error=std::get_if<Unsupported>(&result)) {
+            if(not_outer_safe(*error))return RepresentationFilter{false,"outer_enclosure_not_contained_in_stage_set",{}, {}};
+            return *error;
+        }
+        bounded(std::get<reachability::FinitePlanZonotopeTrace>(result));
+        const bool contains=member();
+        return RepresentationFilter{contains,contains?"zonotope_coordinate_outer_contains_discrete_child":"zonotope_coordinate_outer_misses_discrete_child",std::move(lower),std::move(upper)};
+    }
+    if(representation==NominalRepresentation::parallelotope) {
+        auto result=reachability::finite_plan_parallelotope(fixed,context);
+        if(const auto* stopped=std::get_if<OperationStopped>(&result))return *stopped;
+        if(const auto* error=std::get_if<Unsupported>(&result)) {
+            if(not_outer_safe(*error))return RepresentationFilter{false,"outer_enclosure_not_contained_in_stage_set",{}, {}};
+            return *error;
+        }
+        bounded(std::get<reachability::FinitePlanParallelotopeTrace>(result));
+        const bool contains=member();
+        return RepresentationFilter{contains,contains?"parallelotope_coordinate_outer_contains_discrete_child":"parallelotope_coordinate_outer_misses_discrete_child",std::move(lower),std::move(upper)};
+    }
+    if(representation==NominalRepresentation::ellipsoid) {
+        auto result=reachability::finite_plan_ellipsoid(fixed,context);
+        if(const auto* stopped=std::get_if<OperationStopped>(&result))return *stopped;
+        if(const auto* error=std::get_if<Unsupported>(&result)) {
+            if(not_outer_safe(*error))return RepresentationFilter{false,"outer_enclosure_not_contained_in_stage_set",{}, {}};
+            return *error;
+        }
+        bounded(std::get<reachability::FinitePlanEllipsoidTrace>(result));
+        const bool contains=member();
+        return RepresentationFilter{contains,contains?"ellipsoid_coordinate_outer_contains_discrete_child":"ellipsoid_coordinate_outer_misses_discrete_child",std::move(lower),std::move(upper)};
+    }
+    return unsupported("finite_graph.representation_filter","Only box, zonotope, parallelotope and ellipsoid edge filters are supported.");
+}
 
 struct PredecessorCheck { bool contains_parent{}; };
 using PredecessorOutcome = std::variant<PredecessorCheck, Unsupported, OperationStopped>;
@@ -438,7 +579,7 @@ static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(const Fin
     ++graph.stage_intersection_calls;
     const bool initial_ok = contains_with_tolerance(std::get<sets::SetData>(root_intersection), request.initial_state);
     graph.nodes.push_back({0, request.initial_state, {}, {}, 0.0, 0.0, initial_ok, initial_ok,
-        false, {}, {}, {}, {}, FiniteGraphBackwardStatus::root_node, {}});
+        false, {}, {}, {}, {}, FiniteGraphBackwardStatus::root_node, {}, {}, {}, {}, {}});
     graph.layers[0].push_back(0);
     graph.layer_statistics[0].retained = 1;
     if(!initial_ok) {
@@ -487,6 +628,28 @@ static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(const Fin
                 const auto edge_cost = stage_cost(request.running_cost, absolute, request.actions.catalogue[action_index]);
                 if(!std::isfinite(edge_cost))
                     return unsupported("finite_graph.running_cost.overflow", "Authored running cost overflowed for a finite discrete edge; graph scores are not ranked.");
+                std::optional<bool> representation_filter_passed;
+                std::string representation_filter_outcome;
+                Vector representation_outer_lower,representation_outer_upper;
+                if(limits.edge_representation_filter) {
+                    if(!state_ok) {
+                        representation_filter_passed=false;
+                        representation_filter_outcome="discrete_child_outside_authored_stage_set";
+                    } else {
+                        const auto filtered=representation_edge_filter(request,*limits.edge_representation_filter,
+                            stage,parent.state,request.actions.catalogue[action_index],next,
+                            limits.max_generators_per_stage,std::to_string(parent_id)+"-"+
+                                std::to_string(action_index),context);
+                        ++graph.representation_filter_calls;
+                        if(const auto* error=std::get_if<Unsupported>(&filtered)) return *error;
+                        if(const auto* stopped=std::get_if<OperationStopped>(&filtered)) return *stopped;
+                        representation_filter_passed=std::get<RepresentationFilter>(filtered).passed;
+                        representation_filter_outcome=std::get<RepresentationFilter>(filtered).outcome;
+                        representation_outer_lower=std::get<RepresentationFilter>(filtered).lower;
+                        representation_outer_upper=std::get<RepresentationFilter>(filtered).upper;
+                    }
+                    if(representation_filter_passed==false) ++graph.representation_filter_rejections;
+                }
                 const auto terminal_value = evaluate(request.objective, next);
                 if(const auto* error = std::get_if<Diagnostic>(&terminal_value)) return unsupported(error->field, error->explanation);
                 const double terminal = std::get<double>(terminal_value);
@@ -496,13 +659,17 @@ static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(const Fin
                 auto lineage = parent.action_lineage;
                 lineage.push_back(action_index);
                 candidates.push_back({parent_id, action_index, std::move(next), edge_cost, heuristic,
-                    state_ok, envelope_ok, std::move(lineage)});
+                    state_ok, envelope_ok, representation_filter_passed,
+                    std::move(representation_filter_outcome),std::move(representation_outer_lower),
+                    std::move(representation_outer_upper),std::move(lineage)});
             }
         }
         auto& stats = graph.layer_statistics[stage];
         stats.generated = candidates.size();
         std::stable_sort(candidates.begin(), candidates.end(), [](const Candidate& left, const Candidate& right) {
             if(left.state_admissible != right.state_admissible) return left.state_admissible > right.state_admissible;
+            if(left.representation_filter_passed.value_or(true) != right.representation_filter_passed.value_or(true))
+                return left.representation_filter_passed.value_or(true) > right.representation_filter_passed.value_or(true);
             if(left.heuristic != right.heuristic) return left.heuristic < right.heuristic;
             if(left.parent != right.parent) return left.parent < right.parent;
             if(left.action_index != right.action_index) return left.action_index < right.action_index;
@@ -517,10 +684,14 @@ static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(const Fin
             graph.nodes.push_back({stage + 1, candidate.state, candidate.parent, candidate.action_index,
                 candidate.edge_cost, candidate.heuristic, candidate.state_admissible,
                 candidate.state_admissible, false, {}, {}, {}, candidate.lineage,
-                FiniteGraphBackwardStatus::pending, candidate.reachable_envelope_contains});
+                FiniteGraphBackwardStatus::pending, candidate.reachable_envelope_contains,
+                candidate.representation_filter_passed,candidate.representation_filter_outcome,
+                candidate.representation_outer_lower,candidate.representation_outer_upper});
             graph.layers[stage + 1].push_back(node_id);
             ++graph.layer_statistics[stage + 1].retained;
             if(!candidate.state_admissible) ++graph.layer_statistics[stage + 1].stage_inadmissible;
+            if(candidate.representation_filter_passed==false)
+                ++graph.layer_statistics[stage+1].representation_filter_rejected;
         }
         if(retained < candidates.size() && graph.nodes.size() >= limits.max_nodes) graph.node_budget_exhausted = true;
         if(retained == 0) break;
@@ -531,9 +702,12 @@ static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(const Fin
 
     for(const auto id : graph.layers.back()) {
         auto& node = graph.nodes[id];
-        node.backward_viable = node.state_admissible && node.reachable_envelope_contains.value_or(true);
-        node.backward_status = node.state_admissible ? FiniteGraphBackwardStatus::terminal_admissible :
-            FiniteGraphBackwardStatus::terminal_outside_stage_set;
+        node.backward_viable = node.state_admissible && node.reachable_envelope_contains.value_or(true) &&
+            node.representation_filter_passed.value_or(true);
+        node.backward_status = !node.representation_filter_passed.value_or(true) ?
+            FiniteGraphBackwardStatus::representation_filter_rejected :
+            (node.state_admissible ? FiniteGraphBackwardStatus::terminal_admissible :
+                FiniteGraphBackwardStatus::terminal_outside_stage_set);
         if(node.backward_viable) {
             const auto value = evaluate(request.objective, node.state);
             if(const auto* error = std::get_if<Diagnostic>(&value)) return unsupported(error->field, error->explanation);
@@ -546,7 +720,8 @@ static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(const Fin
         for(const auto child_id : graph.layers[stage + 1]) {
             auto& child = graph.nodes[child_id];
             if(!child.backward_viable) {
-                child.backward_status = FiniteGraphBackwardStatus::skipped_suffix_nonviable;
+                if(child.representation_filter_passed.value_or(true))
+                    child.backward_status = FiniteGraphBackwardStatus::skipped_suffix_nonviable;
                 continue;
             }
             auto& parent = graph.nodes[*child.parent_node];
@@ -578,9 +753,11 @@ static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(const Fin
             if(!*child.predecessor_contains_parent) child.backward_status = FiniteGraphBackwardStatus::predecessor_membership_false;
             else if(!*child.discrete_transition_witness) child.backward_status = FiniteGraphBackwardStatus::discrete_transition_witness_failed;
             else if(!parent.state_admissible) child.backward_status = FiniteGraphBackwardStatus::parent_stage_intersection_empty;
+            else if(!child.representation_filter_passed.value_or(true)) child.backward_status = FiniteGraphBackwardStatus::representation_filter_rejected;
             else child.backward_status = eligible_status();
             child.backward_viable = *child.discrete_transition_witness && *child.predecessor_contains_parent &&
-                parent.state_admissible && child.reachable_envelope_contains.value_or(true);
+                parent.state_admissible && child.reachable_envelope_contains.value_or(true) &&
+                child.representation_filter_passed.value_or(true);
             if(!child.backward_viable) continue;
             const double candidate = child.edge_running_cost + *child.backward_value;
             if(!std::isfinite(candidate))

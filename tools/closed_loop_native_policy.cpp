@@ -278,6 +278,7 @@ std::string backward_status(optimization::FiniteGraphBackwardStatus status) {
         case Status::predecessor_membership_false: return "numerical-predecessor-membership-false";
         case Status::discrete_transition_witness_failed: return "discrete-transition-witness-failed";
         case Status::parent_stage_intersection_empty: return "parent-stage-intersection-empty";
+        case Status::representation_filter_rejected: return "representation-filter-rejected";
         case Status::eligible_numerical_predecessor_and_discrete_edge:
             return "eligible-numerical-predecessor-and-discrete-edge";
     }
@@ -285,7 +286,9 @@ std::string backward_status(optimization::FiniteGraphBackwardStatus status) {
 }
 
 Json graph_response(const Json& input, const optimization::FiniteActionNominalRequest& request,
-                    std::size_t beam_width, std::size_t max_nodes) {
+                    std::size_t beam_width, std::size_t max_nodes,
+                    optimization::NominalRepresentation representation,
+                    std::size_t max_generators) {
     const auto reachable_set_method = input.at("reachable_set_method").get<std::string>();
     if(reachable_set_method != "csl.geometry.affine-sum")
         return query_failure(input, "unsupported", "This build does not contain the explicitly requested reachable-set method.");
@@ -303,7 +306,8 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
     auto provider = std::get<registry::PreparedProvider<registry::GeometryPort>>(std::move(prepared));
     const auto reachable_provider = affine_sum_provider();
     const auto outcome = optimization::finite_action_stage_layered_graph(request,
-        {beam_width, max_nodes}, provider, reachable_provider);
+        {beam_width, max_nodes, representation==optimization::NominalRepresentation::exact_polytope ?
+            std::nullopt : std::optional{representation},max_generators}, provider, reachable_provider);
     if(const auto* error = std::get_if<Unsupported>(&outcome))
         return {{"status", "unsupported"}, {"reason", error->diagnostics.empty() ? "unsupported graph request" : error->diagnostics.front().explanation}};
     if(const auto* stopped = std::get_if<OperationStopped>(&outcome))
@@ -311,10 +315,13 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
     const auto& graph = std::get<optimization::FiniteActionGraphResult>(outcome);
     const auto& provenance = provider.provenance();
     const auto provider_id = provenance.actual ? provenance.actual->id.value + "@" + provenance.actual->version : "unresolved-provider";
+    const std::array<std::string,5> representation_names{"exact-polytope","box","zonotope","parallelotope","ellipsoid"};
+    const auto representation_index=static_cast<std::size_t>(representation);
     Json layers = Json::array(), nodes = Json::array(), edges = Json::array();
     for(const auto& stat : graph.layer_statistics)
         layers.push_back({{"stage", stat.stage}, {"generated", stat.generated}, {"retained", stat.retained},
-            {"pruned", stat.pruned}, {"infeasible", stat.stage_inadmissible}});
+            {"pruned", stat.pruned}, {"infeasible", stat.stage_inadmissible},
+            {"representation_filter_rejected",stat.representation_filter_rejected}});
     for(std::size_t id = 0; id < graph.nodes.size(); ++id) {
         const auto& node = graph.nodes[id];
         nodes.push_back({{"node_id", id}, {"absolute_stage", request.absolute_stage_offset + node.stage},
@@ -323,6 +330,11 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
             {"edge_running_cost", node.edge_running_cost}, {"heuristic_score", node.heuristic_score},
             {"state_admissible", node.state_admissible}, {"stage_set_intersection_nonempty", node.stage_intersection_nonempty},
             {"reachable_envelope_contains", node.reachable_envelope_contains ? Json(*node.reachable_envelope_contains) : Json(nullptr)},
+            {"representation_filter_passed",node.representation_filter_passed?Json(*node.representation_filter_passed):Json(nullptr)},
+            {"representation_filter_outcome",node.representation_filter_outcome},
+            {"representation_edge_outer_enclosure",node.representation_outer_lower.empty()?Json(nullptr):Json{{"lower",node.representation_outer_lower},
+                {"upper",node.representation_outer_upper},{"representation",representation_names.at(representation_index)},
+                {"coordinate_outer_box",true},{"relation","outer"},{"assurance","numerical"}}},
             {"backward_viable", node.backward_viable},
             {"predecessor_contains_parent", node.predecessor_contains_parent ? Json(*node.predecessor_contains_parent) : Json(nullptr)},
             {"discrete_transition_witness", node.discrete_transition_witness ? Json(*node.discrete_transition_witness) : Json(nullptr)},
@@ -338,6 +350,11 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
                 {"action_lineage", node.action_lineage}, {"backward_viable", node.backward_viable},
                 {"predecessor_contains_parent", node.predecessor_contains_parent ? Json(*node.predecessor_contains_parent) : Json(nullptr)},
                 {"discrete_transition_witness", node.discrete_transition_witness ? Json(*node.discrete_transition_witness) : Json(nullptr)},
+                {"representation_filter_passed",node.representation_filter_passed?Json(*node.representation_filter_passed):Json(nullptr)},
+                {"representation_filter_outcome",node.representation_filter_outcome},
+                {"representation_edge_outer_enclosure",node.representation_outer_lower.empty()?Json(nullptr):Json{{"lower",node.representation_outer_lower},
+                    {"upper",node.representation_outer_upper},{"representation",representation_names.at(representation_index)},
+                    {"coordinate_outer_box",true},{"relation","outer"},{"assurance","numerical"}}},
                 {"backward_edge_status", backward_status(node.backward_status)}});
         }
     Json invocations = Json::array({{{"module_id", "csl::optimization::finite_action_stage_layered_graph"},
@@ -366,10 +383,20 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
         {"operation", "registered Minkowski sum with stage-transformed authored discrete action hull"},
         {"provider", reachable_provider_id}, {"selected_method_id", reachable_set_method}, {"profile_id", input.at("controller_id")},
         {"calls", graph.reachable_envelope_calls / 2}, {"relation", "equivalent"}, {"assurance", "numerical"}});
+    const std::array<std::string,5> representation_modules{"not_used", "csl::reachability::finite_plan_box",
+        "csl::reachability::finite_plan_zonotope", "csl::reachability::finite_plan_parallelotope",
+        "csl::reachability::finite_plan_ellipsoid"};
+    if(representation_index>0) invocations.push_back({{"module_id",representation_modules.at(representation_index)},
+        {"operation","one-step fixed-discrete-edge outer enclosure, authored-stage safety check, and coordinate-outer child membership before graph selection"},
+        {"provider","public-function"},{"profile_id",input.at("controller_id")},
+        {"representation",representation_names.at(representation_index)},
+        {"calls",graph.representation_filter_calls},{"rejected",graph.representation_filter_rejections},
+        {"relation","outer"},{"assurance","numerical"},
+        {"membership_lowering","box/zonotope/parallelotope/ellipsoid coordinate outer bounds; no conversion claimed"}});
     Json response{{"task_id", input.at("task_id")}, {"task_sha256", input.at("task_sha256")},
         {"action_profile_id", input.at("action_profile_id")},
         {"policy_id", input.at("controller_id").get<std::string>() + "/budgeted-backward-graph-mpc/1"},
-        {"representation", 0}, {"invocations", invocations},
+        {"representation", representation_index}, {"invocations", invocations},
         {"predicted_sets", Json::array({{{"role", "retained-stage-layered-singleton-nodes"},
             {"representation", "polytope-h"}, {"relation", "equivalent"}, {"assurance", "numerical"}, {"nodes", nodes}}})},
         {"graph_receipt", {{"schema", "csl.closed-loop.finite-action-backward-graph/1"},
@@ -377,7 +404,9 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
             {"source_model_id", input.at("source_model_id")}, {"predictor_model_id", input.at("predictor_model_id")},
             {"original_horizon", input.at("original_horizon")}, {"absolute_stage_offset", request.absolute_stage_offset},
             {"action_profile_id", input.at("action_profile_id")}, {"objective_id", request.running_cost.objective_id},
-            {"representation", "exact-polytope"}, {"beam_width", beam_width}, {"max_graph_nodes", max_nodes},
+            {"representation", representation_names.at(representation_index)}, {"beam_width", beam_width}, {"max_graph_nodes", max_nodes},
+            {"representation_filter_calls",graph.representation_filter_calls},
+            {"representation_filter_rejections",graph.representation_filter_rejections},
             {"search_coverage", graph.search_complete ? "complete" : "incomplete"},
             {"node_budget_exhausted", graph.node_budget_exhausted},
             {"optimality_scope", "Bellman minimum over retained graph only; no claim over pruned paths or nonlinear plant"},
@@ -401,7 +430,13 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
                 {"absolute_stage", request.absolute_stage_offset + node.stage - 1},
                 {"action_index", *node.action_index}, {"action", request.actions.catalogue[*node.action_index]},
                 {"child_state", node.state}, {"action_lineage", node.action_lineage},
-                {"backward_viable", node.backward_viable}, {"backward_edge_status", backward_status(node.backward_status)}});
+                {"backward_viable", node.backward_viable},
+                {"representation_filter_passed",node.representation_filter_passed?Json(*node.representation_filter_passed):Json(nullptr)},
+                {"representation_filter_outcome",node.representation_filter_outcome},
+                {"representation_edge_outer_enclosure",node.representation_outer_lower.empty()?Json(nullptr):Json{{"lower",node.representation_outer_lower},
+                    {"upper",node.representation_outer_upper},{"representation",representation_names.at(representation_index)},
+                    {"coordinate_outer_box",true},{"relation","outer"},{"assurance","numerical"}}},
+                {"backward_edge_status", backward_status(node.backward_status)}});
         }
     }
     const auto terminal_value = optimization::evaluate(request.objective,
@@ -413,7 +448,6 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
     for(const auto id : graph.selected_nodes) running_cost_value += graph.nodes[id].edge_running_cost;
     response["status"] = "accepted";
     response["control"] = request.actions.catalogue[*graph.nodes[graph.selected_nodes[1]].action_index];
-    response["recovered_control"] = response["control"];
     response["selected_plan"] = {{"states", states}, {"controls", controls},
         {"terminal_objective", terminal_cost}, {"running_objective", running_cost_value},
         {"total_objective", terminal_cost + running_cost_value}};
@@ -423,7 +457,7 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
         {"terminal_objective", terminal_cost}, {"running_objective", running_cost_value},
         {"total_replay_objective", terminal_cost + running_cost_value},
         {"score_kind", "exact-source-cost-on-numerical-affine-predictor"},
-        {"policy_semantics", "receding finite-action graph MPC; backward predecessor viability filters authored edges before Bellman selection; replans after each observed hold"},
+        {"policy_semantics", "receding finite-action graph MPC; numerical backward predecessor plus authored discrete-edge witnesses filter before Bellman selection; selected representation applies a numerical one-step outer safety and membership filter per discrete edge; replans after each observed hold"},
         {"optimality_scope", "retained graph only; not complete finite-action optimum, nonlinear global optimum, or causal feedback optimum"}};
     return response;
 }
@@ -478,10 +512,12 @@ Json query(const Json& in) {
         optimization::NominalRepresentation::parallelotope,
         optimization::NominalRepresentation::ellipsoid};
     if(representation_index >= representations.size()) throw std::runtime_error("representation index must be in [0,4]");
-    if(representation_index == 0 && in.value("search_policy", std::string{}) == "stage-layered-backward-viability")
+    if(in.value("search_policy", std::string{}) == "stage-layered-backward-viability")
         return graph_response(in, request,
             in.at("limits").value("max_beam_width", std::size_t{16}),
-            in.at("limits").value("max_graph_nodes", std::size_t{2048}));
+            in.at("limits").value("max_graph_nodes", std::size_t{2048}),
+            representations[representation_index],
+            in.at("limits").value("max_generators_per_stage",std::size_t{1000}));
     const auto outcome = optimization::finite_action_nominal_profile(request,
         {in.at("limits").at("max_plans").get<std::size_t>(),
          in.at("limits").at("max_points_per_stage").get<std::size_t>(),

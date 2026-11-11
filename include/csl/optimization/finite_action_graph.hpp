@@ -17,6 +17,7 @@ enum class FiniteGraphBackwardStatus {
     predecessor_membership_false,
     discrete_transition_witness_failed,
     parent_stage_intersection_empty,
+    representation_filter_rejected,
     eligible_numerical_predecessor_and_discrete_edge
 };
 
@@ -36,6 +37,10 @@ struct FiniteActionGraphNode {
     std::vector<std::size_t> action_lineage;
     FiniteGraphBackwardStatus backward_status{FiniteGraphBackwardStatus::pending};
     std::optional<bool> reachable_envelope_contains;
+    std::optional<bool> representation_filter_passed;
+    std::string representation_filter_outcome;
+    Vector representation_outer_lower;
+    Vector representation_outer_upper;
 };
 
 struct FiniteActionGraphLayerStatistics {
@@ -44,11 +49,18 @@ struct FiniteActionGraphLayerStatistics {
     std::size_t retained{};
     std::size_t pruned{};
     std::size_t stage_inadmissible{};
+    std::size_t representation_filter_rejected{};
 };
 
 struct FiniteActionGraphLimits {
     std::size_t beam_width;
     std::size_t max_nodes;
+    // Optional per-authored-edge numerical outer filter. It does not merge or
+    // replace discrete action nodes; non-box representations use an explicit
+    // coordinate-box outer relaxation for child membership.
+    std::optional<NominalRepresentation> edge_representation_filter{};
+    // Used only by the zonotope filter.
+    std::size_t max_generators_per_stage{1000};
 };
 
 struct FiniteActionGraphResult {
@@ -59,6 +71,8 @@ struct FiniteActionGraphResult {
     std::size_t predecessor_calls{};
     std::size_t stage_intersection_calls{};
     std::size_t reachable_envelope_calls{};
+    std::size_t representation_filter_calls{};
+    std::size_t representation_filter_rejections{};
     bool search_complete{};
     bool node_budget_exhausted{};
     bool has_viable_path{};
