@@ -1,12 +1,16 @@
 #include <csl/model/linear_system.hpp>
+#include <csl/geometry/polyhedral_projection.hpp>
 #include <csl/optimization/finite_action_nominal.hpp>
 #include <csl/optimization/objectives.hpp>
+#include <csl/reachability/nominal_predecessor.hpp>
+#include <csl/registry/registry.hpp>
 #include <csl/sets/data.hpp>
 #include <nlohmann/json.hpp>
 
 #include <array>
 #include <cmath>
 #include <iostream>
+#include <limits>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
@@ -188,6 +192,194 @@ Json trace_json(const optimization::NominalTrackSelected& selected) {
         {"relation", relation}, {"assurance", "numerical"}, {"stages", std::move(stages)}};
 }
 
+bool contains_with_tolerance(const sets::SetData& set, const Vector& point,
+                             double absolute_tolerance = 1e-9,
+                             double relative_tolerance = 1e-10) {
+    if(point.size() != set.metadata()->set.dimension) return false;
+    const auto representation = set.representation();
+    if(const auto* singleton = std::get_if<sets::SingletonRepresentation>(&representation)) {
+        if(singleton->point.size() != point.size()) return false;
+        for(std::size_t i = 0; i < point.size(); ++i)
+            if(std::abs(point[i] - singleton->point[i]) > absolute_tolerance +
+               relative_tolerance * std::max(std::abs(point[i]), std::abs(singleton->point[i]))) return false;
+        return true;
+    }
+    if(std::holds_alternative<sets::UniversalRepresentation>(representation)) return true;
+    if(std::holds_alternative<sets::EmptyRepresentation>(representation)) return false;
+    const auto* h = std::get_if<sets::HRepresentation>(&representation);
+    if(!h) return false;
+    for(std::size_t row = 0; row < h->inequalities.rows(); ++row) {
+        double lhs = 0.0, scale = std::abs(h->upper_bounds[row]);
+        for(std::size_t col = 0; col < point.size(); ++col) {
+            const double term = h->inequalities(row, col) * point[col];
+            lhs += term; scale += std::abs(term);
+        }
+        if(lhs > h->upper_bounds[row] + absolute_tolerance + relative_tolerance * scale) return false;
+    }
+    for(std::size_t row = 0; row < h->equalities.rows(); ++row) {
+        double lhs = 0.0, scale = std::abs(h->equality_values[row]);
+        for(std::size_t col = 0; col < point.size(); ++col) {
+            const double term = h->equalities(row, col) * point[col];
+            lhs += term; scale += std::abs(term);
+        }
+        if(std::abs(lhs - h->equality_values[row]) > absolute_tolerance + relative_tolerance * scale) return false;
+    }
+    return true;
+}
+
+double absolute_stage_cost(const optimization::RunningControlCost& cost,
+                           std::size_t absolute_stage, const Vector& control) {
+    double value = 0.0;
+    for(const auto& stage : cost.stages) {
+        if(stage.stage != absolute_stage) continue;
+        for(const auto& term : stage.terms) {
+            std::visit([&](const auto& penalty) {
+                using T = std::decay_t<decltype(penalty)>;
+                if constexpr(std::is_same_v<T, optimization::QuadraticControlPenalty>) {
+                    if(penalty.reference.size() != control.size())
+                        throw std::runtime_error("recovery cost/control dimensions differ");
+                    for(std::size_t i = 0; i < control.size(); ++i) {
+                        const double residual = (control[i] - penalty.reference[i]) / penalty.scales[i];
+                        value += penalty.coefficient / static_cast<double>(penalty.normalization_horizon) *
+                            penalty.weights[i] * residual * residual;
+                    }
+                } else {
+                    if(penalty.map.cols != control.size())
+                        throw std::runtime_error("recovery norm/control dimensions differ");
+                    double squared = 0.0;
+                    for(std::size_t row = 0; row < penalty.map.rows; ++row) {
+                        double residual = penalty.offset[row];
+                        for(std::size_t col = 0; col < control.size(); ++col)
+                            residual += penalty.map.values[row * penalty.map.cols + col] * control[col];
+                        squared += residual * residual;
+                    }
+                    value += penalty.coefficient * std::sqrt(squared);
+                }
+            }, term);
+        }
+    }
+    return value;
+}
+
+struct FirstStepRecovery {
+    Vector control;
+    double running_cost;
+    Json predecessor_set;
+    Json invocation;
+    Json receipt;
+};
+
+FirstStepRecovery recover_first_action_2d(const Json& in,
+        const optimization::FiniteActionNominalRequest& request,
+        const optimization::NominalTrackSelected& selected) {
+    const auto dimension = request.initial_state.size();
+    if(dimension != 2 || selected.replay.states.size() < 2 || selected.replay.controls.empty())
+        throw std::runtime_error("2D first-action predecessor recovery needs one complete transition");
+    const auto dynamics_value = request.system.stage({0});
+    if(const auto* error = std::get_if<Diagnostic>(&dynamics_value))
+        throw std::runtime_error("predecessor dynamics: " + error->explanation);
+    const auto& dynamics = std::get<model::DynamicsStage>(dynamics_value);
+    Matrix a{dimension, dimension, Vector(dimension * dimension)};
+    Matrix b{dimension, request.actions.dimension, Vector(dimension * request.actions.dimension)};
+    Vector offset(dimension);
+    for(std::size_t row = 0; row < dimension; ++row) {
+        offset[row] = dynamics.offset[row];
+        for(std::size_t col = 0; col < dimension; ++col)
+            a.values[row * dimension + col] = dynamics.A(row, col);
+        for(std::size_t col = 0; col < request.actions.dimension; ++col)
+            b.values[row * request.actions.dimension + col] = dynamics.B(row, col);
+    }
+
+    Vector lower(request.actions.dimension, std::numeric_limits<double>::infinity());
+    Vector upper(request.actions.dimension, -std::numeric_limits<double>::infinity());
+    for(const auto& action : request.actions.catalogue)
+        for(std::size_t col = 0; col < action.size(); ++col) {
+            lower[col] = std::min(lower[col], action[col]);
+            upper[col] = std::max(upper[col], action[col]);
+        }
+    Json control_bounds = Json::array();
+    for(std::size_t col = 0; col < lower.size(); ++col) control_bounds.push_back({lower[col], upper[col]});
+    auto controls = safe_box(control_bounds, request.actions.dimension, "finite-action-hull");
+    auto target = take(sets::make_singleton({{"selected-first-step-target"}, dimension, {}},
+        take(numeric::snapshot_vector(selected.replay.states[1]), "predecessor-target")), "predecessor-target-set");
+
+    auto registration = geometry::polyhedral::make_projection_registration();
+    registry::Registry<registry::GeometryPort> registry;
+    if(const auto error = registry.add(registration))
+        throw std::runtime_error("predecessor projection registration: " +
+            (error->diagnostics.empty() ? std::string("registration rejected") : error->diagnostics.front().explanation));
+    registry::Requirements requirements;
+    requirements.output.representation = {"csl.polyhedron.h"};
+    requirements.output.relation = SetRelation::equivalent;
+    const registry::Method method{registration.identity.id, registration.identity.version};
+    auto provider_result = registry::prepare_provider(
+        registry::select_provider(registry, method, requirements));
+    if(!std::holds_alternative<registry::PreparedProvider<registry::GeometryPort>>(provider_result))
+        throw std::runtime_error("predecessor projection provider rejected the H relation");
+    auto provider = std::get<registry::PreparedProvider<registry::GeometryPort>>(std::move(provider_result));
+    reachability::NominalPredecessorRequest predecessor_request{
+        {{in.at("problem_id").get<std::string>()},
+         {in.at("request_id").get<std::string>() + "/first-step-predecessor"},
+         {in.at("request_id").get<std::string>() + "/selected-next-state"}},
+        request.admissible_states.front().as_handle(), controls.as_handle(), target.as_handle(),
+        std::move(a), std::move(b), std::move(offset)};
+    auto prepared_result = reachability::prepare_nominal_predecessor(predecessor_request, provider);
+    if(!std::holds_alternative<reachability::PreparedNominalPredecessor>(prepared_result))
+        throw std::runtime_error("nominal predecessor did not admit the source-bound 2D request");
+    auto outcome = std::get<reachability::PreparedNominalPredecessor>(std::move(prepared_result)).run({});
+    if(!std::holds_alternative<reachability::NominalPredecessorResult>(outcome))
+        throw std::runtime_error("nominal predecessor failed for selected first-step target");
+    auto predecessor = std::get<reachability::NominalPredecessorResult>(std::move(outcome));
+    auto predecessor_data = take(sets::from_handle(predecessor.result.output), "predecessor-output");
+    if(!contains_with_tolerance(predecessor_data, request.initial_state))
+        throw std::runtime_error("observed state is outside the selected-plan predecessor set");
+
+    const auto target_data = target;
+    std::vector<Vector> feasible_catalogue_actions;
+    for(const auto& action : request.actions.catalogue) {
+        Vector next(dimension);
+        for(std::size_t row = 0; row < dimension; ++row) {
+            next[row] = predecessor_request.offset[row];
+            for(std::size_t col = 0; col < dimension; ++col)
+                next[row] += dynamics.A(row, col) * request.initial_state[col];
+            for(std::size_t col = 0; col < action.size(); ++col)
+                next[row] += dynamics.B(row, col) * action[col];
+        }
+        if(contains_with_tolerance(target_data, next) &&
+           contains_with_tolerance(request.admissible_states[1], next))
+            feasible_catalogue_actions.push_back(action);
+    }
+    const Vector& selected_control = selected.replay.controls.front();
+    const auto recovered = std::find(feasible_catalogue_actions.begin(), feasible_catalogue_actions.end(), selected_control);
+    if(recovered == feasible_catalogue_actions.end())
+        throw std::runtime_error("selected first action has no finite-catalogue predecessor witness");
+    const double stage_cost = absolute_stage_cost(request.running_cost,
+        request.absolute_stage_offset, *recovered);
+    const auto& provenance = predecessor.projection_provider;
+    const std::string provider_id = provenance.actual_module && provenance.actual_version ?
+        provenance.actual_module->value + "@" + *provenance.actual_version : "unresolved-provider";
+    return {*recovered, stage_cost,
+        {{"role", "one-step-feasible-state-predecessor"}, {"representation", "polytope-h"},
+         {"relation", "equivalent"}, {"assurance", "numerical"},
+         {"support", "unestablished"}, {"set", set_json(predecessor_data)}},
+        {{"module_id", "csl::reachability::prepare_nominal_predecessor"},
+         {"operation", "one-step existential-control state predecessor"},
+         {"provider", provider_id}, {"profile_id", in.at("controller_id")},
+         {"projection_provider", provider_id}},
+        {{"schema", "csl.closed-loop.native-first-step-recovery/1"},
+         {"predecessor_request", predecessor_request.identity.request.value},
+         {"observed_state_in_predecessor", true},
+         {"selected_target_state", selected.replay.states[1]},
+         {"selected_control", *recovered},
+         {"finite_catalogue_witness_count", feasible_catalogue_actions.size()},
+         {"running_cost_objective_id", request.running_cost.objective_id},
+         {"absolute_stage", request.absolute_stage_offset},
+         {"original_horizon", request.running_cost.original_horizon},
+         {"selected_stage_running_cost", stage_cost},
+         {"predecessor_assurance", "numerical with unestablished support"},
+         {"replay_check", "affine one-step state lies in selected singleton target and next-state bounds"}}};
+}
+
 Json query(const Json& in) {
     const auto& coefficient_stages = in.at("predictor_stages");
     const auto horizon = coefficient_stages.size();
@@ -255,10 +447,14 @@ Json query(const Json& in) {
         if constexpr(std::is_same_v<T, optimization::NominalTrackUnsupported>) return "unsupported";
         return "stopped";
     }, track.outcome);
+    std::optional<FirstStepRecovery> recovery;
+    if(selected && dimension == 2 && representation_index == 0)
+        recovery = recover_first_action_2d(in, request, *selected);
     Json invocations = Json::array({{{"module_id", "csl::optimization::finite_action_nominal_profile"},
         {"operation", operations.at(representation_index)},
         {"provider", "public-function"},
         {"profile_id", in.at("controller_id")}, {"outcome", route_outcome}}});
+    if(recovery) invocations.push_back(recovery->invocation);
     Json base{{"task_id", in.at("task_id")}, {"task_sha256", in.at("task_sha256")},
         {"action_profile_id", in.at("action_profile_id")},
         {"policy_id", in.at("controller_id").get<std::string>() + "/receding-fixed-plan-mpc/1"},
@@ -322,6 +518,15 @@ Json query(const Json& in) {
         {"search_coverage", coverage}, {"candidate_score", selected->candidate_score},
         {"score_kind", base["selector"]["score_kind"]}, {"selected_control", selected->replay.controls.front()},
         {"predicted_set_role", "fixed-plan-trajectory-enclosure"}, {"invocations", base["invocations"]}};
+    if(recovery) {
+        base["control"] = recovery->control;
+        base["recovered_control"] = recovery->control;
+        base["predicted_sets"].push_back(recovery->predecessor_set);
+        base["selector"]["policy_semantics"] =
+            "receding-horizon finite-action MPC plus a numerical first-step predecessor/recovery witness for its selected singleton target";
+        base["query_receipt"]["first_step_recovery"] = recovery->receipt;
+        base["query_receipt"]["invocations"] = base["invocations"];
+    }
     return base;
 }
 } // namespace

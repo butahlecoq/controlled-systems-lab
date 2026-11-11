@@ -1465,13 +1465,14 @@
       "output": "selected first action, fixed-plan reachable-set record, and full-cost query receipt",
       "dimension": "task-specific state and control dimensions; shrinking horizon preserves original absolute stage indices",
       "assurance": "exact finite-action objective on the declared affine predictor for exact-polytope scoring; numerical outer-estimate ranking for box, zonotope, parallelotope, and ellipsoid; independent physical plant replay is separate",
-      "relation": "selected control from receding finite-action fixed-plan MPC; approximation traces are numerical outer enclosures and do not recover predecessor policies",
+      "relation": "selected control from receding finite-action fixed-plan MPC; exact-H predecessor/recovery is a numerical witness conditional on the selected first-step singleton target, not an independent feedback synthesis; approximation traces are numerical outer enclosures",
       "operations": [
         "source task and action-profile binding",
         "absolute-stage full-cost lowering",
         "selected-profile finite-plan enumeration",
         "selected control from first action of chosen plan",
-        "persistent JSONL native bridge"
+        "persistent JSONL native bridge",
+        "exact-H one-step predecessor feasibility and authored finite-action first-step witness for the selected 2D LV plan"
       ],
       "dependencies": [
         "CSL finite_action_nominal target",

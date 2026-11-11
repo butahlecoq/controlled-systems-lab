@@ -188,10 +188,13 @@ class NativeFiniteActionPolicy:
         response.setdefault("policy_id", self.controller_id)
         response.setdefault("invocations", [])
         if response.get("status") == "accepted":
+            semantics = response.get("selector", {}).get("policy_semantics",
+                "nominal receding-horizon fixed-plan MPC")
+            response["policy_semantics"] = semantics
             response["prediction_profile"] = {"model_id": self.receipt["model_id"],
                 "assurance": self.receipt["coefficient_assurance"],
                 "validity": self.receipt["validity"], "representation": self.representation,
-                "policy_semantics": "nominal receding-horizon fixed-plan MPC"}
+                "policy_semantics": semantics}
         return response
 
     def close(self) -> None:
