@@ -401,7 +401,7 @@ TEST_CASE("finite-only affine enumeration agrees with a one-hot MILP and preserv
         {"finite-only-milp"}, system, {0}, {1, {{-1}, {1}, {-1}}}, {{0}, {0}},
         {safe_data, safe_data, safe_data},
         std::get<csl::optimization::Objective>(
-            csl::optimization::snapshot(LinearTerminal{{1}, 0})), std::nullopt};
+            csl::optimization::snapshot(LinearTerminal{{1}, 0})), {}, 0, std::nullopt};
 
     const auto enumerated = csl::optimization::finite_action_nominal(request, {9, 3, 100, 10, 0.0});
     REQUIRE(std::holds_alternative<csl::optimization::FiniteActionNominalResult>(enumerated));
