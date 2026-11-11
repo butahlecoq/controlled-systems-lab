@@ -27,6 +27,10 @@ jobs:
           python-version: '3.12'
       - name: Exercise real Git event routing
         run: python -m unittest discover -s tests/ci -p 'test_*.py'
+      - name: Enforce local-only working documentation
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
+        run: python scripts/ci/check_local_only_docs.py --base "$BASE_SHA"
       - name: Classify the complete event diff
         id: paths
         run: python scripts/ci/route_changes.py
