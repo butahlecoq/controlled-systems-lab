@@ -1,4 +1,10 @@
 if(TARGET CSL::highs_lp)
+  add_executable(composition_catalogue_tests tests/contract/geometry/composition_catalogue_tests.cpp)
+  target_link_libraries(composition_catalogue_tests PRIVATE
+    CSL::hull CSL::highs_lp CSL::phase_one CSL::quickhull_2d doctest::doctest)
+  add_test(NAME composition_catalogue_tests COMMAND composition_catalogue_tests)
+  csl_test_target(composition_catalogue_tests geometry)
+
   add_executable(historical_hull_differential_test tests/unit/geometry/historical_hull_differential_test.cpp)
   target_link_libraries(historical_hull_differential_test PRIVATE CSL::hull CSL::quickhull_2d CSL::highs_lp doctest::doctest)
   add_test(NAME historical_hull_differential_test COMMAND historical_hull_differential_test)
@@ -25,6 +31,14 @@ if(TARGET CSL::highs_lp)
   add_test(NAME recursive_reducer_test COMMAND recursive_reducer_test)
   csl_test_target(recursive_reducer_test geometry)
 endif()
+
+add_test(NAME module_composition_inventory_source_check
+  COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/catalogue/validate_inventory.py ${PROJECT_SOURCE_DIR})
+add_test(NAME module_composition_catalogue_cli
+  COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/catalogue/check_output.py
+    $<TARGET_FILE:csl_module_composition_catalogue> ${PROJECT_SOURCE_DIR})
+set_tests_properties(module_composition_inventory_source_check module_composition_catalogue_cli
+  PROPERTIES LABELS geometry)
 
 add_executable(quickhull_2d_test tests/unit/geometry/quickhull_2d_test.cpp)
 target_link_libraries(quickhull_2d_test PRIVATE CSL::quickhull_2d doctest::doctest)

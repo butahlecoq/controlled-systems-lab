@@ -1,4 +1,15 @@
-# Native interfaces, revision 1.8
+# Native interfaces, revision 1.10
+
+Revision 1.10 adds request-profile strategy candidate enumeration. It snapshots
+the registered strategy identities, prepares each candidate against a concrete
+request, and returns the actual dependency provenance or the first rejection.
+An admitted candidate must be prepared again for each generated request before
+execution.
+
+Revision 1.9 adds ordered `identities()` snapshots to `Registry<Port>` and
+`StrategyRegistry`. The snapshot reports the actual ID and version for each
+currently registered method in module-ID order. It does not report request
+capability or replace concrete `prepare()` admission.
 
 Revision 1.8 extends typed registry admission with a port-specific opt-in for
 validated assurance. The default remains rejection; an opted-in port must still

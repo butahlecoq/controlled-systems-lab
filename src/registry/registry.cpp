@@ -270,6 +270,12 @@ std::optional<Rejection> StrategyRegistry::add(StrategyRegistration entry) {
     entries_.emplace(entry.identity.id.value,std::move(entry));
     return {};
 }
+std::optional<std::vector<StrategyRegistration::ConfigurationSlot>>
+StrategyRegistry::active_configuration_slots(const ModuleId& id) const {
+    const auto found = entries_.find(id.value);
+    if (found == entries_.end()) return std::nullopt;
+    return found->second.active_configuration_slots;
+}
 std::variant<PreparedStrategy,Rejection> StrategyRegistry::prepare(const StrategyRequest& request,
     const Requirements& requirements, std::optional<std::string> version) const {
     return prepare_impl(request,requirements,std::move(version),nullptr);

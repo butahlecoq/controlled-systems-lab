@@ -134,6 +134,15 @@ template<class Port> class Registry {
     friend struct detail::PipelineAccess;
     friend struct detail::ProviderAccess;
 public:
+    std::vector<Identity> identities() const {
+        std::vector<Identity> result;
+        result.reserve(entries_.size());
+        for (const auto& [id, entry] : entries_) {
+            static_cast<void>(id);
+            result.push_back(entry.identity);
+        }
+        return result;
+    }
     std::optional<Rejection> add(Registration<Port> entry) {
         const Method requested{entry.identity.id,entry.identity.version};
         Provenance provenance{Port::name,requested,entry.identity};
@@ -374,6 +383,8 @@ template<class... Ports,class Builder> StrategyPlan compose_strategy(CheckedPipe
     },std::move(provenance)};
 }
 struct StrategyRegistration {
+    enum class ConfigurationSlot { lp, convex, hull, geometry, converter,
+        approximation, selector, representation };
     Identity identity;
     std::function<Capability(const StrategyRequest&,const Requirements&)> capabilities;
     // Pure planning only: declare every required typed dependency with
@@ -388,6 +399,9 @@ struct StrategyRegistration {
     // Optional pure selector for request-profile-specific complete-family proof
     // authority. When present it replaces (never falls back to) the static key.
     std::function<std::optional<CompleteFamilyVerifierKey>(const StrategyRequest&)> complete_family_verifier_selector{};
+    // When set, identifies configuration fields consumed by this registration.
+    // Unset retains the conservative legacy rule that every populated slot is active.
+    std::optional<std::vector<ConfigurationSlot>> active_configuration_slots{};
 };
 namespace detail {
 class CompiledCompleteFamilyVerifier;
@@ -457,6 +471,17 @@ class StrategyRegistry {
     std::variant<PreparedStrategy,Rejection> prepare_impl(const StrategyRequest&,
         const Requirements&,std::optional<std::string>,StrategyPreparationObservation*) const;
 public:
+    std::vector<Identity> identities() const {
+        std::vector<Identity> result;
+        result.reserve(entries_.size());
+        for (const auto& [id, entry] : entries_) {
+            static_cast<void>(id);
+            result.push_back(entry.identity);
+        }
+        return result;
+    }
+    std::optional<std::vector<StrategyRegistration::ConfigurationSlot>> active_configuration_slots(
+        const ModuleId&) const;
     std::optional<Rejection> add(StrategyRegistration);
     std::variant<PreparedStrategy,Rejection> prepare(const StrategyRequest&, const Requirements& = {},
         std::optional<std::string> version = {}) const;
