@@ -44,9 +44,12 @@ FUNCTIONAL_DOC_ASSETS = {
     "docs/research/figures/": {".png", ".svg"},
     "docs/research/tools/": {".py"},
 }
-EXPLICIT_WORKING_DIRECTORIES = {
-    "docs/drafts", "docs/notes", "docs/plans", "docs/reviews", "docs/specs",
-    "docs/superpowers",
+EXPLICIT_WORKING_DIRECTORIES = {"drafts", "notes", "plans", "reviews", "specs", "superpowers"}
+FUNCTIONAL_REPO_ASSET_LOCATIONS = {
+    "benchmarks/reporting/",
+    "benchmarks/results/",
+    "reports/algorithm-results/",
+    "reports/closed-loop-pilot/",
 }
 
 
@@ -96,23 +99,27 @@ def is_functional_doc_asset(path: str) -> bool:
 
 
 def is_explicit_working_directory(path: str) -> bool:
-    parts = path.split("/")
-    return any("/".join(parts[:index]).lower() in EXPLICIT_WORKING_DIRECTORIES
-               for index in range(2, len(parts) + 1))
+    return any(part.lower() in EXPLICIT_WORKING_DIRECTORIES for part in path.split("/")[:-1])
+
+
+def is_functional_repo_asset(path: str) -> bool:
+    suffix = Path(path).suffix.lower()
+    return (not suffix in DOCUMENT_SUFFIXES and
+            any(path.startswith(prefix) for prefix in FUNCTIONAL_REPO_ASSET_LOCATIONS))
 
 
 def is_retained_change(path: str, root: Path) -> bool:
     suffix = Path(path).suffix.lower()
     if suffix in MARKDOWN_SUFFIXES:
         return is_retained_markdown(path, root)
+    if is_explicit_working_directory(path):
+        return False
     if path.startswith("docs/"):
-        if is_explicit_working_directory(path):
-            return False
         if is_functional_doc_asset(path):
             return True
-        if is_working_document_path(path):
-            return False
         return False
+    if is_functional_repo_asset(path):
+        return True
     if is_working_document_path(path):
         return False
     return True
