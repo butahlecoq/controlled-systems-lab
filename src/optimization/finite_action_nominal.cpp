@@ -17,6 +17,90 @@ Unsupported unsupported(std::string field, std::string message) {
     return {{{DiagnosticCode::unsupported, std::move(field), std::move(message)}}};
 }
 
+bool finite_values(std::span<const double> values) {
+    return std::ranges::all_of(values, [](double value) { return std::isfinite(value); });
+}
+
+Unsupported validate_running_cost(const RunningControlCost& cost,
+    std::size_t absolute_stage_offset, std::size_t horizon, std::size_t control_dimension) {
+    if(cost.stages.empty()) {
+        if(!cost.objective_id.empty() || cost.original_horizon != 0)
+            return unsupported("finite_nominal.running_cost", "An inactive running-cost schedule must have empty identity and zero original horizon.");
+        return {};
+    }
+    if(cost.objective_id.empty() || cost.original_horizon == 0 ||
+       absolute_stage_offset > cost.original_horizon || horizon > cost.original_horizon - absolute_stage_offset)
+        return unsupported("finite_nominal.running_cost", "The running-cost identity and original horizon must cover the requested absolute-stage slice.");
+    std::size_t previous_stage = 0;
+    bool first_stage = true;
+    for(const auto& stage : cost.stages) {
+        if(stage.stage >= cost.original_horizon || (!first_stage && stage.stage <= previous_stage))
+            return unsupported("finite_nominal.running_cost.stages", "Running-cost stages must be unique, increasing, and inside the original horizon.");
+        previous_stage = stage.stage;
+        first_stage = false;
+        for(const auto& term : stage.terms) {
+            if(const auto* quadratic = std::get_if<QuadraticControlPenalty>(&term)) {
+                if(quadratic->reference.size() != control_dimension || quadratic->scales.size() != control_dimension ||
+                   quadratic->weights.size() != control_dimension || quadratic->normalization_horizon != cost.original_horizon ||
+                   !std::isfinite(quadratic->coefficient) || quadratic->coefficient < 0 ||
+                   !finite_values(quadratic->reference) || !finite_values(quadratic->scales) ||
+                   !finite_values(quadratic->weights) ||
+                   !std::ranges::all_of(quadratic->scales, [](double value) { return value != 0.0; }) ||
+                   !std::ranges::all_of(quadratic->weights, [](double value) { return value >= 0.0; }))
+                    return unsupported("finite_nominal.running_cost.quadratic", "Quadratic running-cost dimensions, normalization, scales, weights, and coefficient are invalid.");
+            } else {
+                const auto& norm = std::get<EuclideanControlPenalty>(term);
+                if(norm.map.cols != control_dimension || norm.map.rows == 0 || norm.offset.size() != norm.map.rows ||
+                   norm.map.values.size() != norm.map.rows * norm.map.cols || !finite_values(norm.map.values) ||
+                   !finite_values(norm.offset) || !std::isfinite(norm.coefficient) || norm.coefficient < 0)
+                    return unsupported("finite_nominal.running_cost.euclidean", "Euclidean running-cost map, offset, and coefficient are invalid.");
+            }
+        }
+    }
+    return {};
+}
+
+double stage_running_cost(const RunningControlCost& cost, std::size_t absolute_stage,
+    std::span<const double> control) {
+    const auto found = std::lower_bound(cost.stages.begin(), cost.stages.end(), absolute_stage,
+        [](const AbsoluteStageControlCost& row, std::size_t stage) { return row.stage < stage; });
+    if(found == cost.stages.end() || found->stage != absolute_stage) return 0.0;
+    double total = 0.0;
+    for(const auto& term : found->terms) {
+        if(const auto* quadratic = std::get_if<QuadraticControlPenalty>(&term)) {
+            if(quadratic->coefficient == 0.0) continue;
+            double sum = 0.0;
+            for(std::size_t j = 0; j < control.size(); ++j) {
+                if(quadratic->weights[j] == 0.0) continue;
+                const auto residual = (control[j] - quadratic->reference[j]) / quadratic->scales[j];
+                sum += quadratic->weights[j] * residual * residual;
+            }
+            total += (quadratic->coefficient / static_cast<double>(quadratic->normalization_horizon)) * sum;
+        } else {
+            const auto& norm = std::get<EuclideanControlPenalty>(term);
+            if(norm.coefficient == 0.0) continue;
+            double squared = 0.0;
+            for(std::size_t row = 0; row < norm.map.rows; ++row) {
+                double value = norm.offset[row];
+                for(std::size_t col = 0; col < norm.map.cols; ++col)
+                    value += norm.map.values[row * norm.map.cols + col] * control[col];
+                squared += value * value;
+            }
+            total += norm.coefficient * std::sqrt(squared);
+        }
+    }
+    return total;
+}
+
+double running_cost_for(const FiniteActionNominalRequest& request,
+    const std::vector<std::size_t>& action_indices) {
+    double result = 0.0;
+    for(std::size_t local = 0; local < action_indices.size(); ++local)
+        result += stage_running_cost(request.running_cost, request.absolute_stage_offset + local,
+            request.actions.catalogue.at(action_indices[local]));
+    return result;
+}
+
 using SetOutcome = std::variant<sets::SetData, Unsupported>;
 SetOutcome singleton(std::string id, std::span<const double> values) {
     auto view = numeric::snapshot_vector(Vector(values.begin(), values.end()));
@@ -43,6 +127,8 @@ RequestOutcome make_degenerate_request(const FiniteActionNominalRequest& request
         return unsupported("finite_nominal.dimensions", "Nominal state, controls, disturbances, safe sets, or objective do not match the system.");
     if(horizon != 0 && request.actions.catalogue.empty())
         return unsupported("finite_nominal.actions", "A nonempty finite action catalogue is required.");
+    if(auto cost_error = validate_running_cost(request.running_cost, request.absolute_stage_offset,
+            horizon, dimensions.control); !cost_error.diagnostics.empty()) return cost_error;
     if(!std::ranges::all_of(request.initial_state, [](double value) { return std::isfinite(value); }))
         return unsupported("finite_nominal.initial", "The authored nominal initial state must be finite.");
     auto initial = singleton("nominal-initial", request.initial_state);
@@ -102,6 +188,11 @@ ReplayOutcome replay_nominal(const FiniteActionNominalRequest& request,
     const auto value = evaluate(request.objective, result.states.back());
     if(const auto* error = std::get_if<Diagnostic>(&value)) return unsupported(error->field, error->explanation);
     result.terminal_objective = std::get<double>(value);
+    result.running_objective = running_cost_for(request, indices);
+    result.total_objective = result.terminal_objective + result.running_objective;
+    if(!std::isfinite(result.terminal_objective) || !std::isfinite(result.running_objective) ||
+       !std::isfinite(result.total_objective))
+        return unsupported("finite_nominal.replay.score", "Terminal, running, or accumulated replay objective is non-finite.");
     return result;
 }
 
@@ -131,19 +222,33 @@ ExactOutcome exact_track(const FiniteActionNominalRequest& nominal,
     std::vector<NominalPlanAttempt> attempts;
     attempts.reserve(optimal->plans.size());
     for(const auto& plan : optimal->plans) {
-        if(const auto* scored = std::get_if<FinitePlanFeasible>(&plan))
+        if(const auto* scored = std::get_if<FinitePlanFeasible>(&plan)) {
+            const auto running = running_cost_for(nominal, scored->action_indices);
+            const auto candidate = scored->worst_value + running;
+            if(!std::isfinite(scored->worst_value) || !std::isfinite(running) || !std::isfinite(candidate))
+                return NominalTrackUnsupported{std::move(attempts), NominalSearchCoverage::incomplete,
+                    unsupported("finite_nominal.score.overflow", "Terminal, running, or combined source score is non-finite; the plan is not ranked.")};
             attempts.emplace_back(NominalPlanScored{scored->action_indices, scored->worst_value,
-                NominalScoreKind::exact_deterministic_objective});
-        else {
+                NominalScoreKind::exact_deterministic_objective,
+                scored->worst_value, running});
+            auto& row = std::get<NominalPlanScored>(attempts.back());
+            row.candidate_score = candidate;
+        } else {
             const auto& rejected = std::get<FinitePlanRejected>(plan);
             attempts.emplace_back(NominalPlanRejected{rejected.action_indices, rejected.stage,
                 rejected.violating_successor});
         }
     }
     const auto coverage = optimal->plans.size() == expected ? NominalSearchCoverage::complete : NominalSearchCoverage::incomplete;
-    if(optimal->minimizing_plan_indices.empty())
-        return NominalTrackNoScoredCandidate{std::move(attempts), coverage};
-    const auto selected = optimal->minimizing_plan_indices.front();
+    std::optional<std::size_t> selected_index;
+    for(std::size_t i = 0; i < attempts.size(); ++i) {
+        const auto* scored = std::get_if<NominalPlanScored>(&attempts[i]);
+        if(scored && (!selected_index || scored->candidate_score <
+                std::get<NominalPlanScored>(attempts[*selected_index]).candidate_score))
+            selected_index = i;
+    }
+    if(!selected_index) return NominalTrackNoScoredCandidate{std::move(attempts), coverage};
+    const auto selected = *selected_index;
     const auto* selected_plan = std::get_if<FinitePlanFeasible>(&optimal->plans.at(selected));
     if(!selected_plan)
         return NominalTrackUnsupported{std::move(attempts), coverage,
@@ -172,7 +277,7 @@ ExactOutcome exact_track(const FiniteActionNominalRequest& nominal,
         return NominalTrackStopped{std::move(attempts), NominalSearchCoverage::stopped,
             {StopReason::numerical_failure, "Exact nominal score differs from its deterministic replay."}};
     return NominalTrackSelected{std::move(attempts), coverage, selected,
-        selected_plan->worst_value, NominalScoreKind::exact_deterministic_objective,
+        selected_plan->worst_value + trajectory.running_objective, NominalScoreKind::exact_deterministic_objective,
         trajectory, std::get<reachability::FixedPlanReachable>(trace)};
 }
 
@@ -204,6 +309,21 @@ NominalSearchCoverage coverage_from(CandidateSearchCoverage coverage) {
         NominalSearchCoverage::complete : NominalSearchCoverage::incomplete;
 }
 
+std::optional<std::size_t> best_scored_attempt(const std::vector<NominalPlanAttempt>& attempts) {
+    std::optional<std::size_t> best;
+    for(std::size_t i = 0; i < attempts.size(); ++i) {
+        const auto* scored = std::get_if<NominalPlanScored>(&attempts[i]);
+        if(scored && (!best || scored->candidate_score <
+                std::get<NominalPlanScored>(attempts[*best]).candidate_score)) best = i;
+    }
+    return best;
+}
+
+NominalScoreKind approximate_score_kind(const FiniteActionNominalRequest& request) {
+    return request.running_cost.stages.empty() ? NominalScoreKind::numerical_outer_enclosure_estimate :
+        NominalScoreKind::numerical_outer_estimate_plus_exact_running_cost;
+}
+
 NominalTrackOutcome box_track(const FiniteActionNominalRequest& nominal,
     const FiniteActionMinimaxRequest& request, FiniteActionNominalLimits limits,
     const ExecutionContext& context) {
@@ -217,11 +337,15 @@ NominalTrackOutcome box_track(const FiniteActionNominalRequest& nominal,
     std::vector<NominalPlanAttempt> attempts;
     attempts.reserve(result.plan_attempts.size());
     for(const auto& attempt : result.plan_attempts) {
-        if(const auto* scored = std::get_if<BoxPlanScored>(&attempt))
+        if(const auto* scored = std::get_if<BoxPlanScored>(&attempt)) {
+            const auto terminal = scored->terminal_box_maximum;
+            const auto running = running_cost_for(nominal, scored->action_indices);
+            if(!std::isfinite(terminal) || !std::isfinite(running) || !std::isfinite(terminal + running))
+                return NominalTrackUnsupported{std::move(attempts), NominalSearchCoverage::incomplete,
+                    unsupported("finite_nominal.score.overflow", "Box terminal estimate or combined source score is non-finite; the plan is not ranked.")};
             attempts.emplace_back(NominalPlanScored{scored->action_indices,
-                scored->terminal_box_maximum,
-                NominalScoreKind::numerical_outer_enclosure_estimate});
-        else if(const auto* unscored = std::get_if<BoxPlanUnscored>(&attempt))
+                terminal + running, approximate_score_kind(nominal), terminal, running});
+        } else if(const auto* unscored = std::get_if<BoxPlanUnscored>(&attempt))
             attempts.emplace_back(NominalPlanUnscored{unscored->action_indices, unscored->reason});
         else {
             const auto& stopped = std::get<BoxPlanStopped>(attempt);
@@ -229,18 +353,18 @@ NominalTrackOutcome box_track(const FiniteActionNominalRequest& nominal,
         }
     }
     const auto coverage = coverage_from(result.candidate_search);
-    if(const auto* selected = std::get_if<BoxPlanSelected>(&result.selection)) {
-        if(selected->candidate_attempt_index >= result.plan_attempts.size())
+    if(const auto selected_index = best_scored_attempt(attempts)) {
+        if(*selected_index >= result.plan_attempts.size())
             return NominalTrackUnsupported{std::move(attempts), coverage,
                 unsupported("finite_nominal.box.selection", "Selected box attempt index is outside the attempt table.")};
         const auto* scored = std::get_if<BoxPlanScored>(
-            &result.plan_attempts[selected->candidate_attempt_index]);
+            &result.plan_attempts[*selected_index]);
         if(!scored)
             return NominalTrackUnsupported{std::move(attempts), coverage,
                 unsupported("finite_nominal.box.selection", "Selected box attempt has no candidate score.")};
+        const auto& score = std::get<NominalPlanScored>(attempts[*selected_index]);
         auto selection = select_and_replay(nominal, std::move(attempts), coverage,
-            selected->candidate_attempt_index, scored->terminal_box_maximum,
-            NominalScoreKind::numerical_outer_enclosure_estimate, scored->trace, context);
+            *selected_index, score.candidate_score, score.score_kind, scored->trace, context);
         if(auto* selected_outcome = std::get_if<NominalTrackSelected>(&selection)) return *selected_outcome;
         if(auto* error = std::get_if<NominalTrackUnsupported>(&selection)) return *error;
         return std::get<NominalTrackStopped>(std::move(selection));
@@ -266,11 +390,15 @@ NominalTrackOutcome zonotope_track(const FiniteActionNominalRequest& nominal,
     std::vector<NominalPlanAttempt> attempts;
     attempts.reserve(result.plan_attempts.size());
     for(const auto& attempt : result.plan_attempts) {
-        if(const auto* scored = std::get_if<ZonotopePlanScored>(&attempt))
+        if(const auto* scored = std::get_if<ZonotopePlanScored>(&attempt)) {
+            const auto terminal = scored->score.terminal_factor_corner_maximum;
+            const auto running = running_cost_for(nominal, scored->action_indices);
+            if(!std::isfinite(terminal) || !std::isfinite(running) || !std::isfinite(terminal + running))
+                return NominalTrackUnsupported{std::move(attempts), NominalSearchCoverage::incomplete,
+                    unsupported("finite_nominal.score.overflow", "Zonotope terminal estimate or combined source score is non-finite; the plan is not ranked.")};
             attempts.emplace_back(NominalPlanScored{scored->action_indices,
-                scored->score.terminal_factor_corner_maximum,
-                NominalScoreKind::numerical_outer_enclosure_estimate});
-        else if(const auto* unscored = std::get_if<ZonotopePlanUnscored>(&attempt))
+                terminal + running, approximate_score_kind(nominal), terminal, running});
+        } else if(const auto* unscored = std::get_if<ZonotopePlanUnscored>(&attempt))
             attempts.emplace_back(NominalPlanUnscored{unscored->action_indices, unscored->outcome});
         else {
             const auto& stopped = std::get<ZonotopePlanStopped>(attempt);
@@ -278,15 +406,16 @@ NominalTrackOutcome zonotope_track(const FiniteActionNominalRequest& nominal,
         }
     }
     const auto coverage = coverage_from(result.candidate_search);
-    if(const auto* selected = std::get_if<ZonotopePlanSelected>(&result.selection)) {
-        const auto index = selected->candidate_attempt_index;
+    if(const auto selected_index = best_scored_attempt(attempts)) {
+        const auto index = *selected_index;
         if(index >= result.plan_attempts.size() || !std::holds_alternative<ZonotopePlanScored>(result.plan_attempts[index]))
             return NominalTrackUnsupported{std::move(attempts), coverage,
                 unsupported("finite_nominal.zonotope.selection", "Selected zonotope attempt has no score.")};
-        const auto& score = std::get<ZonotopePlanScored>(result.plan_attempts[index]).score;
+        const auto& native_score = std::get<ZonotopePlanScored>(result.plan_attempts[index]).score;
+        const auto& score = std::get<NominalPlanScored>(attempts[index]);
         auto outcome2 = select_and_replay(nominal,
-            std::move(attempts), coverage, index, score.terminal_factor_corner_maximum,
-            NominalScoreKind::numerical_outer_enclosure_estimate, score.trace, context);
+            std::move(attempts), coverage, index, score.candidate_score,
+            score.score_kind, native_score.trace, context);
         if(auto* good = std::get_if<NominalTrackSelected>(&outcome2)) return *good;
         if(auto* error = std::get_if<NominalTrackUnsupported>(&outcome2)) return *error;
         return std::get<NominalTrackStopped>(std::move(outcome2));
@@ -316,11 +445,15 @@ NominalTrackOutcome parallelotope_track(const FiniteActionNominalRequest& nomina
     std::vector<NominalPlanAttempt> attempts;
     attempts.reserve(result.plan_attempts.size());
     for(const auto& attempt : result.plan_attempts) {
-        if(const auto* scored = std::get_if<ParallelotopePlanScored>(&attempt))
+        if(const auto* scored = std::get_if<ParallelotopePlanScored>(&attempt)) {
+            const auto terminal = scored->score.terminal_frame_box_corner_maximum;
+            const auto running = running_cost_for(nominal, scored->action_indices);
+            if(!std::isfinite(terminal) || !std::isfinite(running) || !std::isfinite(terminal + running))
+                return NominalTrackUnsupported{std::move(attempts), NominalSearchCoverage::incomplete,
+                    unsupported("finite_nominal.score.overflow", "Parallelotope terminal estimate or combined source score is non-finite; the plan is not ranked.")};
             attempts.emplace_back(NominalPlanScored{scored->action_indices,
-                scored->score.terminal_frame_box_corner_maximum,
-                NominalScoreKind::numerical_outer_enclosure_estimate});
-        else if(const auto* unscored = std::get_if<ParallelotopePlanUnscored>(&attempt))
+                terminal + running, approximate_score_kind(nominal), terminal, running});
+        } else if(const auto* unscored = std::get_if<ParallelotopePlanUnscored>(&attempt))
             attempts.emplace_back(NominalPlanUnscored{unscored->action_indices, unscored->outcome});
         else {
             const auto& stopped = std::get<ParallelotopePlanStopped>(attempt);
@@ -328,15 +461,16 @@ NominalTrackOutcome parallelotope_track(const FiniteActionNominalRequest& nomina
         }
     }
     const auto coverage = coverage_from(result.candidate_search);
-    if(const auto* selected = std::get_if<ParallelotopePlanSelected>(&result.selection)) {
-        const auto index = selected->candidate_attempt_index;
+    if(const auto selected_index = best_scored_attempt(attempts)) {
+        const auto index = *selected_index;
         if(index >= result.plan_attempts.size() || !std::holds_alternative<ParallelotopePlanScored>(result.plan_attempts[index]))
             return NominalTrackUnsupported{std::move(attempts), coverage,
                 unsupported("finite_nominal.parallelotope.selection", "Selected parallelotope attempt has no score.")};
-        const auto& score = std::get<ParallelotopePlanScored>(result.plan_attempts[index]).score;
+        const auto& native_score = std::get<ParallelotopePlanScored>(result.plan_attempts[index]).score;
+        const auto& score = std::get<NominalPlanScored>(attempts[index]);
         auto outcome2 = select_and_replay(nominal,
-            std::move(attempts), coverage, index, score.terminal_frame_box_corner_maximum,
-            NominalScoreKind::numerical_outer_enclosure_estimate, score.trace, context);
+            std::move(attempts), coverage, index, score.candidate_score,
+            score.score_kind, native_score.trace, context);
         if(auto* good = std::get_if<NominalTrackSelected>(&outcome2)) return *good;
         if(auto* error = std::get_if<NominalTrackUnsupported>(&outcome2)) return *error;
         return std::get<NominalTrackStopped>(std::move(outcome2));
@@ -364,11 +498,15 @@ NominalTrackOutcome ellipsoid_track(const FiniteActionNominalRequest& nominal,
     std::vector<NominalPlanAttempt> attempts;
     attempts.reserve(result.plan_attempts.size());
     for(const auto& attempt : result.plan_attempts) {
-        if(const auto* scored = std::get_if<EllipsoidPlanScored>(&attempt))
+        if(const auto* scored = std::get_if<EllipsoidPlanScored>(&attempt)) {
+            const auto terminal = scored->score.terminal_support_estimate;
+            const auto running = running_cost_for(nominal, scored->action_indices);
+            if(!std::isfinite(terminal) || !std::isfinite(running) || !std::isfinite(terminal + running))
+                return NominalTrackUnsupported{std::move(attempts), NominalSearchCoverage::incomplete,
+                    unsupported("finite_nominal.score.overflow", "Ellipsoid terminal estimate or combined source score is non-finite; the plan is not ranked.")};
             attempts.emplace_back(NominalPlanScored{scored->action_indices,
-                scored->score.terminal_support_estimate,
-                NominalScoreKind::numerical_outer_enclosure_estimate});
-        else if(const auto* unscored = std::get_if<EllipsoidPlanUnscored>(&attempt))
+                terminal + running, approximate_score_kind(nominal), terminal, running});
+        } else if(const auto* unscored = std::get_if<EllipsoidPlanUnscored>(&attempt))
             attempts.emplace_back(NominalPlanUnscored{unscored->action_indices, unscored->outcome});
         else {
             const auto& stopped = std::get<EllipsoidPlanStopped>(attempt);
@@ -376,15 +514,16 @@ NominalTrackOutcome ellipsoid_track(const FiniteActionNominalRequest& nominal,
         }
     }
     const auto coverage = coverage_from(result.candidate_search);
-    if(const auto* selected = std::get_if<EllipsoidPlanSelected>(&result.selection)) {
-        const auto index = selected->candidate_attempt_index;
+    if(const auto selected_index = best_scored_attempt(attempts)) {
+        const auto index = *selected_index;
         if(index >= result.plan_attempts.size() || !std::holds_alternative<EllipsoidPlanScored>(result.plan_attempts[index]))
             return NominalTrackUnsupported{std::move(attempts), coverage,
                 unsupported("finite_nominal.ellipsoid.selection", "Selected ellipsoid attempt has no score.")};
-        const auto& score = std::get<EllipsoidPlanScored>(result.plan_attempts[index]).score;
+        const auto& native_score = std::get<EllipsoidPlanScored>(result.plan_attempts[index]).score;
+        const auto& score = std::get<NominalPlanScored>(attempts[index]);
         auto outcome2 = select_and_replay(nominal,
-            std::move(attempts), coverage, index, score.terminal_support_estimate,
-            NominalScoreKind::numerical_outer_enclosure_estimate, score.trace, context);
+            std::move(attempts), coverage, index, score.candidate_score,
+            score.score_kind, native_score.trace, context);
         if(auto* good = std::get_if<NominalTrackSelected>(&outcome2)) return *good;
         if(auto* error = std::get_if<NominalTrackUnsupported>(&outcome2)) return *error;
         return std::get<NominalTrackStopped>(std::move(outcome2));
@@ -406,7 +545,9 @@ FiniteActionNominalOutcome finite_action_nominal(const FiniteActionNominalReques
     auto built = make_degenerate_request(request);
     if(const auto* error = std::get_if<Unsupported>(&built)) return *error;
     const auto& minimax_request = std::get<FiniteActionMinimaxRequest>(built);
-    FiniteActionNominalResult result{request.problem, request.request, {}, Assurance::numerical};
+    FiniteActionNominalResult result{request.problem, request.request, {}, Assurance::numerical,
+        request.running_cost.objective_id, request.running_cost.original_horizon,
+        request.absolute_stage_offset};
     result.tracks.reserve(5);
     result.tracks.push_back({NominalRepresentation::exact_polytope,
         exact_track(request, minimax_request, limits, context)});
@@ -418,6 +559,38 @@ FiniteActionNominalOutcome finite_action_nominal(const FiniteActionNominalReques
         parallelotope_track(request, minimax_request, limits, context)});
     result.tracks.push_back({NominalRepresentation::ellipsoid,
         ellipsoid_track(request, minimax_request, limits, context)});
+    return result;
+}
+
+FiniteActionNominalOutcome finite_action_nominal_profile(const FiniteActionNominalRequest& request,
+    FiniteActionNominalLimits limits, NominalRepresentation representation,
+    const ExecutionContext& context) {
+    auto built = make_degenerate_request(request);
+    if(const auto* error = std::get_if<Unsupported>(&built)) return *error;
+    const auto& minimax_request = std::get<FiniteActionMinimaxRequest>(built);
+    NominalTrackOutcome track = NominalTrackUnsupported{{}, NominalSearchCoverage::incomplete,
+        unsupported("finite_nominal.representation", "Selected representation is not a valid nominal route.")};
+    switch(representation) {
+    case NominalRepresentation::exact_polytope:
+        track = exact_track(request, minimax_request, limits, context);
+        break;
+    case NominalRepresentation::box:
+        track = box_track(request, minimax_request, limits, context);
+        break;
+    case NominalRepresentation::zonotope:
+        track = zonotope_track(request, minimax_request, limits, context);
+        break;
+    case NominalRepresentation::parallelotope:
+        track = parallelotope_track(request, minimax_request, limits, context);
+        break;
+    case NominalRepresentation::ellipsoid:
+        track = ellipsoid_track(request, minimax_request, limits, context);
+        break;
+    }
+    FiniteActionNominalResult result{request.problem, request.request, {}, Assurance::numerical,
+        request.running_cost.objective_id, request.running_cost.original_horizon,
+        request.absolute_stage_offset};
+    result.tracks.push_back({representation, std::move(track)});
     return result;
 }
 

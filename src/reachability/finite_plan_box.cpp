@@ -1,4 +1,5 @@
 #include <csl/reachability/finite_plan_box.hpp>
+#include <csl/reachability/detail/outer_safety.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -85,6 +86,19 @@ std::variant<BoxStage, OperationStopped> step(const model::DynamicsStage& dynami
     }
     return next;
 }
+
+auto box_support(const BoxStage& box) {
+    return [&box](std::span<const double> normal) {
+        long double lower = 0.0L, upper = 0.0L;
+        for(std::size_t j = 0; j < normal.size(); ++j) {
+            const auto a = static_cast<long double>(normal[j]);
+            lower += a * (a >= 0.0L ? box.lower[j] : box.upper[j]);
+            upper += a * (a >= 0.0L ? box.upper[j] : box.lower[j]);
+        }
+        return std::pair{detail::outward_lower(static_cast<double>(lower)),
+                         detail::outward_upper(static_cast<double>(upper))};
+    };
+}
 }
 
 FinitePlanBoxOutcome finite_plan_box(const FixedPlanRequest& request,
@@ -98,14 +112,16 @@ FinitePlanBoxOutcome finite_plan_box(const FixedPlanRequest& request,
         return unsupported("finite_plan_box.initial", "Initial set dimension differs from model.");
     const auto model_dimensions = request.system.dimensions();
     for(const auto& safe : request.admissible_states)
-        if(safe.metadata()->set.dimension != dimension ||
-           !std::holds_alternative<sets::UniversalRepresentation>(safe.representation()))
-            return unsupported("finite_plan_box.safe_sets", "This initial box propagator supports universal state constraints only.");
+        if(safe.metadata()->set.dimension != dimension)
+            return unsupported("finite_plan_box.safe_sets", "State-constraint dimension differs from model.");
 
     auto initial = bounds(request.initial, "finite_plan_box.initial");
     if(const auto* error = std::get_if<Unsupported>(&initial)) return *error;
     FinitePlanBoxTrace trace;
     trace.stages.push_back(std::get<BoxStage>(std::move(initial)));
+    if(!detail::outer_set_inside(request.admissible_states.front(), dimension,
+            box_support(trace.stages.front())))
+        return unsupported("finite_plan_box.safe_sets", "Initial box does not certify containment in the physical state constraint.");
     std::vector<BoxStage> disturbances;
     disturbances.reserve(horizon);
     for(const auto& set : request.disturbances) {
@@ -134,6 +150,9 @@ FinitePlanBoxOutcome finite_plan_box(const FixedPlanRequest& request,
                          control, disturbances[k], context);
         if(const auto* stop = std::get_if<OperationStopped>(&next)) return *stop;
         trace.stages.push_back(std::get<BoxStage>(std::move(next)));
+        if(!detail::outer_set_inside(request.admissible_states[k + 1], dimension,
+                box_support(trace.stages.back())))
+            return unsupported("finite_plan_box.safe_sets", "Propagated outer box does not certify containment in the physical state constraint.");
     }
     return trace;
 }

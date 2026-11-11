@@ -1,0 +1,37 @@
+{
+  "schema": "csl.closed-loop.native-one-hold-independent-rk4-check/1",
+  "task_id": "syn-nl-fuel-01/continuous-receding/1",
+  "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b",
+  "control": [
+    1.0,
+    1.0
+  ],
+  "absolute_interval": [
+    0.0,
+    0.5
+  ],
+  "fixed_rk4_substeps": 20000,
+  "independent_equations": "Python task_models.physical_dynamics",
+  "common_bridge_endpoint": [
+    98.94270155982319,
+    29.677061400581515,
+    2.219399171228645,
+    0.6878719791337877
+  ],
+  "independent_endpoint": [
+    98.94270155982868,
+    29.677061400583355,
+    2.2193991712310845,
+    0.6878719791347426
+  ],
+  "absolute_difference": [
+    5.4853899200679734e-12,
+    1.8403056856186595e-12,
+    2.439382029706394e-12,
+    9.549028234800971e-13
+  ],
+  "max_absolute_difference": 5.4853899200679734e-12,
+  "interpretation": "independent fixed-step implementation comparison; numerical only, not a validated error bound",
+  "python": "3.11.14 (main, Feb 12 2026, 00:42:50) [Clang 21.1.4 ]",
+  "source_sha256": "41268676a408b2af4de63dcbf1425e405341963f5f98a3e0020db28bb40434e9"
+}

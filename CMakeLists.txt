@@ -105,6 +105,12 @@ else()
   target_compile_definitions(csl_module_composition_catalogue PRIVATE CSL_CATALOGUE_HAS_QHULL=0)
 endif()
 set_target_properties(csl_module_composition_catalogue PROPERTIES CXX_EXTENSIONS OFF)
+
+add_executable(csl_closed_loop_native_policy tools/closed_loop_native_policy.cpp)
+target_link_libraries(csl_closed_loop_native_policy PRIVATE CSL::finite_action_nominal CSL::polyhedral
+  CSL::affine_sum CSL::phase_one)
+target_include_directories(csl_closed_loop_native_policy SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
+set_target_properties(csl_closed_loop_native_policy PROPERTIES CXX_EXTENSIONS OFF)
 include(cmake/OptionalReports.cmake)
 include(cmake/Package.cmake)
 if(BUILD_TESTING)

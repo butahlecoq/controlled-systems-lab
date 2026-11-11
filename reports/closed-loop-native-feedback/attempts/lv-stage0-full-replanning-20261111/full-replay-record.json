@@ -1,0 +1,92 @@
+{
+  "schema": "csl.closed-loop.native-graph-full-replay/1",
+  "task_id": "syn-nl-lv-01/continuous-receding/1",
+  "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+  "source_attempt": "../../probes/lv-stage0-full-replanning-20261111.json",
+  "controls_sha256": "805237c3bcb747bff91a5e2303cbc9296d6a8b6751b475070b8e3ed953c693da",
+  "witness_sha256": "6c89c2fc5bd1f85842a3fa0b8965ae6c2f3b00ddb6b23205a265a1d3a28f9b42",
+  "original_horizon": 30,
+  "replays": {
+    "common": {
+      "status": "complete",
+      "replay_status": "complete",
+      "checker_status": "complete",
+      "hold_endpoint_max_abs_difference_from_applied_execution": [
+        1.8474111129762605e-13,
+        9.947598300641403e-14
+      ],
+      "independent_objective": {
+        "terminal": 0.05142189640774733,
+        "running": 0.046250000000000006,
+        "total": 0.09767189640774734
+      },
+      "objective_difference": 0.0,
+      "sampled_physical_state_count": 601,
+      "sampled_state_bound_violations": [
+        0.0,
+        0.0
+      ],
+      "control_bound_violations": [
+        0.0
+      ],
+      "fixed_rk4": {
+        "substeps_per_original_interval": 100,
+        "hold_endpoint_max_abs_difference_from_CSL": [
+          5.272227099339943e-12,
+          3.225864020350855e-12
+        ],
+        "physical_objective": {
+          "terminal": 0.051421896407747074,
+          "running": 0.046250000000000006,
+          "total": 0.09767189640774708
+        },
+        "method": "separately transcribed classical fixed-step RK4; numerical diagnostic only"
+      }
+    },
+    "tight": {
+      "status": "complete",
+      "replay_status": "complete",
+      "checker_status": "complete",
+      "hold_endpoint_max_abs_difference_from_applied_execution": [
+        1.8474111129762605e-13,
+        9.947598300641403e-14
+      ],
+      "independent_objective": {
+        "terminal": 0.05142189640774733,
+        "running": 0.046250000000000006,
+        "total": 0.09767189640774734
+      },
+      "objective_difference": 0.0,
+      "sampled_physical_state_count": 601,
+      "sampled_state_bound_violations": [
+        0.0,
+        0.0
+      ],
+      "control_bound_violations": [
+        0.0
+      ],
+      "fixed_rk4": {
+        "substeps_per_original_interval": 100,
+        "hold_endpoint_max_abs_difference_from_CSL": [
+          5.272227099339943e-12,
+          3.225864020350855e-12
+        ],
+        "physical_objective": {
+          "terminal": 0.051421896407747074,
+          "running": 0.046250000000000006,
+          "total": 0.09767189640774708
+        },
+        "method": "separately transcribed classical fixed-step RK4; numerical diagnostic only"
+      }
+    }
+  },
+  "claim": "independent numerical replay and sampled checks; not a validated enclosure",
+  "checker_attempts": {
+    "first_failure": "failed-common-checker-attempt-captured-error.md",
+    "first_failure_raw_streams": "unavailable; overwritten during successful retry and explicitly disclosed in the failure record",
+    "successful_retries": [
+      "full-replay-common-check.json",
+      "full-replay-tight-check.json"
+    ]
+  }
+}
