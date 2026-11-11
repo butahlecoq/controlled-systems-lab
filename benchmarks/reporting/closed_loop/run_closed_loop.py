@@ -584,8 +584,12 @@ def write_coverage(root: Path) -> Path:
         if postchecks:
             latest = postchecks[-1].get("results", {})
             replay = {"common": latest.get("common", {}), "tight": latest.get("tight", {})}
+        reconciliation_path = path.parent / "supervisor-reconciliation.json"
+        reconciliation = json.loads(reconciliation_path.read_text()) if reconciliation_path.exists() else None
         rows.append({"attempt_id": record.get("attempt_id"), "task_id": record.get("task_id"),
-            "task_sha256": record.get("task_sha256"), "status": record.get("status"),
+            "task_sha256": record.get("task_sha256"),
+            "status": reconciliation.get("derived_terminal_status") if reconciliation else record.get("status"),
+            "ledger_status": record.get("status"), "supervisor_reconciliation": reconciliation,
             "completed_holds": record.get("completed_holds", 0), "original_intervals": record.get("original_intervals"),
             "physical_objective": record.get("physical_objective"),
             "common_replay": replay.get("common", {}).get("status"), "tight_replay": replay.get("tight", {}).get("status"),
@@ -593,6 +597,14 @@ def write_coverage(root: Path) -> Path:
             "graph_id": record.get("resolved_graph", {}).get("graph_id"),
             "graph_fingerprint": record.get("resolved_graph", {}).get("graph_fingerprint"),
             "attempt_record": str(path.relative_to(root))})
+    for path in sorted(root.glob("*/attempts/*/runner-startup-failure.json")):
+        try: failure = json.loads(path.read_text())
+        except (OSError, json.JSONDecodeError): continue
+        rows.append({"attempt_id": failure.get("attempt_id"), "task_id": failure.get("task_id"),
+            "status": failure.get("status"), "completed_holds": failure.get("completed_holds", 0),
+            "failure": failure.get("failure"), "actual_solver_invocations": failure.get("actual_solver_invocations", 0),
+            "attempt_record": str(path.relative_to(root))})
+    rows.sort(key=lambda row: row.get("attempt_id", ""))
     coverage = {"schema": "csl.closed-loop.coverage/1", "source_commit": subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(), "attempts": rows,
         "representation_claim": "pure NMPC graph bypasses set modules; zero set work is recorded and no representation performance is inferred"}

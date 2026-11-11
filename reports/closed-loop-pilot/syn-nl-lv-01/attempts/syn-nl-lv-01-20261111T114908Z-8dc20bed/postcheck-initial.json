@@ -1,0 +1,44 @@
+{
+  "schema": "csl.closed-loop.postcheck/1",
+  "postcheck_id": "initial",
+  "original_attempt_id": "syn-nl-lv-01-20261111T114908Z-8dc20bed",
+  "task_id": "syn-nl-lv-01/continuous-receding/1",
+  "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+  "source_sha256": "debf46903cbcd78694ea91bd1734f8ba9e503be36387288bbf1395661450c45b",
+  "controls_sha256": "cd50c4d124e7f91c0a009fa32362400057dfbede3f2b1db656d714515cb15d2e",
+  "witness_sha256": "a0b627f8ab423215297bed0e36d460fccc877313684bf7e511d4da890cf5b1f4",
+  "checker_source_commit": "4478a07052b41ce7de047fca47649933cc722a16",
+  "checker_source_hashes": {
+    "benchmarks/reporting/closed_loop/run_closed_loop.py": "7a598e1c1f811459733803ceccf52cfd2faa5e6696a33545cce638720552540b",
+    "benchmarks/reporting/closed_loop/check_episode.py": "3d07a4c9248cac103346b3858ae26f56df7d66063f8349d29ec6697065e0adf1",
+    "benchmarks/reporting/closed_loop/check_replay.py": "6035165a90350bb9b43719210bd485a9325c9750ce6a9f164867ee742f7a26de",
+    "benchmarks/reporting/closed_loop/task_models.py": "41268676a408b2af4de63dcbf1425e405341963f5f98a3e0020db28bb40434e9"
+  },
+  "bridge_sha256": "b5d47c14c65f1d2f833eaec4d9713bcc4717b130bd688e943ade7442c363973f",
+  "results": {
+    "common": {
+      "status": "complete",
+      "hold_endpoint_max_abs_difference": [
+        1.2789769243681803e-13,
+        1.1368683772161603e-13
+      ],
+      "objective_difference": 0.0
+    },
+    "tight": {
+      "status": "complete",
+      "hold_endpoint_max_abs_difference": [
+        1.2789769243681803e-13,
+        1.1368683772161603e-13
+      ],
+      "objective_difference": 0.0
+    }
+  },
+  "requested_checker_budget": {
+    "wall_seconds": 5,
+    "cpu_seconds": 5,
+    "address_space_bytes": 1073741824
+  },
+  "memory_scope": "each replay and independent Python checker process receives 1 GiB RLIMIT_AS; no machine-wide or descendant-tree memory counter",
+  "postcheck_wall_seconds": 2.7294765058904886,
+  "claim": "independent numerical replay and fixed-RK4 diagnostic; no validated enclosure"
+}
