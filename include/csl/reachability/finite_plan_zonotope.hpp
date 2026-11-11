@@ -29,11 +29,9 @@ struct FinitePlanZonotopeLimits {
 // Propagates a fixed plan with general-dimensional zonotopes. Bounded initial
 // and disturbance V sets are enclosed by coordinate boxes; each affine stage
 // propagates generator columns and adds diagonal generators for floating-point
-// rounding. Universal, singleton or H state constraints are supported when
-// the complete outer zonotope is contained; failed containment is inconclusive,
-// not a reachable violation. Other constraints and unbounded sets return
-// Unsupported. The trace is a numerical outer enclosure, not a control-feasibility
-// or optimizer-completeness certificate. The caller
+// rounding. Universal state constraints are supported; other constraints and
+// unbounded sets return Unsupported. The trace is a numerical outer enclosure,
+// not a control-feasibility or optimizer-completeness certificate. The caller
 // supplies a maximum generator count per stage; exceeding it returns Unsupported.
 FinitePlanZonotopeOutcome finite_plan_zonotope(const FixedPlanRequest& request,
     FinitePlanZonotopeLimits limits, const ExecutionContext& context = {});

@@ -1,5 +1,4 @@
 #include <csl/reachability/finite_plan_zonotope.hpp>
-#include <csl/reachability/detail/outer_safety.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -234,23 +233,6 @@ std::variant<FinitePlanZonotopeTrace::Stage, Unsupported, OperationStopped> prop
     return result;
 }
 
-auto zonotope_support(const FinitePlanZonotopeTrace::Stage& stage) {
-    return [&stage](std::span<const double> normal) {
-        long double center = 0.0L, radius = 0.0L;
-        for(std::size_t i = 0; i < stage.center.size(); ++i)
-            center += static_cast<long double>(normal[i]) * stage.center[i];
-        for(std::size_t col = 0; col < stage.generators.cols; ++col) {
-            long double factor = 0.0L;
-            for(std::size_t row = 0; row < stage.generators.rows; ++row)
-                factor += static_cast<long double>(normal[row]) *
-                    stage.generators.values[row * stage.generators.cols + col];
-            radius += std::abs(factor);
-        }
-        return std::pair{detail::outward_lower(static_cast<double>(center - radius)),
-                         detail::outward_upper(static_cast<double>(center + radius))};
-    };
-}
-
 } // namespace
 
 FinitePlanZonotopeOutcome finite_plan_zonotope(const FixedPlanRequest& request,
@@ -263,8 +245,9 @@ FinitePlanZonotopeOutcome finite_plan_zonotope(const FixedPlanRequest& request,
     if(request.initial.metadata()->set.dimension != n)
         return unsupported("finite_plan_zonotope.initial", "Initial set dimension differs from model.");
     for(const auto& safe : request.admissible_states)
-        if(safe.metadata()->set.dimension != n)
-            return unsupported("finite_plan_zonotope.safe_sets", "State-constraint dimension differs from model.");
+        if(safe.metadata()->set.dimension != n ||
+           !std::holds_alternative<sets::UniversalRepresentation>(safe.representation()))
+            return unsupported("finite_plan_zonotope.safe_sets", "Universal state constraints are the only supported profile.");
 
     auto initial = axis_zonotope(request.initial, "finite_plan_zonotope.initial",
         "finite-plan-zonotope/initial", limits.max_generators_per_stage, context);
@@ -272,9 +255,6 @@ FinitePlanZonotopeOutcome finite_plan_zonotope(const FixedPlanRequest& request,
     if(const auto* stop = std::get_if<OperationStopped>(&initial)) return *stop;
     FinitePlanZonotopeTrace trace;
     trace.stages.push_back(std::get<FinitePlanZonotopeTrace::Stage>(std::move(initial)));
-    if(!detail::outer_set_inside(request.admissible_states.front(), n,
-            zonotope_support(trace.stages.front())))
-        return unsupported("finite_plan_zonotope.safe_sets", "Initial zonotope does not certify containment in the physical state constraint.");
     for(std::size_t stage = 0; stage < horizon; ++stage) {
         if(const auto stop = stopped(context)) return *stop;
         auto disturbance = axis_zonotope(request.disturbances[stage],
@@ -295,9 +275,6 @@ FinitePlanZonotopeOutcome finite_plan_zonotope(const FixedPlanRequest& request,
         if(const auto* error = std::get_if<Unsupported>(&next)) return *error;
         if(const auto* stop = std::get_if<OperationStopped>(&next)) return *stop;
         trace.stages.push_back(std::get<FinitePlanZonotopeTrace::Stage>(std::move(next)));
-        if(!detail::outer_set_inside(request.admissible_states[stage + 1], n,
-                zonotope_support(trace.stages.back())))
-            return unsupported("finite_plan_zonotope.safe_sets", "Propagated outer zonotope does not certify containment in the physical state constraint.");
     }
     return trace;
 }

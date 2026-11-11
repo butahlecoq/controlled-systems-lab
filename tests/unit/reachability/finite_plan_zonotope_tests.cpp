@@ -23,12 +23,6 @@ sets::SetData vertices(std::string id, std::size_t dimension, Matrix points) {
 sets::SetData universal(std::string id, std::size_t dimension = 1) {
     return take(sets::make_universal({{std::move(id)}, dimension, {}}));
 }
-sets::SetData bounded(std::string id, double bound) {
-    return take(sets::make_h({{std::move(id)},1,{"x"}},
-        {take(numeric::snapshot(Matrix{2,1,{1,-1}})),
-         take(numeric::snapshot_vector(Vector{bound,bound})),
-         take(numeric::snapshot(Matrix{0,1,{}})), take(numeric::snapshot_vector(Vector{}))}));
-}
 
 FixedPlanRequest scalar_request() {
     SystemModel authored{{{1,1,1}, TimeDomain::discrete,
@@ -146,11 +140,11 @@ TEST_CASE("the four-state TwoPoints pilot retains stagewise outer coordinate bou
     }
 }
 
-TEST_CASE("zonotope safety admission needs full outer-set containment") {
+TEST_CASE("zonotope propagation preserves unsupported state constraints") {
     auto input = scalar_request();
-    input.admissible_states = {bounded("wide-0",10), bounded("wide-1",10), bounded("wide-2",10)};
-    CHECK(std::holds_alternative<FinitePlanZonotopeTrace>(finite_plan_zonotope(input, {64})));
-    input.admissible_states[1] = bounded("narrow-safe",0.5);
+    input.admissible_states[1] = take(sets::make_h({{"bounded-safe"},1,{}},
+        {take(numeric::snapshot(Matrix{2,1,{1,-1}})), take(numeric::snapshot_vector(Vector{2,2})),
+         take(numeric::snapshot(Matrix{0,1,{}})), take(numeric::snapshot_vector(Vector{}))}));
     const auto result = finite_plan_zonotope(input, {64});
     REQUIRE(std::holds_alternative<Unsupported>(result));
     CHECK(std::get<Unsupported>(result).diagnostics[0].field == "finite_plan_zonotope.safe_sets");

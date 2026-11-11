@@ -1,5 +1,4 @@
 #include <csl/reachability/finite_plan_ellipsoid.hpp>
-#include <csl/reachability/detail/outer_safety.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -158,21 +157,6 @@ std::variant<Stage, Unsupported, OperationStopped> step(
   if (const auto* failure = std::get_if<Unsupported>(&result)) return *failure;
   return std::get<Stage>(std::move(result));
 }
-
-auto ellipsoid_support(const Stage& stage) {
-  return [&stage](std::span<const double> normal) {
-    long double center = 0.0L, radius_squared = 0.0L;
-    for (std::size_t i = 0; i < stage.center.size(); ++i) {
-      const auto activity = static_cast<long double>(normal[i]) * stage.center[i];
-      const auto axis = static_cast<long double>(normal[i]) * stage.radii[i];
-      center += activity;
-      radius_squared += axis * axis;
-    }
-    const auto radius = std::sqrt(radius_squared);
-    return std::pair{detail::outward_lower(static_cast<double>(center - radius)),
-                     detail::outward_upper(static_cast<double>(center + radius))};
-  };
-}
 } // namespace
 
 FinitePlanEllipsoidOutcome finite_plan_ellipsoid(
@@ -193,8 +177,9 @@ FinitePlanEllipsoidOutcome finite_plan_ellipsoid(
         request.disturbances[stage].metadata()->set.dimension != dimensions.external)
       return unsupported("finite_plan_ellipsoid.dimensions", "Control or disturbance dimensions differ from model.");
   for (const auto& safe : request.admissible_states)
-    if (safe.metadata()->set.dimension != dimensions.state)
-      return unsupported("finite_plan_ellipsoid.safe_sets", "State-constraint dimension differs from model.");
+    if (safe.metadata()->set.dimension != dimensions.state ||
+        !std::holds_alternative<sets::UniversalRepresentation>(safe.representation()))
+      return unsupported("finite_plan_ellipsoid.safe_sets", "Only universal state constraints are supported.");
 
   auto initial_bounds = bounds(request.initial, "finite_plan_ellipsoid.initial");
   if (const auto* failure = std::get_if<Unsupported>(&initial_bounds)) return *failure;
@@ -204,9 +189,6 @@ FinitePlanEllipsoidOutcome finite_plan_ellipsoid(
 
   FinitePlanEllipsoidTrace trace;
   trace.stages.push_back(std::get<Stage>(std::move(initial)));
-  if (!detail::outer_set_inside(request.admissible_states.front(), dimensions.state,
-        ellipsoid_support(trace.stages.front())))
-    return unsupported("finite_plan_ellipsoid.safe_sets", "Initial ellipsoid does not certify containment in the physical state constraint.");
   std::vector<std::pair<Vector, Vector>> disturbance_bounds;
   disturbance_bounds.reserve(horizon);
   for (const auto& disturbance : request.disturbances) {
@@ -232,9 +214,6 @@ FinitePlanEllipsoidOutcome finite_plan_ellipsoid(
     if (const auto* failure = std::get_if<Unsupported>(&next)) return *failure;
     if (const auto* stop = std::get_if<OperationStopped>(&next)) return *stop;
     trace.stages.push_back(std::get<Stage>(std::move(next)));
-    if (!detail::outer_set_inside(request.admissible_states[stage + 1], dimensions.state,
-          ellipsoid_support(trace.stages.back())))
-      return unsupported("finite_plan_ellipsoid.safe_sets", "Propagated outer ellipsoid does not certify containment in the physical state constraint.");
   }
   return trace;
 }
