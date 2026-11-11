@@ -22,7 +22,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 1rem; }
 body { margin: 0; background: var(--page); color: var(--text); font-size: 1rem; line-height: 1.65; }
 a { color: var(--link); text-underline-offset: .2em; text-decoration-thickness: .08em; }
 a:hover { color: #8be9fd; }
-a:focus-visible, button:focus-visible, summary:focus-visible, nav:focus-visible {
+a:focus-visible, button:focus-visible, summary:focus-visible, nav:focus-visible, [tabindex]:focus-visible {
   outline: 2px solid var(--focus); outline-offset: 4px; border-radius: 2px;
 }
 img, svg { max-width: 100%; }
@@ -119,6 +119,7 @@ summary { color: var(--link); cursor: pointer; }
   .cards ul { grid-template-columns: 1fr; }
   th, td { padding: .45rem; }
   .report-home { width: min(100% - 1.5rem, 76rem); }
+  .continuous-policy-table th:nth-child(3) { white-space: nowrap; }
 }
 @media (max-height: 520px) and (min-width: 781px) {
   .shell aside { top: .5rem; max-height: calc(100vh - 1rem); }
