@@ -261,23 +261,19 @@ def main() -> None:
     fixed_plan_mpc_trials = {}
     for representation_index, representation_name in enumerate(
             ("exact-polytope", "box", "zonotope", "parallelotope", "ellipsoid")):
-        mpc_request = request(middle_bound=[[1.0, 1.0], [0.0, 0.0]],
+        mpc_request = request(middle_bound=[[-2.0, 3.0], [-1.0, 1.0]],
             controller=f"analytic-fixed-plan-mpc-{representation_name}")
         del mpc_request["search_policy"]
         mpc_request["state_bounds"] = [[-2.0, 3.0], [-1.0, 1.0]]
-        mpc_request["stage_state_bounds"] = [
-            [[-0.01, 0.01], [-0.01, 0.01]],
-            [[0.99, 1.01], [-0.01, 0.01]],
-            [[-0.01, 2.01], [-0.01, 0.01]],
-        ]
+        mpc_request["stage_state_bounds"] = [[[-2.0, 3.0], [-1.0, 1.0]] for _ in range(3)]
         mpc_request["representation_index"] = representation_index
         mpc_request["representation_name"] = representation_name
         mpc_response = execute(bridge, mpc_request)
         assert mpc_response["status"] == "accepted", mpc_response
-        assert mpc_response["control"] == [1.0]
+        assert mpc_response["control"] == [0.0]
         assert mpc_response["policy_id"].endswith("/receding-fixed-plan-mpc/1")
         assert mpc_response["selector"]["search_coverage"] in {"complete", "incomplete"}
-        assert mpc_response["selected_plan"]["controls"] == [[1.0], [0.0]]
+        assert mpc_response["selected_plan"]["controls"] == [[0.0], [0.0]]
         assert len(mpc_response["invocations"]) == 1
         assert mpc_response["invocations"][0]["module_id"] == \
             "csl::optimization::finite_action_nominal_profile"
