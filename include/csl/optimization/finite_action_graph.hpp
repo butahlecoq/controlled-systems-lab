@@ -60,12 +60,14 @@ struct FiniteActionGraphLayerStatistics {
 struct FiniteGraphCloudActionWitness {
     std::size_t action_index{};
     Vector child_state;
-    bool contained_in_selected_outer_shape{};
+    bool accepted_by_selected_shape_numerical_membership{};
     bool contained_in_coordinate_outer_box{};
     std::string membership_method;
     Vector membership_coordinates;
     double membership_residual{};
     double membership_tolerance{};
+    double membership_tolerance_scale{};
+    std::string membership_tolerance_rule;
     std::string containment_basis;
 };
 
@@ -83,6 +85,7 @@ struct FiniteGraphCloudMembership {
     Vector witness_coordinates;
     double reconstruction_residual{};
     double tolerance{};
+    double tolerance_scale{};
 };
 
 struct FiniteGraphActionCloudEnvelope {
