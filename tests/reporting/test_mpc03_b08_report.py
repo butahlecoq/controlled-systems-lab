@@ -1,10 +1,13 @@
 """Validate the saved B08 MIQCP report and deterministic projections."""
 import json
+import os
 from pathlib import Path
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
@@ -43,6 +46,10 @@ class Mpc03B08ReportTests(unittest.TestCase):
         self.assertIn(
             "blob/d71402ba339043226cedb452efb74a0e2c50dabd/"
             "docs/research/b08-displayed-exact-audit.md", page)
+        self.assertIn(
+            "blob/4d812d3e3f0e9b84a7508ddcb83e32b1d32a43fe/"
+            "docs/research/b08-displayed-exact-audit.md",
+            render_html(record))
 
     def test_stage_adds_report_and_gallery_card_idempotently(self):
         stage_mpc03_b08.stage(self.source, self.site)
@@ -55,6 +62,20 @@ class Mpc03B08ReportTests(unittest.TestCase):
         gallery = (self.site / "examples/index.html").read_text(encoding="utf-8")
         self.assertEqual(gallery.count('id="mpc03-b08-l04-miQCP-v1"'), 1)
         self.assertIn("../mpc03-b08-l04-miQCP-v1/index.html", gallery)
+
+    def test_historical_stage_is_independent_of_git_object_availability(self):
+        bundle_before = {path.name: path.read_bytes() for path in self.source.iterdir() if path.is_file()}
+        with tempfile.TemporaryDirectory() as empty_objects, patch.dict(
+                os.environ, {"GIT_OBJECT_DIRECTORY": empty_objects}):
+            unavailable = subprocess.run(
+                ["git", "cat-file", "-e", "4d812d3e3f0e9b84a7508ddcb83e32b1d32a43fe"],
+                cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            self.assertNotEqual(unavailable.returncode, 0)
+            stage_mpc03_b08.stage(self.source, self.site)
+        self.assertEqual(bundle_before,
+                         {path.name: path.read_bytes() for path in self.source.iterdir() if path.is_file()})
+        for name, content in bundle_before.items():
+            self.assertEqual((self.site / stage_mpc03_b08.REPORT_ID / name).read_bytes(), content)
 
     def test_stage_rejects_tampered_solver_output_before_writing(self):
         path = self.source / "solver-output.json"

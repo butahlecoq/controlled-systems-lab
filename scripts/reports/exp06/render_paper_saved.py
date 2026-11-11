@@ -10,7 +10,6 @@ import io
 import json
 import math
 import statistics
-import subprocess
 import sys
 from pathlib import Path
 
@@ -20,12 +19,15 @@ from check_source_indices import check as check_source_indices
 ROOT = Path(__file__).resolve().parents[3]
 NOTE_SOURCE_COMMIT = "d71402ba339043226cedb452efb74a0e2c50dabd"
 NOTE_PATH = "docs/research/itis17-paper-reducers-cpp-adaptation.md"
+HISTORICAL_SOURCE_COMMITS = frozenset({
+    "9d01d149f858ba5eed3aab755295a345f9dcc3b4",
+    "b2b7dfa6a2151259cbe1cd3d0e6d99e790661533",
+    "1f34503eb3f5d4c3e239076a8d48b2af2e6bf06c",
+})
 
 
 def note_source_commit(source_commit: str) -> str:
-    result = subprocess.run(["git", "cat-file", "-e", f"{source_commit}:{NOTE_PATH}"],
-                            cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    return source_commit if result.returncode == 0 else NOTE_SOURCE_COMMIT
+    return source_commit if source_commit in HISTORICAL_SOURCE_COMMITS else NOTE_SOURCE_COMMIT
 
 
 PORT_ROOT = ROOT / "tools/legacy-ports/A29"

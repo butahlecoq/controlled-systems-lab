@@ -3,18 +3,17 @@ from __future__ import annotations
 
 import html
 import math
-import subprocess
 from fractions import Fraction
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[3]
 NOTE_SOURCE_COMMIT = "d71402ba339043226cedb452efb74a0e2c50dabd"
 NOTE_PATH = "docs/research/b08-displayed-exact-audit.md"
+HISTORICAL_SOURCE_COMMITS = frozenset({
+    "4d812d3e3f0e9b84a7508ddcb83e32b1d32a43fe",
+})
+
 
 def note_source_commit(source_commit: str) -> str:
-    result = subprocess.run(["git", "cat-file", "-e", f"{source_commit}:{NOTE_PATH}"],
-                            cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    return source_commit if result.returncode == 0 else NOTE_SOURCE_COMMIT
+    return source_commit if source_commit in HISTORICAL_SOURCE_COMMITS else NOTE_SOURCE_COMMIT
 
 
 def hull(points):
