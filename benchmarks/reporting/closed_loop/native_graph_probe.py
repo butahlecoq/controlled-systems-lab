@@ -264,6 +264,12 @@ def main() -> None:
         mpc_request = request(middle_bound=[[1.0, 1.0], [0.0, 0.0]],
             controller=f"analytic-fixed-plan-mpc-{representation_name}")
         del mpc_request["search_policy"]
+        mpc_request["state_bounds"] = [[-2.0, 3.0], [-1.0, 1.0]]
+        mpc_request["stage_state_bounds"] = [
+            [[-0.01, 0.01], [-0.01, 0.01]],
+            [[0.99, 1.01], [-0.01, 0.01]],
+            [[-0.01, 2.01], [-0.01, 0.01]],
+        ]
         mpc_request["representation_index"] = representation_index
         mpc_request["representation_name"] = representation_name
         mpc_response = execute(bridge, mpc_request)
