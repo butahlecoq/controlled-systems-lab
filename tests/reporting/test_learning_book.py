@@ -45,6 +45,23 @@ class LearningBookTests(unittest.TestCase):
                           "controller", "supporting_operations", "capstones"},
                          {chapter["group"] for chapter in chapters})
 
+    def test_source_permalinks_bind_to_the_executed_example_bytes(self):
+        prefix = "https://github.com/butahlecoq/controlled-systems-lab/blob/"
+        for chapter in self.manifest["chapters"]:
+            for record in chapter.get("records", []):
+                if not record["href"].startswith(prefix):
+                    continue
+                with self.subTest(chapter=chapter["id"], source=record["href"]):
+                    commit, separator, source = record["href"][len(prefix):].partition("/")
+                    self.assertTrue(separator)
+                    self.assertRegex(commit, r"^[0-9a-f]{40}$")
+                    self.assertIn(source, chapter["example_sources"])
+                    result = subprocess.run(["git", "show", f"{commit}:{source}"],
+                                            cwd=ROOT, capture_output=True)
+                    self.assertEqual(result.returncode, 0, result.stderr.decode())
+                    self.assertEqual(result.stdout, (ROOT / source).read_bytes(),
+                                     "Source permalink differs from the executed example")
+
     def test_known_module_without_an_executable_source_witness_is_rejected(self):
         broken = json.loads(json.dumps(self.manifest))
         broken["chapters"][2]["module_ids"].append("csl.hull.grouped-membership")

@@ -796,7 +796,7 @@
       "records": [
         {
           "label": "Analytic five-representation calculation",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/scripts/reports/learning_geometry_toy.py"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/8d79251b331356d1325b92ee7b206199f61f65e3/scripts/reports/learning_geometry_toy.py"
         }
       ],
       "example_sources": [
@@ -992,7 +992,7 @@
       "records": [
         {
           "label": "tests/installed/box_approximation_client.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/8d79251bead9/tests/installed/box_approximation_client.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/1b7c56e3e611e751aca6b19aca104b89eabc5c8a/tests/installed/box_approximation_client.cpp"
         },
         {
           "label": "tests/installed/box_parallelotope_client.cpp",
@@ -1554,7 +1554,7 @@
       "records": [
         {
           "label": "tests/installed/conversion_client.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/tests/installed/conversion_client.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/1b7c56e3e611e751aca6b19aca104b89eabc5c8a/tests/installed/conversion_client.cpp"
         },
         {
           "label": "tests/installed/affine_sum_client.cpp",
