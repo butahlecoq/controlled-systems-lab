@@ -10,6 +10,7 @@ import tarfile
 import unittest
 import zipfile
 from io import BytesIO
+from unittest import mock
 
 from scripts.reports import (augment_pages_bundle, await_pages_augmentation_runs,
                              pages_route_retirement, replay_mpc11_published_variants)
@@ -179,6 +180,62 @@ class PagesAugmentationAggregation(unittest.TestCase):
         latest = await_pages_augmentation_runs.latest_report_run(runs, head_sha=sha)
         self.assertEqual(latest["id"], 10)
 
+    def test_await_handoff_requires_parent_and_all_other_route_artifacts(self):
+        sha = "a" * 40
+        child = {"head_branch": "main", "event": "workflow_run",
+                 "conclusion": "success", "head_sha": sha}
+        parent = {"id": 42, "head_sha": sha, "head_branch": "main",
+                  "name": "Algorithm report records and site", "event": "push",
+                  "status": "completed", "conclusion": "success",
+                  "created_at": "2026-11-11T09:00:00Z",
+                  "updated_at": "2026-11-11T09:10:00Z"}
+        marker = {"schema": "csl.pages-augmentation-source/1",
+                  "report_run_id": 42, "head_sha": sha}
+        with (mock.patch.object(await_pages_augmentation_runs, "get_json",
+                                side_effect=[child, parent]) as get_json,
+              mock.patch.object(await_pages_augmentation_runs, "run_marker",
+                                return_value=marker),
+              mock.patch.object(await_pages_augmentation_runs, "workflow_runs",
+                                return_value=[parent]),
+              mock.patch.object(await_pages_augmentation_runs, "matching_augmentation",
+                                return_value={"conclusion": "success"}) as matching):
+            result = await_pages_augmentation_runs.await_augmentations(
+                "https://api.example", "owner/repository", "token", 99, 30, 1)
+        self.assertEqual(result, 42)
+        self.assertEqual(get_json.call_args_list, [
+            mock.call("https://api.example", "owner/repository", "token", "actions/runs/99"),
+            mock.call("https://api.example", "owner/repository", "token", "actions/runs/42"),
+        ])
+        self.assertEqual([call.args[3] for call in matching.call_args_list], [
+            "mpc01-per-attempt-pages-augmentation.yml",
+            "b04-c-pages-augmentation.yml",
+        ])
+        self.assertTrue(all(call.args[4] is parent for call in matching.call_args_list))
+
+    def test_await_skips_artifacts_for_a_superseded_report_run(self):
+        sha = "a" * 40
+        child = {"head_branch": "main", "event": "workflow_run",
+                 "conclusion": "success", "head_sha": sha}
+        parent = {"id": 42, "head_sha": sha, "head_branch": "main",
+                  "name": "Algorithm report records and site", "event": "push",
+                  "status": "completed", "conclusion": "success"}
+        newer = {"id": 43, "head_sha": sha, "head_branch": "main",
+                 "event": "push", "status": "completed", "conclusion": "success",
+                 "updated_at": "2026-11-11T09:12:00Z"}
+        marker = {"schema": "csl.pages-augmentation-source/1",
+                  "report_run_id": 42, "head_sha": sha}
+        with (mock.patch.object(await_pages_augmentation_runs, "get_json",
+                                side_effect=[child, parent]),
+              mock.patch.object(await_pages_augmentation_runs, "run_marker",
+                                return_value=marker),
+              mock.patch.object(await_pages_augmentation_runs, "workflow_runs",
+                                return_value=[newer]),
+              mock.patch.object(await_pages_augmentation_runs, "matching_augmentation") as matching):
+            result = await_pages_augmentation_runs.await_augmentations(
+                "https://api.example", "owner/repository", "token", 99, 30, 1)
+        self.assertIsNone(result)
+        matching.assert_not_called()
+
     def test_aggregation_wait_job_precedes_single_cumulative_deployment(self):
         workflow = (ROOT / ".github/workflows/pages-augmentation-aggregation.yml").read_text(encoding="utf-8")
         self.assertIn("MPC-06 tube objective Pages augmentation", workflow)
@@ -188,6 +245,45 @@ class PagesAugmentationAggregation(unittest.TestCase):
         self.assertIn("group: github-pages", workflow)
         self.assertIn("PAGES_SOURCE_RUN_ID", workflow)
         self.assertLess(workflow.index("pip install"), workflow.index("name: Stage and verify all Pages augmentations together"))
+
+    def test_only_cumulative_workflow_can_publish_pages(self):
+        workflows = ROOT / ".github/workflows"
+        aggregation = workflows / "pages-augmentation-aggregation.yml"
+        sources = [
+            workflows / "algorithm-reports.yml",
+            workflows / "mpc01-per-attempt-pages-augmentation.yml",
+            workflows / "b04-c-pages-augmentation.yml",
+            workflows / "mpc06-tube-objective-pages-augmentation.yml",
+        ]
+        self.assertIn("actions/deploy-pages@", aggregation.read_text(encoding="utf-8"))
+        self.assertIn("actions/upload-pages-artifact@", aggregation.read_text(encoding="utf-8"))
+        publishers = [path.name for path in workflows.glob("*.yml")
+                      if "actions/deploy-pages@" in path.read_text(encoding="utf-8")]
+        self.assertEqual(publishers, [aggregation.name])
+        for path in sources:
+            with self.subTest(workflow=path.name):
+                source = path.read_text(encoding="utf-8")
+                self.assertIn("actions/upload-pages-artifact@", source)
+                self.assertNotIn("actions/deploy-pages@", source)
+                self.assertNotIn("actions/configure-pages@", source)
+                self.assertNotIn("pages: write", source)
+                self.assertNotIn("id-token: write", source)
+        base = sources[0].read_text(encoding="utf-8")
+        self.assertIn("push:\n    branches: [main]", base)
+        for path in sources[1:]:
+            with self.subTest(workflow_run=path.name):
+                source = path.read_text(encoding="utf-8")
+                self.assertIn("workflow_run:", source)
+                self.assertIn("workflows: [Algorithm report records and site]", source)
+                self.assertIn("branches: [main]", source)
+        aggregation_text = aggregation.read_text(encoding="utf-8")
+        self.assertIn("Wait for every single-route artifact for this source revision", aggregation_text)
+        self.assertIn("await_pages_augmentation_runs.py", aggregation_text)
+        waiter = (ROOT / "scripts/reports/await_pages_augmentation_runs.py").read_text(encoding="utf-8")
+        for name in ("mpc01-per-attempt-pages-augmentation.yml",
+                     "b04-c-pages-augmentation.yml",
+                     "mpc06-tube-objective-pages-augmentation.yml"):
+            self.assertIn(name, waiter)
 
 
 if __name__ == "__main__":
