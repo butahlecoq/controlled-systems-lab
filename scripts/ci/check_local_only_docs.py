@@ -44,6 +44,25 @@ FUNCTIONAL_DOC_ASSETS = {
     "docs/research/figures/": {".png", ".svg"},
     "docs/research/tools/": {".py"},
 }
+FUNCTIONAL_DOC_EXACT_ASSETS = {
+    "docs/build/ci-cache-evidence-2026-10-19.json",
+    "docs/research/archive-selected-sources.json",
+    "docs/research/b04-consistency.json",
+    "docs/research/b04-historical-comparison.html",
+    "docs/research/b04-historical-comparison.json",
+    "docs/research/ext07-hybrid-2d.json",
+    "docs/research/ext07-hybrid-2d.svg",
+    "docs/research/inventory.json",
+    "docs/research/legacy-characterization.json",
+    "docs/research/proof-audit-provenance.json",
+    "docs/research/reference-b08.json",
+    "docs/research/syn04-strategy-b-ts03-control-projection.svg",
+    "docs/research/verification.json",
+    "docs/research/works-selected-sources.json",
+    "scripts/reports/geo07_dependent/review-seal.json",
+    "scripts/reports/geo07_port/review-seal.json",
+}
+LOCAL_ONLY_WORKING_FILES = {"docs/research/exp06-423-decision-log.tsv"}
 EXPLICIT_WORKING_DIRECTORIES = {"drafts", "notes", "plans", "reviews", "specs", "superpowers"}
 FUNCTIONAL_REPO_ASSET_LOCATIONS = {
     "benchmarks/reporting/",
@@ -93,6 +112,10 @@ def is_working_document_path(path: str) -> bool:
 
 
 def is_functional_doc_asset(path: str) -> bool:
+    if path in FUNCTIONAL_DOC_EXACT_ASSETS:
+        return True
+    if path.startswith("docs/research/evidence/") and Path(path).name in {"SHA256SUMS", "exit-code"}:
+        return True
     suffix = Path(path).suffix.lower()
     return any(path.startswith(prefix) and suffix in suffixes
                for prefix, suffixes in FUNCTIONAL_DOC_ASSETS.items())
@@ -110,6 +133,8 @@ def is_functional_repo_asset(path: str) -> bool:
 
 def is_retained_change(path: str, root: Path) -> bool:
     suffix = Path(path).suffix.lower()
+    if path in LOCAL_ONLY_WORKING_FILES:
+        return False
     if suffix in MARKDOWN_SUFFIXES:
         return is_retained_markdown(path, root)
     if is_explicit_working_directory(path):
@@ -118,6 +143,8 @@ def is_retained_change(path: str, root: Path) -> bool:
         if is_functional_doc_asset(path):
             return True
         return False
+    if path in FUNCTIONAL_DOC_EXACT_ASSETS:
+        return True
     if is_functional_repo_asset(path):
         return True
     if is_working_document_path(path):
