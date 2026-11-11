@@ -2,7 +2,7 @@
   "schema": "csl.module-composition-inventory/1",
   "inventory_id": "four-group-module-composition/1",
   "audited_source": "three-environment-closed-loop-matrix-audit.md@ed2dda1ef049ac4fbe259a800d3314e446ceee28",
-  "scope": "Source inventory captured from repository base commit ff451f74d90d70cd9dd228889fa77c181fc1fd26, cross-checked against audit ed2dda1ef049ac4fbe259a800d3314e446ceee28. The branch-native receipt CLI reports compiled availability separately.",
+  "scope": "Four-group module records were initially inventoried from ff451f74d90d70cd9dd228889fa77c181fc1fd26 and rechecked against current main 6f932fb5dc36e81ae59c080d1c12602d4b63367a after the closed-loop task contracts merged. The cited matrix audit remains ed2dda1ef049ac4fbe259a800d3314e446ceee28; compiled receipts are reported separately.",
   "groups": [
     {
       "id": "vertex_lp_simplex",
@@ -545,7 +545,17 @@
       ],
       "action_domain": "continuous controls only for registered profiles that admit them",
       "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
-      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed.",
+      "active_configuration_slots": [
+        "representation"
+      ],
+      "captured_provider_roles": [
+        "geometry:equivalent H projection",
+        "geometry:equivalent V affine/sum",
+        "converter:equivalent H conversion",
+        "LPPort",
+        "ConvexPort"
+      ]
     },
     {
       "group": "controller",
@@ -576,7 +586,13 @@
       ],
       "action_domain": "continuous controls only for registered profiles that admit them",
       "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
-      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed.",
+      "active_configuration_slots": [
+        "lp",
+        "convex",
+        "representation"
+      ],
+      "captured_provider_roles": []
     },
     {
       "group": "controller",
@@ -605,7 +621,11 @@
       ],
       "action_domain": "continuous controls only for registered profiles that admit them",
       "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
-      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed.",
+      "active_configuration_slots": [
+        "representation"
+      ],
+      "captured_provider_roles": []
     },
     {
       "group": "controller",
@@ -1496,7 +1516,7 @@
     "External acados execution and installation remain prohibited.",
     "Build availability and native admission receipts must be emitted by the exact compiled build; this source inventory alone is not a receipt."
   ],
-  "repository_basis_commit": "ff451f74d90d70cd9dd228889fa77c181fc1fd26",
+  "repository_basis_commit": "6f932fb5dc36e81ae59c080d1c12602d4b63367a",
   "identity_policy": "Registered provider IDs and versions are source literals. Public functions are identified by exported C++ symbols without invented version IDs.",
   "known_candidate_classifications": [
     {
@@ -1582,5 +1602,6 @@
     "provider_receipts": "requested and actual identity plus version from concrete prepare",
     "execution_receipts": "observed provider-call records only; prepared dependencies are not invocation counts",
     "dimensions_actions_models": "profile data is pinned to each finite candidate; source inventory describes reusable module limits"
-  }
+  },
+  "previous_module_inventory_basis_commit": "ff451f74d90d70cd9dd228889fa77c181fc1fd26"
 }
