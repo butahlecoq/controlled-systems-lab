@@ -70,6 +70,67 @@ def execute(bridge: Path, query: dict) -> dict:
     return json.loads(result.stdout)
 
 
+def execute_source_bound(bridge: Path, query: dict) -> dict:
+    result = subprocess.run([str(bridge)], input=json.dumps(query) + "\n", text=True,
+                            capture_output=True, check=True)
+    return json.loads(result.stdout)
+
+
+def orbit_box_ulp_query() -> dict:
+    # One-stage absolute slice from env717-earth-orbit. The stage dynamics,
+    # action catalogue, source task hash, action profile, and source cost mask
+    # match the saved original task query. The initial state is the saved graph
+    # parent that produced an authored child 27 ULP below the strict box bound.
+    return {
+        "schema": "csl.closed-loop.native-policy-query/1",
+        "task_id": "env717-earth-orbit/continuous-receding/1",
+        "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+        "source_model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
+        "controller_id": "orbit-box-ulp-graph-regression",
+        "action_profile_id": "env717-earth-orbit/finite-nine-action-per-step-adaptation/1",
+        "problem_id": "env717-earth-orbit/continuous-receding/1",
+        "request_id": "orbit-box-ulp-graph-regression",
+        "absolute_update_index": 2,
+        "observed_physical_state": [6999.7756835054515, -0.002306394573328596,
+            0.2155953791211347, 0.0010779877159017728],
+        "original_horizon": 20,
+        "dt": 100.0,
+        "predictor_model_id": "env717-earth-orbit/local-tangent-zoh/1",
+        "predictor_assurance": "saved source-faithful local tangent predictor stage 2",
+        "predictor_stages": [{
+            "A": [[1.0174163705059924, 99.80640977215867, -0.0, 75391.24366355607],
+                [0.00034798998485238193, 0.9941945431646704, 0.0, 1506.3642411291376],
+                [-1.788875721149373e-07, -0.0015385968094603075, 1.0, 99.2256390886345],
+                [-5.364548044963179e-09, -3.074212736998153e-05, 0.0, 0.9767781726586771]],
+            "B": [[0.09990318613348546, 0.007182901216686848],
+                [0.0019961281954431745, 0.0002154035533244459],
+                [-1.0261287452409472e-06, 1.423039207627737e-05],
+                [-3.077193618920475e-08, 2.8350182596752727e-07]],
+            "c": [-203.19098923657785, -4.059883156611123, 0.0020870216746742276,
+                6.258639385790105e-05]}],
+        "actions": [[-0.5, -0.5], [-0.5, 0.0], [-0.5, 0.5], [0.0, -0.5],
+            [0.0, 0.0], [0.0, 0.5], [0.5, -0.5], [0.5, 0.0], [0.5, 0.5]],
+        "state_bounds": [None, None, None, None],
+        "terminal_objective": {"kind": "norm",
+            "map": [[1.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 100000.0]],
+            "target": [6900.0, 110.15823082230797], "weights": [1.0, 1.0]},
+        "running_cost": {"objective_id": "env717-earth-orbit/source-cost-continuous/1",
+            "stages": [{"stage": 2, "terms": [{"kind": "euclidean",
+                "map": [[1.0, 0.0], [0.0, 1.0]], "offset": [0.0, 0.0], "coefficient": 0.1}]}]},
+        "representation_index": 1, "representation_name": "box",
+        "reachable_set_method": {"id": "csl.geometry.affine-sum", "version": "1.0.0"},
+        "hull_provider": {"id": "csl.hull.lp-membership", "version": "1.0.0"},
+        "vertex_lp_provider": {"id": "phase-one-bland", "version": "1"},
+        "conversion_provider": "not_used",
+        "checker_budget": {"max_points": 64, "wall_ms": 5000},
+        "control_optimizer": {"id": "csl.optimization.finite-action-stage-layered-graph", "version": "1.0.0"},
+        "search_policy": "stage-layered-backward-viability",
+        "limits": {"max_beam_width": 16, "max_graph_nodes": 32,
+            "max_plans": 32, "max_points_per_stage": 128,
+            "max_score_evaluations": 128, "max_generators_per_stage": 64},
+    }
+
+
 def enumerate_paths(query: dict) -> list[dict]:
     rows = []
     for actions in itertools.product(range(len(query["actions"])), repeat=2):
@@ -129,6 +190,31 @@ def main() -> None:
     assert center_response["status"] == "accepted" and center_response["control"] == [0.0]
     assert len(stage_one_nodes) == 3 and center_node["state"] == [0.0, 0.0]
     assert center_best["action_indices"] == [1, 1] and center_best["total_cost"] == 0.0
+
+    orbit_box_request = orbit_box_ulp_query()
+    orbit_box_response = execute_source_bound(bridge, orbit_box_request)
+    assert orbit_box_response["status"] == "accepted", orbit_box_response
+    for key in ("task_id", "task_sha256", "action_profile_id"):
+        assert orbit_box_response[key] == orbit_box_request[key]
+        assert orbit_box_response["graph_receipt"][key] == orbit_box_request[key]
+    orbit_clouds = orbit_box_response["graph_receipt"]["action_cloud_envelopes"]
+    orbit_cloud = next(cloud for cloud in orbit_clouds if cloud["stage"] == 2 and
+        cloud["parent_node_id"] == 0)
+    orbit_witness = next(witness for witness in orbit_cloud["action_child_witnesses"]
+        if witness["action_index"] == 0)
+    assert orbit_witness["contained_in_coordinate_outer_box"] is False
+    assert orbit_witness["accepted_by_selected_shape_numerical_membership"] is True
+    assert orbit_witness["membership_method"] == "coordinate-membership-in-selected-box"
+    assert orbit_witness["membership_tolerance_rule"] == \
+        "max(64*epsilon*global-coordinate-scale,64*denorm_min)"
+    assert orbit_witness["membership_tolerance_scale"] > 6999.0
+    assert orbit_witness["membership_tolerance"] > orbit_witness["membership_residual"] > 0.0
+    orbit_edge = next(edge for edge in orbit_box_response["graph_receipt"]["edges"]
+        if edge["absolute_stage"] == 2 and edge["action_index"] == 0)
+    assert orbit_edge["discrete_transition_witness"] is True
+    assert orbit_edge["predecessor_contains_parent"] is True
+    assert orbit_edge["backward_viable"] is True
+    assert orbit_edge["representation_filter_passed"] is True
 
     provider_profiles = [
         ("lp-membership", "csl.geometry.affine-sum", "csl.hull.lp-membership", "1.0.0", "phase-one-bland"),
@@ -294,6 +380,10 @@ def main() -> None:
             "independent_histories": center_paths, "best_feasible_history": center_best,
             "interior_stage_node_retained": center_node,
             "interpretation": "the state produced by the authored center action is interior to the two endpoint states but remains a distinct witnessed node; the graph does not hull-deduplicate or splice its lineage"},
+        "orbit_box_ulp_graph_membership_case": {"request": orbit_box_request,
+            "response": orbit_box_response, "selected_action_cloud_witness": orbit_witness,
+            "authored_discrete_edge": orbit_edge,
+            "interpretation": "the actual graph admits the recomputed action child through its selected box's numerical membership predicate while preserving strict coordinate-box inclusion as false; predecessor and discrete transition witnesses independently pass"},
         "geometry_provider_trials": provider_trials,
         "fixed_plan_mpc_trials": fixed_plan_mpc_trials,
         "checker_capacity_refusal": {"request": capacity_failure_request,
@@ -312,6 +402,7 @@ def main() -> None:
     print(json.dumps({"viability_selected_action": viable_response["control"],
         "independent_best_feasible": feasible_best["action_indices"],
         "unconstrained_best": unconstrained_best["action_indices"],
+        "orbit_box_ulp_graph_status": orbit_box_response["status"],
         "continuous_only_status": continuous_only_response["status"], "output": str(args.output)}, indent=2))
 
 

@@ -606,7 +606,7 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
         "csl::reachability::finite_plan_zonotope", "csl::reachability::finite_plan_parallelotope",
         "csl::reachability::finite_plan_ellipsoid"};
     if(representation_index>0) invocations.push_back({{"module_id",representation_modules.at(representation_index)},
-        {"operation","one-step fixed-discrete-edge outer enclosure, authored-stage safety check, and coordinate-outer child membership before graph selection"},
+        {"operation","one-step fixed-discrete-edge outer enclosure, authored-stage safety check, and selected-shape numerical membership before graph selection"},
         {"provider","public-function"},{"profile_id",input.at("controller_id")},
         {"representation",representation_names.at(representation_index)},
         {"calls",graph.representation_filter_calls},{"rejected",graph.representation_filter_rejections},
