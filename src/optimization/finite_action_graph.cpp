@@ -97,6 +97,46 @@ SetOutcome stage_intersection(const sets::SetData& admissible, std::span<const d
     return std::get<sets::SetData>(intersection);
 }
 
+Unsupported validate_running_cost(const RunningControlCost& cost, std::size_t stage_offset,
+        std::size_t horizon, std::size_t control_dimension) {
+    if(cost.stages.empty()) {
+        if(!cost.objective_id.empty() || cost.original_horizon != 0)
+            return unsupported("finite_graph.running_cost", "An inactive running-cost schedule must have empty identity and zero original horizon.");
+        return {};
+    }
+    if(cost.objective_id.empty() || cost.original_horizon == 0 || stage_offset > cost.original_horizon ||
+       horizon > cost.original_horizon - stage_offset)
+        return unsupported("finite_graph.running_cost", "The running-cost identity and original horizon must cover the requested absolute-stage slice.");
+    std::size_t previous = 0;
+    bool first = true;
+    for(const auto& row : cost.stages) {
+        if(row.stage >= cost.original_horizon || (!first && row.stage <= previous))
+            return unsupported("finite_graph.running_cost.stages", "Running-cost stages must be unique, increasing, and inside the original horizon.");
+        previous = row.stage;
+        first = false;
+        for(const auto& term : row.terms) {
+            if(const auto* quadratic = std::get_if<QuadraticControlPenalty>(&term)) {
+                if(quadratic->reference.size() != control_dimension || quadratic->scales.size() != control_dimension ||
+                   quadratic->weights.size() != control_dimension || quadratic->normalization_horizon != cost.original_horizon ||
+                   !finite(quadratic->reference) || !finite(quadratic->scales) || !finite(quadratic->weights) ||
+                   !std::isfinite(quadratic->coefficient) || quadratic->coefficient < 0.0 ||
+                   !std::ranges::all_of(quadratic->scales, [](double value) { return value != 0.0; }) ||
+                   !std::ranges::all_of(quadratic->weights, [](double value) { return value >= 0.0; }))
+                    return unsupported("finite_graph.running_cost.quadratic", "Quadratic cost dimensions, original-horizon normalization, scales, weights, or coefficient are invalid.");
+            } else {
+                const auto& norm = std::get<EuclideanControlPenalty>(term);
+                if(norm.map.cols != control_dimension || norm.map.rows == 0 ||
+                   norm.offset.size() != norm.map.rows ||
+                   norm.map.values.size() != norm.map.rows * norm.map.cols ||
+                   !finite(norm.map.values) || !finite(norm.offset) ||
+                   !std::isfinite(norm.coefficient) || norm.coefficient < 0.0)
+                    return unsupported("finite_graph.running_cost.euclidean", "Euclidean cost map, offset, or coefficient is invalid.");
+            }
+        }
+    }
+    return {};
+}
+
 double stage_cost(const RunningControlCost& cost, std::size_t stage, std::span<const double> control) {
     const auto found = std::lower_bound(cost.stages.begin(), cost.stages.end(), stage,
         [](const AbsoluteStageControlCost& row, std::size_t value) { return row.stage < value; });
@@ -208,6 +248,8 @@ FiniteActionGraphOutcome finite_action_stage_layered_graph(const FiniteActionNom
         return unsupported("finite_graph.request", "Finite action graph request dimensions do not match the nominal system.");
     if(horizon == 0 || !finite(request.initial_state))
         return unsupported("finite_graph.horizon", "Graph requires a nonempty horizon and finite initial state.");
+    if(const auto invalid_cost = validate_running_cost(request.running_cost, request.absolute_stage_offset,
+            horizon, dimensions.control); !invalid_cost.diagnostics.empty()) return invalid_cost;
     for(const auto& action : request.actions.catalogue)
         if(action.size() != dimensions.control || !finite(action))
             return unsupported("finite_graph.actions", "Each authored discrete action must be finite and have the declared control dimension.");

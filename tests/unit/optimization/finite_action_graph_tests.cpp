@@ -133,3 +133,14 @@ TEST_CASE("interior authored center action keeps its own node and lineage") {
     CHECK(result.nodes[result.selected_nodes[1]].action_index == 1);
     CHECK(result.total_objective == doctest::Approx(0.0));
 }
+
+TEST_CASE("graph rejects malformed source cost before numerical evaluation") {
+    auto request = viability_request();
+    std::get<QuadraticControlPenalty>(request.running_cost.stages.front().terms.front()).scales[0] = 0.0;
+    auto provider = projection_provider();
+    const auto outcome = finite_action_stage_layered_graph(request, {4,32}, provider);
+    REQUIRE(std::holds_alternative<Unsupported>(outcome));
+    const auto& diagnostics = std::get<Unsupported>(outcome).diagnostics;
+    REQUIRE_FALSE(diagnostics.empty());
+    CHECK(diagnostics.front().field == "finite_graph.running_cost.quadratic");
+}
