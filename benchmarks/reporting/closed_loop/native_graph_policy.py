@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 import subprocess
+from collections.abc import Mapping
 from pathlib import Path
 
 from task_models import prediction_receipt, source_scenario
@@ -94,12 +95,19 @@ def _prediction_stages(task: dict, receipt: dict, stage: int) -> list[dict]:
 
 
 class NativeGraphPolicy:
-    def __init__(self, task: dict, task_sha256: str, controller_id: str, action_profile_id: str):
+    def __init__(self, task: dict, task_sha256: str, controller_id: str,
+                 action_profile_id: str, factory_options: Mapping[str, object] | None = None):
         self.task = task
         self.task_sha256 = task_sha256
         self.controller_id = controller_id
         self.action_profile_id = action_profile_id
+        if factory_options is not None and not isinstance(factory_options, Mapping):
+            raise ValueError("factory_options must be a mapping")
+        self.factory_options = dict(factory_options or {})
         self.representation_index, self.use_backward_graph, self.representation_name = _profile(controller_id)
+        declared_representation = self.factory_options.get("representation")
+        if declared_representation is not None and declared_representation != self.representation_name:
+            raise ValueError("factory_options.representation differs from the controller profile")
         finite = task["control_domains"]["finite"]
         if action_profile_id != finite["problem_id"]:
             raise ValueError("native finite-action controllers require the task's declared finite action profile")
@@ -118,8 +126,18 @@ class NativeGraphPolicy:
         self.original_horizon = task["episode"]["intervals"]
         self.dt = task["episode"]["dt"]
         self.state_bounds = [field.get("bounds") for field in task["model"]["states"]]
+        self.limits = self._limits()
+        backend_profile = self.factory_options.get("build_backend_profile")
+        if backend_profile is not None and not isinstance(backend_profile, Mapping):
+            raise ValueError("factory_options.build_backend_profile must be a mapping")
+        backend_profile = dict(backend_profile or {
+            "build_type": os.environ.get("CSL_NATIVE_BUILD_TYPE", "unspecified"),
+            "CSL_ENABLE_HIGHS": os.environ.get("CSL_NATIVE_HAS_HIGHS", "unspecified"),
+            "CSL_ENABLE_QHULL": os.environ.get("CSL_NATIVE_HAS_QHULL", "unspecified"),
+        })
         self.preparation_receipt = {"executable": str(self.executable),
             "executable_sha256": hashlib.sha256(self.executable.read_bytes()).hexdigest(),
+            "build_backend_profile": backend_profile,
             "predictor_model_id": self.receipt["model_id"],
             "predictor_assurance": self.receipt["coefficient_assurance"],
             "objective_id": task["objective"]["objective_id"],
@@ -128,6 +146,83 @@ class NativeGraphPolicy:
             "controller_semantics": ("finite-action receding-horizon graph MPC with source-cost ranking, numerical H predecessor membership, discrete transition witnesses, and the explicitly selected representation's one-step outer edge filter"
                 if self.use_backward_graph else
                 "finite-action receding-horizon fixed-plan MPC using the selected representation profile, exact source running-cost ranking, authored state-constraint replay, and a separately recomputed original affine trajectory")}
+
+    def _limits(self) -> dict[str, int]:
+        keys = ("max_beam_width", "max_graph_nodes", "max_plans", "max_points_per_stage",
+                "max_score_evaluations", "max_generators_per_stage")
+        defaults = {
+            "max_beam_width": ("CSL_NATIVE_GRAPH_BEAM_WIDTH", 8),
+            "max_graph_nodes": ("CSL_NATIVE_GRAPH_MAX_NODES", 512),
+            "max_plans": ("CSL_NATIVE_MAX_PLANS", 512),
+            "max_points_per_stage": ("CSL_NATIVE_MAX_POINTS_PER_STAGE", 100000),
+            "max_score_evaluations": ("CSL_NATIVE_MAX_SCORE_EVALUATIONS", 100000),
+            "max_generators_per_stage": ("CSL_NATIVE_MAX_GENERATORS_PER_STAGE", 1000),
+        }
+        declared = self.factory_options.get("limits")
+        if declared is not None and not isinstance(declared, Mapping):
+            raise ValueError("factory_options.limits must be a mapping")
+        result = {}
+        for key in keys:
+            if declared is not None and key not in declared:
+                raise ValueError(f"factory_options.limits is missing {key}")
+            raw = declared[key] if declared is not None else os.environ.get(defaults[key][0], defaults[key][1])
+            value = int(raw)
+            if value <= 0:
+                raise ValueError(f"factory_options.limits.{key} must be positive")
+            result[key] = value
+        return result
+
+    def _method_option(self, key: str, env_id: str, env_version: str, default_id: str,
+                       default_version: str) -> dict[str, str]:
+        declared = self.factory_options.get(key)
+        if declared is not None:
+            if not isinstance(declared, Mapping) or not declared.get("id") or not declared.get("version"):
+                raise ValueError(f"factory_options.{key} must provide id and version")
+            return {"id": str(declared["id"]), "version": str(declared["version"])}
+        return {"id": os.environ.get(env_id, default_id),
+                "version": os.environ.get(env_version, default_version)}
+
+    def _geometry_options(self) -> dict[str, object]:
+        if self.factory_options:
+            required = ("reachable_set_method", "hull_provider", "vertex_lp_provider",
+                        "conversion_provider", "checker_budget", "control_optimizer")
+            missing = [key for key in required if key not in self.factory_options]
+            if missing:
+                raise ValueError("factory_options is missing selected graph roles: " + ", ".join(missing))
+        reachable = self._method_option("reachable_set_method", "CSL_NATIVE_REACHABLE_SET_METHOD",
+            "CSL_NATIVE_REACHABLE_SET_VERSION", "csl.geometry.affine-sum", "1.0.0")
+        source_index = reachable["id"] == "csl.geometry.affine-sum.source-index"
+        hull = self._method_option("hull_provider", "CSL_NATIVE_HULL_PROVIDER",
+            "CSL_NATIVE_HULL_PROVIDER_VERSION",
+            "csl.hull.source.quickhull-2d" if source_index else "csl.hull.lp-membership", "1.0.0")
+        declared_lp = self.factory_options.get("vertex_lp_provider")
+        if declared_lp is not None:
+            if declared_lp == "not_used":
+                lp: object = "not_used"
+            elif isinstance(declared_lp, Mapping) and declared_lp.get("id") and declared_lp.get("version"):
+                lp = {"id": str(declared_lp["id"]), "version": str(declared_lp["version"])}
+            else:
+                raise ValueError("factory_options.vertex_lp_provider must be not_used or provide id and version")
+        elif source_index:
+            lp = "not_used"
+        else:
+            lp = {"id": os.environ.get("CSL_NATIVE_VERTEX_LP_PROVIDER", "phase-one-bland"),
+                  "version": os.environ.get("CSL_NATIVE_VERTEX_LP_PROVIDER_VERSION", "1")}
+        conversion = self.factory_options.get("conversion_provider", "not_used")
+        if conversion != "not_used" and (not isinstance(conversion, Mapping) or
+                not conversion.get("id") or not conversion.get("version")):
+            raise ValueError("factory_options.conversion_provider must be not_used or provide id and version")
+        checker = self.factory_options.get("checker_budget", {"max_points": 64, "wall_ms": 5000})
+        if not isinstance(checker, Mapping) or "max_points" not in checker or "wall_ms" not in checker:
+            raise ValueError("factory_options.checker_budget must provide max_points and wall_ms")
+        checker = {"max_points": int(checker["max_points"]), "wall_ms": int(checker["wall_ms"])}
+        if checker["max_points"] <= 0 or checker["wall_ms"] < 0:
+            raise ValueError("factory_options.checker_budget must have positive capacity and nonnegative wall limit")
+        optimizer = self._method_option("control_optimizer", "CSL_NATIVE_CONTROL_OPTIMIZER",
+            "CSL_NATIVE_CONTROL_OPTIMIZER_VERSION", "csl.optimization.finite-action-stage-layered-graph", "1.0.0")
+        return {"reachable_set_method": reachable, "hull_provider": hull,
+            "vertex_lp_provider": lp, "conversion_provider": conversion,
+            "checker_budget": checker, "control_optimizer": optimizer}
 
     def query(self, task_id: str, observed_physical_state: list[float], absolute_update_index: int) -> dict:
         if task_id != self.task["task_id"] or not 0 <= absolute_update_index < self.original_horizon:
@@ -147,31 +242,10 @@ class NativeGraphPolicy:
             "state_bounds": state_bounds,
             "terminal_objective": self.terminal_objective, "running_cost": self.running_cost,
             "representation_index": self.representation_index, "representation_name": self.representation_name,
-            "limits": {"max_beam_width": int(os.environ.get("CSL_NATIVE_GRAPH_BEAM_WIDTH", "8")),
-                "max_graph_nodes": int(os.environ.get("CSL_NATIVE_GRAPH_MAX_NODES", "512")),
-                "max_plans": int(os.environ.get("CSL_NATIVE_MAX_PLANS", "512")),
-                "max_points_per_stage": int(os.environ.get("CSL_NATIVE_MAX_POINTS_PER_STAGE", "100000")),
-                "max_score_evaluations": int(os.environ.get("CSL_NATIVE_MAX_SCORE_EVALUATIONS", "100000")),
-                "max_generators_per_stage": int(os.environ.get("CSL_NATIVE_MAX_GENERATORS_PER_STAGE", "1000"))}}
+            "limits": self.limits}
         if self.use_backward_graph:
             request["search_policy"] = "stage-layered-backward-viability"
-            reachable_id = os.environ.get("CSL_NATIVE_REACHABLE_SET_METHOD", "csl.geometry.affine-sum")
-            source_index = reachable_id == "csl.geometry.affine-sum.source-index"
-            request["reachable_set_method"] = {"id": reachable_id,
-                "version": os.environ.get("CSL_NATIVE_REACHABLE_SET_VERSION", "1.0.0")}
-            request["hull_provider"] = {"id": os.environ.get("CSL_NATIVE_HULL_PROVIDER",
-                "csl.hull.source.quickhull-2d" if source_index else "csl.hull.lp-membership"),
-                "version": os.environ.get("CSL_NATIVE_HULL_PROVIDER_VERSION", "1.0.0")}
-            request["vertex_lp_provider"] = "not_used" if source_index else {
-                "id": os.environ.get("CSL_NATIVE_VERTEX_LP_PROVIDER", "phase-one-bland"),
-                "version": os.environ.get("CSL_NATIVE_VERTEX_LP_PROVIDER_VERSION", "1")}
-            request["conversion_provider"] = os.environ.get("CSL_NATIVE_CONVERSION_PROVIDER", "not_used")
-            request["checker_budget"] = {
-                "max_points": int(os.environ.get("CSL_NATIVE_GEOMETRY_CHECKER_MAX_POINTS", "64")),
-                "wall_ms": int(os.environ.get("CSL_NATIVE_GEOMETRY_CHECKER_WALL_MS", "5000"))}
-            request["control_optimizer"] = {"id": os.environ.get("CSL_NATIVE_CONTROL_OPTIMIZER",
-                "csl.optimization.finite-action-stage-layered-graph"),
-                "version": os.environ.get("CSL_NATIVE_CONTROL_OPTIMIZER_VERSION", "1.0.0")}
+            request.update(self._geometry_options())
         self.last_request = request
         assert self.process.stdin is not None and self.process.stdout is not None
         self.process.stdin.write(json.dumps(request, separators=(",", ":"), allow_nan=False) + "\n")
@@ -181,6 +255,21 @@ class NativeGraphPolicy:
             raise RuntimeError(f"native policy bridge exited before returning a response (code {self.process.poll()})")
         response = json.loads(line)
         native_response = dict(response)
+        actual_build_profile = response.get("build_backend_profile")
+        if not isinstance(actual_build_profile, Mapping):
+            return {"status": "failed", "task_sha256": self.task_sha256,
+                "action_profile_id": self.action_profile_id, "policy_id": self.controller_id,
+                "invocations": [], "reason": "native executable omitted its compiled backend profile"}
+        expected_build_profile = self.preparation_receipt["build_backend_profile"]
+        if any(value != "unspecified" and actual_build_profile.get(key) != value
+                for key, value in expected_build_profile.items()):
+            response.pop("control", None)
+            response["status"] = "failed"
+            response["reason"] = "native executable build/backend profile differs from the selected manifest profile"
+            response["build_backend_profile"] = actual_build_profile
+            return response
+        self.preparation_receipt["build_backend_profile"] = dict(actual_build_profile)
+        response["build_backend_profile"] = dict(actual_build_profile)
         if response.get("task_id") != task_id or response.get("task_sha256") != self.task_sha256:
             raise ValueError(f"native controller response does not echo source task identity: {response}")
         if response.get("action_profile_id") != self.action_profile_id:
@@ -214,5 +303,6 @@ class NativeGraphPolicy:
 
 
 def create_policy(task: dict, *, task_sha256: str, controller_id: str,
-                  action_profile_id: str) -> NativeGraphPolicy:
-    return NativeGraphPolicy(task, task_sha256, controller_id, action_profile_id)
+                  action_profile_id: str,
+                  factory_options: Mapping[str, object] | None = None) -> NativeGraphPolicy:
+    return NativeGraphPolicy(task, task_sha256, controller_id, action_profile_id, factory_options)

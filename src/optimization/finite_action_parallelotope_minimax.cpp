@@ -36,15 +36,16 @@ CornerScoreOutcome
 score_corners(const reachability::ParallelotopeStage &terminal,
               const Matrix &frame, const Objective &objective,
               const ExecutionContext &context) {
-  constexpr std::size_t dimension = 4;
-  if (terminal.lower.size() != dimension ||
-      terminal.upper.size() != dimension || frame.rows != dimension ||
+  const auto dimension = terminal.lower.size();
+  if (dimension == 0 || dimension >= std::numeric_limits<std::size_t>::digits ||
+      terminal.upper.size() != dimension ||
+      frame.rows != dimension ||
       frame.cols != dimension || frame.values.size() != dimension * dimension)
     return unsupported(
         "finite_parallelotope_minimax.terminal",
         "Terminal frame box or frame dimensions are inconsistent.");
   double maximum = -std::numeric_limits<double>::infinity();
-  constexpr std::size_t count = std::size_t{1} << dimension;
+  const std::size_t count = std::size_t{1} << dimension;
   for (std::size_t mask = 0; mask < count; ++mask) {
     if (context.cancellation.stop_requested())
       return OperationStopped{StopReason::cancelled,
