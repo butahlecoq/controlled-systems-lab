@@ -5,6 +5,9 @@
 #include <csl/geometry/composition_catalogue.hpp>
 #include <csl/geometry/source_index_hull.hpp>
 #include <csl/optimization/phase_one.hpp>
+#if CSL_NATIVE_HAS_HIGHS
+#include <csl/adapters/lp/highs.hpp>
+#endif
 #include <csl/optimization/finite_action_nominal.hpp>
 #include <csl/optimization/finite_action_graph.hpp>
 #include <csl/optimization/objectives.hpp>
@@ -323,10 +326,38 @@ registry::PreparedProvider<registry::GeometryPort> affine_sum_provider(const Jso
         throw std::runtime_error("Unsupported or unimplemented reachable-set method: "+reachable.id);
 
     const MethodSelection lp_method=method_selection(input.at("vertex_lp_provider"),"vertex_lp_provider");
-    auto lp_result=optimization::phase_one::make_registration();
-    if(!std::holds_alternative<registry::Registration<registry::LPPort>>(lp_result))
-        throw std::runtime_error("Phase-I LP registration unavailable");
-    auto lp_registration=std::get<registry::Registration<registry::LPPort>>(std::move(lp_result));
+    registry::Registration<registry::LPPort> lp_registration;
+    if(lp_method.id=="phase-one-bland") {
+        auto lp_result=optimization::phase_one::make_registration();
+        if(!std::holds_alternative<registry::Registration<registry::LPPort>>(lp_result))
+            throw std::runtime_error("Phase-I LP registration unavailable");
+        lp_registration=std::get<registry::Registration<registry::LPPort>>(std::move(lp_result));
+    } else if(lp_method.id=="phase-one-priority-tie") {
+        optimization::phase_one::Options options;
+        options.structural_entering_priorities={0,1,2,3,4};
+        auto lp_result=optimization::phase_one::make_registration(std::move(options));
+        if(!std::holds_alternative<registry::Registration<registry::LPPort>>(lp_result))
+            throw std::runtime_error("Phase-I priority-tie LP registration unavailable");
+        lp_registration=std::get<registry::Registration<registry::LPPort>>(std::move(lp_result));
+    } else if(lp_method.id=="csl.lp.highs") {
+#if CSL_NATIVE_HAS_HIGHS
+        auto lp_result=adapters::lp::make_highs_registration();
+        if(!std::holds_alternative<registry::Registration<registry::LPPort>>(lp_result)) {
+            std::string detail;
+            for(const auto& diagnostic:std::get<Diagnostics>(lp_result)) {
+                if(!detail.empty()) detail += "; ";
+                detail += diagnostic.field+": "+diagnostic.explanation;
+            }
+            throw std::runtime_error("Requested HiGHS LP registration unavailable"+
+                (detail.empty()?std::string{}:": "+detail));
+        }
+        lp_registration=std::get<registry::Registration<registry::LPPort>>(std::move(lp_result));
+#else
+        throw std::runtime_error("Requested vertex LP provider csl.lp.highs is unavailable because CSL_ENABLE_HIGHS=OFF; no replacement LP provider was selected.");
+#endif
+    } else {
+        throw std::runtime_error("Unsupported or unimplemented vertex LP provider: "+lp_method.id+"@"+lp_method.version);
+    }
     if(lp_registration.identity.id.value!=lp_method.id || lp_registration.identity.version!=lp_method.version)
         throw std::runtime_error("Requested vertex LP provider is not registered in this native build: "+lp_method.id+"@"+lp_method.version);
     registry::Registry<registry::LPPort> lp_catalogue;

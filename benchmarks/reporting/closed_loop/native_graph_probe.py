@@ -108,6 +108,8 @@ def main() -> None:
 
     provider_profiles = [
         ("lp-membership", "csl.geometry.affine-sum", "csl.hull.lp-membership", "1.0.0", "phase-one-bland"),
+        ("lp-membership-phase-one-priority-tie", "csl.geometry.affine-sum", "csl.hull.lp-membership", "1.0.0", "phase-one-priority-tie"),
+        ("lp-membership-highs", "csl.geometry.affine-sum", "csl.hull.lp-membership", "1.0.0", "csl.lp.highs"),
         ("basis-reuse", "csl.geometry.affine-sum", "csl.hull.phase-one-basis-bulk", "1.0.0", "phase-one-bland"),
         ("ordered-membership", "csl.geometry.affine-sum", "csl.hull.ordered-membership", "1.0.0", "phase-one-bland"),
         ("itis17-a43", "csl.geometry.affine-sum", "csl.hull.itis17.a43-certified-basis-reuse", "1.0.0", "phase-one-bland"),
@@ -144,6 +146,8 @@ def main() -> None:
             term["scales"] = [1.0, 1.0]
             term["weights"] = [1.0, 1.0]
         trial_request["hull_provider"]["version"] = hull_version
+        if lp_method == "csl.lp.highs":
+            trial_request["vertex_lp_provider"]["version"] = "1.1.0+highs.1.11.0"
         trial_response = execute(bridge, trial_request)
         calls = trial_response.get("geometry_invocations", [])
         assert trial_response.get("geometry_selection", {}).get("reachable_set_method", {}).get("id") == reachable_method
@@ -165,7 +169,17 @@ def main() -> None:
                     for call in calls)
                 reducer_calls = [item for call in calls for item in call["evidence_assumptions"]
                     if item.startswith("HullReducerPort invocation:")]
-                assert reducer_calls and all("status=complete" in item for item in reducer_calls)
+                assert reducer_calls
+                if lp_method == "phase-one-priority-tie":
+                    assert all(any(status in item for status in ("status=complete", "status=incomplete"))
+                        for item in reducer_calls)
+                    assert any("status=incomplete" in item for item in reducer_calls), \
+                        "priority-tie Phase-I fixture unexpectedly hid its incompatible/incomplete query path"
+                    assert all(any("all generated candidates retained because the complete HullReducerPort reduction failed" in item
+                        for item in call["evidence_assumptions"]) for call in calls if any(
+                            "status=incomplete" in item for item in call["evidence_assumptions"]))
+                else:
+                    assert all("status=complete" in item for item in reducer_calls)
                 lp_records = [item for call in calls for item in call["evidence_assumptions"]
                     if item.startswith("HullReducerPort child LPPort invocation:") or
                        item.startswith("vertex LP invocation record:")]
@@ -173,6 +187,14 @@ def main() -> None:
                     for item in lp_records), f"{label} omitted actual LP-port invocation identities"
                 assert any("status=completed" in item for item in lp_records), \
                     f"{label} reported LP work without a completed LP-port result"
+                if lp_method == "csl.lp.highs":
+                    assert any("actual_provider=csl.lp.highs@1.1.0+highs.1.11.0" in item and
+                        "status=completed" in item for item in lp_records), \
+                        "HiGHS selection did not produce an actual completed HiGHS LP invocation"
+                elif lp_method == "phase-one-priority-tie":
+                    assert any("actual_provider=phase-one-priority-tie@1" in item and
+                        "status=completed" in item for item in lp_records), \
+                        "priority-tie Phase-I selection did not produce a completed query on this cloud"
                 if hull_method not in {"csl.hull.phase-one-basis-bulk",
                         "csl.hull.itis17.a43-certified-basis-reuse"}:
                     actual_lp_calls = sum(int(item.split("lp_calls=", 1)[1].split(";", 1)[0])
@@ -190,7 +212,12 @@ def main() -> None:
         provider_trials[label] = {"request": trial_request, "response": trial_response,
             "geometry_invocation_count": len(calls),
             "completed_operation_count": sum(call["outcome"] == "completed" for call in calls),
-            "failed_operation_count": sum(call["outcome"] != "completed" for call in calls)}
+            "failed_operation_count": sum(call["outcome"] != "completed" for call in calls),
+            "reducer_statuses": sorted({item.split("status=",1)[1].split(";",1)[0]
+                for call in calls for item in call["evidence_assumptions"]
+                if item.startswith("HullReducerPort invocation:")}),
+            "conservative_retention": any("all generated candidates retained because the complete HullReducerPort reduction failed"
+                in item for call in calls for item in call["evidence_assumptions"])}
 
     capacity_failure_request = copy.deepcopy(provider_trials["source-quickhull"]["request"])
     capacity_failure_request["controller_id"] = "analytic-provider-checker-capacity-refusal"
