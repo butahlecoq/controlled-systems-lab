@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from html import escape
+import json
 from pathlib import Path
 import re
 from typing import Iterable
@@ -18,6 +19,51 @@ def stylesheet() -> bytes:
 
 def stylesheet_link(href: str = "examples.css") -> str:
     return '<link rel="stylesheet" href="' + escape(href, quote=True) + '">'
+
+
+def compact_json(value, *, width: int = 88, indent: int = 2) -> str:
+    """Format lesson JSON with inline vectors and readable object structure."""
+    def scalar(item) -> str:
+        return json.dumps(item, separators=(",", ":"), allow_nan=False)
+
+    def pad(level: int) -> str:
+        return " " * (level * indent)
+
+    def render(item, level: int, column: int) -> str:
+        if isinstance(item, dict):
+            if not item:
+                return "{}"
+            rows = []
+            for key, child in item.items():
+                key_json = scalar(key)
+                prefix = pad(level + 1) + key_json + ": "
+                rows.append(prefix + render(child, level + 1, len(prefix)))
+            return "{\n" + ",\n".join(rows) + "\n" + pad(level) + "}"
+        if isinstance(item, list):
+            if not item:
+                return "[]"
+            if all(not isinstance(child, (list, dict)) for child in item):
+                tokens = [scalar(child) for child in item]
+                inline = "[" + ", ".join(tokens) + "]"
+                if column + len(inline) <= width:
+                    return inline
+                child_pad = pad(level + 1)
+                lines: list[str] = []
+                group: list[str] = []
+                for token in tokens:
+                    candidate = ", ".join((*group, token))
+                    if group and len(child_pad) + len(candidate) > width:
+                        lines.append(child_pad + ", ".join(group) + ",")
+                        group = []
+                    group.append(token)
+                lines.append(child_pad + ", ".join(group))
+                return "[\n" + "\n".join(lines) + "\n" + pad(level) + "]"
+            rows = [pad(level + 1) + render(child, level + 1, len(pad(level + 1)))
+                    for child in item]
+            return "[\n" + ",\n".join(rows) + "\n" + pad(level) + "]"
+        return scalar(item)
+
+    return render(value, 0, 0)
 
 
 def focusable_code_blocks(markup: str, label: str = "Scrollable code example") -> str:
