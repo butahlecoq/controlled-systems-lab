@@ -41,12 +41,14 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Install Linux compiler cache
-      if: runner.os == 'Linux' && inputs.clean != 'true'
+    - name: Try to prepare optional Linux compiler cache
+      id: ccache
       shell: bash
+      env:
+        RUNNER_OS: ${{ runner.os }}
+        CACHE_CLEAN: ${{ inputs.clean }}
       run: |
-        sudo apt-get update -qq
-        sudo apt-get install --no-install-recommends -y ccache
+        bash scripts/ci/prepare_ccache.sh
     - name: Record compatibility context and configure cache paths
       id: keys
       shell: python
@@ -56,13 +58,16 @@ runs:
         CACHE_GENERATOR: ${{ inputs.generator }}
         CACHE_OPTIONS: ${{ inputs.options }}
         CACHE_CLEAN: ${{ inputs.clean }}
+        CCACHE_AVAILABLE: ${{ steps.ccache.outputs.compiler_enabled }}
       run: |
         import json, os, subprocess, sys
         from pathlib import Path
         root = Path(os.environ['GITHUB_WORKSPACE'])
         evidence = root / '.ci-cache/evidence'
         evidence.mkdir(parents=True, exist_ok=True)
-        enabled = os.environ['RUNNER_OS'] == 'Linux' and os.environ['CACHE_CLEAN'] != 'true'
+        enabled = (os.environ['RUNNER_OS'] == 'Linux'
+                   and os.environ['CACHE_CLEAN'] != 'true'
+                   and os.environ['CCACHE_AVAILABLE'] == 'true')
         def version(command):
             return subprocess.check_output(command, text=True, stderr=subprocess.STDOUT).strip()
         compiler = '; '.join(name + '=' + version([os.environ[name], '--version'])
