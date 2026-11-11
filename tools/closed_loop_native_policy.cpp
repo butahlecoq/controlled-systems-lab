@@ -291,7 +291,6 @@ Json query(const Json& in) {
         (selected->coverage == optimization::NominalSearchCoverage::stopped ? "stopped" : "incomplete");
     base["status"] = "accepted";
     base["control"] = selected->replay.controls.front();
-    base["recovered_control"] = selected->replay.controls.front();
     base["predicted_sets"] = Json::array({trace_json(*selected)});
     base["selector"] = {{"search_coverage", coverage}, {"candidate_score", selected->candidate_score},
         {"score_kind", selected->score_kind == optimization::NominalScoreKind::exact_deterministic_objective ?
@@ -299,7 +298,8 @@ Json query(const Json& in) {
             (selected->score_kind == optimization::NominalScoreKind::numerical_outer_estimate_plus_exact_running_cost ?
                 "numerical-terminal-estimate-plus-exact-running-cost" : "numerical-outer-enclosure-estimate")},
         {"objective_id", result.objective_id}, {"original_horizon", result.original_horizon},
-        {"absolute_stage_offset", result.absolute_stage_offset}, {"terminal_objective", selected->replay.terminal_objective},
+        {"absolute_stage_offset", result.absolute_stage_offset}, {"selected_control", selected->replay.controls.front()},
+        {"terminal_objective", selected->replay.terminal_objective},
         {"running_objective", selected->replay.running_objective}, {"total_replay_objective", selected->replay.total_objective},
         {"policy_semantics", "receding-horizon nominal finite-action fixed-plan selection; first action reapplied after observation"},
         {"optimality_scope", "finite action catalogue and declared numerical affine predictor; no nonlinear global-feedback claim"}};
