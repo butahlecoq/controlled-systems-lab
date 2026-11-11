@@ -4,6 +4,8 @@ import hashlib
 import json
 from pathlib import Path
 import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -13,6 +15,37 @@ from scripts.reports import pages_route_retirement as retirement
 
 
 class PagesRouteRetirementTests(unittest.TestCase):
+    def test_real_finalizer_cli_accepts_staged_closed_loop_pilot_producers(self) -> None:
+        repo = Path(__file__).resolve().parents[2]
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary) / "site"
+            (site / "examples").mkdir(parents=True)
+            shutil.copyfile(repo / "docs/examples/examples.css", site / "examples/examples.css")
+            (site / "index.html").write_text(
+                '<!doctype html><html><body><a href="examples/index.html">Examples</a></body></html>',
+                encoding="utf-8")
+            (site / "examples/index.html").write_text(
+                '<!doctype html><html><body><nav><a href="../index.html">Home</a></nav>'
+                '<h1 id="algorithm-coverage">Examples</h1>'
+                '<section id="analytic-illustrations"></section></body></html>', encoding="utf-8")
+            subprocess.run([sys.executable, str(repo / "scripts/reports/stage_closed_loop_pilot.py"),
+                "--site", str(site)], check=True, cwd=repo, capture_output=True, text=True)
+            completed = subprocess.run([sys.executable, str(repo / "scripts/reports/pages_route_retirement.py"),
+                "--site", str(site)], check=False, cwd=repo, capture_output=True, text=True)
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            self.assertIn('"html_route_count"', completed.stdout)
+            inventory = json.loads((site / "pages-route-inventory.json").read_text(encoding="utf-8"))
+            expected_sources = {
+                "closed-loop-pilot-v1/index.html": "scripts/reports/render_closed_loop_pilot.py",
+                "closed-loop-pilot-v1/example-2d.html": "scripts/reports/render_closed_loop_pilot.py",
+                "examples/closed-loop-pilot-2d.html": "scripts/reports/stage_closed_loop_pilot.py",
+            }
+            for route, source in expected_sources.items():
+                with self.subTest(route=route):
+                    producer = inventory["html_routes"][route]["producer"]
+                    self.assertEqual(producer["owner_status"], "exact" if route.startswith("closed-loop") else "gallery-aggregator")
+                    self.assertIn(source, producer["files"])
+
     def make_site(self, root: Path, *, gallery: str | None = None,
                   route: str | None = None) -> tuple[Path, str]:
         site = root / "site"
