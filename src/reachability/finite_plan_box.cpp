@@ -113,10 +113,6 @@ FinitePlanBoxOutcome finite_plan_box(const FixedPlanRequest& request,
     const auto model_dimensions = request.system.dimensions();
     if(!detail::fixed_plan_safe_dimensions_match_model(request))
         return unsupported("finite_plan_box.safe_sets", "State-constraint dimension differs from model.");
-    for(const auto& safe : request.admissible_states)
-        if(!std::holds_alternative<sets::UniversalRepresentation>(safe.representation()))
-            return unsupported("finite_plan_box.safe_sets", "This initial box propagator supports universal state constraints only.");
-
     auto initial = bounds(request.initial, "finite_plan_box.initial");
     if(const auto* error = std::get_if<Unsupported>(&initial)) return *error;
     FinitePlanBoxTrace trace;

@@ -264,10 +264,6 @@ FinitePlanZonotopeOutcome finite_plan_zonotope(const FixedPlanRequest& request,
         return unsupported("finite_plan_zonotope.initial", "Initial set dimension differs from model.");
     if(!detail::fixed_plan_safe_dimensions_match_model(request))
         return unsupported("finite_plan_zonotope.safe_sets", "State-constraint dimension differs from model.");
-    for(const auto& safe : request.admissible_states)
-        if(!std::holds_alternative<sets::UniversalRepresentation>(safe.representation()))
-            return unsupported("finite_plan_zonotope.safe_sets", "Universal state constraints are the only supported profile.");
-
     auto initial = axis_zonotope(request.initial, "finite_plan_zonotope.initial",
         "finite-plan-zonotope/initial", limits.max_generators_per_stage, context);
     if(const auto* error = std::get_if<Unsupported>(&initial)) return *error;
