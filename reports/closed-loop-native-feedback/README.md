@@ -30,8 +30,25 @@ Attempt `-01` conservatively refused path selection because its stage-zero
 constraint was the exact observed singleton and outward-rounded box
 enclosure could not prove containment. This is not a physical infeasibility
 result. Attempt `-02` adds stage-zero margin and selects the authored center
-action; both raw requests and responses are preserved. A later clean-source
-attempt will bind a retrievable analytic task contract and its computed hash.
+action; both raw requests and responses are preserved.
+
+Those prototype attempts are followed by source-bound captures in
+`native-multiaction-parent-cloud-cli-20261111-03` and the four
+`native-multiaction-parent-cloud-{box,zonotope,parallelotope,ellipsoid}-20261111-f84`
+directories. These use the canonical task contract in attempt `-03`, SHA-256
+`f60b9ef5d38bac3d0d202913b8e6ca5c219597b5cfe3751dcd8e3c71d642cc82`, and
+source commit `f84bf6fa`. Each route reports five stage-zero parent clouds,
+five authored actions per cloud, and numerical selected-shape membership
+witnesses for all 25 child nodes. These remain bounded analytic queries, not
+source-task full episodes or global-optimality results.
+
+The visual summary is [analytic-action-clouds.html](figures/analytic-action-clouds.html).
+Its panels plot each actual selected set payload, all five recomputed action
+children, and the selected retained-graph MPC trajectory and first action.
+The reusable renderer is [plot_analytic_action_clouds.py](figures/plot_analytic_action_clouds.py).
+The fresh installed-package consumer check for commit `f84bf6fa` is in
+`attempts/installed-consumer-f84`; it compiled and ran only the public graph
+client against a fresh prefix and passed CTest 1/1.
 
 Objective values in episode records distinguish the selected policy's
 applied-history objective from the independent replay check. A zero

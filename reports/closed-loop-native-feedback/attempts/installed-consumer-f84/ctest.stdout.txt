@@ -1,0 +1,8 @@
+Internal ctest changing into directory: /home/butahlecoq/.local/share/codex/worktrees/native-feedback-composition-943-20261111/build/core/installed-consumer-f84-build
+Test project /home/butahlecoq/.local/share/codex/worktrees/native-feedback-composition-943-20261111/build/core/installed-consumer-f84-build
+    Start 28: installed_finite_action_graph_client
+1/1 Test #28: installed_finite_action_graph_client ...   Passed    0.01 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   0.01 sec

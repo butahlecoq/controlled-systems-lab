@@ -1,0 +1,13 @@
+{
+  "status": "accepted",
+  "returncode": 0,
+  "command": [
+    "/home/butahlecoq/.local/share/codex/worktrees/native-feedback-composition-943-20261111/build/core/csl_closed_loop_native_policy"
+  ],
+  "binary_sha256": "7712f94426f8f7ef414a45202f8fe931e76cfb6a6ebf1742761e08afcf2151a9",
+  "request_sha256": "542c85e341a92822846e063af39f991b39f8bca0465e9af70a0dd9ad74ca45db",
+  "adapter_sha256": "663143134515e7a313fdf4c232ae8e53442cb8b43ae6eb65fde761089692a6f8",
+  "graph_source_sha256": "5dccd52548468e406717bcabca0fe0971d0e377bb9a7375e18cbaf3c47a90840",
+  "source_commit": "b6330801 + uncommitted parent-cloud working diff",
+  "capture_class": "new bounded local JSONL functional attempt; not an original-task closed-loop episode"
+}
