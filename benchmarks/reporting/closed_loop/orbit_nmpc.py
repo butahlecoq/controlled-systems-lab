@@ -67,9 +67,8 @@ def solve(task: dict, observed: np.ndarray, stage: int, previous_prediction=None
     initial_dw = 100000 * (target["angular_rate_rad_s"] - observed[3])
     opti.set_initial(terminal_norm, float(np.hypot(initial_dr, initial_dw)))
     opti.set_initial(running_norm, 0)
-    opti.solver("ipopt", {"expand": True}, {"ipopt.max_iter": 3000, "ipopt.tol": 1e-9,
-        "ipopt.acceptable_tol": 1e-8, "ipopt.bound_relax_factor": 0.0,
-        "ipopt.print_level": 0, "print_time": False})
+    opti.solver("ipopt", {"expand": True, "print_time": False}, {"max_iter": 3000, "tol": 1e-9,
+        "acceptable_tol": 1e-8, "bound_relax_factor": 0.0, "print_level": 0})
     try:
         solution = opti.solve()
         controls = np.asarray(solution.value(u)).T

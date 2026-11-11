@@ -208,8 +208,8 @@ def physical_constraints(task: dict, states, controls) -> dict:
         state_violations.append(0.0 if bound is None else float(max(np.max(np.maximum(bound[0] - x[:, i], 0)),
             np.max(np.maximum(x[:, i] - bound[1], 0)))) if len(x) else 0.0)
     action_bounds = np.asarray(task["control_domains"]["continuous"]["bounds"])
-    control_violation = float(max(np.max(np.maximum(action_bounds[:, 0] - u.T, 0)),
-        np.max(np.maximum(u.T - action_bounds[:, 1], 0)))) if len(u) else 0.0
+    control_violation = float(max(np.max(np.maximum(action_bounds[:, 0, None] - u.T, 0)),
+        np.max(np.maximum(u.T - action_bounds[:, 1, None], 0)))) if len(u) else 0.0
     domain = {"minimum_radius_km": float(x[:, 0].min())} if "ORBIT" in task["model"]["case_id"] and len(x) else {}
     if domain:
         domain["positive_radius"] = domain["minimum_radius_km"] > 0
@@ -220,14 +220,14 @@ def physical_constraints(task: dict, states, controls) -> dict:
             "scope": "sampled endpoints and controls; no continuous-time enclosure"}
 
 
-def replay_attempt(task: dict, result: dict, attempt: Path, bridge: Path) -> None:
+def replay_attempt(task: dict, result: dict, attempt: Path, bridge: Path, tag: str | None = None) -> None:
     from check_replay import independent_cost, rk4_step
     controls = result["controls"]
     witness = hashlib.sha256((result["task_sha256"] + json.dumps(controls, separators=(",", ":"))).encode()).hexdigest()
     replay_rows = {}
     for label, tight in (("common", False), ("tight", True)):
         request = make_replay_request(task, controls, witness, sensitivity=tight)
-        path = attempt / f"full-replay-{label}"; path.mkdir(exist_ok=False)
+        path = attempt / (f"{tag}-{label}" if tag else f"full-replay-{label}"); path.mkdir(exist_ok=False)
         atomic_json(path / "request.json", request)
         started = time.monotonic()
         try:
@@ -272,12 +272,12 @@ def replay_attempt(task: dict, result: dict, attempt: Path, bridge: Path) -> Non
     result["independent_replay"] = replay_rows
     result["sampled_constraint_diagnostics"] = physical_constraints(task, result["physical_states"], controls)
     try:
-        render_attempt(task, result, attempt)
+        render_attempt(task, result, attempt, tag)
     except Exception as error:
         result["render"] = {"status": "failed", "error": str(error)}
 
 
-def render_attempt(task: dict, result: dict, attempt: Path) -> None:
+def render_attempt(task: dict, result: dict, attempt: Path, tag: str | None = None) -> None:
     import matplotlib.pyplot as plt
     states = np.asarray(result["physical_states"]); controls = np.asarray(result["controls"])
     dt = task["episode"]["dt"]; times = np.arange(len(states)) * dt
@@ -288,13 +288,15 @@ def render_attempt(task: dict, result: dict, attempt: Path) -> None:
         ax.set_ylabel(f"{field['name']} ({field['unit']})"); ax.grid(alpha=.25)
     axes[-1].set_xlabel(f"Time ({task['episode']['time_unit']})")
     fig.suptitle(f"{task['task_id']} observed-state NMPC, {result.get('completed_holds', 0)}/{task['episode']['intervals']} holds")
-    fig.tight_layout(); fig.savefig(attempt / "trajectory.png", dpi=150); plt.close(fig)
+    trajectory_name = f"{tag}-trajectory.png" if tag else "trajectory.png"
+    controls_name = f"{tag}-controls.png" if tag else "controls.png"
+    fig.tight_layout(); fig.savefig(attempt / trajectory_name, dpi=150); plt.close(fig)
     if len(controls):
         fig, ax = plt.subplots(figsize=(8, 3)); control_times = (np.arange(len(controls)) + .5) * dt
         for i, field in enumerate(task["model"]["controls"]): ax.step(control_times, controls[:, i], where="mid", label=f"{field['name']} ({field['unit']})")
         ax.set_xlabel(f"Time ({task['episode']['time_unit']})"); ax.set_ylabel("Applied input"); ax.grid(alpha=.25); ax.legend()
-        fig.tight_layout(); fig.savefig(attempt / "controls.png", dpi=150); plt.close(fig)
-    result["render"] = {"status": "complete", "plots": ["trajectory.png"] + (["controls.png"] if len(controls) else [])}
+        fig.tight_layout(); fig.savefig(attempt / controls_name, dpi=150); plt.close(fig)
+    result["render"] = {"status": "complete", "plots": [trajectory_name] + ([controls_name] if len(controls) else [])}
 
 
 def main() -> int:
@@ -303,11 +305,28 @@ def main() -> int:
     parser.add_argument("--bridge", type=Path)
     parser.add_argument("--output-root", type=Path, default=ROOT / "reports/closed-loop-pilot")
     parser.add_argument("--worker", action="store_true"); parser.add_argument("--attempt", type=Path)
+    parser.add_argument("--replay-only", type=Path, help="independently replay a saved complete attempt without rerunning its controller")
     args = parser.parse_args()
     if args.worker:
         if args.bridge is None or args.attempt is None: parser.error("worker mode requires --bridge and --attempt")
         return worker(args.task, args.attempt, args.bridge.resolve())
     if args.bridge is None: parser.error("--bridge is required")
+    if args.replay_only:
+        attempt = args.replay_only.resolve(); result = json.loads((attempt / "attempt.json").read_text())
+        task_name = {"syn-nl-lv-01/continuous-receding/1": "syn-nl-lv-01",
+                     "env717-earth-orbit/continuous-receding/1": "earth-orbit",
+                     "syn-nl-fuel-01/continuous-receding/1": "syn-nl-fuel-01"}.get(result.get("task_id"))
+        if task_name is None: parser.error("existing attempt has an unknown task identity")
+        task = load_task(task_name); validate_source_binding(task)
+        if result.get("task_sha256") != manifest_sha256(task) or result.get("status") != "complete":
+            parser.error("replay-only requires a complete attempt bound to the current immutable task")
+        tag = "full-replay-retry-" + uuid.uuid4().hex[:8]
+        replay_attempt(task, result, attempt, args.bridge.resolve(), tag)
+        result.setdefault("replay_retries", []).append({"tag": tag, "independent_replay": result["independent_replay"], "render": result.get("render")})
+        atomic_json(attempt / "attempt.json", result)
+        print(json.dumps({"attempt": str(attempt), "replay_retry": tag, "status": result["status"],
+                          "independent_replay": result["independent_replay"]}, indent=2))
+        return 0
     names = ["syn-nl-lv-01", "earth-orbit", "syn-nl-fuel-01"] if args.task == "all" else [args.task]
     rows = [run_task(name, args.output_root.resolve(), args.bridge.resolve()) for name in names]
     print(json.dumps({"schema": "csl.closed-loop.coverage/1", "attempts": rows,
