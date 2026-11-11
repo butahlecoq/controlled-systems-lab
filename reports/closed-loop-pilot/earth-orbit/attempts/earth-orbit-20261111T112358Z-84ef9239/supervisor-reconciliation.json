@@ -1,0 +1,17 @@
+{
+  "schema": "csl.closed-loop.supervisor-reconciliation/1",
+  "record_id": "supervisor-reconciliation-112358-orbit",
+  "attempt_id": "earth-orbit-20261111T112358Z-84ef9239",
+  "original_attempt_record": "attempt.json",
+  "evidence": {
+    "ledger_status": "in-progress",
+    "worker_terminal_status": "failed",
+    "worker_return_code": 1,
+    "completed_holds": 0,
+    "stage_record_count": 0,
+    "worker_stderr": "worker-stderr.txt",
+    "failure": "stage checkpoint serialization raised TypeError for a NumPy boolean before any action was executed"
+  },
+  "derived_terminal_status": "incomplete",
+  "reconciliation_source": "post-run ledger/supervisor reconciliation; original attempt and stderr preserved"
+}

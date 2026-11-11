@@ -45,14 +45,18 @@ def main() -> int:
     u = np.asarray(controls, dtype=float)
     control_violation = np.maximum(np.maximum(np.asarray(bounds)[:, 0] - u.min(axis=0),
                                                u.max(axis=0) - np.asarray(bounds)[:, 1]), 0)
-    state_violation = []
+    state_violation = []; endpoint_state_violation = []
     for index, state in enumerate(task["model"]["states"]):
         bound = state["bounds"]
-        state_violation.append(0.0 if bound is None else float(max(
+        violation = 0.0 if bound is None else float(max(
             np.max(np.maximum(bound[0] - endpoints[:, index], 0)),
-            np.max(np.maximum(endpoints[:, index] - bound[1], 0)))))
-    domain = {"minimum_radius_km": float(endpoints[:, 0].min()),
-              "positive_radius": bool(endpoints[:, 0].min() > 0)} if "ORBIT" in task["model"]["case_id"] else {}
+            np.max(np.maximum(endpoints[:, index] - bound[1], 0))))
+        full_violation = 0.0 if bound is None else float(max(
+            np.max(np.maximum(bound[0] - replay_states[:, index], 0)),
+            np.max(np.maximum(replay_states[:, index] - bound[1], 0))))
+        endpoint_state_violation.append(violation); state_violation.append(full_violation)
+    domain = {"minimum_radius_km": float(replay_states[:, 0].min()),
+              "positive_radius": bool(replay_states[:, 0].min() > 0)} if "ORBIT" in task["model"]["case_id"] else {}
     out = {"schema": "csl.closed-loop.independent-episode-check/1", "status": "complete",
         "task_sha256": data["task_sha256"], "controls_sha256": data["controls_sha256"],
         "hold_endpoint_max_abs_difference_from_applied_execution": np.max(
@@ -60,6 +64,9 @@ def main() -> int:
         "independent_objective": costs, "task_adapter_objective": adapter_cost,
         "objective_difference": abs(costs["total"] - adapter_cost["total"]),
         "sampled_physical_state_bound_violation_by_coordinate": state_violation,
+        "hold_endpoint_state_bound_violation_by_coordinate": endpoint_state_violation,
+        "sampled_state_count": int(len(replay_states)),
+        "sampled_state_scope": "CSL replay initial state and report samples, including 20 samples per original hold; numerical diagnostics only",
         "control_bound_violation_by_coordinate": control_violation.tolist(), "model_domain": domain,
         "fixed_rk4": {"substeps_per_original_interval": source_steps,
             "hold_endpoint_max_abs_difference_from_CSL": np.max(np.abs(fixed - endpoints), axis=0).tolist(),
