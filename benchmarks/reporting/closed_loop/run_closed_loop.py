@@ -382,7 +382,7 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
     complete = len(controls) == n
     ledger.update({"status": "complete" if complete else "incomplete", "completed_holds": len(controls),
         "controls": controls, "physical_states": states, "stages": stages,
-        "elapsed_seconds": sum(row.get("stage_elapsed_seconds", 0) for row in stages),
+        "stage_interval_seconds_sum": sum(row.get("stage_elapsed_seconds", 0) for row in stages),
         "physical_objective": objective(task, states, controls) if complete else None,
         "controls_sha256": hashlib.sha256(json.dumps(controls, separators=(",", ":")).encode()).hexdigest()})
     if any(row.get("mathematical_support_status") == "not_evaluated" for row in stages):
@@ -395,7 +395,8 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
         except Exception as error:
             ledger["policy_adapter_lifecycle"] = {"close": "failed", "adapter": policy_adapter,
                                                    "error": f"{type(error).__name__}: {error}"}
-    ledger["resource_limits"]["observed"].update({"worker_wall_seconds": ledger["elapsed_seconds"],
+    ledger["resource_limits"]["observed"].update({
+        "worker_stage_interval_seconds_sum": ledger["stage_interval_seconds_sum"],
         "worker_cpu_seconds": usage.ru_utime + usage.ru_stime, "worker_max_rss_kib": usage.ru_maxrss,
         "rss_accounting_scope": "worker process only; bridge subprocess peaks are not included"})
     atomic_json(attempt / "attempt.json", ledger)
@@ -600,6 +601,13 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
         "enforced_cpu_rlimit_soft_hard_seconds": [resource_profile["enforced"]["cpu_seconds_soft"],
             resource_profile["enforced"]["cpu_seconds_hard"]],
         "stdout": "worker-stdout.txt", "stderr": "worker-stderr.txt"}
+    # The parent spans worker launch through process exit, including preparation,
+    # checkpoints, lifecycle close, and the worker's terminal JSON write.
+    result.setdefault("resource_limits", {}).setdefault("observed", {})[
+        "worker_wall_seconds"] = result["supervisor"]["wall_seconds"]
+    result["resource_limits"]["observed"]["worker_wall_scope"] = (
+        "supervisor monotonic span from worker launch through process exit; includes preparation, "
+        "checkpoint I/O, early rejection, lifecycle close, and terminal serialization")
     if status == "completed" and result.get("status") == "complete":
         try:
             replay_attempt(task, result, attempt, bridge)

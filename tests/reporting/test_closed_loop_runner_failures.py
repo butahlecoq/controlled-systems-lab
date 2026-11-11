@@ -16,6 +16,58 @@ import run_closed_loop
 
 
 class ClosedLoopRunnerFailureTests(unittest.TestCase):
+    def test_supervisor_wall_clock_covers_worker_lifecycle_and_overrides_stage_sum(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw); bridge = root / "bridge"; bridge.write_bytes(b"bridge")
+
+            class WorkerProcess:
+                pid = 999999999
+                returncode = 0
+                def communicate(self, timeout):
+                    record_path = next(root.glob("syn-nl-lv-01/attempts/*/attempt.json"))
+                    record = json.loads(record_path.read_text())
+                    record.update(status="incomplete", resource_limits={"observed": {
+                        "worker_stage_interval_seconds_sum": 0.25}})
+                    record_path.write_text(json.dumps(record))
+                    return "", ""
+
+            ticks = iter(float(i) for i in range(20))
+            with mock.patch.object(run_closed_loop.subprocess, "Popen", return_value=WorkerProcess()), \
+                 mock.patch.object(run_closed_loop.subprocess, "check_output", return_value="test-commit\n"), \
+                 mock.patch.object(run_closed_loop.time, "monotonic", side_effect=lambda: next(ticks)):
+                result = run_closed_loop.run_task("syn-nl-lv-01", root, bridge)
+
+            record = json.loads((Path(result["attempt"]) / "attempt.json").read_text())
+            observed = record["resource_limits"]["observed"]
+            self.assertEqual(observed["worker_wall_seconds"], record["supervisor"]["wall_seconds"])
+            self.assertGreater(observed["worker_wall_seconds"], observed["worker_stage_interval_seconds_sum"])
+            self.assertIn("terminal serialization", observed["worker_wall_scope"])
+
+    def test_supervisor_records_wall_clock_when_worker_preparation_fails(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw); bridge = root / "bridge"; bridge.write_bytes(b"bridge")
+
+            class PreparationFailureProcess:
+                pid = 999999999
+                returncode = 2
+                def communicate(self, timeout):
+                    record_path = next(root.glob("syn-nl-lv-01/attempts/*/attempt.json"))
+                    record = json.loads(record_path.read_text())
+                    record.update(status="preparation_failed", resource_limits={})
+                    record_path.write_text(json.dumps(record))
+                    return "", ""
+
+            ticks = iter(float(i) for i in range(20))
+            with mock.patch.object(run_closed_loop.subprocess, "Popen", return_value=PreparationFailureProcess()), \
+                 mock.patch.object(run_closed_loop.subprocess, "check_output", return_value="test-commit\n"), \
+                 mock.patch.object(run_closed_loop.time, "monotonic", side_effect=lambda: next(ticks)):
+                result = run_closed_loop.run_task("syn-nl-lv-01", root, bridge)
+
+            record = json.loads((Path(result["attempt"]) / "attempt.json").read_text())
+            self.assertEqual(record["status"], "preparation_failed")
+            self.assertEqual(record["resource_limits"]["observed"]["worker_wall_seconds"],
+                             record["supervisor"]["wall_seconds"])
+
     def test_attempt_resource_budget_is_positive_recorded_and_enforced(self):
         profile = run_closed_loop.attempt_resource_profile(1800, 1800)
         self.assertEqual(profile["profile_id"], "worker-wall-1800-cpu-1800/1")
