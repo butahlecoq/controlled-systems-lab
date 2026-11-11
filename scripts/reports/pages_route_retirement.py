@@ -412,16 +412,19 @@ def inventory(site: Path, *, source_commit: str = "unknown") -> dict:
 
 def learning_page() -> bytes:
     cards = (
-        ("Vertex algorithms", "LP and simplex methods select vertices. Their membership and redundancy checks are separate from terminal optimization.", "#vertex-algorithms"),
-        ("Reachable-set representations", "Polytopes, zonotopes, parallelotopes, ellipsoids, and boxes carry different relations and guarantees.", "#reachable-sets"),
-        ("Control algorithms", "Read saved reachability, synthesis, and MPC examples with their replay and completeness limits.", "#control-algorithms"),
-        ("Supporting algorithms", "Follow conversions, projections, sums, intersections, predecessor recovery, and optimization providers.", "#supporting-algorithms"),
+        ("Vertex algorithms", "LP and simplex methods select vertices. Their membership and redundancy checks are separate from terminal optimization.", "vertex-algorithms"),
+        ("Reachable-set representations", "Polytopes, zonotopes, parallelotopes, ellipsoids, and boxes carry different relations and guarantees.", "reachable-sets"),
+        ("Control algorithms", "Read saved reachability, synthesis, and MPC examples with their replay and completeness limits.", "control-algorithms"),
+        ("Supporting algorithms", "Follow conversions, projections, sums, intersections, predecessor recovery, and optimization providers.", "supporting-algorithms"),
     )
-    body = "".join(f'<section id="{anchor[1:]}"><h2>{escape(title)}</h2><p>{escape(summary)}</p><a href="examples/index.html#algorithm-coverage">Browse related examples</a></section>' for title, summary, anchor in cards)
-    return ("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Learn · Controlled Systems Lab</title><link rel=\"stylesheet\" href=\"examples/examples.css\"></head><body data-csl-pages-learning-root=\"1\">"
-            "<nav><a href=\"index.html\">Learn</a><a href=\"examples/index.html\">Examples</a><a href=\"archive.html\">Evidence archive</a></nav>"
-            "<main><h1>Learn controlled systems</h1><p>Start with an illustrated example, then open its saved report to inspect the inputs, result, and evidence limits. The archive keeps historical and supplemental reports with their original files.</p>"
-            + body + "</main></body></html>").encode("utf-8")
+    body = "".join(f'<li id="{anchor}"><h3>{escape(title)}</h3><p class="summary">{escape(summary)}</p><a href="examples/index.html#algorithm-coverage">Browse related examples</a></li>' for title, summary, anchor in cards)
+    return ("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Learn · Controlled Systems Lab</title><link rel=\"stylesheet\" href=\"examples/examples.css\"></head><body data-csl-pages-learning-root=\"1\"><div class=\"shell\"><aside>"
+            "<a class=\"brand\" href=\"index.html\">[ csl ]<br>Controlled Systems Lab</a><p class=\"eyebrow\">Learning routes</p>"
+            "<nav aria-label=\"Learning routes\"><a href=\"index.html\">Learn</a><a href=\"examples/index.html\">Examples</a><a href=\"archive.html\">Evidence archive</a>"
+            "<a href=\"index.html#vertex-algorithms\">Vertex algorithms</a><a href=\"index.html#reachable-sets\">Reachable sets</a>"
+            "<a href=\"index.html#control-algorithms\">Control algorithms</a><a href=\"index.html#supporting-algorithms\">Supporting algorithms</a></nav></aside>"
+            "<main class=\"report-home\"><header><p class=\"eyebrow\">Start here</p><h1>Learn controlled systems</h1><p>Start with an illustrated example, then open its saved report to inspect the inputs, result, and evidence limits. The archive keeps historical and supplemental reports with their original files.</p></header>"
+            "<div class=\"cards\"><ul>" + body + "</ul></div></main></div></body></html>").encode("utf-8")
 
 
 def archive_page(site: Path) -> bytes:
@@ -434,12 +437,14 @@ def archive_page(site: Path) -> bytes:
             summary = f"{disposition} evidence. {lesson}."
         else:
             summary = "Saved report or supporting evidence. Read the page for its scope and limits."
-        rows.append(f'<li id="{_archive_fragment(route)}"><a href="{escape(route, quote=True)}">{escape(route)}</a><p>{escape(summary)}</p></li>')
-    return ("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Evidence archive · Controlled Systems Lab</title><link rel=\"stylesheet\" href=\"examples/examples.css\"></head><body>"
-            "<nav><a href=\"index.html\">Learn</a> · <a href=\"examples/index.html\">Examples</a></nav><main><h1>Evidence archive</h1>"
+        rows.append(f'<li class="coverage-row" id="{_archive_fragment(route)}"><h3><a href="{escape(route, quote=True)}">{escape(route)}</a></h3><p class="summary">{escape(summary)}</p></li>')
+    return ("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Evidence archive · Controlled Systems Lab</title><link rel=\"stylesheet\" href=\"examples/examples.css\"></head><body><div class=\"shell\"><aside>"
+            "<a class=\"brand\" href=\"index.html\">[ csl ]<br>Controlled Systems Lab</a><p class=\"eyebrow\">Learning routes</p>"
+            "<nav aria-label=\"Learning routes\"><a href=\"index.html\">Learn</a><a href=\"examples/index.html\">Examples</a><a href=\"archive.html\">Evidence archive</a></nav></aside>"
+            "<main class=\"report-home\"><header><p class=\"eyebrow\">Saved pages</p><h1>Evidence archive</h1>"
             "<p>These routes retain saved report pages and their evidence. Each page states its own scope and limits."
-            " The previous archive landing page remains byte-identical at <a href=\"legacy-index.html\">legacy-index.html</a>.</p><ul>"
-            + "".join(rows) + "</ul></main></body></html>").encode("utf-8")
+            " The previous archive landing page remains byte-identical at <a href=\"legacy-index.html\">legacy-index.html</a>.</p></header><div class=\"cards\"><ul>"
+            + "".join(rows) + "</ul></div></main></div></body></html>").encode("utf-8")
 
 
 def finalize(site: Path, *, source_commit: str = "unknown") -> dict:

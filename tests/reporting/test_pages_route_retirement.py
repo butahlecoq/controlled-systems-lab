@@ -56,6 +56,9 @@ class PagesRouteRetirementTests(unittest.TestCase):
             self.assertIn(route, second["html_routes"])
             self.assertEqual(second["artifact_transition"]["preserved_immutable_html"], [route])
             self.assertEqual(second["artifact_transition"]["preserved_zip_routes"], [archive_path.name])
+            self.assertIn('class="shell"', (site / "index.html").read_text())
+            self.assertIn('class="report-home"', (site / "index.html").read_text())
+            self.assertIn('class="coverage-row"', (site / "archive.html").read_text())
 
             (site / "late-report").mkdir()
             (site / "late-report/index.html").write_text("<!doctype html><html><body>Late</body></html>")
