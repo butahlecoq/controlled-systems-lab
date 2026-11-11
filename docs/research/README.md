@@ -2,6 +2,8 @@
 
 The [illustrated book and three-environment control program](pages-learning-control-program.md) audits HTML retirement, Pages consistency, the four module groups and single-player closed-loop coverage, with the published implementation tickets.
 
+The [current-intent architecture audit](current-intent-architecture-audit.md) records source-grounded deepening findings and the panel-selected follow-up [#951](https://github.com/butahlecoq/controlled-systems-lab/issues/951), scheduled after the initial closed-loop pilot.
+
 The [owner-selected working references](owner-reference-decisions-2026-11-10.md) record the accepted B04, R29, L04 and L13 choices, the revised historical-reproduction acceptance policy, and the requested source-faithful legacy C++ modules.
 
 Assessment date: 2026-10-11. Rolling literature window: 2021-10-11 through 2026-10-11. Status: initial investigation.
