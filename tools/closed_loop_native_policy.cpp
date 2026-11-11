@@ -67,10 +67,15 @@ Json set_json(const sets::SetData& set) {
             const auto& rows = repr.inequalities;
             Json bounds = Json::array();
             for(const auto item : repr.upper_bounds.values()) bounds.push_back(item);
+            Json equality_values = Json::array();
+            for(const auto item : repr.equality_values.values()) equality_values.push_back(item);
             return {{"representation", "polytope-h"},
                 {"inequalities", matrix_json(rows.rows(), rows.cols(),
                     [&](std::size_t i, std::size_t j) { return rows(i, j); })},
-                {"upper_bounds", std::move(bounds)}};
+                {"upper_bounds", std::move(bounds)},
+                {"equalities", matrix_json(repr.equalities.rows(), repr.equalities.cols(),
+                    [&](std::size_t i, std::size_t j) { return repr.equalities(i, j); })},
+                {"equality_values", std::move(equality_values)}};
         } else if constexpr(std::is_same_v<T, sets::SingletonRepresentation>) {
             Json point = Json::array();
             for(const auto item : repr.point.values()) point.push_back(item);
@@ -292,6 +297,10 @@ Json query(const Json& in) {
     base["status"] = "accepted";
     base["control"] = selected->replay.controls.front();
     base["predicted_sets"] = Json::array({trace_json(*selected)});
+    base["selected_plan"] = {{"states", selected->replay.states}, {"controls", selected->replay.controls},
+        {"terminal_objective", selected->replay.terminal_objective},
+        {"running_objective", selected->replay.running_objective},
+        {"total_objective", selected->replay.total_objective}};
     base["selector"] = {{"search_coverage", coverage}, {"candidate_score", selected->candidate_score},
         {"score_kind", selected->score_kind == optimization::NominalScoreKind::exact_deterministic_objective ?
             "exact-deterministic-objective" :
