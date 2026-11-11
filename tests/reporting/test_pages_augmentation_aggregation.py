@@ -1,6 +1,7 @@
 """Combined main-only Pages deployment retains all standalone report routes."""
 from __future__ import annotations
 
+import hashlib
 import json
 import importlib.util
 from pathlib import Path
@@ -32,48 +33,93 @@ class PagesAugmentationAggregation(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="pages-augmentation-aggregation-") as temporary:
             site = Path(temporary) / "site"
             site.mkdir()
-            (site / "index.html").write_text(
-                '<!doctype html><html><body><p id="base">Base reports</p></body></html>',
-                encoding="utf-8")
+            legacy_root = b'<!doctype html><html><body><p id="base">Base reports</p></body></html>'
+            (site / "index.html").write_bytes(legacy_root)
             (site / "existing-route").mkdir()
-            (site / "existing-route/index.html").write_text("existing", encoding="utf-8")
+            existing_page = (b'<!doctype html><html><body><h1>Existing report</h1>'
+                             b'<a href="records.json">Raw records</a> '
+                             b'<a href="../existing-route.zip">Offline bundle</a></body></html>')
+            (site / "existing-route/index.html").write_bytes(existing_page)
+            records = b'{"schema":"csl.fixture-record/1","value":7}\n'
+            (site / "existing-route/records.json").write_bytes(records)
+            envelope = {
+                "schema": "csl.report-envelope/1",
+                "report_id": "existing-route",
+                "source_report_id": "fixture-existing-report",
+                "source_commit": "a" * 40,
+                "payload_sha256": hashlib.sha256(records).hexdigest(),
+            }
+            envelope_bytes = (json.dumps(envelope, sort_keys=True) + "\n").encode()
+            (site / "existing-route/report-envelope.json").write_bytes(envelope_bytes)
+            with zipfile.ZipFile(site / "existing-route.zip", "w") as archive:
+                archive.writestr("existing-route/records.json", records)
+                archive.writestr("existing-route/report-envelope.json", envelope_bytes)
+            existing_zip_hash = hashlib.sha256((site / "existing-route.zip").read_bytes()).hexdigest()
+            (site / "catalog.json").write_text(json.dumps({
+                "schema": "csl.algorithm-report-catalog/3",
+                "reports": [{
+                    "report_id": "existing-route",
+                    "report_kind": "finite-feedback",
+                    "source_commit": "a" * 40,
+                    "payload_sha256": hashlib.sha256(records).hexdigest(),
+                    "zip_sha256": existing_zip_hash,
+                }],
+            }, sort_keys=True) + "\n", encoding="utf-8")
             (site / "examples").mkdir()
-            (site / "examples/index.html").write_text("<html><body>examples</body></html>", encoding="utf-8")
+            (site / "examples/index.html").write_text(
+                '<!doctype html><html><body><h1 id="algorithm-coverage">Examples</h1></body></html>',
+                encoding="utf-8")
+            (site / "examples/examples.css").write_text("body{color:inherit}\n", encoding="utf-8")
 
             routes = augment_pages_bundle.stage_all(site)
 
             landing = (site / "index.html").read_text(encoding="utf-8")
-            self.assertIn('id="base"', landing)
-            self.assertIn(f'href="{routes["mpc01"]}/index.html"', landing)
-            self.assertIn("mpc01-strategy-ab-ts03-20261103-r1/strategy-ab-ts03-summary.html", landing)
-            self.assertIn(f'href="{routes["b04_c"]}/index.html"', landing)
-            self.assertIn(f'href="{routes["b04_c"]}.zip"', landing)
-            self.assertIn(f'href="{routes["mpc06"]}/index.html"', landing)
-            self.assertIn(f'href="{routes["mpc06"]}.zip"', landing)
-            self.assertIn(f'href="{routes["mpc06_complete"]}/index.html"', landing)
-            self.assertIn(f'href="{routes["mpc06_complete"]}.zip"', landing)
-            self.assertIn(f'href="{routes["mpc06_offline"]}/index.html"', landing)
-            self.assertIn(f'href="{routes["mpc06_offline"]}.zip"', landing)
+            archive_page = (site / "archive.html").read_text(encoding="utf-8")
+            self.assertIn('data-csl-pages-learning-root="1"', landing)
+            self.assertIn('href="examples/index.html"', landing)
+            self.assertIn('href="archive.html"', landing)
+            self.assertIn('id="base"', (site / "legacy-index.html").read_text(encoding="utf-8"))
+            self.assertEqual((site / "legacy-index.html").read_bytes(), legacy_root)
+            self.assertNotIn('id="base"', landing)
+            strategy_summary = "docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1/strategy-ab-ts03-summary.html"
+            self.assertIn(f'href="{strategy_summary}"', archive_page)
+            for name in ("mpc01", "b04_c", "mpc06", "mpc06_complete", "mpc06_offline",
+                         "review05", "mpc11", "mpc08", "mpc07", "mpc10", "mpc11_studies",
+                         "b04_source"):
+                self.assertIn(f'href="{routes[name]}/index.html"', archive_page)
             self.assertIn(routes["mpc06_offline"]+"/index.html#offline-example", (site/"examples/index.html").read_text())
             self.assertIn(routes["mpc06_complete"]+"/index.html", (site/routes["mpc06_offline"]/"index.html").read_text())
-            self.assertEqual((site / "existing-route/index.html").read_text(), "existing")
-            self.assertIn("examples", (site / "examples/index.html").read_text())
+            self.assertEqual((site / "existing-route/index.html").read_bytes(), existing_page)
+            self.assertEqual((site / "existing-route/records.json").read_bytes(), records)
+            self.assertEqual(hashlib.sha256((site / "existing-route.zip").read_bytes()).hexdigest(), existing_zip_hash)
+            self.assertIn("existing-route/index.html", archive_page)
+            gallery = (site / "examples/index.html").read_text()
+            self.assertIn('href="../index.html">Learn</a>', gallery)
+            self.assertIn('href="../archive.html">Evidence archive</a>', gallery)
             self.assertIn(routes["review05"]+"/index.html#scalar-2d", (site/"examples/index.html").read_text())
-            self.assertIn(routes["review05"]+"/index.html", landing)
-            self.assertIn(routes["mpc11"]+"/index.html", landing)
+            self.assertIn(routes["review05"]+"/index.html", archive_page)
+            self.assertIn(routes["mpc11"]+"/index.html", archive_page)
             self.assertIn(routes["mpc11"]+"/index.html", (site/"examples/index.html").read_text())
             self.assertTrue((site / "docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1/strategy-ab-ts03-summary.html").is_file())
             self.assertIn(routes["mpc08"]+"/index.html#minimal-example", (site/"examples/index.html").read_text())
-            self.assertIn(routes["mpc08"]+"/index.html", landing)
+            self.assertIn(routes["mpc08"]+"/index.html", archive_page)
             for name in ('mpc07','mpc10','b04_source'):
                 self.assertIn(routes[name]+'/index.html#minimal-example',(site/'examples/index.html').read_text())
-                self.assertIn(routes[name]+'/index.html',landing)
+                self.assertIn(routes[name]+'/index.html',archive_page)
             online = json.loads((site/routes["mpc07"]/"online-verification.json").read_text())
             self.assertEqual(sum(row["episodes"] for row in online["reports"]), 864)
             self.assertEqual(sum(row["stages"] for row in online["reports"]), 4032)
             self.assertIn("figures/online-policy-traces.svg", (site/routes["mpc07"]/"index.html").read_text())
             self.assertIn(routes["mpc11_studies"]+"/index.html#mesh-example",(site/"examples/index.html").read_text())
-            self.assertIn(routes["mpc11_studies"]+"/index.html",landing)
+            self.assertIn(routes["mpc11_studies"]+"/index.html",archive_page)
+            inventory = json.loads((site / "pages-route-inventory.json").read_text(encoding="utf-8"))
+            self.assertEqual(inventory["html_route_count"], len(inventory["html_routes"]))
+            expected_indexes = sum(route.endswith("/index.html") and route != "index.html"
+                                   for route in inventory["html_routes"])
+            self.assertEqual(inventory["navigation_transition"]["archive_index_route_count"], expected_indexes)
+            self.assertEqual(inventory["navigation_transition"]["new_root_report_link_count"], 0)
+            self.assertEqual(inventory["html_routes"]["existing-route/index.html"]["visibility"], "archive")
+            self.assertIn("archive.html", inventory["html_routes"][strategy_summary]["inbound_html_references"])
             for report_id in (routes["b04_c"], routes["mpc06"], routes["mpc06_complete"], routes["mpc06_offline"], routes["review05"], routes["mpc11"], routes["mpc08"], routes["mpc07"], routes["mpc10"], routes["mpc11_studies"], routes["b04_source"]):
                 with zipfile.ZipFile(site / f"{report_id}.zip") as archive:
                     self.assertIn(f"{report_id}/publication-manifest.json", archive.namelist())

@@ -428,7 +428,7 @@ def learning_page() -> bytes:
     body = "".join(f'<li id="{anchor}"><h3>{escape(title)}</h3><p class="summary">{escape(summary)}</p><a href="examples/index.html#algorithm-coverage">Browse related examples</a></li>' for title, summary, anchor in cards)
     return ("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Learn · Controlled Systems Lab</title><link rel=\"stylesheet\" href=\"examples/examples.css\"></head><body data-csl-pages-learning-root=\"1\"><div class=\"shell\"><aside>"
             "<a class=\"brand\" href=\"index.html\">[ csl ]<br>Controlled Systems Lab</a><p class=\"eyebrow\">Learning routes</p>"
-            "<nav aria-label=\"Learning routes\"><a href=\"index.html\">Learn</a><a href=\"examples/index.html\">Examples</a><a href=\"archive.html\">Evidence archive</a>"
+            "<nav aria-label=\"Learning routes\"><a href=\"index.html\" aria-current=\"page\">Learn</a><a href=\"examples/index.html\">Examples</a><a href=\"archive.html\">Evidence archive</a>"
             "<a href=\"index.html#vertex-algorithms\">Vertex algorithms</a><a href=\"index.html#reachable-sets\">Reachable sets</a>"
             "<a href=\"index.html#control-algorithms\">Control algorithms</a><a href=\"index.html#supporting-algorithms\">Supporting algorithms</a></nav></aside>"
             "<main class=\"report-home\"><header><p class=\"eyebrow\">Start here</p><h1>Learn controlled systems</h1><p>Start with an illustrated example, then open its saved report to inspect the inputs, result, and evidence limits. The archive keeps historical and supplemental reports with their original files.</p></header>"
@@ -461,6 +461,12 @@ def archive_page(site: Path, inventory_data: dict) -> bytes:
             learning_rows.append(row)
         else:
             ordinary_rows.append(row)
+    for route, route_data in sorted(inventory_data["html_routes"].items()):
+        if (not route.endswith("/index.html") and route_data["visibility"] == "archive"):
+            ordinary_rows.append(
+                f'<li class="coverage-row" id="{_archive_fragment(route)}">'
+                f'<h3><a href="{escape(route, quote=True)}">{escape(route)}</a></h3>'
+                f'<p class="summary">{escape(route_data["role"])}; retained in the evidence archive.</p></li>')
     learning_section = ("<section id=\"learning-pages\"><h2>Learning pages and examples</h2>"
                         "<div class=\"cards\"><ul>" + "".join(learning_rows) + "</ul></div></section>") if learning_rows else ""
     hidden_section = ("<section id=\"hidden-evidence\"><h2>Hidden and superseded evidence</h2>"
@@ -469,7 +475,7 @@ def archive_page(site: Path, inventory_data: dict) -> bytes:
     hidden_nav = '<a href="archive.html#hidden-evidence">Hidden/superseded evidence</a>' if hidden_rows else ""
     return ("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Evidence archive · Controlled Systems Lab</title><link rel=\"stylesheet\" href=\"examples/examples.css\"></head><body><div class=\"shell\"><aside>"
             "<a class=\"brand\" href=\"index.html\">[ csl ]<br>Controlled Systems Lab</a><p class=\"eyebrow\">Learning routes</p>"
-            "<nav aria-label=\"Learning routes\"><a href=\"index.html\">Learn</a><a href=\"examples/index.html\">Examples</a><a href=\"archive.html\">Evidence archive</a>" + hidden_nav + "</nav></aside>"
+            "<nav aria-label=\"Learning routes\"><a href=\"index.html\">Learn</a><a href=\"examples/index.html\">Examples</a><a href=\"archive.html\" aria-current=\"page\">Evidence archive</a>" + hidden_nav + "</nav></aside>"
             "<main class=\"report-home\"><header><p class=\"eyebrow\">Saved pages</p><h1>Evidence archive</h1>"
             "<p>Learning pages, current saved reports, and supporting evidence are listed in their own sections. Hidden or superseded evidence is listed separately with its stable URL."
             " The previous archive landing page remains byte-identical at <a href=\"legacy-index.html\">legacy-index.html</a>.</p></header><section id=\"saved-reports\"><h2>Saved reports and supporting evidence</h2><div class=\"cards\"><ul>"
@@ -515,7 +521,34 @@ def _validate_generated_fragments(inventory_data: dict) -> None:
             raise ValueError(f"generated archive link fragment is broken: examples/index.html -> {ref['value']}")
 
 
-def finalize(site: Path, *, source_commit: str = "unknown") -> dict:
+def preflight(site: Path) -> Path:
+    """Validate every finalizer destination before an augmentation writer runs."""
+    site = Path(site)
+    canonical_stylesheet = Path(__file__).resolve().parents[2] / "docs/examples/examples.css"
+    if site.is_symlink() or not site.is_dir():
+        raise ValueError("Pages site must be an existing regular directory")
+    outputs = ("index.html", "examples/index.html", "archive.html", "legacy-index.html",
+               "pages-route-inventory.json", "examples/examples.css")
+    site = site.absolute()
+    site_root = site.resolve()
+    if not canonical_stylesheet.is_file() or canonical_stylesheet.is_symlink():
+        raise ValueError("canonical shared Pages stylesheet is unavailable")
+    for relative in outputs:
+        path = site / relative
+        parent = path.parent
+        while parent != site:
+            if parent.is_symlink() or not parent.is_dir():
+                raise ValueError(f"Pages output parent is not a regular directory: {parent.relative_to(site)}")
+            parent = parent.parent
+        if path.is_symlink() or (path.exists() and not path.is_file()):
+            raise ValueError(f"Pages output is not a regular file: {relative}")
+        if not path.resolve().is_relative_to(site_root):
+            raise ValueError(f"Pages output escapes the site: {relative}")
+    return canonical_stylesheet
+
+
+def finalize(site: Path, *, source_commit: str = "unknown",
+             original_root_bytes: bytes | None = None) -> dict:
     site = Path(site)
     if site.is_symlink() or not site.is_dir():
         raise ValueError("Pages site must be an existing regular directory")
@@ -525,6 +558,7 @@ def finalize(site: Path, *, source_commit: str = "unknown") -> dict:
         raise ValueError("composed Pages artifact has no regular root index")
     if gallery.is_symlink() or not gallery.is_file():
         raise ValueError("composed Pages artifact has no regular examples gallery")
+    canonical_stylesheet = preflight(site)
     baseline = inventory(site, source_commit=source_commit)
     broken_figures = [f"{route} -> {ref['value']}" for route, row in baseline["html_routes"].items()
                       for ref in row["outbound_references"]
@@ -555,7 +589,7 @@ def finalize(site: Path, *, source_commit: str = "unknown") -> dict:
     else:
         if legacy.exists() and legacy.read_bytes() != root_bytes:
             raise ValueError("legacy-index.html already exists with different content")
-        legacy_bytes = root_bytes
+        legacy_bytes = original_root_bytes if original_root_bytes is not None else root_bytes
     immutable_before = {
         path.relative_to(site).as_posix(): sha256(path.read_bytes())
         for path in site.rglob("*") if path.is_file()
@@ -571,11 +605,26 @@ def finalize(site: Path, *, source_commit: str = "unknown") -> dict:
         gallery_text = gallery_text.replace("../" + route,
                                             "../archive.html#" + _archive_fragment(route))
     if "../archive.html" not in gallery_text:
-        raise ValueError("gallery navigation did not expose the evidence archive")
+        navigation = ""
+        if "../index.html" not in gallery_text:
+            navigation += '<a href="../index.html">Learn</a>'
+        navigation += '<a href="../archive.html">Evidence archive</a>'
+        if "</nav>" in gallery_text:
+            gallery_text = gallery_text.replace("</nav>", navigation + "</nav>", 1)
+        elif "</aside>" in gallery_text:
+            gallery_text = gallery_text.replace(
+                "</aside>", '<nav aria-label="Site">' + navigation + "</nav></aside>", 1)
+        elif "</body>" in gallery_text:
+            gallery_text = gallery_text.replace(
+                "</body>", '<nav aria-label="Site">' + navigation + "</nav></body>", 1)
+        else:
+            raise ValueError("gallery has no insertion point for evidence archive navigation")
     root.write_bytes(learning_page())
     legacy.write_bytes(legacy_bytes)
     archive.write_bytes(archive_page(site, baseline))
     gallery.write_text(gallery_text, encoding="utf-8")
+    stylesheet = site / "examples/examples.css"
+    stylesheet.write_bytes(canonical_stylesheet.read_bytes())
     immutable_after = {
         path.relative_to(site).as_posix(): sha256(path.read_bytes())
         for path in site.rglob("*") if path.is_file()
@@ -600,12 +649,14 @@ def finalize(site: Path, *, source_commit: str = "unknown") -> dict:
         "new_root_report_link_count": len(new_report_links),
         "retired_primary_routes": sorted(BARE_ROUTE_LESSONS),
         "deleted_html_wrappers": [],
-        "deletion_disposition": "No HTML routes were deleted. Every index page is reachable through its learning, ordinary archive, or hidden-evidence section according to its reviewed visibility, so no standalone wrapper was shown to be disposable.",
+        "deletion_disposition": "No HTML routes were deleted. Every report page is reachable through its learning, ordinary archive, or hidden-evidence section according to its reviewed visibility, so no standalone wrapper was shown to be disposable.",
         "archive_index_route_count": sum(route.endswith("/index.html") and route != "index.html"
                                          for route in result["html_routes"]),
         "ordinary_archive_routes": sorted(route for route, row in result["html_routes"].items()
                                            if route.endswith("/index.html") and route != "index.html"
                                            and row["visibility"] == "archive"),
+        "ordinary_archive_html_routes": sorted(route for route, row in result["html_routes"].items()
+                                                if route != "index.html" and row["visibility"] == "archive"),
         "learning_page_routes": sorted(route for route, row in result["html_routes"].items()
                                         if route.endswith("/index.html") and route != "index.html"
                                         and row["visibility"] == "learning"),

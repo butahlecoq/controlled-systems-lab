@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+import shutil
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -77,6 +78,34 @@ class PagesRouteRetirementTests(unittest.TestCase):
             self.assertIn("late-report/index.html", third["html_routes"])
             self.assertIn("late-report/index.html", (site / "archive.html").read_text())
 
+    def test_finalization_retains_pre_augmentation_root_bytes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            site, _ = self.make_site(Path(temporary))
+            original_root = (site / "index.html").read_bytes()
+            (site / "index.html").write_bytes(original_root + b'<p id="augmentation">Added later</p>')
+
+            retirement.finalize(site, source_commit="fixture", original_root_bytes=original_root)
+
+            self.assertEqual((site / "legacy-index.html").read_bytes(), original_root)
+
+    def test_archive_links_orphaned_named_report_after_root_replacement(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            site, _ = self.make_site(Path(temporary))
+            route = "docs/research/evidence/fixture/strategy-summary.html"
+            report = site / route
+            report.parent.mkdir(parents=True)
+            report.write_text("<!doctype html><html><body><h1>Named report</h1></body></html>")
+            original_root = (site / "index.html").read_bytes()
+            (site / "index.html").write_text(
+                '<html><body><a href="' + route + '">Strategy summary</a></body></html>')
+
+            result = retirement.finalize(site, source_commit="fixture", original_root_bytes=original_root)
+
+            archive = (site / "archive.html").read_text()
+            self.assertIn(f'href="{route}"', archive)
+            self.assertIn("archive.html", result["html_routes"][route]["inbound_html_references"])
+            self.assertEqual(result["navigation_transition"]["ordinary_archive_html_routes"].count(route), 1)
+
     def test_bad_figure_link_fails_before_writing_navigation(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             site, _ = self.make_site(Path(temporary), gallery=
@@ -117,6 +146,48 @@ class PagesRouteRetirementTests(unittest.TestCase):
             self.assertEqual((site / "index.html").read_bytes(), root_before)
             self.assertEqual((site / "examples/index.html").read_bytes(), gallery_before)
             self.assertFalse((site / "archive.html").exists())
+
+    def test_archive_navigation_is_added_when_gallery_has_no_legacy_label(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            site, _ = self.make_site(
+                Path(temporary),
+                gallery='<html><body><h1 id="algorithm-coverage">Examples</h1></body></html>')
+            retirement.finalize(site, source_commit="fixture")
+            gallery = (site / "examples/index.html").read_text()
+
+            self.assertIn('<a href="../index.html">Learn</a>', gallery)
+            self.assertIn('<a href="../archive.html">Evidence archive</a>', gallery)
+            self.assertIn('<nav aria-label="Site">', gallery)
+
+    def test_symlinked_stylesheet_is_rejected_before_any_output_changes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            site, _ = self.make_site(Path(temporary))
+            external = Path(temporary) / "external.css"
+            sentinel = b"leave this file untouched\n"
+            external.write_bytes(sentinel)
+            stylesheet = site / "examples/examples.css"
+            stylesheet.unlink()
+            stylesheet.symlink_to(external)
+            root_before = (site / "index.html").read_bytes()
+            gallery_before = (site / "examples/index.html").read_bytes()
+
+            with self.assertRaisesRegex(ValueError, "Pages output is not a regular file"):
+                retirement.finalize(site, source_commit="fixture")
+
+            self.assertEqual(external.read_bytes(), sentinel)
+            self.assertEqual((site / "index.html").read_bytes(), root_before)
+            self.assertEqual((site / "examples/index.html").read_bytes(), gallery_before)
+            self.assertFalse((site / "archive.html").exists())
+
+    def test_output_parent_alias_is_rejected_by_preflight(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            site, _ = self.make_site(Path(temporary))
+            examples = site / "examples"
+            shutil.rmtree(examples)
+            examples.symlink_to(site, target_is_directory=True)
+
+            with self.assertRaisesRegex(ValueError, "Pages output parent is not a regular directory"):
+                retirement.preflight(site)
 
 
 if __name__ == "__main__":

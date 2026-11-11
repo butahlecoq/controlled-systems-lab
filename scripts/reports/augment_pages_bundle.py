@@ -32,6 +32,11 @@ def stage_all(site: Path) -> dict[str, str]:
     """Add every standalone Pages augmentation and verify their combined site."""
     if site.is_symlink() or not site.is_dir():
         raise ValueError("extracted Pages site must be a regular directory")
+    pages_route_retirement.preflight(site)
+    root_before_augmentation = site / "index.html"
+    if root_before_augmentation.is_symlink() or not root_before_augmentation.is_file():
+        raise ValueError("extracted Pages site has no regular root index")
+    original_root_bytes = root_before_augmentation.read_bytes()
 
     per_attempt = stage_per_attempt.stage(site)
     b04_route = stage_b04_c_strategy_a.stage(B04_SOURCE, site)
@@ -113,7 +118,8 @@ def stage_all(site: Path) -> dict[str, str]:
     if strategy_page.is_symlink() or not strategy_page.is_file():
         raise ValueError("combined Pages site is missing the Strategy A/B T-S03 report")
     route_inventory = pages_route_retirement.finalize(
-        site, source_commit=os.environ.get("GITHUB_SHA", "unknown"))
+        site, source_commit=os.environ.get("GITHUB_SHA", "unknown"),
+        original_root_bytes=original_root_bytes)
     primary = (site / "index.html").read_text(encoding="utf-8")
     if "archive.html" not in primary or "examples/index.html" not in primary:
         raise ValueError("primary learning page must link to the gallery and evidence archive")
