@@ -28,7 +28,9 @@ ISSUE_TEMPLATES = {
 }
 ADR_PATH = re.compile(r"docs/architecture/decisions/(?P<number>[0-9]{4})-[a-z0-9]+(?:-[a-z0-9]+)*\.md\Z")
 WORKING_PATH_WORD = re.compile(r"(?:^|[-_.])(plan|plans|spec|specs|draft|drafts|review|reviews|notes)(?:[-_.]|$)", re.I)
-DOCUMENT_SUFFIXES = {".md", ".markdown", ".rst", ".adoc", ".org", ".text", ".txt"}
+MARKDOWN_SUFFIXES = {".md", ".markdown"}
+DOCUMENT_SUFFIXES = MARKDOWN_SUFFIXES | {".rst", ".adoc", ".org", ".text", ".txt"}
+WORKING_DOCUMENT_SUFFIXES = DOCUMENT_SUFFIXES | {".json", ".yml", ".yaml"}
 FUNCTIONAL_DOC_ASSETS = {
     "docs/artifacts/schemas/": {".json"},
     "docs/catalogue/": {".json", ".sha256"},
@@ -73,6 +75,8 @@ def changed_paths(base: str, root: Path) -> list[str]:
 
 
 def is_working_document_path(path: str) -> bool:
+    if Path(path).suffix.lower() not in WORKING_DOCUMENT_SUFFIXES:
+        return False
     parts = path.split("/")
     stem = Path(path).stem
     suffix = Path(path).suffix.lower()
@@ -89,12 +93,14 @@ def is_functional_doc_asset(path: str) -> bool:
 
 def is_retained_change(path: str, root: Path) -> bool:
     suffix = Path(path).suffix.lower()
-    if suffix in DOCUMENT_SUFFIXES:
+    if suffix in MARKDOWN_SUFFIXES:
         return is_retained_markdown(path, root)
+    if path.startswith("docs/"):
+        if is_working_document_path(path):
+            return False
+        return is_functional_doc_asset(path)
     if is_working_document_path(path):
         return False
-    if path.startswith("docs/"):
-        return is_functional_doc_asset(path)
     return True
 
 

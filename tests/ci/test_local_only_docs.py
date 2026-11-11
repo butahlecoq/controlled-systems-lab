@@ -73,6 +73,9 @@ class LocalOnlyDocsTests(unittest.TestCase):
                 "docs/examples/math-example.html": "<html></html>\n",
                 "docs/catalogue/capabilities.json": "{}\n",
                 "docs/research/evidence/run-1/record.json": "{}\n",
+                "docs/research/evidence/run-1/stdout.txt": "solver output\n",
+                "src/CMakeLists.txt": "cmake_minimum_required(VERSION 3.31)\n",
+                "src/reachability/fixed_plan_admission.hpp": "#pragma once\n",
             }
             for relative, content in assets.items():
                 path = root / relative
