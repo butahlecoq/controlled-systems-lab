@@ -43,6 +43,8 @@ std::string stop_name(StopReason reason) {
     case StopReason::pivot_limit: return "pivot_limit";
     case StopReason::non_finite_arithmetic: return "non_finite_arithmetic";
     case StopReason::invalid_dependency_result: return "invalid_dependency_result";
+    case StopReason::cancelled: return "cancelled";
+    case StopReason::deadline_expired: return "deadline_expired";
     }
     return "unknown";
 }
