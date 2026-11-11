@@ -1,4 +1,9 @@
-# Native interfaces, revision 1.8
+# Native interfaces, revision 1.9
+
+Revision 1.9 adds ordered `identities()` snapshots to `Registry<Port>` and
+`StrategyRegistry`. The snapshot reports the actual ID and version for each
+currently registered method in module-ID order. It does not report request
+capability or replace concrete `prepare()` admission.
 
 Revision 1.8 extends typed registry admission with a port-specific opt-in for
 validated assurance. The default remains rejection; an opted-in port must still

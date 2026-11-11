@@ -7,14 +7,19 @@ not redefine publication validity. The bridge preserves the pure planning,
 check-before-snapshot and dependency-before-factory contracts below.
 
 CORE-04 adds `<csl/registry/registry.hpp>` and the installed `CSL::registry`
-target. The current [native interface revision is 1.8](core-interfaces.md).
+target. The current [native interface revision is 1.9](core-interfaces.md).
 This is a C++20 source interface for compatible in-process toolchains. It
 provides no portable C++ ABI, loader, global registry, fallback algorithm or
 production optimization implementation.
 
 ## Typed registration and the runtime seam
 
-`Registry<Port>` owns registrations indexed by module ID. Each registration
+`Registry<Port>` owns registrations indexed by module ID. Its `identities()`
+method returns a value snapshot in module-ID order. The snapshot lists only
+registered IDs and versions. It does not imply request support; callers still
+pin a version and call `prepare_pipeline()` or `prepare_provider()` with a
+concrete request. `StrategyRegistry::identities()` follows the same contract.
+Each registration
 contains its actual ID/version, a pure capability callback, a typed workspace
 factory and an optional separate basis-diagnostics factory. Duplicate IDs reject
 with the incoming requested identity and the already registered actual identity.

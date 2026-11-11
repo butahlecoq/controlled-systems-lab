@@ -1,4 +1,5 @@
 #include <csl/adapters/lp/highs.hpp>
+#include <csl/geometry/composition_catalogue.hpp>
 #include <csl/geometry/hull_reducer.hpp>
 #include <csl/geometry/basis_reuse_reducer.hpp>
 #include <csl/registry/provider.hpp>
@@ -27,6 +28,20 @@ int main() {
     registry::Registry<registry::HullReducerPort> hull_registry;
     if (hull_registry.add(geometry::make_lp_hull_reducer_registration())) return 3;
     const geometry::PointCloud cloud{{"installed-hull"}, {{0,0},{1,0},{1,1},{0,1},{0.5,0.5}}};
+    auto catalogue_lp_result = adapters::lp::make_highs_registration();
+    if (!std::holds_alternative<registry::Registration<registry::LPPort>>(catalogue_lp_result)) return 18;
+    auto catalogue = geometry::make_hull_reducer_catalogue(
+        std::get<registry::Registration<registry::LPPort>>(std::move(catalogue_lp_result)));
+    const auto candidates = geometry::enumerate_hull_candidates(catalogue,2);
+    if (candidates.size() != 10 || catalogue.reducer_identities().size() != 10) return 19;
+    auto candidate = geometry::prepare_hull_candidate(catalogue,candidates.front(),cloud);
+    if (!std::holds_alternative<geometry::PreparedHullCandidate>(candidate)) return 20;
+    const auto& candidate_provenance = std::get<geometry::PreparedHullCandidate>(candidate).provenance;
+    if (candidate_provenance.size() != 2 || !candidate_provenance[0].actual ||
+        !candidate_provenance[1].actual ||
+        candidate_provenance[0].actual->id != candidates.front().vertex_reducer.id ||
+        candidate_provenance[1].actual->id != candidates.front().vertex_lp.id) return 21;
+
     auto hull_prepared_result = registry::prepare_pipeline(registry::select(hull_registry,
         registry::Method{{"csl.hull.lp-membership"}, std::nullopt}, cloud));
     if (!std::holds_alternative<registry::PreparedPipeline<registry::HullReducerPort>>(hull_prepared_result)) return 4;

@@ -14,6 +14,34 @@ static_assert(!std::is_default_constructible_v<PreparedStrategy>);
 static_assert(!std::is_copy_constructible_v<BoundWorkspace<LPPort>>);
 static_assert(!std::is_convertible_v<IncumbentCandidate,FeasibleIncumbent>);
 
+TEST_CASE("registry identity snapshots reflect actual registrations in stable module-ID order") {
+    Registry<LPPort> lp;
+    const auto registration = [](std::string id, std::string version) {
+        return Registration<LPPort>{{{std::move(id)},std::move(version)},
+            [](const LinearProgram&,const Requirements&) -> Capability { return Offer{}; },
+            [](const LinearProgram&) { return std::make_unique<registry_fixtures::EndpointWorkspace>(); }};
+    };
+    REQUIRE_FALSE(lp.add(registration("z-provider","2")));
+    REQUIRE_FALSE(lp.add(registration("a-provider","7")));
+    const auto identities = lp.identities();
+    REQUIRE(identities.size() == 2);
+    CHECK(identities[0].id.value == "a-provider");
+    CHECK(identities[0].version == "7");
+    CHECK(identities[1].id.value == "z-provider");
+    CHECK(identities[1].version == "2");
+
+    Registry<LPPort> empty;
+    CHECK(empty.identities().empty());
+
+    Registry<LPPort> dependencies;
+    StrategyRegistry strategies;
+    REQUIRE_FALSE(strategies.add(forward_registration(dependencies,"fixture-strategy")));
+    const auto strategy_identities = strategies.identities();
+    REQUIRE(strategy_identities.size() == 1);
+    CHECK(strategy_identities[0].id.value == "fixture-strategy");
+    CHECK(strategy_identities[0].version == "fixture-1");
+}
+
 namespace {
 // A plugin may omit provenance, misreport it, or return a foreign witness.
 // These tests exercise the public boundary, not a concrete selection algorithm.
