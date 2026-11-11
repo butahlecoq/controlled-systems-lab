@@ -5,6 +5,10 @@
 #include <csl/registry/provider.hpp>
 
 #include <optional>
+#include <chrono>
+#include <functional>
+#include <string>
+#include <vector>
 
 namespace csl::optimization {
 
@@ -52,6 +56,25 @@ struct FiniteActionGraphLayerStatistics {
     std::size_t representation_filter_rejected{};
 };
 
+// Per-call receipt for the caller-selected forward GeometryPort operation.
+// The graph stays independent of concrete geometry/reducer ports while making
+// the exact nested operation evidence available to the application layer.
+struct FiniteGraphGeometryInvocation {
+    std::string request_id;
+    std::string ideal_output_id;
+    std::vector<std::string> input_ids;
+    std::string operation;
+    std::string requested_method_id;
+    std::string actual_method_id;
+    std::string actual_method_version;
+    std::string outcome;
+    std::optional<SetRelation> relation;
+    std::chrono::nanoseconds elapsed{};
+    std::vector<std::string> evidence_assumptions;
+    std::string diagnostics;
+};
+using FiniteGraphGeometryObserver = std::function<void(const FiniteGraphGeometryInvocation&)>;
+
 struct FiniteActionGraphLimits {
     std::size_t beam_width;
     std::size_t max_nodes;
@@ -73,6 +96,7 @@ struct FiniteActionGraphResult {
     std::size_t reachable_envelope_calls{};
     std::size_t representation_filter_calls{};
     std::size_t representation_filter_rejections{};
+    std::vector<FiniteGraphGeometryInvocation> reachable_geometry_invocations;
     bool search_complete{};
     bool node_budget_exhausted{};
     bool has_viable_path{};
@@ -97,6 +121,6 @@ FiniteActionGraphOutcome finite_action_stage_layered_graph(
     const FiniteActionNominalRequest&, FiniteActionGraphLimits,
     const registry::PreparedProvider<registry::GeometryPort>& projection_provider,
     const registry::PreparedProvider<registry::GeometryPort>& reachable_set_provider,
-    const ExecutionContext& = {});
+    const ExecutionContext& = {}, FiniteGraphGeometryObserver = {});
 
 } // namespace csl::optimization
