@@ -7,6 +7,7 @@ import unittest
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/"scripts/reports"))
 import audit_visual_routes
+import site_design
 
 
 class VisualRouteInventoryTests(unittest.TestCase):
@@ -279,8 +280,9 @@ class VisualRouteInventoryTests(unittest.TestCase):
             *audit_visual_routes.viz10_companion_assets(),
             *audit_visual_routes.control_witness_companions.asset_paths()})
 
-        self.assertEqual((ROOT/"docs/examples/examples.css").read_bytes(),
-                         (ROOT/"scripts/reports/visual_examples.css").read_bytes())
+        self.assertEqual((ROOT/"docs/examples/examples.css").read_bytes(), site_design.stylesheet())
+        gallery = (ROOT/"scripts/reports/visual_examples.py").read_text(encoding="utf-8")
+        self.assertIn('output_files["examples.css"] = site_design.stylesheet()', gallery)
         before=ROOT/"docs/examples/fuel-b06-viz06-before.svg"
         self.assertEqual(hashlib.sha256(before.read_bytes()).hexdigest(),
                          "ac5997b750ef20fb80c90b46549a1110cf10f7ff37bbb5f9d72ab1cc44461f20")

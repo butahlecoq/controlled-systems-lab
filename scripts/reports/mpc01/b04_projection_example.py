@@ -5,9 +5,12 @@ from fractions import Fraction
 import html
 import json
 from pathlib import Path
+import sys
 
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "scripts/reports"))
+import site_design
 CASE = ROOT / "docs/research/evidence/b04-reference-v1/canonical-case.json"
 REFERENCE = ROOT / "docs/research/evidence/b04-reference-v1/exact-optimal-reference.json"
 SVG = ROOT / "docs/examples/b04-reference-trajectory-projections.svg"
@@ -130,18 +133,21 @@ def main() -> None:
 <text x="500" y="576" text-anchor="middle" font-size="12">No stock constraints are specified; negative stocks appear in this exact reference witness.</text>
 </svg>'''
     SVG.write_bytes((svg + "\n").encode("utf-8"))
-    PAGE.write_bytes(('''<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>B04 reference fuel trajectory projections</title>
-<style>body{margin:0;background:#0b1020;color:#e2e8f0;font:16px/1.6 system-ui,sans-serif}main{max-width:1100px;margin:auto;padding:2rem}h1{line-height:1.15}a{color:#7dd3fc}code{color:#fde68a}img{width:100%;height:auto}.scope{border-left:4px solid #fb7185;padding:.7rem 1rem;background:#171d30}</style></head>
-<body><main><p><a href="index.html#visual-mpc01-b04-reference-projection">← Visual examples</a></p><p>Exact saved reference data, shown as an illustration</p>
-<h1>Projecting a four-state fuel trajectory into two planes</h1>
-<p>The state is <code>(oxidizer flow, oxidizer working stock, fuel flow, fuel working stock)</code>. The left panel projects each four-dimensional state onto the two flow coordinates; the right projects onto the two working-stock coordinates. Stage labels show 0, 4, 8, 12, and 16.</p>
-<img src="b04-reference-trajectory-projections.svg" alt="A selected exact optimal B04 reference trajectory projected into flow and working-stock planes">
-<p class="scope"><strong>Evidence scope.</strong> This plots one exact optimal witness from the separate <code>b04-reference-v1</code> article-derived reference input. It is not a reconstruction of historical B04, not a complete optimal-control family, and not an OSQP or HPIPM comparison. The plotted flow box shows the declared stage constraints. The stock coordinates can become negative because the source specifies no stock bounds.</p>
-<h2>Reproduce</h2><pre><code>python3 scripts/reports/mpc01/b04_projection_example.py</code></pre>
-<p><strong>Oracle method.</strong> The witness comes from exact rational minimization over the affine terminal plane, followed by exact feasibility checks for the selected control history. That construction establishes one global optimum for this frozen reference variant. It is not Strategy A, Strategy B, or an external QP solver. See the <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/23b0d912236386860ad036894af138bf9f78a9db/docs/research/evidence/b04-reference-v1/canonical-case.json">pinned input case</a>, <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/23b0d912236386860ad036894af138bf9f78a9db/docs/research/evidence/b04-reference-v1/exact-optimal-reference.json">exact witness</a>, <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/23b0d912236386860ad036894af138bf9f78a9db/docs/research/evidence/b04-reference-v1/exact_check.py">oracle source</a>, and <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/23b0d912236386860ad036894af138bf9f78a9db/docs/research/evidence/b04-reference-v1/exact-check-report.json">independent exact-check report</a>.</p>
-</main></body></html>\n''').encode("utf-8"))
+    page = (site_design.page_start("B04 reference fuel trajectory projections",
+                                   main_class="page-content",
+                                   crumbs=[("Learn", "../index.html"),
+                                           ("Examples", "index.html"),
+                                           ("Fuel reference projection", "index.html#visual-mpc01-b04-reference-projection"),
+                                           ("B04 reference trajectory", "b04-reference-trajectory-projections.html")])
+            + '<p class="eyebrow">Exact saved reference data, shown as an illustration</p>'
+            + '<h1>Projecting a four-state fuel trajectory into two planes</h1>'
+            + '<p>The state is <code>(oxidizer flow, oxidizer working stock, fuel flow, fuel working stock)</code>. The left panel projects each four-dimensional state onto the two flow coordinates; the right projects onto the two working-stock coordinates. Stage labels show 0, 4, 8, 12, and 16.</p>'
+            + '<figure><img src="b04-reference-trajectory-projections.svg" alt="A selected exact optimal B04 reference trajectory projected into flow and working-stock planes"></figure>'
+            + '<p class="scope"><strong>Evidence scope.</strong> This plots one exact optimal witness from the separate <code>b04-reference-v1</code> article-derived reference input. It is not a reconstruction of historical B04, not a complete optimal-control family, and not an OSQP or HPIPM comparison. The plotted flow box shows the declared stage constraints. The stock coordinates can become negative because the source specifies no stock bounds.</p>'
+            + '<h2>Reproduce</h2><pre><code>python3 scripts/reports/mpc01/b04_projection_example.py</code></pre>'
+            + '<p><strong>Oracle method.</strong> The witness comes from exact rational minimization over the affine terminal plane, followed by exact feasibility checks for the selected control history. That construction establishes one global optimum for this frozen reference variant. It is not Strategy A, Strategy B, or an external QP solver. See the <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/23b0d912236386860ad036894af138bf9f78a9db/docs/research/evidence/b04-reference-v1/canonical-case.json">pinned input case</a>, <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/23b0d912236386860ad036894af138bf9f78a9db/docs/research/evidence/b04-reference-v1/exact-optimal-reference.json">exact witness</a>, <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/23b0d912236386860ad036894af138bf9f78a9db/docs/research/evidence/b04-reference-v1/exact_check.py">oracle source</a>, and <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/23b0d912236386860ad036894af138bf9f78a9db/docs/research/evidence/b04-reference-v1/exact-check-report.json">independent exact-check report</a>.</p>'
+            + site_design.page_end())
+    PAGE.write_text(page + "\n", encoding="utf-8")
     print(f"wrote {SVG.relative_to(ROOT)} and {PAGE.relative_to(ROOT)}; checked {len(states)} exact states")
 
 

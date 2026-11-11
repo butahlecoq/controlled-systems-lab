@@ -257,8 +257,7 @@ class GalleryTests(unittest.TestCase):
         examples_dir = self.site / "examples"
         examples_dir.mkdir(exist_ok=True)
         (examples_dir / "index.html").write_text("<html>gallery fixture</html>", encoding="utf-8")
-        shutil.copyfile(Path(gallery.__file__).with_name("visual_examples.css"),
-                        examples_dir / "examples.css")
+        (examples_dir / "examples.css").write_bytes(gallery.site_design.stylesheet())
         for name, contents in result.files.items():
             target = examples_dir / name
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -437,14 +436,16 @@ class GalleryTests(unittest.TestCase):
         self.assertIn(
             f'<a class="nav-shortcut" href="#{last_anchor}">Jump to final example: '
             f'{last_topic_title} ↓</a>', page)
-        self.assertIn('target.scrollIntoView({behavior:"instant",block:"start"})', page)
-        self.assertIn('<nav aria-label="Examples" tabindex="0">', page)
+        self.assertIn('target.scrollIntoView({behavior:"instant",block:"start"});', page)
+        self.assertIn('<nav aria-label="Examples topics" tabindex="0">', page)
+        self.assertIn('<a href="../index.html">Learn</a>', page)
+        self.assertIn('<li aria-current="page">Examples</li>', page)
         self.assertIn(f'<article class="saved-figure" id="{last_anchor}">', page)
         fuel_page = self.site / "examples/fuel-b06-viz03.html"
         self.assertTrue(fuel_page.is_file())
         fuel_links = Links(); fuel_links.feed(fuel_page.read_text(encoding="utf-8"))
         for link in fuel_links.links:
-            if not urlsplit(link).scheme:
+            if not urlsplit(link).scheme and not link.startswith("#"):
                 self.assertTrue((fuel_page.parent / link.split("#")[0]).is_file(), link)
         readable_fuel_page = self.site / "examples/fuel-b06-viz06.html"
         self.assertTrue(readable_fuel_page.is_file())
@@ -457,14 +458,16 @@ class GalleryTests(unittest.TestCase):
         for link in readable_links.links:
             if not urlsplit(link).scheme and not link.startswith("#"):
                 self.assertTrue((readable_fuel_page.parent/link.split("#")[0]).is_file(),link)
-        stylesheet = (Path(gallery.__file__).with_name("visual_examples.css")).read_text(encoding="utf-8")
-        self.assertIn("height:calc(100vh - 6rem);display:flex;flex-direction:column", stylesheet)
-        self.assertIn("min-height:0;max-height:min(42vh,24rem);overflow-y:auto", stylesheet)
-        self.assertIn("max-height:35vh;overflow-y:auto;overscroll-behavior:contain", stylesheet)
-        self.assertIn("@media(max-height:500px) and (min-width:651px)", stylesheet)
-        self.assertIn(".control-witness-page #mpc06-tube .scroll{overflow:visible", stylesheet)
-        self.assertNotIn("*{overflow:visible", stylesheet)
-        self.assertIn("#mpc06-tube th{background:white;color:#111}", stylesheet)
+        stylesheet = gallery.site_design.stylesheet().decode("utf-8")
+        self.assertIn("max-height: calc(100vh - 2rem)", stylesheet)
+        self.assertIn("overflow-y: auto", stylesheet)
+        self.assertIn("overflow-x: auto; overflow-y: hidden", stylesheet)
+        self.assertIn("@media (max-height: 520px) and (min-width: 781px)", stylesheet)
+        self.assertIn(".control-witness-page #mpc06-tube .scroll { overflow: visible", stylesheet)
+        self.assertNotIn("* { overflow: visible", stylesheet)
+        self.assertIn(".control-witness-page #mpc06-tube th { background: #fff; color: #111; }", stylesheet)
+        self.assertIn("prefers-reduced-motion: reduce", stylesheet)
+        self.assertIn("@media print", stylesheet)
         self.assertIn("Original point ID", page)
         self.assertIn("explicit analytic constructions", page)
         self.assertIn("duplicate of point 0", page)

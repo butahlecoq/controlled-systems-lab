@@ -47,7 +47,7 @@
     "issue4-volterra-error-boxes.svg": "151f1e98eb34218ae01e80111a14fb2db6168fc9859f40d54a34e7308b45d968",
     "manifest.json": "f53fabeeb53df51e0f79f9fc115acc853ec7753e66758fefd81ce99774174c78"
   },
-  "index_sha256": "9016b7a3477d469445739d6becad3a18723db0fd8f87762765130b56f6f8e258",
+  "index_sha256": "5de506e45b3a006352b1aad8045ca1307d7fa60ce54cfaf6460ca0c78fa1e855",
   "inputs": {
     "reports/algorithm-results/b07-owner-approved-eight-case-v1/README.md": "7aa0daee5f1008c0eb505ca78d37fd7b93159f484728ec8fe0a110d993106e05",
     "reports/algorithm-results/b07-owner-approved-eight-case-v1/results.jsonl": "f2f81f70ab29d0c07624eee01cefb0a8d06f2062487dc5f337141b1d66636881",
