@@ -436,7 +436,7 @@ class GalleryTests(unittest.TestCase):
         self.assertIn(
             f'<a class="nav-shortcut" href="#{last_anchor}">Jump to final example: '
             f'{last_topic_title} ↓</a>', page)
-        self.assertNotIn("scrollIntoView", page)
+        self.assertIn('target.scrollIntoView({behavior:"instant",block:"start"});', page)
         self.assertIn('<nav aria-label="Examples topics" tabindex="0">', page)
         self.assertIn('<a href="../index.html">Learn</a>', page)
         self.assertIn('<li aria-current="page">Examples</li>', page)

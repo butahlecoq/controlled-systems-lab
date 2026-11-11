@@ -1019,7 +1019,11 @@ def build(catalog, site):
             'alt="B07 terminal points projected from four state coordinates onto oxidizer/fuel flow and stock axes"></a>'
             '<p>Plots saved B07 and B09 four-state terminal rows in labeled flow and stock coordinate pairs. The figures show points and do not reconstruct a filled enclosure.</p>'
             '<p><a href="viz10/index.html">Open the historical and benchmark saved-data plots →</a></p></article>' +
-            '</div></section><footer>Controlled Systems Lab · Saved evidence, visible geometry.</footer></main></div></body></html>')
+            '</div></section><footer>Controlled Systems Lab · Saved evidence, visible geometry.</footer></main></div>'
+            '<script>document.querySelector(".nav-shortcut").addEventListener("click",event=>{'
+            'const target=document.querySelector(event.currentTarget.hash);if(!target)return;'
+            'event.preventDefault();history.pushState(null,"",event.currentTarget.hash);'
+            'target.scrollIntoView({behavior:"instant",block:"start"});});</script></body></html>')
     outputs["index.html"] = body
     fuel_example_dir = Path(__file__).parents[2] / "docs/examples"
     for filename in ("b04-reference-trajectory-projections.html",
