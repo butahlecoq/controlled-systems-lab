@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from pathlib import Path, PurePosixPath
 import shutil
 import subprocess
@@ -129,11 +130,26 @@ def _verify_staged_route(site: Path, variant: dict) -> None:
 
 def _stage_in_isolated_site(checkout: Path, variant: dict, parent: Path) -> Path:
     site = parent / (variant["route"] + "-site")
+    cache_root = parent / (variant["route"] + "-process-cache")
+    matplotlib_cache = cache_root / "matplotlib"
+    xdg_cache = cache_root / "xdg"
+    temporary_root = cache_root / "tmp"
+    for path in (matplotlib_cache, xdg_cache, temporary_root):
+        path.mkdir(parents=True)
     (site / "examples").mkdir(parents=True)
     (site / "index.html").write_text("<!doctype html><html><body></body></html>", encoding="utf-8")
     (site / "examples/index.html").write_text("<!doctype html><html><body></body></html>", encoding="utf-8")
     command = [sys.executable, "-B", variant["stager_path"], "--site", str(site)]
-    process = subprocess.run(command, cwd=checkout, capture_output=True, text=True)
+    environment = os.environ.copy()
+    environment.update({
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "MPLCONFIGDIR": str(matplotlib_cache),
+        "XDG_CACHE_HOME": str(xdg_cache),
+        "TMPDIR": str(temporary_root),
+        "TMP": str(temporary_root),
+        "TEMP": str(temporary_root),
+    })
+    process = subprocess.run(command, cwd=checkout, env=environment, capture_output=True, text=True)
     if process.returncode:
         detail = (process.stderr + "\n" + process.stdout)[-5000:]
         raise RuntimeError("historical MPC11 publisher failed for " + variant["route"] + ":\n" + detail)
