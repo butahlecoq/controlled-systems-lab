@@ -11,6 +11,13 @@
 namespace csl::geometry {
 namespace {
 
+std::string interruption(const ExecutionContext& context) {
+    if (context.cancellation.stop_requested()) return "cancelled_during_kernel";
+    if (context.deadline && std::chrono::steady_clock::now() >= *context.deadline)
+        return "deadline_expired_during_kernel";
+    return {};
+}
+
 class QuickHullWorkspace final : public SourceIndexHullWorkspace {
 public:
     SourceIndexProposalResult propose(const PointCloud& cloud, const ExecutionContext& context) override {
@@ -18,7 +25,19 @@ public:
             return SourceIndexProposal{SourceIndexProposalStatus::stopped, {}, "not_started", "cancelled", {}, 0};
         if (context.deadline && std::chrono::steady_clock::now() >= *context.deadline)
             return SourceIndexProposal{SourceIndexProposalStatus::stopped, {}, "not_started", "deadline", {}, 0};
-        const auto result = quickhull_2d(cloud.points);
+        const auto result = quickhull_2d_controlled(cloud.points,
+            {context.cancellation,context.deadline});
+        if (const auto reason=interruption(context); !reason.empty()) {
+            SourceIndexProposal proposal{SourceIndexProposalStatus::stopped, {},
+                "kernel_returned_after_interruption", reason,
+                {"QuickHull2D invocation completed before context recheck"}, 1};
+            if (const auto* hull=std::get_if<QuickHull2D>(&result))
+                proposal.retained_indices=hull->vertex_indices;
+            return proposal;
+        }
+        if (const auto* stopped=std::get_if<QuickHullStopped>(&result))
+            return SourceIndexProposal{SourceIndexProposalStatus::stopped,{},stopped->reason,
+                stopped->reason,{},1};
         if (const auto* diagnostics = std::get_if<Diagnostics>(&result)) {
             SourceIndexProposal proposal{SourceIndexProposalStatus::malformed, {}, "invalid_input", {}, {}, 1};
             for (const auto& diagnostic : *diagnostics)
@@ -41,9 +60,24 @@ public:
         if (context.deadline && std::chrono::steady_clock::now() >= *context.deadline)
             return SourceIndexProposal{SourceIndexProposalStatus::stopped, {}, "not_started", "deadline", {}, 0};
         const legacy_btulshor::Limits limits{options_.max_pivots,options_.max_dense_entries,
-            options_.capture_trace,options_.max_trace_events};
+            options_.capture_trace,options_.max_trace_events,context.cancellation,context.deadline};
         const auto result = legacy_btulshor::source_kpabep_port().run(cloud.points,
             legacy_btulshor::source_modif_port(), limits);
+        if (const auto reason=interruption(context); !reason.empty()) {
+            SourceIndexProposal proposal{SourceIndexProposalStatus::stopped, {},
+                "kernel_returned_after_interruption", reason,
+                {std::string{legacy_btulshor::reach_source_id},
+                 "BTULSHOR invocation returned before context recheck"}, std::nullopt};
+            if (const auto* raw=std::get_if<legacy_btulshor::KpabepResult>(&result)) {
+                proposal.retained_indices=raw->retained_indices;
+                proposal.trace.push_back("raw legacy result pivots="+std::to_string(raw->pivots)+
+                    "; modif_calls="+std::to_string(raw->modif_calls));
+            } else {
+                proposal.trace.push_back("raw legacy stop="+
+                    std::get<legacy_btulshor::Stopped>(result).message);
+            }
+            return proposal;
+        }
         if (const auto* stopped = std::get_if<legacy_btulshor::Stopped>(&result))
             return SourceIndexProposal{SourceIndexProposalStatus::stopped, {}, "stopped",
                 stopped->message, {std::string{legacy_btulshor::reach_source_id}, stopped->message}, std::nullopt};

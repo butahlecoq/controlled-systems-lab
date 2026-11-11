@@ -16,6 +16,7 @@
 #include <iostream>
 #include <numeric>
 #include <random>
+#include <thread>
 #include <type_traits>
 
 using namespace csl;
@@ -501,6 +502,103 @@ TEST_CASE("source-index affine and control-sum paths use the selected method and
     CHECK(support(sum_output.output,{0,1})==1.0);
     CHECK(std::any_of(sum_output.evidence.assumptions.begin(),sum_output.evidence.assumptions.end(),
         [](const auto& item){return item.find("source-index invocation:")!=std::string::npos && item.find("internal_invocations=1")!=std::string::npos;}));
+}
+
+TEST_CASE("source-index evidence binds exact ordered checker input including interior coordinates") {
+    const Matrix identity{2,2,{1,0,0,1}};
+    const auto first=vertices("source-index-manifest-a",2,
+        {0,0, 1,0, 1,1, 0,1, 0.25,0.25},5);
+    const auto second=vertices("source-index-manifest-b",2,
+        {0,0, 1,0, 1,1, 0,1, 0.375,0.25},5);
+    const auto a=run_source_index(request(AffineImage{first,identity,{0,0}},"source-index-manifest-a"),
+        geometry::make_quickhull_source_index_registration());
+    const auto b=run_source_index(request(AffineImage{second,identity,{0,0}},"source-index-manifest-b"),
+        geometry::make_quickhull_source_index_registration());
+    REQUIRE(std::holds_alternative<OperationResult>(a));
+    REQUIRE(std::holds_alternative<OperationResult>(b));
+    const auto manifest=[](const OperationResult& result) -> std::string {
+        for(const auto& item:result.evidence.assumptions)
+            if(item.starts_with("source-index generated ordered cloud:")) return item;
+        return {};
+    };
+    const auto manifest_a=manifest(std::get<OperationResult>(a));
+    const auto manifest_b=manifest(std::get<OperationResult>(b));
+    CHECK_FALSE(manifest_a.empty());
+    CHECK_FALSE(manifest_b.empty());
+    CHECK(manifest_a.find("encoding=binary64-bit-pattern-hex/row-order/1")!=std::string::npos);
+    CHECK(manifest_a.find("3fd0000000000000,3fd0000000000000")!=std::string::npos);
+    CHECK(manifest_a!=manifest_b);
+    CHECK(manifest_a.find("digest=")!=std::string::npos);
+    CHECK(std::any_of(std::get<OperationResult>(a).evidence.assumptions.begin(),
+        std::get<OperationResult>(a).evidence.assumptions.end(),[&](const auto& item) {
+            return item.starts_with("checker invocation:") && item.find(manifest_a.substr(
+                manifest_a.find("digest=")+7,64))!=std::string::npos &&
+                item.find("ordered_cloud_ref=source-index generated ordered cloud")!=std::string::npos;
+        }));
+}
+
+TEST_CASE("built-in source-index QuickHull rechecks cancellation and deadline after kernel entry") {
+    std::vector<Vector> points;
+    points.reserve(100000);
+    std::uint32_t state=0x12345678U;
+    for(std::size_t i=0;i<100000;++i) {
+        state=1664525U*state+1013904223U;
+        const double x=static_cast<double>(state)/4294967296.0;
+        state=1664525U*state+1013904223U;
+        const double y=static_cast<double>(state)/4294967296.0;
+        points.push_back({x,y});
+    }
+    const geometry::PointCloud cloud{{"source-index-interruption-probe"},std::move(points)};
+    auto registration=geometry::make_quickhull_source_index_registration();
+
+    std::stop_source cancellation;
+    ExecutionContext cancelled_context;
+    cancelled_context.cancellation=cancellation.get_token();
+    auto cancelled_workspace=registration.factory(cloud);
+    std::jthread cancel_during_kernel([&] {
+        std::this_thread::sleep_for(std::chrono::milliseconds{1});
+        cancellation.request_stop();
+    });
+    const auto cancelled=cancelled_workspace->propose(cloud,cancelled_context);
+    cancel_during_kernel.join();
+    REQUIRE(std::holds_alternative<geometry::SourceIndexProposal>(cancelled));
+    const auto& cancellation_result=std::get<geometry::SourceIndexProposal>(cancelled);
+    CHECK(cancellation_result.status==geometry::SourceIndexProposalStatus::stopped);
+    CHECK(cancellation_result.stop_reason=="cancelled_during_kernel");
+    CHECK(cancellation_result.raw_status=="kernel_returned_after_interruption");
+
+    ExecutionContext deadline_context;
+    deadline_context.deadline=std::chrono::steady_clock::now()+std::chrono::milliseconds{1};
+    auto deadline_workspace=registration.factory(cloud);
+    const auto deadline=deadline_workspace->propose(cloud,deadline_context);
+    REQUIRE(std::holds_alternative<geometry::SourceIndexProposal>(deadline));
+    const auto& deadline_result=std::get<geometry::SourceIndexProposal>(deadline);
+    CHECK(deadline_result.status==geometry::SourceIndexProposalStatus::stopped);
+    CHECK(deadline_result.stop_reason=="deadline_expired_during_kernel");
+}
+
+TEST_CASE("source-index BTULSHOR propagates cooperative interruption through bounded legacy loops") {
+    std::vector<Vector> points;
+    points.reserve(100000);
+    for(std::size_t i=0;i<100000;++i)
+        points.push_back({static_cast<double>(i)/100000.0,
+            static_cast<double>((i*7919U)%100003U)/100003.0});
+    const geometry::PointCloud cloud{{"source-index-legacy-interruption-probe"},std::move(points)};
+    auto registration=geometry::make_legacy_kpabep_source_index_registration();
+    std::stop_source cancellation;
+    ExecutionContext context_with_cancel;
+    context_with_cancel.cancellation=cancellation.get_token();
+    auto workspace=registration.factory(cloud);
+    std::jthread cancel_during_kernel([&] {
+        std::this_thread::sleep_for(std::chrono::milliseconds{1});
+        cancellation.request_stop();
+    });
+    const auto result=workspace->propose(cloud,context_with_cancel);
+    cancel_during_kernel.join();
+    REQUIRE(std::holds_alternative<geometry::SourceIndexProposal>(result));
+    const auto& stopped=std::get<geometry::SourceIndexProposal>(result);
+    CHECK(stopped.status==geometry::SourceIndexProposalStatus::stopped);
+    CHECK(stopped.stop_reason.find("cancelled")!=std::string::npos);
 }
 
 TEST_CASE("source-index operation requires and records the independently selected H-to-V converter") {

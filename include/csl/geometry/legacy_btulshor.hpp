@@ -3,8 +3,11 @@
 #include <csl/core/values.hpp>
 
 #include <cstddef>
+#include <chrono>
 #include <functional>
+#include <optional>
 #include <span>
+#include <stop_token>
 #include <string>
 #include <string_view>
 #include <variant>
@@ -19,6 +22,8 @@ struct Limits {
     std::size_t max_dense_entries{1048576};
     bool capture_trace{false};
     std::size_t max_trace_events{4096};
+    std::stop_token cancellation;
+    std::optional<std::chrono::steady_clock::time_point> deadline;
 };
 
 enum class StopReason {
@@ -27,6 +32,8 @@ enum class StopReason {
     pivot_limit,
     non_finite_arithmetic,
     invalid_dependency_result,
+    cancelled,
+    deadline_expired,
 };
 
 struct Stopped {

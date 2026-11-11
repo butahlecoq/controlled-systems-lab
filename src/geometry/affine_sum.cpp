@@ -7,10 +7,13 @@
 #include "conversion/exact_h_box.hpp"
 #include "conversion/exact_h_interval.hpp"
 #include <algorithm>
+#include <bit>
 #include <chrono>
 #include <cmath>
+#include <iomanip>
 #include <limits>
 #include <numeric>
+#include <sstream>
 #include <span>
 
 namespace csl::geometry {
@@ -28,6 +31,18 @@ bool stopped(const ExecutionContext& context) {
 }
 StopReason stop_reason(const ExecutionContext& context) {
     return context.cancellation.stop_requested() ? StopReason::cancelled : StopReason::resource_limit;
+}
+std::string ordered_binary64_manifest(std::span<const Vector> points) {
+    std::ostringstream encoded;
+    encoded << std::hex << std::setfill('0');
+    for (std::size_t row=0; row<points.size(); ++row) {
+        if(row) encoded << ';';
+        for(std::size_t col=0; col<points[row].size(); ++col) {
+            if(col) encoded << ',';
+            encoded << std::setw(16) << std::bit_cast<std::uint64_t>(points[row][col]);
+        }
+    }
+    return encoded.str();
 }
 std::string_view outcome_name(MathematicalOutcome outcome) {
     switch(outcome) {
@@ -494,7 +509,15 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
             const auto& dependencies=std::get<SourceIndexAffineSumDependencies>(dependencies_);
             selected_reducer_identity=identity(dependencies.hull.provenance());
             if (cloud.points.size() > dependencies.checker_budget.max_points)
-                return unsupported("affine-sum.source-index.capacity", "Generated candidate cloud exceeds the independently selected 2D checker capacity.");
+                return unsupported("affine-sum.source-index.capacity", "Generated candidate cloud exceeds the independently selected 2D checker capacity; checker input manifest was not materialized.");
+            const auto digest=digest_hull_input(cloud.points);
+            if (const auto* failure=std::get_if<std::string>(&digest))
+                return unsupported("affine-sum.source-index.digest",*failure);
+            const auto cloud_digest=problem::hex(std::get<HullInputDigest>(digest));
+            const auto cloud_manifest=ordered_binary64_manifest(cloud.points);
+            source_index_assumptions.push_back("source-index generated ordered cloud: digest="+cloud_digest+
+                "; encoding=binary64-bit-pattern-hex/row-order/1; points="+
+                std::to_string(cloud.points.size())+"; rows="+cloud_manifest);
             auto prepared_result=dependencies.hull.prepare(cloud);
             if (const auto* rejected=std::get_if<registry::Rejection>(&prepared_result))
                 return Unsupported{rejected->diagnostics};
@@ -539,7 +562,8 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
                 std::string record="provider="+selected_reducer_identity+"; status="+proposal.raw_status+
                     "; internal_invocations="+(proposal.internal_invocations?
                     std::to_string(*proposal.internal_invocations):"unavailable")+
-                    "; elapsed_ns="+std::to_string(algorithm_elapsed.count())+"; proposed_ids=";
+                    "; elapsed_ns="+std::to_string(algorithm_elapsed.count())+
+                    "; checker_input_digest="+cloud_digest+"; proposed_ids=";
                 for (const auto id:proposal.retained_indices) record+=std::to_string(id)+",";
                 for (const auto& item:proposal.trace) record+="; trace="+item;
                 return record;
@@ -553,11 +577,6 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
                         "Source-index method stopped; raw outcome: "+proposal_record()+"; reason="+proposal.stop_reason};
                 return unsupported("affine-sum.source-index.proposal",
                     "Selected source-index method did not complete: "+proposal_record()+"; "+proposal.stop_reason);
-            }
-            const auto digest=digest_hull_input(cloud.points);
-            if (const auto* failure=std::get_if<std::string>(&digest)) {
-                append_proposal_record("not_run",*failure);
-                return unsupported("affine-sum.source-index.digest",*failure);
             }
             const SourceIndexHull output{std::get<HullInputDigest>(digest),proposal.retained_indices};
             auto checker_budget=dependencies.checker_budget;
@@ -576,7 +595,8 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
             const std::string checker_record=std::string{"checker invocation: provider=csl.geometry.bounded-hull-checker@1; status="}+
                 (checker.status==HullCheckStatus::verified?"verified":
                     checker.status==HullCheckStatus::incorrect?"incorrect":"inconclusive")+
-                "; reason="+checker.reason+"; elapsed_ns="+std::to_string(checker.elapsed.count())+
+                "; input_digest="+cloud_digest+"; ordered_cloud_ref=source-index generated ordered cloud; reason="+
+                checker.reason+"; elapsed_ns="+std::to_string(checker.elapsed.count())+
                 "; budget_ms="+std::to_string(checker_budget.wall.count())+
                 "; max_points="+std::to_string(checker_budget.max_points);
             source_index_assumptions.push_back(checker_record);
