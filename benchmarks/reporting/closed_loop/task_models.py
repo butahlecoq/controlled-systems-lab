@@ -237,7 +237,7 @@ def make_replay_request(task: dict, controls, witness_sha256: str, *, sensitivit
 
 def make_held_step_request(task: dict, observed_physical_state, control,
                            absolute_update_index: int, witness_sha256: str,
-                           *, sensitivity=False) -> dict:
+                           *, action_profile_id: str | None = None, sensitivity=False) -> dict:
     """Bind one actually applied hold to its immutable full-task contract.
 
     The replay bridge accepts complete scenarios.  This adapter derives a
@@ -257,7 +257,15 @@ def make_held_step_request(task: dict, observed_physical_state, control,
         raise ValueError("observed physical state has wrong width or nonfinite values")
     if task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01" and physical[0] <= 0:
         raise ValueError("observed orbit state must have positive radius")
+    profile = action_profile_id or task["control_domains"]["continuous"]["problem_id"]
+    continuous = task["control_domains"]["continuous"]
+    finite = task["control_domains"]["finite"]
     values = _validate_control(task, control)
+    if profile == finite["problem_id"]:
+        if values not in finite["actions"]:
+            raise ValueError("control is not an action in the selected finite per-step profile")
+    elif profile != continuous["problem_id"]:
+        raise ValueError("selected action profile is not declared by the original task")
     source = copy.deepcopy(replay_scenario(task))
     start = absolute_update_index * task["episode"]["dt"]
     end = start + task["episode"]["dt"]
@@ -274,7 +282,7 @@ def make_held_step_request(task: dict, observed_physical_state, control,
                       "control": values, "scenario_sha256": source_hash}
     return {"schema": "csl.closed-loop.held-step-request/1", "task_id": task["task_id"],
             "task_sha256": task_hash, "model_id": task["model"]["model_id"],
-            "action_profile_id": task["control_domains"]["continuous"]["problem_id"],
+            "action_profile_id": profile,
             "original_interval_count": n, "original_final_time": task["episode"]["final_time"],
             "absolute_update_index": absolute_update_index, "absolute_time": start,
             "observed_state": {"physical": physical.tolist(), "scaled": (physical / scales).tolist(),
