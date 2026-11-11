@@ -98,3 +98,18 @@ TEST_CASE("parallelotope route supports bounded two-state LV-shaped propagation"
   CHECK(std::get<Unsupported>(outside).diagnostics.front().field ==
       "finite_plan_parallelotope.safe_sets");
 }
+
+TEST_CASE("parallelotope keeps its four-state universal-safe-set profile refusal") {
+  auto request = two_points_request();
+  auto bounded = take(sets::make_v(
+      {{"bounded-four-state-safe"}, 4, {}},
+      {take(numeric::snapshot(Matrix{1, 4, {0.0, 0.0, 0.0, 0.0}})),
+       take(numeric::snapshot(Matrix{0, 4, {}}))}));
+  request.admissible_states[1] = std::move(bounded);
+
+  const auto result = finite_plan_parallelotope(request);
+  REQUIRE(std::holds_alternative<Unsupported>(result));
+  const auto& diagnostic = std::get<Unsupported>(result).diagnostics[0];
+  CHECK(diagnostic.field == "finite_plan_parallelotope.safe_sets");
+  CHECK(diagnostic.explanation == "Universal state constraints are the only supported profile.");
+}

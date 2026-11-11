@@ -17,6 +17,11 @@ from scripts.reports import pages_route_retirement as retirement
 class PagesRouteRetirementTests(unittest.TestCase):
     def test_real_finalizer_cli_accepts_staged_closed_loop_pilot_producers(self) -> None:
         repo = Path(__file__).resolve().parents[2]
+        frozen_source = repo / "reports/closed-loop-pilot/closed-loop-pilot-v1"
+        frozen_before = {path.relative_to(frozen_source).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
+                         for path in frozen_source.rglob("*") if path.is_file()}
+        frozen_zip_before = hashlib.sha256(
+            (frozen_source.parent / "closed-loop-pilot-v1.zip").read_bytes()).hexdigest()
         with tempfile.TemporaryDirectory() as temporary:
             site = Path(temporary) / "site"
             (site / "examples").mkdir(parents=True)
@@ -30,6 +35,19 @@ class PagesRouteRetirementTests(unittest.TestCase):
                 '<section id="analytic-illustrations"></section></body></html>', encoding="utf-8")
             subprocess.run([sys.executable, str(repo / "scripts/reports/stage_closed_loop_pilot.py"),
                 "--site", str(site)], check=True, cwd=repo, capture_output=True, text=True)
+            companion = (site / "examples/closed-loop-pilot-2d.html").read_text(encoding="utf-8")
+            self.assertIn('href="examples.css"', companion)
+            self.assertIn('aria-label="Breadcrumb"', companion)
+            self.assertIn("Capture-time publication status", companion)
+            self.assertIn('pre tabindex="0" role="region"', companion)
+            self.assertNotIn('class="shell"', companion)
+            self.assertNotIn('<aside', companion)
+            frozen_after = {path.relative_to(frozen_source).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
+                            for path in frozen_source.rglob("*") if path.is_file()}
+            self.assertEqual(frozen_after, frozen_before)
+            self.assertEqual(hashlib.sha256(
+                (frozen_source.parent / "closed-loop-pilot-v1.zip").read_bytes()).hexdigest(),
+                frozen_zip_before)
             completed = subprocess.run([sys.executable, str(repo / "scripts/reports/pages_route_retirement.py"),
                 "--site", str(site)], check=False, cwd=repo, capture_output=True, text=True)
             self.assertEqual(completed.returncode, 0, completed.stderr)
@@ -110,6 +128,23 @@ class PagesRouteRetirementTests(unittest.TestCase):
             third = retirement.finalize(site, source_commit="fixture")
             self.assertIn("late-report/index.html", third["html_routes"])
             self.assertIn("late-report/index.html", (site / "archive.html").read_text())
+
+    def test_managed_finalization_restores_only_the_verified_legacy_snapshot(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            site, _ = self.make_site(Path(temporary))
+            pinned = retirement.legacy_root_snapshot()
+            retirement.finalize(site, source_commit="fixture", original_root_bytes=pinned)
+            legacy = site / "legacy-index.html"
+            legacy.write_text("<!doctype html><style>body{font-family:system-ui}</style>", encoding="utf-8")
+
+            retirement.finalize(site, source_commit="fixture", original_root_bytes=pinned)
+
+            self.assertEqual(legacy.read_bytes(), pinned)
+            unverified = b"unverified root bytes"
+            legacy.write_bytes(unverified)
+            with self.assertRaisesRegex(ValueError, "hash-verified Pages snapshot"):
+                retirement.finalize(site, source_commit="fixture", original_root_bytes=b"forged snapshot")
+            self.assertEqual(legacy.read_bytes(), unverified)
 
     def test_finalization_retains_pre_augmentation_root_bytes(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

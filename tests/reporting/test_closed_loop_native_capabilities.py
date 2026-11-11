@@ -76,6 +76,18 @@ class NativeCapabilityTests(unittest.TestCase):
         self.assertEqual(roles["bellman_solver"], "integrated in selected graph optimizer")
         self.assertEqual(roles["terminal_solver"], "direct authored objective evaluation")
 
+    def test_graph_representation_adapters_and_shared_admission_header_are_sealed(self):
+        manifest = capabilities.build_native_manifest()
+        adapters = {"box": "box", "zonotope": "zonotope", "parallelotope": "parallelotope",
+            "ellipsoid": "ellipsoid"}
+        for representation, stem in adapters.items():
+            row = next(item for item in manifest["graphs"] if
+                item["controller"]["id"] == f"native-{representation}-mpc/1")
+            source_paths = {item["path"] for item in row["source_files"]}
+            self.assertIn(f"include/csl/reachability/finite_plan_{stem}.hpp", source_paths)
+            self.assertIn(f"src/reachability/finite_plan_{stem}.cpp", source_paths)
+            self.assertIn("src/reachability/fixed_plan_admission.hpp", source_paths)
+
     def test_generic_policy_prepare_forwards_manifest_factory_options(self):
         graph = {"task_sha256": "task-hash", "action_profile_id": "finite/1",
             "graph_id": "graph/1", "controller": {"id": "native-profile/1",

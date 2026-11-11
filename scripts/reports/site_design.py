@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from html import escape
 from pathlib import Path
+import re
 from typing import Iterable
 
 
@@ -17,6 +18,38 @@ def stylesheet() -> bytes:
 
 def stylesheet_link(href: str = "examples.css") -> str:
     return '<link rel="stylesheet" href="' + escape(href, quote=True) + '">'
+
+
+def focusable_code_blocks(markup: str, label: str = "Scrollable code example") -> str:
+    """Make each horizontally scrollable pre block keyboard reachable and named."""
+    escaped_label = escape(label, quote=True)
+    index = 0
+
+    def add_focus(match: re.Match[str]) -> str:
+        nonlocal index
+        index += 1
+        opening, body = match.group(1) or "", match.group(2)
+        name = escaped_label if index == 1 else f"{escaped_label} {index}"
+        attributes = opening
+        if re.search(r"\btabindex\s*=", attributes, flags=re.IGNORECASE):
+            attributes = re.sub(r"\btabindex\s*=\s*(?:\"[^\"]*\"|'[^']*'|[^\s>]+)",
+                                'tabindex="0"', attributes, flags=re.IGNORECASE)
+        else:
+            attributes += ' tabindex="0"'
+        if not re.search(r"\brole\s*=", attributes, flags=re.IGNORECASE):
+            attributes += ' role="region"'
+        if not re.search(r"\baria-label\s*=", attributes, flags=re.IGNORECASE):
+            attributes += f' aria-label="{name}"'
+        return f'<pre{attributes}>{body}</pre>'
+
+    return re.sub(r"<pre(\s[^>]*)?>(.*?)</pre>",
+                  lambda match: add_focus(match), markup, flags=re.IGNORECASE | re.DOTALL)
+
+
+def code_block(content: str, label: str) -> str:
+    """Render a named code region that keyboard users can scroll."""
+    return (f'<pre tabindex="0" role="region" aria-label="{escape(label, quote=True)}">'
+            f'<code>{escape(content)}</code></pre>')
 
 
 def breadcrumbs(items: Iterable[tuple[str, str]], *, current_href: str | None = None) -> str:

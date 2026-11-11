@@ -1,5 +1,6 @@
 #include <csl/reachability/finite_plan_ellipsoid.hpp>
 #include <csl/reachability/detail/outer_safety.hpp>
+#include "fixed_plan_admission.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -179,10 +180,9 @@ FinitePlanEllipsoidOutcome finite_plan_ellipsoid(
     const FixedPlanRequest& request, const ExecutionContext& context) {
   const auto dimensions = request.system.dimensions();
   const auto horizon = request.system.horizon();
-  if (request.controls.size() != horizon || request.disturbances.size() != horizon ||
-      request.admissible_states.size() != horizon + 1)
+  if (!detail::has_fixed_plan_horizon_shape(request))
     return unsupported("finite_plan_ellipsoid.horizon", "Controls, disturbances and safe sets must match the model horizon.");
-  if (request.initial.metadata()->set.dimension != dimensions.state)
+  if (!detail::fixed_plan_initial_matches_model(request))
     return unsupported("finite_plan_ellipsoid.initial", "Initial set dimension differs from model.");
   if (dimensions.state == 0)
     return unsupported("finite_plan_ellipsoid.dimension", "State dimension must be positive.");
@@ -192,9 +192,11 @@ FinitePlanEllipsoidOutcome finite_plan_ellipsoid(
     if (request.controls[stage].size() != dimensions.control ||
         request.disturbances[stage].metadata()->set.dimension != dimensions.external)
       return unsupported("finite_plan_ellipsoid.dimensions", "Control or disturbance dimensions differ from model.");
+  if (!detail::fixed_plan_safe_dimensions_match_model(request))
+    return unsupported("finite_plan_ellipsoid.safe_sets", "State-constraint dimension differs from model.");
   for (const auto& safe : request.admissible_states)
-    if (safe.metadata()->set.dimension != dimensions.state)
-      return unsupported("finite_plan_ellipsoid.safe_sets", "State-constraint dimension differs from model.");
+    if (!std::holds_alternative<sets::UniversalRepresentation>(safe.representation()))
+      return unsupported("finite_plan_ellipsoid.safe_sets", "Only universal state constraints are supported.");
 
   auto initial_bounds = bounds(request.initial, "finite_plan_ellipsoid.initial");
   if (const auto* failure = std::get_if<Unsupported>(&initial_bounds)) return *failure;

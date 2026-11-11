@@ -65,6 +65,31 @@ TEST_CASE("fixed-plan boxes require their complete outer enclosure inside physic
     CHECK(std::get<Unsupported>(result).diagnostics[0].explanation.find("does not certify containment") != std::string::npos);
 }
 
+TEST_CASE("box admission preserves horizon precedence over other malformed request fields") {
+    auto input = request();
+    input.controls.pop_back();
+    input.initial = take(sets::make_universal({{"wrong-initial-dimension"}, 2, {}}));
+    const auto result = finite_plan_box(input);
+    REQUIRE(std::holds_alternative<Unsupported>(result));
+    const auto& diagnostic = std::get<Unsupported>(result).diagnostics[0];
+    CHECK(diagnostic.field == "finite_plan_box.horizon");
+    CHECK(diagnostic.explanation == "Controls, disturbances and safe sets must match the model horizon.");
+}
+
+TEST_CASE("box admission reports initial and safe-set dimension mismatches") {
+    auto bad_initial = request();
+    bad_initial.initial = take(sets::make_universal({{"wrong-initial-dimension"}, 2, {}}));
+    auto initial_result = finite_plan_box(bad_initial);
+    REQUIRE(std::holds_alternative<Unsupported>(initial_result));
+    CHECK(std::get<Unsupported>(initial_result).diagnostics[0].field == "finite_plan_box.initial");
+
+    auto bad_safe = request();
+    bad_safe.admissible_states[1] = take(sets::make_universal({{"wrong-safe-dimension"}, 2, {}}));
+    auto safe_result = finite_plan_box(bad_safe);
+    REQUIRE(std::holds_alternative<Unsupported>(safe_result));
+    CHECK(std::get<Unsupported>(safe_result).diagnostics[0].field == "finite_plan_box.safe_sets");
+}
+
 TEST_CASE("stagewise four-state boxes enclose the pinned TwoPoints finite-game reference") {
     const auto input = two_points_request();
     const auto boxed = finite_plan_box(input);

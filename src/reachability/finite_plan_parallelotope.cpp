@@ -1,5 +1,6 @@
 #include <csl/reachability/finite_plan_parallelotope.hpp>
 #include <csl/reachability/detail/outer_safety.hpp>
+#include "fixed_plan_admission.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -330,15 +331,17 @@ finite_plan_parallelotope(const FixedPlanRequest &request,
   constexpr std::size_t n = 4;
   const auto horizon = request.system.horizon();
   if (request.system.dimensions().state != n ||
-      request.controls.size() != horizon ||
-      request.disturbances.size() != horizon ||
-      request.admissible_states.size() != horizon + 1)
+      !detail::has_fixed_plan_horizon_shape(request))
     return unsupported("finite_plan_parallelotope.dimensions",
                        "The four-state model and horizon fields must agree.");
+  if (!detail::fixed_plan_safe_dimensions_match_model(request))
+    return unsupported("finite_plan_parallelotope.safe_sets",
+                       "State-constraint dimension differs from model.");
   for (const auto &safe : request.admissible_states)
-    if (safe.metadata()->set.dimension != n)
+    if (!std::holds_alternative<sets::UniversalRepresentation>(
+            safe.representation()))
       return unsupported("finite_plan_parallelotope.safe_sets",
-                         "State-constraint dimension differs from model.");
+                         "Universal state constraints are the only supported profile.");
 
   auto initial = set_bounds_in_frame(
       request.initial, "finite_plan_parallelotope.initial", qi, context);

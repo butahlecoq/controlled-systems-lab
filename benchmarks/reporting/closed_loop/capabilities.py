@@ -165,6 +165,10 @@ def _native_definitions() -> list[dict]:
                     "zonotope": "src/reachability/finite_plan_zonotope.cpp",
                     "parallelotope": "src/reachability/finite_plan_parallelotope.cpp",
                     "ellipsoid": "src/reachability/finite_plan_ellipsoid.cpp"}.get(representation)
+                representation_header = {"box": "include/csl/reachability/finite_plan_box.hpp",
+                    "zonotope": "include/csl/reachability/finite_plan_zonotope.hpp",
+                    "parallelotope": "include/csl/reachability/finite_plan_parallelotope.hpp",
+                    "ellipsoid": "include/csl/reachability/finite_plan_ellipsoid.hpp"}.get(representation)
                 controller_sources = source_paths + ["include/csl/optimization/finite_action_graph.hpp",
                     "src/optimization/finite_action_graph.cpp", "src/geometry/affine_sum.cpp",
                     "include/csl/geometry/polyhedral_intersection.hpp",
@@ -174,7 +178,8 @@ def _native_definitions() -> list[dict]:
                     "include/csl/reachability/nominal_predecessor.hpp",
                     "src/reachability/nominal_predecessor.cpp"]
                 if representation_source:
-                    controller_sources.append(representation_source)
+                    controller_sources.extend([representation_header, representation_source,
+                        "src/reachability/fixed_plan_admission.hpp"])
                 controller_sources += _catalogue_sources(options)
             else:
                 optimizer_sources = {

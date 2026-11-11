@@ -1,5 +1,6 @@
 #include <csl/reachability/finite_plan_box.hpp>
 #include <csl/reachability/detail/outer_safety.hpp>
+#include "fixed_plan_admission.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -105,15 +106,16 @@ FinitePlanBoxOutcome finite_plan_box(const FixedPlanRequest& request,
     const ExecutionContext& context) {
     const auto dimension = request.system.dimensions().state;
     const auto horizon = request.system.horizon();
-    if(request.controls.size() != horizon || request.disturbances.size() != horizon ||
-       request.admissible_states.size() != horizon + 1)
+    if(!detail::has_fixed_plan_horizon_shape(request))
         return unsupported("finite_plan_box.horizon", "Controls, disturbances and safe sets must match the model horizon.");
-    if(request.initial.metadata()->set.dimension != dimension)
+    if(!detail::fixed_plan_initial_matches_model(request))
         return unsupported("finite_plan_box.initial", "Initial set dimension differs from model.");
     const auto model_dimensions = request.system.dimensions();
+    if(!detail::fixed_plan_safe_dimensions_match_model(request))
+        return unsupported("finite_plan_box.safe_sets", "State-constraint dimension differs from model.");
     for(const auto& safe : request.admissible_states)
-        if(safe.metadata()->set.dimension != dimension)
-            return unsupported("finite_plan_box.safe_sets", "State-constraint dimension differs from model.");
+        if(!std::holds_alternative<sets::UniversalRepresentation>(safe.representation()))
+            return unsupported("finite_plan_box.safe_sets", "This initial box propagator supports universal state constraints only.");
 
     auto initial = bounds(request.initial, "finite_plan_box.initial");
     if(const auto* error = std::get_if<Unsupported>(&initial)) return *error;

@@ -6,9 +6,13 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import re
 import shutil
+import sys
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts/reports"))
+import site_design
 REPORT_ID = "closed-loop-pilot-v1"
 CARD = (
     '<article class="saved-figure" id="closed-loop-pilot-v1">'
@@ -32,6 +36,32 @@ def digest(data: bytes) -> str:
 def file_map(root: Path) -> dict[str, str]:
     return {path.relative_to(root).as_posix(): digest(path.read_bytes())
             for path in sorted(root.rglob("*")) if path.is_file()}
+
+
+def mutable_example(example: bytes) -> bytes:
+    """Frame the saved 2D content as a current mutable learning companion."""
+    markup = example.decode("utf-8")
+    old_shell = '<body><div class="shell"><aside aria-hidden="true"></aside><main>\n'
+    require(old_shell in markup, "saved 2D example shell differs from the known renderer output")
+    start = site_design.page_start(
+        "Lotka–Volterra observed-state trajectory",
+        stylesheet_href="examples.css",
+        crumbs=[("Learn", "../index.html"), ("Examples", "../examples/index.html"),
+                ("Closed-loop 2D companion", "closed-loop-pilot-2d.html")],
+    ).partition("<body>")[2]
+    markup = markup.replace(old_shell, "<body>" + start, 1)
+    old_end = "</main></div></body></html>"
+    require(markup.endswith(old_end), "saved 2D example ending differs from the known renderer output")
+    markup = markup[:-len(old_end)] + site_design.page_end() + "</body></html>"
+    markup = markup.replace('<p class="muted">', '<p class="eyebrow">')
+    markup = markup.replace('class="panel"', '')
+    status = ('<p class="note"><strong>Capture-time publication status.</strong> The immutable v1 report records '
+              'that review and main-only Pages deployment were pending when its evidence bundle was captured. '
+              'That saved status text remains part of the versioned report and does not describe this current '
+              'mutable companion.</p>')
+    markup = markup.replace('</h1>', '</h1>' + status, 1)
+    markup = site_design.focusable_code_blocks(markup, "Saved-report reproduction code")
+    return markup.encode("utf-8")
 
 
 def stage(source: Path, site: Path) -> None:
@@ -79,7 +109,7 @@ def stage(source: Path, site: Path) -> None:
     else:
         shutil.copyfile(archive, staged_archive)
     shared_example = site / "examples/closed-loop-pilot-2d.html"
-    shared_example_bytes = (example.replace(b'href="index.html"',
+    shared_example_bytes = (mutable_example(example).replace(b'href="index.html"',
         b'href="../closed-loop-pilot-v1/index.html"')
         .replace(b'src="assets/', b'src="../closed-loop-pilot-v1/assets/')
         .replace(b'href="raw/', b'href="../closed-loop-pilot-v1/raw/'))
