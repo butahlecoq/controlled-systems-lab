@@ -10,6 +10,7 @@ import tarfile
 import unittest
 import zipfile
 from io import BytesIO
+from unittest import mock
 
 from scripts.reports import augment_pages_bundle, await_pages_augmentation_runs
 
@@ -150,6 +151,62 @@ class PagesAugmentationAggregation(unittest.TestCase):
         ]
         latest = await_pages_augmentation_runs.latest_report_run(runs, head_sha=sha)
         self.assertEqual(latest["id"], 10)
+
+    def test_await_handoff_requires_parent_and_all_other_route_artifacts(self):
+        sha = "a" * 40
+        child = {"head_branch": "main", "event": "workflow_run",
+                 "conclusion": "success", "head_sha": sha}
+        parent = {"id": 42, "head_sha": sha, "head_branch": "main",
+                  "name": "Algorithm report records and site", "event": "push",
+                  "status": "completed", "conclusion": "success",
+                  "created_at": "2026-11-11T09:00:00Z",
+                  "updated_at": "2026-11-11T09:10:00Z"}
+        marker = {"schema": "csl.pages-augmentation-source/1",
+                  "report_run_id": 42, "head_sha": sha}
+        with (mock.patch.object(await_pages_augmentation_runs, "get_json",
+                                side_effect=[child, parent]) as get_json,
+              mock.patch.object(await_pages_augmentation_runs, "run_marker",
+                                return_value=marker),
+              mock.patch.object(await_pages_augmentation_runs, "workflow_runs",
+                                return_value=[parent]),
+              mock.patch.object(await_pages_augmentation_runs, "matching_augmentation",
+                                return_value={"conclusion": "success"}) as matching):
+            result = await_pages_augmentation_runs.await_augmentations(
+                "https://api.example", "owner/repository", "token", 99, 30, 1)
+        self.assertEqual(result, 42)
+        self.assertEqual(get_json.call_args_list, [
+            mock.call("https://api.example", "owner/repository", "token", "actions/runs/99"),
+            mock.call("https://api.example", "owner/repository", "token", "actions/runs/42"),
+        ])
+        self.assertEqual([call.args[3] for call in matching.call_args_list], [
+            "mpc01-per-attempt-pages-augmentation.yml",
+            "b04-c-pages-augmentation.yml",
+        ])
+        self.assertTrue(all(call.args[4] is parent for call in matching.call_args_list))
+
+    def test_await_skips_artifacts_for_a_superseded_report_run(self):
+        sha = "a" * 40
+        child = {"head_branch": "main", "event": "workflow_run",
+                 "conclusion": "success", "head_sha": sha}
+        parent = {"id": 42, "head_sha": sha, "head_branch": "main",
+                  "name": "Algorithm report records and site", "event": "push",
+                  "status": "completed", "conclusion": "success"}
+        newer = {"id": 43, "head_sha": sha, "head_branch": "main",
+                 "event": "push", "status": "completed", "conclusion": "success",
+                 "updated_at": "2026-11-11T09:12:00Z"}
+        marker = {"schema": "csl.pages-augmentation-source/1",
+                  "report_run_id": 42, "head_sha": sha}
+        with (mock.patch.object(await_pages_augmentation_runs, "get_json",
+                                side_effect=[child, parent]),
+              mock.patch.object(await_pages_augmentation_runs, "run_marker",
+                                return_value=marker),
+              mock.patch.object(await_pages_augmentation_runs, "workflow_runs",
+                                return_value=[newer]),
+              mock.patch.object(await_pages_augmentation_runs, "matching_augmentation") as matching):
+            result = await_pages_augmentation_runs.await_augmentations(
+                "https://api.example", "owner/repository", "token", 99, 30, 1)
+        self.assertIsNone(result)
+        matching.assert_not_called()
 
     def test_aggregation_wait_job_precedes_single_cumulative_deployment(self):
         workflow = (ROOT / ".github/workflows/pages-augmentation-aggregation.yml").read_text(encoding="utf-8")
