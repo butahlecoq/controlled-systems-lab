@@ -376,9 +376,10 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
 
     OperationOutcome apply_supported(const ExecutionContext& context) {
         const bool source_index_mode = std::holds_alternative<SourceIndexAffineSumDependencies>(dependencies_);
-        const auto& conversion = std::visit([](const auto& dependencies) -> const auto& {
-            return dependencies.conversion;
+        const auto* conversion_dependency = std::visit([](const auto& dependencies) {
+            return &dependencies.conversion;
         }, dependencies_);
+        const auto& conversion = *conversion_dependency;
         if (request_.assurance != Assurance::numerical)
             return unsupported("geometry.assurance", "Affine images and sums provide numerical evidence only.");
         if (request_.required_relation != SetRelation::equivalent)
