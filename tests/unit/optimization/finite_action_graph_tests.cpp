@@ -208,6 +208,42 @@ TEST_CASE("each selected numerical set route filters original discrete edges bef
     }
 }
 
+TEST_CASE("selected approximations enclose the complete multi-action cloud and preserve center-action lineage") {
+    const SystemModel authored{{{2,2,0},TimeDomain::discrete,
+        LinearStage{{2,2,{1,0,0,1}},{2,2,{1,0,0,1}},{2,0,{}},{0,0}}},{}};
+    const auto system=std::get<model::LinearSystem>(model::snapshot(authored,Vector{0,1}));
+    const auto safe=h_box({-2,-2},{2,2},"multi-action-cloud-safe");
+    const auto objective=std::get<Objective>(snapshot(QuadraticTerminal{{2,2,{2,0,0,2}},{0,0},0}));
+    FiniteActionNominalRequest request{{"multi-action-cloud"},{"multi-action-cloud-run"},system,
+        {0,0},{2,{{-1,-1},{-1,1},{1,-1},{1,1},{0,0}}},{Vector{}},
+        {safe,safe},objective};
+    const std::array representations{NominalRepresentation::box,NominalRepresentation::zonotope,
+        NominalRepresentation::parallelotope,NominalRepresentation::ellipsoid};
+    for(const auto representation:representations) {
+        const auto outcome=finite_action_stage_layered_graph(request,
+            {8,32,representation,64,representation},projection_provider());
+        REQUIRE(std::holds_alternative<FiniteActionGraphResult>(outcome));
+        const auto& graph=std::get<FiniteActionGraphResult>(outcome);
+        REQUIRE(graph.has_viable_path);
+        REQUIRE(graph.action_cloud_calls==1);
+        REQUIRE(graph.action_cloud_envelopes.size()==1);
+        const auto& cloud=graph.action_cloud_envelopes.front();
+        CHECK(cloud.action_witnesses.size()==request.actions.catalogue.size());
+        REQUIRE(cloud.outer_lower.size()==2);
+        REQUIRE(cloud.outer_upper.size()==2);
+        CHECK(cloud.outer_upper[0]-cloud.outer_lower[0]>1.0);
+        CHECK(cloud.outer_upper[1]-cloud.outer_lower[1]>1.0);
+        CHECK(cloud.outer_inside_authored_stage_set==std::optional<bool>{true});
+        for(const auto& witness:cloud.action_witnesses)CHECK(witness.contained_in_outer);
+        const auto center=std::find_if(cloud.action_witnesses.begin(),cloud.action_witnesses.end(),
+            [](const auto& witness){return witness.action_index==4;});
+        REQUIRE(center!=cloud.action_witnesses.end());
+        CHECK((center->child_state==Vector{0,0}));
+        REQUIRE(graph.selected_nodes.size()==2);
+        CHECK(graph.nodes[graph.selected_nodes[1]].action_index==4);
+    }
+}
+
 TEST_CASE("outer edge filter refusal stays distinct from discrete graph infeasibility") {
     auto request=viability_request();
     auto provider=projection_provider();
@@ -276,8 +312,6 @@ TEST_CASE("graph ranking preserves a positive quadratic cost when coefficient di
         {"tiny-cost-objective",2,{{0, {QuadraticControlPenalty{{0},{1e-150},{1},
             std::numeric_limits<double>::denorm_min(),2}}}}}};
     const auto result = finite_action_stage_layered_graph(request,{4,16},projection_provider());
-    if(const auto* error=std::get_if<Unsupported>(&result))
-        for(const auto& diagnostic:error->diagnostics) MESSAGE(diagnostic.field << ": " << diagnostic.explanation);
     REQUIRE(std::holds_alternative<FiniteActionGraphResult>(result));
     const auto& graph = std::get<FiniteActionGraphResult>(result);
     REQUIRE(graph.has_viable_path);
@@ -288,5 +322,8 @@ TEST_CASE("graph ranking preserves a positive quadratic cost when coefficient di
     });
     REQUIRE(costly != graph.nodes.end());
     // Independent binary-input evaluation: denorm_min * (1 / 1e-150)^2 / 2.
+    CHECK(costly->edge_running_cost > 0.0);
     CHECK(costly->edge_running_cost == doctest::Approx(2.4703282292062326e-24).epsilon(1e-15));
+    CHECK(costly->edge_running_cost / 2.4703282292062326e-24 ==
+        doctest::Approx(1.0).epsilon(1e-15).scale(0.0));
 }

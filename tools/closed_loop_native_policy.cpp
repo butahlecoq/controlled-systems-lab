@@ -307,7 +307,9 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
     const auto reachable_provider = affine_sum_provider();
     const auto outcome = optimization::finite_action_stage_layered_graph(request,
         {beam_width, max_nodes, representation==optimization::NominalRepresentation::exact_polytope ?
-            std::nullopt : std::optional{representation},max_generators}, provider, reachable_provider);
+            std::nullopt : std::optional{representation},max_generators,
+            representation==optimization::NominalRepresentation::exact_polytope ?
+                std::nullopt : std::optional{representation}}, provider, reachable_provider);
     if(const auto* error = std::get_if<Unsupported>(&outcome))
         return {{"status", "unsupported"}, {"reason", error->diagnostics.empty() ? "unsupported graph request" : error->diagnostics.front().explanation}};
     if(const auto* stopped = std::get_if<OperationStopped>(&outcome))
@@ -317,7 +319,32 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
     const auto provider_id = provenance.actual ? provenance.actual->id.value + "@" + provenance.actual->version : "unresolved-provider";
     const std::array<std::string,5> representation_names{"exact-polytope","box","zonotope","parallelotope","ellipsoid"};
     const auto representation_index=static_cast<std::size_t>(representation);
-    Json layers = Json::array(), nodes = Json::array(), edges = Json::array();
+    Json layers = Json::array(), nodes = Json::array(), edges = Json::array(), action_clouds=Json::array();
+    for(const auto& cloud:graph.action_cloud_envelopes) {
+        Json witnesses=Json::array();
+        for(const auto& witness:cloud.action_witnesses)
+            witnesses.push_back({{"action_index",witness.action_index},{"child_state",witness.child_state},
+                {"contained_in_outer",witness.contained_in_outer}});
+        action_clouds.push_back({{"stage",cloud.stage},{"parent_node_id",cloud.parent_node},
+            {"parent_state",cloud.parent_state},{"representation",representation_names.at(static_cast<std::size_t>(cloud.representation))},
+            {"module_id",cloud.module_id},{"auxiliary_request_id",cloud.auxiliary_request_id},
+            {"lifting_semantics",cloud.lifting_semantics},
+            {"source_task_external_disturbance_unchanged",true},
+            {"source_task_action_profile_unchanged",true},
+            {"auxiliary_model",{{"A",matrix_json(cloud.auxiliary_A.rows,cloud.auxiliary_A.cols,
+                    [&](std::size_t i,std::size_t j){return cloud.auxiliary_A.values[i*cloud.auxiliary_A.cols+j];})},
+                {"B",matrix_json(cloud.auxiliary_B.rows,cloud.auxiliary_B.cols,
+                    [&](std::size_t i,std::size_t j){return cloud.auxiliary_B.values[i*cloud.auxiliary_B.cols+j];})},
+                {"E",matrix_json(cloud.auxiliary_E.rows,cloud.auxiliary_E.cols,
+                    [&](std::size_t i,std::size_t j){return cloud.auxiliary_E.values[i*cloud.auxiliary_E.cols+j];})},
+                {"offset",cloud.auxiliary_offset},{"fixed_auxiliary_control",cloud.auxiliary_control},
+                {"auxiliary_safe_sets","universal construction constraints"},
+                {"auxiliary_disturbance_vertices","authored B*u action images listed below"}}},
+            {"authored_action_effect_vertices",cloud.authored_action_effect_vertices},
+            {"outer_coordinate_bounds",{{"lower",cloud.outer_lower},{"upper",cloud.outer_upper}}},
+            {"outer_inside_authored_stage_set",cloud.outer_inside_authored_stage_set ? Json(*cloud.outer_inside_authored_stage_set):Json(nullptr)},
+            {"action_child_witnesses",witnesses},{"relation","outer"},{"assurance","numerical"}});
+    }
     for(const auto& stat : graph.layer_statistics)
         layers.push_back({{"stage", stat.stage}, {"generated", stat.generated}, {"retained", stat.retained},
             {"pruned", stat.pruned}, {"infeasible", stat.stage_inadmissible},
@@ -393,12 +420,21 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
         {"calls",graph.representation_filter_calls},{"rejected",graph.representation_filter_rejections},
         {"relation","outer"},{"assurance","numerical"},
         {"membership_lowering","box/zonotope/parallelotope/ellipsoid coordinate outer bounds; no conversion claimed"}});
+    if(graph.action_cloud_calls>0) invocations.push_back({{"module_id",representation_modules.at(representation_index)},
+        {"operation","whole authored-action image outer envelope per retained parent via auxiliary control-image disturbance lift"},
+        {"provider","public-function"},{"profile_id",input.at("controller_id")},
+        {"calls",graph.action_cloud_calls},{"relation","outer"},{"assurance","numerical"},
+        {"semantics","artificial external set is exactly B*conv(authored action catalogue); it is not the source task disturbance or a second player"}});
+    Json predicted_sets=Json::array({{{"role", "retained-stage-layered-singleton-nodes"},
+        {"representation", "polytope-h"}, {"relation", "equivalent"}, {"assurance", "numerical"}, {"nodes", nodes}}});
+    if(!action_clouds.empty())predicted_sets.push_back({{"role","complete-authored-action-parent-clouds"},
+        {"representation",representation_names.at(representation_index)},
+        {"relation","outer"},{"assurance","numerical"},{"clouds",action_clouds}});
     Json response{{"task_id", input.at("task_id")}, {"task_sha256", input.at("task_sha256")},
         {"action_profile_id", input.at("action_profile_id")},
         {"policy_id", input.at("controller_id").get<std::string>() + "/budgeted-backward-graph-mpc/1"},
         {"representation", representation_index}, {"invocations", invocations},
-        {"predicted_sets", Json::array({{{"role", "retained-stage-layered-singleton-nodes"},
-            {"representation", "polytope-h"}, {"relation", "equivalent"}, {"assurance", "numerical"}, {"nodes", nodes}}})},
+        {"predicted_sets", predicted_sets},
         {"graph_receipt", {{"schema", "csl.closed-loop.finite-action-backward-graph/1"},
             {"task_id", input.at("task_id")}, {"task_sha256", input.at("task_sha256")},
             {"source_model_id", input.at("source_model_id")}, {"predictor_model_id", input.at("predictor_model_id")},
@@ -407,6 +443,7 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
             {"representation", representation_names.at(representation_index)}, {"beam_width", beam_width}, {"max_graph_nodes", max_nodes},
             {"representation_filter_calls",graph.representation_filter_calls},
             {"representation_filter_rejections",graph.representation_filter_rejections},
+            {"action_cloud_calls",graph.action_cloud_calls},{"action_cloud_envelopes",action_clouds},
             {"search_coverage", graph.search_complete ? "complete" : "incomplete"},
             {"node_budget_exhausted", graph.node_budget_exhausted},
             {"optimality_scope", "Bellman minimum over retained graph only; no claim over pruned paths or nonlinear plant"},

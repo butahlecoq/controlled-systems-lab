@@ -495,6 +495,174 @@ bool contains_v(const sets::SetData& set, std::span<const double> point,
     return false;
 }
 
+struct ParentActionCloud { FiniteGraphActionCloudEnvelope record; };
+using ParentActionCloudOutcome = std::variant<ParentActionCloud,Unsupported,OperationStopped>;
+
+std::optional<bool> outer_box_inside_set(std::span<const double> lower,
+        std::span<const double> upper, const sets::SetData& set) {
+    if(lower.size()!=upper.size() || lower.size()!=set.metadata()->set.dimension) return false;
+    const auto representation=set.representation();
+    if(std::holds_alternative<sets::UniversalRepresentation>(representation))return true;
+    if(std::holds_alternative<sets::EmptyRepresentation>(representation))return false;
+    if(const auto* singleton=std::get_if<sets::SingletonRepresentation>(&representation)) {
+        if(singleton->point.size()!=lower.size())return false;
+        for(std::size_t i=0;i<lower.size();++i)
+            if(lower[i]!=singleton->point[i] || upper[i]!=singleton->point[i])return false;
+        return true;
+    }
+    const auto* h=std::get_if<sets::HRepresentation>(&representation);
+    if(!h)return std::nullopt;
+    for(std::size_t row=0;row<h->inequalities.rows();++row) {
+        double maximum=0.0;
+        for(std::size_t col=0;col<lower.size();++col) {
+            const auto a=h->inequalities(row,col);
+            const auto endpoint=a>=0.0?upper[col]:lower[col];
+            const auto product=a*endpoint;
+            if(!std::isfinite(product))return false;
+            maximum=std::nextafter(maximum+std::nextafter(product,
+                std::numeric_limits<double>::infinity()),std::numeric_limits<double>::infinity());
+        }
+        if(maximum>h->upper_bounds[row])return false;
+    }
+    if(h->equalities.rows()!=0)return false;
+    return true;
+}
+
+ParentActionCloudOutcome parent_action_cloud(const FiniteActionNominalRequest& request,
+        NominalRepresentation representation,std::size_t stage,std::size_t parent_id,
+        const Vector& parent,std::size_t max_generators,const ExecutionContext& context) {
+    const auto dimensions=request.system.dimensions();
+    const auto original_stage=request.system.stage({stage});
+    if(const auto* error=std::get_if<Diagnostic>(&original_stage))return unsupported(error->field,error->explanation);
+    const auto& d=std::get<model::DynamicsStage>(original_stage);
+    const auto action_effect=action_state_hull(request,stage);
+    if(const auto* error=std::get_if<Unsupported>(&action_effect))return *error;
+    const auto& effect_set=std::get<sets::SetData>(action_effect);
+    const auto effect_rep=effect_set.representation();
+    const auto* effect_v=std::get_if<sets::VRepresentation>(&effect_rep);
+    if(!effect_v || effect_v->rays.rows()!=0 || effect_v->vertices.rows()==0)
+        return unsupported("finite_graph.action_cloud.input","Authored B*action images must form a bounded nonempty V cloud.");
+    Matrix identity{dimensions.state,dimensions.state,Vector(dimensions.state*dimensions.state,0.0)};
+    Matrix zero_control{dimensions.state,dimensions.control,Vector(dimensions.state*dimensions.control,0.0)};
+    for(std::size_t i=0;i<dimensions.state;++i)identity.values[i*dimensions.state+i]=1.0;
+    Vector offset(dimensions.state);
+    for(std::size_t i=0;i<dimensions.state;++i)offset[i]=d.offset[i];
+    const Dimensions lifted_dimensions{dimensions.state,dimensions.control,dimensions.state};
+    SystemModel lifted_model{{lifted_dimensions,TimeDomain::discrete,
+        std::vector<LinearStage>{{copy_matrix(d.A),std::move(zero_control),std::move(identity),std::move(offset)}}},{}};
+    const double times[]{0.0,1.0};
+    const auto lifted_system=model::snapshot(lifted_model,times);
+    if(const auto* error=std::get_if<Diagnostic>(&lifted_system))return unsupported(error->field,error->explanation);
+    auto parent_view=numeric::snapshot_vector(parent);
+    if(!std::holds_alternative<numeric::VectorView>(parent_view))
+        return unsupported("finite_graph.action_cloud.parent","Could not snapshot retained parent state.");
+    auto parent_set=sets::make_singleton({{"parent-action-cloud"},dimensions.state,{}},
+        std::get<numeric::VectorView>(parent_view));
+    if(const auto* error=std::get_if<Diagnostic>(&parent_set))return unsupported(error->field,error->explanation);
+    const auto safe=sets::make_universal({{"auxiliary-action-cloud-safe"},dimensions.state,{}});
+    if(const auto* error=std::get_if<Diagnostic>(&safe))return unsupported(error->field,error->explanation);
+    const auto auxiliary_id=request.request.value+"/aux-action-cloud-"+
+        std::to_string(request.absolute_stage_offset+stage)+"-parent-"+std::to_string(parent_id);
+    reachability::FixedPlanRequest auxiliary{std::get<model::LinearSystem>(lifted_system),
+        std::get<sets::SetData>(parent_set),{Vector(dimensions.control,0.0)},{effect_set},
+        {std::get<sets::SetData>(safe),std::get<sets::SetData>(safe)},{auxiliary_id}};
+
+    Vector lower,upper;
+    std::string module;
+    const auto as_bounds=[&](const auto& last,const auto& frame) {
+        lower.resize(dimensions.state);upper.resize(dimensions.state);
+        using Stage=std::decay_t<decltype(last)>;
+        if constexpr(std::is_same_v<Stage,reachability::BoxStage>) {
+            lower=last.lower;upper=last.upper;
+        } else if constexpr(std::is_same_v<Stage,reachability::FinitePlanZonotopeTrace::Stage>) {
+            lower=last.center;upper=last.center;
+            for(std::size_t row=0;row<dimensions.state;++row)
+                for(std::size_t col=0;col<last.generators.cols;++col) {
+                    const auto radius=std::abs(last.generators.values[row*last.generators.cols+col]);
+                    lower[row]=std::nextafter(lower[row]-radius,-std::numeric_limits<double>::infinity());
+                    upper[row]=std::nextafter(upper[row]+radius,std::numeric_limits<double>::infinity());
+                }
+        } else if constexpr(std::is_same_v<Stage,reachability::ParallelotopeStage>) {
+            for(std::size_t row=0;row<dimensions.state;++row)
+                for(std::size_t col=0;col<dimensions.state;++col) {
+                    const auto q=frame.values[row*dimensions.state+col];
+                    const auto left=q*last.lower[col],right=q*last.upper[col];
+                    const auto term_lower=std::nextafter(std::min(left,right),-std::numeric_limits<double>::infinity());
+                    const auto term_upper=std::nextafter(std::max(left,right),std::numeric_limits<double>::infinity());
+                    lower[row]=std::nextafter(lower[row]+term_lower,-std::numeric_limits<double>::infinity());
+                    upper[row]=std::nextafter(upper[row]+term_upper,std::numeric_limits<double>::infinity());
+                }
+        } else {
+            lower.resize(last.center.size());upper.resize(last.center.size());
+            for(std::size_t i=0;i<last.center.size();++i) {
+                lower[i]=std::nextafter(last.center[i]-last.radii[i],-std::numeric_limits<double>::infinity());
+                upper[i]=std::nextafter(last.center[i]+last.radii[i],std::numeric_limits<double>::infinity());
+            }
+        }
+    };
+    if(representation==NominalRepresentation::box) {
+        module="csl.reachability.finite-plan-box";
+        const auto outcome=reachability::finite_plan_box(auxiliary,context);
+        if(const auto* stopped=std::get_if<OperationStopped>(&outcome))return *stopped;
+        if(const auto* error=std::get_if<Unsupported>(&outcome))return *error;
+        as_bounds(std::get<reachability::FinitePlanBoxTrace>(outcome).stages.back(),Matrix{});
+    } else if(representation==NominalRepresentation::zonotope) {
+        module="csl.reachability.finite-plan-zonotope";
+        const auto outcome=reachability::finite_plan_zonotope(auxiliary,{max_generators},context);
+        if(const auto* stopped=std::get_if<OperationStopped>(&outcome))return *stopped;
+        if(const auto* error=std::get_if<Unsupported>(&outcome))return *error;
+        as_bounds(std::get<reachability::FinitePlanZonotopeTrace>(outcome).stages.back(),Matrix{});
+    } else if(representation==NominalRepresentation::parallelotope) {
+        module="csl.reachability.finite-plan-parallelotope";
+        const auto outcome=reachability::finite_plan_parallelotope(auxiliary,context);
+        if(const auto* stopped=std::get_if<OperationStopped>(&outcome))return *stopped;
+        if(const auto* error=std::get_if<Unsupported>(&outcome))return *error;
+        const auto& trace=std::get<reachability::FinitePlanParallelotopeTrace>(outcome);
+        as_bounds(trace.stages.back(),trace.frame);
+    } else if(representation==NominalRepresentation::ellipsoid) {
+        module="csl.reachability.finite-plan-ellipsoid";
+        const auto outcome=reachability::finite_plan_ellipsoid(auxiliary,context);
+        if(const auto* stopped=std::get_if<OperationStopped>(&outcome))return *stopped;
+        if(const auto* error=std::get_if<Unsupported>(&outcome))return *error;
+        as_bounds(std::get<reachability::FinitePlanEllipsoidTrace>(outcome).stages.back(),Matrix{});
+    } else return unsupported("finite_graph.action_cloud.representation","Only the four selected numerical approximation modules support this cloud route.");
+    if(lower.size()!=dimensions.state || upper.size()!=dimensions.state || !finite(lower) || !finite(upper))
+        return unsupported("finite_graph.action_cloud.output","Selected set module did not produce finite coordinate outer bounds.");
+
+    FiniteGraphActionCloudEnvelope record;
+    record.stage=request.absolute_stage_offset+stage;record.parent_node=parent_id;
+    record.representation=representation;record.module_id=std::move(module);
+    record.auxiliary_request_id=auxiliary_id;record.parent_state=parent;
+    record.auxiliary_A=copy_matrix(d.A);
+    record.auxiliary_B={dimensions.state,dimensions.control,Vector(dimensions.state*dimensions.control,0.0)};
+    record.auxiliary_E={dimensions.state,dimensions.state,Vector(dimensions.state*dimensions.state,0.0)};
+    record.auxiliary_offset.resize(dimensions.state);
+    for(std::size_t i=0;i<dimensions.state;++i) {
+        record.auxiliary_E.values[i*dimensions.state+i]=1.0;
+        record.auxiliary_offset[i]=d.offset[i];
+    }
+    record.auxiliary_control=Vector(dimensions.control,0.0);
+    record.outer_lower=lower;record.outer_upper=upper;
+    record.outer_inside_authored_stage_set=outer_box_inside_set(lower,upper,request.admissible_states[stage+1]);
+    for(std::size_t row=0;row<effect_v->vertices.rows();++row) {
+        Vector vertex(dimensions.state);
+        for(std::size_t col=0;col<dimensions.state;++col)vertex[col]=effect_v->vertices(row,col);
+        record.authored_action_effect_vertices.push_back(std::move(vertex));
+    }
+    for(std::size_t action=0;action<request.actions.catalogue.size();++action) {
+        const auto child=request.system.step({stage},parent,request.actions.catalogue[action],request.nominal_disturbances[stage]);
+        if(const auto* error=std::get_if<Diagnostic>(&child))return unsupported(error->field,error->explanation);
+        if(const auto* stopped=std::get_if<OperationStopped>(&child))return *stopped;
+        const auto state=std::get<Vector>(child);
+        bool inside=true;
+        for(std::size_t i=0;i<state.size();++i)
+            inside=inside && state[i]>=lower[i] && state[i]<=upper[i];
+        if(!inside)return unsupported("finite_graph.action_cloud.witness","Numerical outer cloud failed to contain an authored discrete action child.");
+        record.action_witnesses.push_back({action,state,inside});
+    }
+    return ParentActionCloud{std::move(record)};
+}
+
 GeometryCallOutcome parent_reachable_envelope(
         const FiniteActionNominalRequest& request,
         const registry::PreparedProvider<registry::GeometryPort>& provider,
@@ -592,6 +760,14 @@ static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(const Fin
         std::vector<Candidate> candidates;
         for(const auto parent_id : graph.layers[stage]) {
             const auto& parent = graph.nodes[parent_id];
+            if(limits.parent_action_cloud_representation) {
+                auto cloud=parent_action_cloud(request,*limits.parent_action_cloud_representation,
+                    stage,parent_id,parent.state,limits.max_generators_per_stage,context);
+                ++graph.action_cloud_calls;
+                if(const auto* error=std::get_if<Unsupported>(&cloud))return *error;
+                if(const auto* stopped=std::get_if<OperationStopped>(&cloud))return *stopped;
+                graph.action_cloud_envelopes.push_back(std::move(std::get<ParentActionCloud>(cloud).record));
+            }
             std::optional<sets::SetData> reachable_envelope;
             if(reachable_set_provider) {
                 auto envelope = parent_reachable_envelope(request, *reachable_set_provider,

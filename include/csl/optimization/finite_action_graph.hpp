@@ -52,6 +52,35 @@ struct FiniteActionGraphLayerStatistics {
     std::size_t representation_filter_rejected{};
 };
 
+struct FiniteGraphCloudActionWitness {
+    std::size_t action_index{};
+    Vector child_state;
+    bool contained_in_outer{};
+};
+
+struct FiniteGraphActionCloudEnvelope {
+    std::size_t stage{};
+    std::size_t parent_node{};
+    NominalRepresentation representation{NominalRepresentation::exact_polytope};
+    std::string module_id;
+    std::string auxiliary_request_id;
+    Vector parent_state;
+    Matrix auxiliary_A;
+    Matrix auxiliary_B;
+    Matrix auxiliary_E;
+    Vector auxiliary_offset;
+    Vector auxiliary_control;
+    std::vector<Vector> authored_action_effect_vertices;
+    Vector outer_lower;
+    Vector outer_upper;
+    std::optional<bool> outer_inside_authored_stage_set;
+    std::vector<FiniteGraphCloudActionWitness> action_witnesses;
+    Assurance assurance{Assurance::numerical};
+    // The artificial external channel carries B*conv(authored actions) only;
+    // the source task's external disturbance dimension remains unchanged.
+    std::string lifting_semantics{"auxiliary-authored-control-image"};
+};
+
 struct FiniteActionGraphLimits {
     std::size_t beam_width;
     std::size_t max_nodes;
@@ -61,6 +90,10 @@ struct FiniteActionGraphLimits {
     std::optional<NominalRepresentation> edge_representation_filter{};
     // Used only by the zonotope filter.
     std::size_t max_generators_per_stage{1000};
+    // Selected approximation of the complete authored-action image from each
+    // retained parent. This envelope is recorded and checked for containment;
+    // it does not replace or merge discrete edge witnesses.
+    std::optional<NominalRepresentation> parent_action_cloud_representation{};
 };
 
 struct FiniteActionGraphResult {
@@ -73,6 +106,8 @@ struct FiniteActionGraphResult {
     std::size_t reachable_envelope_calls{};
     std::size_t representation_filter_calls{};
     std::size_t representation_filter_rejections{};
+    std::vector<FiniteGraphActionCloudEnvelope> action_cloud_envelopes;
+    std::size_t action_cloud_calls{};
     bool search_complete{};
     bool node_budget_exhausted{};
     bool has_viable_path{};

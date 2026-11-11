@@ -146,8 +146,6 @@ TEST_CASE("nominal selection preserves a positive quadratic cost when coefficien
             std::numeric_limits<double>::denorm_min(),2}}}}}};
     const auto result = finite_action_nominal_profile(request,{4,16,100,16,0.0},
         NominalRepresentation::exact_polytope);
-    if(const auto* error=std::get_if<Unsupported>(&result))
-        for(const auto& diagnostic:error->diagnostics) MESSAGE(diagnostic.field << ": " << diagnostic.explanation);
     REQUIRE(std::holds_alternative<FiniteActionNominalResult>(result));
     const auto& track = std::get<FiniteActionNominalResult>(result).tracks.front().outcome;
     REQUIRE(std::holds_alternative<NominalTrackSelected>(track));
@@ -159,8 +157,12 @@ TEST_CASE("nominal selection preserves a positive quadratic cost when coefficien
         return scored && !scored->action_indices.empty() && scored->action_indices.front() == 0;
     });
     REQUIRE(costly != selected.attempts.end());
-    CHECK(std::get<NominalPlanScored>(*costly).exact_running_cost ==
+    const auto exact_running_cost=std::get<NominalPlanScored>(*costly).exact_running_cost;
+    CHECK(exact_running_cost > 0.0);
+    CHECK(exact_running_cost ==
         doctest::Approx(2.4703282292062326e-24).epsilon(1e-15));
+    CHECK(exact_running_cost / 2.4703282292062326e-24 ==
+        doctest::Approx(1.0).epsilon(1e-15).scale(0.0));
 }
 
 TEST_CASE("selected nominal profile executes one representation route") {
