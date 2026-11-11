@@ -175,6 +175,25 @@ class GalleryTests(unittest.TestCase):
         self.assertIn('"points": [\n    [0, 0],\n    [1, 0],\n    [1, 1],', displayed_json)
         self.assertEqual(displayed_json.count("[0, 0]"), 2)
 
+    def test_output_matrix_coordinate_names_follow_each_example_kind(self):
+        expected_rows = {
+            "hybrid": "u<sub>0</sub>, x<sub>2</sub>",
+            "projected_reachability": "u<sub>0</sub>, x<sub>1</sub>",
+            "two_parameter": "u<sub>0</sub>, u<sub>1</sub>",
+            "intersection": "x<sub>1</sub>, x<sub>2</sub>",
+        }
+        for kind, rows in expected_rows.items():
+            with self.subTest(kind=kind):
+                example = next(item for item in self.examples if item["kind"] == kind)
+                page = gallery.section(example, 1)
+                self.assertIn("coordinates ", page)
+                spoken_coordinates = rows.replace("<sub>", "").replace("</sub>", "")
+                self.assertIn("displayed to six significant digits; coordinates " + spoken_coordinates, page)
+                self.assertIn("coordinates are rows: " + rows + ". Repeated coordinates remain in place.", page)
+                blocks = [html.unescape(block) for block in re.findall(
+                    r'<pre[^>]*><code>(.*?)</code></pre>', page, flags=re.DOTALL)]
+                self.assertEqual(json.loads(blocks[0]), example["points"])
+
         intersection = next(item for item in self.examples if item["slug"] == "crossing_octagon")
         intersection_page = gallery.section(intersection, 3)
         self.assertIn("Data · 8 intersection vertices · output matrix and copyable JSON", intersection_page)
@@ -190,13 +209,13 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(intersection_page.count('<span class="math-matrix" role="math"'), 5)
         self.assertEqual(intersection_page.count('<mtr>'), 18)
         output_matrix = re.search(
-            r'<span class="math-matrix" role="math" aria-label="(Output coordinate matrix W, 2 coordinate rows by 8 stored-output columns, displayed to six significant digits:[^"]*)">.*?<math display="inline" aria-hidden="true">(.*?)</math>',
+            r'<span class="math-matrix" role="math" aria-label="(Output coordinate matrix W, 2 coordinate rows by 8 stored-output columns, displayed to six significant digits; coordinates x1, x2:[^"]*)">.*?<math display="inline" aria-hidden="true">(.*?)</math>',
             intersection_page, re.DOTALL)
         self.assertIsNotNone(output_matrix)
         self.assertIn("<var>W</var> ≈", intersection_page)
         self.assertIn("Displayed matrix values are rounded to 6 significant digits (≈);", intersection_page)
         expected_label = ("Output coordinate matrix W, 2 coordinate rows by 8 stored-output columns, "
-                          "displayed to six significant digits: "
+                          "displayed to six significant digits; coordinates x1, x2: "
                           + "; ".join(", ".join(format(value, ".6g") for value in row)
                                       for row in [[point[coordinate] for point in intersection["points"]]
                                                   for coordinate in range(2)]))

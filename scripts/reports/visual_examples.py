@@ -306,12 +306,20 @@ def data_details(example):
         points = example["points"]
         dimensions = len(points[0])
         matrix = [[point[coordinate] for point in points] for coordinate in range(dimensions)]
+        coordinate_labels = {
+            "hybrid": (("u<sub>0</sub>", "u0"), ("x<sub>2</sub>", "x2")),
+            "projected_reachability": (("u<sub>0</sub>", "u0"), ("x<sub>1</sub>", "x1")),
+            "two_parameter": (("u<sub>0</sub>", "u0"), ("u<sub>1</sub>", "u1")),
+            "intersection": (("x<sub>1</sub>", "x1"), ("x<sub>2</sub>", "x2")),
+        }[example["kind"]]
+        math_rows = ", ".join(math_label for math_label, _ in coordinate_labels)
+        spoken_rows = ", ".join(spoken_label for _, spoken_label in coordinate_labels)
         output_matrix = _math_matrix(
             matrix,
-            f"Output coordinate matrix W, {dimensions} coordinate rows by {len(points)} stored-output columns, displayed to six significant digits",
+            f"Output coordinate matrix W, {dimensions} coordinate rows by {len(points)} stored-output columns, displayed to six significant digits; coordinates {spoken_rows}",
             display_significant_digits=6)
         columns = ", ".join(f'w<sub>{i}</sub>' for i in range(len(points)))
-        rows = ", ".join(f'x<sub>{i + 1}</sub>' for i in range(dimensions))
+        rows = math_rows
         summary = f"Data · {len(points)} {role} · output matrix and copyable JSON"
         content = ('<p><var>W</var> ≈ [<var>w</var><sub>0</sub> … '
                    f'<var>w</var><sub>{len(points) - 1}</sub>] ∈ ℝ<sup>{dimensions}×{len(points)}</sup></p>'
