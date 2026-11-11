@@ -76,6 +76,11 @@ class VisualRouteInventoryTests(unittest.TestCase):
                          "composes-or-copies-existing-saved-figure")
         self.assertEqual(producers["scripts/reports/render.py"]["disposition"],
                          "publication-validation-or-frozen-route")
+        for source in ("benchmarks/reporting/closed_loop/run_closed_loop.py",
+                       "scripts/reports/render_closed_loop_pilot.py"):
+            self.assertEqual(producers[source]["disposition"],
+                             "analytic-reference-checked-saved-run-renderer")
+            self.assertTrue(producers[source]["role_and_disposition_reason"])
         self.assertEqual(producers["scripts/reports/viz10_plot_companions.py"]["disposition"],
                          "shared-quantitative-policy-companion-renderer")
         viz10_sources = (

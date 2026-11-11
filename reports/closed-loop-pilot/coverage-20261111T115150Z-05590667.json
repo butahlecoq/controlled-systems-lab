@@ -1,0 +1,221 @@
+{
+  "schema": "csl.closed-loop.coverage/1",
+  "source_commit": "d99c594ea14792ec7fe367996dc70835a3dc059f",
+  "attempts": [
+    {
+      "attempt_id": "earth-orbit-20261111T112014Z-ad48e1da",
+      "task_id": "env717-earth-orbit/continuous-receding/1",
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+      "status": "incomplete",
+      "ledger_status": "incomplete",
+      "supervisor_reconciliation": null,
+      "completed_holds": 0,
+      "original_intervals": 20,
+      "physical_objective": null,
+      "common_replay": null,
+      "tight_replay": null,
+      "postcheck_records": [],
+      "graph_id": null,
+      "graph_fingerprint": null,
+      "attempt_record": "earth-orbit/attempts/earth-orbit-20261111T112014Z-ad48e1da/attempt.json"
+    },
+    {
+      "attempt_id": "earth-orbit-20261111T112358Z-84ef9239",
+      "task_id": "env717-earth-orbit/continuous-receding/1",
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+      "status": "incomplete",
+      "ledger_status": "in-progress",
+      "supervisor_reconciliation": {
+        "schema": "csl.closed-loop.supervisor-reconciliation/1",
+        "record_id": "supervisor-reconciliation-112358-orbit",
+        "attempt_id": "earth-orbit-20261111T112358Z-84ef9239",
+        "original_attempt_record": "attempt.json",
+        "evidence": {
+          "ledger_status": "in-progress",
+          "worker_terminal_status": "failed",
+          "worker_return_code": 1,
+          "completed_holds": 0,
+          "stage_record_count": 0,
+          "worker_stderr": "worker-stderr.txt",
+          "failure": "stage checkpoint serialization raised TypeError for a NumPy boolean before any action was executed"
+        },
+        "derived_terminal_status": "incomplete",
+        "reconciliation_source": "post-run ledger/supervisor reconciliation; original attempt and stderr preserved"
+      },
+      "completed_holds": 0,
+      "original_intervals": 20,
+      "physical_objective": null,
+      "common_replay": null,
+      "tight_replay": null,
+      "postcheck_records": [],
+      "graph_id": null,
+      "graph_fingerprint": null,
+      "attempt_record": "earth-orbit/attempts/earth-orbit-20261111T112358Z-84ef9239/attempt.json"
+    },
+    {
+      "attempt_id": "earth-orbit-20261111T112429Z-d2b6da4c",
+      "task_id": "env717-earth-orbit/continuous-receding/1",
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+      "status": "incomplete",
+      "ledger_status": "incomplete",
+      "supervisor_reconciliation": null,
+      "completed_holds": 19,
+      "original_intervals": 20,
+      "physical_objective": null,
+      "common_replay": null,
+      "tight_replay": null,
+      "postcheck_records": [],
+      "graph_id": null,
+      "graph_fingerprint": null,
+      "attempt_record": "earth-orbit/attempts/earth-orbit-20261111T112429Z-d2b6da4c/attempt.json"
+    },
+    {
+      "attempt_id": "earth-orbit-20261111T112612Z-8d9a98e3",
+      "task_id": "env717-earth-orbit/continuous-receding/1",
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+      "status": "complete",
+      "ledger_status": "complete",
+      "supervisor_reconciliation": null,
+      "completed_holds": 20,
+      "original_intervals": 20,
+      "physical_objective": {
+        "terminal": 63.89918301942375,
+        "running": 1.3304813451979687,
+        "total": 65.22966436462173
+      },
+      "common_replay": "complete",
+      "tight_replay": "complete",
+      "postcheck_records": [
+        "full-replay-retry-5ca52575"
+      ],
+      "graph_id": null,
+      "graph_fingerprint": null,
+      "attempt_record": "earth-orbit/attempts/earth-orbit-20261111T112612Z-8d9a98e3/attempt.json"
+    },
+    {
+      "attempt_id": "earth-orbit-20261111T114923Z-e26a58ff",
+      "task_id": "env717-earth-orbit/continuous-receding/1",
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+      "status": "complete",
+      "ledger_status": "complete",
+      "supervisor_reconciliation": null,
+      "completed_holds": 20,
+      "original_intervals": 20,
+      "physical_objective": {
+        "terminal": 63.89918301942375,
+        "running": 1.3304813451979687,
+        "total": 65.22966436462173
+      },
+      "common_replay": "complete",
+      "tight_replay": "complete",
+      "postcheck_records": [
+        "initial"
+      ],
+      "graph_id": "closed-loop/earth-orbit/nmpc-csl-adaptive/1/cfg-2bf617a536444eb7",
+      "graph_fingerprint": "2bf617a536444eb7420d56f8a853a413727d0cc9176af74755a0798df1c6118b",
+      "attempt_record": "earth-orbit/attempts/earth-orbit-20261111T114923Z-e26a58ff/attempt.json"
+    },
+    {
+      "attempt_id": "syn-nl-fuel-01-20261111T112016Z-4bbfb28e",
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b",
+      "status": "complete",
+      "ledger_status": "complete",
+      "supervisor_reconciliation": null,
+      "completed_holds": 40,
+      "original_intervals": 40,
+      "physical_objective": {
+        "terminal": 0.0002544882053355357,
+        "running": 0.003571496881908354,
+        "total": 0.0038259850872438897
+      },
+      "common_replay": "complete",
+      "tight_replay": "complete",
+      "postcheck_records": [
+        "full-replay-retry-b0873059"
+      ],
+      "graph_id": null,
+      "graph_fingerprint": null,
+      "attempt_record": "syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261111T112016Z-4bbfb28e/attempt.json"
+    },
+    {
+      "attempt_id": "syn-nl-fuel-01-20261111T114928Z-bf3654d0",
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b",
+      "status": "complete",
+      "ledger_status": "complete",
+      "supervisor_reconciliation": null,
+      "completed_holds": 40,
+      "original_intervals": 40,
+      "physical_objective": {
+        "terminal": 0.0002544882053355357,
+        "running": 0.003571496881908354,
+        "total": 0.0038259850872438897
+      },
+      "common_replay": "complete",
+      "tight_replay": "complete",
+      "postcheck_records": [
+        "initial"
+      ],
+      "graph_id": "closed-loop/syn-nl-fuel-01/nmpc-csl-adaptive/1/cfg-a69f51633ddbfc59",
+      "graph_fingerprint": "a69f51633ddbfc59ad58ec8e0e8798671409adada8d10886b3188a14c5bbff74",
+      "attempt_record": "syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261111T114928Z-bf3654d0/attempt.json"
+    },
+    {
+      "attempt_id": "syn-nl-lv-01-20261111T111937Z-3048d4b1",
+      "task_id": "syn-nl-lv-01/continuous-receding/1",
+      "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+      "status": "complete",
+      "ledger_status": "complete",
+      "supervisor_reconciliation": null,
+      "completed_holds": 30,
+      "original_intervals": 30,
+      "physical_objective": {
+        "terminal": 0.06755422575467881,
+        "running": 0.024130559408367985,
+        "total": 0.0916847851630468
+      },
+      "common_replay": "complete",
+      "tight_replay": "complete",
+      "postcheck_records": [
+        "full-replay-retry-3124ebef"
+      ],
+      "graph_id": null,
+      "graph_fingerprint": null,
+      "attempt_record": "syn-nl-lv-01/attempts/syn-nl-lv-01-20261111T111937Z-3048d4b1/attempt.json"
+    },
+    {
+      "attempt_id": "syn-nl-lv-01-20261111T114844Z-aa23c1a5",
+      "task_id": "syn-nl-lv-01/continuous-receding/1",
+      "status": "failed-before-worker-start",
+      "completed_holds": 0,
+      "failure": "NameError: run manifest source capture referenced MANIFEST without importing it",
+      "actual_solver_invocations": 0,
+      "attempt_record": "syn-nl-lv-01/attempts/syn-nl-lv-01-20261111T114844Z-aa23c1a5/runner-startup-failure.json"
+    },
+    {
+      "attempt_id": "syn-nl-lv-01-20261111T114908Z-8dc20bed",
+      "task_id": "syn-nl-lv-01/continuous-receding/1",
+      "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+      "status": "complete",
+      "ledger_status": "complete",
+      "supervisor_reconciliation": null,
+      "completed_holds": 30,
+      "original_intervals": 30,
+      "physical_objective": {
+        "terminal": 0.06755422575467881,
+        "running": 0.024130559408367985,
+        "total": 0.0916847851630468
+      },
+      "common_replay": "complete",
+      "tight_replay": "complete",
+      "postcheck_records": [
+        "initial"
+      ],
+      "graph_id": "closed-loop/syn-nl-lv-01/nmpc-csl-adaptive/1/cfg-66c71d071816ee5d",
+      "graph_fingerprint": "66c71d071816ee5d947152cdce356db41d273613906da5624e1a17e7a9e3755d",
+      "attempt_record": "syn-nl-lv-01/attempts/syn-nl-lv-01-20261111T114908Z-8dc20bed/attempt.json"
+    }
+  ],
+  "representation_claim": "pure NMPC graph bypasses set modules; zero set work is recorded and no representation performance is inferred"
+}

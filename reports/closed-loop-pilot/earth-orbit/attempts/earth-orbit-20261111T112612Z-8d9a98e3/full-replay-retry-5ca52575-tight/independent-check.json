@@ -1,0 +1,52 @@
+{
+  "schema": "csl.closed-loop.independent-episode-check/1",
+  "status": "complete",
+  "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+  "controls_sha256": "8ef57e98c70c1df0e46c7276e2ef5a9c2d11680ed736e186161d486d7127bd08",
+  "hold_endpoint_max_abs_difference_from_applied_execution": [
+    0.0,
+    0.0,
+    0.0,
+    2.168404344971009e-19
+  ],
+  "independent_objective": {
+    "terminal": 63.89918301942375,
+    "running": 1.3304813451979685,
+    "total": 65.22966436462173
+  },
+  "task_adapter_objective": {
+    "terminal": 63.89918301942375,
+    "running": 1.3304813451979687,
+    "total": 65.22966436462173
+  },
+  "objective_difference": 0.0,
+  "sampled_physical_state_bound_violation_by_coordinate": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "control_bound_violation_by_coordinate": [
+    0.0,
+    0.0
+  ],
+  "model_domain": {
+    "minimum_radius_km": 6963.881268019565,
+    "positive_radius": true
+  },
+  "fixed_rk4": {
+    "substeps_per_original_interval": 100,
+    "hold_endpoint_max_abs_difference_from_CSL": [
+      3.637978807091713e-11,
+      4.5005665860742283e-14,
+      8.43769498715119e-15,
+      7.37257477290143e-18
+    ],
+    "physical_objective": {
+      "terminal": 63.899183019387365,
+      "running": 1.3304813451979685,
+      "total": 65.22966436458533
+    },
+    "method": "separately transcribed classical fixed-step RK4; numerical diagnostic only"
+  }
+}

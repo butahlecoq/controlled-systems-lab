@@ -1,0 +1,16 @@
+{
+  "schema": "csl.closed-loop.resolution-receipt/1",
+  "capability_manifest_id": "source-bound-three-task-nmpc-baseline/1",
+  "capability_manifest_sha256": "13b8bb3e79387e775e58120b8224b72a42293b021bbff358d794820dad82f32b",
+  "task_id": "syn-nl-lv-01/continuous-receding/1",
+  "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+  "requested_controller_id": "syn-nl-lv-01/nominal-shrinking-radau3/1",
+  "requested_action_profile_id": "syn-nl-lv-01/continuous-receding/1/continuous-control/1",
+  "selected_controller_id": "syn-nl-lv-01/nominal-shrinking-radau3/1",
+  "selected_controller_version": "1",
+  "selected_execution_id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+  "selected_execution_version": "1",
+  "graph_id": "closed-loop/syn-nl-lv-01/nmpc-csl-adaptive/1/cfg-66c71d071816ee5d",
+  "graph_fingerprint": "66c71d071816ee5d947152cdce356db41d273613906da5624e1a17e7a9e3755d",
+  "resolved_graph_path": "resolved-graph.json"
+}

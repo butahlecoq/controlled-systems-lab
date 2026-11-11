@@ -1,0 +1,91 @@
+{
+  "action_profile_id": "syn-nl-fuel-01/continuous-receding/1/continuous-control/1",
+  "admission": {
+    "basis": "source-bound task contract and declared baseline controller/execution profiles",
+    "status": "admitted"
+  },
+  "controller": {
+    "adapter": "mpc11_nmpc",
+    "collocation": {
+      "degree": 3,
+      "elements_per_interval": 1,
+      "method": "radau",
+      "state_constraint_nodes": "all-collocation-and-mesh-including-endpoints"
+    },
+    "id": "syn-nl-fuel-01/nominal-shrinking-radau3/1",
+    "prediction": "source-bound MPC11 nonlinear dynamics and shrinking Radau collocation",
+    "solver": {
+      "acceptable_tolerance": 1e-06,
+      "linear_solver": "mumps",
+      "max_iter": 1000,
+      "name": "ipopt",
+      "tolerance": 1e-08
+    },
+    "source_files": [
+      "benchmarks/reporting/mpc11/nmpc.py",
+      "benchmarks/reporting/mpc11/affine.py",
+      "benchmarks/reporting/mpc11/scenarios/syn-nl-fuel-01.json"
+    ],
+    "transcription": "do-mpc collocation profile from immutable source scenario",
+    "version": "1",
+    "warm_start": {
+      "dual": "zero-every-solve",
+      "initial_state_override": "new-full-observation",
+      "primal": "drop-first-interval-no-terminal-repeat"
+    }
+  },
+  "execution": {
+    "abstol": 1e-10,
+    "id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+    "method": "adaptive RK4 step doubling",
+    "original_final_time": 20,
+    "original_intervals": 40,
+    "provider": "CSL::simulation",
+    "reltol": 1e-09,
+    "report_subintervals_per_hold": 20,
+    "source_files": [
+      "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+      "src/simulation/nonlinear_replay.cpp"
+    ],
+    "version": "1"
+  },
+  "geometry_work": {
+    "claim": "no representation comparison is made",
+    "set_operations": 0,
+    "vertices": 0
+  },
+  "graph_fingerprint": "a69f51633ddbfc59ad58ec8e0e8798671409adada8d10886b3188a14c5bbff74",
+  "graph_id": "closed-loop/syn-nl-fuel-01/nmpc-csl-adaptive/1/cfg-a69f51633ddbfc59",
+  "inactive_roles": {
+    "converter": "not_used",
+    "representation": "not_used",
+    "set_reducer": "not_used",
+    "vertex_lp": "not_used"
+  },
+  "model_id": "syn-nl-fuel-01/ode/1",
+  "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
+  "source_files": [
+    {
+      "path": "benchmarks/reporting/mpc11/affine.py",
+      "sha256": "54d31b9c21fef962cb2a5f09f2e341ef92b3a40b128114c3c06a5b039fb95149"
+    },
+    {
+      "path": "benchmarks/reporting/mpc11/nmpc.py",
+      "sha256": "41462f02fac817012a0884f176fbac617320fadc0eb945638cb1b7678b9ef11e"
+    },
+    {
+      "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+      "sha256": "104adee4c3999daedae08bc6735e6058d7c3cd66e2bca8b306ea4d65142e2f21"
+    },
+    {
+      "path": "benchmarks/reporting/mpc11/scenarios/syn-nl-fuel-01.json",
+      "sha256": "5dd38a65f5ad6c5f90b8616fbc866eb9ef2735b1b7f7279bca0b2b0d05f9dce1"
+    },
+    {
+      "path": "src/simulation/nonlinear_replay.cpp",
+      "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+    }
+  ],
+  "task_id": "syn-nl-fuel-01/continuous-receding/1",
+  "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b"
+}

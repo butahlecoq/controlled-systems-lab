@@ -1,0 +1,48 @@
+{
+  "update_index": 0,
+  "absolute_time": 0.0,
+  "observed_physical": [
+    7000.0,
+    0.0,
+    0.0,
+    0.0010780614796240577
+  ],
+  "observed_scaled": [
+    7.0,
+    0.0,
+    0.0,
+    1.0780614796240577
+  ],
+  "original_task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+  "status": "rejected",
+  "module_calls": [],
+  "requested_modules": {
+    "controller": "syn-nl-orbit-01/source-cost-direct-shooting/1",
+    "vertex_lp": "not_used",
+    "set_reducer": "not_used",
+    "representation": "not_used",
+    "converter": "not_used",
+    "execution": "CSL::simulation"
+  },
+  "policy_id": "syn-nl-orbit-01/source-cost-direct-shooting/1",
+  "controller_invocations": [
+    {
+      "operation": "controller.solve",
+      "module_id": "syn-nl-orbit-01/source-cost-direct-shooting/1",
+      "provider": "CasADi/IPOPT",
+      "profile_id": "casadi-ipopt/direct-shooting-rk4-1-step/epigraph-exact-euclidean/1"
+    }
+  ],
+  "solve_receipt": {
+    "accepted": false,
+    "success": false,
+    "status": "solver-error",
+    "error": "Error in Opti::solve [OptiNode] at .../casadi/core/optistack.cpp:217:\n.../casadi/core/function_internal.cpp:164: Error calling IpoptInterface::finalize for 'solver':\n.../casadi/interfaces/ipopt/ipopt_interface.cpp:320: No such IPOPT option: ipopt",
+    "solve_seconds": 0.7154279109090567,
+    "solver_profile": "casadi-ipopt/direct-shooting-rk4-1-step/epigraph-exact-euclidean/1"
+  },
+  "invoked_modules": [
+    "syn-nl-orbit-01/source-cost-direct-shooting/1"
+  ],
+  "failure": "controller-rejected; no fallback action applied"
+}

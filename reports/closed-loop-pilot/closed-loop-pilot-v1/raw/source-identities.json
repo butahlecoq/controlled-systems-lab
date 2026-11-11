@@ -1,0 +1,28 @@
+{
+  "capability_manifest": {
+    "path": "capabilities/closed-loop-pilot-capabilities-v1.json",
+    "sha256": "a81c8b41a6f4c67dc6beb6c5db80f5e73bda11ca4e005cebd43ac60a23f1ec9d",
+    "source": "docs/catalogue/closed-loop-pilot-capabilities-v1.json"
+  },
+  "schema": "csl.closed-loop.report-source-identities/1",
+  "tasks": {
+    "earth-orbit": {
+      "contract": "contracts/earth-orbit.json",
+      "source_path": "benchmarks/reporting/env717/earth_orbit.cpp",
+      "source_sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c",
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
+    },
+    "syn-nl-fuel-01": {
+      "contract": "contracts/syn-nl-fuel-01.json",
+      "source_path": "benchmarks/reporting/mpc11/scenarios/syn-nl-fuel-01.json",
+      "source_sha256": "c0fb79df63b9b87116ddb96552d139de177eb9ac71440b662d3d4719f6f65572",
+      "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b"
+    },
+    "syn-nl-lv-01": {
+      "contract": "contracts/syn-nl-lv-01.json",
+      "source_path": "benchmarks/reporting/mpc11/scenarios/syn-nl-lv-01.json",
+      "source_sha256": "debf46903cbcd78694ea91bd1734f8ba9e503be36387288bbf1395661450c45b",
+      "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec"
+    }
+  }
+}

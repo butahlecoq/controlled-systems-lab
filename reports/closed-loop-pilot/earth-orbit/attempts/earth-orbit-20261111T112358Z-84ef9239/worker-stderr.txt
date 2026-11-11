@@ -1,0 +1,26 @@
+Traceback (most recent call last):
+  File "/home/butahlecoq/.local/share/codex/worktrees/closed-loop-pilot-945-20261111/benchmarks/reporting/closed_loop/run_closed_loop.py", line 339, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/home/butahlecoq/.local/share/codex/worktrees/closed-loop-pilot-945-20261111/benchmarks/reporting/closed_loop/run_closed_loop.py", line 312, in main
+    return worker(args.task, args.attempt, args.bridge.resolve())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/butahlecoq/.local/share/codex/worktrees/closed-loop-pilot-945-20261111/benchmarks/reporting/closed_loop/run_closed_loop.py", line 135, in worker
+    stages.append(row); atomic_json(attempt / f"stage-{j:03d}.json", row)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/butahlecoq/.local/share/codex/worktrees/closed-loop-pilot-945-20261111/benchmarks/reporting/closed_loop/run_closed_loop.py", line 38, in atomic_json
+    json.dump(value, stream, indent=2, allow_nan=False)
+  File "/home/butahlecoq/.local/share/mise/installs/python/3.11.14/lib/python3.11/json/__init__.py", line 179, in dump
+    for chunk in iterable:
+  File "/home/butahlecoq/.local/share/mise/installs/python/3.11.14/lib/python3.11/json/encoder.py", line 432, in _iterencode
+    yield from _iterencode_dict(o, _current_indent_level)
+  File "/home/butahlecoq/.local/share/mise/installs/python/3.11.14/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "/home/butahlecoq/.local/share/mise/installs/python/3.11.14/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "/home/butahlecoq/.local/share/mise/installs/python/3.11.14/lib/python3.11/json/encoder.py", line 439, in _iterencode
+    o = _default(o)
+        ^^^^^^^^^^^
+  File "/home/butahlecoq/.local/share/mise/installs/python/3.11.14/lib/python3.11/json/encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+TypeError: Object of type bool is not JSON serializable

@@ -1,0 +1,18 @@
+{
+  "schema": "csl.closed-loop.run-manifest/1",
+  "attempt_id": "earth-orbit-20261111T112358Z-84ef9239",
+  "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+  "source_commit": "2ffbc3e30f1fc232b26607141b9502f3eaaf27a0",
+  "source_hashes": {
+    "benchmarks/reporting/closed_loop/run_closed_loop.py": "2a30341a73a2105f489af44a03aac4f1536b3457d7c2bf7ca12afb25358e07eb",
+    "benchmarks/reporting/closed_loop/orbit_nmpc.py": "2eab9c35bc58248ec4cebb58d38e8c79d75f21c834ed82f683694f0510cb2ffc",
+    "benchmarks/reporting/closed_loop/task_models.py": "f23e970ecaf593cf6bb71ac6ae692517cb3271b74361646cba2cf5e66650b8e5",
+    "benchmarks/reporting/mpc11/nmpc.py": "41462f02fac817012a0884f176fbac617320fadc0eb945638cb1b7678b9ef11e",
+    "benchmarks/reporting/mpc11/affine.py": "54d31b9c21fef962cb2a5f09f2e341ef92b3a40b128114c3c06a5b039fb95149"
+  },
+  "python": "3.11.14 (main, Feb 12 2026, 00:42:50) [Clang 21.1.4 ]",
+  "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+  "bridge": "/home/butahlecoq/.local/share/codex/worktrees/closed-loop-pilot-945-20261111/build/closed-loop-pilot-945/csl_mpc11_nonlinear_replay",
+  "bridge_sha256": "b5d47c14c65f1d2f833eaec4d9713bcc4717b130bd688e943ade7442c363973f",
+  "claim": "one-off correctness pilot; clocks descriptive, no speed comparison"
+}

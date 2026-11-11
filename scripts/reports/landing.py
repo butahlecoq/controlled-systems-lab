@@ -105,6 +105,11 @@ FAMILIES = {
         "Cross-checks one synthetic two-stage scalar fixed-plan minimax case with an exhaustive "
         "finite-action oracle, a shared-selector MILP and its continuous selector relaxation. "
         "The report measures no performance and does not complete issue #599."),
+    "closed-loop-pilot": Family(
+        r"closed-loop-pilot-v1", "synthesis", "Three source-bound observed-state control episodes",
+        "Reports one complete continuous-NMPC trajectory for each source-bound Lotka–Volterra, "
+        "Earth-orbit and fuel task, with common nonlinear plant execution, independent replays, "
+        "saved raw records and numerical-only evidence limits."),
     "mpc03-b08-miQCP": Family(
         r"mpc03-b08-l04-miQCP-v1", "synthesis", "B08 robust minimax MIQCP",
         "Solves the four-step L04 displayed-data finite-action minimax model with a shared-selector "
@@ -917,6 +922,18 @@ def build(site: Path) -> None:
             links=(("Full result record", pilot + "/record.json"),
                    ("Raw executable output", pilot + "/pilot-output.json"),
                    ("Build provenance", pilot + "/build-provenance.json"))))
+    closed_loop = "closed-loop-pilot-v1"
+    if (site / closed_loop / "index.html").is_file():
+        report_manifest = json.loads((site / closed_loop / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != closed_loop]
+        detailed.append(Entry(report_id=closed_loop,
+            scope="Three complete source-bound continuous NMPC episodes with independent common and tighter replay checks",
+            limits="One-off local-NLP numerical trajectories; no global optimality, reachability, safety, robustness, or speed-winner claim; Pages deployment and live URL verification pending",
+            commit=report_manifest.get("numerical_source_commit", ""),
+            links=(("Full source-bound report", closed_loop + "/index.html"),
+                   ("Lotka–Volterra 2D example", closed_loop + "/example-2d.html"),
+                   ("Full coverage record", closed_loop + "/raw/coverage.json"),
+                   ("Offline report ZIP", closed_loop + ".zip"))))
     b08 = "mpc03-b08-l04-miQCP-v1"
     if (site / b08 / "index.html").is_file():
         detailed = [entry for entry in detailed if entry.report_id != b08]
