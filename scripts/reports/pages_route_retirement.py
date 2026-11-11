@@ -40,7 +40,7 @@ BARE_ROUTE_REPLACEMENTS = {
     "opt05-hull-20261012-d6d3282081d5ea90d8a0c440ccc1ec774d40221e209a01d8207ebd06a551dbf5/index.html": "examples/index.html#square_duplicates",
     "opt06-basis-reuse-20261014-ef70e8c5-57c666a4f82b1f7c84d3507fbad32982a7928129c18f80348ea2c9ad457b3a8d/index.html": None,
     "perf03-ts01-single-process-correlation-20261014-365f6e659e316219/index.html": None,
-    "syn02-1b07970d73d90c79c4bba2c65d429ba05bd798751d885146cb21d8a876a067c3/index.html": "examples/control-witness-timing-v1.html#control-witness-timings",
+    "syn02-1b07970d73d90c79c4bba2c65d429ba05bd798751d885146cb21d8a876a067c3/index.html": "examples/control-witness-timing-v1.html",
     "env717-two-points-33ebdad360671940fb54/index.html": None,
     "review05-family-query-d6af180b0e398d78ebd2/review05-build-phases-20261110-468cc0eb/index.html": None,
 }
@@ -90,6 +90,7 @@ class References(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.refs: list[tuple[str, str]] = []
         self.tags: set[str] = set()
+        self.anchors: set[str] = set()
         self.inline_svg = 0
         self.text: list[str] = []
         self.svg_text: list[str] = []
@@ -102,6 +103,8 @@ class References(HTMLParser):
             self.inline_svg += 1
             self.in_svg = True
         for key, value in attrs:
+            if (key.lower() == "id" or (key.lower() == "name" and tag.lower() == "a")) and value:
+                self.anchors.add(value)
             if key.lower() in {"href", "src", "poster", "data"} and value:
                 self.refs.append((key.lower(), value))
             if key.lower() == "alt" and value:
@@ -330,7 +333,9 @@ def inventory(site: Path, *, source_commit: str = "unknown") -> dict:
             target = _internal_target(site, path, ref)
             if target is not None:
                 exists = (site / target).is_file()
-                refs.append({"kind": kind, "value": ref, "target": target, "exists": exists})
+                fragment = unquote(urlsplit(ref).fragment)
+                refs.append({"kind": kind, "value": ref, "target": target,
+                             "fragment": fragment or None, "exists": exists})
                 if exists and target.endswith(".html"):
                     inbound.setdefault(target, []).append(rel)
         figure_tags = sorted(parser.tags & {"img", "svg", "canvas", "object", "figure"})
@@ -339,6 +344,8 @@ def inventory(site: Path, *, source_commit: str = "unknown") -> dict:
         role, visibility = _route_role(rel, catalog)
         if rel in BARE_ROUTE_LESSONS:
             visibility, lesson = BARE_ROUTE_LESSONS[rel]
+            if visibility == "hidden-evidence":
+                role = "superseded or hidden evidence"
             completeness = {"status": "evidence-only", "basis": "reviewed route disposition",
                             "related_gallery_entries": [item.get("title") for item in route_entries]}
             replacement_page = BARE_ROUTE_REPLACEMENTS.get(rel)
@@ -374,6 +381,7 @@ def inventory(site: Path, *, source_commit: str = "unknown") -> dict:
         pages[rel] = {
             "producer": producer, "source_identity": source_identity,
             "role": role, "visibility": visibility,
+            "anchors": sorted(parser.anchors),
             "illustration": {"type": illustration, "basis": "observed HTML tags, inline SVG labels, alt text, linked asset names, and gallery metadata",
                              "embedded_tags": figure_tags,
                              "inline_svg_count": parser.inline_svg,
@@ -427,24 +435,84 @@ def learning_page() -> bytes:
             "<div class=\"cards\"><ul>" + body + "</ul></div></main></div></body></html>").encode("utf-8")
 
 
-def archive_page(site: Path) -> bytes:
+def archive_page(site: Path, inventory_data: dict) -> bytes:
     routes = sorted(path.relative_to(site).as_posix() for path in site.rglob("index.html")
                     if path.is_file() and path.relative_to(site).as_posix() != "index.html")
-    rows = []
+    learning_rows = []
+    ordinary_rows = []
+    hidden_rows = []
     for route in routes:
+        route_data = inventory_data["html_routes"][route]
+        hidden = route_data["visibility"] == "hidden-evidence"
         if route in BARE_ROUTE_LESSONS:
             disposition, lesson = BARE_ROUTE_LESSONS[route]
-            summary = f"{disposition} evidence. {lesson}."
+            summary = (f"Hidden or superseded evidence. {lesson}." if hidden
+                       else f"Retained in the archive. {lesson}.")
+        elif hidden:
+            summary = f"{route_data['role']}; retained for provenance and direct-route continuity."
         else:
-            summary = "Saved report or supporting evidence. Read the page for its scope and limits."
-        rows.append(f'<li class="coverage-row" id="{_archive_fragment(route)}"><h3><a href="{escape(route, quote=True)}">{escape(route)}</a></h3><p class="summary">{escape(summary)}</p></li>')
+            summary = f"{route_data['role']}. Read the page for its scope and evidence limits."
+        row = (f'<li class="coverage-row" id="{_archive_fragment(route)}">'
+               f'<h3><a href="{escape(route, quote=True)}">{escape(route)}</a></h3>'
+               f'<p class="summary">{escape(summary)}</p></li>')
+        if hidden:
+            hidden_rows.append(row)
+        elif route_data["visibility"] == "learning":
+            learning_rows.append(row)
+        else:
+            ordinary_rows.append(row)
+    learning_section = ("<section id=\"learning-pages\"><h2>Learning pages and examples</h2>"
+                        "<div class=\"cards\"><ul>" + "".join(learning_rows) + "</ul></div></section>") if learning_rows else ""
+    hidden_section = ("<section id=\"hidden-evidence\"><h2>Hidden and superseded evidence</h2>"
+                      "<p>Retained for provenance and stable direct URLs. These pages are not current primary lessons or ordinary report entries.</p>"
+                      "<div class=\"cards\"><ul>" + "".join(hidden_rows) + "</ul></div></section>") if hidden_rows else ""
+    hidden_nav = '<a href="archive.html#hidden-evidence">Hidden/superseded evidence</a>' if hidden_rows else ""
     return ("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Evidence archive · Controlled Systems Lab</title><link rel=\"stylesheet\" href=\"examples/examples.css\"></head><body><div class=\"shell\"><aside>"
             "<a class=\"brand\" href=\"index.html\">[ csl ]<br>Controlled Systems Lab</a><p class=\"eyebrow\">Learning routes</p>"
-            "<nav aria-label=\"Learning routes\"><a href=\"index.html\">Learn</a><a href=\"examples/index.html\">Examples</a><a href=\"archive.html\">Evidence archive</a></nav></aside>"
+            "<nav aria-label=\"Learning routes\"><a href=\"index.html\">Learn</a><a href=\"examples/index.html\">Examples</a><a href=\"archive.html\">Evidence archive</a>" + hidden_nav + "</nav></aside>"
             "<main class=\"report-home\"><header><p class=\"eyebrow\">Saved pages</p><h1>Evidence archive</h1>"
-            "<p>These routes retain saved report pages and their evidence. Each page states its own scope and limits."
-            " The previous archive landing page remains byte-identical at <a href=\"legacy-index.html\">legacy-index.html</a>.</p></header><div class=\"cards\"><ul>"
-            + "".join(rows) + "</ul></div></main></div></body></html>").encode("utf-8")
+            "<p>Learning pages, current saved reports, and supporting evidence are listed in their own sections. Hidden or superseded evidence is listed separately with its stable URL."
+            " The previous archive landing page remains byte-identical at <a href=\"legacy-index.html\">legacy-index.html</a>.</p></header><section id=\"saved-reports\"><h2>Saved reports and supporting evidence</h2><div class=\"cards\"><ul>"
+            + "".join(ordinary_rows) + "</ul></div></section>" + learning_section + hidden_section + "</main></div></body></html>").encode("utf-8")
+
+
+def _validate_replacement_lessons(site: Path, inventory_data: dict) -> None:
+    pages = inventory_data["html_routes"]
+    for retired_route, lesson in BARE_ROUTE_REPLACEMENTS.items():
+        if lesson is None or retired_route not in pages:
+            continue
+        parsed = urlsplit(lesson)
+        if parsed.scheme or parsed.netloc or not parsed.path:
+            raise ValueError(f"replacement lesson must be an internal route: {retired_route} -> {lesson}")
+        target = (site.resolve() / unquote(parsed.path)).resolve()
+        if not target.is_relative_to(site.resolve()):
+            raise ValueError(f"replacement lesson escapes the Pages site: {retired_route} -> {lesson}")
+        if target.is_dir():
+            target = target / "index.html"
+        target_route = target.relative_to(site.resolve()).as_posix()
+        target_page = pages.get(target_route)
+        if target_page is None:
+            raise ValueError(f"replacement lesson route is missing: {retired_route} -> {lesson}")
+        fragment = unquote(parsed.fragment)
+        if fragment and fragment not in target_page["anchors"]:
+            raise ValueError(f"replacement lesson fragment is missing: {retired_route} -> {lesson}")
+
+
+def _validate_generated_fragments(inventory_data: dict) -> None:
+    pages = inventory_data["html_routes"]
+    for route in ("index.html", "archive.html"):
+        for ref in pages[route]["outbound_references"]:
+            if ref["kind"] != "href" or not ref["exists"] or not ref["fragment"]:
+                continue
+            target_page = pages.get(ref["target"])
+            if target_page is None or ref["fragment"] not in target_page["anchors"]:
+                raise ValueError(f"generated navigation fragment is broken: {route} -> {ref['value']}")
+    for ref in pages["examples/index.html"]["outbound_references"]:
+        if (ref["kind"] != "href" or ref["target"] != "archive.html"
+                or not ref["fragment"]):
+            continue
+        if ref["fragment"] not in pages["archive.html"]["anchors"]:
+            raise ValueError(f"generated archive link fragment is broken: examples/index.html -> {ref['value']}")
 
 
 def finalize(site: Path, *, source_commit: str = "unknown") -> dict:
@@ -463,6 +531,7 @@ def finalize(site: Path, *, source_commit: str = "unknown") -> dict:
                       if ref["kind"] in {"src", "poster", "data"} and not ref["exists"]]
     if broken_figures:
         raise ValueError("composed site contains broken local figure references: " + "; ".join(broken_figures[:10]))
+    _validate_replacement_lessons(site, baseline)
     root_bytes = root.read_bytes()
     archive = site / "archive.html"
     legacy = site / "legacy-index.html"
@@ -505,7 +574,7 @@ def finalize(site: Path, *, source_commit: str = "unknown") -> dict:
         raise ValueError("gallery navigation did not expose the evidence archive")
     root.write_bytes(learning_page())
     legacy.write_bytes(legacy_bytes)
-    archive.write_bytes(archive_page(site))
+    archive.write_bytes(archive_page(site, baseline))
     gallery.write_text(gallery_text, encoding="utf-8")
     immutable_after = {
         path.relative_to(site).as_posix(): sha256(path.read_bytes())
@@ -531,7 +600,18 @@ def finalize(site: Path, *, source_commit: str = "unknown") -> dict:
         "new_root_report_link_count": len(new_report_links),
         "retired_primary_routes": sorted(BARE_ROUTE_LESSONS),
         "deleted_html_wrappers": [],
-        "deletion_disposition": "All HTML routes remain available. The generated archive indexes every report index page, so no wrapper qualifies for deletion.",
+        "deletion_disposition": "No HTML routes were deleted. Every index page is reachable through its learning, ordinary archive, or hidden-evidence section according to its reviewed visibility, so no standalone wrapper was shown to be disposable.",
+        "archive_index_route_count": sum(route.endswith("/index.html") and route != "index.html"
+                                         for route in result["html_routes"]),
+        "ordinary_archive_routes": sorted(route for route, row in result["html_routes"].items()
+                                           if route.endswith("/index.html") and route != "index.html"
+                                           and row["visibility"] == "archive"),
+        "learning_page_routes": sorted(route for route, row in result["html_routes"].items()
+                                        if route.endswith("/index.html") and route != "index.html"
+                                        and row["visibility"] == "learning"),
+        "hidden_evidence_routes": sorted(route for route, row in result["html_routes"].items()
+                                         if route.endswith("/index.html") and route != "index.html"
+                                         and row["visibility"] == "hidden-evidence"),
         "primary_route_dispositions": [
             {"route": route, "disposition": "moved to the evidence archive",
              "replacement_lesson": BARE_ROUTE_LESSONS.get(route, ("archive", "No replacement lesson assigned."))[1],
@@ -576,6 +656,7 @@ def finalize(site: Path, *, source_commit: str = "unknown") -> dict:
         for ref in result["html_routes"][generated]["outbound_references"]:
             if ref["kind"] == "href" and not ref["exists"]:
                 raise ValueError(f"generated navigation link is broken: {generated} -> {ref['value']}")
+    _validate_generated_fragments(result)
     for route in BARE_ROUTE_LESSONS:
         direct = "../" + route
         if any(ref["value"] == direct for ref in result["html_routes"]["examples/index.html"]["outbound_references"]):

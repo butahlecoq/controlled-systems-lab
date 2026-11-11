@@ -5,27 +5,34 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 import zipfile
 
 from scripts.reports import pages_route_retirement as retirement
 
 
 class PagesRouteRetirementTests(unittest.TestCase):
-    def make_site(self, root: Path, *, gallery: str | None = None) -> tuple[Path, str]:
+    def make_site(self, root: Path, *, gallery: str | None = None,
+                  route: str | None = None) -> tuple[Path, str]:
         site = root / "site"
         (site / "examples").mkdir(parents=True)
         (site / "examples/examples.css").write_text("body{color:inherit}")
-        route = next(iter(retirement.BARE_ROUTE_LESSONS))
+        route = route or next(iter(retirement.BARE_ROUTE_LESSONS))
         (site / "catalog.json").write_text(json.dumps({
             "schema": "csl.algorithm-report-catalog/3",
             "reports": [{"report_id": route.split("/", 1)[0], "report_kind": "finite-feedback"}],
         }))
         (site / route).parent.mkdir(parents=True)
         (site / route).write_text("<!doctype html><html><body><h1>Saved report</h1></body></html>")
+        replacement = retirement.BARE_ROUTE_REPLACEMENTS.get(route)
+        if replacement:
+            replacement_path = site / replacement.split("#", 1)[0]
+            replacement_path.parent.mkdir(parents=True, exist_ok=True)
+            replacement_path.write_text("<!doctype html><html><body><h1>Related example</h1></body></html>")
         (site / "index.html").write_text(
             f'<!doctype html><html><body><ul><li><a href="{route}">Bare report</a></li></ul></body></html>')
         (site / "examples/index.html").write_text(gallery or
-            f'<!doctype html><html><body><a href="../index.html">All numerical reports ↗</a>'
+            f'<!doctype html><html><body><h1 id="algorithm-coverage">Examples</h1><a href="../index.html">All numerical reports ↗</a>'
             f'<a href="../{route}">Saved report</a></body></html>')
         with zipfile.ZipFile(site / (route.split("/", 1)[0] + ".zip"), "w") as archive:
             archive.writestr("result.json", '{"saved":true}\n')
@@ -54,7 +61,8 @@ class PagesRouteRetirementTests(unittest.TestCase):
             self.assertIn("../archive.html#", (site / "examples/index.html").read_text())
             self.assertNotIn("../" + route, (site / "examples/index.html").read_text())
             self.assertIn(route, second["html_routes"])
-            self.assertEqual(second["artifact_transition"]["preserved_immutable_html"], [route])
+            self.assertEqual(second["artifact_transition"]["preserved_immutable_html"],
+                             sorted([route, "examples/finite-feedback-timing-v1.html"]))
             self.assertEqual(second["artifact_transition"]["preserved_zip_routes"], [archive_path.name])
             self.assertIn('class="shell"', (site / "index.html").read_text())
             self.assertIn('class="report-home"', (site / "index.html").read_text())
@@ -78,6 +86,33 @@ class PagesRouteRetirementTests(unittest.TestCase):
 
             with self.assertRaisesRegex(ValueError, "broken local figure references"):
                 retirement.finalize(site, source_commit="fixture")
+
+            self.assertEqual((site / "index.html").read_bytes(), root_before)
+            self.assertEqual((site / "examples/index.html").read_bytes(), gallery_before)
+            self.assertFalse((site / "archive.html").exists())
+
+    def test_hidden_evidence_is_separated_from_ordinary_archive(self) -> None:
+        route = "review05-family-query-d6af180b0e398d78ebd2/review05-build-phases-20261110-468cc0eb/index.html"
+        with tempfile.TemporaryDirectory() as temporary:
+            site, _ = self.make_site(Path(temporary), route=route)
+            result = retirement.finalize(site, source_commit="fixture")
+            archive = (site / "archive.html").read_text()
+            ordinary, hidden = archive.split('<section id="hidden-evidence">', 1)
+
+            self.assertNotIn(route, ordinary)
+            self.assertIn(route, hidden)
+            self.assertEqual(result["navigation_transition"]["hidden_evidence_routes"], [route])
+            self.assertIn("Hidden and superseded evidence", hidden)
+
+    def test_missing_replacement_fragment_fails_before_navigation_writes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            site, route = self.make_site(Path(temporary))
+            root_before = (site / "index.html").read_bytes()
+            gallery_before = (site / "examples/index.html").read_bytes()
+            with patch.dict(retirement.BARE_ROUTE_REPLACEMENTS,
+                            {route: "examples/index.html#missing-example-anchor"}):
+                with self.assertRaisesRegex(ValueError, "replacement lesson fragment is missing"):
+                    retirement.finalize(site, source_commit="fixture")
 
             self.assertEqual((site / "index.html").read_bytes(), root_before)
             self.assertEqual((site / "examples/index.html").read_bytes(), gallery_before)
