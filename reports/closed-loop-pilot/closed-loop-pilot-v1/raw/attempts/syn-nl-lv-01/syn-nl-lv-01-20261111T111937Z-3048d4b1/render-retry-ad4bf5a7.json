@@ -1,0 +1,37 @@
+{
+  "schema": "csl.closed-loop.render/1",
+  "render_id": "render-retry-ad4bf5a7",
+  "attempt_id": "syn-nl-lv-01-20261111T111937Z-3048d4b1",
+  "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+  "controls_sha256": "cd50c4d124e7f91c0a009fa32362400057dfbede3f2b1db656d714515cb15d2e",
+  "source_commit": "cd4e7778eaad9451594210351cbc382ce8719d72",
+  "renderer_source_hashes": {
+    "benchmarks/reporting/closed_loop/run_closed_loop.py": "983ad196b2c2947c24b6fa99e7b60bb31fce98bdebd90ac7de885bade637ffc6",
+    "benchmarks/reporting/closed_loop/task_models.py": "41268676a408b2af4de63dcbf1425e405341963f5f98a3e0020db28bb40434e9"
+  },
+  "render": {
+    "status": "complete",
+    "plots": [
+      "render-retry-ad4bf5a7-trajectory.png",
+      "render-retry-ad4bf5a7-phase.png",
+      "render-retry-ad4bf5a7-controls.png"
+    ],
+    "phase_projections": [
+      {
+        "coordinates": [
+          "P",
+          "R"
+        ],
+        "units": [
+          "thousand individuals",
+          "thousand individuals"
+        ],
+        "indices": [
+          0,
+          1
+        ]
+      }
+    ],
+    "target_marker": "soft objective reference, not a terminal constraint"
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "schema": "csl.closed-loop.attempt/1",
+  "attempt_id": "earth-orbit-20261111T112358Z-84ef9239",
+  "task_id": "env717-earth-orbit/continuous-receding/1",
+  "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+  "source_sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c",
+  "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
+  "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
+  "objective_id": "env717-earth-orbit/source-cost-continuous/1",
+  "controller_id": "syn-nl-orbit-01/source-cost-direct-shooting/1",
+  "selected_initial_state_physical": [
+    7000.0,
+    0.0,
+    0.0,
+    0.0010780614796240577
+  ],
+  "original_intervals": 20,
+  "original_final_time": 2000.0,
+  "status": "in-progress",
+  "controls": [],
+  "physical_states": [
+    [
+      7000.0,
+      0.0,
+      0.0,
+      0.0010780614796240577
+    ]
+  ],
+  "stages": [],
+  "module_roles": {
+    "vertex_lp": "not_used",
+    "set_reducer": "not_used",
+    "representation": "not_used",
+    "converter": "not_used",
+    "controller": "syn-nl-orbit-01/source-cost-direct-shooting/1",
+    "execution": "common-adaptive-replay/CSL-simulation-rk4-step-doubling/1"
+  },
+  "geometry_work": {
+    "vertices": 0,
+    "set_operations": 0,
+    "claim": "pure NMPC; no representation comparison"
+  },
+  "resource_limits": {
+    "requested": {
+      "wall_seconds": 300,
+      "address_space_bytes": 8589934592,
+      "cpu_seconds": 300,
+      "worker_count": 1,
+      "solver_threads": 1
+    },
+    "enforced": {
+      "wall_seconds": "subprocess timeout with process-group termination",
+      "address_space_bytes": "POSIX RLIMIT_AS on worker process",
+      "cpu_seconds": "POSIX RLIMIT_CPU on worker process",
+      "worker_count": "one worker",
+      "solver_threads": "environment requests one BLAS/OMP/MKL thread"
+    },
+    "observed": {
+      "worker_pid": 3278316,
+      "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+      "python": "3.11.14"
+    }
+  },
+  "assurance": "observed-state single-player policy trajectory; local NLP diagnostics; no global optimality, reachability, safety, or robustness guarantee",
+  "supervisor": {
+    "status": "failed",
+    "return_code": 1,
+    "wall_seconds": 0.4605222758837044,
+    "termination_scope": "worker process group",
+    "stdout": "worker-stdout.txt",
+    "stderr": "worker-stderr.txt"
+  },
+  "sampled_constraint_diagnostics": {
+    "sampled_state_bound_violation_by_coordinate": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "control_bound_violation_by_coordinate": [],
+    "control_bound_violation_max": 0.0,
+    "model_domain": {
+      "minimum_radius_km": 7000.0,
+      "positive_radius": true
+    },
+    "scope": "sampled endpoints and controls; no continuous-time enclosure"
+  }
+}

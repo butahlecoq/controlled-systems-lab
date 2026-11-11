@@ -1,0 +1,300 @@
+{
+  "schema": "csl.mpc11.nonlinear-request/1",
+  "scenario": {
+    "schema": "csl.mpc11.scenario/1",
+    "track": "new-synthetic-comparison",
+    "contract": "docs/contracts/mpc11-synthetic-controller-study.md",
+    "assurance": "numerical-binary64",
+    "hold": "zero-order",
+    "observation": "exact-full-execution-state",
+    "variants": [
+      "affine-plan/affine-replay",
+      "affine-plan/nonlinear-replay",
+      "nominal-nmpc/nonlinear-replay"
+    ],
+    "nmpc": {
+      "horizon": "shrinking-to-fixed-terminal",
+      "running_cost_denominator": "original-interval-count",
+      "physical_constraints": true,
+      "affine_trust_region": false,
+      "collocation": {
+        "method": "radau",
+        "degree": 3,
+        "elements_per_interval": 1,
+        "state_constraint_nodes": "all-collocation-and-mesh-including-endpoints"
+      },
+      "solver": {
+        "name": "ipopt",
+        "linear_solver": "mumps",
+        "tol": 1e-08,
+        "acceptable_tol": 1e-06,
+        "max_iter": 1000
+      },
+      "warm_start": {
+        "primal": "drop-first-interval-no-terminal-repeat",
+        "dual": "zero-every-solve",
+        "initial_state_override": "new-full-observation"
+      },
+      "failure": "stop-before-next-input-no-fallback",
+      "n_robust": 0
+    },
+    "execution": {
+      "method": "cvodes",
+      "scaled_abstol": 1e-10,
+      "reltol": 1e-09
+    },
+    "independent_replay": {
+      "provider": "CSL::simulation",
+      "method": "adaptive-rk4-step-doubling",
+      "scaled_abstol": 1e-10,
+      "reltol": 1e-09,
+      "step_attempts_per_hold_interval": 100000,
+      "report_subintervals_per_hold": 20,
+      "sensitivity": {
+        "scaled_abstol": 1e-11,
+        "reltol": 1e-10
+      }
+    },
+    "evidence_limits": [
+      "local-NLP-only",
+      "sampled-constraints-not-continuous-safety",
+      "no-nonlinear-robustness",
+      "no-reachable-set-containment",
+      "not-historical-restoration"
+    ],
+    "case_id": "SYN-NL-LV-01",
+    "model_id": "syn-nl-lv-01/ode/1",
+    "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
+    "time": {
+      "unit": "day",
+      "dt": 0.1,
+      "intervals": 1,
+      "final": 0.5,
+      "grid": [
+        0.4,
+        0.5
+      ],
+      "reference_transforms": "physical-coordinates; affine-reference-subtraction-saved-by-producer"
+    },
+    "states": [
+      {
+        "name": "P",
+        "unit": "thousand individuals",
+        "initial": 120,
+        "scale": 100,
+        "physical_bounds": [
+          0,
+          200
+        ]
+      },
+      {
+        "name": "R",
+        "unit": "thousand individuals",
+        "initial": 60,
+        "scale": 80,
+        "physical_bounds": [
+          0,
+          150
+        ]
+      }
+    ],
+    "controls": [
+      {
+        "name": "u",
+        "unit": "1/day",
+        "physical_bounds": [
+          0,
+          0.05
+        ]
+      }
+    ],
+    "parameters": {
+      "a": {
+        "value": 0.8,
+        "unit": "1/day"
+      },
+      "b": {
+        "value": 0.01,
+        "unit": "1/(thousand individuals*day)"
+      },
+      "c": {
+        "value": 0.6,
+        "unit": "1/day"
+      },
+      "d": {
+        "value": 0.006,
+        "unit": "1/(thousand individuals*day)"
+      }
+    },
+    "equations": [
+      "dP/dt=(a-b*R-u)*P",
+      "dR/dt=(d*P-c)*R"
+    ],
+    "model_domain": "P,R finite; bounds checked independently",
+    "objective": {
+      "terminal_target": [
+        100,
+        80
+      ],
+      "terminal_scale": [
+        100,
+        80
+      ],
+      "terminal_weights": [
+        1,
+        1
+      ],
+      "running_weight": 0.05,
+      "running_scale": [
+        0.05
+      ],
+      "running_reference": [
+        0
+      ],
+      "running_formula": "running_weight/N*sum_k(sum_i(((u[k,i]-running_reference[i])/running_scale[i])^2))",
+      "terminal_formula": "sum_i(terminal_weights[i]*((x[N,i]-terminal_target[i])/terminal_scale[i])^2)"
+    },
+    "affine": {
+      "model_id": "syn-nl-lv-01/frozen-coexistence-affine/1",
+      "linearization": "frozen",
+      "state_reference": [
+        100,
+        80
+      ],
+      "input_reference": [
+        0
+      ],
+      "discretization": "matrix-exponential-with-Taylor-offset",
+      "trust_state_absolute": [
+        40,
+        30
+      ],
+      "trust_input_absolute": [
+        0.05
+      ],
+      "producer": "actual-CSL-public-joint-program-or-synthesis; retain-provider-and-witness",
+      "offset_coordinates": "physical-state; scale-transform=x/scale; reference-deviation-transform-explicit"
+    },
+    "initial_guess": {
+      "input": [
+        0.025
+      ],
+      "state": "coexistence-reference; first-state=observation"
+    },
+    "controller_id": "syn-nl-lv-01/nominal-shrinking-radau3/1",
+    "parameter_source": "authored-synthetic-design; docs/research/mpc11-nonlinear-study-design.md",
+    "figures": {
+      "phase_planes": [
+        [
+          "P",
+          "R"
+        ]
+      ],
+      "geometry_claim": "individual-numerical-trajectories-only",
+      "companion": "state-and-control-time-traces"
+    }
+  },
+  "scenario_sha256": "b775290dd913f645fa75e50ef39418db022e0c3815b977350fd32329917aefde",
+  "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+  "witness_sha256": "ebbc7b81657af634ec05e74767dc9026fc86cdb06ba8758d3e1090e1b3e3c281",
+  "controls_sha256": "7b82e7de41f3e52fcf617e9f7cb2021423fefc2caac53beb117f7504f7e0a04e",
+  "hold": "constant-on-original-interval",
+  "original_controls": [
+    [
+      0.030188331695864237
+    ]
+  ],
+  "controls": [
+    [
+      0.030188331695864237
+    ],
+    [
+      0.030188331695864237
+    ],
+    [
+      0.030188331695864237
+    ],
+    [
+      0.030188331695864237
+    ],
+    [
+      0.030188331695864237
+    ],
+    [
+      0.030188331695864237
+    ],
+    [
+      0.030188331695864237
+    ],
+    [
+      0.030188331695864237
+    ],
+    [
+      0.030188331695864237
+    ],
+    [
+      0.030188331695864237
+    ],
+    [
+      0.030188331695864237
+    ],
+    [
+      0.030188331695864237
+    ],
+    [
+      0.030188331695864237
+    ],
+    [
+      0.030188331695864237
+    ],
+    [
+      0.030188331695864237
+    ],
+    [
+      0.030188331695864237
+    ],
+    [
+      0.030188331695864237
+    ],
+    [
+      0.030188331695864237
+    ],
+    [
+      0.030188331695864237
+    ],
+    [
+      0.030188331695864237
+    ]
+  ],
+  "times": [
+    0.4,
+    0.405,
+    0.41000000000000003,
+    0.41500000000000004,
+    0.42000000000000004,
+    0.42500000000000004,
+    0.43,
+    0.435,
+    0.44,
+    0.445,
+    0.45,
+    0.455,
+    0.46,
+    0.465,
+    0.47,
+    0.475,
+    0.48,
+    0.485,
+    0.49,
+    0.495,
+    0.5
+  ],
+  "initial_scaled": [
+    1.278794350830502,
+    0.7946274957236458
+  ],
+  "abstol": 1e-10,
+  "reltol": 1e-09,
+  "max_attempts": 5000,
+  "report_subintervals_per_hold": 20
+}

@@ -1,0 +1,1253 @@
+{
+  "update_index": 28,
+  "absolute_time": 2.8000000000000003,
+  "observed_physical": [
+    114.16127916690289,
+    97.9287747242357
+  ],
+  "observed_scaled": [
+    1.1416127916690288,
+    1.2241096840529462
+  ],
+  "original_task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+  "status": "applied-and-observed",
+  "module_calls": [
+    {
+      "operation": "execution.advance",
+      "provider": "CSL::simulation",
+      "module_id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+      "profile_id": "common-adaptive-replay/CSL-simulation-rk4-step-doubling/1",
+      "status": "complete",
+      "accepted_steps": 20,
+      "rejected_steps": 0
+    }
+  ],
+  "requested_modules": {
+    "controller": "syn-nl-lv-01/nominal-shrinking-radau3/1",
+    "vertex_lp": "not_used",
+    "set_reducer": "not_used",
+    "representation": "not_used",
+    "converter": "not_used",
+    "execution": "CSL::simulation"
+  },
+  "policy_id": "syn-nl-lv-01/nominal-shrinking-radau3/1",
+  "controller_invocations": [
+    {
+      "operation": "controller.solve",
+      "module_id": "syn-nl-lv-01/nominal-shrinking-radau3/1",
+      "provider": "do-mpc/CasADi/IPOPT-MUMPS",
+      "profile_id": "mpc11-nominal-shrinking-radau3/1"
+    }
+  ],
+  "solve_receipt": {
+    "setup_seconds": 0.09530897717922926,
+    "original_interval_count": 30,
+    "remaining_horizon": 2,
+    "update_index": 28,
+    "absolute_initial_time": 2.8,
+    "fixed_terminal_time": 3,
+    "running_cost_semantics": "direct sum of lterm, original N, no dt factor",
+    "nlp_objective_expression": "@1=0.00166667, @2=0.05, @3=100, @4=80, (((@1*sq(((_u_0_0_u-_tvp_0_reference)/@2)))+(@1*sq(((_u_1_0_u-_tvp_1_reference)/@2))))+(sq((((@3*_x_2_0_4_z_0)-@3)/@3))+sq((((@4*_x_2_0_4_z_1)-@4)/@4))))",
+    "nlp_variable_labels": [
+      "[_x,0,0,0,z,0]",
+      "[_x,0,0,0,z,1]",
+      "[_x,0,0,1,z,0]",
+      "[_x,0,0,1,z,1]",
+      "[_x,0,0,2,z,0]",
+      "[_x,0,0,2,z,1]",
+      "[_x,0,0,3,z,0]",
+      "[_x,0,0,3,z,1]",
+      "[_x,0,0,4,z,0]",
+      "[_x,0,0,4,z,1]",
+      "[_x,1,0,0,z,0]",
+      "[_x,1,0,0,z,1]",
+      "[_x,1,0,1,z,0]",
+      "[_x,1,0,1,z,1]",
+      "[_x,1,0,2,z,0]",
+      "[_x,1,0,2,z,1]",
+      "[_x,1,0,3,z,0]",
+      "[_x,1,0,3,z,1]",
+      "[_x,1,0,4,z,0]",
+      "[_x,1,0,4,z,1]",
+      "[_x,2,0,0,z,0]",
+      "[_x,2,0,0,z,1]",
+      "[_x,2,0,1,z,0]",
+      "[_x,2,0,1,z,1]",
+      "[_x,2,0,2,z,0]",
+      "[_x,2,0,2,z,1]",
+      "[_x,2,0,3,z,0]",
+      "[_x,2,0,3,z,1]",
+      "[_x,2,0,4,z,0]",
+      "[_x,2,0,4,z,1]",
+      "[_u,0,0,u,0]",
+      "[_u,1,0,u,0]"
+    ],
+    "constraint_lower": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "constraint_upper": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "variable_lower": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "variable_upper": [
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      0.05,
+      0.05
+    ],
+    "schema": "csl.mpc11.nlp-update/1",
+    "status": "Solve_Succeeded",
+    "success": true,
+    "accepted": true,
+    "iteration_count": 8,
+    "objective": 0.06802065784413154,
+    "objective_recomputed": 0.06802065784413154,
+    "objective_reconstruction_difference": 0.0,
+    "optimization_node_max_physical_state_violation": [
+      0.0,
+      0.0
+    ],
+    "max_scaled_primal_violation": 4.100886297209172e-15,
+    "local_stationarity_infinity_norm": 4.041181588012864e-15,
+    "dual_x": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      7.242604488902978e-10,
+      1.8028395019418294e-09,
+      7.054684818724775e-10,
+      1.814950388408187e-09,
+      6.460799782381245e-10,
+      1.851529035844166e-09,
+      6.030599331294816e-10,
+      1.876379092698528e-09,
+      6.030599331294816e-10,
+      1.876379092698528e-09,
+      6.030599331294816e-10,
+      1.876379092698528e-09,
+      5.845492897313077e-10,
+      1.886780606136668e-09,
+      5.261335700143852e-10,
+      1.9178078817947173e-09,
+      4.838928976009477e-10,
+      1.9385009882262054e-09,
+      4.838928976009477e-10,
+      1.9385009882262054e-09,
+      4.838928976009477e-10,
+      1.9385009882262054e-09,
+      -4.086833372978369e-08,
+      -6.937124019982674e-08
+    ],
+    "dual_g": [
+      -0.251441127586315,
+      -0.45019354801863054,
+      0.0929967415747465,
+      0.1705595778738381,
+      0.11937345901771035,
+      0.23676989304041252,
+      0.024709428246967508,
+      0.05200532218634966,
+      -0.22238650711413335,
+      -0.46804788237348194,
+      0.22238650651107342,
+      0.46804788049710283,
+      0.08194107054957232,
+      0.17713003260583865,
+      0.10381619945913902,
+      0.24507020073499347,
+      0.021259088853603978,
+      0.053703364186040096,
+      -0.19133379111655016,
+      -0.4833304166598236,
+      0.19133379063265726,
+      0.4833304147213226
+    ],
+    "solve_seconds": 0.010209070052951574,
+    "observation_scaled": [
+      1.1416127916690288,
+      1.2241096840529462
+    ],
+    "guess": {
+      "policy": "drop-first-interval-no-terminal-repeat",
+      "dual_policy": "zero-every-solve",
+      "controls": [
+        [
+          0.020099493344534373
+        ],
+        [
+          0.017194677768040647
+        ]
+      ],
+      "mesh_scaled": [
+        [
+          1.1416127916690288,
+          1.2241096840529462
+        ],
+        [
+          1.118634326344906,
+          1.2337066911141077
+        ],
+        [
+          1.0956668950840607,
+          1.241665206385704
+        ]
+      ],
+      "full_primal": [
+        1.1609265368497828,
+        1.214755950646442,
+        1.1497773394564892,
+        1.2203160852661212,
+        1.1416127916783176,
+        1.224109684045923,
+        1.1416127916783176,
+        1.224109684045923,
+        1.1416127916690288,
+        1.2241096840529462,
+        1.1380776231930205,
+        1.225703306072733,
+        1.1268376719635678,
+        1.2304850804153653,
+        1.118634326344906,
+        1.2337066911141077,
+        1.118634326344906,
+        1.2337066911141077,
+        1.118634326344906,
+        1.2337066911141077,
+        1.1150895276156532,
+        1.2350487030209674,
+        1.1038466788185244,
+        1.2390292508330727,
+        1.0956668950840607,
+        1.241665206385704,
+        1.0956668950840607,
+        1.241665206385704,
+        1.0956668950840607,
+        1.241665206385704,
+        0.020099493344534373,
+        0.017194677768040647
+      ],
+      "guess_sha256": "874a506f5aa7e0f5181056d76a4530f5f5f580f2f4c309fb11c5bffccdf2c435"
+    },
+    "primal": [
+      0.9999999999999999,
+      0.9374999999999999,
+      0.9999999999999999,
+      0.9374999999999999,
+      0.9999999999999999,
+      0.9375000000000001,
+      0.9999999999999999,
+      0.9375000000000001,
+      1.1416127916690288,
+      1.2241096840529462,
+      1.1380776231836904,
+      1.2257033060796592,
+      1.1268376719541195,
+      1.2304850804219785,
+      1.118634326335384,
+      1.2337066911204888,
+      1.118634326335384,
+      1.2337066911204888,
+      1.118634326335384,
+      1.2337066911204888,
+      1.115089527606102,
+      1.2350487030272457,
+      1.103846678808893,
+      1.2390292508390217,
+      1.0956668950743822,
+      1.2416652063914106,
+      1.0956668950743822,
+      1.2416652063914106,
+      1.0956668950743822,
+      1.2416652063914106,
+      0.020099493342926832,
+      0.017194677766419537
+    ],
+    "parameters": [
+      1.1416127916690288,
+      1.2241096840529462,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "constraint_values": [
+      0.0,
+      0.0,
+      6.938893903907228e-18,
+      -1.1796119636642288e-16,
+      2.185751579730777e-16,
+      4.701100619897147e-16,
+      3.885780586188048e-16,
+      -1.6792123247455493e-15,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.321859288694327e-15,
+      7.476658181460039e-16,
+      2.2620794126737565e-15,
+      -8.890457814381136e-16,
+      4.100886297209172e-15,
+      -2.96637714392034e-16,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "predicted_controls": [
+      [
+        0.020099493342926832
+      ],
+      [
+        0.017194677766419537
+      ]
+    ],
+    "predicted_mesh_scaled": [
+      [
+        1.1416127916690288,
+        1.2241096840529462
+      ],
+      [
+        1.118634326335384,
+        1.2337066911204888
+      ],
+      [
+        1.0956668950743822,
+        1.2416652063914106
+      ]
+    ],
+    "predicted_mesh_physical": [
+      [
+        114.16127916690289,
+        97.9287747242357
+      ],
+      [
+        111.8634326335384,
+        98.6965352896391
+      ],
+      [
+        109.56668950743821,
+        99.33321651131286
+      ]
+    ],
+    "solver_iterations": {
+      "alpha_du": [
+        0.0,
+        1.0,
+        1.0,
+        0.95725361781071,
+        0.8181255283745739,
+        1.0,
+        1.0,
+        0.9992424713433121,
+        1.0
+      ],
+      "alpha_pr": [
+        0.0,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "d_norm": [
+        0.0,
+        0.030799080577261648,
+        0.007674196923266808,
+        0.014021667843201939,
+        0.008990368194971286,
+        0.009204175516746928,
+        0.23868523645633166,
+        6.927607402132129e-05,
+        5.328889869625362e-07
+      ],
+      "inf_du": [
+        6.531066143455888e-08,
+        0.038239202667975314,
+        6.586393000024282e-07,
+        0.0001242457094245801,
+        0.0022681698758621003,
+        1.8428757879302413e-07,
+        9.592493664269137e-09,
+        7.179357777682894e-08,
+        4.041181588012864e-15
+      ],
+      "inf_pr": [
+        3.8449479711211154e-11,
+        4.18827153868262e-06,
+        1.4129880633595437e-09,
+        9.334162012764047e-08,
+        1.385641759322348e-06,
+        1.7724719872380668e-07,
+        9.191307284717176e-09,
+        7.323990372509748e-11,
+        4.100886297209172e-15
+      ],
+      "mu": [
+        0.1,
+        0.1,
+        0.002828427124746191,
+        0.00015042412372345582,
+        1.8449144625279508e-06,
+        1.8449144625279508e-06,
+        1.8449144625279508e-06,
+        2.5059035596800618e-09,
+        2.5059035596800618e-09
+      ],
+      "obj": [
+        0.0680206578433055,
+        0.06824977967961444,
+        0.06824238278142616,
+        0.06817988934908052,
+        0.06803612046494131,
+        0.06802120163815818,
+        0.06802066029883462,
+        0.06802065783350957,
+        0.06802065784413154
+      ],
+      "regularization_size": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "source_solve_id": 27,
+    "assurance": "local NLP diagnostics only; no global nonlinear certificate",
+    "solve_sha256": "b3ed459ce1f25c9a0efb8322fc68498917b7e36a3030ae21477d21fa1929624d",
+    "controller_id": "syn-nl-lv-01/nominal-shrinking-radau3/1"
+  },
+  "invoked_modules": [
+    "syn-nl-lv-01/nominal-shrinking-radau3/1"
+  ],
+  "held_step_request": {
+    "schema": "csl.closed-loop.held-step-request/1",
+    "task_id": "syn-nl-lv-01/continuous-receding/1",
+    "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+    "model_id": "syn-nl-lv-01/ode/1",
+    "action_profile_id": "syn-nl-lv-01/continuous-receding/1/continuous-control/1",
+    "original_interval_count": 30,
+    "original_final_time": 3,
+    "absolute_update_index": 28,
+    "absolute_time": 2.8000000000000003,
+    "observed_state": {
+      "physical": [
+        114.16127916690289,
+        97.9287747242357
+      ],
+      "scaled": [
+        1.1416127916690288,
+        1.2241096840529462
+      ],
+      "scales": [
+        100.0,
+        80.0
+      ]
+    },
+    "control": [
+      0.020099493342926832
+    ],
+    "execution_profile_id": "common-adaptive-replay/CSL-simulation-rk4-step-doubling/1",
+    "witness_sha256": "b2b038df6d0f4e6bbf728b18c51b7ef7b3622cd9d85946f0bfbac3020d771554",
+    "derived_slice": {
+      "schema": "csl.closed-loop.execution-slice/1",
+      "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+      "absolute_update_index": 28,
+      "absolute_time_start": 2.8000000000000003,
+      "absolute_time_end": 2.9000000000000004,
+      "observed_physical_state": [
+        114.16127916690289,
+        97.9287747242357
+      ],
+      "control": [
+        0.020099493342926832
+      ],
+      "scenario_sha256": "e6174a7817c7057c5255541ebeaaa81e9a1f254d32c5d2c5f9d3cac12cb2c73e"
+    },
+    "bridge_request": {
+      "schema": "csl.mpc11.nonlinear-request/1",
+      "scenario": {
+        "schema": "csl.mpc11.scenario/1",
+        "track": "new-synthetic-comparison",
+        "contract": "docs/contracts/mpc11-synthetic-controller-study.md",
+        "assurance": "numerical-binary64",
+        "hold": "zero-order",
+        "observation": "exact-full-execution-state",
+        "variants": [
+          "affine-plan/affine-replay",
+          "affine-plan/nonlinear-replay",
+          "nominal-nmpc/nonlinear-replay"
+        ],
+        "nmpc": {
+          "horizon": "shrinking-to-fixed-terminal",
+          "running_cost_denominator": "original-interval-count",
+          "physical_constraints": true,
+          "affine_trust_region": false,
+          "collocation": {
+            "method": "radau",
+            "degree": 3,
+            "elements_per_interval": 1,
+            "state_constraint_nodes": "all-collocation-and-mesh-including-endpoints"
+          },
+          "solver": {
+            "name": "ipopt",
+            "linear_solver": "mumps",
+            "tol": 1e-08,
+            "acceptable_tol": 1e-06,
+            "max_iter": 1000
+          },
+          "warm_start": {
+            "primal": "drop-first-interval-no-terminal-repeat",
+            "dual": "zero-every-solve",
+            "initial_state_override": "new-full-observation"
+          },
+          "failure": "stop-before-next-input-no-fallback",
+          "n_robust": 0
+        },
+        "execution": {
+          "method": "cvodes",
+          "scaled_abstol": 1e-10,
+          "reltol": 1e-09
+        },
+        "independent_replay": {
+          "provider": "CSL::simulation",
+          "method": "adaptive-rk4-step-doubling",
+          "scaled_abstol": 1e-10,
+          "reltol": 1e-09,
+          "step_attempts_per_hold_interval": 100000,
+          "report_subintervals_per_hold": 20,
+          "sensitivity": {
+            "scaled_abstol": 1e-11,
+            "reltol": 1e-10
+          }
+        },
+        "evidence_limits": [
+          "local-NLP-only",
+          "sampled-constraints-not-continuous-safety",
+          "no-nonlinear-robustness",
+          "no-reachable-set-containment",
+          "not-historical-restoration"
+        ],
+        "case_id": "SYN-NL-LV-01",
+        "model_id": "syn-nl-lv-01/ode/1",
+        "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
+        "time": {
+          "unit": "day",
+          "dt": 0.1,
+          "intervals": 1,
+          "final": 2.9000000000000004,
+          "grid": [
+            2.8000000000000003,
+            2.9000000000000004
+          ],
+          "reference_transforms": "physical-coordinates; affine-reference-subtraction-saved-by-producer"
+        },
+        "states": [
+          {
+            "name": "P",
+            "unit": "thousand individuals",
+            "initial": 120,
+            "scale": 100,
+            "physical_bounds": [
+              0,
+              200
+            ]
+          },
+          {
+            "name": "R",
+            "unit": "thousand individuals",
+            "initial": 60,
+            "scale": 80,
+            "physical_bounds": [
+              0,
+              150
+            ]
+          }
+        ],
+        "controls": [
+          {
+            "name": "u",
+            "unit": "1/day",
+            "physical_bounds": [
+              0,
+              0.05
+            ]
+          }
+        ],
+        "parameters": {
+          "a": {
+            "value": 0.8,
+            "unit": "1/day"
+          },
+          "b": {
+            "value": 0.01,
+            "unit": "1/(thousand individuals*day)"
+          },
+          "c": {
+            "value": 0.6,
+            "unit": "1/day"
+          },
+          "d": {
+            "value": 0.006,
+            "unit": "1/(thousand individuals*day)"
+          }
+        },
+        "equations": [
+          "dP/dt=(a-b*R-u)*P",
+          "dR/dt=(d*P-c)*R"
+        ],
+        "model_domain": "P,R finite; bounds checked independently",
+        "objective": {
+          "terminal_target": [
+            100,
+            80
+          ],
+          "terminal_scale": [
+            100,
+            80
+          ],
+          "terminal_weights": [
+            1,
+            1
+          ],
+          "running_weight": 0.05,
+          "running_scale": [
+            0.05
+          ],
+          "running_reference": [
+            0
+          ],
+          "running_formula": "running_weight/N*sum_k(sum_i(((u[k,i]-running_reference[i])/running_scale[i])^2))",
+          "terminal_formula": "sum_i(terminal_weights[i]*((x[N,i]-terminal_target[i])/terminal_scale[i])^2)"
+        },
+        "affine": {
+          "model_id": "syn-nl-lv-01/frozen-coexistence-affine/1",
+          "linearization": "frozen",
+          "state_reference": [
+            100,
+            80
+          ],
+          "input_reference": [
+            0
+          ],
+          "discretization": "matrix-exponential-with-Taylor-offset",
+          "trust_state_absolute": [
+            40,
+            30
+          ],
+          "trust_input_absolute": [
+            0.05
+          ],
+          "producer": "actual-CSL-public-joint-program-or-synthesis; retain-provider-and-witness",
+          "offset_coordinates": "physical-state; scale-transform=x/scale; reference-deviation-transform-explicit"
+        },
+        "initial_guess": {
+          "input": [
+            0.025
+          ],
+          "state": "coexistence-reference; first-state=observation"
+        },
+        "controller_id": "syn-nl-lv-01/nominal-shrinking-radau3/1",
+        "parameter_source": "authored-synthetic-design; docs/research/mpc11-nonlinear-study-design.md",
+        "figures": {
+          "phase_planes": [
+            [
+              "P",
+              "R"
+            ]
+          ],
+          "geometry_claim": "individual-numerical-trajectories-only",
+          "companion": "state-and-control-time-traces"
+        }
+      },
+      "scenario_sha256": "e6174a7817c7057c5255541ebeaaa81e9a1f254d32c5d2c5f9d3cac12cb2c73e",
+      "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+      "witness_sha256": "b2b038df6d0f4e6bbf728b18c51b7ef7b3622cd9d85946f0bfbac3020d771554",
+      "controls_sha256": "673e247b05107694defc97a71b7ca954bc492378c9d0aa3e831d68a7a0ceeeb0",
+      "hold": "constant-on-original-interval",
+      "original_controls": [
+        [
+          0.020099493342926832
+        ]
+      ],
+      "controls": [
+        [
+          0.020099493342926832
+        ],
+        [
+          0.020099493342926832
+        ],
+        [
+          0.020099493342926832
+        ],
+        [
+          0.020099493342926832
+        ],
+        [
+          0.020099493342926832
+        ],
+        [
+          0.020099493342926832
+        ],
+        [
+          0.020099493342926832
+        ],
+        [
+          0.020099493342926832
+        ],
+        [
+          0.020099493342926832
+        ],
+        [
+          0.020099493342926832
+        ],
+        [
+          0.020099493342926832
+        ],
+        [
+          0.020099493342926832
+        ],
+        [
+          0.020099493342926832
+        ],
+        [
+          0.020099493342926832
+        ],
+        [
+          0.020099493342926832
+        ],
+        [
+          0.020099493342926832
+        ],
+        [
+          0.020099493342926832
+        ],
+        [
+          0.020099493342926832
+        ],
+        [
+          0.020099493342926832
+        ],
+        [
+          0.020099493342926832
+        ]
+      ],
+      "times": [
+        2.8000000000000003,
+        2.805,
+        2.8100000000000005,
+        2.8150000000000004,
+        2.8200000000000003,
+        2.825,
+        2.83,
+        2.8350000000000004,
+        2.8400000000000003,
+        2.845,
+        2.8500000000000005,
+        2.8550000000000004,
+        2.8600000000000003,
+        2.865,
+        2.87,
+        2.8750000000000004,
+        2.8800000000000003,
+        2.8850000000000002,
+        2.8900000000000006,
+        2.8950000000000005,
+        2.9000000000000004
+      ],
+      "initial_scaled": [
+        1.1416127916690288,
+        1.2241096840529462
+      ],
+      "abstol": 1e-10,
+      "reltol": 1e-09,
+      "max_attempts": 5000,
+      "report_subintervals_per_hold": 20
+    }
+  },
+  "execution": {
+    "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+    "slice_sha256": "d225606aa3c6dbb0ce224fbc0768f9a0c115f62090540bc1de67273661f681e6",
+    "scenario_sha256": "e6174a7817c7057c5255541ebeaaa81e9a1f254d32c5d2c5f9d3cac12cb2c73e",
+    "physical_states": [
+      [
+        114.16127916690289,
+        97.9287747242357
+      ],
+      [
+        114.04740604796599,
+        97.97022015179374
+      ],
+      [
+        113.93341131740516,
+        98.01134811420256
+      ],
+      [
+        113.8192973760622,
+        98.05215784278217
+      ],
+      [
+        113.70506662201696,
+        98.09264857841553
+      ],
+      [
+        113.59072145048725,
+        98.13281957157324
+      ],
+      [
+        113.47626425372968,
+        98.17267008233742
+      ],
+      [
+        113.36169742094097,
+        98.21219938042509
+      ],
+      [
+        113.24702333815996,
+        98.25140674521067
+      ],
+      [
+        113.13224438817007,
+        98.29029146574808
+      ],
+      [
+        113.01736295040253,
+        98.32885284079182
+      ],
+      [
+        112.9023814008403,
+        98.36709017881776
+      ],
+      [
+        112.78730211192251,
+        98.40500279804301
+      ],
+      [
+        112.67212745244954,
+        98.44259002644512
+      ],
+      [
+        112.5568597874889,
+        98.47985120178078
+      ],
+      [
+        112.44150147828161,
+        98.51678567160363
+      ],
+      [
+        112.32605488214938,
+        98.55339279328162
+      ],
+      [
+        112.21052235240236,
+        98.58967193401348
+      ],
+      [
+        112.09490623824767,
+        98.62562247084476
+      ],
+      [
+        111.9792088846985,
+        98.66124379068287
+      ],
+      [
+        111.86343263248402,
+        98.69653529031181
+      ]
+    ],
+    "scaled_states": [
+      [
+        1.1416127916690288,
+        1.2241096840529462
+      ],
+      [
+        1.14047406047966,
+        1.2246277518974218
+      ],
+      [
+        1.1393341131740515,
+        1.225141851427532
+      ],
+      [
+        1.138192973760622,
+        1.225651973034777
+      ],
+      [
+        1.1370506662201696,
+        1.2261581072301941
+      ],
+      [
+        1.1359072145048725,
+        1.2266602446446655
+      ],
+      [
+        1.1347626425372968,
+        1.2271583760292177
+      ],
+      [
+        1.1336169742094098,
+        1.2276524922553136
+      ],
+      [
+        1.1324702333815997,
+        1.2281425843151335
+      ],
+      [
+        1.1313224438817007,
+        1.228628643321851
+      ],
+      [
+        1.1301736295040252,
+        1.2291106605098978
+      ],
+      [
+        1.129023814008403,
+        1.229588627235222
+      ],
+      [
+        1.1278730211192252,
+        1.2300625349755376
+      ],
+      [
+        1.1267212745244954,
+        1.230532375330564
+      ],
+      [
+        1.125568597874889,
+        1.2309981400222596
+      ],
+      [
+        1.124415014782816,
+        1.2314598208950454
+      ],
+      [
+        1.1232605488214937,
+        1.2319174099160202
+      ],
+      [
+        1.1221052235240236,
+        1.2323708991751685
+      ],
+      [
+        1.1209490623824767,
+        1.2328202808855595
+      ],
+      [
+        1.119792088846985,
+        1.2332655473835359
+      ],
+      [
+        1.1186343263248402,
+        1.2337066911288976
+      ]
+    ],
+    "times": [
+      2.8000000000000003,
+      2.805,
+      2.8100000000000005,
+      2.8150000000000004,
+      2.8200000000000003,
+      2.825,
+      2.83,
+      2.8350000000000004,
+      2.8400000000000003,
+      2.845,
+      2.8500000000000005,
+      2.8550000000000004,
+      2.8600000000000003,
+      2.865,
+      2.87,
+      2.8750000000000004,
+      2.8800000000000003,
+      2.8850000000000002,
+      2.8900000000000006,
+      2.8950000000000005,
+      2.9000000000000004
+    ],
+    "integration_receipts": [
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          1.4802973661668754e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          1.4802973661668754e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.0362081563168128e-16,
+          1.4802973661668754e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          1.4802973661668754e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      }
+    ],
+    "diagnostics": [],
+    "status": "complete",
+    "elapsed_seconds": 8.7931e-05
+  },
+  "applied_control": [
+    0.020099493342926832
+  ],
+  "stage_elapsed_seconds": 0.13579332106746733
+}

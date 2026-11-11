@@ -1,0 +1,16 @@
+{
+  "schema": "csl.closed-loop.resolution-receipt/1",
+  "capability_manifest_id": "source-bound-three-task-nmpc-baseline/1",
+  "capability_manifest_sha256": "13b8bb3e79387e775e58120b8224b72a42293b021bbff358d794820dad82f32b",
+  "task_id": "env717-earth-orbit/continuous-receding/1",
+  "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+  "requested_controller_id": "syn-nl-orbit-01/source-cost-direct-shooting/1",
+  "requested_action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
+  "selected_controller_id": "syn-nl-orbit-01/source-cost-direct-shooting/1",
+  "selected_controller_version": "1",
+  "selected_execution_id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+  "selected_execution_version": "1",
+  "graph_id": "closed-loop/earth-orbit/nmpc-csl-adaptive/1/cfg-2bf617a536444eb7",
+  "graph_fingerprint": "2bf617a536444eb7420d56f8a853a413727d0cc9176af74755a0798df1c6118b",
+  "resolved_graph_path": "resolved-graph.json"
+}
