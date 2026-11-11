@@ -284,7 +284,7 @@
       "records": [
         {
           "label": "tests/installed/box_approximation_client.cpp",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/BOOK_COMMIT/tests/installed/box_approximation_client.cpp"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/8d79251bead9/tests/installed/box_approximation_client.cpp"
         },
         {
           "label": "tests/installed/box_parallelotope_client.cpp",
