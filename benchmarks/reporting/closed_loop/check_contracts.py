@@ -5,17 +5,13 @@ from __future__ import annotations
 import copy
 import json
 import math
-import sys
-
-import numpy as np
 
 from contracts import canonical_sha256, load_task, manifest_sha256
-from task_models import (continuous_jacobian, make_replay_request, objective,
-                         physical_dynamics, prediction_receipt, source_scenario,
-                         validate_source_binding)
 
 
 def finite_difference(task, x, u):
+    import numpy as np
+    from task_models import physical_dynamics
     a = np.empty((len(x), len(x))); b = np.empty((len(x), len(u)))
     for j in range(len(x)):
         h = 1e-6 * max(1.0, abs(x[j]))
@@ -29,6 +25,13 @@ def finite_difference(task, x, u):
 
 
 def main() -> int:
+    # Numerical dependencies are intentionally loaded only when this check is
+    # executed. Base reporting test discovery does not install SciPy.
+    import numpy as np
+    from task_models import (continuous_jacobian, make_replay_request, objective,
+                             physical_dynamics, prediction_receipt, source_scenario,
+                             validate_source_binding)
+
     cases = {
         "syn-nl-lv-01": (np.array([143.0, 47.0]), np.array([0.017])),
         "syn-nl-fuel-01": (np.array([91.0, 26.0, 1.8, 0.49]), np.array([0.31, 0.67])),
@@ -79,7 +82,26 @@ def main() -> int:
     fuel=load_task("syn-nl-fuel-01")
     assert fuel["coordinate_maps"]["projections"][0]["indices"]==[0,2]
     assert fuel["coordinate_maps"]["projections"][1]["indices"]==[1,3]
+    assert fuel["coordinate_maps"]["requested_physical_planes"][0]["indices"]==[2,0]
+    assert fuel["coordinate_maps"]["requested_physical_planes"][1]["indices"]==[3,1]
+    assert fuel["coordinate_maps"]["requested_physical_planes"][0]["units"]==["kg/s","kg"]
+    assert fuel["coordinate_maps"]["requested_physical_planes"][1]["units"]==["kg/s","kg"]
     assert fuel["legacy_source_cases"][0]["task_id"]!="syn-nl-fuel-01/continuous-receding/1"
+    changed=copy.deepcopy(fuel)
+    changed["coordinate_maps"]["requested_physical_planes"][0]["indices"]=[0,2]
+    try:validate_source_binding(changed)
+    except ValueError:pass
+    else:raise AssertionError("fuel physical plot-axis orientation mutation was admitted")
+    changed=copy.deepcopy(fuel)
+    changed["coordinate_maps"]["requested_physical_planes"][0]["units"]=["kg","kg/s"]
+    try:validate_source_binding(changed)
+    except ValueError:pass
+    else:raise AssertionError("fuel physical plot-axis unit mutation was admitted")
+    changed=copy.deepcopy(fuel)
+    changed["coordinate_maps"]["projection_comparison_note"]="archived stocks equal MPC11 absolute mass"
+    try:validate_source_binding(changed)
+    except ValueError:pass
+    else:raise AssertionError("fuel source-coordinate equivalence claim was admitted")
     xf=np.array([s["initial"] for s in fuel["model"]["states"]]);uf=np.zeros((fuel["episode"]["intervals"],2));sf=np.tile(xf,(len(uf)+1,1))
     fuel_value=objective(fuel,sf,uf);fo=fuel["objective"]["source_definition"]
     fuel_terminal=sum(w*((xv-t)/scale)**2 for xv,t,scale,w in zip(xf,fo["terminal_target"],fo["terminal_scale"],fo["terminal_weights"]))

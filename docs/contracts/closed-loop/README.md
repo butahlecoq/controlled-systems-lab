@@ -11,11 +11,14 @@ MPC11 scenario or the Earth-orbit pilot source.
 | `earth-orbit.json` | `env717-earth-orbit/continuous-receding/1` | `benchmarks/reporting/env717/earth_orbit.cpp` | Source terminal `hypot` and first 19 Euclidean force-norm terms |
 | `syn-nl-fuel-01.json` | `syn-nl-fuel-01/continuous-receding/1` | MPC11 `SYN-NL-FUEL-01`, physical order `(m_ox,m_f,q_ox,q_f)` | Existing scaled quadratic terminal cost and all 40 reference-deviation terms |
 
-The fuel contract maps the oxidizer mass-flow plane to state coordinates
-`(0,2)` and the fuel mass-flow plane to `(1,3)`, with units `(kg, kg/s)`.
-The existing `csl.fuel-reachability-model/1` and
-`fuel-four-state-box-control-demo-v1` linear-stock examples keep their own
-source hashes, coordinate orders, and task identities.
+The fuel contract records native MPC11 axes `(m_ox,q_ox)` at `(0,2)` and
+`(m_f,q_f)` at `(1,3)`, with units `(kg, kg/s)`. For the requested
+flow-versus-mass plots, use `(q_ox,m_ox)` at `(2,0)` and `(q_f,m_f)` at
+`(3,1)`, with units `(kg/s, kg)`. The archived
+`csl.fuel-reachability-model/1` and `fuel-four-state-box-control-demo-v1`
+examples are separate source cases: their stock-balance coordinates are not
+numerically equivalent to MPC11 absolute propellant mass. Keep their source
+hashes, coordinate orders, units, and task identities distinct.
 
 Each contract also names a separate finite-action adaptation. This means a
 finite catalogue is never silently compared as the same control domain as the

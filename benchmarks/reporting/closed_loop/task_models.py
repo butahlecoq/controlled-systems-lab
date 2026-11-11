@@ -286,6 +286,14 @@ def validate_source_binding(task: dict) -> None:
                     ([0, 2], ["m_ox", "q_ox"], ["kg", "kg/s"]),
                     ([1, 3], ["m_f", "q_f"], ["kg", "kg/s"])]:
                 raise ValueError("fuel mass/flow projection order or units changed")
+            requested = task["coordinate_maps"]["requested_physical_planes"]
+            if [(p["indices"], p["names"], p["units"], p["native_mpc11_plane"]) for p in requested] != [
+                    ([2, 0], ["q_ox", "m_ox"], ["kg/s", "kg"], "oxidizer-mass-flow"),
+                    ([3, 1], ["q_f", "m_f"], ["kg/s", "kg"], "fuel-mass-flow")]:
+                raise ValueError("requested fuel flow/mass plane order or units changed")
+            note = task["coordinate_maps"]["projection_comparison_note"]
+            if "not numerically equivalent" not in note or "absolute propellant mass" not in note:
+                raise ValueError("fuel source-case coordinate distinction is missing")
     else:
         raw = (ROOT / task["source"]["path"]).read_text()
         expected_equations = ["dr/dt=v", "dv/dt=r*omega^2-G*M/r^2+u_r/(1000*m_vehicle)",

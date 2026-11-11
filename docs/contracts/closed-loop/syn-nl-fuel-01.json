@@ -38,6 +38,23 @@
     }
   },
   "coordinate_maps": {
+    "requested_physical_planes": [
+      {
+        "id": "oxidizer-flow-mass",
+        "indices": [2, 0],
+        "names": ["q_ox", "m_ox"],
+        "units": ["kg/s", "kg"],
+        "native_mpc11_plane": "oxidizer-mass-flow"
+      },
+      {
+        "id": "fuel-flow-mass",
+        "indices": [3, 1],
+        "names": ["q_f", "m_f"],
+        "units": ["kg/s", "kg"],
+        "native_mpc11_plane": "fuel-mass-flow"
+      }
+    ],
+    "projection_comparison_note": "Archived linear stock-balance coordinates are not numerically equivalent to MPC11 absolute propellant mass; use each source case's own coordinates and units.",
     "projections": [
       {
         "id": "oxidizer-mass-flow",
