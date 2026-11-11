@@ -1,7 +1,6 @@
-"""Behavior checks for the saved closed-loop figure boundary."""
-
 from __future__ import annotations
 
+from itertools import product
 import sys
 import unittest
 from pathlib import Path
@@ -56,6 +55,55 @@ class RecordedClosedLoopFigureTests(unittest.TestCase):
         self.assertEqual(max(point[0] for point in projected), 33.0)
         self.assertEqual(min(point[1] for point in projected), 36.0)
         self.assertEqual(max(point[1] for point in projected), 44.0)
+
+    def test_parallelotope_projection_matches_independently_enumerated_corners(self) -> None:
+        frame = [[1.0, 2.0], [0.0, 1.0]]
+        lower, upper = [-1.0, -2.0], [1.0, 2.0]
+        shape = {"representation": "parallelotope", "frame": frame,
+                 "lower": lower, "upper": upper}
+        projected = figures.project_shape(shape, (0, 1))
+
+        # Enumerate the defining input box independently, then apply x = frame * y.
+        corners = [
+            [sum(frame[i][j] * y[j] for j in range(2)) for i in range(2)]
+            for y in product(*zip(lower, upper))
+        ]
+        expected_bounds = [
+            (min(point[axis] for point in corners), max(point[axis] for point in corners))
+            for axis in range(2)
+        ]
+        actual_bounds = [
+            (min(point[axis] for point in projected), max(point[axis] for point in projected))
+            for axis in range(2)
+        ]
+        self.assertEqual(actual_bounds, expected_bounds)
+        self.assertEqual(actual_bounds, [(-5.0, 5.0), (-2.0, 2.0)])
+
+    def test_four_dimensional_parallelotope_projection_matches_corner_enumeration(self) -> None:
+        frame = [
+            [1.0, 2.0, 0.0, 0.0],
+            [0.0, 1.0, 1.0, 0.0],
+            [1.0, 0.0, 1.0, 2.0],
+            [0.0, 1.0, 0.0, 1.0],
+        ]
+        lower, upper = [-1.0, -2.0, 0.0, 1.0], [2.0, 1.0, 3.0, 5.0]
+        projected = figures.project_shape(
+            {"representation": "parallelotope", "frame": frame,
+             "lower": lower, "upper": upper}, (3, 1)
+        )
+        corners = [
+            [sum(frame[i][j] * y[j] for j in range(4)) for i in range(4)]
+            for y in product(*zip(lower, upper))
+        ]
+        expected_bounds = [
+            (min(point[axis] for point in corners), max(point[axis] for point in corners))
+            for axis in (3, 1)
+        ]
+        actual_bounds = [
+            (min(point[axis] for point in projected), max(point[axis] for point in projected))
+            for axis in (0, 1)
+        ]
+        self.assertEqual(actual_bounds, expected_bounds)
 
 
     def test_projected_overlap_does_not_establish_full_state_intersection(self) -> None:

@@ -141,13 +141,9 @@ def _convex_hull(points: list[tuple[float, float]]) -> list[list[float]]:
     return [[x, y] for x, y in lower[:-1] + upper[:-1]]
 
 
-def _zonotope_polygon(center: list[float], generators: list[list[float]], indices: tuple[int, int]) -> list[list[float]]:
-    if generators and len(generators) == len(center):
-        columns = list(zip(*generators))
-    else:
-        columns = generators
+def _zonotope_polygon(center: list[float], generator_vectors: list[list[float]], indices: tuple[int, int]) -> list[list[float]]:
     segments: list[tuple[float, float]] = []
-    for vector in columns:
+    for vector in generator_vectors:
         dx, dy = float(vector[indices[0]]), float(vector[indices[1]])
         if dy < 0.0 or (dy == 0.0 and dx < 0.0):
             dx, dy = -dx, -dy
@@ -187,7 +183,13 @@ def project_shape(shape: dict[str, Any], indices: tuple[int, int]) -> list[list[
         center, generators = shape.get("center"), shape.get("generators")
         if not isinstance(center, list) or not isinstance(generators, list):
             return None
-        return _zonotope_polygon(center, generators, indices)
+        if len(generators) != len(center) or any(not isinstance(row, list) for row in generators):
+            return None
+        if generators and any(len(row) != len(generators[0]) for row in generators):
+            return None
+        # Serialized zonotope generators are a state-dimension by generator-count
+        # matrix. Convert once at the boundary to explicit full-state vectors.
+        return _zonotope_polygon(center, [list(column) for column in zip(*generators)], indices)
     if kind == "parallelotope":
         frame, lower, upper = shape.get("frame"), shape.get("lower"), shape.get("upper")
         if not isinstance(frame, list) or not isinstance(lower, list) or not isinstance(upper, list):
@@ -198,9 +200,9 @@ def project_shape(shape: dict[str, Any], indices: tuple[int, int]) -> list[list[
             return None
         middle = [(float(a) + float(b)) / 2.0 for a, b in zip(lower, upper)]
         center = [sum(float(matrix[i][j]) * middle[j] for j in range(dimension)) for i in range(dimension)]
-        generators = [[float(matrix[i][j]) * (float(upper[j]) - float(lower[j])) / 2.0
-                       for i in range(dimension)] for j in range(dimension)]
-        return _zonotope_polygon(center, generators, indices)
+        generator_vectors = [[float(matrix[i][j]) * (float(upper[j]) - float(lower[j])) / 2.0
+                              for i in range(dimension)] for j in range(dimension)]
+        return _zonotope_polygon(center, generator_vectors, indices)
     return None
 
 
