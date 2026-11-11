@@ -621,6 +621,13 @@ def finalize(site: Path, *, source_commit: str = "unknown",
         if not legacy.is_file():
             raise ValueError("managed learning root has no retained legacy index")
         legacy_bytes = legacy.read_bytes()
+        if original_root_bytes is not None:
+            pinned_root = legacy_root_snapshot()
+            if original_root_bytes != pinned_root:
+                raise ValueError("supplied legacy root is not the hash-verified Pages snapshot")
+            if legacy_bytes != pinned_root:
+                legacy_bytes = pinned_root
+                legacy.write_bytes(pinned_root)
     else:
         if legacy.exists() and legacy.read_bytes() != root_bytes:
             raise ValueError("legacy-index.html already exists with different content")
