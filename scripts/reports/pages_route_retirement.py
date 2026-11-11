@@ -128,6 +128,28 @@ def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def legacy_root_snapshot() -> bytes:
+    """Load the exact Pages landing page recorded before route retirement."""
+    repo = Path(__file__).resolve().parents[2]
+    metadata_path = repo / "docs/research/evidence/pages-legacy-index-ed2dda1.json"
+    snapshot_path = repo / "docs/research/evidence/pages-legacy-index-ed2dda1.html"
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    snapshot = snapshot_path.read_bytes()
+    expected = {
+        "schema": "csl.pages-legacy-root-snapshot/1",
+        "source_commit": "ed2dda1ef049ac4fbe259a800d3314e446ceee28",
+        "source_report_run_id": 42902971467,
+        "complete_pages_artifact_run_id": 42909649474,
+        "artifact_relative_path": "index.html",
+        "snapshot_path": "docs/research/evidence/pages-legacy-index-ed2dda1.html",
+        "bytes": 176366,
+        "sha256": "29376974f806ad83816be9b42bda19fbeccaebc9a7ca79c291ed3d9ea3d522d2",
+    }
+    if metadata != expected or len(snapshot) != expected["bytes"] or sha256(snapshot) != expected["sha256"]:
+        raise ValueError("pinned legacy Pages snapshot provenance or bytes differ")
+    return snapshot
+
+
 def _internal_target(site: Path, page: Path, ref: str) -> str | None:
     parsed = urlsplit(ref)
     if parsed.scheme or parsed.netloc or not parsed.path:

@@ -11,7 +11,8 @@ import unittest
 import zipfile
 from io import BytesIO
 
-from scripts.reports import augment_pages_bundle, await_pages_augmentation_runs
+from scripts.reports import (augment_pages_bundle, await_pages_augmentation_runs,
+                             pages_route_retirement, replay_mpc11_published_variants)
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -75,11 +76,15 @@ class PagesAugmentationAggregation(unittest.TestCase):
 
             landing = (site / "index.html").read_text(encoding="utf-8")
             archive_page = (site / "archive.html").read_text(encoding="utf-8")
+            inventory = json.loads((site / "pages-route-inventory.json").read_text(encoding="utf-8"))
             self.assertIn('data-csl-pages-learning-root="1"', landing)
             self.assertIn('href="examples/index.html"', landing)
             self.assertIn('href="archive.html"', landing)
-            self.assertIn('id="base"', (site / "legacy-index.html").read_text(encoding="utf-8"))
-            self.assertEqual((site / "legacy-index.html").read_bytes(), legacy_root)
+            preserved_legacy = (site / "legacy-index.html").read_bytes()
+            self.assertEqual(preserved_legacy, pages_route_retirement.legacy_root_snapshot())
+            self.assertNotEqual(preserved_legacy, legacy_root)
+            self.assertEqual(hashlib.sha256(preserved_legacy).hexdigest(),
+                             "29376974f806ad83816be9b42bda19fbeccaebc9a7ca79c291ed3d9ea3d522d2")
             self.assertNotIn('id="base"', landing)
             strategy_summary = "docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1/strategy-ab-ts03-summary.html"
             self.assertIn(f'href="{strategy_summary}"', archive_page)
@@ -112,7 +117,30 @@ class PagesAugmentationAggregation(unittest.TestCase):
             self.assertIn("figures/online-policy-traces.svg", (site/routes["mpc07"]/"index.html").read_text())
             self.assertIn(routes["mpc11_studies"]+"/index.html#mesh-example",(site/"examples/index.html").read_text())
             self.assertIn(routes["mpc11_studies"]+"/index.html",archive_page)
-            inventory = json.loads((site / "pages-route-inventory.json").read_text(encoding="utf-8"))
+            retained_mpc11 = {
+                "mpc11-controller-comparison-5d94c9106e1cf07e4a2e": "dd270a903dff87a24385e205aaa705efb98f7a86019bdce024824d6fba1bc363",
+                "mpc11-mesh-timing-dcb9e6e302ed2fabeb71": "f886dce8913fd833929ecc18ab6d9b2a1c087b4992b77505fb41377494d0070a",
+                "mpc11-controller-comparison-967db980c95590a5150b": "a14f045212e4bbd3858e1efa2ea62e2387c648bbb7742ef8cd4ec1317873866e",
+                "mpc11-mesh-timing-e1d5ebe497051adfdfad": "c8a84931f056a25c0cfb88b7ec8a24b16be4c119794d6e3964247d3af4374854",
+            }
+            self.assertEqual(routes["mpc11"], "mpc11-controller-comparison-967db980c95590a5150b")
+            self.assertEqual(routes["mpc11_studies"], "mpc11-mesh-timing-e1d5ebe497051adfdfad")
+            self.assertEqual(routes["retained_mpc11_variants"], retained_mpc11)
+            for route, expected_zip_hash in retained_mpc11.items():
+                self.assertTrue((site / route / "index.html").is_file())
+                self.assertEqual(hashlib.sha256((site / (route + ".zip")).read_bytes()).hexdigest(),
+                                 expected_zip_hash)
+                self.assertIn(f'href="{route}/index.html"', archive_page)
+                self.assertIn("archive.html", inventory["html_routes"][route + "/index.html"]["inbound_html_references"])
+            first_variant_hashes = {
+                route: hashlib.sha256((site / route / "index.html").read_bytes()).hexdigest()
+                for route in retained_mpc11
+            }
+            self.assertEqual(replay_mpc11_published_variants.preserve(site), retained_mpc11)
+            self.assertEqual({
+                route: hashlib.sha256((site / route / "index.html").read_bytes()).hexdigest()
+                for route in retained_mpc11
+            }, first_variant_hashes)
             self.assertEqual(inventory["html_route_count"], len(inventory["html_routes"]))
             expected_indexes = sum(route.endswith("/index.html") and route != "index.html"
                                    for route in inventory["html_routes"])
