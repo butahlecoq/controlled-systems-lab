@@ -15,6 +15,47 @@ import run_closed_loop
 
 
 class ClosedLoopRunnerFailureTests(unittest.TestCase):
+    def coverage_with_retry(self, *, original_overall: str, retry_postcheck: str,
+                            retry_render: str) -> tuple[dict, bool]:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            attempt = root / "syn-nl-lv-01" / "attempts" / "attempt-1"
+            attempt.mkdir(parents=True)
+            record = {"schema": "csl.closed-loop.attempt/1", "attempt_id": "attempt-1",
+                "task_id": "syn-nl-lv-01/continuous-receding/1", "status": "complete",
+                "algorithm_status": "complete", "overall_status": original_overall,
+                "completed_holds": 30, "independent_replay": {
+                    "common": {"status": "complete"}, "tight": {"status": "complete"}},
+                "render": {"status": "complete"}}
+            record_path = attempt / "attempt.json"
+            record_path.write_text(json.dumps(record), encoding="utf-8")
+            original_bytes = record_path.read_bytes()
+            postcheck_statuses = ("complete", "complete") if retry_postcheck == "complete" else ("failed", "complete")
+            (attempt / "postcheck-retry.json").write_text(json.dumps({
+                "postcheck_id": "postcheck-retry", "postcheck_status": retry_postcheck,
+                "render_status": "complete", "results": {
+                    "common": {"status": postcheck_statuses[0]},
+                    "tight": {"status": postcheck_statuses[1]}}}), encoding="utf-8")
+            (attempt / "render-retry-1.json").write_text(json.dumps({"status": retry_render}), encoding="utf-8")
+            coverage = json.loads(run_closed_loop.write_coverage(root).read_text(encoding="utf-8"))
+            return coverage["attempts"][0], record_path.read_bytes() == original_bytes
+
+    def test_failed_retry_downgrades_coverage_without_rewriting_attempt(self):
+        row, unchanged = self.coverage_with_retry(original_overall="complete",
+            retry_postcheck="failed", retry_render="complete")
+        self.assertEqual((row["algorithm_status"], row["postcheck_status"], row["render_status"]),
+                         ("complete", "failed", "complete"))
+        self.assertEqual(row["overall_status"], "incomplete")
+        self.assertTrue(unchanged)
+
+    def test_successful_retry_upgrades_coverage_without_rewriting_attempt(self):
+        row, unchanged = self.coverage_with_retry(original_overall="incomplete",
+            retry_postcheck="complete", retry_render="complete")
+        self.assertEqual((row["algorithm_status"], row["postcheck_status"], row["render_status"]),
+                         ("complete", "complete", "complete"))
+        self.assertEqual(row["overall_status"], "complete")
+        self.assertTrue(unchanged)
+
     def fake_executable(self, folder: Path, source: str) -> Path:
         path = folder / "fake-bridge"
         if not source.startswith("#!"):

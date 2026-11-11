@@ -697,10 +697,7 @@ def write_coverage(root: Path) -> Path:
             render_status = latest_check.get("render_status", render_status)
         if render_records:
             render_status = render_records[-1].get("status", render_records[-1].get("render", {}).get("status", render_status))
-        overall_status = record.get("overall_status")
-        if overall_status is None:
-            overall_status = ("complete" if algorithm_status == "complete" and
-                postcheck_status == "complete" and render_status == "complete" else "incomplete")
+        overall_status = coverage_overall_status(algorithm_status, postcheck_status, render_status)
         rows.append({"attempt_id": record.get("attempt_id"), "task_id": record.get("task_id"),
             "task_sha256": record.get("task_sha256"),
             "status": overall_status, "overall_status": overall_status,
@@ -730,6 +727,15 @@ def write_coverage(root: Path) -> Path:
     output = root / ("coverage-" + time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()) + "-" + uuid.uuid4().hex[:8] + ".json")
     atomic_json(output, coverage)
     return output
+
+
+def coverage_overall_status(algorithm: str, postcheck: str, render: str) -> str:
+    """Derive coverage status from the latest displayed phase receipts."""
+    if algorithm == postcheck == render == "complete":
+        return "complete"
+    if algorithm not in ("complete", "incomplete"):
+        return algorithm
+    return "incomplete"
 
 
 def main() -> int:

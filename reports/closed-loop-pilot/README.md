@@ -36,8 +36,19 @@ cmake --build build/closed-loop-pilot-945 --target csl_mpc11_nonlinear_replay
 "$PYTHON" benchmarks/reporting/closed_loop/run_closed_loop.py --task all \
   --bridge build/closed-loop-pilot-945/csl_mpc11_nonlinear_replay \
   --output-root reports/closed-loop-pilot
-"$PYTHON" scripts/reports/render_closed_loop_pilot.py
 ```
+
+The report is a separate saved-record rendering step. Do not rerun the numerical episodes to rebuild it. The versioned `closed-loop-pilot-v1` manifest records renderer source commit `a81217178eb3af8586bad1d6768a609de0325c4d`. To recreate that exact report, check out that renderer commit in a separate worktree and run the renderer there with the configured Python environment:
+
+```sh
+export REPORT_SOURCE_WORKTREE="${REPORT_SOURCE_WORKTREE:-$PWD/.worktrees/closed-loop-report-v1}"
+git worktree add --detach "$REPORT_SOURCE_WORKTREE" a81217178eb3af8586bad1d6768a609de0325c4d
+(cd "$REPORT_SOURCE_WORKTREE" && \
+  PYTHONPATH=benchmarks/reporting/closed_loop \
+  "$PYTHON" scripts/reports/render_closed_loop_pilot.py)
+```
+
+The report source commit is distinct from the later commit that stores the generated HTML and raw-record bundle. Use the renderer commit from the report manifest when you need a byte-identical rebuild.
 
 The runner executes tasks sequentially with one numerical worker. The worker requests a 300-second wall timeout, 300 seconds CPU, and 8 GiB `RLIMIT_AS`; it applies the CPU/address-space limits to the worker process and terminates the worker process group on wall timeout. The host observed at run start is recorded in each run manifest. Checker processes use separate 5-second wall/CPU and 1 GiB `RLIMIT_AS` limits; RSS sampling is per process, not a machine-wide or child-tree memory cap. The suite has no machine-wide memory enforcement.
 
