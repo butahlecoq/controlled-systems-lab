@@ -121,6 +121,42 @@ class LocalOnlyDocsTests(unittest.TestCase):
             self.assertEqual(result.returncode, 1, f"{relative}: {result.stdout}{result.stderr}")
             self.assertIn(relative, result.stderr)
 
+    def test_allows_grandfathered_report_records_and_evidence_sidecars(self) -> None:
+        temporary, root, base = self.repository()
+        with temporary:
+            assets = {
+                "docs/build/ci-cache-evidence-2026-10-19.json": "{}\n",
+                "docs/research/archive-selected-sources.json": "{}\n",
+                "docs/research/b04-consistency.json": "{}\n",
+                "docs/research/b04-historical-comparison.html": "<html></html>\n",
+                "docs/research/b04-historical-comparison.json": "{}\n",
+                "docs/research/ext07-hybrid-2d.json": "{}\n",
+                "docs/research/ext07-hybrid-2d.svg": "<svg></svg>\n",
+                "docs/research/evidence/b04-c-preliminary-20261023/attempt-001/exit-code": "0\n",
+                "docs/research/evidence/mpc01-per-attempt-20261103-r3/SHA256SUMS": "hash  record.json\n",
+                "scripts/reports/geo07_port/review-seal.json": "{}\n",
+            }
+            for relative, content in assets.items():
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(content, encoding="utf-8")
+            subprocess.run(["git", "-C", str(root), "add", *assets], check=True)
+            subprocess.run(["git", "-C", str(root), "commit", "-qm", "add report records"], check=True)
+            result = self.run_checker(root, base)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_rejects_the_local_research_decision_log(self) -> None:
+        temporary, root, base = self.repository()
+        with temporary:
+            path = root / "docs/research/exp06-423-decision-log.tsv"
+            path.parent.mkdir(parents=True)
+            path.write_text("decision\tevidence\n", encoding="utf-8")
+            subprocess.run(["git", "-C", str(root), "add", str(path.relative_to(root))], check=True)
+            subprocess.run(["git", "-C", str(root), "commit", "-qm", "add working decision log"], check=True)
+            result = self.run_checker(root, base)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("docs/research/exp06-423-decision-log.tsv", result.stderr)
+
     def test_accepts_a_properly_named_numbered_adr(self) -> None:
         temporary, root, base = self.repository()
         with temporary:
