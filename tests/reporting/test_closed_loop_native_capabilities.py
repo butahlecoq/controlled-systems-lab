@@ -191,5 +191,78 @@ class NativeCapabilityTests(unittest.TestCase):
                 "native-box-fixed-plan-mpc/1", manifest_path=capabilities.NATIVE_MANIFEST)
 
 
+    def test_native_bridge_failures_persist_request_and_raw_response(self):
+        task = capabilities.load_task("earth-orbit")
+        graph = next(row for row in capabilities.build_native_manifest()["graphs"]
+            if row["task_id"] == task["task_id"] and row["controller"]["id"] == "native-box-mpc/1")
+        profile = graph["controller"]["id"]
+        base = {"task_id": task["task_id"], "task_sha256": graph["task_sha256"],
+            "action_profile_id": graph["action_profile_id"], "policy_id": profile,
+            "status": "unsupported", "control": None, "invocations": [],
+            "reason": "stubbed native policy outcome",
+            "build_backend_profile": {"build_type": "Release", "CSL_ENABLE_HIGHS": True,
+                "CSL_ENABLE_QHULL": True}}
+        cases = {
+            "bad-id": (base | {"task_id": "wrong-task", "status": "accepted", "control": [0, 0]},
+                None, "controller_protocol_or_execution_failure"),
+            "missing-backend": ({k: v for k, v in base.items() if k != "build_backend_profile"}, None, None),
+            "malformed": (None, "{malformed native response\n", "controller_protocol_or_execution_failure"),
+            "unsupported": (base, None, None),
+            "nonfinite-partial": (base | {"partial_diagnostic": float("nan")}, None,
+                "controller_protocol_or_execution_failure"),
+        }
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw); execution_bridge = root / "execution-bridge"
+            execution_bridge.write_bytes(b"unused execution bridge")
+            for label, (response, raw_line, expected_category) in cases.items():
+                with self.subTest(response_case=label):
+                    if raw_line is None:
+                        raw_line = json.dumps(response, separators=(",", ":")) + "\n"
+                    executable = root / f"native-{label}"
+                    source = "#!/usr/bin/env python3\nimport sys\nsys.stdin.readline()\nsys.stdout.write(" + repr(raw_line) + ")\nsys.stdout.flush()\n"
+                    executable.write_text(source, encoding="utf-8"); executable.chmod(0o755)
+                    attempt = root / f"attempt-{label}"; attempt.mkdir()
+                    graph_path = root / f"graph-{label}.json"; graph_path.write_text(json.dumps(graph))
+                    with mock.patch.dict("os.environ", {"CSL_NATIVE_POLICY_BRIDGE": str(executable)}):
+                        result = run_closed_loop.worker("earth-orbit", attempt, execution_bridge,
+                            graph_path=graph_path)
+                    self.assertEqual(result, 2)
+                    record = json.loads((attempt / "attempt.json").read_text())
+                    stage = json.loads((attempt / "stage-000.json").read_text())
+                    self.assertEqual((record["status"], record["completed_holds"]), ("incomplete", 0))
+                    capture = stage["native_query_capture"]
+                    self.assertTrue(capture["bridge_request_sent"])
+                    request = json.loads(capture["request_json"])
+                    self.assertEqual(capture["bridge_request_raw"], capture["request_json"] + "\n")
+                    self.assertEqual(capture["request_sha256"],
+                        hashlib.sha256(capture["bridge_request_raw"].encode("utf-8")).hexdigest())
+                    self.assertEqual(request["task_sha256"], graph["task_sha256"])
+                    self.assertEqual(request["action_profile_id"], graph["action_profile_id"])
+                    self.assertEqual(capture["bridge_response_raw"], raw_line)
+                    self.assertEqual(capture["bridge_response_sha256"], hashlib.sha256(raw_line.encode()).hexdigest())
+                    if expected_category:
+                        self.assertEqual(stage["failure_category"], expected_category)
+                        self.assertEqual(stage["mathematical_support_status"], "not_evaluated")
+                        self.assertEqual(record["mathematical_support_status"], "not_evaluated")
+                    if label == "malformed":
+                        self.assertEqual(capture["response_parse_status"], "malformed_json")
+                    if label == "unsupported":
+                        self.assertEqual(stage["controller_status"], "unsupported")
+                        self.assertEqual(stage["mathematical_support_status"], "not_established")
+                        self.assertEqual(stage["controller_reason"], "stubbed native policy outcome")
+                    if label == "missing-backend":
+                        self.assertEqual(stage["controller_status"], "failed")
+                        self.assertEqual(stage["mathematical_support_status"], "not_evaluated")
+                        self.assertEqual(record["mathematical_support_status"], "not_evaluated")
+                        self.assertIn("omitted its compiled backend profile", stage["controller_reason"])
+                    if label == "bad-id":
+                        self.assertIn("source task identity", stage["controller_failure"]["reason"])
+                        self.assertEqual(capture["parsed_response"]["task_id"], "wrong-task")
+                    if label == "nonfinite-partial":
+                        self.assertEqual(stage["mathematical_support_status"], "not_evaluated")
+                        self.assertEqual(capture["parsed_response"]["partial_diagnostic"],
+                            {"nonfinite_float": "nan"})
+
+
 if __name__ == "__main__":
     unittest.main()

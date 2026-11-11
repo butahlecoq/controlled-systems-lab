@@ -7,6 +7,7 @@ is atomically replaced after each stage, and retries never overwrite failures.
 from __future__ import annotations
 
 import argparse
+import functools
 import hashlib
 import importlib
 import importlib.metadata
@@ -33,6 +34,28 @@ from capabilities import MANIFEST, NATIVE_MANIFEST, resolve_graph, validate_reso
 HERE = Path(__file__).resolve().parent
 MPC11 = ROOT / "benchmarks/reporting/mpc11"
 sys.path.insert(0, str(MPC11))
+DEFAULT_ATTEMPT_WALL_SECONDS = 300
+DEFAULT_ATTEMPT_CPU_SECONDS = 300
+
+
+def positive_seconds(value: str | int, name: str = "seconds") -> int:
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError) as error:
+        raise ValueError(f"{name} must be a positive integer") from error
+    if isinstance(value, bool) or parsed <= 0 or str(value).strip() not in {str(parsed), f"+{parsed}"}:
+        raise ValueError(f"{name} must be a positive integer")
+    return parsed
+
+
+def attempt_resource_profile(wall_seconds: int, cpu_seconds: int) -> dict:
+    wall = positive_seconds(wall_seconds, "attempt wall seconds")
+    cpu = positive_seconds(cpu_seconds, "attempt CPU seconds")
+    return {"profile_id": f"worker-wall-{wall}-cpu-{cpu}/1",
+        "requested": {"wall_seconds": wall, "cpu_seconds": cpu},
+        "enforced": {"wall_seconds": wall, "cpu_seconds_soft": cpu,
+            "cpu_seconds_hard": cpu + 1,
+            "wall_scope": "supervised worker process group; excludes replay, checkers and rendering"}}
 
 
 def atomic_json(path: Path, value: dict) -> None:
@@ -191,7 +214,9 @@ def trace_call_roles(query: dict, graph: dict) -> list[dict]:
 
 def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | None = None,
            requested_controller_id: str | None = None, requested_action_profile_id: str | None = None,
-           graph_path: Path | None = None) -> int:
+           graph_path: Path | None = None, attempt_wall_seconds: int = DEFAULT_ATTEMPT_WALL_SECONDS,
+           attempt_cpu_seconds: int = DEFAULT_ATTEMPT_CPU_SECONDS) -> int:
+    resource_profile = attempt_resource_profile(attempt_wall_seconds, attempt_cpu_seconds)
     task = load_task(task_name); validate_source_binding(task)
     task_hash = manifest_sha256(task)
     if graph_path is None: raise ValueError("worker requires an admitted resolved graph")
@@ -210,6 +235,9 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
         atomic_json(attempt / "attempt.json", {"schema": "csl.closed-loop.attempt/1",
             "attempt_id": attempt.name, "task_id": task["task_id"], "task_sha256": task_hash,
             "controller_id": graph["controller"]["id"], "resolved_graph": graph,
+            "resource_profile_id": resource_profile["profile_id"],
+            "resource_limits": {"requested": resource_profile["requested"],
+                "enforced": resource_profile["enforced"]},
             "status": "preparation_failed", "algorithm_status": "preparation_failed",
             "overall_status": "preparation_failed", "completed_holds": 0,
             "preparation_failure": {"type": type(error).__name__, "reason": str(error)},
@@ -236,10 +264,11 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
                          "controller": controller_id, "execution": graph["execution"]["id"]},
         "geometry_work": {"vertices": None if geometry_active else 0, "set_operations": 0,
             "claim": graph.get("claim_scope", "pure NMPC; no representation comparison")},
-        "resource_limits": {"requested": {"wall_seconds": 300, "address_space_bytes": 8 * 1024**3,
-              "cpu_seconds": 300, "worker_count": 1, "solver_threads": 1},
-            "enforced": {"wall_seconds": "subprocess timeout with process-group termination",
-              "address_space_bytes": "POSIX RLIMIT_AS on worker process", "cpu_seconds": "POSIX RLIMIT_CPU on worker process",
+        "resource_profile_id": resource_profile["profile_id"],
+        "resource_limits": {"requested": {**resource_profile["requested"], "address_space_bytes": 8 * 1024**3,
+              "worker_count": 1, "solver_threads": 1},
+            "enforced": {**resource_profile["enforced"],
+              "address_space_bytes": "POSIX RLIMIT_AS on worker process",
               "worker_count": "one worker", "solver_threads": "environment requests one BLAS/OMP/MKL thread"},
             "observed": {"worker_pid": os.getpid(), "platform": platform.platform(), "python": platform.python_version(),
                 "effective_cpu_seconds": resource.getrlimit(resource.RLIMIT_CPU),
@@ -259,14 +288,27 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
                    "execution": {"id": graph["execution"]["id"], "version": graph["execution"]["version"]}}}
         atomic_json(attempt / f"stage-{j:03d}.json", row)
         try:
+            if policy is not None:
+                install_capture = getattr(policy, "set_query_capture_callback", None)
+                if callable(install_capture):
+                    def persist_native_capture(capture):
+                        row["native_query_capture"] = capture
+                        atomic_json(attempt / f"stage-{j:03d}.json", row)
+                    install_capture(persist_native_capture)
             query = (policy.query(task["task_id"], state.tolist(), j) if policy is not None
                      else controller_query(task, graph, state, j, previous, prepared_controller))
             if policy is not None:
+                capture = getattr(policy, "last_query_capture", None)
+                if capture is not None:
+                    row["native_query_capture"] = capture
+                    atomic_json(attempt / f"stage-{j:03d}.json", row)
                 query = validate_policy_response(task, task_hash, action_profile_id, query)
                 ledger["preparation_receipt"]["adapter_receipt"] = getattr(policy, "preparation_receipt", {})
             row.update({"status": query["status"], "policy_id": query["policy_id"],
                         "controller_invocations": query["invocations"]})
             row["controller_status"] = query["status"]
+            if query.get("reason"):
+                row["controller_reason"] = query["reason"]
             if query["status"] in {"unavailable", "incompatible"}:
                 row["failure_category"] = "backend_unavailable_or_incompatible"
             elif query["status"] == "failed":
@@ -288,7 +330,7 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
                           "policy_semantics", "prediction_profile", "coverage", "geometry_selection",
                           "geometry_invocations", "action_cloud_rows", "selected_representation",
                           "finite_action_nominal_profile", "build_backend_profile", "candidate_plan_search",
-                          "selector", "selected_plan", "representation"):
+                          "selector", "selected_plan", "representation", "native_query_capture"):
                 if field in query: row[field] = query[field]
             if "selected_representation" not in row and "representation" in query:
                 row["selected_representation"] = query["representation"]
@@ -320,7 +362,16 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
             controls.append(action); states.append(state.tolist()); previous = query.get("next_guess")
             row["status"] = "applied-and-observed"; row["applied_control"] = action
         except Exception as error:
+            failure = {"type": type(error).__name__, "reason": str(error)}
             row.update({"status": "failed", "failure": f"{type(error).__name__}: {error}"})
+            if policy is not None:
+                capture = getattr(policy, "last_query_capture", None)
+                if capture is not None:
+                    row["native_query_capture"] = capture
+                    failure["native_query_capture"] = capture
+                row["failure_category"] = "controller_protocol_or_execution_failure"
+                row["mathematical_support_status"] = "not_evaluated"
+                row["controller_failure"] = failure
         row["stage_elapsed_seconds"] = time.monotonic() - started
         stages.append(row); atomic_json(attempt / f"stage-{j:03d}.json", row)
         ledger.update({"controls": controls, "physical_states": states, "stages": stages,
@@ -334,6 +385,8 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
         "elapsed_seconds": sum(row.get("stage_elapsed_seconds", 0) for row in stages),
         "physical_objective": objective(task, states, controls) if complete else None,
         "controls_sha256": hashlib.sha256(json.dumps(controls, separators=(",", ":")).encode()).hexdigest()})
+    if any(row.get("mathematical_support_status") == "not_evaluated" for row in stages):
+        ledger["mathematical_support_status"] = "not_evaluated"
     usage = resource.getrusage(resource.RUSAGE_SELF)
     if policy is not None:
         try:
@@ -349,8 +402,9 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
     return 0 if complete else 2
 
 
-def limited_worker():
-    resource.setrlimit(resource.RLIMIT_CPU, (300, 301))
+def limited_worker(cpu_seconds: int = DEFAULT_ATTEMPT_CPU_SECONDS):
+    cpu = positive_seconds(cpu_seconds, "attempt CPU seconds")
+    resource.setrlimit(resource.RLIMIT_CPU, (cpu, cpu + 1))
     cap = 8 * 1024**3
     resource.setrlimit(resource.RLIMIT_AS, (cap, cap))
 
@@ -404,20 +458,27 @@ def run_limited(command: list[str], stdout_path: Path, stderr_path: Path, *, wal
 
 
 def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | None = None,
-             controller_id: str | None = None, action_profile_id: str | None = None) -> dict:
+             controller_id: str | None = None, action_profile_id: str | None = None,
+             attempt_wall_seconds: int = DEFAULT_ATTEMPT_WALL_SECONDS,
+             attempt_cpu_seconds: int = DEFAULT_ATTEMPT_CPU_SECONDS) -> dict:
+    resource_profile = attempt_resource_profile(attempt_wall_seconds, attempt_cpu_seconds)
     attempt_started = time.monotonic()
     attempt_id = f"{task_name}-{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}-{uuid.uuid4().hex[:8]}"
     attempt = root / task_name / "attempts" / attempt_id
     attempt.mkdir(parents=True, exist_ok=False)
     requested = {"task_name": task_name, "controller_id": controller_id,
         "action_profile_id": action_profile_id, "policy_adapter": policy_adapter,
-        "bridge": str(bridge)}
+        "bridge": str(bridge), "resource_profile_id": resource_profile["profile_id"],
+        "resource_limits": resource_profile}
     atomic_json(attempt / "request.json", {"schema": "csl.closed-loop.run-request/1",
         "attempt_id": attempt_id, "requested": requested,
         "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()})
     initial = {"schema": "csl.closed-loop.attempt/1", "attempt_id": attempt_id,
         "task_id": None, "status": "resolving", "algorithm_status": "not_started",
-        "overall_status": "incomplete", "completed_holds": 0, "requested": requested}
+        "overall_status": "incomplete", "completed_holds": 0, "requested": requested,
+        "resource_profile_id": resource_profile["profile_id"],
+        "resource_limits": {"requested": resource_profile["requested"],
+            "enforced": resource_profile["enforced"]}}
     atomic_json(attempt / "attempt.json", initial)
     try:
         task = load_task(task_name); validate_source_binding(task)
@@ -446,7 +507,8 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
             "mathematical_support_status": "not_evaluated"})
         atomic_json(attempt / "attempt.json", refusal)
         return {"task_id": refusal["task_id"] or task_name, "attempt": str(attempt),
-            "status": status, "algorithm_status": status, "postcheck_status": "not_run",
+            "status": status, "resource_profile_id": resource_profile["profile_id"],
+            "algorithm_status": status, "postcheck_status": "not_run",
             "render_status": "not_run", "overall_status": status, "completed_holds": 0}
     controller_id = selected_controller_id
     source_hashes = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in [
@@ -468,6 +530,8 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
         "bridge_sha256": hashlib.sha256(bridge.read_bytes()).hexdigest(),
         "capability_manifest_sha256": selected_manifest_sha256,
         "graph_id": graph["graph_id"], "graph_fingerprint": graph["graph_fingerprint"],
+        "resource_profile_id": resource_profile["profile_id"],
+        "resource_limits": resource_profile,
         "resolved_modules": graph["controller"], "execution_module": graph["execution"],
         "host_allocation": {"logical_cpus": os.cpu_count(), "mem_available_bytes_at_start": mem_available,
             "suite_memory_request_bytes": min(2 * 1024**3, int(mem_available * .75)) if mem_available else None,
@@ -500,10 +564,13 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
     if policy_adapter: command.extend(["--policy-adapter", policy_adapter])
     if controller_id: command.extend(["--controller-id", controller_id])
     if action_profile_id: command.extend(["--action-profile-id", action_profile_id])
+    command.extend(["--attempt-wall-seconds", str(resource_profile["requested"]["wall_seconds"]),
+        "--attempt-cpu-seconds", str(resource_profile["requested"]["cpu_seconds"])])
     started = time.monotonic(); proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        text=True, env=env, preexec_fn=limited_worker, start_new_session=True)
+        text=True, env=env, preexec_fn=functools.partial(limited_worker,
+            cpu_seconds=resource_profile["requested"]["cpu_seconds"]), start_new_session=True)
     try:
-        stdout, stderr = proc.communicate(timeout=300)
+        stdout, stderr = proc.communicate(timeout=resource_profile["requested"]["wall_seconds"])
         status = "completed" if proc.returncode == 0 else "failed"
     except subprocess.TimeoutExpired:
         os.killpg(proc.pid, signal.SIGTERM)
@@ -522,8 +589,16 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
         result["terminal_supervisor_failure"] = {"status": status, "return_code": proc.returncode,
             "prior_ledger_status": prior_ledger_status, "preserved_stage_records": True,
             "reason": "worker stopped before writing terminal attempt status" if prior_ledger_status == "in-progress" else None}
+        if prior_ledger_status == "in-progress":
+            result.setdefault("mathematical_support_status", "not_evaluated")
     result["supervisor"] = {"status": status, "return_code": proc.returncode,
         "wall_seconds": time.monotonic() - started, "termination_scope": "worker process group",
+        "resource_profile_id": resource_profile["profile_id"],
+        "requested_wall_seconds": resource_profile["requested"]["wall_seconds"],
+        "enforced_wall_timeout_seconds": resource_profile["enforced"]["wall_seconds"],
+        "requested_cpu_seconds": resource_profile["requested"]["cpu_seconds"],
+        "enforced_cpu_rlimit_soft_hard_seconds": [resource_profile["enforced"]["cpu_seconds_soft"],
+            resource_profile["enforced"]["cpu_seconds_hard"]],
         "stdout": "worker-stdout.txt", "stderr": "worker-stderr.txt"}
     if status == "completed" and result.get("status") == "complete":
         try:
@@ -546,6 +621,7 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
     result.update(derive_outcome_status(result))
     atomic_json(final_path, result)
     return {"task_id": task["task_id"], "attempt": str(attempt), "status": status,
+            "resource_profile_id": resource_profile["profile_id"],
             "algorithm_status": result.get("algorithm_status"),
             "postcheck_status": result.get("postcheck_status"), "render_status": result.get("render_status"),
             "overall_status": result.get("overall_status"),
@@ -883,6 +959,8 @@ def write_coverage(root: Path) -> Path:
         overall_status = coverage_overall_status(algorithm_status, postcheck_status, render_status)
         rows.append({"attempt_id": record.get("attempt_id"), "task_id": record.get("task_id"),
             "task_sha256": record.get("task_sha256"),
+            "resource_profile_id": record.get("resource_profile_id"),
+            "resource_limits": record.get("resource_limits"),
             "status": overall_status, "overall_status": overall_status,
             "algorithm_status": algorithm_status, "postcheck_status": postcheck_status,
             "render_status": render_status, "ledger_status": record.get("status"),
@@ -932,14 +1010,20 @@ def main() -> int:
     parser.add_argument("--policy-adapter", help="persistent in-process policy factory as module:function")
     parser.add_argument("--controller-id", help="selected policy identity passed to an external adapter")
     parser.add_argument("--action-profile-id", help="task-declared continuous or finite per-step action-domain identity")
+    parser.add_argument("--attempt-wall-seconds", type=positive_seconds, default=DEFAULT_ATTEMPT_WALL_SECONDS,
+        help="positive worker-only wall timeout in seconds (default: 300; excludes replay, checkers and rendering)")
+    parser.add_argument("--attempt-cpu-seconds", type=positive_seconds, default=DEFAULT_ATTEMPT_CPU_SECONDS,
+        help="positive POSIX worker CPU limit in seconds (default: 300)")
     parser.add_argument("--replay-only", type=Path, help="independently replay a saved complete attempt without rerunning its controller")
     parser.add_argument("--render-only", type=Path, help="render source-defined views for a saved complete attempt without changing its record")
     parser.add_argument("--coverage-only", action="store_true", help="write a coverage index from saved append-only attempt records")
     args = parser.parse_args()
     if args.worker:
         if args.bridge is None or args.attempt is None or args.graph is None: parser.error("worker mode requires --bridge, --attempt, and --graph")
+        limited_worker(args.attempt_cpu_seconds)
         return worker(args.task, args.attempt, args.bridge.resolve(), args.policy_adapter, args.controller_id,
-                      args.action_profile_id, args.graph.resolve())
+                      args.action_profile_id, args.graph.resolve(), args.attempt_wall_seconds,
+                      args.attempt_cpu_seconds)
     if args.bridge is None and not args.render_only and not args.coverage_only: parser.error("--bridge is required")
     if args.coverage_only:
         path = write_coverage(args.output_root.resolve()); print(json.dumps({"coverage_record": str(path)})); return 0
@@ -991,12 +1075,14 @@ def main() -> int:
         return 0 if result["overall_status"] == "complete" else 1
     names = ["syn-nl-lv-01", "earth-orbit", "syn-nl-fuel-01"] if args.task == "all" else [args.task]
     rows = [run_task(name, args.output_root.resolve(), args.bridge.resolve(), args.policy_adapter,
-                     args.controller_id, args.action_profile_id) for name in names]
+                     args.controller_id, args.action_profile_id, args.attempt_wall_seconds,
+                     args.attempt_cpu_seconds) for name in names]
     coverage_path = write_coverage(args.output_root.resolve())
     print(json.dumps({"schema": "csl.closed-loop.coverage/1", "coverage_record": str(coverage_path), "attempts": rows,
         "coverage": [{"task_id": row["task_id"], "algorithm_status": row.get("algorithm_status"),
             "postcheck_status": row.get("postcheck_status"), "render_status": row.get("render_status"),
             "overall_status": row.get("overall_status"), "completed_holds": row["completed_holds"],
+            "resource_profile_id": row.get("resource_profile_id"),
             "actual_observed_state_updates": row["completed_holds"]} for row in rows]}, indent=2))
     return 0 if all(row.get("overall_status") == "complete" for row in rows) else 1
 

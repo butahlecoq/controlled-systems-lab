@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import itertools
 import json
+import math
 import os
 import subprocess
 from collections.abc import Mapping
@@ -24,6 +25,19 @@ _PROFILES = {
     "native-parallelotope-fixed-plan-mpc/1": (3, False, "parallelotope"),
     "native-ellipsoid-fixed-plan-mpc/1": (4, False, "ellipsoid"),
 }
+
+
+def _capture_safe(value):
+    """Keep failure evidence JSON-writable, including nonfinite native values."""
+    if isinstance(value, Mapping):
+        return {str(key): _capture_safe(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_capture_safe(item) for item in value]
+    if isinstance(value, float) and not math.isfinite(value):
+        return {"nonfinite_float": repr(value)}
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    return {"unserializable_type": type(value).__name__, "repr": repr(value)}
 
 
 def _profile(controller_id: str) -> tuple[int, bool, str]:
@@ -156,6 +170,8 @@ class NativeGraphPolicy:
             raise ValueError("native policy bridge is not executable")
         self.process = subprocess.Popen([str(self.executable)], stdin=subprocess.PIPE,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
+        self.last_query_capture = None
+        self.query_capture_callback = None
         self.receipt = prediction_receipt(task)
         self.running_cost = _source_cost(task)
         self.terminal_objective = _terminal_objective(task)
@@ -208,6 +224,13 @@ class NativeGraphPolicy:
                 raise ValueError(f"factory_options.limits.{key} must be positive")
             result[key] = value
         return result
+
+    def set_query_capture_callback(self, callback) -> None:
+        self.query_capture_callback = callback
+
+    def _publish_query_capture(self) -> None:
+        if self.query_capture_callback is not None and self.last_query_capture is not None:
+            self.query_capture_callback(_capture_safe(self.last_query_capture))
 
     def _method_option(self, key: str, env_id: str, env_version: str, default_id: str,
                        default_version: str) -> dict[str, str]:
@@ -262,6 +285,7 @@ class NativeGraphPolicy:
             "checker_budget": checker, "control_optimizer": optimizer}
 
     def query(self, task_id: str, observed_physical_state: list[float], absolute_update_index: int) -> dict:
+        self.last_query_capture = None
         if task_id != self.task["task_id"] or not 0 <= absolute_update_index < self.original_horizon:
             raise ValueError("query task or absolute update index differs from the source-bound task")
         predictor_stages = _prediction_stages(self.task, self.receipt, absolute_update_index)
@@ -287,7 +311,7 @@ class NativeGraphPolicy:
             candidate_search = _candidate_action_histories(
                 len(self.actions), horizon, self.limits["max_plans"])
             if not candidate_search["candidates"]:
-                return {"status": "unsupported", "task_id": task_id,
+                response = {"status": "unsupported", "task_id": task_id,
                     "task_sha256": self.task_sha256, "action_profile_id": self.action_profile_id,
                     "policy_id": self.controller_id, "invocations": [],
                     "mathematical_support": "not_evaluated",
@@ -298,25 +322,69 @@ class NativeGraphPolicy:
                         "available_single_switch_history_count": candidate_search[
                             "available_single_switch_history_count"]},
                     "reason": "candidate plan budget is smaller than the source action catalogue; no histories were searched"}
+                self.last_query_capture = {"schema": "csl.closed-loop.native-query-capture/2",
+                    "capture_kind": "adapter-preflight", "bridge_request_sent": False,
+                    "request": _capture_safe(request), "bridge_response_raw": None,
+                    "bridge_response_sha256": None, "adapter_response": _capture_safe(response)}
+                self._publish_query_capture()
+                response["native_query_capture"] = _capture_safe(self.last_query_capture)
+                return response
             request["candidate_action_indices"] = candidate_search["candidates"]
             request["candidate_search_policy"] = candidate_search["policy_id"]
             request["candidate_search_full_action_history_count"] = candidate_search["full_action_history_count"]
             request["candidate_search_coverage"] = candidate_search["search_coverage"]
             request["candidate_search_budget"] = candidate_search["candidate_budget"]
-        self.last_request = request
+        request_json = None
+        self.last_query_capture = {"schema": "csl.closed-loop.native-query-capture/2",
+            "capture_kind": "bridge-exchange", "bridge_request_sent": False,
+            "request": _capture_safe(request), "request_json": None,
+            "bridge_request_raw": None, "bridge_request_transmission_status": "not_started",
+            "request_sha256": None, "bridge_response_raw": None,
+            "bridge_response_sha256": None, "response_parse_status": "not_received"}
+        self._publish_query_capture()
+        request_json = json.dumps(request, separators=(",", ":"), allow_nan=False)
+        request_line = request_json + "\n"
+        self.last_query_capture["request_json"] = request_json
+        self.last_query_capture["bridge_request_raw"] = request_line
+        self.last_query_capture["request_sha256"] = hashlib.sha256(request_line.encode("utf-8")).hexdigest()
+        self.last_query_capture["bridge_request_transmission_status"] = "prepared"
+        self._publish_query_capture()
         assert self.process.stdin is not None and self.process.stdout is not None
-        self.process.stdin.write(json.dumps(request, separators=(",", ":"), allow_nan=False) + "\n")
+        self.last_query_capture["bridge_request_transmission_status"] = "attempted"
+        self._publish_query_capture()
+        self.process.stdin.write(request_line)
         self.process.stdin.flush()
+        self.last_query_capture["bridge_request_sent"] = True
+        self.last_query_capture["bridge_request_transmission_status"] = "sent"
+        self._publish_query_capture()
         line = self.process.stdout.readline()
+        self.last_query_capture["bridge_response_raw"] = line
+        self.last_query_capture["bridge_response_sha256"] = hashlib.sha256(line.encode("utf-8")).hexdigest()
         if not line:
+            self.last_query_capture["response_parse_status"] = "missing_response"
+            self._publish_query_capture()
             raise RuntimeError(f"native policy bridge exited before returning a response (code {self.process.poll()})")
-        response = json.loads(line)
+        self.last_query_capture["response_parse_status"] = "raw_received"
+        self._publish_query_capture()
+        try:
+            response = json.loads(line)
+        except (json.JSONDecodeError, ValueError) as error:
+            self.last_query_capture["response_parse_status"] = "malformed_json"
+            self._publish_query_capture()
+            raise ValueError(f"native policy bridge returned malformed JSON: {error}") from error
+        self.last_query_capture["parsed_response"] = _capture_safe(response)
+        self.last_query_capture["response_parse_status"] = "parsed"
+        self._publish_query_capture()
+        if not isinstance(response, dict):
+            raise ValueError("native policy bridge response must be a JSON object")
         native_response = dict(response)
         actual_build_profile = response.get("build_backend_profile")
         if not isinstance(actual_build_profile, Mapping):
-            return {"status": "failed", "task_sha256": self.task_sha256,
+            failed = {"status": "failed", "task_sha256": self.task_sha256,
                 "action_profile_id": self.action_profile_id, "policy_id": self.controller_id,
                 "invocations": [], "reason": "native executable omitted its compiled backend profile"}
+            failed["native_query_capture"] = _capture_safe(self.last_query_capture)
+            return failed
         expected_build_profile = self.preparation_receipt["build_backend_profile"]
         if any(value != "unspecified" and actual_build_profile.get(key) != value
                 for key, value in expected_build_profile.items()):
@@ -324,6 +392,7 @@ class NativeGraphPolicy:
             response["status"] = "incompatible"
             response["reason"] = "native executable build/backend profile differs from the selected manifest profile"
             response["build_backend_profile"] = actual_build_profile
+            response["native_query_capture"] = _capture_safe(self.last_query_capture)
             return response
         self.preparation_receipt["build_backend_profile"] = dict(actual_build_profile)
         response["build_backend_profile"] = dict(actual_build_profile)
@@ -344,6 +413,7 @@ class NativeGraphPolicy:
             "bridge_response_sha256": hashlib.sha256(json.dumps(native_response, sort_keys=True,
                 separators=(",", ":"), allow_nan=False).encode()).hexdigest(),
             "bridge_response": native_response}
+        response["native_query_capture"] = _capture_safe(self.last_query_capture)
         return response
 
     def close(self) -> None:
@@ -355,6 +425,9 @@ class NativeGraphPolicy:
             self.process.terminate()
             try: self.process.wait(timeout=1)
             except subprocess.TimeoutExpired: self.process.kill(); self.process.wait()
+        for stream in (self.process.stdout, self.process.stderr):
+            if stream is not None:
+                stream.close()
         if self.process.returncode not in (0, None):
             raise RuntimeError(f"native policy bridge exited with status {self.process.returncode}")
 

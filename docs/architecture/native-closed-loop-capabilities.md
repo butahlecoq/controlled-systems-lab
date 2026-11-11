@@ -26,6 +26,16 @@ target. Preparation records that executable's hash and reported build/backend
 profile separately from the common plant bridge. A missing executable or
 incompatible provider is a preparation failure, not evidence that the mathematical
 task or controller profile is unsupported.
+
+The worker wall and CPU limits default to 300 seconds, preserving the pilot's
+original budget. Longer native exploration can request, for example,
+`--attempt-wall-seconds 1800 --attempt-cpu-seconds 1800`. Both values must be
+positive integers. The saved attempt records a resource-profile ID, the requested
+budgets, the supervisor wall timeout, and the worker's POSIX CPU soft/hard limits.
+These limits cover the worker process group through policy execution; independent
+replay, bounded checking and rendering run afterward under their own limits, so
+the whole attempt may take longer.
+
 At query time, a provider or optimizer that cannot be resolved is recorded as
 `unavailable`; a resolved method that rejects a profile or dimension is
 `incompatible`. Both leave mathematical support `not_evaluated` and do not count as
