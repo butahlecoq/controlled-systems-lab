@@ -21,12 +21,28 @@ archive without an explanation.
 from __future__ import annotations
 
 import argparse
+import importlib.util
 from html import escape
 from html.parser import HTMLParser
 import json
 from pathlib import Path
 import re
 from typing import NamedTuple
+
+try:
+    import site_design
+except ModuleNotFoundError as error:
+    if error.name != "site_design":
+        raise
+    # A few publication validators load this file by path, outside the
+    # scripts/reports import context. Resolve the helper beside this file so
+    # those standalone imports use the same canonical page framing.
+    design_path = Path(__file__).with_name("site_design.py")
+    design_spec = importlib.util.spec_from_file_location("site_design", design_path)
+    if design_spec is None or design_spec.loader is None:
+        raise ImportError(f"cannot load shared page design from {design_path}")
+    site_design = importlib.util.module_from_spec(design_spec)
+    design_spec.loader.exec_module(site_design)
 
 
 class Family(NamedTuple):
@@ -89,6 +105,11 @@ FAMILIES = {
         "Cross-checks one synthetic two-stage scalar fixed-plan minimax case with an exhaustive "
         "finite-action oracle, a shared-selector MILP and its continuous selector relaxation. "
         "The report measures no performance and does not complete issue #599."),
+    "closed-loop-pilot": Family(
+        r"closed-loop-pilot-v1", "synthesis", "Three source-bound observed-state control episodes",
+        "Reports one complete continuous-NMPC trajectory for each source-bound Lotka–Volterra, "
+        "Earth-orbit and fuel task, with common nonlinear plant execution, independent replays, "
+        "saved raw records and numerical-only evidence limits."),
     "mpc03-b08-miQCP": Family(
         r"mpc03-b08-l04-miQCP-v1", "synthesis", "B08 robust minimax MIQCP",
         "Solves the four-step L04 displayed-data finite-action minimax model with a shared-selector "
@@ -595,10 +616,6 @@ FAMILIES = {
 }
 
 
-def stylesheet() -> str:
-    return Path(__file__).with_name("landing.css").read_text(encoding="utf-8")
-
-
 def family_for(report_id: str) -> str:
     """Return the family whose registered pattern covers a published route."""
     matches = [key for key, family in FAMILIES.items() if re.fullmatch(family.pattern, report_id)]
@@ -641,7 +658,7 @@ def card(entry: Entry, number: int, heading: str) -> str:
     return "".join(parts)
 
 
-def page(entries, extras=None) -> str:
+def page(entries, extras=None, *, shared_shell=False) -> str:
     """Render the complete landing page for the given report entries."""
     groups = {}
     for entry in entries:
@@ -662,10 +679,26 @@ def page(entries, extras=None) -> str:
     if extras:
         extra_links = ('<p class="hero-links" id="visual-examples-link">'
                        + links_html(extras) + "</p>")
-    return ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
-            '<meta name="viewport" content="width=device-width,initial-scale=1">'
-            "<title>CSL algorithm reports</title><style>\n" + stylesheet() + "\n</style></head><body>"
-            '<p class="eyebrow">Controlled Systems Lab &middot; research archive</p>'
+    if shared_shell:
+        opening = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
+                   '<meta name="viewport" content="width=device-width,initial-scale=1">'
+                   '<title>CSL algorithm reports</title><style>\n'
+                   + site_design.stylesheet().decode("utf-8") + '\n</style></head>'
+                   '<body><a class="skip" href="#main">Skip to archive</a>'
+                   '<main id="main" class="report-home">'
+                   + site_design.breadcrumbs([("Learn", "index.html"),
+                                              ("Evidence archive", "archive.html")])
+                   + '<p class="eyebrow">Controlled Systems Lab &middot; evidence archive</p>')
+        closing = '</main></body></html>'
+    else:
+        opening = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
+                   '<meta name="viewport" content="width=device-width,initial-scale=1">'
+                   '<title>CSL algorithm reports</title><style>\n'
+                   + site_design.stylesheet().decode("utf-8")
+                   + '\n</style></head><body><div class="report-home">'
+                   '<p class="eyebrow">Controlled Systems Lab &middot; research archive</p>')
+        closing = '</div></body></html>'
+    return (opening +
             "<h1>Algorithm reports and research evidence</h1>"
             '<p class="lede">This archive contains measured algorithm results and a separate '
             'Research Evidence section for fixed-profile audits. Every entry explains in plain language what the report '
@@ -693,7 +726,7 @@ def page(entries, extras=None) -> str:
             "</dl></div>"
             '<div class="section"><div class="cards"><ul>' + "".join(cards) + "</ul></div></div>"
             '<div class="footer"><p>Controlled Systems Lab &middot; Research evidence is separated from '
-            "registered algorithm results; every entry states its own limits.</p></div></body></html>")
+            "registered algorithm results; every entry states its own limits.</p></div>" + closing)
 
 
 class Node:
@@ -889,6 +922,18 @@ def build(site: Path) -> None:
             links=(("Full result record", pilot + "/record.json"),
                    ("Raw executable output", pilot + "/pilot-output.json"),
                    ("Build provenance", pilot + "/build-provenance.json"))))
+    closed_loop = "closed-loop-pilot-v1"
+    if (site / closed_loop / "index.html").is_file():
+        report_manifest = json.loads((site / closed_loop / "manifest.json").read_text(encoding="utf-8"))
+        detailed = [entry for entry in detailed if entry.report_id != closed_loop]
+        detailed.append(Entry(report_id=closed_loop,
+            scope="Three complete source-bound continuous NMPC episodes with independent common and tighter replay checks",
+            limits="One-off local-NLP numerical trajectories; no global optimality, reachability, safety, robustness, or speed-winner claim; Pages deployment and live URL verification pending",
+            commit=report_manifest.get("numerical_source_commit", ""),
+            links=(("Full source-bound report", closed_loop + "/index.html"),
+                   ("Lotka–Volterra 2D example", closed_loop + "/example-2d.html"),
+                   ("Full coverage record", closed_loop + "/raw/coverage.json"),
+                   ("Offline report ZIP", closed_loop + ".zip"))))
     b08 = "mpc03-b08-l04-miQCP-v1"
     if (site / b08 / "index.html").is_file():
         detailed = [entry for entry in detailed if entry.report_id != b08]
@@ -917,7 +962,7 @@ def build(site: Path) -> None:
             links=(("Full result record", report_id + "/result.json"),
                    ("Phase-plane data", report_id + "/figure-data.json"),
                    ("Offline report bundle", report_id + ".zip"))))
-    rendered = page(detailed, extras)
+    rendered = page(detailed, extras, shared_shell=True)
     validate(rendered, site)
     index.write_text(rendered, encoding="utf-8")
 

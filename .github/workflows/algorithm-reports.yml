@@ -505,6 +505,9 @@ jobs:
       - name: Stage minimal 2D visual examples from reviewed saved results
         if: steps.catalog.outputs.has_reports == 'true'
         run: python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site
+      - name: Stage the saved closed-loop pilot report and 2D example
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/closed-loop-pilot/closed-loop-pilot-v1/manifest.json') != ''
+        run: python scripts/reports/stage_closed_loop_pilot.py --source reports/closed-loop-pilot/closed-loop-pilot-v1 --site build/report-site
       - name: Stage the saved MPC-03 pilot report and gallery link
         if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/mpc03-open-loop-pilot-v1/record.json') != ''
         run: python scripts/reports/stage_mpc03.py --source reports/algorithm-results/mpc03-open-loop-pilot-v1 --site build/report-site
@@ -592,34 +595,3 @@ jobs:
           path: build/obs04-perf-probe-result/
           if-no-files-found: warn
           retention-days: 14
-
-  deploy:
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && needs.validate.outputs.has_reports == 'true'
-    needs: validate
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    concurrency:
-      group: github-pages
-      cancel-in-progress: false
-      # Preserve reverse-finished validations; GitHub caps this queue at 100 pending jobs.
-      queue: max
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          persist-credentials: false
-      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0; root configures Pages first
-      - name: Check that the staged report still belongs to current main
-        id: head
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: python3 scripts/reports/check_deploy_head.py
-      - name: Deploy reviewed reports
-        if: steps.head.outputs.current == 'true'
-        id: deployment
-        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

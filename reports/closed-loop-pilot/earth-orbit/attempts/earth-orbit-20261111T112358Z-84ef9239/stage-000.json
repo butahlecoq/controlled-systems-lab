@@ -1,0 +1,27 @@
+{
+  "update_index": 0,
+  "absolute_time": 0.0,
+  "observed_physical": [
+    7000.0,
+    0.0,
+    0.0,
+    0.0010780614796240577
+  ],
+  "observed_scaled": [
+    7.0,
+    0.0,
+    0.0,
+    1.0780614796240577
+  ],
+  "original_task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+  "status": "started",
+  "module_calls": [],
+  "requested_modules": {
+    "controller": "syn-nl-orbit-01/source-cost-direct-shooting/1",
+    "vertex_lp": "not_used",
+    "set_reducer": "not_used",
+    "representation": "not_used",
+    "converter": "not_used",
+    "execution": "CSL::simulation"
+  }
+}

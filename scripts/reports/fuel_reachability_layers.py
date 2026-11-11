@@ -14,6 +14,7 @@ import subprocess
 import sys
 
 import numpy as np
+import site_design
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -463,7 +464,29 @@ def render(record_path: Path, output_dir: Path) -> list[Path]:
         card = f'''<section><h2>{html.escape(pair_titles[key])}</h2><figure><a href="{svg.name}"><img src="{png.name}" alt="Forward and backward fuel reachable sets at every stage, full-state intersections, and one selected minimizing trajectory projected onto {pair[0]} and {pair[1]}"></a><figcaption><a href="{svg.name}">SVG</a> · <a href="{png.name}" download>PNG</a></figcaption></figure></section>'''
         (primary_cards if key in {"x1-x2", "x3-x4"} else supplementary_cards).append(card)
     html_path = output_dir / "index.html"
-    html_path.write_text(f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fuel reachability layers</title><style>body{{max-width:1100px;margin:2rem auto;padding:0 1rem;font:16px/1.55 system-ui;color:#18212b}}img{{width:100%;height:auto}}section{{border-top:1px solid #ccd3db;padding:1rem 0;break-inside:avoid}}.note{{padding:1rem;background:#f2f5f8;border-left:4px solid #2f6bff}}a{{color:#174ea6}}@media print{{img{{max-height:8.5in;object-fit:contain}}}}</style><main><h1>Forward and backward fuel reachable sets</h1><p class="note">The main plots are the oxidizer flow/stock projection (x₁,x₂) and fuel flow/stock projection (x₃,x₄). Two cross-coordinate projections follow as supplementary views. The figures use deterministic linear model parameters transcribed from local source <code>papers/Minimax/Constrained/ReachableSets.m</code> (SHA-256 recorded in the model and geometry records); the source file is not redistributed. Each 2D plot shows stage-labelled forward sets R0…RT, backward sets G0…GT leading to the selected minimizing terminal point, their full-state intersections, and one selected minimizing open-loop trajectory. Intersections are computed in full 4D before projection. Degenerate projections remain points or line segments; no artificial area is added. This is not the B06/L09 minimax run, a historical figure reproduction, or a claim about disturbance-robust or complete optimal families.</p><p>Selected controls: {html.escape(', '.join(f'{value:.6g}' for value in record['optimal']['controls']))}. Terminal objective: {record['optimal']['objective']:.9g}. Capture code commit: <code>{html.escape(record['source']['code_commit'])}</code>. <a href="plot-data.json" download>Saved geometry and provenance</a> · <a href="fuel-reachability-layers-model.json" download>Model input</a>.</p><h2>Oxidizer and fuel state projections</h2>{''.join(primary_cards)}<h2>Supplementary cross-coordinate projections</h2>{''.join(supplementary_cards)}</main></html>''', encoding="utf-8")
+    page = (site_design.page_start("Fuel reachability layers",
+                                   main_class="page-content fuel-layers",
+                                   crumbs=[("Learn", "../../index.html"),
+                                           ("Examples", "../index.html"),
+                                           ("Fuel reachability", "index.html")])
+            + '<h1>Forward and backward fuel reachable sets</h1>'
+            + '<p class="note">The main plots are the oxidizer flow/stock projection (x₁,x₂) and fuel flow/stock projection (x₃,x₄). '
+              'Two cross-coordinate projections follow as supplementary views. The figures use deterministic linear model parameters '
+              'transcribed from local source <code>papers/Minimax/Constrained/ReachableSets.m</code> (SHA-256 recorded in the model '
+              'and geometry records); the source file is not redistributed. Each 2D plot shows stage-labelled forward sets R0…RT, '
+              'backward sets G0…GT leading to the selected minimizing terminal point, their full-state intersections, and one selected '
+              'minimizing open-loop trajectory. Intersections are computed in full 4D before projection. Degenerate projections remain '
+              'points or line segments; no artificial area is added. This is not the B06/L09 minimax run, a historical figure '
+              'reproduction, or a claim about disturbance-robust or complete optimal families.</p>'
+            + f'<p>Selected controls: {html.escape(", ".join(f"{value:.6g}" for value in record["optimal"]["controls"]))}. '
+              f'Terminal objective: {record["optimal"]["objective"]:.9g}. Capture code commit: '
+              f'<code>{html.escape(record["source"]["code_commit"])}</code>. '
+              '<a href="plot-data.json" download>Saved geometry and provenance</a> · '
+              '<a href="fuel-reachability-layers-model.json" download>Model input</a>.</p>'
+            + '<h2>Oxidizer and fuel state projections</h2>' + ''.join(primary_cards)
+            + '<h2>Supplementary cross-coordinate projections</h2>' + ''.join(supplementary_cards)
+            + site_design.page_end())
+    html_path.write_text(page + "\n", encoding="utf-8")
     saved_data = output_dir / "plot-data.json"
     saved_data.write_text(record_path.read_text(encoding="utf-8"), encoding="utf-8")
     model_copy = output_dir / "fuel-reachability-layers-model.json"

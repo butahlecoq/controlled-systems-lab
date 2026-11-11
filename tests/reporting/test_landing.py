@@ -260,6 +260,8 @@ class AssembledIndexTests(unittest.TestCase):
     def test_staged_items_become_cards_with_the_scope_recorded_with_the_report(self):
         landing.build(self.site)
         page = (self.site / "index.html").read_text(encoding="utf-8")
+        self.assertIn('<a href="index.html">Learn</a>', page)
+        self.assertIn('<li aria-current="page">Evidence archive</li>', page)
         self.assertIn("Box and parallelotope approximations", page)
         self.assertIn("Five authored interval and 2D polygon fixtures", page)
         self.assertIn("Exact containment applies to stored binary64 vertices.", page)

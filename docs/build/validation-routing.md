@@ -10,18 +10,17 @@ empty diffs, invalid event data and unavailable history request both gates.
 
 | Owner / changed paths | Native matrix | Full reporting validation and staging |
 | --- | --- | --- |
-| Educational renderer `scripts/reports/visual_examples.py` (legends, hyperlinks), its `scripts/reports/visual_examples.css` stylesheet and `tests/reporting/test_visual_examples.py` | Skip | Run |
+| Mutable Pages stylesheet, shared page-layout helper, archive/gallery renderers, saved-data companion renderers, their generated example pages and presentation tests (exact paths in `route_changes.py`) | Skip | Run |
 | Saved `reports/algorithm-results/` bundles, except `tooling/` | Skip | Run |
 | Other Markdown documentation | Skip | Skip |
 | Everything else, including unknown executable files | Run | Run |
 
-The educational files are neither named CTest inputs nor dependencies of native
-collectors or smoke checkers. Their imports of existing report validators do not
-make those validators educational: a change to an imported validator still
-requests both gates. Expand the allowlist only after checking consumers and
-adding a behavioral routing case. Shared record/schema validators, collectors,
-smoke checkers, executable drivers, C++, CMake, dependency pins/patches and workflow
-or router changes retain both gates. A mixed diff uses the union of its needs.
+The Pages files are not native build inputs. Their renderer checks remain in the
+full reporting suite. Changes to shared record/schema validators, collectors,
+smoke checkers, executable drivers, C++, CMake, dependency pins/patches and
+workflow or router code retain both gates. A mixed diff uses the union of its
+needs. Add a path to the presentation allowlist only after checking its
+consumers and adding a behavioral routing case.
 Untracked local files do not define ownership.
 
 Presentation changes still run the entire reporting unittest suite, frozen

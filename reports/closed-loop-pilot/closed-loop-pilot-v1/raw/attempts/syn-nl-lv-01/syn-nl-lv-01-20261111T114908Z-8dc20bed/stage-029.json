@@ -1,0 +1,1128 @@
+{
+  "update_index": 29,
+  "absolute_time": 2.9000000000000004,
+  "observed_physical": [
+    111.86343263248402,
+    98.69653529031181
+  ],
+  "observed_scaled": [
+    1.1186343263248402,
+    1.2337066911288976
+  ],
+  "original_task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+  "status": "applied-and-observed",
+  "module_calls": [
+    {
+      "operation": "execution.advance",
+      "provider": "CSL::simulation",
+      "module_id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+      "version": "CSL 0.1.0",
+      "profile_id": "common-adaptive-replay/CSL-simulation-rk4-step-doubling/1",
+      "status": "complete",
+      "accepted_steps": 20,
+      "rejected_steps": 0
+    }
+  ],
+  "requested_modules": {
+    "controller": {
+      "id": "syn-nl-lv-01/nominal-shrinking-radau3/1",
+      "version": "1"
+    },
+    "vertex_lp": "not_used",
+    "set_reducer": "not_used",
+    "representation": "not_used",
+    "converter": "not_used",
+    "execution": {
+      "id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+      "version": "1"
+    }
+  },
+  "policy_id": "syn-nl-lv-01/nominal-shrinking-radau3/1",
+  "controller_invocations": [
+    {
+      "operation": "controller.solve",
+      "module_id": "syn-nl-lv-01/nominal-shrinking-radau3/1",
+      "provider": "do-mpc/CasADi/IPOPT-MUMPS",
+      "version": "do-mpc5.1.2/casadi3.8.0",
+      "profile_id": "mpc11-nominal-shrinking-radau3/1"
+    }
+  ],
+  "solve_receipt": {
+    "setup_seconds": 0.10418254579417408,
+    "original_interval_count": 30,
+    "remaining_horizon": 1,
+    "update_index": 29,
+    "absolute_initial_time": 2.9,
+    "fixed_terminal_time": 3,
+    "running_cost_semantics": "direct sum of lterm, original N, no dt factor",
+    "nlp_objective_expression": "@1=100, @2=80, ((0.00166667*sq(((_u_0_0_u-_tvp_0_reference)/0.05)))+(sq((((@1*_x_1_0_4_z_0)-@1)/@1))+sq((((@2*_x_1_0_4_z_1)-@2)/@2))))",
+    "nlp_variable_labels": [
+      "[_x,0,0,0,z,0]",
+      "[_x,0,0,0,z,1]",
+      "[_x,0,0,1,z,0]",
+      "[_x,0,0,1,z,1]",
+      "[_x,0,0,2,z,0]",
+      "[_x,0,0,2,z,1]",
+      "[_x,0,0,3,z,0]",
+      "[_x,0,0,3,z,1]",
+      "[_x,0,0,4,z,0]",
+      "[_x,0,0,4,z,1]",
+      "[_x,1,0,0,z,0]",
+      "[_x,1,0,0,z,1]",
+      "[_x,1,0,1,z,0]",
+      "[_x,1,0,1,z,1]",
+      "[_x,1,0,2,z,0]",
+      "[_x,1,0,2,z,1]",
+      "[_x,1,0,3,z,0]",
+      "[_x,1,0,3,z,1]",
+      "[_x,1,0,4,z,0]",
+      "[_x,1,0,4,z,1]",
+      "[_u,0,0,u,0]"
+    ],
+    "constraint_lower": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "constraint_upper": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "variable_lower": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "variable_upper": [
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      2.0,
+      1.875,
+      0.05
+    ],
+    "schema": "csl.mpc11.nlp-update/1",
+    "status": "Solve_Succeeded",
+    "success": true,
+    "accepted": true,
+    "iteration_count": 7,
+    "objective": 0.0677513314233592,
+    "objective_recomputed": 0.0677513314233592,
+    "objective_reconstruction_difference": 0.0,
+    "optimization_node_max_physical_state_violation": [
+      0.0,
+      0.0
+    ],
+    "max_scaled_primal_violation": 5.939956859712936e-12,
+    "local_stationarity_infinity_norm": 6.255579985960361e-12,
+    "dual_x": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      6.030598884918263e-10,
+      1.8763790903063397e-09,
+      5.845755834006874e-10,
+      1.886780828013211e-09,
+      5.262412317449966e-10,
+      1.9178117956959317e-09,
+      4.840578002706351e-10,
+      1.93851043017197e-09,
+      4.840578002706351e-10,
+      1.93851043017197e-09,
+      4.840578002706351e-10,
+      1.93851043017197e-09,
+      -1.312096913863643e-07
+    ],
+    "dual_g": [
+      -0.22238649579348052,
+      -0.4680478810245122,
+      0.08194106655990584,
+      0.17713003274881103,
+      0.10381619421316034,
+      0.24507020070326602,
+      0.021259087744401578,
+      0.0537033641461751,
+      -0.19133378113339414,
+      -0.48333041630135937,
+      0.19133378064933634,
+      0.48333041436284896
+    ],
+    "solve_seconds": 0.004089169204235077,
+    "observation_scaled": [
+      1.1186343263248402,
+      1.2337066911288976
+    ],
+    "guess": {
+      "policy": "drop-first-interval-no-terminal-repeat",
+      "dual_policy": "zero-every-solve",
+      "controls": [
+        [
+          0.017194677766419537
+        ]
+      ],
+      "mesh_scaled": [
+        [
+          1.1186343263248402,
+          1.2337066911288976
+        ],
+        [
+          1.0956668950743822,
+          1.2416652063914106
+        ]
+      ],
+      "full_primal": [
+        1.1380776231836904,
+        1.2257033060796592,
+        1.1268376719541195,
+        1.2304850804219785,
+        1.118634326335384,
+        1.2337066911204888,
+        1.118634326335384,
+        1.2337066911204888,
+        1.1186343263248402,
+        1.2337066911288976,
+        1.115089527606102,
+        1.2350487030272457,
+        1.103846678808893,
+        1.2390292508390217,
+        1.0956668950743822,
+        1.2416652063914106,
+        1.0956668950743822,
+        1.2416652063914106,
+        1.0956668950743822,
+        1.2416652063914106,
+        0.017194677766419537
+      ],
+      "guess_sha256": "e6f56a49bb6b9ed71ae3d35635ee3d4d1e8cd8f220d43d57e6e528e8250c7ac5"
+    },
+    "primal": [
+      1.0000000000000016,
+      0.9375000000000057,
+      1.0000000000000002,
+      0.9374999999999997,
+      1.000000000000001,
+      0.9374999999999996,
+      1.000000000000001,
+      0.9374999999999996,
+      1.1186343263248402,
+      1.2337066911288976,
+      1.115089526809068,
+      1.2350487030310262,
+      1.1038466755603538,
+      1.2390292507689749,
+      1.0956668900826394,
+      1.2416652062121694,
+      1.0956668900826394,
+      1.2416652062121694,
+      1.0956668900826394,
+      1.2416652062121694,
+      0.017194723247484223
+    ],
+    "parameters": [
+      1.1186343263248402,
+      1.2337066911288976,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "constraint_values": [
+      0.0,
+      0.0,
+      9.410180967783788e-13,
+      3.122502256758253e-17,
+      3.8679337510671985e-12,
+      4.132978681514743e-15,
+      5.939956859712936e-12,
+      1.3925492703403819e-14,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "predicted_controls": [
+      [
+        0.017194723247484223
+      ]
+    ],
+    "predicted_mesh_scaled": [
+      [
+        1.1186343263248402,
+        1.2337066911288976
+      ],
+      [
+        1.0956668900826394,
+        1.2416652062121694
+      ]
+    ],
+    "predicted_mesh_physical": [
+      [
+        111.86343263248402,
+        98.69653529031181
+      ],
+      [
+        109.56668900826394,
+        99.33321649697355
+      ]
+    ],
+    "solver_iterations": {
+      "alpha_du": [
+        0.0,
+        1.0,
+        1.0,
+        0.958090831512569,
+        1.0,
+        1.0,
+        0.9829542714000565,
+        1.0
+      ],
+      "alpha_pr": [
+        0.0,
+        0.5,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "d_norm": [
+        0.0,
+        0.03159538038618539,
+        0.007931164242460348,
+        0.014491177608499405,
+        0.009004228834194378,
+        0.25617454931514744,
+        0.0006042705263702892,
+        2.3326306340523837e-05
+      ],
+      "inf_du": [
+        6.684103515119943e-08,
+        0.03852773359863515,
+        3.938803117276013e-07,
+        0.00011909609436604185,
+        8.784494887957399e-07,
+        1.200331083730684e-07,
+        1.4001845877781133e-05,
+        6.255538352596938e-12
+      ],
+      "inf_pr": [
+        4.364376568477546e-11,
+        2.59123935325567e-06,
+        8.455788430561384e-10,
+        5.6277442251478904e-08,
+        8.833257600128486e-07,
+        1.142368633022528e-07,
+        3.986413029538616e-09,
+        5.939956859712936e-12
+      ],
+      "mu": [
+        0.1,
+        0.1,
+        0.002828427124746191,
+        0.00015042412372345582,
+        1.8449144625279508e-06,
+        1.8449144625279508e-06,
+        2.5059035596800618e-09,
+        2.5059035596800618e-09
+      ],
+      "obj": [
+        0.06775133142236997,
+        0.0679125424058829,
+        0.06790713774516569,
+        0.06786385960045663,
+        0.06776138225508856,
+        0.06775158759470536,
+        0.06775133138972836,
+        0.0677513314233592
+      ],
+      "regularization_size": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "source_solve_id": 28,
+    "assurance": "local NLP diagnostics only; no global nonlinear certificate",
+    "solve_sha256": "800186c844b0e7178611feb9d446993319eaaed2cb8975672e007ff846d6abfc",
+    "controller_id": "syn-nl-lv-01/nominal-shrinking-radau3/1"
+  },
+  "invoked_modules": [
+    "syn-nl-lv-01/nominal-shrinking-radau3/1"
+  ],
+  "held_step_request": {
+    "schema": "csl.closed-loop.held-step-request/1",
+    "task_id": "syn-nl-lv-01/continuous-receding/1",
+    "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+    "model_id": "syn-nl-lv-01/ode/1",
+    "action_profile_id": "syn-nl-lv-01/continuous-receding/1/continuous-control/1",
+    "original_interval_count": 30,
+    "original_final_time": 3,
+    "absolute_update_index": 29,
+    "absolute_time": 2.9000000000000004,
+    "observed_state": {
+      "physical": [
+        111.86343263248402,
+        98.69653529031181
+      ],
+      "scaled": [
+        1.1186343263248402,
+        1.2337066911288976
+      ],
+      "scales": [
+        100.0,
+        80.0
+      ]
+    },
+    "control": [
+      0.017194723247484223
+    ],
+    "execution_profile_id": "common-adaptive-replay/CSL-simulation-rk4-step-doubling/1",
+    "witness_sha256": "a4f58bb47f5900e64c7207e8f7f87cc617e256c43f2574bda4cd4cfb5d5f7f39",
+    "derived_slice": {
+      "schema": "csl.closed-loop.execution-slice/1",
+      "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+      "absolute_update_index": 29,
+      "absolute_time_start": 2.9000000000000004,
+      "absolute_time_end": 3.0000000000000004,
+      "observed_physical_state": [
+        111.86343263248402,
+        98.69653529031181
+      ],
+      "control": [
+        0.017194723247484223
+      ],
+      "scenario_sha256": "08d8ce1d9935cbc69c1e685b812cd13813c1c1a806de6eef69a7d8962f9c84f2"
+    },
+    "bridge_request": {
+      "schema": "csl.mpc11.nonlinear-request/1",
+      "scenario": {
+        "schema": "csl.mpc11.scenario/1",
+        "track": "new-synthetic-comparison",
+        "contract": "docs/contracts/mpc11-synthetic-controller-study.md",
+        "assurance": "numerical-binary64",
+        "hold": "zero-order",
+        "observation": "exact-full-execution-state",
+        "variants": [
+          "affine-plan/affine-replay",
+          "affine-plan/nonlinear-replay",
+          "nominal-nmpc/nonlinear-replay"
+        ],
+        "nmpc": {
+          "horizon": "shrinking-to-fixed-terminal",
+          "running_cost_denominator": "original-interval-count",
+          "physical_constraints": true,
+          "affine_trust_region": false,
+          "collocation": {
+            "method": "radau",
+            "degree": 3,
+            "elements_per_interval": 1,
+            "state_constraint_nodes": "all-collocation-and-mesh-including-endpoints"
+          },
+          "solver": {
+            "name": "ipopt",
+            "linear_solver": "mumps",
+            "tol": 1e-08,
+            "acceptable_tol": 1e-06,
+            "max_iter": 1000
+          },
+          "warm_start": {
+            "primal": "drop-first-interval-no-terminal-repeat",
+            "dual": "zero-every-solve",
+            "initial_state_override": "new-full-observation"
+          },
+          "failure": "stop-before-next-input-no-fallback",
+          "n_robust": 0
+        },
+        "execution": {
+          "method": "cvodes",
+          "scaled_abstol": 1e-10,
+          "reltol": 1e-09
+        },
+        "independent_replay": {
+          "provider": "CSL::simulation",
+          "method": "adaptive-rk4-step-doubling",
+          "scaled_abstol": 1e-10,
+          "reltol": 1e-09,
+          "step_attempts_per_hold_interval": 100000,
+          "report_subintervals_per_hold": 20,
+          "sensitivity": {
+            "scaled_abstol": 1e-11,
+            "reltol": 1e-10
+          }
+        },
+        "evidence_limits": [
+          "local-NLP-only",
+          "sampled-constraints-not-continuous-safety",
+          "no-nonlinear-robustness",
+          "no-reachable-set-containment",
+          "not-historical-restoration"
+        ],
+        "case_id": "SYN-NL-LV-01",
+        "model_id": "syn-nl-lv-01/ode/1",
+        "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
+        "time": {
+          "unit": "day",
+          "dt": 0.1,
+          "intervals": 1,
+          "final": 3.0000000000000004,
+          "grid": [
+            2.9000000000000004,
+            3.0000000000000004
+          ],
+          "reference_transforms": "physical-coordinates; affine-reference-subtraction-saved-by-producer"
+        },
+        "states": [
+          {
+            "name": "P",
+            "unit": "thousand individuals",
+            "initial": 120,
+            "scale": 100,
+            "physical_bounds": [
+              0,
+              200
+            ]
+          },
+          {
+            "name": "R",
+            "unit": "thousand individuals",
+            "initial": 60,
+            "scale": 80,
+            "physical_bounds": [
+              0,
+              150
+            ]
+          }
+        ],
+        "controls": [
+          {
+            "name": "u",
+            "unit": "1/day",
+            "physical_bounds": [
+              0,
+              0.05
+            ]
+          }
+        ],
+        "parameters": {
+          "a": {
+            "value": 0.8,
+            "unit": "1/day"
+          },
+          "b": {
+            "value": 0.01,
+            "unit": "1/(thousand individuals*day)"
+          },
+          "c": {
+            "value": 0.6,
+            "unit": "1/day"
+          },
+          "d": {
+            "value": 0.006,
+            "unit": "1/(thousand individuals*day)"
+          }
+        },
+        "equations": [
+          "dP/dt=(a-b*R-u)*P",
+          "dR/dt=(d*P-c)*R"
+        ],
+        "model_domain": "P,R finite; bounds checked independently",
+        "objective": {
+          "terminal_target": [
+            100,
+            80
+          ],
+          "terminal_scale": [
+            100,
+            80
+          ],
+          "terminal_weights": [
+            1,
+            1
+          ],
+          "running_weight": 0.05,
+          "running_scale": [
+            0.05
+          ],
+          "running_reference": [
+            0
+          ],
+          "running_formula": "running_weight/N*sum_k(sum_i(((u[k,i]-running_reference[i])/running_scale[i])^2))",
+          "terminal_formula": "sum_i(terminal_weights[i]*((x[N,i]-terminal_target[i])/terminal_scale[i])^2)"
+        },
+        "affine": {
+          "model_id": "syn-nl-lv-01/frozen-coexistence-affine/1",
+          "linearization": "frozen",
+          "state_reference": [
+            100,
+            80
+          ],
+          "input_reference": [
+            0
+          ],
+          "discretization": "matrix-exponential-with-Taylor-offset",
+          "trust_state_absolute": [
+            40,
+            30
+          ],
+          "trust_input_absolute": [
+            0.05
+          ],
+          "producer": "actual-CSL-public-joint-program-or-synthesis; retain-provider-and-witness",
+          "offset_coordinates": "physical-state; scale-transform=x/scale; reference-deviation-transform-explicit"
+        },
+        "initial_guess": {
+          "input": [
+            0.025
+          ],
+          "state": "coexistence-reference; first-state=observation"
+        },
+        "controller_id": "syn-nl-lv-01/nominal-shrinking-radau3/1",
+        "parameter_source": "authored-synthetic-design; docs/research/mpc11-nonlinear-study-design.md",
+        "figures": {
+          "phase_planes": [
+            [
+              "P",
+              "R"
+            ]
+          ],
+          "geometry_claim": "individual-numerical-trajectories-only",
+          "companion": "state-and-control-time-traces"
+        }
+      },
+      "scenario_sha256": "08d8ce1d9935cbc69c1e685b812cd13813c1c1a806de6eef69a7d8962f9c84f2",
+      "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+      "witness_sha256": "a4f58bb47f5900e64c7207e8f7f87cc617e256c43f2574bda4cd4cfb5d5f7f39",
+      "controls_sha256": "da225d19dd0faa6d94c6ba72f4637e6fc2deb179fed6d52c81f79fcef5ae1bca",
+      "hold": "constant-on-original-interval",
+      "original_controls": [
+        [
+          0.017194723247484223
+        ]
+      ],
+      "controls": [
+        [
+          0.017194723247484223
+        ],
+        [
+          0.017194723247484223
+        ],
+        [
+          0.017194723247484223
+        ],
+        [
+          0.017194723247484223
+        ],
+        [
+          0.017194723247484223
+        ],
+        [
+          0.017194723247484223
+        ],
+        [
+          0.017194723247484223
+        ],
+        [
+          0.017194723247484223
+        ],
+        [
+          0.017194723247484223
+        ],
+        [
+          0.017194723247484223
+        ],
+        [
+          0.017194723247484223
+        ],
+        [
+          0.017194723247484223
+        ],
+        [
+          0.017194723247484223
+        ],
+        [
+          0.017194723247484223
+        ],
+        [
+          0.017194723247484223
+        ],
+        [
+          0.017194723247484223
+        ],
+        [
+          0.017194723247484223
+        ],
+        [
+          0.017194723247484223
+        ],
+        [
+          0.017194723247484223
+        ],
+        [
+          0.017194723247484223
+        ]
+      ],
+      "times": [
+        2.9000000000000004,
+        2.9050000000000002,
+        2.91,
+        2.9150000000000005,
+        2.9200000000000004,
+        2.9250000000000003,
+        2.9300000000000006,
+        2.9350000000000005,
+        2.9400000000000004,
+        2.9450000000000003,
+        2.95,
+        2.9550000000000005,
+        2.9600000000000004,
+        2.9650000000000003,
+        2.9700000000000006,
+        2.9750000000000005,
+        2.9800000000000004,
+        2.9850000000000003,
+        2.99,
+        2.9950000000000006,
+        3.0000000000000004
+      ],
+      "initial_scaled": [
+        1.1186343263248402,
+        1.2337066911288976
+      ],
+      "abstol": 1e-10,
+      "reltol": 1e-09,
+      "max_attempts": 5000,
+      "report_subintervals_per_hold": 20
+    }
+  },
+  "execution": {
+    "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+    "slice_sha256": "3ed85a42ecb97e5279b938d689b75446b5a938891ae47315b08e1def80efc039",
+    "scenario_sha256": "08d8ce1d9935cbc69c1e685b812cd13813c1c1a806de6eef69a7d8962f9c84f2",
+    "physical_states": [
+      [
+        111.86343263248402,
+        98.69653529031181
+      ],
+      [
+        111.74920283040794,
+        98.73149878087102
+      ],
+      [
+        111.63489542719908,
+        98.76613608013392
+      ],
+      [
+        111.52051272029462,
+        98.80044660954114
+      ],
+      [
+        111.40605700276782,
+        98.83442980026301
+      ],
+      [
+        111.29153056324212,
+        98.86808509321148
+      ],
+      [
+        111.17693568580607,
+        98.90141193905143
+      ],
+      [
+        111.06227464992884,
+        98.93440979821128
+      ],
+      [
+        110.94754973037656,
+        98.96707814089297
+      ],
+      [
+        110.8327631971293,
+        98.9994164470813
+      ],
+      [
+        110.71791731529868,
+        99.03142420655269
+      ],
+      [
+        110.60301434504636,
+        99.06310091888304
+      ],
+      [
+        110.48805654150324,
+        99.09444609345533
+      ],
+      [
+        110.37304615468916,
+        99.12545924946616
+      ],
+      [
+        110.25798542943359,
+        99.15613991593202
+      ],
+      [
+        110.14287660529698,
+        99.18648763169459
+      ],
+      [
+        110.02772191649272,
+        99.21650194542576
+      ],
+      [
+        109.9125235918101,
+        99.24618241563154
+      ],
+      [
+        109.79728385453762,
+        99.27552861065584
+      ],
+      [
+        109.6820049223875,
+        99.30454010868323
+      ],
+      [
+        109.56668900742075,
+        99.33321649774122
+      ]
+    ],
+    "scaled_states": [
+      [
+        1.1186343263248402,
+        1.2337066911288976
+      ],
+      [
+        1.1174920283040795,
+        1.2341437347608877
+      ],
+      [
+        1.1163489542719909,
+        1.234576701001674
+      ],
+      [
+        1.1152051272029462,
+        1.2350055826192643
+      ],
+      [
+        1.1140605700276782,
+        1.2354303725032876
+      ],
+      [
+        1.1129153056324212,
+        1.2358510636651434
+      ],
+      [
+        1.1117693568580607,
+        1.2362676492381428
+      ],
+      [
+        1.1106227464992884,
+        1.236680122477641
+      ],
+      [
+        1.1094754973037657,
+        1.237088476761162
+      ],
+      [
+        1.108327631971293,
+        1.2374927055885163
+      ],
+      [
+        1.1071791731529868,
+        1.2378928025819085
+      ],
+      [
+        1.1060301434504636,
+        1.238288761486038
+      ],
+      [
+        1.1048805654150324,
+        1.2386805761681916
+      ],
+      [
+        1.1037304615468917,
+        1.239068240618327
+      ],
+      [
+        1.102579854294336,
+        1.2394517489491501
+      ],
+      [
+        1.1014287660529698,
+        1.2398310953961824
+      ],
+      [
+        1.1002772191649273,
+        1.240206274317822
+      ],
+      [
+        1.099125235918101,
+        1.2405772801953943
+      ],
+      [
+        1.0979728385453762,
+        1.240944107633198
+      ],
+      [
+        1.096820049223875,
+        1.2413067513585403
+      ],
+      [
+        1.0956668900742075,
+        1.2416652062217652
+      ]
+    ],
+    "times": [
+      2.9000000000000004,
+      2.9050000000000002,
+      2.91,
+      2.9150000000000005,
+      2.9200000000000004,
+      2.9250000000000003,
+      2.9300000000000006,
+      2.9350000000000005,
+      2.9400000000000004,
+      2.9450000000000003,
+      2.95,
+      2.9550000000000005,
+      2.9600000000000004,
+      2.9650000000000003,
+      2.9700000000000006,
+      2.9750000000000005,
+      2.9800000000000004,
+      2.9850000000000003,
+      2.99,
+      2.9950000000000006,
+      3.0000000000000004
+    ],
+    "integration_receipts": [
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.4802973661668753e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          5.921189464667501e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.4802973661668753e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      }
+    ],
+    "diagnostics": [],
+    "status": "complete",
+    "elapsed_seconds": 6.0413e-05
+  },
+  "applied_control": [
+    0.017194723247484223
+  ],
+  "stage_elapsed_seconds": 0.12277758005075157
+}

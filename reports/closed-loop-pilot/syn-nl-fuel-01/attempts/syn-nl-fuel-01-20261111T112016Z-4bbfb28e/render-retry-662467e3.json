@@ -1,0 +1,51 @@
+{
+  "schema": "csl.closed-loop.render/1",
+  "render_id": "render-retry-662467e3",
+  "attempt_id": "syn-nl-fuel-01-20261111T112016Z-4bbfb28e",
+  "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b",
+  "controls_sha256": "fb16cbae7351c17109fadcfce8d006887e91f42d19c92e1d6c474cd1ecafe253",
+  "source_commit": "cd4e7778eaad9451594210351cbc382ce8719d72",
+  "renderer_source_hashes": {
+    "benchmarks/reporting/closed_loop/run_closed_loop.py": "983ad196b2c2947c24b6fa99e7b60bb31fce98bdebd90ac7de885bade637ffc6",
+    "benchmarks/reporting/closed_loop/task_models.py": "41268676a408b2af4de63dcbf1425e405341963f5f98a3e0020db28bb40434e9"
+  },
+  "render": {
+    "status": "complete",
+    "plots": [
+      "render-retry-662467e3-trajectory.png",
+      "render-retry-662467e3-phase.png",
+      "render-retry-662467e3-controls.png"
+    ],
+    "phase_projections": [
+      {
+        "coordinates": [
+          "q_ox",
+          "m_ox"
+        ],
+        "units": [
+          "kg/s",
+          "kg"
+        ],
+        "indices": [
+          2,
+          0
+        ]
+      },
+      {
+        "coordinates": [
+          "q_f",
+          "m_f"
+        ],
+        "units": [
+          "kg/s",
+          "kg"
+        ],
+        "indices": [
+          3,
+          1
+        ]
+      }
+    ],
+    "target_marker": "soft objective reference, not a terminal constraint"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schema": "csl.closed-loop.independent-episode-check/1",
+  "status": "complete",
+  "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+  "controls_sha256": "cd50c4d124e7f91c0a009fa32362400057dfbede3f2b1db656d714515cb15d2e",
+  "hold_endpoint_max_abs_difference_from_applied_execution": [
+    1.2789769243681803e-13,
+    1.1368683772161603e-13
+  ],
+  "independent_objective": {
+    "terminal": 0.06755422575467863,
+    "running": 0.024130559408367988,
+    "total": 0.09168478516304662
+  },
+  "task_adapter_objective": {
+    "terminal": 0.06755422575467863,
+    "running": 0.024130559408367985,
+    "total": 0.09168478516304662
+  },
+  "objective_difference": 0.0,
+  "sampled_physical_state_bound_violation_by_coordinate": [
+    0.0,
+    0.0
+  ],
+  "hold_endpoint_state_bound_violation_by_coordinate": [
+    0.0,
+    0.0
+  ],
+  "sampled_state_count": 601,
+  "sampled_state_scope": "CSL replay initial state and report samples, including 20 samples per original hold; numerical diagnostics only",
+  "control_bound_violation_by_coordinate": [
+    0.0
+  ],
+  "model_domain": {},
+  "fixed_rk4": {
+    "substeps_per_original_interval": 100,
+    "hold_endpoint_max_abs_difference_from_CSL": [
+      6.153300091682468e-12,
+      3.652189661806915e-12
+    ],
+    "physical_objective": {
+      "terminal": 0.06755422575468052,
+      "running": 0.024130559408367988,
+      "total": 0.09168478516304851
+    },
+    "method": "separately transcribed classical fixed-step RK4; numerical diagnostic only"
+  }
+}

@@ -71,7 +71,18 @@ EXAMPLE_ROUTE_PRODUCERS = {
     "examples/fuel-reachability-layers/index.html": ["scripts/reports/fuel_reachability_layers.py"],
     "examples/geometry-optimization-v1.html": ["scripts/reports/geometry_opt_companions.py"],
     "examples/lotka-volterra-sampled-v1.html": ["scripts/reports/approx_extension_companions.py"],
+    "examples/closed-loop-pilot-2d.html": ["scripts/reports/stage_closed_loop_pilot.py",
+                                           "scripts/reports/render_closed_loop_pilot.py"],
     "examples/viz10/index.html": ["scripts/reports/viz10_plot_companions.py"],
+}
+
+STANDALONE_REPORT_ROUTE_PRODUCERS = {
+    "closed-loop-pilot-v1/index.html": ["scripts/reports/render_closed_loop_pilot.py",
+                                        "scripts/reports/stage_closed_loop_pilot.py",
+                                        ".github/workflows/algorithm-reports.yml"],
+    "closed-loop-pilot-v1/example-2d.html": ["scripts/reports/render_closed_loop_pilot.py",
+                                             "scripts/reports/stage_closed_loop_pilot.py",
+                                             ".github/workflows/algorithm-reports.yml"],
 }
 
 GALLERY_INDEX_PRODUCERS = [
@@ -127,6 +138,28 @@ class References(HTMLParser):
 
 def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def legacy_root_snapshot() -> bytes:
+    """Load the exact Pages landing page recorded before route retirement."""
+    repo = Path(__file__).resolve().parents[2]
+    metadata_path = repo / "docs/research/evidence/pages-legacy-index-ed2dda1.json"
+    snapshot_path = repo / "docs/research/evidence/pages-legacy-index-ed2dda1.html"
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    snapshot = snapshot_path.read_bytes()
+    expected = {
+        "schema": "csl.pages-legacy-root-snapshot/1",
+        "source_commit": "ed2dda1ef049ac4fbe259a800d3314e446ceee28",
+        "source_report_run_id": 42902971467,
+        "complete_pages_artifact_run_id": 42909649474,
+        "artifact_relative_path": "index.html",
+        "snapshot_path": "docs/research/evidence/pages-legacy-index-ed2dda1.html",
+        "bytes": 176366,
+        "sha256": "29376974f806ad83816be9b42bda19fbeccaebc9a7ca79c291ed3d9ea3d522d2",
+    }
+    if metadata != expected or len(snapshot) != expected["bytes"] or sha256(snapshot) != expected["sha256"]:
+        raise ValueError("pinned legacy Pages snapshot provenance or bytes differ")
+    return snapshot
 
 
 def _internal_target(site: Path, page: Path, ref: str) -> str | None:
@@ -205,6 +238,8 @@ def _producer_record(site: Path, route: str, catalog: dict[str, dict], source_id
     }
     if top in route_modules:
         return {"files": [route_modules[top], "scripts/reports/augment_pages_bundle.py"], "owner_status": "exact"}
+    if route in STANDALONE_REPORT_ROUTE_PRODUCERS:
+        return {"files": STANDALONE_REPORT_ROUTE_PRODUCERS[route], "owner_status": "exact"}
     if top in catalog:
         kind = catalog[top].get("report_kind", "")
         family = kind.split("-", 1)[0]

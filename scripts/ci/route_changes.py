@@ -7,13 +7,37 @@ from pathlib import Path
 import subprocess
 
 
-# Ownership map: educational output only; neither file is a named CTest input
-# or imported by a native smoke checker/collector. Add files only after reviewing
-# their consumers; the stylesheet is copied into the educational site.
+# Ownership map: mutable Pages shells, report companions and their presentation
+# tests. These Python renderers read saved inputs but never define native targets.
+# Keep numerical collectors, validators and test drivers outside this list.
 PRESENTATION_FILES = {
+    "docs/examples/examples.css",
+    "docs/examples/continuous-policy-2d.html",
+    "docs/examples/fixed-plan-minimax-2d.html",
+    "docs/examples/fuel-b06-viz03.html",
+    "docs/examples/fuel-b06-viz06.html",
+    "docs/examples/adaptive-ode-replay.html",
+    "docs/examples/b04-reference-trajectory-projections.html",
+    "docs/examples/viz04-replay-comparison.html",
+    "docs/examples/viz10/index.html",
+    "docs/examples/fuel-reachability-layers/index.html",
+    "scripts/reports/site_design.py",
+    "scripts/reports/landing.py",
     "scripts/reports/visual_examples.py",
-    "scripts/reports/visual_examples.css",
+    "scripts/reports/geometry_opt_companions.py",
+    "scripts/reports/control_witness_companions.py",
+    "scripts/reports/approx_extension_companions.py",
+    "scripts/reports/viz10_plot_companions.py",
+    "scripts/reports/fuel_reachability_layers.py",
+    "scripts/reports/render_adaptive_ode_example.py",
+    "scripts/reports/visual-route-inventory.json",
+    "scripts/reports/mpc01/b04_projection_example.py",
     "tests/reporting/test_visual_examples.py",
+    "tests/reporting/test_visual_route_inventory.py",
+    "tests/reporting/test_render_adaptive_ode_example.py",
+    "tests/reporting/test_fuel_reachability_layers.py",
+    "tests/reporting/test_viz10_plot_companions.py",
+    "tests/reporting/test_landing.py",
 }
 SAVED_REPORTS = "reports/algorithm-results/"
 EXECUTABLE_REPORT_TOOLS = SAVED_REPORTS + "tooling/"

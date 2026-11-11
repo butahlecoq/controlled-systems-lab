@@ -3,18 +3,41 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import subprocess
+import sys
 import tempfile
 import unittest
 
 import numpy as np
 
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts/reports"))
 from scripts.reports.fuel_reachability_layers import capture
 
 
-ROOT = Path(__file__).resolve().parents[2]
-
-
 class FuelReachabilityLayersTests(unittest.TestCase):
+    def test_render_output_directory_contains_its_styles_and_local_assets(self):
+        record_path = ROOT / "docs/examples/fuel-reachability-layers/plot-data.json"
+        original = record_path.read_bytes()
+        with tempfile.TemporaryDirectory(dir=ROOT) as temporary:
+            output = Path(temporary) / "custom-output"
+            result = subprocess.run(
+                [sys.executable, str(ROOT / "scripts/reports/fuel_reachability_layers.py"),
+                 "render", "--input", str(record_path), "--out-dir", str(output)],
+                cwd=ROOT, capture_output=True, text=True, check=False)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            page = (output / "index.html").read_text(encoding="utf-8")
+            self.assertIn("<style>", page)
+            self.assertIn((ROOT / "docs/examples/examples.css").read_text(encoding="utf-8"), page)
+            self.assertNotIn('href="../examples.css"', page)
+            self.assertIn('href="../../index.html">Learn</a>', page)
+            self.assertIn('href="../index.html">Examples</a>', page)
+            for name in ("plot-data.json", "fuel-reachability-layers-model.json",
+                         "fuel-reachability-x1-x2.svg", "fuel-reachability-x1-x2.png",
+                         "fuel-reachability-x3-x4.svg", "fuel-reachability-x3-x4.png"):
+                self.assertTrue((output / name).is_file(), name)
+        self.assertEqual(record_path.read_bytes(), original)
+
     def test_capture_optimizes_the_model_target_and_objective_matrix(self):
         model = json.loads((ROOT / "docs/examples/fuel-reachability-layers-model.json")
                            .read_text(encoding="utf-8"))
