@@ -74,6 +74,10 @@ class LocalOnlyDocsTests(unittest.TestCase):
                 "docs/catalogue/capabilities.json": "{}\n",
                 "docs/research/evidence/run-1/record.json": "{}\n",
                 "docs/research/evidence/run-1/stdout.txt": "solver output\n",
+                "docs/artifacts/schemas/comparison-spec-v1.schema.json": "{}\n",
+                "docs/artifacts/schemas/comparison-spec-v2.schema.json": "{}\n",
+                "docs/artifacts/schemas/comparison-spec-v3.schema.json": "{}\n",
+                "docs/research/evidence/issue1-draft-uncertainty.json": "{}\n",
                 "src/CMakeLists.txt": "cmake_minimum_required(VERSION 3.31)\n",
                 "src/reachability/fixed_plan_admission.hpp": "#pragma once\n",
             }
@@ -85,6 +89,37 @@ class LocalOnlyDocsTests(unittest.TestCase):
             subprocess.run(["git", "-C", str(root), "commit", "-qm", "add functional assets"], check=True)
             result = self.run_checker(root, base)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_allows_owned_benchmark_results_and_publication_schemas(self) -> None:
+        temporary, root, base = self.repository()
+        with temporary:
+            assets = {
+                "benchmarks/reporting/issue422/results/finite-plan-comparison.json": "{}\n",
+                "reports/algorithm-results/exp05-fixed-plan-minimax-20261026-6c561462/"
+                "comparison-spec-v3.schema.json": "{}\n",
+            }
+            for relative, content in assets.items():
+                path = root / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(content, encoding="utf-8")
+            subprocess.run(["git", "-C", str(root), "add", *assets], check=True)
+            subprocess.run(["git", "-C", str(root), "commit", "-qm", "add report assets"], check=True)
+            result = self.run_checker(root, base)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_keeps_working_documents_rejected_inside_report_asset_locations(self) -> None:
+        for relative in ("benchmarks/reporting/notes/capture.json",
+                         "reports/algorithm-results/example/working-plan.md"):
+            temporary, root, base = self.repository()
+            with temporary:
+                note = root / relative
+                note.parent.mkdir(parents=True, exist_ok=True)
+                note.write_text("Working note\n", encoding="utf-8")
+                subprocess.run(["git", "-C", str(root), "add", str(note.relative_to(root))], check=True)
+                subprocess.run(["git", "-C", str(root), "commit", "-qm", "add working document"], check=True)
+                result = self.run_checker(root, base)
+            self.assertEqual(result.returncode, 1, f"{relative}: {result.stdout}{result.stderr}")
+            self.assertIn(relative, result.stderr)
 
     def test_accepts_a_properly_named_numbered_adr(self) -> None:
         temporary, root, base = self.repository()
