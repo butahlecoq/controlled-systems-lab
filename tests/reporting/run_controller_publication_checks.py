@@ -8,6 +8,7 @@ def main():
         importlib.import_module(name)
     suite = unittest.defaultTestLoader.loadTestsFromNames([
         'tests.reporting.test_mpc11_affine_saved',
+        'tests.reporting.test_closed_loop_tasks',
         'tests.reporting.test_mpc11_publication',
         'tests.reporting.test_pages_augmentation_aggregation',
         'tests.reporting.test_b04_source_moments',
