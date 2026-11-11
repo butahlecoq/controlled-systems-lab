@@ -1,5 +1,6 @@
 #include <csl/geometry/hull_reducer.hpp>
 #include "../hull/reducer_internal.hpp"
+#include "child_lp_trace.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -161,22 +162,28 @@ public:
         auto prepared_result = prepare_lp_provider(provider_, cloud);
         if (auto* diagnostics = std::get_if<Diagnostics>(&prepared_result)) return *diagnostics;
         auto prepared = std::get<registry::PreparedPipeline<registry::LPPort>>(std::move(prepared_result));
-        auto create_child = [&]() -> std::unique_ptr<ChildWorkspace> {
+        const auto provider=prepared.provenance().front();
+        auto first_trace=std::make_shared<detail::ChildLPTraceBuffer>();
+        auto second_trace=std::make_shared<detail::ChildLPTraceBuffer>();
+        auto create_child = [&](const std::shared_ptr<detail::ChildLPTraceBuffer>& trace) -> std::unique_ptr<ChildWorkspace> {
             auto workspaces = prepared.create();
-            return std::move(std::get<0>(workspaces));
+            auto child=std::move(std::get<0>(workspaces));
+            detail::trace_child_lp(*child,trace,provider);
+            return child;
         };
 
-        auto first = create_child();
+        auto first = create_child(first_trace);
         if (ids.size() <= leaf_limit) {
             registry::LPWorkspaceView lp(*first);
             auto result = reduce_node(cloud, std::move(ids), lp, context, "r");
             if (auto* diagnostics = std::get_if<Diagnostics>(&result)) return *diagnostics;
             auto node = std::get<NodeResult>(std::move(result));
             node.reduction.recursive = node.stats.metrics;
+            detail::append_child_lp_trace(node.reduction,*first_trace);
             return node.reduction;
         }
 
-        auto second = create_child();
+        auto second = create_child(second_trace);
         registry::LPWorkspaceView first_lp(*first);
         registry::LPWorkspaceView second_lp(*second);
         const bool parallel = context.resources && context.resources->outer_workers >= 2 &&
@@ -232,6 +239,8 @@ public:
                     std::chrono::duration_cast<std::chrono::microseconds>(elapsed - longer_child).count());
         }
         merged.recursive = metrics;
+        detail::append_child_lp_trace(merged,*first_trace);
+        detail::append_child_lp_trace(merged,*second_trace);
         return merged;
     }
 

@@ -63,7 +63,7 @@ class RoutingTests(unittest.TestCase):
         self.assertEqual(self.route(), ("false", "true"))
 
     def test_gallery_stylesheet_alone_uses_complete_reporting_only(self):
-        self.write("scripts/reports/visual_examples.css", "/* gallery style */")
+        self.write("docs/examples/examples.css", "/* gallery style */")
         self.commit()
         self.assertEqual(self.route(), ("false", "true"))
 

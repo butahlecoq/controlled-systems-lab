@@ -41,11 +41,64 @@ request identity.
 The selected hull reducer and LP provider identities are recorded in output
 assumptions; the converter identity is also recorded when a dependency is
 configured. Conversion assumptions are retained with the operation evidence.
+Generated outer LP queries record requested/actual provider identity and
+request/outcome. Basis-reuse and recursive reducers also record child LPPort
+calls made through reducer-owned workspaces. These records have a 4,096-call
+per-workspace cap, with total and omitted counts shown when the cap is reached.
+Each record limits raw diagnostics to 1,024 characters and marks truncation.
+They describe LPPort calls and outcomes; they do not establish that a native
+solver was entered. Reducer aggregate metrics and exact removal certificates
+remain separate from these query records.
 
 The API accepts `SetHandle` operands only. It does not accept `FiniteDomain` or
 `MixedDomain`; callers must not replace either catalogue by its convex hull to
 invoke these operations. Such domains require a separate explicitly modeled
 operation/relaxation contract.
+
+## Source-index method path
+
+`SourceIndexHullPort` is a separate proposal interface for methods that return
+original point IDs without the exact dyadic barycentric certificates required
+by `HullReducerPort`. `make_affine_sum_registration(SourceIndexAffineSumDependencies)`
+selects this path explicitly. The built-in adapters are QuickHull2D and the
+source-faithful BTULSHOR KPABEP/MODIF profile. The latter preserves its source
+epsilon, MODIF status sequence, candidate IDs, pivot counts, and configured
+resource/trace limits. It does not claim to provide a second historical
+baseline/modified variant.
+
+After candidate generation, affine-sum hashes the ordered binary64 cloud and
+independently calls the bounded exact 2D source-index checker on that cloud and
+the selected provider's proposed IDs. The operation applies the IDs only when
+the checker returns `verified`. The checker proves every generated candidate is
+in the hull of the returned source points; since each returned point is drawn
+from that cloud, this proves equality of the represented finite hull. It does
+not establish vertex minimality or a historical REACH reproduction. The
+checker is limited by its configured point and wall budgets and checks
+cancellation and the parent operation deadline during enumeration.
+
+Source-method and checker invocations, statuses, elapsed times, configuration,
+proposed IDs, and available internal trace facts are recorded separately in
+the operation evidence or failure diagnostic. A stopped, malformed, incorrect
+or inconclusive proposal fails the source-index operation with the raw proposal
+details preserved. It is never replaced by a modern reducer or applied to the
+output. This path does not select or invoke a vertex LP; the LP role is
+`not_used`. The H-to-V converter remains independently selected when an input
+is H-represented. Modern `HullReducerPort` outputs retain the existing exact
+dyadic removal-certificate and LP-call accounting gates without change.
+
+Source-index methods reject dimensions other than two before invocation,
+including QuickHull2D requests that must not be silently projected. A zero
+checker wall budget is permitted to retain an explicit timeout outcome; the
+point limit must be positive.
+
+For the known legacy/simplex comparison axis, the available faithful Pascal
+KPABEP/MODIF source is one baseline profile. The separately registered ITIS17
+A43 and A44 reducers are paper-derived modified methods with their own recorded
+adaptation boundaries and exact deletion-certificate gates; they are not
+alternate BTULSHOR source listings. The QuickHull profile is a geometric
+reference, not a simplex variant. A distinct second Pascal baseline/modified
+listing has not been identified, so the catalogue reports only these actual
+methods and does not infer a missing implementation from a related MATLAB file.
 
 ## Numerical relation and limitations
 
@@ -120,3 +173,14 @@ singular maps, H equality segments, empty and singleton inputs, and `R^0`. They
 also exercise the selected HiGHS and phase-I LP paths. Those floating-point
 oracles validate the implemented numerical behavior; they do not validate exact
 geometry claims.
+
+## Delivery impact
+
+The public geometry headers add `SourceIndexHullPort` and an explicit
+source-index affine-sum registration overload. `CSL::affine_sum` now has a
+public dependency on the bounded hull checker and private implementation links
+to QuickHull2D and the source-faithful BTULSHOR library for that overload.
+Existing `HullReducerPort` call sites retain their current interface. This changes the installed CMake target's dependency graph and
+requires installed-consumer validation; it does not add a package registry or
+change the project version. Release/package impact for the PR: no release is
+prepared here; reviewed consumer validation remains a delivery gate.

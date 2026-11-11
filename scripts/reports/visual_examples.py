@@ -17,6 +17,7 @@ import control_witness_companions
 import geometry_opt_companions
 import report_data
 import site_additions
+import site_design
 import stage_ext07 as ext07_reports
 import visual_illustrations
 import visual_example_geometry as geometry_examples
@@ -326,7 +327,7 @@ def point_table(example):
             '<th scope="col">Role</th></tr></thead><tbody>' + "".join(rows) + '</tbody></table></div>')
 
 
-def section(example, number):
+def section(example, number, previous=None, following=None):
     owner = CASE_OWNERS[example["kind"]]
     content = owner.presentation(example)
     return (f'<section id="{example["slug"]}"><p class="eyebrow">Example {number:02d} / {content["example_type"]}</p>'
@@ -340,7 +341,8 @@ def section(example, number):
             '<p>' + content["platform_note"] + '</p>'
             f'<p><a href="{content["source_url"]}">Complete native fixture/driver ↗</a></p></details>'
             f'<p class="limits">{content["notes"]}</p>' + content["source_provenance"] +
-            content["raw_record_link"] + content["report_links"] + '</section>')
+            content["raw_record_link"] + content["report_links"] +
+            site_design.lesson_neighbors(previous, following) + '</section>')
 
 
 def saved_figure_sections(catalog, site):
@@ -594,10 +596,15 @@ def issue3_control_walkthrough(record_path, report_id):
                '<text transform="translate(20 210) rotate(-90)" text-anchor="middle" fill="#dce5d5">terminal state y₁ coordinate (dimensionless)</text></svg>')
     page = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width,initial-scale=1">'
+            '<meta name="color-scheme" content="dark light">'
             '<title>One saved control task from input to verified result</title>'
-            '<link rel="stylesheet" href="examples.css"></head><body><main class="walkthrough">'
-            '<p><a href="index.html#algorithm-coverage">← Algorithm family coverage</a></p>'
-            '<p class="eyebrow">Saved validated API run · Issue #3</p>'
+            '<link rel="stylesheet" href="examples.css"></head><body><a class="skip" href="#main">Skip to walkthrough</a>'
+            '<main id="main" class="walkthrough page-content">'
+            + site_design.breadcrumbs([("Learn", "../index.html"),
+                                       ("Examples", "index.html"),
+                                       ("Algorithm coverage", "index.html#algorithm-coverage"),
+                                       ("One finite-action task", "issue3-control-walkthrough.html")])
+            + '<p class="eyebrow">Saved validated API run · Issue #3</p>'
             '<h1>One finite-action control task, end to end</h1>'
             '<p>This walkthrough reads the saved <code>analytic_2d</code> input and result. It does not rerun the solver. '
             'The plotted terminal points are independently calculated from the saved matrices and actions.</p>'
@@ -641,6 +648,12 @@ def build(catalog, site):
         '<p>The installed CSL replay client integrates a two-state harmonic oscillator and compares its recorded path with the analytic solution.</p>'
         '<p><a href="adaptive-ode-replay.html">Inputs, answer and reproduction details ↗</a> · '
         '<a href="adaptive-ode-replay.json">Raw record ↗</a></p></article>')
+    saved_figures += ('<article class="saved-figure" id="source-index-geometry-2d"><p class="eyebrow">Geometry · Public-interface example</p>'
+        '<h3><a href="source-index-geometry-2d.html">Source-index hulls in a 2D geometry pipeline</a></h3>'
+        '<a href="source-index-geometry-2d.html"><img src="source-index-geometry-2d.svg" alt="A square point cloud with edge, duplicate and interior points, followed by its affine image and one-step control sum"></a>'
+        '<p>QuickHull2D and the recovered BTULSHOR KPABEP/MODIF profile propose original point IDs; an independent exact checker validates each generated cloud before the affine or control sum applies those IDs.</p>'
+        '<p><a href="source-index-geometry-2d.html">Inputs, answer and reproduction details ↗</a> · '
+        '<a href="source-index-geometry-2d-records.json">Raw records ↗</a></p></article>')
     fuel_layer_files, fuel_layer_inventory, fuel_layer_card = visual_example_fuel_layers.build(
         Path(__file__).resolve().parents[2])
     saved_figures += fuel_layer_card
@@ -669,6 +682,12 @@ def build(catalog, site):
         source = adaptive_assets / name
         require(source.is_file() and not source.is_symlink(), "missing adaptive ODE example asset: " + name)
         outputs[name] = source.read_bytes() if source.suffix != ".html" else source.read_text(encoding="utf-8")
+    for name in ("source-index-geometry-2d.html", "source-index-geometry-2d.svg",
+                 "source-index-geometry-2d-records.json"):
+        source = adaptive_assets / name
+        require(source.is_file() and not source.is_symlink(),
+                "missing source-index geometry example asset: " + name)
+        outputs[name] = source.read_bytes() if source.suffix != ".html" else source.read_text(encoding="utf-8")
     with tempfile.TemporaryDirectory(prefix="csl-gallery-geometry-") as temporary:
         geometry_root = Path(temporary) / "examples"
         _, geometry_inventory, geometry_assets = geometry_opt_companions.build(geometry_root)
@@ -681,6 +700,12 @@ def build(catalog, site):
         "page": "adaptive-ode-replay.html", "figure": "adaptive-ode-replay.svg",
         "source_page": "https://github.com/butahlecoq/controlled-systems-lab/blob/main/examples/adaptive_ode_replay.cpp",
         "raw_record": "adaptive-ode-replay.json"})
+    gallery_inventory.append({"family": "Geometry and control reachability",
+        "title": "Source-index hulls in a 2D geometry pipeline",
+        "status": "educational-example", "anchor": "source-index-geometry-2d",
+        "page": "source-index-geometry-2d.html", "figure": "source-index-geometry-2d.svg",
+        "source_page": "https://github.com/butahlecoq/controlled-systems-lab/blob/main/examples/source_index_geometry_2d.cpp",
+        "raw_record": "source-index-geometry-2d-records.json"})
     control_witness = control_witness_companions.build(site, catalog)
     outputs.update(control_witness.files)
     gallery_inventory.extend(control_witness.gallery_entries)
@@ -881,7 +906,7 @@ def build(catalog, site):
     workflow_figure, workflow_page = issue3_control_walkthrough(
         Path(catalog).resolve().parent / issue3_report["source_report_id"] / "records.json",
         issue3_report["report_id"])
-    navigation = "".join(f'<a href="#{e["slug"]}">{e["title"]}</a>' for e in examples)
+    navigation = "".join(f'<a href="#{e["slug"]}">{escape(e["title"])}</a>' for e in examples)
     navigation += '<a href="#analytic-illustrations">Analytic geometry and optimization</a>'
     navigation += '<a href="#algorithm-coverage">Algorithm coverage map</a>'
     navigation += '<a href="#saved-report-figures">More saved algorithm figures</a>'
@@ -892,9 +917,10 @@ def build(catalog, site):
             '<a class="brand" href="../index.html">[ csl ]<br>Controlled Systems Lab</a>'
             '<p class="eyebrow">Learn by looking</p>'
             f'<a class="nav-shortcut" href="#{last_topic_anchor}">Jump to final example: {escape(last_topic_title)} ↓</a>'
-            '<nav aria-label="Examples" tabindex="0">' + navigation +
-            '<a href="../index.html">All numerical reports ↗</a></nav></aside><main id="main">'
-            '<header><p class="eyebrow">Small inputs / visible answers</p><h1>Algorithms,<br><em>in two dimensions.</em></h1>'
+            '<nav aria-label="Examples topics" tabindex="0">' + navigation +
+            '<a href="../index.html">Learn</a></nav></aside><main id="main">'
+            '<header>' + site_design.breadcrumbs([("Learn", "../index.html"), ("Examples", "index.html")])
+            + '<p class="eyebrow">Small inputs / visible answers</p><h1>Algorithms,<br><em>in two dimensions.</em></h1>'
             '<p>See what goes in, what comes out, and why. Explore hull vertices, set intersections, hybrid control families, and projected reachability.</p>'
             '<p class="limits">These educational pages show reviewed saved outputs or explicit analytic constructions; '
             'they are not new performance measurements. Each page states whether it replays saved output or illustrates a literal fixture.</p>'
@@ -904,7 +930,11 @@ def build(catalog, site):
             '<a href="algorithm-coverage.json" download>Download algorithm-family coverage (JSON)</a></p>'
             '<p class="limits">This inventory describes figures currently linked here; it does not imply that every implemented algorithm already has a 2D example. '
             'The full algorithm-coverage gap is tracked in <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/563">issue #563</a>.</p></header>'
-            + "".join(section(e, i+1) for i, e in enumerate(examples)) +
+            + "".join(section(e, i+1,
+                              (examples[i-1]["title"], "#" + examples[i-1]["slug"]) if i else None,
+                              (examples[i+1]["title"], "#" + examples[i+1]["slug"])
+                              if i + 1 < len(examples) else None)
+                      for i, e in enumerate(examples)) +
             '<section id="analytic-illustrations"><p class="eyebrow">Hand-derived examples</p>'
             '<h2>Analytic geometry and optimization</h2><p>These exact low-dimensional examples explain the operations with literal inputs and answers. They are not solver traces or performance evidence.</p>'
             '<div class="saved-grid">' + visual_illustrations.cards(analytic_inventory) + '</div></section>' +
@@ -1073,7 +1103,7 @@ def build(catalog, site):
     link = '<p id="visual-examples-link"><a href="examples/index.html">Visual examples: minimal 2D inputs, hull vertices and plots →</a></p>'
     output_files = {name: (content if isinstance(content, bytes) else content.encode("utf-8"))
                     for name, content in outputs.items()}
-    output_files["examples.css"] = Path(__file__).with_name("visual_examples.css").read_bytes()
+    output_files["examples.css"] = site_design.stylesheet()
 
     with tempfile.TemporaryDirectory(prefix="csl-gallery-validation-") as temporary:
         validation_site = Path(temporary)

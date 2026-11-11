@@ -16,6 +16,8 @@
 #include <functional>
 #include <limits>
 #include <numeric>
+#include <chrono>
+#include <type_traits>
 
 namespace csl::optimization {
 namespace {
@@ -377,30 +379,97 @@ FiniteGraphBackwardStatus eligible_status() {
 
 using GeometryCallOutcome = std::variant<sets::SetData, Unsupported, OperationStopped>;
 
+std::string geometry_operation_name(const GeometryOperation& operation) {
+    return std::visit([](const auto& value) {
+        using T=std::decay_t<decltype(value)>;
+        if constexpr(std::is_same_v<T,AffineImage>) return std::string{"affine-image"};
+        if constexpr(std::is_same_v<T,MinkowskiSum>) return std::string{"minkowski-sum"};
+        if constexpr(std::is_same_v<T,DependentSum>) return std::string{"dependent-sum"};
+        if constexpr(std::is_same_v<T,Intersection>) return std::string{"intersection"};
+        if constexpr(std::is_same_v<T,Projection>) return std::string{"projection"};
+        if constexpr(std::is_same_v<T,AffinePreimage>) return std::string{"affine-preimage"};
+        if constexpr(std::is_same_v<T,SupportQuery>) return std::string{"support-query"};
+        return std::string{"containment-query"};
+    },operation);
+}
+
+std::string diagnostics_text(const Diagnostics& diagnostics) {
+    std::string text;
+    for(const auto& item:diagnostics) {
+        if(!text.empty()) text += "; ";
+        text += item.field + ": " + item.explanation;
+    }
+    return text;
+}
+
 GeometryCallOutcome run_geometry(const registry::PreparedProvider<registry::GeometryPort>& provider,
         const FiniteActionNominalRequest& request, GeometryOperation operation,
-        std::string suffix, const ExecutionContext& context) {
+        std::string suffix, const ExecutionContext& context,
+        std::vector<FiniteGraphGeometryInvocation>* observations,
+        const FiniteGraphGeometryObserver& observer) {
     const auto provenance = provider.provenance();
     const auto implementation = provenance.actual ? provenance.actual->id : provenance.requested.id;
     GeometryRequestIdentity identity{request.problem,
         {request.request.value + "/" + suffix}, {request.request.value + "/" + suffix + "/output"}};
     OperationRequest geometry_request{identity, implementation, std::move(operation),
         SetRelation::equivalent, Assurance::numerical};
+    const auto reference=geometry_reference(geometry_request);
+    const auto started=std::chrono::steady_clock::now();
+    const auto make_observation=[&](std::string outcome,std::optional<SetRelation> relation,
+            std::vector<std::string> assumptions,std::string diagnostics) {
+        if(!observations) return;
+        const auto elapsed=std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::steady_clock::now()-started);
+        FiniteGraphGeometryInvocation record;
+        record.request_id=geometry_request.identity.request.value;
+        record.ideal_output_id=geometry_request.identity.ideal_output.value;
+        for(const auto& id:reference.inputs) record.input_ids.push_back(id.value);
+        record.operation=geometry_operation_name(geometry_request.operation);
+        record.requested_method_id=provenance.requested.id.value;
+        record.actual_method_id=provenance.actual?provenance.actual->id.value:"unresolved-provider";
+        record.actual_method_version=provenance.actual?provenance.actual->version:"unresolved";
+        record.outcome=std::move(outcome);
+        record.relation=relation;
+        record.elapsed=elapsed;
+        record.evidence_assumptions=std::move(assumptions);
+        record.diagnostics=std::move(diagnostics);
+        observations->push_back(record);
+        if(observer) observer(record);
+    };
     auto prepared = provider.prepare(geometry_request);
-    if(const auto* rejection = std::get_if<registry::Rejection>(&prepared))
+    if(const auto* rejection = std::get_if<registry::Rejection>(&prepared)) {
+        make_observation("provider_rejected",{}, {},diagnostics_text(rejection->diagnostics));
         return Unsupported{rejection->diagnostics};
+    }
     auto workspace = std::get<registry::PreparedPipeline<registry::GeometryPort>>(std::move(prepared)).create();
     auto outcome = std::get<0>(workspace)->run(context);
-    if(const auto* stopped = std::get_if<OperationStopped>(&outcome)) return *stopped;
-    if(const auto* error = std::get_if<Unsupported>(&outcome)) return *error;
+    if(const auto* stopped = std::get_if<OperationStopped>(&outcome)) {
+        make_observation("stopped",{}, {},stopped->diagnostics);
+        return *stopped;
+    }
+    if(const auto* error = std::get_if<Unsupported>(&outcome)) {
+        make_observation("unsupported",{}, {},diagnostics_text(error->diagnostics));
+        return *error;
+    }
     const auto* result = std::get_if<OperationResult>(&outcome);
-    if(!result) return unsupported("finite_graph.reachable.operation", "Selected reachable-set operation returned a query result rather than a set.");
-    if(const auto diagnostics = check_geometry_evidence(result->evidence, geometry_request); !diagnostics.empty())
+    if(!result) {
+        make_observation("unexpected_query_result",{}, {},"Selected reachable-set operation returned a query result rather than a set.");
+        return unsupported("finite_graph.reachable.operation", "Selected reachable-set operation returned a query result rather than a set.");
+    }
+    if(const auto diagnostics = check_geometry_evidence(result->evidence, geometry_request); !diagnostics.empty()) {
+        make_observation("invalid_evidence",result->relation,result->evidence.assumptions,diagnostics_text(diagnostics));
         return Unsupported{diagnostics};
-    if(result->relation != SetRelation::equivalent)
+    }
+    if(result->relation != SetRelation::equivalent) {
+        make_observation("wrong_relation",result->relation,result->evidence.assumptions,"Expected equivalent set relation.");
         return unsupported("finite_graph.reachable.evidence", "Reachable-set operation must return an equivalent numerical set result.");
+    }
     auto set = sets::from_handle(result->output);
-    if(const auto* error = std::get_if<Diagnostic>(&set)) return unsupported(error->field, error->explanation);
+    if(const auto* error = std::get_if<Diagnostic>(&set)) {
+        make_observation("invalid_output",result->relation,result->evidence.assumptions,error->explanation);
+        return unsupported(error->field, error->explanation);
+    }
+    make_observation("completed",result->relation,result->evidence.assumptions,{});
     return std::get<sets::SetData>(std::move(set));
 }
 
@@ -715,7 +784,9 @@ ParentActionCloudOutcome parent_action_cloud(const FiniteActionNominalRequest& r
 GeometryCallOutcome parent_reachable_envelope(
         const FiniteActionNominalRequest& request,
         const registry::PreparedProvider<registry::GeometryPort>& provider,
-        std::size_t stage, const Vector& parent, const ExecutionContext& context) {
+        std::size_t stage, const Vector& parent, const ExecutionContext& context,
+        std::vector<FiniteGraphGeometryInvocation>* observations,
+        const FiniteGraphGeometryObserver& observer) {
     const auto dynamics_value = request.system.stage({stage});
     if(const auto* error = std::get_if<Diagnostic>(&dynamics_value)) return unsupported(error->field, error->explanation);
     const auto& dynamics = std::get<model::DynamicsStage>(dynamics_value);
@@ -736,14 +807,14 @@ GeometryCallOutcome parent_reachable_envelope(
     if(const auto* error=std::get_if<Diagnostic>(&singleton))return unsupported(error->field,error->explanation);
     const auto base=run_geometry(provider,request,
         AffineImage{std::get<sets::SetData>(singleton).as_handle(),std::move(map),std::move(offset)},
-        "graph-forward-affine-"+std::to_string(stage),context);
+        "graph-forward-affine-"+std::to_string(stage),context,observations,observer);
     if(const auto* error=std::get_if<Unsupported>(&base))return *error;
     if(const auto* stopped=std::get_if<OperationStopped>(&base))return *stopped;
     const auto action_set=action_state_hull(request,stage);
     if(const auto* error=std::get_if<Unsupported>(&action_set))return *error;
     return run_geometry(provider,request,
         MinkowskiSum{std::get<sets::SetData>(base).as_handle(),std::get<sets::SetData>(action_set).as_handle()},
-        "graph-forward-control-sum-"+std::to_string(stage),context);
+        "graph-forward-control-sum-"+std::to_string(stage),context,observations,observer);
 }
 
 } // namespace
@@ -752,7 +823,7 @@ static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(const Fin
         FiniteActionGraphLimits limits,
         const registry::PreparedProvider<registry::GeometryPort>& projection_provider,
         const registry::PreparedProvider<registry::GeometryPort>* reachable_set_provider,
-        const ExecutionContext& context) {
+        const ExecutionContext& context, const FiniteGraphGeometryObserver& geometry_observer) {
     const auto dimensions = request.system.dimensions();
     const auto horizon = request.system.horizon();
     if(limits.beam_width == 0 || limits.max_nodes == 0)
@@ -822,9 +893,10 @@ static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(const Fin
             }
             std::optional<sets::SetData> reachable_envelope;
             if(reachable_set_provider) {
+                const auto calls_before=graph.reachable_geometry_invocations.size();
                 auto envelope = parent_reachable_envelope(request, *reachable_set_provider,
-                    stage, parent.state, context);
-                graph.reachable_envelope_calls += 2;
+                    stage, parent.state, context,&graph.reachable_geometry_invocations,geometry_observer);
+                graph.reachable_envelope_calls += graph.reachable_geometry_invocations.size()-calls_before;
                 if(const auto* error = std::get_if<Unsupported>(&envelope)) return *error;
                 if(const auto* stopped = std::get_if<OperationStopped>(&envelope)) return *stopped;
                 reachable_envelope = std::get<sets::SetData>(std::move(envelope));
@@ -1288,15 +1360,15 @@ FiniteActionGraphOutcome finite_action_stage_layered_graph(const FiniteActionNom
         FiniteActionGraphLimits limits,
         const registry::PreparedProvider<registry::GeometryPort>& projection_provider,
         const ExecutionContext& context) {
-    return finite_action_stage_layered_graph_impl(request, limits, projection_provider, nullptr, context);
+    return finite_action_stage_layered_graph_impl(request, limits, projection_provider, nullptr, context,{});
 }
 
 FiniteActionGraphOutcome finite_action_stage_layered_graph(const FiniteActionNominalRequest& request,
         FiniteActionGraphLimits limits,
         const registry::PreparedProvider<registry::GeometryPort>& projection_provider,
         const registry::PreparedProvider<registry::GeometryPort>& reachable_set_provider,
-        const ExecutionContext& context) {
-    return finite_action_stage_layered_graph_impl(request, limits, projection_provider, &reachable_set_provider, context);
+        const ExecutionContext& context, FiniteGraphGeometryObserver observer) {
+    return finite_action_stage_layered_graph_impl(request, limits, projection_provider, &reachable_set_provider, context,observer);
 }
 
 } // namespace csl::optimization

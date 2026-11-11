@@ -124,11 +124,11 @@ class DeploymentHeadTest(unittest.TestCase):
         self.assertEqual(older.returncode, 0, older.stderr)
         self.assertEqual(older_output, "current=false\n")
 
-    def test_busy_deployer_keeps_newer_pending_when_older_validation_finishes_late(self):
-        # Model GitHub's documented pending-slot semantics from the real workflow.
+    def test_cumulative_deployer_keeps_newer_pending_when_older_validation_finishes_late(self):
+        # Model GitHub's documented pending-slot semantics from the sole publisher.
         # A running old deployment holds the group while the newer, then older,
-        # validated jobs arrive. With the default single slot, older replaces newer.
-        workflow = (ROOT / ".github" / "workflows" / "algorithm-reports.yml").read_text()
+        # validated jobs arrive. Preserve the queued, newest-source publication.
+        workflow = (ROOT / ".github" / "workflows" / "pages-augmentation-aggregation.yml").read_text()
         deploy = workflow.split("\n  deploy:\n", 1)[1]
         concurrency = deploy.split("\n    concurrency:\n", 1)[1].split("\n    environment:\n", 1)[0]
         settings = dict(

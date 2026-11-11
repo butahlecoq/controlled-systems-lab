@@ -1,7 +1,13 @@
 #include <csl/model/linear_system.hpp>
 #include <csl/geometry/polyhedral_projection.hpp>
 #include <csl/geometry/affine_sum.hpp>
+#include <csl/geometry/basis_reuse_reducer.hpp>
+#include <csl/geometry/composition_catalogue.hpp>
+#include <csl/geometry/source_index_hull.hpp>
 #include <csl/optimization/phase_one.hpp>
+#if CSL_NATIVE_HAS_HIGHS
+#include <csl/adapters/lp/highs.hpp>
+#endif
 #include <csl/optimization/finite_action_nominal.hpp>
 #include <csl/optimization/finite_action_graph.hpp>
 #include <csl/optimization/objectives.hpp>
@@ -250,21 +256,138 @@ registry::PreparedProvider<Port> prepare_provider(registry::Registration<Port> r
     return std::get<registry::PreparedProvider<Port>>(std::move(prepared));
 }
 
-registry::PreparedProvider<registry::GeometryPort> affine_sum_provider() {
-    auto lp_result=optimization::phase_one::make_registration();
-    if(!std::holds_alternative<registry::Registration<registry::LPPort>>(lp_result))
-        throw std::runtime_error("HiGHS LP registration unavailable");
-    registry::Requirements lp_requirements;
-    lp_requirements.output.representation={"csl.program-result.v1"};
-    auto lp=prepare_provider(std::get<registry::Registration<registry::LPPort>>(std::move(lp_result)),lp_requirements);
-    auto hull=prepare_provider(geometry::make_lp_hull_reducer_registration(),{});
-    geometry::AffineSumDependencies dependencies{std::move(hull),std::move(lp),std::nullopt};
-    auto registration=geometry::make_affine_sum_registration(std::move(dependencies));
+struct MethodSelection { std::string id; std::string version; };
+
+MethodSelection method_selection(const Json& value, const char* field) {
+    if(!value.is_object() || !value.contains("id") || !value.contains("version"))
+        throw std::runtime_error(std::string(field)+" must explicitly provide id and version");
+    return {value.at("id").get<std::string>(),value.at("version").get<std::string>()};
+}
+
+template<class Port>
+registry::PreparedProvider<Port> select_registered_provider(registry::Registry<Port>& providers,
+        const MethodSelection& method, registry::Requirements requirements, const char* field) {
+    auto prepared=registry::prepare_provider(registry::select_provider(providers,
+        {{method.id},method.version},std::move(requirements)));
+    if(const auto* rejected=std::get_if<registry::Rejection>(&prepared))
+        throw std::runtime_error(std::string(field)+" selection rejected: "+
+            (rejected->diagnostics.empty()?"no diagnostic":rejected->diagnostics.front().explanation));
+    return std::get<registry::PreparedProvider<Port>>(std::move(prepared));
+}
+
+registry::Registration<registry::HullReducerPort> hull_registration(
+        const MethodSelection& method, const registry::Registration<registry::LPPort>& lp_registration) {
+    if(method.id=="csl.hull.lp-membership") return geometry::make_lp_hull_reducer_registration();
+    if(method.id=="csl.hull.phase-one-basis-bulk")
+        return geometry::make_basis_reuse_hull_reducer_registration(lp_registration);
+    if(method.id=="csl.hull.ordered-membership") return geometry::make_ordered_hull_reducer_registration();
+    if(method.id=="csl.hull.itis17.a43-certified-basis-reuse")
+        return geometry::make_itis17_a43_hull_reducer_registration();
+    if(method.id=="csl.hull.itis17.a43-artificial-basis")
+        return geometry::make_itis17_a43_paper_hull_reducer_registration(geometry::A43PivotRule::phase_one_order);
+    if(method.id=="csl.hull.itis17.a43-largest-norm-tie")
+        return geometry::make_itis17_a43_paper_hull_reducer_registration(geometry::A43PivotRule::largest_norm_tie);
+    if(method.id=="csl.hull.itis17.a44-incremental-lp")
+        return geometry::make_itis17_a44_hull_reducer_registration();
+    if(method.id=="csl.hull.itis17.a44-paper-farthest-incremental-lp")
+        return geometry::make_itis17_a44_paper_hull_reducer_registration();
+    if(method.id=="csl.hull.grouped-membership") return geometry::make_grouped_hull_reducer_registration();
+    if(method.id=="csl.hull.recursive-split-merge")
+        return geometry::make_recursive_hull_reducer_registration(lp_registration);
+    throw std::runtime_error("Unsupported or unimplemented HullReducerPort id: "+method.id);
+}
+
+registry::PreparedProvider<registry::GeometryPort> affine_sum_provider(const Json& input) {
+    const MethodSelection reachable=method_selection(input.at("reachable_set_method"),"reachable_set_method");
+    if(reachable.version!="1.0.0")
+        throw std::runtime_error("reachable_set_method version is unavailable: "+reachable.id+"@"+reachable.version);
+    const MethodSelection hull_method=method_selection(input.at("hull_provider"),"hull_provider");
+    const auto& converter_request=input.at("conversion_provider");
+    if(!converter_request.is_string() || converter_request.get<std::string>()!="not_used")
+        throw std::runtime_error("conversion_provider must explicitly be not_used for the V-only native graph operands");
     registry::Requirements requirements;
     requirements.output.representation={"csl.polyhedron.v"};
     requirements.output.relation=SetRelation::equivalent;
     requirements.output.assurance=Assurance::numerical;
+    if(reachable.id=="csl.geometry.affine-sum.source-index") {
+        if(input.at("vertex_lp_provider")!="not_used")
+            throw std::runtime_error("vertex_lp_provider must be explicitly not_used for a source-index method");
+        const auto budget_json=input.at("checker_budget");
+        geometry::HullCheckBudget budget{
+            std::chrono::milliseconds{budget_json.at("wall_ms").get<std::int64_t>()},
+            budget_json.at("max_points").get<std::size_t>()};
+        auto catalogue=geometry::make_source_index_hull_catalogue();
+        auto selected=select_registered_provider(catalogue,hull_method,{},"SourceIndexHullPort");
+        auto registration=geometry::make_affine_sum_registration(
+            geometry::SourceIndexAffineSumDependencies{std::move(selected),{},budget});
+        return prepare_provider(std::move(registration),requirements);
+    }
+    if(reachable.id!="csl.geometry.affine-sum")
+        throw std::runtime_error("Unsupported or unimplemented reachable-set method: "+reachable.id);
+
+    const MethodSelection lp_method=method_selection(input.at("vertex_lp_provider"),"vertex_lp_provider");
+    registry::Registration<registry::LPPort> lp_registration;
+    if(lp_method.id=="phase-one-bland") {
+        auto lp_result=optimization::phase_one::make_registration();
+        if(!std::holds_alternative<registry::Registration<registry::LPPort>>(lp_result))
+            throw std::runtime_error("Phase-I LP registration unavailable");
+        lp_registration=std::get<registry::Registration<registry::LPPort>>(std::move(lp_result));
+    } else if(lp_method.id=="phase-one-priority-tie") {
+        optimization::phase_one::Options options;
+        options.structural_entering_priorities={0,1,2,3,4};
+        auto lp_result=optimization::phase_one::make_registration(std::move(options));
+        if(!std::holds_alternative<registry::Registration<registry::LPPort>>(lp_result))
+            throw std::runtime_error("Phase-I priority-tie LP registration unavailable");
+        lp_registration=std::get<registry::Registration<registry::LPPort>>(std::move(lp_result));
+    } else if(lp_method.id=="csl.lp.highs") {
+#if CSL_NATIVE_HAS_HIGHS
+        auto lp_result=adapters::lp::make_highs_registration();
+        if(!std::holds_alternative<registry::Registration<registry::LPPort>>(lp_result)) {
+            std::string detail;
+            for(const auto& diagnostic:std::get<Diagnostics>(lp_result)) {
+                if(!detail.empty()) detail += "; ";
+                detail += diagnostic.field+": "+diagnostic.explanation;
+            }
+            throw std::runtime_error("Requested HiGHS LP registration unavailable"+
+                (detail.empty()?std::string{}:": "+detail));
+        }
+        lp_registration=std::get<registry::Registration<registry::LPPort>>(std::move(lp_result));
+#else
+        throw std::runtime_error("Requested vertex LP provider csl.lp.highs is unavailable because CSL_ENABLE_HIGHS=OFF; no replacement LP provider was selected.");
+#endif
+    } else {
+        throw std::runtime_error("Unsupported or unimplemented vertex LP provider: "+lp_method.id+"@"+lp_method.version);
+    }
+    if(lp_registration.identity.id.value!=lp_method.id || lp_registration.identity.version!=lp_method.version)
+        throw std::runtime_error("Requested vertex LP provider is not registered in this native build: "+lp_method.id+"@"+lp_method.version);
+    registry::Registry<registry::LPPort> lp_catalogue;
+    if(const auto rejection=lp_catalogue.add(lp_registration))
+        throw std::runtime_error("built-in LP registration failed: "+rejection->diagnostics.front().explanation);
+    registry::Requirements lp_requirements;
+    lp_requirements.output.representation={"csl.program-result.v1"};
+    auto lp=select_registered_provider(lp_catalogue,lp_method,lp_requirements,"vertex LP provider");
+
+    registry::Registry<registry::HullReducerPort> hull_catalogue;
+    for(auto registration : {
+            hull_registration(hull_method,lp_registration)}) {
+        if(const auto rejection=hull_catalogue.add(std::move(registration)))
+            throw std::runtime_error("HullReducerPort registration rejected: "+rejection->diagnostics.front().explanation);
+    }
+    auto hull=select_registered_provider(hull_catalogue,hull_method,{},"HullReducerPort");
+    geometry::AffineSumDependencies dependencies{std::move(hull),std::move(lp),std::nullopt};
+    auto registration=geometry::make_affine_sum_registration(std::move(dependencies));
     return prepare_provider(std::move(registration),requirements);
+}
+
+Json geometry_invocation_json(const optimization::FiniteGraphGeometryInvocation& call) {
+    const auto relation=call.relation ? Json(*call.relation==SetRelation::equivalent?"equivalent":
+        *call.relation==SetRelation::outer?"outer":*call.relation==SetRelation::inner?"inner":"heuristic") : Json(nullptr);
+    return {{"request_id",call.request_id},{"ideal_output_id",call.ideal_output_id},
+        {"input_ids",call.input_ids},{"operation",call.operation},
+        {"requested_method_id",call.requested_method_id},{"actual_method_id",call.actual_method_id},
+        {"actual_method_version",call.actual_method_version},{"outcome",call.outcome},
+        {"relation",relation},{"elapsed_ns",call.elapsed.count()},
+        {"evidence_assumptions",call.evidence_assumptions},{"diagnostics",call.diagnostics}};
 }
 
 std::string backward_status(optimization::FiniteGraphBackwardStatus status) {
@@ -289,9 +412,11 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
                     std::size_t beam_width, std::size_t max_nodes,
                     optimization::NominalRepresentation representation,
                     std::size_t max_generators) {
-    const auto reachable_set_method = input.at("reachable_set_method").get<std::string>();
-    if(reachable_set_method != "csl.geometry.affine-sum")
-        return query_failure(input, "unsupported", "This build does not contain the explicitly requested reachable-set method.");
+    const auto reachable_set_method = input.at("reachable_set_method").at("id").get<std::string>();
+    const auto control_optimizer=method_selection(input.at("control_optimizer"),"control_optimizer");
+    if(control_optimizer.id!="csl.optimization.finite-action-stage-layered-graph" ||
+            control_optimizer.version!="1.0.0")
+        return query_failure(input,"unsupported","The explicitly requested control optimizer is unavailable.");
     auto registration = geometry::polyhedral::make_projection_registration();
     registry::Registry<registry::GeometryPort> providers;
     if(const auto error = providers.add(registration))
@@ -304,16 +429,27 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
     if(!std::holds_alternative<registry::PreparedProvider<registry::GeometryPort>>(prepared))
         return {{"status", "unsupported"}, {"reason", "exact-H projection provider failed preparation"}};
     auto provider = std::get<registry::PreparedProvider<registry::GeometryPort>>(std::move(prepared));
-    const auto reachable_provider = affine_sum_provider();
+    const auto reachable_provider = affine_sum_provider(input);
+    Json geometry_calls=Json::array();
+    const auto geometry_selection=Json{{"reachable_set_method",input.at("reachable_set_method")},
+        {"hull_provider",input.at("hull_provider")},{"vertex_lp_provider",input.at("vertex_lp_provider")},
+        {"conversion_provider",input.at("conversion_provider")},{"checker_budget",input.at("checker_budget")},
+        {"control_optimizer",input.at("control_optimizer")},
+        {"terminal_optimizer_provider","not_used"},
+        {"terminal_value_evaluation","direct authored objective evaluation"}};
     const auto outcome = optimization::finite_action_stage_layered_graph(request,
         {beam_width, max_nodes, representation==optimization::NominalRepresentation::exact_polytope ?
             std::nullopt : std::optional{representation},max_generators,
+            std::nullopt : std::optional{representation},max_generators,
             representation==optimization::NominalRepresentation::exact_polytope ?
-                std::nullopt : std::optional{representation}}, provider, reachable_provider);
+                std::nullopt : std::optional{representation}}, provider, reachable_provider, {},
+        [&geometry_calls](const auto& call) { geometry_calls.push_back(geometry_invocation_json(call)); });
     if(const auto* error = std::get_if<Unsupported>(&outcome))
-        return {{"status", "unsupported"}, {"reason", error->diagnostics.empty() ? "unsupported graph request" : error->diagnostics.front().explanation}};
+        return {{"status", "unsupported"}, {"reason", error->diagnostics.empty() ? "unsupported graph request" : error->diagnostics.front().explanation},
+            {"geometry_selection",geometry_selection},{"geometry_invocations",geometry_calls}};
     if(const auto* stopped = std::get_if<OperationStopped>(&outcome))
-        return {{"status", "failed"}, {"reason", stopped->diagnostics}};
+        return {{"status", "failed"}, {"reason", stopped->diagnostics},
+            {"geometry_selection",geometry_selection},{"geometry_invocations",geometry_calls}};
     const auto& graph = std::get<optimization::FiniteActionGraphResult>(outcome);
     const auto& provenance = provider.provenance();
     const auto provider_id = provenance.actual ? provenance.actual->id.value + "@" + provenance.actual->version : "unresolved-provider";
@@ -411,7 +547,10 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
         }
     Json invocations = Json::array({{{"module_id", "csl::optimization::finite_action_stage_layered_graph"},
         {"operation", "full-authored-horizon stage-layered finite-action graph and backward Bellman selection"},
+        {"selected_method_id",control_optimizer.id},{"selected_method_version",control_optimizer.version},
         {"provider", "public-function"}, {"profile_id", input.at("controller_id")},
+        {"terminal_optimizer_provider","not_used"},
+        {"terminal_value_evaluation","direct authored objective evaluation"},
         {"outcome", graph.has_viable_path ? "selected" : "no-viable-retained-path"},
         {"generated_edges", std::accumulate(graph.layer_statistics.begin(), graph.layer_statistics.end(), std::size_t{0},
             [](std::size_t count, const auto& row) { return count + row.generated; })},
@@ -459,6 +598,7 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
         {"action_profile_id", input.at("action_profile_id")},
         {"policy_id", input.at("controller_id").get<std::string>() + "/budgeted-backward-graph-mpc/1"},
         {"representation", representation_index}, {"invocations", invocations},
+        {"geometry_selection",geometry_selection},{"geometry_invocations",geometry_calls},
         {"predicted_sets", predicted_sets},
         {"graph_receipt", {{"schema", "csl.closed-loop.finite-action-backward-graph/1"},
             {"task_id", input.at("task_id")}, {"task_sha256", input.at("task_sha256")},
@@ -466,6 +606,7 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
             {"original_horizon", input.at("original_horizon")}, {"absolute_stage_offset", request.absolute_stage_offset},
             {"action_profile_id", input.at("action_profile_id")}, {"objective_id", request.running_cost.objective_id},
             {"representation", representation_names.at(representation_index)}, {"beam_width", beam_width}, {"max_graph_nodes", max_nodes},
+            {"geometry_selection",geometry_selection},{"geometry_invocations",geometry_calls},
             {"representation_filter_calls",graph.representation_filter_calls},
             {"representation_filter_rejections",graph.representation_filter_rejections},
             {"action_cloud_calls",graph.action_cloud_calls},{"action_cloud_envelopes",action_clouds},

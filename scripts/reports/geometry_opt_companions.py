@@ -12,6 +12,7 @@ import tempfile
 import xml.etree.ElementTree as ET
 
 import figure_style
+import site_design
 import geometry_figures
 
 
@@ -352,19 +353,15 @@ def build(output: Path) -> tuple[list[str], list[dict], list[str]]:
         inventory.append({"family": "Geometry and optimization", "title": title,
                           "report_id": report_id, "figure": svg_name,
                           "page": "geometry-optimization-v1.html#" + slug, "records": raw_name})
-    page = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
-            '<meta name="viewport" content="width=device-width,initial-scale=1">'
-            '<title>Geometry and optimization report plots</title><link rel="stylesheet" href="examples.css">'
-            '<style>body{max-width:1150px;margin:2rem auto;padding:0 1rem;font:16px/1.55 system-ui,sans-serif;color:#182532}'
-            'section{border-top:1px solid #cbd5de;padding:1.4rem 0}figure{margin:1rem 0}figure img{display:block;width:100%;height:auto}'
-            '.scroll{max-width:100%;overflow-x:auto}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}'
-            'th,td{border:1px solid #cbd5de;padding:.45rem;text-align:left}code{overflow-wrap:anywhere}'
-            '@media print{body{max-width:none;margin:0;padding:0}section{break-inside:avoid}figure img{max-height:8in;object-fit:contain}}</style>'
-            '</head><body><main><p><a href="index.html#saved-report-figures">← Saved report figures</a></p>'
-            '<h1>Geometry and optimization report plots</h1><p>Presentation companions rendered from immutable saved report records. '
+    page = (site_design.page_start("Geometry and optimization report plots",
+                                   crumbs=[("Learn", "../index.html"),
+                                           ("Examples", "index.html"),
+                                           ("Saved report figures", "index.html#saved-report-figures"),
+                                           ("Geometry and optimization", "geometry-optimization-v1.html")])
+            + '<h1>Geometry and optimization report plots</h1><p>Presentation companions rendered from immutable saved report records. '
             'Original report bundles, manifests, checksums and versioned URLs remain unchanged. Timing values use a logarithmic axis; '
             'exact values and their evidence limits remain in each table and raw record. Geometry illustrations state their aspect and units.</p>'
-            + "".join(sections) + '</main></body></html>')
+            + "".join(sections) + site_design.page_end())
     (output / "geometry-optimization-v1.html").write_text(page, encoding="utf-8")
     assets.extend(["geometry-optimization-v1.html"])
     return sections, inventory, sorted(assets)

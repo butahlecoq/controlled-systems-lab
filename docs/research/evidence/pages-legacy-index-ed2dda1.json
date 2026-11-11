@@ -1,0 +1,10 @@
+{
+  "artifact_relative_path": "index.html",
+  "bytes": 176366,
+  "complete_pages_artifact_run_id": 42909649474,
+  "schema": "csl.pages-legacy-root-snapshot/1",
+  "sha256": "29376974f806ad83816be9b42bda19fbeccaebc9a7ca79c291ed3d9ea3d522d2",
+  "snapshot_path": "docs/research/evidence/pages-legacy-index-ed2dda1.html",
+  "source_commit": "ed2dda1ef049ac4fbe259a800d3314e446ceee28",
+  "source_report_run_id": 42902971467
+}

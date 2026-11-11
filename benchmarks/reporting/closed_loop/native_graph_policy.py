@@ -148,7 +148,23 @@ class NativeGraphPolicy:
                 "max_generators_per_stage": int(os.environ.get("CSL_NATIVE_MAX_GENERATORS_PER_STAGE", "1000"))}}
         if self.use_backward_graph:
             request["search_policy"] = "stage-layered-backward-viability"
-            request["reachable_set_method"] = "csl.geometry.affine-sum"
+            reachable_id = os.environ.get("CSL_NATIVE_REACHABLE_SET_METHOD", "csl.geometry.affine-sum")
+            source_index = reachable_id == "csl.geometry.affine-sum.source-index"
+            request["reachable_set_method"] = {"id": reachable_id,
+                "version": os.environ.get("CSL_NATIVE_REACHABLE_SET_VERSION", "1.0.0")}
+            request["hull_provider"] = {"id": os.environ.get("CSL_NATIVE_HULL_PROVIDER",
+                "csl.hull.source.quickhull-2d" if source_index else "csl.hull.lp-membership"),
+                "version": os.environ.get("CSL_NATIVE_HULL_PROVIDER_VERSION", "1.0.0")}
+            request["vertex_lp_provider"] = "not_used" if source_index else {
+                "id": os.environ.get("CSL_NATIVE_VERTEX_LP_PROVIDER", "phase-one-bland"),
+                "version": os.environ.get("CSL_NATIVE_VERTEX_LP_PROVIDER_VERSION", "1")}
+            request["conversion_provider"] = os.environ.get("CSL_NATIVE_CONVERSION_PROVIDER", "not_used")
+            request["checker_budget"] = {
+                "max_points": int(os.environ.get("CSL_NATIVE_GEOMETRY_CHECKER_MAX_POINTS", "64")),
+                "wall_ms": int(os.environ.get("CSL_NATIVE_GEOMETRY_CHECKER_WALL_MS", "5000"))}
+            request["control_optimizer"] = {"id": os.environ.get("CSL_NATIVE_CONTROL_OPTIMIZER",
+                "csl.optimization.finite-action-stage-layered-graph"),
+                "version": os.environ.get("CSL_NATIVE_CONTROL_OPTIMIZER_VERSION", "1.0.0")}
         self.last_request = request
         assert self.process.stdin is not None and self.process.stdout is not None
         self.process.stdin.write(json.dumps(request, separators=(",", ":"), allow_nan=False) + "\n")

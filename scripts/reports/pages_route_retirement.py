@@ -49,6 +49,7 @@ BARE_ROUTE_REPLACEMENTS = {
 # own page content or figures for the routes they contribute.
 EXAMPLE_ROUTE_PRODUCERS = {
     "examples/adaptive-ode-replay.html": ["scripts/reports/render_adaptive_ode_example.py"],
+    "examples/source-index-geometry-2d.html": ["docs/examples/source-index-geometry-2d.html"],
     "examples/app01-plan-timing-v1.html": ["scripts/reports/approx_extension_companions.py"],
     "examples/app02-diamond-v1.html": ["scripts/reports/approx_extension_companions.py"],
     "examples/app03-zonotope-v1.html": ["scripts/reports/approx_extension_companions.py"],
@@ -126,6 +127,28 @@ class References(HTMLParser):
 
 def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def legacy_root_snapshot() -> bytes:
+    """Load the exact Pages landing page recorded before route retirement."""
+    repo = Path(__file__).resolve().parents[2]
+    metadata_path = repo / "docs/research/evidence/pages-legacy-index-ed2dda1.json"
+    snapshot_path = repo / "docs/research/evidence/pages-legacy-index-ed2dda1.html"
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    snapshot = snapshot_path.read_bytes()
+    expected = {
+        "schema": "csl.pages-legacy-root-snapshot/1",
+        "source_commit": "ed2dda1ef049ac4fbe259a800d3314e446ceee28",
+        "source_report_run_id": 42902971467,
+        "complete_pages_artifact_run_id": 42909649474,
+        "artifact_relative_path": "index.html",
+        "snapshot_path": "docs/research/evidence/pages-legacy-index-ed2dda1.html",
+        "bytes": 176366,
+        "sha256": "29376974f806ad83816be9b42bda19fbeccaebc9a7ca79c291ed3d9ea3d522d2",
+    }
+    if metadata != expected or len(snapshot) != expected["bytes"] or sha256(snapshot) != expected["sha256"]:
+        raise ValueError("pinned legacy Pages snapshot provenance or bytes differ")
+    return snapshot
 
 
 def _internal_target(site: Path, page: Path, ref: str) -> str | None:

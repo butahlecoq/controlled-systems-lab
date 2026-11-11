@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <optional>
 #include <span>
+#include <stop_token>
 #include <string>
 #include <variant>
 #include <vector>
@@ -31,6 +32,11 @@ struct HullCheckBudget {
     std::size_t max_points{64};
 };
 
+struct HullCheckControl {
+    std::stop_token cancellation;
+    std::optional<std::chrono::steady_clock::time_point> deadline;
+};
+
 struct HullCheckRecord {
     HullCheckStatus status{HullCheckStatus::inconclusive};
     std::optional<HullInputDigest> input_digest;
@@ -45,7 +51,7 @@ struct HullCheckRecord {
 // enumerate convex combinations of at most three reported source points.
 // It does not invoke a hull algorithm, reducer, LP, or sampled support test.
 HullCheckRecord check_source_index_hull(std::span<const Vector> input,
-    const SourceIndexHull& output, HullCheckBudget budget = {});
+    const SourceIndexHull& output, HullCheckBudget budget = {}, HullCheckControl control = {});
 
 struct HullSmokeRecord {
     // This is a modern-only smoke, with no historical side or timing claim.

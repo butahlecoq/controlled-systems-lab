@@ -4,8 +4,12 @@
 #include <csl/optimization/finite_action_nominal.hpp>
 #include <csl/registry/provider.hpp>
 
+#include <chrono>
+#include <functional>
 #include <optional>
 #include <span>
+#include <string>
+#include <vector>
 
 namespace csl::optimization {
 
@@ -112,6 +116,25 @@ struct FiniteGraphActionCloudEnvelope {
     std::string lifting_semantics{"auxiliary-authored-control-image"};
 };
 
+// Per-call receipt for the caller-selected forward GeometryPort operation.
+// The graph stays independent of concrete geometry/reducer ports while making
+// the exact nested operation evidence available to the application layer.
+struct FiniteGraphGeometryInvocation {
+    std::string request_id;
+    std::string ideal_output_id;
+    std::vector<std::string> input_ids;
+    std::string operation;
+    std::string requested_method_id;
+    std::string actual_method_id;
+    std::string actual_method_version;
+    std::string outcome;
+    std::optional<SetRelation> relation;
+    std::chrono::nanoseconds elapsed{};
+    std::vector<std::string> evidence_assumptions;
+    std::string diagnostics;
+};
+using FiniteGraphGeometryObserver = std::function<void(const FiniteGraphGeometryInvocation&)>;
+
 struct FiniteActionGraphLimits {
     std::size_t beam_width;
     std::size_t max_nodes;
@@ -139,6 +162,7 @@ struct FiniteActionGraphResult {
     std::size_t representation_filter_rejections{};
     std::vector<FiniteGraphActionCloudEnvelope> action_cloud_envelopes;
     std::size_t action_cloud_calls{};
+    std::vector<FiniteGraphGeometryInvocation> reachable_geometry_invocations;
     bool search_complete{};
     bool node_budget_exhausted{};
     bool has_viable_path{};
@@ -163,7 +187,7 @@ FiniteActionGraphOutcome finite_action_stage_layered_graph(
     const FiniteActionNominalRequest&, FiniteActionGraphLimits,
     const registry::PreparedProvider<registry::GeometryPort>& projection_provider,
     const registry::PreparedProvider<registry::GeometryPort>& reachable_set_provider,
-    const ExecutionContext& = {});
+    const ExecutionContext& = {}, FiniteGraphGeometryObserver = {});
 
 // Shape-specific numerical membership witness, separate from the coordinate-
 // box outer relaxation retained for plots and diagnostics.

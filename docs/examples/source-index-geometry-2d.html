@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source-index hulls in a 2D geometry pipeline</title>
+<style>
+  body{font:16px/1.55 system-ui,sans-serif;max-width:980px;margin:2rem auto;padding:0 1rem;color:#18212b}
+  svg{display:block;width:min(100%,900px);height:auto;background:#fbfcfe;border:1px solid #ccd5df}
+  .axis{stroke:#405366;stroke-width:2}.grid{stroke:#dce3ea;stroke-width:1}
+  .hull{fill:#dcefe7;stroke:#287357;stroke-width:3}.image{fill:#f5e5bd;stroke:#9b6c13;stroke-width:3}
+  .sum{fill:#dce8f5;stroke:#32658f;stroke-width:3}.corner{fill:#287357}.edge{fill:#bd6c22}.duplicate{fill:#7657a6}
+  .interior{fill:#bd3f36}.label{font-size:15px;fill:#18212b}.small{font-size:13px;fill:#405366}
+  code{background:#eef2f5;padding:.1rem .3rem;border-radius:3px} pre{overflow:auto;background:#f4f6f8;padding:1rem}
+</style>
+<h1>Two source-index methods inside the same 2D geometry operation</h1>
+<p>The input cloud is the unit square with four corners (IDs 0–3), a boundary point (ID 4),
+duplicate corner (ID 5), and the non-dyadic interior point (ID 6). QuickHull2D and the
+source-faithful BTULSHOR KPABEP/MODIF profile each propose original IDs. The affine-sum
+operation independently checks all generated points against those IDs with exact dyadic
+membership before it applies them. The checker is a separate invocation and its time/status
+is recorded separately.</p>
+<svg viewBox="0 0 900 470" role="img" aria-labelledby="title desc">
+  <title id="title">Input cloud, affine image and one-step control Minkowski sum</title>
+  <desc id="desc">The left panel shows the square hull and boundary, duplicate and interior points. The center shows an affine parallelogram. The right panel shows the one-step reachable parallelogram obtained by adding a known initial state to the control square.</desc>
+  <path class="grid" d="M65 350H285 M65 290H285 M65 230H285 M65 170H285 M65 110H285 M65 50V350 M125 50V350 M185 50V350 M245 50V350"/>
+  <path class="axis" d="M65 365H295 M55 350V40"/>
+  <path class="hull" d="M65 350L245 350L245 110L65 110Z"/>
+  <circle class="corner" cx="65" cy="350" r="6"/><circle class="corner" cx="245" cy="350" r="6"/>
+  <circle class="corner" cx="245" cy="110" r="6"/><circle class="corner" cx="65" cy="110" r="6"/>
+  <circle class="edge" cx="155" cy="350" r="6"/><circle class="duplicate" cx="70" cy="345" r="6"/>
+  <circle class="interior" cx="125" cy="270" r="6"/>
+  <text class="label" x="75" y="30">Input cloud (IDs shown in prose)</text>
+  <text class="small" x="66" y="389">0 (0,0), 1 (1,0), 2 (1,1), 3 (0,1)</text>
+  <text class="small" x="66" y="410">4 edge, 5 duplicate of 0, 6 (1/3,1/3)</text>
+  <text class="small" x="70" y="340">0,5</text><text class="small" x="147" y="340">4</text><text class="small" x="132" y="270">6</text>
+
+  <path class="grid" d="M355 350H575 M355 290H575 M355 230H575 M355 170H575 M355 110H575 M355 50V350 M415 50V350 M475 50V350 M535 50V350"/>
+  <path class="axis" d="M355 365H585 M345 350V40"/>
+  <path class="image" d="M385 290L505 230L565 110L445 170Z"/>
+  <circle class="corner" cx="385" cy="290" r="5"/><circle class="corner" cx="505" cy="230" r="5"/>
+  <circle class="corner" cx="565" cy="110" r="5"/><circle class="corner" cx="445" cy="170" r="5"/>
+  <text class="label" x="365" y="30">Affine image</text>
+  <text class="small" x="365" y="389">(x,y) ↦ (x+0.25, 0.5x+y−0.5)</text>
+  <text class="small" x="365" y="410">Four retained hull IDs; checker verified</text>
+
+  <path class="grid" d="M650 350H870 M650 290H870 M650 230H870 M650 170H870 M650 110H870 M650 50V350 M710 50V350 M770 50V350 M830 50V350"/>
+  <path class="axis" d="M650 365H880 M640 350V40"/>
+  <path class="sum" d="M695 230L815 230L815 110L695 110Z"/>
+  <circle class="corner" cx="695" cy="230" r="5"/><circle class="corner" cx="815" cy="230" r="5"/>
+  <circle class="corner" cx="815" cy="110" r="5"/><circle class="corner" cx="695" cy="110" r="5"/>
+  <text class="label" x="660" y="30">One-step control sum</text>
+  <text class="small" x="660" y="389">known x₀=(0.25,0.5), control U=[0,1]²</text>
+  <text class="small" x="660" y="410">X₁=x₀⊕U; authored control IDs retained</text>
+</svg>
+<h2>Run the public-interface example</h2>
+<pre><code>cmake -S . -B build/dev -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release
+cmake --build build/dev --target csl_affine_sum -j1
+cmake --install build/dev --prefix "$PWD/build/install"
+cmake -S examples -B build/examples -DCMAKE_PREFIX_PATH="$PWD/build/install"
+cmake --build build/examples --target source_index_geometry_2d -j1
+./build/examples/source_index_geometry_2d quickhull
+./build/examples/source_index_geometry_2d btulshor</code></pre>
+<p>The executable emits JSON with method identity, retained IDs, source trace/status, independent
+checker status and timing, and output vertices. It uses a 5,000 ms / 64-point checker budget.
+The pictured geometry is an explanation of the fixture; consult the saved raw records to inspect
+the actual provider traces. This is a functional illustration, not a performance comparison or
+a claim of historical REACH reproduction. The legacy selection is the recovered Pascal source
+profile; no distinct baseline/modified source implementation has been identified.</p>
+<p><a href="https://github.com/butahlecoq/controlled-systems-lab/blob/main/docs/contracts/affine-sum-operations.md">Operation contract</a> ·
+<a href="https://github.com/butahlecoq/controlled-systems-lab/blob/main/docs/research/btulshor-original-body-recovery.md">Legacy source recovery</a> ·
+<a href="source-index-geometry-2d-records.json">Saved raw execution records</a></p>
+</html>

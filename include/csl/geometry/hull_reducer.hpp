@@ -126,6 +126,20 @@ struct RemovalCertificate {
     NumericalCheck evidence;
 };
 
+// A call made through a reducer-owned child LP workspace. `status` and
+// `outcome` describe the LPPort result; they do not claim that a native solver
+// was entered. Provider fields preserve both the requested and resolved IDs.
+struct HullChildLPInvocation {
+    ProgramIdentity request;
+    std::string requested_provider;
+    std::string actual_provider;
+    std::string actual_version;
+    std::string status;
+    std::string outcome;
+    std::string raw_diagnostics;
+    bool raw_diagnostics_truncated{};
+};
+
 struct HullReduction {
     ReductionStatus status;
     std::vector<std::size_t> retained;
@@ -145,6 +159,13 @@ struct HullReduction {
     std::optional<A43ReductionMetrics> itis17_a43{};
     std::optional<A43PaperMetrics> itis17_a43_paper{};
     std::optional<A44ReductionMetrics> itis17_a44{};
+    // Bounded records for direct child LPPort calls that bypass the outer
+    // RegisteredLPQueryRunner. A nonzero omitted count means per-query detail
+    // is incomplete even when the geometric reduction remains valid.
+    std::vector<HullChildLPInvocation> child_lp_invocations{};
+    std::size_t child_lp_invocations_total{};
+    std::size_t child_lp_invocations_omitted{};
+    bool child_lp_trace_capture_failed{};
 };
 
 using HullReductionResult = std::variant<HullReduction, Diagnostics>;
