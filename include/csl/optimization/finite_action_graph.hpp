@@ -5,6 +5,7 @@
 #include <csl/registry/provider.hpp>
 
 #include <optional>
+#include <span>
 
 namespace csl::optimization {
 
@@ -55,11 +56,37 @@ struct FiniteActionGraphLayerStatistics {
 struct FiniteGraphCloudActionWitness {
     std::size_t action_index{};
     Vector child_state;
-    bool contained_in_outer{};
+    bool contained_in_selected_outer_shape{};
+    bool contained_in_coordinate_outer_box{};
+    std::string membership_method;
+    Vector membership_coordinates;
+    double membership_residual{};
+    double membership_tolerance{};
+    std::string containment_basis;
+};
+
+struct FiniteGraphBoxShape { Vector lower, upper; };
+struct FiniteGraphZonotopeShape { Vector center; Matrix generators; };
+struct FiniteGraphParallelotopeShape { Matrix frame; Vector lower, upper; };
+struct FiniteGraphEllipsoidShape { Vector center, radii; };
+using FiniteGraphActionCloudShape=std::variant<FiniteGraphBoxShape,
+    FiniteGraphZonotopeShape,FiniteGraphParallelotopeShape,FiniteGraphEllipsoidShape>;
+
+struct FiniteGraphCloudMembership {
+    bool supported{};
+    bool contained{};
+    std::string method;
+    Vector witness_coordinates;
+    double reconstruction_residual{};
+    double tolerance{};
 };
 
 struct FiniteGraphActionCloudEnvelope {
+    // stage is the absolute parent stage; output_stage is the next state stage.
     std::size_t stage{};
+    std::size_t output_stage{};
+    double parent_time{};
+    double output_time{};
     std::size_t parent_node{};
     NominalRepresentation representation{NominalRepresentation::exact_polytope};
     std::string module_id;
@@ -70,9 +97,13 @@ struct FiniteGraphActionCloudEnvelope {
     Matrix auxiliary_E;
     Vector auxiliary_offset;
     Vector auxiliary_control;
+    Matrix original_E;
+    Vector source_nominal_external;
+    Vector lifted_external_contribution;
     std::vector<Vector> authored_action_effect_vertices;
     Vector outer_lower;
     Vector outer_upper;
+    FiniteGraphActionCloudShape selected_outer_shape{FiniteGraphBoxShape{}};
     std::optional<bool> outer_inside_authored_stage_set;
     std::vector<FiniteGraphCloudActionWitness> action_witnesses;
     Assurance assurance{Assurance::numerical};
@@ -133,5 +164,10 @@ FiniteActionGraphOutcome finite_action_stage_layered_graph(
     const registry::PreparedProvider<registry::GeometryPort>& projection_provider,
     const registry::PreparedProvider<registry::GeometryPort>& reachable_set_provider,
     const ExecutionContext& = {});
+
+// Shape-specific numerical membership witness, separate from the coordinate-
+// box outer relaxation retained for plots and diagnostics.
+FiniteGraphCloudMembership finite_graph_action_cloud_membership(
+    const FiniteGraphActionCloudEnvelope&, std::span<const double> point);
 
 } // namespace csl::optimization

@@ -228,13 +228,26 @@ TEST_CASE("selected approximations enclose the complete multi-action cloud and p
         REQUIRE(graph.action_cloud_calls==1);
         REQUIRE(graph.action_cloud_envelopes.size()==1);
         const auto& cloud=graph.action_cloud_envelopes.front();
+        CHECK(cloud.stage==0);
+        CHECK(cloud.output_stage==1);
+        CHECK(cloud.parent_time==doctest::Approx(0.0));
+        CHECK(cloud.output_time==doctest::Approx(1.0));
         CHECK(cloud.action_witnesses.size()==request.actions.catalogue.size());
         REQUIRE(cloud.outer_lower.size()==2);
         REQUIRE(cloud.outer_upper.size()==2);
         CHECK(cloud.outer_upper[0]-cloud.outer_lower[0]>1.0);
         CHECK(cloud.outer_upper[1]-cloud.outer_lower[1]>1.0);
         CHECK(cloud.outer_inside_authored_stage_set==std::optional<bool>{true});
-        for(const auto& witness:cloud.action_witnesses)CHECK(witness.contained_in_outer);
+        for(const auto& witness:cloud.action_witnesses) {
+            CHECK(witness.contained_in_selected_outer_shape);
+            CHECK(witness.contained_in_coordinate_outer_box);
+            CHECK_FALSE(witness.membership_method.empty());
+            CHECK(witness.membership_residual<=witness.membership_tolerance);
+        }
+        if(representation==NominalRepresentation::box)CHECK(std::holds_alternative<FiniteGraphBoxShape>(cloud.selected_outer_shape));
+        if(representation==NominalRepresentation::zonotope)CHECK(std::holds_alternative<FiniteGraphZonotopeShape>(cloud.selected_outer_shape));
+        if(representation==NominalRepresentation::parallelotope)CHECK(std::holds_alternative<FiniteGraphParallelotopeShape>(cloud.selected_outer_shape));
+        if(representation==NominalRepresentation::ellipsoid)CHECK(std::holds_alternative<FiniteGraphEllipsoidShape>(cloud.selected_outer_shape));
         const auto center=std::find_if(cloud.action_witnesses.begin(),cloud.action_witnesses.end(),
             [](const auto& witness){return witness.action_index==4;});
         REQUIRE(center!=cloud.action_witnesses.end());
@@ -242,6 +255,68 @@ TEST_CASE("selected approximations enclose the complete multi-action cloud and p
         REQUIRE(graph.selected_nodes.size()==2);
         CHECK(graph.nodes[graph.selected_nodes[1]].action_index==4);
     }
+}
+
+TEST_CASE("shape membership rejects points admitted only by a coordinate bounding box") {
+    FiniteGraphActionCloudEnvelope box;
+    box.outer_lower={-1,-1};box.outer_upper={1,1};
+    box.selected_outer_shape=FiniteGraphBoxShape{{-0.5,-0.5},{0.5,0.5}};
+    const auto box_membership=finite_graph_action_cloud_membership(box,Vector{0.75,0.0});
+    CHECK(box_membership.supported);
+    CHECK_FALSE(box_membership.contained);
+
+    FiniteGraphActionCloudEnvelope parallel;
+    parallel.outer_lower={-0.2,-0.2};parallel.outer_upper={0.2,0.2};
+    parallel.selected_outer_shape=FiniteGraphParallelotopeShape{
+        Matrix{2,2,{1,1,0,1}},{-0.1,-0.1},{0.1,0.1}};
+    const Vector outside_parallelotope{0.0,0.19};
+    CHECK((outside_parallelotope[0]>=parallel.outer_lower[0] && outside_parallelotope[0]<=parallel.outer_upper[0]));
+    CHECK((outside_parallelotope[1]>=parallel.outer_lower[1] && outside_parallelotope[1]<=parallel.outer_upper[1]));
+    const auto parallel_membership=finite_graph_action_cloud_membership(parallel,outside_parallelotope);
+    CHECK(parallel_membership.supported);
+    CHECK_FALSE(parallel_membership.contained);
+
+    FiniteGraphActionCloudEnvelope ellipsoid;
+    ellipsoid.outer_lower={-0.2,-0.1};ellipsoid.outer_upper={0.2,0.1};
+    ellipsoid.selected_outer_shape=FiniteGraphEllipsoidShape{{0,0},{0.2,0.1}};
+    const Vector outside_ellipsoid{0.18,0.09};
+    CHECK((outside_ellipsoid[0]>=ellipsoid.outer_lower[0] && outside_ellipsoid[0]<=ellipsoid.outer_upper[0]));
+    CHECK((outside_ellipsoid[1]>=ellipsoid.outer_lower[1] && outside_ellipsoid[1]<=ellipsoid.outer_upper[1]));
+    const auto ellipsoid_membership=finite_graph_action_cloud_membership(ellipsoid,outside_ellipsoid);
+    CHECK(ellipsoid_membership.supported);
+    CHECK_FALSE(ellipsoid_membership.contained);
+
+    FiniteGraphActionCloudEnvelope zonotope;
+    zonotope.outer_lower={-1,-1};zonotope.outer_upper={1,1};
+    zonotope.selected_outer_shape=FiniteGraphZonotopeShape{{0,0},Matrix{2,1,{1,1}}};
+    const Vector outside_zonotope{1,-1};
+    CHECK((outside_zonotope[0]>=zonotope.outer_lower[0] && outside_zonotope[0]<=zonotope.outer_upper[0]));
+    CHECK((outside_zonotope[1]>=zonotope.outer_lower[1] && outside_zonotope[1]<=zonotope.outer_upper[1]));
+    const auto zonotope_membership=finite_graph_action_cloud_membership(zonotope,outside_zonotope);
+    CHECK(zonotope_membership.supported);
+    CHECK_FALSE(zonotope_membership.contained);
+}
+
+TEST_CASE("action-cloud lift preserves the source nominal external E*w contribution") {
+    const SystemModel authored{{{2,2,2},TimeDomain::discrete,
+        LinearStage{{2,2,{1,0,0,1}},{2,2,{1,0,0,1}},{2,2,{1,0,0,1}},{0,0}}},{}};
+    const auto system=std::get<model::LinearSystem>(model::snapshot(authored,Vector{0,1}));
+    const auto safe=h_box({-2,-2},{2,2},"external-cloud-safe");
+    const auto objective=std::get<Objective>(snapshot(QuadraticTerminal{{2,2,{2,0,0,2}},{1,0},0}));
+    FiniteActionNominalRequest request{{"external-cloud"},{"external-cloud-run"},system,
+        {0,0},{2,{{0,0}}},{{1,0}},{safe,safe},objective};
+    const auto outcome=finite_action_stage_layered_graph(request,
+        {4,16,NominalRepresentation::box,16,NominalRepresentation::box},projection_provider());
+    REQUIRE(std::holds_alternative<FiniteActionGraphResult>(outcome));
+    const auto& graph=std::get<FiniteActionGraphResult>(outcome);
+    REQUIRE(graph.has_viable_path);
+    REQUIRE(graph.action_cloud_envelopes.size()==1);
+    const auto& cloud=graph.action_cloud_envelopes.front();
+    CHECK((cloud.source_nominal_external==Vector{1,0}));
+    CHECK((cloud.lifted_external_contribution==Vector{1,0}));
+    CHECK((cloud.auxiliary_offset==Vector{1,0}));
+    REQUIRE(cloud.action_witnesses.size()==1);
+    CHECK((cloud.action_witnesses.front().child_state==Vector{1,0}));
 }
 
 TEST_CASE("outer edge filter refusal stays distinct from discrete graph infeasibility") {

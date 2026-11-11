@@ -324,8 +324,28 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
         Json witnesses=Json::array();
         for(const auto& witness:cloud.action_witnesses)
             witnesses.push_back({{"action_index",witness.action_index},{"child_state",witness.child_state},
-                {"contained_in_outer",witness.contained_in_outer}});
-        action_clouds.push_back({{"stage",cloud.stage},{"parent_node_id",cloud.parent_node},
+                {"contained_in_selected_outer_shape",witness.contained_in_selected_outer_shape},
+                {"contained_in_coordinate_outer_box",witness.contained_in_coordinate_outer_box},
+                {"membership_method",witness.membership_method},{"membership_coordinates",witness.membership_coordinates},
+                {"membership_residual",witness.membership_residual},{"membership_tolerance",witness.membership_tolerance},
+                {"containment_basis",witness.containment_basis}});
+        const auto selected_shape=std::visit([&](const auto& shape)->Json {
+            using T=std::decay_t<decltype(shape)>;
+            if constexpr(std::is_same_v<T,optimization::FiniteGraphBoxShape>)
+                return {{"representation","box"},{"lower",shape.lower},{"upper",shape.upper}};
+            else if constexpr(std::is_same_v<T,optimization::FiniteGraphZonotopeShape>)
+                return {{"representation","zonotope"},{"center",shape.center},
+                    {"generators",matrix_json(shape.generators.rows,shape.generators.cols,
+                        [&](std::size_t i,std::size_t j){return shape.generators.values[i*shape.generators.cols+j];})}};
+            else if constexpr(std::is_same_v<T,optimization::FiniteGraphParallelotopeShape>)
+                return {{"representation","parallelotope"},
+                    {"frame",matrix_json(shape.frame.rows,shape.frame.cols,
+                        [&](std::size_t i,std::size_t j){return shape.frame.values[i*shape.frame.cols+j];})},
+                    {"lower",shape.lower},{"upper",shape.upper}};
+            else return {{"representation","ellipsoid"},{"center",shape.center},{"radii",shape.radii}};
+        },cloud.selected_outer_shape);
+        action_clouds.push_back({{"stage",cloud.stage},{"parent_stage",cloud.stage},{"output_stage",cloud.output_stage},
+            {"parent_time",cloud.parent_time},{"output_time",cloud.output_time},{"parent_node_id",cloud.parent_node},
             {"parent_state",cloud.parent_state},{"representation",representation_names.at(static_cast<std::size_t>(cloud.representation))},
             {"module_id",cloud.module_id},{"auxiliary_request_id",cloud.auxiliary_request_id},
             {"lifting_semantics",cloud.lifting_semantics},
@@ -338,9 +358,14 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
                 {"E",matrix_json(cloud.auxiliary_E.rows,cloud.auxiliary_E.cols,
                     [&](std::size_t i,std::size_t j){return cloud.auxiliary_E.values[i*cloud.auxiliary_E.cols+j];})},
                 {"offset",cloud.auxiliary_offset},{"fixed_auxiliary_control",cloud.auxiliary_control},
+                {"source_external_matrix_E",matrix_json(cloud.original_E.rows,cloud.original_E.cols,
+                    [&](std::size_t i,std::size_t j){return cloud.original_E.values[i*cloud.original_E.cols+j];})},
+                {"source_nominal_external_input",cloud.source_nominal_external},
+                {"lifted_Ew_contribution",cloud.lifted_external_contribution},
                 {"auxiliary_safe_sets","universal construction constraints"},
                 {"auxiliary_disturbance_vertices","authored B*u action images listed below"}}},
             {"authored_action_effect_vertices",cloud.authored_action_effect_vertices},
+            {"selected_outer_shape",selected_shape},
             {"outer_coordinate_bounds",{{"lower",cloud.outer_lower},{"upper",cloud.outer_upper}}},
             {"outer_inside_authored_stage_set",cloud.outer_inside_authored_stage_set ? Json(*cloud.outer_inside_authored_stage_set):Json(nullptr)},
             {"action_child_witnesses",witnesses},{"relation","outer"},{"assurance","numerical"}});
@@ -494,7 +519,7 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
         {"terminal_objective", terminal_cost}, {"running_objective", running_cost_value},
         {"total_replay_objective", terminal_cost + running_cost_value},
         {"score_kind", "exact-source-cost-on-numerical-affine-predictor"},
-        {"policy_semantics", "receding finite-action graph MPC; numerical backward predecessor plus authored discrete-edge witnesses filter before Bellman selection; selected representation applies a numerical one-step outer safety and membership filter per discrete edge; replans after each observed hold"},
+        {"policy_semantics", "receding finite-action graph MPC; numerical backward predecessor plus authored discrete-edge witnesses filter before Bellman selection; selected approximation records a whole authored-action outer cloud per retained parent and applies a numerical one-step outer safety and membership filter per discrete edge; replans after each observed hold"},
         {"optimality_scope", "retained graph only; not complete finite-action optimum, nonlinear global optimum, or causal feedback optimum"}};
     return response;
 }

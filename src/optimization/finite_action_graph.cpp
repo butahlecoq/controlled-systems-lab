@@ -207,8 +207,7 @@ RepresentationFilterOutcome representation_edge_filter(const FiniteActionNominal
         return unsupported(error->field,error->explanation);
     const auto& d=std::get<model::DynamicsStage>(source_dynamics);
     const auto dimensions=request.system.dimensions();
-    const Matrix a=copy_matrix(d.A),b=copy_matrix(d.B),e{dimensions.state,dimensions.external,
-        Vector(dimensions.state*dimensions.external)};
+    const Matrix a=copy_matrix(d.A),b=copy_matrix(d.B),e=copy_matrix(d.E);
     Vector offset(dimensions.state);
     for(std::size_t i=0;i<dimensions.state;++i) offset[i]=d.offset[i];
     SystemModel one_step_model{{dimensions,TimeDomain::discrete,
@@ -337,6 +336,8 @@ PredecessorOutcome predecessor_contains(const FiniteActionNominalRequest& reques
     Vector offset(dimension);
     for(std::size_t row = 0; row < dimension; ++row) {
         offset[row] = dynamics.offset[row];
+        for(std::size_t col=0;col<request.nominal_disturbances[stage].size();++col)
+            offset[row]+=dynamics.E(row,col)*request.nominal_disturbances[stage][col];
         for(std::size_t col = 0; col < dimension; ++col) a.values[row * dimension + col] = dynamics.A(row, col);
         for(std::size_t col = 0; col < request.actions.dimension; ++col)
             b.values[row * request.actions.dimension + col] = dynamics.B(row, col);
@@ -540,14 +541,23 @@ ParentActionCloudOutcome parent_action_cloud(const FiniteActionNominalRequest& r
     const auto& effect_set=std::get<sets::SetData>(action_effect);
     const auto effect_rep=effect_set.representation();
     const auto* effect_v=std::get_if<sets::VRepresentation>(&effect_rep);
-    if(!effect_v || effect_v->rays.rows()!=0 || effect_v->vertices.rows()==0)
+    if(!effect_v || effect_v->rays.rows()!=0 || effect_v->vertices.rows()!=request.actions.catalogue.size())
         return unsupported("finite_graph.action_cloud.input","Authored B*action images must form a bounded nonempty V cloud.");
     Matrix identity{dimensions.state,dimensions.state,Vector(dimensions.state*dimensions.state,0.0)};
     Matrix zero_control{dimensions.state,dimensions.control,Vector(dimensions.state*dimensions.control,0.0)};
     for(std::size_t i=0;i<dimensions.state;++i)identity.values[i*dimensions.state+i]=1.0;
     Vector offset(dimensions.state);
-    for(std::size_t i=0;i<dimensions.state;++i)offset[i]=d.offset[i];
+    Vector external_contribution(dimensions.state,0.0);
+    for(std::size_t i=0;i<dimensions.state;++i) {
+        offset[i]=d.offset[i];
+        for(std::size_t col=0;col<dimensions.external;++col) {
+            const auto term=d.E(i,col)*request.nominal_disturbances[stage][col];
+            external_contribution[i]+=term;
+            offset[i]+=term;
+        }
+    }
     const Dimensions lifted_dimensions{dimensions.state,dimensions.control,dimensions.state};
+    const auto lifted_offset=offset;
     SystemModel lifted_model{{lifted_dimensions,TimeDomain::discrete,
         std::vector<LinearStage>{{copy_matrix(d.A),std::move(zero_control),std::move(identity),std::move(offset)}}},{}};
     const double times[]{0.0,1.0};
@@ -569,6 +579,7 @@ ParentActionCloudOutcome parent_action_cloud(const FiniteActionNominalRequest& r
 
     Vector lower,upper;
     std::string module;
+    FiniteGraphActionCloudShape selected_shape{FiniteGraphBoxShape{}};
     const auto as_bounds=[&](const auto& last,const auto& frame) {
         lower.resize(dimensions.state);upper.resize(dimensions.state);
         using Stage=std::decay_t<decltype(last)>;
@@ -601,48 +612,66 @@ ParentActionCloudOutcome parent_action_cloud(const FiniteActionNominalRequest& r
         }
     };
     if(representation==NominalRepresentation::box) {
-        module="csl.reachability.finite-plan-box";
+        module="csl::reachability::finite_plan_box";
         const auto outcome=reachability::finite_plan_box(auxiliary,context);
         if(const auto* stopped=std::get_if<OperationStopped>(&outcome))return *stopped;
         if(const auto* error=std::get_if<Unsupported>(&outcome))return *error;
-        as_bounds(std::get<reachability::FinitePlanBoxTrace>(outcome).stages.back(),Matrix{});
+        const auto& shape=std::get<reachability::FinitePlanBoxTrace>(outcome).stages.back();
+        selected_shape=FiniteGraphBoxShape{shape.lower,shape.upper};
+        as_bounds(shape,Matrix{});
     } else if(representation==NominalRepresentation::zonotope) {
-        module="csl.reachability.finite-plan-zonotope";
+        module="csl::reachability::finite_plan_zonotope";
         const auto outcome=reachability::finite_plan_zonotope(auxiliary,{max_generators},context);
         if(const auto* stopped=std::get_if<OperationStopped>(&outcome))return *stopped;
         if(const auto* error=std::get_if<Unsupported>(&outcome))return *error;
-        as_bounds(std::get<reachability::FinitePlanZonotopeTrace>(outcome).stages.back(),Matrix{});
+        const auto& shape=std::get<reachability::FinitePlanZonotopeTrace>(outcome).stages.back();
+        selected_shape=FiniteGraphZonotopeShape{shape.center,shape.generators};
+        as_bounds(shape,Matrix{});
     } else if(representation==NominalRepresentation::parallelotope) {
-        module="csl.reachability.finite-plan-parallelotope";
+        module="csl::reachability::finite_plan_parallelotope";
         const auto outcome=reachability::finite_plan_parallelotope(auxiliary,context);
         if(const auto* stopped=std::get_if<OperationStopped>(&outcome))return *stopped;
         if(const auto* error=std::get_if<Unsupported>(&outcome))return *error;
         const auto& trace=std::get<reachability::FinitePlanParallelotopeTrace>(outcome);
+        const auto& shape=trace.stages.back();
+        selected_shape=FiniteGraphParallelotopeShape{trace.frame,shape.lower,shape.upper};
         as_bounds(trace.stages.back(),trace.frame);
     } else if(representation==NominalRepresentation::ellipsoid) {
-        module="csl.reachability.finite-plan-ellipsoid";
+        module="csl::reachability::finite_plan_ellipsoid";
         const auto outcome=reachability::finite_plan_ellipsoid(auxiliary,context);
         if(const auto* stopped=std::get_if<OperationStopped>(&outcome))return *stopped;
         if(const auto* error=std::get_if<Unsupported>(&outcome))return *error;
-        as_bounds(std::get<reachability::FinitePlanEllipsoidTrace>(outcome).stages.back(),Matrix{});
+        const auto& shape=std::get<reachability::FinitePlanEllipsoidTrace>(outcome).stages.back();
+        selected_shape=FiniteGraphEllipsoidShape{shape.center,shape.radii};
+        as_bounds(shape,Matrix{});
     } else return unsupported("finite_graph.action_cloud.representation","Only the four selected numerical approximation modules support this cloud route.");
     if(lower.size()!=dimensions.state || upper.size()!=dimensions.state || !finite(lower) || !finite(upper))
         return unsupported("finite_graph.action_cloud.output","Selected set module did not produce finite coordinate outer bounds.");
 
     FiniteGraphActionCloudEnvelope record;
-    record.stage=request.absolute_stage_offset+stage;record.parent_node=parent_id;
+    const auto parent_time=request.system.time({stage});
+    const auto output_time=request.system.time({stage+1});
+    if(const auto* error=std::get_if<Diagnostic>(&parent_time))return unsupported(error->field,error->explanation);
+    if(const auto* error=std::get_if<Diagnostic>(&output_time))return unsupported(error->field,error->explanation);
+    record.stage=request.absolute_stage_offset+stage;
+    record.output_stage=request.absolute_stage_offset+stage+1;
+    record.parent_time=std::get<double>(parent_time);
+    record.output_time=std::get<double>(output_time);
+    record.parent_node=parent_id;
     record.representation=representation;record.module_id=std::move(module);
     record.auxiliary_request_id=auxiliary_id;record.parent_state=parent;
     record.auxiliary_A=copy_matrix(d.A);
+    record.original_E=copy_matrix(d.E);
+    record.source_nominal_external=request.nominal_disturbances[stage];
+    record.lifted_external_contribution=external_contribution;
     record.auxiliary_B={dimensions.state,dimensions.control,Vector(dimensions.state*dimensions.control,0.0)};
     record.auxiliary_E={dimensions.state,dimensions.state,Vector(dimensions.state*dimensions.state,0.0)};
-    record.auxiliary_offset.resize(dimensions.state);
+    record.auxiliary_offset=lifted_offset;
     for(std::size_t i=0;i<dimensions.state;++i) {
         record.auxiliary_E.values[i*dimensions.state+i]=1.0;
-        record.auxiliary_offset[i]=d.offset[i];
     }
     record.auxiliary_control=Vector(dimensions.control,0.0);
-    record.outer_lower=lower;record.outer_upper=upper;
+    record.outer_lower=lower;record.outer_upper=upper;record.selected_outer_shape=std::move(selected_shape);
     record.outer_inside_authored_stage_set=outer_box_inside_set(lower,upper,request.admissible_states[stage+1]);
     for(std::size_t row=0;row<effect_v->vertices.rows();++row) {
         Vector vertex(dimensions.state);
@@ -654,11 +683,31 @@ ParentActionCloudOutcome parent_action_cloud(const FiniteActionNominalRequest& r
         if(const auto* error=std::get_if<Diagnostic>(&child))return unsupported(error->field,error->explanation);
         if(const auto* stopped=std::get_if<OperationStopped>(&child))return *stopped;
         const auto state=std::get<Vector>(child);
-        bool inside=true;
+        const auto& effect=record.authored_action_effect_vertices[action];
+        bool affine_equivalent=true;
+        for(std::size_t row=0;row<state.size();++row) {
+            double reconstructed=d.offset[row]+external_contribution[row];
+            for(std::size_t col=0;col<dimensions.state;++col)reconstructed+=d.A(row,col)*parent[col];
+            reconstructed+=effect[row];
+            affine_equivalent=affine_equivalent && std::abs(reconstructed-state[row])<=1e-9+
+                1e-10*std::max(std::abs(reconstructed),std::abs(state[row]));
+        }
+        if(!affine_equivalent)return unsupported("finite_graph.action_cloud.lineage","Lifted auxiliary action image does not match the original affine model transition.");
+        bool coordinate_inside=true;
         for(std::size_t i=0;i<state.size();++i)
-            inside=inside && state[i]>=lower[i] && state[i]<=upper[i];
-        if(!inside)return unsupported("finite_graph.action_cloud.witness","Numerical outer cloud failed to contain an authored discrete action child.");
-        record.action_witnesses.push_back({action,state,inside});
+            coordinate_inside=coordinate_inside && state[i]>=lower[i] && state[i]<=upper[i];
+        if(!coordinate_inside)return unsupported("finite_graph.action_cloud.witness","Coordinate outer relaxation failed to contain an authored discrete action child.");
+        const auto shape_membership=finite_graph_action_cloud_membership(record,state);
+        if(!shape_membership.supported)
+            return unsupported("finite_graph.action_cloud.shape_membership.inconclusive",
+                "Selected-shape membership witness is unsupported for this numeric generator/frame layout; this is not a physical infeasibility result.");
+        if(!shape_membership.contained)
+            return unsupported("finite_graph.action_cloud.shape_membership.refused",
+                "A recomputed authored action child failed the selected-shape numeric membership check; no edge is certified from this approximation.");
+        record.action_witnesses.push_back({action,state,shape_membership.contained,coordinate_inside,
+            shape_membership.method,shape_membership.witness_coordinates,
+            shape_membership.reconstruction_residual,shape_membership.tolerance,
+            "Selected finite-plan trace declares a numerical outer relation over the complete V input cloud; the shape-specific membership witness is retained, and the original-versus-lifted affine transition was recomputed within numerical tolerance."});
     }
     return ParentActionCloud{std::move(record)};
 }
@@ -675,8 +724,8 @@ GeometryCallOutcome parent_reachable_envelope(
     Vector offset(dimension);
     for(std::size_t row=0;row<dimension;++row) {
         offset[row]=dynamics.offset[row];
-        if(request.nominal_disturbances[stage].size()==dimension)
-            offset[row]+=request.nominal_disturbances[stage][row];
+        for(std::size_t col=0;col<request.nominal_disturbances[stage].size();++col)
+            offset[row]+=dynamics.E(row,col)*request.nominal_disturbances[stage][col];
         for(std::size_t col=0;col<dimension;++col) map.values[row*dimension+col]=dynamics.A(row,col);
     }
     auto point_view=numeric::snapshot_vector(parent);
@@ -708,12 +757,15 @@ static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(const Fin
     const auto horizon = request.system.horizon();
     if(limits.beam_width == 0 || limits.max_nodes == 0)
         return unsupported("finite_graph.limits", "Beam width and maximum node count must be positive.");
-    if((dimensions.state != 2 && dimensions.state != 4) || dimensions.external != 0)
-        return unsupported("finite_graph.model", "The finite-action graph admits 2D or 4D nominal systems without external inputs.");
+    if(dimensions.state != 2 && dimensions.state != 4)
+        return unsupported("finite_graph.model", "The finite-action graph admits 2D or 4D nominal systems.");
     if(request.initial_state.size() != dimensions.state || request.actions.dimension != dimensions.control ||
        request.actions.catalogue.empty() || request.admissible_states.size() != horizon + 1 ||
        request.nominal_disturbances.size() != horizon || request.objective.dimension() != dimensions.state)
         return unsupported("finite_graph.request", "Finite action graph request dimensions do not match the nominal system.");
+    for(const auto& disturbance:request.nominal_disturbances)
+        if(disturbance.size()!=dimensions.external || !finite(disturbance))
+            return unsupported("finite_graph.disturbances","Each authored nominal external input must be finite and match the source model external dimension.");
     if(horizon == 0 || !finite(request.initial_state))
         return unsupported("finite_graph.horizon", "Graph requires a nonempty horizon and finite initial state.");
     if(const auto invalid_cost = validate_running_cost(request.running_cost, request.absolute_stage_offset,
@@ -910,6 +962,8 @@ static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(const Fin
                     replay[row] += dynamics.A(row, col) * parent.state[col];
                 for(std::size_t col = 0; col < action.size(); ++col)
                     replay[row] += dynamics.B(row, col) * action[col];
+                for(std::size_t col=0;col<request.nominal_disturbances[stage].size();++col)
+                    replay[row]+=dynamics.E(row,col)*request.nominal_disturbances[stage][col];
             }
             bool discrete_witness = replay.size() == child.state.size();
             for(std::size_t i = 0; discrete_witness && i < replay.size(); ++i)
@@ -968,6 +1022,193 @@ static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(const Fin
         graph.selected_nodes.push_back(current);
     }
     return graph;
+}
+
+FiniteGraphCloudMembership finite_graph_action_cloud_membership(
+        const FiniteGraphActionCloudEnvelope& cloud,std::span<const double> point) {
+    FiniteGraphCloudMembership result;
+    if(point.empty() || point.size()!=cloud.outer_lower.size() || point.size()!=cloud.outer_upper.size() || !finite(point)) {
+        result.method="dimension-or-finiteness-invalid";
+        return result;
+    }
+    double scale=0.0;
+    for(const auto value:point)scale=std::max(scale,std::abs(value));
+    for(const auto value:cloud.outer_lower)scale=std::max(scale,std::abs(value));
+    for(const auto value:cloud.outer_upper)scale=std::max(scale,std::abs(value));
+    result.tolerance=std::max(64.0*std::numeric_limits<double>::epsilon()*scale,
+        64.0*std::numeric_limits<double>::denorm_min());
+    return std::visit([&](const auto& shape)->FiniteGraphCloudMembership {
+        using T=std::decay_t<decltype(shape)>;
+        auto membership=result;
+        membership.supported=true;
+        if constexpr(std::is_same_v<T,FiniteGraphBoxShape>) {
+            membership.method="coordinate-membership-in-selected-box";
+            membership.contained=shape.lower.size()==point.size() && shape.upper.size()==point.size();
+            if(!membership.contained) {
+                membership.supported=false;
+                membership.method="box-dimension-unsupported";
+                return membership;
+            }
+            membership.witness_coordinates.assign(point.begin(),point.end());
+            double residual=0.0;
+            for(std::size_t i=0;i<point.size();++i) {
+                residual=std::max(residual,std::max(shape.lower[i]-point[i],point[i]-shape.upper[i]));
+                membership.contained=membership.contained && point[i]>=shape.lower[i]-result.tolerance &&
+                    point[i]<=shape.upper[i]+result.tolerance;
+            }
+            membership.reconstruction_residual=std::max(0.0,residual);
+        } else if constexpr(std::is_same_v<T,FiniteGraphParallelotopeShape>) {
+            membership.method="frame-coordinate-solve-and-interval-check";
+            const auto n=point.size();
+            if(shape.frame.rows!=n || shape.frame.cols!=n || shape.frame.values.size()!=n*n) {
+                membership.supported=false;membership.method="parallelotope-frame-dimension-unsupported";return membership;
+            }
+            std::vector<double> augmented(n*(n+1));
+            for(std::size_t row=0;row<n;++row) {
+                for(std::size_t col=0;col<n;++col)augmented[row*(n+1)+col]=shape.frame.values[row*n+col];
+                augmented[row*(n+1)+n]=point[row];
+            }
+            double frame_scale=0.0;
+            for(const auto value:shape.frame.values)frame_scale=std::max(frame_scale,std::abs(value));
+            const auto pivot_tolerance=std::max(64.0*std::numeric_limits<double>::epsilon()*frame_scale,
+                64.0*std::numeric_limits<double>::denorm_min());
+            for(std::size_t col=0;col<n;++col) {
+                std::size_t pivot=col;
+                for(std::size_t row=col+1;row<n;++row)
+                    if(std::abs(augmented[row*(n+1)+col])>std::abs(augmented[pivot*(n+1)+col]))pivot=row;
+                if(std::abs(augmented[pivot*(n+1)+col])<=pivot_tolerance) {
+                    membership.supported=false;membership.method="singular-parallelotope-frame";return membership;
+                }
+                for(std::size_t j=col;j<=n;++j)std::swap(augmented[col*(n+1)+j],augmented[pivot*(n+1)+j]);
+                const auto divisor=augmented[col*(n+1)+col];
+                for(std::size_t j=col;j<=n;++j)augmented[col*(n+1)+j]/=divisor;
+                for(std::size_t row=0;row<n;++row)if(row!=col) {
+                    const auto factor=augmented[row*(n+1)+col];
+                    for(std::size_t j=col;j<=n;++j)augmented[row*(n+1)+j]-=factor*augmented[col*(n+1)+j];
+                }
+            }
+            membership.witness_coordinates.resize(n);
+            for(std::size_t i=0;i<n;++i)membership.witness_coordinates[i]=augmented[i*(n+1)+n];
+            membership.contained=shape.lower.size()==n && shape.upper.size()==n;
+            if(!membership.contained) {
+                membership.supported=false;membership.method="parallelotope-interval-dimension-unsupported";return membership;
+            }
+            for(std::size_t i=0;i<n;++i)
+                if(membership.witness_coordinates[i]<shape.lower[i]-result.tolerance ||
+                   membership.witness_coordinates[i]>shape.upper[i]+result.tolerance)
+                    membership.contained=false;
+            double residual2=0.0;
+            for(std::size_t row=0;row<n;++row) {
+                double reconstructed=0.0;
+                for(std::size_t col=0;col<n;++col)reconstructed+=shape.frame.values[row*n+col]*membership.witness_coordinates[col];
+                const auto residual=reconstructed-point[row];residual2+=residual*residual;
+            }
+            membership.reconstruction_residual=std::sqrt(residual2);
+            membership.contained=membership.contained && membership.reconstruction_residual<=result.tolerance;
+        } else if constexpr(std::is_same_v<T,FiniteGraphEllipsoidShape>) {
+            membership.method="normalized-ellipsoid-quadratic-metric";
+            if(shape.center.size()!=point.size() || shape.radii.size()!=point.size()) {
+                membership.supported=false;membership.method="ellipsoid-dimension-unsupported";return membership;
+            }
+            double metric=0.0;
+            membership.witness_coordinates.resize(point.size());
+            for(std::size_t i=0;i<point.size();++i) {
+                if(shape.radii[i]==0.0) {
+                    if(std::abs(point[i]-shape.center[i])>result.tolerance) { metric=std::numeric_limits<double>::infinity();break; }
+                    membership.witness_coordinates[i]=0.0;
+                } else {
+                    const auto coordinate=(point[i]-shape.center[i])/shape.radii[i];
+                    membership.witness_coordinates[i]=coordinate;metric+=coordinate*coordinate;
+                }
+            }
+            membership.reconstruction_residual=std::max(0.0,std::sqrt(metric)-1.0);
+            membership.contained=metric<=1.0+64.0*std::numeric_limits<double>::epsilon()*
+                static_cast<double>(std::max<std::size_t>(1,point.size()));
+        } else {
+            membership.method="bounded-generator-coefficients-and-rounding-residual";
+            const auto n=point.size(),g=shape.generators.cols;
+            if(shape.center.size()!=n || shape.generators.rows!=n || shape.generators.values.size()!=n*g) {
+                membership.supported=false;membership.method="zonotope-dimension-unsupported";return membership;
+            }
+            membership.witness_coordinates.assign(g,0.0);
+            double generator_scale=0.0;
+            for(const auto value:shape.generators.values)generator_scale=std::max(generator_scale,std::abs(value));
+            const auto generator_tolerance=std::max(64.0*std::numeric_limits<double>::epsilon()*generator_scale,
+                64.0*std::numeric_limits<double>::denorm_min());
+            const auto coefficient_tolerance=[](double coefficient) {
+                return 64.0*std::numeric_limits<double>::epsilon()*std::max(1.0,std::abs(coefficient));
+            };
+            if(g==0) {
+                double residual2=0.0;
+                for(std::size_t i=0;i<n;++i) {const auto r=point[i]-shape.center[i];residual2+=r*r;}
+                membership.reconstruction_residual=std::sqrt(residual2);
+                membership.contained=membership.reconstruction_residual<=result.tolerance;
+                return membership;
+            }
+            if(g==1) {
+                double dot=0.0,norm2=0.0;
+                for(std::size_t i=0;i<n;++i) {
+                    const auto generator=shape.generators.values[i];
+                    dot+=(point[i]-shape.center[i])*generator;norm2+=generator*generator;
+                }
+                if(norm2==0.0) {
+                    membership.supported=false;membership.method="degenerate-single-generator-zonotope";return membership;
+                }
+                const auto alpha=dot/norm2;membership.witness_coordinates[0]=alpha;
+                double residual2=0.0;
+                for(std::size_t i=0;i<n;++i) {
+                    const auto residual=point[i]-shape.center[i]-alpha*shape.generators.values[i];
+                    residual2+=residual*residual;
+                }
+                membership.reconstruction_residual=std::sqrt(residual2);
+                membership.contained=std::abs(alpha)<=1.0+64.0*std::numeric_limits<double>::epsilon()*std::max(1.0,std::abs(alpha)) &&
+                    membership.reconstruction_residual<=result.tolerance;
+                return membership;
+            }
+            if(g<n) {membership.supported=false;membership.method="zonotope-generator-layout-unsupported";return membership;}
+            const auto input_columns=g-n;
+            Vector delta(n);
+            for(std::size_t row=0;row<n;++row)delta[row]=point[row]-shape.center[row];
+            bool axes=true;
+            for(std::size_t row=0;row<n;++row) {
+                std::optional<std::size_t> axis;
+                for(std::size_t col=0;col<input_columns;++col) {
+                    const auto value=shape.generators.values[row*g+col];
+                    bool other_rows_zero=true;
+                    for(std::size_t other=0;other<n;++other)if(other!=row)
+                        other_rows_zero=other_rows_zero && std::abs(shape.generators.values[other*g+col])<=generator_tolerance;
+                    if(std::abs(value)>generator_tolerance && other_rows_zero) {axis=col;break;}
+                }
+                if(axis) {
+                    const auto generator=shape.generators.values[row*g+*axis];
+                    membership.witness_coordinates[*axis]=delta[row]/generator;
+                } else if(std::abs(delta[row])>result.tolerance) axes=false;
+            }
+            if(!axes) {membership.supported=false;membership.method="zonotope-input-generators-not-axis-aligned";return membership;}
+            double residual2=0.0;
+            for(std::size_t row=0;row<n;++row) {
+                double reconstructed=shape.center[row];
+                for(std::size_t col=0;col<input_columns;++col)
+                    reconstructed+=shape.generators.values[row*g+col]*membership.witness_coordinates[col];
+                const auto residual=point[row]-reconstructed;
+                residual2+=residual*residual;
+                const auto rounding=shape.generators.values[row*g+input_columns+row];
+                for(std::size_t other=0;other<n;++other)if(other!=row)
+                    if(std::abs(shape.generators.values[other*g+input_columns+row])>generator_tolerance)axes=false;
+                if(std::abs(rounding)>generator_tolerance)
+                    membership.witness_coordinates[input_columns+row]=residual/rounding;
+                if(std::abs(residual)>std::abs(rounding)+result.tolerance ||
+                   std::abs(membership.witness_coordinates[input_columns+row])>1.0+
+                       coefficient_tolerance(membership.witness_coordinates[input_columns+row]))axes=false;
+            }
+            for(std::size_t col=0;col<input_columns;++col)
+                if(std::abs(membership.witness_coordinates[col])>1.0+64.0*std::numeric_limits<double>::epsilon()*
+                    std::max(1.0,std::abs(membership.witness_coordinates[col])))axes=false;
+            membership.reconstruction_residual=std::sqrt(residual2);
+            membership.contained=axes;
+        }
+        return membership;
+    },cloud.selected_outer_shape);
 }
 
 FiniteActionGraphOutcome finite_action_stage_layered_graph(const FiniteActionNominalRequest& request,

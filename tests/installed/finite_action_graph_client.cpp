@@ -89,5 +89,23 @@ int main() {
     if(!result.has_viable_path || result.selected_nodes.size() != 3 || result.total_objective != 1.5) return 6;
     if(result.reachable_envelope_calls != 6 ||
        result.nodes[result.selected_nodes[1]].reachable_envelope_contains != true) return 8;
-    return result.nodes[result.selected_nodes[1]].action_index == 1 ? 0 : 7;
+    if(result.nodes[result.selected_nodes[1]].action_index != 1) return 7;
+    optimization::FiniteGraphActionCloudEnvelope cloud;
+    cloud.outer_lower={-1,-1}; cloud.outer_upper={1,1};
+    cloud.selected_outer_shape=optimization::FiniteGraphBoxShape{{-1,-1},{1,1}};
+    const auto membership=optimization::finite_graph_action_cloud_membership(cloud,Vector{0.5,0.5});
+    if(!membership.supported || !membership.contained || membership.method.empty()) return 9;
+    const auto box_reject=optimization::finite_graph_action_cloud_membership(cloud,Vector{1.5,0.0});
+    if(!box_reject.supported || box_reject.contained) return 10;
+    cloud.selected_outer_shape=optimization::FiniteGraphParallelotopeShape{
+        Matrix{2,2,{1,1,0,1}},{-0.1,-0.1},{0.1,0.1}};
+    if(!optimization::finite_graph_action_cloud_membership(cloud,Vector{0,0.19}).supported ||
+       optimization::finite_graph_action_cloud_membership(cloud,Vector{0,0.19}).contained) return 11;
+    cloud.selected_outer_shape=optimization::FiniteGraphEllipsoidShape{{0,0},{0.2,0.1}};
+    if(!optimization::finite_graph_action_cloud_membership(cloud,Vector{0.18,0.09}).supported ||
+       optimization::finite_graph_action_cloud_membership(cloud,Vector{0.18,0.09}).contained) return 12;
+    cloud.selected_outer_shape=optimization::FiniteGraphZonotopeShape{{0,0},Matrix{2,1,{1,1}}};
+    if(!optimization::finite_graph_action_cloud_membership(cloud,Vector{1,-1}).supported ||
+       optimization::finite_graph_action_cloud_membership(cloud,Vector{1,-1}).contained) return 13;
+    return 0;
 }
