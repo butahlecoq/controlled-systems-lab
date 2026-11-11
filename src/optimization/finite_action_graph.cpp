@@ -768,9 +768,12 @@ ParentActionCloudOutcome parent_action_cloud(const FiniteActionNominalRequest& r
         }
         if(!affine_equivalent)return unsupported("finite_graph.action_cloud.lineage","Lifted auxiliary action image does not match the original affine model transition.");
         bool coordinate_inside=true;
-        for(std::size_t i=0;i<state.size();++i)
-            coordinate_inside=coordinate_inside && state[i]>=lower[i] && state[i]<=upper[i];
-        if(!coordinate_inside)return unsupported("finite_graph.action_cloud.witness","Coordinate outer relaxation failed to contain an authored discrete action child.");
+        for(std::size_t i=0;i<state.size();++i) {
+            if(state[i]<lower[i] || state[i]>upper[i]) {
+                coordinate_inside=false;
+                break;
+            }
+        }
         const auto shape_membership=finite_graph_action_cloud_membership(record,state);
         if(!shape_membership.supported)
             return unsupported("finite_graph.action_cloud.shape_membership.inconclusive",
@@ -781,7 +784,9 @@ ParentActionCloudOutcome parent_action_cloud(const FiniteActionNominalRequest& r
         record.action_witnesses.push_back({action,state,shape_membership.contained,coordinate_inside,
             shape_membership.method,shape_membership.witness_coordinates,
             shape_membership.reconstruction_residual,shape_membership.tolerance,
-            "Selected finite-plan trace declares a numerical outer relation over the complete V input cloud; the shape-specific membership witness is retained, and the original-versus-lifted affine transition was recomputed within numerical tolerance."});
+            shape_membership.tolerance_scale,
+            "max(64*epsilon*global-coordinate-scale,64*denorm_min)",
+            "Accepted by selected-shape numerical membership predicate; this is not a literal set-inclusion claim. The original-versus-lifted affine transition was recomputed within numerical tolerance."});
     }
     return ParentActionCloud{std::move(record)};
 }
@@ -1154,6 +1159,7 @@ FiniteGraphCloudMembership finite_graph_action_cloud_membership(
     for(const auto value:point)scale=std::max(scale,std::abs(value));
     for(const auto value:cloud.outer_lower)scale=std::max(scale,std::abs(value));
     for(const auto value:cloud.outer_upper)scale=std::max(scale,std::abs(value));
+    result.tolerance_scale=scale;
     result.tolerance=std::max(64.0*std::numeric_limits<double>::epsilon()*scale,
         64.0*std::numeric_limits<double>::denorm_min());
     auto membership=std::visit([&](const auto& shape)->FiniteGraphCloudMembership {

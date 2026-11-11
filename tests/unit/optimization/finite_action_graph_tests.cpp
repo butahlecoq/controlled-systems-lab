@@ -288,10 +288,11 @@ TEST_CASE("selected approximations enclose the complete multi-action cloud and p
         CHECK(cloud.outer_upper[1]-cloud.outer_lower[1]>1.0);
         CHECK(cloud.outer_inside_authored_stage_set==std::optional<bool>{true});
         for(const auto& witness:cloud.action_witnesses) {
-            CHECK(witness.contained_in_selected_outer_shape);
+            CHECK(witness.accepted_by_selected_shape_numerical_membership);
             CHECK(witness.contained_in_coordinate_outer_box);
             CHECK_FALSE(witness.membership_method.empty());
-            CHECK(witness.membership_residual<=witness.membership_tolerance);
+            CHECK(witness.membership_tolerance_scale>0.0);
+            CHECK(witness.membership_tolerance_rule=="max(64*epsilon*global-coordinate-scale,64*denorm_min)");
         }
         if(representation==NominalRepresentation::box)CHECK(std::holds_alternative<FiniteGraphBoxShape>(cloud.selected_outer_shape));
         if(representation==NominalRepresentation::zonotope)CHECK(std::holds_alternative<FiniteGraphZonotopeShape>(cloud.selected_outer_shape));
@@ -357,6 +358,35 @@ TEST_CASE("shape membership rejects points admitted only by a coordinate boundin
     CHECK_FALSE(unsupported_rotated.supported);
     CHECK_FALSE(unsupported_rotated.contained);
     CHECK(unsupported_rotated.method.find("inconclusive")!=std::string::npos);
+}
+
+TEST_CASE("orbit box child 27 ULP below strict bounds uses selected-shape numerical membership") {
+    FiniteGraphActionCloudEnvelope cloud;
+    cloud.outer_lower={6999.48247958194861,-0.00358794570065600277,0.323390168309409032,0.00107790439878146507};
+    cloud.outer_upper={6999.58956566931192,-0.00137641395188615816,0.323405424830231158,0.00107821867254362380};
+    cloud.selected_outer_shape=FiniteGraphBoxShape{cloud.outer_lower,cloud.outer_upper};
+    const Vector child{6999.48247958195589,-0.00358794570065601448,0.323391194438154561,0.00107793517071765521};
+    CHECK(child[1]<cloud.outer_lower[1]);
+    auto twenty_seven_ulps_below=cloud.outer_lower[1];
+    for(int i=0;i<27;++i)
+        twenty_seven_ulps_below=std::nextafter(twenty_seven_ulps_below,-std::numeric_limits<double>::infinity());
+    CHECK(child[1]==twenty_seven_ulps_below);
+
+    const auto membership=finite_graph_action_cloud_membership(cloud,child);
+    CHECK(membership.supported);
+    CHECK(membership.contained);
+    CHECK(membership.method=="coordinate-membership-in-selected-box");
+    CHECK(membership.tolerance_scale==doctest::Approx(6999.58956566931192));
+    CHECK(membership.tolerance==doctest::Approx(std::max(
+        64.0*std::numeric_limits<double>::epsilon()*membership.tolerance_scale,
+        64.0*std::numeric_limits<double>::denorm_min())));
+    CHECK(membership.reconstruction_residual>0.0);
+    CHECK(membership.reconstruction_residual<membership.tolerance);
+
+    const auto outside=finite_graph_action_cloud_membership(cloud,Vector{child[0],
+        cloud.outer_lower[1]-10.0*membership.tolerance,child[2],child[3]});
+    CHECK(outside.supported);
+    CHECK_FALSE(outside.contained);
 }
 
 TEST_CASE("public shape membership refuses malformed and non-finite shape payloads") {

@@ -461,12 +461,21 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
             representation==optimization::NominalRepresentation::exact_polytope ?
                 std::nullopt : std::optional{representation}}, provider, reachable_provider, {},
         [&geometry_calls](const auto& call) { geometry_calls.push_back(geometry_invocation_json(call)); });
-    if(const auto* error = std::get_if<Unsupported>(&outcome))
-        return {{"status", "unsupported"}, {"reason", error->diagnostics.empty() ? "unsupported graph request" : error->diagnostics.front().explanation},
-            {"geometry_selection",geometry_selection},{"geometry_invocations",geometry_calls}};
-    if(const auto* stopped = std::get_if<OperationStopped>(&outcome))
-        return {{"status", "failed"}, {"reason", stopped->diagnostics},
-            {"geometry_selection",geometry_selection},{"geometry_invocations",geometry_calls}};
+    if(const auto* error = std::get_if<Unsupported>(&outcome)) {
+        auto response = query_failure(input,"unsupported",
+            error->diagnostics.empty() ? "unsupported graph request" : error->diagnostics.front().explanation);
+        response["mathematical_support"] = "not_evaluated";
+        response["geometry_selection"] = geometry_selection;
+        response["geometry_invocations"] = geometry_calls;
+        return response;
+    }
+    if(const auto* stopped = std::get_if<OperationStopped>(&outcome)) {
+        auto response = query_failure(input,"failed",stopped->diagnostics);
+        response["mathematical_support"] = "not_evaluated";
+        response["geometry_selection"] = geometry_selection;
+        response["geometry_invocations"] = geometry_calls;
+        return response;
+    }
     const auto& graph = std::get<optimization::FiniteActionGraphResult>(outcome);
     const auto& provenance = provider.provenance();
     const auto provider_id = provenance.actual ? provenance.actual->id.value + "@" + provenance.actual->version : "unresolved-provider";
@@ -477,10 +486,12 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
         Json witnesses=Json::array();
         for(const auto& witness:cloud.action_witnesses)
             witnesses.push_back({{"action_index",witness.action_index},{"child_state",witness.child_state},
-                {"contained_in_selected_outer_shape",witness.contained_in_selected_outer_shape},
+                {"accepted_by_selected_shape_numerical_membership",witness.accepted_by_selected_shape_numerical_membership},
                 {"contained_in_coordinate_outer_box",witness.contained_in_coordinate_outer_box},
                 {"membership_method",witness.membership_method},{"membership_coordinates",witness.membership_coordinates},
                 {"membership_residual",witness.membership_residual},{"membership_tolerance",witness.membership_tolerance},
+                {"membership_tolerance_scale",witness.membership_tolerance_scale},
+                {"membership_tolerance_rule",witness.membership_tolerance_rule},
                 {"containment_basis",witness.containment_basis}});
         const auto selected_shape=std::visit([&](const auto& shape)->Json {
             using T=std::decay_t<decltype(shape)>;
@@ -595,7 +606,7 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
         "csl::reachability::finite_plan_zonotope", "csl::reachability::finite_plan_parallelotope",
         "csl::reachability::finite_plan_ellipsoid"};
     if(representation_index>0) invocations.push_back({{"module_id",representation_modules.at(representation_index)},
-        {"operation","one-step fixed-discrete-edge outer enclosure, authored-stage safety check, and coordinate-outer child membership before graph selection"},
+        {"operation","one-step fixed-discrete-edge coordinate-outer enclosure and coordinate-bound child check, with authored-stage safety before graph selection"},
         {"provider","public-function"},{"profile_id",input.at("controller_id")},
         {"representation",representation_names.at(representation_index)},
         {"calls",graph.representation_filter_calls},{"rejected",graph.representation_filter_rejections},
@@ -677,7 +688,7 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
         {"terminal_objective", terminal_cost}, {"running_objective", running_cost_value},
         {"total_replay_objective", terminal_cost + running_cost_value},
         {"score_kind", "exact-source-cost-on-numerical-affine-predictor"},
-        {"policy_semantics", "receding finite-action graph MPC; numerical backward predecessor plus authored discrete-edge witnesses filter before Bellman selection; selected approximation records a whole authored-action outer cloud per retained parent and applies a numerical one-step outer safety and membership filter per discrete edge; replans after each observed hold"},
+        {"policy_semantics", "receding finite-action graph MPC; numerical backward predecessor plus authored discrete-edge witnesses filter before Bellman selection; selected approximation records a whole authored-action outer cloud per retained parent with selected-shape numerical membership witnesses, while its per-edge safety filter checks a coordinate-outer relaxation; replans after each observed hold"},
         {"optimality_scope", "retained graph only; not complete finite-action optimum, nonlinear global optimum, or causal feedback optimum"}};
     return response;
 }

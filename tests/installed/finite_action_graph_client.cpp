@@ -95,7 +95,8 @@ int main() {
     cloud.outer_lower={-1,-1}; cloud.outer_upper={1,1};
     cloud.selected_outer_shape=optimization::FiniteGraphBoxShape{{-1,-1},{1,1}};
     const auto membership=optimization::finite_graph_action_cloud_membership(cloud,Vector{0.5,0.5});
-    if(!membership.supported || !membership.contained || membership.method.empty()) return 9;
+    if(!membership.supported || !membership.contained || membership.method.empty() ||
+       membership.tolerance_scale<=0.0) return 9;
     const auto box_reject=optimization::finite_graph_action_cloud_membership(cloud,Vector{1.5,0.0});
     if(!box_reject.supported || box_reject.contained) return 10;
     cloud.selected_outer_shape=optimization::FiniteGraphParallelotopeShape{
@@ -115,5 +116,17 @@ int main() {
         {std::numeric_limits<double>::quiet_NaN(),0},Matrix{2,0,{}}};
     const auto malformed=optimization::finite_graph_action_cloud_membership(cloud,Vector{0,0});
     if(malformed.supported || malformed.contained) return 15;
+
+    const auto cloud_graph=optimization::finite_action_stage_layered_graph(request,
+        {4,32,std::nullopt,64,optimization::NominalRepresentation::box},
+        std::get<registry::PreparedProvider<registry::GeometryPort>>(provider),reachable_provider());
+    if(!std::holds_alternative<optimization::FiniteActionGraphResult>(cloud_graph)) return 16;
+    const auto& graph_result=std::get<optimization::FiniteActionGraphResult>(cloud_graph);
+    if(!graph_result.has_viable_path || graph_result.action_cloud_envelopes.empty() ||
+       graph_result.action_cloud_envelopes.front().action_witnesses.empty()) return 17;
+    const auto& action_witness=graph_result.action_cloud_envelopes.front().action_witnesses.front();
+    if(!action_witness.accepted_by_selected_shape_numerical_membership ||
+       action_witness.membership_tolerance_scale<=0.0 ||
+       action_witness.membership_tolerance_rule!="max(64*epsilon*global-coordinate-scale,64*denorm_min)") return 18;
     return 0;
 }
