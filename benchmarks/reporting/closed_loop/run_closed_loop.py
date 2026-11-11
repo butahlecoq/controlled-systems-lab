@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import platform
 import resource
+import threading
 import signal
 import subprocess
 import sys
@@ -99,7 +100,11 @@ def worker(task_name: str, attempt: Path, bridge: Path) -> int:
             "enforced": {"wall_seconds": "subprocess timeout with process-group termination",
               "address_space_bytes": "POSIX RLIMIT_AS on worker process", "cpu_seconds": "POSIX RLIMIT_CPU on worker process",
               "worker_count": "one worker", "solver_threads": "environment requests one BLAS/OMP/MKL thread"},
-            "observed": {"worker_pid": os.getpid(), "platform": platform.platform(), "python": platform.python_version()}},
+            "observed": {"worker_pid": os.getpid(), "platform": platform.platform(), "python": platform.python_version(),
+                "effective_cpu_seconds": resource.getrlimit(resource.RLIMIT_CPU),
+                "effective_address_space_bytes": resource.getrlimit(resource.RLIMIT_AS),
+                "thread_environment": {key: os.environ.get(key) for key in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS")},
+                "python_process_threads": threading.active_count()}},
         "assurance": "observed-state single-player policy trajectory; local NLP diagnostics; no global optimality, reachability, safety, or robustness guarantee"}
     atomic_json(attempt / "attempt.json", ledger)
     n = task["episode"]["intervals"]
@@ -152,6 +157,10 @@ def worker(task_name: str, attempt: Path, bridge: Path) -> int:
         "elapsed_seconds": sum(row.get("stage_elapsed_seconds", 0) for row in stages),
         "physical_objective": objective(task, states, controls) if complete else None,
         "controls_sha256": hashlib.sha256(json.dumps(controls, separators=(",", ":")).encode()).hexdigest()})
+    usage = resource.getrusage(resource.RUSAGE_SELF)
+    ledger["resource_limits"]["observed"].update({"worker_wall_seconds": ledger["elapsed_seconds"],
+        "worker_cpu_seconds": usage.ru_utime + usage.ru_stime, "worker_max_rss_kib": usage.ru_maxrss,
+        "rss_accounting_scope": "worker process only; bridge subprocess peaks are not included"})
     atomic_json(attempt / "attempt.json", ledger)
     return 0 if complete else 2
 
@@ -274,7 +283,7 @@ def replay_attempt(task: dict, result: dict, attempt: Path, bridge: Path, tag: s
             replay_rows[label] = {"status": row["status"], "hold_endpoint_max_abs_difference": row.get("hold_endpoint_max_abs_difference"),
                                   "objective_difference": row.get("objective_difference")}
         except Exception as error:
-            (path / "stderr.txt").write_text(f"{type(error).__name__}: {error}\n")
+            (path / "exception.txt").write_text(f"{type(error).__name__}: {error}\n")
             atomic_json(path / "record.json", {"status": "failed", "error": str(error), "elapsed_seconds": time.monotonic() - started})
             replay_rows[label] = {"status": "failed", "error": str(error)}
     result["independent_replay"] = replay_rows
