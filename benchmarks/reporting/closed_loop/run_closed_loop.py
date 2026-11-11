@@ -28,7 +28,7 @@ from contracts import ROOT, load_task, manifest_sha256
 from task_models import (make_held_step_request, make_replay_request, objective,
                          source_scenario, validate_held_step_response,
                          validate_source_binding)
-from capabilities import resolve_graph, validate_resolved_graph, SIDECAR
+from capabilities import MANIFEST, resolve_graph, validate_resolved_graph, SIDECAR
 
 HERE = Path(__file__).resolve().parent
 MPC11 = ROOT / "benchmarks/reporting/mpc11"

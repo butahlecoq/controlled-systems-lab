@@ -1,0 +1,10 @@
+{
+  "schema": "csl.closed-loop.runner-startup-failure/1",
+  "attempt_id": "syn-nl-lv-01-20261111T114844Z-aa23c1a5",
+  "task_id": "syn-nl-lv-01/continuous-receding/1",
+  "status": "failed-before-worker-start",
+  "completed_holds": 0,
+  "failure": "NameError: run manifest source capture referenced MANIFEST without importing it",
+  "actual_solver_invocations": 0,
+  "attempt_record": "source-bound runner startup; no numerical work executed"
+}
