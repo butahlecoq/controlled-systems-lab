@@ -71,7 +71,7 @@ def solve(task: dict, observed: np.ndarray, stage: int, previous_prediction=None
         "acceptable_tol": 1e-8, "bound_relax_factor": 0.0, "print_level": 0})
     try:
         solution = opti.solve()
-        controls = np.asarray(solution.value(u)).T
+        controls = np.asarray(solution.value(u), dtype=float).reshape((2, h), order="F").T
         states = np.asarray(solution.value(x)).T * scales
         objective = float(solution.value(opti.f))
         status = str(opti.stats().get("return_status", "unknown"))
