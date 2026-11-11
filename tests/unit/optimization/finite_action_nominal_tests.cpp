@@ -85,6 +85,50 @@ TEST_CASE("selected parallelotope MPC profile scores planar terminal corners") {
     CHECK(selected->candidate_score == doctest::Approx(0.0));
 }
 
+TEST_CASE("nominal profiles honor a restricted full-horizon source action history") {
+    const SystemModel authored{{{2,1,0}, TimeDomain::discrete,
+        LinearStage{{2,2,{1,0,0,1}}, {2,1,{1,0}}, {2,0,{}}, {0,0}}}, {}};
+    const auto system_snapshot = model::snapshot(authored, Vector{0,1,2});
+    if(const auto* diagnostic = std::get_if<Diagnostic>(&system_snapshot)) {
+        INFO(diagnostic->field << ": " << diagnostic->explanation);
+    }
+    REQUIRE(std::holds_alternative<model::LinearSystem>(system_snapshot));
+    const auto system = std::get<model::LinearSystem>(system_snapshot);
+    const auto safe = take_nominal(sets::make_universal({{"candidate-history-safe"},2,{"x","y"}}));
+    const auto objective = std::get<Objective>(snapshot(LinearTerminal{{-1,0}, 0.0}));
+    FiniteActionNominalRequest request{
+        {"candidate-history-source"}, {"candidate-history-query"}, system, {0,0},
+        {1, {{0}, {1}}}, {{}, {}}, {safe,safe,safe}, objective};
+    request.running_cost = {"source-euclidean-control-cost/1", 2, {
+        {0, {EuclideanControlPenalty{{1,1,{1}}, {0}, 0.25}}}}};
+    request.candidate_action_indices = {{1,0}, {0,0}};
+
+    for(const auto representation : {NominalRepresentation::exact_polytope,
+            NominalRepresentation::box, NominalRepresentation::zonotope,
+            NominalRepresentation::parallelotope, NominalRepresentation::ellipsoid}) {
+        const auto outcome = finite_action_nominal_profile(request,
+            {4, 64, 64, 64, 0.0}, representation);
+        REQUIRE(std::holds_alternative<FiniteActionNominalResult>(outcome));
+        const auto& result = std::get<FiniteActionNominalResult>(outcome);
+        REQUIRE(result.tracks.size() == 1);
+        INFO("representation: " << static_cast<int>(representation));
+        INFO("track outcome alternative: " << result.tracks.front().outcome.index());
+        const auto* selected = std::get_if<NominalTrackSelected>(&result.tracks.front().outcome);
+        REQUIRE(selected);
+        CHECK(selected->coverage == NominalSearchCoverage::incomplete);
+        CHECK(selected->replay.controls == std::vector<Vector>{{1},{0}});
+        CHECK(selected->replay.states == std::vector<Vector>{{0,0},{1,0},{1,0}});
+        CHECK(selected->replay.running_objective == doctest::Approx(0.25));
+        CHECK(selected->replay.terminal_objective == doctest::Approx(-1.0));
+        CHECK(selected->replay.total_objective == doctest::Approx(-0.75));
+        REQUIRE(selected->attempts.size() == 2);
+        const auto* scored = std::get_if<NominalPlanScored>(&selected->attempts[selected->selected_attempt]);
+        REQUIRE(scored);
+        CHECK(scored->action_indices == std::vector<std::size_t>{1,0});
+        CHECK(scored->exact_running_cost == doctest::Approx(0.25));
+    }
+}
+
 TEST_CASE("nominal box track preserves a scored plan before a later stopped plan") {
     const SystemModel authored{{{1,1,1}, TimeDomain::discrete,
         LinearStage{{1,1,{1}}, {1,1,{1e308}}, {1,1,{0}}, {0}}}, {}};

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import itertools
 import json
 import os
 import subprocess
@@ -94,6 +95,39 @@ def _prediction_stages(task: dict, receipt: dict, stage: int) -> list[dict]:
     return [coefficients for _ in range(n - stage)]
 
 
+def _candidate_action_histories(action_count: int, horizon: int, budget: int) -> dict:
+    if action_count <= 0 or horizon <= 0 or budget <= 0:
+        raise ValueError("candidate history generation needs positive action, horizon, and budget counts")
+    full_count = action_count ** horizon
+    if full_count <= budget:
+        candidates = [list(row) for row in itertools.product(range(action_count), repeat=horizon)]
+        return {"policy_id": "exhaustive-full-action-product/1", "candidates": candidates,
+            "full_action_history_count": str(full_count), "search_coverage": "complete",
+            "candidate_budget": budget}
+    if budget < action_count:
+        return {"policy_id": "constant-and-single-switch-full-horizon/1", "candidates": [],
+            "full_action_history_count": str(full_count), "search_coverage": "unsupported-budget-below-action-count",
+            "candidate_budget": budget}
+    candidates = [[action] * horizon for action in range(action_count)]
+    action_pairs = [(left, right) for left in range(action_count)
+                    for right in range(action_count) if left != right]
+    switch_templates = []
+    for switch in range(1, horizon):
+        for left, right in action_pairs:
+            switch_templates.append(([left] * switch) + ([right] * (horizon - switch)))
+    remaining = min(len(switch_templates), budget - len(candidates))
+    if remaining == len(switch_templates):
+        candidates.extend(switch_templates)
+    elif remaining > 0:
+        positions = ([0] if remaining == 1 else
+            [(index * (len(switch_templates) - 1)) // (remaining - 1) for index in range(remaining)])
+        candidates.extend(switch_templates[position] for position in positions)
+    return {"policy_id": "constant-and-single-switch-full-horizon/1", "candidates": candidates,
+        "full_action_history_count": str(full_count), "search_coverage": "incomplete",
+        "candidate_budget": budget, "constant_history_count": action_count,
+        "available_single_switch_history_count": len(switch_templates)}
+
+
 class NativeGraphPolicy:
     def __init__(self, task: dict, task_sha256: str, controller_id: str,
                  action_profile_id: str, factory_options: Mapping[str, object] | None = None):
@@ -145,7 +179,7 @@ class NativeGraphPolicy:
             "representation": self.representation_name,
             "controller_semantics": ("finite-action receding-horizon graph MPC with source-cost ranking, numerical H predecessor membership, discrete transition witnesses, and the explicitly selected representation's one-step outer edge filter"
                 if self.use_backward_graph else
-                "finite-action receding-horizon fixed-plan MPC using the selected representation profile, exact source running-cost ranking, authored state-constraint replay, and a separately recomputed original affine trajectory")}
+                "finite-action receding-horizon fixed-plan MPC using exhaustive full action histories when within budget, otherwise a deterministic bounded catalogue of full-horizon constant and single-switch histories; exact source running-cost ranking, authored state-constraint replay, and a separately recomputed original affine trajectory")}
 
     def _limits(self) -> dict[str, int]:
         keys = ("max_beam_width", "max_graph_nodes", "max_plans", "max_points_per_stage",
@@ -246,6 +280,19 @@ class NativeGraphPolicy:
         if self.use_backward_graph:
             request["search_policy"] = "stage-layered-backward-viability"
             request.update(self._geometry_options())
+        else:
+            candidate_search = _candidate_action_histories(
+                len(self.actions), horizon, self.limits["max_plans"])
+            if not candidate_search["candidates"]:
+                return {"status": "unsupported", "task_id": task_id,
+                    "task_sha256": self.task_sha256, "action_profile_id": self.action_profile_id,
+                    "policy_id": self.controller_id, "invocations": [],
+                    "reason": "candidate plan budget is smaller than the source action catalogue"}
+            request["candidate_action_indices"] = candidate_search["candidates"]
+            request["candidate_search_policy"] = candidate_search["policy_id"]
+            request["candidate_search_full_action_history_count"] = candidate_search["full_action_history_count"]
+            request["candidate_search_coverage"] = candidate_search["search_coverage"]
+            request["candidate_search_budget"] = candidate_search["candidate_budget"]
         self.last_request = request
         assert self.process.stdin is not None and self.process.stdout is not None
         self.process.stdin.write(json.dumps(request, separators=(",", ":"), allow_nan=False) + "\n")
@@ -264,7 +311,7 @@ class NativeGraphPolicy:
         if any(value != "unspecified" and actual_build_profile.get(key) != value
                 for key, value in expected_build_profile.items()):
             response.pop("control", None)
-            response["status"] = "failed"
+            response["status"] = "incompatible"
             response["reason"] = "native executable build/backend profile differs from the selected manifest profile"
             response["build_backend_profile"] = actual_build_profile
             return response

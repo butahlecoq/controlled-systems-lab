@@ -9,7 +9,9 @@
 
 namespace csl::optimization {
 
-// Complete means every declared action plan received a usable candidate score.
+// Complete means every action plan selected by the request received a usable
+// candidate score. Callers with a restricted candidate catalogue must report
+// coverage against the full action product separately.
 enum class CandidateSearchCoverage { complete, incomplete };
 
 // Stage-invariant ordered action catalogue; indices distinguish duplicate rows.
@@ -22,6 +24,10 @@ struct FiniteActionMinimaxRequest {
     std::vector<sets::SetData> disturbances;
     std::vector<sets::SetData> admissible_states;
     Objective objective;
+    // Optional restricted set of full-horizon catalogue-index histories.
+    // When present, solvers evaluate these histories only and nominal callers
+    // must report coverage against the complete catalogue product separately.
+    std::vector<std::vector<std::size_t>> candidate_action_indices;
 };
 struct FiniteActionMinimaxLimits {
     std::size_t max_plans;
