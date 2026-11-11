@@ -58,6 +58,33 @@ TEST_CASE("nominal finite-plan comparison keeps exact and enclosure scores disti
     }
 }
 
+TEST_CASE("selected parallelotope MPC profile scores planar terminal corners") {
+    const SystemModel authored{{{2,1,0}, TimeDomain::discrete,
+        LinearStage{{2,2,{1,0,0,1}}, {2,1,{1,0}}, {2,0,{}}, {0,0}}}, {}};
+    const auto system = take_nominal(model::snapshot(authored, Vector{0,1}));
+    const auto safe = take_nominal(sets::make_universal({{"parallelotope-2d-safe"},2,{"x","y"}}));
+    const auto objective = std::get<Objective>(snapshot(QuadraticTerminal{
+        Matrix{2,2,{2,0,0,2}}, {0,0}, 0}));
+    FiniteActionNominalRequest request{
+        {"parallelotope-2d-mpc"}, {"parallelotope-2d-mpc-query"}, system, {0,0},
+        {1, {{0},{1}}}, {{}}, {safe,safe}, objective};
+    const auto outcome = finite_action_nominal_profile(request,
+        {2, 32, 32, 32, 0.0}, NominalRepresentation::parallelotope);
+    REQUIRE(std::holds_alternative<FiniteActionNominalResult>(outcome));
+    const auto& result = std::get<FiniteActionNominalResult>(outcome);
+    REQUIRE(result.tracks.size() == 1);
+    const auto* selected = std::get_if<NominalTrackSelected>(&result.tracks.front().outcome);
+    REQUIRE(selected);
+    CHECK(selected->coverage == NominalSearchCoverage::complete);
+    CHECK((selected->replay.controls == std::vector<Vector>{{0}}));
+    CHECK(selected->replay.terminal_objective == doctest::Approx(0.0));
+    const auto* trace = std::get_if<reachability::FinitePlanParallelotopeTrace>(&selected->selected_trace);
+    REQUIRE(trace);
+    CHECK(trace->frame.rows == 2);
+    CHECK(trace->frame.cols == 2);
+    CHECK(selected->candidate_score == doctest::Approx(0.0));
+}
+
 TEST_CASE("nominal box track preserves a scored plan before a later stopped plan") {
     const SystemModel authored{{{1,1,1}, TimeDomain::discrete,
         LinearStage{{1,1,{1}}, {1,1,{1e308}}, {1,1,{0}}, {0}}}, {}};
