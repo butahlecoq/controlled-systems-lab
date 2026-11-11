@@ -683,6 +683,16 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
 }
 
 Json query(const Json& in) {
+    if(in.contains("candidate_action_indices") &&
+            (!in.at("candidate_action_indices").is_array() || in.at("candidate_action_indices").empty())) {
+        auto result=query_failure(in,"rejected",
+            "An explicit candidate_action_indices catalogue must be a nonempty array of full-horizon histories.");
+        result["mathematical_support"]="not_evaluated";
+        result["candidate_plan_search"]={{"policy_id",in.value("candidate_search_policy",std::string("caller-declared-history-subset/1"))},
+            {"candidate_count",0},{"search_coverage","not_evaluated"},
+            {"reason","no candidate histories were supplied; exhaustive search was not substituted"}};
+        return result;
+    }
     const auto& coefficient_stages = in.at("predictor_stages");
     const auto horizon = coefficient_stages.size();
     const auto initial = vector(in.at("observed_physical_state"));
@@ -724,9 +734,11 @@ Json query(const Json& in) {
         {in.at("problem_id").get<std::string>()}, {in.at("request_id").get<std::string>()},
         std::move(system), initial, {action_dimension, std::move(actions)}, std::move(external),
         std::move(safe), objective, cost, absolute_stage};
-    if(in.contains("candidate_action_indices"))
+    if(in.contains("candidate_action_indices")) {
+        request.candidate_action_indices.emplace();
         for(const auto& candidate:in.at("candidate_action_indices"))
-            request.candidate_action_indices.push_back(candidate.get<std::vector<std::size_t>>());
+            request.candidate_action_indices->push_back(candidate.get<std::vector<std::size_t>>());
+    }
     const auto representation_index = in.at("representation_index").get<std::size_t>();
     const std::array<optimization::NominalRepresentation, 5> representations{
         optimization::NominalRepresentation::exact_polytope,
@@ -789,7 +801,7 @@ Json query(const Json& in) {
         {"policy_id", in.at("controller_id").get<std::string>() + "/receding-fixed-plan-mpc/1"},
         {"representation", representation_index}, {"invocations", invocations}};
     Json candidate_plan_search=nullptr;
-    if(in.contains("candidate_action_indices")) {
+    if(in.contains("candidate_action_indices") && request.candidate_action_indices) {
         const auto action_count=in.at("actions").size();
         std::size_t full_count=1;
         bool overflow=false;
@@ -802,12 +814,12 @@ Json query(const Json& in) {
         }
         candidate_plan_search={{"policy_id",in.value("candidate_search_policy",std::string("caller-declared-history-subset/1"))},
             {"full_authored_horizon",horizon},{"original_horizon",in.at("original_horizon")},
-            {"action_catalogue_size",action_count},{"candidate_count",request.candidate_action_indices.size()},
-            {"candidate_action_indices",request.candidate_action_indices},
+            {"action_catalogue_size",action_count},{"candidate_count",request.candidate_action_indices->size()},
+            {"candidate_action_indices",*request.candidate_action_indices},
             {"candidate_budget",in.at("limits").at("max_plans")},
             {"all_rows_span_full_prediction_horizon",true},{"indices_refer_to_untouched_source_action_catalogue",true},
             {"full_action_history_count",overflow?Json("exceeds_size_t"):Json(full_count)},
-            {"search_coverage",!overflow&&full_count==request.candidate_action_indices.size()?"complete":"incomplete"},
+            {"search_coverage",!overflow&&full_count==request.candidate_action_indices->size()?"complete":"incomplete"},
             {"candidate_evaluation_coverage",candidate_evaluation_coverage}};
         base["candidate_plan_search"]=candidate_plan_search;
     }

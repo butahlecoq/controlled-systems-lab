@@ -7,6 +7,7 @@
 #include <csl/reachability/finite_plan_zonotope.hpp>
 
 #include <string>
+#include <optional>
 
 namespace csl::optimization {
 
@@ -51,10 +52,12 @@ struct FiniteActionNominalRequest {
     // keeps the complete source schedule and advances absolute_stage_offset.
     RunningControlCost running_cost{};
     std::size_t absolute_stage_offset{};
-    // Optional deterministic subset of full-horizon action-index histories.
-    // Every row spans the entire request horizon and indexes the untouched
-    // source action catalogue. A proper subset yields incomplete coverage.
-    std::vector<std::vector<std::size_t>> candidate_action_indices;
+    // nullopt preserves exhaustive enumeration. A present, nonempty value is a
+    // deterministic subset of full-horizon action-index histories. Every row
+    // spans the entire request horizon and indexes the untouched source action
+    // catalogue. A proper subset yields incomplete coverage; an empty value is
+    // invalid.
+    std::optional<std::vector<std::vector<std::size_t>>> candidate_action_indices;
 };
 
 struct FiniteActionNominalLimits {

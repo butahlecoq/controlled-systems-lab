@@ -39,6 +39,23 @@ class ClosedLoopTaskContracts(unittest.TestCase):
         self.assertEqual(refused["search_coverage"], "unsupported-budget-below-action-count")
         self.assertEqual(refused["candidates"], [])
 
+    def test_large_single_switch_space_is_not_materialized_when_constants_fill_budget(self):
+        from native_graph_policy import _candidate_action_histories
+
+        result = _candidate_action_histories(action_count=100, horizon=1000, budget=100)
+        self.assertEqual(len(result["candidates"]), 100)
+        self.assertEqual(result["candidate_budget"], 100)
+        self.assertEqual(result["constant_history_count"], 100)
+        self.assertEqual(result["available_single_switch_history_count"], 999 * 100 * 99)
+        self.assertEqual(result["selected_single_switch_history_count"], 0)
+        self.assertTrue(all(len(row) == 1000 for row in result["candidates"]))
+
+        thinned = _candidate_action_histories(action_count=3, horizon=1000, budget=5)
+        self.assertEqual(thinned["selected_single_switch_history_count"], 2)
+        self.assertEqual(thinned["candidates"][:3], [[0] * 1000, [1] * 1000, [2] * 1000])
+        self.assertEqual(thinned["candidates"][3], [0] + [1] * 999)
+        self.assertEqual(thinned["candidates"][4], [2] * 999 + [1])
+
 
 if __name__ == "__main__":
     unittest.main()

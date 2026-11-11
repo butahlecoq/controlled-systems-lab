@@ -124,15 +124,20 @@ RequestOutcome make_degenerate_request(const FiniteActionNominalRequest& request
         return unsupported("finite_nominal.dimensions", "Nominal state, controls, disturbances, safe sets, or objective do not match the system.");
     if(horizon != 0 && request.actions.catalogue.empty())
         return unsupported("finite_nominal.actions", "A nonempty finite action catalogue is required.");
+    if(request.candidate_action_indices && request.candidate_action_indices->empty())
+        return unsupported("finite_nominal.candidate_plans",
+            "An explicit candidate-history catalogue must contain at least one full-horizon plan.");
     std::vector<std::vector<std::size_t>> checked_plans;
-    checked_plans.reserve(request.candidate_action_indices.size());
-    for(const auto& plan:request.candidate_action_indices) {
-        if(plan.size()!=horizon || std::any_of(plan.begin(),plan.end(),[&](auto action) {
-                return action>=request.actions.catalogue.size();}) ||
-           std::find(checked_plans.begin(),checked_plans.end(),plan)!=checked_plans.end())
-            return unsupported("finite_nominal.candidate_plans",
-                "Candidate action histories must be unique, full-horizon, and index the unchanged action catalogue.");
-        checked_plans.push_back(plan);
+    if(request.candidate_action_indices) {
+        checked_plans.reserve(request.candidate_action_indices->size());
+        for(const auto& plan:*request.candidate_action_indices) {
+            if(plan.size()!=horizon || std::any_of(plan.begin(),plan.end(),[&](auto action) {
+                    return action>=request.actions.catalogue.size();}) ||
+               std::find(checked_plans.begin(),checked_plans.end(),plan)!=checked_plans.end())
+                return unsupported("finite_nominal.candidate_plans",
+                    "Candidate action histories must be unique, full-horizon, and index the unchanged action catalogue.");
+            checked_plans.push_back(plan);
+        }
     }
     if(auto cost_error = validate_running_cost(request.running_cost, request.absolute_stage_offset,
             horizon, dimensions.control); !cost_error.diagnostics.empty()) return cost_error;
@@ -164,9 +169,9 @@ NominalSearchCoverage coverage_from(CandidateSearchCoverage coverage);
 
 NominalSearchCoverage coverage_for_candidates(const FiniteActionMinimaxRequest& request,
         CandidateSearchCoverage coverage) {
-    if(coverage==CandidateSearchCoverage::incomplete || request.candidate_action_indices.empty())
+    if(coverage==CandidateSearchCoverage::incomplete || !request.candidate_action_indices)
         return coverage_from(coverage);
-    if(request.candidate_action_indices.size()<detail::full_action_plan_count(request))
+    if(request.candidate_action_indices->size()<detail::full_action_plan_count(request))
         return NominalSearchCoverage::incomplete;
     return NominalSearchCoverage::complete;
 }

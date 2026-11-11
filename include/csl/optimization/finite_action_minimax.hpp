@@ -5,6 +5,7 @@
 #include <csl/optimization/worst_case_vertex.hpp>
 #include <csl/artifacts/run_statistics.hpp>
 
+#include <optional>
 #include <vector>
 
 namespace csl::optimization {
@@ -24,10 +25,11 @@ struct FiniteActionMinimaxRequest {
     std::vector<sets::SetData> disturbances;
     std::vector<sets::SetData> admissible_states;
     Objective objective;
-    // Optional restricted set of full-horizon catalogue-index histories.
-    // When present, solvers evaluate these histories only and nominal callers
-    // must report coverage against the complete catalogue product separately.
-    std::vector<std::vector<std::size_t>> candidate_action_indices;
+    // nullopt preserves exhaustive enumeration. A present, nonempty value is a
+    // restricted set of full-horizon catalogue-index histories; solvers only
+    // evaluate those histories and nominal callers report product coverage
+    // separately. An explicitly empty value is invalid.
+    std::optional<std::vector<std::vector<std::size_t>>> candidate_action_indices;
 };
 struct FiniteActionMinimaxLimits {
     std::size_t max_plans;

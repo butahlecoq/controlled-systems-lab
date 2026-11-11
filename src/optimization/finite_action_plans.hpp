@@ -33,24 +33,25 @@ inline std::size_t full_action_plan_count(const FiniteActionMinimaxRequest& requ
 }
 
 inline std::size_t selected_plan_count(const FiniteActionMinimaxRequest& request) {
-    return request.candidate_action_indices.empty()
-        ? full_action_plan_count(request) : request.candidate_action_indices.size();
+    return request.candidate_action_indices
+        ? request.candidate_action_indices->size() : full_action_plan_count(request);
 }
 
 inline std::vector<std::size_t> selected_plan_indices(
         const FiniteActionMinimaxRequest& request,std::size_t plan) {
-    if(!request.candidate_action_indices.empty())
-        return request.candidate_action_indices.at(plan);
+    if(request.candidate_action_indices)
+        return request.candidate_action_indices->at(plan);
     return action_plan_indices(plan,request.actions.catalogue.size(),request.system.horizon());
 }
 
 inline bool valid_candidate_action_indices(const FiniteActionMinimaxRequest& request) {
-    if(request.candidate_action_indices.empty()) return true;
+    if(!request.candidate_action_indices) return true;
+    if(request.candidate_action_indices->empty()) return false;
     const auto horizon=request.system.horizon();
     const auto actions=request.actions.catalogue.size();
     std::vector<std::vector<std::size_t>> seen;
-    seen.reserve(request.candidate_action_indices.size());
-    for(const auto& plan:request.candidate_action_indices) {
+    seen.reserve(request.candidate_action_indices->size());
+    for(const auto& plan:*request.candidate_action_indices) {
         if(plan.size()!=horizon) return false;
         for(const auto index:plan) if(index>=actions) return false;
         if(std::find(seen.begin(),seen.end(),plan)!=seen.end()) return false;

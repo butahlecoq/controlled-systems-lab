@@ -107,25 +107,28 @@ def _candidate_action_histories(action_count: int, horizon: int, budget: int) ->
     if budget < action_count:
         return {"policy_id": "constant-and-single-switch-full-horizon/1", "candidates": [],
             "full_action_history_count": str(full_count), "search_coverage": "unsupported-budget-below-action-count",
-            "candidate_budget": budget}
+            "candidate_budget": budget, "constant_history_count": action_count,
+            "available_single_switch_history_count": (horizon - 1) * action_count * (action_count - 1)}
     candidates = [[action] * horizon for action in range(action_count)]
-    action_pairs = [(left, right) for left in range(action_count)
-                    for right in range(action_count) if left != right]
-    switch_templates = []
-    for switch in range(1, horizon):
-        for left, right in action_pairs:
-            switch_templates.append(([left] * switch) + ([right] * (horizon - switch)))
-    remaining = min(len(switch_templates), budget - len(candidates))
-    if remaining == len(switch_templates):
-        candidates.extend(switch_templates)
-    elif remaining > 0:
-        positions = ([0] if remaining == 1 else
-            [(index * (len(switch_templates) - 1)) // (remaining - 1) for index in range(remaining)])
-        candidates.extend(switch_templates[position] for position in positions)
+    switch_count = (horizon - 1) * action_count * (action_count - 1)
+    remaining = min(switch_count, budget - len(candidates))
+    for selected in range(remaining):
+        if remaining == switch_count:
+            flat_index = selected
+        elif remaining == 1:
+            flat_index = 0
+        else:
+            flat_index = (selected * (switch_count - 1)) // (remaining - 1)
+        switch_ordinal, pair_index = divmod(flat_index, action_count * (action_count - 1))
+        left, right_offset = divmod(pair_index, action_count - 1)
+        right = right_offset if right_offset < left else right_offset + 1
+        switch = switch_ordinal + 1
+        candidates.append(([left] * switch) + ([right] * (horizon - switch)))
     return {"policy_id": "constant-and-single-switch-full-horizon/1", "candidates": candidates,
         "full_action_history_count": str(full_count), "search_coverage": "incomplete",
         "candidate_budget": budget, "constant_history_count": action_count,
-        "available_single_switch_history_count": len(switch_templates)}
+        "available_single_switch_history_count": switch_count,
+        "selected_single_switch_history_count": remaining}
 
 
 class NativeGraphPolicy:
@@ -287,7 +290,14 @@ class NativeGraphPolicy:
                 return {"status": "unsupported", "task_id": task_id,
                     "task_sha256": self.task_sha256, "action_profile_id": self.action_profile_id,
                     "policy_id": self.controller_id, "invocations": [],
-                    "reason": "candidate plan budget is smaller than the source action catalogue"}
+                    "mathematical_support": "not_evaluated",
+                    "candidate_plan_search": {"policy_id": candidate_search["policy_id"],
+                        "candidate_count": 0, "candidate_budget": candidate_search["candidate_budget"],
+                        "full_action_history_count": candidate_search["full_action_history_count"],
+                        "search_coverage": "not_evaluated",
+                        "available_single_switch_history_count": candidate_search[
+                            "available_single_switch_history_count"]},
+                    "reason": "candidate plan budget is smaller than the source action catalogue; no histories were searched"}
             request["candidate_action_indices"] = candidate_search["candidates"]
             request["candidate_search_policy"] = candidate_search["policy_id"]
             request["candidate_search_full_action_history_count"] = candidate_search["full_action_history_count"]

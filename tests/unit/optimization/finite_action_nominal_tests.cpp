@@ -127,6 +127,13 @@ TEST_CASE("nominal profiles honor a restricted full-horizon source action histor
         CHECK(scored->action_indices == std::vector<std::size_t>{1,0});
         CHECK(scored->exact_running_cost == doctest::Approx(0.25));
     }
+
+    auto empty_catalogue = request;
+    empty_catalogue.candidate_action_indices = std::vector<std::vector<std::size_t>>{};
+    const auto rejected = finite_action_nominal_profile(empty_catalogue,
+        {4, 64, 64, 64, 0.0}, NominalRepresentation::exact_polytope);
+    REQUIRE(std::holds_alternative<Unsupported>(rejected));
+    CHECK(std::get<Unsupported>(rejected).diagnostics.front().field == "finite_nominal.candidate_plans");
 }
 
 TEST_CASE("nominal box track preserves a scored plan before a later stopped plan") {
