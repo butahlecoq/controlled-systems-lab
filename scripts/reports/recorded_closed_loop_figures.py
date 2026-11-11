@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from figure_style import STYLE_ID, configure_numeric_axis
+from mathematical_notation import matrix_html
 
 
 SCHEMA = "csl.closed-loop.figure-index/1"
@@ -34,6 +35,44 @@ class Plane:
         if max(self.raw_indices) >= len(state):
             raise ValueError(f"state dimension does not support {self.figure_id} plane")
         return float(state[self.raw_indices[0]]), float(state[self.raw_indices[1]])
+
+
+def replay_for_output_stage(replay: list[dict[str, Any]], output_stage: int, dt: float) -> list[dict[str, Any]]:
+    """Show state 0 at the initial instant and state k with replay interval k-1 to k."""
+    if output_stage < 0 or dt <= 0.0:
+        return []
+    tolerance = max(1.0, abs(output_stage * dt)) * 1e-10
+    if output_stage == 0:
+        return [row for row in replay if abs(float(row["time"])) <= tolerance]
+    lower, upper = (output_stage - 1) * dt, output_stage * dt
+    return [row for row in replay
+            if lower - tolerance <= float(row["time"]) <= upper + tolerance]
+
+
+def rows_for_output_stage(rows: list[dict[str, Any]], output_stage: int) -> list[dict[str, Any]]:
+    return [row for row in rows if int(row.get("absolute_stage", -1)) == output_stage]
+
+
+def output_stage_values(stage_count: int) -> range:
+    """A capture with N updates has output states 0 through N, inclusive."""
+    return range(max(0, stage_count) + 1)
+
+
+def normalized_time(time: float, end_time: float) -> float:
+    if end_time <= 0.0:
+        return 0.0
+    return min(1.0, max(0.0, float(time) / end_time))
+
+
+def timeline_end(runs: list[dict[str, Any]]) -> float:
+    times = [
+        float(row["time"])
+        for run in runs
+        for series_name in ("clouds", "nodes", "planned_prediction", "plant_replay")
+        for row in run.get(series_name, [])
+        if "time" in row
+    ]
+    return max(times, default=0.0)
 
 
 PLANES = {
@@ -396,20 +435,19 @@ def _ellipse_patch(center: list[float], radii: list[float], *, color: str, alpha
                    linestyle=linestyle)
 
 
-def _plot_run(axis, run: dict[str, Any], plane: Plane, cmap, stage_count: int, all_stages: bool) -> None:
+def _plot_run(axis, run: dict[str, Any], plane: Plane, cmap, end_time: float,
+              focused_stage: int | None = None) -> None:
     import numpy as np
     from matplotlib.patches import Polygon
 
-    stage_max = max(1, stage_count - 1)
+    all_stages = focused_stage is None
     linestyle = "--" if run["controller_id"] == "native-exact-polytope-backward-graph/1" else "-"
-    for item in run["clouds"]:
-        stage = int(item["absolute_stage"])
-        if not all_stages and stage != stage_count - 1:
-            continue
+    clouds = run["clouds"] if all_stages else rows_for_output_stage(run["clouds"], focused_stage)
+    for item in clouds:
         geometry = item.get("projected_geometry")
         if not geometry:
             continue
-        color = cmap(min(1.0, stage / stage_max))
+        color = cmap(normalized_time(item["time"], end_time))
         kind = item.get("representation")
         if kind == "ellipsoid" and len(geometry) == 2:
             axis.add_patch(_ellipse_patch(geometry[0], geometry[1], color=color,
@@ -418,14 +456,15 @@ def _plot_run(axis, run: dict[str, Any], plane: Plane, cmap, stage_count: int, a
             axis.add_patch(Polygon(geometry, closed=True, facecolor=color,
                                    edgecolor=color, alpha=0.025 if all_stages else 0.12,
                                    linewidth=0.45, linestyle=linestyle))
-    if run["nodes"]:
-        points = [plane.project(row["state"]) for row in run["nodes"]
-                  if all_stages or row["absolute_stage"] == stage_count - 1]
-        if points:
-            values = np.asarray(points, dtype=float)
-            axis.scatter(values[:, 0], values[:, 1], s=3.0, color="#555f6f", alpha=0.17,
-                         label="Retained graph node states", zorder=2)
-    line = run["plant_replay"] if all_stages else [x for x in run["plant_replay"] if x["absolute_stage"] == stage_count - 1]
+    nodes = run["nodes"] if all_stages else rows_for_output_stage(run["nodes"], focused_stage)
+    if nodes:
+        values = np.asarray([plane.project(row["state"]) for row in nodes], dtype=float)
+        times = np.asarray([row["time"] for row in nodes], dtype=float)
+        axis.scatter(values[:, 0], values[:, 1], c=times, cmap=cmap, vmin=0.0,
+                     vmax=max(end_time, 1e-12), s=3.0, alpha=0.35,
+                     label="Retained graph node states", zorder=2)
+    line = (run["plant_replay"] if all_stages else
+            replay_for_output_stage(run["plant_replay"], focused_stage, plane.dt))
     if line:
         coords = np.asarray([x["point"] for x in line], dtype=float)
         times = np.asarray([x["time"] for x in line], dtype=float)
@@ -433,12 +472,12 @@ def _plot_run(axis, run: dict[str, Any], plane: Plane, cmap, stage_count: int, a
                   linestyle=linestyle, alpha=.82, zorder=4,
                   label="Actual plant replay")
         axis.scatter(coords[:, 0], coords[:, 1], c=times, cmap=cmap,
-                     vmin=min(times), vmax=max(times) or 1.0,
+                     vmin=0.0, vmax=max(end_time, 1e-12),
                      s=6, alpha=.88, edgecolors="none", zorder=5)
     plan = run["planned_prediction"]
     if plan:
         if not all_stages:
-            plan = [x for x in plan if x["absolute_stage"] == stage_count - 1]
+            plan = rows_for_output_stage(plan, focused_stage)
         if plan:
             coords = np.asarray([x["point"] for x in plan], dtype=float)
             times = np.asarray([x["time"] for x in plan], dtype=float)
@@ -446,7 +485,7 @@ def _plot_run(axis, run: dict[str, Any], plane: Plane, cmap, stage_count: int, a
                       linestyle=":", zorder=6,
                       label="Initial model prediction")
             axis.scatter(coords[:, 0], coords[:, 1], c=times, cmap=cmap,
-                         vmin=0.0, vmax=max(1.0, (stage_count - 1) * plane.dt),
+                         vmin=0.0, vmax=max(end_time, 1e-12),
                          s=7, alpha=.9, edgecolors="none", zorder=7)
 
 
@@ -464,10 +503,10 @@ def render_figure(entry: dict[str, Any], plane: Plane, output_dir: Path) -> None
     rows = math.ceil(panel_count / cols)
     fig, axes = plt.subplots(rows, cols, figsize=(6.0 * cols, 4.8 * rows), squeeze=False)
     cmap = plt.get_cmap("viridis")
-    stage_count = max(run["stage_count"] for run in runs)
+    end_time = timeline_end(runs)
     for index, run in enumerate(runs):
         axis = axes[index // cols][index % cols]
-        _plot_run(axis, run, plane, cmap, stage_count, True)
+        _plot_run(axis, run, plane, cmap, end_time)
         x0, y0 = run["initial_point"]
         axis.scatter([x0], [y0], marker="*", s=90, color="#f3b61f", edgecolor="#31270d",
                      linewidth=.65, zorder=8, label="Initial state")
@@ -494,11 +533,10 @@ def render_figure(entry: dict[str, Any], plane: Plane, output_dir: Path) -> None
     if handles:
         fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(.5, .94),
                    ncol=min(5, len(labels)), frameon=False, fontsize=8)
-    replay_end = max((item["time"] for run in runs for item in run["plant_replay"]), default=(stage_count - 1) * plane.dt)
-    scalar = ScalarMappable(norm=Normalize(0.0, max(1.0, replay_end)), cmap=cmap)
+    scalar = ScalarMappable(norm=Normalize(0.0, max(1e-12, end_time)), cmap=cmap)
     colorbar_axis = fig.add_axes([.28, .10, .44, .025])
     colorbar = fig.colorbar(scalar, cax=colorbar_axis, orientation="horizontal")
-    colorbar.set_label(f"Recorded physical time ({plane.time_unit}); shape color uses absolute output time")
+    colorbar.set_label(f"Recorded physical time ({plane.time_unit}); all stage layers share this scale")
     fig.suptitle(f"{plane.title}: recorded closed-loop views", y=.99, fontsize=14)
     fig.subplots_adjust(left=.09, right=.98, top=.85, bottom=.24, hspace=.30, wspace=.27)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -534,11 +572,17 @@ def _html_page(entry: dict[str, Any], plane: Plane) -> str:
     x_label, y_label = (html.escape(v) for v in plane.names)
     x_unit, y_unit = (html.escape(v) for v in plane.units)
     transform = entry["coordinate_transform"]
-    permutation = html.escape(json.dumps(transform["permutation_matrix"], separators=(",", ":")))
+    permutation = matrix_html(transform["permutation_matrix"], "Projection matrix P")
     scales = transform.get("raw_scales")
-    scale_note = (f" Raw scales in state order are <code>{html.escape(json.dumps(scales))}</code>; "
-                  "recorded values are already physical, so no second unscale is applied.") if scales else " Recorded values are physical coordinates."
-    timeline_end = max((point["time"] for run in entry["runs"] for point in run["plant_replay"]), default=0.0)
+    scale_view = ("<p>Raw scale vector in state order: "
+                  + matrix_html([[scale] for scale in scales], "Raw scale vector")
+                  + ". Recorded values are already physical, so the scales are not reapplied.</p>") if scales else "<p>Recorded values are physical coordinates.</p>"
+    timeline_end_value = timeline_end(entry["runs"])
+    stage_count = max(run["stage_count"] for run in entry["runs"])
+    stage_options = "".join(
+        f'<option value="{stage}">Output state stage {stage}; replay {stage - 1}→{stage}</option>'
+        for stage in output_stage_values(stage_count) if stage > 0
+    )
     return f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title} · Recorded closed-loop figures</title>
@@ -557,11 +601,11 @@ code{{overflow-wrap:anywhere}} .data-links a{{margin-right:1rem}}
 <main><p><a href="../figure-index.json">All recorded closed-loop figures</a></p>
 <h1>{title}</h1>
 <p>Stage-coloured projections from saved records. Solid traces show executed plant replay. Dotted traces show the initial model prediction. Shaded shapes show serialized finite authored-action parent clouds, projected from their stored shape parameters.</p>
-<div class="figure-actions"><label for="stage-focus">Stage focus</label><select id="stage-focus" aria-label="Stage focus"><option value="all">All stages</option><option value="0">Initial stage</option></select>
+<div class="figure-actions"><label for="stage-focus">Output state focus</label><select id="stage-focus" aria-label="Output state focus"><option value="all">All stages</option><option value="0">Output state stage 0 (initial)</option>{stage_options}</select>
 <a href="{ident}.svg">Standalone SVG</a><a href="{ident}.png">PNG</a><a href="{data_url}">Exact plotted-data JSON</a></div>
 <p class="note"><strong>Evidence scope.</strong> Retained graph and finite authored-action model predictions are numerical and policy-conditioned. These plots do not show all-admissible-control reachability. A point or a membership flag is a witness, not a materialized region. The marked terminal objective target is soft, not a hard target set.</p>
 <div class="figure-frame"><svg id="stage-svg" viewBox="0 0 1000 620" role="img" aria-label="Interactive {title} stage view"></svg></div>
-<div><small>Time color: 0 {html.escape(plane.time_unit)} to {timeline_end:g} {html.escape(plane.time_unit)}</small><div class="time-key" role="img" aria-label="Time color scale from early purple to late yellow"></div></div>
+<div><small>Shared physical-time color scale: 0 to {timeline_end_value:g} {html.escape(plane.time_unit)}</small><div class="time-key" role="img" aria-label="Shared time color scale from early purple to late yellow"></div></div>
 <p class="data-links"><a href="{ident}.svg">Open the all-stage SVG export</a> · <a href="{ident}.png">Open the all-stage PNG export</a> · <a href="{data_url}">Exact plotted-data JSON</a></p>
 <h2>Unavailable geometric layers</h2><ul>{missing}</ul>
 <h2>Incomplete comparison tracks</h2><ul>{coverage_gaps or '<li>All five intended controller tracks have a completed matched record in this capture.</li>'}</ul>
@@ -569,13 +613,15 @@ code{{overflow-wrap:anywhere}} .data-links a{{margin-right:1rem}}
 <h2>Saved source records</h2><ul>{raw_links}</ul>
 <p>The immutable raw capture archive is external to this Pages bundle. The locators and per-file SHA-256 values above identify its records; a public raw archive link is not available in this capture.</p>
 <h2>Rebuild the figures</h2><pre><code>python scripts/reports/recorded_closed_loop_figures.py --capture-root "$CSL_CLOSED_LOOP_CAPTURE_ROOT" --output docs/examples/closed-loop</code></pre>
-<p>Source commit <code>{SOURCE_COMMIT}</code>. Coordinate axes are {x_label} ({x_unit}) and {y_label} ({y_unit}). Projection matrix P is <code>{permutation}</code>.{scale_note} Figures use style <code>{STYLE_ID}</code>.</p>
+<p>Source commit <code>{SOURCE_COMMIT}</code>. Coordinate axes are {x_label} ({x_unit}) and {y_label} ({y_unit}). Figures use style <code>{STYLE_ID}</code>.</p>
+<section class="math-input"><p>Projection matrix P maps raw state coordinates to the displayed axes: {permutation}</p>{scale_view}<p>Exact coordinate-transform metadata is available in the plotted-data JSON.</p></section>
 <script>
 const focus=document.querySelector('#stage-focus'),svg=document.querySelector('#stage-svg');
 const NS='http://www.w3.org/2000/svg';
 const make=(tag,attrs={{}},text='')=>{{const e=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,String(v));if(text)e.textContent=text;return e}};
 const stops=['#440154','#3b528b','#21918c','#5ec962','#fde725'];
-const color=(stage,max)=>{{const t=Math.min(1,stage/Math.max(1,max))*4,i=Math.min(3,Math.floor(t)),f=t-i;const rgb=c=>[parseInt(c.slice(1,3),16),parseInt(c.slice(3,5),16),parseInt(c.slice(5,7),16)];const a=rgb(stops[i]),b=rgb(stops[i+1]);return `rgb(${{a.map((v,j)=>Math.round(v+(b[j]-v)*f)).join(',')}})`}};
+const color=(time,end)=>{{const t=Math.min(1,Math.max(0,time/Math.max(end,1e-12)))*4,i=Math.min(3,Math.floor(t)),f=t-i;const rgb=c=>[parseInt(c.slice(1,3),16),parseInt(c.slice(3,5),16),parseInt(c.slice(5,7),16)];const a=rgb(stops[i]),b=rgb(stops[i+1]);return `rgb(${{a.map((v,j)=>Math.round(v+(b[j]-v)*f)).join(',')}})`}};
+const replayForOutputStage=(rows,k,dt)=>{{const eps=Math.max(1,Math.abs(k*dt))*1e-10;if(k===0)return rows.filter(p=>Math.abs(p.time)<=eps);const lo=(k-1)*dt,hi=k*dt;return rows.filter(p=>p.time>=lo-eps&&p.time<=hi+eps)}};
 function draw(d,selected){{
  const runs=d.runs, b=d.plot_bounds, left=95,right=950,top=45,bottom=535;
  const x=v=>left+(v-b.x[0])/(b.x[1]-b.x[0])*(right-left), y=v=>bottom-(v-b.y[0])/(b.y[1]-b.y[0])*(bottom-top);
@@ -590,16 +636,16 @@ function draw(d,selected){{
   svg.append(make('text',{{x:left-9,y:y(yv)+4,'text-anchor':'end','font-size':12,fill:'currentColor'}},Number(yv.toPrecision(5)).toString()));
  }}
  for(let ri=0;ri<runs.length;ri++){{const run=runs[ri], lineColor=['#1769aa','#c04424','#18864b','#8156a8','#bc7b12'][ri%5];
-  for(const c of run.clouds||[]){{if(selected!=='all'&&c.absolute_stage!==Number(selected))continue;const g=c.projected_geometry;if(!g)continue;const col=color(c.absolute_stage,d.stage_count);
+  for(const c of run.clouds||[]){{if(selected!=='all'&&c.absolute_stage!==Number(selected))continue;const g=c.projected_geometry;if(!g)continue;const col=color(c.time,d.timeline_end);
    if(c.representation==='ellipsoid'&&g.length===2)svg.append(make('ellipse',{{cx:x(g[0][0]),cy:y(g[0][1]),rx:Math.abs(x(g[0][0]+g[1][0])-x(g[0][0])),ry:Math.abs(y(g[0][1]+g[1][1])-y(g[0][1])),fill:col,'fill-opacity':selected==='all'?.08:.2,stroke:col,'stroke-width':1}}));
    else if(g.length>2)svg.append(make('polygon',{{points:g.map(p=>`${{x(p[0])}},${{y(p[1])}}`).join(' '),fill:col,'fill-opacity':selected==='all'?.035:.16,stroke:col,'stroke-width':.6}}));
   }}
   const graph=(run.nodes||[]).filter(n=>selected==='all'||n.absolute_stage===Number(selected));
-  for(const n of graph){{const p=n.state,ix=d.coordinate_transform.raw_indices;svg.append(make('circle',{{cx:x(p[ix[0]]),cy:y(p[ix[1]]),r:2.3,fill:'#576273','fill-opacity':.38}}));}}
-  const replay=(run.plant_replay||[]).filter(p=>selected==='all'||p.update_index===Number(selected));
-  if(replay.length){{svg.append(make('polyline',{{points:replay.map(p=>`${{x(p.point[0])}},${{y(p.point[1])}}`).join(' '),fill:'none',stroke:lineColor,'stroke-width':2.3}}));for(const p of replay)svg.append(make('circle',{{cx:x(p.point[0]),cy:y(p.point[1]),r:3.1,fill:color(p.absolute_stage,d.stage_count),stroke:lineColor,'stroke-width':.7}}));}}
+  for(const n of graph){{const p=n.state,ix=d.coordinate_transform.raw_indices;svg.append(make('circle',{{cx:x(p[ix[0]]),cy:y(p[ix[1]]),r:2.3,fill:color(n.time,d.timeline_end),'fill-opacity':.65}}));}}
+  const replay=selected==='all'?(run.plant_replay||[]):replayForOutputStage(run.plant_replay||[],Number(selected),d.time_step);
+  if(replay.length){{svg.append(make('polyline',{{points:replay.map(p=>`${{x(p.point[0])}},${{y(p.point[1])}}`).join(' '),fill:'none',stroke:lineColor,'stroke-width':2.3}}));for(const p of replay)svg.append(make('circle',{{cx:x(p.point[0]),cy:y(p.point[1]),r:3.1,fill:color(p.time,d.timeline_end),stroke:lineColor,'stroke-width':.7}}));}}
   const plan=(run.planned_prediction||[]).filter(p=>selected==='all'||p.absolute_stage===Number(selected));
-  if(plan.length){{svg.append(make('polyline',{{points:plan.map(p=>`${{x(p.point[0])}},${{y(p.point[1])}}`).join(' '),fill:'none',stroke:'#111820','stroke-width':1.5,'stroke-dasharray':'5 4'}}));for(const p of plan)svg.append(make('circle',{{cx:x(p.point[0]),cy:y(p.point[1]),r:2.6,fill:color(p.absolute_stage,d.stage_count)}}));}}
+  if(plan.length){{svg.append(make('polyline',{{points:plan.map(p=>`${{x(p.point[0])}},${{y(p.point[1])}}`).join(' '),fill:'none',stroke:'#111820','stroke-width':1.5,'stroke-dasharray':'5 4'}}));for(const p of plan)svg.append(make('circle',{{cx:x(p.point[0]),cy:y(p.point[1]),r:2.6,fill:color(p.time,d.timeline_end)}}));}}
   if(selected==='all'||selected==='0'){{const p=run.initial_point;svg.append(make('path',{{d:`M ${{x(p[0])-7}} ${{y(p[1])}} L ${{x(p[0])+7}} ${{y(p[1])}} M ${{x(p[0])}} ${{y(p[1])-7}} L ${{x(p[0])}} ${{y(p[1])+7}}`,stroke:'#e1a900','stroke-width':3}}));}}
   if(run.target)svg.append(make('path',{{d:`M ${{x(run.target[0])-6}} ${{y(run.target[1])-6}} L ${{x(run.target[0])+6}} ${{y(run.target[1])+6}} M ${{x(run.target[0])-6}} ${{y(run.target[1])+6}} L ${{x(run.target[0])+6}} ${{y(run.target[1])-6}}`,stroke:'#c02f31','stroke-width':2.5}}));
   svg.append(make('rect',{{x:left+5,y:top+5+ri*18,width:Math.min(280,run.controller_label.length*7.4+12),height:16,rx:2,fill:'white','fill-opacity':.86}}));
@@ -608,7 +654,7 @@ function draw(d,selected){{
  svg.append(make('text',{{x:(left+right)/2,y:590,'text-anchor':'middle','font-size':14,fill:'currentColor'}},`${{d.coordinate_transform.names[0]}} (${{d.coordinate_transform.units[0]}})`));
  const yl=make('text',{{x:22,y:(top+bottom)/2,'text-anchor':'middle','font-size':14,fill:'currentColor',transform:`rotate(-90 22 ${{(top+bottom)/2}})`}},`${{d.coordinate_transform.names[1]}} (${{d.coordinate_transform.units[1]}})`);svg.append(yl);
 }}
-fetch('{data_url}').then(r=>r.json()).then(d=>{{for(let i=1;i<d.stage_count;i++){{const o=document.createElement('option');o.value=String(i);o.textContent=`Stage ${{i}}`;focus.append(o)}}draw(d,'all');focus.addEventListener('change',()=>draw(d,focus.value));}});
+fetch('{data_url}').then(r=>r.json()).then(d=>{{draw(d,'all');focus.addEventListener('change',()=>draw(d,focus.value));}});
 </script></main></body></html>'''
 
 
@@ -648,6 +694,9 @@ def _figure_entry(plane: Plane, capture_root: Path) -> dict[str, Any]:
         "title": plane.title,
         "task_id": plane.task_id,
         "task_sha256": next(iter(expected_hashes)),
+        "stage_count": max(run["stage_count"] for run in runs),
+        "time_step": plane.dt,
+        "timeline_end": timeline_end(runs),
         "source_commit": SOURCE_COMMIT,
         "profile_id": "worker-wall-1800-cpu-1800/1",
         "reproduction_command": "python scripts/reports/recorded_closed_loop_figures.py --capture-root \"$CSL_CLOSED_LOOP_CAPTURE_ROOT\" --output docs/examples/closed-loop",
@@ -743,6 +792,8 @@ def build(capture_root: Path, destination: Path | None = None) -> dict[str, Any]
             "runs": entry["runs"],
             "reproduction_command": "python scripts/reports/recorded_closed_loop_figures.py --capture-root \"$CSL_CLOSED_LOOP_CAPTURE_ROOT\" --output docs/examples/closed-loop",
             "stage_count": max(run["stage_count"] for run in entry["runs"]),
+            "time_step": plane.dt,
+            "timeline_end": timeline_end(entry["runs"]),
             "plot_bounds": _plot_bounds(entry, plane),
         }
         (figure_dir / f"{entry['id']}.plotted-data.json").write_text(
@@ -751,6 +802,7 @@ def build(capture_root: Path, destination: Path | None = None) -> dict[str, Any]
         index["figures"].append({key: entry[key] for key in (
             "id", "availability", "href", "plotted_data_href", "svg_href", "png_href",
             "title", "task_id", "task_sha256", "source_commit", "profile_id",
+            "stage_count", "time_step", "timeline_end",
             "coordinate_transform", "layer_scopes", "missing_layers", "comparison_coverage_gaps",
             "shape_coverage_gaps", "raw_record_refs", "reproduction_command")})
     output.mkdir(parents=True, exist_ok=True)

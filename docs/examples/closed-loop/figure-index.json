@@ -701,9 +701,12 @@
         }
       ],
       "source_commit": "64560a03b2d4a04a56a94c86b3abf193bb63f54f",
+      "stage_count": 30,
       "svg_href": "examples/closed-loop/figures/lotka-populations.svg",
       "task_id": "syn-nl-lv-01/continuous-receding/1",
       "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+      "time_step": 0.1,
+      "timeline_end": 3.0000000000000004,
       "title": "Lotka population plane"
     },
     {
@@ -1129,9 +1132,12 @@
         }
       ],
       "source_commit": "64560a03b2d4a04a56a94c86b3abf193bb63f54f",
+      "stage_count": 20,
       "svg_href": "examples/closed-loop/figures/earth-orbit.svg",
       "task_id": "env717-earth-orbit/continuous-receding/1",
       "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+      "time_step": 100.0,
+      "timeline_end": 2000.0,
       "title": "Earth orbit phase plane"
     },
     {
@@ -1556,9 +1562,12 @@
         }
       ],
       "source_commit": "64560a03b2d4a04a56a94c86b3abf193bb63f54f",
+      "stage_count": 40,
       "svg_href": "examples/closed-loop/figures/fuel-state.svg",
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
       "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b",
+      "time_step": 0.5,
+      "timeline_end": 20.0,
       "title": "Fuel control state planes"
     },
     {
@@ -1983,9 +1992,12 @@
         }
       ],
       "source_commit": "64560a03b2d4a04a56a94c86b3abf193bb63f54f",
+      "stage_count": 40,
       "svg_href": "examples/closed-loop/figures/fuel-fuel-flow.svg",
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
       "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b",
+      "time_step": 0.5,
+      "timeline_end": 20.0,
       "title": "Fuel flow and mass plane"
     }
   ],
