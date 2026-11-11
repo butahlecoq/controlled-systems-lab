@@ -125,10 +125,13 @@ def _native_request(task: dict[str, Any], task_sha256: str, controller_id: str,
         "running_cost": _running_cost(task, receipt),
         "representation_index": representation_index,
         "representation_name": _representation(controller_id)[0],
+        "search_policy": "stage-layered-backward-viability" if representation_index == 0 else "fixed-plan-mpc",
         "limits": {"max_plans": _positive_limit("CSL_NATIVE_MAX_PLANS", 4096),
                    "max_points_per_stage": _positive_limit("CSL_NATIVE_MAX_POINTS", 10000),
                    "max_score_evaluations": _positive_limit("CSL_NATIVE_MAX_SCORES", 10000),
-                   "max_generators_per_stage": _positive_limit("CSL_NATIVE_MAX_GENERATORS", 512)},
+                   "max_generators_per_stage": _positive_limit("CSL_NATIVE_MAX_GENERATORS", 512),
+                   "max_beam_width": _positive_limit("CSL_NATIVE_GRAPH_BEAM_WIDTH", 16),
+                   "max_graph_nodes": _positive_limit("CSL_NATIVE_GRAPH_MAX_NODES", 2048)},
     }
 
 

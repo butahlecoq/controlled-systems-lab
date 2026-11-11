@@ -1,5 +1,6 @@
 #include <csl/model/linear_system.hpp>
 #include <csl/geometry/polyhedral_projection.hpp>
+#include <csl/geometry/polyhedral_intersection.hpp>
 #include <csl/optimization/finite_action_nominal.hpp>
 #include <csl/optimization/objectives.hpp>
 #include <csl/reachability/nominal_predecessor.hpp>
@@ -11,6 +12,7 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <numeric>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
@@ -269,6 +271,377 @@ struct FirstStepRecovery {
     Json receipt;
 };
 
+struct GraphNode {
+    std::size_t stage{};
+    Vector state;
+    std::size_t parent{std::numeric_limits<std::size_t>::max()};
+    std::size_t action_index{std::numeric_limits<std::size_t>::max()};
+    double edge_cost{};
+    double heuristic{};
+    bool state_admissible{};
+    bool intersection_nonempty{};
+    bool viable{};
+    double value{std::numeric_limits<double>::infinity()};
+    std::string lineage;
+    std::string backward_edge_status;
+};
+
+struct GraphCandidate {
+    std::size_t parent{};
+    std::size_t action_index{};
+    Vector state;
+    double edge_cost{};
+    double heuristic{};
+    bool state_admissible{};
+    bool intersection_nonempty{};
+    std::string lineage;
+};
+
+bool intersects_stage_h(const sets::SetData& admissible, const Vector& point,
+                        const std::string& id) {
+    Json point_bounds = Json::array();
+    for(const double coordinate : point) point_bounds.push_back({coordinate, coordinate});
+    const auto point_h = safe_box(point_bounds, point.size(), id + "/point-h");
+    const auto intersection = geometry::polyhedral::intersect_h(admissible, point_h, {id + "/intersection"});
+    if(const auto* diagnostics = std::get_if<Diagnostics>(&intersection))
+        throw std::runtime_error("stage H intersection: " +
+            (diagnostics->empty() ? std::string("unsupported") : diagnostics->front().explanation));
+    return contains_with_tolerance(std::get<sets::SetData>(intersection), point);
+}
+
+struct GraphPolicyResult {
+    std::vector<GraphNode> nodes;
+    std::vector<std::vector<std::size_t>> layers;
+    std::vector<std::size_t> selected_nodes;
+    std::vector<std::size_t> generated;
+    std::vector<std::size_t> retained;
+    std::vector<std::size_t> pruned;
+    std::vector<std::size_t> infeasible;
+    std::size_t predecessor_calls{};
+    bool complete{};
+    bool has_viable_path{};
+    double total_cost{};
+};
+
+bool predecessor_contains(const optimization::FiniteActionNominalRequest& request,
+        const sets::SetData& control_hull, const registry::PreparedProvider<registry::GeometryPort>& provider,
+        std::size_t stage, const Vector& parent, const Vector& child, const Json& input,
+        const std::string& lineage) {
+    const auto dynamics_value = request.system.stage({stage});
+    if(const auto* error = std::get_if<Diagnostic>(&dynamics_value))
+        throw std::runtime_error("graph predecessor dynamics: " + error->explanation);
+    const auto& dynamics = std::get<model::DynamicsStage>(dynamics_value);
+    const auto dimension = parent.size();
+    Matrix a{dimension, dimension, Vector(dimension * dimension)};
+    Matrix b{dimension, request.actions.dimension, Vector(dimension * request.actions.dimension)};
+    Vector offset(dimension);
+    for(std::size_t row = 0; row < dimension; ++row) {
+        offset[row] = dynamics.offset[row];
+        for(std::size_t col = 0; col < dimension; ++col)
+            a.values[row * dimension + col] = dynamics.A(row, col);
+        for(std::size_t col = 0; col < request.actions.dimension; ++col)
+            b.values[row * request.actions.dimension + col] = dynamics.B(row, col);
+    }
+    auto target = take(sets::make_singleton({{"graph-child-" + lineage}, dimension, {}},
+        take(numeric::snapshot_vector(child), "graph-child-view")), "graph-child-target");
+    reachability::NominalPredecessorRequest predecessor_request{
+        {{input.at("problem_id").get<std::string>()},
+         {input.at("request_id").get<std::string>() + "/graph-predecessor-" + lineage},
+         {input.at("request_id").get<std::string>() + "/graph-target-" + lineage}},
+        request.admissible_states.at(stage).as_handle(), control_hull.as_handle(), target.as_handle(),
+        std::move(a), std::move(b), std::move(offset)};
+    auto prepared = reachability::prepare_nominal_predecessor(predecessor_request, provider);
+    if(!std::holds_alternative<reachability::PreparedNominalPredecessor>(prepared))
+        throw std::runtime_error("graph predecessor preparation rejected a concrete retained edge");
+    auto outcome = std::get<reachability::PreparedNominalPredecessor>(std::move(prepared)).run({});
+    if(!std::holds_alternative<reachability::NominalPredecessorResult>(outcome)) return false;
+    const auto& result = std::get<reachability::NominalPredecessorResult>(outcome);
+    const auto set = take(sets::from_handle(result.result.output), "graph-predecessor-set");
+    return contains_with_tolerance(set, parent);
+}
+
+GraphPolicyResult run_exact_graph(const Json& input,
+        const optimization::FiniteActionNominalRequest& request,
+        std::size_t beam_width, std::size_t max_nodes) {
+    if(request.initial_state.size() != 2)
+        throw std::runtime_error("stage-layered predecessor graph currently requires the 2D exact-H route");
+    const auto horizon = request.system.horizon();
+    if(horizon == 0) throw std::runtime_error("stage-layered graph needs at least one authored transition");
+    auto registration = geometry::polyhedral::make_projection_registration();
+    registry::Registry<registry::GeometryPort> registry;
+    if(const auto error = registry.add(registration))
+        throw std::runtime_error("graph projection registration: " +
+            (error->diagnostics.empty() ? std::string("registration rejected") : error->diagnostics.front().explanation));
+    registry::Requirements requirements;
+    requirements.output.representation = {"csl.polyhedron.h"};
+    requirements.output.relation = SetRelation::equivalent;
+    auto prepared_provider = registry::prepare_provider(registry::select_provider(registry,
+        {registration.identity.id, registration.identity.version}, requirements));
+    if(!std::holds_alternative<registry::PreparedProvider<registry::GeometryPort>>(prepared_provider))
+        throw std::runtime_error("graph exact-H projection provider did not prepare");
+    auto provider = std::get<registry::PreparedProvider<registry::GeometryPort>>(std::move(prepared_provider));
+
+    Vector action_lower(request.actions.dimension, std::numeric_limits<double>::infinity());
+    Vector action_upper(request.actions.dimension, -std::numeric_limits<double>::infinity());
+    for(const auto& action : request.actions.catalogue)
+        for(std::size_t j = 0; j < action.size(); ++j) {
+            action_lower[j] = std::min(action_lower[j], action[j]);
+            action_upper[j] = std::max(action_upper[j], action[j]);
+        }
+    Json hull_bounds = Json::array();
+    for(std::size_t j = 0; j < action_lower.size(); ++j) hull_bounds.push_back({action_lower[j], action_upper[j]});
+    const auto control_hull = safe_box(hull_bounds, request.actions.dimension, "finite-action-control-hull");
+
+    GraphPolicyResult graph;
+    graph.layers.resize(horizon + 1);
+    graph.generated.resize(horizon);
+    graph.retained.resize(horizon + 1);
+    graph.pruned.resize(horizon);
+    graph.infeasible.resize(horizon + 1);
+    const bool initial_ok = intersects_stage_h(request.admissible_states.front(), request.initial_state, "graph-root");
+    graph.nodes.push_back({0, request.initial_state, std::numeric_limits<std::size_t>::max(),
+        std::numeric_limits<std::size_t>::max(), 0.0, 0.0, initial_ok, initial_ok, false,
+        std::numeric_limits<double>::infinity(), "root", "root-node"});
+    graph.layers[0].push_back(0);
+    graph.retained[0] = 1;
+    if(!initial_ok) {
+        graph.infeasible[0] = 1;
+        graph.complete = true;
+        return graph;
+    }
+
+    for(std::size_t stage = 0; stage < horizon; ++stage) {
+        std::vector<GraphCandidate> candidates;
+        for(const auto parent_id : graph.layers[stage]) {
+            const auto& parent = graph.nodes.at(parent_id);
+            for(std::size_t action_index = 0; action_index < request.actions.catalogue.size(); ++action_index) {
+                const auto step = request.system.step({stage}, parent.state,
+                    request.actions.catalogue[action_index], request.nominal_disturbances[stage]);
+                if(const auto* error = std::get_if<Diagnostic>(&step))
+                    throw std::runtime_error("graph affine transition: " + error->explanation);
+                if(const auto* stopped = std::get_if<OperationStopped>(&step))
+                    throw std::runtime_error("graph affine transition stopped: " + stopped->diagnostics);
+                auto next = std::get<Vector>(step);
+                const auto state_ok = intersects_stage_h(request.admissible_states[stage + 1], next,
+                    "graph-" + parent.lineage + "-" + std::to_string(action_index));
+                const auto edge_cost = absolute_stage_cost(request.running_cost,
+                    request.absolute_stage_offset + stage, request.actions.catalogue[action_index]);
+                const auto terminal_value = optimization::evaluate(request.objective, next);
+                if(const auto* error = std::get_if<Diagnostic>(&terminal_value))
+                    throw std::runtime_error("graph terminal heuristic: " + error->explanation);
+                const auto cumulative = parent.heuristic + edge_cost + std::get<double>(terminal_value);
+                const auto lineage = parent.lineage + "/" + std::to_string(action_index);
+                candidates.push_back({parent_id, action_index, std::move(next), edge_cost,
+                    cumulative, state_ok, state_ok, lineage});
+            }
+        }
+        graph.generated[stage] = candidates.size();
+        std::stable_sort(candidates.begin(), candidates.end(), [](const auto& left, const auto& right) {
+            if(left.state_admissible != right.state_admissible) return left.state_admissible > right.state_admissible;
+            if(left.heuristic != right.heuristic) return left.heuristic < right.heuristic;
+            if(left.parent != right.parent) return left.parent < right.parent;
+            if(left.action_index != right.action_index) return left.action_index < right.action_index;
+            return left.lineage < right.lineage;
+        });
+        const auto retained = std::min({beam_width, candidates.size(), max_nodes - std::min(max_nodes, graph.nodes.size())});
+        graph.pruned[stage] = candidates.size() - retained;
+        graph.complete = graph.complete && candidates.size() == retained;
+        for(std::size_t i = 0; i < retained; ++i) {
+            const auto& candidate = candidates[i];
+            const auto id = graph.nodes.size();
+            graph.nodes.push_back({stage + 1, candidate.state, candidate.parent, candidate.action_index,
+                candidate.edge_cost, candidate.heuristic, candidate.state_admissible,
+                candidate.intersection_nonempty, false,
+                std::numeric_limits<double>::infinity(), candidate.lineage, "pending-backward-pass"});
+            graph.layers[stage + 1].push_back(id);
+            ++graph.retained[stage + 1];
+            if(!candidate.state_admissible) ++graph.infeasible[stage + 1];
+        }
+        if(retained == 0) break;
+    }
+    graph.complete = std::ranges::all_of(graph.pruned, [](std::size_t count) { return count == 0; });
+    if(graph.layers.back().empty()) return graph;
+
+    for(const auto id : graph.layers.back()) {
+        auto& node = graph.nodes[id];
+        node.viable = node.state_admissible;
+        node.backward_edge_status = node.state_admissible ? "terminal-node-admissible" : "terminal-node-outside-stage-set";
+        if(node.viable) {
+            const auto value = optimization::evaluate(request.objective, node.state);
+            if(const auto* error = std::get_if<Diagnostic>(&value))
+                throw std::runtime_error("graph terminal objective: " + error->explanation);
+            node.value = std::get<double>(value);
+        }
+    }
+    for(std::size_t reverse = horizon; reverse > 0; --reverse) {
+        const auto stage = reverse - 1;
+        for(const auto child_id : graph.layers[stage + 1]) {
+            auto& child = graph.nodes[child_id];
+            if(!child.viable) {
+                child.backward_edge_status = "skipped-suffix-nonviable";
+                continue;
+            }
+            auto& parent = graph.nodes[child.parent];
+            const auto& selected_action = request.actions.catalogue[child.action_index];
+            const auto dynamics_value = request.system.stage({stage});
+            if(const auto* error = std::get_if<Diagnostic>(&dynamics_value))
+                throw std::runtime_error("graph edge replay dynamics: " + error->explanation);
+            const auto& dynamics = std::get<model::DynamicsStage>(dynamics_value);
+            Vector replayed(child.state.size());
+            for(std::size_t row = 0; row < child.state.size(); ++row) {
+                replayed[row] = dynamics.offset[row];
+                for(std::size_t col = 0; col < parent.state.size(); ++col)
+                    replayed[row] += dynamics.A(row, col) * parent.state[col];
+                for(std::size_t col = 0; col < selected_action.size(); ++col)
+                    replayed[row] += dynamics.B(row, col) * selected_action[col];
+            }
+            const bool discrete_witness = contains_with_tolerance(
+                take(sets::make_singleton({{"graph-edge-replay"}, replayed.size(), {}},
+                    take(numeric::snapshot_vector(replayed), "graph-edge-replay-view")), "graph-edge-replay-set"), child.state);
+            ++graph.predecessor_calls;
+            const bool predecessor = predecessor_contains(request, control_hull, provider,
+                stage, parent.state, child.state, input, child.lineage);
+            if(!predecessor) child.backward_edge_status = "numerical-predecessor-membership-false";
+            else if(!discrete_witness) child.backward_edge_status = "discrete-transition-witness-failed";
+            else if(!parent.state_admissible) child.backward_edge_status = "parent-stage-intersection-empty";
+            else child.backward_edge_status = "eligible-numerical-predecessor-and-discrete-edge";
+            child.viable = discrete_witness && predecessor && parent.state_admissible;
+            if(!child.viable) continue;
+            const auto candidate = child.edge_cost + child.value;
+            if(candidate < parent.value) {
+                parent.value = candidate;
+                parent.viable = true;
+            }
+        }
+    }
+    if(!graph.nodes.front().viable) return graph;
+    graph.has_viable_path = true;
+    graph.total_cost = graph.nodes.front().value;
+    std::size_t current = 0;
+    graph.selected_nodes.push_back(current);
+    for(std::size_t stage = 0; stage < horizon; ++stage) {
+        std::size_t best = std::numeric_limits<std::size_t>::max();
+        double best_value = std::numeric_limits<double>::infinity();
+        for(const auto child_id : graph.layers[stage + 1]) {
+            const auto& child = graph.nodes[child_id];
+            if(child.parent != current || !child.viable) continue;
+            const auto candidate = child.edge_cost + child.value;
+            if(candidate < best_value || (candidate == best_value && child.action_index < graph.nodes[best].action_index)) {
+                best = child_id;
+                best_value = candidate;
+            }
+        }
+        if(best == std::numeric_limits<std::size_t>::max()) {
+            graph.has_viable_path = false;
+            graph.selected_nodes.clear();
+            return graph;
+        }
+        current = best;
+        graph.selected_nodes.push_back(current);
+    }
+    return graph;
+}
+
+Json graph_response(const Json& input, const optimization::FiniteActionNominalRequest& request,
+                    std::size_t beam_width, std::size_t max_nodes) {
+    const auto absolute_stage = request.absolute_stage_offset;
+    auto graph = run_exact_graph(input, request, beam_width, max_nodes);
+    Json layers = Json::array(), nodes = Json::array(), edges = Json::array();
+    for(std::size_t stage = 0; stage < graph.retained.size(); ++stage)
+        layers.push_back({{"stage", absolute_stage + stage},
+            {"generated", stage < graph.generated.size() ? graph.generated[stage] : 0},
+            {"retained", graph.retained[stage]}, {"pruned", stage < graph.pruned.size() ? graph.pruned[stage] : 0},
+            {"infeasible", graph.infeasible[stage]}});
+    for(std::size_t id = 0; id < graph.nodes.size(); ++id) {
+        const auto& node = graph.nodes[id];
+        nodes.push_back({{"node_id", id}, {"absolute_stage", absolute_stage + node.stage}, {"state", node.state},
+            {"parent_node_id", node.parent == std::numeric_limits<std::size_t>::max() ? Json(nullptr) : Json(node.parent)},
+            {"action_index", node.action_index == std::numeric_limits<std::size_t>::max() ? Json(nullptr) : Json(node.action_index)},
+            {"edge_running_cost", node.edge_cost}, {"state_admissible", node.state_admissible},
+            {"stage_set_intersection_nonempty", node.intersection_nonempty},
+            {"backward_viable", node.viable}, {"backward_value", std::isfinite(node.value) ? Json(node.value) : Json(nullptr)},
+            {"lineage", node.lineage}, {"backward_edge_status", node.backward_edge_status}});
+    }
+    for(std::size_t stage = 1; stage < graph.layers.size(); ++stage)
+        for(const auto id : graph.layers[stage]) {
+            const auto& node = graph.nodes[id];
+            edges.push_back({{"parent_node_id", node.parent}, {"child_node_id", id},
+                {"absolute_stage", absolute_stage + stage - 1}, {"action_index", node.action_index},
+                {"action", request.actions.catalogue[node.action_index]}, {"child_state", node.state},
+                {"lineage", node.lineage}, {"backward_viable", node.viable},
+                {"backward_edge_status", node.backward_edge_status},
+                {"discrete_transition_witness", true}});
+        }
+    Json invocations = Json::array({{{"module_id", "csl::optimization::run_exact_graph"},
+        {"operation", "full-authored-horizon stage-layered graph with backward viability before Bellman selection"},
+        {"provider", "public-function"}, {"profile_id", input.at("controller_id")},
+        {"outcome", graph.has_viable_path ? "selected" : "no-viable-retained-path"},
+        {"generated_edges", std::accumulate(graph.generated.begin(), graph.generated.end(), std::size_t{0})},
+        {"retained_nodes", graph.nodes.size()}}});
+    invocations.push_back({{"module_id", "csl::reachability::prepare_nominal_predecessor"},
+        {"operation", "exact-H predecessor membership on each retained discrete edge"},
+        {"provider", "csl.geometry.polyhedral-projection@1.0.0"}, {"profile_id", input.at("controller_id")},
+        {"calls", graph.predecessor_calls}, {"assurance", "numerical, support unestablished"}});
+    invocations.push_back({{"module_id", "csl::geometry::polyhedral::intersect_h"},
+        {"operation", "intersect each retained singleton node with its authored stage H constraints"},
+        {"provider", "public-function"}, {"profile_id", input.at("controller_id")},
+        {"calls", std::accumulate(graph.generated.begin(), graph.generated.end(), std::size_t{1})}});
+    Json response{{"task_id", input.at("task_id")}, {"task_sha256", input.at("task_sha256")},
+        {"action_profile_id", input.at("action_profile_id")},
+        {"policy_id", input.at("controller_id").get<std::string>() + "/budgeted-backward-graph-mpc/1"},
+        {"representation", 0}, {"invocations", invocations},
+        {"predicted_sets", Json::array({{{"role", "retained-stage-layered-singleton-nodes"},
+            {"representation", "polytope-h"}, {"relation", "equivalent"}, {"assurance", "numerical"}, {"nodes", nodes}}})},
+        {"graph_receipt", {{"schema", "csl.closed-loop.finite-action-backward-graph/1"},
+            {"task_id", input.at("task_id")}, {"task_sha256", input.at("task_sha256")},
+            {"source_model_id", input.at("source_model_id")}, {"predictor_model_id", input.at("predictor_model_id")},
+            {"original_horizon", input.at("original_horizon")}, {"absolute_stage_offset", absolute_stage},
+            {"action_profile_id", input.at("action_profile_id")}, {"objective_id", request.running_cost.objective_id},
+            {"representation", "exact-polytope"}, {"beam_width", beam_width}, {"max_graph_nodes", max_nodes},
+            {"search_coverage", graph.complete ? "complete" : "incomplete"},
+            {"optimality_scope", "Bellman minimum over retained graph only; no claim over pruned paths or nonlinear plant"},
+            {"no_path_semantics", "no viable retained path after numerical filtering is not a global infeasibility proof"},
+            {"layer_statistics", layers}, {"nodes", nodes}, {"edges", edges},
+            {"backward_viability_applied_before_selection", true}}}};
+    if(!graph.has_viable_path) {
+        response["status"] = "unsupported";
+        response["reason"] = graph.nodes.size() >= max_nodes ?
+            "Graph node budget exhausted before retaining a viable full-horizon path; no action is returned." :
+            "No viable retained path passed the numerical backward filter; this is not a global infeasibility proof and no action is returned.";
+        return response;
+    }
+    Json states = Json::array(), controls = Json::array(), selected_edges = Json::array();
+    for(const auto id : graph.selected_nodes) {
+        const auto& node = graph.nodes[id];
+        states.push_back(node.state);
+        if(id != 0) {
+            controls.push_back(request.actions.catalogue[node.action_index]);
+            selected_edges.push_back({{"parent_node_id", node.parent}, {"child_node_id", id},
+                {"absolute_stage", absolute_stage + node.stage - 1}, {"action_index", node.action_index},
+                {"action", request.actions.catalogue[node.action_index]}, {"child_state", node.state},
+                {"lineage", node.lineage}, {"backward_viable", node.viable}});
+        }
+    }
+    const auto terminal_value = optimization::evaluate(request.objective, graph.nodes[graph.selected_nodes.back()].state);
+    if(const auto* error = std::get_if<Diagnostic>(&terminal_value)) throw std::runtime_error("selected graph terminal objective: " + error->explanation);
+    const double terminal_cost = std::get<double>(terminal_value);
+    double running_cost_value = 0.0;
+    for(const auto id : graph.selected_nodes) if(id != 0) running_cost_value += graph.nodes[id].edge_cost;
+    response["status"] = "accepted";
+    response["control"] = request.actions.catalogue[graph.nodes[graph.selected_nodes[1]].action_index];
+    response["recovered_control"] = response["control"];
+    response["selected_plan"] = {{"states", states}, {"controls", controls}, {"terminal_objective", terminal_cost},
+        {"running_objective", running_cost_value}, {"total_objective", terminal_cost + running_cost_value}};
+    response["selected_edges"] = selected_edges;
+    response["selector"] = {{"search_coverage", graph.complete ? "complete" : "incomplete"}, {"beam_width", beam_width},
+        {"retained_graph_value", graph.total_cost}, {"terminal_objective", terminal_cost},
+        {"running_objective", running_cost_value}, {"total_replay_objective", terminal_cost + running_cost_value},
+        {"score_kind", "exact-source-cost-on-numerical-affine-predictor"},
+        {"policy_semantics", "receding finite-action graph MPC; backward predecessor viability filters authored edges before Bellman selection; replans after each observed hold"},
+        {"optimality_scope", "retained graph only; not complete finite-action optimum, nonlinear global optimum, or causal feedback optimum"}};
+    return response;
+}
+
 FirstStepRecovery recover_first_action_2d(const Json& in,
         const optimization::FiniteActionNominalRequest& request,
         const optimization::NominalTrackSelected& selected) {
@@ -407,8 +780,15 @@ Json query(const Json& in) {
     for(const auto& action : actions_json) actions.push_back(vector(action));
     std::vector<Vector> external(horizon, Vector{});
     std::vector<sets::SetData> safe;
-    for(std::size_t i = 0; i <= horizon; ++i)
-        safe.push_back(safe_box(in.at("state_bounds"), dimension, "safe-stage-" + std::to_string(i)));
+    if(in.contains("stage_state_bounds")) {
+        const auto& rows = in.at("stage_state_bounds");
+        if(rows.size() != horizon + 1) throw std::runtime_error("stage_state_bounds must include every absolute state stage");
+        for(std::size_t i = 0; i <= horizon; ++i)
+            safe.push_back(safe_box(rows[i], dimension, "safe-stage-" + std::to_string(i)));
+    } else {
+        for(std::size_t i = 0; i <= horizon; ++i)
+            safe.push_back(safe_box(in.at("state_bounds"), dimension, "safe-stage-" + std::to_string(i)));
+    }
     const auto objective = terminal_objective(in.at("terminal_objective"), dimension);
     const auto cost = running_cost(in.at("running_cost"), in.at("original_horizon").get<std::size_t>(), action_dimension);
     optimization::FiniteActionNominalRequest request{
@@ -423,6 +803,10 @@ Json query(const Json& in) {
         optimization::NominalRepresentation::parallelotope,
         optimization::NominalRepresentation::ellipsoid};
     if(representation_index >= representations.size()) throw std::runtime_error("representation index must be in [0,4]");
+    if(representation_index == 0 && in.value("search_policy", std::string{}) == "stage-layered-backward-viability")
+        return graph_response(in, request,
+            in.at("limits").value("max_beam_width", std::size_t{16}),
+            in.at("limits").value("max_graph_nodes", std::size_t{2048}));
     const auto outcome = optimization::finite_action_nominal_profile(request,
         {in.at("limits").at("max_plans").get<std::size_t>(),
          in.at("limits").at("max_points_per_stage").get<std::size_t>(),
