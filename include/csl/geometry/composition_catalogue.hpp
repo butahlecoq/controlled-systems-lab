@@ -22,7 +22,7 @@ struct PreparedHullCandidate {
     HullCandidateGraph graph;
     registry::PreparedPipeline<registry::HullReducerPort> reducer;
     registry::PreparedProvider<registry::LPPort> vertex_lp;
-    std::vector<registry::Provenance> provenance;
+    std::vector<registry::Provenance> prepared_providers;
 };
 
 class HullReducerCatalogue {
@@ -47,9 +47,13 @@ std::variant<PreparedHullCandidate,registry::Rejection> prepare_hull_candidate(
 
 struct HullCandidateExecution {
     HullCandidateGraph graph;
-    std::vector<registry::Provenance> provenance;
+    std::vector<registry::Provenance> prepared_providers;
     HullReductionResult reduction;
-    std::vector<registry::LPQueryRecord> vertex_lp_queries;
+    // Records only calls routed through the outer RegisteredLPQueryRunner.
+    // Reducers may create child workspaces from a captured provider and report
+    // those calls only through reducer-specific metrics; preparation provenance
+    // alone is not evidence of invocation.
+    std::vector<registry::LPQueryRecord> outer_lp_runner_queries;
 };
 
 HullCandidateExecution run_hull_candidate(PreparedHullCandidate, const ExecutionContext& = {});

@@ -45,13 +45,22 @@ Provider registries are assembled by owning modules rather than a single applica
 - [x] Read the Principles section of the poteto-mode skill.
 - [x] Phase A: Frame.
 - [x] Phase B: Design the workflow.
-- [ ] Phase C: Run the loop.
-- [ ] Phase D: Keep the audit trail.
-- [ ] Phase E: Verify and hand back.
+- [x] Phase C: Run the first native component loop (geometry/vertex provider slice).
+- [x] Phase D: Keep the audit trail and component checkpoint PR.
+- [ ] Phase E: Verify, expand the complete graph universe, and hand back.
 - [ ] Ground actual compiled inventory and choose concrete test requests.
-- [ ] Add and verify geometry/vertex provider probes.
-- [ ] Add and verify representation/controller probes.
-- [ ] Implement native finite candidate catalogue and reusable resolver output.
-- [ ] Document catalogue semantics, limitations, reproduction command, and delivery impact.
-- [ ] Run focused test suite and inspect native JSON output.
-- [ ] Commit, push, and open PR without merging or closing issue 942.
+- [x] Add and verify geometry/vertex provider probes.
+- [x] Add native finite provider/controller probe output and source-grounded four-group inventory.
+- [x] Add StrategyRegistry candidate/re-prepare seam with source-owned active configuration slots.
+- [x] Document catalogue semantics, current limits, reproduction command, and delivery impact.
+- [x] Run focused test suite and inspect native JSON output (5 focused tests passed).
+- [ ] Expand native finite candidate rows to representation, controller, and supporting-operation profiles; enumerate priority-tie Phase-I and explicit backend-unavailable cases.
+- [ ] Add/verify full candidate coverage against the independent four-group universe; current CLI output is only the ten reducers x compiled LPs plus TS01.
+- [ ] Install this branch and run hull/registry clients from exported package targets without source include overrides.
+- [x] Commit, push, and open draft PR #952 without merging or closing issue 942.
+
+## Current checkpoint evidence
+
+Focused command passed in `build/dev-clean`: `ctest --test-dir build/dev-clean --output-on-failure -R '^(module_composition_inventory_source_check|module_composition_catalogue_cli|composition_catalogue_tests|registry_tests|application_comparison_integration_tests)$'`. The native CLI emitted 20 admitted reducer/LP tuples (ten reducers crossed with HiGHS and Bland Phase I), and one admitted/re-prepared TS01 analytic strategy profile. The square fixture retained indices 0–3 and removed the strict interior point. `lp-membership` produced completed calls through the outer registered runner. Reducer-specific metrics separately report captured child-solver work where exposed. Strategy A and B were concretely prepared/re-prepared in the integration test.
+
+The inventory source check validated 46 records, ten registered hull IDs, and three source-faithful BTULSHOR public symbols against the pinned repository base plus cited research audit. The inventory/classification examples are not the complete exhaustive four-group graph. The native CLI currently omits priority-tie Phase I, disabled-HiGHS candidate rows, five-representation candidate combinations, and broad controller/support-operation graph enumeration. Keep #942 open and do not describe this checkpoint as full acceptance. Current all-target build in `build/dev-clean` is running under exec session 56997 for the installed-package consumer check; poll it without canceling.

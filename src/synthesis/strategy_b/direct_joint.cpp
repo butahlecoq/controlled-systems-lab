@@ -811,6 +811,10 @@ registry::StrategyRegistration make_registration(const registry::Registry<regist
                     std::get<1>(std::move(providers)),prepared,selected_verifier);
             });
     },verifier_binding};
+    registration.active_configuration_slots = std::vector{
+        registry::StrategyRegistration::ConfigurationSlot::lp,
+        registry::StrategyRegistration::ConfigurationSlot::convex,
+        registry::StrategyRegistration::ConfigurationSlot::representation};
     registration.complete_family_verifier_selector=[](const registry::StrategyRequest& request)
         ->std::optional<registry::StrategyRegistration::CompleteFamilyVerifierKey> {
         if(request.family.target!=FamilyTarget::exact_optimal_relation)return std::nullopt;

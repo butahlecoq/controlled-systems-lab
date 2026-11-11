@@ -1,0 +1,1586 @@
+{
+  "schema": "csl.module-composition-inventory/1",
+  "inventory_id": "four-group-module-composition/1",
+  "audited_source": "three-environment-closed-loop-matrix-audit.md@ed2dda1ef049ac4fbe259a800d3314e446ceee28",
+  "scope": "Source inventory captured from repository base commit ff451f74d90d70cd9dd228889fa77c181fc1fd26, cross-checked against audit ed2dda1ef049ac4fbe259a800d3314e446ceee28. The branch-native receipt CLI reports compiled availability separately.",
+  "groups": [
+    {
+      "id": "vertex_lp_simplex",
+      "label": "Vertex LP and simplex methods"
+    },
+    {
+      "id": "reachable_set_representation",
+      "label": "Reachable-set representations"
+    },
+    {
+      "id": "controller",
+      "label": "Reachable-set controllers and MPC"
+    },
+    {
+      "id": "supporting_operations",
+      "label": "Conversions, set operations, approximations and optimization"
+    }
+  ],
+  "modules": [
+    {
+      "group": "vertex_lp_simplex",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.hull.lp-membership",
+        "version": "1.0.0"
+      },
+      "role": "vertex_redundancy",
+      "input": "finite V point cloud",
+      "output": "finite V point cloud",
+      "dimension": "n>=1, request-specific solver limits",
+      "assurance": "numerical LP decisions plus exact dyadic deletion check",
+      "relation": "equivalent when complete",
+      "operations": [
+        "vertex-membership LP"
+      ],
+      "dependencies": [
+        "selected LP provider"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "src/geometry/hull_reducer.cpp"
+      },
+      "model_classes": [
+        "finite binary64 point-cloud membership/reduction"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "vertex_lp_simplex",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.hull.phase-one-basis-bulk",
+        "version": "1.0.0"
+      },
+      "role": "vertex_redundancy",
+      "input": "finite V point cloud",
+      "output": "finite V point cloud",
+      "dimension": "n>=1, request-specific solver limits",
+      "assurance": "numerical Phase-I basis plus certificate-safe deletion check",
+      "relation": "equivalent when complete",
+      "operations": [
+        "Phase-I simplex",
+        "basis reuse"
+      ],
+      "dependencies": [
+        "selected Phase-I implementation"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "src/geometry/basis_reuse_reducer.cpp"
+      },
+      "model_classes": [
+        "finite binary64 point-cloud membership/reduction"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "vertex_lp_simplex",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.hull.ordered-membership",
+        "version": "1.0.0"
+      },
+      "role": "vertex_redundancy",
+      "input": "finite V point cloud",
+      "output": "finite V point cloud",
+      "dimension": "n>=1",
+      "assurance": "numerical LP decisions plus exact dyadic deletion check",
+      "relation": "equivalent when complete",
+      "operations": [
+        "ordered vertex membership LP"
+      ],
+      "dependencies": [
+        "selected LP provider"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "src/geometry/hull/ordered_reducer.cpp"
+      },
+      "model_classes": [
+        "finite binary64 point-cloud membership/reduction"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "vertex_lp_simplex",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.hull.grouped-membership",
+        "version": "1.0.0"
+      },
+      "role": "vertex_redundancy",
+      "input": "finite V point cloud",
+      "output": "finite V point cloud",
+      "dimension": "n>=1",
+      "assurance": "numerical LP decisions plus exact dyadic deletion check",
+      "relation": "equivalent when complete",
+      "operations": [
+        "grouped vertex membership LP"
+      ],
+      "dependencies": [
+        "selected LP provider"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "src/geometry/hull/grouped_reducer.cpp"
+      },
+      "model_classes": [
+        "finite binary64 point-cloud membership/reduction"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "vertex_lp_simplex",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.hull.recursive-split-merge",
+        "version": "1.0.0"
+      },
+      "role": "vertex_redundancy",
+      "input": "finite V point cloud",
+      "output": "finite V point cloud",
+      "dimension": "n>=1",
+      "assurance": "numerical LP decisions plus exact dyadic deletion check",
+      "relation": "equivalent when complete",
+      "operations": [
+        "recursive split and merge",
+        "vertex membership LP"
+      ],
+      "dependencies": [
+        "selected LP provider"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "src/geometry/hull/recursive_reducer.cpp"
+      },
+      "model_classes": [
+        "finite binary64 point-cloud membership/reduction"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "vertex_lp_simplex",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.hull.itis17.a43-certified-basis-reuse",
+        "version": "1.0.0"
+      },
+      "role": "vertex_redundancy",
+      "input": "finite V point cloud",
+      "output": "finite V point cloud",
+      "dimension": "n>=1",
+      "assurance": "certificate-safe basis reuse with final LP recheck",
+      "relation": "equivalent when complete",
+      "operations": [
+        "ITIS17 A43 basis reuse",
+        "LP recheck"
+      ],
+      "dependencies": [
+        "selected LP provider",
+        "Phase-I basis interface"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "src/geometry/hull/itis17_reducers.cpp"
+      },
+      "model_classes": [
+        "finite binary64 point-cloud membership/reduction"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "vertex_lp_simplex",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.hull.itis17.a43-artificial-basis",
+        "version": "1.0.0"
+      },
+      "role": "vertex_redundancy",
+      "input": "finite V point cloud",
+      "output": "finite V point cloud",
+      "dimension": "n>=1",
+      "assurance": "source-adapted paper route with checked final membership",
+      "relation": "equivalent when complete",
+      "operations": [
+        "ITIS17 A43 artificial basis",
+        "LP membership"
+      ],
+      "dependencies": [
+        "selected LP provider"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "src/geometry/a43_paper_reducer.cpp"
+      },
+      "model_classes": [
+        "finite binary64 point-cloud membership/reduction"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "vertex_lp_simplex",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.hull.itis17.a43-largest-norm-tie",
+        "version": "1.0.0"
+      },
+      "role": "vertex_redundancy",
+      "input": "finite V point cloud",
+      "output": "finite V point cloud",
+      "dimension": "n>=1",
+      "assurance": "largest-norm tie source adaptation; unsupported tie hook remains explicit",
+      "relation": "equivalent when complete",
+      "operations": [
+        "ITIS17 A43 paper variant",
+        "LP membership"
+      ],
+      "dependencies": [
+        "selected LP provider"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "src/geometry/a43_paper_reducer.cpp"
+      },
+      "model_classes": [
+        "finite binary64 point-cloud membership/reduction"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "vertex_lp_simplex",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.hull.itis17.a44-incremental-lp",
+        "version": "2.0.0"
+      },
+      "role": "vertex_redundancy",
+      "input": "finite V point cloud",
+      "output": "finite V point cloud",
+      "dimension": "n>=1",
+      "assurance": "numerical LP decisions plus exact dyadic deletion check",
+      "relation": "equivalent when complete",
+      "operations": [
+        "ITIS17 A44 incremental membership"
+      ],
+      "dependencies": [
+        "selected LP provider"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "src/geometry/hull/itis17_reducers.cpp"
+      },
+      "model_classes": [
+        "finite binary64 point-cloud membership/reduction"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "vertex_lp_simplex",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.hull.itis17.a44-paper-farthest-incremental-lp",
+        "version": "1.0.0"
+      },
+      "role": "vertex_redundancy",
+      "input": "finite V point cloud",
+      "output": "finite V point cloud",
+      "dimension": "n>=1",
+      "assurance": "farthest-first source adaptation with checked LP membership",
+      "relation": "equivalent when complete",
+      "operations": [
+        "ITIS17 A44 farthest-first",
+        "incremental LP membership"
+      ],
+      "dependencies": [
+        "selected LP provider"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "src/geometry/hull/itis17_reducers.cpp"
+      },
+      "model_classes": [
+        "finite binary64 point-cloud membership/reduction"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "vertex_lp_simplex",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.lp.highs",
+        "version": "1.1.0+highs.1.11.0"
+      },
+      "role": "vertex_lp_provider",
+      "input": "binary64 linear program",
+      "output": "csl.program-result.v1",
+      "dimension": "native integer and resource limits",
+      "assurance": "numerical",
+      "relation": "optimization result, not a hull representation",
+      "operations": [
+        "LP solve"
+      ],
+      "dependencies": [
+        "CSL_ENABLE_HIGHS"
+      ],
+      "build": "optional HiGHS",
+      "source": {
+        "path": "src/adapters/lp/highs.cpp"
+      },
+      "model_classes": [
+        "finite binary64 point-cloud membership/reduction"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "reachable_set_representation",
+      "kind": "public_function_route",
+      "identity": {
+        "symbol": "csl::reachability::fixed_plan_disturbance"
+      },
+      "representation": "polytope.v",
+      "role": "fixed_plan_trace",
+      "input": "discrete affine plan, bounded finite V sets",
+      "output": "stage V descriptions",
+      "dimension": "request budget",
+      "assurance": "numerical",
+      "relation": "equivalent finite affine propagation; constraints reject unsafe plan",
+      "operations": [
+        "affine vertex propagation"
+      ],
+      "dependencies": [
+        "V materialization capacity"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
+        "symbol": "csl::reachability::fixed_plan_disturbance"
+      },
+      "route": "exact finite-V fixed-plan route",
+      "model_classes": [
+        "discrete affine fixed-plan propagation or the specific set-operation input contract"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "reachable_set_representation",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.approximation.box",
+        "version": "1"
+      },
+      "representation": "box",
+      "role": "set_approximation",
+      "input": "native polyhedron",
+      "output": "H polyhedron",
+      "dimension": "1-2",
+      "assurance": "numerical",
+      "relation": "outer",
+      "operations": [
+        "box enclosure"
+      ],
+      "dependencies": [],
+      "build": "CSL core",
+      "source": {
+        "path": "src/geometry/approximation/box_parallelotope.cpp"
+      },
+      "model_classes": [
+        "discrete affine fixed-plan propagation or the specific set-operation input contract"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "reachable_set_representation",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.approximation.parallelotope",
+        "version": "1"
+      },
+      "representation": "parallelotope",
+      "role": "set_approximation",
+      "input": "native polyhedron",
+      "output": "H polyhedron",
+      "dimension": "1-2",
+      "assurance": "numerical",
+      "relation": "outer",
+      "operations": [
+        "parallelotope enclosure"
+      ],
+      "dependencies": [],
+      "build": "CSL core",
+      "source": {
+        "path": "src/geometry/approximation/box_parallelotope.cpp"
+      },
+      "model_classes": [
+        "discrete affine fixed-plan propagation or the specific set-operation input contract"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "reachable_set_representation",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.geometry.zonotope.axis-cover",
+        "version": "1.0.0"
+      },
+      "representation": "zonotope",
+      "role": "set_approximation",
+      "input": "generator set",
+      "output": "H polyhedron",
+      "dimension": "generator and dimension budgets",
+      "assurance": "numerical",
+      "relation": "outer",
+      "operations": [
+        "axis cover"
+      ],
+      "dependencies": [],
+      "build": "CSL core",
+      "source": {
+        "path": "src/geometry/approximation/zonotope.cpp"
+      },
+      "model_classes": [
+        "discrete affine fixed-plan propagation or the specific set-operation input contract"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "reachable_set_representation",
+      "kind": "internal_registration_factory",
+      "identity": {
+        "symbol": "csl::geometry::approximation::make_directional_ellipsoid_registration"
+      },
+      "representation": "ellipsoid",
+      "role": "set_approximation",
+      "input": "bounded native V set",
+      "output": "2D directional ellipsoid",
+      "dimension": "2",
+      "assurance": "numerical",
+      "relation": "outer",
+      "operations": [
+        "directional ellipsoid construction"
+      ],
+      "dependencies": [
+        "caller-selected direction profile"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "src/geometry/approximation/ellipsoidal.cpp",
+        "symbol": "csl::geometry::approximation::make_directional_ellipsoid_registration"
+      },
+      "identity_source": "caller-selected registry.Method; no stable built-in provider ID",
+      "version_policy": "caller-supplied; catalogues must preserve the supplied version",
+      "model_classes": [
+        "discrete affine fixed-plan propagation or the specific set-operation input contract"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "controller",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.synthesis.reach-back",
+        "version": "1"
+      },
+      "role": "reachable_set_controller",
+      "input": "discrete affine nominal problem, native H profile",
+      "output": "recovered control relation",
+      "dimension": "profile-specific",
+      "assurance": "numerical or exact-family verified",
+      "relation": "feasible relation by declared profile",
+      "operations": [
+        "forward marginals",
+        "terminal optimization",
+        "predecessor",
+        "control recovery"
+      ],
+      "dependencies": [
+        "terminal minimizer",
+        "predecessor",
+        "recovery",
+        "selected representation"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "src/synthesis/strategy_a/strategy.cpp"
+      },
+      "model_classes": [
+        "source-admitted controller profile; see source and finite probe profile"
+      ],
+      "action_domain": "continuous controls only for registered profiles that admit them",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "controller",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.synthesis.strategy-b",
+        "version": "1"
+      },
+      "role": "joint_trajectory_controller",
+      "input": "discrete affine nominal problem, native H profile",
+      "output": "joint trajectory relation",
+      "dimension": "profile-specific",
+      "assurance": "numerical or exact-family verified",
+      "relation": "feasible relation by declared profile",
+      "operations": [
+        "joint LP/QP formulation"
+      ],
+      "dependencies": [
+        "selected LP provider",
+        "selected convex provider"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "src/synthesis/strategy_b/direct_joint.cpp"
+      },
+      "model_classes": [
+        "source-admitted controller profile; see source and finite probe profile"
+      ],
+      "action_domain": "continuous controls only for registered profiles that admit them",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "controller",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.synthesis.ts01-analytic",
+        "version": "1"
+      },
+      "role": "analytic_controller",
+      "input": "two-step scalar-integrator family",
+      "output": "H-polyhedral relation",
+      "dimension": "state=1, horizon=2",
+      "assurance": "analytic exact-family verifier with numerical representation",
+      "relation": "equivalent for registered profile",
+      "operations": [
+        "analytic synthesis"
+      ],
+      "dependencies": [],
+      "build": "CSL core",
+      "source": {
+        "path": "include/csl/synthesis/strategy_ts01/analytic_profile.hpp",
+        "implementation_path": "src/synthesis/strategy_ts01/analytic_profile.cpp"
+      },
+      "model_classes": [
+        "source-admitted controller profile; see source and finite probe profile"
+      ],
+      "action_domain": "continuous controls only for registered profiles that admit them",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "controller",
+      "kind": "public_function_route",
+      "identity": {
+        "symbol": "csl::optimization::finite_action_nominal"
+      },
+      "role": "finite_action_nominal_planner",
+      "input": "discrete affine system, finite action catalogue, known initial state",
+      "output": "selected open-loop plan",
+      "dimension": "profile-specific",
+      "assurance": "numerical; approximate tracks use estimates",
+      "relation": "exact enumeration or representation-specific estimate",
+      "operations": [
+        "finite plan enumeration",
+        "independent replay"
+      ],
+      "dependencies": [
+        "finite horizon and action budget"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "include/csl/optimization/finite_action_nominal.hpp",
+        "symbol": "csl::optimization::finite_action_nominal"
+      },
+      "route": "five-track finite-action nominal selector",
+      "model_classes": [
+        "source-admitted controller profile; see source and finite probe profile"
+      ],
+      "action_domain": "finite authored action catalogue",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "controller",
+      "kind": "external_program_route",
+      "identity": {
+        "symbol": "benchmarks/reporting/mpc11/run_nmpc.py"
+      },
+      "role": "nominal_local_nmpc",
+      "input": "synthetic nonlinear LV or fuel case",
+      "output": "observed-state shrinking-horizon first action",
+      "dimension": "scenario-defined",
+      "assurance": "local numerical NLP, independent replay",
+      "relation": "nominal trajectory; no global optimum guarantee",
+      "operations": [
+        "CasADi/IPOPT solve",
+        "apply first input",
+        "nonlinear replay"
+      ],
+      "dependencies": [
+        "Python environment",
+        "CasADi",
+        "do-mpc",
+        "IPOPT/MUMPS"
+      ],
+      "build": "external optional; acados prohibited",
+      "source": {
+        "path": "benchmarks/reporting/mpc11/run_nmpc.py",
+        "symbol": "benchmarks/reporting/mpc11/run_nmpc.py"
+      },
+      "model_classes": [
+        "source-admitted controller profile; see source and finite probe profile"
+      ],
+      "action_domain": "continuous bounded control box from named scenario",
+      "tolerance_policy": "MPC11 scenario and solver options; separate CVODES solve, collocation transcription, and adaptive RK4 replay settings.",
+      "budget_policy": "Finite horizon, solver iteration policy, and replay tolerances are pinned by each MPC11 scenario/profile."
+    },
+    {
+      "group": "supporting_operations",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.conversion.qhull",
+        "version": "1.0.0+qhull.8.0.2"
+      },
+      "role": "v_h_conversion",
+      "input": "bounded polyhedral request",
+      "output": "H/V polyhedron",
+      "dimension": "provider limits",
+      "assurance": "numerical with audit evidence",
+      "relation": "equivalent within checked conversion contract",
+      "operations": [
+        "Qhull H/V conversion"
+      ],
+      "dependencies": [
+        "CSL_ENABLE_QHULL",
+        "CSL_ENABLE_HIGHS"
+      ],
+      "build": "optional Qhull",
+      "source": {
+        "path": "src/adapters/polyhedral/qhull.cpp"
+      },
+      "model_classes": [
+        "typed source-admitted operation contract"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "supporting_operations",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.geometry.affine-sum",
+        "version": "1.0.0"
+      },
+      "role": "set_operation",
+      "input": "H polyhedra",
+      "output": "H polyhedron",
+      "dimension": "provider budgets",
+      "assurance": "numerical",
+      "relation": "equivalent within request contract",
+      "operations": [
+        "affine sum"
+      ],
+      "dependencies": [
+        "selected hull",
+        "selected LP",
+        "selected converter"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "src/geometry/affine_sum.cpp"
+      },
+      "model_classes": [
+        "typed source-admitted operation contract"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "supporting_operations",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.geometry.projection-materializer",
+        "version": "1.0.0"
+      },
+      "role": "set_operation",
+      "input": "polyhedral projection request",
+      "output": "materialized projected set",
+      "dimension": "provider budgets",
+      "assurance": "numerical",
+      "relation": "equivalent within conversion contract",
+      "operations": [
+        "projection",
+        "materialization"
+      ],
+      "dependencies": [
+        "selected conversion provider"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "src/geometry/polyhedral/projection.cpp"
+      },
+      "model_classes": [
+        "typed source-admitted operation contract"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "supporting_operations",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.geometry.generators.operations",
+        "version": "1.1.0"
+      },
+      "role": "generator_set_operations",
+      "input": "generator set",
+      "output": "generator set",
+      "dimension": "provider budgets",
+      "assurance": "numerical",
+      "relation": "equivalent",
+      "operations": [
+        "generator set operations"
+      ],
+      "dependencies": [],
+      "build": "CSL core",
+      "source": {
+        "path": "src/geometry/generators/adapter.cpp"
+      },
+      "model_classes": [
+        "typed source-admitted operation contract"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "supporting_operations",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.geometry.generators.v-conversion",
+        "version": "1.0.0"
+      },
+      "role": "representation_conversion",
+      "input": "generator set",
+      "output": "finite V polyhedron",
+      "dimension": "provider budgets",
+      "assurance": "numerical",
+      "relation": "equivalent",
+      "operations": [
+        "generator to V conversion"
+      ],
+      "dependencies": [],
+      "build": "CSL core",
+      "source": {
+        "path": "src/geometry/generators/adapter.cpp"
+      },
+      "model_classes": [
+        "typed source-admitted operation contract"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "supporting_operations",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.convex.highs",
+        "version": "1.0.0+highs.1.11.0"
+      },
+      "role": "terminal_optimizer",
+      "input": "supported binary64 convex program",
+      "output": "csl.program-result.v1",
+      "dimension": "native integer and resource limits",
+      "assurance": "numerical",
+      "relation": "optimization result, not a hull representation",
+      "operations": [
+        "QP/residual norm solve"
+      ],
+      "dependencies": [
+        "CSL_ENABLE_HIGHS"
+      ],
+      "build": "optional HiGHS",
+      "source": {
+        "path": "src/adapters/convex/highs.cpp"
+      },
+      "model_classes": [
+        "typed source-admitted operation contract"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "supporting_operations",
+      "kind": "public_function_route",
+      "identity": {
+        "symbol": "csl::synthesis::TerminalOptimizer::solve"
+      },
+      "role": "terminal_optimizer",
+      "input": "resolved problem and H-polyhedral terminal slice",
+      "output": "terminal optimization result",
+      "dimension": "profile-specific",
+      "assurance": "numerical",
+      "relation": "optimization result, not vertex LP",
+      "operations": [
+        "terminal cost minimization"
+      ],
+      "dependencies": [
+        "explicit convex/LP optimization selection"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "include/csl/synthesis/terminal_minimizers.hpp",
+        "symbol": "csl::synthesis::TerminalOptimizer::solve"
+      },
+      "route": "terminal optimizer; distinct from vertex LP",
+      "model_classes": [
+        "typed source-admitted operation contract"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "supporting_operations",
+      "kind": "public_function_route",
+      "identity": {
+        "symbol": "csl::geometry::quickhull_2d"
+      },
+      "role": "geometric_hull_reference",
+      "input": "2D binary64 point sequence",
+      "output": "source-index hull",
+      "dimension": "2 only",
+      "assurance": "exact orientation predicate for binary64 inputs",
+      "relation": "equivalent convex hull of supplied points",
+      "operations": [
+        "QuickHull2D"
+      ],
+      "dependencies": [],
+      "build": "CSL core; no HullReducerPort adapter",
+      "source": {
+        "path": "include/csl/geometry/quickhull_2d.hpp",
+        "symbol": "csl::geometry::quickhull_2d"
+      },
+      "model_classes": [
+        "typed source-admitted operation contract"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "vertex_lp_simplex",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "phase-one-bland",
+        "version": "1"
+      },
+      "role": "vertex_lp_provider",
+      "input": "zero-objective nonnegative-variable equality feasibility request",
+      "output": "csl.program-result.v1",
+      "dimension": "request and pivot limits",
+      "assurance": "numerical",
+      "relation": "feasibility/basis subroutine; not a terminal optimizer",
+      "operations": [
+        "Phase-I simplex",
+        "Bland entering priority"
+      ],
+      "dependencies": [],
+      "build": "CSL core",
+      "source": {
+        "path": "src/optimization/phase_one/simplex.cpp",
+        "symbol": "csl::optimization::phase_one::make_registration"
+      },
+      "model_classes": [
+        "finite binary64 point-cloud membership/reduction"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "vertex_lp_simplex",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "phase-one-priority-tie",
+        "version": "1"
+      },
+      "role": "vertex_lp_provider",
+      "input": "zero-objective nonnegative-variable equality feasibility request",
+      "output": "csl.program-result.v1",
+      "dimension": "request and pivot limits",
+      "assurance": "numerical",
+      "relation": "feasibility/basis subroutine; not a terminal optimizer",
+      "operations": [
+        "Phase-I simplex",
+        "caller-provided structural entering priorities"
+      ],
+      "dependencies": [],
+      "build": "CSL core",
+      "source": {
+        "path": "src/optimization/phase_one/simplex.cpp",
+        "symbol": "csl::optimization::phase_one::make_registration"
+      },
+      "model_classes": [
+        "finite binary64 point-cloud membership/reduction"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "vertex_lp_simplex",
+      "kind": "public_function_route",
+      "identity": {
+        "symbol": "csl::geometry::legacy_btulshor::modif"
+      },
+      "route": "faithful_simplex_variant",
+      "input": "legacy MODIF matrix and initial vector",
+      "output": "legacy pivot result",
+      "dimension": "explicit limits in legacy_btulshor::Limits",
+      "assurance": "source-faithful binary64 implementation with retained trace/capacity stops",
+      "relation": "source reference; do not treat as a registered HullReducerPort",
+      "operations": [
+        "MODIF pivot routine"
+      ],
+      "dependencies": [
+        "legacy_btulshor::source_modif_port and/or source_kpabep_port as required"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "include/csl/geometry/legacy_btulshor.hpp",
+        "symbol": "csl::geometry::legacy_btulshor::modif"
+      },
+      "immutable_evidence": "reports/algorithm-results/btulshor-source-faithful-20261110-v1/manifest.json",
+      "role": "source_faithful_vertex_reference",
+      "model_classes": [
+        "finite binary64 point-cloud membership/reduction"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "vertex_lp_simplex",
+      "kind": "public_function_route",
+      "identity": {
+        "symbol": "csl::geometry::legacy_btulshor::kpabep"
+      },
+      "route": "faithful_vertex_reducer_variant",
+      "input": "finite point sequence plus MODIF port",
+      "output": "retained source-index points",
+      "dimension": "explicit limits in legacy_btulshor::Limits",
+      "assurance": "source-faithful binary64 implementation with retained trace/capacity stops",
+      "relation": "source reference; do not treat as a registered HullReducerPort",
+      "operations": [
+        "KPABEP source reduction"
+      ],
+      "dependencies": [
+        "legacy_btulshor::source_modif_port and/or source_kpabep_port as required"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "include/csl/geometry/legacy_btulshor.hpp",
+        "symbol": "csl::geometry::legacy_btulshor::kpabep"
+      },
+      "immutable_evidence": "reports/algorithm-results/btulshor-source-faithful-20261110-v1/manifest.json",
+      "role": "source_faithful_vertex_reference",
+      "model_classes": [
+        "finite binary64 point-cloud membership/reduction"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "vertex_lp_simplex",
+      "kind": "public_function_route",
+      "identity": {
+        "symbol": "csl::geometry::legacy_btulshor::reach"
+      },
+      "route": "faithful_geometric_reference",
+      "input": "linear map and initial/control point sets",
+      "output": "propagated/reduced points with source pairs",
+      "dimension": "explicit limits in legacy_btulshor::Limits",
+      "assurance": "source-faithful binary64 implementation with retained trace/capacity stops",
+      "relation": "source reference; do not treat as a registered HullReducerPort",
+      "operations": [
+        "REACH composition of KPABEP and MODIF"
+      ],
+      "dependencies": [
+        "legacy_btulshor::source_modif_port and/or source_kpabep_port as required"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "include/csl/geometry/legacy_btulshor.hpp",
+        "symbol": "csl::geometry::legacy_btulshor::reach"
+      },
+      "immutable_evidence": "reports/algorithm-results/btulshor-source-faithful-20261110-v1/manifest.json",
+      "role": "source_faithful_vertex_reference",
+      "model_classes": [
+        "finite binary64 point-cloud membership/reduction"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No catalogue-wide value; concrete requests pin FamilyRequest.numerical or ExecutionContext numerical policy.",
+      "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
+    },
+    {
+      "group": "reachable_set_representation",
+      "kind": "public_representation_type",
+      "identity": {
+        "symbol": "csl::sets::HRepresentation"
+      },
+      "role": "polytope_halfspace_encoding",
+      "representation": "polytope.h",
+      "input": "owning numeric buffers with ambient dimension/coordinate labels",
+      "output": "typed set representation",
+      "dimension": "stored dimension; validate request at construction",
+      "assurance": "representation type alone makes no numeric/exactness claim",
+      "relation": "encoding of a set; conversion contract determines equivalence/approximation",
+      "operations": [
+        "native set storage"
+      ],
+      "dependencies": [],
+      "build": "CSL core",
+      "source": {
+        "path": "include/csl/sets/data.hpp",
+        "symbol": "csl::sets::HRepresentation"
+      },
+      "model_classes": [
+        "any model that produces a compatible finite-dimensional set"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No approximation tolerance in the representation type.",
+      "budget_policy": "Caller-provided owning buffers and construction checks."
+    },
+    {
+      "group": "reachable_set_representation",
+      "kind": "public_representation_type",
+      "identity": {
+        "symbol": "csl::sets::VRepresentation"
+      },
+      "role": "polytope_vertex_ray_encoding",
+      "representation": "polytope.v",
+      "input": "owning numeric buffers with ambient dimension/coordinate labels",
+      "output": "typed set representation",
+      "dimension": "stored dimension; validate request at construction",
+      "assurance": "representation type alone makes no numeric/exactness claim",
+      "relation": "encoding of a set; conversion contract determines equivalence/approximation",
+      "operations": [
+        "native set storage"
+      ],
+      "dependencies": [],
+      "build": "CSL core",
+      "source": {
+        "path": "include/csl/sets/data.hpp",
+        "symbol": "csl::sets::VRepresentation"
+      },
+      "model_classes": [
+        "any model that produces a compatible finite-dimensional set"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No approximation tolerance in the representation type.",
+      "budget_policy": "Caller-provided owning buffers and construction checks."
+    },
+    {
+      "group": "reachable_set_representation",
+      "kind": "public_function_route",
+      "identity": {
+        "symbol": "csl::reachability::finite_plan_box"
+      },
+      "role": "box_fixed_plan_trace",
+      "input": "affine fixed-plan request",
+      "output": "stage boxes",
+      "dimension": "n>=1",
+      "assurance": "numerical",
+      "relation": "outer",
+      "operations": [
+        "interval affine propagation"
+      ],
+      "dependencies": [
+        "finite-plan request and explicit resource caps"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "include/csl/reachability/finite_plan_box.hpp",
+        "symbol": "csl::reachability::finite_plan_box"
+      },
+      "model_classes": [
+        "discrete affine fixed-plan propagation"
+      ],
+      "action_domain": "authored fixed open-loop controls; no feedback recovery",
+      "tolerance_policy": "ExecutionContext numerical policy supplied by caller.",
+      "budget_policy": "Function-specific limits in request/API."
+    },
+    {
+      "group": "reachable_set_representation",
+      "kind": "public_function_route",
+      "identity": {
+        "symbol": "csl::reachability::finite_plan_zonotope"
+      },
+      "role": "zonotope_fixed_plan_trace",
+      "input": "affine fixed-plan request",
+      "output": "stage zonotopes",
+      "dimension": "n>=1, explicit generator limit",
+      "assurance": "numerical",
+      "relation": "outer",
+      "operations": [
+        "generator propagation and reduction"
+      ],
+      "dependencies": [
+        "finite-plan request and explicit resource caps"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "include/csl/reachability/finite_plan_zonotope.hpp",
+        "symbol": "csl::reachability::finite_plan_zonotope"
+      },
+      "model_classes": [
+        "discrete affine fixed-plan propagation"
+      ],
+      "action_domain": "authored fixed open-loop controls; no feedback recovery",
+      "tolerance_policy": "ExecutionContext numerical policy supplied by caller.",
+      "budget_policy": "Function-specific limits in request/API."
+    },
+    {
+      "group": "reachable_set_representation",
+      "kind": "public_function_route",
+      "identity": {
+        "symbol": "csl::reachability::finite_plan_parallelotope"
+      },
+      "role": "parallelotope_fixed_plan_trace",
+      "input": "affine fixed-plan TwoPoints request",
+      "output": "stage parallelotopes",
+      "dimension": "four-state authored frame",
+      "assurance": "numerical",
+      "relation": "outer",
+      "operations": [
+        "fixed-frame affine propagation"
+      ],
+      "dependencies": [
+        "finite-plan request and explicit resource caps"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "include/csl/reachability/finite_plan_parallelotope.hpp",
+        "symbol": "csl::reachability::finite_plan_parallelotope"
+      },
+      "model_classes": [
+        "discrete affine fixed-plan propagation"
+      ],
+      "action_domain": "authored fixed open-loop controls; no feedback recovery",
+      "tolerance_policy": "ExecutionContext numerical policy supplied by caller.",
+      "budget_policy": "Function-specific limits in request/API."
+    },
+    {
+      "group": "reachable_set_representation",
+      "kind": "public_function_route",
+      "identity": {
+        "symbol": "csl::reachability::finite_plan_ellipsoid"
+      },
+      "role": "ellipsoid_fixed_plan_trace",
+      "input": "affine fixed-plan request",
+      "output": "stage ellipsoids",
+      "dimension": "n>=1",
+      "assurance": "numerical",
+      "relation": "outer",
+      "operations": [
+        "interval propagation and sqrt(n) enlargement"
+      ],
+      "dependencies": [
+        "finite-plan request and explicit resource caps"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "include/csl/reachability/finite_plan_ellipsoid.hpp",
+        "symbol": "csl::reachability::finite_plan_ellipsoid"
+      },
+      "model_classes": [
+        "discrete affine fixed-plan propagation"
+      ],
+      "action_domain": "authored fixed open-loop controls; no feedback recovery",
+      "tolerance_policy": "ExecutionContext numerical policy supplied by caller.",
+      "budget_policy": "Function-specific limits in request/API."
+    },
+    {
+      "group": "controller",
+      "kind": "public_function_route",
+      "identity": {
+        "symbol": "csl::reachability::finite_feedback::solve"
+      },
+      "role": "finite_table_feasibility_controller",
+      "input": "exact finite transition table with safety and target sets",
+      "output": "all admissible state/action policy table",
+      "dimension": "finite state/action/disturbance catalogues",
+      "assurance": "exact table semantics",
+      "relation": "feasibility only; no cost-optimality claim",
+      "operations": [
+        "causal feasible-action recursion"
+      ],
+      "dependencies": [
+        "explicit complete finite transition table"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "include/csl/reachability/finite_feedback.hpp",
+        "symbol": "csl::reachability::finite_feedback::solve"
+      },
+      "model_classes": [
+        "finite deterministic or finite disturbance transition table"
+      ],
+      "action_domain": "finite authored action IDs",
+      "tolerance_policy": "Not applicable to exact table recursion.",
+      "budget_policy": "Explicit finite table dimensions."
+    },
+    {
+      "group": "controller",
+      "kind": "public_function_route",
+      "identity": {
+        "symbol": "csl::optimization::finite_causal_minimax::solve"
+      },
+      "role": "finite_table_cost_controller",
+      "input": "exact finite stage-local transition game and terminal costs",
+      "output": "optimal feasible action IDs by state and stage",
+      "dimension": "finite stage/state/action/disturbance catalogues",
+      "assurance": "binary64 dynamic programming with declared value tolerances",
+      "relation": "optimal for the supplied finite table and terminal objective",
+      "operations": [
+        "causal Bellman recursion"
+      ],
+      "dependencies": [
+        "complete exact-state IDs and terminal costs"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "include/csl/optimization/finite_causal_minimax.hpp",
+        "symbol": "csl::optimization::finite_causal_minimax::solve"
+      },
+      "model_classes": [
+        "finite transition table; not a generic continuous model"
+      ],
+      "action_domain": "finite authored action IDs",
+      "tolerance_policy": "Options absolute and relative value tolerances.",
+      "budget_policy": "Finite table storage and exact declared state catalogues."
+    },
+    {
+      "group": "controller",
+      "kind": "public_function_route",
+      "identity": {
+        "symbol": "csl::reachability::nominal_forward"
+      },
+      "role": "forward_reachable_relation",
+      "input": "registered discrete affine nominal problem and prepared geometry/conversion providers",
+      "output": "forward marginal tube with recovery factors",
+      "dimension": "source-profile-specific",
+      "assurance": "numerical set-operation evidence",
+      "relation": "profile contract; not a selected policy or controller by itself",
+      "operations": [
+        "projection",
+        "affine sum",
+        "conversion to H"
+      ],
+      "dependencies": [
+        "prepared geometry providers",
+        "prepared affine-sum provider",
+        "prepared converter"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "include/csl/reachability/nominal_forward.hpp",
+        "symbol": "csl::reachability::nominal_forward"
+      },
+      "model_classes": [
+        "discrete affine nominal control"
+      ],
+      "action_domain": "all continuous controls admitted by the native H model",
+      "tolerance_policy": "Per-provider request requirements and execution numerical context.",
+      "budget_policy": "Provider request budgets and point/capacity limits."
+    },
+    {
+      "group": "supporting_operations",
+      "kind": "public_function_route",
+      "identity": {
+        "symbol": "csl::geometry::polyhedral::intersect_h"
+      },
+      "role": "polyhedral_set_operation",
+      "input": "two H-polyhedral sets",
+      "output": "H-polyhedral intersection",
+      "dimension": "compatible ambient dimension",
+      "assurance": "validated structural H-row concatenation",
+      "relation": "equivalent intersection",
+      "operations": [
+        "H inequality/equality concatenation"
+      ],
+      "dependencies": [
+        "explicit output SetId"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "include/csl/geometry/polyhedral_intersection.hpp",
+        "symbol": "csl::geometry::polyhedral::intersect_h"
+      },
+      "model_classes": [
+        "polyhedral sets"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "No numeric geometric tolerance; set construction validates structure.",
+      "budget_policy": "Input row/storage capacity."
+    },
+    {
+      "group": "supporting_operations",
+      "kind": "public_function_route",
+      "identity": {
+        "symbol": "csl::geometry::polyhedral::remove_redundant_halfspaces"
+      },
+      "role": "H_halfspace_reduction",
+      "input": "H polyhedron and LPWorkspace",
+      "output": "reduced H polyhedron with retained-row evidence",
+      "dimension": "solver and row budgets",
+      "assurance": "numerical lower-bound evidence; unsupported rows retained",
+      "relation": "equivalent when complete",
+      "operations": [
+        "LP-based H-row redundancy"
+      ],
+      "dependencies": [
+        "selected LP workspace"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "include/csl/geometry/polyhedral_intersection.hpp",
+        "symbol": "csl::geometry::polyhedral::remove_redundant_halfspaces"
+      },
+      "model_classes": [
+        "H polyhedra"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "ExecutionContext numerical policy.",
+      "budget_policy": "Input row count and selected LP provider policy."
+    },
+    {
+      "group": "controller",
+      "kind": "public_function_route",
+      "identity": {
+        "symbol": "csl::reachability::prepare_nominal_predecessor"
+      },
+      "role": "predecessor_and_recovery_operation",
+      "input": "nominal affine terminal slice with prepared geometry dependencies",
+      "output": "predecessor relation and recovery metadata",
+      "dimension": "native affine profile and provider budgets",
+      "assurance": "numerical set-operation evidence",
+      "relation": "profile-dependent feasible predecessor",
+      "operations": [
+        "projection",
+        "affine sum",
+        "H/V conversion",
+        "recovery relation"
+      ],
+      "dependencies": [
+        "prepared geometry/conversion providers"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "include/csl/reachability/nominal_predecessor.hpp",
+        "symbol": "csl::reachability::prepare_nominal_predecessor"
+      },
+      "model_classes": [
+        "discrete affine nominal control"
+      ],
+      "action_domain": "all continuous controls in the native affine model",
+      "tolerance_policy": "Selected provider requirements and ExecutionContext numerical policy.",
+      "budget_policy": "Provider request budgets and operation limits."
+    }
+  ],
+  "finite_probe_profiles": [
+    {
+      "id": "vertex-square-2d-v1",
+      "groups": [
+        "vertex_lp_simplex"
+      ],
+      "profile": "five point 2D square with one strict interior point",
+      "expected_hull_indices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "native_resolution": "HullReducerPort plus selected LPPort prepare; execute and inspect actual query receipts",
+      "scope": "functional admission probe only; not a benchmark"
+    },
+    {
+      "id": "controller-ts01-integrator-v1",
+      "groups": [
+        "controller",
+        "supporting_operations"
+      ],
+      "profile": "two-step scalar integrator exact-family synthesis",
+      "native_resolution": "StrategyRegistry::prepare plus pinned re-prepare; full strategy dependency prepare is authoritative",
+      "scope": "functional admission probe only; observed invocations require execution instrumentation"
+    },
+    {
+      "id": "reachability-dimension-profiles-v1",
+      "groups": [
+        "reachable_set_representation",
+        "supporting_operations"
+      ],
+      "dimensions": [
+        2,
+        4
+      ],
+      "profile": "finite affine known-initial-point smoke profiles",
+      "scope": "function contracts do not imply generic registry admission; incompatible dimensions and missing adapters retain explicit rows"
+    }
+  ],
+  "canonicalization": {
+    "inactive_slot": "not_used",
+    "equivalent_graphs": "one canonical candidate with aliases retained",
+    "optimizer_role": "terminal_optimizer",
+    "vertex_lp_role": "vertex_lp_provider",
+    "required_statuses": [
+      "admitted",
+      "incompatible",
+      "implementation_missing",
+      "backend_unavailable",
+      "excluded"
+    ],
+    "first_failure": "retain first provider/admission diagnostic and requested tuple"
+  },
+  "limitations": [
+    "No nonlinear closed-loop reachability guarantee is implied.",
+    "Strategy preparation proves required dependency admission, not that execution invoked each dependency.",
+    "Continuous parameter spaces are represented only by named finite profiles.",
+    "External acados execution and installation remain prohibited.",
+    "Build availability and native admission receipts must be emitted by the exact compiled build; this source inventory alone is not a receipt."
+  ],
+  "repository_basis_commit": "ff451f74d90d70cd9dd228889fa77c181fc1fd26",
+  "identity_policy": "Registered provider IDs and versions are source literals. Public functions are identified by exported C++ symbols without invented version IDs.",
+  "known_candidate_classifications": [
+    {
+      "candidate_id": "representation/finite-plan-parallelotope/dimension-2-v1",
+      "status": "incompatible",
+      "module_tuple": {
+        "representation": "parallelotope",
+        "route": "finite_plan_parallelotope"
+      },
+      "first_unmet": {
+        "field": "request.dimension",
+        "reason": "The delivered fixed-frame parallelotope trace requires its four-state TwoPoints profile."
+      },
+      "source": "include/csl/reachability/finite_plan_parallelotope.hpp"
+    },
+    {
+      "candidate_id": "geometry/quickhull2d/point-cloud-dimension-4-v1",
+      "status": "incompatible",
+      "module_tuple": {
+        "geometric_hull": "csl::geometry::quickhull_2d",
+        "input_dimension": 4
+      },
+      "first_unmet": {
+        "field": "points.dimension",
+        "reason": "QuickHull2D accepts two-dimensional points only; no projection is inserted implicitly."
+      },
+      "source": "include/csl/geometry/quickhull_2d.hpp"
+    },
+    {
+      "candidate_id": "controller/orbit/nonlinear-feedback-bridge-v1",
+      "status": "implementation_missing",
+      "module_tuple": {
+        "controller": "MPC11 nominal local NMPC",
+        "environment": "Earth-orbit pilot"
+      },
+      "first_unmet": {
+        "field": "environment.adapter",
+        "reason": "No source-supported MPC11 orbit model/episode adapter exists."
+      },
+      "source": "docs/research/three-environment-closed-loop-matrix-audit.md"
+    },
+    {
+      "candidate_id": "controller/approximate-representation/predecessor-recovery-v1",
+      "status": "implementation_missing",
+      "module_tuple": {
+        "controller": "reachable-set predecessor/recovery",
+        "representation": "box|zonotope|parallelotope|ellipsoid"
+      },
+      "first_unmet": {
+        "field": "controller.adapter",
+        "reason": "The finite-plan traces do not provide the common feedback predecessor and first-action recovery route."
+      },
+      "source": "docs/research/three-environment-closed-loop-matrix-audit.md"
+    },
+    {
+      "candidate_id": "controller/mpc11/acados-backend-v1",
+      "status": "excluded",
+      "module_tuple": {
+        "controller": "MPC11",
+        "backend": "acados"
+      },
+      "first_unmet": {
+        "field": "policy.acados",
+        "reason": "The existing MPC11 contract prohibits acados execution and installation."
+      },
+      "source": "docs/contracts/mpc11-synthetic-controller-study.md"
+    }
+  ],
+  "build_dependent_classifications": [
+    {
+      "candidate_id": "supporting/qhull-conversion/build-profile-v1",
+      "status_when_CSL_ENABLE_QHULL_false": "backend_unavailable",
+      "status_when_CSL_ENABLE_QHULL_true": "requires concrete converter prepare receipt",
+      "first_unmet_when_unavailable": {
+        "field": "build.CSL_ENABLE_QHULL",
+        "reason": "Qhull converter target is not compiled in this build."
+      },
+      "source": "src/adapters/polyhedral/qhull.cpp"
+    }
+  ],
+  "output_contract": {
+    "candidate_statuses": "admission result with actual first failure",
+    "provider_receipts": "requested and actual identity plus version from concrete prepare",
+    "execution_receipts": "observed provider-call records only; prepared dependencies are not invocation counts",
+    "dimensions_actions_models": "profile data is pinned to each finite candidate; source inventory describes reusable module limits"
+  }
+}

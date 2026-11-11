@@ -68,21 +68,24 @@ TEST_CASE("catalogue resolves every expected vertex reducer and selected LP prov
                 std::get<geometry::PreparedHullCandidate>(std::move(prepared)));
             REQUIRE(std::holds_alternative<geometry::HullReduction>(execution.reduction));
             const auto& reduction = std::get<geometry::HullReduction>(execution.reduction);
-            // Preparation proves this concrete module tuple is admitted. A
-            // finite fixture run is separate evidence and may conservatively
-            // retain a point when a numerical query is inconclusive.
-            CHECK(std::all_of(reduction.retained.begin(), reduction.retained.end(),
-                [&](std::size_t index) { return index < fixture_cloud().points.size(); }));
-            REQUIRE(execution.provenance.size() == 2);
-            CHECK(execution.provenance[0].actual->id == candidate.vertex_reducer.id);
-            CHECK(execution.provenance[0].actual->version == candidate.vertex_reducer.version);
-            CHECK(execution.provenance[1].actual->id == candidate.vertex_lp.id);
-            CHECK(execution.provenance[1].actual->version == candidate.vertex_lp.version);
-            for (const auto& query : execution.vertex_lp_queries)
-                if (const auto* completed = std::get_if<registry::LPQueryCompleted>(&query)) {
-                    CHECK(completed->provider.actual->id == candidate.vertex_lp.id);
-                    CHECK(completed->provider.actual->version == candidate.vertex_lp.version);
-                }
+            // The square's four corners are independently known extreme points;
+            // its center is strictly interior and must be removed.
+            CHECK(std::set<std::size_t>(reduction.retained.begin(),reduction.retained.end()) ==
+                std::set<std::size_t>{0,1,2,3});
+            REQUIRE(execution.prepared_providers.size() == 2);
+            CHECK(execution.prepared_providers[0].actual->id == candidate.vertex_reducer.id);
+            CHECK(execution.prepared_providers[0].actual->version == candidate.vertex_reducer.version);
+            CHECK(execution.prepared_providers[1].actual->id == candidate.vertex_lp.id);
+            CHECK(execution.prepared_providers[1].actual->version == candidate.vertex_lp.version);
+            if (candidate.vertex_reducer.id.value == "csl.hull.lp-membership")
+                REQUIRE_FALSE(execution.outer_lp_runner_queries.empty());
+            CHECK(std::all_of(execution.outer_lp_runner_queries.begin(),execution.outer_lp_runner_queries.end(),
+                [](const auto& query) { return std::holds_alternative<registry::LPQueryCompleted>(query); }));
+            for (const auto& query : execution.outer_lp_runner_queries) {
+                const auto& completed = std::get<registry::LPQueryCompleted>(query);
+                CHECK(completed.provider.actual->id == candidate.vertex_lp.id);
+                CHECK(completed.provider.actual->version == candidate.vertex_lp.version);
+            }
             ++admitted_graphs;
         }
         CHECK(candidate_ids.size() == expected_hull_methods.size());

@@ -32,6 +32,14 @@ if(TARGET CSL::highs_lp)
   csl_test_target(recursive_reducer_test geometry)
 endif()
 
+add_test(NAME module_composition_inventory_source_check
+  COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/catalogue/validate_inventory.py ${PROJECT_SOURCE_DIR})
+add_test(NAME module_composition_catalogue_cli
+  COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/catalogue/check_output.py
+    $<TARGET_FILE:csl_module_composition_catalogue> ${PROJECT_SOURCE_DIR})
+set_tests_properties(module_composition_inventory_source_check module_composition_catalogue_cli
+  PROPERTIES LABELS geometry)
+
 add_executable(quickhull_2d_test tests/unit/geometry/quickhull_2d_test.cpp)
 target_link_libraries(quickhull_2d_test PRIVATE CSL::quickhull_2d doctest::doctest)
 add_test(NAME quickhull_2d_test COMMAND quickhull_2d_test)

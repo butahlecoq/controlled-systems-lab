@@ -256,6 +256,12 @@ set_target_properties(installed_registry_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_registry_client COMMAND installed_registry_client)
 set_tests_properties(installed_registry_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed registry client: retained custom-port fixture and exclusive workspaces passed")
+add_executable(installed_strategy_catalogue_client strategy_catalogue_client.cpp)
+target_link_libraries(installed_strategy_catalogue_client PRIVATE CSL::registry CSL::resolved_problem CSL::strategy_ts01)
+set_target_properties(installed_strategy_catalogue_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_strategy_catalogue_client COMMAND installed_strategy_catalogue_client)
+set_tests_properties(installed_strategy_catalogue_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed strategy catalogue client: concrete TS01 admission and re-prepare passed")
 
 add_executable(installed_provider_client provider_client.cpp)
 target_link_libraries(installed_provider_client PRIVATE CSL::registry CSL::optimization)
@@ -349,7 +355,7 @@ target_link_libraries(installed_hull_reducer_client PRIVATE CSL::hull CSL::highs
 set_target_properties(installed_hull_reducer_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_hull_reducer_client COMMAND installed_hull_reducer_client)
 set_tests_properties(installed_hull_reducer_client PROPERTIES
-  PASS_REGULAR_EXPRESSION "Installed hull client: each membership LP passed registered-provider admission")
+  PASS_REGULAR_EXPRESSION "Installed hull client: canonical square and completed registered LP receipts passed")
 
 
 endif()

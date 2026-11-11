@@ -2,8 +2,10 @@
 #include <doctest/doctest.h>
 #include <csl/registry/registry.hpp>
 #include <csl/registry/provider.hpp>
+#include <csl/registry/strategy_catalogue.hpp>
 #include <limits>
 #include <functional>
+#include <set>
 #include "fixtures.hpp"
 
 using namespace csl;
@@ -40,6 +42,81 @@ TEST_CASE("registry identity snapshots reflect actual registrations in stable mo
     REQUIRE(strategy_identities.size() == 1);
     CHECK(strategy_identities[0].id.value == "fixture-strategy");
     CHECK(strategy_identities[0].version == "fixture-1");
+}
+
+TEST_CASE("strategy catalogue enumerates an independent registry universe and prepares concrete requests") {
+    Registry<LPPort> dependencies;
+    REQUIRE_FALSE(dependencies.add(endpoint_registration()));
+    StrategyRegistry strategies;
+    REQUIRE_FALSE(strategies.add(forward_registration(dependencies,"candidate-a")));
+    REQUIRE_FALSE(strategies.add(forward_registration(dependencies,"candidate-b")));
+
+    auto request = strategy_request();
+    request.configuration = {{}, {"endpoint"}, {}, {}, {}, {}, {}, {}, {}};
+    const auto rows = enumerate_strategy_candidates(strategies,request);
+    const std::set<std::string> independently_expected{"candidate-a", "candidate-b"};
+    std::set<std::string> observed;
+    REQUIRE(rows.size() == independently_expected.size());
+    for (const auto& row : rows) {
+        if (row.rejection && !row.rejection->diagnostics.empty()) {
+            INFO(row.rejection->diagnostics.front().field << ": " <<
+                row.rejection->diagnostics.front().explanation);
+        }
+        CHECK(row.status == CandidateStatus::admitted);
+        CHECK((row.graph.module_slots[2] == std::pair<std::string,std::string>{"convex","not_used"}));
+        CHECK((row.graph.module_slots[3] == std::pair<std::string,std::string>{"hull","not_used"}));
+        CHECK(observed.insert(row.graph.strategy.id.value).second);
+        CHECK(row.prepared.has_value());
+        REQUIRE_FALSE(row.provenance.empty());
+        REQUIRE(row.provenance.front().actual.has_value());
+        CHECK(row.provenance.front().actual->id == row.graph.strategy.id);
+        CHECK(row.provenance.front().actual->version == row.graph.strategy.version);
+
+        auto generated = request;
+        generated.configuration.strategy = row.graph.strategy.id;
+        generated.strategy_version = row.graph.strategy.version;
+        auto prepared = prepare_strategy_candidate(strategies,row.graph,generated);
+        REQUIRE(std::holds_alternative<PreparedStrategyCandidate>(prepared));
+        const auto& receipt = std::get<PreparedStrategyCandidate>(prepared);
+        REQUIRE_FALSE(receipt.provenance.empty());
+        CHECK(receipt.provenance.front().actual->id == row.graph.strategy.id);
+    }
+    CHECK(observed == independently_expected);
+
+    auto altered = request;
+    altered.configuration.strategy = rows.front().graph.strategy.id;
+    altered.strategy_version = rows.front().graph.strategy.version;
+    altered.configuration.hull = {"unused-but-selected"};
+    CHECK(std::holds_alternative<Rejection>(prepare_strategy_candidate(
+        strategies,rows.front().graph,altered)));
+    altered = request;
+    altered.configuration.strategy = rows.front().graph.strategy.id;
+    altered.strategy_version = rows.front().graph.strategy.version;
+    altered.configuration.lp = {"substituted-lp"};
+    CHECK(std::holds_alternative<Rejection>(prepare_strategy_candidate(
+        strategies,rows.front().graph,altered)));
+    altered = request;
+    altered.configuration.strategy = rows.front().graph.strategy.id;
+    altered.strategy_version = rows.front().graph.strategy.version;
+    altered.configuration.converter = {"substituted-converter"};
+    CHECK(std::holds_alternative<Rejection>(prepare_strategy_candidate(
+        strategies,rows.front().graph,altered)));
+    altered = request;
+    altered.configuration.strategy = rows.front().graph.strategy.id;
+    altered.strategy_version = "substituted-version";
+    CHECK(std::holds_alternative<Rejection>(prepare_strategy_candidate(
+        strategies,rows.front().graph,altered)));
+
+    Requirements validated;
+    validated.output.assurance = Assurance::validated;
+    const auto rejected_rows = enumerate_strategy_candidates(strategies,request,validated);
+    REQUIRE(rejected_rows.size() == independently_expected.size());
+    for (const auto& row : rejected_rows) {
+        CHECK(row.status == CandidateStatus::incompatible);
+        REQUIRE(row.rejection.has_value());
+        REQUIRE_FALSE(row.rejection->diagnostics.empty());
+        CHECK(row.rejection->diagnostics.front().field == "family");
+    }
 }
 
 namespace {
