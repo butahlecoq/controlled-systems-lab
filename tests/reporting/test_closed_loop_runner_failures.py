@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -15,8 +16,28 @@ import run_closed_loop
 
 
 class ClosedLoopRunnerFailureTests(unittest.TestCase):
+    def test_initial_only_receipts_remain_interpretable(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw); attempt = root / "syn-nl-lv-01" / "attempts" / "attempt-1"
+            attempt.mkdir(parents=True)
+            (attempt / "attempt.json").write_text(json.dumps({
+                "attempt_id": "attempt-1", "task_id": "syn-nl-lv-01/continuous-receding/1",
+                "status": "complete", "algorithm_status": "complete", "overall_status": "complete",
+                "completed_holds": 30, "independent_replay": {
+                    "common": {"status": "complete"}, "tight": {"status": "complete"}},
+                "render": {"status": "complete"}}), encoding="utf-8")
+            (attempt / "postcheck-initial.json").write_text(json.dumps({
+                "postcheck_id": "initial", "postcheck_status": "complete", "render_status": "complete",
+                "results": {"common": {"status": "complete"}, "tight": {"status": "complete"}}}),
+                encoding="utf-8")
+            coverage = json.loads(run_closed_loop.write_coverage(root).read_text(encoding="utf-8"))
+            row = coverage["attempts"][0]
+            self.assertEqual(row["phase_receipt_ordering"], "initial-record-only")
+            self.assertEqual(row["overall_status"], "complete")
+
     def coverage_with_retry(self, *, original_overall: str, retry_postcheck: str,
-                            retry_render: str) -> tuple[dict, bool]:
+                            retry_render: str, event_order: tuple[str, ...] | None = ("postcheck-retry", "render-retry"),
+                            receipt_mtimes: tuple[int, int] | None = None) -> tuple[dict, bool]:
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw)
             attempt = root / "syn-nl-lv-01" / "attempts" / "attempt-1"
@@ -31,12 +52,23 @@ class ClosedLoopRunnerFailureTests(unittest.TestCase):
             record_path.write_text(json.dumps(record), encoding="utf-8")
             original_bytes = record_path.read_bytes()
             postcheck_statuses = ("complete", "complete") if retry_postcheck == "complete" else ("failed", "complete")
-            (attempt / "postcheck-retry.json").write_text(json.dumps({
+            postcheck_path = attempt / "postcheck-retry.json"
+            postcheck_path.write_text(json.dumps({
                 "postcheck_id": "postcheck-retry", "postcheck_status": retry_postcheck,
-                "render_status": "complete", "results": {
+                "render_status": retry_render, "results": {
                     "common": {"status": postcheck_statuses[0]},
                     "tight": {"status": postcheck_statuses[1]}}}), encoding="utf-8")
-            (attempt / "render-retry-1.json").write_text(json.dumps({"status": retry_render}), encoding="utf-8")
+            render_path = attempt / "render-retry-1.json"
+            render_path.write_text(json.dumps({"render_id": "render-retry", "status": retry_render}), encoding="utf-8")
+            if event_order is not None:
+                for event_type in event_order:
+                    if event_type == "postcheck-retry":
+                        run_closed_loop.append_phase_event(attempt, event_type, "postcheck-retry", postcheck_path)
+                    else:
+                        run_closed_loop.append_phase_event(attempt, event_type, "render-retry", render_path)
+            if receipt_mtimes is not None:
+                os.utime(postcheck_path, ns=(receipt_mtimes[0], receipt_mtimes[0]))
+                os.utime(render_path, ns=(receipt_mtimes[1], receipt_mtimes[1]))
             coverage = json.loads(run_closed_loop.write_coverage(root).read_text(encoding="utf-8"))
             return coverage["attempts"][0], record_path.read_bytes() == original_bytes
 
@@ -55,6 +87,113 @@ class ClosedLoopRunnerFailureTests(unittest.TestCase):
                          ("complete", "complete", "complete"))
         self.assertEqual(row["overall_status"], "complete")
         self.assertTrue(unchanged)
+
+    def test_phase_event_order_survives_reversed_and_equal_receipt_mtimes(self):
+        # Premise under test: receipt file mtimes do not define retry chronology.
+        # The same append ledger must produce the same phases after copy/reorder.
+        cases = [
+            (("postcheck-retry", "render-retry"), "failed", "complete"),
+            (("render-retry", "postcheck-retry"), "failed", "failed"),
+        ]
+        for order, postcheck, render in cases:
+            with self.subTest(order=order):
+                reordered, _ = self.coverage_with_retry(original_overall="complete",
+                    retry_postcheck=postcheck, retry_render=render, event_order=order,
+                    receipt_mtimes=(20_000_000, 10_000_000))
+                equal, _ = self.coverage_with_retry(original_overall="complete",
+                    retry_postcheck=postcheck, retry_render=render, event_order=order,
+                    receipt_mtimes=(10_000_000, 10_000_000))
+                expected_render = render
+                self.assertEqual(reordered["phase_receipt_ordering"], "sequenced")
+                self.assertEqual(equal["phase_receipt_ordering"], "sequenced")
+                self.assertEqual((reordered["postcheck_status"], reordered["render_status"]),
+                                 (equal["postcheck_status"], equal["render_status"]))
+                self.assertEqual(reordered["postcheck_status"], postcheck)
+                self.assertEqual(reordered["render_status"], expected_render)
+
+    def test_legacy_cross_type_retries_remain_explicitly_ambiguous_after_copy(self):
+        first, _ = self.coverage_with_retry(original_overall="complete", retry_postcheck="failed",
+            retry_render="complete", event_order=(), receipt_mtimes=(20_000_000, 10_000_000))
+        equal, _ = self.coverage_with_retry(original_overall="complete", retry_postcheck="failed",
+            retry_render="complete", event_order=(), receipt_mtimes=(10_000_000, 10_000_000))
+        for row in (first, equal):
+            self.assertEqual(row["phase_receipt_ordering"], "ambiguous_legacy_unsequenced_retries")
+            self.assertEqual(row["postcheck_status"], "ordering_ambiguous")
+            self.assertEqual(row["render_status"], "ordering_ambiguous")
+            self.assertEqual(row["overall_status"], "incomplete")
+
+    def test_legacy_postcheck_mtime_cannot_select_authoritative_retry(self):
+        def coverage_with_mtimes(first_mtime: int, second_mtime: int) -> dict:
+            with tempfile.TemporaryDirectory() as raw:
+                root = Path(raw); attempt = root / "syn-nl-lv-01" / "attempts" / "attempt-1"
+                attempt.mkdir(parents=True)
+                (attempt / "attempt.json").write_text(json.dumps({
+                    "attempt_id": "attempt-1", "task_id": "syn-nl-lv-01/continuous-receding/1",
+                    "status": "complete", "algorithm_status": "complete", "overall_status": "complete",
+                    "postcheck_status": "complete", "render_status": "complete", "completed_holds": 30,
+                    "independent_replay": {"common": {"status": "complete"}, "tight": {"status": "complete"}},
+                    "render": {"status": "complete"}}), encoding="utf-8")
+                receipts = [
+                    attempt / "postcheck-a.json",
+                    attempt / "postcheck-b.json",
+                ]
+                for path, status in zip(receipts, ("complete", "failed")):
+                    path.write_text(json.dumps({"postcheck_id": path.stem,
+                        "postcheck_status": status, "render_status": "complete",
+                        "results": {"common": {"status": status}, "tight": {"status": "complete"}}}),
+                        encoding="utf-8")
+                os.utime(receipts[0], ns=(first_mtime, first_mtime))
+                os.utime(receipts[1], ns=(second_mtime, second_mtime))
+                coverage = json.loads(run_closed_loop.write_coverage(root).read_text(encoding="utf-8"))
+                return coverage["attempts"][0]
+
+        failed_newer = coverage_with_mtimes(10_000_000, 20_000_000)
+        complete_newer = coverage_with_mtimes(20_000_000, 10_000_000)
+        equal = coverage_with_mtimes(10_000_000, 10_000_000)
+        for row in (failed_newer, complete_newer, equal):
+            self.assertEqual(row["phase_receipt_ordering"], "ambiguous_legacy_unsequenced_retries")
+            self.assertEqual(row["postcheck_status"], "ordering_ambiguous")
+            self.assertEqual(row["overall_status"], "incomplete")
+
+    def test_phase_ledger_rejects_duplicate_receipts_and_changed_hashes(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw); attempt = root / "syn-nl-lv-01" / "attempts" / "attempt-1"
+            attempt.mkdir(parents=True)
+            (attempt / "attempt.json").write_text(json.dumps({
+                "attempt_id": "attempt-1", "task_id": "syn-nl-lv-01/continuous-receding/1",
+                "status": "complete", "algorithm_status": "complete", "overall_status": "complete",
+                "postcheck_status": "complete", "render_status": "complete", "completed_holds": 30,
+                "independent_replay": {"common": {"status": "complete"}, "tight": {"status": "complete"}},
+                "render": {"status": "complete"}}), encoding="utf-8")
+            postcheck = attempt / "postcheck-retry-1.json"
+            postcheck.write_text(json.dumps({"postcheck_id": "postcheck-retry-1", "postcheck_status": "failed",
+                "render_status": "failed", "results": {"common": {"status": "failed"},
+                    "tight": {"status": "complete"}}}), encoding="utf-8")
+            render = attempt / "render-retry-1.json"
+            render.write_text(json.dumps({"render_id": "render-retry-1", "status": "complete"}), encoding="utf-8")
+            run_closed_loop.append_phase_event(attempt, "postcheck-retry", "postcheck-retry-1", postcheck)
+            with self.assertRaises(ValueError):
+                run_closed_loop.append_phase_event(attempt, "postcheck-retry", "postcheck-retry-1", postcheck)
+            run_closed_loop.append_phase_event(attempt, "render-retry", "render-retry-1", render)
+            ledger = attempt / "phase-events.jsonl"
+            original_ledger = ledger.read_text(encoding="utf-8")
+            events = [json.loads(line) for line in original_ledger.splitlines()]
+            events[1]["sequence"] = events[0]["sequence"]
+            ledger.write_text("".join(json.dumps(event) + "\n" for event in events), encoding="utf-8")
+            coverage = json.loads(run_closed_loop.write_coverage(root).read_text(encoding="utf-8"))
+            self.assertEqual(coverage["attempts"][0]["phase_receipt_ordering"], "ambiguous_unsequenced_receipt")
+            ledger.write_text(original_ledger, encoding="utf-8")
+            postcheck.write_text(postcheck.read_text(encoding="utf-8") + " ", encoding="utf-8")
+            another = attempt / "postcheck-retry-2.json"
+            another.write_text(json.dumps({"postcheck_id": "postcheck-retry-2", "postcheck_status": "complete"}),
+                encoding="utf-8")
+            with self.assertRaises(ValueError):
+                run_closed_loop.append_phase_event(attempt, "postcheck-retry", "postcheck-retry-2", another)
+            coverage = json.loads(run_closed_loop.write_coverage(root).read_text(encoding="utf-8"))
+            row = coverage["attempts"][0]
+            self.assertEqual(row["phase_receipt_ordering"], "ambiguous_unsequenced_receipt")
+            self.assertEqual(row["render_status"], "ordering_ambiguous")
+            self.assertEqual(row["overall_status"], "incomplete")
 
     def fake_executable(self, folder: Path, source: str) -> Path:
         path = folder / "fake-bridge"

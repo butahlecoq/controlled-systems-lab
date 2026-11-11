@@ -610,6 +610,7 @@ def replay_attempt(task: dict, result: dict, attempt: Path, bridge: Path, tag: s
             stream.write(json.dumps({"postcheck_id": checker_id, "postcheck_record": postcheck_path.name,
                 "task_sha256": result["task_sha256"], "controls_sha256": result["controls_sha256"]}, allow_nan=False) + "\n")
             stream.flush(); os.fsync(stream.fileno())
+        append_phase_event(attempt, "postcheck-retry", checker_id, postcheck_path)
 
 
 def render_attempt(task: dict, result: dict, attempt: Path, tag: str | None = None) -> None:
@@ -667,36 +668,129 @@ def render_attempt(task: dict, result: dict, attempt: Path, tag: str | None = No
         "target_marker": "soft objective reference, not a terminal constraint"}
 
 
+def append_phase_event(attempt: Path, event_type: str, receipt_id: str, receipt_path: Path) -> dict:
+    """Append one retry receipt in the single-writer per-attempt command flow.
+
+    Concurrent retry commands for one attempt are unsupported. Coverage rejects
+    duplicate or nonmonotone sequence numbers and receipts with changed hashes.
+    """
+    if event_type not in ("postcheck-retry", "render-retry"):
+        raise ValueError(f"unsupported phase event type: {event_type}")
+    receipt_path = receipt_path.resolve()
+    if receipt_path.parent != attempt.resolve() or not receipt_path.is_file():
+        raise ValueError("phase event receipt must be a saved file in its attempt directory")
+    ledger = attempt / "phase-events.jsonl"
+    events = []
+    if ledger.exists():
+        for line in ledger.read_text(encoding="utf-8").splitlines():
+            if line.strip(): events.append(json.loads(line))
+    for sequence, prior in enumerate(events, start=1):
+        if not isinstance(prior, dict) or prior.get("schema") != "csl.closed-loop.phase-event/1" or \
+                prior.get("sequence") != sequence or prior.get("event_type") not in ("postcheck-retry", "render-retry") or \
+                not isinstance(prior.get("receipt"), str) or not isinstance(prior.get("receipt_id"), str) or \
+                not isinstance(prior.get("receipt_sha256"), str):
+            raise ValueError("existing phase event ledger is invalid; refusing to append an ambiguous order")
+        if prior.get("receipt") == receipt_path.name or prior.get("receipt_id") == receipt_id:
+            raise ValueError("phase event receipt or ID is already present in the ledger")
+        prior_path = (attempt / prior["receipt"]).resolve()
+        if prior_path.parent != attempt.resolve() or not prior_path.is_file() or \
+                hashlib.sha256(prior_path.read_bytes()).hexdigest() != prior["receipt_sha256"]:
+            raise ValueError("existing phase event receipt is missing or has changed")
+    sequence = len(events) + 1
+    event = {"schema": "csl.closed-loop.phase-event/1", "sequence": sequence,
+        "event_type": event_type, "receipt_id": receipt_id,
+        "receipt": receipt_path.name,
+        "receipt_sha256": hashlib.sha256(receipt_path.read_bytes()).hexdigest()}
+    with ledger.open("a", encoding="utf-8") as stream:
+        stream.write(json.dumps(event, sort_keys=True, allow_nan=False) + "\n")
+        stream.flush(); os.fsync(stream.fileno())
+    return event
+
+
 def write_coverage(root: Path) -> Path:
     rows = []
     for path in sorted(root.glob("*/attempts/*/attempt.json")):
         try: record = json.loads(path.read_text())
         except (OSError, json.JSONDecodeError): continue
         replay = record.get("independent_replay", {})
+        postcheck_paths = {item.name: item for item in path.parent.glob("postcheck-*.json")}
         postchecks = []
-        for postcheck_path in sorted(path.parent.glob("postcheck-*.json"), key=lambda item: item.stat().st_mtime_ns):
+        for postcheck_path in sorted(postcheck_paths.values(), key=lambda item: item.name):
             try: postchecks.append(json.loads(postcheck_path.read_text()))
             except (OSError, json.JSONDecodeError): continue
-        render_records = []
-        for render_path in sorted(path.parent.glob("render-retry-*.json"), key=lambda item: item.stat().st_mtime_ns):
-            try: render_records.append(json.loads(render_path.read_text()))
-            except (OSError, json.JSONDecodeError): continue
-        if postchecks:
-            latest = postchecks[-1].get("results", {})
-            replay = {"common": latest.get("common", {}), "tight": latest.get("tight", {})}
+        initial_check = {}
+        if "postcheck-initial.json" in postcheck_paths:
+            try: initial_check = json.loads(postcheck_paths["postcheck-initial.json"].read_text())
+            except (OSError, json.JSONDecodeError): pass
+        render_paths = {item.name: item for item in path.parent.glob("render-retry-*.json")}
         reconciliation_path = path.parent / "supervisor-reconciliation.json"
         reconciliation = json.loads(reconciliation_path.read_text()) if reconciliation_path.exists() else None
         algorithm_status = reconciliation.get("derived_terminal_status") if reconciliation else record.get("algorithm_status", record.get("status"))
+        replay = initial_check.get("results", replay)
         replay_statuses = [replay.get(name, {}).get("status") for name in ("common", "tight")]
-        postcheck_status = ("complete" if replay_statuses == ["complete", "complete"] else
-                            ("failed" if any(status not in (None, "not_run") for status in replay_statuses) else "not_run"))
-        render_status = record.get("render", {}).get("status", "not_run")
-        if postchecks:
-            latest_check = postchecks[-1]
-            postcheck_status = latest_check.get("postcheck_status", postcheck_status)
-            render_status = latest_check.get("render_status", render_status)
-        if render_records:
-            render_status = render_records[-1].get("status", render_records[-1].get("render", {}).get("status", render_status))
+        postcheck_status = record.get("postcheck_status") or initial_check.get("postcheck_status") or (
+            "complete" if replay_statuses == ["complete", "complete"] else
+            ("failed" if any(status not in (None, "not_run") for status in replay_statuses) else "not_run"))
+        render_status = record.get("render_status", record.get("render", {}).get("status",
+            initial_check.get("render_status", "not_run")))
+        phase_ordering = "initial-record-only"
+        event_path = path.parent / "phase-events.jsonl"
+        retry_postcheck_names = set(postcheck_paths) - {"postcheck-initial.json"}
+        retry_render_names = set(render_paths)
+        if event_path.is_file():
+            events = []
+            event_log_readable = True
+            try:
+                events = [json.loads(line) for line in event_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+            except (OSError, json.JSONDecodeError):
+                event_log_readable = False
+            covered_receipts = set()
+            valid = event_log_readable and all(isinstance(event, dict) and event.get("schema") == "csl.closed-loop.phase-event/1" and
+                event.get("sequence") == index and event.get("event_type") in ("postcheck-retry", "render-retry") and
+                isinstance(event.get("receipt"), str) and isinstance(event.get("receipt_id"), str) and
+                isinstance(event.get("receipt_sha256"), str)
+                for index, event in enumerate(events, start=1))
+            if valid and len({event["receipt"] for event in events}) != len(events):
+                valid = False
+            if valid:
+                for event in events:
+                    receipt_name = event["receipt"]
+                    if not isinstance(receipt_name, str) or not isinstance(event.get("receipt_id"), str):
+                        valid = False; break
+                    receipt = path.parent / receipt_name
+                    is_postcheck = event["event_type"] == "postcheck-retry"
+                    expected_names = retry_postcheck_names if is_postcheck else retry_render_names
+                    if receipt_name not in expected_names or not receipt.is_file() or hashlib.sha256(receipt.read_bytes()).hexdigest() != event.get("receipt_sha256"):
+                        valid = False; break
+                    covered_receipts.add(receipt_name)
+                    try:
+                        receipt_record = json.loads(receipt.read_text(encoding="utf-8"))
+                    except (OSError, json.JSONDecodeError):
+                        valid = False; break
+                    id_field = "postcheck_id" if is_postcheck else "render_id"
+                    if not isinstance(receipt_record, dict) or receipt_record.get(id_field) != event["receipt_id"]:
+                        valid = False; break
+                    if is_postcheck:
+                        postcheck_status = receipt_record.get("postcheck_status", postcheck_status)
+                        render_status = receipt_record.get("render_status", render_status)
+                        replay = receipt_record.get("results", replay)
+                    else:
+                        render_status = receipt_record.get("status",
+                            receipt_record.get("render", {}).get("status", render_status))
+                if covered_receipts != retry_postcheck_names | retry_render_names:
+                    valid = False
+            if valid:
+                phase_ordering = "sequenced"
+            else:
+                phase_ordering = "ambiguous_unsequenced_receipt"
+        elif retry_postcheck_names or retry_render_names:
+            # Legacy retry files have no shared sequence. Do not infer one from
+            # mtimes or from a ledger that orders only one receipt type.
+            phase_ordering = "ambiguous_legacy_unsequenced_retries"
+        if phase_ordering.startswith("ambiguous"):
+            if retry_postcheck_names:
+                postcheck_status = "ordering_ambiguous"
+            render_status = "ordering_ambiguous"
         overall_status = coverage_overall_status(algorithm_status, postcheck_status, render_status)
         rows.append({"attempt_id": record.get("attempt_id"), "task_id": record.get("task_id"),
             "task_sha256": record.get("task_sha256"),
@@ -708,6 +802,7 @@ def write_coverage(root: Path) -> Path:
             "physical_objective": record.get("physical_objective"),
             "common_replay": replay.get("common", {}).get("status"), "tight_replay": replay.get("tight", {}).get("status"),
             "postcheck_records": [row.get("postcheck_id") for row in postchecks],
+            "phase_receipt_ordering": phase_ordering,
             "graph_id": record.get("resolved_graph", {}).get("graph_id"),
             "graph_fingerprint": record.get("resolved_graph", {}).get("graph_fingerprint"),
             "attempt_record": str(path.relative_to(root))})
@@ -785,6 +880,7 @@ def main() -> int:
                 ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(), "renderer_source_hashes": source_hashes,
             "render": result["render"], "status": render_status, "error": error}
         atomic_json(attempt / f"{tag}.json", render_record)
+        append_phase_event(attempt, "render-retry", tag, attempt / f"{tag}.json")
         print(json.dumps(render_record, indent=2))
         return 0 if render_status == "complete" else 1
     if args.replay_only:
