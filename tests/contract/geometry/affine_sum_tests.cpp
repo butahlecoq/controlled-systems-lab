@@ -683,6 +683,9 @@ TEST_CASE("source-index operation retains malformed, near-tolerance and stopped 
     CHECK(std::get<Unsupported>(malformed).diagnostics.front().field=="affine-sum.source-index.checker");
     CHECK(std::get<Unsupported>(malformed).diagnostics.front().explanation.find("incorrect")!=std::string::npos);
     CHECK(std::get<Unsupported>(malformed).diagnostics.front().explanation.find("proposed_ids=0,1,2,")!=std::string::npos);
+    CHECK(std::get<Unsupported>(malformed).diagnostics.front().explanation.find(
+        "source-index generated ordered cloud: digest=")!=std::string::npos);
+    CHECK(std::get<Unsupported>(malformed).diagnostics.front().explanation.find("; rows=")!=std::string::npos);
 
     const auto near_tolerance=vertices("source-index-near-tolerance",2,
         {0,0,1,0,1,1,0,1,0.5,1.00000001},5);
@@ -694,6 +697,8 @@ TEST_CASE("source-index operation retains malformed, near-tolerance and stopped 
     CHECK(legacy_error.explanation.find("input point lies outside")!=std::string::npos);
     CHECK(legacy_error.explanation.find("csl.legacy.btulshor.reach.source-v1")!=std::string::npos);
     CHECK(legacy_error.explanation.find("modif_status=")!=std::string::npos);
+    CHECK(legacy_error.explanation.find("source-index generated ordered cloud: digest=")!=std::string::npos);
+    CHECK(legacy_error.explanation.find("; rows=")!=std::string::npos);
 
     auto stop_limits=geometry::LegacyKpabepOptions{};
     stop_limits.max_pivots=0;
@@ -701,7 +706,7 @@ TEST_CASE("source-index operation retains malformed, near-tolerance and stopped 
         geometry::make_legacy_kpabep_source_index_registration(stop_limits));
     CHECK(std::holds_alternative<OperationStopped>(stopped));
     if(const auto* stop=std::get_if<OperationStopped>(&stopped))
-        CHECK(stop->diagnostics.find("source")!=std::string::npos);
+        CHECK(stop->diagnostics.find("source-index generated ordered cloud: digest=")!=std::string::npos);
 }
 
 TEST_CASE("source-index checker timeout refuses output without a reducer fallback") {
@@ -715,6 +720,8 @@ TEST_CASE("source-index checker timeout refuses output without a reducer fallbac
     CHECK(stop.reason==StopReason::resource_limit);
     CHECK(stop.diagnostics.find("checker timeout")!=std::string::npos);
     CHECK(stop.diagnostics.find("raw proposal")!=std::string::npos);
+    CHECK(stop.diagnostics.find("source-index generated ordered cloud: digest=")!=std::string::npos);
+    CHECK(stop.diagnostics.find("; rows=")!=std::string::npos);
 }
 
 TEST_CASE("public affine operation removes exact duplicate and interior candidates") {

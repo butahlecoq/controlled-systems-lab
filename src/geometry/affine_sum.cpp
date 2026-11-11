@@ -515,12 +515,17 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
                 return unsupported("affine-sum.source-index.digest",*failure);
             const auto cloud_digest=problem::hex(std::get<HullInputDigest>(digest));
             const auto cloud_manifest=ordered_binary64_manifest(cloud.points);
-            source_index_assumptions.push_back("source-index generated ordered cloud: digest="+cloud_digest+
+            const auto cloud_record="source-index generated ordered cloud: digest="+cloud_digest+
                 "; encoding=binary64-bit-pattern-hex/row-order/1; points="+
-                std::to_string(cloud.points.size())+"; rows="+cloud_manifest);
+                std::to_string(cloud.points.size())+"; rows="+cloud_manifest;
+            source_index_assumptions.push_back(cloud_record);
             auto prepared_result=dependencies.hull.prepare(cloud);
-            if (const auto* rejected=std::get_if<registry::Rejection>(&prepared_result))
-                return Unsupported{rejected->diagnostics};
+            if (const auto* rejected=std::get_if<registry::Rejection>(&prepared_result)) {
+                std::string details="Selected source-index provider rejected the generated cloud; "+cloud_record;
+                for(const auto& item:rejected->diagnostics)
+                    details+="; "+item.field+": "+item.explanation;
+                return unsupported("affine-sum.source-index.admission",std::move(details));
+            }
             auto prepared=std::get<registry::PreparedPipeline<registry::SourceIndexHullPort>>(std::move(prepared_result));
             auto workspaces=prepared.create();
             const auto algorithm_started=std::chrono::steady_clock::now();
@@ -532,6 +537,7 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
                     selected_reducer_identity+"; elapsed_ns="+std::to_string(algorithm_elapsed.count())+
                     "; raw diagnostics=";
                 for (const auto& diagnostic:*diagnostics) details += "; "+diagnostic.field+": "+diagnostic.explanation;
+                details+="; "+cloud_record;
                 return Unsupported{{{DiagnosticCode::unsupported,"affine-sum.source-index.proposal",std::move(details)}}};
             }
             auto proposal=std::get<SourceIndexProposal>(std::move(proposed));
@@ -563,7 +569,7 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
                     "; internal_invocations="+(proposal.internal_invocations?
                     std::to_string(*proposal.internal_invocations):"unavailable")+
                     "; elapsed_ns="+std::to_string(algorithm_elapsed.count())+
-                    "; checker_input_digest="+cloud_digest+"; proposed_ids=";
+                    "; checker_input_digest="+cloud_digest+"; "+cloud_record+"; proposed_ids=";
                 for (const auto id:proposal.retained_indices) record+=std::to_string(id)+",";
                 for (const auto& item:proposal.trace) record+="; trace="+item;
                 return record;
