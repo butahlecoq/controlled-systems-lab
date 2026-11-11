@@ -1556,7 +1556,8 @@
         "field": "environment.adapter",
         "reason": "No source-supported MPC11 orbit model/episode adapter exists."
       },
-      "source": "docs/research/three-environment-closed-loop-matrix-audit.md"
+      "source": "https://github.com/butahlecoq/controlled-systems-lab/blob/797b606faee21d9cc22004c882fc7e120113be20/docs/research/three-environment-closed-loop-matrix-audit.md",
+      "source_sha256": "6ceb1153879f4cc6c94060ba8afdaec32cc9a366b283cab90f41e57e174513ff"
     },
     {
       "candidate_id": "controller/approximate-representation/predecessor-recovery-v1",
@@ -1569,7 +1570,8 @@
         "field": "controller.adapter",
         "reason": "The finite-plan traces do not provide the common feedback predecessor and first-action recovery route."
       },
-      "source": "docs/research/three-environment-closed-loop-matrix-audit.md"
+      "source": "https://github.com/butahlecoq/controlled-systems-lab/blob/797b606faee21d9cc22004c882fc7e120113be20/docs/research/three-environment-closed-loop-matrix-audit.md",
+      "source_sha256": "6ceb1153879f4cc6c94060ba8afdaec32cc9a366b283cab90f41e57e174513ff"
     },
     {
       "candidate_id": "controller/mpc11/acados-backend-v1",

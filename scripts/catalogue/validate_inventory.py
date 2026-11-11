@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -29,6 +30,19 @@ EXPECTED_GROUPS = {
     "controller",
     "supporting_operations",
 }
+
+
+def check_candidate_source(root: Path, row: dict) -> None:
+    source = row['source']
+    if source.startswith('https://'):
+        assert re.fullmatch(
+            r'https://github\.com/butahlecoq/controlled-systems-lab/blob/[0-9a-f]{40}/docs/[a-zA-Z0-9_./-]+\.md',
+            source), f'candidate rationale must use a pinned repository source: {source}'
+        assert re.fullmatch(r'[0-9a-f]{64}', row.get('source_sha256', '')), \
+            f'historical candidate rationale needs a byte hash: {source}'
+    else:
+        source_path = root / source
+        assert source_path.is_file(), f'missing candidate rationale source: {source_path}'
 
 
 def main() -> int:
@@ -76,8 +90,7 @@ def main() -> int:
             raise AssertionError(f"public route has invented module version: {identity}")
 
     for row in data["known_candidate_classifications"]:
-        source_path = root / row["source"]
-        assert source_path.is_file(), f"missing candidate rationale source: {source_path}"
+        check_candidate_source(root, row)
         assert row["first_unmet"]["field"] and row["first_unmet"]["reason"]
 
     optimizer_roles = [row for row in records if row.get("role") == "terminal_optimizer"]
