@@ -1,0 +1,57 @@
+{
+  "schema": "csl.installed-candidate-history-api-check/1",
+  "attempt_id": "installed-candidate-api-d40dfc9e",
+  "source_head": "d40dfc9e2d15293a51390bf9e2b429587c802ee6",
+  "compiled_library_source_head": "1809e5a6f2b55025140f75bb8fb4c0aea3e12c8e",
+  "compiled_library_source_note": "The intervening d40dfc9 commit changed only the installed consumer, documentation, and comment wording in finite_action_minimax.hpp; finite-action implementation sources were unchanged.",
+  "tracked_source_clean_at_validation": true,
+  "build_profile": {
+    "configuration": "Release",
+    "compiler": "GNU 16.2.1",
+    "target_architecture": "x86_64",
+    "cxx_standard": 20,
+    "CSL_ENABLE_HIGHS": false,
+    "CSL_ENABLE_QHULL": false
+  },
+  "installed_prefix": "/home/butahlecoq/.local/share/codex/worktrees/native-feedback-composition-943-20261111/build/core/installed-candidate-api-d40dfc9e-prefix",
+  "package_artifacts": {
+    "CSLTargets.cmake_sha256": "990e12155d64a4103b5eb7540c18662b80c3715c421f62fce6cefff28dbd1f10",
+    "CSLConfig.cmake_sha256": "d58d19e565849210d562656d74cbdfd94c6d72fee52e92e428ce7e86a690a8df",
+    "finite_action_minimax_header_sha256": "6c8bdba0ab961b9d7378fc98140bd2f83ff56e06c61500194b40a5737db5e1be",
+    "finite_action_nominal_header_sha256": "a0daeea2dc8adbb42e873d50e0a56100779a927d64a4b2ebad13b0a266f74815",
+    "finite_action_nominal_library_sha256": "aab67639823412715ba50d11c1abf9e3864f7c851d4dc83bfc16d86ad2d30d72",
+    "finite_action_minimax_library_sha256": "c0e36d58cc658294747e187c0b9e8734831c1adf86e70f8eca4464887cc74ad5"
+  },
+  "consumer": {
+    "source_path": "tests/installed/finite_action_nominal_client.cpp",
+    "source_sha256": "6f616af2208735a68e2858ca56f0e533fa38a403d4bd8291dc177cc10af4321d",
+    "isolated_source_tree": "build/core/installed-candidate-api-isolated/installed-consumer/source",
+    "isolated_compile_include": "installed prefix include directory only; no repository include directory",
+    "tested_behavior": {
+      "absent_candidate_catalogue": "retained prior exhaustive behavior: all 4 full-horizon histories evaluated, coverage complete",
+      "restricted_catalogue": "2 of 4 full-horizon source-index histories; selected [1,0], exact terminal cost -1, exact Euclidean running cost 0.25, total -0.75, coverage incomplete",
+      "explicit_empty_catalogue": "public nominal API returned Unsupported at finite_nominal.candidate_plans"
+    },
+    "executable_sha256": "15c259eb9b3a1fab0d674a67ddedd1365b297e524234e1efb386361c78c1d6e1"
+  },
+  "commands": {
+    "stage_sources": "cmake -DCSL_STAGE_ONLY=ON -DCSL_BUILD_DIR=<isolated-build-root> -DCSL_SOURCE_DIR=<source-root> -P cmake/RunInstalledClient.cmake",
+    "install": "cmake --install build/core --config Release --prefix <fresh-prefix>",
+    "configure_consumer": "cmake -S <isolated-source> -B <isolated-build> -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCSL_DIR=<fresh-prefix>/lib/cmake/CSL -DCSL_EXPECT_HIGHS=OFF -DCSL_EXPECT_QHULL=OFF",
+    "build_consumer": "cmake --build <isolated-build> --target installed_finite_action_nominal_client -j1",
+    "test_consumer": "<CMake-3.31.6>/bin/ctest --test-dir <isolated-build> -R '^installed_finite_action_nominal_client$' --output-on-failure"
+  },
+  "results": {
+    "install_returncode": 0,
+    "configure_returncode": 0,
+    "consumer_build_returncode": 0,
+    "ctest_returncode": 0,
+    "ctest_passed": "1/1",
+    "client_returncode": 0,
+    "initial_ctest_path_attempt": "mise ctest shim failed because no version was set; exact CMake 3.31.6 ctest binary retry passed; both streams retained separately"
+  },
+  "release_outcome": {
+    "decision": "no release needed",
+    "reason": "The repository has no published GitHub releases. This PR adds a source-level request field to the existing development API and does not publish an archive or change dependencies/CMake targets. Any future binary release must rebuild consumers against the changed public request layout and describe optional candidate-domain semantics."
+  }
+}

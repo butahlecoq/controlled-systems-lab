@@ -1,0 +1,11 @@
+source commit: d40dfc9e2d15293a51390bf9e2b429587c802ee6
+isolated source staging:
+  /home/butahlecoq/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -DCSL_BUILD_DIR=/home/butahlecoq/.local/share/codex/worktrees/native-feedback-composition-943-20261111/build/core/installed-candidate-api-isolated -DCSL_SOURCE_DIR=/home/butahlecoq/.local/share/codex/worktrees/native-feedback-composition-943-20261111 -DCSL_STAGE_ONLY=ON -P cmake/RunInstalledClient.cmake
+fresh prefix install:
+  /home/butahlecoq/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake --install build/core --config Release --prefix build/core/installed-candidate-api-d40dfc9e-prefix
+isolated consumer configure:
+  /home/butahlecoq/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake -S build/core/installed-candidate-api-isolated/installed-consumer/source -B build/core/installed-candidate-api-isolated/installed-consumer/build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCSL_DIR=/home/butahlecoq/.local/share/codex/worktrees/native-feedback-composition-943-20261111/build/core/installed-candidate-api-d40dfc9e-prefix/lib/cmake/CSL -DCSL_EXPECT_HIGHS=OFF -DCSL_EXPECT_QHULL=OFF
+isolated consumer build:
+  flock -w 55 /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/native-build.lock /home/butahlecoq/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake --build build/core/installed-candidate-api-isolated/installed-consumer/build --target installed_finite_action_nominal_client -j1
+installed consumer test:
+  /home/butahlecoq/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/ctest --test-dir build/core/installed-candidate-api-isolated/installed-consumer/build -R '^installed_finite_action_nominal_client$' --output-on-failure
