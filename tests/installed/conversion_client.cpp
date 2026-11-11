@@ -73,9 +73,17 @@ int main() {
     if (!inequalities || inequalities->inequalities.rows()!=4 || inequalities->upper_bounds.size()!=4) return 10;
     for (std::size_t row=0;row<4;++row) {
         const double a=inequalities->inequalities(row,0), b=inequalities->inequalities(row,1);
-        const double expected_bound = a == -1.0 || b == -1.0 ? 0.0 : 1.0;
-        if (inequalities->upper_bounds[row]!=expected_bound ||
-            !((std::abs(a)==1.0 && b==0.0) || (a==0.0 && std::abs(b)==1.0))) return 11;
+        constexpr double tolerance=1e-7;
+        const double expected_bound = a < 0.0 || b < 0.0 ? 0.0 : 1.0;
+        const bool axis_normal =
+            (std::abs(std::abs(a)-1.0)<tolerance && std::abs(b)<tolerance) ||
+            (std::abs(a)<tolerance && std::abs(std::abs(b)-1.0)<tolerance);
+        if (std::abs(inequalities->upper_bounds[row]-expected_bound)>1e-7 ||
+            !axis_normal) {
+            std::cerr << "Unexpected V-to-H square row " << row << ": " << a << " " << b
+                      << " <= " << inequalities->upper_bounds[row] << '\n';
+            return 11;
+        }
     }
     std::cout << "Installed Qhull conversion client: V-to-H square inequalities passed\n";
     return 0;

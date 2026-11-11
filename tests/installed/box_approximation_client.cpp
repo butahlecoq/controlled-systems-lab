@@ -2,6 +2,7 @@
 #include <csl/geometry/box_parallelotope.hpp>
 #include <csl/sets/data.hpp>
 
+#include <cstddef>
 #include <iostream>
 #include <variant>
 
@@ -30,7 +31,7 @@ int main() {
     const auto representation = std::get<sets::SetData>(native).representation();
     const auto* h = std::get_if<sets::HRepresentation>(&representation);
     if (!h || h->inequalities.rows() != 4 || h->upper_bounds.size() != 4) return 7;
-    for (double bound : h->upper_bounds)
-        if (bound != 2.0) return 8;
+    for (std::size_t row = 0; row < 4; ++row)
+        if (h->upper_bounds[row] != 2.0) return 8;
     std::cout << "Installed box approximation client: diamond is enclosed with bounds 2 on both axes\n";
 }

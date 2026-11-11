@@ -92,7 +92,60 @@
       "example_sources": [
         "docs/contracts/closed-loop/syn-nl-fuel-01.json"
       ],
-      "kind": "analytic illustration"
+      "kind": "analytic illustration",
+      "mathematical_displays": [
+        {
+          "label": "Physical state x, rows [m_ox, m_f, q_ox, q_f]",
+          "rows": [
+            [
+              100
+            ],
+            [
+              30
+            ],
+            [
+              2
+            ],
+            [
+              0.6
+            ]
+          ]
+        },
+        {
+          "label": "Raw scale vector s",
+          "rows": [
+            [
+              100
+            ],
+            [
+              30
+            ],
+            [
+              3
+            ],
+            [
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Dimensionless state x_hat = x / s",
+          "rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              0.6666666666666666
+            ],
+            [
+              0.6
+            ]
+          ]
+        }
+      ]
     },
     {
       "id": "vertex-membership",
@@ -198,22 +251,28 @@
         "csl.synthesis.reach-back"
       ],
       "source": "terminal-optimization.html",
-      "summary": "The feasible triangle has three vertices; this LP selects (0,1). Terminal LP optimization is not a vertex membership decision. Convex terminal objectives use a separate adapter.",
-      "mathematical_input": "State x=(x,y) starts at (0,0). Choose (u,v)∈[0,1]² as the terminal state. Require x+y≥1 and minimize x+y.",
-      "command": "ctest --test-dir build/dev -C Release -R \"^installed_public_client$\" --output-on-failure\nbuild/dev/installed-consumer/examples-build/nominal_linear_exact_2d",
-      "expected_output": "profile=strategy-a.nominal-linear-exact-v1\nstate_dimension=2 control_dimension=2 horizon=1\nterminal_constraint=x+y>=1; 0<=x,y<=1\nobjective=minimize x+y\nexact_optimum=1 optimal_face={(x,y): x+y=1, 0<=x,y<=1}\nverified_complete_family=true assurance=numerical",
-      "intermediate_geometry": "The feasible target is the unit square intersected with x+y≥1. Its minimum-cost face is the segment from (1,0) to (0,1). The executable reports the complete family and optimum 1.",
-      "support_limits": "This is the registered nominal linear exact profile in two dimensions and one stage. Its result uses numerical assurance. A generic terminal objective has no complete-family guarantee. Vertex membership and redundancy are different operations. First complete the installed-consumer setup in the opening chapter. Its CTest installs the current package and builds the isolated clients with find_package(CSL CONFIG).",
+      "summary": "A terminal linear program selects a minimum-cost face. A separate convex residual-norm terminal program uses the registered QP adapter. Neither operation is a vertex membership query.",
+      "mathematical_input": "Linear terminal program: choose (x,y)∈[0,1]² with x+y≥1 and minimize x+y. Convex terminal program: minimize ||(z−3,4)|| over 0≤z≤2; the registered adapter solves the equivalent squared objective (z−3)²+16.",
+      "command": "ctest --test-dir build/dev -C Release -R \"^installed_public_client$\" --output-on-failure\nbuild/dev/installed-consumer/examples-build/nominal_linear_exact_2d\nbuild/dev/installed-consumer/examples-build/registered_convex",
+      "expected_output": "profile=strategy-a.nominal-linear-exact-v1\nstate_dimension=2 control_dimension=2 horizon=1\nterminal_constraint=x+y>=1; 0<=x,y<=1\nobjective=minimize x+y\nexact_optimum=1 optimal_face={(x,y): x+y=1, 0<=x,y<=1}\nverified_complete_family=true assurance=numerical\nbackend=csl.convex.highs version=1.0.0+highs.1.11.0\nx=2 original_cost=4.123105626 squared_cost=17\ntermination=completed outcome=optimal evidence=unestablished\nNo certified bounds or optimal-family result.",
+      "intermediate_geometry": "The linear feasible set is the unit square clipped by x+y≥1. Its minimum-cost face is the segment from (1,0) to (0,1). The convex residual-norm problem has a scalar feasible interval [0,2] and selects its right endpoint z=2.",
+      "support_limits": "The complete-family result applies only to the registered nominal linear exact profile and one stage. The convex adapter reports one numerical minimizer for its squared residual-norm program; it does not report certified bounds or an optimal family. Both terminal optimization roles remain distinct from vertex membership and redundancy removal. First complete the installed-consumer setup in the opening chapter.",
       "figure_ids": [],
       "records": [
         {
           "label": "examples/nominal_linear_exact_2d.cpp",
           "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/examples/nominal_linear_exact_2d.cpp"
+        },
+        {
+          "label": "examples/registered_convex.cpp",
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/2c612c64600b5ae10906809a9147571cd9237b79/examples/registered_convex.cpp"
         }
       ],
       "example_sources": [
         "examples/nominal_linear_exact_2d.cpp",
-        "examples/CMakeLists.txt"
+        "examples/CMakeLists.txt",
+        "examples/registered_convex.cpp",
+        "tests/installed/convex_client.cpp"
       ],
       "kind": "installed consumer"
     },
@@ -603,7 +662,82 @@
       "example_sources": [
         "docs/contracts/closed-loop/syn-nl-fuel-01.json"
       ],
-      "kind": "saved evidence"
+      "kind": "saved evidence",
+      "mathematical_displays": [
+        {
+          "label": "Physical state x, rows [m_ox, m_f, q_ox, q_f]",
+          "rows": [
+            [
+              100
+            ],
+            [
+              30
+            ],
+            [
+              2
+            ],
+            [
+              0.6
+            ]
+          ]
+        },
+        {
+          "label": "Oxidizer projection P_ox x = [q_ox, m_ox]^T",
+          "rows": [
+            [
+              0,
+              0,
+              1,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "label": "Fuel projection P_f x = [q_f, m_f]^T",
+          "rows": [
+            [
+              0,
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              1,
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "label": "Oxidizer flow-mass point P_ox x, rows [q_ox, m_ox]",
+          "rows": [
+            [
+              2
+            ],
+            [
+              100
+            ]
+          ]
+        },
+        {
+          "label": "Fuel flow-mass point P_f x, rows [q_f, m_f]",
+          "rows": [
+            [
+              0.6
+            ],
+            [
+              30
+            ]
+          ]
+        }
+      ]
     },
     {
       "id": "native-substitution-matrix",

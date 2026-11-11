@@ -82,6 +82,18 @@ class LearningBookTests(unittest.TestCase):
         self.assertIn("all-admissible-control forward sets; full-state intersections", html)
         self.assertIn("lotka-populations.plotted-data.json", html)
 
+    def test_fuel_coordinate_maps_render_as_accessible_mathml_matrices(self):
+        chapters = learning_book.validate(self.manifest, self.inventory, self.figures)
+        chapter = next(item for item in chapters if item["id"] == "fuel-capstone")
+        html = learning_book._chapter_page(chapter, chapters,
+            (ROOT / "docs/examples/learning/chapters/fuel-capstone.html").read_text(),
+            self.figures, self.inventory)
+        self.assertIn('role="math" aria-label="Physical state x, rows [m_ox, m_f, q_ox, q_f]: 100; 30; 2; 0.6"', html)
+        self.assertIn('aria-label="Oxidizer projection P_ox x = [q_ox, m_ox]^T: 0, 0, 1, 0; 1, 0, 0, 0"', html)
+        self.assertIn('aria-label="Fuel flow-mass point P_f x, rows [q_f, m_f]: 0.6; 30"', html)
+        self.assertEqual(html.count('<math display="inline" aria-hidden="true">'), 5)
+        self.assertEqual(html.count('class="scroll" tabindex="0" role="region"'), 5)
+
     def test_rejects_missing_modules_and_figures(self):
         broken = json.loads(json.dumps(self.manifest))
         broken["chapters"][2]["module_ids"].append("invented.module")
@@ -127,6 +139,34 @@ Q subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2
             self.assertTrue((site / "examples/closed-loop/figure-index.json").is_file())
             self.assertEqual((site / "examples/index.html").read_bytes(), gallery)
             self.assertEqual((site / "saved-report.zip").read_bytes(), b"frozen evidence bytes")
+
+    def test_build_joins_and_copies_ready_recorded_figure_assets(self):
+        entries = []
+        for figure_id in ("fuel-state", "fuel-fuel-flow"):
+            route = f"examples/closed-loop/figures/{figure_id}"
+            entries.append({"id": figure_id, "availability": "ready",
+                "href": route + ".html", "plotted_data_href": route + ".plotted-data.json",
+                "svg_href": route + ".svg", "png_href": route + ".png",
+                "layer_scopes": ["observed plant replay"],
+                "missing_layers": ["all-admissible-control forward sets"]})
+        entries.extend({"id": figure_id, "availability": "pending", "reason": "Not part of this smoke."}
+                       for figure_id in ("lotka-populations", "earth-orbit"))
+        index = {"schema": "csl.closed-loop.figure-index/1", "figures": entries}
+        with tempfile.TemporaryDirectory() as tmp:
+            site = Path(tmp)
+            (site / "examples").mkdir()
+            (site / "examples/examples.css").write_text("body { color: black; }")
+            figure_index = site / "input-figure-index.json"
+            figure_index.write_text(json.dumps(index))
+            learning_book.build(site, figure_index_path=figure_index)
+            page = (site / "learn/fuel-capstone.html").read_text()
+            self.assertIn("observed plant replay", page)
+            self.assertIn("all-admissible-control forward sets", page)
+            for figure_id in ("fuel-state", "fuel-fuel-flow"):
+                for suffix in ("html", "plotted-data.json", "svg", "png"):
+                    rel = f"examples/closed-loop/figures/{figure_id}.{suffix}"
+                    source = ROOT / "docs" / rel
+                    self.assertEqual((site / rel).read_bytes(), source.read_bytes())
 
 
 if __name__ == "__main__":

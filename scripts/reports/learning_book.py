@@ -11,12 +11,14 @@ import sys
 try:
     import site_design
     import site_additions
+    import mathematical_notation
 except ModuleNotFoundError as error:
-    if error.name not in {"site_design", "site_additions"}:
+    if error.name not in {"site_design", "site_additions", "mathematical_notation"}:
         raise
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     import site_design
     import site_additions
+    import mathematical_notation
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -167,6 +169,19 @@ def _chapter_page(chapter: dict, chapters: list[dict], chapter_html: str,
     parts.append(f'<h1>{escape(chapter["title"])}</h1>')
     parts.append(f'<p class="learning-status">{escape(chapter["status_label"])}</p>')
     parts.append(chapter_html)
+    displays = chapter.get("mathematical_displays", [])
+    if displays:
+        parts.append('<section class="learning-math"><h2>Coordinates and maps</h2>')
+        for display in displays:
+            rows = display.get("rows")
+            if not isinstance(rows, list) or not rows:
+                raise ValueError(f"{chapter['id']}: mathematical display needs nonempty rows")
+            label = escape(display["label"])
+            parts.append('<figure class="learning-math-display"><figcaption>' + label +
+                         '</figcaption><div class="scroll" tabindex="0" role="region" aria-label="' +
+                         escape(display["label"], quote=True) + '">' +
+                         mathematical_notation.matrix_html(rows, display["label"]) + '</div></figure>')
+        parts.append('</section>')
     if chapter.get("module_ids"):
         module_numbers = {}
         for number, module in enumerate((inventory or {}).get("modules", []), start=1):

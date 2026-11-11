@@ -157,6 +157,7 @@ SAVED_DATA_COMPANION_RENDERERS = {
     "benchmarks/reporting/closed_loop/run_closed_loop.py",
     "scripts/reports/recorded_closed_loop_figures.py",
     "scripts/reports/render_closed_loop_pilot.py",
+    "scripts/reports/source_index_figure.py",
     "scripts/reports/mpc06_online/render.py",
     "scripts/reports/mpc06_delivery/figures.py",
     "scripts/reports/render_adaptive_ode_example.py",
