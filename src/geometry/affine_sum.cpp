@@ -29,6 +29,28 @@ bool stopped(const ExecutionContext& context) {
 StopReason stop_reason(const ExecutionContext& context) {
     return context.cancellation.stop_requested() ? StopReason::cancelled : StopReason::resource_limit;
 }
+std::string_view outcome_name(MathematicalOutcome outcome) {
+    switch(outcome) {
+    case MathematicalOutcome::optimal:return "optimal";
+    case MathematicalOutcome::infeasible:return "infeasible";
+    case MathematicalOutcome::unbounded:return "unbounded";
+    case MathematicalOutcome::infimum_not_attained:return "infimum_not_attained";
+    case MathematicalOutcome::undetermined:return "undetermined";
+    }
+    return "unknown";
+}
+std::string_view not_run_name(registry::LPQueryNotRunReason reason) {
+    return reason==registry::LPQueryNotRunReason::cancelled?"cancelled":"deadline";
+}
+std::string_view stopped_name(registry::LPQueryStopReason reason) {
+    switch(reason) {
+    case registry::LPQueryStopReason::cancelled:return "cancelled";
+    case registry::LPQueryStopReason::deadline_expired:return "deadline_expired";
+    case registry::LPQueryStopReason::resource_limit:return "resource_limit";
+    case registry::LPQueryStopReason::numerical_failure:return "numerical_failure";
+    }
+    return "unknown";
+}
 bool finite_policy(const NumericalPolicy& policy) {
     return std::isfinite(policy.absolute_tolerance) && policy.absolute_tolerance >= 0.0 &&
         std::isfinite(policy.relative_tolerance) && policy.relative_tolerance >= 0.0 &&
@@ -678,28 +700,35 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
             for(const auto& query:lp_runner->records()) {
                 std::visit([&](const auto& record) {
                     using T=std::decay_t<decltype(record)>;
-                    std::string status,actual="unresolved",detail;
+                    std::string status,requested="unresolved",actual="unresolved",detail;
                     if constexpr(std::is_same_v<T,registry::LPQueryNotRun>) {
-                        status="not_run"; actual=identity(record.provider);
-                        detail="; stop_reason="+std::to_string(static_cast<int>(record.reason));
+                        status="not_run"; requested=record.provider.requested.id.value;
+                        actual=identity(record.provider);
+                        detail="; stop_reason="+std::string{not_run_name(record.reason)};
                     } else if constexpr(std::is_same_v<T,registry::LPQueryRejected>) {
                         status="rejected";
+                        requested=record.rejection.provenance.requested.id.value;
+                        actual=identity(record.rejection.provenance);
                         for(const auto& diagnostic:record.rejection.diagnostics)
                             detail+="; "+diagnostic.field+": "+diagnostic.explanation;
                     } else if constexpr(std::is_same_v<T,registry::LPQuerySolverUnsupported>) {
-                        status="solver_unsupported"; actual=identity(record.provider);
+                        status="solver_unsupported"; requested=record.provider.requested.id.value;
+                        actual=identity(record.provider);
                         for(const auto& diagnostic:record.diagnostics)
                             detail+="; "+diagnostic.field+": "+diagnostic.explanation;
                     } else if constexpr(std::is_same_v<T,registry::LPQueryCompleted>) {
-                        status="completed"; actual=identity(record.provider);
-                        detail="; outcome="+std::to_string(static_cast<int>(record.outcome))+
+                        status="completed"; requested=record.provider.requested.id.value;
+                        actual=identity(record.provider);
+                        detail="; outcome="+std::string{outcome_name(record.outcome)}+
                             "; returned_problem="+record.returned_subject.problem.value+
                             "; returned_program="+record.returned_subject.program.value;
                     } else {
-                        status="stopped"; actual=identity(record.provider);
-                        detail="; stop_reason="+std::to_string(static_cast<int>(record.reason));
+                        status="stopped"; requested=record.provider.requested.id.value;
+                        actual=identity(record.provider);
+                        detail="; stop_reason="+std::string{stopped_name(record.reason)};
                     }
-                    reducer_invocation_assumptions.push_back("vertex LP invocation record: status="+status+
+                    reducer_invocation_assumptions.push_back("vertex LP invocation record: requested_provider="+
+                        requested+"; status="+status+
                         "; actual_provider="+actual+"; problem="+record.request.problem.value+
                         "; program="+record.request.program.value+detail);
                 },query);

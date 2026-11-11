@@ -55,6 +55,17 @@ std::string escape(std::string_view value) {
     return out.str();
 }
 
+std::string_view outcome_name(MathematicalOutcome outcome) {
+    switch(outcome) {
+    case MathematicalOutcome::optimal:return "optimal";
+    case MathematicalOutcome::infeasible:return "infeasible";
+    case MathematicalOutcome::unbounded:return "unbounded";
+    case MathematicalOutcome::infimum_not_attained:return "infimum_not_attained";
+    case MathematicalOutcome::undetermined:return "undetermined";
+    }
+    return "unknown";
+}
+
 std::string read_file(const std::string& path) {
     std::ifstream input(path);
     if (!input) throw std::runtime_error("cannot read inventory file: " + path);
@@ -410,7 +421,12 @@ void emit_candidate(std::ostream& out, const geometry::HullReducerCatalogue& cat
                 << escape(completed->provider.requested.id.value) << "\",\"actual\":\""
                 << escape(completed->provider.actual ? completed->provider.actual->id.value : "unresolved")
                 << "\",\"version\":\""
-                << escape(completed->provider.actual ? completed->provider.actual->version : "unresolved") << "\"}";
+                << escape(completed->provider.actual ? completed->provider.actual->version : "unresolved")
+                << "\",\"problem\":\"" << escape(completed->request.problem.value)
+                << "\",\"program\":\"" << escape(completed->request.program.value)
+                << "\",\"outcome\":\"" << outcome_name(completed->outcome)
+                << "\",\"returned_problem\":\"" << escape(completed->returned_subject.problem.value)
+                << "\",\"returned_program\":\"" << escape(completed->returned_subject.program.value) << "\"}";
         } else if (const auto* rejected = std::get_if<registry::LPQueryRejected>(&query)) {
             out << "{\"status\":\"rejected\",\"request\":\""
                 << escape(rejected->request.program.value) << "\",\"module_tuple\":{\"port\":\""

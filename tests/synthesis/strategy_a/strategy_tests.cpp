@@ -641,10 +641,10 @@ TEST_CASE("Strategy A runs a paper-derived A43 hull reducer with a separately se
         for(const auto& assumption:evidence.assumptions) {
             observed_a43|=assumption.find("HullReducerPort invocation: provider=csl.hull.itis17.a43-certified-basis-reuse")!=std::string::npos &&
                 assumption.find("status=complete")!=std::string::npos;
-            observed_vertex_lp|=assumption.find("vertex LP invocation record: status=completed; actual_provider=csl.lp.highs")!=std::string::npos;
+            observed_vertex_lp|=assumption.find("vertex LP invocation record: requested_provider=csl.lp.highs; status=completed; actual_provider=csl.lp.highs")!=std::string::npos &&
+                assumption.find("outcome=")!=std::string::npos;
             observed_basis_child_lp|=assumption.find("HullReducerPort child LPPort invocation: requested_provider=")!=std::string::npos &&
                 assumption.find("actual_provider=")!=std::string::npos;
-            if(assumption.find("HullReducerPort child LPPort")!=std::string::npos) MESSAGE(assumption);
         }
     CHECK(observed_a43);
     CHECK(observed_vertex_lp);

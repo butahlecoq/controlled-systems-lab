@@ -41,6 +41,8 @@ def main() -> int:
             assert query["status"] == "completed", query
             assert query["actual"] == active["vertex_lp_provider"]["id"], query
             assert query["version"] == active["vertex_lp_provider"]["version"], query
+            assert query["problem"] and query["program"] and query["outcome"], query
+            assert query["returned_problem"] and query["returned_program"], query
         child_summary = row["child_lp_port_trace_summary"]
         child_queries = row["child_lp_port_invocations"]
         assert child_summary["captured"] + child_summary["omitted"] == child_summary["total"], row
