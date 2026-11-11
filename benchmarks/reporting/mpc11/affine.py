@@ -37,6 +37,8 @@ def tracking_quadratic(dimension, terminal_indices, target, scale, weights,
 
 
 def model(scenario):
+    if scenario['case_id'] not in {'SYN-NL-FUEL-01', 'SYN-NL-LV-01'}:
+        raise ValueError('unsupported MPC11 affine source case')
     n, m = len(scenario['states']), len(scenario['controls'])
     dt, count = scenario['time']['dt'], scenario['time']['intervals']
     scales = np.array([x['scale'] for x in scenario['states']])

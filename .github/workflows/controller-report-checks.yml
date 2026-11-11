@@ -6,6 +6,10 @@ on:
       - '.github/workflows/controller-report-checks.yml'
       - '.github/workflows/pages-augmentation-aggregation.yml'
       - 'benchmarks/reporting/mpc11/**'
+      - 'benchmarks/reporting/closed_loop/**'
+      - 'docs/contracts/closed-loop/**'
+      - 'docs/research/issue-941-implementation-plan.md'
+      - 'tests/reporting/test_closed_loop_tasks.py'
       - 'docs/research/evidence/b04-source-moment*'
       - 'docs/research/evidence/b04-source-moment-figures/**'
       - 'docs/research/tools/check_b04_source_moments.py'
@@ -24,6 +28,10 @@ on:
       - '.github/workflows/controller-report-checks.yml'
       - '.github/workflows/pages-augmentation-aggregation.yml'
       - 'benchmarks/reporting/mpc11/**'
+      - 'benchmarks/reporting/closed_loop/**'
+      - 'docs/contracts/closed-loop/**'
+      - 'docs/research/issue-941-implementation-plan.md'
+      - 'tests/reporting/test_closed_loop_tasks.py'
       - 'docs/research/evidence/b04-source-moment*'
       - 'docs/research/evidence/b04-source-moment-figures/**'
       - 'docs/research/tools/check_b04_source_moments.py'
@@ -68,6 +76,18 @@ jobs:
           build/controller-report-env/bin/python -m pip check
       - name: Require actual controller dependencies before selecting full tests
         run: build/controller-report-env/bin/python -c 'import sys,numpy,scipy,casadi,do_mpc; assert sys.version_info[:3] == (3,11,14)'
+      - name: Install the CMake version required by CSL
+        run: python -m pip install cmake==3.31.6
+      - name: Build the shared CSL nonlinear replay bridge
+        run: |
+          cmake -S benchmarks/reporting/mpc11 -B build/controller-replay-build \
+            -DCSL_SOURCE_ROOT="$PWD" -DCMAKE_BUILD_TYPE=Release -G Ninja
+          cmake --build build/controller-replay-build --target csl_mpc11_nonlinear_replay --parallel 2
+      - name: Check source-bound closed-loop task replay
+        run: |
+          build/controller-report-env/bin/python benchmarks/reporting/closed_loop/validate_contracts.py
+          build/controller-report-env/bin/python benchmarks/reporting/closed_loop/check_replay.py \
+            --bridge build/controller-replay-build/csl_mpc11_nonlinear_replay
       - name: Recheck saved transcriptions and complete cumulative staging
         run: |
           set -o pipefail
