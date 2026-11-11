@@ -9,18 +9,24 @@ or singleton disturbance set per transition, and a convex terminal `Objective`.
 It does not optimize a causal feedback policy, mixed/continuous controls,
 nonlinear dynamics, correlated disturbances, or an H-only terminal set.
 
-For horizon `T`, the module visits every ordered index tuple in
-`{0,...,m-1}^T`, where `m` is the catalogue length. Duplicate action rows remain
-separate plans. Each plan propagates **all** disturbance candidate histories
-without clipping them to the safe set. An unsafe successor rejects that plan.
-For a robustly feasible plan, the complete generated terminal V description is
-scored by `worst_case_vertex`. Convexity and complete compact V semantics imply
-that a maximum occurs at one of these rows. The least of those per-plan maxima
-is the reported minimax value. The supplied plan and point limits are checked
+For horizon `T`, the default request (`candidate_action_indices == nullopt`)
+visits every ordered index tuple in `{0,...,m-1}^T`, where `m` is the catalogue
+length. An explicit, nonempty `candidate_action_indices` value restricts
+evaluation to those unique, full-horizon catalogue-index tuples; an explicit
+empty list is invalid. Duplicate action rows remain distinct because their
+catalogue indices differ. A restricted request does not establish an optimum
+over the complete catalogue product. Nominal callers that use a proper subset
+must report incomplete full-product coverage. Each selected plan propagates
+**all** disturbance candidate histories without clipping them to the safe set.
+An unsafe successor rejects that plan. For a robustly feasible plan, the
+complete generated terminal V description is scored by `worst_case_vertex`.
+Convexity and complete compact V semantics imply that a maximum occurs at one
+of these rows. The least of those per-plan maxima is the reported value over
+the selected history domain. The supplied plan and point limits are checked
 before any truncated successful result is published.
 
 `FiniteMinimaxOptimal` binds the result to caller-supplied problem and request
-IDs. Its ordered `plans` record contains every catalogue tuple: a feasible
+IDs. Its ordered `plans` record contains every selected history: a feasible
 record has its computed worst value, a maximizing point, evaluated vertex
 count, and immutable terminal V set; a rejected record has its first violating
 stage and successor. The `minimizing_plan_indices` address those records. The
@@ -34,8 +40,18 @@ replayed through fixed-plan propagation. The result does not contain a validated
 rounding bound or a stand-alone proof that every generated point equals an
 independent source representation.
 
-`FiniteMinimaxInfeasible` is returned only after every indexed plan has a
-robust violation. `FiniteMinimaxEmptyCatalogue` distinguishes an empty action
+The additive `FiniteActionNominalRequest` API uses the same optional candidate
+history semantics. Its nominal wrapper reports full-product coverage
+separately and evaluates source running-control costs on the selected full
+histories. Exact-polytope scoring remains numerical binary64 evaluation;
+box, zonotope, parallelotope and ellipsoid score estimates remain
+representation-derived estimates with exact running cost added. A restricted
+history result is not a global finite-action, nonlinear or feedback optimum.
+
+`FiniteMinimaxInfeasible` is returned only after every selected plan has a
+robust violation. For a restricted request, this means only the selected
+histories are infeasible; it does not imply complete-domain infeasibility.
+`FiniteMinimaxEmptyCatalogue` distinguishes an empty action
 catalogue at positive horizon. `FiniteMinimaxNoScenarios` distinguishes an
 empty initial or disturbance description: no terminal worst-case value is
 defined for the resulting empty trajectory product. The first fixed plan's
