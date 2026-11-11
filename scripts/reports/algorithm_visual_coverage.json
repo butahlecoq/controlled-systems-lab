@@ -1,6 +1,6 @@
 {
   "schema": "csl.algorithm-visual-coverage/1",
-  "source": "docs/architecture/framework-composition.md",
+  "source": "https://github.com/butahlecoq/controlled-systems-lab/blob/8161565dd7124c14bf516b5c6334614837d2e7c7/docs/architecture/framework-composition.md",
   "scope": "Implemented algorithm families in the main nominal synthesis path and installed modules outside that path. Shared data, input, registry, report-rendering, and packaging infrastructure is excluded unless it performs a geometric or control computation.",
   "evidence_only_kinds": {
     "b04-c-research-dossier": "External exact-arithmetic research dossier; no compiled verifier admission, registered complete-family result, or issue #531 completion claim."
