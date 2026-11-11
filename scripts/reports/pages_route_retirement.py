@@ -49,6 +49,7 @@ BARE_ROUTE_REPLACEMENTS = {
 # own page content or figures for the routes they contribute.
 EXAMPLE_ROUTE_PRODUCERS = {
     "examples/adaptive-ode-replay.html": ["scripts/reports/render_adaptive_ode_example.py"],
+    "examples/source-index-geometry-2d.html": ["docs/examples/source-index-geometry-2d.html"],
     "examples/app01-plan-timing-v1.html": ["scripts/reports/approx_extension_companions.py"],
     "examples/app02-diamond-v1.html": ["scripts/reports/approx_extension_companions.py"],
     "examples/app03-zonotope-v1.html": ["scripts/reports/approx_extension_companions.py"],

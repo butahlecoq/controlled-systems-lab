@@ -1,0 +1,219 @@
+{
+  "schema": "csl.example.source-index-geometry-2d-records/1",
+  "source_revision": "d8742521f1a4e22304f928a30ec467ed20195c1a",
+  "source_worktree_dirty": true,
+  "build": {
+    "configuration": "Release",
+    "compiler": "GNU C++",
+    "standard": "C++20",
+    "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44"
+  },
+  "reproduction_commands": [
+    "cmake --build build/dev --target source_index_geometry_2d_example -j1",
+    "./build/dev/source_index_geometry_2d_example quickhull",
+    "./build/dev/source_index_geometry_2d_example btulshor"
+  ],
+  "evidence_boundary": "Small functional example output, not a benchmark. Timings are single invocation observations and support no performance comparison.",
+  "quickhull": {
+    "schema": "csl.example.source-index-geometry-2d/1",
+    "source_method": "csl.hull.source.quickhull-2d",
+    "checker_budget": {
+      "wall_ms": 5000,
+      "max_points": 64
+    },
+    "results": [
+      {
+        "operation": "affine_image",
+        "method": "csl.hull.source.quickhull-2d",
+        "status": "completed",
+        "vertices": [
+          [
+            0.25,
+            -0.5
+          ],
+          [
+            1.25,
+            0
+          ],
+          [
+            1.25,
+            1
+          ],
+          [
+            0.25,
+            0.5
+          ]
+        ],
+        "evidence": [
+          "binary64 affine and sum arithmetic; numerical tolerances do not authorize removal of generated candidates",
+          "source-index IDs applied only after the bounded exact 2D checker verified every generated point against the selected retained cloud; the checker proves containment, not minimality",
+          "NumericalCheck.max_residual is zero for a successful exact source-index containment check; no LP reconstruction residual is claimed",
+          "numerical equivalent relation is an algorithm claim, not exact equality or validated inclusion for the intended real-valued model",
+          "published L-infinity error bound composes exact represented-dyadic candidate generation with direct V inputs or independently checked ambient-one/axis-aligned-box H/V coverage; exact deletion preserves the generated hull",
+          "finite and mixed action catalogues are not accepted by this SetHandle operation",
+          "selected HullReducerPort: not_used",
+          "selected vertex LP provider: not_used",
+          "selected source-index hull provider: csl.hull.source.quickhull-2d@1.0.0",
+          "selected H-to-V converter: not_used",
+          "checker invocation: provider=csl.geometry.bounded-hull-checker@1; status=verified; reason=every source point is in the exact convex hull of reported source points; elapsed_ns=138357; budget_ms=5000; max_points=64",
+          "source-index invocation: provider=csl.hull.source.quickhull-2d@1.0.0; status=completed; outcome=completed; internal_invocations=1; elapsed_ns=101481; checker_status=verified; checker_reason=every source point is in the exact convex hull of reported source points",
+          "source-index trace: exact represented-binary64 orientation; duplicate coordinates retain the lowest original ID; edge/interior IDs omitted; output order starts lexicographically and proceeds counterclockwise",
+          "source-index proposed original IDs: 0,1,2,3",
+          "independent exact 2D checker verifies every generated input point lies in the convex hull of selected original IDs; minimality is not established"
+        ]
+      },
+      {
+        "operation": "control_minkowski_sum",
+        "method": "csl.hull.source.quickhull-2d",
+        "status": "completed",
+        "vertices": [
+          [
+            0.25,
+            0.5
+          ],
+          [
+            1.25,
+            0.5
+          ],
+          [
+            1.25,
+            1.5
+          ],
+          [
+            0.25,
+            1.5
+          ]
+        ],
+        "evidence": [
+          "binary64 affine and sum arithmetic; numerical tolerances do not authorize removal of generated candidates",
+          "source-index IDs applied only after the bounded exact 2D checker verified every generated point against the selected retained cloud; the checker proves containment, not minimality",
+          "NumericalCheck.max_residual is zero for a successful exact source-index containment check; no LP reconstruction residual is claimed",
+          "numerical equivalent relation is an algorithm claim, not exact equality or validated inclusion for the intended real-valued model",
+          "published L-infinity error bound composes exact represented-dyadic candidate generation with direct V inputs or independently checked ambient-one/axis-aligned-box H/V coverage; exact deletion preserves the generated hull",
+          "finite and mixed action catalogues are not accepted by this SetHandle operation",
+          "selected HullReducerPort: not_used",
+          "selected vertex LP provider: not_used",
+          "selected source-index hull provider: csl.hull.source.quickhull-2d@1.0.0",
+          "selected H-to-V converter: not_used",
+          "checker invocation: provider=csl.geometry.bounded-hull-checker@1; status=verified; reason=every source point is in the exact convex hull of reported source points; elapsed_ns=133119; budget_ms=5000; max_points=64",
+          "source-index invocation: provider=csl.hull.source.quickhull-2d@1.0.0; status=completed; outcome=completed; internal_invocations=1; elapsed_ns=55035; checker_status=verified; checker_reason=every source point is in the exact convex hull of reported source points",
+          "source-index trace: exact represented-binary64 orientation; duplicate coordinates retain the lowest original ID; edge/interior IDs omitted; output order starts lexicographically and proceeds counterclockwise",
+          "source-index proposed original IDs: 0,1,2,3",
+          "independent exact 2D checker verifies every generated input point lies in the convex hull of selected original IDs; minimality is not established"
+        ]
+      }
+    ],
+    "raw_failures": []
+  },
+  "btulshor": {
+    "schema": "csl.example.source-index-geometry-2d/1",
+    "source_method": "csl.hull.source.btulshor-kpabep",
+    "checker_budget": {
+      "wall_ms": 5000,
+      "max_points": 64
+    },
+    "results": [
+      {
+        "operation": "affine_image",
+        "method": "csl.hull.source.btulshor-kpabep",
+        "status": "completed",
+        "vertices": [
+          [
+            0.25,
+            0.5
+          ],
+          [
+            0.25,
+            -0.5
+          ],
+          [
+            1.25,
+            0
+          ],
+          [
+            1.25,
+            1
+          ]
+        ],
+        "evidence": [
+          "binary64 affine and sum arithmetic; numerical tolerances do not authorize removal of generated candidates",
+          "source-index IDs applied only after the bounded exact 2D checker verified every generated point against the selected retained cloud; the checker proves containment, not minimality",
+          "NumericalCheck.max_residual is zero for a successful exact source-index containment check; no LP reconstruction residual is claimed",
+          "numerical equivalent relation is an algorithm claim, not exact equality or validated inclusion for the intended real-valued model",
+          "published L-infinity error bound composes exact represented-dyadic candidate generation with direct V inputs or independently checked ambient-one/axis-aligned-box H/V coverage; exact deletion preserves the generated hull",
+          "finite and mixed action catalogues are not accepted by this SetHandle operation",
+          "selected HullReducerPort: not_used",
+          "selected vertex LP provider: not_used",
+          "selected source-index hull provider: csl.hull.source.btulshor-kpabep@1.0.0",
+          "selected H-to-V converter: not_used",
+          "checker invocation: provider=csl.geometry.bounded-hull-checker@1; status=verified; reason=every source point is in the exact convex hull of reported source points; elapsed_ns=159030; budget_ms=5000; max_points=64",
+          "source-index invocation: provider=csl.hull.source.btulshor-kpabep@1.0.0; status=completed; epsilon=1e-5; MODIF source statuses retained verbatim; outcome=completed; internal_invocations=8; elapsed_ns=55803; checker_status=verified; checker_reason=every source point is in the exact convex hull of reported source points",
+          "source-index trace: source=csl.legacy.btulshor.reach.source-v1; modif_calls=7; pivots=17; trace_truncated=false; max_pivots=100000; max_dense_entries=1048576; capture_trace=true; max_trace_events=4096; source status 2 uses the original retain/swap branch; all other raw MODIF statuses are preserved and are not interpreted as a hull certificate",
+          "source-index trace: candidate=6; modif_status=1; pivots=4",
+          "source-index trace: candidate=5; modif_status=1; pivots=2",
+          "source-index trace: candidate=4; modif_status=1; pivots=3",
+          "source-index trace: candidate=3; modif_status=2; pivots=2",
+          "source-index trace: candidate=0; modif_status=2; pivots=2",
+          "source-index trace: candidate=1; modif_status=2; pivots=2",
+          "source-index trace: candidate=2; modif_status=2; pivots=2",
+          "source-index proposed original IDs: 3,0,1,2",
+          "independent exact 2D checker verifies every generated input point lies in the convex hull of selected original IDs; minimality is not established"
+        ]
+      },
+      {
+        "operation": "control_minkowski_sum",
+        "method": "csl.hull.source.btulshor-kpabep",
+        "status": "completed",
+        "vertices": [
+          [
+            0.25,
+            1.5
+          ],
+          [
+            0.25,
+            0.5
+          ],
+          [
+            1.25,
+            0.5
+          ],
+          [
+            1.25,
+            1.5
+          ]
+        ],
+        "evidence": [
+          "binary64 affine and sum arithmetic; numerical tolerances do not authorize removal of generated candidates",
+          "source-index IDs applied only after the bounded exact 2D checker verified every generated point against the selected retained cloud; the checker proves containment, not minimality",
+          "NumericalCheck.max_residual is zero for a successful exact source-index containment check; no LP reconstruction residual is claimed",
+          "numerical equivalent relation is an algorithm claim, not exact equality or validated inclusion for the intended real-valued model",
+          "published L-infinity error bound composes exact represented-dyadic candidate generation with direct V inputs or independently checked ambient-one/axis-aligned-box H/V coverage; exact deletion preserves the generated hull",
+          "finite and mixed action catalogues are not accepted by this SetHandle operation",
+          "selected HullReducerPort: not_used",
+          "selected vertex LP provider: not_used",
+          "selected source-index hull provider: csl.hull.source.btulshor-kpabep@1.0.0",
+          "selected H-to-V converter: not_used",
+          "checker invocation: provider=csl.geometry.bounded-hull-checker@1; status=verified; reason=every source point is in the exact convex hull of reported source points; elapsed_ns=166434; budget_ms=5000; max_points=64",
+          "source-index invocation: provider=csl.hull.source.btulshor-kpabep@1.0.0; status=completed; epsilon=1e-5; MODIF source statuses retained verbatim; outcome=completed; internal_invocations=8; elapsed_ns=26890; checker_status=verified; checker_reason=every source point is in the exact convex hull of reported source points",
+          "source-index trace: source=csl.legacy.btulshor.reach.source-v1; modif_calls=7; pivots=20; trace_truncated=false; max_pivots=100000; max_dense_entries=1048576; capture_trace=true; max_trace_events=4096; source status 2 uses the original retain/swap branch; all other raw MODIF statuses are preserved and are not interpreted as a hull certificate",
+          "source-index trace: candidate=6; modif_status=1; pivots=4",
+          "source-index trace: candidate=5; modif_status=1; pivots=4",
+          "source-index trace: candidate=4; modif_status=1; pivots=3",
+          "source-index trace: candidate=3; modif_status=2; pivots=2",
+          "source-index trace: candidate=0; modif_status=2; pivots=3",
+          "source-index trace: candidate=1; modif_status=2; pivots=2",
+          "source-index trace: candidate=2; modif_status=2; pivots=2",
+          "source-index proposed original IDs: 3,0,1,2",
+          "independent exact 2D checker verifies every generated input point lies in the convex hull of selected original IDs; minimality is not established"
+        ]
+      }
+    ],
+    "raw_failures": [
+      {
+        "case": "near_tolerance_legacy_proposal",
+        "outcome": "unsupported",
+        "raw": "affine-sum.source-index.checker: source-index proposal retained for audit; checker invocation: provider=csl.geometry.bounded-hull-checker@1; status=incorrect; reason=input point lies outside reported convex hull; elapsed_ns=132630; budget_ms=5000; max_points=64; raw proposal: provider=csl.hull.source.btulshor-kpabep@1.0.0; status=completed; epsilon=1e-5; MODIF source statuses retained verbatim; internal_invocations=6; elapsed_ns=20114; proposed_ids=3,0,1,2,; trace=source=csl.legacy.btulshor.reach.source-v1; modif_calls=5; pivots=11; trace_truncated=false; max_pivots=100000; max_dense_entries=1048576; capture_trace=true; max_trace_events=4096; source status 2 uses the original retain/swap branch; all other raw MODIF statuses are preserved and are not interpreted as a hull certificate; trace=candidate=4; modif_status=1; pivots=2; trace=candidate=3; modif_status=2; pivots=2; trace=candidate=0; modif_status=2; pivots=3; trace=candidate=1; modif_status=2; pivots=2; trace=candidate=2; modif_status=2; pivots=2"
+      }
+    ]
+  }
+}

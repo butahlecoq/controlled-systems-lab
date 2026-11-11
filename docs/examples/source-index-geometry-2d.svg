@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 470" role="img" aria-labelledby="title desc">
+  <title id="title">Source-index hull input, affine image, and 2D control sum</title>
+  <desc id="desc">The left panel shows a square with a boundary point, duplicate corner and non-dyadic interior point. The center panel shows its affine parallelogram. The right panel shows a one-step reachable square from adding a known initial state to the control square.</desc>
+  <style>
+    text{font:15px system-ui,sans-serif;fill:#18212b}.small{font-size:13px;fill:#405366}
+    .grid{stroke:#dce3ea;stroke-width:1}.axis{stroke:#405366;stroke-width:2}
+    .hull{fill:#dcefe7;stroke:#287357;stroke-width:3}.image{fill:#f5e5bd;stroke:#9b6c13;stroke-width:3}
+    .sum{fill:#dce8f5;stroke:#32658f;stroke-width:3}.corner{fill:#287357}.edge{fill:#bd6c22}
+    .duplicate{fill:#7657a6}.interior{fill:#bd3f36}
+  </style>
+  <rect width="900" height="470" fill="#fbfcfe"/>
+  <path class="grid" d="M65 350H285 M65 290H285 M65 230H285 M65 170H285 M65 110H285 M65 50V350 M125 50V350 M185 50V350 M245 50V350"/>
+  <path class="axis" d="M65 365H295 M55 350V40"/>
+  <path class="hull" d="M65 350L245 350L245 110L65 110Z"/>
+  <circle class="corner" cx="65" cy="350" r="6"/><circle class="corner" cx="245" cy="350" r="6"/>
+  <circle class="corner" cx="245" cy="110" r="6"/><circle class="corner" cx="65" cy="110" r="6"/>
+  <circle class="edge" cx="155" cy="350" r="6"/><circle class="duplicate" cx="70" cy="345" r="6"/>
+  <circle class="interior" cx="125" cy="270" r="6"/>
+  <text x="75" y="30">Input cloud</text><text class="small" x="66" y="389">IDs 0–3 corners; 4 edge; 5 duplicates 0</text>
+  <text class="small" x="66" y="410">6 is non-dyadic interior point (⅓,⅓)</text>
+  <text class="small" x="70" y="340">0,5</text><text class="small" x="147" y="340">4</text><text class="small" x="132" y="270">6</text>
+
+  <path class="grid" d="M355 350H575 M355 290H575 M355 230H575 M355 170H575 M355 110H575 M355 50V350 M415 50V350 M475 50V350 M535 50V350"/>
+  <path class="axis" d="M355 365H585 M345 350V40"/>
+  <path class="image" d="M385 290L505 230L565 110L445 170Z"/>
+  <circle class="corner" cx="385" cy="290" r="5"/><circle class="corner" cx="505" cy="230" r="5"/>
+  <circle class="corner" cx="565" cy="110" r="5"/><circle class="corner" cx="445" cy="170" r="5"/>
+  <text x="365" y="30">Affine image</text><text class="small" x="365" y="389">(x,y) ↦ (x+0.25, 0.5x+y−0.5)</text>
+  <text class="small" x="365" y="410">Four retained original IDs; exact check passed</text>
+
+  <path class="grid" d="M650 350H870 M650 290H870 M650 230H870 M650 170H870 M650 110H870 M650 50V350 M710 50V350 M770 50V350 M830 50V350"/>
+  <path class="axis" d="M650 365H880 M640 350V40"/>
+  <path class="sum" d="M695 230L815 230L815 110L695 110Z"/>
+  <circle class="corner" cx="695" cy="230" r="5"/><circle class="corner" cx="815" cy="230" r="5"/>
+  <circle class="corner" cx="815" cy="110" r="5"/><circle class="corner" cx="695" cy="110" r="5"/>
+  <text x="660" y="30">One-step control sum</text><text class="small" x="660" y="389">known x₀=(0.25,0.5), U=[0,1]²</text>
+  <text class="small" x="660" y="410">X₁=x₀⊕U; original action vertices preserved</text>
+</svg>

@@ -39,9 +39,12 @@ csl_add_library(csl_lazy_geometry STATIC
   src/geometry/lazy/materialize.cpp)
 target_link_libraries(csl_lazy_geometry PUBLIC CSL::sets CSL::registry)
 
-csl_add_library(csl_affine_sum STATIC src/geometry/affine_sum.cpp)
+csl_add_library(csl_affine_sum STATIC
+  src/geometry/affine_sum.cpp
+  src/geometry/source_index_hull.cpp)
 
-target_link_libraries(csl_affine_sum PUBLIC CSL::sets CSL::hull CSL::registry)
+target_link_libraries(csl_affine_sum PUBLIC CSL::sets CSL::hull CSL::registry CSL::bounded_hull_checker
+  PRIVATE CSL::quickhull_2d CSL::legacy_btulshor)
 
 csl_add_library(csl_geometry_generators STATIC src/geometry/generators/generator_sets.cpp)
 target_link_libraries(csl_geometry_generators PUBLIC CSL::sets)

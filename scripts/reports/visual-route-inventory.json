@@ -1974,7 +1974,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 83,
+      "signal_count": 86,
       "asset_name_literals": [
         "adaptive-ode-replay.svg",
         "app01-plan-timing-v1.svg",
@@ -2026,6 +2026,7 @@
         "projections-lambda1.svg",
         "projections.svg",
         "reachability-and-approximations.svg",
+        "source-index-geometry-2d.svg",
         "syn01-timing.svg",
         "synthesis-2d.svg",
         "terminal-projections.svg",

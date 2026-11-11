@@ -641,6 +641,12 @@ def build(catalog, site):
         '<p>The installed CSL replay client integrates a two-state harmonic oscillator and compares its recorded path with the analytic solution.</p>'
         '<p><a href="adaptive-ode-replay.html">Inputs, answer and reproduction details ↗</a> · '
         '<a href="adaptive-ode-replay.json">Raw record ↗</a></p></article>')
+    saved_figures += ('<article class="saved-figure" id="source-index-geometry-2d"><p class="eyebrow">Geometry · Public-interface example</p>'
+        '<h3><a href="source-index-geometry-2d.html">Source-index hulls in a 2D geometry pipeline</a></h3>'
+        '<a href="source-index-geometry-2d.html"><img src="source-index-geometry-2d.svg" alt="A square point cloud with edge, duplicate and interior points, followed by its affine image and one-step control sum"></a>'
+        '<p>QuickHull2D and the recovered BTULSHOR KPABEP/MODIF profile propose original point IDs; an independent exact checker validates each generated cloud before the affine or control sum applies those IDs.</p>'
+        '<p><a href="source-index-geometry-2d.html">Inputs, answer and reproduction details ↗</a> · '
+        '<a href="source-index-geometry-2d-records.json">Raw records ↗</a></p></article>')
     fuel_layer_files, fuel_layer_inventory, fuel_layer_card = visual_example_fuel_layers.build(
         Path(__file__).resolve().parents[2])
     saved_figures += fuel_layer_card
@@ -669,6 +675,12 @@ def build(catalog, site):
         source = adaptive_assets / name
         require(source.is_file() and not source.is_symlink(), "missing adaptive ODE example asset: " + name)
         outputs[name] = source.read_bytes() if source.suffix != ".html" else source.read_text(encoding="utf-8")
+    for name in ("source-index-geometry-2d.html", "source-index-geometry-2d.svg",
+                 "source-index-geometry-2d-records.json"):
+        source = adaptive_assets / name
+        require(source.is_file() and not source.is_symlink(),
+                "missing source-index geometry example asset: " + name)
+        outputs[name] = source.read_bytes() if source.suffix != ".html" else source.read_text(encoding="utf-8")
     with tempfile.TemporaryDirectory(prefix="csl-gallery-geometry-") as temporary:
         geometry_root = Path(temporary) / "examples"
         _, geometry_inventory, geometry_assets = geometry_opt_companions.build(geometry_root)
@@ -681,6 +693,12 @@ def build(catalog, site):
         "page": "adaptive-ode-replay.html", "figure": "adaptive-ode-replay.svg",
         "source_page": "https://github.com/butahlecoq/controlled-systems-lab/blob/main/examples/adaptive_ode_replay.cpp",
         "raw_record": "adaptive-ode-replay.json"})
+    gallery_inventory.append({"family": "Geometry and control reachability",
+        "title": "Source-index hulls in a 2D geometry pipeline",
+        "status": "educational-example", "anchor": "source-index-geometry-2d",
+        "page": "source-index-geometry-2d.html", "figure": "source-index-geometry-2d.svg",
+        "source_page": "https://github.com/butahlecoq/controlled-systems-lab/blob/main/examples/source_index_geometry_2d.cpp",
+        "raw_record": "source-index-geometry-2d-records.json"})
     control_witness = control_witness_companions.build(site, catalog)
     outputs.update(control_witness.files)
     gallery_inventory.extend(control_witness.gallery_entries)

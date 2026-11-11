@@ -2,6 +2,7 @@
 #include <csl/adapters/convex/highs.hpp>
 #include <csl/adapters/polyhedral/qhull.hpp>
 #include <csl/geometry/composition_catalogue.hpp>
+#include <csl/geometry/affine_sum.hpp>
 #include <csl/geometry/generator_adapter.hpp>
 #include <csl/geometry/approximation.hpp>
 #include <csl/geometry/box_parallelotope.hpp>
@@ -442,7 +443,32 @@ void emit_candidate(std::ostream& out, const geometry::HullReducerCatalogue& cat
                 << escape(stopped.request.program.value) << "\"}";
         }
     }
-    out << "],\"attempt\":\"" << (exact_fixture ? "completed" : "incomplete")
+    out << "],\"child_lp_port_invocations\":[";
+    if(reduction) for(std::size_t i=0;i<reduction->child_lp_invocations.size();++i) {
+        if(i) out << ',';
+        const auto& query=reduction->child_lp_invocations[i];
+        out << "{\"requested_provider\":\"" << escape(query.requested_provider)
+            << "\",\"actual_provider\":\"" << escape(query.actual_provider)
+            << "\",\"actual_version\":\"" << escape(query.actual_version)
+            << "\",\"problem\":\"" << escape(query.request.problem.value)
+            << "\",\"program\":\"" << escape(query.request.program.value)
+            << "\",\"status\":\"" << escape(query.status)
+            << "\",\"outcome\":\"" << escape(query.outcome)
+            << "\",\"raw_diagnostics\":\"" << escape(query.raw_diagnostics)
+            << "\",\"raw_diagnostics_truncated\":"
+            << (query.raw_diagnostics_truncated?"true":"false") << "}";
+    }
+    const bool child_lp_trace_complete=!reduction ||
+        (reduction->child_lp_invocations_omitted==0 && !reduction->child_lp_trace_capture_failed);
+    out << "],\"child_lp_port_trace_summary\":{";
+    if(reduction)
+        out << "\"captured\":" << reduction->child_lp_invocations.size()
+            << ",\"total\":" << reduction->child_lp_invocations_total
+            << ",\"omitted\":" << reduction->child_lp_invocations_omitted
+            << ",\"capture_failed\":" << (reduction->child_lp_trace_capture_failed?"true":"false");
+    else out << "\"captured\":0,\"total\":0,\"omitted\":0,\"capture_failed\":false";
+    out << ",\"native_solver_entry_proven\":false},\"attempt\":\""
+        << (exact_fixture && child_lp_trace_complete ? "completed" : "incomplete")
         << "\",\"execution_first_unmet\":";
     const registry::LPQueryRejected* first_query_rejection = nullptr;
     for (const auto& query : execution.outer_lp_runner_queries) {
@@ -717,6 +743,89 @@ void emit_geometric_reference_candidates(std::ostream& out) {
     } else out << "{\"graph_id\":\"legacy-btulshor/reach/source-v1\",\"status\":\"implementation_missing\","
         << "\"first_unmet\":{\"field\":\"reach.execution\",\"reason\":\"source fixture did not complete\"}}]";
 }
+
+void emit_source_index_operation_candidates(std::ostream& out) {
+    auto source_catalogue=geometry::make_source_index_hull_catalogue();
+    const auto points=Matrix{7,2,{0,0,1,0,1,1,0,1,0.5,0,0,0,1.0/3.0,1.0/3.0}};
+    const auto point_view=take(numeric::snapshot(points));
+    const auto ray_view=take(numeric::snapshot(Matrix{0,2,{}}));
+    const auto control_data=take_variant(sets::make_v({{"catalogue-source-index-controls"},2,{"x","y"}},
+        {point_view,ray_view}),"source-index point cloud");
+    const auto control=control_data.as_handle();
+    const auto initial=take_variant(sets::make_singleton({{"catalogue-source-index-initial"},2,{"x","y"}},
+        take(numeric::snapshot_vector(Vector{0.25,0.5}))),
+        "source-index initial singleton").as_handle();
+    const std::array<std::pair<std::string_view,GeometryOperation>,2> operations{{
+        {"affine-image",AffineImage{control,{2,2,{1,0,0.5,1}},{0.25,-0.5}}},
+        {"control-minkowski-sum",MinkowskiSum{initial,control}}}};
+    out<<'[';
+    bool first=true;
+    for(const auto& source_identity:source_catalogue.identities()) {
+        registry::Requirements source_requirements;
+        const registry::Method source_method{source_identity.id,source_identity.version};
+        auto selected_source=take_variant(registry::prepare_provider(registry::select_provider(
+            source_catalogue,source_method,source_requirements)),"source-index provider selection");
+        auto registration=geometry::make_affine_sum_registration({std::move(selected_source),{},
+            geometry::HullCheckBudget{std::chrono::milliseconds{5000},64}});
+        const registry::Method operation_method{registration.identity.id,registration.identity.version};
+        registry::Registry<registry::GeometryPort> operation_registry;
+        if(operation_registry.add(std::move(registration)))
+            throw std::runtime_error("source-index affine-sum registration rejected");
+        registry::Requirements operation_requirements;
+        operation_requirements.output.representation={"csl.polyhedron.v"};
+        operation_requirements.output.relation=SetRelation::equivalent;
+        const auto selected_operation=take_variant(registry::prepare_provider(registry::select_provider(
+            operation_registry,operation_method,operation_requirements)),"source-index operation selection");
+        for(const auto& [operation_name,geometry_operation]:operations) {
+            OperationRequest request{{{"catalogue-source-index"},{std::string{operation_name}},
+                {"catalogue-source-index-"+std::string{operation_name}}},
+                operation_method.id,geometry_operation,
+                SetRelation::equivalent,Assurance::numerical};
+            auto prepared=selected_operation.prepare(request);
+            if(!std::holds_alternative<registry::PreparedPipeline<registry::GeometryPort>>(prepared)) {
+                if(!first) out<<','; first=false;
+                const auto& rejection=std::get<registry::Rejection>(prepared);
+                out<<"{\"graph_id\":\"geometry/source-index/"<<escape(source_identity.id.value)<<'/'
+                    <<escape(operation_name)<<"\",\"status\":\"incompatible\",\"first_unmet\":";
+                emit_rejection(out,rejection);
+                out<<'}';
+                continue;
+            }
+            auto workspace=std::get<registry::PreparedPipeline<registry::GeometryPort>>(prepared).create();
+            const auto outcome=std::get<0>(workspace)->run({{},{},{},{1e-8,1e-8},"catalogue-source-index"});
+            if(!first) out<<','; first=false;
+            out<<"{\"graph_id\":\"geometry/source-index/"<<escape(source_identity.id.value)<<'/'
+                <<escape(operation_name)<<"\",\"status\":\"";
+            if(const auto* result=std::get_if<OperationResult>(&outcome)) {
+                const auto result_data=take_variant(sets::from_handle(result->output),"source-index output import");
+                const auto representation=result_data.representation();
+                const auto* vertices=std::get_if<sets::VRepresentation>(&representation);
+                if(!vertices) throw std::runtime_error("source-index affine-sum output is not V data");
+                out<<"admitted\",\"attempt\":\"completed\",\"operation_method\":\""
+                    <<escape(operation_method.id.value)<<"@"<<escape(operation_method.version.value())
+                    <<"\",\"source_provider\":\""<<escape(source_identity.id.value)<<"@"
+                    <<escape(source_identity.version)<<"\",\"input_dimension\":2,\"output_vertex_count\":"
+                    <<vertices->vertices.rows()<<",\"active_roles\":{\"vertex_lp_provider\":\"not_used\","
+                    <<"\"terminal_optimizer\":\"not_used\",\"h_to_v_converter\":\"not_used\"},\"evidence\":[";
+                for(std::size_t i=0;i<result->evidence.assumptions.size();++i) {
+                    if(i) out<<',';
+                    out<<'\"'<<escape(result->evidence.assumptions[i])<<'\"';
+                }
+                out<<"],\"first_unmet\":null}";
+            } else {
+                out<<"incompatible\",\"attempt\":\"failed\",\"source_provider\":\""
+                    <<escape(source_identity.id.value)<<"@"<<escape(source_identity.version)
+                    <<"\",\"active_roles\":{\"vertex_lp_provider\":\"not_used\","
+                    <<"\"terminal_optimizer\":\"not_used\"},\"first_unmet\":\"";
+                if(const auto* stopped=std::get_if<OperationStopped>(&outcome)) out<<escape(stopped->diagnostics);
+                else for(const auto& diagnostic:std::get<Unsupported>(outcome).diagnostics)
+                    out<<escape(diagnostic.field+": "+diagnostic.explanation)<<"; ";
+                out<<"\"}";
+            }
+        }
+    }
+    out<<']';
+}
 }
 
 int main(int argc, char** argv) try {
@@ -788,6 +897,8 @@ int main(int argc, char** argv) try {
     emit_approximation_candidates(std::cout);
     std::cout << ",\"geometric_reference_candidates\":";
     emit_geometric_reference_candidates(std::cout);
+    std::cout << ",\"source_index_operation_candidates\":";
+    emit_source_index_operation_candidates(std::cout);
     std::cout << ",\"terminal_optimizer_candidates\":";
     emit_terminal_optimizer_candidates(std::cout);
     std::cout << ",\"controller_candidates\":";

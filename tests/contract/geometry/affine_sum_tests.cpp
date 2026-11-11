@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/geometry/affine_sum.hpp>
+#include <csl/geometry/basis_reuse_reducer.hpp>
 #include <csl/geometry/operation_admission.hpp>
 #include <csl/geometry/polyhedral_intersection.hpp>
 #include <csl/adapters/lp/highs.hpp>
@@ -61,6 +62,22 @@ Registration<HullReducerPort> make_fixed_reduction_hull_registration(geometry::H
         [](const geometry::PointCloud&,const Requirements&) -> Capability { return Offer{}; },
         [reduction=std::move(reduction)](const geometry::PointCloud&) {
             return std::make_unique<FixedReductionHullWorkspace>(reduction);
+        }};
+}
+class FixedSourceIndexWorkspace final : public geometry::SourceIndexHullWorkspace {
+    geometry::SourceIndexProposal proposal_;
+public:
+    explicit FixedSourceIndexWorkspace(geometry::SourceIndexProposal proposal)
+        :proposal_(std::move(proposal)){}
+    geometry::SourceIndexProposalResult propose(const geometry::PointCloud&,
+            const ExecutionContext&) override { return proposal_; }
+};
+Registration<SourceIndexHullPort> make_fixed_source_index_registration(
+        geometry::SourceIndexProposal proposal) {
+    return {{{"test.source-index.fixed"},"1"},
+        [](const geometry::PointCloud&,const Requirements&) -> Capability {return Offer{};},
+        [proposal=std::move(proposal)](const geometry::PointCloud&) {
+            return std::make_unique<FixedSourceIndexWorkspace>(proposal);
         }};
 }
 class NearEndpointDroppingHullWorkspace final : public geometry::HullReducerWorkspace {
@@ -192,6 +209,22 @@ OperationOutcome run(const OperationRequest& req,geometry::AffineSumDependencies
     if(auto* rejection=std::get_if<Rejection>(&prepared))return Unsupported{rejection->diagnostics};
     auto [workspace]=std::get<PreparedPipeline<GeometryPort>>(prepared).create();
     return workspace->run(ctx);
+}
+OperationOutcome run_source_index(const OperationRequest& req,
+        Registration<SourceIndexHullPort> selected,
+        geometry::HullCheckBudget budget={},geometry::AffineSumOptions options={},
+        std::optional<PreparedProvider<ConversionPort>> conversion={}) {
+    auto source=provider(std::move(selected));
+    geometry::SourceIndexAffineSumDependencies deps{std::move(source),std::move(conversion),budget};
+    Registry<GeometryPort> registry;
+    REQUIRE_FALSE(registry.add(geometry::make_affine_sum_registration(std::move(deps),std::move(options))).has_value());
+    Requirements requirements;
+    requirements.output.representation={"csl.polyhedron.v"};
+    requirements.output.relation=SetRelation::equivalent;
+    auto prepared=prepare_pipeline(select(registry,{{"csl.geometry.affine-sum.source-index"},{}},req,requirements));
+    if(auto* rejection=std::get_if<Rejection>(&prepared))return Unsupported{rejection->diagnostics};
+    auto [workspace]=std::get<PreparedPipeline<GeometryPort>>(prepared).create();
+    return workspace->run(context());
 }
 double support(const SetHandle& handle,const Vector& direction) {
     auto data=take(sets::from_handle(handle));
@@ -433,6 +466,157 @@ TEST_CASE("affine and sum operations use the selected hull reducer") {
     CHECK(std::get<sets::VRepresentation>(rep).vertices.rows()==4);
     CHECK(std::any_of(result.evidence.assumptions.begin(),result.evidence.assumptions.end(),
         [](const std::string& value){return value.find("test.hull.keep-all@1")!=std::string::npos;}));
+}
+
+TEST_CASE("source-index affine and control-sum paths use the selected method and independent exact checker") {
+    const std::vector<std::string> labels{"position", "velocity"};
+    const auto cloud=vertices("source-index-cloud",2,
+        {0,0, 1,0, 1,1, 0,1, 1.0/3.0,1.0/3.0, 0.5,0, 0,0},7,labels);
+    const Matrix identity{2,2,{1,0,0,1}};
+    const auto affine=request(AffineImage{cloud,identity,{0,0}},"source-index-affine");
+    geometry::AffineSumOptions affine_options; affine_options.affine_output_labels=labels;
+    const auto affine_result=run_source_index(affine,geometry::make_quickhull_source_index_registration(),{},affine_options);
+    REQUIRE(std::holds_alternative<OperationResult>(affine_result));
+    const auto& affine_output=std::get<OperationResult>(affine_result);
+    const auto affine_data=take(sets::from_handle(affine_output.output));
+    const auto affine_rep=affine_data.representation();
+    REQUIRE(std::holds_alternative<sets::VRepresentation>(affine_rep));
+    CHECK(std::get<sets::VRepresentation>(affine_rep).vertices.rows()==4);
+    CHECK(support(affine_output.output,{1,0})==1.0);
+    CHECK(support(affine_output.output,{0,1})==1.0);
+    CHECK(affine_data.metadata()->coordinate_labels==labels);
+    CHECK(std::any_of(affine_output.evidence.assumptions.begin(),affine_output.evidence.assumptions.end(),
+        [](const auto& item){return item.find("checker invocation: provider=csl.geometry.bounded-hull-checker")!=std::string::npos && item.find("status=verified")!=std::string::npos;}));
+    CHECK(std::any_of(affine_output.evidence.assumptions.begin(),affine_output.evidence.assumptions.end(),
+        [](const auto& item){return item.find("source-index proposed original IDs: 0,1,2,3")!=std::string::npos;}));
+    CHECK(std::any_of(affine_output.evidence.assumptions.begin(),affine_output.evidence.assumptions.end(),
+        [](const auto& item){return item.find("selected vertex LP provider: not_used")!=std::string::npos;}));
+
+    const auto segment=vertices("source-index-control-segment",2,{0,0,0.5,0,0.5,0},3,labels);
+    const auto sum=request(MinkowskiSum{cloud,segment},"source-index-control-sum");
+    const auto sum_result=run_source_index(sum,geometry::make_quickhull_source_index_registration());
+    REQUIRE(std::holds_alternative<OperationResult>(sum_result));
+    const auto& sum_output=std::get<OperationResult>(sum_result);
+    CHECK(support(sum_output.output,{1,0})==doctest::Approx(1.5));
+    CHECK(support(sum_output.output,{0,1})==1.0);
+    CHECK(std::any_of(sum_output.evidence.assumptions.begin(),sum_output.evidence.assumptions.end(),
+        [](const auto& item){return item.find("source-index invocation:")!=std::string::npos && item.find("internal_invocations=1")!=std::string::npos;}));
+}
+
+TEST_CASE("source-index operation requires and records the independently selected H-to-V converter") {
+    const auto square=take(sets::make_h({{"source-index-h-square"},2,{}},
+        {take(numeric::snapshot(Matrix{4,2,{-1,0,1,0,0,-1,0,1}})),
+         take(numeric::snapshot_vector(Vector{0,1,0,1})),
+         take(numeric::snapshot(Matrix{0,2,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
+    const auto req=request(AffineImage{square,{2,2,{1,0,0,1}},{0,0}},"source-index-h-conversion");
+    const auto missing=run_source_index(req,geometry::make_quickhull_source_index_registration());
+    REQUIRE(std::holds_alternative<Unsupported>(missing));
+    CHECK(std::get<Unsupported>(missing).diagnostics.front().field=="affine-sum.conversion");
+
+    auto selected=dependencies();
+    REQUIRE(selected.conversion);
+    const auto converted=run_source_index(req,geometry::make_quickhull_source_index_registration(),{}, {},
+        selected.conversion);
+    REQUIRE(std::holds_alternative<OperationResult>(converted));
+    const auto& evidence=std::get<OperationResult>(converted).evidence;
+    CHECK(std::any_of(evidence.assumptions.begin(),evidence.assumptions.end(),[](const auto& item) {
+        return item.find("H-to-V conversion invoked:")!=std::string::npos &&
+            item.find("csl.conversion.qhull")!=std::string::npos;
+    }));
+    CHECK(std::any_of(evidence.assumptions.begin(),evidence.assumptions.end(),[](const auto& item) {
+        return item.find("checker invocation:")!=std::string::npos && item.find("status=verified")!=std::string::npos;
+    }));
+}
+
+TEST_CASE("affine operation records basis-reuse and recursive child LPPort invocations") {
+    std::vector<double> points{0,0, 1,0, 1,1, 0,1};
+    for(std::size_t x=1;x<=4;++x) for(std::size_t y=1;y<=4;++y) {
+        points.push_back(static_cast<double>(x)/5.0);
+        points.push_back(static_cast<double>(y)/5.0);
+    }
+    const auto cloud=vertices("child-lp-trace-cloud",2,std::move(points),20,{"x","y"});
+    const AffineImage image{cloud,{2,2,{1,0,0,1}},{0,0}};
+    const auto req=request(image,"child-lp-trace");
+    const auto selected_lp=take(adapters::lp::make_highs_registration());
+    auto basis_dependencies=geometry::AffineSumDependencies{
+        provider(geometry::make_basis_reuse_hull_reducer_registration()),
+        provider(selected_lp),{}};
+    const auto basis=run(req,std::move(basis_dependencies));
+    REQUIRE(std::holds_alternative<OperationResult>(basis));
+    const auto& basis_result=std::get<OperationResult>(basis);
+    const auto basis_data=take(sets::from_handle(basis_result.output));
+    const auto basis_vertices=std::get<sets::VRepresentation>(basis_data.representation()).vertices;
+    CHECK(basis_vertices.rows()<20);
+    CHECK(basis_vertices.rows()>=4);
+    CHECK(std::count_if(basis_result.evidence.assumptions.begin(),basis_result.evidence.assumptions.end(),
+        [](const auto& item){return item.find("HullReducerPort child LPPort invocation:")!=std::string::npos;})==1);
+    CHECK(std::any_of(basis_result.evidence.assumptions.begin(),basis_result.evidence.assumptions.end(),
+        [](const auto& item){return item.find("requested_provider=phase-one-bland@1")!=std::string::npos &&
+            item.find("actual_provider=phase-one-bland@1")!=std::string::npos &&
+            item.find("status=completed; mathematical_outcome=optimal")!=std::string::npos;}));
+
+    const auto recursive_lp=take(adapters::lp::make_highs_registration());
+    const auto outer_lp=take(adapters::lp::make_highs_registration());
+    auto recursive_dependencies=geometry::AffineSumDependencies{
+        provider(geometry::make_recursive_hull_reducer_registration(recursive_lp)),
+        provider(outer_lp),{}};
+    const auto recursive=run(req,std::move(recursive_dependencies));
+    REQUIRE(std::holds_alternative<OperationResult>(recursive));
+    const auto& recursive_result=std::get<OperationResult>(recursive);
+    const auto recursive_data=take(sets::from_handle(recursive_result.output));
+    const auto recursive_vertices=std::get<sets::VRepresentation>(recursive_data.representation()).vertices;
+    CHECK(recursive_vertices.rows()==20);
+    CHECK(recursive_vertices.rows()>=4);
+    const auto child_calls=std::count_if(recursive_result.evidence.assumptions.begin(),recursive_result.evidence.assumptions.end(),
+        [](const auto& item){return item.find("HullReducerPort child LPPort invocation:")!=std::string::npos;});
+    CHECK(child_calls>0);
+    CHECK(std::any_of(recursive_result.evidence.assumptions.begin(),recursive_result.evidence.assumptions.end(),
+        [child_calls](const auto& item){return item.find("child LPPort trace summary: captured="+std::to_string(child_calls)+
+            "; total="+std::to_string(child_calls)+"; omitted=0; capture_failed=false")!=std::string::npos;}));
+}
+
+TEST_CASE("source-index operation retains malformed, near-tolerance and stopped method outcomes") {
+    const Matrix identity{2,2,{1,0,0,1}};
+    const auto square=vertices("source-index-bad-square",2,{0,0,1,0,1,1,0,1},4);
+    const auto request_square=request(AffineImage{square,identity,{0,0}},"source-index-malformed");
+    const auto malformed=run_source_index(request_square,make_fixed_source_index_registration(
+        {geometry::SourceIndexProposalStatus::completed,{0,1,2},"fixture-completed",{}, {"fixture method trace"},1}));
+    REQUIRE(std::holds_alternative<Unsupported>(malformed));
+    CHECK(std::get<Unsupported>(malformed).diagnostics.front().field=="affine-sum.source-index.checker");
+    CHECK(std::get<Unsupported>(malformed).diagnostics.front().explanation.find("incorrect")!=std::string::npos);
+    CHECK(std::get<Unsupported>(malformed).diagnostics.front().explanation.find("proposed_ids=0,1,2,")!=std::string::npos);
+
+    const auto near_tolerance=vertices("source-index-near-tolerance",2,
+        {0,0,1,0,1,1,0,1,0.5,1.00000001},5);
+    const auto near_request=request(AffineImage{near_tolerance,identity,{0,0}},"source-index-near-tolerance");
+    const auto legacy=run_source_index(near_request,geometry::make_legacy_kpabep_source_index_registration());
+    REQUIRE(std::holds_alternative<Unsupported>(legacy));
+    const auto& legacy_error=std::get<Unsupported>(legacy).diagnostics.front();
+    CHECK(legacy_error.field=="affine-sum.source-index.checker");
+    CHECK(legacy_error.explanation.find("input point lies outside")!=std::string::npos);
+    CHECK(legacy_error.explanation.find("csl.legacy.btulshor.reach.source-v1")!=std::string::npos);
+    CHECK(legacy_error.explanation.find("modif_status=")!=std::string::npos);
+
+    auto stop_limits=geometry::LegacyKpabepOptions{};
+    stop_limits.max_pivots=0;
+    const auto stopped=run_source_index(request_square,
+        geometry::make_legacy_kpabep_source_index_registration(stop_limits));
+    CHECK(std::holds_alternative<OperationStopped>(stopped));
+    if(const auto* stop=std::get_if<OperationStopped>(&stopped))
+        CHECK(stop->diagnostics.find("source")!=std::string::npos);
+}
+
+TEST_CASE("source-index checker timeout refuses output without a reducer fallback") {
+    const Matrix identity{2,2,{1,0,0,1}};
+    const auto square=vertices("source-index-timeout-square",2,{0,0,1,0,1,1,0,1},4);
+    const auto req=request(AffineImage{square,identity,{0,0}},"source-index-timeout");
+    const auto outcome=run_source_index(req,geometry::make_quickhull_source_index_registration(),
+        {std::chrono::milliseconds{0},64});
+    REQUIRE(std::holds_alternative<OperationStopped>(outcome));
+    const auto& stop=std::get<OperationStopped>(outcome);
+    CHECK(stop.reason==StopReason::resource_limit);
+    CHECK(stop.diagnostics.find("checker timeout")!=std::string::npos);
+    CHECK(stop.diagnostics.find("raw proposal")!=std::string::npos);
 }
 
 TEST_CASE("public affine operation removes exact duplicate and interior candidates") {
