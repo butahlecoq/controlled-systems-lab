@@ -69,9 +69,6 @@ SOURCE_FILES = (
     "tests/reporting/test_issue824_zonotope_minimax_publication.py",
     "tests/reporting/test_visual_route_inventory.py",
     ".github/workflows/algorithm-reports.yml",
-    "docs/architecture/issue824-zonotope-minimax-selection.md",
-    "docs/architecture/issue824-parallelotope-propagation.md",
-    "docs/architecture/issue824-parallelotope-minimax-selection.md",
 )
 COLORS = ("#458588", "#689d6a", "#d79921")
 
