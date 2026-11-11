@@ -30,6 +30,7 @@ def main() -> int:
     import numpy as np
     from task_models import (continuous_jacobian, make_replay_request, objective,
                              physical_dynamics, prediction_receipt, source_scenario,
+                             make_held_step_request, validate_held_step_response,
                              validate_source_binding)
 
     cases = {
@@ -149,6 +150,25 @@ def main() -> int:
         assert request["task_sha256"]==manifest_sha256(task)
         assert request["scenario_sha256"]==canonical_sha256(request["scenario"])
         assert len(request["original_controls"])==n
+        index=min(3,n-1);state=np.asarray([row["initial"] for row in task["model"]["states"]],dtype=float)
+        held=make_held_step_request(task,state,u[index],index,"held-step-witness")
+        assert held["task_sha256"]==manifest_sha256(task)
+        assert held["original_interval_count"]==n and held["original_final_time"]==task["episode"]["final_time"]
+        assert held["absolute_update_index"]==index and held["absolute_time"]==index*task["episode"]["dt"]
+        assert held["derived_slice"]["task_sha256"]==held["task_sha256"]
+        assert held["derived_slice"]["scenario_sha256"]==canonical_sha256(held["bridge_request"]["scenario"])
+        assert held["bridge_request"]["scenario"]["time"]["grid"]==[index*task["episode"]["dt"],(index+1)*task["episode"]["dt"]]
+        fake={"status":"complete","task_sha256":held["task_sha256"],
+              "scenario_sha256":held["derived_slice"]["scenario_sha256"],
+              "witness_sha256":held["bridge_request"]["witness_sha256"],
+              "controls_sha256":held["bridge_request"]["controls_sha256"],
+              "physical_states":[state.tolist()]*(held["bridge_request"]["report_subintervals_per_hold"]+1),
+              "times":held["bridge_request"]["times"],"integration_receipts":[],"diagnostics":[]}
+        assert validate_held_step_response(held,fake)["status"]=="complete"
+        bad=dict(fake);bad["task_sha256"]="0"*64
+        try:validate_held_step_response(held,bad)
+        except ValueError:pass
+        else:raise AssertionError("held-step response with mutated original task identity was accepted")
     invalid=copy.deepcopy(lv);invalid["model"]["states"].pop()
     try:
         from contracts import validate_task
@@ -167,7 +187,8 @@ def main() -> int:
     except ValueError:pass
     else:raise AssertionError("out-of-bounds physical control was admitted")
     print(json.dumps({"status":"pass","checks":results,"physical_objective":"independent LV, fuel and orbit checks pass",
-                      "model_domains":"fuel and orbit rejection pass","replay_requests":"three source-bound tasks pass"},indent=2))
+                      "model_domains":"fuel and orbit rejection pass","replay_requests":"three source-bound tasks pass",
+                      "held_step_requests":"three full-task-bound absolute execution slices pass"},indent=2))
     return 0
 
 
