@@ -313,15 +313,16 @@ def data_details(example):
     return '<details><summary>' + summary + '</summary>' + content + '</details>'
 
 
-def _matrix_table(matrix, row_labels, column_labels, label):
-    header = "".join(f'<th scope="col">{name}</th>' for name in column_labels)
+def _math_matrix(matrix, label):
+    """Render a numeric-only matrix body with stretchy mathematical brackets."""
     rows = []
-    for row_label, values in zip(row_labels, matrix):
-        cells = "".join(f'<td>{escape(json.dumps(value, allow_nan=False))}</td>' for value in values)
-        rows.append(f'<tr><th scope="row">{row_label}</th>{cells}</tr>')
-    return ('<span class="math-brackets"><table class="math-matrix" aria-label="' + label + '">'
-            '<thead><tr><th scope="col">row</th>' + header + '</tr></thead>'
-            '<tbody>' + "".join(rows) + '</tbody></table></span>')
+    for values in matrix:
+        cells = "".join(f'<mtd>{escape(json.dumps(value, allow_nan=False))}</mtd>'
+                        for value in values)
+        rows.append(f'<mtr>{cells}</mtr>')
+    return ('<math class="math-matrix" display="inline" aria-label="' + escape(label, quote=True) + '">'
+            '<mo stretchy="true">[</mo><mtable columnspacing="0.7em" rowspacing="0.25em">'
+            + "".join(rows) + '</mtable><mo stretchy="true">]</mo></math>')
 
 
 def lesson_input_math(example):
@@ -329,36 +330,30 @@ def lesson_input_math(example):
     if example["kind"] == "hull":
         points = example["inputs"]["points"]
         dimensions = len(points[0])
-        point_ids = "".join(f'<th scope="col"><var>v</var><sub>{i}</sub></th>'
-                            for i in range(len(points)))
-        rows = []
-        for coordinate in range(dimensions):
-            values = "".join(f'<td>{escape(json.dumps(point[coordinate], allow_nan=False))}</td>'
-                             for point in points)
-            rows.append(f'<tr><th scope="row">x<sub>{coordinate + 1}</sub></th>{values}</tr>')
-        table = ('<span class="math-brackets"><table class="math-matrix" '
-                 'aria-label="Point matrix V with source point columns">'
-                 '<caption>Coordinate rows</caption>'
-                 '<thead><tr><th scope="col">coord.</th>' + point_ids + '</tr></thead>'
-                 '<tbody>' + "".join(rows) + '</tbody></table></span>')
+        matrix = [[point[coordinate] for point in points] for coordinate in range(dimensions)]
+        values = _math_matrix(matrix,
+                              f"Point matrix V, {dimensions} coordinate rows by {len(points)} source-point columns")
         return ('<div class="math-input"><p><var>V</var> = [<var>v</var><sub>0</sub> … '
                 f'<var>v</var><sub>{len(points) - 1}</sub>] ∈ ℝ<sup>{dimensions}×{len(points)}</sup></p>'
-                + '<p class="limits">Columns are zero-based source IDs; duplicate points remain separate.</p>'
+                + '<p class="limits">Matrix columns, in order: source points '
+                + ", ".join(f'v<sub>{i}</sub>' for i in range(len(points)))
+                + "; rows: " + ", ".join(f'x<sub>{i + 1}</sub>' for i in range(dimensions))
+                + '. Duplicate source points remain separate.</p>'
                 + '<div class="scroll" tabindex="0" role="region" aria-label="Input point matrix V">'
-                + table + '</div></div>')
+                + values + '</div></div>')
     if example["kind"] == "intersection":
         source = example["inputs"]
 
         def halfspace(name, symbol, set_symbol, title):
             matrix = source[name + "_A"]
             bounds = source[name + "_b"]
-            rows = [str(index + 1) for index in range(len(matrix))]
-            matrix_table = _matrix_table(matrix, rows, ["x₁", "x₂"], f"Matrix A_{symbol}")
-            vector_table = _matrix_table([[value] for value in bounds], rows, ["b"],
-                                         f"Column vector b_{symbol}")
+            matrix_table = _math_matrix(matrix, f"Matrix A_{symbol}, {len(matrix)} rows by 2 columns")
+            vector_table = _math_matrix([[value] for value in bounds],
+                                        f"Column vector b_{symbol}, {len(bounds)} entries")
             return ('<section class="math-system"><h3>' + title + '</h3>'
                     f'<p><var>{set_symbol}</var> = {{<var>x</var> ∈ ℝ<sup>2</sup> : '
                     f'<var>A</var><sub>{symbol}</sub><var>x</var> ≤ <var>b</var><sub>{symbol}</sub>}}</p>'
+                    '<p class="limits">Columns of A: x₁, x₂. Rows are paired in order with entries of b.</p>'
                     '<div class="math-expression"><span><var>A</var><sub>' + symbol + '</sub> = </span>'
                     + matrix_table + '<span><var>b</var><sub>' + symbol + '</sub> = </span>'
                     + vector_table + '</div></section>')
