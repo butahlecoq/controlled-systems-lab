@@ -17,6 +17,7 @@ import control_witness_companions
 import geometry_opt_companions
 import report_data
 import site_additions
+import site_design
 import stage_ext07 as ext07_reports
 import visual_illustrations
 import visual_example_geometry as geometry_examples
@@ -326,7 +327,7 @@ def point_table(example):
             '<th scope="col">Role</th></tr></thead><tbody>' + "".join(rows) + '</tbody></table></div>')
 
 
-def section(example, number):
+def section(example, number, previous=None, following=None):
     owner = CASE_OWNERS[example["kind"]]
     content = owner.presentation(example)
     return (f'<section id="{example["slug"]}"><p class="eyebrow">Example {number:02d} / {content["example_type"]}</p>'
@@ -340,7 +341,8 @@ def section(example, number):
             '<p>' + content["platform_note"] + '</p>'
             f'<p><a href="{content["source_url"]}">Complete native fixture/driver ↗</a></p></details>'
             f'<p class="limits">{content["notes"]}</p>' + content["source_provenance"] +
-            content["raw_record_link"] + content["report_links"] + '</section>')
+            content["raw_record_link"] + content["report_links"] +
+            site_design.lesson_neighbors(previous, following) + '</section>')
 
 
 def saved_figure_sections(catalog, site):
@@ -594,10 +596,15 @@ def issue3_control_walkthrough(record_path, report_id):
                '<text transform="translate(20 210) rotate(-90)" text-anchor="middle" fill="#dce5d5">terminal state y₁ coordinate (dimensionless)</text></svg>')
     page = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width,initial-scale=1">'
+            '<meta name="color-scheme" content="dark light">'
             '<title>One saved control task from input to verified result</title>'
-            '<link rel="stylesheet" href="examples.css"></head><body><main class="walkthrough">'
-            '<p><a href="index.html#algorithm-coverage">← Algorithm family coverage</a></p>'
-            '<p class="eyebrow">Saved validated API run · Issue #3</p>'
+            '<link rel="stylesheet" href="examples.css"></head><body><a class="skip" href="#main">Skip to walkthrough</a>'
+            '<main id="main" class="walkthrough page-content">'
+            + site_design.breadcrumbs([("Research archive", "../index.html"),
+                                       ("Learning examples", "index.html"),
+                                       ("Algorithm coverage", "index.html#algorithm-coverage"),
+                                       ("One finite-action task", "issue3-control-walkthrough.html")])
+            + '<p class="eyebrow">Saved validated API run · Issue #3</p>'
             '<h1>One finite-action control task, end to end</h1>'
             '<p>This walkthrough reads the saved <code>analytic_2d</code> input and result. It does not rerun the solver. '
             'The plotted terminal points are independently calculated from the saved matrices and actions.</p>'
@@ -881,7 +888,7 @@ def build(catalog, site):
     workflow_figure, workflow_page = issue3_control_walkthrough(
         Path(catalog).resolve().parent / issue3_report["source_report_id"] / "records.json",
         issue3_report["report_id"])
-    navigation = "".join(f'<a href="#{e["slug"]}">{e["title"]}</a>' for e in examples)
+    navigation = "".join(f'<a href="#{e["slug"]}">{escape(e["title"])}</a>' for e in examples)
     navigation += '<a href="#analytic-illustrations">Analytic geometry and optimization</a>'
     navigation += '<a href="#algorithm-coverage">Algorithm coverage map</a>'
     navigation += '<a href="#saved-report-figures">More saved algorithm figures</a>'
@@ -892,9 +899,10 @@ def build(catalog, site):
             '<a class="brand" href="../index.html">[ csl ]<br>Controlled Systems Lab</a>'
             '<p class="eyebrow">Learn by looking</p>'
             f'<a class="nav-shortcut" href="#{last_topic_anchor}">Jump to final example: {escape(last_topic_title)} ↓</a>'
-            '<nav aria-label="Examples" tabindex="0">' + navigation +
+            '<nav aria-label="Examples topics" tabindex="0">' + navigation +
             '<a href="../index.html">All numerical reports ↗</a></nav></aside><main id="main">'
-            '<header><p class="eyebrow">Small inputs / visible answers</p><h1>Algorithms,<br><em>in two dimensions.</em></h1>'
+            '<header>' + site_design.breadcrumbs([("Research archive", "../index.html"), ("Learning examples", "index.html")])
+            + '<p class="eyebrow">Small inputs / visible answers</p><h1>Algorithms,<br><em>in two dimensions.</em></h1>'
             '<p>See what goes in, what comes out, and why. Explore hull vertices, set intersections, hybrid control families, and projected reachability.</p>'
             '<p class="limits">These educational pages show reviewed saved outputs or explicit analytic constructions; '
             'they are not new performance measurements. Each page states whether it replays saved output or illustrates a literal fixture.</p>'
@@ -904,7 +912,11 @@ def build(catalog, site):
             '<a href="algorithm-coverage.json" download>Download algorithm-family coverage (JSON)</a></p>'
             '<p class="limits">This inventory describes figures currently linked here; it does not imply that every implemented algorithm already has a 2D example. '
             'The full algorithm-coverage gap is tracked in <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/563">issue #563</a>.</p></header>'
-            + "".join(section(e, i+1) for i, e in enumerate(examples)) +
+            + "".join(section(e, i+1,
+                              (examples[i-1]["title"], "#" + examples[i-1]["slug"]) if i else None,
+                              (examples[i+1]["title"], "#" + examples[i+1]["slug"])
+                              if i + 1 < len(examples) else None)
+                      for i, e in enumerate(examples)) +
             '<section id="analytic-illustrations"><p class="eyebrow">Hand-derived examples</p>'
             '<h2>Analytic geometry and optimization</h2><p>These exact low-dimensional examples explain the operations with literal inputs and answers. They are not solver traces or performance evidence.</p>'
             '<div class="saved-grid">' + visual_illustrations.cards(analytic_inventory) + '</div></section>' +
@@ -1007,11 +1019,7 @@ def build(catalog, site):
             'alt="B07 terminal points projected from four state coordinates onto oxidizer/fuel flow and stock axes"></a>'
             '<p>Plots saved B07 and B09 four-state terminal rows in labeled flow and stock coordinate pairs. The figures show points and do not reconstruct a filled enclosure.</p>'
             '<p><a href="viz10/index.html">Open the historical and benchmark saved-data plots →</a></p></article>' +
-            '</div></section><footer>Controlled Systems Lab · Saved evidence, visible geometry.</footer></main></div>'
-            '<script>document.querySelector(".nav-shortcut").addEventListener("click",event=>{'
-            'const target=document.querySelector(event.currentTarget.hash);if(!target)return;'
-            'event.preventDefault();history.pushState(null,"",event.currentTarget.hash);'
-            'target.scrollIntoView({behavior:"instant",block:"start"});});</script></body></html>')
+            '</div></section><footer>Controlled Systems Lab · Saved evidence, visible geometry.</footer></main></div></body></html>')
     outputs["index.html"] = body
     fuel_example_dir = Path(__file__).parents[2] / "docs/examples"
     for filename in ("b04-reference-trajectory-projections.html",
@@ -1073,7 +1081,7 @@ def build(catalog, site):
     link = '<p id="visual-examples-link"><a href="examples/index.html">Visual examples: minimal 2D inputs, hull vertices and plots →</a></p>'
     output_files = {name: (content if isinstance(content, bytes) else content.encode("utf-8"))
                     for name, content in outputs.items()}
-    output_files["examples.css"] = Path(__file__).with_name("visual_examples.css").read_bytes()
+    output_files["examples.css"] = site_design.stylesheet()
 
     with tempfile.TemporaryDirectory(prefix="csl-gallery-validation-") as temporary:
         validation_site = Path(temporary)

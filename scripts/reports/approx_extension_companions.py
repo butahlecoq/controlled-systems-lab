@@ -8,6 +8,7 @@ from pathlib import Path
 import tempfile
 
 import geometry_figures
+import site_design
 
 
 STAGE_BANDS = ((1, 15, "#D55E00"), (16, 30, "#E69F00"),
@@ -483,6 +484,7 @@ def _require(condition: bool, message: str) -> None:
 def _companion_page(title: str, stem: str, report_id: str, summary: str,
                     axis_context: str = "equal", source_commit: str | None = None,
                     image_alt: str | None = None, report_route: str | None = None) -> bytes:
+    title_text = title
     title = escape(title)
     summary = escape(summary)
     report_id = escape(report_id, quote=True)
@@ -502,17 +504,19 @@ def _companion_page(title: str, stem: str, report_id: str, summary: str,
         scaling = "Fixture ordinal and median elapsed time use separate numeric axes; elapsed time is per 40,000-call batch in milliseconds."
     else:
         scaling = "Independent coordinate scales are disclosed."
-    return ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
-            '<meta name="viewport" content="width=device-width,initial-scale=1">'
-            f'<title>{title} · shared axis policy</title><link rel="stylesheet" href="examples.css"></head><body>'
-            '<main><p><a href="index.html#saved-report-figures">← Reviewed report figures</a></p>'
-            '<p class="eyebrow">Saved-data companion · shared quantitative axes</p>'
+    return (site_design.page_start(title_text + " · shared axis policy",
+                                   crumbs=[("Research archive", "../index.html"),
+                                           ("Learning examples", "index.html"),
+                                           ("Saved report figures", "index.html#saved-report-figures"),
+                                           (title_text, stem + ".html")])
+            + '<p class="eyebrow">Saved-data companion · shared quantitative axes</p>'
             f'<h1>{title}</h1><p>{summary}</p>'
             f'<figure><img src="{stem}.svg" alt="{escape(image_alt or (title + "; saved values on labelled numeric axes"), quote=True)}">'
             '<figcaption>Numeric ticks and major grids follow the shared csl-report-quantitative-v1 policy. '
             + escape(scaling) + '</figcaption></figure>'
             f'<p><a href="{stem}.png">Standalone PNG</a> · <a href="../{report_route}/records.json">Frozen values ↗</a> · '
-            f'<a href="../{report_route}/index.html">Original report ↗</a>{source_link}</p></main></body></html>').encode()
+            f'<a href="../{report_route}/index.html">Original report ↗</a>{source_link}</p>'
+            + site_design.page_end()).encode()
 
 
 def lotka_volterra_companion(record_path: Path, style_path: Path) -> dict[str, bytes]:
@@ -560,12 +564,12 @@ def lotka_volterra_companion(record_path: Path, style_path: Path) -> dict[str, b
         png = (output / "geometry.png").read_bytes()
     report_id = escape(record["report_id"], quote=True)
     source_commit = escape(record["source_commit"], quote=True)
-    page = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
-            '<meta name="viewport" content="width=device-width,initial-scale=1">'
-            '<title>Lotka–Volterra sample geometry · shared axis policy</title>'
-            '<link rel="stylesheet" href="examples.css"></head><body><main>'
-            '<p><a href="index.html#saved-report-figures">← Reviewed report figures</a></p>'
-            '<p class="eyebrow">Saved-data companion · shared quantitative axes</p>'
+    page = (site_design.page_start("Lotka–Volterra sample geometry · shared axis policy",
+                                   crumbs=[("Research archive", "../index.html"),
+                                           ("Learning examples", "index.html"),
+                                           ("Saved report figures", "index.html#saved-report-figures"),
+                                           ("Lotka–Volterra samples", "lotka-volterra-sampled-v1.html")])
+            + '<p class="eyebrow">Saved-data companion · shared quantitative axes</p>'
             '<h1>Lotka–Volterra samples across four stage bands</h1>'
             '<p>This figure reads the frozen record directly; it does not re-run the recurrence. Each colored dot is a saved state '
             'from one of 512 seeded control histories. The four colors divide stages 1–60 into equal bands.</p>'
@@ -578,7 +582,7 @@ def lotka_volterra_companion(record_path: Path, style_path: Path) -> dict[str, b
             '<a href="https://github.com/butahlecoq/controlled-systems-lab/blob/' + source_commit +
             '/scripts/reports/lotka_volterra_sampled.py">Source at recorded commit ↗</a></p>'
             '<p class="limits">This is an additive display of the saved sample data, not an exact reachability set, solver result, or historical reproduction.</p>'
-            '</main></body></html>').encode()
+            + site_design.page_end()).encode()
     return {"lotka-volterra-sampled-v1.svg": svg,
             "lotka-volterra-sampled-v1.png": png,
             "lotka-volterra-sampled-v1.html": page,

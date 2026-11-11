@@ -13,6 +13,7 @@ from typing import Literal
 
 import b04_native_smoke_companion
 import geometry_figures
+import site_design
 
 
 SourceRole = Literal[
@@ -921,10 +922,12 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
             "<a href=\"" + stem + "-evidence.json\">Evidence data ↗</a></p></article>")
 
     outputs["control-witness-timing-v1.html"] = (
-        '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-        '<title>Saved control report timings</title><link rel="stylesheet" href="examples.css"></head><body class="control-witness-page"><main>'
-        '<p><a href="index.html">← Visual examples</a></p><h1>Saved control report timing figures</h1>' +
-        ''.join(timing_cards) + '</main></body></html>').encode()
+        site_design.page_start("Saved control report timing figures", main_class="page-content control-witness-page",
+                               crumbs=[("Research archive", "../index.html"),
+                                       ("Learning examples", "index.html"),
+                                       ("Saved report figures", "index.html#saved-report-figures"),
+                                       ("Control report timings", "control-witness-timing-v1.html")])
+        + '<h1>Saved control report timing figures</h1>' + ''.join(timing_cards) + site_design.page_end()).encode()
     timing_entry = {"family": "Control strategy and witness reports", "title": "Saved SYN report timings",
                     "status": "saved-data-companion", "anchor": "control-witness-timings",
                     "page": "control-witness-timing-v1.html", "figure": "control-witness/syn01-timing.svg",
@@ -995,20 +998,19 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
         '<a href="../' + mpc06_route + '/figure-data.json">Original saved figure data ↗</a> · '
         '<a href="control-witness/mpc06-tube-evidence.json">Companion data and hashes ↗</a></p></article>')
     outputs["control-witness-v1.html"] = (
-        '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-        '<title>Saved control figures · Controlled Systems Lab</title><link rel="stylesheet" href="examples.css">'
-        '<style>.control-witness-page #b04-native-smoke th,.control-witness-page #b04-native-smoke td{white-space:normal;vertical-align:top}'
-        '@media print{.control-witness-page #b04-native-smoke{break-inside:auto;page-break-inside:auto}'
-        '.control-witness-page #b04-native-smoke h2{break-after:avoid;page-break-after:avoid}'
-        '.control-witness-page #b04-native-smoke figure{break-inside:avoid;page-break-inside:avoid}'
-        '.control-witness-page #b04-native-smoke .scroll{overflow:visible;margin:.5rem 0}}</style></head>'
-        '<body class="control-witness-page"><main><p><a href="index.html">← Visual examples</a></p><h1>Saved control and witness figures</h1>'
+        site_design.page_start("Saved control figures · Controlled Systems Lab",
+                               main_class="page-content control-witness-page",
+                               crumbs=[("Research archive", "../index.html"),
+                                       ("Learning examples", "index.html"),
+                                       ("Saved report figures", "index.html#saved-report-figures"),
+                                       ("Control and witness figures", "control-witness-v1.html")])
+        + '<h1>Saved control and witness figures</h1>'
         '<p>The first five figures show projections of frozen five-coordinate state/control relations into the control plane '
         '(u₀,u₁); each can omit distinctions present in the full joint relation. The MPC-06 figure re-plots a saved two-state '
         'feasibility tube. The T-S01 figure shows saved Strategy A/B control histories and an exact analytic minimizer relation. '
         'The Exp-02 and B04 companions replot frozen control-family and representative trajectory evidence. '
         'These companions do not run a solver or recompute scientific geometry.</p>' +
-        ''.join(body) + '</main></body></html>').encode()
+        ''.join(body) + site_design.page_end()).encode()
     strategy_ab_entry = {
         "family": "Control strategy and witness reports",
         "title": "T-S01 Strategy A/B selected histories and exact minimizer family",

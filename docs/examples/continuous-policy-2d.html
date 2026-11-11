@@ -1,15 +1,15 @@
 <!doctype html>
 <html lang="en">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width">
 <title>Continuous affine observation policy example</title>
-<style>
-body{font:16px system-ui;max-width:980px;margin:2rem auto;padding:0 1rem;background:#172019;color:#dce5d5;line-height:1.55}
-main{background:#202a22;border:1px solid #405045;border-radius:12px;padding:1.5rem}
-svg{display:block;width:100%;height:auto;margin:1rem 0}
-code{color:#b4cda3}table{border-collapse:collapse;width:100%;margin:1rem 0}th,td{border:1px solid #53634f;padding:.45rem;text-align:left}
-</style>
-<main>
+<meta name="color-scheme" content="dark light">
+<link rel="stylesheet" href="examples.css">
+</head>
+<body><a class="skip" href="#main">Skip to example</a>
+<main id="main" class="page-content">
+<nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li><a href="../index.html">Research archive</a></li><li><a href="index.html">Learning examples</a></li><li aria-current="page">Continuous affine policy</li></ol></nav>
 <h1>Evaluate one affine policy over a continuous set</h1>
 <p>This two-state example uses position and velocity, with one position observation available before the action. The policy sets acceleration to the observed position. The initial joint V-set is the full square <code>[0,1] × [0,1]</code>, so its four rows define a continuous convex polytope rather than four random samples.</p>
 <img src="continuous-policy-2d.svg" alt="Initial square mapped to a terminal parallelogram under the affine observation policy">
@@ -25,4 +25,5 @@ cmake --build build/ext04 --config Release --target csl_ext04_continuous_policy_
 build/ext04/csl_ext04_continuous_policy_report smoke</code></pre>
 <p><a href="../../ext04-continuous-ebcf879d07ee9157/records.json">Saved values</a> · <a href="../../ext04-continuous-ebcf879d07ee9157/trials.jsonl">Raw trials</a> · <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/ebcf879d07ee91576a929becfc9b088b5453a327">Measured source commit</a>.</p></details>
 </main>
+</body>
 </html>

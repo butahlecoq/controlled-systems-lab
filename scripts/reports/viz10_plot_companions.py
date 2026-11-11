@@ -15,6 +15,7 @@ import tempfile
 import xml.etree.ElementTree as ET
 
 import figure_style
+import site_design
 
 ROOT = Path(__file__).resolve().parents[2]
 STYLE = ROOT / "scripts/reports/styles/control-v1.json"
@@ -297,16 +298,18 @@ def build(out: Path) -> None:
                      f'<figure><a href="{name}.svg"><img src="{name}.png" alt="{html.escape(title)}; {html.escape(desc)}"></a>'
                      f'<figcaption>{report_link}<a href="{name}.svg">SVG</a> · <a href="{name}.png" download>PNG</a> · '
                      f'<a href="{name}-export.json">source and export hashes</a></figcaption></figure></section>')
-    page = ('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-            '<title>VIZ-10 saved-data plot companions</title><style>body{font:16px/1.55 system-ui,sans-serif;max-width:1120px;margin:auto;padding:1rem;color:#17212b}'
-            'img{display:block;width:100%;height:auto}figure{margin:1rem 0}section{border-bottom:1px solid #ccd4de;padding:1rem 0}'
-            '.limit{background:#f3f5f7;padding:1rem}@media(max-width:40rem){body{padding:.75rem}h1{font-size:1.6rem}figcaption{overflow-wrap:anywhere}}'
-            '@media print{body{max-width:none;margin:0;padding:0;color:#000;font-size:11pt}.limit{background:#fff;border:1px solid #777}section{break-inside:avoid;padding:.35rem 0}figure{margin:.35rem 0}a{color:#000;text-decoration:none}img{max-height:8.5in;object-fit:contain}h1,h2{break-after:avoid}}</style></head><body><main>'
-            '<h1>VIZ-10: saved-data plot companions</h1>'
+    page = (site_design.page_start("VIZ-10 saved-data plot companions",
+                                   stylesheet_href="../examples.css",
+                                   main_class="page-content viz10-page",
+                                   crumbs=[("Research archive", "../../index.html"),
+                                           ("Learning examples", "../index.html"),
+                                           ("Saved report figures", "../index.html#saved-report-figures"),
+                                           ("VIZ-10 saved plots", "index.html")])
+            + '<h1>VIZ-10: saved-data plot companions</h1>'
             '<p>Every chart below is rendered from the versioned records named in its export receipt. Existing report bundles, manifests, checksums and URLs remain unchanged.</p>'
             '<p class="limit">Fuel charts show 2D coordinate projections of recorded four-state terminal rows. They preserve the selected state coordinates and units. A point cloud does not assert a filled reachable-set enclosure, and the B09 replay endpoints remain distinct from its robust terminal rows. No solver, hull query, numerical experiment or benchmark ran during rendering.</p>'
             + ''.join(cards) + '<p><a href="../fuel-b06-viz06.html">B06 saved-data companion, including x₁/x₃ flow and x₂/x₄ stock projections</a></p>'
-            '</main></body></html>')
+            + site_design.page_end())
     (out / "index.html").write_text(page, encoding="utf-8")
     manifest = {"schema": "csl.viz10-gallery/1", "style_sha256": sha(style_bytes),
                 "quantitative_axis_policy": figure_style.STYLE_ID,

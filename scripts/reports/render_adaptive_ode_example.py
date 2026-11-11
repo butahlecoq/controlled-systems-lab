@@ -7,6 +7,8 @@ import json
 import math
 from pathlib import Path
 
+import site_design
+
 
 def load(path: Path) -> tuple[dict[str, str], list[dict[str, float]]]:
     lines = path.read_text(encoding="utf-8").splitlines()
@@ -94,14 +96,60 @@ def raw_record(metadata: dict[str, str], rows: list[dict[str, float]]) -> dict:
     }
 
 
+def page_html() -> str:
+    """Render the mutable companion with the shared learning-site shell."""
+    return (site_design.page_start(
+        "Adaptive RK4 nonlinear replay · Controlled Systems Lab",
+        crumbs=[("Research archive", "../index.html"),
+                ("Learning examples", "index.html"),
+                ("Numerical integration", "index.html#adaptive-ode-rk4"),
+                ("Adaptive RK4 replay", "adaptive-ode-replay.html")])
+        + '<h1>Adaptive RK4 replay of a two-state oscillator</h1>'
+        + '<p>This 2D example integrates <code>x′ = y</code>, <code>y′ = −x</code> from '
+          '<code>(x,y)=(1,0)</code> through one full period. The blue curve and markers are '
+          'produced by the CSL adaptive RK4 step-doubling replay. The dashed amber curve is '
+          'the independent analytic solution <code>(cos t, −sin t)</code>.</p>'
+        + '<figure><img src="adaptive-ode-replay.svg" alt="The adaptive numerical trajectory follows the analytic unit circle in the x-y phase plane.">'
+          '<figcaption>Phase-plane trajectory. The calculation uses 64 held zero-control intervals; '
+          'the controls do not enter this oscillator. Local step-doubling estimates are observations, '
+          'not certified global error bounds.</figcaption></figure>'
+        + '<h2>Reproduce the saved data</h2>'
+        + '<p>The source is <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/main/examples/adaptive_ode_replay.cpp">the installed public-client example</a>. '
+          'The raw state and analytic-reference rows are available as <a href="adaptive-ode-replay.csv">CSV</a>.</p>'
+        + '<pre><code>cmake -S examples -B build/examples -DCMAKE_PREFIX_PATH=&lt;CSL-install-prefix&gt;\n'
+          'cmake --build build/examples --target adaptive_ode_replay\n'
+          'build/examples/adaptive_ode_replay &gt; docs/examples/adaptive-ode-replay.csv\n'
+          'python3 scripts/reports/render_adaptive_ode_example.py --record docs/examples/adaptive-ode-replay.csv '
+          '--output docs/examples/adaptive-ode-replay.svg</code></pre>'
+        + '<p class="note">This demonstrates a supported numerical replay method. It is not a control optimization, '
+          'reachable-set boundary, B04 reproduction, or optimality claim. The repository remains pre-release; '
+          'use a local CSL install built from the reviewed source.</p>'
+        + site_design.page_end())
+
+
+def validate_paths(record: Path, output: Path) -> None:
+    """Protect the input record from the renderer's generated output files."""
+    if output.suffix.lower() != ".svg":
+        raise ValueError("--output must name an .svg file")
+    source = record.resolve()
+    destinations = (output, output.with_suffix(".html"), output.with_suffix(".json"))
+    if any(destination.resolve() == source for destination in destinations):
+        raise ValueError("renderer output or sidecar would overwrite the input record")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--record", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    try:
+        validate_paths(args.record, args.output)
+    except ValueError as error:
+        parser.error(str(error))
     metadata, rows = load(args.record)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(render(metadata, rows) + "\n", encoding="utf-8")
+    args.output.with_suffix(".html").write_text(page_html() + "\n", encoding="utf-8")
     record_path = args.output.with_suffix(".json")
     record_path.write_text(json.dumps(raw_record(metadata, rows), indent=2) + "\n", encoding="utf-8")
 

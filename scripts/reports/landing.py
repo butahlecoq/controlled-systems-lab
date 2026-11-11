@@ -28,6 +28,8 @@ from pathlib import Path
 import re
 from typing import NamedTuple
 
+import site_design
+
 
 class Family(NamedTuple):
     """One report family: the routes it covers, where it belongs and what it is."""
@@ -595,10 +597,6 @@ FAMILIES = {
 }
 
 
-def stylesheet() -> str:
-    return Path(__file__).with_name("landing.css").read_text(encoding="utf-8")
-
-
 def family_for(report_id: str) -> str:
     """Return the family whose registered pattern covers a published route."""
     matches = [key for key, family in FAMILIES.items() if re.fullmatch(family.pattern, report_id)]
@@ -641,7 +639,7 @@ def card(entry: Entry, number: int, heading: str) -> str:
     return "".join(parts)
 
 
-def page(entries, extras=None) -> str:
+def page(entries, extras=None, *, shared_shell=False) -> str:
     """Render the complete landing page for the given report entries."""
     groups = {}
     for entry in entries:
@@ -662,10 +660,26 @@ def page(entries, extras=None) -> str:
     if extras:
         extra_links = ('<p class="hero-links" id="visual-examples-link">'
                        + links_html(extras) + "</p>")
-    return ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
-            '<meta name="viewport" content="width=device-width,initial-scale=1">'
-            "<title>CSL algorithm reports</title><style>\n" + stylesheet() + "\n</style></head><body>"
-            '<p class="eyebrow">Controlled Systems Lab &middot; research archive</p>'
+    if shared_shell:
+        opening = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
+                   '<meta name="viewport" content="width=device-width,initial-scale=1">'
+                   '<title>CSL algorithm reports</title><style>\n'
+                   + site_design.stylesheet().decode("utf-8") + '\n</style></head>'
+                   '<body><a class="skip" href="#main">Skip to archive</a>'
+                   '<main id="main" class="report-home">'
+                   + site_design.breadcrumbs([("Controlled Systems Lab", "index.html"),
+                                              ("Research archive", "index.html")])
+                   + '<p class="eyebrow">Controlled Systems Lab &middot; research archive</p>')
+        closing = '</main></body></html>'
+    else:
+        opening = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
+                   '<meta name="viewport" content="width=device-width,initial-scale=1">'
+                   '<title>CSL algorithm reports</title><style>\n'
+                   + site_design.stylesheet().decode("utf-8")
+                   + '\n</style></head><body><div class="report-home">'
+                   '<p class="eyebrow">Controlled Systems Lab &middot; research archive</p>')
+        closing = '</div></body></html>'
+    return (opening +
             "<h1>Algorithm reports and research evidence</h1>"
             '<p class="lede">This archive contains measured algorithm results and a separate '
             'Research Evidence section for fixed-profile audits. Every entry explains in plain language what the report '
@@ -693,7 +707,7 @@ def page(entries, extras=None) -> str:
             "</dl></div>"
             '<div class="section"><div class="cards"><ul>' + "".join(cards) + "</ul></div></div>"
             '<div class="footer"><p>Controlled Systems Lab &middot; Research evidence is separated from '
-            "registered algorithm results; every entry states its own limits.</p></div></body></html>")
+            "registered algorithm results; every entry states its own limits.</p></div>" + closing)
 
 
 class Node:
@@ -917,7 +931,7 @@ def build(site: Path) -> None:
             links=(("Full result record", report_id + "/result.json"),
                    ("Phase-plane data", report_id + "/figure-data.json"),
                    ("Offline report bundle", report_id + ".zip"))))
-    rendered = page(detailed, extras)
+    rendered = page(detailed, extras, shared_shell=True)
     validate(rendered, site)
     index.write_text(rendered, encoding="utf-8")
 
