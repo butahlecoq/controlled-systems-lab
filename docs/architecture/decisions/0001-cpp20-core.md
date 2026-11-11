@@ -23,4 +23,4 @@ CMake packaging, a native library as the first interface, concrete numerical dep
 
 Rust, Julia, MATLAB and Python tools can remain external scientific comparisons or backend implementations where useful. They are no longer competing choices for the main core in this design cycle.
 
-See the [native contracts draft](../../superpowers/specs/2026-10-11-cpp-core-contracts-design.md), [modular algorithm design](../modular-algorithms-and-solution-sets.md) and [performance framework](../performance-and-language.md).
+See the [modular algorithm design](../modular-algorithms-and-solution-sets.md) and [performance framework](../performance-and-language.md). The earlier native-contracts draft remains in the local working-document archive.
