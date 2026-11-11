@@ -374,6 +374,15 @@ set_tests_properties(installed_affine_sum_client PROPERTIES
 
 
 endif()
+
+if(TARGET CSL::affine_sum)
+add_executable(installed_source_index_affine_sum_client source_index_affine_sum_client.cpp)
+target_link_libraries(installed_source_index_affine_sum_client PRIVATE CSL::affine_sum)
+set_target_properties(installed_source_index_affine_sum_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_source_index_affine_sum_client COMMAND installed_source_index_affine_sum_client)
+set_tests_properties(installed_source_index_affine_sum_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed source-index affine-sum client: selected QuickHull and exact all-input checker passed")
+endif()
 add_executable(installed_terminal_minimizers_client terminal_minimizers_client.cpp)
 target_link_libraries(installed_terminal_minimizers_client PRIVATE CSL::terminal_minimizers)
 set_target_properties(installed_terminal_minimizers_client PROPERTIES CXX_EXTENSIONS OFF)
