@@ -70,6 +70,9 @@ class NativeCapabilityTests(unittest.TestCase):
         source_paths = {source["path"] for source in graph["source_files"]}
         self.assertIn("src/geometry/hull_reducer.cpp", source_paths)
         self.assertIn("src/optimization/phase_one/simplex.cpp", source_paths)
+        self.assertIn("src/geometry/polyhedral/intersection.cpp", source_paths)
+        self.assertIn("src/geometry/polyhedral/projection.cpp", source_paths)
+        self.assertIn("include/csl/reachability/nominal_predecessor.hpp", source_paths)
         self.assertEqual(roles["bellman_solver"], "integrated in selected graph optimizer")
         self.assertEqual(roles["terminal_solver"], "direct authored objective evaluation")
 
@@ -152,6 +155,27 @@ class NativeCapabilityTests(unittest.TestCase):
         digest = capabilities.manifest_digest(manifest)
         self.assertEqual(digest, capabilities.NATIVE_SIDECAR.read_text().split()[0])
         self.assertNotEqual(digest, capabilities.SIDECAR.read_text().split()[0])
+
+    def test_manifest_graph_ids_are_an_exact_unique_source_defined_set(self):
+        valid = capabilities.validate_manifest(manifest_path=capabilities.NATIVE_MANIFEST)
+        self.assertEqual(len(valid["graphs"]), 30)
+
+        mutations = {
+            "duplicate": (lambda rows: rows.__setitem__(1, json.loads(json.dumps(rows[0]))),
+                "graph IDs are not unique"),
+            "missing": (lambda rows: rows.pop(), "graph IDs differ from source definitions"),
+            "foreign": (lambda rows: rows[0].__setitem__("graph_id", "closed-loop/foreign/1"),
+                "graph IDs differ from source definitions"),
+        }
+        for label, (mutate, message) in mutations.items():
+            with self.subTest(manifest_mutation=label), tempfile.TemporaryDirectory() as raw:
+                manifest = json.loads(json.dumps(valid))
+                mutate(manifest["graphs"])
+                seal = Path(raw) / "native.sha256"
+                seal.write_text(capabilities.canonical_sha256(manifest) + "  native.json\n")
+                with mock.patch.object(capabilities, "NATIVE_SIDECAR", seal):
+                    with self.assertRaisesRegex(ValueError, message):
+                        capabilities.validate_manifest(manifest, capabilities.NATIVE_MANIFEST)
 
     def test_native_resolution_selects_manifest_seal_and_finite_profile(self):
         task = capabilities.load_task("syn-nl-lv-01")

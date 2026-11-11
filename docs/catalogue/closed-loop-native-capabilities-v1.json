@@ -71,6 +71,11 @@
           "include/csl/optimization/finite_action_graph.hpp",
           "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
+          "include/csl/geometry/polyhedral_intersection.hpp",
+          "src/geometry/polyhedral/intersection.cpp",
+          "include/csl/geometry/polyhedral_projection.hpp",
+          "src/geometry/polyhedral/projection.cpp",
+          "include/csl/reachability/nominal_predecessor.hpp",
           "src/reachability/nominal_predecessor.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/geometry/affine_sum.cpp",
@@ -91,8 +96,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "b49d5f757cd42f1e5e21c65f1eca12c5ebbb8fd285f3621d91b7a3c61c8ff467",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-backward-graph/1/cfg-b49d5f757cd42f1e",
+      "graph_fingerprint": "c6e188ddf52bbc87df2052184029d20af5320b82a761d6b6c226909e5aa37b2d",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-backward-graph/1/cfg-c6e188ddf52bbc87",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -162,16 +167,36 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
+          "path": "include/csl/geometry/polyhedral_intersection.hpp",
+          "sha256": "9280c5bba0ada04d8ed234839b6ca8b0a80fbca12a83d54003574170e4c438b6"
+        },
+        {
+          "path": "include/csl/geometry/polyhedral_projection.hpp",
+          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+        },
+        {
           "path": "include/csl/optimization/finite_action_graph.hpp",
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
+          "path": "include/csl/reachability/nominal_predecessor.hpp",
+          "sha256": "61548426d59bd8437e77232b9d9d50efc20dd6799be584e44fb86eca2d087be4"
+        },
+        {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
+          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
           "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+        },
+        {
+          "path": "src/geometry/polyhedral/intersection.cpp",
+          "sha256": "582929bea382cccf865b8ae858a39f4809d1fce0f473c64dcba20d009bb4f289"
+        },
+        {
+          "path": "src/geometry/polyhedral/projection.cpp",
+          "sha256": "d9aa374a643978b821acf2c520fe2556588738defa22221b3a16108973718926"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -270,6 +295,11 @@
           "include/csl/optimization/finite_action_graph.hpp",
           "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
+          "include/csl/geometry/polyhedral_intersection.hpp",
+          "src/geometry/polyhedral/intersection.cpp",
+          "include/csl/geometry/polyhedral_projection.hpp",
+          "src/geometry/polyhedral/projection.cpp",
+          "include/csl/reachability/nominal_predecessor.hpp",
           "src/reachability/nominal_predecessor.cpp",
           "src/reachability/finite_plan_box.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
@@ -291,8 +321,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "c6216f4e80e6fa84d0b6cebd479d1e67613060f38f70ed58b469b5574761afed",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-box-mpc/1/cfg-c6216f4e80e6fa84",
+      "graph_fingerprint": "1cfb0403d2dc57f6fe6e428401177b7d2007bb5162766b48f6b19a697774b8c2",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-box-mpc/1/cfg-1cfb0403d2dc57f6",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -363,16 +393,36 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
+          "path": "include/csl/geometry/polyhedral_intersection.hpp",
+          "sha256": "9280c5bba0ada04d8ed234839b6ca8b0a80fbca12a83d54003574170e4c438b6"
+        },
+        {
+          "path": "include/csl/geometry/polyhedral_projection.hpp",
+          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+        },
+        {
           "path": "include/csl/optimization/finite_action_graph.hpp",
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
+          "path": "include/csl/reachability/nominal_predecessor.hpp",
+          "sha256": "61548426d59bd8437e77232b9d9d50efc20dd6799be584e44fb86eca2d087be4"
+        },
+        {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
+          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
           "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+        },
+        {
+          "path": "src/geometry/polyhedral/intersection.cpp",
+          "sha256": "582929bea382cccf865b8ae858a39f4809d1fce0f473c64dcba20d009bb4f289"
+        },
+        {
+          "path": "src/geometry/polyhedral/projection.cpp",
+          "sha256": "d9aa374a643978b821acf2c520fe2556588738defa22221b3a16108973718926"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -475,6 +525,11 @@
           "include/csl/optimization/finite_action_graph.hpp",
           "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
+          "include/csl/geometry/polyhedral_intersection.hpp",
+          "src/geometry/polyhedral/intersection.cpp",
+          "include/csl/geometry/polyhedral_projection.hpp",
+          "src/geometry/polyhedral/projection.cpp",
+          "include/csl/reachability/nominal_predecessor.hpp",
           "src/reachability/nominal_predecessor.cpp",
           "src/reachability/finite_plan_zonotope.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
@@ -496,8 +551,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "68e27d82ac212fef29ef540148be193c9f7d2e1b980ad9fde3a9dfa5ffe4ddec",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-mpc/1/cfg-68e27d82ac212fef",
+      "graph_fingerprint": "6fbd8a8faa2109e156074e0addf8449a65dd80442237c0db66b00e450466714c",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-mpc/1/cfg-6fbd8a8faa2109e1",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -568,16 +623,36 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
+          "path": "include/csl/geometry/polyhedral_intersection.hpp",
+          "sha256": "9280c5bba0ada04d8ed234839b6ca8b0a80fbca12a83d54003574170e4c438b6"
+        },
+        {
+          "path": "include/csl/geometry/polyhedral_projection.hpp",
+          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+        },
+        {
           "path": "include/csl/optimization/finite_action_graph.hpp",
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
+          "path": "include/csl/reachability/nominal_predecessor.hpp",
+          "sha256": "61548426d59bd8437e77232b9d9d50efc20dd6799be584e44fb86eca2d087be4"
+        },
+        {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
+          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
           "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+        },
+        {
+          "path": "src/geometry/polyhedral/intersection.cpp",
+          "sha256": "582929bea382cccf865b8ae858a39f4809d1fce0f473c64dcba20d009bb4f289"
+        },
+        {
+          "path": "src/geometry/polyhedral/projection.cpp",
+          "sha256": "d9aa374a643978b821acf2c520fe2556588738defa22221b3a16108973718926"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -680,6 +755,11 @@
           "include/csl/optimization/finite_action_graph.hpp",
           "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
+          "include/csl/geometry/polyhedral_intersection.hpp",
+          "src/geometry/polyhedral/intersection.cpp",
+          "include/csl/geometry/polyhedral_projection.hpp",
+          "src/geometry/polyhedral/projection.cpp",
+          "include/csl/reachability/nominal_predecessor.hpp",
           "src/reachability/nominal_predecessor.cpp",
           "src/reachability/finite_plan_parallelotope.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
@@ -701,8 +781,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "680e8e10d805f87097ccd90fd4077269b8b0c23d7455d9440cc7877bc63b6620",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-mpc/1/cfg-680e8e10d805f870",
+      "graph_fingerprint": "b8d2206fe37d5d79cda359bcacfa702a8a43003d819cb2b93802f13f6d751b7e",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-mpc/1/cfg-b8d2206fe37d5d79",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -773,16 +853,36 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
+          "path": "include/csl/geometry/polyhedral_intersection.hpp",
+          "sha256": "9280c5bba0ada04d8ed234839b6ca8b0a80fbca12a83d54003574170e4c438b6"
+        },
+        {
+          "path": "include/csl/geometry/polyhedral_projection.hpp",
+          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+        },
+        {
           "path": "include/csl/optimization/finite_action_graph.hpp",
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
+          "path": "include/csl/reachability/nominal_predecessor.hpp",
+          "sha256": "61548426d59bd8437e77232b9d9d50efc20dd6799be584e44fb86eca2d087be4"
+        },
+        {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
+          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
           "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+        },
+        {
+          "path": "src/geometry/polyhedral/intersection.cpp",
+          "sha256": "582929bea382cccf865b8ae858a39f4809d1fce0f473c64dcba20d009bb4f289"
+        },
+        {
+          "path": "src/geometry/polyhedral/projection.cpp",
+          "sha256": "d9aa374a643978b821acf2c520fe2556588738defa22221b3a16108973718926"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -885,6 +985,11 @@
           "include/csl/optimization/finite_action_graph.hpp",
           "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
+          "include/csl/geometry/polyhedral_intersection.hpp",
+          "src/geometry/polyhedral/intersection.cpp",
+          "include/csl/geometry/polyhedral_projection.hpp",
+          "src/geometry/polyhedral/projection.cpp",
+          "include/csl/reachability/nominal_predecessor.hpp",
           "src/reachability/nominal_predecessor.cpp",
           "src/reachability/finite_plan_ellipsoid.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
@@ -906,8 +1011,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "bfd9fb04b274e4b2aa79f8b6b02fba9dd25fa64d1ee2b042f4f47c77c77ff7a8",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-mpc/1/cfg-bfd9fb04b274e4b2",
+      "graph_fingerprint": "e7cab391e04013b8b638dc5f18922daf03f61780d05a44d260c6da68bdf9b91f",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-mpc/1/cfg-e7cab391e04013b8",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -978,16 +1083,36 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
+          "path": "include/csl/geometry/polyhedral_intersection.hpp",
+          "sha256": "9280c5bba0ada04d8ed234839b6ca8b0a80fbca12a83d54003574170e4c438b6"
+        },
+        {
+          "path": "include/csl/geometry/polyhedral_projection.hpp",
+          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+        },
+        {
           "path": "include/csl/optimization/finite_action_graph.hpp",
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
+          "path": "include/csl/reachability/nominal_predecessor.hpp",
+          "sha256": "61548426d59bd8437e77232b9d9d50efc20dd6799be584e44fb86eca2d087be4"
+        },
+        {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
+          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
           "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+        },
+        {
+          "path": "src/geometry/polyhedral/intersection.cpp",
+          "sha256": "582929bea382cccf865b8ae858a39f4809d1fce0f473c64dcba20d009bb4f289"
+        },
+        {
+          "path": "src/geometry/polyhedral/projection.cpp",
+          "sha256": "d9aa374a643978b821acf2c520fe2556588738defa22221b3a16108973718926"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -1941,6 +2066,11 @@
           "include/csl/optimization/finite_action_graph.hpp",
           "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
+          "include/csl/geometry/polyhedral_intersection.hpp",
+          "src/geometry/polyhedral/intersection.cpp",
+          "include/csl/geometry/polyhedral_projection.hpp",
+          "src/geometry/polyhedral/projection.cpp",
+          "include/csl/reachability/nominal_predecessor.hpp",
           "src/reachability/nominal_predecessor.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/geometry/affine_sum.cpp",
@@ -1961,8 +2091,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "9ac2d80302abc2101ba8195796b9b84806dc8595239990c791e3b34e67ad35c5",
-      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-backward-graph/1/cfg-9ac2d80302abc210",
+      "graph_fingerprint": "b4a5cd35510159945c64cc04fdaf691009b22bc639ab05b34e8a4c91f2ab8167",
+      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-backward-graph/1/cfg-b4a5cd3551015994",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2032,16 +2162,36 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
+          "path": "include/csl/geometry/polyhedral_intersection.hpp",
+          "sha256": "9280c5bba0ada04d8ed234839b6ca8b0a80fbca12a83d54003574170e4c438b6"
+        },
+        {
+          "path": "include/csl/geometry/polyhedral_projection.hpp",
+          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+        },
+        {
           "path": "include/csl/optimization/finite_action_graph.hpp",
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
+          "path": "include/csl/reachability/nominal_predecessor.hpp",
+          "sha256": "61548426d59bd8437e77232b9d9d50efc20dd6799be584e44fb86eca2d087be4"
+        },
+        {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
+          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
           "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+        },
+        {
+          "path": "src/geometry/polyhedral/intersection.cpp",
+          "sha256": "582929bea382cccf865b8ae858a39f4809d1fce0f473c64dcba20d009bb4f289"
+        },
+        {
+          "path": "src/geometry/polyhedral/projection.cpp",
+          "sha256": "d9aa374a643978b821acf2c520fe2556588738defa22221b3a16108973718926"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -2140,6 +2290,11 @@
           "include/csl/optimization/finite_action_graph.hpp",
           "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
+          "include/csl/geometry/polyhedral_intersection.hpp",
+          "src/geometry/polyhedral/intersection.cpp",
+          "include/csl/geometry/polyhedral_projection.hpp",
+          "src/geometry/polyhedral/projection.cpp",
+          "include/csl/reachability/nominal_predecessor.hpp",
           "src/reachability/nominal_predecessor.cpp",
           "src/reachability/finite_plan_box.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
@@ -2161,8 +2316,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "d52c82ea0d9098f95b10eb944b97fe5543a58ac2fefd22fdc8c1cf4377323002",
-      "graph_id": "closed-loop/earth-orbit/native-box-mpc/1/cfg-d52c82ea0d9098f9",
+      "graph_fingerprint": "7e1a897ec1a80188cd5837442f2a5bc8e16f0cfc902ec7a0ad939f878bca23c3",
+      "graph_id": "closed-loop/earth-orbit/native-box-mpc/1/cfg-7e1a897ec1a80188",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2233,16 +2388,36 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
+          "path": "include/csl/geometry/polyhedral_intersection.hpp",
+          "sha256": "9280c5bba0ada04d8ed234839b6ca8b0a80fbca12a83d54003574170e4c438b6"
+        },
+        {
+          "path": "include/csl/geometry/polyhedral_projection.hpp",
+          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+        },
+        {
           "path": "include/csl/optimization/finite_action_graph.hpp",
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
+          "path": "include/csl/reachability/nominal_predecessor.hpp",
+          "sha256": "61548426d59bd8437e77232b9d9d50efc20dd6799be584e44fb86eca2d087be4"
+        },
+        {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
+          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
           "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+        },
+        {
+          "path": "src/geometry/polyhedral/intersection.cpp",
+          "sha256": "582929bea382cccf865b8ae858a39f4809d1fce0f473c64dcba20d009bb4f289"
+        },
+        {
+          "path": "src/geometry/polyhedral/projection.cpp",
+          "sha256": "d9aa374a643978b821acf2c520fe2556588738defa22221b3a16108973718926"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -2345,6 +2520,11 @@
           "include/csl/optimization/finite_action_graph.hpp",
           "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
+          "include/csl/geometry/polyhedral_intersection.hpp",
+          "src/geometry/polyhedral/intersection.cpp",
+          "include/csl/geometry/polyhedral_projection.hpp",
+          "src/geometry/polyhedral/projection.cpp",
+          "include/csl/reachability/nominal_predecessor.hpp",
           "src/reachability/nominal_predecessor.cpp",
           "src/reachability/finite_plan_zonotope.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
@@ -2366,8 +2546,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "cd677f2e673a818346571ebadb205b9a5674bddc0da97aecfa360017891206b3",
-      "graph_id": "closed-loop/earth-orbit/native-zonotope-mpc/1/cfg-cd677f2e673a8183",
+      "graph_fingerprint": "116f22338abd1eec2e45f724c0de885223acc1caf24b9655030f2289ced84fda",
+      "graph_id": "closed-loop/earth-orbit/native-zonotope-mpc/1/cfg-116f22338abd1eec",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2438,16 +2618,36 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
+          "path": "include/csl/geometry/polyhedral_intersection.hpp",
+          "sha256": "9280c5bba0ada04d8ed234839b6ca8b0a80fbca12a83d54003574170e4c438b6"
+        },
+        {
+          "path": "include/csl/geometry/polyhedral_projection.hpp",
+          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+        },
+        {
           "path": "include/csl/optimization/finite_action_graph.hpp",
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
+          "path": "include/csl/reachability/nominal_predecessor.hpp",
+          "sha256": "61548426d59bd8437e77232b9d9d50efc20dd6799be584e44fb86eca2d087be4"
+        },
+        {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
+          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
           "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+        },
+        {
+          "path": "src/geometry/polyhedral/intersection.cpp",
+          "sha256": "582929bea382cccf865b8ae858a39f4809d1fce0f473c64dcba20d009bb4f289"
+        },
+        {
+          "path": "src/geometry/polyhedral/projection.cpp",
+          "sha256": "d9aa374a643978b821acf2c520fe2556588738defa22221b3a16108973718926"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -2550,6 +2750,11 @@
           "include/csl/optimization/finite_action_graph.hpp",
           "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
+          "include/csl/geometry/polyhedral_intersection.hpp",
+          "src/geometry/polyhedral/intersection.cpp",
+          "include/csl/geometry/polyhedral_projection.hpp",
+          "src/geometry/polyhedral/projection.cpp",
+          "include/csl/reachability/nominal_predecessor.hpp",
           "src/reachability/nominal_predecessor.cpp",
           "src/reachability/finite_plan_parallelotope.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
@@ -2571,8 +2776,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "8b93c5c7409b434177b30e0cd9464c93c9450aebaeee096dba6ce25c5f105764",
-      "graph_id": "closed-loop/earth-orbit/native-parallelotope-mpc/1/cfg-8b93c5c7409b4341",
+      "graph_fingerprint": "b8a73252e3d66f92f6f72acd6c7a07f6977a3836ba8eab1c5258f4c394e22f61",
+      "graph_id": "closed-loop/earth-orbit/native-parallelotope-mpc/1/cfg-b8a73252e3d66f92",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2643,16 +2848,36 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
+          "path": "include/csl/geometry/polyhedral_intersection.hpp",
+          "sha256": "9280c5bba0ada04d8ed234839b6ca8b0a80fbca12a83d54003574170e4c438b6"
+        },
+        {
+          "path": "include/csl/geometry/polyhedral_projection.hpp",
+          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+        },
+        {
           "path": "include/csl/optimization/finite_action_graph.hpp",
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
+          "path": "include/csl/reachability/nominal_predecessor.hpp",
+          "sha256": "61548426d59bd8437e77232b9d9d50efc20dd6799be584e44fb86eca2d087be4"
+        },
+        {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
+          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
           "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+        },
+        {
+          "path": "src/geometry/polyhedral/intersection.cpp",
+          "sha256": "582929bea382cccf865b8ae858a39f4809d1fce0f473c64dcba20d009bb4f289"
+        },
+        {
+          "path": "src/geometry/polyhedral/projection.cpp",
+          "sha256": "d9aa374a643978b821acf2c520fe2556588738defa22221b3a16108973718926"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -2755,6 +2980,11 @@
           "include/csl/optimization/finite_action_graph.hpp",
           "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
+          "include/csl/geometry/polyhedral_intersection.hpp",
+          "src/geometry/polyhedral/intersection.cpp",
+          "include/csl/geometry/polyhedral_projection.hpp",
+          "src/geometry/polyhedral/projection.cpp",
+          "include/csl/reachability/nominal_predecessor.hpp",
           "src/reachability/nominal_predecessor.cpp",
           "src/reachability/finite_plan_ellipsoid.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
@@ -2776,8 +3006,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "bb9faf5a05870686883a8c0bc2ff7e8e80d182005b330810a4c9660e05384bca",
-      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-mpc/1/cfg-bb9faf5a05870686",
+      "graph_fingerprint": "e962e6de7133f48c399d531082c63cebdc19409315a8ae95bbac73d617997299",
+      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-mpc/1/cfg-e962e6de7133f48c",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2848,16 +3078,36 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
+          "path": "include/csl/geometry/polyhedral_intersection.hpp",
+          "sha256": "9280c5bba0ada04d8ed234839b6ca8b0a80fbca12a83d54003574170e4c438b6"
+        },
+        {
+          "path": "include/csl/geometry/polyhedral_projection.hpp",
+          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+        },
+        {
           "path": "include/csl/optimization/finite_action_graph.hpp",
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
+          "path": "include/csl/reachability/nominal_predecessor.hpp",
+          "sha256": "61548426d59bd8437e77232b9d9d50efc20dd6799be584e44fb86eca2d087be4"
+        },
+        {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
+          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
           "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+        },
+        {
+          "path": "src/geometry/polyhedral/intersection.cpp",
+          "sha256": "582929bea382cccf865b8ae858a39f4809d1fce0f473c64dcba20d009bb4f289"
+        },
+        {
+          "path": "src/geometry/polyhedral/projection.cpp",
+          "sha256": "d9aa374a643978b821acf2c520fe2556588738defa22221b3a16108973718926"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -3811,6 +4061,11 @@
           "include/csl/optimization/finite_action_graph.hpp",
           "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
+          "include/csl/geometry/polyhedral_intersection.hpp",
+          "src/geometry/polyhedral/intersection.cpp",
+          "include/csl/geometry/polyhedral_projection.hpp",
+          "src/geometry/polyhedral/projection.cpp",
+          "include/csl/reachability/nominal_predecessor.hpp",
           "src/reachability/nominal_predecessor.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
           "src/geometry/affine_sum.cpp",
@@ -3831,8 +4086,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "a2527f17c4551303eac7ab8f0f8daba6d79043b822f1899e9f365464e23bb847",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-backward-graph/1/cfg-a2527f17c4551303",
+      "graph_fingerprint": "0e3b47d9c68a6e1836e55bb06bf50fe8918af9f67954b9cf407ccf6a83ad5c44",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-backward-graph/1/cfg-0e3b47d9c68a6e18",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -3902,16 +4157,36 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
+          "path": "include/csl/geometry/polyhedral_intersection.hpp",
+          "sha256": "9280c5bba0ada04d8ed234839b6ca8b0a80fbca12a83d54003574170e4c438b6"
+        },
+        {
+          "path": "include/csl/geometry/polyhedral_projection.hpp",
+          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+        },
+        {
           "path": "include/csl/optimization/finite_action_graph.hpp",
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
+          "path": "include/csl/reachability/nominal_predecessor.hpp",
+          "sha256": "61548426d59bd8437e77232b9d9d50efc20dd6799be584e44fb86eca2d087be4"
+        },
+        {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
+          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
           "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+        },
+        {
+          "path": "src/geometry/polyhedral/intersection.cpp",
+          "sha256": "582929bea382cccf865b8ae858a39f4809d1fce0f473c64dcba20d009bb4f289"
+        },
+        {
+          "path": "src/geometry/polyhedral/projection.cpp",
+          "sha256": "d9aa374a643978b821acf2c520fe2556588738defa22221b3a16108973718926"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -4010,6 +4285,11 @@
           "include/csl/optimization/finite_action_graph.hpp",
           "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
+          "include/csl/geometry/polyhedral_intersection.hpp",
+          "src/geometry/polyhedral/intersection.cpp",
+          "include/csl/geometry/polyhedral_projection.hpp",
+          "src/geometry/polyhedral/projection.cpp",
+          "include/csl/reachability/nominal_predecessor.hpp",
           "src/reachability/nominal_predecessor.cpp",
           "src/reachability/finite_plan_box.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
@@ -4031,8 +4311,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "275b9ea204f0aa1b0eee8a447bec7caa8ee58fe171e4bade5d3d2acc74d06365",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-mpc/1/cfg-275b9ea204f0aa1b",
+      "graph_fingerprint": "d4aee876152ea4a7d1d698f7c3cfcb9510b4eefe3affec2d4cb1cece7637985d",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-mpc/1/cfg-d4aee876152ea4a7",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4103,16 +4383,36 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
+          "path": "include/csl/geometry/polyhedral_intersection.hpp",
+          "sha256": "9280c5bba0ada04d8ed234839b6ca8b0a80fbca12a83d54003574170e4c438b6"
+        },
+        {
+          "path": "include/csl/geometry/polyhedral_projection.hpp",
+          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+        },
+        {
           "path": "include/csl/optimization/finite_action_graph.hpp",
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
+          "path": "include/csl/reachability/nominal_predecessor.hpp",
+          "sha256": "61548426d59bd8437e77232b9d9d50efc20dd6799be584e44fb86eca2d087be4"
+        },
+        {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
+          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
           "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+        },
+        {
+          "path": "src/geometry/polyhedral/intersection.cpp",
+          "sha256": "582929bea382cccf865b8ae858a39f4809d1fce0f473c64dcba20d009bb4f289"
+        },
+        {
+          "path": "src/geometry/polyhedral/projection.cpp",
+          "sha256": "d9aa374a643978b821acf2c520fe2556588738defa22221b3a16108973718926"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -4215,6 +4515,11 @@
           "include/csl/optimization/finite_action_graph.hpp",
           "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
+          "include/csl/geometry/polyhedral_intersection.hpp",
+          "src/geometry/polyhedral/intersection.cpp",
+          "include/csl/geometry/polyhedral_projection.hpp",
+          "src/geometry/polyhedral/projection.cpp",
+          "include/csl/reachability/nominal_predecessor.hpp",
           "src/reachability/nominal_predecessor.cpp",
           "src/reachability/finite_plan_zonotope.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
@@ -4236,8 +4541,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "b9bb5c984174e94f7fe3fc9f967d8620fa920759772192269518ff171b47e856",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-mpc/1/cfg-b9bb5c984174e94f",
+      "graph_fingerprint": "8a4da2fa17ddea33c76ae7d1a2a14a6f4798ec9d2e13e99a56196d1c0f7d3d86",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-mpc/1/cfg-8a4da2fa17ddea33",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4308,16 +4613,36 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
+          "path": "include/csl/geometry/polyhedral_intersection.hpp",
+          "sha256": "9280c5bba0ada04d8ed234839b6ca8b0a80fbca12a83d54003574170e4c438b6"
+        },
+        {
+          "path": "include/csl/geometry/polyhedral_projection.hpp",
+          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+        },
+        {
           "path": "include/csl/optimization/finite_action_graph.hpp",
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
+          "path": "include/csl/reachability/nominal_predecessor.hpp",
+          "sha256": "61548426d59bd8437e77232b9d9d50efc20dd6799be584e44fb86eca2d087be4"
+        },
+        {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
+          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
           "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+        },
+        {
+          "path": "src/geometry/polyhedral/intersection.cpp",
+          "sha256": "582929bea382cccf865b8ae858a39f4809d1fce0f473c64dcba20d009bb4f289"
+        },
+        {
+          "path": "src/geometry/polyhedral/projection.cpp",
+          "sha256": "d9aa374a643978b821acf2c520fe2556588738defa22221b3a16108973718926"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -4420,6 +4745,11 @@
           "include/csl/optimization/finite_action_graph.hpp",
           "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
+          "include/csl/geometry/polyhedral_intersection.hpp",
+          "src/geometry/polyhedral/intersection.cpp",
+          "include/csl/geometry/polyhedral_projection.hpp",
+          "src/geometry/polyhedral/projection.cpp",
+          "include/csl/reachability/nominal_predecessor.hpp",
           "src/reachability/nominal_predecessor.cpp",
           "src/reachability/finite_plan_parallelotope.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
@@ -4441,8 +4771,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "b39403a0687ef485a971bb76b209063dc5c96a612f8a53cd69600b7ba93f81c2",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-mpc/1/cfg-b39403a0687ef485",
+      "graph_fingerprint": "4416fb22be1320dddf6319bd9544cb88471e1d0a79a744da97650fd2e4b23b2e",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-mpc/1/cfg-4416fb22be1320dd",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4513,16 +4843,36 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
+          "path": "include/csl/geometry/polyhedral_intersection.hpp",
+          "sha256": "9280c5bba0ada04d8ed234839b6ca8b0a80fbca12a83d54003574170e4c438b6"
+        },
+        {
+          "path": "include/csl/geometry/polyhedral_projection.hpp",
+          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+        },
+        {
           "path": "include/csl/optimization/finite_action_graph.hpp",
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
+          "path": "include/csl/reachability/nominal_predecessor.hpp",
+          "sha256": "61548426d59bd8437e77232b9d9d50efc20dd6799be584e44fb86eca2d087be4"
+        },
+        {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
+          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
           "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+        },
+        {
+          "path": "src/geometry/polyhedral/intersection.cpp",
+          "sha256": "582929bea382cccf865b8ae858a39f4809d1fce0f473c64dcba20d009bb4f289"
+        },
+        {
+          "path": "src/geometry/polyhedral/projection.cpp",
+          "sha256": "d9aa374a643978b821acf2c520fe2556588738defa22221b3a16108973718926"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",
@@ -4625,6 +4975,11 @@
           "include/csl/optimization/finite_action_graph.hpp",
           "src/optimization/finite_action_graph.cpp",
           "src/geometry/affine_sum.cpp",
+          "include/csl/geometry/polyhedral_intersection.hpp",
+          "src/geometry/polyhedral/intersection.cpp",
+          "include/csl/geometry/polyhedral_projection.hpp",
+          "src/geometry/polyhedral/projection.cpp",
+          "include/csl/reachability/nominal_predecessor.hpp",
           "src/reachability/nominal_predecessor.cpp",
           "src/reachability/finite_plan_ellipsoid.cpp",
           "docs/catalogue/module-composition-inventory-v1.json",
@@ -4646,8 +5001,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "0c6b4dd99fe62367786891399c338e8e0d8022bac48eee3da61dc1b6229a0e7e",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-mpc/1/cfg-0c6b4dd99fe62367",
+      "graph_fingerprint": "991baa311247d19bfe6b75a18e2af2939fabaabb9bc1605f734586404fb59549",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-mpc/1/cfg-991baa311247d19b",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4718,16 +5073,36 @@
           "sha256": "10f061d03d816156fc5727a47340a611852afcf16a3ee8763cd9fdf53ee4ea3b"
         },
         {
+          "path": "include/csl/geometry/polyhedral_intersection.hpp",
+          "sha256": "9280c5bba0ada04d8ed234839b6ca8b0a80fbca12a83d54003574170e4c438b6"
+        },
+        {
+          "path": "include/csl/geometry/polyhedral_projection.hpp",
+          "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+        },
+        {
           "path": "include/csl/optimization/finite_action_graph.hpp",
           "sha256": "1d8d06af69c176f1126b18678a23bc7c1980f0806f9305f2844f1e1fd53ef147"
         },
         {
+          "path": "include/csl/reachability/nominal_predecessor.hpp",
+          "sha256": "61548426d59bd8437e77232b9d9d50efc20dd6799be584e44fb86eca2d087be4"
+        },
+        {
           "path": "src/geometry/affine_sum.cpp",
-          "sha256": "60ed57f298bdf7a4954d5987fe6189bd29659888a8a4a49e21eb7887e200e947"
+          "sha256": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f"
         },
         {
           "path": "src/geometry/hull_reducer.cpp",
           "sha256": "f3f2eed4f0ae10027108ed698361a1ed2f3de82f3c56b6c00b6175b4304e72d8"
+        },
+        {
+          "path": "src/geometry/polyhedral/intersection.cpp",
+          "sha256": "582929bea382cccf865b8ae858a39f4809d1fce0f473c64dcba20d009bb4f289"
+        },
+        {
+          "path": "src/geometry/polyhedral/projection.cpp",
+          "sha256": "d9aa374a643978b821acf2c520fe2556588738defa22221b3a16108973718926"
         },
         {
           "path": "src/optimization/finite_action_graph.cpp",

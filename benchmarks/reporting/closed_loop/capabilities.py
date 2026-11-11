@@ -167,6 +167,11 @@ def _native_definitions() -> list[dict]:
                     "ellipsoid": "src/reachability/finite_plan_ellipsoid.cpp"}.get(representation)
                 controller_sources = source_paths + ["include/csl/optimization/finite_action_graph.hpp",
                     "src/optimization/finite_action_graph.cpp", "src/geometry/affine_sum.cpp",
+                    "include/csl/geometry/polyhedral_intersection.hpp",
+                    "src/geometry/polyhedral/intersection.cpp",
+                    "include/csl/geometry/polyhedral_projection.hpp",
+                    "src/geometry/polyhedral/projection.cpp",
+                    "include/csl/reachability/nominal_predecessor.hpp",
                     "src/reachability/nominal_predecessor.cpp"]
                 if representation_source:
                     controller_sources.append(representation_source)
@@ -262,9 +267,14 @@ def validate_manifest(value: dict | None = None, manifest_path: Path | None = No
     expected = sidecar.read_text().split()[0]
     if canonical_sha256(manifest) != expected:
         raise ValueError("closed-loop capability manifest hash mismatch")
-    expected_graphs = {row["graph_id"]: row for row in (_native_definitions() if native else _definitions())}
-    if len(expected_graphs) != len(manifest["graphs"]):
-        raise ValueError("closed-loop capability manifest graph count differs from source definitions")
+    expected_rows = _native_definitions() if native else _definitions()
+    expected_ids = {row["graph_id"] for row in expected_rows}
+    graph_ids = [row.get("graph_id") for row in manifest["graphs"]]
+    if len(graph_ids) != len(set(graph_ids)):
+        raise ValueError("closed-loop capability manifest graph IDs are not unique")
+    if set(graph_ids) != expected_ids:
+        raise ValueError("closed-loop capability manifest graph IDs differ from source definitions")
+    expected_graphs = {row["graph_id"]: row for row in expected_rows}
     for graph in manifest["graphs"]:
         source = {key: val for key, val in graph.items() if key not in {"graph_id", "graph_fingerprint"}}
         if canonical_sha256(source) != graph["graph_fingerprint"]:
