@@ -113,6 +113,24 @@ problem::ResolvedProblem nominal_linear_exact_multivariable() {
         InformationPattern::nominal_open_loop,LinearTerminal{{1,0},0}};
     return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
 }
+SetHandle bounded_box_2d(std::string id,std::string x,std::string y,double lx,double ux,double ly,double uy) {
+    return take(sets::make_h({{std::move(id)},2,{std::move(x),std::move(y)}},
+        {take(numeric::snapshot(Matrix{4,2,{1,0,-1,0,0,1,0,-1}})),
+         take(numeric::snapshot_vector(Vector{ux,-lx,uy,-ly})),
+         take(numeric::snapshot(Matrix{0,2,{}})),take(numeric::snapshot_vector(Vector{}))})).as_handle();
+}
+problem::ResolvedProblem planar_control_problem() {
+    const auto control=interval("source-index-planar-control",0,1,"u");
+    Problem source{{"source-index-planar-control"},
+        std::make_shared<const SystemModel>(SystemModel{{{2,1,0},TimeDomain::discrete,
+            LinearStage{Matrix{2,2,{1,0,0,1}},Matrix{2,1,{1,1}},Matrix{2,0,{}},Vector{0,0}}},{}}),
+        {0,1},KnownInitial{{0,0}},ContinuousDomain{{control}},
+        {bounded_box_2d("source-index-planar-x0","position","velocity",-1,1,-1,1),
+         bounded_box_2d("source-index-planar-x1","position","velocity",0,1,0,1)}, {},{},
+        InformationPattern::nominal_open_loop,
+        QuadraticTerminal{Matrix{2,2,{2,0,0,2}},Vector{-2,-2},2}};
+    return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+}
 problem::ResolvedProblem nominal_linear_exact_three_stage_multivariable() {
     const auto box = unit_box_2d("nominal-exact-three-stage-box", "p", "v");
     Problem source{{"strategy-a-nominal-linear-exact-three-stage"},
@@ -313,7 +331,8 @@ std::variant<PreparedStrategy,Rejection> admit(const StrategyRequest& request_,b
     std::optional<std::stop_source> stop_after_terminal={},bool omit_test_verifier=false,
     bool fail_terminal_numerically=false,bool limit_terminal_resources=false,
     ExecutionContext* expire_deadline_after_terminal=nullptr,int* lp_workspace_factories=nullptr,
-    bool deadline_terminal_result=false) {
+    bool deadline_terminal_result=false,bool source_index_path=false,bool source_index_legacy=false,
+    bool a43_hull_path=false) {
     auto lp=take(adapters::lp::make_highs_registration());
     if(lp_workspace_factories) {
         const auto factory=lp.factory;
@@ -325,9 +344,16 @@ std::variant<PreparedStrategy,Rejection> admit(const StrategyRequest& request_,b
     auto convex=take(adapters::convex::make_highs_registration());
     auto converter=take(adapters::polyhedral::make_qhull_registration(lp));
     auto projection=geometry::polyhedral::make_projection_registration();
-    auto affine=geometry::make_affine_sum_registration({
-        selected(geometry::make_lp_hull_reducer_registration(),""),selected(lp,"csl.program-result.v1"),
-        selected(converter,"csl.polyhedron.v")});
+    auto modern_hull=a43_hull_path ? geometry::make_itis17_a43_hull_reducer_registration() :
+        geometry::make_lp_hull_reducer_registration();
+    auto affine=source_index_path ?
+        geometry::make_affine_sum_registration(geometry::SourceIndexAffineSumDependencies{
+            selected(source_index_legacy ? geometry::make_legacy_kpabep_source_index_registration() :
+                geometry::make_quickhull_source_index_registration(),""),
+            selected(converter,"csl.polyhedron.v"),{}}) :
+        geometry::make_affine_sum_registration({
+            selected(std::move(modern_hull),""),selected(lp,"csl.program-result.v1"),
+            selected(converter,"csl.polyhedron.v")});
     if(reject_terminal)convex.capabilities=[](const ConvexProgram&,const Requirements&)->Capability {
         return Diagnostics{{DiagnosticCode::unsupported,"test.terminal","terminal provider rejected generated request"}};
     };
@@ -394,6 +420,20 @@ SynthesisResult run(const StrategyRequest& request_,bool reject_terminal=false,E
             for(const auto& d:stop.diagnostics)std::cerr<<d.field<<": "<<d.explanation<<'\n';
     },result.stop);
     return result;
+}
+SynthesisResult run_source_index_strategy(const StrategyRequest& request_,ExecutionContext context={},
+        bool use_legacy=false) {
+    if(!context.resources)context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    auto prepared=take(admit(request_,false,std::nullopt,false,false,false,nullptr,nullptr,false,true,use_legacy));
+    auto workspace=prepared.create();
+    auto result=take(workspace->run(context));
+    return result;
+}
+SynthesisResult run_a43_hull_strategy(const StrategyRequest& request_,ExecutionContext context={}) {
+    if(!context.resources)context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    auto prepared=take(admit(request_,false,std::nullopt,false,false,false,nullptr,nullptr,false,false,false,true));
+    auto workspace=prepared.create();
+    return take(workspace->run(context));
 }
 class StrategyTimingClock final : public ob::TimingClock {
     std::int64_t tick_{};
@@ -558,6 +598,86 @@ bool has_equality(const sets::HRepresentation& h,const Vector& coefficients,doub
     }
     return false;
 }
+}
+TEST_CASE("Strategy A runs source-index hulls in a 2D control tube and selects a separate terminal optimizer") {
+    auto problem=planar_control_problem();
+    const auto request_=request(problem);
+    const auto result=run_source_index_strategy(request_);
+    REQUIRE(result.termination==Termination::completed);
+    REQUIRE(result.family);
+    CHECK(result.family->target()==FamilyTarget::candidate_relaxation);
+    const auto& history=payload(result);
+    REQUIRE(history.forward.stages.size()==2);
+    bool observed_affine_image=false,observed_control_sum=false,observed_verified_checker=false;
+    for(const auto& stage:history.forward.stages) for(const auto& evidence:stage.operation_lineage) {
+        const bool is_control_sum=evidence.reference.identity.request.value.find("/sum")!=std::string::npos;
+        for(const auto& assumption:evidence.assumptions) {
+            observed_affine_image|=assumption.find("source-index invocation:")!=std::string::npos &&
+                assumption.find("csl.hull.source.quickhull-2d")!=std::string::npos;
+            observed_control_sum|=is_control_sum && assumption.find("independent exact 2D checker verifies every generated input point")!=std::string::npos;
+            observed_verified_checker|=assumption.find("checker invocation:")!=std::string::npos &&
+                assumption.find("status=verified")!=std::string::npos;
+        }
+    }
+    CHECK(observed_affine_image);
+    CHECK(observed_control_sum);
+    CHECK(observed_verified_checker);
+    REQUIRE(history.terminal);
+    REQUIRE(history.terminal->provider);
+    REQUIRE(history.terminal->provider->actual);
+    CHECK(history.terminal->provider->port=="convex");
+    CHECK(history.terminal->provider->actual->id==ModuleId{"csl.convex.highs"});
+    CHECK(history.terminal->outcome==MathematicalOutcome::optimal);
+    CHECK(history.terminal->optimization.has_value());
+}
+TEST_CASE("Strategy A runs a paper-derived A43 hull reducer with a separately selected control optimizer") {
+    const auto request_=request(planar_control_problem());
+    const auto result=run_a43_hull_strategy(request_);
+    REQUIRE(result.termination==Termination::completed);
+    REQUIRE(result.family);
+    const auto& history=payload(result);
+    bool observed_a43=false,observed_vertex_lp=false,observed_basis_child_lp=false;
+    for(const auto& stage:history.forward.stages) for(const auto& evidence:stage.operation_lineage)
+        for(const auto& assumption:evidence.assumptions) {
+            observed_a43|=assumption.find("HullReducerPort invocation: provider=csl.hull.itis17.a43-certified-basis-reuse")!=std::string::npos &&
+                assumption.find("status=complete")!=std::string::npos;
+            observed_vertex_lp|=assumption.find("vertex LP invocation record: requested_provider=csl.lp.highs; status=completed; actual_provider=csl.lp.highs")!=std::string::npos &&
+                assumption.find("outcome=")!=std::string::npos;
+            observed_basis_child_lp|=assumption.find("HullReducerPort child LPPort invocation: requested_provider=")!=std::string::npos &&
+                assumption.find("actual_provider=")!=std::string::npos;
+        }
+    CHECK(observed_a43);
+    CHECK(observed_vertex_lp);
+    CHECK(observed_basis_child_lp);
+    REQUIRE(history.terminal);
+    REQUIRE(history.terminal->provider);
+    REQUIRE(history.terminal->provider->actual);
+    CHECK(history.terminal->provider->port=="convex");
+    CHECK(history.terminal->provider->actual->id==ModuleId{"csl.convex.highs"});
+    CHECK(history.terminal->outcome==MathematicalOutcome::optimal);
+}
+TEST_CASE("Strategy A records faithful legacy source-index proposals in the same 2D control tube") {
+    const auto request_=request(planar_control_problem());
+    const auto result=run_source_index_strategy(request_,{},true);
+    REQUIRE(result.termination==Termination::completed);
+    REQUIRE(result.family);
+    const auto& history=payload(result);
+    REQUIRE(history.forward.stages.size()==2);
+    bool observed_legacy=false,observed_checker=false;
+    for(const auto& stage:history.forward.stages) for(const auto& evidence:stage.operation_lineage)
+        for(const auto& assumption:evidence.assumptions) {
+            observed_legacy|=assumption.find("csl.hull.source.btulshor-kpabep")!=std::string::npos &&
+                assumption.find("source-index invocation:")!=std::string::npos;
+            observed_checker|=assumption.find("checker invocation:")!=std::string::npos &&
+                assumption.find("status=verified")!=std::string::npos;
+        }
+    CHECK(observed_legacy);
+    CHECK(observed_checker);
+    REQUIRE(history.terminal);
+    REQUIRE(history.terminal->provider);
+    REQUIRE(history.terminal->provider->actual);
+    CHECK(history.terminal->provider->port=="convex");
+    CHECK(history.terminal->provider->actual->id==ModuleId{"csl.convex.highs"});
 }
 TEST_CASE("T-S01 registered candidate retains u0+u1=1 and rejects the marginal product") {
     const auto query=request(integrator());auto result=run(query);CHECK(result.termination==Termination::completed);

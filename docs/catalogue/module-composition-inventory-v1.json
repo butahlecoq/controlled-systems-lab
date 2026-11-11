@@ -1090,6 +1090,75 @@
       "budget_policy": "Use the source request limits and finite candidate profile; no implicit unlimited budget is claimed."
     },
     {
+      "group": "vertex_lp_simplex",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.hull.source.quickhull-2d",
+        "version": "1.0.0"
+      },
+      "role": "source_index_hull",
+      "input": "ordered finite binary64 2D point cloud",
+      "output": "proposed original positional IDs",
+      "dimension": "2 only; no implicit projection",
+      "assurance": "exact represented-binary64 orientation, independently checked by exact dyadic all-input containment",
+      "relation": "equivalent finite hull when the selected IDs pass the bounded checker; minimality is not established",
+      "operations": [
+        "QuickHull2D source-index proposal",
+        "independent bounded all-input check inside affine-sum operation"
+      ],
+      "dependencies": [
+        "selected bounded hull-check budget"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "src/geometry/source_index_hull.cpp",
+        "symbol": "csl::geometry::make_quickhull_source_index_registration"
+      },
+      "role_contract": "separate from HullReducerPort; no LP work is attributed to this provider",
+      "model_classes": [
+        "finite binary64 2D point-cloud hulls"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "QuickHull uses exact orientation on represented binary64 values; independent checker uses exact dyadic membership, with no geometric tolerance.",
+      "budget_policy": "The affine-sum caller selects a positive point budget and nonnegative wall budget; checker status and timing are separate from algorithm invocation."
+    },
+    {
+      "group": "vertex_lp_simplex",
+      "kind": "registered_provider",
+      "identity": {
+        "id": "csl.hull.source.btulshor-kpabep",
+        "version": "1.0.0"
+      },
+      "role": "source_faithful_vertex_reference",
+      "input": "ordered finite binary64 2D point cloud",
+      "output": "proposed retained original positional IDs and raw KPABEP/MODIF trace",
+      "dimension": "2 only; no implicit projection",
+      "assurance": "source-faithful Pascal KPABEP/MODIF profile with original order, pivots, epsilon and stops; independent exact dyadic all-input checker gates application",
+      "relation": "equivalent finite hull when the selected IDs pass the bounded checker; source failures remain outcomes",
+      "operations": [
+        "source KPABEP reduction",
+        "source MODIF pivot sequence",
+        "independent bounded all-input check inside affine-sum operation"
+      ],
+      "dependencies": [
+        "selected source MODIF and KPABEP ports",
+        "selected bounded hull-check budget"
+      ],
+      "build": "CSL core",
+      "source": {
+        "path": "src/geometry/source_index_hull.cpp",
+        "symbol": "csl::geometry::make_legacy_kpabep_source_index_registration"
+      },
+      "immutable_evidence": "reports/algorithm-results/btulshor-source-faithful-20261110-v1/manifest.json",
+      "role_contract": "the recovered source exposes one faithful profile; no distinct baseline/modified legacy variant has been identified",
+      "model_classes": [
+        "finite binary64 2D point-cloud hulls"
+      ],
+      "action_domain": "not_applicable to this module role",
+      "tolerance_policy": "Preserve the source profile epsilon and candidate/status sequence; the independent checker uses exact dyadic predicates, not this epsilon.",
+      "budget_policy": "Legacy pivot, dense-entry and trace limits are caller-selected; checker point/wall limits are separate and the operation deadline bounds both."
+    },
+    {
       "group": "reachable_set_representation",
       "kind": "public_representation_type",
       "identity": {

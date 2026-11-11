@@ -21,7 +21,15 @@ public:
         auto final_result = detail::reduce_hull_in_order(cloud, lp, context,
             basis_reduction.retained, std::move(basis_reduction.removed),
             "itis17-a43-final-recheck");
-        if (!std::holds_alternative<HullReduction>(final_result)) return final_result;
+        if (!std::holds_alternative<HullReduction>(final_result)) {
+            auto diagnostics=std::get<Diagnostics>(std::move(final_result));
+            for(auto& diagnostic:diagnostics)
+                diagnostic.explanation += "; basis child LPPort calls="+
+                    std::to_string(basis_reduction.child_lp_invocations_total)+
+                    "; captured="+std::to_string(basis_reduction.child_lp_invocations.size())+
+                    "; omitted="+std::to_string(basis_reduction.child_lp_invocations_omitted);
+            return diagnostics;
+        }
 
         auto reduction = std::get<HullReduction>(std::move(final_result));
         const auto final_recheck_calls = reduction.lp_calls;
@@ -31,6 +39,10 @@ public:
         if (basis_reduction.status == ReductionStatus::incomplete)
             reduction.status = ReductionStatus::incomplete;
         reduction.basis_reuse = std::move(basis_reduction.basis_reuse);
+        reduction.child_lp_invocations=std::move(basis_reduction.child_lp_invocations);
+        reduction.child_lp_invocations_total=basis_reduction.child_lp_invocations_total;
+        reduction.child_lp_invocations_omitted=basis_reduction.child_lp_invocations_omitted;
+        reduction.child_lp_trace_capture_failed=basis_reduction.child_lp_trace_capture_failed;
         reduction.itis17_a43 = A43ReductionMetrics{final_recheck_calls, false};
         return reduction;
     }
