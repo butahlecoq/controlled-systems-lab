@@ -29,7 +29,7 @@ struct FiniteActionMinimaxRequest {
     // restricted set of full-horizon catalogue-index histories; solvers only
     // evaluate those histories and nominal callers report product coverage
     // separately. An explicitly empty value is invalid.
-    std::optional<std::vector<std::vector<std::size_t>>> candidate_action_indices;
+    std::optional<std::vector<std::vector<std::size_t>>> candidate_action_indices{};
 };
 struct FiniteActionMinimaxLimits {
     std::size_t max_plans;

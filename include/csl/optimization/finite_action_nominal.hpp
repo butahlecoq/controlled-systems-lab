@@ -57,7 +57,7 @@ struct FiniteActionNominalRequest {
     // spans the entire request horizon and indexes the untouched source action
     // catalogue. A proper subset yields incomplete coverage; an empty value is
     // invalid.
-    std::optional<std::vector<std::vector<std::size_t>>> candidate_action_indices;
+    std::optional<std::vector<std::vector<std::size_t>>> candidate_action_indices{};
 };
 
 struct FiniteActionNominalLimits {

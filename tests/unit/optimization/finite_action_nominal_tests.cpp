@@ -17,6 +17,15 @@ template<class T> T take_nominal(std::variant<T, Diagnostic> result) {
 }
 }
 
+TEST_CASE("legacy nominal aggregate requests leave candidate filtering unset") {
+    const auto source = csl::issue824::fixture::two_points_request("nominal-legacy-source");
+    const FiniteActionNominalRequest legacy{
+        source.problem, {"nominal-legacy"}, source.system, {4.5, 0.0, 0.0, 0.0},
+        source.actions, {{1.0}, {1.0}, {1.0}}, source.admissible_states,
+        source.objective, {}, 0};
+    CHECK_FALSE(legacy.candidate_action_indices.has_value());
+}
+
 TEST_CASE("nominal finite-plan comparison keeps exact and enclosure scores distinct") {
     const auto source = csl::issue824::fixture::two_points_request("nominal-test-source");
     FiniteActionNominalRequest request{
