@@ -161,6 +161,45 @@ class PagesAugmentationAggregation(unittest.TestCase):
         self.assertIn("PAGES_SOURCE_RUN_ID", workflow)
         self.assertLess(workflow.index("pip install"), workflow.index("name: Stage and verify all Pages augmentations together"))
 
+    def test_only_cumulative_workflow_can_publish_pages(self):
+        workflows = ROOT / ".github/workflows"
+        aggregation = workflows / "pages-augmentation-aggregation.yml"
+        sources = [
+            workflows / "algorithm-reports.yml",
+            workflows / "mpc01-per-attempt-pages-augmentation.yml",
+            workflows / "b04-c-pages-augmentation.yml",
+            workflows / "mpc06-tube-objective-pages-augmentation.yml",
+        ]
+        self.assertIn("actions/deploy-pages@", aggregation.read_text(encoding="utf-8"))
+        self.assertIn("actions/upload-pages-artifact@", aggregation.read_text(encoding="utf-8"))
+        publishers = [path.name for path in workflows.glob("*.yml")
+                      if "actions/deploy-pages@" in path.read_text(encoding="utf-8")]
+        self.assertEqual(publishers, [aggregation.name])
+        for path in sources:
+            with self.subTest(workflow=path.name):
+                source = path.read_text(encoding="utf-8")
+                self.assertIn("actions/upload-pages-artifact@", source)
+                self.assertNotIn("actions/deploy-pages@", source)
+                self.assertNotIn("actions/configure-pages@", source)
+                self.assertNotIn("pages: write", source)
+                self.assertNotIn("id-token: write", source)
+        base = sources[0].read_text(encoding="utf-8")
+        self.assertIn("push:\n    branches: [main]", base)
+        for path in sources[1:]:
+            with self.subTest(workflow_run=path.name):
+                source = path.read_text(encoding="utf-8")
+                self.assertIn("workflow_run:", source)
+                self.assertIn("workflows: [Algorithm report records and site]", source)
+                self.assertIn("branches: [main]", source)
+        aggregation_text = aggregation.read_text(encoding="utf-8")
+        self.assertIn("Wait for every single-route artifact for this source revision", aggregation_text)
+        self.assertIn("await_pages_augmentation_runs.py", aggregation_text)
+        waiter = (ROOT / "scripts/reports/await_pages_augmentation_runs.py").read_text(encoding="utf-8")
+        for name in ("mpc01-per-attempt-pages-augmentation.yml",
+                     "b04-c-pages-augmentation.yml",
+                     "mpc06-tube-objective-pages-augmentation.yml"):
+            self.assertIn(name, waiter)
+
 
 if __name__ == "__main__":
     unittest.main()
