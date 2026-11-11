@@ -24,6 +24,7 @@ def request(*, middle_bound: list[list[float]], controller: str) -> dict:
             {"stage": i, "terms": [{"kind": "quadratic", "reference": [0.0], "scales": [1.0],
              "weights": [1.0], "coefficient": 1.0}]} for i in range(2)]},
         "representation_index": 0, "representation_name": "exact_polytope",
+        "reachable_set_method": "csl.geometry.affine-sum",
         "search_policy": "stage-layered-backward-viability",
         "limits": {"max_beam_width": 4, "max_graph_nodes": 32},
     }

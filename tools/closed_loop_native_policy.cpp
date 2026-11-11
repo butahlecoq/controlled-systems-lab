@@ -1,5 +1,7 @@
 #include <csl/model/linear_system.hpp>
 #include <csl/geometry/polyhedral_projection.hpp>
+#include <csl/geometry/affine_sum.hpp>
+#include <csl/optimization/phase_one.hpp>
 #include <csl/optimization/finite_action_nominal.hpp>
 #include <csl/optimization/finite_action_graph.hpp>
 #include <csl/optimization/objectives.hpp>
@@ -227,6 +229,36 @@ bool contains_with_tolerance(const sets::SetData& set, const Vector& point,
     return true;
 }
 
+template<class Port>
+registry::PreparedProvider<Port> prepare_provider(registry::Registration<Port> registration,
+        registry::Requirements requirements) {
+    const registry::Method method{registration.identity.id, registration.identity.version};
+    registry::Registry<Port> providers;
+    if(const auto rejected=providers.add(std::move(registration)))
+        throw std::runtime_error(rejected->diagnostics.empty() ? "provider registration failed" : rejected->diagnostics.front().explanation);
+    auto prepared=registry::prepare_provider(registry::select_provider(providers,method,requirements));
+    if(!std::holds_alternative<registry::PreparedProvider<Port>>(prepared))
+        throw std::runtime_error("selected provider failed preparation");
+    return std::get<registry::PreparedProvider<Port>>(std::move(prepared));
+}
+
+registry::PreparedProvider<registry::GeometryPort> affine_sum_provider() {
+    auto lp_result=optimization::phase_one::make_registration();
+    if(!std::holds_alternative<registry::Registration<registry::LPPort>>(lp_result))
+        throw std::runtime_error("HiGHS LP registration unavailable");
+    registry::Requirements lp_requirements;
+    lp_requirements.output.representation={"csl.program-result.v1"};
+    auto lp=prepare_provider(std::get<registry::Registration<registry::LPPort>>(std::move(lp_result)),lp_requirements);
+    auto hull=prepare_provider(geometry::make_lp_hull_reducer_registration(),{});
+    geometry::AffineSumDependencies dependencies{std::move(hull),std::move(lp),std::nullopt};
+    auto registration=geometry::make_affine_sum_registration(std::move(dependencies));
+    registry::Requirements requirements;
+    requirements.output.representation={"csl.polyhedron.v"};
+    requirements.output.relation=SetRelation::equivalent;
+    requirements.output.assurance=Assurance::numerical;
+    return prepare_provider(std::move(registration),requirements);
+}
+
 std::string backward_status(optimization::FiniteGraphBackwardStatus status) {
     using Status = optimization::FiniteGraphBackwardStatus;
     switch(status) {
@@ -246,6 +278,9 @@ std::string backward_status(optimization::FiniteGraphBackwardStatus status) {
 
 Json graph_response(const Json& input, const optimization::FiniteActionNominalRequest& request,
                     std::size_t beam_width, std::size_t max_nodes) {
+    const auto reachable_set_method = input.at("reachable_set_method").get<std::string>();
+    if(reachable_set_method != "csl.geometry.affine-sum")
+        return {{"status", "unsupported"}, {"reason", "This build does not contain the explicitly requested reachable-set method."}};
     auto registration = geometry::polyhedral::make_projection_registration();
     registry::Registry<registry::GeometryPort> providers;
     if(const auto error = providers.add(registration))
@@ -258,8 +293,9 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
     if(!std::holds_alternative<registry::PreparedProvider<registry::GeometryPort>>(prepared))
         return {{"status", "unsupported"}, {"reason", "exact-H projection provider failed preparation"}};
     auto provider = std::get<registry::PreparedProvider<registry::GeometryPort>>(std::move(prepared));
+    const auto reachable_provider = affine_sum_provider();
     const auto outcome = optimization::finite_action_stage_layered_graph(request,
-        {beam_width, max_nodes}, provider);
+        {beam_width, max_nodes}, provider, reachable_provider);
     if(const auto* error = std::get_if<Unsupported>(&outcome))
         return {{"status", "unsupported"}, {"reason", error->diagnostics.empty() ? "unsupported graph request" : error->diagnostics.front().explanation}};
     if(const auto* stopped = std::get_if<OperationStopped>(&outcome))
@@ -278,6 +314,7 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
             {"action_index", node.action_index ? Json(*node.action_index) : Json(nullptr)},
             {"edge_running_cost", node.edge_running_cost}, {"heuristic_score", node.heuristic_score},
             {"state_admissible", node.state_admissible}, {"stage_set_intersection_nonempty", node.stage_intersection_nonempty},
+            {"reachable_envelope_contains", node.reachable_envelope_contains ? Json(*node.reachable_envelope_contains) : Json(nullptr)},
             {"backward_viable", node.backward_viable},
             {"predecessor_contains_parent", node.predecessor_contains_parent ? Json(*node.predecessor_contains_parent) : Json(nullptr)},
             {"discrete_transition_witness", node.discrete_transition_witness ? Json(*node.discrete_transition_witness) : Json(nullptr)},
@@ -310,6 +347,17 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
         {"operation", "intersect each generated point with its authored stage H constraints"},
         {"provider", "public-function"}, {"profile_id", input.at("controller_id")},
         {"calls", graph.stage_intersection_calls}});
+    const auto reachable_provenance = reachable_provider.provenance();
+    const auto reachable_provider_id = reachable_provenance.actual ?
+        reachable_provenance.actual->id.value + "@" + reachable_provenance.actual->version : "unresolved-provider";
+    invocations.push_back({{"module_id", "csl::geometry::affine-image"},
+        {"operation", "registered affine image of each retained observed-state parent"},
+        {"provider", reachable_provider_id}, {"selected_method_id", reachable_set_method}, {"profile_id", input.at("controller_id")},
+        {"calls", graph.reachable_envelope_calls / 2}, {"relation", "equivalent"}, {"assurance", "numerical"}});
+    invocations.push_back({{"module_id", "csl::geometry::minkowski-sum"},
+        {"operation", "registered Minkowski sum with stage-transformed authored discrete action hull"},
+        {"provider", reachable_provider_id}, {"selected_method_id", reachable_set_method}, {"profile_id", input.at("controller_id")},
+        {"calls", graph.reachable_envelope_calls / 2}, {"relation", "equivalent"}, {"assurance", "numerical"}});
     Json response{{"task_id", input.at("task_id")}, {"task_sha256", input.at("task_sha256")},
         {"action_profile_id", input.at("action_profile_id")},
         {"policy_id", input.at("controller_id").get<std::string>() + "/budgeted-backward-graph-mpc/1"},

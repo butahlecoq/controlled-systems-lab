@@ -1,11 +1,25 @@
 #include <csl/geometry/polyhedral_projection.hpp>
+#include <csl/geometry/affine_sum.hpp>
 #include <csl/optimization/finite_action_graph.hpp>
+#include <csl/optimization/phase_one.hpp>
 
 #include <variant>
 
 using namespace csl;
 
 namespace {
+template<class Port>
+registry::PreparedProvider<Port> select(registry::Registration<Port> registration,
+        registry::Requirements requirements) {
+    const registry::Method method{registration.identity.id, registration.identity.version};
+    registry::Registry<Port> providers;
+    if(providers.add(std::move(registration))) throw std::runtime_error("provider registration failed");
+    auto prepared=registry::prepare_provider(registry::select_provider(providers,method,requirements));
+    if(!std::holds_alternative<registry::PreparedProvider<Port>>(prepared))
+        throw std::runtime_error("provider preparation failed");
+    return std::get<registry::PreparedProvider<Port>>(std::move(prepared));
+}
+
 sets::SetData make_box(const Vector& lower, const Vector& upper, const char* id) {
     const auto dimension = lower.size();
     Matrix a{2 * dimension, dimension, Vector(2 * dimension * dimension, 0.0)};
@@ -24,6 +38,22 @@ sets::SetData make_box(const Vector& lower, const Vector& upper, const char* id)
          std::get<numeric::MatrixView>(ev), std::get<numeric::VectorView>(fv)});
     if(!std::holds_alternative<sets::SetData>(set)) throw std::runtime_error("H box construction failed");
     return std::get<sets::SetData>(set);
+}
+
+registry::PreparedProvider<registry::GeometryPort> reachable_provider() {
+    auto lp_result=optimization::phase_one::make_registration();
+    if(!std::holds_alternative<registry::Registration<registry::LPPort>>(lp_result))
+        throw std::runtime_error("Phase-I LP registration unavailable");
+    registry::Requirements lp_requirements;
+    lp_requirements.output.representation={"csl.program-result.v1"};
+    auto lp=select(std::get<registry::Registration<registry::LPPort>>(std::move(lp_result)),lp_requirements);
+    auto hull=select(geometry::make_lp_hull_reducer_registration(),{});
+    geometry::AffineSumDependencies dependencies{std::move(hull),std::move(lp),std::nullopt};
+    registry::Requirements geometry_requirements;
+    geometry_requirements.output.representation={"csl.polyhedron.v"};
+    geometry_requirements.output.relation=SetRelation::equivalent;
+    geometry_requirements.output.assurance=Assurance::numerical;
+    return select(geometry::make_affine_sum_registration(std::move(dependencies)),geometry_requirements);
 }
 }
 
@@ -53,9 +83,11 @@ int main() {
         {registration.identity.id, registration.identity.version}, requirements));
     if(!std::holds_alternative<registry::PreparedProvider<registry::GeometryPort>>(provider)) return 4;
     const auto graph = optimization::finite_action_stage_layered_graph(request, {4,32},
-        std::get<registry::PreparedProvider<registry::GeometryPort>>(provider));
+        std::get<registry::PreparedProvider<registry::GeometryPort>>(provider), reachable_provider());
     if(!std::holds_alternative<optimization::FiniteActionGraphResult>(graph)) return 5;
     const auto& result = std::get<optimization::FiniteActionGraphResult>(graph);
     if(!result.has_viable_path || result.selected_nodes.size() != 3 || result.total_objective != 1.5) return 6;
+    if(result.reachable_envelope_calls != 6 ||
+       result.nodes[result.selected_nodes[1]].reachable_envelope_contains != true) return 8;
     return result.nodes[result.selected_nodes[1]].action_index == 1 ? 0 : 7;
 }

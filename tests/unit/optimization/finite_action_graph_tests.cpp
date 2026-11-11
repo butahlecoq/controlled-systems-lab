@@ -2,6 +2,8 @@
 #include <doctest/doctest.h>
 
 #include <csl/geometry/polyhedral_projection.hpp>
+#include <csl/geometry/affine_sum.hpp>
+#include <csl/optimization/phase_one.hpp>
 #include <csl/optimization/finite_action_graph.hpp>
 
 using namespace csl;
@@ -40,6 +42,34 @@ registry::PreparedProvider<registry::GeometryPort> projection_provider() {
         {registration.identity.id, registration.identity.version}, requirements));
     REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::GeometryPort>>(prepared));
     return std::get<registry::PreparedProvider<registry::GeometryPort>>(std::move(prepared));
+}
+
+template<class Port>
+registry::PreparedProvider<Port> prepare(registry::Registration<Port> registration,
+        std::string representation) {
+    registry::Registry<Port> providers;
+    const registry::Method method{registration.identity.id, registration.identity.version};
+    REQUIRE_FALSE(providers.add(std::move(registration)).has_value());
+    registry::Requirements requirements;
+    requirements.output.representation = {std::move(representation)};
+    if constexpr(std::is_same_v<Port, registry::LPPort>)
+        requirements.output.assurance = Assurance::numerical;
+    else requirements.output.relation = SetRelation::equivalent;
+    auto selected = registry::prepare_provider(registry::select_provider(providers, method, requirements));
+    REQUIRE(std::holds_alternative<registry::PreparedProvider<Port>>(selected));
+    return std::get<registry::PreparedProvider<Port>>(std::move(selected));
+}
+
+registry::PreparedProvider<registry::GeometryPort> reachable_set_provider() {
+    auto lp_result = optimization::phase_one::make_registration();
+    REQUIRE(std::holds_alternative<registry::Registration<registry::LPPort>>(lp_result));
+    auto lp = std::get<registry::Registration<registry::LPPort>>(std::move(lp_result));
+    auto hull = geometry::make_lp_hull_reducer_registration();
+    geometry::AffineSumDependencies dependencies{
+        prepare(std::move(hull), "csl.hull-reduction.v1"),
+        prepare(lp, "csl.program-result.v1"), std::nullopt};
+    auto registration = geometry::make_affine_sum_registration(std::move(dependencies));
+    return prepare(std::move(registration), "csl.polyhedron.v");
 }
 
 model::LinearSystem two_stage_system(double a00 = 1.0) {
@@ -132,6 +162,20 @@ TEST_CASE("interior authored center action keeps its own node and lineage") {
     CHECK(result.nodes[*center].state == Vector{0,0});
     CHECK(result.nodes[result.selected_nodes[1]].action_index == 1);
     CHECK(result.total_objective == doctest::Approx(0.0));
+}
+
+TEST_CASE("registered affine-sum reachable envelopes guard every discrete child") {
+    auto request = viability_request();
+    auto predecessor = projection_provider();
+    auto reachable = reachable_set_provider();
+    const auto outcome = finite_action_stage_layered_graph(request, {4,32}, predecessor, reachable);
+    REQUIRE(std::holds_alternative<FiniteActionGraphResult>(outcome));
+    const auto& result = std::get<FiniteActionGraphResult>(outcome);
+    REQUIRE(result.has_viable_path);
+    CHECK(result.reachable_envelope_calls == 6); // affine image + Minkowski sum per expanded parent
+    CHECK(result.nodes[result.selected_nodes[1]].reachable_envelope_contains == true);
+    CHECK(result.nodes[result.selected_nodes[2]].reachable_envelope_contains == true);
+    CHECK(result.nodes[result.selected_nodes[1]].action_index == 1);
 }
 
 TEST_CASE("graph rejects malformed source cost before numerical evaluation") {

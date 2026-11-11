@@ -112,12 +112,14 @@ add_test(NAME finite_action_nominal_tests COMMAND finite_action_nominal_tests)
 csl_test_target(finite_action_nominal_tests optimization)
 
 add_executable(finite_action_graph_tests tests/unit/optimization/finite_action_graph_tests.cpp)
-target_link_libraries(finite_action_graph_tests PRIVATE CSL::finite_action_nominal doctest::doctest)
+target_link_libraries(finite_action_graph_tests PRIVATE CSL::finite_action_nominal CSL::affine_sum
+  CSL::phase_one doctest::doctest)
 add_test(NAME finite_action_graph_tests COMMAND finite_action_graph_tests)
 csl_test_target(finite_action_graph_tests optimization)
 
 add_executable(finite_action_graph_public_client tests/installed/finite_action_graph_client.cpp)
-target_link_libraries(finite_action_graph_public_client PRIVATE CSL::finite_action_nominal)
+target_link_libraries(finite_action_graph_public_client PRIVATE CSL::finite_action_nominal
+  CSL::affine_sum CSL::phase_one)
 add_test(NAME finite_action_graph_public_client COMMAND finite_action_graph_public_client)
 csl_test_target(finite_action_graph_public_client optimization)
 

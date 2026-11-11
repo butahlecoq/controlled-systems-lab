@@ -35,6 +35,7 @@ struct FiniteActionGraphNode {
     std::optional<double> backward_value;
     std::vector<std::size_t> action_lineage;
     FiniteGraphBackwardStatus backward_status{FiniteGraphBackwardStatus::pending};
+    std::optional<bool> reachable_envelope_contains;
 };
 
 struct FiniteActionGraphLayerStatistics {
@@ -57,6 +58,7 @@ struct FiniteActionGraphResult {
     std::vector<std::size_t> selected_nodes;
     std::size_t predecessor_calls{};
     std::size_t stage_intersection_calls{};
+    std::size_t reachable_envelope_calls{};
     bool search_complete{};
     bool node_budget_exhausted{};
     bool has_viable_path{};
@@ -73,6 +75,14 @@ using FiniteActionGraphOutcome = std::variant<FiniteActionGraphResult, Unsupport
 FiniteActionGraphOutcome finite_action_stage_layered_graph(
     const FiniteActionNominalRequest&, FiniteActionGraphLimits,
     const registry::PreparedProvider<registry::GeometryPort>& projection_provider,
+    const ExecutionContext& = {});
+
+// Optional registered forward-set operation. It is applied to each retained
+// parent before any of that parent's discrete action edges are admitted.
+FiniteActionGraphOutcome finite_action_stage_layered_graph(
+    const FiniteActionNominalRequest&, FiniteActionGraphLimits,
+    const registry::PreparedProvider<registry::GeometryPort>& projection_provider,
+    const registry::PreparedProvider<registry::GeometryPort>& reachable_set_provider,
     const ExecutionContext& = {});
 
 } // namespace csl::optimization

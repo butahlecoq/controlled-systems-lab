@@ -172,6 +172,7 @@ struct Candidate {
     double edge_cost{};
     double heuristic{};
     bool state_admissible{};
+    std::optional<bool> reachable_envelope_contains;
     std::vector<std::size_t> lineage;
 };
 
@@ -230,11 +231,147 @@ FiniteGraphBackwardStatus eligible_status() {
     return FiniteGraphBackwardStatus::eligible_numerical_predecessor_and_discrete_edge;
 }
 
+using GeometryCallOutcome = std::variant<sets::SetData, Unsupported, OperationStopped>;
+
+GeometryCallOutcome run_geometry(const registry::PreparedProvider<registry::GeometryPort>& provider,
+        const FiniteActionNominalRequest& request, GeometryOperation operation,
+        std::string suffix, const ExecutionContext& context) {
+    const auto provenance = provider.provenance();
+    const auto implementation = provenance.actual ? provenance.actual->id : provenance.requested.id;
+    GeometryRequestIdentity identity{request.problem,
+        {request.request.value + "/" + suffix}, {request.request.value + "/" + suffix + "/output"}};
+    OperationRequest geometry_request{identity, implementation, std::move(operation),
+        SetRelation::equivalent, Assurance::numerical};
+    auto prepared = provider.prepare(geometry_request);
+    if(const auto* rejection = std::get_if<registry::Rejection>(&prepared))
+        return Unsupported{rejection->diagnostics};
+    auto workspace = std::get<registry::PreparedPipeline<registry::GeometryPort>>(std::move(prepared)).create();
+    auto outcome = std::get<0>(workspace)->run(context);
+    if(const auto* stopped = std::get_if<OperationStopped>(&outcome)) return *stopped;
+    if(const auto* error = std::get_if<Unsupported>(&outcome)) return *error;
+    const auto* result = std::get_if<OperationResult>(&outcome);
+    if(!result) return unsupported("finite_graph.reachable.operation", "Selected reachable-set operation returned a query result rather than a set.");
+    if(const auto diagnostics = check_geometry_evidence(result->evidence, geometry_request); !diagnostics.empty())
+        return Unsupported{diagnostics};
+    if(result->relation != SetRelation::equivalent)
+        return unsupported("finite_graph.reachable.evidence", "Reachable-set operation must return an equivalent numerical set result.");
+    auto set = sets::from_handle(result->output);
+    if(const auto* error = std::get_if<Diagnostic>(&set)) return unsupported(error->field, error->explanation);
+    return std::get<sets::SetData>(std::move(set));
+}
+
+SetOutcome action_state_hull(const FiniteActionNominalRequest& request, std::size_t stage) {
+    const auto dynamics_value = request.system.stage({stage});
+    if(const auto* error = std::get_if<Diagnostic>(&dynamics_value)) return unsupported(error->field, error->explanation);
+    const auto& dynamics = std::get<model::DynamicsStage>(dynamics_value);
+    Matrix vertices{request.actions.catalogue.size(), request.system.dimensions().state,
+        Vector(request.actions.catalogue.size() * request.system.dimensions().state)};
+    for(std::size_t point = 0; point < request.actions.catalogue.size(); ++point)
+        for(std::size_t row = 0; row < vertices.cols; ++row)
+            for(std::size_t col = 0; col < request.actions.dimension; ++col)
+                vertices.values[point * vertices.cols + row] += dynamics.B(row, col) * request.actions.catalogue[point][col];
+    auto vertex_view = numeric::snapshot(vertices);
+    auto ray_view = numeric::snapshot(Matrix{0, vertices.cols, {}});
+    if(!std::holds_alternative<numeric::MatrixView>(vertex_view) || !std::holds_alternative<numeric::MatrixView>(ray_view))
+        return unsupported("finite_graph.action_hull.snapshot", "Could not snapshot the authored state-space action hull.");
+    const auto made = sets::make_v({{"finite-graph-state-action-hull"}, vertices.cols, {}},
+        {std::get<numeric::MatrixView>(vertex_view), std::get<numeric::MatrixView>(ray_view)});
+    if(const auto* error = std::get_if<Diagnostic>(&made)) return unsupported(error->field, error->explanation);
+    return std::get<sets::SetData>(made);
+}
+
+bool contains_v_2d(const sets::SetData& set, std::span<const double> point,
+        double absolute_tolerance = 1e-9, double relative_tolerance = 1e-10) {
+    const auto representation = set.representation();
+    const auto* v = std::get_if<sets::VRepresentation>(&representation);
+    if(!v || point.size() != 2 || v->vertices.cols() != 2 || v->rays.rows() != 0 || v->vertices.rows() == 0) return false;
+    const auto n = v->vertices.rows();
+    auto tolerance = [&](double scale) { return absolute_tolerance + relative_tolerance * scale; };
+    if(n == 1) {
+        const double dx = point[0] - v->vertices(0,0), dy = point[1] - v->vertices(0,1);
+        return std::hypot(dx,dy) <= tolerance(std::max(std::abs(point[0]), std::abs(point[1])));
+    }
+    bool noncollinear = false;
+    for(std::size_t i = 0; i < n && !noncollinear; ++i)
+        for(std::size_t j = i + 1; j < n && !noncollinear; ++j)
+            for(std::size_t k = j + 1; k < n; ++k) {
+                const double cross = (v->vertices(j,0)-v->vertices(i,0))*(v->vertices(k,1)-v->vertices(i,1))-
+                    (v->vertices(j,1)-v->vertices(i,1))*(v->vertices(k,0)-v->vertices(i,0));
+                if(std::abs(cross) > tolerance(std::abs(cross))) { noncollinear=true; break; }
+            }
+    if(!noncollinear) {
+        std::size_t a=0,b=1;
+        double max_distance=-1.0;
+        for(std::size_t i=0;i<n;++i)for(std::size_t j=i+1;j<n;++j) {
+            const double dx=v->vertices(j,0)-v->vertices(i,0),dy=v->vertices(j,1)-v->vertices(i,1);
+            const double distance=dx*dx+dy*dy;
+            if(distance>max_distance){max_distance=distance;a=i;b=j;}
+        }
+        const double dx=v->vertices(b,0)-v->vertices(a,0),dy=v->vertices(b,1)-v->vertices(a,1);
+        const double px=point[0]-v->vertices(a,0),py=point[1]-v->vertices(a,1);
+        const double cross=dx*py-dy*px;
+        const double scale=std::abs(dx*py)+std::abs(dy*px);
+        const double projection=px*dx+py*dy;
+        return std::abs(cross)<=tolerance(scale) && projection>=-tolerance(max_distance) &&
+            projection<=max_distance+tolerance(max_distance);
+    }
+    for(std::size_t i=0;i<n;++i)for(std::size_t j=i+1;j<n;++j) {
+        const double dx=v->vertices(j,0)-v->vertices(i,0),dy=v->vertices(j,1)-v->vertices(i,1);
+        double min_cross=0.0,max_cross=0.0;
+        for(std::size_t k=0;k<n;++k) {
+            const double cross=dx*(v->vertices(k,1)-v->vertices(i,1))-dy*(v->vertices(k,0)-v->vertices(i,0));
+            min_cross=std::min(min_cross,cross);max_cross=std::max(max_cross,cross);
+        }
+        const double edge_tolerance=tolerance(std::max(std::abs(min_cross),std::abs(max_cross)));
+        if(min_cross>=-edge_tolerance || max_cross<=edge_tolerance) {
+            const double point_cross=dx*(point[1]-v->vertices(i,1))-dy*(point[0]-v->vertices(i,0));
+            if(min_cross>=-edge_tolerance && point_cross < -tolerance(std::abs(point_cross))) return false;
+            if(max_cross<=edge_tolerance && point_cross > tolerance(std::abs(point_cross))) return false;
+        }
+    }
+    return true;
+}
+
+GeometryCallOutcome parent_reachable_envelope(
+        const FiniteActionNominalRequest& request,
+        const registry::PreparedProvider<registry::GeometryPort>& provider,
+        std::size_t stage, const Vector& parent, const ExecutionContext& context) {
+    const auto dynamics_value = request.system.stage({stage});
+    if(const auto* error = std::get_if<Diagnostic>(&dynamics_value)) return unsupported(error->field, error->explanation);
+    const auto& dynamics = std::get<model::DynamicsStage>(dynamics_value);
+    const auto dimension = parent.size();
+    Matrix map{dimension, dimension, Vector(dimension * dimension)};
+    Vector offset(dimension);
+    for(std::size_t row=0;row<dimension;++row) {
+        offset[row]=dynamics.offset[row];
+        if(request.nominal_disturbances[stage].size()==dimension)
+            offset[row]+=request.nominal_disturbances[stage][row];
+        for(std::size_t col=0;col<dimension;++col) map.values[row*dimension+col]=dynamics.A(row,col);
+    }
+    auto point_view=numeric::snapshot_vector(parent);
+    if(!std::holds_alternative<numeric::VectorView>(point_view))
+        return unsupported("finite_graph.reachable.parent", "Could not snapshot the retained parent state.");
+    auto singleton=sets::make_singleton({{"finite-graph-parent"},dimension,
+        {}},std::get<numeric::VectorView>(point_view));
+    if(const auto* error=std::get_if<Diagnostic>(&singleton))return unsupported(error->field,error->explanation);
+    const auto base=run_geometry(provider,request,
+        AffineImage{std::get<sets::SetData>(singleton).as_handle(),std::move(map),std::move(offset)},
+        "graph-forward-affine-"+std::to_string(stage),context);
+    if(const auto* error=std::get_if<Unsupported>(&base))return *error;
+    if(const auto* stopped=std::get_if<OperationStopped>(&base))return *stopped;
+    const auto action_set=action_state_hull(request,stage);
+    if(const auto* error=std::get_if<Unsupported>(&action_set))return *error;
+    return run_geometry(provider,request,
+        MinkowskiSum{std::get<sets::SetData>(base).as_handle(),std::get<sets::SetData>(action_set).as_handle()},
+        "graph-forward-control-sum-"+std::to_string(stage),context);
+}
+
 } // namespace
 
-FiniteActionGraphOutcome finite_action_stage_layered_graph(const FiniteActionNominalRequest& request,
+static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(const FiniteActionNominalRequest& request,
         FiniteActionGraphLimits limits,
         const registry::PreparedProvider<registry::GeometryPort>& projection_provider,
+        const registry::PreparedProvider<registry::GeometryPort>* reachable_set_provider,
         const ExecutionContext& context) {
     const auto dimensions = request.system.dimensions();
     const auto horizon = request.system.horizon();
@@ -277,7 +414,7 @@ FiniteActionGraphOutcome finite_action_stage_layered_graph(const FiniteActionNom
     ++graph.stage_intersection_calls;
     const bool initial_ok = contains_with_tolerance(std::get<sets::SetData>(root_intersection), request.initial_state);
     graph.nodes.push_back({0, request.initial_state, {}, {}, 0.0, 0.0, initial_ok, initial_ok,
-        false, {}, {}, {}, {}, FiniteGraphBackwardStatus::root_node});
+        false, {}, {}, {}, {}, FiniteGraphBackwardStatus::root_node, {}});
     graph.layers[0].push_back(0);
     graph.layer_statistics[0].retained = 1;
     if(!initial_ok) {
@@ -292,6 +429,19 @@ FiniteActionGraphOutcome finite_action_stage_layered_graph(const FiniteActionNom
         std::vector<Candidate> candidates;
         for(const auto parent_id : graph.layers[stage]) {
             const auto& parent = graph.nodes[parent_id];
+            std::optional<sets::SetData> reachable_envelope;
+            if(reachable_set_provider) {
+                auto envelope = parent_reachable_envelope(request, *reachable_set_provider,
+                    stage, parent.state, context);
+                graph.reachable_envelope_calls += 2;
+                if(const auto* error = std::get_if<Unsupported>(&envelope)) return *error;
+                if(const auto* stopped = std::get_if<OperationStopped>(&envelope)) return *stopped;
+                reachable_envelope = std::get<sets::SetData>(std::move(envelope));
+                const auto representation = reachable_envelope->representation();
+                const auto* v = std::get_if<sets::VRepresentation>(&representation);
+                if(!v || v->vertices.cols()!=dimensions.state || v->rays.rows()!=0)
+                    return unsupported("finite_graph.reachable.output", "Selected reachable-set provider must return a bounded state-space V polytope.");
+            }
             for(std::size_t action_index = 0; action_index < request.actions.catalogue.size(); ++action_index) {
                 const auto step = request.system.step({stage}, parent.state,
                     request.actions.catalogue[action_index], request.nominal_disturbances[stage]);
@@ -303,6 +453,12 @@ FiniteActionGraphOutcome finite_action_stage_layered_graph(const FiniteActionNom
                 if(const auto* error = std::get_if<Unsupported>(&intersection)) return *error;
                 ++graph.stage_intersection_calls;
                 const bool state_ok = contains_with_tolerance(std::get<sets::SetData>(intersection), next);
+                std::optional<bool> envelope_ok;
+                if(reachable_envelope) {
+                    envelope_ok = contains_v_2d(*reachable_envelope, next);
+                    if(!*envelope_ok)
+                        return unsupported("finite_graph.reachable.witness", "The registered forward outer set failed to contain a child generated by the same authored affine dynamics and discrete action.");
+                }
                 const auto absolute = request.absolute_stage_offset + stage;
                 const auto edge_cost = stage_cost(request.running_cost, absolute, request.actions.catalogue[action_index]);
                 const auto terminal_value = evaluate(request.objective, next);
@@ -310,7 +466,8 @@ FiniteActionGraphOutcome finite_action_stage_layered_graph(const FiniteActionNom
                 const double heuristic = parent.heuristic_score + edge_cost + std::get<double>(terminal_value);
                 auto lineage = parent.action_lineage;
                 lineage.push_back(action_index);
-                candidates.push_back({parent_id, action_index, std::move(next), edge_cost, heuristic, state_ok, std::move(lineage)});
+                candidates.push_back({parent_id, action_index, std::move(next), edge_cost, heuristic,
+                    state_ok, envelope_ok, std::move(lineage)});
             }
         }
         auto& stats = graph.layer_statistics[stage];
@@ -330,7 +487,8 @@ FiniteActionGraphOutcome finite_action_stage_layered_graph(const FiniteActionNom
             const auto node_id = graph.nodes.size();
             graph.nodes.push_back({stage + 1, candidate.state, candidate.parent, candidate.action_index,
                 candidate.edge_cost, candidate.heuristic, candidate.state_admissible,
-                candidate.state_admissible, false, {}, {}, {}, candidate.lineage, FiniteGraphBackwardStatus::pending});
+                candidate.state_admissible, false, {}, {}, {}, candidate.lineage,
+                FiniteGraphBackwardStatus::pending, candidate.reachable_envelope_contains});
             graph.layers[stage + 1].push_back(node_id);
             ++graph.layer_statistics[stage + 1].retained;
             if(!candidate.state_admissible) ++graph.layer_statistics[stage + 1].stage_inadmissible;
@@ -344,7 +502,7 @@ FiniteActionGraphOutcome finite_action_stage_layered_graph(const FiniteActionNom
 
     for(const auto id : graph.layers.back()) {
         auto& node = graph.nodes[id];
-        node.backward_viable = node.state_admissible;
+        node.backward_viable = node.state_admissible && node.reachable_envelope_contains.value_or(true);
         node.backward_status = node.state_admissible ? FiniteGraphBackwardStatus::terminal_admissible :
             FiniteGraphBackwardStatus::terminal_outside_stage_set;
         if(node.backward_viable) {
@@ -392,7 +550,8 @@ FiniteActionGraphOutcome finite_action_stage_layered_graph(const FiniteActionNom
             else if(!*child.discrete_transition_witness) child.backward_status = FiniteGraphBackwardStatus::discrete_transition_witness_failed;
             else if(!parent.state_admissible) child.backward_status = FiniteGraphBackwardStatus::parent_stage_intersection_empty;
             else child.backward_status = eligible_status();
-            child.backward_viable = *child.discrete_transition_witness && *child.predecessor_contains_parent && parent.state_admissible;
+            child.backward_viable = *child.discrete_transition_witness && *child.predecessor_contains_parent &&
+                parent.state_admissible && child.reachable_envelope_contains.value_or(true);
             if(!child.backward_viable) continue;
             const double candidate = child.edge_running_cost + *child.backward_value;
             if(!parent.backward_value || candidate < *parent.backward_value) {
@@ -427,6 +586,21 @@ FiniteActionGraphOutcome finite_action_stage_layered_graph(const FiniteActionNom
         graph.selected_nodes.push_back(current);
     }
     return graph;
+}
+
+FiniteActionGraphOutcome finite_action_stage_layered_graph(const FiniteActionNominalRequest& request,
+        FiniteActionGraphLimits limits,
+        const registry::PreparedProvider<registry::GeometryPort>& projection_provider,
+        const ExecutionContext& context) {
+    return finite_action_stage_layered_graph_impl(request, limits, projection_provider, nullptr, context);
+}
+
+FiniteActionGraphOutcome finite_action_stage_layered_graph(const FiniteActionNominalRequest& request,
+        FiniteActionGraphLimits limits,
+        const registry::PreparedProvider<registry::GeometryPort>& projection_provider,
+        const registry::PreparedProvider<registry::GeometryPort>& reachable_set_provider,
+        const ExecutionContext& context) {
+    return finite_action_stage_layered_graph_impl(request, limits, projection_provider, &reachable_set_provider, context);
 }
 
 } // namespace csl::optimization
