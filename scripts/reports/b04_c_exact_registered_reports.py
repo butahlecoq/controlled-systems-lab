@@ -46,6 +46,13 @@ SOURCE_FILES = ("docs/research/tools/b04_c_exact_profile.py",
     "scripts/reports/landing.py",
     "scripts/reports/visual_examples.py",
     "scripts/reports/algorithm_visual_coverage.json")
+FROZEN_SOURCE_HASHES = {
+    # These values identify historical inputs to the published report. They
+    # remain provenance after prose removal or tooling changes; neither file
+    # is a current runtime dependency.
+    "docs/research/tools/README.md": "cfefd0e48e8dba4789af5b1055c4dae997b5a8216287ebf97622161803d50d25",
+    "docs/research/tools/finalize_b04_c_exact_fiber.py": "b6ea85fe3835344f6ec17ec003e0dbf6ccd501f035212ea54879a2c2f9e0367d",
+}
 FILES = {"README.md", "record.json", "trajectory.svg", "verification.json", "tests.txt"}
 
 
@@ -81,9 +88,13 @@ def _verify_bundle(bundle: Path):
         if hashlib.sha256((bundle / name).read_bytes()).hexdigest() != expected:
             raise ValueError("B04-C evidence hash mismatch: " + name)
     source_hashes = manifest.get("source_files")
-    if not isinstance(source_hashes, dict) or set(source_hashes) != set(SOURCE_FILES):
+    if not isinstance(source_hashes, dict) or set(source_hashes) != set(SOURCE_FILES) | set(FROZEN_SOURCE_HASHES):
         raise ValueError("B04-C source hash inventory differs")
     for name, expected in source_hashes.items():
+        if name in FROZEN_SOURCE_HASHES:
+            if expected != FROZEN_SOURCE_HASHES[name]:
+                raise ValueError("B04-C frozen source hash differs: " + name)
+            continue
         relative = Path(name)
         if relative.is_absolute() or ".." in relative.parts:
             raise ValueError("unsafe B04-C source path")
