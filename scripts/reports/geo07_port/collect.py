@@ -53,8 +53,6 @@ ALLOWED = {
     SEAL_PATH,
     "reports/algorithm-results/tooling/geo07_port/README.md",
     "tests/reporting/test_geo07_port_harness.py",
-    # Historical deletion permission for the frozen report diff; the collector
-    # does not read this working plan as an input or report source.
     "docs/superpowers/plans/2026-10-16-geo07-port-harness.md",
 }
 RELEASE_FLAGS = {
