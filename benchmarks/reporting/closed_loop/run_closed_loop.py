@@ -35,9 +35,17 @@ def atomic_json(path: Path, value: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temp = path.with_name(path.name + f".tmp-{os.getpid()}")
     with temp.open("w") as stream:
-        json.dump(value, stream, indent=2, allow_nan=False)
+        json.dump(json_safe(value), stream, indent=2, allow_nan=False)
         stream.write("\n"); stream.flush(); os.fsync(stream.fileno())
     os.replace(temp, path)
+
+
+def json_safe(value):
+    if isinstance(value, np.ndarray): return value.tolist()
+    if isinstance(value, np.generic): return value.item()
+    if isinstance(value, dict): return {str(k): json_safe(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)): return [json_safe(v) for v in value]
+    return value
 
 
 def controller_query(task: dict, state: np.ndarray, stage: int, previous):
