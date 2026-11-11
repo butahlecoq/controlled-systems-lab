@@ -37,7 +37,9 @@ def request(*, middle_bound: list[list[float]], controller: str,
         "checker_budget": {"max_points": 64, "wall_ms": 5000},
         "control_optimizer": {"id": "csl.optimization.finite-action-stage-layered-graph", "version": "1.0.0"},
         "search_policy": "stage-layered-backward-viability",
-        "limits": {"max_beam_width": 4, "max_graph_nodes": 32},
+        "limits": {"max_beam_width": 4, "max_graph_nodes": 32,
+            "max_plans": 32, "max_points_per_stage": 128,
+            "max_score_evaluations": 128, "max_generators_per_stage": 64},
     }
 
 
@@ -256,6 +258,27 @@ def main() -> None:
     assert "capacity" in capacity_failure_calls[1]["diagnostics"]
     assert "manifest was not materialized" in capacity_failure_calls[1]["diagnostics"]
 
+    fixed_plan_mpc_trials = {}
+    for representation_index, representation_name in enumerate(
+            ("exact-polytope", "box", "zonotope", "parallelotope", "ellipsoid")):
+        mpc_request = request(middle_bound=[[1.0, 1.0], [0.0, 0.0]],
+            controller=f"analytic-fixed-plan-mpc-{representation_name}")
+        del mpc_request["search_policy"]
+        mpc_request["representation_index"] = representation_index
+        mpc_request["representation_name"] = representation_name
+        mpc_response = execute(bridge, mpc_request)
+        assert mpc_response["status"] == "accepted", mpc_response
+        assert mpc_response["control"] == [1.0]
+        assert mpc_response["policy_id"].endswith("/receding-fixed-plan-mpc/1")
+        assert mpc_response["selector"]["search_coverage"] == "complete"
+        assert len(mpc_response["selected_plan"]["controls"]) == 2
+        assert len(mpc_response["invocations"]) == 1
+        assert mpc_response["invocations"][0]["module_id"] == \
+            "csl::optimization::finite_action_nominal_profile"
+        fixed_plan_mpc_trials[representation_name] = {"request": mpc_request,
+            "response": mpc_response,
+            "interpretation": "selected-profile fixed-plan MPC; no backward reachable-set synthesis"}
+
     record = {"schema": "csl.closed-loop.analytic-backward-graph-probe/1",
         "bridge": str(bridge), "viability_case": {"request": viable_request, "response": viable_response,
             "independent_histories": paths, "unconstrained_best": unconstrained_best,
@@ -270,6 +293,7 @@ def main() -> None:
             "interior_stage_node_retained": center_node,
             "interpretation": "the state produced by the authored center action is interior to the two endpoint states but remains a distinct witnessed node; the graph does not hull-deduplicate or splice its lineage"},
         "geometry_provider_trials": provider_trials,
+        "fixed_plan_mpc_trials": fixed_plan_mpc_trials,
         "checker_capacity_refusal": {"request": capacity_failure_request,
             "response": capacity_failure_response,
             "failure_semantics": "the independently selected checker rejects before an oversized generated cloud is materialized; the refusal and actual source-index provider invocation remain recorded, and no cloud digest is claimed"},

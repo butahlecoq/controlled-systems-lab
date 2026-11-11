@@ -16,6 +16,11 @@ _PROFILES = {
     "native-zonotope-mpc/1": (2, True, "zonotope"),
     "native-parallelotope-mpc/1": (3, True, "parallelotope"),
     "native-ellipsoid-mpc/1": (4, True, "ellipsoid"),
+    "native-exact-polytope-fixed-plan-mpc/1": (0, False, "exact-polytope"),
+    "native-box-fixed-plan-mpc/1": (1, False, "box"),
+    "native-zonotope-fixed-plan-mpc/1": (2, False, "zonotope"),
+    "native-parallelotope-fixed-plan-mpc/1": (3, False, "parallelotope"),
+    "native-ellipsoid-fixed-plan-mpc/1": (4, False, "ellipsoid"),
 }
 
 
@@ -120,7 +125,9 @@ class NativeGraphPolicy:
             "objective_id": task["objective"]["objective_id"],
             "original_horizon": self.original_horizon, "action_profile_id": action_profile_id,
             "representation": self.representation_name,
-            "controller_semantics": "finite-action receding-horizon graph MPC with source-cost ranking, numerical H predecessor membership, discrete transition witnesses, and the explicitly selected representation's one-step outer edge filter"}
+            "controller_semantics": ("finite-action receding-horizon graph MPC with source-cost ranking, numerical H predecessor membership, discrete transition witnesses, and the explicitly selected representation's one-step outer edge filter"
+                if self.use_backward_graph else
+                "finite-action receding-horizon fixed-plan MPC using the selected representation profile, exact source running-cost ranking, authored state-constraint replay, and a separately recomputed original affine trajectory")}
 
     def query(self, task_id: str, observed_physical_state: list[float], absolute_update_index: int) -> dict:
         if task_id != self.task["task_id"] or not 0 <= absolute_update_index < self.original_horizon:
