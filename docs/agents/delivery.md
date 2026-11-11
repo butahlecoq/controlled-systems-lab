@@ -33,8 +33,9 @@ temporary CI outputs, not stable release URLs.
    supported profiles, API/package compatibility, dependency and migration
    changes, known limitations and links to the relevant issues. Do not infer a
    stable API promise from the current `0.1.0` project version.
-2. Check the [development commands](../build/development.md) for every advertised
-   platform and enabled-backend configuration. Verify an external installed
+2. Check the [native CI workflow](../../.github/workflows/native.yml) for every
+   advertised platform and enabled-backend configuration. Use the
+   [README quick start](../../README.md#quick-start) to verify an external installed
    `find_package(CSL CONFIG)` consumer and the shipped examples. Record compiler,
    architecture, Release configuration, dependency pins/patches and options.
    Reuse reviewed CI outputs from the exact candidate when their provenance and

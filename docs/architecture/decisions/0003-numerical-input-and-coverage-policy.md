@@ -24,4 +24,4 @@ optimization producers and do not establish generic Strategy A/B coverage.
 
 ## Consequences
 
-The architecture has a stable, honest default without inventing universal physical tolerances. New numerical profiles still require a reviewed coverage argument, profile-specific acceptance criteria, adversarial tests, and a compiled verifier before they can publish a complete family. The [decision-support report](../../research/issue7-numerical-coverage-policy-options.md) compares the alternatives and source limits; the [complete-family verifier boundary](../../contracts/complete-family-verifier-seam-blocker.md) tracks current implementation status.
+The architecture has a stable default without inventing universal physical tolerances. New numerical profiles still require a reviewed coverage argument, profile-specific acceptance criteria, adversarial tests, and a compiled verifier before they can publish a complete family. The local decision-support report compares the alternatives and source limits; the [complete-family verifier boundary](../../contracts/complete-family-verifier-seam-blocker.md) tracks current implementation status.
