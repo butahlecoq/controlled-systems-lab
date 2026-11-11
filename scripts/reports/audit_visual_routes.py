@@ -44,6 +44,20 @@ ASSET_NAME_LITERAL_OVERRIDES = {
     "scripts/reports/mpc01/b04_native_smoke_projection.py": [
         "b04-repeated-projections.svg", "native-smoke-projections.svg"],
 }
+PINNED_HISTORICAL_SOURCE_SNAPSHOTS = {
+    "scripts/reports/lotka_volterra_sampled_frozen_321ac099.py": {
+        "disposition": "pinned-historical-source-snapshot",
+        "role_and_disposition_reason": (
+            "Exact historical producer bytes retained only to authenticate the existing sampled Lotka–Volterra "
+            "example; this source snapshot makes no full-reachability claim and has no algorithm-family deferral."),
+        "source_snapshot": {
+            "source_commit": "3be2f4257eeb4d00a81b3275ba9f576fb1332e87",
+            "source_path": "scripts/reports/lotka_volterra_sampled.py",
+            "sha256": "321ac099e8185c8b1b9a76af9859c9b818682b429ba705f1410a19d648238f1c",
+        },
+        "companion_ids": ["lotka-volterra-sampled-20261023"],
+    },
+}
 FROZEN_DIAGRAM_EXCEPTIONS = {
     "benchmarks/reporting/approximation_pilot/summarize.py",
     "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py",
@@ -274,6 +288,13 @@ def source_inventory(root: Path) -> list[dict]:
                              if isinstance(node, ast.Constant) and isinstance(node.value, str)
                              for asset in ASSET_NAME.findall(node.value)})
             assets = sorted(set(assets) | set(ASSET_NAME_LITERAL_OVERRIDES.get(relative, ())))
+            if relative in PINNED_HISTORICAL_SOURCE_SNAPSHOTS:
+                spec = PINNED_HISTORICAL_SOURCE_SNAPSHOTS[relative]
+                if hashlib.sha256(path.read_bytes()).hexdigest() != spec["source_snapshot"]["sha256"]:
+                    raise ValueError("pinned historical producer snapshot bytes differ: " + relative)
+                entries.append({"source": relative, "signal_count": len(matches),
+                                "asset_name_literals": assets, **spec})
+                continue
             if relative in reviewed:
                 spec = reviewed[relative]
                 found.add(relative)

@@ -19,6 +19,15 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertEqual(delivery["disposition"],"analytic-reference-checked-saved-run-renderer")
         self.assertEqual(inventory["schema"],"csl.visual-route-inventory/1")
         producers={entry["source"]:entry for entry in inventory["producers_and_routes"]}
+        pinned_lotka=producers["scripts/reports/lotka_volterra_sampled_frozen_321ac099.py"]
+        self.assertEqual(pinned_lotka["disposition"],"pinned-historical-source-snapshot")
+        self.assertEqual(pinned_lotka["source_snapshot"],{
+            "source_commit":"3be2f4257eeb4d00a81b3275ba9f576fb1332e87",
+            "source_path":"scripts/reports/lotka_volterra_sampled.py",
+            "sha256":"321ac099e8185c8b1b9a76af9859c9b818682b429ba705f1410a19d648238f1c"})
+        self.assertEqual(pinned_lotka["companion_ids"],["lotka-volterra-sampled-20261023"])
+        self.assertNotIn("follow_up_issue",pinned_lotka)
+        self.assertIn("no full-reachability claim",pinned_lotka["role_and_disposition_reason"])
         self.assertIn("scripts/reports/env717/check_two_points.py", producers)
         self.assertEqual(producers["scripts/reports/env717/check_two_points.py"]["follow_up_issue"],717)
         self.assertEqual(producers["scripts/reports/env717/check_two_points.py"]["asset_name_literals"],
@@ -153,6 +162,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
                  "frozen-report-plot-preserved-with-saved-timing-companion",
                  "frozen-report-plot-preserved-with-phase-plane-companion",
                  "frozen-report-plot-preserved-with-gallery-companion",
+                 "pinned-historical-source-snapshot",
                  "frozen-repeated-b04-figure-preserved-with-shared-policy-companion",
                  "reviewed: frozen control-family report preserved with shared-policy saved-data companion",
                  "regeneration-entrypoint-preserved-gallery-never-invokes-it",
