@@ -20,6 +20,15 @@ class ClosedLoopRunnerFailureTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw); bridge = root / "bridge"; bridge.write_bytes(b"bridge")
 
+            clock = [0.0]
+            exited = [False]
+            read_text = Path.read_text
+
+            def read_after_exit(path, *args, **kwargs):
+                if exited[0]:
+                    clock[0] += 10.0
+                return read_text(path, *args, **kwargs)
+
             class WorkerProcess:
                 pid = 999999999
                 returncode = 0
@@ -29,17 +38,21 @@ class ClosedLoopRunnerFailureTests(unittest.TestCase):
                     record.update(status="incomplete", resource_limits={"observed": {
                         "worker_stage_interval_seconds_sum": 0.25}})
                     record_path.write_text(json.dumps(record))
+                    clock[0] = 2.0
+                    exited[0] = True
                     return "", ""
 
-            ticks = iter(float(i) for i in range(20))
             with mock.patch.object(run_closed_loop.subprocess, "Popen", return_value=WorkerProcess()), \
                  mock.patch.object(run_closed_loop.subprocess, "check_output", return_value="test-commit\n"), \
-                 mock.patch.object(run_closed_loop.time, "monotonic", side_effect=lambda: next(ticks)):
+                 mock.patch.object(run_closed_loop.time, "monotonic", side_effect=lambda: clock[0]), \
+                 mock.patch.object(Path, "read_text", read_after_exit):
                 result = run_closed_loop.run_task("syn-nl-lv-01", root, bridge)
 
             record = json.loads((Path(result["attempt"]) / "attempt.json").read_text())
             observed = record["resource_limits"]["observed"]
             self.assertEqual(observed["worker_wall_seconds"], record["supervisor"]["wall_seconds"])
+            self.assertEqual(observed["worker_wall_seconds"], 2.0)
+            self.assertGreater(record["end_to_end"]["wall_seconds"], 2.0)
             self.assertGreater(observed["worker_wall_seconds"], observed["worker_stage_interval_seconds_sum"])
             self.assertIn("terminal serialization", observed["worker_wall_scope"])
 

@@ -579,6 +579,7 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
         except subprocess.TimeoutExpired:
             os.killpg(proc.pid, signal.SIGKILL); stdout, stderr = proc.communicate()
         status = "timed_out"
+    worker_wall_seconds = time.monotonic() - started
     (attempt / "worker-stdout.txt").write_text(stdout or "")
     (attempt / "worker-stderr.txt").write_text(stderr or "")
     final_path = attempt / "attempt.json"
@@ -593,7 +594,7 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
         if prior_ledger_status == "in-progress":
             result.setdefault("mathematical_support_status", "not_evaluated")
     result["supervisor"] = {"status": status, "return_code": proc.returncode,
-        "wall_seconds": time.monotonic() - started, "termination_scope": "worker process group",
+        "wall_seconds": worker_wall_seconds, "termination_scope": "worker process group",
         "resource_profile_id": resource_profile["profile_id"],
         "requested_wall_seconds": resource_profile["requested"]["wall_seconds"],
         "enforced_wall_timeout_seconds": resource_profile["enforced"]["wall_seconds"],
