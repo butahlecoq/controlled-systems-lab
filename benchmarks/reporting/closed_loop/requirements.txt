@@ -1,2 +1,2 @@
-# Numerical dependency used by source-defined closed-loop prediction and replay tests.
 scipy==1.17.1
+casadi==3.8.0
