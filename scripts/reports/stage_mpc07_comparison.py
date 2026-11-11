@@ -221,7 +221,7 @@ def source_export(captures,online=None):
         require(set(maps)==set(env['source_sha256']),'export capture source inventory differs')
         for commit in (env['source_commit'],native):
             require(re.fullmatch('[0-9a-f]{40}',commit),'invalid capture source revision')
-            sources.append((commit,{path:env['source_sha256'][name] for name,path in maps.items() if (name.startswith('native-') and name!='native-build-receipt.json')==(commit==native)}))
+            sources.append((commit,{path:env['source_sha256'][name] for name,path in maps.items() if name!='README.md' and (name.startswith('native-') and name!='native-build-receipt.json')==(commit==native)}))
     if online is not None:
         environment=online['environment'];reading=online['reading']
         sources.extend([(environment['source_revision'],environment['source_sha256']),

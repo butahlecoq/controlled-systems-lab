@@ -66,6 +66,16 @@ class VanDerPolPublicationTests(unittest.TestCase):
             self.assertIn(f"{report_id}/figure-data.json", archive.namelist())
         self.assertIn(f'href="{report_id}/index.html"', (self.site / "index.html").read_text())
 
+    def test_new_capture_readme_pins_the_retained_source_note(self):
+        result = json.loads((self.source / "result.json").read_text())
+        result["source_commit"] = "d54621def6c8d62bbfe8c3a8b7c54365211f093e"
+        output = self.root / "new-capture"
+        stage_module.checker.write_bundle(result, output)
+        readme = (output / "README.md").read_text()
+        self.assertIn(
+            "blob/d71402ba339043226cedb452efb74a0e2c50dabd/"
+            "docs/research/env717-vanderpol-source-notes.md", readme)
+
     def test_rejects_modified_plan_even_after_checksum_rewrite(self):
         result_path = self.source / "result.json"
         result = json.loads(result_path.read_text())

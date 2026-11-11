@@ -38,6 +38,11 @@ class Mpc03B08ReportTests(unittest.TestCase):
         self.assertIn("worst-cost terminal", svg)
         self.assertIn("projected target at stage 4", svg)
         self.assertIn("fixed plan (0.3, 0.6, 0.6, -0.6)", svg)
+        future_record = dict(record, source_commit="d54621def6c8d62bbfe8c3a8b7c54365211f093e")
+        page = render_html(future_record)
+        self.assertIn(
+            "blob/d71402ba339043226cedb452efb74a0e2c50dabd/"
+            "docs/research/b08-displayed-exact-audit.md", page)
 
     def test_stage_adds_report_and_gallery_card_idempotently(self):
         stage_mpc03_b08.stage(self.source, self.site)

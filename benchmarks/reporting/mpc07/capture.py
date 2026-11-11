@@ -17,6 +17,7 @@ import subprocess
 import sys
 import time
 import threading
+import zipfile
 from fractions import Fraction as Q
 if __package__ in (None,''):
     sys.path.insert(0,str(Path(__file__).resolve().parents[3]))
@@ -24,6 +25,9 @@ from benchmarks.reporting.mpc07 import policy
 
 ROOT=Path(__file__).resolve().parents[3]
 BRIDGE_SHA='266e1cda61b064b4603ff6499d76dc4db59106e4e673905f585c54caafa9c533'
+README_ARCHIVE=ROOT/'benchmarks/reporting/mpc07/evidence/bounded-policy-0e821c2a/offline.zip'
+README_MEMBER='mpc07-report/RAW/source/README.md'
+README_SHA256='631c84d73f1b228bd6797a0e2ccf5e4d409fafcf6ef9a3cf820be69f89cd40cb'
 
 
 def encode(value):
@@ -33,6 +37,17 @@ def encode(value):
 
 def write(path,value):path.write_text(json.dumps(value,indent=2,default=encode)+'\n')
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def archived_readme():
+    with zipfile.ZipFile(README_ARCHIVE) as archive:
+        members=[item for item in archive.infolist() if item.filename==README_MEMBER]
+        if len(members)!=1 or members[0].is_dir() or members[0].file_size>100_000:
+            raise ValueError('sealed MPC07 README member inventory differs')
+        content=archive.read(members[0])
+    if hashlib.sha256(content).hexdigest()!=README_SHA256:
+        raise ValueError('sealed MPC07 README bytes differ')
+    return content
 
 
 def limits():
@@ -112,7 +127,8 @@ def capture(bridge,output,repetitions):
     if source_status:raise ValueError('capture requires committed clean source')
     output.mkdir(parents=True);(output/'attempts').mkdir();(output/'source').mkdir()
     for path in Path(__file__).parent.iterdir():
-        if path.is_file():(output/'source'/path.name).write_bytes(path.read_bytes())
+        if path.is_file() and path.name!='README.md':(output/'source'/path.name).write_bytes(path.read_bytes())
+    (output/'source/README.md').write_bytes(archived_readme())
     (output/'source/test_mpc07_policy.py').write_bytes((ROOT/'tests/reporting/test_mpc07_policy.py').read_bytes())
     (output/'native-CMakeCache.txt').write_bytes((bridge.parent/'CMakeCache.txt').read_bytes())
     for name in ('affine_bridge.cpp','CMakeLists.txt'):

@@ -10,6 +10,7 @@ import io
 import json
 import math
 import statistics
+import subprocess
 import sys
 from pathlib import Path
 
@@ -17,6 +18,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check_source_indices import check as check_source_indices
 
 ROOT = Path(__file__).resolve().parents[3]
+NOTE_SOURCE_COMMIT = "d71402ba339043226cedb452efb74a0e2c50dabd"
+NOTE_PATH = "docs/research/itis17-paper-reducers-cpp-adaptation.md"
+
+
+def note_source_commit(source_commit: str) -> str:
+    result = subprocess.run(["git", "cat-file", "-e", f"{source_commit}:{NOTE_PATH}"],
+                            cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return source_commit if result.returncode == 0 else NOTE_SOURCE_COMMIT
+
+
 PORT_ROOT = ROOT / "tools/legacy-ports/A29"
 DEFAULT_METHODS = ("csl.geometry.a29-a30-python", "csl.geometry.quickhull-2d")
 PALETTE = ("#eb6f92", "#3e8fb0", "#f6c177", "#9ccfd8", "#c4a7e7", "#a6da95", "#ee99a0", "#8bd5ca")
@@ -290,7 +301,7 @@ body{{margin:0;background:#191724;color:#e0def4;font:16px/1.55 system-ui,sans-se
 <section><h2>Scope and provenance</h2><p>Single bounded 2D synthetic fixture; this is an initial algorithm-functionality example, not a general correctness or performance claim. Source commit: <code>{html.escape(capture['source_commit'])}</code>. Report: <code>{report_id}</code>.</p>
 <p><a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{html.escape(capture['source_commit'])}">Exact source commit</a> · <a href="comparison-record.json">Paired comparison record</a> · <a href="fixture/square.json">Input fixture</a> · <a href="capture.json">Capture metadata</a> · <a href="trials.csv">Attempt table</a> · <a href="manifest.json">File hashes</a></p>
 <h3>Method details</h3><p>Each attempt retains its reducer status, returned indices, certificate counts and available algorithm counters in the saved comparison record. The A43 paper-derived methods use exact dyadic deletion certificates and a full final recheck. The largest-norm tie variant reports how often its priority actually selected an equal reduced-cost structural column. A44 uses the documented farthest-first interpretation of conflicting ordering text. The separate adaptation note records deviations and source limits.</p>
-<p><a href="https://github.com/butahlecoq/controlled-systems-lab/blob/{html.escape(capture['source_commit'])}/docs/research/itis17-paper-reducers-cpp-adaptation.md">A43/A44 method and deviation note</a></p>
+<p><a href="https://github.com/butahlecoq/controlled-systems-lab/blob/{note_source_commit(capture['source_commit'])}/{NOTE_PATH}">A43/A44 method and deviation note</a></p>
 <h3>Reproduce</h3><pre>{html.escape(reproduction)}</pre></section>
 </main><footer>EXP-06 · geometry algorithm pilot · <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/423">Issue #423</a></footer></body></html>'''
 
