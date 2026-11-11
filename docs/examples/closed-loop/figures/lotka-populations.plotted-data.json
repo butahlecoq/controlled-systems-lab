@@ -149140,5 +149140,7 @@
   "source_commit": "64560a03b2d4a04a56a94c86b3abf193bb63f54f",
   "stage_count": 30,
   "task_id": "syn-nl-lv-01/continuous-receding/1",
-  "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec"
+  "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+  "time_step": 0.1,
+  "timeline_end": 3.0000000000000004
 }

@@ -105,6 +105,37 @@ class RecordedClosedLoopFigureTests(unittest.TestCase):
         ]
         self.assertEqual(actual_bounds, expected_bounds)
 
+    def test_output_stage_focus_includes_terminal_state_and_preceding_replay(self) -> None:
+        dt = 0.5
+        replay = [
+            {"time": 0.0, "update_index": 0},
+            {"time": 0.25, "update_index": 0},
+            {"time": 0.5, "update_index": 0},
+            {"time": 0.75, "update_index": 1},
+            {"time": 1.0, "update_index": 1},
+            {"time": 1.25, "update_index": 2},
+            {"time": 1.5, "update_index": 2},
+        ]
+        self.assertEqual([r["time"] for r in figures.replay_for_output_stage(replay, 0, dt)], [0.0])
+        self.assertEqual([r["time"] for r in figures.replay_for_output_stage(replay, 1, dt)],
+                         [0.0, 0.25, 0.5])
+        self.assertEqual([r["time"] for r in figures.replay_for_output_stage(replay, 3, dt)],
+                         [1.0, 1.25, 1.5])
+
+        stages = [{"absolute_stage": i, "time": i * dt} for i in range(4)]
+        self.assertEqual(list(figures.output_stage_values(3)), [0, 1, 2, 3])
+        self.assertEqual(figures.rows_for_output_stage(stages, 0), [stages[0]])
+        self.assertEqual(figures.rows_for_output_stage(stages, 3), [stages[3]])
+        self.assertEqual(figures.normalized_time(0.0, 1.5), 0.0)
+        self.assertEqual(figures.normalized_time(1.5, 1.5), 1.0)
+        self.assertEqual(figures.timeline_end([{
+            "stage_count": 3,
+            "clouds": [{"time": 1.0}],
+            "nodes": [{"time": 1.5}],
+            "planned_prediction": [{"time": 1.5}],
+            "plant_replay": replay,
+        }]), 1.5)
+
 
     def test_projected_overlap_does_not_establish_full_state_intersection(self) -> None:
         left = [0.0, 0.0, 0.0, 0.0]

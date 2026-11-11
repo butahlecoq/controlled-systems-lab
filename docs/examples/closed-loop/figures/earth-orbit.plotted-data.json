@@ -121366,5 +121366,7 @@
   "source_commit": "64560a03b2d4a04a56a94c86b3abf193bb63f54f",
   "stage_count": 20,
   "task_id": "env717-earth-orbit/continuous-receding/1",
-  "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
+  "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+  "time_step": 100.0,
+  "timeline_end": 2000.0
 }
