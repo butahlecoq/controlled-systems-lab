@@ -303,26 +303,56 @@ def data_details(example):
         "two_parameter": "feasible polygon vertices",
         "intersection": "intersection vertices",
         }[example["kind"]]
-        summary = f"Data · {len(example['points'])} {role} · input JSON and coordinates"
-        content = ('<p class="limits">Output coordinates</p>'
-                   + site_design.code_block(site_design.compact_json(example["points"]),
-                                            "Output coordinates · " + role)
+        points = example["points"]
+        dimensions = len(points[0])
+        matrix = [[point[coordinate] for point in points] for coordinate in range(dimensions)]
+        output_matrix = _math_matrix(
+            matrix,
+            f"Output coordinate matrix W, {dimensions} coordinate rows by {len(points)} stored-output columns, displayed to six significant digits",
+            display_significant_digits=6)
+        columns = ", ".join(f'w<sub>{i}</sub>' for i in range(len(points)))
+        rows = ", ".join(f'x<sub>{i + 1}</sub>' for i in range(dimensions))
+        summary = f"Data · {len(points)} {role} · output matrix and copyable JSON"
+        content = ('<p><var>W</var> ≈ [<var>w</var><sub>0</sub> … '
+                   f'<var>w</var><sub>{len(points) - 1}</sub>] ∈ ℝ<sup>{dimensions}×{len(points)}</sup></p>'
+                   + '<p class="limits">Displayed matrix values are rounded to 6 significant digits (≈); '
+                   'full precision is in Copy JSON. Matrix columns are output rows in stored order: '
+                   + columns + '; coordinates are rows: ' + rows
+                   + '. Repeated coordinates remain in place.</p>'
+                   + '<div class="scroll" tabindex="0" role="region" aria-label="Output coordinate matrix W">'
+                   + output_matrix + '</div>'
+                   + '<details><summary>Copy JSON for reproduction</summary>'
+                   + '<p class="limits">Output coordinates · ' + escape(role) + '</p>'
+                   + site_design.code_block(site_design.compact_json(points), "Output coordinates · " + role)
                    + '<p class="limits">Complete minimal input JSON</p>'
                    + site_design.code_block(site_design.compact_json(example["inputs"]),
-                                            "Complete minimal input JSON"))
+                                            "Complete minimal input JSON")
+                   + '</details>')
     return '<details><summary>' + summary + '</summary>' + content + '</details>'
 
 
-def _math_matrix(matrix, label):
-    """Render a numeric-only matrix body with stretchy mathematical brackets."""
+def _math_matrix(matrix, label, *, display_significant_digits=None):
+    """Render a numeric-only MathML body with accessible CSS-stretched brackets."""
+    def display_value(value):
+        exact = json.dumps(value, allow_nan=False)
+        if display_significant_digits is not None and isinstance(value, (int, float)):
+            return format(value, f".{display_significant_digits}g")
+        return exact
+
     rows = []
     for values in matrix:
-        cells = "".join(f'<mtd>{escape(json.dumps(value, allow_nan=False))}</mtd>'
+        cells = "".join(f'<mtd><mn>{escape(display_value(value))}</mn></mtd>'
                         for value in values)
         rows.append(f'<mtr>{cells}</mtr>')
-    return ('<math class="math-matrix" display="inline" aria-label="' + escape(label, quote=True) + '">'
-            '<mo stretchy="true">[</mo><mtable columnspacing="0.7em" rowspacing="0.25em">'
-            + "".join(rows) + '</mtable><mo stretchy="true">]</mo></math>')
+    spoken_rows = "; ".join(", ".join(display_value(value) for value in row)
+                             for row in matrix)
+    accessible_label = f"{label}: {spoken_rows}"
+    return ('<span class="math-matrix" role="math" aria-label="'
+            + escape(accessible_label, quote=True) + '">'
+            '<span class="math-bracket math-bracket-left" aria-hidden="true"></span>'
+            '<math display="inline" aria-hidden="true"><mtable columnspacing="0.7em" rowspacing="0.25em">'
+            + "".join(rows) + '</mtable></math>'
+            '<span class="math-bracket math-bracket-right" aria-hidden="true"></span></span>')
 
 
 def lesson_input_math(example):
