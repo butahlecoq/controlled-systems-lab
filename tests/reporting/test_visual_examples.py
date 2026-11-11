@@ -1,8 +1,10 @@
 """Check the educational gallery against reviewed native data and literal geometry."""
 import hashlib
+import html
 from html.parser import HTMLParser
 import json
 from pathlib import Path
+import re
 import shutil
 import sys
 import tempfile
@@ -151,6 +153,54 @@ class GalleryTests(unittest.TestCase):
         future_block = gallery.site_design.focusable_code_blocks(
             '<pre tabindex="-1"><code>future code</code></pre>')
         self.assertIn('<pre tabindex="0" role="region" aria-label="Scrollable code example">', future_block)
+
+    def test_point_input_matrix_and_compact_json_preserve_the_seven_source_rows(self):
+        example = next(item for item in self.examples if item["slug"] == "square_duplicates")
+        page = gallery.section(example, 1)
+        self.assertIn("Data · 7 source points · copyable JSON", page)
+        self.assertIn("Columns are zero-based source IDs; duplicate points remain separate.", page)
+        self.assertIn('<table class="math-matrix" aria-label="Point matrix V with source point columns">', page)
+        self.assertIn("<var>V</var> = [<var>v</var><sub>0</sub> … <var>v</var><sub>6</sub>]", page)
+        self.assertIn('<th scope="col"><var>v</var><sub>6</sub></th>', page)
+        self.assertIn('<th scope="row">x<sub>1</sub></th><td>0</td><td>1</td><td>1</td><td>0</td><td>0.5</td><td>0</td><td>1</td>', page)
+        self.assertNotIn('scope="col">Role', page)
+        self.assertNotIn("<details open", page)
+        code_blocks = [html.unescape(block) for block in re.findall(
+            r'<pre[^>]*><code>(.*?)</code></pre>', page, flags=re.DOTALL)]
+        displayed_json = code_blocks[0]
+        self.assertEqual(json.loads(displayed_json), example["inputs"])
+        self.assertIn('"points": [\n    [0, 0],\n    [1, 0],\n    [1, 1],', displayed_json)
+        self.assertEqual(displayed_json.count("[0, 0]"), 2)
+
+        intersection = next(item for item in self.examples if item["slug"] == "crossing_octagon")
+        intersection_page = gallery.section(intersection, 3)
+        self.assertIn("Data · 8 intersection vertices · input JSON and coordinates", intersection_page)
+        self.assertIn("<var>P</var> = {<var>x</var> ∈ ℝ<sup>2</sup> : <var>A</var><sub>L</sub><var>x</var> ≤ <var>b</var><sub>L</sub>}", intersection_page)
+        self.assertIn("<var>Q</var> = {<var>x</var> ∈ ℝ<sup>2</sup> : <var>A</var><sub>R</sub><var>x</var> ≤ <var>b</var><sub>R</sub>}", intersection_page)
+        self.assertIn('<table class="math-matrix" aria-label="Matrix A_L">', intersection_page)
+        self.assertIn('<table class="math-matrix" aria-label="Column vector b_L">', intersection_page)
+        self.assertIn('<table class="math-matrix" aria-label="Matrix A_R">', intersection_page)
+        self.assertIn('<table class="math-matrix" aria-label="Column vector b_R">', intersection_page)
+        self.assertIn('<th scope="row">1</th><td>1</td><td>0</td>', intersection_page)
+        self.assertIn('<th scope="row">1</th><td>1</td>', intersection_page)
+        self.assertNotIn("<details open", intersection_page)
+        intersection_blocks = [html.unescape(block) for block in re.findall(
+            r'<pre[^>]*><code>(.*?)</code></pre>', intersection_page, flags=re.DOTALL)]
+        self.assertEqual(json.loads(intersection_blocks[0]), intersection["points"])
+        coordinate_lines = intersection_blocks[0].splitlines()[1:-1]
+        self.assertEqual(len(coordinate_lines), 8)
+        self.assertTrue(all(line.strip().startswith("[") and line.strip().endswith(("],", "]"))
+                            for line in coordinate_lines))
+        self.assertEqual(json.loads(intersection_blocks[1]), intersection["inputs"])
+        self.assertIn('"left_A": [\n    [1, 0],\n    [-1, 0],', intersection_blocks[1])
+        self.assertIn('"left_b": [1, 1, 1, 1]', intersection_blocks[1])
+        self.assertIn('"right_b": [1.5, 1.5, 1.5, 1.5]', intersection_blocks[1])
+
+        long_vector = list(range(40))
+        wrapped_vector = gallery.site_design.compact_json(long_vector, width=32)
+        self.assertEqual(json.loads(wrapped_vector), long_vector)
+        self.assertTrue(all(len(line.strip().strip(",").split(", ")) > 1
+                            for line in wrapped_vector.splitlines()[1:-1]))
 
     def test_saved_outputs_match_literal_geometry(self):
         cases = {example["slug"]: example for example in self.examples}
@@ -478,10 +528,10 @@ class GalleryTests(unittest.TestCase):
         self.assertIn(".control-witness-page #mpc06-tube th { background: #fff; color: #111; }", stylesheet)
         self.assertIn("prefers-reduced-motion: reduce", stylesheet)
         self.assertIn("@media print", stylesheet)
-        self.assertIn("Original point ID", page)
+        self.assertIn("Data · 7 source points · copyable JSON", page)
         self.assertIn("explicit analytic constructions", page)
-        self.assertIn("duplicate of point 0", page)
-        self.assertIn("binary64", page)
+        self.assertIn("Data · 8 intersection vertices", page)
+        self.assertIn("Columns are zero-based source IDs; duplicate points remain separate.", page)
         self.assertIn("two-stage scalar family", page)
         self.assertIn("not part of that measured fixture", page)
         self.assertIn("unique minimum", page)

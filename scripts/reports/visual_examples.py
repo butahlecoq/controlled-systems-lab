@@ -290,41 +290,83 @@ def plot(example):
             '</g></svg>')
 
 
-def point_table(example):
+def data_details(example):
+    """Keep input and output coordinates available without crowding the lesson view."""
+    if example["kind"] == "hull":
+        summary = f"Data · {len(example['points'])} source points · copyable JSON"
+        content = site_design.code_block(site_design.compact_json(example["inputs"]),
+                                         "Complete minimal input JSON")
+    else:
+        role = {
+        "hybrid": "feasible interval endpoints",
+        "projected_reachability": "projected terminal endpoints",
+        "two_parameter": "feasible polygon vertices",
+        "intersection": "intersection vertices",
+        }[example["kind"]]
+        summary = f"Data · {len(example['points'])} {role} · input JSON and coordinates"
+        content = ('<p class="limits">Output coordinates</p>'
+                   + site_design.code_block(site_design.compact_json(example["points"]),
+                                            "Output coordinates · " + role)
+                   + '<p class="limits">Complete minimal input JSON</p>'
+                   + site_design.code_block(site_design.compact_json(example["inputs"]),
+                                            "Complete minimal input JSON"))
+    return '<details><summary>' + summary + '</summary>' + content + '</details>'
+
+
+def _matrix_table(matrix, row_labels, column_labels, label):
+    header = "".join(f'<th scope="col">{name}</th>' for name in column_labels)
     rows = []
-    seen = {}
-    for index, p in enumerate(example["points"]):
-        if example["kind"] in {"hybrid", "projected_reachability"}:
-            role = ("unique minimum" if index == 0 else "feasible interval endpoint") \
-                if example["kind"] == "hybrid" else "projected terminal endpoint"
-        elif example["kind"] == "two_parameter":
-            role = "feasible polygon vertex; shared vertices preserve separate path labels"
-        elif example["kind"] == "intersection":
-            role = "intersection vertex"
-        elif tuple(p) in seen:
-            role = "duplicate of point " + str(seen[tuple(p)])
-        else:
-            role = "hull vertex" if index in example["indices"] else "interior / omitted"
-        seen.setdefault(tuple(p), index)
-        rows.append(f'<tr><td>{index}</td><td>{p[0]:.6g}</td><td>{p[1]:.6g}</td><td>{role}</td></tr>')
-    heading = ("Original point ID" if example["kind"] == "hull" else
-               "Fixture point" if example["kind"] == "hybrid" else
-               "Projected endpoint" if example["kind"] == "projected_reachability" else
-               "Polygon vertex" if example["kind"] == "two_parameter" else "Saved output row ID")
-    caption = ("Exact illustrative values; the continuous feasible set is the full segment."
-               if example["kind"] == "hybrid" else
-               "Exact endpoints of the projected terminal interval; the plotted relation is the complete line segment."
-               if example["kind"] == "projected_reachability" else
-               "Exact polygon vertices; identical locations belong to separately labelled path branches."
-               if example["kind"] == "two_parameter" else
-               "Coordinates (rounded to six significant digits; raw JSON retains binary64 values)")
-    x_label, y_label = (("u₀", "x₂") if example["kind"] == "hybrid" else
-                        ("u₀", "x₁") if example["kind"] == "projected_reachability" else
-                        ("u₀", "u₁") if example["kind"] == "two_parameter" else ("x", "y"))
-    return ('<div class="scroll" tabindex="0" role="region" aria-label="Point coordinates"><table>'
-            f'<caption>{caption}</caption>'
-            f'<thead><tr><th scope="col">{heading}</th><th scope="col">{x_label}</th><th scope="col">{y_label}</th>'
-            '<th scope="col">Role</th></tr></thead><tbody>' + "".join(rows) + '</tbody></table></div>')
+    for row_label, values in zip(row_labels, matrix):
+        cells = "".join(f'<td>{escape(json.dumps(value, allow_nan=False))}</td>' for value in values)
+        rows.append(f'<tr><th scope="row">{row_label}</th>{cells}</tr>')
+    return ('<span class="math-brackets"><table class="math-matrix" aria-label="' + label + '">'
+            '<thead><tr><th scope="col">row</th>' + header + '</tr></thead>'
+            '<tbody>' + "".join(rows) + '</tbody></table></span>')
+
+
+def lesson_input_math(example):
+    """Show a mathematical view only for the lesson inputs with known schemas."""
+    if example["kind"] == "hull":
+        points = example["inputs"]["points"]
+        dimensions = len(points[0])
+        point_ids = "".join(f'<th scope="col"><var>v</var><sub>{i}</sub></th>'
+                            for i in range(len(points)))
+        rows = []
+        for coordinate in range(dimensions):
+            values = "".join(f'<td>{escape(json.dumps(point[coordinate], allow_nan=False))}</td>'
+                             for point in points)
+            rows.append(f'<tr><th scope="row">x<sub>{coordinate + 1}</sub></th>{values}</tr>')
+        table = ('<span class="math-brackets"><table class="math-matrix" '
+                 'aria-label="Point matrix V with source point columns">'
+                 '<caption>Coordinate rows</caption>'
+                 '<thead><tr><th scope="col">coord.</th>' + point_ids + '</tr></thead>'
+                 '<tbody>' + "".join(rows) + '</tbody></table></span>')
+        return ('<div class="math-input"><p><var>V</var> = [<var>v</var><sub>0</sub> … '
+                f'<var>v</var><sub>{len(points) - 1}</sub>] ∈ ℝ<sup>{dimensions}×{len(points)}</sup></p>'
+                + '<p class="limits">Columns are zero-based source IDs; duplicate points remain separate.</p>'
+                + '<div class="scroll" tabindex="0" role="region" aria-label="Input point matrix V">'
+                + table + '</div></div>')
+    if example["kind"] == "intersection":
+        source = example["inputs"]
+
+        def halfspace(name, symbol, set_symbol, title):
+            matrix = source[name + "_A"]
+            bounds = source[name + "_b"]
+            rows = [str(index + 1) for index in range(len(matrix))]
+            matrix_table = _matrix_table(matrix, rows, ["x₁", "x₂"], f"Matrix A_{symbol}")
+            vector_table = _matrix_table([[value] for value in bounds], rows, ["b"],
+                                         f"Column vector b_{symbol}")
+            return ('<section class="math-system"><h3>' + title + '</h3>'
+                    f'<p><var>{set_symbol}</var> = {{<var>x</var> ∈ ℝ<sup>2</sup> : '
+                    f'<var>A</var><sub>{symbol}</sub><var>x</var> ≤ <var>b</var><sub>{symbol}</sub>}}</p>'
+                    '<div class="math-expression"><span><var>A</var><sub>' + symbol + '</sub> = </span>'
+                    + matrix_table + '<span><var>b</var><sub>' + symbol + '</sub> = </span>'
+                    + vector_table + '</div></section>')
+
+        return ('<div class="math-input"><p>Input sets:</p><div class="math-systems">'
+                + halfspace("left", "L", "P", "Left set P")
+                + halfspace("right", "R", "Q", "Right set Q") + '</div></div>')
+    return ""
 
 
 def section(example, number, previous=None, following=None):
@@ -332,12 +374,10 @@ def section(example, number, previous=None, following=None):
     content = owner.presentation(example)
     markup = (f'<section id="{example["slug"]}"><p class="eyebrow">Example {number:02d} / {content["example_type"]}</p>'
             f'<h2>{example["title"]}</h2><p>{content["explanation"]}</p>'
-            f'<figure><img src="{example["slug"]}.svg" alt="{escape(content["explanation"], quote=True)}">'
+            + lesson_input_math(example)
+            + f'<figure><img src="{example["slug"]}.svg" alt="{escape(content["explanation"], quote=True)}">'
             f'<figcaption>{content["caption"]}</figcaption></figure>'
-            f'<p class="answer">{content["result"]}</p>{point_table(example)}'
-            '<details><summary>Complete minimal input</summary>'
-            + site_design.code_block(json.dumps(example["inputs"], indent=2), "Complete minimal input")
-            + '</details>'
+            f'<p class="answer">{content["result"]}</p>{data_details(example)}'
             + content["extra"] + '<details><summary>Reproduce the functional example</summary>' + content["reproduction"] +
             site_design.code_block(content["command"], "Functional example reproduction commands")
             + '<p>' + content["platform_note"] + '</p>'

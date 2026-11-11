@@ -43,6 +43,18 @@ table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nu
 th, td { border-bottom: 1px solid var(--line); padding: .55rem .7rem; text-align: left; vertical-align: top; }
 th { color: var(--accent); background: var(--surface-raised); }
 th, td { overflow-wrap: anywhere; }
+.math-input { margin: 1.25rem 0; padding: .75rem 1rem; border-left: 3px solid var(--accent); background: var(--surface); }
+.math-input > p:first-child { margin-top: 0; }
+.math-matrix { width: auto; white-space: nowrap; }
+.math-matrix th, .math-matrix td { border: 0; padding: .15rem .45rem; text-align: right; }
+.math-matrix th[scope="row"] { color: var(--text-soft); background: transparent; font-weight: 500; }
+.math-matrix th[scope="col"] { color: var(--text-muted); background: transparent; font-weight: 500; }
+.math-matrix caption { caption-side: bottom; padding-top: .25rem; color: var(--text-muted); font-size: .82rem; }
+.math-brackets { display: inline-block; padding: .1rem .25rem; border-inline: 1px solid var(--text-soft); }
+.math-systems { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.math-system { min-width: 0; }
+.math-system h3 { margin-bottom: .4rem; }
+.math-expression { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; }
 details { margin: 1rem 0; padding: .65rem .8rem; border: 1px solid var(--line); }
 summary { color: var(--link); cursor: pointer; }
 .skip { position: absolute; z-index: 10; top: -5rem; left: 1rem; padding: .7rem 1rem; background: var(--surface-raised); }
@@ -109,6 +121,7 @@ summary { color: var(--link); cursor: pointer; }
   .shell aside .eyebrow { margin: .9rem 0 .3rem; }
   .shell aside nav { display: flex; max-height: none; overflow-x: auto; overflow-y: hidden; white-space: nowrap; scrollbar-gutter: auto; padding: .25rem; }
   .shell aside nav a { flex: 0 0 auto; }
+  .math-systems { grid-template-columns: 1fr; }
   .shell aside .brand br { display: none; }
   .page-content, .report-home { width: min(100% - 2rem, 76rem); padding-top: 1.25rem; }
 }
