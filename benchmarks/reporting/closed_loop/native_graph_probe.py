@@ -215,6 +215,14 @@ def main() -> None:
     assert orbit_edge["predecessor_contains_parent"] is True
     assert orbit_edge["backward_viable"] is True
     assert orbit_edge["representation_filter_passed"] is True
+    edge_filter_call = next(call for call in orbit_box_response["invocations"]
+        if call["module_id"] == "csl::reachability::finite_plan_box" and
+        call["operation"].startswith("one-step fixed-discrete-edge"))
+    assert "coordinate-bound child check" in edge_filter_call["operation"]
+    assert "selected-shape numerical membership witnesses" in \
+        orbit_box_response["selector"]["policy_semantics"]
+    assert "per-edge safety filter checks a coordinate-outer relaxation" in \
+        orbit_box_response["selector"]["policy_semantics"]
 
     provider_profiles = [
         ("lp-membership", "csl.geometry.affine-sum", "csl.hull.lp-membership", "1.0.0", "phase-one-bland"),

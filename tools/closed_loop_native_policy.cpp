@@ -606,7 +606,7 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
         "csl::reachability::finite_plan_zonotope", "csl::reachability::finite_plan_parallelotope",
         "csl::reachability::finite_plan_ellipsoid"};
     if(representation_index>0) invocations.push_back({{"module_id",representation_modules.at(representation_index)},
-        {"operation","one-step fixed-discrete-edge outer enclosure, authored-stage safety check, and selected-shape numerical membership before graph selection"},
+        {"operation","one-step fixed-discrete-edge coordinate-outer enclosure and coordinate-bound child check, with authored-stage safety before graph selection"},
         {"provider","public-function"},{"profile_id",input.at("controller_id")},
         {"representation",representation_names.at(representation_index)},
         {"calls",graph.representation_filter_calls},{"rejected",graph.representation_filter_rejections},
@@ -688,7 +688,7 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
         {"terminal_objective", terminal_cost}, {"running_objective", running_cost_value},
         {"total_replay_objective", terminal_cost + running_cost_value},
         {"score_kind", "exact-source-cost-on-numerical-affine-predictor"},
-        {"policy_semantics", "receding finite-action graph MPC; numerical backward predecessor plus authored discrete-edge witnesses filter before Bellman selection; selected approximation records a whole authored-action outer cloud per retained parent and applies its selected-shape numerical membership predicate to each recomputed discrete child; replans after each observed hold"},
+        {"policy_semantics", "receding finite-action graph MPC; numerical backward predecessor plus authored discrete-edge witnesses filter before Bellman selection; selected approximation records a whole authored-action outer cloud per retained parent with selected-shape numerical membership witnesses, while its per-edge safety filter checks a coordinate-outer relaxation; replans after each observed hold"},
         {"optimality_scope", "retained graph only; not complete finite-action optimum, nonlinear global optimum, or causal feedback optimum"}};
     return response;
 }
