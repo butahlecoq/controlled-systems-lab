@@ -1,4 +1,5 @@
 #include <csl/reachability/finite_plan_parallelotope.hpp>
+#include <csl/reachability/detail/outer_safety.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -224,6 +225,99 @@ coordinate_bounds(const sets::SetData &set, const ExecutionContext &context) {
   return result;
 }
 
+auto parallelotope_support(const Matrix& frame, const ParallelotopeStage& stage) {
+  return [&frame, &stage](std::span<const double> normal) {
+    long double lower = 0.0L, upper = 0.0L;
+    for (std::size_t col = 0; col < frame.cols; ++col) {
+      long double coefficient_value = 0.0L;
+      for (std::size_t row = 0; row < frame.rows; ++row)
+        coefficient_value += static_cast<long double>(normal[row]) *
+            frame.values[row * frame.cols + col];
+      lower += coefficient_value * (coefficient_value >= 0.0L ? stage.lower[col] : stage.upper[col]);
+      upper += coefficient_value * (coefficient_value >= 0.0L ? stage.upper[col] : stage.lower[col]);
+    }
+    return std::pair{detail::outward_lower(static_cast<double>(lower)),
+                     detail::outward_upper(static_cast<double>(upper))};
+  };
+}
+
+FinitePlanParallelotopeOutcome parallelotope_planar(const FixedPlanRequest& request,
+                                                      const ExecutionContext& context) {
+  constexpr std::size_t n = 2;
+  const auto horizon = request.system.horizon();
+  const auto dimensions = request.system.dimensions();
+  if (request.controls.size() != horizon || request.disturbances.size() != horizon ||
+      request.admissible_states.size() != horizon + 1 ||
+      request.initial.metadata()->set.dimension != n)
+    return unsupported("finite_plan_parallelotope.dimensions",
+                       "The two-state model and horizon fields must agree.");
+  for (const auto& safe : request.admissible_states)
+    if (safe.metadata()->set.dimension != n)
+      return unsupported("finite_plan_parallelotope.safe_sets",
+                         "State-constraint dimension differs from model.");
+  auto initial = coordinate_bounds(request.initial, context);
+  if (const auto* error = std::get_if<Unsupported>(&initial)) return *error;
+  if (const auto* stop = std::get_if<OperationStopped>(&initial)) return *stop;
+  FinitePlanParallelotopeTrace trace{Matrix{n, n, {1.0, 0.0, 0.0, 1.0}},
+      {std::get<ParallelotopeStage>(std::move(initial))}, Assurance::numerical};
+  if (!detail::outer_set_inside(request.admissible_states.front(), n,
+          parallelotope_support(trace.frame, trace.stages.front())))
+    return unsupported("finite_plan_parallelotope.safe_sets",
+                       "Initial parallelotope does not certify containment in the physical state constraint.");
+  for (std::size_t k = 0; k < horizon; ++k) {
+    if (const auto stop = stop_if_needed(context)) return *stop;
+    auto disturbance = coordinate_bounds(request.disturbances[k], context);
+    if (const auto* error = std::get_if<Unsupported>(&disturbance)) return *error;
+    if (const auto* stop = std::get_if<OperationStopped>(&disturbance)) return *stop;
+    const auto dynamics = request.system.stage({k});
+    if (const auto* error = std::get_if<Diagnostic>(&dynamics))
+      return unsupported(error->field, error->explanation);
+    const auto& d = std::get<model::DynamicsStage>(dynamics);
+    const auto& u = request.controls[k];
+    const auto& w = std::get<ParallelotopeStage>(disturbance);
+    if (d.A.rows() != n || d.A.cols() != n || d.B.rows() != n || d.B.cols() != u.size() ||
+        d.E.rows() != n || d.E.cols() != w.lower.size() || d.offset.size() != n ||
+        dimensions.control != u.size() || dimensions.external != w.lower.size())
+      return unsupported("finite_plan_parallelotope.stage.dimension",
+                         "Dynamics, action and disturbance dimensions differ from the planar profile.");
+    if (std::any_of(u.begin(), u.end(), [](double value) { return !std::isfinite(value); }))
+      return unsupported("finite_plan_parallelotope.control", "Controls must be finite.");
+    ParallelotopeStage next{Vector(n), Vector(n)};
+    for (std::size_t i = 0; i < n; ++i) {
+      Interval image{d.offset[i], d.offset[i]};
+      for (std::size_t j = 0; j < n; ++j) {
+        const auto term = multiply({d.A(i,j), d.A(i,j)},
+            {trace.stages.back().lower[j], trace.stages.back().upper[j]});
+        if (!term) return OperationStopped{StopReason::numerical_failure, "Planar parallelotope state propagation overflowed."};
+        const auto sum = add(image, *term);
+        if (!sum) return OperationStopped{StopReason::numerical_failure, "Planar parallelotope state propagation overflowed."};
+        image = *sum;
+      }
+      for (std::size_t j = 0; j < u.size(); ++j) {
+        const auto term = multiply({d.B(i,j), d.B(i,j)}, {u[j], u[j]});
+        if (!term) return OperationStopped{StopReason::numerical_failure, "Planar parallelotope control propagation overflowed."};
+        const auto sum = add(image, *term);
+        if (!sum) return OperationStopped{StopReason::numerical_failure, "Planar parallelotope control propagation overflowed."};
+        image = *sum;
+      }
+      for (std::size_t j = 0; j < w.lower.size(); ++j) {
+        const auto term = multiply({d.E(i,j), d.E(i,j)}, {w.lower[j], w.upper[j]});
+        if (!term) return OperationStopped{StopReason::numerical_failure, "Planar parallelotope disturbance propagation overflowed."};
+        const auto sum = add(image, *term);
+        if (!sum) return OperationStopped{StopReason::numerical_failure, "Planar parallelotope disturbance propagation overflowed."};
+        image = *sum;
+      }
+      next.lower[i] = image.lo; next.upper[i] = image.hi;
+    }
+    trace.stages.push_back(std::move(next));
+    if (!detail::outer_set_inside(request.admissible_states[k + 1], n,
+            parallelotope_support(trace.frame, trace.stages.back())))
+      return unsupported("finite_plan_parallelotope.safe_sets",
+                         "Propagated outer parallelotope does not certify containment in the physical state constraint.");
+  }
+  return trace;
+}
+
 } // namespace
 
 FinitePlanParallelotopeOutcome
@@ -231,6 +325,8 @@ finite_plan_parallelotope(const FixedPlanRequest &request,
                           const ExecutionContext &context) {
   if (const auto stopped = stop_if_needed(context))
     return *stopped;
+  if (request.system.dimensions().state == 2)
+    return parallelotope_planar(request, context);
   constexpr std::size_t n = 4;
   const auto horizon = request.system.horizon();
   if (request.system.dimensions().state != n ||
@@ -240,12 +336,9 @@ finite_plan_parallelotope(const FixedPlanRequest &request,
     return unsupported("finite_plan_parallelotope.dimensions",
                        "The four-state model and horizon fields must agree.");
   for (const auto &safe : request.admissible_states)
-    if (safe.metadata()->set.dimension != n ||
-        !std::holds_alternative<sets::UniversalRepresentation>(
-            safe.representation()))
-      return unsupported(
-          "finite_plan_parallelotope.safe_sets",
-          "Universal state constraints are the only supported profile.");
+    if (safe.metadata()->set.dimension != n)
+      return unsupported("finite_plan_parallelotope.safe_sets",
+                         "State-constraint dimension differs from model.");
 
   auto initial = set_bounds_in_frame(
       request.initial, "finite_plan_parallelotope.initial", qi, context);
@@ -259,6 +352,10 @@ finite_plan_parallelotope(const FixedPlanRequest &request,
     for (std::size_t j = 0; j < 4; ++j)
       trace.frame.values[i * 4 + j] = static_cast<double>(q[i][j]);
   trace.stages.push_back(std::get<ParallelotopeStage>(std::move(initial)));
+  if (!detail::outer_set_inside(request.admissible_states.front(), n,
+          parallelotope_support(trace.frame, trace.stages.front())))
+    return unsupported("finite_plan_parallelotope.safe_sets",
+                       "Initial parallelotope does not certify containment in the physical state constraint.");
 
   for (std::size_t k = 0; k < horizon; ++k) {
     if (const auto stopped = stop_if_needed(context))
@@ -371,6 +468,10 @@ finite_plan_parallelotope(const FixedPlanRequest &request,
       next.upper[i] = image.hi;
     }
     trace.stages.push_back(std::move(next));
+    if (!detail::outer_set_inside(request.admissible_states[k + 1], n,
+            parallelotope_support(trace.frame, trace.stages.back())))
+      return unsupported("finite_plan_parallelotope.safe_sets",
+                         "Propagated outer parallelotope does not certify containment in the physical state constraint.");
   }
   return trace;
 }

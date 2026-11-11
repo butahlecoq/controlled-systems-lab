@@ -6,7 +6,36 @@
 #include <csl/reachability/finite_plan_parallelotope.hpp>
 #include <csl/reachability/finite_plan_zonotope.hpp>
 
+#include <string>
+
 namespace csl::optimization {
+
+// Running control penalties are evaluated on the original, absolute stage
+// grid. The quadratic form is coefficient / normalization_horizon times
+// sum_i weights[i] * ((u[i] - reference[i]) / scales[i])^2. Euclidean terms
+// retain the source norm: coefficient * ||map * u + offset||_2.
+struct QuadraticControlPenalty {
+    Vector reference;
+    Vector scales;
+    Vector weights;
+    double coefficient;
+    std::size_t normalization_horizon;
+};
+struct EuclideanControlPenalty {
+    Matrix map;
+    Vector offset;
+    double coefficient;
+};
+using ControlPenalty = std::variant<QuadraticControlPenalty, EuclideanControlPenalty>;
+struct AbsoluteStageControlCost {
+    std::size_t stage;
+    std::vector<ControlPenalty> terms;
+};
+struct RunningControlCost {
+    std::string objective_id;
+    std::size_t original_horizon;
+    std::vector<AbsoluteStageControlCost> stages;
+};
 
 struct FiniteActionNominalRequest {
     ProblemId problem;
@@ -18,6 +47,10 @@ struct FiniteActionNominalRequest {
     std::vector<Vector> nominal_disturbances;
     std::vector<sets::SetData> admissible_states;
     Objective objective;
+    // Empty preserves terminal-only behavior. A shrinking-horizon request
+    // keeps the complete source schedule and advances absolute_stage_offset.
+    RunningControlCost running_cost{};
+    std::size_t absolute_stage_offset{};
 };
 
 struct FiniteActionNominalLimits {
@@ -33,7 +66,10 @@ enum class NominalScoreKind {
     exact_deterministic_objective,
     // Floating-point enclosure-derived ranking score; no certified objective
     // bound is established in either direction.
-    numerical_outer_enclosure_estimate
+    numerical_outer_enclosure_estimate,
+    // A numerical terminal enclosure estimate plus the exactly evaluated
+    // source running-control cost; the sum remains a numerical rank estimate.
+    numerical_outer_estimate_plus_exact_running_cost
 };
 enum class NominalSearchCoverage { complete, incomplete, stopped };
 
@@ -41,6 +77,8 @@ struct NominalPlanScored {
     std::vector<std::size_t> action_indices;
     double candidate_score;
     NominalScoreKind score_kind;
+    double terminal_score{};
+    double exact_running_cost{};
 };
 struct NominalPlanRejected {
     std::vector<std::size_t> action_indices;
@@ -63,6 +101,8 @@ struct NominalTrajectory {
     std::vector<Vector> controls;
     std::vector<Vector> disturbances;
     double terminal_objective;
+    double running_objective{};
+    double total_objective{};
 };
 using NominalPlanTrace = std::variant<reachability::FixedPlanReachable,
     reachability::FinitePlanBoxTrace, reachability::FinitePlanZonotopeTrace,
@@ -103,6 +143,9 @@ struct FiniteActionNominalResult {
     RequestId request;
     std::vector<NominalProfileResult> tracks; // Exact, box, zonotope, parallelotope, ellipsoid.
     Assurance assurance{Assurance::numerical};
+    std::string objective_id;
+    std::size_t original_horizon{};
+    std::size_t absolute_stage_offset{};
 };
 using FiniteActionNominalOutcome = std::variant<FiniteActionNominalResult,
     Unsupported, OperationStopped>;
@@ -113,5 +156,12 @@ using FiniteActionNominalOutcome = std::variant<FiniteActionNominalResult,
 FiniteActionNominalOutcome finite_action_nominal(
     const FiniteActionNominalRequest&, FiniteActionNominalLimits,
     const ExecutionContext& = {});
+
+// Runs exactly one selected representation route. The all-five comparison
+// overload above remains available to existing callers; a selected query does
+// not execute inactive representation modules.
+FiniteActionNominalOutcome finite_action_nominal_profile(
+    const FiniteActionNominalRequest&, FiniteActionNominalLimits,
+    NominalRepresentation, const ExecutionContext& = {});
 
 } // namespace csl::optimization

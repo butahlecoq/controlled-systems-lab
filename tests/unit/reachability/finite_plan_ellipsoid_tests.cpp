@@ -23,6 +23,12 @@ sets::SetData vertices(std::string id, std::size_t dimension, Matrix points) {
 sets::SetData universal(std::string id, std::size_t dimension) {
   return take(sets::make_universal({{std::move(id)}, dimension, {}}));
 }
+sets::SetData bounded(std::string id, double bound) {
+  return take(sets::make_h({{std::move(id)},1,{"x"}},
+      {take(numeric::snapshot(Matrix{2,1,{1,-1}})),
+       take(numeric::snapshot_vector(Vector{bound,bound})),
+       take(numeric::snapshot(Matrix{0,1,{}})), take(numeric::snapshot_vector(Vector{}))}));
+}
 FixedPlanRequest points_request() {
   const auto game = issue824::fixture::two_points_request("ellipsoid-test");
   return {game.system, game.initial, {{-2.5}, {-2.5}, {-2.5}}, game.disturbances,
@@ -67,14 +73,17 @@ TEST_CASE("stagewise ellipsoids contain the exact finite TwoPoints history sets"
   }
 }
 
-TEST_CASE("ellipsoid propagation refuses bounded safety constraints it cannot propagate") {
+TEST_CASE("ellipsoid propagation only accepts a bounded safe set when its outer shape fits") {
   const auto one = vertices("one", 1, Matrix{1, 1, {0.0}});
   const auto two = vertices("two", 1, Matrix{2, 1, {-1.0, 1.0}});
   const auto universal_set = universal("universal", 1);
   const SystemModel sys_model{{{1, 1, 1}, TimeDomain::discrete,
       LinearStage{{1, 1, {1.0}}, {1, 1, {1.0}}, {1, 1, {1.0}}, {0.0}}}, {}};
   const auto system = take(model::snapshot(sys_model, Vector{0.0, 1.0}));
-  auto input = FixedPlanRequest{system, one, {{0.0}}, {two}, {universal_set, two}, {"unsafe"}};
+  auto input = FixedPlanRequest{system, one, {{0.0}}, {two},
+      {universal_set, bounded("wide-safe",10)}, {"bounded-safe"}};
+  CHECK(std::holds_alternative<FinitePlanEllipsoidTrace>(finite_plan_ellipsoid(input)));
+  input.admissible_states[1] = bounded("narrow-safe",0.5);
   const auto result = finite_plan_ellipsoid(input);
   REQUIRE(std::holds_alternative<Unsupported>(result));
   CHECK(std::get<Unsupported>(result).diagnostics[0].field == "finite_plan_ellipsoid.safe_sets");
