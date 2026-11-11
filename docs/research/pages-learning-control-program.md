@@ -41,8 +41,8 @@ The matrix must identify each set's mathematical role. In a deterministic model,
 | [#943](https://github.com/butahlecoq/controlled-systems-lab/issues/943) | Reachable-set/MPC feedback composition across five representations | #941, #942 |
 | [#944](https://github.com/butahlecoq/controlled-systems-lab/issues/944) | Actual selectable vertex LP, conversion and optimizer calls in control pipelines | #942 |
 | [#945](https://github.com/butahlecoq/controlled-systems-lab/issues/945) | Common runner and initial closed-loop results for each environment | #941, #942 |
-| [#946](https://github.com/butahlecoq/controlled-systems-lab/issues/946) | All-stage set/intersection/trajectory figures from saved records | #945 |
-| [#947](https://github.com/butahlecoq/controlled-systems-lab/issues/947) | Full admitted-composition execution and published coverage dashboard | #943, #944, #945, #946 |
+| [#946](https://github.com/butahlecoq/controlled-systems-lab/issues/946) | All-stage set/intersection/trajectory figures from saved records | #945, #939 |
+| [#947](https://github.com/butahlecoq/controlled-systems-lab/issues/947) | Full admitted-composition execution and published coverage dashboard | #943, #944, #945, #946, #940 |
 
 These tickets are native children of #936. Their dependency edges express implementation order; they are not requests for new owner approval. The live tracker remains authoritative for status, claims and subsequent changes. Research #937 closes when the audited findings and ticket handoff are delivered, not when #936's implementation is complete.
 
