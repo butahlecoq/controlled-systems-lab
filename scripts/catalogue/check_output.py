@@ -41,6 +41,22 @@ def main() -> int:
             assert query["status"] == "completed", query
             assert query["actual"] == active["vertex_lp_provider"]["id"], query
             assert query["version"] == active["vertex_lp_provider"]["version"], query
+            assert query["problem"] and query["program"] and query["outcome"], query
+            assert query["returned_problem"] and query["returned_program"], query
+        child_summary = row["child_lp_port_trace_summary"]
+        child_queries = row["child_lp_port_invocations"]
+        assert child_summary["captured"] + child_summary["omitted"] == child_summary["total"], row
+        assert len(child_queries) == child_summary["captured"], row
+        assert child_summary["native_solver_entry_proven"] is False, row
+        for query in child_queries:
+            assert query["requested_provider"] and query["actual_provider"] and query["actual_version"], query
+            assert query["problem"] and query["program"] and query["status"], query
+            assert len(query["raw_diagnostics"]) <= 1024, query
+    traced_reducers = {row["active_roles"]["vertex_reducer"]["id"] for row in rows
+        if row["child_lp_port_trace_summary"]["total"]}
+    assert "csl.hull.itis17.a43-certified-basis-reuse" in traced_reducers
+    assert "csl.hull.recursive-split-merge" in traced_reducers
+    assert "csl.hull.phase-one-basis-bulk" in traced_reducers
     controller_rows = output["controller_candidates"]
     assert len(controller_rows) == 1
     controller = controller_rows[0]
@@ -119,6 +135,22 @@ def main() -> int:
     dimension_reject = next(row for row in references if "dimension-4" in row["graph_id"])
     assert dimension_reject["status"] == "incompatible" and dimension_reject["first_unmet"]["field"] == "points"
     assert all(row["status"] == "admitted" for row in references if row["graph_id"].startswith("legacy-btulshor/"))
+    source_operations = output["source_index_operation_candidates"]
+    assert len(source_operations) == 4
+    assert {row["source_provider"].split("@")[0] for row in source_operations} == {
+        "csl.hull.source.quickhull-2d", "csl.hull.source.btulshor-kpabep"
+    }
+    assert {row["graph_id"].rsplit("/", 1)[-1] for row in source_operations} == {
+        "affine-image", "control-minkowski-sum"
+    }
+    for row in source_operations:
+        assert row["status"] == "admitted" and row["attempt"] == "completed", row
+        assert row["active_roles"]["vertex_lp_provider"] == "not_used"
+        assert row["active_roles"]["terminal_optimizer"] == "not_used"
+        assert row["active_roles"]["h_to_v_converter"] == "not_used"
+        assert any("source-index invocation:" in item for item in row["evidence"]), row
+        assert any("checker invocation:" in item and "status=verified" in item
+            for item in row["evidence"]), row
     optimizers = output["terminal_optimizer_candidates"]
     assert len(optimizers) == 1
     optimizer = optimizers[0]

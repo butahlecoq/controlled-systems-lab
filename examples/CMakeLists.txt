@@ -119,6 +119,7 @@ csl_example(registered_synthesis_comparison CSL::input CSL::strategy_a CSL::stra
   CSL::witness_selector CSL::verification CSL::highs_lp CSL::highs_convex CSL::qhull_conversion CSL::affine_sum)
 csl_example(nominal_linear_exact_2d CSL::strategy_a CSL::highs_lp CSL::highs_convex
   CSL::qhull_conversion CSL::affine_sum)
+csl_example(source_index_geometry_2d CSL::affine_sum)
 csl_example(continuous_policy CSL::controllers CSL::model)
 csl_example(adaptive_ode_replay CSL::simulation)
 
@@ -140,6 +141,10 @@ example_check(continuous_policy_all_generators continuous_policy "" 0
   "scope=all_joint_uncertainty assurance=numerical generators=4.*initial=0,0 action=0 terminal=0,0.*initial=0,1 action=0 terminal=1,1.*initial=1,0 action=1 terminal=1.5,1.*initial=1,1 action=1 terminal=2.5,2")
 example_check(adaptive_ode_replay adaptive_ode_replay "" 0
   "schema=csl.example.adaptive-ode-replay/1.*method=adaptive_rk4_step_doubling.*accepted_steps=[0-9]+.*final_state_error=")
+example_check(source_index_geometry_quickhull source_index_geometry_2d "quickhull" 0
+  "csl.hull.source.quickhull-2d.*status=verified.*csl.geometry.bounded-hull-checker")
+example_check(source_index_geometry_btulshor source_index_geometry_2d "btulshor" 0
+  "csl.hull.source.btulshor-kpabep.*status=verified.*csl.geometry.bounded-hull-checker")
 example_check(scenario_cli_valid scenario_cli "--validate-only;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" 0
   "validation=valid.*schema=csl.scenario/1.*requested=comparison.*mode=validate_only solvers=not_invoked")
 example_check(scenario_cli_missing scenario_cli "--validate-only;${CMAKE_CURRENT_BINARY_DIR}/no-such-scenario.json" 2

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <csl/geometry/hull_reducer.hpp>
+#include <csl/geometry/source_index_hull.hpp>
 #include <csl/registry/provider.hpp>
 #include <cstddef>
 
@@ -40,6 +41,11 @@ public:
 };
 
 HullReducerCatalogue make_hull_reducer_catalogue(registry::Registration<registry::LPPort>);
+// Source-index methods have an independent port and do not masquerade as
+// HullReducerPort implementations. Both compiled methods are supported only
+// for admitted 2D point clouds; callers still select one explicitly.
+registry::Registry<registry::SourceIndexHullPort> make_source_index_hull_catalogue(
+    LegacyKpabepOptions = {});
 std::vector<HullCandidateGraph> enumerate_hull_candidates(const HullReducerCatalogue&,
     std::size_t input_dimension);
 std::variant<PreparedHullCandidate,registry::Rejection> prepare_hull_candidate(
@@ -50,9 +56,9 @@ struct HullCandidateExecution {
     std::vector<registry::Provenance> prepared_providers;
     HullReductionResult reduction;
     // Records only calls routed through the outer RegisteredLPQueryRunner.
-    // Reducers may create child workspaces from a captured provider and report
-    // those calls only through reducer-specific metrics; preparation provenance
-    // alone is not evidence of invocation.
+    // Reducers may create child workspaces from a captured provider. Their
+    // bounded LPPort call records live in reduction.child_lp_invocations;
+    // preparation provenance alone is not evidence of invocation.
     std::vector<registry::LPQueryRecord> outer_lp_runner_queries;
 };
 

@@ -142,6 +142,34 @@ class GalleryTests(unittest.TestCase):
                 if not (target / "index.html").exists():
                     (target / "index.html").write_text("<html>report fixture</html>", encoding="utf-8")
 
+    def test_source_index_example_has_exact_pages_producer_after_finalizer(self):
+        import subprocess
+        with tempfile.TemporaryDirectory() as temporary:
+            site=Path(temporary)
+            (site/"examples").mkdir()
+            (site/"index.html").write_text(
+                '<!doctype html><html><body><h1>Learning</h1><a href="examples/index.html">Examples</a></body></html>')
+            (site/"examples/index.html").write_text(
+                '<!doctype html><html><body><h1>Visual examples</h1><article id="source-index-geometry-2d">'
+                '<a href="source-index-geometry-2d.html">Inputs and reproduction</a>'
+                '<a href="source-index-geometry-2d-records.json">Raw record</a>'
+                '<img src="source-index-geometry-2d.svg" alt="2D source-index hull example"></article>'
+                '<section id="algorithm-coverage"></section></body></html>')
+            assets=ROOT/"docs/examples"
+            for name in ("source-index-geometry-2d.html","source-index-geometry-2d.svg",
+                         "source-index-geometry-2d-records.json"):
+                shutil.copyfile(assets/name,site/"examples"/name)
+            completed=subprocess.run([sys.executable,str(ROOT/"scripts/reports/pages_route_retirement.py"),
+                "--site",str(site),"--source-commit","source-index-gallery-test"],
+                check=False,capture_output=True,text=True)
+            self.assertEqual(completed.returncode,0,completed.stderr)
+            self.assertIn('"html_route_count"',completed.stdout)
+            routes=json.loads((site/"pages-route-inventory.json").read_text(encoding="utf-8"))
+            owner=routes["html_routes"]["examples/source-index-geometry-2d.html"]["producer"]
+            self.assertEqual(owner["owner_status"],"gallery-aggregator")
+            self.assertEqual(owner["files"],["scripts/reports/visual_examples.py",
+                "docs/examples/source-index-geometry-2d.html"])
+
     def test_saved_outputs_match_literal_geometry(self):
         cases = {example["slug"]: example for example in self.examples}
         square = cases["square_duplicates"]
@@ -513,7 +541,9 @@ class GalleryTests(unittest.TestCase):
             if not urlsplit(link).scheme and not link.startswith("#"):
                 self.assertTrue((self.site / "examples" / link.split("#")[0]).is_file(), link)
         figures = list((self.site / "examples").glob("*.svg"))
-        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 23)
+        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 24)
+        self.assertIn('id="source-index-geometry-2d"', page)
+        self.assertTrue((self.site / "examples/source-index-geometry-2d-records.json").is_file())
         for figure in figures:
             if figure.name == "fuel-b06-viz06-before.svg":
                 self.assertEqual(hashlib.sha256(figure.read_bytes()).hexdigest(),

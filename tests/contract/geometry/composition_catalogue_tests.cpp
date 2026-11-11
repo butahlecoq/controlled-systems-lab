@@ -110,6 +110,37 @@ TEST_CASE("catalogue resolves every expected vertex reducer and selected LP prov
     CHECK(admitted_graphs == expected_hull_methods.size() * vertex_lp_methods().size());
 }
 
+TEST_CASE("source-index catalogue exposes QuickHull and faithful BTULSHOR on their actual 2D port") {
+    auto providers=geometry::make_source_index_hull_catalogue();
+    const auto identities=providers.identities();
+    REQUIRE(identities.size()==2);
+    std::set<std::string> actual;
+    for(const auto& identity:identities) actual.insert(identity.id.value);
+    CHECK(actual==std::set<std::string>{"csl.hull.source.btulshor-kpabep","csl.hull.source.quickhull-2d"});
+
+    const auto cloud=fixture_cloud();
+    for(const auto& identity:identities) {
+        const auto prepared=registry::prepare_pipeline(registry::select(providers,
+            {identity.id,identity.version},cloud));
+        REQUIRE(std::holds_alternative<registry::PreparedPipeline<registry::SourceIndexHullPort>>(prepared));
+        auto workspace=std::get<registry::PreparedPipeline<registry::SourceIndexHullPort>>(prepared).create();
+        const auto proposal=std::get<0>(workspace)->run({{},{},{},{1e-8,1e-8},"source-index-catalogue"});
+        REQUIRE(std::holds_alternative<geometry::SourceIndexProposal>(proposal));
+        const auto& source=std::get<geometry::SourceIndexProposal>(proposal);
+        REQUIRE(source.status==geometry::SourceIndexProposalStatus::completed);
+        const auto digest=geometry::digest_hull_input(cloud.points);
+        REQUIRE(std::holds_alternative<geometry::HullInputDigest>(digest));
+        const auto check=geometry::check_source_index_hull(cloud.points,
+            {std::get<geometry::HullInputDigest>(digest),source.retained_indices});
+        CHECK(check.status==geometry::HullCheckStatus::verified);
+    }
+    auto quickhull=providers.identities().front();
+    const geometry::PointCloud unsupported{{"source-index-4d"},{{0,0,0,0},{1,0,0,0}}};
+    const auto rejected=registry::prepare_pipeline(registry::select(providers,
+        {quickhull.id,quickhull.version},unsupported));
+    CHECK(std::holds_alternative<registry::Rejection>(rejected));
+}
+
 TEST_CASE("catalogue resolver accepts a concrete four-dimensional point cloud profile") {
     auto lp_result = adapters::lp::make_highs_registration();
     REQUIRE(std::holds_alternative<registry::Registration<registry::LPPort>>(lp_result));

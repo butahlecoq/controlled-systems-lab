@@ -22,7 +22,8 @@
       "report_routes": [],
       "examples": [
         "square_duplicates",
-        "collinear_endpoints"
+        "collinear_endpoints",
+        "source-index-geometry-2d"
       ],
       "implementation_issues": [
         23
@@ -42,7 +43,8 @@
       ],
       "report_routes": [],
       "examples": [
-        "saved-figure-btulshor-source-faithful"
+        "saved-figure-btulshor-source-faithful",
+        "source-index-geometry-2d"
       ],
       "implementation_issues": [
         2,

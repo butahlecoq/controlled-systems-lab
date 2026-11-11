@@ -175,6 +175,7 @@ template<class Port> class BoundWorkspace final : public ExclusiveWorkspace {
     std::shared_ptr<const typename Port::Request> request_;
     std::unique_ptr<typename Port::Workspace> workspace_;
     std::unique_ptr<BasisDiagnostics> basis_;
+    std::function<void(const LinearProgram&, const ProgramOutcome&)> lp_query_observer_;
     friend struct detail::PipelineAccess;
     BoundWorkspace(std::shared_ptr<const typename Port::Request> request,
         std::unique_ptr<typename Port::Workspace> workspace, std::unique_ptr<BasisDiagnostics> basis)
@@ -195,7 +196,14 @@ public:
     }
     ProgramOutcome solve_dependency(const LinearProgram& program, const ExecutionContext& context)
         requires std::is_same_v<Port,LPPort> {
-        return workspace_->solve(program,context);
+        auto outcome=workspace_->solve(program,context);
+        if(lp_query_observer_) lp_query_observer_(program,outcome);
+        return outcome;
+    }
+    void set_lp_query_observer(
+            std::function<void(const LinearProgram&, const ProgramOutcome&)> observer)
+        requires std::is_same_v<Port,LPPort> {
+        lp_query_observer_=std::move(observer);
     }
     const BasisDiagnostics* basis() const { return basis_.get(); }
     const WorkspaceIdentity& workspace_identity() const noexcept requires std::is_same_v<Port,LPPort> {
