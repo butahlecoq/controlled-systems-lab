@@ -103,10 +103,15 @@ class Viz10SavedPlotCompanionTests(unittest.TestCase):
                 self.assertEqual(hashlib.sha256((ROOT / path).read_bytes()).hexdigest(), expected_hash, path)
             for name, expected_hash in manifest["figures"].items():
                 self.assertEqual(hashlib.sha256((out / name).read_bytes()).hexdigest(), expected_hash, name)
-            self.assertIn("../../issue6-b07-reference-a394915af10636430cdcd757d95a9d987eaa6c4c0b742bef7ba1aa04638a2cdd/index.html",
-                          (out / "index.html").read_text(encoding="utf-8"))
-            self.assertIn("No solver, hull query, numerical experiment or benchmark ran during rendering",
-                          (out / "index.html").read_text(encoding="utf-8"))
+            page = (out / "index.html").read_text(encoding="utf-8")
+            self.assertIn("../../issue6-b07-reference-a394915af10636430cdcd757d95a9d987eaa6c4c0b742bef7ba1aa04638a2cdd/index.html", page)
+            self.assertIn('href="../../index.html">Learn</a>', page)
+            self.assertIn('href="../index.html">Examples</a>', page)
+            self.assertIn('href="../index.html#saved-report-figures">Saved report figures</a>', page)
+            self.assertIn("<style>", page)
+            self.assertIn((ROOT / "docs/examples/examples.css").read_text(encoding="utf-8"), page)
+            self.assertNotIn('href="../examples.css"', page)
+            self.assertIn("No solver, hull query, numerical experiment or benchmark ran during rendering", page)
 
 
 if __name__ == "__main__":

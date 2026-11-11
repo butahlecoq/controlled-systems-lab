@@ -9,7 +9,7 @@
 </head>
 <body><a class="skip" href="#main">Skip to example</a>
 <main id="main" class="page-content">
-<nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li><a href="../index.html">Research archive</a></li><li><a href="index.html">Learning examples</a></li><li aria-current="page">Fixed-plan minimax</li></ol></nav>
+<nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li><a href="../index.html">Learn</a></li><li><a href="index.html">Examples</a></li><li aria-current="page">Fixed-plan minimax</li></ol></nav>
 <h1>Choose one action before the disturbance</h1>
 <p>This one-stage scalar problem fixes the action before the unknown disturbance is revealed. The state evolves as <code>x₁=x₀+u+w</code> from <code>x₀=0</code>, with action catalogue <code>{0,1}</code>, disturbance vertices <code>{0,2}</code>, and safe set <code>−10≤x≤10</code> at both stages.</p>
 <img src="fixed-plan-minimax-2d.svg" alt="Two fixed actions and their disturbance-dependent state trajectories">
@@ -20,7 +20,7 @@
 <pre><code>cmake -S . -B build/core -DCSL_BUILD_ISSUE422_REPORT=ON
 cmake --build build/core --target csl_issue422_fixed_plan_comparison --parallel 4
 build/core/csl_issue422_fixed_plan_comparison</code></pre>
-<p><a href="../../benchmarks/reporting/issue422/results/finite-plan-comparison.json">Saved comparison record and raw timings</a> · <a href="../../benchmarks/reporting/issue422/fixed_plan_comparison.cpp">Fixture, solvers and independent oracle source</a>.</p></details>
+<p><a href="../benchmarks/reporting/issue422/results/finite-plan-comparison.json">Saved comparison record and raw timings</a> · <a href="../benchmarks/reporting/issue422/fixed_plan_comparison.cpp">Fixture, solvers and independent oracle source</a>.</p></details>
 <p>Timings are exploratory for this tiny fixture and do not establish a performance winner or scalability result. The archived comparison contains all 14 attempts.</p>
 </main>
 </body>

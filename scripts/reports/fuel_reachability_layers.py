@@ -465,10 +465,9 @@ def render(record_path: Path, output_dir: Path) -> list[Path]:
         (primary_cards if key in {"x1-x2", "x3-x4"} else supplementary_cards).append(card)
     html_path = output_dir / "index.html"
     page = (site_design.page_start("Fuel reachability layers",
-                                   stylesheet_href="../examples.css",
                                    main_class="page-content fuel-layers",
-                                   crumbs=[("Research archive", "../../index.html"),
-                                           ("Learning examples", "../index.html"),
+                                   crumbs=[("Learn", "../../index.html"),
+                                           ("Examples", "../index.html"),
                                            ("Fuel reachability", "index.html")])
             + '<h1>Forward and backward fuel reachable sets</h1>'
             + '<p class="note">The main plots are the oxidizer flow/stock projection (x₁,x₂) and fuel flow/stock projection (x₃,x₄). '

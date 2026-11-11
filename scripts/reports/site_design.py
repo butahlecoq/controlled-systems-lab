@@ -19,13 +19,16 @@ def stylesheet_link(href: str = "examples.css") -> str:
     return '<link rel="stylesheet" href="' + escape(href, quote=True) + '">'
 
 
-def breadcrumbs(items: Iterable[tuple[str, str]]) -> str:
+def breadcrumbs(items: Iterable[tuple[str, str]], *, current_href: str | None = None) -> str:
     """Render named route steps; the final item is the current page."""
     links = list(items)
     parts = ['<nav class="breadcrumbs" aria-label="Breadcrumb"><ol>']
     for index, (label, href) in enumerate(links):
         if index == len(links) - 1:
-            parts.append('<li aria-current="page">' + escape(label) + '</li>')
+            current = escape(label)
+            if current_href is not None:
+                current = '<a href="' + escape(current_href, quote=True) + '">' + current + '</a>'
+            parts.append('<li aria-current="page">' + current + '</li>')
         else:
             parts.append('<li><a href="' + escape(href, quote=True) + '">' + escape(label) + '</a></li>')
     parts.append('</ol></nav>')
@@ -54,15 +57,18 @@ def lesson_neighbors(previous: tuple[str, str] | None,
     return ''.join(parts)
 
 
-def page_start(title: str, *, stylesheet_href: str = "examples.css",
-               crumbs: Iterable[tuple[str, str]] = (), main_class: str = "page-content") -> str:
+def page_start(title: str, *, stylesheet_href: str | None = None,
+               crumbs: Iterable[tuple[str, str]] = (), main_class: str = "page-content",
+               current_href: str | None = None) -> str:
     """Start a responsive standalone page using the shared site appearance."""
     escaped_title = escape(title)
-    nav = breadcrumbs(crumbs) if crumbs else ''
+    nav = breadcrumbs(crumbs, current_href=current_href) if crumbs else ''
+    stylesheet_tag = (stylesheet_link(stylesheet_href) if stylesheet_href is not None
+                      else '<style>\n' + stylesheet().decode("utf-8") + '\n</style>')
     return ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
             '<meta name="viewport" content="width=device-width,initial-scale=1">'
             '<title>' + escaped_title + '</title>'
-            + stylesheet_link(stylesheet_href) + '</head><body><a class="skip" href="#main">Skip to content</a>'
+            + stylesheet_tag + '</head><body><a class="skip" href="#main">Skip to content</a>'
             '<main id="main" class="' + escape(main_class, quote=True) + '">' + nav)
 
 

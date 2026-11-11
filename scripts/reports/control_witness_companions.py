@@ -923,8 +923,8 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
 
     outputs["control-witness-timing-v1.html"] = (
         site_design.page_start("Saved control report timing figures", main_class="page-content control-witness-page",
-                               crumbs=[("Research archive", "../index.html"),
-                                       ("Learning examples", "index.html"),
+                               crumbs=[("Learn", "../index.html"),
+                                       ("Examples", "index.html"),
                                        ("Saved report figures", "index.html#saved-report-figures"),
                                        ("Control report timings", "control-witness-timing-v1.html")])
         + '<h1>Saved control report timing figures</h1>' + ''.join(timing_cards) + site_design.page_end()).encode()
@@ -1000,8 +1000,8 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
     outputs["control-witness-v1.html"] = (
         site_design.page_start("Saved control figures · Controlled Systems Lab",
                                main_class="page-content control-witness-page",
-                               crumbs=[("Research archive", "../index.html"),
-                                       ("Learning examples", "index.html"),
+                               crumbs=[("Learn", "../index.html"),
+                                       ("Examples", "index.html"),
                                        ("Saved report figures", "index.html#saved-report-figures"),
                                        ("Control and witness figures", "control-witness-v1.html")])
         + '<h1>Saved control and witness figures</h1>'

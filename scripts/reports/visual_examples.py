@@ -600,8 +600,8 @@ def issue3_control_walkthrough(record_path, report_id):
             '<title>One saved control task from input to verified result</title>'
             '<link rel="stylesheet" href="examples.css"></head><body><a class="skip" href="#main">Skip to walkthrough</a>'
             '<main id="main" class="walkthrough page-content">'
-            + site_design.breadcrumbs([("Research archive", "../index.html"),
-                                       ("Learning examples", "index.html"),
+            + site_design.breadcrumbs([("Learn", "../index.html"),
+                                       ("Examples", "index.html"),
                                        ("Algorithm coverage", "index.html#algorithm-coverage"),
                                        ("One finite-action task", "issue3-control-walkthrough.html")])
             + '<p class="eyebrow">Saved validated API run · Issue #3</p>'
@@ -900,8 +900,8 @@ def build(catalog, site):
             '<p class="eyebrow">Learn by looking</p>'
             f'<a class="nav-shortcut" href="#{last_topic_anchor}">Jump to final example: {escape(last_topic_title)} ↓</a>'
             '<nav aria-label="Examples topics" tabindex="0">' + navigation +
-            '<a href="../index.html">All numerical reports ↗</a></nav></aside><main id="main">'
-            '<header>' + site_design.breadcrumbs([("Research archive", "../index.html"), ("Learning examples", "index.html")])
+            '<a href="../index.html">Learn</a></nav></aside><main id="main">'
+            '<header>' + site_design.breadcrumbs([("Learn", "../index.html"), ("Examples", "index.html")])
             + '<p class="eyebrow">Small inputs / visible answers</p><h1>Algorithms,<br><em>in two dimensions.</em></h1>'
             '<p>See what goes in, what comes out, and why. Explore hull vertices, set intersections, hybrid control families, and projected reachability.</p>'
             '<p class="limits">These educational pages show reviewed saved outputs or explicit analytic constructions; '

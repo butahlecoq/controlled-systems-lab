@@ -505,8 +505,8 @@ def _companion_page(title: str, stem: str, report_id: str, summary: str,
     else:
         scaling = "Independent coordinate scales are disclosed."
     return (site_design.page_start(title_text + " · shared axis policy",
-                                   crumbs=[("Research archive", "../index.html"),
-                                           ("Learning examples", "index.html"),
+                                   crumbs=[("Learn", "../index.html"),
+                                           ("Examples", "index.html"),
                                            ("Saved report figures", "index.html#saved-report-figures"),
                                            (title_text, stem + ".html")])
             + '<p class="eyebrow">Saved-data companion · shared quantitative axes</p>'
@@ -565,8 +565,8 @@ def lotka_volterra_companion(record_path: Path, style_path: Path) -> dict[str, b
     report_id = escape(record["report_id"], quote=True)
     source_commit = escape(record["source_commit"], quote=True)
     page = (site_design.page_start("Lotka–Volterra sample geometry · shared axis policy",
-                                   crumbs=[("Research archive", "../index.html"),
-                                           ("Learning examples", "index.html"),
+                                   crumbs=[("Learn", "../index.html"),
+                                           ("Examples", "index.html"),
                                            ("Saved report figures", "index.html#saved-report-figures"),
                                            ("Lotka–Volterra samples", "lotka-volterra-sampled-v1.html")])
             + '<p class="eyebrow">Saved-data companion · shared quantitative axes</p>'

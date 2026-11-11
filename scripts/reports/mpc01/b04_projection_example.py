@@ -135,8 +135,8 @@ def main() -> None:
     SVG.write_bytes((svg + "\n").encode("utf-8"))
     page = (site_design.page_start("B04 reference fuel trajectory projections",
                                    main_class="page-content",
-                                   crumbs=[("Research archive", "../index.html"),
-                                           ("Learning examples", "index.html"),
+                                   crumbs=[("Learn", "../index.html"),
+                                           ("Examples", "index.html"),
                                            ("Fuel reference projection", "index.html#visual-mpc01-b04-reference-projection"),
                                            ("B04 reference trajectory", "b04-reference-trajectory-projections.html")])
             + '<p class="eyebrow">Exact saved reference data, shown as an illustration</p>'

@@ -354,8 +354,8 @@ def build(output: Path) -> tuple[list[str], list[dict], list[str]]:
                           "report_id": report_id, "figure": svg_name,
                           "page": "geometry-optimization-v1.html#" + slug, "records": raw_name})
     page = (site_design.page_start("Geometry and optimization report plots",
-                                   crumbs=[("Research archive", "../index.html"),
-                                           ("Learning examples", "index.html"),
+                                   crumbs=[("Learn", "../index.html"),
+                                           ("Examples", "index.html"),
                                            ("Saved report figures", "index.html#saved-report-figures"),
                                            ("Geometry and optimization", "geometry-optimization-v1.html")])
             + '<h1>Geometry and optimization report plots</h1><p>Presentation companions rendered from immutable saved report records. '

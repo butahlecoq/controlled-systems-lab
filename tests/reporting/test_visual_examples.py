@@ -438,6 +438,8 @@ class GalleryTests(unittest.TestCase):
             f'{last_topic_title} ↓</a>', page)
         self.assertNotIn("scrollIntoView", page)
         self.assertIn('<nav aria-label="Examples topics" tabindex="0">', page)
+        self.assertIn('<a href="../index.html">Learn</a>', page)
+        self.assertIn('<li aria-current="page">Examples</li>', page)
         self.assertIn(f'<article class="saved-figure" id="{last_anchor}">', page)
         fuel_page = self.site / "examples/fuel-b06-viz03.html"
         self.assertTrue(fuel_page.is_file())

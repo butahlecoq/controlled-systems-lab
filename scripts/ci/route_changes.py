@@ -35,6 +35,9 @@ PRESENTATION_FILES = {
     "tests/reporting/test_visual_examples.py",
     "tests/reporting/test_visual_route_inventory.py",
     "tests/reporting/test_render_adaptive_ode_example.py",
+    "tests/reporting/test_fuel_reachability_layers.py",
+    "tests/reporting/test_viz10_plot_companions.py",
+    "tests/reporting/test_landing.py",
 }
 SAVED_REPORTS = "reports/algorithm-results/"
 EXECUTABLE_REPORT_TOOLS = SAVED_REPORTS + "tooling/"

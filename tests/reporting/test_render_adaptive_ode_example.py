@@ -41,6 +41,54 @@ class AdaptiveOdeRendererPathTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("renderer output or sidecar would overwrite", result.stderr)
 
+    def test_custom_svg_output_has_local_figure_csv_and_stylesheet(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            svg = directory / "custom.svg"
+            original = RECORD.read_bytes()
+
+            result = subprocess.run(
+                [sys.executable, str(RENDERER), "--record", str(RECORD),
+                 "--output", str(svg)],
+                cwd=ROOT, capture_output=True, text=True, check=False)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            html_path = directory / "custom.html"
+            csv_path = directory / "custom.csv"
+            self.assertTrue(svg.is_file())
+            self.assertTrue(html_path.is_file())
+            self.assertTrue(csv_path.is_file())
+            self.assertTrue((directory / "custom.json").is_file())
+            page = html_path.read_text(encoding="utf-8")
+            self.assertIn('href="custom.html"', page)
+            self.assertIn('src="custom.svg"', page)
+            self.assertIn('href="custom.csv"', page)
+            self.assertIn("<style>", page)
+            self.assertIn(Path(ROOT / "docs/examples/examples.css").read_text(encoding="utf-8"), page)
+            self.assertNotIn('href="examples.css"', page)
+            self.assertEqual(csv_path.read_bytes(), original)
+            self.assertEqual(RECORD.read_bytes(), original)
+
+    def test_custom_output_refuses_to_replace_unrelated_csv_sidecar(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            svg = directory / "custom.svg"
+            csv_path = directory / "custom.csv"
+            unrelated = b"keep this unrelated CSV exactly as written\n"
+            csv_path.write_bytes(unrelated)
+
+            result = subprocess.run(
+                [sys.executable, str(RENDERER), "--record", str(RECORD),
+                 "--output", str(svg)],
+                cwd=ROOT, capture_output=True, text=True, check=False)
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("CSV sidecar already exists", result.stderr)
+            self.assertEqual(csv_path.read_bytes(), unrelated)
+            self.assertFalse(svg.exists())
+            self.assertFalse((directory / "custom.html").exists())
+            self.assertFalse((directory / "custom.json").exists())
+
 
 if __name__ == "__main__":
     unittest.main()

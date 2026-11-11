@@ -1151,7 +1151,7 @@
     },
     {
       "source": "scripts/reports/render_adaptive_ode_example.py",
-      "signal_count": 6,
+      "signal_count": 5,
       "asset_name_literals": [
         "adaptive-ode-replay.svg"
       ],

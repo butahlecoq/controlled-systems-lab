@@ -299,10 +299,9 @@ def build(out: Path) -> None:
                      f'<figcaption>{report_link}<a href="{name}.svg">SVG</a> · <a href="{name}.png" download>PNG</a> · '
                      f'<a href="{name}-export.json">source and export hashes</a></figcaption></figure></section>')
     page = (site_design.page_start("VIZ-10 saved-data plot companions",
-                                   stylesheet_href="../examples.css",
                                    main_class="page-content viz10-page",
-                                   crumbs=[("Research archive", "../../index.html"),
-                                           ("Learning examples", "../index.html"),
+                                   crumbs=[("Learn", "../../index.html"),
+                                           ("Examples", "../index.html"),
                                            ("Saved report figures", "../index.html#saved-report-figures"),
                                            ("VIZ-10 saved plots", "index.html")])
             + '<h1>VIZ-10: saved-data plot companions</h1>'

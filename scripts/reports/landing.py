@@ -667,9 +667,9 @@ def page(entries, extras=None, *, shared_shell=False) -> str:
                    + site_design.stylesheet().decode("utf-8") + '\n</style></head>'
                    '<body><a class="skip" href="#main">Skip to archive</a>'
                    '<main id="main" class="report-home">'
-                   + site_design.breadcrumbs([("Controlled Systems Lab", "index.html"),
-                                              ("Research archive", "index.html")])
-                   + '<p class="eyebrow">Controlled Systems Lab &middot; research archive</p>')
+                   + site_design.breadcrumbs([("Learn", "index.html"),
+                                              ("Evidence archive", "archive.html")])
+                   + '<p class="eyebrow">Controlled Systems Lab &middot; evidence archive</p>')
         closing = '</main></body></html>'
     else:
         opening = ('<!doctype html><html lang="en"><head><meta charset="utf-8">'
