@@ -7,7 +7,7 @@ not redefine publication validity. The bridge preserves the pure planning,
 check-before-snapshot and dependency-before-factory contracts below.
 
 CORE-04 adds `<csl/registry/registry.hpp>` and the installed `CSL::registry`
-target. The current [native interface revision is 1.9](core-interfaces.md).
+target. The current [native interface revision is 1.10](core-interfaces.md).
 This is a C++20 source interface for compatible in-process toolchains. It
 provides no portable C++ ABI, loader, global registry, fallback algorithm or
 production optimization implementation.
@@ -26,6 +26,22 @@ with the incoming requested identity and the already registered actual identity.
 Empty IDs/versions and absent callbacks reject at registration. A method request
 can pin a version; mismatch never selects a different version silently. Unknown
 methods remain explicitly unresolved in `Rejection::provenance.actual`.
+
+`enumerate_strategy_candidates()` builds a finite strategy candidate set from
+actual registry identities for one concrete problem/family request. It calls
+`StrategyRegistry::prepare()` for every row and retains either the prepared
+strategy with requested/actual preparation provenance or the first rejection.
+Route-declared inactive slots are recorded as `not_used`; populated active
+selections and the actual prepared dependency path remain part of the graph
+identity. Strategy B activates LP, Convex, and representation slots; its hull,
+geometry, conversion, approximation, and selector slots are `not_used`. Strategy
+A captures its dependencies in the strategy registration and reports them in
+prepared provenance. Before executing a generated request,
+`prepare_strategy_candidate()` checks the request against the graph and calls
+`prepare()` again. Successful preparation proves admission for that concrete
+request, not successful synthesis or controller execution. Prepared dependency
+provenance records selections made during admission; invocation counts require
+separate execution instrumentation.
 
 The existing mathematical interfaces have separate `LPPort`, `ConvexPort`,
 `GeometryPort`, `ConversionPort`, `ApproximationPort`, `SelectorPort` and

@@ -516,6 +516,8 @@ registry::StrategyRegistration make_registration(Providers providers) {
         // still reject unsupported coverage/profile requests with scoped diagnostics.
         return registry::StrategyRegistration::CompleteFamilyVerifierKey{{"csl.verifier.ts01-analytic"},"1"};
     };
+    registration.active_configuration_slots = std::vector{
+        registry::StrategyRegistration::ConfigurationSlot::representation};
     return registration;
 }
 }

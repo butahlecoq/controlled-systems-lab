@@ -102,8 +102,10 @@ std::variant<PreparedHullCandidate,registry::Rejection> prepare_hull_candidate(
     registry::Registry<registry::LPPort> lp_registry;
     if (const auto rejection = lp_registry.add(catalogue.vertex_lp_))
         return *rejection;
+    registry::Requirements lp_requirements;
+    lp_requirements.output.representation = {"csl.program-result.v1"};
     auto lp_preparation = registry::prepare_provider(registry::select_provider(lp_registry,
-        {graph.vertex_lp.id,graph.vertex_lp.version}));
+        {graph.vertex_lp.id,graph.vertex_lp.version},lp_requirements));
     if (const auto* rejection = std::get_if<registry::Rejection>(&lp_preparation))
         return *rejection;
 
@@ -128,7 +130,7 @@ HullCandidateExecution run_hull_candidate(PreparedHullCandidate candidate,
     auto workspaces = candidate.reducer.create();
     registry::RegisteredLPQueryRunner runner(std::move(candidate.vertex_lp));
     auto reduction = std::get<0>(workspaces)->run_with(context,runner);
-    return {std::move(candidate.graph),std::move(candidate.provenance),std::move(reduction),
+    return {std::move(candidate.graph),std::move(candidate.prepared_providers),std::move(reduction),
         runner.records()};
 }
 

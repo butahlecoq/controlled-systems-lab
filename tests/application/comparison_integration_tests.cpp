@@ -12,6 +12,7 @@
 #include <csl/geometry/approximation.hpp>
 #include <csl/geometry/box_parallelotope.hpp>
 #include <csl/problem/validator.hpp>
+#include <csl/registry/strategy_catalogue.hpp>
 #include <csl/sets/data.hpp>
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
@@ -1056,6 +1057,69 @@ TEST_CASE("application preparation retains provider registries after module asse
     CHECK(workspaces[0] != nullptr);
     CHECK(workspaces[1] != nullptr);
 }
+
+TEST_CASE("strategy catalogue canonicalizes inactive Strategy B axes from its real prepared route") {
+    const auto problem = source("ts01_exact_integrator");
+    const auto comparison = request_for(problem,"ts01_exact_integrator");
+    auto registered = modules();
+    registry::StrategyRequest concrete{problem,comparison.strategies[1],comparison.family,"1",{}};
+    registry::Requirements requirements;
+    requirements.output.representation = concrete.family.representation;
+    requirements.output.assurance = concrete.family.assurance;
+    const auto rows = registry::enumerate_strategy_candidates(registered.strategies,concrete,requirements);
+    const auto strategy_a = std::find_if(rows.begin(),rows.end(),[](const auto& row) {
+        return row.graph.strategy.id.value == "csl.synthesis.reach-back";
+    });
+    REQUIRE(strategy_a != rows.end());
+    if (strategy_a->rejection && !strategy_a->rejection->diagnostics.empty()) {
+        INFO(strategy_a->rejection->diagnostics.front().field << ": " <<
+            strategy_a->rejection->diagnostics.front().explanation);
+    }
+    REQUIRE(strategy_a->status == registry::CandidateStatus::admitted);
+    REQUIRE(strategy_a->provenance.size() > 1);
+    CHECK(std::all_of(strategy_a->provenance.begin() + 1,strategy_a->provenance.end(),
+        [](const auto& provider) { return provider.actual.has_value(); }));
+    auto strategy_a_request = concrete;
+    strategy_a_request.configuration.strategy = strategy_a->graph.strategy.id;
+    CHECK(std::holds_alternative<registry::PreparedStrategyCandidate>(
+        registry::prepare_strategy_candidate(registered.strategies,strategy_a->graph,
+            strategy_a_request,requirements)));
+    const auto found = std::find_if(rows.begin(),rows.end(),[](const auto& row) {
+        return row.graph.strategy.id.value == "csl.synthesis.strategy-b";
+    });
+    REQUIRE(found != rows.end());
+    if (found->rejection && !found->rejection->diagnostics.empty()) {
+        INFO(found->rejection->diagnostics.front().field << ": " <<
+            found->rejection->diagnostics.front().explanation);
+    }
+    REQUIRE(found->status == registry::CandidateStatus::admitted);
+    CHECK((found->graph.module_slots[3] == std::pair<std::string,std::string>{"hull","not_used"}));
+    CHECK((found->graph.module_slots[4] == std::pair<std::string,std::string>{"geometry","not_used"}));
+    CHECK((found->graph.module_slots[5] == std::pair<std::string,std::string>{"converter","not_used"}));
+    CHECK((found->graph.module_slots[6] == std::pair<std::string,std::string>{"approximation","not_used"}));
+    CHECK((found->graph.module_slots[7] == std::pair<std::string,std::string>{"selector","not_used"}));
+
+    auto inactive_changed = concrete;
+    inactive_changed.configuration.hull = {"unused-by-strategy-b"};
+    inactive_changed.configuration.converter = {"unused-converter-by-strategy-b"};
+    const auto alias = registry::prepare_strategy_candidate(registered.strategies,
+        found->graph,inactive_changed,requirements);
+    REQUIRE(std::holds_alternative<registry::PreparedStrategyCandidate>(alias));
+
+    auto active_changed = concrete;
+    active_changed.configuration.lp = {"csl.lp.unregistered"};
+    CHECK(std::holds_alternative<registry::Rejection>(registry::prepare_strategy_candidate(
+        registered.strategies,found->graph,active_changed,requirements)));
+    active_changed = concrete;
+    active_changed.configuration.convex = {"csl.convex.unregistered"};
+    CHECK(std::holds_alternative<registry::Rejection>(registry::prepare_strategy_candidate(
+        registered.strategies,found->graph,active_changed,requirements)));
+    active_changed = concrete;
+    active_changed.strategy_version = "substituted-version";
+    CHECK(std::holds_alternative<registry::Rejection>(registry::prepare_strategy_candidate(
+        registered.strategies,found->graph,active_changed,requirements)));
+}
+
 TEST_CASE("application selected methods preserve versions and share verification") {
     const auto problem = source("ts01_exact_integrator");
     auto paired_request = request_for(problem, "ts01_exact_integrator");

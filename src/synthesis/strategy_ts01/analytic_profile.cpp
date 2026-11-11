@@ -85,7 +85,7 @@ public:
 };
 
 registry::StrategyRegistration make_registration() {
-    return {{ModuleId{strategy_id},strategy_version},
+    registry::StrategyRegistration registration{{ModuleId{strategy_id},strategy_version},
         [](const registry::StrategyRequest& request,const registry::Requirements&)->registry::Capability {
             if(registry::detail::ts01_partial_profile_valid(request.problem,request)) {
                 registry::Output output;output.representation=h_polyhedron;output.assurance=Assurance::numerical;
@@ -106,6 +106,9 @@ registry::StrategyRegistration make_registration() {
         },
         registry::StrategyRegistration::CompleteFamilyVerifierKey{ModuleId{"csl.verifier.ts01-analytic"},"1"},
         {},registry::StrategyRegistration::PartialFamilyVerifierKey{ModuleId{"csl.verifier.ts01-midpoint"},"1"}};
+    registration.active_configuration_slots = std::vector{
+        registry::StrategyRegistration::ConfigurationSlot::representation};
+    return registration;
 }
 
 MidpointJointRelation::MidpointJointRelation(sets::SetData h_polyhedron):h_polyhedron_(std::move(h_polyhedron)) {}

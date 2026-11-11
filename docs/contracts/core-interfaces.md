@@ -1,4 +1,10 @@
-# Native interfaces, revision 1.9
+# Native interfaces, revision 1.10
+
+Revision 1.10 adds request-profile strategy candidate enumeration. It snapshots
+the registered strategy identities, prepares each candidate against a concrete
+request, and returns the actual dependency provenance or the first rejection.
+An admitted candidate must be prepared again for each generated request before
+execution.
 
 Revision 1.9 adds ordered `identities()` snapshots to `Registry<Port>` and
 `StrategyRegistry`. The snapshot reports the actual ID and version for each
