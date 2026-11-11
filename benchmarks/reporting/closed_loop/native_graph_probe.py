@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import itertools
 import json
 import subprocess
@@ -191,6 +192,21 @@ def main() -> None:
             "completed_operation_count": sum(call["outcome"] == "completed" for call in calls),
             "failed_operation_count": sum(call["outcome"] != "completed" for call in calls)}
 
+    capacity_failure_request = copy.deepcopy(provider_trials["source-quickhull"]["request"])
+    capacity_failure_request["controller_id"] = "analytic-provider-checker-capacity-refusal"
+    capacity_failure_request["request_id"] = "analytic-provider-checker-capacity-refusal"
+    capacity_failure_request["checker_budget"]["max_points"] = 1
+    capacity_failure_response = execute(bridge, capacity_failure_request)
+    capacity_failure_calls = capacity_failure_response.get("geometry_invocations", [])
+    assert capacity_failure_response["status"] == "unsupported"
+    assert capacity_failure_response["geometry_selection"]["reachable_set_method"]["id"] == \
+        "csl.geometry.affine-sum.source-index"
+    assert len(capacity_failure_calls) == 2
+    assert capacity_failure_calls[0]["outcome"] == "completed"
+    assert capacity_failure_calls[1]["outcome"] == "unsupported"
+    assert "capacity" in capacity_failure_calls[1]["diagnostics"]
+    assert "manifest was not materialized" in capacity_failure_calls[1]["diagnostics"]
+
     record = {"schema": "csl.closed-loop.analytic-backward-graph-probe/1",
         "bridge": str(bridge), "viability_case": {"request": viable_request, "response": viable_response,
             "independent_histories": paths, "unconstrained_best": unconstrained_best,
@@ -205,6 +221,9 @@ def main() -> None:
             "interior_stage_node_retained": center_node,
             "interpretation": "the state produced by the authored center action is interior to the two endpoint states but remains a distinct witnessed node; the graph does not hull-deduplicate or splice its lineage"},
         "geometry_provider_trials": provider_trials,
+        "checker_capacity_refusal": {"request": capacity_failure_request,
+            "response": capacity_failure_response,
+            "failure_semantics": "the independently selected checker rejects before an oversized generated cloud is materialized; the refusal and actual source-index provider invocation remain recorded, and no cloud digest is claimed"},
         "optimizer_selection": {"control_selector": {
                 "requested_method": viable_request["control_optimizer"],
                 "actual_method": "csl.optimization.finite-action-stage-layered-graph@1.0.0",
