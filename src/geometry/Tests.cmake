@@ -184,3 +184,8 @@ if(TARGET CSL::highs_lp)
   add_test(NAME affine_sum_public_client COMMAND affine_sum_public_client)
   csl_test_target(affine_sum_public_client geometry)
 endif()
+
+add_executable(source_index_affine_sum_public_client tests/installed/source_index_affine_sum_client.cpp)
+target_link_libraries(source_index_affine_sum_public_client PRIVATE CSL::affine_sum)
+add_test(NAME source_index_affine_sum_public_client COMMAND source_index_affine_sum_public_client)
+csl_test_target(source_index_affine_sum_public_client geometry)
