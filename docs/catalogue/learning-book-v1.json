@@ -294,7 +294,7 @@
       ],
       "source": "simplex-and-comparators.html",
       "summary": "Check every input point, including interior points, edge points, and duplicates. KPABEP/MODIF preserve source order, pivots, epsilon, and stops. QuickHull is a distinct modern comparator. Saved timings do not imply a general speedup.",
-      "mathematical_input": "The ordered cloud is [(0,0),(1,0),(1,1),(0,1),(0.5,0),(0,0),(1/3,1/3)]. The affine map is (x,y) ↦ (x+0.25, 0.5x+y−0.5). The one-step sum adds x0=(0.25,0.5) to the same control square.",
+      "mathematical_input": "The ordered cloud is [(0,0),(1,0),(1,1),(0,1),(0.5,0),(0,0),(1/3,1/3)]. The affine map is (x,y) ↦ (x+0.25, 0.5x+y−0.5). The one-step sum adds x0=(0.25,0.5) to the same control square. The BTULSHOR run also submits the cloud [(0,0),(1,0),(1,1),(0,1),(0.5,1.00000001)] under the identity affine map and retains its unsupported or stopped outcome. The separate installed legacy client uses MODIF A=[1,2,−1]ᵀ, x=[1,2,−1]ᵀ, initial status 1; KPABEP uses the square with center (0.5,0.5); REACH uses A=I, B=[1,2]ᵀ, initial vertices (0,0),(1,0) and control vertices 0,1.",
       "command": "ctest --test-dir build/dev -C Release -R \"^installed_public_client$\" --output-on-failure\nbuild/dev/installed-consumer/examples-build/source_index_geometry_2d quickhull\nbuild/dev/installed-consumer/examples-build/source_index_geometry_2d btulshor\nbuild/dev/installed-consumer/build/installed_legacy_btulshor_client",
       "expected_output": "Both source-index runs return affine-image vertices {(0.25,-0.5),(1.25,0),(1.25,1),(0.25,0.5)} and one-step-sum vertices {(0.25,0.5),(1.25,0.5),(1.25,1.5),(0.25,1.5)}. Each reports checker status=verified. The legacy consumer reports MODIF, KPABEP port and REACH source pairs passed.",
       "intermediate_geometry": "The affine map produces vertical edges at x=0.25 and x=1.25. Its lower-left vertex is below y=0. Adding x0=(0.25,0.5) to the unit control square produces the translated square [0.25,1.25]×[0.5,1.5].",
@@ -393,6 +393,166 @@
               0.5
             ]
           ]
+        },
+        {
+          "label": "BTULSHOR near-tolerance refusal cloud",
+          "rows": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0.5,
+              1.00000001
+            ]
+          ]
+        },
+        {
+          "label": "Near-tolerance affine map, also legacy REACH state map A",
+          "rows": [
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Near-tolerance affine offset",
+          "rows": [
+            [
+              0
+            ],
+            [
+              0
+            ]
+          ]
+        },
+        {
+          "label": "Installed legacy MODIF matrix A",
+          "rows": [
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              -1
+            ]
+          ]
+        },
+        {
+          "label": "Installed legacy MODIF initial x",
+          "rows": [
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              -1
+            ]
+          ]
+        },
+        {
+          "label": "Installed legacy KPABEP input cloud",
+          "rows": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0.5,
+              0.5
+            ]
+          ]
+        },
+        {
+          "label": "Installed legacy REACH control map B",
+          "rows": [
+            [
+              1
+            ],
+            [
+              2
+            ]
+          ]
+        },
+        {
+          "label": "Installed legacy REACH initial vertices",
+          "rows": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        {
+          "label": "Installed legacy REACH control vertices",
+          "rows": [
+            [
+              0
+            ],
+            [
+              1
+            ]
+          ]
+        }
+      ],
+      "mathematical_tables": [
+        {
+          "label": "Legacy algorithm input and refusal settings",
+          "columns": [
+            "input",
+            "value"
+          ],
+          "rows": [
+            [
+              "MODIF initial status",
+              "1"
+            ],
+            [
+              "source-index independent checker budget",
+              "5000 ms, at most 64 points"
+            ],
+            [
+              "near-tolerance attempted operation",
+              "identity affine image; unsupported or stopped, not a successful hull"
+            ]
+          ]
         }
       ]
     },
@@ -412,7 +572,7 @@
       ],
       "source": "terminal-optimization.html",
       "summary": "A Strategy A linear terminal program returns the complete minimum-cost segment. A separate convex residual-norm terminal program returns one numerical minimizer. Neither result is a vertex membership decision.",
-      "mathematical_input": "Linear terminal program: choose (x,y)∈[0,1]² with x+y≥1 and minimize x+y. Convex program: minimize ||[1,0]ᵀx−[3,−4]ᵀ|| for scalar 0≤x≤2; the adapter minimizes the squared norm.",
+      "mathematical_input": "Linear terminal program: choose (x,y)∈[0,1]² with x+y≥1 and minimize x+y. Convex program: minimize ||[1,0]ᵀx−[3,−4]ᵀ|| for scalar 0≤x≤2; the adapter minimizes the squared norm. The nominal one-step model has state map A=0, control map B=I, initial state (0,0), affine offset (0,0), and control box [0,1]².",
       "command": "ctest --test-dir build/dev -C Release -R \"^installed_public_client$\" --output-on-failure\nbuild/dev/installed-consumer/examples-build/nominal_linear_exact_2d\nbuild/dev/installed-consumer/examples-build/registered_convex",
       "expected_output": "profile=strategy-a.nominal-linear-exact-v1\nstate_dimension=2 control_dimension=2 horizon=1\nterminal_constraint=x+y>=1; 0<=x,y<=1\nobjective=minimize x+y\nexact_optimum=1 optimal_face={(x,y): x+y=1, 0<=x,y<=1}\nverified_complete_family=true assurance=numerical\nbackend=csl.convex.highs version=1.0.0+highs.1.11.0\nx=2 original_cost=4.123105626 squared_cost=17\ntermination=completed outcome=optimal evidence=unestablished\nNo certified bounds or optimal-family result.",
       "intermediate_geometry": "The linear feasible set is the unit square clipped by x+y≥1. Its minimum-cost face is the segment from (1,0) to (0,1). The convex residual-norm problem has a scalar feasible interval [0,2] and selects its right endpoint z=2.",
@@ -522,6 +682,56 @@
               2
             ]
           ]
+        },
+        {
+          "label": "One-step nominal state map A",
+          "rows": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "label": "One-step nominal control map B",
+          "rows": [
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Initial state and affine offset, both zero",
+          "rows": [
+            [
+              0
+            ],
+            [
+              0
+            ]
+          ]
+        },
+        {
+          "label": "Control box lower and upper bounds, rows for u and v",
+          "rows": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ]
         }
       ],
       "mathematical_conclusion": "LP result: {(x,y)=(s,1−s) : 0≤s≤1}, with x+y=1. The program and CTest verify the complete optimal face, not one selected point. The convex consumer returns x=2 for the squared residual objective.",
@@ -542,6 +752,25 @@
             "std::abs(check.solver_objective - 17)"
           ]
         }
+      ],
+      "mathematical_tables": [
+        {
+          "label": "Terminal optimization inputs",
+          "columns": [
+            "program",
+            "input"
+          ],
+          "rows": [
+            [
+              "one-step nominal LP",
+              "horizon 1; (x₁,y₁)=(u,v); initial state (0,0); (u,v)∈[0,1]²; minimize x₁+y₁"
+            ],
+            [
+              "convex terminal program",
+              "minimize ‖Ax−r‖₂; backend minimizes (x−3)²+16; no additional rows"
+            ]
+          ]
+        }
       ]
     },
     {
@@ -558,7 +787,7 @@
       "module_ids": [],
       "source": "same-geometry-five-representations.html",
       "summary": "This analytic calculation compares H/V polytopes, zonotopes, parallelotopes, ellipsoids and boxes on one square. Its Python script does not invoke CSL APIs.",
-      "mathematical_input": "Q=[-1,1]^2. H rows: ±x<=1, ±y<=1. V corners: (±1,±1). Z center 0, generators e1,e2. Parallelotope A[-1,1]^2 with A=I. E={x:xᵀx<=2}.",
+      "mathematical_input": "Q=[-1,1]^2. H rows: ±x<=1, ±y<=1. V corners: (±1,±1). Z center 0, generators e1,e2. Parallelotope A[-1,1]^2 with A=I. E={x:xᵀx<=2}. All centers are zero, generator coefficients lie in [−1,1], and support is evaluated in directions (1,0) and (1,1).",
       "command": "python3 scripts/reports/learning_geometry_toy.py",
       "expected_output": "d=(1.0, 0.0); exact_square=1; outer_disk=1.41421\nd=(1.0, 1.0); exact_square=2; outer_disk=2\npolytope=exact zonotope=exact parallelotope=exact ellipsoid=outer box=exact\nQ subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2",
       "intermediate_geometry": "At d=(1,0), Q support is 1 and the enclosing disk support is √2. At d=(1,1), both supports equal 2. Q⊂E⊂[-√2,√2]².",
@@ -672,6 +901,58 @@
               2
             ]
           ]
+        },
+        {
+          "label": "Common zonotope, parallelotope and ellipsoid center",
+          "rows": [
+            [
+              0
+            ],
+            [
+              0
+            ]
+          ]
+        },
+        {
+          "label": "Support query directions, one per row",
+          "rows": [
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Box lower and upper bounds, rows for x and y",
+          "rows": [
+            [
+              -1,
+              1
+            ],
+            [
+              -1,
+              1
+            ]
+          ]
+        }
+      ],
+      "mathematical_tables": [
+        {
+          "label": "Generator coefficient domain",
+          "columns": [
+            "representation",
+            "coefficient bounds"
+          ],
+          "rows": [
+            [
+              "zonotope and parallelotope",
+              "−1≤ξ₁,ξ₂≤1"
+            ]
+          ]
         }
       ]
     },
@@ -702,7 +983,7 @@
       ],
       "source": "representation-consumers.html",
       "summary": "Installed clients execute the public box, parallelotope, zonotope-reduction, and ellipsoid APIs on declared inputs. The box and parallelotope clients use the same diamond; the two other clients use their own specified sets.",
-      "mathematical_input": "The box/parallelotope client encloses a four-vertex diamond. The zonotope client reduces center 0 with generators e1, e2, and (0.5,0.5). The ellipsoidal client checks two outer members for a square.",
+      "mathematical_input": "The box/parallelotope client encloses a four-vertex diamond. The zonotope client reduces center 0 with generators e1, e2, and (0.5,0.5). The ellipsoidal client checks two outer members for a square. The diamond clients request four H rows and use the axis or displayed fixed direction matrix. The zonotope requests two generators with independent coefficients in [−1,1] and no factor constraints. Each directional ellipsoid member requests one outer ellipsoid; the family is their intersection. All vertex inputs have no rays.",
       "command": "ctest --test-dir build/dev -C Release -R \"^installed_public_client$\" --output-on-failure\nbuild/dev/installed-consumer/build/installed_box_approximation_client\nbuild/dev/installed-consumer/build/installed_box_parallelotope_client\nbuild/dev/installed-consumer/build/installed_zonotope_reduction_client\nbuild/dev/installed-consumer/build/installed_ellipsoidal_client",
       "expected_output": "Installed box approximation client: diamond is enclosed with bounds 2 on both axes\nInstalled box/parallelotope client: rotated diamond bounds passed\nInstalled zonotope client: independently admitted axis cover passed\nInstalled ellipsoidal client: two reviewed outer members passed",
       "intermediate_geometry": "Both the box and rotated parallelotope use the diamond with vertices (0,2),(2,0),(0,-2),(-2,0). The axis-aligned box is [-2,2]². The rotated parallelotope uses directions (1,1) and (1,-1) with bounds 2. The zonotope cover uses generators (1.5,0) and (0,1.5). The ellipsoid client checks two separately reviewed outer members.",
@@ -749,7 +1030,7 @@
           ]
         },
         {
-          "label": "Rotated parallelotope generator columns",
+          "label": "Fixed parallelotope direction matrix",
           "rows": [
             [
               1,
@@ -837,6 +1118,36 @@
             [
               "rotated",
               "[[1,1],[1,−1]]"
+            ]
+          ]
+        },
+        {
+          "label": "Approximation inputs",
+          "columns": [
+            "client",
+            "requested relation and budget",
+            "source domain"
+          ],
+          "rows": [
+            [
+              "box",
+              "outer, 4 H rows",
+              "convex hull of the diamond vertices; no rays"
+            ],
+            [
+              "parallelotope",
+              "outer, 4 H rows",
+              "same diamond; fixed direction matrix shown above"
+            ],
+            [
+              "zonotope axis cover",
+              "outer, 2 generators",
+              "−1≤ξ₁,ξ₂,ξ₃≤1; no factor constraints"
+            ],
+            [
+              "ellipsoid family",
+              "outer, 1 ellipsoid per member",
+              "convex hull of the square vertices; no rays; intersect both members"
             ]
           ]
         }
@@ -1164,7 +1475,18 @@
           ]
         },
         {
-          "label": "Complete optimal control family (u₀,u₁)=(s,1−s)",
+          "label": "Control bounds for each stage u₀,u₁ ∈ [0,1]",
+          "rows": [
+            [
+              0
+            ],
+            [
+              1
+            ]
+          ]
+        },
+        {
+          "label": "Endpoints of the optimal control segment (u₀,u₁)=(s,1−s), 0≤s≤1",
           "rows": [
             [
               0,
@@ -1173,6 +1495,29 @@
             [
               1,
               0
+            ]
+          ]
+        }
+      ],
+      "mathematical_tables": [
+        {
+          "label": "Controller optimization problem",
+          "columns": [
+            "quantity",
+            "value"
+          ],
+          "rows": [
+            [
+              "horizon",
+              "2 stages, k=0,1"
+            ],
+            [
+              "terminal objective",
+              "minimize (x₂−1)²"
+            ],
+            [
+              "complete optimal family",
+              "Complete optimal histories (x₀,x₁,x₂,u₀,u₁)=(0,s,1,s,1−s), 0≤s≤1"
             ]
           ]
         }
@@ -1421,7 +1766,7 @@
       ],
       "source": "optimization-backends.html",
       "summary": "An LP returns one optimizer; a membership query returns a predicate; finite minimax is scoped to its finite table. HiGHS is optional. Numerical solver output is not a certificate unless a separate verifier says so.",
-      "mathematical_input": "The primary installed convex input minimizes ||[1,0]ᵀx−[3,−4]ᵀ|| for scalar 0≤x≤2. The client also checks a second problem with one authored explicit-zero row.",
+      "mathematical_input": "Both installed convex problems minimize ‖Ax−b‖₂ with A=[1,0]ᵀ and b=[3,−4]ᵀ. The first has 0≤x≤2 and no rows. The second has 1≤x≤2 and the authored row 0≤0x≤0. The adapter minimizes the same squared objective (x−3)²+16 in both cases.",
       "command": "ctest --test-dir build/dev -C Release -R \"^installed_public_client$\" --output-on-failure\nbuild/dev/installed-consumer/build/installed_convex_client",
       "expected_output": "Installed convex client: original norm, squared provenance and numerical KKT passed",
       "intermediate_geometry": "The client retains a numerical solution and checks its objective provenance and KKT conditions. It is not the vertex-membership query, which uses the LP port.",
@@ -1440,7 +1785,7 @@
       "kind": "installed consumer",
       "mathematical_displays": [
         {
-          "label": "Residual map A for r(x)=Ax−b",
+          "label": "Residual map A for r(x)=Ax−b, shared by both programs",
           "rows": [
             [
               1
@@ -1451,7 +1796,7 @@
           ]
         },
         {
-          "label": "Residual target b",
+          "label": "Residual target b, shared by both programs",
           "rows": [
             [
               3
@@ -1462,7 +1807,7 @@
           ]
         },
         {
-          "label": "Scalar decision bounds",
+          "label": "First program scalar bounds 0≤x≤2",
           "rows": [
             [
               0
@@ -1473,9 +1818,22 @@
           ]
         },
         {
-          "label": "Explicit-zero row coefficients in the second client input",
+          "label": "Second program scalar bounds 1≤x≤2",
           "rows": [
             [
+              1
+            ],
+            [
+              2
+            ]
+          ]
+        },
+        {
+          "label": "Second program equality row 0≤0x≤0",
+          "rows": [
+            [
+              0,
+              0,
               0
             ]
           ]
@@ -1499,6 +1857,29 @@
               "convex adapter",
               "squared residual norm, 17 at x=2",
               "original norm √17, solver objective 17, KKT residuals"
+            ]
+          ]
+        },
+        {
+          "label": "Complete convex objectives",
+          "columns": [
+            "program",
+            "original objective",
+            "backend objective",
+            "additional rows"
+          ],
+          "rows": [
+            [
+              "first, 0≤x≤2",
+              "minimize ‖Ax−b‖₂",
+              "minimize (x−3)²+16",
+              "none"
+            ],
+            [
+              "second, 1≤x≤2",
+              "minimize ‖Ax−b‖₂",
+              "minimize (x−3)²+16",
+              "0≤0x≤0, columns above are lower bound, coefficient, upper bound"
             ]
           ]
         }
@@ -1620,7 +2001,7 @@
           ]
         },
         {
-          "label": "Force bounds [uᵣ,uₜ]ᵀ in N",
+          "label": "Bounds for each force component uᵣ,uₜ in N",
           "rows": [
             [
               -0.5

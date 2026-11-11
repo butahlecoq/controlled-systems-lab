@@ -183,6 +183,143 @@ Q subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2
             self.assertEqual((site / "examples/index.html").read_bytes(), gallery)
             self.assertEqual((site / "saved-report.zip").read_bytes(), b"frozen evidence bytes")
 
+    def test_built_primary_math_contains_runnable_fixture_values(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            site = Path(tmp)
+            index = site / "figure-index.json"
+            index.write_text(json.dumps(self.figures))
+            learning_book.build(site, figure_index_path=index)
+            expected = {
+                "install-consumer": [
+                    "Constraint matrix A for Ax ≤ b: -1, 0; 0, -1; 1, 1",
+                    "Constraint bounds b: 0; 0; 1",
+                    "Objective coefficients c, with constant 7: -1, -2",
+                ],
+                "coordinates-and-outcomes": [
+                    "Physical state x, rows [m_ox, m_f, q_ox, q_f]: 100; 30; 2; 0.6",
+                    "Raw scale vector s: 100; 30; 3; 1",
+                ],
+                "vertex-membership": [
+                    "Ordered V input. Row 4 is the midpoint candidate: 0, 0; 1, 0; 1, 1; 0, 1; 0.5, 0.5",
+                ],
+                "simplex-and-comparators": [
+                    "Ordered source cloud, one point per row: 0, 0; 1, 0; 1, 1; 0, 1; 0.5, 0; 0, 0; 0.3333333333333333, 0.3333333333333333",
+                    "Affine map matrix A: 1, 0; 0.5, 1",
+                    "Affine offset b: 0.25; -0.5",
+                    "One-step sum translation x₀: 0.25; 0.5",
+                    "BTULSHOR near-tolerance refusal cloud: 0, 0; 1, 0; 1, 1; 0, 1; 0.5, 1.00000001",
+                    "Near-tolerance affine map, also legacy REACH state map A: 1, 0; 0, 1",
+                    "Near-tolerance affine offset: 0; 0",
+                    "Installed legacy MODIF matrix A: 1; 2; -1",
+                    "Installed legacy MODIF initial x: 1; 2; -1",
+                    "<td>MODIF initial status</td><td>1</td>",
+                    "Installed legacy KPABEP input cloud: 0, 0; 1, 0; 1, 1; 0, 1; 0.5, 0.5",
+                    "Installed legacy REACH control map B: 1; 2",
+                    "Installed legacy REACH initial vertices: 0, 0; 1, 0",
+                    "Installed legacy REACH control vertices: 0; 1",
+                ],
+                "terminal-optimization": [
+                    "Terminal constraints Ax ≤ b in variables (x,y): -1, 0; 0, -1; -1, -1; 1, 0; 0, 1",
+                    "Terminal constraint bounds b: 0; 0; -1; 1; 1",
+                    "Terminal LP objective coefficients c: 1, 1",
+                    "Convex residual map A: 1; 0",
+                    "Convex residual target r: 3; -4",
+                    "Convex scalar bounds: 0; 2",
+                    "One-step nominal state map A: 0, 0; 0, 0",
+                    "One-step nominal control map B: 1, 0; 0, 1",
+                    "Initial state and affine offset, both zero: 0; 0",
+                    "Control box lower and upper bounds, rows for u and v: 0, 1; 0, 1",
+                    "{(x,y)=(s,1−s) : 0≤s≤1}",
+                ],
+                "same-geometry-five-representations": [
+                    "H representation: rows aᵢᵀ in Ax ≤ b: 1, 0; -1, 0; 0, 1; 0, -1",
+                    "H bounds b: 1; 1; 1; 1",
+                    "V representation: square vertices: -1, -1; 1, -1; 1, 1; -1, 1",
+                    "Zonotope generator columns G: 1, 0; 0, 1",
+                    "Parallelotope map A: 1, 0; 0, 1",
+                    "Ellipsoid shape matrix Q for xᵀQ⁻¹x ≤ 1: 2, 0; 0, 2",
+                    "Common zonotope, parallelotope and ellipsoid center: 0; 0",
+                    "Support query directions, one per row: 1, 0; 1, 1",
+                    "Box lower and upper bounds, rows for x and y: -1, 1; -1, 1",
+                    "−1≤ξ₁,ξ₂≤1",
+                ],
+                "representation-consumers": [
+                    "Shared diamond V input for box and parallelotope clients: 0, 2; 2, 0; 0, -2; -2, 0",
+                    "Fixed parallelotope direction matrix: 1, 1; 1, -1",
+                    "Zonotope generator columns before reduction: 1, 0, 0.5; 0, 1, 0.5",
+                    "Zonotope center: 0; 0",
+                    "Square V input for ellipsoid family: -1, -1; 1, -1; 1, 1; -1, 1",
+                    "<td>axis</td><td>[[1,0],[0,1]]</td>",
+                    "<td>rotated</td><td>[[1,1],[1,−1]]</td>",
+                    "−1≤ξ₁,ξ₂,ξ₃≤1; no factor constraints",
+                ],
+                "closed-loop-semantics": [
+                    "Scalar plant state update x[k+1]=Ax[k]+Bu[k]: 1",
+                    "Control input map B: 1",
+                    "Initial state and one-stage target: 0; 1",
+                    "u[k]=1−x[k]",
+                    "<td>0</td><td>0</td><td>1</td><td>1</td>",
+                    "<td>1</td><td>1</td><td>0</td><td>1</td>",
+                ],
+                "finite-controller-consumers": [
+                    "<td>0</td><td>yes</td><td>1</td>",
+                    "<td>1</td><td>yes</td><td>1</td>",
+                    "<td>0</td><td>yes</td><td>no</td>",
+                    "<td>1</td><td>yes</td><td>yes</td>",
+                    "<td>0</td><td>0</td><td>2</td>",
+                    "<td>1</td><td>1</td><td>1</td>",
+                ],
+                "set-operations": [
+                    "Unit-square H matrix A in Ax ≤ b: 1, 0; -1, 0; 0, 1; 0, -1",
+                    "Unit-square H bounds b: 1; 0; 1; 0",
+                    "Unit-square V vertices. The V-to-H client uses the same rows.: 0, 0; 1, 0; 1, 1; 0, 1",
+                    "Interval-sum V endpoints for [0,1]: 0; 1",
+                    "Integrator state map A: 1",
+                    "Integrator control map B: 1",
+                    "Target state: 2",
+                    "Admissible control interval endpoints: -1; 1",
+                    "<td>x ≤ 1</td><td>1</td>",
+                    "<td>−x ≤ 0</td><td>0</td>",
+                    "[0,1]+[0,1]=[0,2]",
+                ],
+                "lotka-capstone": [
+                    "Initial population state x₀=[P,R]ᵀ in thousand individuals: 120; 60",
+                    "Continuous control bound for u in 1/day: 0; 0.05",
+                ],
+                "orbit-capstone": [
+                    "Initial orbit state x₀=[r,v,θ,ω]ᵀ: 7000; 0; 0; 0.0010780614796240577",
+                    "Bounds for each force component uᵣ,uₜ in N: -0.5; 0.5",
+                ],
+                "fuel-capstone": [
+                    "Physical state x, rows [m_ox, m_f, q_ox, q_f]: 100; 30; 2; 0.6",
+                    "Oxidizer projection P_ox x = [q_ox, m_ox]^T: 0, 0, 1, 0; 1, 0, 0, 0",
+                    "Fuel projection P_f x = [q_f, m_f]^T: 0, 0, 0, 1; 0, 1, 0, 0",
+                ],
+                "controller-composition": [
+                    "Control bounds for each stage u₀,u₁ ∈ [0,1]: 0; 1",
+                    "<td>terminal objective</td><td>minimize (x₂−1)²</td>",
+                    "Complete optimal histories (x₀,x₁,x₂,u₀,u₁)=(0,s,1,s,1−s), 0≤s≤1",
+                ],
+                "optimization-backends": [
+                    "Residual map A for r(x)=Ax−b, shared by both programs: 1; 0",
+                    "Residual target b, shared by both programs: 3; -4",
+                    "First program scalar bounds 0≤x≤2: 0; 2",
+                    "Second program scalar bounds 1≤x≤2: 1; 2",
+                    "Second program equality row 0≤0x≤0: 0, 0, 0",
+                    "minimize ‖Ax−b‖₂",
+                    "(x−3)²+16",
+                ],
+            }
+            self.assertEqual(set(expected), {chapter["id"] for chapter in self.manifest["chapters"]
+                                             if chapter["status"] == "ready"})
+            for chapter_id, values in expected.items():
+                page = (site / f"learn/{chapter_id}.html").read_text()
+                primary = page.split('<section class="learning-math">', 1)[1].split('</section>', 1)[0]
+                self.assertNotIn('<details', primary)
+                for value in values:
+                    with self.subTest(chapter=chapter_id, value=value):
+                        self.assertIn(value, primary)
+
     def test_build_joins_and_copies_ready_recorded_figure_assets(self):
         entries = []
         for figure_id in ("fuel-state", "fuel-fuel-flow"):
