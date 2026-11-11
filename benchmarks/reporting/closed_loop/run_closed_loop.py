@@ -28,7 +28,7 @@ from contracts import ROOT, load_task, manifest_sha256
 from task_models import (make_held_step_request, make_replay_request, objective,
                          source_scenario, validate_held_step_response,
                          validate_source_binding)
-from capabilities import MANIFEST, resolve_graph, validate_resolved_graph, SIDECAR
+from capabilities import MANIFEST, NATIVE_MANIFEST, resolve_graph, validate_resolved_graph, manifest_digest
 
 HERE = Path(__file__).resolve().parent
 MPC11 = ROOT / "benchmarks/reporting/mpc11"
@@ -62,7 +62,8 @@ def prepare_graph(task: dict, graph: dict, bridge: Path) -> tuple[object | None,
     if graph["controller"].get("policy_factory"):
         factory_spec = graph["controller"]["policy_factory"]
         policy = load_policy_adapter(factory_spec)(task, task_sha256=graph["task_sha256"],
-            controller_id=graph["controller"]["id"], action_profile_id=graph["action_profile_id"])
+            controller_id=graph["controller"]["id"], action_profile_id=graph["action_profile_id"],
+            factory_options=graph["controller"].get("factory_options", {}))
         details = getattr(policy, "preparation_receipt", {})
         return policy, {"status": "prepared", "controller_id": graph["controller"]["id"],
             "profile_id": graph["graph_id"], "policy_factory": factory_spec,
@@ -136,7 +137,7 @@ def validate_policy_response(task: dict, task_hash: str, action_profile_id: str,
         raise ValueError("policy response is not bound to the original full task hash")
     if query.get("action_profile_id") != action_profile_id:
         raise ValueError("policy response action profile differs from the task control domain")
-    if query.get("status") not in {"accepted", "rejected", "unsupported", "failed"}:
+    if query.get("status") not in {"accepted", "rejected", "unsupported", "failed", "unavailable", "incompatible"}:
         raise ValueError("policy response has an unsupported outcome status")
     if not isinstance(query.get("policy_id"), str) or not query["policy_id"]:
         raise ValueError("policy response must identify the selected policy")
@@ -146,6 +147,46 @@ def validate_policy_response(task: dict, task_hash: str, action_profile_id: str,
         if not isinstance(call, dict) or not all(call.get(key) for key in ("operation", "module_id", "profile_id")) or not (call.get("provider") or call.get("provider_id")):
             raise ValueError("every policy invocation needs operation, module, provider, and profile identities")
     return query
+
+
+def trace_call_roles(query: dict, graph: dict) -> list[dict]:
+    """Attach declared role labels to observed calls, retaining their raw evidence."""
+    role_bindings = graph.get("role_bindings", graph.get("inactive_roles", {}))
+    operation_roles = graph.get("operation_roles", {})
+    rows = []
+    for call in query.get("invocations", []):
+        operation = call.get("operation")
+        role = call.get("role") or operation_roles.get(operation)
+        if role is None:
+            actual_ids = {call.get(key) for key in ("module_id", "selected_method_id", "actual_method_id")
+                          if call.get(key) is not None}
+            role = next((name for name, binding in role_bindings.items()
+                if isinstance(binding, dict) and actual_ids.intersection({value for value in (
+                    binding.get("module_id"), binding.get("id"), binding.get("symbol")) if value is not None})), None)
+        if role is None:
+            role = "controller" if operation == "controller.solve" else "unclassified"
+        rows.append({**call, "role": role, "selected_role_binding": role_bindings.get(role)})
+    for call in query.get("geometry_invocations", []):
+        operation = call.get("operation")
+        role = call.get("role") or operation_roles.get(operation, "reachable_set_method")
+        rows.append({**call, "role": role, "selected_role_binding": role_bindings.get(role)})
+        for evidence in call.get("evidence_assumptions", []):
+            if not isinstance(evidence, str):
+                continue
+            if evidence.startswith("HullReducerPort child LPPort invocation:") or evidence.startswith("vertex LP invocation record:"):
+                nested_role = "vertex_lp"
+            elif evidence.startswith("HullReducerPort invocation:"):
+                nested_role = "hull_provider"
+            elif evidence.startswith("checker invocation:"):
+                nested_role = "geometry_checker"
+            elif evidence.startswith("source-index generated ordered cloud:"):
+                nested_role = "reachable_set_method"
+            else:
+                continue
+            rows.append({"trace_source": "geometry_invocations.evidence_assumptions",
+                "role": nested_role, "selected_role_binding": role_bindings.get(nested_role),
+                "evidence": evidence})
+    return rows
 
 
 def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | None = None,
@@ -163,7 +204,17 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
     expected_action_profile = graph["action_profile_id"]
     if requested_action_profile_id and requested_action_profile_id != expected_action_profile:
         raise ValueError("requested action profile differs from the resolved capability graph")
-    prepared_controller, preparation = prepare_graph(task, graph, bridge)
+    try:
+        prepared_controller, preparation = prepare_graph(task, graph, bridge)
+    except Exception as error:
+        atomic_json(attempt / "attempt.json", {"schema": "csl.closed-loop.attempt/1",
+            "attempt_id": attempt.name, "task_id": task["task_id"], "task_sha256": task_hash,
+            "controller_id": graph["controller"]["id"], "resolved_graph": graph,
+            "status": "preparation_failed", "algorithm_status": "preparation_failed",
+            "overall_status": "preparation_failed", "completed_holds": 0,
+            "preparation_failure": {"type": type(error).__name__, "reason": str(error)},
+            "mathematical_support_status": "not_evaluated"})
+        return 2
     scales = np.asarray([s["scale"] for s in task["model"]["states"]])
     state = np.asarray([s["initial"] for s in task["model"]["states"]], dtype=float)
     controls = []; states = [state.tolist()]; stages = []; previous = None
@@ -171,6 +222,8 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
     controller_id = requested_controller_id or default_controller_id
     action_profile_id = expected_action_profile
     policy = prepared_controller if graph["controller"].get("policy_factory") else None
+    geometry_method = graph.get("role_bindings", {}).get("reachable_set_method", "not_used")
+    geometry_active = geometry_method != "not_used"
     ledger = {"schema": "csl.closed-loop.attempt/1", "attempt_id": attempt.name,
         "task_id": task["task_id"], "task_sha256": task_hash, "source_sha256": task["source"]["sha256"],
         "model_id": task["model"]["model_id"], "action_profile_id": action_profile_id,
@@ -179,12 +232,10 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
         "selected_initial_state_physical": state.tolist(), "original_intervals": task["episode"]["intervals"],
         "original_final_time": task["episode"]["final_time"], "status": "in-progress", "controls": controls,
         "physical_states": states, "stages": stages,
-        "module_roles": {"vertex_lp": graph["inactive_roles"]["vertex_lp"],
-                         "set_reducer": graph["inactive_roles"]["set_reducer"],
-                         "representation": graph["inactive_roles"]["representation"],
-                         "converter": graph["inactive_roles"]["converter"], "controller": controller_id,
-                         "execution": graph["execution"]["id"]},
-        "geometry_work": {"vertices": 0, "set_operations": 0, "claim": "pure NMPC; no representation comparison"},
+        "module_roles": {**graph.get("role_bindings", graph.get("inactive_roles", {})),
+                         "controller": controller_id, "execution": graph["execution"]["id"]},
+        "geometry_work": {"vertices": None if geometry_active else 0, "set_operations": 0,
+            "claim": graph.get("claim_scope", "pure NMPC; no representation comparison")},
         "resource_limits": {"requested": {"wall_seconds": 300, "address_space_bytes": 8 * 1024**3,
               "cpu_seconds": 300, "worker_count": 1, "solver_threads": 1},
             "enforced": {"wall_seconds": "subprocess timeout with process-group termination",
@@ -195,7 +246,7 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
                 "effective_address_space_bytes": resource.getrlimit(resource.RLIMIT_AS),
                 "thread_environment": {key: os.environ.get(key) for key in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS")},
                 "python_process_threads": threading.active_count()}},
-        "assurance": "observed-state single-player policy trajectory; local NLP diagnostics; no global optimality, reachability, safety, or robustness guarantee"}
+        "assurance": "observed-state single-player policy trajectory; no global optimality, reachability, safety, or robustness guarantee"}
     atomic_json(attempt / "attempt.json", ledger)
     n = task["episode"]["intervals"]
     for j in range(n):
@@ -204,7 +255,7 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
                "observed_physical": state.tolist(), "observed_scaled": (state / scales).tolist(),
                "original_task_sha256": task_hash, "status": "started", "module_calls": [],
                "requested_modules": {"controller": {"id": graph["controller"]["id"], "version": graph["controller"]["version"]},
-                   "vertex_lp": "not_used", "set_reducer": "not_used", "representation": "not_used", "converter": "not_used",
+                   **graph.get("role_bindings", graph.get("inactive_roles", {})),
                    "execution": {"id": graph["execution"]["id"], "version": graph["execution"]["version"]}}}
         atomic_json(attempt / f"stage-{j:03d}.json", row)
         try:
@@ -212,16 +263,36 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
                      else controller_query(task, graph, state, j, previous, prepared_controller))
             if policy is not None:
                 query = validate_policy_response(task, task_hash, action_profile_id, query)
+                ledger["preparation_receipt"]["adapter_receipt"] = getattr(policy, "preparation_receipt", {})
             row.update({"status": query["status"], "policy_id": query["policy_id"],
                         "controller_invocations": query["invocations"]})
+            row["controller_status"] = query["status"]
+            if query["status"] in {"unavailable", "incompatible"}:
+                row["failure_category"] = "backend_unavailable_or_incompatible"
+                row["mathematical_support_status"] = "not_evaluated"
+            elif query["status"] == "failed":
+                row["failure_category"] = "controller_execution_failed"
+                row["mathematical_support_status"] = "not_evaluated"
+            elif query["status"] == "unsupported":
+                row["mathematical_support_status"] = "not_established"
             receipt = query.get("solve_receipt", query.get("query_receipt"))
             if receipt is not None: row["solve_receipt"] = receipt
-            row["invoked_modules"] = [call["module_id"] for call in query["invocations"]]
+            row["invoked_modules"] = ([call["module_id"] for call in query["invocations"] if call.get("module_id")]
+                + [call[key] for call in query.get("geometry_invocations", [])
+                   for key in ("actual_method_id",) if call.get(key)])
             for field in ("predicted_sets", "recovered_control", "composition_id", "profile_id", "query_receipt",
-                          "policy_semantics", "prediction_profile", "coverage"):
+                          "policy_semantics", "prediction_profile", "coverage", "geometry_selection",
+                          "geometry_invocations", "action_cloud_rows", "selected_representation",
+                          "finite_action_nominal_profile", "build_backend_profile"):
                 if field in query: row[field] = query[field]
+            row["module_call_roles"] = trace_call_roles(query, graph)
+            ledger["geometry_work"]["set_operations"] += len(query.get("geometry_invocations", []))
             if query["status"] != "accepted" or query["control"] is None:
-                row["failure"] = "controller-rejected; no fallback action applied"
+                row["failure"] = ("controller unavailable or incompatible; mathematical support was not evaluated"
+                    if query["status"] in {"unavailable", "incompatible"} else
+                    ("controller execution failed; mathematical support was not evaluated"
+                        if query["status"] == "failed" else
+                        "controller-rejected; no fallback action applied"))
                 stages.append(row); atomic_json(attempt / f"stage-{j:03d}.json", row)
                 break
             action = [float(v) for v in query["control"]]
@@ -344,8 +415,14 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
     try:
         task = load_task(task_name); validate_source_binding(task)
         requested_action_profile_id = action_profile_id
+        native_controller = bool(controller_id and controller_id.startswith("native-"))
+        if native_controller and action_profile_id is None:
+            action_profile_id = task["control_domains"]["finite"]["problem_id"]
         action_profile_id = action_profile_id or task["control_domains"]["continuous"]["problem_id"]
-        capability_manifest, graph = resolve_graph(task, action_profile_id, controller_id)
+        selected_manifest_path = NATIVE_MANIFEST if native_controller else MANIFEST
+        capability_manifest, graph = resolve_graph(task, action_profile_id, controller_id,
+                                                    manifest_path=selected_manifest_path)
+        selected_manifest_sha256 = manifest_digest(capability_manifest)
         selected_controller_id = graph["controller"]["id"]
         if policy_adapter and policy_adapter != graph["controller"].get("policy_factory"):
             raise ValueError("requested policy adapter is not the factory selected by the admitted capability graph")
@@ -355,9 +432,11 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
         refusal = {**initial, "task_id": task.get("task_id") if "task" in locals() else None,
             "status": status, "algorithm_status": status, "overall_status": status,
             "refusal": {"type": type(error).__name__, "reason": str(error)},
-            "completed_holds": 0, "actual_solver_invocations": 0}
+            "completed_holds": 0, "actual_solver_invocations": 0,
+            "mathematical_support_status": "not_evaluated"}
         atomic_json(attempt / "resolution-refusal.json", refusal["refusal"] | {
-            "schema": "csl.closed-loop.resolution-refusal/1", "requested": requested})
+            "schema": "csl.closed-loop.resolution-refusal/1", "requested": requested,
+            "mathematical_support_status": "not_evaluated"})
         atomic_json(attempt / "attempt.json", refusal)
         return {"task_id": refusal["task_id"] or task_name, "attempt": str(attempt),
             "status": status, "algorithm_status": status, "postcheck_status": "not_run",
@@ -366,7 +445,10 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
     source_hashes = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in [
         HERE / "run_closed_loop.py", HERE / "orbit_nmpc.py", HERE / "task_models.py", HERE / "check_episode.py",
         HERE / "check_replay.py", HERE / "capabilities.py", MPC11 / "nmpc.py", MPC11 / "affine.py"]}
-    source_hashes["docs/catalogue/closed-loop-pilot-capabilities-v1.json"] = hashlib.sha256(MANIFEST.read_bytes()).hexdigest()
+    selected_manifest_path = NATIVE_MANIFEST if graph["controller"]["id"].startswith("native-") else MANIFEST
+    source_hashes[str(selected_manifest_path.relative_to(ROOT))] = hashlib.sha256(selected_manifest_path.read_bytes()).hexdigest()
+    for source_file in graph.get("source_files", []):
+        source_hashes[source_file["path"]] = source_file["sha256"]
     mem_available = None
     try:
         for line in Path("/proc/meminfo").read_text().splitlines():
@@ -377,7 +459,7 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(), "source_hashes": source_hashes,
         "python": sys.version, "platform": platform.platform(), "bridge": str(bridge),
         "bridge_sha256": hashlib.sha256(bridge.read_bytes()).hexdigest(),
-        "capability_manifest_sha256": SIDECAR.read_text().split()[0],
+        "capability_manifest_sha256": selected_manifest_sha256,
         "graph_id": graph["graph_id"], "graph_fingerprint": graph["graph_fingerprint"],
         "resolved_modules": graph["controller"], "execution_module": graph["execution"],
         "host_allocation": {"logical_cpus": os.cpu_count(), "mem_available_bytes_at_start": mem_available,
@@ -394,7 +476,7 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
     atomic_json(attempt / "resolution-receipt.json", {
         "schema": "csl.closed-loop.resolution-receipt/1",
         "capability_manifest_id": capability_manifest["manifest_id"],
-        "capability_manifest_sha256": SIDECAR.read_text().split()[0],
+        "capability_manifest_sha256": selected_manifest_sha256,
         "task_id": task["task_id"], "task_sha256": manifest_sha256(task),
         "requested_controller_id": requested["controller_id"] or controller_id,
         "requested_action_profile_id": requested_action_profile_id or action_profile_id,

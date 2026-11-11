@@ -10,6 +10,27 @@ from task_models import replay_scenario, source_scenario, validate_source_bindin
 
 MANIFEST = ROOT / "docs/catalogue/closed-loop-pilot-capabilities-v1.json"
 SIDECAR = ROOT / "docs/catalogue/closed-loop-pilot-capabilities-v1.sha256"
+NATIVE_MANIFEST = ROOT / "docs/catalogue/closed-loop-native-capabilities-v1.json"
+NATIVE_SIDECAR = ROOT / "docs/catalogue/closed-loop-native-capabilities-v1.sha256"
+MODULE_INVENTORY = ROOT / "docs/catalogue/module-composition-inventory-v1.json"
+
+NATIVE_PROFILES = {
+    "native-exact-polytope-backward-graph/1": ("exact-polytope", "backward-graph"),
+    "native-box-mpc/1": ("box", "backward-graph"),
+    "native-zonotope-mpc/1": ("zonotope", "backward-graph"),
+    "native-parallelotope-mpc/1": ("parallelotope", "backward-graph"),
+    "native-ellipsoid-mpc/1": ("ellipsoid", "backward-graph"),
+    "native-exact-polytope-fixed-plan-mpc/1": ("exact-polytope", "fixed-plan-mpc"),
+    "native-box-fixed-plan-mpc/1": ("box", "fixed-plan-mpc"),
+    "native-zonotope-fixed-plan-mpc/1": ("zonotope", "fixed-plan-mpc"),
+    "native-parallelotope-fixed-plan-mpc/1": ("parallelotope", "fixed-plan-mpc"),
+    "native-ellipsoid-fixed-plan-mpc/1": ("ellipsoid", "fixed-plan-mpc"),
+}
+
+
+def manifest_digest(manifest: dict) -> str:
+    """Hash the selected manifest itself, regardless of its catalogue path."""
+    return canonical_sha256(manifest)
 
 
 def _definitions() -> list[dict]:
@@ -77,14 +98,143 @@ def build_manifest() -> dict:
         "graphs": _definitions()}
 
 
-def validate_manifest(value: dict | None = None) -> dict:
-    manifest = value or json.loads(MANIFEST.read_text())
-    if manifest.get("schema") != "csl.closed-loop-capability-manifest/1":
+def _native_factory_options(profile_id: str, representation: str,
+                            search: str) -> dict:
+    limits = ({"max_beam_width": 16, "max_graph_nodes": 128, "max_plans": 32,
+        "max_points_per_stage": 128, "max_score_evaluations": 128,
+        "max_generators_per_stage": 64} if search == "backward-graph" else
+        {"max_beam_width": 1, "max_graph_nodes": 1, "max_plans": 512, "max_score_evaluations": 100000,
+         "max_points_per_stage": 100000, "max_generators_per_stage": 1000})
+    options = {"representation": representation, "limits": limits,
+        "build_backend_profile": {"build_type": "Release", "CSL_ENABLE_HIGHS": True,
+            "CSL_ENABLE_QHULL": True}}
+    if search == "backward-graph":
+        options.update({"reachable_set_method": {"id": "csl.geometry.affine-sum", "version": "1.0.0"},
+            "hull_provider": {"id": "csl.hull.lp-membership", "version": "1.0.0"},
+            "vertex_lp_provider": {"id": "phase-one-bland", "version": "1"},
+            "conversion_provider": "not_used",
+            "checker_budget": {"max_points": 64, "wall_ms": 5000},
+            "control_optimizer": {"id": "csl.optimization.finite-action-stage-layered-graph",
+                "version": "1.0.0"}})
+    return options
+
+
+def _catalogue_sources(options: dict) -> list[str]:
+    """Resolve selected provider source files from the checked-in module catalogue."""
+    identities = []
+    for key in ("reachable_set_method", "hull_provider", "vertex_lp_provider"):
+        value = options.get(key)
+        if isinstance(value, dict) and value.get("id"):
+            identities.append((value["id"], value.get("version")))
+    catalogue = json.loads(MODULE_INVENTORY.read_text())
+    sources = {str(MODULE_INVENTORY.relative_to(ROOT))}
+    for identity, version in identities:
+        entries = [row for row in catalogue["modules"]
+            if row.get("identity", {}).get("id") == identity
+            and (version is None or row.get("identity", {}).get("version") == version)]
+        if len(entries) != 1:
+            raise ValueError(f"selected native provider is not uniquely registered in the module catalogue: {identity}@{version}")
+        path = entries[0].get("source", {}).get("path")
+        if path:
+            sources.add(path)
+    return sorted(sources)
+
+
+def _native_definitions() -> list[dict]:
+    rows = []
+    source_paths = ["benchmarks/reporting/closed_loop/native_graph_policy.py",
+        "benchmarks/reporting/closed_loop/task_models.py", "benchmarks/reporting/mpc11/affine.py",
+        "tools/closed_loop_native_policy.cpp", "include/csl/optimization/finite_action_graph.hpp",
+        "src/optimization/finite_action_graph.cpp", "include/csl/optimization/finite_action_nominal.hpp",
+        "src/optimization/finite_action_nominal.cpp", "src/optimization/finite_action_parallelotope_minimax.cpp",
+        "CMakeLists.txt", str(MODULE_INVENTORY.relative_to(ROOT)),
+        "src/optimization/running_cost_evaluation.hpp"]
+    execution_id = "CSL::simulation/adaptive-rk4-step-doubling/1"
+    for task_name in ("syn-nl-lv-01", "earth-orbit", "syn-nl-fuel-01"):
+        task = load_task(task_name)
+        validate_source_binding(task)
+        for profile_id, (representation, search) in NATIVE_PROFILES.items():
+            options = _native_factory_options(profile_id, representation, search)
+            control_optimizer = options.get("control_optimizer", {
+                "module_id": "csl::optimization::finite_action_nominal_profile",
+                "provider": "public-function", "operation": f"{representation}-plan-select",
+                "profile_id": profile_id})
+            representation_modules = {"box": "csl::reachability::finite_plan_box",
+                "zonotope": "csl::reachability::finite_plan_zonotope",
+                "parallelotope": "csl::reachability::finite_plan_parallelotope",
+                "ellipsoid": "csl::reachability::finite_plan_ellipsoid"}
+            representation_source = {"box": "src/reachability/finite_plan_box.cpp",
+                "zonotope": "src/reachability/finite_plan_zonotope.cpp",
+                "parallelotope": "src/reachability/finite_plan_parallelotope.cpp",
+                "ellipsoid": "src/reachability/finite_plan_ellipsoid.cpp"}.get(representation)
+            controller_sources = source_paths + ([representation_source] if representation_source else [])
+            if search == "backward-graph":
+                controller_sources += ["src/geometry/affine_sum.cpp", "src/reachability/nominal_predecessor.cpp"]
+                controller_sources += _catalogue_sources(options)
+            graph = {"task_id": task["task_id"], "task_sha256": manifest_sha256(task),
+                "model_id": task["model"]["model_id"], "objective_id": task["objective"]["objective_id"],
+                "action_profile_id": task["control_domains"]["finite"]["problem_id"],
+                "controller": {"id": profile_id, "version": "1", "adapter": "native_graph_policy",
+                    "policy_factory": "native_graph_policy:create_policy", "source_files": controller_sources,
+                    "factory_options": options,
+                    "prediction": "source-bound affine physical coefficients; exact finite action catalogue",
+                    "control_semantics": search},
+                "execution": {"id": execution_id, "version": "1", "provider": "CSL::simulation",
+                    "source_files": ["benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+                        "src/simulation/nonlinear_replay.cpp"],
+                    "method": "adaptive RK4 step doubling", "original_intervals": task["episode"]["intervals"],
+                    "original_final_time": task["episode"]["final_time"]},
+                "role_bindings": {"reachable_set_method": options.get("reachable_set_method", "not_used"),
+                    "hull_provider": options.get("hull_provider", "not_used"),
+                    "vertex_lp": options.get("vertex_lp_provider", "not_used"),
+                    "converter": options.get("conversion_provider", "not_used"),
+                    "set_reducer": options.get("hull_provider", "not_used"),
+                    "geometry_checker": "not_used" if search == "fixed-plan-mpc" else {
+                        "status": "budget-declared; not consumed by selected affine-sum profile",
+                        "budget": options["checker_budget"]},
+                    "representation": {"name": representation,
+                        "module_id": representation_modules.get(representation),
+                        "status": "selected" if representation in representation_modules else "integrated-h-polytope"},
+                    "control_optimizer": control_optimizer,
+                    "bellman_solver": ("integrated in selected graph optimizer" if search == "backward-graph" else "not_used"),
+                    "terminal_solver": ("direct authored objective evaluation" if search == "backward-graph"
+                        else "integrated in selected nominal planner")},
+                "operation_roles": {"affine-image": "reachable_set_method", "minkowski-sum": "reachable_set_method",
+                    "controller.solve": "control_optimizer"},
+                "admission": {"status": "admitted", "basis": "source-bound task, finite action profile, and declared native policy factory"},
+                "claim_scope": ("Observed-state finite-action receding-horizon backward graph policy; numerical predecessor membership and discrete transition witnesses; no global guarantee"
+                    if search == "backward-graph" else
+                    "Observed-state finite-action fixed-plan MPC; bounded candidate coverage recorded per query; no adaptive or global optimality guarantee")}
+            graph["source_files"] = [{"path": path,
+                "sha256": hashlib.sha256((ROOT / path).read_bytes()).hexdigest()} for path in sorted(set(controller_sources + graph["execution"]["source_files"]))]
+            graph["graph_fingerprint"] = canonical_sha256(graph)
+            graph["graph_id"] = f"closed-loop/{task_name}/{profile_id}/cfg-{graph['graph_fingerprint'][:16]}"
+            rows.append(graph)
+    return rows
+
+
+def build_native_manifest() -> dict:
+    return {"schema": "csl.closed-loop-capability-manifest/2",
+        "manifest_id": "source-bound-native-finite-action-profiles/1",
+        "registration_status": "provisional-pending-native-source-freeze",
+        "purpose": "Source-bound native finite-action graph and fixed-plan profiles for the same three closed-loop task contracts.",
+        "catalogue_parent": "csl.module-composition-inventory/1",
+        "claim_scope": "Observed-state policy trajectories; no global optimality, reachability, safety, or robustness guarantee.",
+        "graphs": _native_definitions()}
+
+
+def validate_manifest(value: dict | None = None, manifest_path: Path | None = None) -> dict:
+    selected_path = manifest_path or MANIFEST
+    manifest = value or json.loads(selected_path.read_text())
+    native = selected_path.resolve() == NATIVE_MANIFEST.resolve()
+    expected_schema = "csl.closed-loop-capability-manifest/2" if native else "csl.closed-loop-capability-manifest/1"
+    if manifest.get("schema") != expected_schema:
         raise ValueError("unsupported closed-loop capability manifest")
-    expected = SIDECAR.read_text().split()[0]
+    sidecar = NATIVE_SIDECAR if native else SIDECAR
+    expected = sidecar.read_text().split()[0]
     if canonical_sha256(manifest) != expected:
         raise ValueError("closed-loop capability manifest hash mismatch")
-    expected_graphs = {row["graph_id"]: row for row in _definitions()}
+    expected_graphs = {row["graph_id"]: row for row in (_native_definitions() if native else _definitions())}
     if len(expected_graphs) != len(manifest["graphs"]):
         raise ValueError("closed-loop capability manifest graph count differs from source definitions")
     for graph in manifest["graphs"]:
@@ -115,8 +265,9 @@ def validate_resolved_graph(graph: dict) -> None:
             raise ValueError(f"resolved controller or executor source changed: {source_file['path']}")
 
 
-def resolve_graph(task: dict, action_profile_id: str, controller_id: str | None = None) -> tuple[dict, dict]:
-    manifest = validate_manifest()
+def resolve_graph(task: dict, action_profile_id: str, controller_id: str | None = None,
+                  manifest_path: Path | None = None) -> tuple[dict, dict]:
+    manifest = validate_manifest(manifest_path=manifest_path)
     candidates = [row for row in manifest["graphs"] if row["task_id"] == task["task_id"]
         and row["task_sha256"] == manifest_sha256(task) and row["action_profile_id"] == action_profile_id
         and (controller_id is None or row["controller"]["id"] == controller_id)]
@@ -131,13 +282,22 @@ def write_manifest() -> None:
     SIDECAR.write_text(canonical_sha256(manifest) + "  closed-loop-pilot-capabilities-v1.json\n")
 
 
+def write_native_manifest() -> None:
+    manifest = build_native_manifest()
+    NATIVE_MANIFEST.write_text(json.dumps(manifest, sort_keys=True, indent=2) + "\n")
+    NATIVE_SIDECAR.write_text(canonical_sha256(manifest) + "  closed-loop-native-capabilities-v1.json\n")
+
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--write", action="store_true")
+    parser.add_argument("--write-native", action="store_true")
     args = parser.parse_args()
     if args.write: write_manifest()
-    checked = validate_manifest()
+    if args.write_native: write_native_manifest()
+    selected = NATIVE_MANIFEST if args.write_native else MANIFEST
+    checked = validate_manifest(manifest_path=selected)
     print(json.dumps({"status": "pass", "manifest_id": checked["manifest_id"],
         "graphs": [{"graph_id": row["graph_id"], "task_sha256": row["task_sha256"],
                     "graph_fingerprint": row["graph_fingerprint"]} for row in checked["graphs"]]}, indent=2))

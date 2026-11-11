@@ -249,6 +249,8 @@ class ClosedLoopRunnerFailureTests(unittest.TestCase):
             self.assertTrue((attempt / "request.json").is_file())
             self.assertTrue((attempt / "resolution-refusal.json").is_file())
             self.assertEqual(json.loads((attempt / "attempt.json").read_text())["actual_solver_invocations"], 0)
+            self.assertEqual(json.loads((attempt / "attempt.json").read_text())["mathematical_support_status"],
+                "not_evaluated")
             coverage = json.loads(run_closed_loop.write_coverage(out).read_text())
             self.assertEqual(coverage["attempts"][0]["overall_status"], "refused")
 
