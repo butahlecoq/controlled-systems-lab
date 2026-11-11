@@ -1,8 +1,10 @@
 """Check the educational gallery against reviewed native data and literal geometry."""
 import hashlib
+import html
 from html.parser import HTMLParser
 import json
 from pathlib import Path
+import re
 import shutil
 import sys
 import tempfile
@@ -142,6 +144,34 @@ class GalleryTests(unittest.TestCase):
                 if not (target / "index.html").exists():
                     (target / "index.html").write_text("<html>report fixture</html>", encoding="utf-8")
 
+    def test_source_index_example_has_exact_pages_producer_after_finalizer(self):
+        import subprocess
+        with tempfile.TemporaryDirectory() as temporary:
+            site=Path(temporary)
+            (site/"examples").mkdir()
+            (site/"index.html").write_text(
+                '<!doctype html><html><body><h1>Learning</h1><a href="examples/index.html">Examples</a></body></html>')
+            (site/"examples/index.html").write_text(
+                '<!doctype html><html><body><h1>Visual examples</h1><article id="source-index-geometry-2d">'
+                '<a href="source-index-geometry-2d.html">Inputs and reproduction</a>'
+                '<a href="source-index-geometry-2d-records.json">Raw record</a>'
+                '<img src="source-index-geometry-2d.svg" alt="2D source-index hull example"></article>'
+                '<section id="algorithm-coverage"></section></body></html>')
+            assets=ROOT/"docs/examples"
+            for name in ("source-index-geometry-2d.html","source-index-geometry-2d.svg",
+                         "source-index-geometry-2d-records.json"):
+                shutil.copyfile(assets/name,site/"examples"/name)
+            completed=subprocess.run([sys.executable,str(ROOT/"scripts/reports/pages_route_retirement.py"),
+                "--site",str(site),"--source-commit","source-index-gallery-test"],
+                check=False,capture_output=True,text=True)
+            self.assertEqual(completed.returncode,0,completed.stderr)
+            self.assertIn('"html_route_count"',completed.stdout)
+            routes=json.loads((site/"pages-route-inventory.json").read_text(encoding="utf-8"))
+            owner=routes["html_routes"]["examples/source-index-geometry-2d.html"]["producer"]
+            self.assertEqual(owner["owner_status"],"gallery-aggregator")
+            self.assertEqual(owner["files"],["scripts/reports/visual_examples.py",
+                "docs/examples/source-index-geometry-2d.html"])
+
     def test_generated_example_code_regions_are_keyboard_focusable(self):
         page = gallery.section(self.examples[0], 1)
         code_regions = page.count('role="region" aria-label=')
@@ -151,6 +181,102 @@ class GalleryTests(unittest.TestCase):
         future_block = gallery.site_design.focusable_code_blocks(
             '<pre tabindex="-1"><code>future code</code></pre>')
         self.assertIn('<pre tabindex="0" role="region" aria-label="Scrollable code example">', future_block)
+
+    def test_point_input_matrix_and_compact_json_preserve_the_seven_source_rows(self):
+        example = next(item for item in self.examples if item["slug"] == "square_duplicates")
+        page = gallery.section(example, 1)
+        self.assertIn("Data · 7 source points · copyable JSON", page)
+        self.assertIn("Matrix columns, in order: source points", page)
+        self.assertIn('<span class="math-matrix" role="math" aria-label="Point matrix V, 2 coordinate rows by 7 source-point columns:', page)
+        self.assertIn("<var>V</var> = [<var>v</var><sub>0</sub> … <var>v</var><sub>6</sub>]", page)
+        self.assertIn('Matrix columns, in order: source points v<sub>0</sub>, v<sub>1</sub>, v<sub>2</sub>, v<sub>3</sub>, v<sub>4</sub>, v<sub>5</sub>, v<sub>6</sub>; rows: x<sub>1</sub>, x<sub>2</sub>. Duplicate source points remain separate.', page)
+        self.assertIn('<mtr><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0.5</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd></mtr>', page)
+        self.assertIn('<mtr><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>0.5</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0</mn></mtd></mtr>', page)
+        self.assertNotIn("<th", page)
+        self.assertEqual(page.count("<mtr>"), 2)
+        self.assertNotIn('scope="col">Role', page)
+        self.assertNotIn("<details open", page)
+        code_blocks = [html.unescape(block) for block in re.findall(
+            r'<pre[^>]*><code>(.*?)</code></pre>', page, flags=re.DOTALL)]
+        displayed_json = code_blocks[0]
+        self.assertEqual(json.loads(displayed_json), example["inputs"])
+        self.assertIn('"points": [\n    [0, 0],\n    [1, 0],\n    [1, 1],', displayed_json)
+        self.assertEqual(displayed_json.count("[0, 0]"), 2)
+
+    def test_output_matrix_coordinate_names_follow_each_example_kind(self):
+        expected_rows = {
+            "hybrid": "u<sub>0</sub>, x<sub>2</sub>",
+            "projected_reachability": "u<sub>0</sub>, x<sub>1</sub>",
+            "two_parameter": "u<sub>0</sub>, u<sub>1</sub>",
+            "intersection": "x<sub>1</sub>, x<sub>2</sub>",
+        }
+        for kind, rows in expected_rows.items():
+            with self.subTest(kind=kind):
+                example = next(item for item in self.examples if item["kind"] == kind)
+                page = gallery.section(example, 1)
+                self.assertIn("coordinates ", page)
+                spoken_coordinates = rows.replace("<sub>", "").replace("</sub>", "")
+                self.assertIn("displayed to six significant digits; coordinates " + spoken_coordinates, page)
+                self.assertIn("coordinates are rows: " + rows + ". Repeated coordinates remain in place.", page)
+                blocks = [html.unescape(block) for block in re.findall(
+                    r'<pre[^>]*><code>(.*?)</code></pre>', page, flags=re.DOTALL)]
+                self.assertEqual(json.loads(blocks[0]), example["points"])
+
+        intersection = next(item for item in self.examples if item["slug"] == "crossing_octagon")
+        intersection_page = gallery.section(intersection, 3)
+        self.assertIn("Data · 8 intersection vertices · output matrix and copyable JSON", intersection_page)
+        self.assertIn("<var>P</var> = {<var>x</var> ∈ ℝ<sup>2</sup> : <var>A</var><sub>L</sub><var>x</var> ≤ <var>b</var><sub>L</sub>}", intersection_page)
+        self.assertIn("<var>Q</var> = {<var>x</var> ∈ ℝ<sup>2</sup> : <var>A</var><sub>R</sub><var>x</var> ≤ <var>b</var><sub>R</sub>}", intersection_page)
+        self.assertIn('aria-label="Matrix A_L, 4 rows by 2 columns:', intersection_page)
+        self.assertIn('aria-label="Column vector b_L, 4 entries:', intersection_page)
+        self.assertIn('aria-label="Matrix A_R, 4 rows by 2 columns:', intersection_page)
+        self.assertIn('aria-label="Column vector b_R, 4 entries:', intersection_page)
+        self.assertIn('<mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd></mtr>', intersection_page)
+        self.assertIn('<mtr><mtd><mn>1</mn></mtd></mtr>', intersection_page)
+        self.assertNotIn('<th scope="col">row</th>', intersection_page)
+        self.assertEqual(intersection_page.count('<span class="math-matrix" role="math"'), 5)
+        self.assertEqual(intersection_page.count('<mtr>'), 18)
+        output_matrix = re.search(
+            r'<span class="math-matrix" role="math" aria-label="(Output coordinate matrix W, 2 coordinate rows by 8 stored-output columns, displayed to six significant digits; coordinates x1, x2:[^"]*)">.*?<math display="inline" aria-hidden="true">(.*?)</math>',
+            intersection_page, re.DOTALL)
+        self.assertIsNotNone(output_matrix)
+        self.assertIn("<var>W</var> ≈", intersection_page)
+        self.assertIn("Displayed matrix values are rounded to 6 significant digits (≈);", intersection_page)
+        expected_label = ("Output coordinate matrix W, 2 coordinate rows by 8 stored-output columns, "
+                          "displayed to six significant digits; coordinates x1, x2: "
+                          + "; ".join(", ".join(format(value, ".6g") for value in row)
+                                      for row in [[point[coordinate] for point in intersection["points"]]
+                                                  for coordinate in range(2)]))
+        self.assertEqual(html.unescape(output_matrix.group(1)), expected_label)
+        matrix_rows = re.findall(r'<mtr>(.*?)</mtr>', output_matrix.group(2))
+        self.assertEqual(len(matrix_rows), 2)
+        for coordinate, row in enumerate(matrix_rows):
+            cells = [html.unescape(value) for value in re.findall(r'<mn>(.*?)</mn>', row)]
+            self.assertEqual(cells, [format(point[coordinate], ".6g")
+                                     for point in intersection["points"]])
+            self.assertNotEqual(cells, [json.dumps(point[coordinate], allow_nan=False)
+                                        for point in intersection["points"]])
+        self.assertIn("Matrix columns are output rows in stored order:", intersection_page)
+        self.assertIn("Repeated coordinates remain in place.", intersection_page)
+        self.assertIn('<details><summary>Copy JSON for reproduction</summary>', intersection_page)
+        self.assertNotIn("<details open", intersection_page)
+        intersection_blocks = [html.unescape(block) for block in re.findall(
+            r'<pre[^>]*><code>(.*?)</code></pre>', intersection_page, flags=re.DOTALL)]
+        self.assertEqual(json.loads(intersection_blocks[0]), intersection["points"])
+        coordinate_lines = intersection_blocks[0].splitlines()[1:-1]
+        self.assertEqual(len(coordinate_lines), 8)
+        self.assertTrue(all(line.strip().startswith("[") and line.strip().endswith(("],", "]"))
+                            for line in coordinate_lines))
+        self.assertEqual(json.loads(intersection_blocks[1]), intersection["inputs"])
+        self.assertIn('"left_A": [\n    [1, 0],\n    [-1, 0],', intersection_blocks[1])
+        self.assertIn('"left_b": [1, 1, 1, 1]', intersection_blocks[1])
+        self.assertIn('"right_b": [1.5, 1.5, 1.5, 1.5]', intersection_blocks[1])
+
+        long_vector = list(range(40))
+        wrapped_vector = gallery.site_design.compact_json(long_vector, width=32)
+        self.assertEqual(json.loads(wrapped_vector), long_vector)
+        self.assertTrue(all(len(line.strip().strip(",").split(", ")) > 1
+                            for line in wrapped_vector.splitlines()[1:-1]))
 
     def test_saved_outputs_match_literal_geometry(self):
         cases = {example["slug"]: example for example in self.examples}
@@ -478,10 +604,10 @@ class GalleryTests(unittest.TestCase):
         self.assertIn(".control-witness-page #mpc06-tube th { background: #fff; color: #111; }", stylesheet)
         self.assertIn("prefers-reduced-motion: reduce", stylesheet)
         self.assertIn("@media print", stylesheet)
-        self.assertIn("Original point ID", page)
+        self.assertIn("Data · 7 source points · copyable JSON", page)
         self.assertIn("explicit analytic constructions", page)
-        self.assertIn("duplicate of point 0", page)
-        self.assertIn("binary64", page)
+        self.assertIn("Data · 8 intersection vertices", page)
+        self.assertIn("Matrix columns, in order: source points", page)
         self.assertIn("two-stage scalar family", page)
         self.assertIn("not part of that measured fixture", page)
         self.assertIn("unique minimum", page)
@@ -523,7 +649,9 @@ class GalleryTests(unittest.TestCase):
             if not urlsplit(link).scheme and not link.startswith("#"):
                 self.assertTrue((self.site / "examples" / link.split("#")[0]).is_file(), link)
         figures = list((self.site / "examples").glob("*.svg"))
-        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 23)
+        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 24)
+        self.assertIn('id="source-index-geometry-2d"', page)
+        self.assertTrue((self.site / "examples/source-index-geometry-2d-records.json").is_file())
         for figure in figures:
             if figure.name == "fuel-b06-viz06-before.svg":
                 self.assertEqual(hashlib.sha256(figure.read_bytes()).hexdigest(),

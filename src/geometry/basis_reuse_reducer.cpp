@@ -1,6 +1,7 @@
 #include <csl/geometry/basis_reuse_reducer.hpp>
 #include <csl/optimization/phase_one.hpp>
 #include "exact_convex_combination.hpp"
+#include "hull/child_lp_trace.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -88,8 +89,18 @@ public:
         using Pipeline = registry::PreparedPipeline<registry::LPPort>;
         if (!std::holds_alternative<Pipeline>(prepared_result))
             return fallback(cloud, lp, context, metrics);
-        auto workspaces = std::get<Pipeline>(std::move(prepared_result)).create();
+        auto prepared=std::get<Pipeline>(std::move(prepared_result));
+        const auto provider=prepared.provenance().front();
+        auto workspaces=prepared.create();
         auto& phase = *std::get<0>(workspaces);
+        auto child_trace=std::make_shared<detail::ChildLPTraceBuffer>();
+        detail::trace_child_lp(phase,child_trace,provider);
+        const auto fallback_with_trace=[&]() -> HullReductionResult {
+            auto result=fallback(cloud,lp,context,metrics);
+            if(auto* reduction=std::get_if<HullReduction>(&result))
+                detail::append_child_lp_trace(*reduction,*child_trace);
+            return result;
+        };
         ++metrics.basis_solves;
         const auto phase_result = phase.solve_dependency(*program, context);
         const auto* view = dynamic_cast<const optimization::phase_one::DiagnosticsView*>(phase.basis());
@@ -101,19 +112,19 @@ public:
             }
         }
         if (!view || !std::holds_alternative<ProgramResult>(phase_result))
-            return fallback(cloud, lp, context, metrics);
+            return fallback_with_trace();
         const auto& solved = std::get<ProgramResult>(phase_result);
         if (solved.termination != Termination::completed ||
             solved.outcome.value != MathematicalOutcome::optimal || !solved.primal)
-            return fallback(cloud, lp, context, metrics);
+            return fallback_with_trace();
 
         auto basis_result = view->snapshot();
         if (!std::holds_alternative<BasisSnapshot>(basis_result))
-            return fallback(cloud, lp, context, metrics);
+            return fallback_with_trace();
         const auto& basis = std::get<BasisSnapshot>(basis_result);
         if (!optimization::check_basis_snapshot(basis, phase.last_attempt()).empty() ||
             basis.columns.size() != dimension + 1)
-            return fallback(cloud, lp, context, metrics);
+            return fallback_with_trace();
 
         std::vector<std::optional<std::size_t>> basis_points;
         basis_points.reserve(basis.columns.size());
@@ -122,14 +133,14 @@ public:
             const auto* structural = std::get_if<StructuralColumn>(&column);
             if (structural) {
                 if (structural->index >= cloud.points.size() || is_basis[structural->index])
-                    return fallback(cloud, lp, context, metrics);
+                    return fallback_with_trace();
                 basis_points.push_back(structural->index);
                 metrics.structural_basis_points.push_back(structural->index);
                 is_basis[structural->index] = 1;
             } else if (std::holds_alternative<AuxiliaryColumn>(column)) {
                 basis_points.push_back(std::nullopt);
             } else {
-                return fallback(cloud, lp, context, metrics);
+                return fallback_with_trace();
             }
         }
 
@@ -182,6 +193,7 @@ public:
         for (std::size_t i = 0; i < cloud.points.size(); ++i)
             if (!removed[i]) reduction.retained.push_back(i);
         reduction.basis_reuse = metrics;
+        detail::append_child_lp_trace(reduction,*child_trace);
         return reduction;
     }
 private:

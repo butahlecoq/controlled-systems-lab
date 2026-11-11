@@ -1,7 +1,8 @@
 if(TARGET CSL::highs_lp)
   add_executable(composition_catalogue_tests tests/contract/geometry/composition_catalogue_tests.cpp)
   target_link_libraries(composition_catalogue_tests PRIVATE
-    CSL::hull CSL::highs_lp CSL::phase_one CSL::quickhull_2d doctest::doctest)
+    CSL::hull CSL::affine_sum CSL::bounded_hull_checker CSL::highs_lp CSL::phase_one
+    CSL::quickhull_2d CSL::legacy_btulshor doctest::doctest)
   add_test(NAME composition_catalogue_tests COMMAND composition_catalogue_tests)
   csl_test_target(composition_catalogue_tests geometry)
 
@@ -54,6 +55,15 @@ add_executable(bounded_hull_checker_test tests/contract/geometry/bounded_hull_ch
 target_link_libraries(bounded_hull_checker_test PRIVATE CSL::bounded_hull_checker doctest::doctest)
 add_test(NAME bounded_hull_checker_test COMMAND bounded_hull_checker_test)
 csl_test_target(bounded_hull_checker_test geometry)
+
+add_executable(source_index_geometry_2d_example ${PROJECT_SOURCE_DIR}/examples/source_index_geometry_2d.cpp)
+target_link_libraries(source_index_geometry_2d_example PRIVATE CSL::affine_sum)
+target_compile_features(source_index_geometry_2d_example PRIVATE cxx_std_20)
+csl_strict_warnings(source_index_geometry_2d_example)
+add_test(NAME source_index_geometry_2d_quickhull COMMAND source_index_geometry_2d_example quickhull)
+add_test(NAME source_index_geometry_2d_btulshor COMMAND source_index_geometry_2d_example btulshor)
+set_tests_properties(source_index_geometry_2d_quickhull source_index_geometry_2d_btulshor
+  PROPERTIES LABELS "geometry;example" TIMEOUT 30)
 
 if(TARGET CSL::highs_lp)
   add_executable(quickhull_2d_lp_test tests/unit/geometry/quickhull_2d_lp_test.cpp)
@@ -174,3 +184,8 @@ if(TARGET CSL::highs_lp)
   add_test(NAME affine_sum_public_client COMMAND affine_sum_public_client)
   csl_test_target(affine_sum_public_client geometry)
 endif()
+
+add_executable(source_index_affine_sum_public_client tests/installed/source_index_affine_sum_client.cpp)
+target_link_libraries(source_index_affine_sum_public_client PRIVATE CSL::affine_sum)
+add_test(NAME source_index_affine_sum_public_client COMMAND source_index_affine_sum_public_client)
+csl_test_target(source_index_affine_sum_public_client geometry)

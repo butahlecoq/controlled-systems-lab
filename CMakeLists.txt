@@ -85,7 +85,7 @@ foreach(module IN LISTS csl_modules)
 endforeach()
 add_executable(csl_module_composition_catalogue tools/module_composition_catalogue.cpp)
 target_link_libraries(csl_module_composition_catalogue PRIVATE
-  CSL::hull CSL::phase_one CSL::strategy_ts01 CSL::finite_action_nominal CSL::approximation
+  CSL::hull CSL::affine_sum CSL::phase_one CSL::strategy_ts01 CSL::finite_action_nominal CSL::approximation
   CSL::quickhull_2d CSL::legacy_btulshor CSL::generator_adapter CSL::terminal_minimizers)
 target_include_directories(csl_module_composition_catalogue PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/exp824)

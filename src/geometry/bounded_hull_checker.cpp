@@ -22,6 +22,11 @@ bool budget_expired(const Clock::time_point start, const std::chrono::millisecon
     return elapsed_ms.count() >= static_cast<long double>(budget.count());
 }
 
+bool interrupted(const HullCheckControl& control) {
+    return control.cancellation.stop_requested() ||
+        (control.deadline && Clock::now() >= *control.deadline);
+}
+
 void append_u64(std::vector<std::byte>& bytes, std::uint64_t value) {
     for (unsigned shift = 0; shift < 64; shift += 8)
         bytes.push_back(static_cast<std::byte>((value >> shift) & 0xffU));
@@ -67,16 +72,16 @@ bool in_triangle(const Vector& point, const Vector& a, const Vector& b,
 bool covered(const Vector& point, std::span<const Vector> input,
              const std::vector<std::size_t>& indices, bool& certain,
              const Clock::time_point start, const std::chrono::milliseconds budget,
-             bool& timed_out) {
+             bool& timed_out, const HullCheckControl& control) {
     for (std::size_t i = 0; i < indices.size(); ++i) {
-        if (budget_expired(start, budget)) { timed_out = true; return false; }
+        if (budget_expired(start, budget) || interrupted(control)) { timed_out = true; return false; }
         const auto& a = input[indices[i]];
         if (point == a) return true;
         for (std::size_t j = i + 1; j < indices.size(); ++j) {
             if (on_segment(point, a, input[indices[j]], certain)) return true;
             if (!certain) return false;
             for (std::size_t k = j + 1; k < indices.size(); ++k) {
-                if (budget_expired(start, budget)) { timed_out = true; return false; }
+                if (budget_expired(start, budget) || interrupted(control)) { timed_out = true; return false; }
                 if (in_triangle(point, a, input[indices[j]], input[indices[k]], certain))
                     return true;
                 if (!certain) return false;
@@ -115,7 +120,7 @@ HullInputDigestResult digest_hull_input(std::span<const Vector> points) {
 }
 
 HullCheckRecord check_source_index_hull(std::span<const Vector> input,
-    const SourceIndexHull& output, HullCheckBudget budget) {
+    const SourceIndexHull& output, HullCheckBudget budget, HullCheckControl control) {
     const auto start = Clock::now();
     HullCheckRecord record;
     record.budget = budget;
@@ -124,6 +129,10 @@ HullCheckRecord check_source_index_hull(std::span<const Vector> input,
         return record;
     };
     const auto check_budget = [&]() -> bool {
+        if (interrupted(control)) {
+            record.reason = control.cancellation.stop_requested() ? "checker cancelled" : "operation deadline expired during checker";
+            return true;
+        }
         if (budget_expired(start, budget.wall)) {
             record.reason = "checker timeout";
             return true;
@@ -131,6 +140,12 @@ HullCheckRecord check_source_index_hull(std::span<const Vector> input,
         return false;
     };
     try {
+        if (control.cancellation.stop_requested()) {
+            record.reason = "checker cancelled"; return finish();
+        }
+        if (control.deadline && Clock::now() >= *control.deadline) {
+            record.reason = "operation deadline expired during checker"; return finish();
+        }
         if (budget.wall <= std::chrono::milliseconds::zero()) {
             record.reason = "checker timeout"; return finish();
         }
@@ -168,8 +183,10 @@ HullCheckRecord check_source_index_hull(std::span<const Vector> input,
         }
         for (std::size_t i = 0; i < input.size(); ++i) {
             bool certain = true, timed_out = false;
-            if (!covered(input[i], input, output.indices, certain, start, budget.wall, timed_out)) {
-                if (timed_out) record.reason = "checker timeout";
+            if (!covered(input[i], input, output.indices, certain, start, budget.wall, timed_out, control)) {
+                if (interrupted(control))
+                    record.reason = control.cancellation.stop_requested() ? "checker cancelled" : "operation deadline expired during checker";
+                else if (timed_out) record.reason = "checker timeout";
                 else if (!certain) record.reason = "exact arithmetic capacity exceeded";
                 else if (budget_expired(start, budget.wall)) record.reason = "checker timeout";
                 else {

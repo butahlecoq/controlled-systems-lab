@@ -8,12 +8,20 @@
 #include <cassert>
 #include <cmath>
 #include <numeric>
+#include <stdexcept>
 #include <utility>
 
 namespace csl::geometry {
 namespace {
 
 using detail::exact_detail::Integer;
+
+struct Interrupted { std::string reason; };
+void check_interruption(const QuickHullControl& control) {
+    if (control.cancellation.stop_requested()) throw Interrupted{"cancelled_during_kernel"};
+    if (control.deadline && std::chrono::steady_clock::now() >= *control.deadline)
+        throw Interrupted{"deadline_expired_during_kernel"};
+}
 
 Integer orientation(const Vector& a, const Vector& b, const Vector& c) {
     using detail::exact_detail::add_product;
@@ -49,11 +57,12 @@ bool coordinate_less(const std::span<const Vector> points, std::size_t a, std::s
 
 void append_chain(std::span<const Vector> points, std::size_t left, std::size_t right,
                   int side, const std::vector<std::size_t>& candidates,
-                  std::vector<std::size_t>& vertices) {
+                  std::vector<std::size_t>& vertices, const QuickHullControl& control) {
     if (candidates.empty()) return;
     std::size_t farthest = candidates.front();
     Integer greatest = orientation(points[left], points[right], points[farthest]);
     for (const auto candidate : candidates) {
+        check_interruption(control);
         Integer distance = orientation(points[left], points[right], points[candidate]);
         if (detail::exact_detail::compare_magnitude(distance, greatest) > 0) {
             greatest = std::move(distance);
@@ -67,6 +76,7 @@ void append_chain(std::span<const Vector> points, std::size_t left, std::size_t 
     before.reserve(candidates.size());
     after.reserve(candidates.size());
     for (const auto candidate : candidates) {
+        check_interruption(control);
         if (candidate == farthest) continue;
         const int first = orientation_sign(orientation(points[left], points[farthest], points[candidate]));
         if (first == side) {
@@ -75,15 +85,26 @@ void append_chain(std::span<const Vector> points, std::size_t left, std::size_t 
             after.push_back(candidate);
         }
     }
-    append_chain(points, left, farthest, side, before, vertices);
+    append_chain(points, left, farthest, side, before, vertices, control);
     vertices.push_back(farthest);
-    append_chain(points, farthest, right, side, after, vertices);
+    append_chain(points, farthest, right, side, after, vertices, control);
 }
 
 } // namespace
 
 QuickHull2DResult quickhull_2d(std::span<const Vector> points) {
+    const auto result=quickhull_2d_controlled(points,{});
+    if(const auto* hull=std::get_if<QuickHull2D>(&result)) return *hull;
+    if(const auto* diagnostics=std::get_if<Diagnostics>(&result)) return *diagnostics;
+    throw std::logic_error("uncontrolled QuickHull unexpectedly stopped");
+}
+
+ControlledQuickHull2DResult quickhull_2d_controlled(std::span<const Vector> points,
+        QuickHullControl control) {
+    try {
+    check_interruption(control);
     for (const auto& point : points) {
+        check_interruption(control);
         if (point.size() != 2)
             return Diagnostics{{DiagnosticCode::invalid_input, "points",
                 "QuickHull2D requires exactly two coordinates per point"}};
@@ -97,9 +118,15 @@ QuickHull2DResult quickhull_2d(std::span<const Vector> points) {
     std::vector<std::size_t> unique(points.size());
     std::iota(unique.begin(), unique.end(), std::size_t{0});
     std::sort(unique.begin(), unique.end(),
-        [&](std::size_t a, std::size_t b) { return coordinate_less(points, a, b); });
+        [&](std::size_t a, std::size_t b) {
+            check_interruption(control);
+            return coordinate_less(points, a, b);
+        });
     unique.erase(std::unique(unique.begin(), unique.end(),
-        [&](std::size_t a, std::size_t b) { return points[a] == points[b]; }), unique.end());
+        [&](std::size_t a, std::size_t b) {
+            check_interruption(control);
+            return points[a] == points[b];
+        }), unique.end());
 
     const auto left = unique.front();
     result.vertex_indices.push_back(left);
@@ -108,15 +135,19 @@ QuickHull2DResult quickhull_2d(std::span<const Vector> points) {
     std::vector<std::size_t> below;
     std::vector<std::size_t> above;
     for (const auto index : unique) {
+        check_interruption(control);
         if (index == left || index == right) continue;
         const int side = orientation_sign(orientation(points[left], points[right], points[index]));
         if (side < 0) below.push_back(index);
         else if (side > 0) above.push_back(index);
     }
-    append_chain(points, left, right, -1, below, result.vertex_indices);
+    append_chain(points, left, right, -1, below, result.vertex_indices, control);
     result.vertex_indices.push_back(right);
-    append_chain(points, right, left, -1, above, result.vertex_indices);
+    append_chain(points, right, left, -1, above, result.vertex_indices, control);
     return result;
+    } catch(const Interrupted& interruption) {
+        return QuickHullStopped{interruption.reason};
+    }
 }
 
 } // namespace csl::geometry

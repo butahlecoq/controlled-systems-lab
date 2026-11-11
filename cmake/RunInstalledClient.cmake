@@ -47,6 +47,7 @@ file(COPY "${CSL_SOURCE_DIR}/tests/installed/highs_client.cpp" DESTINATION "${wo
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/phase_one_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/hull_reducer_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/affine_sum_client.cpp" DESTINATION "${work}/source")
+file(COPY "${CSL_SOURCE_DIR}/tests/installed/source_index_affine_sum_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/terminal_minimizers_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/convex_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/installed/run_statistics_client.cpp" DESTINATION "${work}/source")
@@ -167,7 +168,8 @@ file(MAKE_DIRECTORY "${example_source}/scenarios")
 foreach(example_file CMakeLists.txt registered_lp.cpp registered_convex.cpp
     resolved_scenario.cpp scenario_file.cpp backend_substitution.cpp registered_synthesis_comparison.cpp
     nominal_linear_exact_2d.cpp scenario_cli.cpp continuous_policy.cpp
-    adaptive_ode_replay.cpp scenario_backend_substitution.cpp scenario_backend_artifact_check.cpp)
+    source_index_geometry_2d.cpp adaptive_ode_replay.cpp scenario_backend_substitution.cpp
+    scenario_backend_artifact_check.cpp)
   file(COPY "${CSL_SOURCE_DIR}/examples/${example_file}" DESTINATION "${example_source}")
 endforeach()
 file(COPY "${CSL_SOURCE_DIR}/examples/scenario_cli_export_check.cmake"

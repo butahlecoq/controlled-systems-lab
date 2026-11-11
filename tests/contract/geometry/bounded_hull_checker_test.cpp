@@ -5,6 +5,7 @@
 
 #include <chrono>
 #include <limits>
+#include <stop_token>
 #include <vector>
 
 using csl::Vector;
@@ -72,6 +73,21 @@ TEST_CASE("budget and unsupported input preserve inconclusive status") {
     const auto unsupported = check_source_index_hull(three_dimensions, {digest, {0,1}});
     CHECK(unsupported.status == HullCheckStatus::inconclusive);
     CHECK(unsupported.reason == "unsupported dimension");
+}
+
+TEST_CASE("the source-index checker respects parent cancellation and deadlines") {
+    std::stop_source cancellation;
+    cancellation.request_stop();
+    const auto cancelled=check_source_index_hull(square,hull({0,1,2,3}),
+        {std::chrono::milliseconds{5000},64},{cancellation.get_token(),{}});
+    CHECK(cancelled.status==HullCheckStatus::inconclusive);
+    CHECK(cancelled.reason=="checker cancelled");
+
+    const auto deadline=std::chrono::steady_clock::now()-std::chrono::milliseconds{1};
+    const auto expired=check_source_index_hull(square,hull({0,1,2,3}),
+        {std::chrono::milliseconds{5000},64},{{},deadline});
+    CHECK(expired.status==HullCheckStatus::inconclusive);
+    CHECK(expired.reason=="operation deadline expired during checker");
 }
 
 TEST_CASE("maximum representable wall budget does not overflow its deadline") {

@@ -7,9 +7,13 @@
 #include "conversion/exact_h_box.hpp"
 #include "conversion/exact_h_interval.hpp"
 #include <algorithm>
+#include <bit>
+#include <chrono>
 #include <cmath>
+#include <iomanip>
 #include <limits>
 #include <numeric>
+#include <sstream>
 #include <span>
 
 namespace csl::geometry {
@@ -27,6 +31,40 @@ bool stopped(const ExecutionContext& context) {
 }
 StopReason stop_reason(const ExecutionContext& context) {
     return context.cancellation.stop_requested() ? StopReason::cancelled : StopReason::resource_limit;
+}
+std::string ordered_binary64_manifest(std::span<const Vector> points) {
+    std::ostringstream encoded;
+    encoded << std::hex << std::setfill('0');
+    for (std::size_t row=0; row<points.size(); ++row) {
+        if(row) encoded << ';';
+        for(std::size_t col=0; col<points[row].size(); ++col) {
+            if(col) encoded << ',';
+            encoded << std::setw(16) << std::bit_cast<std::uint64_t>(points[row][col]);
+        }
+    }
+    return encoded.str();
+}
+std::string_view outcome_name(MathematicalOutcome outcome) {
+    switch(outcome) {
+    case MathematicalOutcome::optimal:return "optimal";
+    case MathematicalOutcome::infeasible:return "infeasible";
+    case MathematicalOutcome::unbounded:return "unbounded";
+    case MathematicalOutcome::infimum_not_attained:return "infimum_not_attained";
+    case MathematicalOutcome::undetermined:return "undetermined";
+    }
+    return "unknown";
+}
+std::string_view not_run_name(registry::LPQueryNotRunReason reason) {
+    return reason==registry::LPQueryNotRunReason::cancelled?"cancelled":"deadline";
+}
+std::string_view stopped_name(registry::LPQueryStopReason reason) {
+    switch(reason) {
+    case registry::LPQueryStopReason::cancelled:return "cancelled";
+    case registry::LPQueryStopReason::deadline_expired:return "deadline_expired";
+    case registry::LPQueryStopReason::resource_limit:return "resource_limit";
+    case registry::LPQueryStopReason::numerical_failure:return "numerical_failure";
+    }
+    return "unknown";
 }
 bool finite_policy(const NumericalPolicy& policy) {
     return std::isfinite(policy.absolute_tolerance) && policy.absolute_tolerance >= 0.0 &&
@@ -130,7 +168,7 @@ OperationOutcome operation_stop(OperationStopped stop) { return OperationOutcome
 
 std::variant<FiniteSet, OperationOutcome> finite_vertices(const SetHandle& handle,
         const OperationRequest& parent, const ExecutionContext& context,
-        const AffineSumDependencies& dependencies) {
+        const std::optional<registry::PreparedProvider<registry::ConversionPort>>& conversion) {
     auto imported = sets::from_handle(handle);
     if (const auto* error = std::get_if<Diagnostic>(&imported))
         return operation_error(unsupported(error->field, error->explanation, error->code));
@@ -170,14 +208,14 @@ std::variant<FiniteSet, OperationOutcome> finite_vertices(const SetHandle& handl
         return result;
     }
 
-    if (!dependencies.conversion)
+    if (!conversion)
         return operation_error(unsupported("affine-sum.conversion", "H input requires an explicitly selected H-to-V converter."));
     ConversionRequest request{
         {parent.identity.problem,
          {parent.identity.request.value + "/affine-sum-convert/" + handle.id.value},
          {parent.identity.ideal_output.value + "/converted/" + handle.id.value}},
         handle, {"csl.polyhedron.v"}, parent.assurance};
-    auto prepared_result = dependencies.conversion->prepare(request);
+    auto prepared_result = conversion->prepare(request);
     if (std::holds_alternative<registry::Rejection>(prepared_result))
         return operation_error(unsupported("affine-sum.conversion", "Selected H-to-V converter rejected the concrete request."));
     auto prepared = std::get<registry::PreparedPipeline<registry::ConversionPort>>(std::move(prepared_result));
@@ -237,7 +275,8 @@ std::variant<FiniteSet, OperationOutcome> finite_vertices(const SetHandle& handl
         if (const auto* bound = std::get_if<double>(&coverage))
             result.input_to_vertices_error = *bound;
     }
-    result.assumptions.emplace_back("H-to-V conversion evidence is numerical and conditional on the selected converter");
+    result.assumptions.emplace_back("H-to-V conversion invoked: "+identity(conversion->provenance())+
+        "; numerical evidence is conditional on the selected converter");
     if (result.input_to_vertices_error)
         result.assumptions.emplace_back("H/V coverage was independently checked against exact stored-dyadic ambient-one or supported axis-aligned box rows");
     return result;
@@ -332,10 +371,15 @@ bool valid_reduction(const PointCloud& cloud, const HullReduction& reduction,
 
 class AffineSumWorkspace final : public SetOperatorWorkspace {
     OperationRequest request_;
-    AffineSumDependencies dependencies_;
+    std::variant<AffineSumDependencies, SourceIndexAffineSumDependencies> dependencies_;
     AffineSumOptions options_;
 
     OperationOutcome apply_supported(const ExecutionContext& context) {
+        const bool source_index_mode = std::holds_alternative<SourceIndexAffineSumDependencies>(dependencies_);
+        const auto* conversion_dependency = std::visit([](const auto& dependencies) {
+            return &dependencies.conversion;
+        }, dependencies_);
+        const auto& conversion = *conversion_dependency;
         if (request_.assurance != Assurance::numerical)
             return unsupported("geometry.assurance", "Affine images and sums provide numerical evidence only.");
         if (request_.required_relation != SetRelation::equivalent)
@@ -358,12 +402,12 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
             left_handle = sum->left; right_handle = sum->right;
         } else return unsupported("geometry.operation", "Only affine images and Minkowski sums are implemented.");
 
-        auto left_result = finite_vertices(left_handle, request_, context, dependencies_);
+        auto left_result = finite_vertices(left_handle, request_, context, conversion);
         if (auto* failed = std::get_if<OperationOutcome>(&left_result)) return std::move(*failed);
         auto left = std::get<FiniteSet>(std::move(left_result));
         std::optional<FiniteSet> right;
         if (std::holds_alternative<MinkowskiSum>(request_.operation)) {
-            auto right_result = finite_vertices(right_handle, request_, context, dependencies_);
+            auto right_result = finite_vertices(right_handle, request_, context, conversion);
             if (auto* failed = std::get_if<OperationOutcome>(&right_result)) return std::move(*failed);
             right = std::get<FiniteSet>(std::move(right_result));
             if (left.labels != right->labels)
@@ -454,19 +498,214 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
         }
         if (stopped(context)) return OperationStopped{stop_reason(context), "Stopped before hull reduction."};
 
-        auto hull_prepared_result = dependencies_.hull.prepare(cloud);
         double max_residual=0.0;
         bool reduction_usable=false;
         std::optional<HullReduction> reduction;
+        std::vector<std::size_t> output_indices;
+        std::vector<std::string> source_index_assumptions;
+        std::vector<std::string> reducer_invocation_assumptions;
+        std::string selected_reducer_identity;
+        std::string selected_lp_identity = "not_used";
+        if (source_index_mode) {
+            const auto& dependencies=std::get<SourceIndexAffineSumDependencies>(dependencies_);
+            selected_reducer_identity=identity(dependencies.hull.provenance());
+            if (cloud.points.size() > dependencies.checker_budget.max_points)
+                return unsupported("affine-sum.source-index.capacity", "Generated candidate cloud exceeds the independently selected 2D checker capacity; checker input manifest was not materialized.");
+            const auto digest=digest_hull_input(cloud.points);
+            if (const auto* failure=std::get_if<std::string>(&digest))
+                return unsupported("affine-sum.source-index.digest",*failure);
+            const auto cloud_digest=problem::hex(std::get<HullInputDigest>(digest));
+            const auto cloud_manifest=ordered_binary64_manifest(cloud.points);
+            const auto cloud_record="source-index generated ordered cloud: digest="+cloud_digest+
+                "; encoding=binary64-bit-pattern-hex/row-order/1; points="+
+                std::to_string(cloud.points.size())+"; rows="+cloud_manifest;
+            source_index_assumptions.push_back(cloud_record);
+            auto prepared_result=dependencies.hull.prepare(cloud);
+            if (const auto* rejected=std::get_if<registry::Rejection>(&prepared_result)) {
+                std::string details="Selected source-index provider rejected the generated cloud; "+cloud_record;
+                for(const auto& item:rejected->diagnostics)
+                    details+="; "+item.field+": "+item.explanation;
+                return unsupported("affine-sum.source-index.admission",std::move(details));
+            }
+            auto prepared=std::get<registry::PreparedPipeline<registry::SourceIndexHullPort>>(std::move(prepared_result));
+            auto workspaces=prepared.create();
+            const auto algorithm_started=std::chrono::steady_clock::now();
+            auto proposed=std::get<0>(workspaces)->run(context);
+            const auto algorithm_elapsed=std::chrono::duration_cast<std::chrono::nanoseconds>(
+                std::chrono::steady_clock::now()-algorithm_started);
+            if (const auto* diagnostics=std::get_if<Diagnostics>(&proposed)) {
+                std::string details="selected source-index provider invocation=1; provider="+
+                    selected_reducer_identity+"; elapsed_ns="+std::to_string(algorithm_elapsed.count())+
+                    "; raw diagnostics=";
+                for (const auto& diagnostic:*diagnostics) details += "; "+diagnostic.field+": "+diagnostic.explanation;
+                details+="; "+cloud_record;
+                return Unsupported{{{DiagnosticCode::unsupported,"affine-sum.source-index.proposal",std::move(details)}}};
+            }
+            auto proposal=std::get<SourceIndexProposal>(std::move(proposed));
+            const auto proposal_status_name=[&]() -> std::string_view {
+                switch(proposal.status) {
+                case SourceIndexProposalStatus::completed:return "completed";
+                case SourceIndexProposalStatus::stopped:return "stopped";
+                case SourceIndexProposalStatus::malformed:return "malformed";
+                }
+                return "unknown";
+            };
+            const auto append_proposal_record=[&](std::string_view check_status,std::string_view reason) {
+                source_index_assumptions.push_back("source-index invocation: provider="+selected_reducer_identity+
+                    "; status="+proposal.raw_status+"; outcome="+std::string{proposal_status_name()}+
+                    "; internal_invocations="+(proposal.internal_invocations?
+                    std::to_string(*proposal.internal_invocations):"unavailable")+"; elapsed_ns="+
+                    std::to_string(algorithm_elapsed.count())+"; checker_status="+std::string{check_status}+
+                    "; checker_reason="+std::string{reason});
+                for (const auto& item:proposal.trace) source_index_assumptions.push_back("source-index trace: "+item);
+                source_index_assumptions.push_back("source-index proposed original IDs: "+[&] {
+                    std::string result; for (const auto id:proposal.retained_indices) {
+                        if (!result.empty()) result += ",";
+                        result += std::to_string(id);
+                    } return result;
+                }());
+            };
+            const auto proposal_record=[&]() {
+                std::string record="provider="+selected_reducer_identity+"; status="+proposal.raw_status+
+                    "; internal_invocations="+(proposal.internal_invocations?
+                    std::to_string(*proposal.internal_invocations):"unavailable")+
+                    "; elapsed_ns="+std::to_string(algorithm_elapsed.count())+
+                    "; checker_input_digest="+cloud_digest+"; "+cloud_record+"; proposed_ids=";
+                for (const auto id:proposal.retained_indices) record+=std::to_string(id)+",";
+                for (const auto& item:proposal.trace) record+="; trace="+item;
+                return record;
+            };
+            if (proposal.status!=SourceIndexProposalStatus::completed) {
+                append_proposal_record("not_run",proposal.stop_reason);
+                if (proposal.status==SourceIndexProposalStatus::stopped)
+                    return OperationStopped{proposal.stop_reason.find("cancelled")!=std::string::npos?
+                        StopReason::cancelled:proposal.stop_reason.find("deadline")!=std::string::npos?
+                        StopReason::deadline_expired:StopReason::resource_limit,
+                        "Source-index method stopped; raw outcome: "+proposal_record()+"; reason="+proposal.stop_reason};
+                return unsupported("affine-sum.source-index.proposal",
+                    "Selected source-index method did not complete: "+proposal_record()+"; "+proposal.stop_reason);
+            }
+            const SourceIndexHull output{std::get<HullInputDigest>(digest),proposal.retained_indices};
+            auto checker_budget=dependencies.checker_budget;
+            if (context.deadline) {
+                const auto remaining=*context.deadline-std::chrono::steady_clock::now();
+                if (remaining<=std::chrono::steady_clock::duration::zero()) {
+                    append_proposal_record("not_run","operation deadline expired before checker");
+                    return OperationStopped{StopReason::deadline_expired,
+                        "Source-index proposal completed; checker did not start before the operation deadline; raw proposal: "+proposal_record()};
+                }
+                const auto remaining_ms=std::chrono::duration_cast<std::chrono::milliseconds>(remaining);
+                checker_budget.wall=std::min(checker_budget.wall,std::max(std::chrono::milliseconds{1},remaining_ms));
+            }
+            const auto checker=check_source_index_hull(cloud.points,output,checker_budget,
+                {context.cancellation,context.deadline});
+            const std::string checker_record=std::string{"checker invocation: provider=csl.geometry.bounded-hull-checker@1; status="}+
+                (checker.status==HullCheckStatus::verified?"verified":
+                    checker.status==HullCheckStatus::incorrect?"incorrect":"inconclusive")+
+                "; input_digest="+cloud_digest+"; ordered_cloud_ref=source-index generated ordered cloud; reason="+
+                checker.reason+"; elapsed_ns="+std::to_string(checker.elapsed.count())+
+                "; budget_ms="+std::to_string(checker_budget.wall.count())+
+                "; max_points="+std::to_string(checker_budget.max_points);
+            source_index_assumptions.push_back(checker_record);
+            append_proposal_record(checker.status==HullCheckStatus::verified?"verified":
+                checker.status==HullCheckStatus::incorrect?"incorrect":"inconclusive",checker.reason);
+            if (checker.status!=HullCheckStatus::verified) {
+                const auto details="source-index proposal retained for audit; "+checker_record;
+                if (checker.reason.find("cancelled")!=std::string::npos)
+                    return OperationStopped{StopReason::cancelled,details+"; raw proposal: "+proposal_record()};
+                if (checker.reason.find("deadline")!=std::string::npos)
+                    return OperationStopped{StopReason::deadline_expired,details+"; raw proposal: "+proposal_record()};
+                if(checker.status==HullCheckStatus::inconclusive)
+                    return OperationStopped{StopReason::resource_limit,details+"; raw proposal: "+proposal_record()};
+                return unsupported("affine-sum.source-index.checker",details+"; raw proposal: "+proposal_record(),
+                    checker.status==HullCheckStatus::incorrect?DiagnosticCode::invalid_claim:DiagnosticCode::unsupported);
+            }
+            reduction_usable=true;
+            output_indices=std::move(proposal.retained_indices);
+            max_residual=0.0;
+            source_index_assumptions.push_back("independent exact 2D checker verifies every generated input point lies in the convex hull of selected original IDs; minimality is not established");
+        } else {
+        const auto& dependencies=std::get<AffineSumDependencies>(dependencies_);
+        selected_reducer_identity=identity(dependencies.hull.provenance());
+        selected_lp_identity=identity(dependencies.lp.provenance());
+        auto hull_prepared_result = dependencies.hull.prepare(cloud);
         if (std::holds_alternative<registry::PreparedPipeline<registry::HullReducerPort>>(hull_prepared_result)) {
             auto hull_prepared=std::get<registry::PreparedPipeline<registry::HullReducerPort>>(std::move(hull_prepared_result));
             auto hull_workspaces=hull_prepared.create();
-            auto lp_runner=std::make_unique<registry::RegisteredLPQueryRunner>(dependencies_.lp);
+            auto lp_runner=std::make_unique<registry::RegisteredLPQueryRunner>(dependencies.lp);
             auto reduction_result=std::get<0>(hull_workspaces)->run_with(context,*lp_runner);
             if (auto* complete=std::get_if<HullReduction>(&reduction_result)) {
                 reduction=std::move(*complete);
                 const auto& checked=*reduction;
-                reduction_usable=checked.lp_calls==lp_runner->records().size() &&
+                const auto indices=[](const std::vector<std::size_t>& values) {
+                    std::string text;
+                    for(const auto value:values) { if(!text.empty())text+=","; text+=std::to_string(value); }
+                    return text;
+                };
+                const auto membership_name=[](MembershipOutcome outcome) -> std::string_view {
+                    switch(outcome) {
+                    case MembershipOutcome::feasible:return "feasible";
+                    case MembershipOutcome::infeasible:return "infeasible";
+                    case MembershipOutcome::unsupported:return "unsupported";
+                    case MembershipOutcome::stopped:return "stopped";
+                    case MembershipOutcome::numerical_failure:return "numerical_failure";
+                    case MembershipOutcome::malformed_result:return "malformed_result";
+                    }
+                    return "unknown";
+                };
+                reducer_invocation_assumptions.push_back("HullReducerPort invocation: provider="+
+                    selected_reducer_identity+"; status="+
+                    (checked.status==ReductionStatus::complete?"complete":"incomplete")+
+                    "; tolerance_abs="+std::to_string(context.numerical.absolute_tolerance)+
+                    "; tolerance_rel="+std::to_string(context.numerical.relative_tolerance)+
+                    "; lp_calls="+std::to_string(checked.lp_calls)+
+                    "; exact_removal_certificates="+std::to_string(checked.removed.size())+
+                    "; retained_original_ids="+indices(checked.retained));
+                for(const auto& attempt:checked.attempts)
+                    reducer_invocation_assumptions.push_back("HullReducerPort attempt: candidate_id="+
+                        std::to_string(attempt.candidate)+"; status="+
+                        std::string{membership_name(attempt.outcome)});
+                if(checked.basis_reuse)
+                    reducer_invocation_assumptions.push_back("HullReducerPort basis_reuse: basis_solves="+
+                        std::to_string(checked.basis_reuse->basis_solves)+"; pivots="+
+                        std::to_string(checked.basis_reuse->pivots)+"; bulk_removals="+
+                        std::to_string(checked.basis_reuse->bulk_removals)+"; fell_back_to_lp_baseline="+
+                        (checked.basis_reuse->fell_back_to_lp_baseline?"true":"false"));
+                if(checked.itis17_a43)
+                    reducer_invocation_assumptions.push_back("HullReducerPort itis17_a43: final_recheck_calls="+
+                        std::to_string(checked.itis17_a43->final_recheck_calls)+
+                        "; largest_norm_tie_policy_applied="+
+                        (checked.itis17_a43->largest_norm_tie_policy_applied?"true":"false"));
+                if(checked.itis17_a43_paper)
+                    reducer_invocation_assumptions.push_back("HullReducerPort itis17_a43_paper: candidate_solves="+
+                        std::to_string(checked.itis17_a43_paper->candidate_solves)+"; pivots="+
+                        std::to_string(checked.itis17_a43_paper->phase_one_pivots)+
+                        "; largest_norm_tie_rule="+
+                        (checked.itis17_a43_paper->largest_norm_tie_rule?"true":"false"));
+                if(checked.itis17_a44)
+                    reducer_invocation_assumptions.push_back("HullReducerPort itis17_a44: processing_order="+
+                        indices(checked.itis17_a44->processing_order)+"; seeded_candidates="+
+                        std::to_string(checked.itis17_a44->seeded_candidates)+"; incremental_calls="+
+                        std::to_string(checked.itis17_a44->incremental_membership_calls)+
+                        "; final_recheck_calls="+std::to_string(checked.itis17_a44->final_recheck_calls));
+                for(const auto& query:checked.child_lp_invocations)
+                    reducer_invocation_assumptions.push_back("HullReducerPort child LPPort invocation: requested_provider="+
+                        query.requested_provider+"; actual_provider="+query.actual_provider+"@"+query.actual_version+
+                        "; problem="+query.request.problem.value+"; program="+query.request.program.value+
+                        "; status="+query.status+
+                        (query.outcome.empty()?"":"; mathematical_outcome="+query.outcome)+
+                        (query.raw_diagnostics.empty()?"":"; raw_diagnostics="+query.raw_diagnostics)+
+                        (query.raw_diagnostics_truncated?"; raw_diagnostics_truncated=true":""));
+                if(checked.child_lp_invocations_total>0)
+                    reducer_invocation_assumptions.push_back("HullReducerPort child LPPort trace summary: captured="+
+                        std::to_string(checked.child_lp_invocations.size())+"; total="+
+                        std::to_string(checked.child_lp_invocations_total)+"; omitted="+
+                        std::to_string(checked.child_lp_invocations_omitted)+"; capture_failed="+
+                        (checked.child_lp_trace_capture_failed?"true":"false")+
+                        "; these are LPPort calls/outcomes, not evidence of native solver entry");
+                const auto observed_membership_calls=lp_runner->records().size()+
+                    (checked.recursive?checked.child_lp_invocations_total:0);
+                reduction_usable=checked.lp_calls==observed_membership_calls &&
                     valid_reduction(cloud,checked,context.numerical,max_residual);
                 if (reduction_usable) {
                     for (const auto& certificate:checked.removed) {
@@ -479,13 +718,59 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
                         }
                     }
                 }
+            } else {
+                for(const auto& diagnostic:std::get<Diagnostics>(reduction_result))
+                    reducer_invocation_assumptions.push_back("HullReducerPort invocation: provider="+
+                        selected_reducer_identity+"; status=diagnostic_failure; field="+diagnostic.field+
+                        "; reason="+diagnostic.explanation);
             }
+            for(const auto& query:lp_runner->records()) {
+                std::visit([&](const auto& record) {
+                    using T=std::decay_t<decltype(record)>;
+                    std::string status,requested="unresolved",actual="unresolved",detail;
+                    if constexpr(std::is_same_v<T,registry::LPQueryNotRun>) {
+                        status="not_run"; requested=record.provider.requested.id.value;
+                        actual=identity(record.provider);
+                        detail="; stop_reason="+std::string{not_run_name(record.reason)};
+                    } else if constexpr(std::is_same_v<T,registry::LPQueryRejected>) {
+                        status="rejected";
+                        requested=record.rejection.provenance.requested.id.value;
+                        actual=identity(record.rejection.provenance);
+                        for(const auto& diagnostic:record.rejection.diagnostics)
+                            detail+="; "+diagnostic.field+": "+diagnostic.explanation;
+                    } else if constexpr(std::is_same_v<T,registry::LPQuerySolverUnsupported>) {
+                        status="solver_unsupported"; requested=record.provider.requested.id.value;
+                        actual=identity(record.provider);
+                        for(const auto& diagnostic:record.diagnostics)
+                            detail+="; "+diagnostic.field+": "+diagnostic.explanation;
+                    } else if constexpr(std::is_same_v<T,registry::LPQueryCompleted>) {
+                        status="completed"; requested=record.provider.requested.id.value;
+                        actual=identity(record.provider);
+                        detail="; outcome="+std::string{outcome_name(record.outcome)}+
+                            "; returned_problem="+record.returned_subject.problem.value+
+                            "; returned_program="+record.returned_subject.program.value;
+                    } else {
+                        status="stopped"; requested=record.provider.requested.id.value;
+                        actual=identity(record.provider);
+                        detail="; stop_reason="+std::string{stopped_name(record.reason)};
+                    }
+                    reducer_invocation_assumptions.push_back("vertex LP invocation record: requested_provider="+
+                        requested+"; status="+status+
+                        "; actual_provider="+actual+"; problem="+record.request.problem.value+
+                        "; program="+record.request.program.value+detail);
+                },query);
+            }
+        } else {
+            const auto& rejection=std::get<registry::Rejection>(hull_prepared_result);
+            for(const auto& diagnostic:rejection.diagnostics)
+                reducer_invocation_assumptions.push_back("HullReducerPort preparation rejected: provider="+
+                    selected_reducer_identity+"; field="+diagnostic.field+"; reason="+diagnostic.explanation);
         }
-        std::vector<std::size_t> output_indices;
         if (reduction_usable) output_indices=reduction->retained;
         else {
             output_indices.resize(cloud.points.size());
             std::iota(output_indices.begin(),output_indices.end(),std::size_t{0});
+        }
         }
         std::vector<double> retained_values;
         if (result_id_dimension != 0 && output_indices.size() > std::numeric_limits<std::size_t>::max()/result_id_dimension)
@@ -502,20 +787,35 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
         if(const auto* error=std::get_if<Diagnostic>(&output)) return unsupported(error->field,error->explanation,error->code);
 
         std::vector<std::string> assumptions{
-            "binary64 affine and sum arithmetic; caller tolerance screens reduction evidence but cannot authorize deletion",
-            reduction_usable ?
-                "reducer retained indices applied only after exact binary64 convex-combination checks for every removal and complete acyclic dependency and partition validation" :
-                "all generated candidates retained because the complete reduction failed exact binary64 certification or structural validation",
-            "NumericalCheck.max_residual records the maximum attempted reducer reconstruction residual in binary64; it is not an output error bound and does not authorize candidate removal",
+            "binary64 affine and sum arithmetic; numerical tolerances do not authorize removal of generated candidates",
+            source_index_mode ?
+                "source-index IDs applied only after the bounded exact 2D checker verified every generated point against the selected retained cloud; the checker proves containment, not minimality" :
+                reduction_usable ?
+                    "HullReducerPort retained indices applied only after exact binary64 convex-combination checks for every removal and complete acyclic dependency and partition validation" :
+                    "all generated candidates retained because the complete HullReducerPort reduction failed exact binary64 certification or structural validation",
+            source_index_mode ?
+                "NumericalCheck.max_residual is zero for a successful exact source-index containment check; no LP reconstruction residual is claimed" :
+                "NumericalCheck.max_residual records the maximum attempted reducer reconstruction residual in binary64; it is not an output error bound and does not authorize candidate removal",
             "numerical equivalent relation is an algorithm claim, not exact equality or validated inclusion for the intended real-valued model",
             exact_bound_applicable ?
                 "published L-infinity error bound composes exact represented-dyadic candidate generation with direct V inputs or independently checked ambient-one/axis-aligned-box H/V coverage; exact deletion preserves the generated hull" :
                 "no independently checked global H/V coverage bound is available for every converted operand; no operation error bound is reported",
             "finite and mixed action catalogues are not accepted by this SetHandle operation",
-            "selected hull reducer: " + identity(dependencies_.hull.provenance()),
-            "selected LP provider: " + identity(dependencies_.lp.provenance())};
-        if(dependencies_.conversion)
-            assumptions.push_back("selected H-to-V converter: " + identity(dependencies_.conversion->provenance()));
+            source_index_mode ? "selected HullReducerPort: not_used" : "selected hull reducer: " + selected_reducer_identity,
+            "selected vertex LP provider: " + selected_lp_identity};
+        if(source_index_mode)
+            assumptions.push_back("selected source-index hull provider: "+selected_reducer_identity);
+        if(conversion) {
+            const bool invoked=std::any_of(left.assumptions.begin(),left.assumptions.end(),[](const auto& item) {
+                return item.starts_with("H-to-V conversion invoked:");
+            }) || (right && std::any_of(right->assumptions.begin(),right->assumptions.end(),[](const auto& item) {
+                return item.starts_with("H-to-V conversion invoked:");
+            }));
+            assumptions.push_back("selected H-to-V converter: "+identity(conversion->provenance())+
+                (invoked?"; role=invoked":"; role=not_invoked_for_V_inputs"));
+        } else assumptions.push_back("selected H-to-V converter: not_used");
+        assumptions.insert(assumptions.end(),source_index_assumptions.begin(),source_index_assumptions.end());
+        assumptions.insert(assumptions.end(),reducer_invocation_assumptions.begin(),reducer_invocation_assumptions.end());
         assumptions.insert(assumptions.end(),left.assumptions.begin(),left.assumptions.end());
         if(right) assumptions.insert(assumptions.end(),right->assumptions.begin(),right->assumptions.end());
         const std::vector<SetId> inputs = std::visit([](const auto& operation) -> std::vector<SetId> {
@@ -562,7 +862,8 @@ class AffineSumWorkspace final : public SetOperatorWorkspace {
         return OperationResult{std::get<sets::SetData>(std::move(output)).as_handle(),SetRelation::equivalent,std::move(evidence)};
     }
 public:
-    AffineSumWorkspace(OperationRequest request, AffineSumDependencies dependencies, AffineSumOptions options)
+    AffineSumWorkspace(OperationRequest request,
+        std::variant<AffineSumDependencies,SourceIndexAffineSumDependencies> dependencies, AffineSumOptions options)
         : request_(std::move(request)), dependencies_(std::move(dependencies)), options_(std::move(options)) {}
     OperationOutcome apply(const OperationRequest& request, const ExecutionContext& context) override {
         static_cast<void>(request); // GeometryPort binds and snapshots this immutable request before workspace creation.
@@ -595,6 +896,39 @@ registry::Registration<registry::GeometryPort> make_affine_sum_registration(
         },
         [dependencies=std::move(dependencies),options=std::move(options)](const OperationRequest& request) mutable {
             return std::make_unique<AffineSumWorkspace>(request,dependencies,options);
+        }};
+}
+
+registry::Registration<registry::GeometryPort> make_affine_sum_registration(
+        SourceIndexAffineSumDependencies dependencies, AffineSumOptions options) {
+    const auto source_assurance=dependencies.hull.requirements().output.assurance;
+    return {{{"csl.geometry.affine-sum.source-index"},"1.0.0"},
+        [checker_budget=dependencies.checker_budget,source_assurance](const OperationRequest& request,const registry::Requirements& requirements) -> registry::Capability {
+            if(request.assurance!=Assurance::numerical || requirements.output.assurance!=Assurance::numerical)
+                return Diagnostics{{DiagnosticCode::unsupported,"geometry.assurance","Affine images and sums provide numerical evidence only."}};
+            if(request.required_relation!=SetRelation::equivalent ||
+                (requirements.output.relation && *requirements.output.relation!=SetRelation::equivalent))
+                return Diagnostics{{DiagnosticCode::unsupported,"geometry.relation","Only equivalent set operations are supported."}};
+            if(!std::holds_alternative<AffineImage>(request.operation) && !std::holds_alternative<MinkowskiSum>(request.operation))
+                return Diagnostics{{DiagnosticCode::unsupported,"geometry.operation","Only affine images and Minkowski sums are implemented."}};
+            if(source_assurance==Assurance::validated)
+                return Diagnostics{{DiagnosticCode::unsupported,"geometry.source-index.assurance","Source-index methods provide exact represented-binary64 2D evidence only."}};
+            if(checker_budget.max_points==0)
+                return Diagnostics{{DiagnosticCode::invalid_input,"geometry.source-index.budget","Checker point budget must be positive; a zero wall budget is retained as a timeout outcome."}};
+            if(const auto* image=std::get_if<AffineImage>(&request.operation);
+                image && positive_dimensional_universal(image->input))
+                return Diagnostics{{DiagnosticCode::unsupported,"affine-sum.universal","Positive-dimensional universal input is outside the finite V profile."}};
+            if(const auto* sum=std::get_if<MinkowskiSum>(&request.operation);
+                sum && (positive_dimensional_universal(sum->left)||positive_dimensional_universal(sum->right)))
+                return Diagnostics{{DiagnosticCode::unsupported,"affine-sum.universal","Positive-dimensional universal input is outside the finite V profile."}};
+            registry::Output output; output.representation={"csl.polyhedron.v"};
+            output.assurance=Assurance::numerical; output.relation=SetRelation::equivalent;
+            return registry::Offer{output};
+        },
+        [dependencies=std::move(dependencies),options=std::move(options)](const OperationRequest& request) mutable {
+            return std::make_unique<AffineSumWorkspace>(request,
+                std::variant<AffineSumDependencies,SourceIndexAffineSumDependencies>{std::in_place_type<SourceIndexAffineSumDependencies>,dependencies},
+                options);
         }};
 }
 } // namespace csl::geometry

@@ -8,6 +8,14 @@
 namespace csl::geometry::legacy_btulshor {
 namespace {
 
+std::optional<Stopped> interruption(const Limits& limits) {
+    if (limits.cancellation.stop_requested())
+        return Stopped{StopReason::cancelled,"BTULSHOR execution cancelled at cooperative checkpoint"};
+    if (limits.deadline && std::chrono::steady_clock::now()>=*limits.deadline)
+        return Stopped{StopReason::deadline_expired,"BTULSHOR deadline expired at cooperative checkpoint"};
+    return std::nullopt;
+}
+
 Stopped stopped(StopReason reason, const char* message) { return {reason, message}; }
 
 bool checked_product(std::size_t a, std::size_t b, std::size_t& result) {
@@ -62,9 +70,11 @@ Outcome<ModifResult> run_modif(const ModifRequest& request, const Limits& limits
 
     // Pascal A is column-major and passed by value. Build that private copy.
     Vector a(entries);
-    for (std::size_t i = 0; i < m; ++i)
+    for (std::size_t i = 0; i < m; ++i) {
+        if (auto stop=interruption(limits)) return *stop;
         for (std::size_t j = 0; j < n; ++j)
             a[i + m * j] = request.a.values[i * n + j];
+    }
     Vector x = request.x;
     Vector u(m * m, 0.0);
     Vector xk(m, 0.0);
@@ -97,10 +107,12 @@ Outcome<ModifResult> run_modif(const ModifRequest& request, const Limits& limits
     record_phase(ne);
 
     for (;;) {
+        if (auto stop=interruption(limits)) return *stop;
         double minimum = 0.0;
         std::size_t k = 0;
         // Literal MODIF entering-column scan. Strict comparisons keep first ties.
         for (std::size_t j = 0; j < n; ++j) {
+            if (auto stop=interruption(limits)) return *stop;
             bool basic = false;
             for (std::size_t i = 0; i < m - 2; ++i)
                 if (nb[i] == static_cast<int>(j + 1)) { basic = true; break; }
@@ -139,6 +151,7 @@ Outcome<ModifResult> run_modif(const ModifRequest& request, const Limits& limits
         }
 
         for (std::size_t i = 0; i < m; ++i) {
+            if (auto stop=interruption(limits)) return *stop;
             double delta = 0.0;
             for (std::size_t j = 0; j < m; ++j) delta += u[i + m * j] * a[j + m * k];
             if (!std::isfinite(delta)) return stopped(StopReason::non_finite_arithmetic, "MODIF pivot column became nonfinite");
@@ -147,6 +160,7 @@ Outcome<ModifResult> run_modif(const ModifRequest& request, const Limits& limits
         double theta = 1E11;
         std::size_t l = 0;
         for (std::size_t i = 0; i < m - 2; ++i) {
+            if (auto stop=interruption(limits)) return *stop;
             if (xk[i] >= request.epsilon) {
                 const double delta = x[i] / xk[i];
                 if (!std::isfinite(delta)) return stopped(StopReason::non_finite_arithmetic, "MODIF ratio became nonfinite");
@@ -159,6 +173,7 @@ Outcome<ModifResult> run_modif(const ModifRequest& request, const Limits& limits
         const double pivot = xk[l];
         for (std::size_t j = 0; j < m - 2; ++j) u[l + m * j] /= pivot;
         for (std::size_t i = 0; i < m; ++i) {
+            if (auto stop=interruption(limits)) return *stop;
             if (i == l) x[i] = theta;
             else {
                 const double delta = xk[i];
@@ -197,6 +212,7 @@ Outcome<KpabepResult> kpabep(std::span<const Vector> points, const ModifPort& mo
     if (n == 0 || !modif_port.run || modif_port.id.empty())
         return stopped(StopReason::invalid_input, "KPABEP requires nonempty point dimensions and a named MODIF port");
     for (const auto& point : points) {
+        if (auto stop=interruption(limits)) return *stop;
         if (point.size() != n || !finite(point))
             return stopped(StopReason::invalid_input, "KPABEP points must have one finite shared dimension");
     }
@@ -216,9 +232,11 @@ Outcome<KpabepResult> kpabep(std::span<const Vector> points, const ModifPort& mo
     Vector a(cells, 0.0);
     std::vector<std::size_t> ids(m + 1);
     std::iota(ids.begin(), ids.end(), 0);
-    for (std::size_t col = 0; col < m; ++col)
+    for (std::size_t col = 0; col < m; ++col) {
+        if (auto stop=interruption(limits)) return *stop;
         for (std::size_t row = 0; row < n; ++row)
             a[row + stride * col] = points[col][row];
+    }
     const auto at = [&](std::size_t row, std::size_t col) -> double& { return a[row + stride * col]; };
 
     const std::size_t n1 = n, n2 = n + 1, n3 = n + 2;
@@ -244,6 +262,7 @@ Outcome<KpabepResult> kpabep(std::span<const Vector> points, const ModifPort& mo
     };
 
     while (j >= 1) {
+        if (auto stop=interruption(limits)) return *stop;
         // Label 1: the source rechecks the column swapped into this position.
         for (;;) {
             for (std::size_t i = 0; i < n; ++i) {

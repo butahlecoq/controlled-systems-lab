@@ -24,6 +24,10 @@ EXPECTED_LEGACY_SYMBOLS = {
     "csl::geometry::legacy_btulshor::kpabep",
     "csl::geometry::legacy_btulshor::reach",
 }
+EXPECTED_SOURCE_INDEX_IDS = {
+    "csl.hull.source.quickhull-2d",
+    "csl.hull.source.btulshor-kpabep",
+}
 EXPECTED_GROUPS = {
     "vertex_lp_simplex",
     "reachable_set_representation",
@@ -55,8 +59,14 @@ def main() -> int:
     assert len(records) >= 30, f"inventory unexpectedly short: {len(records)}"
     hull_ids = {row["identity"]["id"] for row in records
                 if row["group"] == "vertex_lp_simplex" and row["kind"] == "registered_provider"
-                and row["identity"]["id"].startswith("csl.hull.")}
+                and row["identity"]["id"].startswith("csl.hull.")
+                and not row["identity"]["id"].startswith("csl.hull.source.")}
     assert hull_ids == EXPECTED_HULL_IDS, f"hull registry mismatch: {hull_ids ^ EXPECTED_HULL_IDS}"
+    source_index_ids = {row["identity"]["id"] for row in records
+                        if row["group"] == "vertex_lp_simplex" and row["kind"] == "registered_provider"
+                        and row["identity"]["id"].startswith("csl.hull.source.")}
+    assert source_index_ids == EXPECTED_SOURCE_INDEX_IDS, \
+        f"source-index registry mismatch: {source_index_ids ^ EXPECTED_SOURCE_INDEX_IDS}"
     legacy_symbols = {row["identity"]["symbol"] for row in records
                       if row.get("route", "").startswith("faithful_")}
     assert legacy_symbols == EXPECTED_LEGACY_SYMBOLS
@@ -97,7 +107,8 @@ def main() -> int:
     vertex_roles = [row for row in records if row.get("role") == "vertex_lp_provider"]
     assert optimizer_roles and vertex_roles
     assert all(row["source"]["path"] != "src/geometry/hull_reducer.cpp" for row in optimizer_roles)
-    print(f"inventory source check passed: {len(records)} records, {len(hull_ids)} hull IDs, "
+    print(f"inventory source check passed: {len(records)} records, {len(hull_ids)} HullReducerPort IDs, "
+          f"{len(source_index_ids)} source-index IDs, "
           f"{len(legacy_symbols)} faithful BTULSHOR symbols")
     return 0
 

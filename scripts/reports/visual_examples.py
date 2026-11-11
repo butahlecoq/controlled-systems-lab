@@ -290,41 +290,116 @@ def plot(example):
             '</g></svg>')
 
 
-def point_table(example):
+def data_details(example):
+    """Keep input and output coordinates available without crowding the lesson view."""
+    if example["kind"] == "hull":
+        summary = f"Data · {len(example['points'])} source points · copyable JSON"
+        content = site_design.code_block(site_design.compact_json(example["inputs"]),
+                                         "Complete minimal input JSON")
+    else:
+        role = {
+        "hybrid": "feasible interval endpoints",
+        "projected_reachability": "projected terminal endpoints",
+        "two_parameter": "feasible polygon vertices",
+        "intersection": "intersection vertices",
+        }[example["kind"]]
+        points = example["points"]
+        dimensions = len(points[0])
+        matrix = [[point[coordinate] for point in points] for coordinate in range(dimensions)]
+        coordinate_labels = {
+            "hybrid": (("u<sub>0</sub>", "u0"), ("x<sub>2</sub>", "x2")),
+            "projected_reachability": (("u<sub>0</sub>", "u0"), ("x<sub>1</sub>", "x1")),
+            "two_parameter": (("u<sub>0</sub>", "u0"), ("u<sub>1</sub>", "u1")),
+            "intersection": (("x<sub>1</sub>", "x1"), ("x<sub>2</sub>", "x2")),
+        }[example["kind"]]
+        math_rows = ", ".join(math_label for math_label, _ in coordinate_labels)
+        spoken_rows = ", ".join(spoken_label for _, spoken_label in coordinate_labels)
+        output_matrix = _math_matrix(
+            matrix,
+            f"Output coordinate matrix W, {dimensions} coordinate rows by {len(points)} stored-output columns, displayed to six significant digits; coordinates {spoken_rows}",
+            display_significant_digits=6)
+        columns = ", ".join(f'w<sub>{i}</sub>' for i in range(len(points)))
+        rows = math_rows
+        summary = f"Data · {len(points)} {role} · output matrix and copyable JSON"
+        content = ('<p><var>W</var> ≈ [<var>w</var><sub>0</sub> … '
+                   f'<var>w</var><sub>{len(points) - 1}</sub>] ∈ ℝ<sup>{dimensions}×{len(points)}</sup></p>'
+                   + '<p class="limits">Displayed matrix values are rounded to 6 significant digits (≈); '
+                   'full precision is in Copy JSON. Matrix columns are output rows in stored order: '
+                   + columns + '; coordinates are rows: ' + rows
+                   + '. Repeated coordinates remain in place.</p>'
+                   + '<div class="scroll" tabindex="0" role="region" aria-label="Output coordinate matrix W">'
+                   + output_matrix + '</div>'
+                   + '<details><summary>Copy JSON for reproduction</summary>'
+                   + '<p class="limits">Output coordinates · ' + escape(role) + '</p>'
+                   + site_design.code_block(site_design.compact_json(points), "Output coordinates · " + role)
+                   + '<p class="limits">Complete minimal input JSON</p>'
+                   + site_design.code_block(site_design.compact_json(example["inputs"]),
+                                            "Complete minimal input JSON")
+                   + '</details>')
+    return '<details><summary>' + summary + '</summary>' + content + '</details>'
+
+
+def _math_matrix(matrix, label, *, display_significant_digits=None):
+    """Render a numeric-only MathML body with accessible CSS-stretched brackets."""
+    def display_value(value):
+        exact = json.dumps(value, allow_nan=False)
+        if display_significant_digits is not None and isinstance(value, (int, float)):
+            return format(value, f".{display_significant_digits}g")
+        return exact
+
     rows = []
-    seen = {}
-    for index, p in enumerate(example["points"]):
-        if example["kind"] in {"hybrid", "projected_reachability"}:
-            role = ("unique minimum" if index == 0 else "feasible interval endpoint") \
-                if example["kind"] == "hybrid" else "projected terminal endpoint"
-        elif example["kind"] == "two_parameter":
-            role = "feasible polygon vertex; shared vertices preserve separate path labels"
-        elif example["kind"] == "intersection":
-            role = "intersection vertex"
-        elif tuple(p) in seen:
-            role = "duplicate of point " + str(seen[tuple(p)])
-        else:
-            role = "hull vertex" if index in example["indices"] else "interior / omitted"
-        seen.setdefault(tuple(p), index)
-        rows.append(f'<tr><td>{index}</td><td>{p[0]:.6g}</td><td>{p[1]:.6g}</td><td>{role}</td></tr>')
-    heading = ("Original point ID" if example["kind"] == "hull" else
-               "Fixture point" if example["kind"] == "hybrid" else
-               "Projected endpoint" if example["kind"] == "projected_reachability" else
-               "Polygon vertex" if example["kind"] == "two_parameter" else "Saved output row ID")
-    caption = ("Exact illustrative values; the continuous feasible set is the full segment."
-               if example["kind"] == "hybrid" else
-               "Exact endpoints of the projected terminal interval; the plotted relation is the complete line segment."
-               if example["kind"] == "projected_reachability" else
-               "Exact polygon vertices; identical locations belong to separately labelled path branches."
-               if example["kind"] == "two_parameter" else
-               "Coordinates (rounded to six significant digits; raw JSON retains binary64 values)")
-    x_label, y_label = (("u₀", "x₂") if example["kind"] == "hybrid" else
-                        ("u₀", "x₁") if example["kind"] == "projected_reachability" else
-                        ("u₀", "u₁") if example["kind"] == "two_parameter" else ("x", "y"))
-    return ('<div class="scroll" tabindex="0" role="region" aria-label="Point coordinates"><table>'
-            f'<caption>{caption}</caption>'
-            f'<thead><tr><th scope="col">{heading}</th><th scope="col">{x_label}</th><th scope="col">{y_label}</th>'
-            '<th scope="col">Role</th></tr></thead><tbody>' + "".join(rows) + '</tbody></table></div>')
+    for values in matrix:
+        cells = "".join(f'<mtd><mn>{escape(display_value(value))}</mn></mtd>'
+                        for value in values)
+        rows.append(f'<mtr>{cells}</mtr>')
+    spoken_rows = "; ".join(", ".join(display_value(value) for value in row)
+                             for row in matrix)
+    accessible_label = f"{label}: {spoken_rows}"
+    return ('<span class="math-matrix" role="math" aria-label="'
+            + escape(accessible_label, quote=True) + '">'
+            '<span class="math-bracket math-bracket-left" aria-hidden="true"></span>'
+            '<math display="inline" aria-hidden="true"><mtable columnspacing="0.7em" rowspacing="0.25em">'
+            + "".join(rows) + '</mtable></math>'
+            '<span class="math-bracket math-bracket-right" aria-hidden="true"></span></span>')
+
+
+def lesson_input_math(example):
+    """Show a mathematical view only for the lesson inputs with known schemas."""
+    if example["kind"] == "hull":
+        points = example["inputs"]["points"]
+        dimensions = len(points[0])
+        matrix = [[point[coordinate] for point in points] for coordinate in range(dimensions)]
+        values = _math_matrix(matrix,
+                              f"Point matrix V, {dimensions} coordinate rows by {len(points)} source-point columns")
+        return ('<div class="math-input"><p><var>V</var> = [<var>v</var><sub>0</sub> … '
+                f'<var>v</var><sub>{len(points) - 1}</sub>] ∈ ℝ<sup>{dimensions}×{len(points)}</sup></p>'
+                + '<p class="limits">Matrix columns, in order: source points '
+                + ", ".join(f'v<sub>{i}</sub>' for i in range(len(points)))
+                + "; rows: " + ", ".join(f'x<sub>{i + 1}</sub>' for i in range(dimensions))
+                + '. Duplicate source points remain separate.</p>'
+                + '<div class="scroll" tabindex="0" role="region" aria-label="Input point matrix V">'
+                + values + '</div></div>')
+    if example["kind"] == "intersection":
+        source = example["inputs"]
+
+        def halfspace(name, symbol, set_symbol, title):
+            matrix = source[name + "_A"]
+            bounds = source[name + "_b"]
+            matrix_table = _math_matrix(matrix, f"Matrix A_{symbol}, {len(matrix)} rows by 2 columns")
+            vector_table = _math_matrix([[value] for value in bounds],
+                                        f"Column vector b_{symbol}, {len(bounds)} entries")
+            return ('<section class="math-system"><h3>' + title + '</h3>'
+                    f'<p><var>{set_symbol}</var> = {{<var>x</var> ∈ ℝ<sup>2</sup> : '
+                    f'<var>A</var><sub>{symbol}</sub><var>x</var> ≤ <var>b</var><sub>{symbol}</sub>}}</p>'
+                    '<p class="limits">Columns of A: x₁, x₂. Rows are paired in order with entries of b.</p>'
+                    '<div class="math-expression"><span><var>A</var><sub>' + symbol + '</sub> = </span>'
+                    + matrix_table + '<span><var>b</var><sub>' + symbol + '</sub> = </span>'
+                    + vector_table + '</div></section>')
+
+        return ('<div class="math-input"><p>Input sets:</p><div class="math-systems">'
+                + halfspace("left", "L", "P", "Left set P")
+                + halfspace("right", "R", "Q", "Right set Q") + '</div></div>')
+    return ""
 
 
 def section(example, number, previous=None, following=None):
@@ -332,12 +407,10 @@ def section(example, number, previous=None, following=None):
     content = owner.presentation(example)
     markup = (f'<section id="{example["slug"]}"><p class="eyebrow">Example {number:02d} / {content["example_type"]}</p>'
             f'<h2>{example["title"]}</h2><p>{content["explanation"]}</p>'
-            f'<figure><img src="{example["slug"]}.svg" alt="{escape(content["explanation"], quote=True)}">'
+            + lesson_input_math(example)
+            + f'<figure><img src="{example["slug"]}.svg" alt="{escape(content["explanation"], quote=True)}">'
             f'<figcaption>{content["caption"]}</figcaption></figure>'
-            f'<p class="answer">{content["result"]}</p>{point_table(example)}'
-            '<details><summary>Complete minimal input</summary>'
-            + site_design.code_block(json.dumps(example["inputs"], indent=2), "Complete minimal input")
-            + '</details>'
+            f'<p class="answer">{content["result"]}</p>{data_details(example)}'
             + content["extra"] + '<details><summary>Reproduce the functional example</summary>' + content["reproduction"] +
             site_design.code_block(content["command"], "Functional example reproduction commands")
             + '<p>' + content["platform_note"] + '</p>'
@@ -651,6 +724,12 @@ def build(catalog, site):
         '<p>The installed CSL replay client integrates a two-state harmonic oscillator and compares its recorded path with the analytic solution.</p>'
         '<p><a href="adaptive-ode-replay.html">Inputs, answer and reproduction details ↗</a> · '
         '<a href="adaptive-ode-replay.json">Raw record ↗</a></p></article>')
+    saved_figures += ('<article class="saved-figure" id="source-index-geometry-2d"><p class="eyebrow">Geometry · Public-interface example</p>'
+        '<h3><a href="source-index-geometry-2d.html">Source-index hulls in a 2D geometry pipeline</a></h3>'
+        '<a href="source-index-geometry-2d.html"><img src="source-index-geometry-2d.svg" alt="A square point cloud with edge, duplicate and interior points, followed by its affine image and one-step control sum"></a>'
+        '<p>QuickHull2D and the recovered BTULSHOR KPABEP/MODIF profile propose original point IDs; an independent exact checker validates each generated cloud before the affine or control sum applies those IDs.</p>'
+        '<p><a href="source-index-geometry-2d.html">Inputs, answer and reproduction details ↗</a> · '
+        '<a href="source-index-geometry-2d-records.json">Raw records ↗</a></p></article>')
     fuel_layer_files, fuel_layer_inventory, fuel_layer_card = visual_example_fuel_layers.build(
         Path(__file__).resolve().parents[2])
     saved_figures += fuel_layer_card
@@ -679,6 +758,12 @@ def build(catalog, site):
         source = adaptive_assets / name
         require(source.is_file() and not source.is_symlink(), "missing adaptive ODE example asset: " + name)
         outputs[name] = source.read_bytes() if source.suffix != ".html" else source.read_text(encoding="utf-8")
+    for name in ("source-index-geometry-2d.html", "source-index-geometry-2d.svg",
+                 "source-index-geometry-2d-records.json"):
+        source = adaptive_assets / name
+        require(source.is_file() and not source.is_symlink(),
+                "missing source-index geometry example asset: " + name)
+        outputs[name] = source.read_bytes() if source.suffix != ".html" else source.read_text(encoding="utf-8")
     with tempfile.TemporaryDirectory(prefix="csl-gallery-geometry-") as temporary:
         geometry_root = Path(temporary) / "examples"
         _, geometry_inventory, geometry_assets = geometry_opt_companions.build(geometry_root)
@@ -691,6 +776,12 @@ def build(catalog, site):
         "page": "adaptive-ode-replay.html", "figure": "adaptive-ode-replay.svg",
         "source_page": "https://github.com/butahlecoq/controlled-systems-lab/blob/main/examples/adaptive_ode_replay.cpp",
         "raw_record": "adaptive-ode-replay.json"})
+    gallery_inventory.append({"family": "Geometry and control reachability",
+        "title": "Source-index hulls in a 2D geometry pipeline",
+        "status": "educational-example", "anchor": "source-index-geometry-2d",
+        "page": "source-index-geometry-2d.html", "figure": "source-index-geometry-2d.svg",
+        "source_page": "https://github.com/butahlecoq/controlled-systems-lab/blob/main/examples/source_index_geometry_2d.cpp",
+        "raw_record": "source-index-geometry-2d-records.json"})
     control_witness = control_witness_companions.build(site, catalog)
     outputs.update(control_witness.files)
     gallery_inventory.extend(control_witness.gallery_entries)
