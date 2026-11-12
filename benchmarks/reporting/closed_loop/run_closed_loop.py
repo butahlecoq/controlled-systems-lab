@@ -280,7 +280,7 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
             "module_roles": {**graph.get("role_bindings", graph.get("inactive_roles", {})),
                              "controller": controller_id, "execution": graph["execution"]["id"]},
             "geometry_work": {"vertices": None if geometry_active else 0, "set_operations": 0,
-                "claim": graph.get("claim_scope", "pure NMPC; no representation comparison")},
+                "claim": graph.get("geometry_work", {}).get("claim", "no representation comparison is made")},
             "resource_profile_id": resource_profile["profile_id"],
             "resource_limits": {"requested": {**resource_profile["requested"], "address_space_bytes": 8 * 1024**3,
                   "worker_count": 1, "solver_threads": 1},
@@ -896,7 +896,22 @@ def render_attempt(task: dict, result: dict, attempt: Path, tag: str | None = No
         ax.set_ylabel(f"{field['name']} ({field['unit']})"); ax.grid(alpha=.25)
     axes[-1].set_xlabel(f"Time ({task['episode']['time_unit']})")
     short_name = {"SYN-NL-LV-01": "Lotka–Volterra", "SYN-NL-FUEL-01": "Fuel", "ENV717-EARTH-ORBIT-CONTINUOUS-01": "Earth orbit"}[task["model"]["case_id"]]
-    fig.suptitle(f"{short_name} observed-state NMPC, {result.get('completed_holds', 0)}/{task['episode']['intervals']} holds")
+    adapter = result.get("resolved_graph", {}).get("controller", {}).get("adapter")
+    controller_label = {"continuous_history": "Affine-history MPC", "native_graph_policy": "Finite-action MPC",
+                        "mpc11_nmpc": "Nonlinear MPC", "orbit_direct_shooting": "Nonlinear MPC"}.get(adapter, "Control")
+    providers = set()
+    for stage_path in sorted(attempt.glob("stage-[0-9][0-9][0-9].json")):
+        try:
+            stage = json.loads(stage_path.read_text())
+            for call in stage.get("controller_invocations", []):
+                if call.get("operation") == "controller.solve" and call.get("provider"):
+                    provider = call["provider"]
+                    providers.add("HiGHS" if "highs" in provider.lower() else
+                                  "IPOPT" if "ipopt" in provider.lower() else provider)
+        except (OSError, ValueError, TypeError):
+            continue
+    provider_label = ", ".join(sorted(providers)) if providers else "backend not recorded"
+    fig.suptitle(f"{short_name} observed-state {controller_label} ({provider_label}), {result.get('completed_holds', 0)}/{task['episode']['intervals']} holds")
     trajectory_name = f"{tag}-trajectory.png" if tag else "trajectory.png"
     controls_name = f"{tag}-controls.png" if tag else "controls.png"
     fig.tight_layout(); fig.savefig(attempt / trajectory_name, dpi=150); plt.close(fig)
@@ -1097,7 +1112,7 @@ def write_coverage(root: Path) -> Path:
     rows.sort(key=lambda row: row.get("attempt_id", ""))
     coverage = {"schema": "csl.closed-loop.coverage/1", "source_commit": subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(), "attempts": rows,
-        "representation_claim": "pure NMPC graph bypasses set modules; zero set work is recorded and no representation performance is inferred"}
+        "representation_claim": "Per-graph geometry roles and work are recorded; no representation performance is inferred from zero set work"}
     output = root / ("coverage-" + time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()) + "-" + uuid.uuid4().hex[:8] + ".json")
     atomic_json(output, coverage)
     return output

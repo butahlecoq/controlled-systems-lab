@@ -27,27 +27,33 @@ class HistoryBundleTest(unittest.TestCase):
             write("run-manifest.json", {"source_commit":"source", "task_sha256":"hash", "capability_manifest_sha256":"manifest", "bridge_sha256":"physical", "graph_id":"graph", "graph_fingerprint":"fingerprint"})
             write("resolved-graph.json", {"graph_id":"graph", "graph_fingerprint":"fingerprint", "task_id":"task", "controller":{"id":"controller"}, "action_profile_id":"continuous", "objective_id":"cost"})
             (attempt/"raw.bin").write_bytes(b"\x00raw\xff")
+            (attempt/"stage-000.json").write_bytes(b"stage")
             for name in ("trajectory.png","controls.png","phase.png"): (attempt/name).write_bytes(name.encode())
-            audit=root/"audit.json"; audit.write_text(json.dumps({"source_commit":"source","tasks":{"task":{"audit_status":"pass","task_sha256":"hash","completed_holds":1,"expected_holds":1,"applied_original_objective":objective}}}))
+            audit=root/"audit.json"; audit.write_text(json.dumps({"source_commit":"source","tasks":{"task":{"audit_status":"pass","task_sha256":"hash","completed_holds":1,"expected_holds":1,"provider_ids":["casadi-ipopt"],"applied_original_objective":objective}}}))
             build=root/"build.json"; build.write_text(json.dumps({"source_commit":"source","artifacts":{"source_capsule":{"sha256":"capsule"},"native_policy":{"sha256":"native"},"physical_bridge":{"sha256":"physical"}}}))
             sdk=root/"sdk.json"; sdk.write_text(json.dumps({"sdk_source_commit":"source","files":[]}))
             auditor=root/"auditor.py"; auditor.write_text("# original audit source\n")
-            dest=package(attempt,output,"case",audit,build,sdk,auditor,"producer")
+            rendered=root/"rendered";rendered.mkdir()
+            for name in ("trajectory.png","controls.png","phase.png"): (rendered/name).write_bytes(("corrected-"+name).encode())
+            (rendered/"render-receipt.json").write_text(json.dumps({"producer_commit":"producer", "attempt_sha256":hashlib.sha256((attempt/"attempt.json").read_bytes()).hexdigest(), "task_sha256":"hash", "controller_id":"controller", "actual_provider":"casadi-ipopt", "stage_sources":[{"path":"stage-000.json","sha256":hashlib.sha256(b"stage").hexdigest()}], "plots":{name:hashlib.sha256((rendered/name).read_bytes()).hexdigest() for name in ("trajectory.png","controls.png","phase.png")}, "correction":"corrected label", "renderer_source_sha256":hashlib.sha256((ROOT/"benchmarks/reporting/closed_loop/run_closed_loop.py").read_bytes()).hexdigest(), "generator_source_sha256":hashlib.sha256((ROOT/"scripts/reports/render_history_functional.py").read_bytes()).hexdigest()}))
+            dest=package(attempt,output,"case",audit,build,sdk,auditor,"producer",rendered)
             manifest=json.loads((dest/"receipt.json").read_text())
             with zipfile.ZipFile(dest/"raw.zip") as archive:
                 self.assertIsNone(archive.testzip())
                 self.assertEqual(set(archive.namelist()),set(manifest["archive_members"]))
                 self.assertEqual(archive.read("raw.bin"),b"\x00raw\xff")
                 self.assertEqual(hashlib.sha256(archive.read("raw.bin")).hexdigest(),manifest["archive_members"]["raw.bin"]["sha256"])
-            self.assertEqual((dest/"trajectory.png").read_bytes(),(attempt/"trajectory.png").read_bytes())
+            self.assertEqual((dest/"trajectory.png").read_bytes(),(rendered/"trajectory.png").read_bytes())
+            with zipfile.ZipFile(dest/"raw.zip") as archive:
+                self.assertEqual(archive.read("trajectory.png"),(attempt/"trajectory.png").read_bytes())
             value=json.loads((attempt/"attempt.json").read_text());value["overall_status"]="incomplete";write("attempt.json",value)
             with self.assertRaisesRegex(ValueError,"complete"):
-                package(attempt,output,"incomplete",audit,build,sdk,auditor,"producer")
+                package(attempt,output,"incomplete",audit,build,sdk,auditor,"producer",rendered)
             self.assertFalse((output/"incomplete").exists())
             value["overall_status"]="complete";write("attempt.json",value)
             (attempt/"link").symlink_to(attempt/"raw.bin")
             with self.assertRaisesRegex(ValueError,"symlinks"):
-                package(attempt,output,"symlink",audit,build,sdk,auditor,"producer")
+                package(attempt,output,"symlink",audit,build,sdk,auditor,"producer",rendered)
             self.assertFalse((output/"symlink").exists())
 
 

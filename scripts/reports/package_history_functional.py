@@ -22,8 +22,8 @@ def digest(data: bytes) -> str:
 
 
 def package(attempt: Path, output_root: Path, name: str, audit: Path, build: Path,
-            sdk: Path, auditor: Path, producer_commit: str) -> Path:
-    if attempt.is_symlink() or output_root.is_symlink():
+            sdk: Path, auditor: Path, producer_commit: str, rendered: Path) -> Path:
+    if attempt.is_symlink() or output_root.is_symlink() or rendered.is_symlink():
         raise ValueError("source and output directories may not be symlinks")
     attempt, output_root = attempt.resolve(strict=True), output_root.resolve(strict=True)
     if not attempt.is_dir() or not output_root.is_dir():
@@ -45,6 +45,8 @@ def package(attempt: Path, output_root: Path, name: str, audit: Path, build: Pat
     graph = json.loads((attempt / 'resolved-graph.json').read_bytes())
     audit_bytes, build_bytes, sdk_bytes, auditor_bytes = (p.read_bytes() for p in (audit, build, sdk, auditor))
     verified, provenance, sdk_manifest = map(json.loads, (audit_bytes, build_bytes, sdk_bytes))
+    render_bytes = (rendered / 'render-receipt.json').read_bytes()
+    render = json.loads(render_bytes)
     case = episode['task_id'].split('/')[0]
     case_key = 'earth-orbit' if case.startswith('env717-earth-orbit') else case
     check = verified['tasks'][case_key]
@@ -66,9 +68,23 @@ def package(attempt: Path, output_root: Path, name: str, audit: Path, build: Pat
             or provenance['artifacts']['native_policy']['sha256'] != native_hash
             or provenance['artifacts']['physical_bridge']['sha256'] != physical_hash
             or sdk_manifest['sdk_source_commit'] != provenance.get('sdk_source_commit', provenance['source_commit'])
+            or render['producer_commit'] != producer_commit or render['attempt_sha256'] != digest((attempt / 'attempt.json').read_bytes())
+            or render['task_sha256'] != episode['task_sha256'] or render['controller_id'] != episode['controller_id']
+            or check['provider_ids'] != [render['actual_provider']]
+            or [row['path'] for row in render['stage_sources']] != [f'stage-{i:03d}.json' for i in range(episode['original_intervals'])]
+            or render['renderer_source_sha256'] != digest((ROOT / 'benchmarks/reporting/closed_loop/run_closed_loop.py').read_bytes())
+            or render['generator_source_sha256'] != digest((ROOT / 'scripts/reports/render_history_functional.py').read_bytes())
             or any(not math.isclose(episode['physical_objective'][key], check['applied_original_objective'][key],
                                     rel_tol=1e-12, abs_tol=1e-12) for key in ('terminal', 'running', 'total'))):
         raise ValueError('source, task, cost, action, SDK or binary evidence does not match')
+    for row in render['stage_sources']:
+        stage_path = attempt / row['path']
+        if (Path(row['path']).name != row['path'] or stage_path.is_symlink()
+                or digest(stage_path.read_bytes()) != row['sha256']):
+            raise ValueError('corrected render stage source differs from the original')
+    for filename in ('trajectory.png', 'controls.png', 'phase.png'):
+        if (rendered / filename).is_symlink() or digest((rendered / filename).read_bytes()) != render['plots'][filename]:
+            raise ValueError('corrected plot differs from its render receipt')
     files = sorted(path for path in attempt.rglob('*') if path.is_file())
     stage = Path(tempfile.mkdtemp(prefix=f'.{name}.stage-', dir=output_root))
     archive_path = stage / 'raw.zip'
@@ -98,10 +114,10 @@ def package(attempt: Path, output_root: Path, name: str, audit: Path, build: Pat
                     or f'{archive.getinfo(member).CRC:08x}' != expected['crc32']
                     or digest(source.read_bytes()) != expected['sha256']):
                 raise ValueError(f'archive or source verification failed: {member}')
-    for filename, data in [('build-receipt.json', build_bytes), ('sdk-manifest.json', sdk_bytes), ('audit.py', auditor_bytes)]:
+    for filename, data in [('build-receipt.json', build_bytes), ('sdk-manifest.json', sdk_bytes), ('audit.py', auditor_bytes), ('render-receipt.json', render_bytes)]:
         (stage / filename).write_bytes(data)
     for filename in ('trajectory.png', 'controls.png', 'phase.png'):
-        (stage / filename).write_bytes((attempt / filename).read_bytes())
+        (stage / filename).write_bytes((rendered / filename).read_bytes())
     receipt = {'schema': 'csl.closed-loop.history-functional-bundle/1', 'producer_commit': producer_commit,
         'producer_script': 'scripts/reports/package_history_functional.py', 'source_commit': run['source_commit'],
         'source_capsule_sha256': provenance['artifacts']['source_capsule']['sha256'],
@@ -114,6 +130,9 @@ def package(attempt: Path, output_root: Path, name: str, audit: Path, build: Pat
         'capability_manifest_sha256': run['capability_manifest_sha256'], 'original_intervals': episode['original_intervals'],
         'completed_holds': episode['completed_holds'], 'physical_objective': episode['physical_objective'],
         'independent_replay': episode['independent_replay'], 'independent_audit': check,
+        'historical_label_correction': render['correction'], 'renderer_source_commit': render['producer_commit'],
+        'renderer_source_sha256': render['renderer_source_sha256'], 'generator_source_sha256': render['generator_source_sha256'],
+        'corrected_plot_sha256': render['plots'],
         'audit_source_sha256': digest(auditor_bytes), 'raw_zip_sha256': digest(archive_path.read_bytes()),
         'archive_format': 'ZIP deflate level 9; sorted members; fixed 1980 timestamp; original uncompressed bytes',
         'archive_members': inventory, 'scope': 'functional numerical evidence; no benchmark, global optimum or validated safety claim'}
@@ -128,7 +147,7 @@ def package(attempt: Path, output_root: Path, name: str, audit: Path, build: Pat
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    for arg in ('attempt', 'output-root', 'audit', 'build', 'sdk', 'auditor'):
+    for arg in ('attempt', 'output-root', 'audit', 'build', 'sdk', 'auditor', 'rendered'):
         parser.add_argument('--' + arg, type=Path, required=True)
     parser.add_argument('--name', required=True)
     args = parser.parse_args()
@@ -142,7 +161,7 @@ def main() -> int:
     committed = subprocess.check_output(['git', 'show', f'{commit}:scripts/reports/package_history_functional.py'], cwd=ROOT)
     if committed != Path(__file__).read_bytes():
         raise ValueError('bundle producer must match the committed source')
-    path = package(args.attempt, output_root, args.name, args.audit, args.build, args.sdk, args.auditor, commit)
+    path = package(args.attempt, output_root, args.name, args.audit, args.build, args.sdk, args.auditor, commit, args.rendered)
     print(json.dumps({'status': 'complete', 'bundle': str(path), 'producer_commit': commit}))
     return 0
 

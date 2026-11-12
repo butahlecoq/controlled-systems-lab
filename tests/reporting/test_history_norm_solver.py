@@ -133,6 +133,39 @@ class HistoryNormSolverTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "history solver"):
             make_request(task, manifest_sha256(task), prediction_receipt(task), state, 2, history_solver="unknown")
 
+    def test_history_plot_labels_the_affine_predictor(self):
+        import tempfile
+        from unittest.mock import patch
+        import matplotlib.figure
+        from contracts import load_task
+        from run_closed_loop import render_attempt
+
+        task=load_task("syn-nl-lv-01")
+        result={"physical_states":[[120,60],[121,61]], "controls":[[0.02]], "completed_holds":1,
+                "resolved_graph":{"controller":{"adapter":"continuous_history"}}}
+        titles=[]
+        original=matplotlib.figure.Figure.suptitle
+        def capture(figure, title, *args, **kwargs):
+            titles.append(title)
+            return original(figure,title,*args,**kwargs)
+        with tempfile.TemporaryDirectory() as tmp, patch.object(matplotlib.figure.Figure,"suptitle",capture):
+            import json
+            (Path(tmp)/"stage-000.json").write_text(json.dumps({"status":"applied-and-observed",
+                "controller_invocations":[{"operation":"controller.solve","provider":"csl.convex.highs"}]}))
+            render_attempt(task,result,Path(tmp))
+        self.assertIn("Affine-history MPC (HiGHS)",titles[0])
+        self.assertNotIn("NMPC",titles[0])
+
+    def test_coverage_does_not_assume_every_profile_is_nonlinear_mpc(self):
+        import json
+        import tempfile
+        from pathlib import Path
+        from run_closed_loop import write_coverage
+        with tempfile.TemporaryDirectory() as tmp:
+            coverage=json.loads(write_coverage(Path(tmp)).read_text())
+        self.assertNotIn("pure NMPC",coverage["representation_claim"])
+        self.assertIn("Per-graph",coverage["representation_claim"])
+
     def test_history_verification_rejects_wrong_rows_and_cost(self):
         import numpy as np
         from contracts import load_task
