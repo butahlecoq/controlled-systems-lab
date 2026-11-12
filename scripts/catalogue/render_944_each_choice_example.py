@@ -16,7 +16,8 @@ def main() -> int:
         for task in ("linear", "quadratic")]
     for row in rows:
         assert row["independent_check"]["forward_hull_is_unit_square"]
-        assert row["independent_check"]["analytic_control_histories_replay"]
+        assert row["history_recovery_status"] == "completed"
+        assert row["independent_check"]["selected_history_in_returned_family"]
     width, height = 900, 620
     left, top, plot_w, plot_h = 110, 100, 520, 400
 
@@ -33,10 +34,10 @@ def main() -> int:
     trajectories = []
     terminal_marks = []
     for index, row in enumerate(rows):
-        witness = row["replay_witnesses"][0]
+        witness = row["selected_history"]
         initial = xy(witness[:2])
-        control = witness[2:4]
-        final = xy(witness[4:6])
+        final = xy(witness[2:4])
+        control = witness[4:6]
         x1, y1 = initial
         x2, y2 = final
         trajectories.append(
@@ -63,12 +64,13 @@ def main() -> int:
 <text x="{left-28}" y="{top+plot_h+4}" class="small">0</text><text x="{left-28}" y="{top+12}" class="small">1</text>
 <text x="680" y="145" class="label">Independent checks</text>
 <text x="680" y="178" class="small">Reachable hull = unit square</text>
-<text x="680" y="203" class="small">Both selected histories replay</text>
+<text x="680" y="203" class="small">Both recovered histories replay</text>
 <text x="680" y="228" class="small">LP optimum: (1,0); convex: (0,0)</text>
 <text x="680" y="260" class="small">Reducer: csl.hull.lp-membership</text>
 <text x="680" y="285" class="small">Vertex LP: csl.lp.highs</text>
 <text x="680" y="310" class="small">Converter: Qhull, both directions</text>
-<text x="40" y="580" class="small muted">The control history relation is a numerical candidate. No complete-family or feedback-optimality claim is made.</text>
+<text x="40" y="570" class="small muted">Histories use public recovery and LP selection from the returned terminal-optimal family.</text>
+<text x="40" y="592" class="small muted">No complete-family or feedback-optimality claim is made.</text>
 </svg>'''
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(markup, encoding="utf-8")

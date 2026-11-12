@@ -2,6 +2,7 @@
 """Independently check the retained 2D Strategy A choice matrix."""
 
 import json
+import math
 import subprocess
 import sys
 
@@ -9,8 +10,8 @@ import sys
 def main() -> int:
     result = subprocess.run([sys.argv[1]], check=True, capture_output=True, text=True)
     document = json.loads(result.stdout)
-    assert document["schema"] == "csl.strategy-a-each-choice-pipeline/1"
-    assert document["scope"].startswith("one-step, two-state, two-control")
+    assert document["schema"] == "csl.strategy-a-each-choice-pipeline/2"
+    assert document["scope"].startswith("one-step nominal Strategy A candidate construction")
     assert document["task"]["state_dimension"] == 2
     assert document["task"]["horizon"] == 1
     inventory = document["choice_inventory"]
@@ -36,6 +37,8 @@ def main() -> int:
     assert set(inventory["source_index_reducers"]) == source_reducers
     assert inventory["converter"].startswith("csl.conversion.qhull@")
     assert set(inventory["terminal_optimizer_choices"]) == {"csl.lp.highs", "csl.convex.highs"}
+    assert inventory["history_recovery_api"] == "csl.synthesis.recover_joint_history@1"
+    assert inventory["history_selection_provider"] == "csl.lp.highs@1"
 
     rows = document["attempts"]
     assert len(rows) == 128, len(rows)
@@ -109,10 +112,41 @@ def main() -> int:
 
         if row["status"] == "completed":
             assert row["independent_check"]["forward_hull_is_unit_square"], row
-            assert row["independent_check"]["analytic_control_histories_replay"], row
             assert row["independent_check"]["candidate_relation_returned"], row
+            assert row["history_recovery_api"] == "csl.synthesis.recover_joint_history@1", row
+            assert row["history_recovery_status"] == "completed", row
+            assert row["history_selection_provider"] == "csl.lp.highs", row
+            assert row["history_selection_program"] == f"issue944-history-selection:{row['task']}", row
+            assert row["history_selection_objective"] == [0.0, 0.0, 1.0, 1.0, 1.0, 1.0], row
+            assert counts["history_selection"] == 1, row
+            assert row["independent_check"]["selected_history_in_returned_family"], row
+            assert row["independent_check"]["selected_history_in_terminal_family"], row
+            calls = row["operation_call_evidence"]
+            assert any("public recovery API invocation" in call and
+                       "csl.synthesis.recover_joint_history@1" in call for call in calls), row
+            assert any("recovered-history selection LP invocation: role=history_selection; "
+                       "provider=csl.lp.highs;" in call and "calls=1" in call for call in calls), row
             assert set(map(tuple, row["forward_vertices"])) == {(0,0),(0,1),(1,0),(1,1)}, row
-            assert row["terminal_point"] == ([[1,0]] if row["task"] == "linear" else [[0,0]]), row
+            assert row["selected_history_coordinates"] == [
+                "x0.position", "x0.velocity", "x1.position", "x1.velocity", "u0.0", "u0.1"], row
+            history = row["selected_history"]
+            assert len(history) == 6 and all(math.isfinite(value) for value in history), row
+            x0, endpoint, control = history[:2], history[2:4], history[4:6]
+            assert x0 == [0.0, 0.0], row
+            assert all(0.0 <= value <= 1.0 for value in control), row
+            assert endpoint == [x0[i] + control[i] for i in range(2)], row
+            assert all(0.0 <= value <= 1.0 for value in endpoint), row
+            optimizer_anchor = row["terminal_point"][0]
+            assert len(optimizer_anchor) == 2 and all(math.isfinite(value) for value in optimizer_anchor), row
+            assert all(0.0 <= value <= 1.0 for value in optimizer_anchor), row
+            if row["task"] == "linear":
+                selected_objective = -endpoint[0]
+                anchor_objective = -optimizer_anchor[0]
+                assert selected_objective == -1.0 and anchor_objective == -1.0, row
+            else:
+                selected_objective = sum(value * value for value in endpoint)
+                anchor_objective = sum(value * value for value in optimizer_anchor)
+                assert selected_objective == 0.0 and anchor_objective == 0.0, row
             assert row["lp_call_counts"]["terminal_convex"] > 0 if row["task"] == "quadratic" else row["lp_call_counts"]["terminal_lp"] > 0
             if row["task"] == "quadratic":
                 assert row["terminal_lp_provider"] == "not_used", row
@@ -123,7 +157,7 @@ def main() -> int:
             assert row["first_unmet"] and "phase_one.objective" in row["first_unmet"], row
 
     print(f"#944 2D Strategy A pipeline: {len(rows)} task/choice tuples checked; "
-          f"{sum(row['status'] == 'completed' for row in rows)} completed, "
+          f"{sum(row['status'] == 'completed' for row in rows)} completed with recovered selected histories, "
           f"{len(phase_one_terminal_rejections)} Phase-I/nonzero-objective rejections, "
           f"{len(numeric_boundaries)} Qhull/HiGHS numeric-boundary rejections")
     return 0

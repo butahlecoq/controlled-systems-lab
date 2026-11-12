@@ -9,9 +9,11 @@
 #include <csl/geometry/polyhedral_projection.hpp>
 #include <csl/geometry/quickhull_2d.hpp>
 #include <csl/geometry/source_index_hull.hpp>
+#include <csl/optimization/linear_program.hpp>
 #include <csl/optimization/phase_one.hpp>
 #include <csl/problem/resolved_problem.hpp>
 #include <csl/registry/strategy_catalogue.hpp>
+#include <csl/synthesis/control_recovery.hpp>
 #include <csl/synthesis/strategy_a/strategy.hpp>
 #include <csl/synthesis/terminal_minimizers.hpp>
 
@@ -284,23 +286,6 @@ bool h_is_unit_square(const sets::HRepresentation& h) {
     return left && right && bottom && top;
 }
 
-Vector analytic_optimizer_history(const std::string& task) {
-    return task=="linear" ? Vector{0,0,1,0,1,0} : Vector{0,0,0,0,0,0};
-}
-
-bool replay_task(const std::string& task, const sets::HRepresentation& relation) {
-    const auto history=analytic_optimizer_history(task);
-    const auto x0=Vector{history[0],history[1]};
-    const auto control=Vector{history[2],history[3]};
-    const auto terminal=Vector{history[4],history[5]};
-    for (std::size_t i=0;i<2;++i)
-        if (terminal[i] != x0[i]+control[i] || x0[i] != 0 || control[i]<0 || control[i]>1 ||
-                terminal[i]<0 || terminal[i]>1) return false;
-    const bool independently_optimal=task=="linear"
-        ? terminal==Vector{1,0} : terminal==Vector{0,0};
-    return independently_optimal && contains(relation,history);
-}
-
 std::string terminal_provider(const synthesis::strategy_a::CandidateHistory& history) {
     if (!history.terminal || !history.terminal->provider) return "not_used";
     return history.terminal->provider->actual ? history.terminal->provider->actual->id.value :
@@ -328,23 +313,145 @@ struct Trial {
     std::string terminal_choice;
     std::string status;
     std::string terminal_actual{"not_used"};
+    std::string history_recovery_status{"not_attempted"};
+    std::string history_recovery_api{"csl.synthesis.recover_joint_history@1"};
+    std::string history_selection_provider{"csl.lp.highs"};
+    std::string history_selection_program;
+    Vector history_selection_objective;
     std::vector<std::string> calls;
     std::vector<std::string> conversion_calls;
     std::vector<std::string> program_boundary_observations;
     std::vector<Vector> forward_vertices;
     std::vector<Vector> terminal_point;
-    std::vector<Vector> replay_witnesses;
-    std::vector<std::string> replay_coordinates;
-    std::size_t replay_dimension{};
+    Vector selected_history;
+    std::vector<std::string> selected_history_coordinates;
     bool geometry_check{};
-    bool replay_check{};
     bool returned_relation{};
+    bool selected_history_in_returned_family{};
+    bool selected_history_in_terminal_family{};
     std::size_t vertex_lp_calls{};
     std::size_t converter_lp_calls{};
     std::size_t terminal_lp_calls{};
     std::size_t terminal_convex_calls{};
+    std::size_t history_selection_lp_calls{};
     std::string reason;
 };
+
+std::optional<Vector> select_history_from_terminal_family(
+        const problem::ResolvedProblem& problem, const sets::SetData& terminal_family,
+        const std::string& task, Trial& trial) {
+    auto recovered=synthesis::recover_joint_history(problem,terminal_family);
+    trial.calls.push_back("public recovery API invocation: provider=csl.synthesis.recover_joint_history@1; source="+
+        terminal_family.metadata()->id.value);
+    if (const auto* errors=std::get_if<Diagnostics>(&recovered)) {
+        trial.history_recovery_status="recovery_rejected";
+        if (!errors->empty()) trial.reason=errors->front().field+": "+errors->front().explanation;
+        return {};
+    }
+    const auto& relation=std::get<synthesis::JointHistoryRelation>(recovered).relation;
+    const auto representation=relation.representation();
+    const auto* h=std::get_if<sets::HRepresentation>(&representation);
+    if (!h) {
+        trial.history_recovery_status="selection_rejected";
+        trial.reason="public history recovery did not return native H geometry";
+        return {};
+    }
+
+    const std::size_t columns=h->inequalities.cols();
+    SparseMatrix constraints{0,columns,{0},{},{}};
+    std::vector<Interval> row_bounds;
+    const auto append_rows=[&](const numeric::MatrixView& matrix, const numeric::VectorView& values,
+            bool equality) {
+        for (std::size_t row=0;row<matrix.rows();++row) {
+            for (std::size_t column=0;column<columns;++column) {
+                const auto coefficient=matrix(row,column);
+                if (coefficient==0) continue;
+                constraints.column_indices.push_back(column);
+                constraints.values.push_back(coefficient);
+            }
+            constraints.row_offsets.push_back(constraints.values.size());
+            row_bounds.push_back(equality ? Interval{values[row],values[row]} : Interval{{},values[row]});
+            ++constraints.rows;
+        }
+    };
+    append_rows(h->inequalities,h->upper_bounds,false);
+    append_rows(h->equalities,h->equality_values,true);
+
+    // This deterministic tie-break selects a concrete point from the recovered
+    // terminal-optimal history family. It is a separate consumer LP role; it
+    // does not replace the Strategy A terminal objective or vertex reducer LP.
+    Vector objective(columns,0.0);
+    constexpr std::size_t state_dimension=2;
+    constexpr std::size_t horizon=1;
+    constexpr std::size_t first_control=(horizon+1)*state_dimension;
+    if (columns!=first_control+state_dimension) {
+        trial.history_recovery_status="selection_rejected";
+        trial.reason="recovered history width differs from the declared one-step task";
+        return {};
+    }
+    for (std::size_t i=0;i<state_dimension;++i) {
+        objective[state_dimension+i]=1.0;
+        objective[first_control+i]=1.0;
+    }
+    trial.history_selection_objective=objective;
+    trial.history_selection_program="issue944-history-selection:"+task;
+    const ProgramIdentity identity{problem.identity(),ProgramId{trial.history_selection_program}};
+    auto made=optimization::make_linear_program({identity,objective,0.0,std::move(constraints),
+        std::vector<Interval>(columns),std::move(row_bounds)});
+    if (const auto* errors=std::get_if<Diagnostics>(&made)) {
+        trial.history_recovery_status="selection_rejected";
+        if (!errors->empty()) trial.reason=errors->front().field+": "+errors->front().explanation;
+        return {};
+    }
+
+    auto registration=take(adapters::lp::make_highs_registration());
+    auto calls=std::make_shared<std::atomic<std::size_t>>(0);
+    const auto factory=registration.factory;
+    registration.factory=[factory,calls](const LinearProgram& program) {
+        return std::make_unique<CountingLPWorkspace>(factory(program),calls);
+    };
+    if (registration.basis_factory) {
+        const auto basis=registration.basis_factory;
+        registration.basis_factory=[basis](const LinearProgram& program,LPWorkspace& workspace) {
+            auto& counting=dynamic_cast<CountingLPWorkspace&>(workspace);
+            return basis(program,counting.inner());
+        };
+    }
+    const auto provider=selected(std::move(registration),"csl.program-result.v1");
+    auto prepared=provider.prepare(std::get<LinearProgram>(made));
+    if (const auto* rejection=std::get_if<registry::Rejection>(&prepared)) {
+        trial.history_recovery_status="selection_rejected";
+        if (!rejection->diagnostics.empty()) trial.reason=rejection->diagnostics.front().field+": "+rejection->diagnostics.front().explanation;
+        return {};
+    }
+    auto pipeline=std::get<registry::PreparedPipeline<registry::LPPort>>(std::move(prepared));
+    const auto provenance=pipeline.provenance().front();
+    if (provenance.actual) trial.history_selection_provider=provenance.actual->id.value;
+    auto workspaces=pipeline.create();
+    const auto outcome=std::get<0>(workspaces)->run({.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}})});
+    trial.history_selection_lp_calls=calls->load();
+    trial.calls.push_back("recovered-history selection LP invocation: role=history_selection; provider="+
+        trial.history_selection_provider+"; program="+trial.history_selection_program+
+        "; calls="+std::to_string(trial.history_selection_lp_calls));
+    if (const auto* unsupported=std::get_if<Unsupported>(&outcome)) {
+        trial.history_recovery_status="selection_rejected";
+        if (!unsupported->diagnostics.empty()) trial.reason=unsupported->diagnostics.front().field+": "+unsupported->diagnostics.front().explanation;
+        return {};
+    }
+    const auto& solved=std::get<ProgramResult>(outcome);
+    if (solved.termination!=Termination::completed || !solved.primal) {
+        trial.history_recovery_status="selection_rejected";
+        trial.reason=solved.raw_diagnostics.empty()?"recovered-history LP returned no completed primal":solved.raw_diagnostics;
+        return {};
+    }
+    if (!contains(*h,*solved.primal)) {
+        trial.history_recovery_status="selection_rejected";
+        trial.reason="recovered-history LP primal is outside the public recovery relation";
+        return {};
+    }
+    trial.history_recovery_status="completed";
+    return *solved.primal;
+}
 
 std::string json_vector(const Vector& point) {
     std::ostringstream out;
@@ -386,23 +493,29 @@ void emit_trial(std::ostream& out, const Trial& trial) {
         << ",\"terminal_lp_provider\":" << quote(trial.terminal_lp)
         << ",\"terminal_optimizer_choice\":" << quote(trial.terminal_choice)
         << ",\"terminal_optimizer_actual\":" << quote(trial.terminal_actual)
+        << ",\"history_recovery_api\":" << quote(trial.history_recovery_api)
+        << ",\"history_recovery_status\":" << quote(trial.history_recovery_status)
+        << ",\"history_selection_provider\":" << quote(trial.history_selection_provider)
+        << ",\"history_selection_program\":" << quote(trial.history_selection_program)
+        << ",\"history_selection_objective\":" << json_vector(trial.history_selection_objective)
         << ",\"status\":" << quote(trial.status)
         << ",\"lp_call_counts\":{\"vertex\":" << trial.vertex_lp_calls
         << ",\"converter\":" << trial.converter_lp_calls
         << ",\"terminal_lp\":" << trial.terminal_lp_calls
-        << ",\"terminal_convex\":" << trial.terminal_convex_calls << '}'
+        << ",\"terminal_convex\":" << trial.terminal_convex_calls
+        << ",\"history_selection\":" << trial.history_selection_lp_calls << '}'
         << ",\"independent_check\":{\"forward_hull_is_unit_square\":" << (trial.geometry_check ? "true" : "false")
-        << ",\"analytic_control_histories_replay\":" << (trial.replay_check ? "true" : "false")
+        << ",\"selected_history_in_returned_family\":" << (trial.selected_history_in_returned_family ? "true" : "false")
+        << ",\"selected_history_in_terminal_family\":" << (trial.selected_history_in_terminal_family ? "true" : "false")
         << ",\"candidate_relation_returned\":" << (trial.returned_relation ? "true" : "false") << '}'
         << ",\"forward_vertices\":[";
     for (std::size_t i=0; i<trial.forward_vertices.size(); ++i) { if (i) out << ','; out << json_vector(trial.forward_vertices[i]); }
     out << "],\"terminal_point\":[";
     for (std::size_t i=0; i<trial.terminal_point.size(); ++i) { if (i) out << ','; out << json_vector(trial.terminal_point[i]); }
-    out << "],\"replay_witnesses\":[";
-    for (std::size_t i=0; i<trial.replay_witnesses.size(); ++i) { if (i) out << ','; out << json_vector(trial.replay_witnesses[i]); }
-    out << "],\"replay_coordinates\":[";
-    for (std::size_t i=0; i<trial.replay_coordinates.size(); ++i) { if (i) out << ','; out << quote(trial.replay_coordinates[i]); }
-    out << "],\"replay_dimension\":" << trial.replay_dimension << ",\"conversion_calls\":[";
+    out << "],\"selected_history\":" << json_vector(trial.selected_history)
+        << ",\"selected_history_coordinates\":[";
+    for (std::size_t i=0; i<trial.selected_history_coordinates.size(); ++i) { if (i) out << ','; out << quote(trial.selected_history_coordinates[i]); }
+    out << "],\"conversion_calls\":[";
     for (std::size_t i=0; i<trial.conversion_calls.size(); ++i) { if (i) out << ','; out << quote(trial.conversion_calls[i]); }
     out << "],\"program_boundary_observations\":[";
     for (std::size_t i=0; i<trial.program_boundary_observations.size(); ++i) { if (i) out << ','; out << quote(trial.program_boundary_observations[i]); }
@@ -625,7 +738,7 @@ Trial execute(const std::string& task, const std::string& reducer_id, const std:
     StrategyConfiguration configuration;
     configuration.strategy = {"csl.synthesis.reach-back"};
     configuration.representation = {"csl.polyhedron.h"};
-    registry::StrategyRequest request{std::move(problem), configuration, family, "1", {}};
+    registry::StrategyRequest request{problem, configuration, family, "1", {}};
     registry::Requirements output;
     output.output.representation = {"csl.polyhedron.h"};
     output.output.family = family.target;
@@ -685,16 +798,22 @@ Trial execute(const std::string& task, const std::string& reducer_id, const std:
                     }
                 }
                 const auto& joint_relation = history->history.relation;
-                trial.replay_dimension = joint_relation.metadata()->set.dimension;
-                trial.replay_coordinates = {"x0.position","x0.velocity","u0.0","u0.1","x1.position","x1.velocity"};
-                const auto joint_data = joint_relation;
-                const auto* candidate_set = &joint_data;
-                if (candidate_set) {
-                    const auto joint_representation = candidate_set->representation();
-                    if (const auto* hrep = std::get_if<sets::HRepresentation>(&joint_representation)) {
-                    const bool optimizer_history = replay_task(task,*hrep);
-                    trial.replay_check = optimizer_history;
-                    if (optimizer_history) trial.replay_witnesses.push_back(analytic_optimizer_history(task));
+                trial.selected_history_coordinates = {"x0.position","x0.velocity","x1.position","x1.velocity","u0.0","u0.1"};
+                const auto joint_representation = joint_relation.representation();
+                const auto* joint_h = std::get_if<sets::HRepresentation>(&joint_representation);
+                if (history->terminal && history->terminal->relation && joint_h) {
+                    const auto selected_history=select_history_from_terminal_family(
+                        problem,*history->terminal->relation,task,trial);
+                    if (selected_history) {
+                        trial.selected_history=*selected_history;
+                        trial.selected_history_in_returned_family=contains(*joint_h,trial.selected_history);
+                        const auto terminal_representation=history->terminal->relation->representation();
+                        if (const auto* terminal_h=std::get_if<sets::HRepresentation>(&terminal_representation)) {
+                            if (trial.selected_history.size()==6) {
+                                const Vector selected_terminal{trial.selected_history[4],trial.selected_history[5]};
+                                trial.selected_history_in_terminal_family=contains(*terminal_h,selected_terminal);
+                            }
+                        }
                     }
                 }
             }
@@ -731,14 +850,15 @@ void emit_matrix(std::ostream& out) {
             }
         }
     }
-    out << "{\"schema\":\"csl.strategy-a-each-choice-pipeline/1\","
-        << "\"scope\":\"one-step, two-state, two-control nominal Strategy A candidate construction; numerical evidence only\","
+    out << "{\"schema\":\"csl.strategy-a-each-choice-pipeline/2\","
+        << "\"scope\":\"one-step nominal Strategy A candidate construction plus public terminal-family recovery and numerical history selection\","
         << "\"task\":{\"dynamics\":\"x_next=x+u\",\"state_dimension\":2,\"control_dimension\":2,\"horizon\":1,"
         << "\"initial_state_box\":[[-1,1],[-1,1]],\"control_box\":[0,1],\"next_state_box\":[[0,1],[0,1]],"
             << "\"linear_terminal_objective\":[-1,0],\"quadratic_terminal_center\":[0,0]},"
         << "\"choice_inventory\":{\"hull_reducers\":10,\"vertex_lp_profiles\":[\"csl.lp.highs\",\"phase-one-bland\",\"phase-one-priority-tie\"],"
         << "\"source_index_reducers\":[\"csl.hull.source.quickhull-2d\",\"csl.hull.source.btulshor-kpabep\"],"
-        << "\"converter\":\"csl.conversion.qhull@1.0.0+qhull.8.0.2\",\"terminal_optimizer_choices\":[\"csl.lp.highs\",\"csl.convex.highs\"]},\"attempts\":[";
+        << "\"converter\":\"csl.conversion.qhull@1.0.0+qhull.8.0.2\",\"terminal_optimizer_choices\":[\"csl.lp.highs\",\"csl.convex.highs\"],"
+        << "\"history_recovery_api\":\"csl.synthesis.recover_joint_history@1\",\"history_selection_provider\":\"csl.lp.highs@1\"},\"attempts\":[";
     for (std::size_t i=0; i<trials.size(); ++i) { if (i) out << ','; emit_trial(out, trials[i]); }
     out << "]}\n";
 }
@@ -746,7 +866,7 @@ void emit_matrix(std::ostream& out) {
 
 int main() try {
 #if !CSL_PIPELINE_HAS_HIGHS || !CSL_PIPELINE_HAS_QHULL
-    std::cout << "{\"schema\":\"csl.strategy-a-each-choice-pipeline/1\",\"status\":\"backend_unavailable\","
+    std::cout << "{\"schema\":\"csl.strategy-a-each-choice-pipeline/2\",\"status\":\"backend_unavailable\","
         << "\"first_unmet\":\"This probe requires compiled HiGHS LP, HiGHS convex and Qhull providers.\"}\n";
 #else
     emit_matrix(std::cout);
