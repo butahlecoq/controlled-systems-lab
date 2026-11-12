@@ -5,8 +5,11 @@
 #include <csl/reachability/finite_plan_ellipsoid.hpp>
 #include <csl/reachability/nominal_predecessor.hpp>
 #include <csl/sets/data.hpp>
+#include "../synthesis/exact_h_polytope.hpp"
 
 #include <algorithm>
+#include <bit>
+#include <chrono>
 #include <cmath>
 #include <limits>
 #include <new>
@@ -122,7 +125,43 @@ struct Runner {
         support_calls.insert(support_calls.end(),output.lp_calls.begin(),output.lp_calls.end()); support_methods.insert(support_methods.end(),output.methods.begin(),output.methods.end()); support_certificates.insert(support_certificates.end(),output.certificates.begin(),output.certificates.end()); return output;
     }
 };
-std::pair<Vector,Vector> explicit_bounds(const SetHandle& input) {
+namespace exact_h=csl::synthesis::detail::exact_h;
+
+// Bracket an exact stored-dyadic rational by binary64 values. The lower end
+// is used for a minimum; no numerical LP optimum is used to bootstrap bounds.
+double outward_lower(const exact_h::ExactRational& value,std::size_t max_bits) {
+    if(exact_h::exact_detail::is_zero(value.numerator)) return 0;
+    auto magnitude=value; const bool negative=magnitude.numerator.negative;
+    magnitude.numerator.negative=false;
+    constexpr std::uint64_t max_finite=0x7fefffffffffffffULL;
+    std::uint64_t low=0,high=max_finite;
+    while(low<=high) {
+        const auto bits=low+(high-low)/2;
+        auto decoded=exact_h::exact_detail::decode(std::bit_cast<double>(bits));
+        exact_h::ExactRational candidate;
+        candidate.numerator=exact_h::exact_detail::from_u64(decoded.significand);
+        candidate.binary_exponent=decoded.exponent;
+        int order=0;
+        if(!exact_h::compare_scaled_rationals(magnitude,candidate,max_bits,order))
+            throw Failure{OperationStopped{StopReason::resource_limit,"Exact control bound comparison exceeded its arithmetic budget."}};
+        if(order==0) return negative ? -std::bit_cast<double>(bits) : std::bit_cast<double>(bits);
+        if(order>0) { if(bits==max_finite) { low=max_finite+1; break; } low=bits+1; }
+        else { if(bits==0) { high=0; break; } high=bits-1; }
+    }
+    if(low>max_finite) bad("feedback.control.bounds","A finite binary64 control carrier could not be represented.");
+    return negative ? -std::bit_cast<double>(low) : std::bit_cast<double>(high);
+}
+
+struct ExactCancellation {
+    const ExecutionContext& context;
+    bool stop_requested() const {
+        return context.cancellation.stop_requested() ||
+            (context.deadline && std::chrono::steady_clock::now()>=*context.deadline);
+    }
+};
+
+std::pair<Vector,Vector> explicit_bounds(const SetHandle& input,
+        const ExecutionContext& context={}, bool* used_exact=nullptr) {
     auto data=import(input); auto repr=data.representation(); const auto n=data.metadata()->set.dimension;
     Vector lo(n,-std::numeric_limits<double>::infinity()),hi(n,std::numeric_limits<double>::infinity());
     if(auto* singleton=std::get_if<sets::SingletonRepresentation>(&repr)) {
@@ -138,6 +177,48 @@ std::pair<Vector,Vector> explicit_bounds(const SetHandle& input) {
         if(!std::isfinite(v)) bad("feedback.control.bounds","Control bound overflowed.");
         if(c>0) hi[axis]=std::min(hi[axis],std::nextafter(v,std::numeric_limits<double>::infinity()));
         else lo[axis]=std::max(lo[axis],std::nextafter(v,-std::numeric_limits<double>::infinity()));
+    }
+    for(std::size_t i=0;i<h->equalities.rows();++i) {
+        std::size_t axis=n;
+        for(std::size_t j=0;j<n;++j) if(h->equalities(i,j)!=0) { if(axis!=n) {axis=n;break;} axis=j; }
+        if(axis==n) continue;
+        const double value=h->equality_values[i]/h->equalities(i,axis);
+        if(!std::isfinite(value)) bad("feedback.control.bounds","Control equality bound overflowed.");
+        const double down=value==0 && h->equality_values[i]==0 ? 0 : std::nextafter(value,-std::numeric_limits<double>::infinity());
+        const double up=value==0 && h->equality_values[i]==0 ? 0 : std::nextafter(value,std::numeric_limits<double>::infinity());
+        lo[axis]=std::max(lo[axis],down); hi[axis]=std::min(hi[axis],up);
+    }
+    const bool needs_exact=std::any_of(lo.begin(),lo.end(),[](double x){return !std::isfinite(x);}) ||
+        std::any_of(hi.begin(),hi.end(),[](double x){return !std::isfinite(x);});
+    if(needs_exact) {
+        if(used_exact) *used_exact=true;
+        exact_h::Limits limits;
+        std::vector<exact_h::Row> rows;
+        for(std::size_t i=0;i<h->inequalities.rows();++i) {
+            Vector coefficients(n); for(std::size_t j=0;j<n;++j) coefficients[j]=h->inequalities(i,j);
+            if(!exact_h::append_inequality(coefficients,h->upper_bounds[i],false,limits.max_integer_bits,rows))
+                throw Failure{OperationStopped{StopReason::resource_limit,"Exact control carrier row exceeds arithmetic limits."}};
+        }
+        for(std::size_t i=0;i<h->equalities.rows();++i) {
+            Vector coefficients(n); for(std::size_t j=0;j<n;++j) coefficients[j]=h->equalities(i,j);
+            if(!exact_h::append_equality(coefficients,h->equality_values[i],limits.max_integer_bits,rows))
+                throw Failure{OperationStopped{StopReason::resource_limit,"Exact control carrier equality exceeds arithmetic limits."}};
+        }
+        for(std::size_t j=0;j<n;++j) for(bool upper : {false,true}) {
+            if(upper ? std::isfinite(hi[j]) : std::isfinite(lo[j])) continue;
+            Vector objective(n,0); objective[j]=upper ? -1 : 1;
+            auto minimum=exact_h::minimize_linear(rows,n,objective,0,limits,ExactCancellation{context});
+            if(minimum.state==exact_h::LinearMinimumState::cancelled) {
+                const auto reason=context.cancellation.stop_requested()?StopReason::cancelled:StopReason::deadline_expired;
+                throw Failure{OperationStopped{reason,"Exact control carrier calculation interrupted."}};
+            }
+            if(minimum.state==exact_h::LinearMinimumState::unsupported)
+                throw Failure{OperationStopped{StopReason::resource_limit,"Exact control carrier limits: "+minimum.reason}};
+            if(minimum.state!=exact_h::LinearMinimumState::minimum)
+                bad("feedback.control.bounds","No finite control carrier was established; no source infeasibility is asserted.");
+            const double lower=outward_lower(minimum.value,limits.max_integer_bits);
+            if(upper) hi[j]=-lower; else lo[j]=lower;
+        }
     }
     for(std::size_t j=0;j<n;++j) if(!std::isfinite(lo[j]) || !std::isfinite(hi[j]) || lo[j]>hi[j])
         bad("feedback.control.bounds","A finite nonempty outer control carrier was not established.");
@@ -290,7 +371,12 @@ FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem& resolv
                 const auto dynamics_result=system.stage({k-1});
                 if(auto* e=std::get_if<Diagnostic>(&dynamics_result)) throw Failure{Unsupported{{*e}}};
                 const auto dynamics=std::get<model::DynamicsStage>(dynamics_result);
-                auto [ulo,uhi]=explicit_bounds(controls[k-1]);
+                bool exact_control_carrier=false;
+                auto [ulo,uhi]=explicit_bounds(controls[k-1],context,&exact_control_carrier);
+                if(exact_control_carrier) run.lineage.push_back({{{resolved.identity(),{run.id("exact-control-carrier")},{run.id("control-carrier")}},
+                    {controls[k-1].id}},GeometryClaimScope::support_value,
+                    SymbolicArgument{"Exact stored-binary64 H elimination", "Built-in bounded exact H linear minimization; outward binary64 bracketing"},
+                    {"Exact carrier applies to the stored closed-H control set, not a nonlinear plant."},{}});
                 auto box=propagate_existential_control_box(dynamics,{carrier_lo,carrier_hi},{ulo,uhi},context);
                 if(auto* e=std::get_if<Unsupported>(&box)) throw Failure{*e};
                 if(auto* e=std::get_if<OperationStopped>(&box)) throw Failure{*e};
