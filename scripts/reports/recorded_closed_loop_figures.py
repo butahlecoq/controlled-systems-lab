@@ -11,6 +11,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "benchmarks/reporting/closed_loop"))
+from attempt_records import iter_stage_references, read_attempt, verify_v2_attempt
 from figure_style import STYLE_ID, configure_numeric_axis
 from mathematical_notation import matrix_html
 
@@ -263,9 +266,24 @@ def _collect_run(plane: Plane, attempt_id: str, capture_root: Path) -> dict[str,
     if manifest.get("resource_profile_id") != "worker-wall-1800-cpu-1800/1":
         raise ValueError(f"unexpected resource profile for {attempt_id}")
 
+    attempt_path = attempt_dir / "attempt.json"
+    attempt_record = None
+    if attempt_path.is_file():
+        attempt_record, _ = read_attempt(attempt_path)
+        if attempt_record.get("format_version") == 2:
+            try:
+                verify_v2_attempt(attempt_dir, attempt_record)
+            except (OSError, ValueError, json.JSONDecodeError) as error:
+                raise ValueError(f"v2 stage evidence is invalid for {attempt_id}: {error}") from error
+
     raw_files: list[dict[str, str]] = []
     stages: list[dict[str, Any]] = []
-    stage_paths = sorted(attempt_dir.glob("stage-*.json"))
+    if attempt_record is not None and attempt_record.get("format_version") == 2:
+        stage_paths = [attempt_dir / reference["path"]
+                       for reference in iter_stage_references(attempt_dir)]
+    else:
+        # Immutable v1 captures remain readable from their canonical files.
+        stage_paths = sorted(attempt_dir.glob("stage-*.json"))
     if not stage_paths:
         raise ValueError(f"no saved stage records for {attempt_id}")
     for path in stage_paths:

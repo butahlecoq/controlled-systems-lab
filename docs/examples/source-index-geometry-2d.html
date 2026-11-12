@@ -19,38 +19,100 @@ source-faithful BTULSHOR KPABEP/MODIF profile each propose original IDs. The aff
 operation independently checks all generated points against those IDs with exact dyadic
 membership before it applies them. The checker is a separate invocation and its time/status
 is recorded separately.</p>
-<svg viewBox="0 0 900 470" role="img" aria-labelledby="title desc">
-  <title id="title">Input cloud, affine image and one-step control Minkowski sum</title>
-  <desc id="desc">The left panel shows the square hull and boundary, duplicate and interior points. The center shows an affine parallelogram. The right panel shows the one-step reachable parallelogram obtained by adding a known initial state to the control square.</desc>
-  <path class="grid" d="M65 350H285 M65 290H285 M65 230H285 M65 170H285 M65 110H285 M65 50V350 M125 50V350 M185 50V350 M245 50V350"/>
-  <path class="axis" d="M65 365H295 M55 350V40"/>
-  <path class="hull" d="M65 350L245 350L245 110L65 110Z"/>
-  <circle class="corner" cx="65" cy="350" r="6"/><circle class="corner" cx="245" cy="350" r="6"/>
-  <circle class="corner" cx="245" cy="110" r="6"/><circle class="corner" cx="65" cy="110" r="6"/>
-  <circle class="edge" cx="155" cy="350" r="6"/><circle class="duplicate" cx="70" cy="345" r="6"/>
-  <circle class="interior" cx="125" cy="270" r="6"/>
-  <text class="label" x="75" y="30">Input cloud (IDs shown in prose)</text>
-  <text class="small" x="66" y="389">0 (0,0), 1 (1,0), 2 (1,1), 3 (0,1)</text>
-  <text class="small" x="66" y="410">4 edge, 5 duplicate of 0, 6 (1/3,1/3)</text>
-  <text class="small" x="70" y="340">0,5</text><text class="small" x="147" y="340">4</text><text class="small" x="132" y="270">6</text>
-
-  <path class="grid" d="M355 350H575 M355 290H575 M355 230H575 M355 170H575 M355 110H575 M355 50V350 M415 50V350 M475 50V350 M535 50V350"/>
-  <path class="axis" d="M355 365H585 M345 350V40"/>
-  <path class="image" d="M385 290L505 230L565 110L445 170Z"/>
-  <circle class="corner" cx="385" cy="290" r="5"/><circle class="corner" cx="505" cy="230" r="5"/>
-  <circle class="corner" cx="565" cy="110" r="5"/><circle class="corner" cx="445" cy="170" r="5"/>
-  <text class="label" x="365" y="30">Affine image</text>
-  <text class="small" x="365" y="389">(x,y) ↦ (x+0.25, 0.5x+y−0.5)</text>
-  <text class="small" x="365" y="410">Four retained hull IDs; checker verified</text>
-
-  <path class="grid" d="M650 350H870 M650 290H870 M650 230H870 M650 170H870 M650 110H870 M650 50V350 M710 50V350 M770 50V350 M830 50V350"/>
-  <path class="axis" d="M650 365H880 M640 350V40"/>
-  <path class="sum" d="M695 230L815 230L815 110L695 110Z"/>
-  <circle class="corner" cx="695" cy="230" r="5"/><circle class="corner" cx="815" cy="230" r="5"/>
-  <circle class="corner" cx="815" cy="110" r="5"/><circle class="corner" cx="695" cy="110" r="5"/>
-  <text class="label" x="660" y="30">One-step control sum</text>
-  <text class="small" x="660" y="389">known x₀=(0.25,0.5), control U=[0,1]²</text>
-  <text class="small" x="660" y="410">X₁=x₀⊕U; authored control IDs retained</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 405" role="img" aria-labelledby="title desc">
+<title id="title">Source-index input, affine image, and one-step control sum in data coordinates</title>
+<desc id="desc">Each panel labels x and y in data coordinates and shows the zero axes. The affine image vertices and control-sum vertices come from the saved QuickHull record. They match the saved BTULSHOR record. Negative y coordinates appear below the horizontal zero axis.</desc>
+<style>text{font:14px system-ui,sans-serif;fill:#18212b}.title{font-weight:650;font-size:16px}.tick{font-size:11px;text-anchor:middle}.ytick{text-anchor:end}.grid{stroke:#e1e6eb;stroke-width:1}.axis{stroke:#405366;stroke-width:2}.axis-label,.axis-name{font-size:12px;font-weight:600}.shape{stroke-width:3;fill-opacity:.4}.hull{fill:#91c8aa;stroke:#287357}.image{fill:#e9c76d;stroke:#9b6c13}.sum{fill:#9cbfdf;stroke:#32658f}.vertex{fill:#153f2f}.edge{fill:#bd6c22}.duplicate{fill:#7657a6}.interior{fill:#bd3f36}</style>
+<rect width="1020" height="405" fill="#fbfcfe"/>
+<g class="plot" aria-label="Input cloud">
+<text class="title" x="68" y="34">Input cloud</text>
+<path class="grid" d="M109.67 74V334"/>
+<text class="tick" x="109.67" y="354">0</text>
+<path class="grid" d="M193.00 74V334"/>
+<text class="tick" x="193.00" y="354">0.5</text>
+<path class="grid" d="M276.33 74V334"/>
+<text class="tick" x="276.33" y="354">1</text>
+<path class="grid" d="M68 290.67H318"/>
+<text class="tick ytick" x="60" y="294.67">0</text>
+<path class="grid" d="M68 204.00H318"/>
+<text class="tick ytick" x="60" y="208.00">0.5</text>
+<path class="grid" d="M68 117.33H318"/>
+<text class="tick ytick" x="60" y="121.33">1</text>
+<path class="axis" d="M68 290.67H318"/>
+<path class="axis" d="M109.67 74V334"/>
+<text class="axis-label" x="310" y="282.67">x</text>
+<text class="axis-label" x="116.67" y="86">y</text>
+<path class="shape hull" d="M109.67,290.67 L276.33,290.67 L276.33,117.33 L109.67,117.33 Z"/>
+<circle class="vertex" cx="109.67" cy="290.67" r="4"/>
+<circle class="vertex" cx="276.33" cy="290.67" r="4"/>
+<circle class="vertex" cx="276.33" cy="117.33" r="4"/>
+<circle class="vertex" cx="109.67" cy="117.33" r="4"/>
+<circle class="edge" cx="193.00" cy="290.67" r="4"/>
+<circle class="duplicate" cx="109.67" cy="290.67" r="4"/>
+<circle class="interior" cx="165.22" cy="232.89" r="4"/>
+<text class="axis-name" x="193" y="376">x coordinate</text>
+<text class="axis-name" transform="translate(40 204) rotate(-90)">y coordinate</text>
+</g>
+<g class="plot" aria-label="Affine image from records">
+<text class="title" x="385" y="34">Affine image from records</text>
+<path class="grid" d="M420.71 74V334"/>
+<text class="tick" x="420.71" y="354">0</text>
+<path class="grid" d="M492.14 74V334"/>
+<text class="tick" x="492.14" y="354">0.5</text>
+<path class="grid" d="M563.57 74V334"/>
+<text class="tick" x="563.57" y="354">1</text>
+<path class="grid" d="M635.00 74V334"/>
+<text class="tick" x="635.00" y="354">1.5</text>
+<path class="grid" d="M385 301.50H635"/>
+<text class="tick ytick" x="377" y="305.50">-0.5</text>
+<path class="grid" d="M385 236.50H635"/>
+<text class="tick ytick" x="377" y="240.50">0</text>
+<path class="grid" d="M385 171.50H635"/>
+<text class="tick ytick" x="377" y="175.50">0.5</text>
+<path class="grid" d="M385 106.50H635"/>
+<text class="tick ytick" x="377" y="110.50">1</text>
+<path class="axis" d="M385 236.50H635"/>
+<path class="axis" d="M420.71 74V334"/>
+<text class="axis-label" x="627" y="228.50">x</text>
+<text class="axis-label" x="427.71" y="86">y</text>
+<path class="shape image" d="M456.43,301.50 L599.29,236.50 L599.29,106.50 L456.43,171.50 Z"/>
+<circle class="vertex" cx="456.43" cy="301.50" r="4"/>
+<circle class="vertex" cx="599.29" cy="236.50" r="4"/>
+<circle class="vertex" cx="599.29" cy="106.50" r="4"/>
+<circle class="vertex" cx="456.43" cy="171.50" r="4"/>
+<text class="axis-name" x="510" y="376">x coordinate</text>
+<text class="axis-name" transform="translate(357 204) rotate(-90)">y coordinate</text>
+</g>
+<g class="plot" aria-label="One-step control sum">
+<text class="title" x="702" y="34">One-step control sum</text>
+<path class="grid" d="M737.71 74V334"/>
+<text class="tick" x="737.71" y="354">0</text>
+<path class="grid" d="M809.14 74V334"/>
+<text class="tick" x="809.14" y="354">0.5</text>
+<path class="grid" d="M880.57 74V334"/>
+<text class="tick" x="880.57" y="354">1</text>
+<path class="grid" d="M952.00 74V334"/>
+<text class="tick" x="952.00" y="354">1.5</text>
+<path class="grid" d="M702 301.50H952"/>
+<text class="tick ytick" x="694" y="305.50">0</text>
+<path class="grid" d="M702 236.50H952"/>
+<text class="tick ytick" x="694" y="240.50">0.5</text>
+<path class="grid" d="M702 171.50H952"/>
+<text class="tick ytick" x="694" y="175.50">1</text>
+<path class="grid" d="M702 106.50H952"/>
+<text class="tick ytick" x="694" y="110.50">1.5</text>
+<path class="axis" d="M702 301.50H952"/>
+<path class="axis" d="M737.71 74V334"/>
+<text class="axis-label" x="944" y="293.50">x</text>
+<text class="axis-label" x="744.71" y="86">y</text>
+<path class="shape sum" d="M773.43,236.50 L916.29,236.50 L916.29,106.50 L773.43,106.50 Z"/>
+<circle class="vertex" cx="773.43" cy="236.50" r="4"/>
+<circle class="vertex" cx="916.29" cy="236.50" r="4"/>
+<circle class="vertex" cx="916.29" cy="106.50" r="4"/>
+<circle class="vertex" cx="773.43" cy="106.50" r="4"/>
+<text class="axis-name" x="827" y="376">x coordinate</text>
+<text class="axis-name" transform="translate(674 204) rotate(-90)">y coordinate</text>
+</g>
 </svg>
 <h2>Run the public-interface example</h2>
 <pre><code>cmake -S . -B build/dev -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release
@@ -62,11 +124,10 @@ cmake --build build/examples --target source_index_geometry_2d -j1
 ./build/examples/source_index_geometry_2d btulshor</code></pre>
 <p>The executable emits JSON with method identity, retained IDs, source trace/status, independent
 checker status and timing, and output vertices. It uses a 5,000 ms / 64-point checker budget.
-The pictured geometry is an explanation of the fixture; consult the saved raw records to inspect
-the actual provider traces. This is a functional illustration, not a performance comparison or
+The input hull uses the declared square corners. The affine image and control sum are plotted from the saved QuickHull vertices. The saved BTULSHOR vertices match both plots. Tick labels show data coordinates, and the axes mark x=0 and y=0. This is a functional illustration, not a performance comparison or
 a claim of historical REACH reproduction. The legacy selection is the recovered Pascal source
 profile; no distinct baseline/modified source implementation has been identified.</p>
 <p><a href="https://github.com/butahlecoq/controlled-systems-lab/blob/main/include/csl/geometry/affine_sum.hpp">Public operation API</a> ·
-<a href="https://github.com/butahlecoq/controlled-systems-lab/blob/main/docs/research/btulshor-original-body-recovery.md">Legacy source recovery</a> ·
+<a href="source-index-geometry-2d-records.json">Saved raw execution records</a></p>
 <a href="source-index-geometry-2d-records.json">Saved raw execution records</a></p>
 </html>

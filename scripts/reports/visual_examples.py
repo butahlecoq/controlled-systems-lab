@@ -23,6 +23,7 @@ import visual_illustrations
 import visual_example_geometry as geometry_examples
 import visual_example_fuel_layers
 import visual_example_hybrid as hybrid_examples
+from mathematical_notation import matrix_html
 
 CASE_OWNERS = {
     "hull": geometry_examples,
@@ -314,7 +315,7 @@ def data_details(example):
         }[example["kind"]]
         math_rows = ", ".join(math_label for math_label, _ in coordinate_labels)
         spoken_rows = ", ".join(spoken_label for _, spoken_label in coordinate_labels)
-        output_matrix = _math_matrix(
+        output_matrix = matrix_html(
             matrix,
             f"Output coordinate matrix W, {dimensions} coordinate rows by {len(points)} stored-output columns, displayed to six significant digits; coordinates {spoken_rows}",
             display_significant_digits=6)
@@ -339,37 +340,13 @@ def data_details(example):
     return '<details><summary>' + summary + '</summary>' + content + '</details>'
 
 
-def _math_matrix(matrix, label, *, display_significant_digits=None):
-    """Render a numeric-only MathML body with accessible CSS-stretched brackets."""
-    def display_value(value):
-        exact = json.dumps(value, allow_nan=False)
-        if display_significant_digits is not None and isinstance(value, (int, float)):
-            return format(value, f".{display_significant_digits}g")
-        return exact
-
-    rows = []
-    for values in matrix:
-        cells = "".join(f'<mtd><mn>{escape(display_value(value))}</mn></mtd>'
-                        for value in values)
-        rows.append(f'<mtr>{cells}</mtr>')
-    spoken_rows = "; ".join(", ".join(display_value(value) for value in row)
-                             for row in matrix)
-    accessible_label = f"{label}: {spoken_rows}"
-    return ('<span class="math-matrix" role="math" aria-label="'
-            + escape(accessible_label, quote=True) + '">'
-            '<span class="math-bracket math-bracket-left" aria-hidden="true"></span>'
-            '<math display="inline" aria-hidden="true"><mtable columnspacing="0.7em" rowspacing="0.25em">'
-            + "".join(rows) + '</mtable></math>'
-            '<span class="math-bracket math-bracket-right" aria-hidden="true"></span></span>')
-
-
 def lesson_input_math(example):
     """Show a mathematical view only for the lesson inputs with known schemas."""
     if example["kind"] == "hull":
         points = example["inputs"]["points"]
         dimensions = len(points[0])
         matrix = [[point[coordinate] for point in points] for coordinate in range(dimensions)]
-        values = _math_matrix(matrix,
+        values = matrix_html(matrix,
                               f"Point matrix V, {dimensions} coordinate rows by {len(points)} source-point columns")
         return ('<div class="math-input"><p><var>V</var> = [<var>v</var><sub>0</sub> … '
                 f'<var>v</var><sub>{len(points) - 1}</sub>] ∈ ℝ<sup>{dimensions}×{len(points)}</sup></p>'
@@ -385,8 +362,8 @@ def lesson_input_math(example):
         def halfspace(name, symbol, set_symbol, title):
             matrix = source[name + "_A"]
             bounds = source[name + "_b"]
-            matrix_table = _math_matrix(matrix, f"Matrix A_{symbol}, {len(matrix)} rows by 2 columns")
-            vector_table = _math_matrix([[value] for value in bounds],
+            matrix_table = matrix_html(matrix, f"Matrix A_{symbol}, {len(matrix)} rows by 2 columns")
+            vector_table = matrix_html([[value] for value in bounds],
                                         f"Column vector b_{symbol}, {len(bounds)} entries")
             return ('<section class="math-system"><h3>' + title + '</h3>'
                     f'<p><var>{set_symbol}</var> = {{<var>x</var> ∈ ℝ<sup>2</sup> : '
