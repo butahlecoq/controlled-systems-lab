@@ -129,7 +129,7 @@ endif()
 
 add_executable(csl_closed_loop_native_policy tools/closed_loop_native_policy.cpp)
 target_link_libraries(csl_closed_loop_native_policy PRIVATE CSL::finite_action_nominal CSL::polyhedral
-  CSL::affine_sum CSL::phase_one CSL::history_cost CSL::bounded_h_support)
+  CSL::affine_sum CSL::phase_one CSL::history_cost CSL::feedback_geometry)
 if(CSL_ENABLE_HIGHS)
   target_link_libraries(csl_closed_loop_native_policy PRIVATE CSL::highs_lp CSL::highs_convex)
   target_compile_definitions(csl_closed_loop_native_policy PRIVATE CSL_NATIVE_HAS_HIGHS=1)
