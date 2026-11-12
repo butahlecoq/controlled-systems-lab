@@ -49,7 +49,7 @@ INTEGER_FIELDS = (
 )
 LINEAGE_AUDIT = {
     "status": "source-level review; executable equivalence not established",
-    "contract_reference": "docs/contracts/polyhedral-conversion.md#lineage-audit-a17-and-a18",
+    "contract_reference": "https://github.com/butahlecoq/controlled-systems-lab/blob/68db559016fcfffea3aa052c65f7757386e35075/docs/contracts/polyhedral-conversion.md#lineage-audit-a17-and-a18",
     "sources": {
         "A17": {
             "path": "Scientific Research/GeoCalcLib-master/vertexEnumeration.m",

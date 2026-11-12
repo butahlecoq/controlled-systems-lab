@@ -12,8 +12,8 @@
 #include <utility>
 
 namespace csl::registry {
-// Compatible-toolchain source interface; see docs/contracts/registry.md for the
-// callback purity, borrowed preparation lifetime and immutable payload contracts.
+// Compatible-toolchain source interface. Checked registrations validate
+// callback results and freeze borrowed preparation state before execution.
 struct Identity { ModuleId id; std::string version; };
 struct Method { ModuleId id; std::optional<std::string> version; };
 struct Provenance { std::string port; Method requested; std::optional<Identity> actual; };

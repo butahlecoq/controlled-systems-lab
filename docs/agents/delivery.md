@@ -89,7 +89,8 @@ steps. If no supported low-dimensional case exists, record that limitation and
 the follow-up issue rather than fabricating a result.
 
 The [published algorithm results policy](../architecture/published-algorithm-results.md)
-and [record contract](../contracts/algorithm-report-records.md) still govern
-measurements and scientific claims. Functional example/CI durations do not become
-performance evidence. Verify local links and responsive plots, then open the
-deployed example before reporting it as published.
+governs measurements and scientific claims. Report record readers and publication
+checks live in [`scripts/reports`](../../scripts/reports/) and are exercised by
+[`tests/reporting`](../../tests/reporting/). Functional example/CI durations do
+not become performance evidence. Verify local links and responsive plots, then
+open the deployed example before reporting it as published.
