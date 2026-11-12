@@ -3,8 +3,10 @@
 #include <csl/geometry/polyhedral_intersection.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/adapters/polyhedral/qhull.hpp>
+#include <csl/registry/provider.hpp>
 
 #include <array>
+#include <stop_token>
 #include <utility>
 
 using namespace csl;
@@ -265,4 +267,107 @@ TEST_CASE("analytic LP fixture rejects a matching ID with malformed implication 
         REQUIRE(std::holds_alternative<ProgramResult>(result));
         CHECK_FALSE(std::get<ProgramResult>(result).objective.lower.has_value());
     }
+}
+
+TEST_CASE("registered H intersection preserves literal rows, coordinates, and operation evidence") {
+    using namespace csl::registry;
+    const auto intersection = geometry::polyhedral::make_intersection_registration();
+    Registry<GeometryPort> providers;
+    const Method method{intersection.identity.id, intersection.identity.version};
+    REQUIRE_FALSE(providers.add(intersection).has_value());
+    Requirements requirements;
+    requirements.output.representation = {"csl.polyhedron.h"};
+    requirements.output.relation = SetRelation::equivalent;
+    auto provider = take(prepare_provider(select_provider(providers, method, requirements)));
+
+    const auto apply = [&](const sets::SetData& left, const sets::SetData& right,
+            std::string request_id, std::string output_id) {
+        OperationRequest request{{{"intersection-contract"},{std::move(request_id)},{std::move(output_id)}},
+            intersection.identity.id, Intersection{left.as_handle(), right.as_handle()},
+            SetRelation::equivalent, Assurance::numerical};
+        auto prepared = provider.prepare(request);
+        REQUIRE(std::holds_alternative<PreparedPipeline<GeometryPort>>(prepared));
+        auto [workspace] = std::get<PreparedPipeline<GeometryPort>>(std::move(prepared)).create();
+        return std::pair{request, workspace->run(ExecutionContext{})};
+    };
+
+    const auto shifted = hset("shifted-box", {4,2,{1,0,-1,0,0,1,0,-1}}, {2,-1,3,-2});
+    const auto cut = hset("cut-box", {4,2,{1,0,-1,0,0,1,0,-1}}, {1,0,2,-1});
+    auto [box_request, box_outcome] = apply(shifted, cut, "asymmetric-boxes", "overlap-boxes");
+    REQUIRE(std::holds_alternative<OperationResult>(box_outcome));
+    const auto& box_result = std::get<OperationResult>(box_outcome);
+    CHECK(box_result.relation == SetRelation::equivalent);
+    CHECK(box_result.evidence.reference == geometry_reference(box_request));
+    const auto box_data = take(sets::from_handle(box_result.output));
+    const auto box_rep = box_data.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(box_rep));
+    const auto& box_h = std::get<sets::HRepresentation>(box_rep);
+    CHECK(box_h.inequalities.rows() == 8);
+    for (std::size_t row=0; row<box_h.inequalities.rows(); ++row)
+        CHECK(box_h.inequalities(row,0)*1.0 + box_h.inequalities(row,1)*2.0 <= box_h.upper_bounds[row]);
+    CHECK(box_h.inequalities(0,0) == 1.0);
+    CHECK(box_h.upper_bounds[0] == 2.0);
+    CHECK(box_h.inequalities(4,0) == 1.0);
+    CHECK(box_h.upper_bounds[4] == 1.0);
+    CHECK(box_h.inequalities(1,0) == -1.0);
+    CHECK(box_h.upper_bounds[1] == -1.0);
+
+    const auto plane = hset("plane", {4,2,{1,0,-1,0,0,1,0,-1}}, {2,0,0,0},
+        {1,2,{0,1}}, {0});
+    const auto segment = hset("segment", {2,2,{0,1,0,-1}}, {1,1},
+        {1,2,{1,0}}, {1});
+    auto [degenerate_request, degenerate_outcome] = apply(plane, segment, "degenerate", "point");
+    REQUIRE(std::holds_alternative<OperationResult>(degenerate_outcome));
+    const auto degenerate = take(sets::from_handle(std::get<OperationResult>(degenerate_outcome).output));
+    const auto degenerate_rep = degenerate.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(degenerate_rep));
+    const auto& degenerate_h = std::get<sets::HRepresentation>(degenerate_rep);
+    CHECK(degenerate_h.equalities.rows() == 2);
+    CHECK(degenerate_h.equalities(0,0) == 0.0);
+    CHECK(degenerate_h.equality_values[0] == 0.0);
+    CHECK(degenerate_h.equalities(1,0) == 1.0);
+    CHECK(degenerate_h.equality_values[1] == 1.0);
+    CHECK(std::get<OperationResult>(degenerate_outcome).evidence.reference == geometry_reference(degenerate_request));
+
+    const auto wrong_labels = take(sets::make_h({{"wrong-labels"},2,{"u","v"}},
+        {matrix(0,2,{}), vector({}), matrix(0,2,{}), vector({})}));
+    OperationRequest incompatible{{{"intersection-contract"},{"bad-coordinates"},{"bad-out"}},
+        intersection.identity.id, Intersection{shifted.as_handle(), wrong_labels.as_handle()},
+        SetRelation::equivalent, Assurance::numerical};
+    CHECK(std::holds_alternative<Rejection>(provider.prepare(incompatible)));
+
+    const auto left3 = take(sets::make_h({{"left-3d"},3,{"x","y","z"}},
+        {matrix(1,3,{1,0,0}), vector({0}), matrix(0,3,{}), vector({})}));
+    const auto right3 = take(sets::make_h({{"right-3d"},3,{"x","y","z"}},
+        {matrix(1,3,{-1,0,0}), vector({-1}), matrix(0,3,{}), vector({})}));
+    auto [disjoint_request, disjoint_outcome] = apply(left3, right3, "disjoint-3d", "empty-3d-h");
+    REQUIRE(std::holds_alternative<OperationResult>(disjoint_outcome));
+    const auto disjoint = take(sets::from_handle(std::get<OperationResult>(disjoint_outcome).output));
+    const auto disjoint_rep = disjoint.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(disjoint_rep));
+    const auto& disjoint_h = std::get<sets::HRepresentation>(disjoint_rep);
+    CHECK(disjoint.metadata()->set.dimension == 3);
+    CHECK(disjoint_h.inequalities.rows() == 2);
+    CHECK(disjoint_h.inequalities(0,0) == 1.0);
+    CHECK(disjoint_h.upper_bounds[0] == 0.0);
+    CHECK(disjoint_h.inequalities(1,0) == -1.0);
+    CHECK(disjoint_h.upper_bounds[1] == -1.0);
+    CHECK(std::get<OperationResult>(disjoint_outcome).evidence.reference == geometry_reference(disjoint_request));
+    OperationRequest wrong_dimension{{{"intersection-contract"},{"bad-dimension"},{"bad-dimension-out"}},
+        intersection.identity.id, Intersection{shifted.as_handle(), left3.as_handle()},
+        SetRelation::equivalent, Assurance::numerical};
+    CHECK(std::holds_alternative<Rejection>(provider.prepare(wrong_dimension)));
+
+    std::stop_source cancellation;
+    cancellation.request_stop();
+    OperationRequest cancelled_request{{{"intersection-contract"},{"cancelled"},{"cancelled-out"}},
+        intersection.identity.id, Intersection{left3.as_handle(), right3.as_handle()},
+        SetRelation::equivalent, Assurance::numerical};
+    auto cancelled_pipeline = provider.prepare(cancelled_request);
+    REQUIRE(std::holds_alternative<PreparedPipeline<GeometryPort>>(cancelled_pipeline));
+    auto [cancelled_workspace] = std::get<PreparedPipeline<GeometryPort>>(std::move(cancelled_pipeline)).create();
+    ExecutionContext cancelled_context;
+    cancelled_context.cancellation = cancellation.get_token();
+    CHECK(std::holds_alternative<OperationStopped>(cancelled_workspace->run(cancelled_context)));
+
 }

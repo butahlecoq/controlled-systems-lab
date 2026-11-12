@@ -3,6 +3,7 @@
 #include <csl/geometry/contracts.hpp>
 
 #include <csl/optimization/lp_backend.hpp>
+#include <csl/registry/provider.hpp>
 #include <csl/sets/data.hpp>
 
 namespace csl::geometry::polyhedral {
@@ -14,6 +15,10 @@ using SetResult = std::variant<sets::SetData, Diagnostics>;
 // separate operation and can therefore enumerate vertices created by cuts.
 SetResult intersect_h(const sets::SetData& left, const sets::SetData& right,
                      SetId output_id);
+
+// Registered native-H intersection. It admits only equivalent numerical
+// intersections over already materialized H operands.
+registry::Registration<registry::GeometryPort> make_intersection_registration();
 
 enum class HalfspaceReductionStatus { complete, incomplete };
 struct HalfspaceReduction {
