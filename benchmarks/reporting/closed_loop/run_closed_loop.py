@@ -33,7 +33,7 @@ from task_models import (make_held_step_request, make_replay_request, objective,
 from capabilities import MANIFEST, NATIVE_MANIFEST, resolve_graph, validate_resolved_graph, manifest_digest
 from attempt_records import (ATTEMPT_SCHEMA_V2, IO_LOG, STAGE_INDEX, append_io_event,
     atomic_json, finalize_stage, iter_stage_references, materialize_episode_summary,
-    persist_native_capture, read_attempt, register_orphan_stages, summarize_io,
+    persist_native_capture, read_attempt, register_orphan_stages, summarize_io, verify_v2_attempt,
     write_attempt, write_record_artifact, write_stage)
 
 HERE = Path(__file__).resolve().parent
@@ -272,7 +272,7 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
         "resolved_graph": graph, "preparation_receipt": preparation,
         "selected_initial_state_physical": state.tolist(), "original_intervals": task["episode"]["intervals"],
         "original_final_time": task["episode"]["final_time"], "status": "in-progress",
-        "timing_scopes": {"stage_interval_seconds": "one stage from before its first checkpoint through controller query, held-step execution, all active-stage checkpoints and final stage checkpoint; overlaps controller and execution subscopes",
+        "timing_scopes": {"stage_interval_seconds": "one stage from before its initial checkpoint through controller query and held-step execution; sampled immediately before the final stage record/index write, so excludes stage finalization and the subsequent attempt checkpoint; overlaps controller and execution subscopes",
             "controller_query_wall_seconds": "controller query including any native capture checkpoint callbacks",
             "execution_process_wall_seconds": "held-step child launch through child completion and stdout/stderr persistence; excludes response parsing, replay and rendering",
             "record_io": "actual JSON bytes, serialization and fsync, plus selective parsing; telemetry log append is excluded"},
@@ -405,7 +405,7 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
             row["observed_next_physical"] = state.tolist()
             row["status"] = "applied-and-observed"; row["applied_control"] = action
         except Exception as error:
-            if controller_query_started is not None:
+            if controller_query_started is not None and "controller_query_wall_seconds" not in row:
                 row["controller_query_wall_seconds"] = time.monotonic() - controller_query_started
             failure = {"type": type(error).__name__, "reason": str(error)}
             row.update({"status": "failed", "failure": f"{type(error).__name__}: {error}"})
@@ -640,7 +640,11 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
     else:
         result = {"status": "incomplete", "completed_holds": 0}
     if result.get("format_version") == 2:
-        register_orphan_stages(attempt)
+        recovery_diagnostics = []
+        recovered_stages = register_orphan_stages(attempt, recovery_diagnostics)
+        if recovered_stages or recovery_diagnostics:
+            result["stage_recovery"] = {"recovered_orphan_stages": recovered_stages,
+                "diagnostics": recovery_diagnostics}
         result["stage_records"]["count"] = sum(1 for _ in iter_stage_references(attempt, verify_hashes=False))
         controls, physical_states, stage_reads = materialize_episode_summary(attempt, result)
         result["controls"] = controls
@@ -956,7 +960,9 @@ def append_phase_event(attempt: Path, event_type: str, receipt_id: str, receipt_
 def write_coverage(root: Path) -> Path:
     rows = []
     for path in sorted(root.glob("*/attempts/*/attempt.json")):
-        try: record, attempt_read = read_attempt(path)
+        try:
+            record, attempt_read = read_attempt(path)
+            verify_v2_attempt(path.parent, record)
         except (OSError, ValueError, json.JSONDecodeError): continue
         replay = record.get("independent_replay", {})
         postcheck_paths = {item.name: item for item in path.parent.glob("postcheck-*.json")}
@@ -1113,6 +1119,10 @@ def main() -> int:
         path = write_coverage(args.output_root.resolve()); print(json.dumps({"coverage_record": str(path)})); return 0
     if args.render_only:
         attempt = args.render_only.resolve(); result, _ = read_attempt(attempt / "attempt.json")
+        try:
+            verify_v2_attempt(attempt, result)
+        except ValueError as error:
+            parser.error(f"saved v2 stage evidence is invalid: {error}")
         task_name = {"syn-nl-lv-01/continuous-receding/1": "syn-nl-lv-01",
                      "env717-earth-orbit/continuous-receding/1": "earth-orbit",
                      "syn-nl-fuel-01/continuous-receding/1": "syn-nl-fuel-01"}.get(result.get("task_id"))
@@ -1143,6 +1153,10 @@ def main() -> int:
         return 0 if render_status == "complete" else 1
     if args.replay_only:
         attempt = args.replay_only.resolve(); result, _ = read_attempt(attempt / "attempt.json")
+        try:
+            verify_v2_attempt(attempt, result)
+        except ValueError as error:
+            parser.error(f"saved v2 stage evidence is invalid: {error}")
         task_name = {"syn-nl-lv-01/continuous-receding/1": "syn-nl-lv-01",
                      "env717-earth-orbit/continuous-receding/1": "earth-orbit",
                      "syn-nl-fuel-01/continuous-receding/1": "syn-nl-fuel-01"}.get(result.get("task_id"))

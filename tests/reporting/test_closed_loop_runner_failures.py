@@ -13,6 +13,7 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "benchmarks/reporting/closed_loop"))
 import run_closed_loop
+from attempt_records import STAGE_INDEX, finalize_stage, write_attempt, write_stage
 
 
 class ClosedLoopRunnerFailureTests(unittest.TestCase):
@@ -80,6 +81,134 @@ class ClosedLoopRunnerFailureTests(unittest.TestCase):
             self.assertEqual(record["status"], "preparation_failed")
             self.assertEqual(record["resource_limits"]["observed"]["worker_wall_seconds"],
                              record["supervisor"]["wall_seconds"])
+
+    def test_controller_query_duration_is_not_extended_by_execution_failure(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            attempt = root / "attempt"; attempt.mkdir()
+            task = run_closed_loop.load_task("syn-nl-lv-01")
+            graph = {"task_sha256": run_closed_loop.manifest_sha256(task),
+                "action_profile_id": task["control_domains"]["continuous"]["problem_id"],
+                "controller": {"id": "test-controller", "version": "1"},
+                "execution": {"id": "test-execution", "version": "1", "provider": "test"},
+                "role_bindings": {}}
+            graph_path = root / "graph.json"
+            graph_path.write_text(json.dumps(graph), encoding="utf-8")
+            bridge = root / "bridge"
+
+            def fail_execution(_bridge, _request, _attempt, _index, row):
+                import time
+                time.sleep(0.25)
+                row["execution_process"] = {"status": "failed", "wall_seconds": 0.25}
+                raise RuntimeError("deterministic execution failure")
+
+            with mock.patch.object(run_closed_loop, "prepare_graph", return_value=(None, {})), \
+                 mock.patch.object(run_closed_loop, "controller_query", return_value={
+                     "status": "accepted", "control": [0.0], "policy_id": "test-controller",
+                     "invocations": []}), \
+                 mock.patch.object(run_closed_loop, "execute_held_step_bridge", side_effect=fail_execution):
+                self.assertEqual(run_closed_loop.worker("syn-nl-lv-01", attempt, bridge,
+                    graph_path=graph_path), 2)
+
+            row = json.loads((attempt / "stage-000.json").read_text())
+            record = json.loads((attempt / "attempt.json").read_text())
+            self.assertEqual(row["execution_process"]["wall_seconds"], 0.25)
+            self.assertLess(row["controller_query_wall_seconds"], 0.1)
+            self.assertIn("immediately before the final stage record/index write",
+                record["timing_scopes"]["stage_interval_seconds"])
+
+    def test_supervisor_recovers_torn_stage_index_and_records_incomplete_status(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw); bridge = root / "bridge"; bridge.write_text("bridge")
+            torn = b'{"schema":"csl.closed-loop.stage-reference/1","update_index":1'
+
+            class InterruptedWorker:
+                pid = 999999999
+                returncode = -15
+
+                def communicate(self, timeout):
+                    attempt = next(root.glob("syn-nl-lv-01/attempts/*"))
+                    record_path = attempt / "attempt.json"
+                    record = json.loads(record_path.read_text())
+                    task = run_closed_loop.load_task("syn-nl-lv-01")
+                    initial = [row["initial"] for row in task["model"]["states"]]
+                    finalize_stage(attempt, 0, {"update_index": 0, "status": "applied-and-observed",
+                        "observed_physical": initial, "applied_control": [0.0],
+                        "observed_next_physical": initial})
+                    write_stage(attempt, 1, {"update_index": 1, "status": "started",
+                        "observed_physical": initial})
+                    with (attempt / STAGE_INDEX).open("ab") as stream:
+                        stream.write(torn)
+                    record.update(status="in-progress", completed_holds=1,
+                        selected_initial_state_physical=initial)
+                    record["stage_records"]["count"] = 1
+                    write_attempt(attempt, record)
+                    return "", "worker interrupted during reference append"
+
+            with mock.patch.object(run_closed_loop.subprocess, "Popen", return_value=InterruptedWorker()), \
+                 mock.patch.object(run_closed_loop.subprocess, "check_output", return_value="test-commit\n"):
+                result = run_closed_loop.run_task("syn-nl-lv-01", root, bridge)
+
+            attempt = Path(result["attempt"])
+            record = json.loads((attempt / "attempt.json").read_text())
+            self.assertEqual(record["status"], "incomplete")
+            self.assertEqual(record["terminal_supervisor_failure"]["status"], "failed")
+            self.assertEqual(record["completed_holds"], 1)
+            self.assertEqual(record["stage_records"]["count"], 2)
+            self.assertEqual(record["stage_recovery"]["recovered_orphan_stages"], 1)
+            preserved = record["stage_recovery"]["diagnostics"][0]
+            self.assertEqual((attempt / preserved["path"]).read_bytes(), torn)
+            self.assertEqual(record["controls"], [[0.0]])
+            self.assertEqual(record["physical_states"], [
+                record["selected_initial_state_physical"], record["selected_initial_state_physical"]])
+
+    def test_retry_modes_reject_changed_v2_stage_before_receipt_creation(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            attempt = root / "attempt"
+            attempt.mkdir()
+            task = run_closed_loop.load_task("syn-nl-lv-01")
+            count = task["episode"]["intervals"]
+            initial = [row["initial"] for row in task["model"]["states"]]
+            control = [0.0]
+            states = [initial for _ in range(count + 1)]
+            controls = [control for _ in range(count)]
+            for index in range(count):
+                finalize_stage(attempt, index, {"update_index": index,
+                    "status": "applied-and-observed", "observed_physical": states[index],
+                    "applied_control": control, "observed_next_physical": states[index + 1]})
+            import hashlib
+            import json
+            from contracts import manifest_sha256
+            record = {"schema": "csl.closed-loop.attempt/2", "format_version": 2,
+                "attempt_id": "retry-guard", "task_id": task["task_id"],
+                "task_sha256": manifest_sha256(task), "status": "complete",
+                "algorithm_status": "complete", "overall_status": "complete",
+                "completed_holds": count, "original_intervals": count,
+                "selected_initial_state_physical": initial, "controls": controls,
+                "physical_states": states,
+                "controls_sha256": hashlib.sha256(json.dumps(controls, separators=(",", ":"),
+                    allow_nan=False).encode()).hexdigest(),
+                "stage_records": {"path": STAGE_INDEX, "count": count}}
+            write_attempt(attempt, record)
+            self.assertIsNotNone(run_closed_loop.verify_v2_attempt(attempt, record))
+            (attempt / "stage-000.json").unlink()
+            bridge = root / "bridge"; bridge.write_text("must not be invoked")
+            original_attempt = (attempt / "attempt.json").read_bytes()
+            for option, argv in (("render-only", ["--render-only", str(attempt)]),
+                                 ("replay-only", ["--bridge", str(bridge), "--replay-only", str(attempt)])):
+                with self.subTest(option=option), \
+                     mock.patch.object(sys, "argv", ["run_closed_loop.py", *argv]), \
+                     mock.patch.object(run_closed_loop, "render_attempt") as render, \
+                     mock.patch.object(run_closed_loop, "replay_attempt") as replay, \
+                     self.assertRaises(SystemExit) as raised:
+                    run_closed_loop.main()
+                    self.assertEqual(raised.exception.code, 2)
+                    render.assert_not_called()
+                    replay.assert_not_called()
+            self.assertEqual((attempt / "attempt.json").read_bytes(), original_attempt)
+            self.assertFalse(list(attempt.glob("render-retry-*.json")))
+            self.assertFalse(list(attempt.glob("full-replay-retry-*")))
 
     def test_attempt_resource_budget_is_positive_recorded_and_enforced(self):
         profile = run_closed_loop.attempt_resource_profile(1800, 1800)

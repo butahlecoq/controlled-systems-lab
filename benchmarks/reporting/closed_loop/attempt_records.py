@@ -201,8 +201,20 @@ def persist_native_capture(attempt_dir: Path, update_index: int, capture: dict,
         "bridge_response_sha256": capture.get("bridge_response_sha256"),
         "response_parse_status": capture.get("response_parse_status"),
         "response": saved.get("response")}
-    meta_path = attempt_dir / f"{stem}.json"
-    receipt = atomic_json(meta_path, metadata)
+    metadata_serialization_started = time.perf_counter()
+    metadata_bytes = (json.dumps(metadata, indent=2, allow_nan=False) + "\n").encode("utf-8")
+    metadata_serialization_seconds = time.perf_counter() - metadata_serialization_started
+    metadata_digest = hashlib.sha256(metadata_bytes).hexdigest()
+    meta_path = attempt_dir / f"{stem}-{metadata_digest}.json"
+    if meta_path.exists():
+        if meta_path.stat().st_size != len(metadata_bytes) or file_sha256(meta_path) != metadata_digest:
+            raise ValueError("content-addressed native capture metadata exists with different contents")
+        receipt = WriteReceipt(meta_path.name, len(metadata_bytes), metadata_digest,
+            metadata_serialization_seconds, 0.0)
+    else:
+        written = atomic_bytes(meta_path, metadata_bytes)
+        receipt = WriteReceipt(written.path, written.bytes_written, written.sha256,
+            written.serialization_seconds + metadata_serialization_seconds, written.fsync_seconds)
     append_io_event(attempt_dir, {"operation": "native-capture-checkpoint", "update_index": update_index,
         "path": receipt.path, "bytes_written": receipt.bytes_written, "sha256": receipt.sha256,
         "serialization_seconds": receipt.serialization_seconds, "fsync_seconds": receipt.fsync_seconds})
@@ -248,7 +260,7 @@ def _append_reference(attempt_dir: Path, update_index: int, path: Path) -> dict[
     if relative != f"stage-{update_index:03d}.json":
         raise ValueError("stage record path does not match its update index")
     byte_count = path.stat().st_size
-    digest = file_sha256(path)
+    digest = _record_hash_read(attempt_dir, path, "stage-reference-hash")
     row = {"schema": STAGE_REFERENCE_SCHEMA, "update_index": update_index,
         "path": relative, "bytes": byte_count, "sha256": digest}
     index_receipt = append_jsonl(attempt_dir / STAGE_INDEX, row)
@@ -271,9 +283,77 @@ def finalize_stage(attempt_dir: Path, update_index: int, value: Mapping[str, Any
     return reference
 
 
-def register_orphan_stages(attempt_dir: Path) -> int:
-    """Index finalized or interrupted stage files left after the worker exits."""
-    indexed = list(iter_stage_references(attempt_dir, verify_hashes=False))
+def _verified_index_prefix(attempt_dir: Path) -> tuple[list[dict[str, Any]], bytes, bytes]:
+    """Return checked complete rows, exact prefix bytes, and any unterminated tail."""
+    path = attempt_dir / STAGE_INDEX
+    if not path.exists():
+        return [], b"", b""
+    started = time.perf_counter()
+    data = path.read_bytes()
+    prefix_end = data.rfind(b"\n") + 1
+    prefix = data[:prefix_end]
+    tail = data[prefix_end:]
+    references: list[dict[str, Any]] = []
+    expected = 0
+    try:
+        for raw_line in prefix.splitlines():
+            if not raw_line.strip():
+                continue
+            try:
+                reference = json.loads(raw_line)
+            except json.JSONDecodeError as error:
+                raise ValueError(f"stage reference index is malformed at row {expected}") from error
+            if (not isinstance(reference, dict) or reference.get("schema") != STAGE_REFERENCE_SCHEMA
+                    or reference.get("update_index") != expected):
+                raise ValueError(f"stage reference index is not contiguous at row {expected}")
+            _reference_path(attempt_dir, reference)
+            references.append(reference)
+            expected += 1
+    finally:
+        append_io_event(attempt_dir, {"operation": "stage-index-recovery-read",
+            "path": STAGE_INDEX, "bytes_read": len(data),
+            "parse_seconds": time.perf_counter() - started})
+    return references, prefix, tail
+
+
+def register_orphan_stages(attempt_dir: Path,
+                           diagnostics: list[dict[str, Any]] | None = None) -> int:
+    """Recover a verified index prefix and index stage files left after interruption.
+
+    Only an unterminated final JSONL fragment is recoverable. Its exact bytes are
+    saved under a content-addressed name before the index is atomically restored
+    to the checked prefix. A malformed newline-terminated row remains fatal.
+    """
+    indexed, prefix, torn_tail = _verified_index_prefix(attempt_dir)
+    if torn_tail:
+        digest = hashlib.sha256(torn_tail).hexdigest()
+        tail_name = f"stage-records-tail-{digest}.bin"
+        tail_path = attempt_dir / tail_name
+        if tail_path.exists():
+            verify_started = time.perf_counter()
+            if tail_path.stat().st_size != len(torn_tail) or file_sha256(tail_path) != digest:
+                raise ValueError("preserved stage-index tail file exists with different contents")
+            tail_receipt = WriteReceipt(tail_name, 0, digest, 0.0, 0.0)
+            append_io_event(attempt_dir, {"operation": "stage-index-tail-verified",
+                "path": tail_name, "bytes_read": len(torn_tail),
+                "verification_seconds": time.perf_counter() - verify_started,
+                "sha256": digest})
+        else:
+            tail_receipt = atomic_bytes(tail_path, torn_tail)
+            append_io_event(attempt_dir, {"operation": "stage-index-tail-preserved",
+                "path": tail_name, "bytes_written": tail_receipt.bytes_written,
+                "sha256": tail_receipt.sha256, "serialization_seconds": tail_receipt.serialization_seconds,
+                "fsync_seconds": tail_receipt.fsync_seconds})
+        index_path = attempt_dir / STAGE_INDEX
+        index_receipt = atomic_bytes(index_path, prefix)
+        append_io_event(attempt_dir, {"operation": "stage-index-prefix-restored",
+            "path": STAGE_INDEX, "bytes_written": index_receipt.bytes_written,
+            "sha256": index_receipt.sha256, "serialization_seconds": index_receipt.serialization_seconds,
+            "fsync_seconds": index_receipt.fsync_seconds})
+        if diagnostics is not None:
+            diagnostics.append({"kind": "unterminated-jsonl-tail", "path": tail_name,
+                "bytes": len(torn_tail), "sha256": tail_receipt.sha256,
+                "diagnostic": "preserved unterminated final stage reference and restored the verified index prefix"})
     next_index = len(indexed)
     recovered = 0
     while True:
@@ -298,7 +378,7 @@ def _reference_path(attempt_dir: Path, reference: Mapping[str, Any]) -> Path:
         raise ValueError(f"referenced stage record is missing: {name}")
     if path.stat().st_size != reference.get("bytes"):
         raise ValueError(f"referenced stage byte count changed: {name}")
-    if file_sha256(path) != reference.get("sha256"):
+    if _record_hash_read(attempt_dir, path, "stage-reference-verification") != reference.get("sha256"):
         raise ValueError(f"referenced stage hash changed: {name}")
     return path
 
@@ -308,33 +388,56 @@ def iter_stage_references(attempt_dir: Path, *, verify_hashes: bool = True) -> I
     if not index_path.exists():
         return
     expected = 0
-    with index_path.open("r", encoding="utf-8") as stream:
-        for line in stream:
-            if not line.strip():
-                continue
-            try:
-                reference = json.loads(line)
-            except json.JSONDecodeError as error:
-                raise ValueError(f"stage reference index is malformed at row {expected}") from error
-            if (not isinstance(reference, dict) or reference.get("schema") != STAGE_REFERENCE_SCHEMA
-                    or reference.get("update_index") != expected):
-                raise ValueError(f"stage reference index is not contiguous at row {expected}")
-            if verify_hashes:
-                _reference_path(attempt_dir, reference)
-            else:
-                name = reference.get("path")
-                if not isinstance(name, str) or Path(name).name != name:
-                    raise ValueError("stage reference path escapes the attempt directory")
-            yield reference
-            expected += 1
+    parse_seconds = 0.0
+    bytes_read = index_path.stat().st_size
+    try:
+        with index_path.open("r", encoding="utf-8") as stream:
+            for line in stream:
+                if not line.strip():
+                    continue
+                parse_started = time.perf_counter()
+                try:
+                    reference = json.loads(line)
+                except json.JSONDecodeError as error:
+                    raise ValueError(f"stage reference index is malformed at row {expected}") from error
+                parse_seconds += time.perf_counter() - parse_started
+                if (not isinstance(reference, dict) or reference.get("schema") != STAGE_REFERENCE_SCHEMA
+                        or reference.get("update_index") != expected):
+                    raise ValueError(f"stage reference index is not contiguous at row {expected}")
+                if verify_hashes:
+                    _reference_path(attempt_dir, reference)
+                else:
+                    name = reference.get("path")
+                    if not isinstance(name, str) or Path(name).name != name:
+                        raise ValueError("stage reference path escapes the attempt directory")
+                yield reference
+                expected += 1
+    finally:
+        append_io_event(attempt_dir, {"operation": "stage-index-read", "path": STAGE_INDEX,
+            "bytes_read": bytes_read, "parse_seconds": parse_seconds})
 
 
 def file_sha256(path: Path) -> str:
+    return _hash_file(path)[0]
+
+
+def _hash_file(path: Path) -> tuple[str, int, float]:
     digest = hashlib.sha256()
+    byte_count = 0
+    started = time.perf_counter()
     with path.open("rb") as stream:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(block)
-    return digest.hexdigest()
+            byte_count += len(block)
+    return digest.hexdigest(), byte_count, time.perf_counter() - started
+
+
+def _record_hash_read(attempt_dir: Path, path: Path, operation: str) -> str:
+    digest, byte_count, elapsed = _hash_file(path)
+    append_io_event(attempt_dir, {"operation": operation,
+        "path": str(path.relative_to(attempt_dir)), "bytes_read": byte_count,
+        "verification_seconds": elapsed, "sha256": digest})
+    return digest
 
 
 def _skip_whitespace(data: mmap.mmap, position: int) -> int:
@@ -508,13 +611,18 @@ def read_stage_fields(attempt_dir: Path, reference: Mapping[str, Any],
 def read_native_capture_metadata(attempt_dir: Path, reference: Mapping[str, Any]) -> tuple[dict[str, Any], dict[str, Path]]:
     index = reference.get("update_index")
     path = reference.get("path")
-    if not isinstance(index, int) or path != f"native-query-{index:03d}.json":
+    prefix = f"native-query-{index:03d}"
+    versioned = isinstance(path, str) and path.startswith(prefix + "-") and path.endswith(".json")
+    legacy = path == f"native-query-{index:03d}.json"
+    if not isinstance(index, int) or not (versioned or legacy):
         raise ValueError("native capture reference has a noncanonical path")
     if Path(path).name != path:
         raise ValueError("native capture reference escapes the attempt directory")
+    if versioned and path != f"{prefix}-{reference.get('sha256')}.json":
+        raise ValueError("native capture content-addressed path differs from its checked hash")
     meta_path = attempt_dir / path
     if not meta_path.is_file() or meta_path.stat().st_size != reference.get("bytes") or \
-            file_sha256(meta_path) != reference.get("sha256"):
+            _record_hash_read(attempt_dir, meta_path, "native-capture-verification") != reference.get("sha256"):
         raise ValueError("native capture metadata reference is missing or changed")
     metadata = json.loads(meta_path.read_text(encoding="utf-8"))
     if metadata.get("schema") != "csl.closed-loop.native-query-capture/3" or \
@@ -532,7 +640,7 @@ def read_native_capture_metadata(attempt_dir: Path, reference: Mapping[str, Any]
             raise ValueError(f"native {name} payload path escapes the attempt directory")
         resolved = attempt_dir / payload_path
         if not resolved.is_file() or resolved.stat().st_size != payload.get("bytes") or \
-                file_sha256(resolved) != payload.get("sha256"):
+                _record_hash_read(attempt_dir, resolved, "native-payload-verification") != payload.get("sha256"):
             raise ValueError(f"native {name} payload reference is missing or changed")
         payload_paths[name] = resolved
     return metadata, payload_paths
@@ -550,8 +658,15 @@ def materialize_episode_summary(attempt_dir: Path, record: Mapping[str, Any]) ->
     for reference in iter_stage_references(attempt_dir):
         count += 1
         fields, receipt = read_stage_fields(attempt_dir, reference,
-            {"status", "observed_physical", "applied_control", "observed_next_physical"})
+            {"status", "observed_physical", "applied_control", "observed_next_physical",
+             "native_query_capture"})
         reads.append(receipt)
+        capture = fields.get("native_query_capture")
+        if capture is not None:
+            if not isinstance(capture, dict) or capture.get("schema") != \
+                    "csl.closed-loop.native-query-capture-reference/1":
+                raise ValueError("v2 stage has an invalid native capture reference")
+            read_native_capture_metadata(attempt_dir, capture)
         if not states and isinstance(fields.get("observed_physical"), list):
             states.append(fields["observed_physical"])
         if fields.get("status") == "applied-and-observed":
@@ -567,14 +682,42 @@ def materialize_episode_summary(attempt_dir: Path, record: Mapping[str, Any]) ->
     return controls, states, reads
 
 
+def verify_v2_attempt(attempt_dir: Path, record: Mapping[str, Any]) -> tuple[list, list, list[IoReceipt]] | None:
+    """Verify canonical stage/native evidence and match it to cached replay summaries."""
+    if record.get("format_version") != 2:
+        return None
+    if record.get("schema") != ATTEMPT_SCHEMA_V2:
+        raise ValueError("attempt format version and schema disagree")
+    stage_records = record.get("stage_records")
+    if not isinstance(stage_records, dict) or stage_records.get("path") != STAGE_INDEX:
+        raise ValueError("v2 attempt has a noncanonical stage index reference")
+    controls, states, reads = materialize_episode_summary(attempt_dir, record)
+    if "controls" in record and record.get("controls") != controls:
+        raise ValueError("cached attempt controls differ from checked stage records")
+    if "physical_states" in record and record.get("physical_states") != states:
+        raise ValueError("cached attempt states differ from checked stage records")
+    if record.get("completed_holds") != len(controls):
+        raise ValueError("cached completed-hold count differs from checked stage records")
+    if record.get("status") == "complete":
+        expected_holds = record.get("original_intervals")
+        if isinstance(expected_holds, bool) or not isinstance(expected_holds, int) or \
+                len(controls) != expected_holds or stage_records.get("count") != expected_holds:
+            raise ValueError("complete attempt does not contain every checked stage")
+    controls_digest = hashlib.sha256(json.dumps(controls, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+    if record.get("controls_sha256") is not None and record.get("controls_sha256") != controls_digest:
+        raise ValueError("cached controls hash differs from checked stage records")
+    return controls, states, reads
+
+
 def summarize_io(attempt_dir: Path) -> dict[str, Any]:
     path = attempt_dir / IO_LOG
     totals: dict[str, Any] = {"checkpoint_writes": 0, "stage_writes": 0,
         "reference_writes": 0, "attempt_json_bytes_written": 0,
         "stage_json_bytes_written": 0, "native_payload_bytes_written": 0,
         "native_capture_checkpoint_bytes_written": 0, "reference_index_bytes_written": 0,
-        "record_artifact_bytes_written": 0, "total_record_bytes_written": 0,
-        "bytes_read": 0, "parse_seconds": 0.0,
+        "record_artifact_bytes_written": 0, "recovery_evidence_bytes_written": 0,
+        "index_repair_bytes_written": 0, "total_record_bytes_written": 0,
+        "bytes_read": 0, "parse_seconds": 0.0, "verification_seconds": 0.0,
         "serialization_seconds": 0.0, "fsync_seconds": 0.0}
     if not path.is_file():
         return totals
@@ -605,12 +748,20 @@ def summarize_io(attempt_dir: Path) -> dict[str, Any]:
             elif operation == "record-artifact":
                 totals["record_artifact_bytes_written"] += event["bytes_written"]
                 totals["total_record_bytes_written"] += event["bytes_written"]
+            elif operation == "stage-index-tail-preserved":
+                totals["recovery_evidence_bytes_written"] += event["bytes_written"]
+                totals["total_record_bytes_written"] += event["bytes_written"]
+            elif operation == "stage-index-prefix-restored":
+                totals["index_repair_bytes_written"] += event["bytes_written"]
+                totals["total_record_bytes_written"] += event["bytes_written"]
             if "bytes_read" in event:
                 totals["bytes_read"] += event["bytes_read"]
                 totals["parse_seconds"] += event.get("parse_seconds", 0.0)
+                totals["verification_seconds"] += event.get("verification_seconds", 0.0)
             totals["serialization_seconds"] += event.get("serialization_seconds", 0.0)
             totals["fsync_seconds"] += event.get("fsync_seconds", 0.0)
     totals["scope"] = ("attempt/stage checkpoints, native payload and capture records, stage-reference index, "
-        "held-step request artifacts, and selective record reads; excludes controller query, execution process, "
-        "replay/checker/render, and telemetry-log append scopes")
+        "checked reference hash reads, held-step request artifacts, torn-tail preservation/index repair, "
+        "and selective record reads; "
+        "excludes controller query, execution process, replay/checker/render, and telemetry-log append scopes")
     return totals
