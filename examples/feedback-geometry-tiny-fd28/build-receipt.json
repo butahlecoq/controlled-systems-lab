@@ -1,0 +1,45 @@
+{
+  "source_commit": "fd28cb652bd8a20839b73abaf184881fd7bcf1b4",
+  "geometry_parent": "77009646",
+  "retention_ref": "evidence/five-family-history-source-fd28cb65-20261112",
+  "source_capsule": {
+    "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/history-five-source-fd28cb65.tar",
+    "sha256": "59c6cfacdfaf279b0f19a19b8531d3fba453ec5abd62db86ba9c9df52dfb48e3"
+  },
+  "native_binary": {
+    "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/history-five-fd28-binary/geometry_policy",
+    "sha256": "772f233bb26a8398fa7d2778fc6a7e5f84655b672bb321e707dedd709a578868"
+  },
+  "sdk_source_commit": "f4e73e08908c472801aef6637d94b1a03cb0b2a7",
+  "sdk_manifest_sha256": "7b31b58248937c147ced8cee3de00b54a96968da029859141ffa0c93903170b5",
+  "build_scope": "Composite external consumer: current listed source files compiled directly and linked with the installed f4 SDK. Not a current-source full SDK or independently reproducible build.",
+  "build_command": "cmake --build history-five-consumer-build --target geometry_policy -j1",
+  "current_source_hashes": {
+    "tools/closed_loop_native_policy.cpp": "2502287a5dc0817309d5612c3935afa00a544ac9a8e8b6e90d40471680eaf6d5",
+    "src/reachability/bounded_h_support.cpp": "504017feeee296138ccad9387ee5965938ab8e0f284bc39059116d6628319d60",
+    "src/reachability/feedback_geometry.cpp": "1d51f9bf2e9a2ade843d2d3c5dc472f94149d3fe7ff8cbd6f3e416a5d7025c3c",
+    "src/reachability/feedback_coordinator.cpp": "4c4c0a3f2990183b669f387606417499c5fae87bb8ba281a4dc9986bfca9371d",
+    "src/reachability/nominal_tube.cpp": "2b50bf5f06eece6476fd856260e6e371d2f6d12e1fad352df6679a5592ae4c0a",
+    "src/geometry/polyhedral/intersection.cpp": "5a583fb352729d2d019dfead7733247fec4b0ca8651519a130b5095c5478821a",
+    "src/reachability/nominal_forward.cpp": "6e6a313b18378026098ff140f4847c20eebe49c31fe11e355a3cee3b4fdd3295",
+    "src/reachability/finite_plan_zonotope.cpp": "99042907401ed408a9674ff0399832a5c511f4efb6202d04da8445de6eeebe44",
+    "src/reachability/finite_plan_box.cpp": "c47ab2fbc17fe789298b6453a51de22dca279146cd464c84ee52070b5c4f2164",
+    "src/reachability/finite_plan_ellipsoid.cpp": "9f4f40bf55a7e647b8b7724d677662153b8a6fb96ad7970928f326ec5fe78449",
+    "src/optimization/history_cost.cpp": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86",
+    "src/optimization/running_control_cost.cpp": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0",
+    "src/optimization/finite_action_nominal.cpp": "26192d7e06d857ae2d2d7efdcef1d667ea8f42bfaec0cd04d60c84ff0e514767",
+    "src/optimization/finite_action_graph.cpp": "beb790b30558d5d6e669cf32a3a16c82a1b3a102c7737f2c5229d1633e02486c"
+  },
+  "files": {
+    "producer.py": "351862fcf70461dd54b829652a0b60618ef402cfc4f3e9331b7045a1460c4976",
+    "CMakeLists.txt": "e2705ebbf44beedcae0bcb2b3a7ae816f69f14479b3214a5cb3dfb191243030d",
+    "CMakeCache.txt": "dff9c3a92f1d1c179fea32f8d95b859480c8853e7765f6a39d4d838d94fd44ff",
+    "link.txt": "a4d5d4334bcec4a2d9a5b186f5659caf86d832677420d5ccd4f8cbf20c453cd5",
+    "flags.make": "7ed225af94eec4434623ceeacd926fcb844b232dbce6bfd10417fba17707b1ce",
+    "link.map": "db0eac25e08ce0f088696d79c51e68666c9c3697145607ee85e19c4794006559",
+    "incremental-build.log": "ca33919bea845a7bf4e7126f933ee744769afab016be0fb5b4855701b23c2277",
+    "sdk-manifest.json": "7b31b58248937c147ced8cee3de00b54a96968da029859141ffa0c93903170b5"
+  },
+  "compiler_symbol_sha256": "cf9ac39bd005b13d530e942a84b1626a73560da49009adae74279d0b1cebe764",
+  "reproduction": "CSL_CAPTURE_SOURCE_ROOT=<clean source root> CSL_CAPTURE_BINARY=<built geometry_policy> CSL_CAPTURE_OUTPUT=<new output directory> <controller env python> producer.py"
+}
