@@ -27,10 +27,15 @@ set(csl_contract_headers
   synthesis/contracts.hpp
   numeric/data.hpp
 )
+set(csl_core_header_targets)
 foreach(header IN LISTS csl_contract_headers)
   string(MAKE_C_IDENTIFIER "${header}" header_name)
   set(source "${CMAKE_CURRENT_BINARY_DIR}/header-checks/${header_name}.cpp")
   file(GENERATE OUTPUT "${source}" CONTENT "#include <csl/${header}>\n")
   add_library(header_${header_name} OBJECT "${source}")
   target_link_libraries(header_${header_name} PRIVATE CSL::contracts)
+  if(header MATCHES "^core/")
+    list(APPEND csl_core_header_targets header_${header_name})
+  endif()
 endforeach()
+add_custom_target(csl_core_header_checks DEPENDS ${csl_core_header_targets})
