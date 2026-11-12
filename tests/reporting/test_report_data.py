@@ -159,12 +159,12 @@ class RecordTests(unittest.TestCase):
                 self.data.validate_view(self.data.seal(view["payload"]))
 
     def test_collector_retains_aborted_prefix_without_inventing_success(self):
-        import collect_lp
+        import collector_common
         view=self.fixture();p=view["payload"]
         header={"schema":self.data.EVENT_SCHEMA,"event":"header","purpose":"test","repetitions":5,
                 "warmups":0,"clock":p["environment"]["clock"],"scenarios":p["scenarios"]}
         events=[header,{"schema":self.data.EVENT_SCHEMA,"event":"trial","trial":p["trials"][0]}]
-        payload=collect_lp.event_payload(events,9,b"partial",b"crashed",p["provenance"],p["environment"],p["profile"],True)
+        payload=collector_common.event_payload(events,9,b"partial",b"crashed",p["provenance"],p["environment"],p["profile"],True)
         aborted=self.data.validate_view(self.data.seal(payload))
         group=self.data.aggregate(aborted)[0]
         self.assertEqual(group["attempts"],1)
@@ -174,13 +174,13 @@ class RecordTests(unittest.TestCase):
         self.assertTrue(aborted["payload"]["process"]["aborted"])
 
     def test_profile_adapter_uses_separate_cpu_deltas_and_nonadditive_phase_totals(self):
-        import collect_lp
+        import collector_common
         metric=lambda x:{"available":True,"value":x,"unit":"ns","scope":"process lifetime CPU at snapshot"}
         unavailable={"available":False,"reason":"not exposed"}
         event={"purpose":"profile","rounds":1,"trials":5,"failures":0,"phase_totals_ns":[10,20,30,100,40,250],
                "before":{"user_cpu":metric(10),"kernel_cpu":metric(3),"peak_resident":unavailable},
                "after":{"user_cpu":metric(40),"kernel_cpu":metric(8),"peak_resident":unavailable}}
-        result=collect_lp.profile_assessment(event)
+        result=collector_common.profile_assessment(event)
         self.assertEqual(result["user_cpu_delta"]["value"],30)
         self.assertEqual(result["kernel_cpu_delta"]["value"],5)
         self.assertEqual(result["dominant_measured_phase"],"public_run")
@@ -189,12 +189,12 @@ class RecordTests(unittest.TestCase):
         self.assertFalse(result["peak_resident"]["available"])
 
     def test_truncated_final_event_retains_only_complete_aborted_prefix(self):
-        import collect_lp
+        import collector_common
         raw=b'{"schema":"csl.lp-report-events/1","event":"header"}\n{"unfinished":"\xe2'
-        self.assertEqual(collect_lp.events_from_bytes(raw,aborted=True),
+        self.assertEqual(collector_common.events_from_bytes(raw,aborted=True),
                          [{"schema":"csl.lp-report-events/1","event":"header"}])
-        with self.assertRaises(ValueError): collect_lp.events_from_bytes(raw)
-        with self.assertRaises(ValueError): collect_lp.events_from_bytes(b'{bad}\n',aborted=True)
+        with self.assertRaises(ValueError): collector_common.events_from_bytes(raw)
+        with self.assertRaises(ValueError): collector_common.events_from_bytes(b'{bad}\n',aborted=True)
 
     def test_relabelling_test_as_measurement_does_not_invent_provenance(self):
         view=self.fixture();p=view["payload"]
@@ -205,16 +205,16 @@ class RecordTests(unittest.TestCase):
         self.assertFalse(self.data.publishable(self.data.seal(p)))
 
     def test_functional_debug_identity_is_distinct_from_measurement_admission(self):
-        import collect_lp
+        import collector_common
         header={"purpose":"test","build":{"source_commit":"a"*40,"configuration":"Debug","ndebug":False,"cxx_standard":20}}
-        collect_lp.verify_build_identity(header,"a"*40,functional=True)
-        with self.assertRaises(ValueError): collect_lp.verify_build_identity(header,"a"*40)
-        with self.assertRaises(ValueError): collect_lp.verify_build_identity(header,"b"*40,functional=True)
+        collector_common.verify_build_identity(header,"a"*40,functional=True)
+        with self.assertRaises(ValueError): collector_common.verify_build_identity(header,"a"*40)
+        with self.assertRaises(ValueError): collector_common.verify_build_identity(header,"b"*40,functional=True)
         view=self.fixture();view["payload"]["provenance"]["build"].update(configuration="Debug",source_commit="0"*40)
         self.data.validate_view(self.data.seal(view["payload"]))
 
     def test_executable_b_cannot_borrow_same_commit_build_a_provenance(self):
-        import collect_lp
+        import collector_common
         with tempfile.TemporaryDirectory() as temp:
             root=Path(temp);source=root/'source';build=root/'A';other=root/'B'
             for path in (source,build,other): path.mkdir()
@@ -225,13 +225,13 @@ class RecordTests(unittest.TestCase):
             graph={"paths":paths,"configuration":"Release","cmake":{"generator":{"name":"Literal generator"}},"targets":[target,{**target,"name":"csl_report_support"}],"toolchains":{"toolchains":[{"language":"CXX","compiler":compiler}]}}
             owner=hashlib.sha256((paths['source']+'\n'+paths['build']+'\n'+compiler['path']).encode()).hexdigest()
             header={"build":{"configuration":"Release","compiler":"LiteralCC","compiler_version":"1.2","generator":"Literal generator","configured_flags":"-base","release_flags":"-O2 -DNDEBUG","build_owner_sha256":owner}}
-            collect_lp.verify_artifact(header,graph,build,exe,source)
-            with self.assertRaises(ValueError): collect_lp.verify_artifact(header,graph,build,foreign,source)
+            collector_common.verify_artifact(header,graph,build,exe,source)
+            with self.assertRaises(ValueError): collector_common.verify_artifact(header,graph,build,foreign,source)
             for field,value in (("compiler","DifferentCC"),("compiler_version","9.0"),("release_flags","-O0"),("build_owner_sha256","f"*64),("configuration","Debug")):
                 changed=copy.deepcopy(header);changed['build'][field]=value
-                with self.subTest(field=field),self.assertRaises(ValueError): collect_lp.verify_artifact(changed,graph,build,exe,source)
-            with self.assertRaises(ValueError): collect_lp.verify_artifact(header,graph,other,exe,source)
-            with self.assertRaises(ValueError): collect_lp.verify_artifact(header,graph,build,exe,other)
+                with self.subTest(field=field),self.assertRaises(ValueError): collector_common.verify_artifact(changed,graph,build,exe,source)
+            with self.assertRaises(ValueError): collector_common.verify_artifact(header,graph,other,exe,source)
+            with self.assertRaises(ValueError): collector_common.verify_artifact(header,graph,build,exe,other)
 
     def test_success_requires_spans_actual_method_and_consistent_typed_iterations(self):
         for mutate in (
