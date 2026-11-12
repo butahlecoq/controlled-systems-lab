@@ -34,7 +34,6 @@ SOURCE_FILES = (
     "include/csl/optimization/finite_action_minimax.hpp",
     "include/csl/controllers/observed_replay.hpp",
     "src/controllers/observed_replay.cpp",
-    "docs/contracts/information-patterns.md",
     "src/optimization/finite_action_minimax.cpp",
     "benchmarks/reporting/env717/two_particle_minimax.cpp",
     "reports/algorithm-results/env717-two-particle-minimax-v1/projections.svg",

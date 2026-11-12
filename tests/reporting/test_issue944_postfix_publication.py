@@ -108,6 +108,24 @@ class Issue944PostfixPublicationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "fresh"):
                 publication.stage(self.bundle, site)
 
+    def test_workflow_cli_stages_both_bundles_and_public_example(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary)
+            for script, bundle in (("stage_issue944_each_choice.py", self.historical),
+                                   ("stage_issue944_postfix.py", self.bundle)):
+                result = subprocess.run([
+                    sys.executable, str(ROOT / "scripts/reports" / script),
+                    "--source", str(bundle), "--site", str(site),
+                ], check=True, capture_output=True, text=True, cwd=ROOT)
+                self.assertEqual(result.stdout.strip(), bundle.name)
+                for source in bundle.iterdir():
+                    self.assertEqual((site / bundle.name / source.name).read_bytes(),
+                                     source.read_bytes())
+            for name in publication.EXAMPLE_FILES:
+                self.assertTrue((site / "examples" / name).is_file())
+            self.assertEqual((site / "examples/qhull-highs-strategy-a-2d-record.json").read_bytes(),
+                             (ROOT / "docs/examples/qhull-highs-strategy-a-2d-record.json").read_bytes())
+
 
 if __name__ == "__main__":
     unittest.main()

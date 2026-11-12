@@ -20,16 +20,12 @@ csl_add_library(csl_strategy_ts01 STATIC src/synthesis/strategy_ts01/analytic_pr
 
 target_link_libraries(csl_strategy_ts01 PUBLIC CSL::resolved_problem CSL::sets CSL::registry)
 
-install(FILES docs/contracts/ts01-exact-analytic-profile.md DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/docs/contracts)
-
 csl_add_library(csl_strategy_b STATIC src/synthesis/strategy_b/direct_joint.cpp)
 
 target_link_libraries(csl_strategy_b PUBLIC
   CSL::resolved_problem CSL::sets CSL::registry CSL::convex CSL::verification
   CSL::strategy_ts01
   PRIVATE CSL::artifacts)
-
-install(FILES docs/contracts/control-recovery.md DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/docs/contracts)
 
 csl_add_library(csl_witness_selector STATIC src/synthesis/witness_selector.cpp)
 
@@ -48,10 +44,6 @@ target_link_libraries(csl_hybrid_path_program PUBLIC CSL::model CSL::sets CSL::o
 
 csl_add_library(csl_finite_action_histories STATIC src/synthesis/finite_search/action_histories.cpp)
 target_link_libraries(csl_finite_action_histories PUBLIC CSL::problem)
-install(FILES docs/contracts/finite-action-histories.md
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/docs/contracts)
-install(FILES docs/contracts/finite-mixed-branch-portfolios.md
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/docs/contracts)
 
 csl_add_library(csl_finite_mixed_branch STATIC src/synthesis/finite_search/mixed_branch.cpp)
 target_link_libraries(csl_finite_mixed_branch PUBLIC CSL::finite_action_histories CSL::resolved_core CSL::registry)

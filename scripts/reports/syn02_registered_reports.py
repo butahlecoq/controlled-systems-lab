@@ -50,10 +50,13 @@ def _digest(value):
 
 
 def _source_inventory(bundle, manifest):
-    expected = (set(_map_module().STAGED_SOURCE_FILES) - {"manifest.json"}) | {"index.html"}
+    mapping = _map_module()
+    current = (set(mapping.STAGED_SOURCE_FILES) - {"manifest.json"}) | {"index.html"}
+    historical = (set(mapping.HISTORICAL_STAGED_SOURCE_FILES) - {"manifest.json"}) | {"index.html"}
     listed = manifest.get("files")
-    if not isinstance(listed, dict) or set(listed) != expected:
+    if not isinstance(listed, dict) or set(listed) not in (current, historical):
         raise ValueError("SYN-02 native bundle inventory differs from publication contract")
+    expected = set(listed)
     actual = set()
     for path in bundle.rglob("*"):
         if path.is_symlink():
@@ -263,7 +266,10 @@ def adapt(bundle):
         _validate_csv(bundle, rows)
         _validate_summary_csv(bundle, record["summary"])
         data.validate_svg((bundle / "latency.svg").read_bytes())
-        projection = _map_module().project(record)
+        mapping = _map_module()
+        projection = mapping.project(record)
+        if "README.md" in files:
+            projection["manifest_fields"]["files"]["entries"] = mapping.HISTORICAL_STAGED_FILES
         if _json(bundle / "publication-map.json") != projection:
             raise ValueError("SYN-02 publication map differs from native records")
         native_digest = projection["native_payload_sha256"]

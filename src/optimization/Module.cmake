@@ -86,8 +86,3 @@ csl_add_library(csl_finite_action_minimax_port STATIC src/optimization/finite_ac
 target_link_libraries(csl_finite_action_minimax_port PUBLIC CSL::finite_action_minimax CSL::registry)
 
 csl_install_headers(optimization)
-
-install(FILES docs/contracts/certificates.md
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/docs/contracts)
-install(FILES docs/contracts/finite-causal-minimax.md
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/docs/contracts)

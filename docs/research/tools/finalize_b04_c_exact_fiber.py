@@ -22,6 +22,19 @@ FROZEN_SOURCE_HASHES = {
     "docs/research/tools/README.md": "cfefd0e48e8dba4789af5b1055c4dae997b5a8216287ebf97622161803d50d25",
     "docs/research/tools/finalize_b04_c_exact_fiber.py": "b6ea85fe3835344f6ec17ec003e0dbf6ccd501f035212ea54879a2c2f9e0367d",
 }
+EVIDENCE_SOURCE_NAMES = {"README.md": "README.txt"}
+
+
+def evidence_source_path(bundle: Path, route_name: str) -> Path:
+    return bundle / EVIDENCE_SOURCE_NAMES.get(route_name, route_name)
+
+
+def copy_bundle_for_publication(source: Path, destination: Path) -> None:
+    """Copy source assets while emitting the evidence's existing route names."""
+    shutil.copytree(source, destination, dirs_exist_ok=True,
+        ignore=shutil.ignore_patterns(*EVIDENCE_SOURCE_NAMES.values()))
+    for route_name, source_name in EVIDENCE_SOURCE_NAMES.items():
+        shutil.copyfile(source / source_name, destination / route_name)
 
 
 def digest(path: Path) -> str:
@@ -68,7 +81,7 @@ def main() -> None:
         "scenario_id": "B04-c-exact-dyadic-20261102",
         "source_commit": json.loads(DEFAULT_RECORD.read_text(encoding="utf-8"))["source_commit"],
         "publication_scope": "Research-only report-index entry: external Python exact-arithmetic audit, not a registered Strategy A result or compiled complete-family publication. The numerical source commit remains the record source_commit.",
-        "evidence_files": {name: digest(BUNDLE / name) for name in evidence_files},
+        "evidence_files": {name: digest(evidence_source_path(BUNDLE, name)) for name in evidence_files},
         "source_files": {
             name: FROZEN_SOURCE_HASHES[name] if name in FROZEN_SOURCE_HASHES else digest(ROOT / name)
             for name in source_files
@@ -81,7 +94,7 @@ def main() -> None:
     }
     (BUNDLE / "manifest.json").write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    shutil.copytree(BUNDLE, PUBLICATION_BUNDLE, dirs_exist_ok=True)
+    copy_bundle_for_publication(BUNDLE, PUBLICATION_BUNDLE)
     print(json.dumps({"manifest": str((BUNDLE / "manifest.json").relative_to(ROOT)),
                       "scenario_id": manifest["scenario_id"],
                       "tests": "passed", "evidence_files": len(evidence_files)}, sort_keys=True))
