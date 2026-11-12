@@ -19,6 +19,7 @@ class PageMarkup(HTMLParser):
         self.math_rows = 0
         self.math_cells = 0
         self.labels: list[str] = []
+        self.links: list[str] = []
         self.control_witness_label = False
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
@@ -33,6 +34,9 @@ class PageMarkup(HTMLParser):
             self.math_cells += 1
         elif tag == "span" and attributes.get("role") == "math":
             self.labels.append(attributes.get("aria-label", ""))
+        for attribute in ("href", "src"):
+            if attributes.get(attribute):
+                self.links.append(attributes[attribute])
 
     def handle_data(self, data: str) -> None:
         if "Checked feasible control witness" in data:
@@ -67,7 +71,12 @@ class QhullHighsStrategyAExampleTests(unittest.TestCase):
         self.assertGreaterEqual(markup.math_cells, 20)
         self.assertTrue(any(label.startswith("Ordered V point matrix:") for label in markup.labels))
         self.assertTrue(any(label.startswith("Returned H bound column vector:") for label in markup.labels))
-        self.assertIn("Checked feasible control witness", example.page(example.load_record()))
+        self.assertTrue(any(label.startswith("Initial state column vector:") for label in markup.labels))
+        self.assertTrue(any(label.startswith("LP checked feasible control witness column vector:")
+                            for label in markup.labels))
+        self.assertIn("renderer source at its distinct commit", example.page(example.load_record()))
+        self.assertIn(example.FIGURE_NAME, markup.links)
+        self.assertIn(example.RECORD_NAME, markup.links)
         self.assertNotIn("<style>", example.page(example.load_record()))
 
 

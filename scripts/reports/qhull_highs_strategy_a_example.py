@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import html
+import hashlib
 import json
 from pathlib import Path
 
@@ -26,6 +27,15 @@ def load_record() -> dict:
         raise ValueError("the example must describe two control coordinates")
     if len(record.get("terminal_cases", [])) != 2:
         raise ValueError("the example must retain both terminal optimizer cases")
+    renderer = record.get("illustration_source", {})
+    renderer_path = renderer.get("source_path")
+    if renderer_path != "scripts/reports/qhull_highs_strategy_a_example.py":
+        raise ValueError("the illustration producer source path is missing or unexpected")
+    renderer_source = ROOT / renderer_path
+    if hashlib.sha256(renderer_source.read_bytes()).hexdigest() != renderer.get("source_sha256"):
+        raise ValueError("the illustration producer source hash does not match this renderer")
+    if renderer.get("commit") == record.get("source_commit"):
+        raise ValueError("the numerical capture and illustration producer must be distinct")
     vertices = record["original_ordered_conversion_input"]["vertices"]
     matrix = record["post_fix_conversion"]["matrix_A"]
     bounds = record["post_fix_conversion"]["vector_b"]
