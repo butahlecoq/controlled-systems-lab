@@ -19,7 +19,7 @@ Vector values(const DM& x) {return static_cast<Vector>(x);}
 void subject(casadi::Opti& opti,const MX& expression,bool equality=false) {
     for(casadi_int i=0;i<expression.numel();++i) {
         const auto row=expression(i);
-        if(!MX::depends_on(row,opti.x())) {
+        if(MX::symvar(row).empty()) {
             const double value=static_cast<double>(MX::evalf(row));
             if(!std::isfinite(value) || (equality?value!=0:value>0))throw std::runtime_error("constant native recovered row is infeasible");
             continue;
