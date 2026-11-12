@@ -112,13 +112,20 @@ class HistoryPolicy:
         result = {"task_sha256": self.task_sha256, "action_profile_id": self.action_profile_id,
                   "policy_id": self.controller_id, "status": "failed", "invocations": [],
                   "native_query_capture": self.last_query_capture}
+        if "history_relation" in response and "history_objective" in response:
+            result["invocations"].extend([
+                {"operation": "history.recover", "module_id": "csl::synthesis::recover_joint_history",
+                 "profile_id": self.controller_id, "provider": "public-function"},
+                {"operation": "history.compile-cost", "module_id": "csl::optimization::compile_history_cost",
+                 "profile_id": self.controller_id, "provider": "public-function"}])
         if response.get("status") not in {"accepted", "exported"}:
             result["status"] = response.get("status", "failed")
             result["reason"] = response.get("reason", "native history export failed")
             if "solver_receipt" in response:
                 result["solve_receipt"] = {"bridge_response": response, "solver": response["solver_receipt"]}
-                result["invocations"] = [{"operation": "controller.solve", "module_id": "continuous-history-mpc",
-                    "profile_id": self.controller_id, "provider": response["solver_receipt"]["provider"]}]
+                result["invocations"].append({"operation": "controller.solve", "module_id": "continuous-history-mpc",
+                    "profile_id": self.controller_id, "provider": response["solver_receipt"]["provider"],
+                    "version": response["solver_receipt"].get("version", "unknown")})
             return result
         relation, compiled = response["history_relation"], response["history_objective"]
         if response["status"] == "accepted":
@@ -138,8 +145,9 @@ class HistoryPolicy:
             initial = np.concatenate([*states, *controls])
             positive = [n * k for k in range(1, len(states))] if self.task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01" else []
             solver_receipt = solve(relation, compiled, initial=initial, positive_indices=positive)
-            result["invocations"] = [{"operation": "controller.solve", "module_id": "continuous-history-mpc",
-                "profile_id": self.controller_id, "provider": "casadi-ipopt"}]
+            result["invocations"].append({"operation": "controller.solve", "module_id": "continuous-history-mpc",
+                "profile_id": self.controller_id, "provider": "casadi-ipopt",
+                "version": solver_receipt.get("version", "unknown")})
             self.last_query_capture["solver_receipt"] = solver_receipt
             self._capture()
             if not solver_receipt["success"]:
@@ -148,8 +156,10 @@ class HistoryPolicy:
                 return result
             primal, solver_cost = solver_receipt["primal"], solver_receipt["objective"]
         provider = solver_receipt.get("provider", "casadi-ipopt")
-        result["invocations"] = [{"operation": "controller.solve", "module_id": "continuous-history-mpc",
-                                  "profile_id": self.controller_id, "provider": provider}]
+        if response["status"] == "accepted":
+            result["invocations"].append({"operation": "controller.solve", "module_id": "continuous-history-mpc",
+                "profile_id": self.controller_id, "provider": provider,
+                "version": solver_receipt.get("version", "unknown")})
         result["solve_receipt"] = {"bridge_response": response, "solver": solver_receipt}
         try:
             checks = validate(self.task, absolute_update_index, observed_physical_state,

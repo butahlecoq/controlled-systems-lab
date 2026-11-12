@@ -69,7 +69,9 @@ def solve(relation: dict, objective: dict, *, initial, positive_indices=()) -> d
                 "status": str(stats.get("return_status", "unknown")), "primal": primal.tolist(),
                 "objective": float(solution.value(cost)), "iterations": stats.get("iter_count"),
                 "solver": "casadi-ipopt/full-history-separate-norm-epigraphs/1",
+                "provider": "casadi-ipopt", "version": f"casadi {ca.__version__}; IPOPT version unavailable",
                 "assurance": "local numerical NLP solution; no global optimality certificate"}
     except Exception as error:
         return {"success": False, "status": "solver-error", "error": str(error),
-                "solver": "casadi-ipopt/full-history-separate-norm-epigraphs/1"}
+                "solver": "casadi-ipopt/full-history-separate-norm-epigraphs/1",
+                "provider": "casadi-ipopt", "version": f"casadi {ca.__version__}; IPOPT version unavailable"}
