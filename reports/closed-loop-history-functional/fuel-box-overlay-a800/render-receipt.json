@@ -1,0 +1,94 @@
+{
+  "schema": "csl.feedback-history-stage-figure/1",
+  "task_id": "syn-nl-fuel-01/continuous-receding/1",
+  "input_response_sha256": "3f07a8d379af4820c56d6370b9053a4324ddd9baa681bc260504827a7748744e",
+  "input_attempt_sha256": "447f28791b2688b7bfe76a3c9597c0eb71347eca43fe09607c636a3fdd86b5f0",
+  "capture_source_commit": "a800b95b9be6a874c0bab188d1cf3394fbb836b1",
+  "renderer_source_commit": "8d805d7aee1880365e38878cc8b0adb33d76301c",
+  "renderer_sha256": "bfd89c19f353437521057d33094a12bf8eabd6861875f580f790e78423a0792e",
+  "query_scope": "first observed-state query; all predicted stages, not all replans",
+  "trajectory_scope": "observed nonlinear plant across full episode",
+  "terminal_feasibility": "projected physical terminal state bounds; source terminal set otherwise universal",
+  "terminal_reference": "soft objective reference, not a terminal constraint",
+  "full_state_before_projection": true,
+  "family": "box",
+  "stages": 41,
+  "quantitative_style": "csl-report-quantitative-v1",
+  "palette": "shared Omarchy stage palette",
+  "execution_protocol": "cold at each query; known warm-start protocol gap",
+  "build_scope": "composite current compiled sources and f4 installed SDK",
+  "figures": [
+    {
+      "path": "all-stages-2-0-screen.png",
+      "sha256": "ca475bf6fd848dc2422f13e9b3c93b44f6d06b70a956d3c69ba431e367f48831",
+      "raw_state_indices": [
+        2,
+        0
+      ],
+      "variant": "screen"
+    },
+    {
+      "path": "all-stages-2-0-screen.svg",
+      "sha256": "c6fcd4692e9b0f59348fbe94dad9d72cea9c273fc44cd77e457473d96163892f",
+      "raw_state_indices": [
+        2,
+        0
+      ],
+      "variant": "screen"
+    },
+    {
+      "path": "all-stages-2-0-print.png",
+      "sha256": "1e49759d31a47302403965f3c9ed3b1fb1dd95a0ab4bc7de2650a949228fad08",
+      "raw_state_indices": [
+        2,
+        0
+      ],
+      "variant": "print"
+    },
+    {
+      "path": "all-stages-2-0-print.svg",
+      "sha256": "22b8379f1939026372b73295ce6bc0dd7a6b8535a2974f1f88207c39ef101d02",
+      "raw_state_indices": [
+        2,
+        0
+      ],
+      "variant": "print"
+    },
+    {
+      "path": "all-stages-3-1-screen.png",
+      "sha256": "59cadc19fdd39e3abbe01c646a15d6d48ea6a464bfca8230479787858eec7bea",
+      "raw_state_indices": [
+        3,
+        1
+      ],
+      "variant": "screen"
+    },
+    {
+      "path": "all-stages-3-1-screen.svg",
+      "sha256": "962e3cec92b2b6e89f17fa7de4e2218b285d91d7882c55baed255d1d8a65840d",
+      "raw_state_indices": [
+        3,
+        1
+      ],
+      "variant": "screen"
+    },
+    {
+      "path": "all-stages-3-1-print.png",
+      "sha256": "133674651902f572564796aee5a717962a8b3977107b96bf1740f218e2c27d93",
+      "raw_state_indices": [
+        3,
+        1
+      ],
+      "variant": "print"
+    },
+    {
+      "path": "all-stages-3-1-print.svg",
+      "sha256": "f970ae7edb7d977ebb027d1cca4820145c9677090715c9be2a39a37848d00d9a",
+      "raw_state_indices": [
+        3,
+        1
+      ],
+      "variant": "print"
+    }
+  ]
+}

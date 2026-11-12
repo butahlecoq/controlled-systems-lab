@@ -45,9 +45,26 @@
       "holds_total": 30,
       "source_objective": 0.09207050915639435,
       "directory": "lv-box-fd28",
-      "all_stage_plot": "lv-box-stages-fd28/all-stages-0-1.png",
+      "all_stage_plot": "lv-box-overlay-fd28/all-stages-0-1-screen.svg",
       "plot_scope": "all predicted stages of the first observed query",
       "warm_start_protocol": "cold at each observed query; source shift-prior-primal contract not implemented in this capture"
+    },
+    {
+      "task": "Fuel",
+      "solver": "CasADi/IPOPT",
+      "family": "box",
+      "controller": "affine-history MPC with F/B/I",
+      "holds_completed": 40,
+      "holds_total": 40,
+      "source_objective": 0.0038341007246844383,
+      "directory": "fuel-box-a800",
+      "all_stage_plots": [
+        "fuel-box-overlay-a800/all-stages-2-0-screen.svg",
+        "fuel-box-overlay-a800/all-stages-3-1-screen.svg"
+      ],
+      "plot_scope": "all predicted stages of first observed query, with actual full nonlinear trajectory",
+      "warm_start_protocol": "cold at each observed query; source shift-prior-primal contract not implemented",
+      "postcheck_source_timing": "policy and solver source edited after worker completed holds while parent performed postcheck/render"
     }
   ],
   "bundle_files": "Each directory contains receipt.json, raw.zip, SHA256SUMS, independent audit source and build receipt. Completed episodes also contain corrected plots and renderer receipt.",

@@ -8,7 +8,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[2]
 REPORT = "closed-loop-history-functional"
 RECORDS = ("lv-highs-f4", "orbit-ipopt-f4", "fuel-ipopt-3c", "fuel-highs-f4-timeout",
-           "lv-box-fd28")
+           "lv-box-fd28", "fuel-box-a800")
 CARD = ('<article class="saved-figure" id="closed-loop-history-functional">'
         '<h3>Continuous affine-history control: functional evidence</h3>'
         '<p>Original-horizon direct and F/B/I box physical episodes, plus a separately retained HiGHS fuel timeout, with source-bound records.</p>'
@@ -33,7 +33,7 @@ def stage(source: Path, site: Path) -> None:
         with zipfile.ZipFile(directory / "raw.zip") as archive:
             if archive.testzip() is not None:
                 raise ValueError("Evidence ZIP CRC failure: " + record)
-    for name in ("lv-box-stages-fd28",):
+    for name in ("lv-box-stages-fd28", "lv-box-overlay-fd28", "fuel-box-overlay-a800"):
         directory = source / name
         sums = directory / "SHA256SUMS"
         if not sums.is_file() or sums.is_symlink():
