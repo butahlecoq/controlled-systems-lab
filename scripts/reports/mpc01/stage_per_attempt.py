@@ -17,17 +17,21 @@ STRATEGY_AB_ID = "mpc01-strategy-ab-ts03-20261103-r1"
 STRATEGY_AB_SOURCE = ROOT / "docs/research/evidence" / STRATEGY_AB_ID
 STRATEGY_AB_ROUTE = Path("docs/research/evidence") / STRATEGY_AB_ID
 STRATEGY_AB_FILES = (
-    "strategy-ab-ts03-summary.html", "strategy-ab-ts03-summary.md",
+    "strategy-ab-ts03-summary.html", "strategy-ab-ts03-summary.txt",
     "strategy-ab-ts03-control-plane.svg", "strategy-ab-ts03-events.jsonl",
     "strategy-ab-ts03-stdout.jsonl", "comparison-record.json", "scenario.json",
     "capture-environment.json", "codec-environment.json", "resource-profile.json",
-    "capture-supervisor.py", "build-note.md",
+    "capture-supervisor.py", "build-note.txt",
 )
+STRATEGY_AB_ROUTE_ASSETS = {
+    "strategy-ab-ts03-summary.txt": "strategy-ab-ts03-summary.md",
+    "build-note.txt": "build-note.md",
+}
 STRATEGY_AB_TS02_ID = "mpc01-strategy-ab-ts02-per-attempt-20261103"
 STRATEGY_AB_TS02_SOURCE = ROOT / "docs/research/evidence" / STRATEGY_AB_TS02_ID
 STRATEGY_AB_TS02_ROUTE = Path("docs/research/evidence") / STRATEGY_AB_TS02_ID
 STRATEGY_AB_TS02_FILES = (
-    "strategy-ab-ts02-summary.html", "strategy-ab-ts02-summary.md",
+    "strategy-ab-ts02-summary.html", "strategy-ab-ts02-summary.txt",
     "strategy-ab-ts02-control-plane.svg", "strategy-ab-ts02-events.jsonl",
     "strategy-ab-ts02-stdout.jsonl", "strategy-ab-ts02-comparison-record.json",
     "scenario.json", "strategy-ab-ts02-environment.json",
@@ -37,17 +41,23 @@ STRATEGY_AB_TS02_FILES = (
     "cmake-compiler-metadata.cmake", "target-flags.make", "target-link.txt",
     "build-record.py", "render-report.py", "write-build-note.py", "sanitize-bundle.py",
 )
+STRATEGY_AB_TS02_ROUTE_ASSETS = {
+    "strategy-ab-ts02-summary.txt": "strategy-ab-ts02-summary.md",
+}
 STRATEGY_AB_TS01_ID = "mpc01-strategy-ab-ts01-per-attempt-20261103"
 STRATEGY_AB_TS01_SOURCE = ROOT / "docs/research/evidence" / STRATEGY_AB_TS01_ID
 STRATEGY_AB_TS01_ROUTE = Path("docs/research/evidence") / STRATEGY_AB_TS01_ID
 STRATEGY_AB_TS01_FILES = (
-    "strategy-ab-ts01-summary.html", "strategy-ab-ts01-summary.md",
+    "strategy-ab-ts01-summary.html", "strategy-ab-ts01-summary.txt",
     "strategy-ab-ts01-control-plane.svg", "strategy-ab-ts01-events.jsonl",
     "strategy-ab-ts01-stdout.jsonl", "comparison-record.json", "scenario.json",
     "strategy-ab-ts01-environment.json", "codec-environment.json",
     "resource-profile.json", "systemd-scope-processes.jsonl", "build-note.json",
     "cmake-compiler-metadata.cmake", "target-flags.make", "target-link.txt",
 )
+STRATEGY_AB_TS01_ROUTE_ASSETS = {
+    "strategy-ab-ts01-summary.txt": "strategy-ab-ts01-summary.md",
+}
 
 
 def _insert_landing_link(site: Path, marker: str, href: str, label: str) -> None:
@@ -67,7 +77,7 @@ def _insert_landing_link(site: Path, marker: str, href: str, label: str) -> None
 
 
 def page() -> str:
-    summary = (SOURCE / "benchmark-summary.md").read_text(encoding="utf-8")
+    summary = (SOURCE / "benchmark-summary.txt").read_text(encoding="utf-8")
     rows = []
     in_table = False
     for line in summary.splitlines():
@@ -107,6 +117,38 @@ th,td{{border-bottom:1px solid #526174;padding:.45rem .6rem;text-align:left}}img
 </main></body></html>'''
 
 
+def _copy_bundle_for_route(source: Path, destination: Path, markdown_routes: dict[str, str],
+                           required_files: tuple[str, ...]) -> None:
+    _check_manifest(source, required_files)
+    shutil.copytree(source, destination, symlinks=False)
+    manifest = destination / "SHA256SUMS"
+    contents = manifest.read_bytes()
+    for source_name, route_name in markdown_routes.items():
+        source_path = destination / source_name
+        route_path = destination / route_name
+        if (source_path.is_symlink() or not source_path.is_file() or
+                route_path.exists() or route_path.is_symlink()):
+            raise ValueError("source asset cannot be mapped to its published route: " + source_name)
+        source_entry = b"  " + source_name.encode("ascii") + b"\n"
+        route_entry = b"  " + route_name.encode("ascii") + b"\n"
+        if contents.count(source_entry) != 1:
+            raise ValueError("checksum manifest must contain exactly one source asset: " + source_name)
+        contents = contents.replace(source_entry, route_entry)
+        source_path.rename(route_path)
+    manifest.write_bytes(contents)
+
+
+def _validate_routed_bundle(source: Path, route: Path, source_names: set[str],
+                            markdown_routes: dict[str, str], label: str) -> None:
+    route_names = {markdown_routes.get(name, name) for name in source_names}
+    if _check_manifest(route, ()) != route_names:
+        raise ValueError(label + " inventory differs from source")
+    for name in source_names:
+        route_name = markdown_routes.get(name, name)
+        if (route / route_name).read_bytes() != (source / name).read_bytes():
+            raise ValueError(label + " differs from source: " + name)
+
+
 def stage(site: Path) -> Path:
     if SOURCE.is_symlink() or not SOURCE.is_dir() or site.is_symlink() or not site.is_dir():
         raise ValueError("evidence source and built site directory are required")
@@ -116,7 +158,9 @@ def stage(site: Path) -> Path:
     dest = site / REPORT_ID
     if dest.exists() or dest.is_symlink():
         raise ValueError("report route must be fresh")
-    shutil.copytree(SOURCE, dest, symlinks=False)
+    _copy_bundle_for_route(SOURCE, dest,
+                           {"benchmark-summary.txt": "benchmark-summary.md"},
+                           ("benchmark-summary.txt",))
     (dest / "index.html").write_text(page(), encoding="utf-8")
     _insert_landing_link(site, "mpc01-per-attempt-link", f"{REPORT_ID}/index.html",
                          "MPC-01 per-attempt OSQP and HPIPM capture →")
@@ -155,12 +199,13 @@ def stage_strategy_ab(site: Path) -> Path:
     if (STRATEGY_AB_SOURCE.is_symlink() or not STRATEGY_AB_SOURCE.is_dir() or
             site.is_symlink() or not site.is_dir()):
         raise ValueError("Strategy A/B evidence source and built site directory are required")
-    _check_manifest(STRATEGY_AB_SOURCE)
     destination = site / STRATEGY_AB_ROUTE
     if destination.exists() or destination.is_symlink():
         raise ValueError("Strategy A/B report route must be fresh")
     destination.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(STRATEGY_AB_SOURCE, destination, symlinks=False)
+    _copy_bundle_for_route(
+        STRATEGY_AB_SOURCE, destination,
+        STRATEGY_AB_ROUTE_ASSETS, STRATEGY_AB_FILES)
 
     # Keep the immutable report's source link working at its documented relative path.
     source_dir = site / "scripts/reports/mpc01"
@@ -184,12 +229,14 @@ def stage_strategy_ab_ts02(site: Path) -> Path:
     if (STRATEGY_AB_TS02_SOURCE.is_symlink() or not STRATEGY_AB_TS02_SOURCE.is_dir() or
             site.is_symlink() or not site.is_dir()):
         raise ValueError("Strategy A/B T-S02 evidence source and built site directory are required")
-    _check_manifest(STRATEGY_AB_TS02_SOURCE, STRATEGY_AB_TS02_FILES)
     destination = site / STRATEGY_AB_TS02_ROUTE
     if destination.exists() or destination.is_symlink():
         raise ValueError("Strategy A/B T-S02 report route must be fresh")
     destination.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(STRATEGY_AB_TS02_SOURCE, destination, symlinks=False)
+    _copy_bundle_for_route(
+        STRATEGY_AB_TS02_SOURCE, destination,
+        STRATEGY_AB_TS02_ROUTE_ASSETS,
+        STRATEGY_AB_TS02_FILES)
     source_dir = site / "scripts/reports/mpc01"
     source_dir.mkdir(parents=True, exist_ok=True)
     for filename in ("summarize_strategy_ab_ts02.py", "build_strategy_ab_records.py"):
@@ -210,12 +257,14 @@ def stage_strategy_ab_ts01(site: Path) -> Path:
     if (STRATEGY_AB_TS01_SOURCE.is_symlink() or not STRATEGY_AB_TS01_SOURCE.is_dir() or
             site.is_symlink() or not site.is_dir()):
         raise ValueError("Strategy A/B T-S01 evidence source and built site directory are required")
-    _check_manifest(STRATEGY_AB_TS01_SOURCE, STRATEGY_AB_TS01_FILES)
     destination = site / STRATEGY_AB_TS01_ROUTE
     if destination.exists() or destination.is_symlink():
         raise ValueError("Strategy A/B T-S01 report route must be fresh")
     destination.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(STRATEGY_AB_TS01_SOURCE, destination, symlinks=False)
+    _copy_bundle_for_route(
+        STRATEGY_AB_TS01_SOURCE, destination,
+        STRATEGY_AB_TS01_ROUTE_ASSETS,
+        STRATEGY_AB_TS01_FILES)
     source_dir = site / "scripts/reports/mpc01"
     source_dir.mkdir(parents=True, exist_ok=True)
     for filename in ("summarize_strategy_ab.py", "build_strategy_ab_records.py"):
@@ -266,8 +315,9 @@ def validate(site: Path) -> None:
             strategy_landing.is_symlink() or not strategy_landing.is_file()):
         raise ValueError("staged Strategy A/B T-S03 report route is missing")
     expected_names = _check_manifest(strategy_source)
-    if _check_manifest(strategy_route) != expected_names:
-        raise ValueError("staged Strategy A/B report inventory differs from source")
+    _validate_routed_bundle(strategy_source, strategy_route, expected_names,
+                            STRATEGY_AB_ROUTE_ASSETS,
+                            "staged Strategy A/B report")
     renderer_dir = site / "scripts/reports/mpc01"
     for filename in ("summarize_strategy_ab_ts03.py", "build_strategy_ab_records.py"):
         renderer = renderer_dir / filename
@@ -275,9 +325,6 @@ def validate(site: Path) -> None:
         if (renderer.is_symlink() or not renderer.is_file() or
                 renderer.read_bytes() != source.read_bytes()):
             raise ValueError("staged Strategy A/B renderer differs from source: " + filename)
-    for name in expected_names:
-        if (strategy_route / name).read_bytes() != (strategy_source / name).read_bytes():
-            raise ValueError("staged Strategy A/B report differs from source: " + name)
     page = strategy_landing.read_text(encoding="utf-8")
     for reference in re.findall(r'(?:href|src)="([^"]+)"', page):
         parsed = urlparse(reference)
@@ -297,11 +344,9 @@ def validate(site: Path) -> None:
             not ts02_route.is_dir() or ts02_landing.is_symlink() or not ts02_landing.is_file()):
         raise ValueError("staged Strategy A/B T-S02 report route is missing")
     ts02_names = _check_manifest(ts02_source, STRATEGY_AB_TS02_FILES)
-    if _check_manifest(ts02_route, STRATEGY_AB_TS02_FILES) != ts02_names:
-        raise ValueError("staged Strategy A/B T-S02 report inventory differs from source")
-    for name in ts02_names:
-        if (ts02_route / name).read_bytes() != (ts02_source / name).read_bytes():
-            raise ValueError("Strategy A/B T-S02 report differs from source: " + name)
+    _validate_routed_bundle(ts02_source, ts02_route, ts02_names,
+                            STRATEGY_AB_TS02_ROUTE_ASSETS,
+                            "staged Strategy A/B T-S02 report")
     for filename in ("summarize_strategy_ab_ts02.py", "build_strategy_ab_records.py"):
         renderer = renderer_dir / filename
         source = ROOT / "scripts/reports/mpc01" / filename
@@ -325,11 +370,9 @@ def validate(site: Path) -> None:
             not ts01_route.is_dir() or ts01_landing.is_symlink() or not ts01_landing.is_file()):
         raise ValueError("staged Strategy A/B T-S01 report route is missing")
     ts01_names = _check_manifest(ts01_source, STRATEGY_AB_TS01_FILES)
-    if _check_manifest(ts01_route, STRATEGY_AB_TS01_FILES) != ts01_names:
-        raise ValueError("staged Strategy A/B T-S01 report inventory differs from source")
-    for name in ts01_names:
-        if (ts01_route / name).read_bytes() != (ts01_source / name).read_bytes():
-            raise ValueError("Strategy A/B T-S01 report differs from source: " + name)
+    _validate_routed_bundle(ts01_source, ts01_route, ts01_names,
+                            STRATEGY_AB_TS01_ROUTE_ASSETS,
+                            "staged Strategy A/B T-S01 report")
     renderer_dir = site / "scripts/reports/mpc01"
     for filename in ("summarize_strategy_ab.py", "build_strategy_ab_records.py"):
         renderer = renderer_dir / filename

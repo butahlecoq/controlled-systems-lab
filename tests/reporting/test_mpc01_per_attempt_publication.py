@@ -40,6 +40,30 @@ class PerAttemptPublicationTests(unittest.TestCase):
             self.assertTrue((route / "attempt-139.stderr").is_file())
             summary = (route / "summary.json").read_bytes()
             self.assertEqual(summary, (stage_module.SOURCE / "summary.json").read_bytes())
+            route_assets = (
+                (stage_module.SOURCE, route, "benchmark-summary.txt", "benchmark-summary.md"),
+                (stage_module.STRATEGY_AB_SOURCE,
+                 site / stage_module.STRATEGY_AB_ROUTE,
+                 "strategy-ab-ts03-summary.txt", "strategy-ab-ts03-summary.md"),
+                (stage_module.STRATEGY_AB_SOURCE,
+                 site / stage_module.STRATEGY_AB_ROUTE,
+                 "build-note.txt", "build-note.md"),
+                (stage_module.STRATEGY_AB_TS02_SOURCE,
+                 site / stage_module.STRATEGY_AB_TS02_ROUTE,
+                 "strategy-ab-ts02-summary.txt", "strategy-ab-ts02-summary.md"),
+                (stage_module.STRATEGY_AB_TS01_SOURCE,
+                 site / stage_module.STRATEGY_AB_TS01_ROUTE,
+                 "strategy-ab-ts01-summary.txt", "strategy-ab-ts01-summary.md"),
+            )
+            for source_bundle, staged_bundle, source_name, route_name in route_assets:
+                with self.subTest(asset=source_name):
+                    self.assertFalse((source_bundle / route_name).exists())
+                    self.assertEqual((staged_bundle / route_name).read_bytes(),
+                                     (source_bundle / source_name).read_bytes())
+                    self.assertIn(f"  {route_name}\n",
+                                  (staged_bundle / "SHA256SUMS").read_text(encoding="ascii"))
+                    self.assertNotIn(f"  {source_name}\n",
+                                     (staged_bundle / "SHA256SUMS").read_text(encoding="ascii"))
             for line in (route / "SHA256SUMS").read_text(encoding="utf-8").splitlines():
                 digest, name = line.split("  ", 1)
                 self.assertEqual(hashlib.sha256((route / name).read_bytes()).hexdigest(), digest, name)

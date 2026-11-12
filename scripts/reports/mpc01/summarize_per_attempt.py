@@ -129,7 +129,7 @@ def main() -> int:
         "- `SHA256SUMS`: bundle integrity manifest.",
         "",
     ]
-    (root / "benchmark-summary.md").write_text("\n".join(lines), encoding="utf-8")
+    (root / "benchmark-summary.txt").write_text("\n".join(lines), encoding="utf-8")
     return 0
 
 

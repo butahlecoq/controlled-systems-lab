@@ -68,7 +68,7 @@ jobs:
             --scenario docs/research/evidence/mpc01-strategy-ab-ts01-per-attempt-20261103/scenario.json \
             --environment docs/research/evidence/mpc01-strategy-ab-ts01-per-attempt-20261103/strategy-ab-ts01-environment.json \
             --resource-profile docs/research/evidence/mpc01-strategy-ab-ts01-per-attempt-20261103/resource-profile.json \
-            --output docs/research/evidence/mpc01-strategy-ab-ts01-per-attempt-20261103/strategy-ab-ts01-summary.md
+            --output docs/research/evidence/mpc01-strategy-ab-ts01-per-attempt-20261103/strategy-ab-ts01-summary.txt
           (cd docs/research/evidence/mpc01-strategy-ab-ts01-per-attempt-20261103 && sha256sum -c SHA256SUMS)
           python -m unittest tests.reporting.test_deploy_head
           python -m unittest tests.reporting.test_mpc01_pages_augmentation
@@ -132,7 +132,7 @@ jobs:
             --scenario docs/research/evidence/mpc01-strategy-ab-ts01-per-attempt-20261103/scenario.json \
             --environment docs/research/evidence/mpc01-strategy-ab-ts01-per-attempt-20261103/strategy-ab-ts01-environment.json \
             --resource-profile docs/research/evidence/mpc01-strategy-ab-ts01-per-attempt-20261103/resource-profile.json \
-            --output docs/research/evidence/mpc01-strategy-ab-ts01-per-attempt-20261103/strategy-ab-ts01-summary.md
+            --output docs/research/evidence/mpc01-strategy-ab-ts01-per-attempt-20261103/strategy-ab-ts01-summary.txt
           (cd docs/research/evidence/mpc01-strategy-ab-ts01-per-attempt-20261103 && sha256sum -c SHA256SUMS)
 
       - name: Find the upstream Pages artifact
