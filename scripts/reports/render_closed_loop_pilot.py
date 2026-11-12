@@ -11,15 +11,12 @@ import math
 from pathlib import Path
 import shutil
 import subprocess
-import sys
 import tempfile
 import zipfile
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "benchmarks/reporting/closed_loop"))
 from contracts import canonical_sha256
-from attempt_records import read_attempt
 
+ROOT = Path(__file__).resolve().parents[2]
 REPORT_ID = "closed-loop-pilot-v1"
 ATTEMPTS = {
     "syn-nl-lv-01": "syn-nl-lv-01-20261111T114908Z-8dc20bed",
@@ -48,7 +45,7 @@ def task_manifest(name: str) -> dict:
 
 def attempt_paths(name: str) -> tuple[Path, dict, dict, dict]:
     path = ROOT / "reports/closed-loop-pilot" / name / "attempts" / ATTEMPTS[name]
-    record, _ = read_attempt(path / "attempt.json")
+    record = read_json(path / "attempt.json")
     run = read_json(path / "run-manifest.json")
     common = read_json(path / "full-replay-common/independent-check.json")
     tight = read_json(path / "full-replay-tight/independent-check.json")
@@ -112,10 +109,7 @@ def _render_candidate(output: Path) -> dict:
     (raw / "coverage.json").write_text(json.dumps(portable_coverage, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     source_identities = {"schema": "csl.closed-loop.report-source-identities/1", "tasks": {},
         "capability_manifest": {"source": "docs/catalogue/closed-loop-pilot-capabilities-v1.json",
-            "path": "capabilities/closed-loop-pilot-capabilities-v1.json"},
-        "tooling": {name: {"path": name, "sha256": digest((ROOT / name).read_bytes())}
-            for name in ("scripts/reports/render_closed_loop_pilot.py",
-                "benchmarks/reporting/closed_loop/attempt_records.py")}}
+            "path": "capabilities/closed-loop-pilot-capabilities-v1.json"}}
     capability_dir = raw / "capabilities"; capability_dir.mkdir(parents=True, exist_ok=True)
     for capability_file in ("closed-loop-pilot-capabilities-v1.json", "closed-loop-pilot-capabilities-v1.sha256"):
         shutil.copyfile(ROOT / "docs/catalogue" / capability_file, capability_dir / capability_file)

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from pathlib import Path
 import sys
 import tempfile
@@ -242,19 +243,19 @@ class NativeCapabilityTests(unittest.TestCase):
                     record = json.loads((attempt / "attempt.json").read_text())
                     stage = json.loads((attempt / "stage-000.json").read_text())
                     self.assertEqual((record["status"], record["completed_holds"]), ("incomplete", 0))
-                    capture_ref = stage["native_query_capture"]
-                    self.assertEqual(capture_ref["schema"], "csl.closed-loop.native-query-capture-reference/1")
                     from attempt_records import read_native_capture_metadata
-                    capture, payloads = read_native_capture_metadata(attempt, capture_ref)
-                    request_raw = payloads["request"].read_text(encoding="utf-8")
-                    request = json.loads(request_raw)
+                    capture, payloads = read_native_capture_metadata(attempt, stage["native_query_capture"])
                     self.assertTrue(capture["bridge_request_sent"])
-                    self.assertEqual(capture["request_sha256"],
-                        hashlib.sha256(request_raw.encode("utf-8")).hexdigest())
+                    request_raw = payloads["request"].read_text(encoding="utf-8")
+                    request_json = request_raw.rstrip("\n")
+                    request = json.loads(request_json)
+                    self.assertEqual(capture["request_sha256"], hashlib.sha256(request_raw.encode("utf-8")).hexdigest())
                     self.assertEqual(request["task_sha256"], graph["task_sha256"])
                     self.assertEqual(request["action_profile_id"], graph["action_profile_id"])
-                    self.assertEqual(payloads["response"].read_text(encoding="utf-8"), raw_line)
+                    response_raw = payloads["response"].read_text(encoding="utf-8")
+                    self.assertEqual(response_raw, raw_line)
                     self.assertEqual(capture["bridge_response_sha256"], hashlib.sha256(raw_line.encode()).hexdigest())
+                    parsed_response = json.loads(response_raw) if capture["response_parse_status"] == "parsed" else None
                     if expected_category:
                         self.assertEqual(stage["failure_category"], expected_category)
                         self.assertEqual(stage["mathematical_support_status"], "not_evaluated")
@@ -272,10 +273,10 @@ class NativeCapabilityTests(unittest.TestCase):
                         self.assertIn("omitted its compiled backend profile", stage["controller_reason"])
                     if label == "bad-id":
                         self.assertIn("source task identity", stage["controller_failure"]["reason"])
-                        self.assertEqual(json.loads(payloads["response"].read_text())["task_id"], "wrong-task")
+                        self.assertEqual(parsed_response["task_id"], "wrong-task")
                     if label == "nonfinite-partial":
                         self.assertEqual(stage["mathematical_support_status"], "not_evaluated")
-                        self.assertIn('"partial_diagnostic":NaN', payloads["response"].read_text())
+                        self.assertTrue(math.isnan(parsed_response["partial_diagnostic"]))
 
 
 if __name__ == "__main__":
