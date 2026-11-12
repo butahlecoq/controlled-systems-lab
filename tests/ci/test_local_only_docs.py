@@ -13,20 +13,34 @@ class LocalOnlyDocsTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         root = Path(temporary.name)
         subprocess.run(["git", "init", "-q", str(root)], check=True)
-        subprocess.run(["git", "-C", str(root), "config", "user.name", "Retention test"], check=True)
-        subprocess.run(["git", "-C", str(root), "config", "user.email", "retention@example.invalid"], check=True)
+        subprocess.run(
+            ["git", "-C", str(root), "config", "user.name", "Retention test"], check=True
+        )
+        subprocess.run(
+            ["git", "-C", str(root), "config", "user.email", "retention@example.invalid"],
+            check=True,
+        )
         (root / ".gitignore").write_text("/docs/superpowers/\n", encoding="utf-8")
         standing = root / "docs/agents/issue-tracker.md"
         standing.parent.mkdir(parents=True)
         standing.write_text("# Issue tracker\n", encoding="utf-8")
-        subprocess.run(["git", "-C", str(root), "add", ".gitignore", "docs/agents/issue-tracker.md"], check=True)
+        subprocess.run(
+            ["git", "-C", str(root), "add", ".gitignore", "docs/agents/issue-tracker.md"],
+            check=True,
+        )
         subprocess.run(["git", "-C", str(root), "commit", "-qm", "baseline"], check=True)
-        base = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()
+        base = subprocess.check_output(
+            ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
+        ).strip()
         return temporary, root, base
 
     def run_checker(self, root: Path, base: str) -> subprocess.CompletedProcess[str]:
-        return subprocess.run(["python3", str(SCRIPT), "--repo-root", str(root), "--base", base],
-                              capture_output=True, text=True, check=False)
+        return subprocess.run(
+            ["python3", str(SCRIPT), "--repo-root", str(root), "--base", base],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
 
     def test_forces_a_tracked_working_document_to_remain_local(self) -> None:
         temporary, root, base = self.repository()
@@ -34,22 +48,37 @@ class LocalOnlyDocsTests(unittest.TestCase):
             plan = root / "docs/superpowers/plans/accidental.md"
             plan.parent.mkdir(parents=True)
             plan.write_text("# New plan\n", encoding="utf-8")
-            subprocess.run(["git", "-C", str(root), "add", "-f", str(plan.relative_to(root))], check=True)
-            subprocess.run(["git", "-C", str(root), "commit", "-qm", "accidental tracked plan"], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "add", "-f", str(plan.relative_to(root))], check=True
+            )
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "-qm", "accidental tracked plan"], check=True
+            )
             result = self.run_checker(root, base)
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("docs/superpowers/plans/accidental.md", result.stderr)
 
     def test_rejects_working_text_and_json_documents_outside_docs(self) -> None:
-        for relative in ("docs/notes/working-plan.txt", "docs/notes/working-plan.json",
-                         "notes/working-plan.txt", "notes/working-plan.json"):
+        for relative in (
+            "docs/notes/working-plan.txt",
+            "docs/notes/working-plan.json",
+            "notes/working-plan.txt",
+            "notes/working-plan.json",
+        ):
             temporary, root, base = self.repository()
             with temporary:
                 note = root / relative
                 note.parent.mkdir(parents=True, exist_ok=True)
-                note.write_text("{}\n" if note.suffix == ".json" else "Working plan\n", encoding="utf-8")
-                subprocess.run(["git", "-C", str(root), "add", str(note.relative_to(root))], check=True)
-                subprocess.run(["git", "-C", str(root), "commit", "-qm", "accidental working document"], check=True)
+                note.write_text(
+                    "{}\n" if note.suffix == ".json" else "Working plan\n", encoding="utf-8"
+                )
+                subprocess.run(
+                    ["git", "-C", str(root), "add", str(note.relative_to(root))], check=True
+                )
+                subprocess.run(
+                    ["git", "-C", str(root), "commit", "-qm", "accidental working document"],
+                    check=True,
+                )
                 result = self.run_checker(root, base)
             self.assertEqual(result.returncode, 1, f"{relative}: {result.stdout}{result.stderr}")
             self.assertIn(relative, result.stderr)
@@ -60,8 +89,12 @@ class LocalOnlyDocsTests(unittest.TestCase):
             plan = root / "docs/superpowers/plans/backlog.json"
             plan.parent.mkdir(parents=True)
             plan.write_text("{}\n", encoding="utf-8")
-            subprocess.run(["git", "-C", str(root), "add", "-f", str(plan.relative_to(root))], check=True)
-            subprocess.run(["git", "-C", str(root), "commit", "-qm", "forced working plan"], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "add", "-f", str(plan.relative_to(root))], check=True
+            )
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "-qm", "forced working plan"], check=True
+            )
             result = self.run_checker(root, base)
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("docs/superpowers/plans/backlog.json", result.stderr)
@@ -86,7 +119,9 @@ class LocalOnlyDocsTests(unittest.TestCase):
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text(content, encoding="utf-8")
             subprocess.run(["git", "-C", str(root), "add", *assets], check=True)
-            subprocess.run(["git", "-C", str(root), "commit", "-qm", "add functional assets"], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "-qm", "add functional assets"], check=True
+            )
             result = self.run_checker(root, base)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
@@ -103,20 +138,28 @@ class LocalOnlyDocsTests(unittest.TestCase):
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text(content, encoding="utf-8")
             subprocess.run(["git", "-C", str(root), "add", *assets], check=True)
-            subprocess.run(["git", "-C", str(root), "commit", "-qm", "add report assets"], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "-qm", "add report assets"], check=True
+            )
             result = self.run_checker(root, base)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_keeps_working_documents_rejected_inside_report_asset_locations(self) -> None:
-        for relative in ("benchmarks/reporting/notes/capture.json",
-                         "reports/algorithm-results/example/working-plan.md"):
+        for relative in (
+            "benchmarks/reporting/notes/capture.json",
+            "reports/algorithm-results/example/working-plan.md",
+        ):
             temporary, root, base = self.repository()
             with temporary:
                 note = root / relative
                 note.parent.mkdir(parents=True, exist_ok=True)
                 note.write_text("Working note\n", encoding="utf-8")
-                subprocess.run(["git", "-C", str(root), "add", str(note.relative_to(root))], check=True)
-                subprocess.run(["git", "-C", str(root), "commit", "-qm", "add working document"], check=True)
+                subprocess.run(
+                    ["git", "-C", str(root), "add", str(note.relative_to(root))], check=True
+                )
+                subprocess.run(
+                    ["git", "-C", str(root), "commit", "-qm", "add working document"], check=True
+                )
                 result = self.run_checker(root, base)
             self.assertEqual(result.returncode, 1, f"{relative}: {result.stdout}{result.stderr}")
             self.assertIn(relative, result.stderr)
@@ -141,7 +184,9 @@ class LocalOnlyDocsTests(unittest.TestCase):
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text(content, encoding="utf-8")
             subprocess.run(["git", "-C", str(root), "add", *assets], check=True)
-            subprocess.run(["git", "-C", str(root), "commit", "-qm", "add report records"], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "-qm", "add report records"], check=True
+            )
             result = self.run_checker(root, base)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
@@ -152,7 +197,9 @@ class LocalOnlyDocsTests(unittest.TestCase):
             path.parent.mkdir(parents=True)
             path.write_text("decision\tevidence\n", encoding="utf-8")
             subprocess.run(["git", "-C", str(root), "add", str(path.relative_to(root))], check=True)
-            subprocess.run(["git", "-C", str(root), "commit", "-qm", "add working decision log"], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "-qm", "add working decision log"], check=True
+            )
             result = self.run_checker(root, base)
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("docs/research/exp06-423-decision-log.tsv", result.stderr)
@@ -162,8 +209,11 @@ class LocalOnlyDocsTests(unittest.TestCase):
         with temporary:
             adr = root / "docs/architecture/decisions/0005-numerical-membership-witnesses.md"
             adr.parent.mkdir(parents=True)
-            adr.write_text("# ADR 0005: Numerical membership witnesses\n\nDate: 2026-11-11. Status: accepted.\n\n"
-                           "## Decision\n\nUse a binding input digest.\n", encoding="utf-8")
+            adr.write_text(
+                "# ADR 0005: Numerical membership witnesses\n\nDate: 2026-11-11. Status: accepted.\n\n"
+                "## Decision\n\nUse a binding input digest.\n",
+                encoding="utf-8",
+            )
             subprocess.run(["git", "-C", str(root), "add", str(adr.relative_to(root))], check=True)
             subprocess.run(["git", "-C", str(root), "commit", "-qm", "add ADR"], check=True)
             result = self.run_checker(root, base)
@@ -174,10 +224,15 @@ class LocalOnlyDocsTests(unittest.TestCase):
         with temporary:
             adr = root / "docs/architecture/decisions/0005-next-steps.md"
             adr.parent.mkdir(parents=True)
-            adr.write_text("# ADR 0005: Next steps\n\nDate: 2026-11-11. Status: draft.\n\n"
-                           "## Next steps\n\n- TODO: finish implementation.\n", encoding="utf-8")
+            adr.write_text(
+                "# ADR 0005: Next steps\n\nDate: 2026-11-11. Status: draft.\n\n"
+                "## Next steps\n\n- TODO: finish implementation.\n",
+                encoding="utf-8",
+            )
             subprocess.run(["git", "-C", str(root), "add", str(adr.relative_to(root))], check=True)
-            subprocess.run(["git", "-C", str(root), "commit", "-qm", "add disguised note"], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "-qm", "add disguised note"], check=True
+            )
             result = self.run_checker(root, base)
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("0005-next-steps.md", result.stderr)
