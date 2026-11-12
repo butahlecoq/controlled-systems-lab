@@ -160,7 +160,7 @@ def is_explicit_working_directory(path: str) -> bool:
 
 def is_functional_repo_asset(path: str) -> bool:
     suffix = Path(path).suffix.lower()
-    return not suffix in DOCUMENT_SUFFIXES and any(
+    return suffix not in DOCUMENT_SUFFIXES and any(
         path.startswith(prefix) for prefix in FUNCTIONAL_REPO_ASSET_LOCATIONS
     )
 

@@ -27,3 +27,12 @@ Every algorithm that produces numerical results must follow the [published-resul
 The initial source-bound observed-state pilot has a [standalone numerical report](reports/closed-loop-pilot/closed-loop-pilot-v1/index.html) and a [minimal Lotka–Volterra 2D example](reports/closed-loop-pilot/closed-loop-pilot-v1/example-2d.html), both rendered only from saved full-episode records. They are staged through the Pages report workflow; independent review, main-only deployment, and live URL/hash verification remain pending.
 
 Before retiring local worktrees or builds, inspect their status and preserve authored files. Keep raw records and versioned published evidence intact.
+
+The Python CI scripts and tests under `scripts/ci` and `tests/ci` use pinned Ruff
+linting/formatting and ty type checking. Install `requirements-quality.txt` in a
+virtual environment, then run `ruff check`, `ruff format --check`, `ty check` and
+`python -m unittest discover -s tests/ci -p 'test_*.py'` from the repository root.
+The `Python CI tooling quality` workflow enforces these checks. Other Python
+tools and C++ formatting/static analysis remain outside this initial gate; their
+adoption and immutable-source exclusions are tracked in
+[issue 993](https://github.com/butahlecoq/controlled-systems-lab/issues/993).

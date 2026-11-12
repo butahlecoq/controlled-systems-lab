@@ -98,15 +98,16 @@ class PrepareCcacheTests(unittest.TestCase):
             self.run_prepare(runner_os="Windows", ccache=True)[1], "compiler_enabled=false"
         )
 
-    @unittest.skipUnless(
-        os.name == "posix" and shutil.which("timeout"), "GNU timeout is unavailable"
-    )
+    @unittest.skipUnless(os.name == "posix", "GNU timeout requires a POSIX host")
     def test_timeout_terminates_apt_like_child_process_group(self):
+        timeout = shutil.which("timeout")
+        if timeout is None:
+            self.skipTest("GNU timeout is unavailable")
         with tempfile.TemporaryDirectory() as temporary:
             child_pid_file = Path(temporary) / "child.pid"
             result = subprocess.run(
                 [
-                    shutil.which("timeout"),
+                    timeout,
                     "--signal=TERM",
                     "--kill-after=1s",
                     "1s",
