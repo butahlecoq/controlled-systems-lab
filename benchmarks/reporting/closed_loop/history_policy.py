@@ -4,12 +4,18 @@ from __future__ import annotations
 from native_graph_policy import _prediction_stages, _source_cost, _terminal_objective
 
 
-def make_request(task, task_sha256, receipt, observed, stage):
+def make_request(task, task_sha256, receipt, observed, stage, *, history_solver=None):
     n = task["episode"]["intervals"]
     if not isinstance(stage, int) or not 0 <= stage < n:
         raise ValueError("query stage must belong to the original horizon")
+    if history_solver is None:
+        history_solver = ("casadi-ipopt" if task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01"
+                          else "csl.convex.highs")
+    if history_solver not in {"csl.convex.highs", "casadi-ipopt"}:
+        raise ValueError("unknown history solver")
     action_profile = task["control_domains"]["continuous"]
     return {"schema": "csl.closed-loop.native-policy-query/1", "mode": "continuous-history/1",
+            "history_solver": history_solver,
             "task_id": task["task_id"], "task_sha256": task_sha256,
             "source_model_id": task["model"]["model_id"],
             "controller_id": "native-continuous-affine-history-mpc/1",
@@ -71,6 +77,13 @@ class HistoryPolicy:
         validate_source_binding(task)
         if manifest_sha256(task) != task_sha256:
             raise ValueError("history policy task hash differs from the source-bound task")
+        if controller_id not in {"native-continuous-affine-history-mpc/1", "native-continuous-affine-history-ipopt/1"}:
+            raise ValueError("unknown continuous history policy profile")
+        if (controller_id == "native-continuous-affine-history-ipopt/1"
+                and task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01"):
+            raise ValueError("orbit already selects the IPOPT history solver in the original profile")
+        self.history_solver = ("casadi-ipopt" if controller_id == "native-continuous-affine-history-ipopt/1"
+            or task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01" else "csl.convex.highs")
         if action_profile_id != task["control_domains"]["continuous"]["problem_id"]:
             raise ValueError("continuous history policy requires the original continuous action domain")
         if factory_options:
@@ -89,7 +102,8 @@ class HistoryPolicy:
             "executable_sha256": hashlib.sha256(executable.read_bytes()).hexdigest(),
             "binary_source": "unknown",
             "action_profile_id": action_profile_id, "original_horizon": task["episode"]["intervals"],
-            "geometry": "not_used", "controller_semantics": "observed-state direct affine-history MPC"}
+            "geometry": "not_used", "history_solver": self.history_solver,
+            "controller_semantics": "observed-state direct affine-history MPC"}
 
     def set_query_capture_callback(self, callback):
         self.query_capture_callback = callback
@@ -112,7 +126,7 @@ class HistoryPolicy:
                 and observed_physical_state[0] <= 0):
             raise ValueError("observed orbit radius must be positive")
         request = make_request(self.task, self.task_sha256, self.receipt,
-                               observed_physical_state, absolute_update_index)
+                               observed_physical_state, absolute_update_index, history_solver=self.history_solver)
         request["controller_id"] = self.controller_id
         initial, warm_start = initial_history(request, self.previous_history)
         request["initial_primal"] = initial.tolist()
@@ -169,6 +183,11 @@ class HistoryPolicy:
                     "profile_id": self.controller_id, "provider": response["solver_receipt"]["provider"],
                     "version": response["solver_receipt"].get("version", "unknown")})
             return result
+        if response.get("requested_solver") != self.history_solver:
+            raise ValueError("native history response differs from the explicitly selected solver")
+        expected_status = "solved" if self.history_solver == "csl.convex.highs" else "exported"
+        if response["status"] != expected_status:
+            raise ValueError("native history response does not match the explicitly selected solver route")
         relation, compiled = response["history_relation"], response["history_objective"]
         if response["status"] == "solved":
             primal = np.asarray(response["primal"], dtype=float)

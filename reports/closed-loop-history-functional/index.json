@@ -1,0 +1,42 @@
+{
+  "description": "Observed-state affine-history controller functional evidence; geometry not used. Original source costs, continuous bounds, and full remaining horizons are retained.",
+  "scope": "Individual numerical results; no global optimality, continuous-time safety, performance ranking, or five-representation coverage claim. IPOPT results are local.",
+  "plot_label_correction": "Original raw images and coverage text labeled the controller as NMPC. Corrected plots are separately rendered from saved records without controller reruns; see each render receipt.",
+  "binary_provenance": "Original attempt preparation recorded binary source unknown; separate build receipts record clean source revision, incremental build, executable and source capsule hashes.",
+  "records": [
+    {
+      "task": "Lotka-Volterra",
+      "solver": "HiGHS QP",
+      "holds_completed": 30,
+      "holds_total": 30,
+      "source_objective": 0.09206356098706904,
+      "directory": "lv-highs-f4"
+    },
+    {
+      "task": "Earth orbit",
+      "solver": "CasADi/IPOPT",
+      "holds_completed": 20,
+      "holds_total": 20,
+      "source_objective": 65.22966483569324,
+      "directory": "orbit-ipopt-f4"
+    },
+    {
+      "task": "Fuel",
+      "solver": "CasADi/IPOPT",
+      "holds_completed": 40,
+      "holds_total": 40,
+      "source_objective": 0.003834213429545932,
+      "directory": "fuel-ipopt-3c"
+    },
+    {
+      "task": "Fuel",
+      "solver": "HiGHS QP",
+      "holds_completed": 2,
+      "holds_total": 40,
+      "status": "worker timeout at declared 1800-second budget; no solver response to third query",
+      "directory": "fuel-highs-f4-timeout"
+    }
+  ],
+  "bundle_files": "Each directory contains receipt.json, raw.zip, SHA256SUMS, independent audit source and build receipt. Completed episodes also contain corrected plots and renderer receipt.",
+  "verification": "Run sha256sum -c SHA256SUMS and python -m zipfile -t raw.zip in each directory."
+}
