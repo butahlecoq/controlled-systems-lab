@@ -53,6 +53,8 @@ class Issue944ChoicePipelinePublicationTests(unittest.TestCase):
         self.assertIn("one-step nominal open-loop", html)
         self.assertIn("complete-family", html)
         self.assertIn("https://github.com/butahlecoq/controlled-systems-lab/pull/976", html)
+        self.assertIn("H = [[1,-1.1102230246251565e-16], [0,1], [1.1102230246251565e-16,-1], [-1,0]]", html)
+        self.assertIn("b = [0.99999999999999989,1,0,0]", html)
         self.assertIn("csl.polyhedron.v", (self.bundle / "records.json").read_text(encoding="utf-8"))
         provenance = json.loads((self.bundle / "provenance.json").read_text(encoding="utf-8"))
         self.assertEqual(provenance["solver_source_commit"], "5a4730c517a875400ec7b69e4c8e2c265e49016c")
