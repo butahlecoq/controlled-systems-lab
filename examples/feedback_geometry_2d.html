@@ -4,9 +4,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Five-family feedback geometry: a two-dimensional example</title>
 <style>
-body{font:16px/1.5 system-ui,sans-serif;max-width:880px;margin:2rem auto;padding:0 1rem;color:#18212b}
-svg{display:block;width:min(100%,620px);height:auto;background:#fbfcfe;border:1px solid #ccd5df}
-.axis{stroke:#405366;stroke-width:2}.label{font-size:16px;fill:#18212b}code{background:#eef2f5;padding:.1rem .3rem;border-radius:3px}
+body{font:16px/1.65 system-ui,sans-serif;max-width:880px;margin:2rem auto;padding:0 1rem;background:#272822;color:#f8f8f2}
+h1{color:#a6e22e}a{color:#66d9ef}a:focus-visible{outline:2px solid #f0c674;outline-offset:4px}
+svg{display:block;width:min(100%,620px);height:auto;background:#303129;border:1px solid #504945}
+.axis{stroke:#d5c4a1;stroke-width:2}.label{font-size:16px;fill:#f8f8f2}code{color:#fd971f;overflow-wrap:anywhere}
 </style>
 <h1>A one-step feedback query in two dimensions</h1>
 <p>Start at <code>x₀=(0,0)</code>, with <code>x₁=x₀+u₀</code> and the whole continuous control set
@@ -15,17 +16,17 @@ svg{display:block;width:min(100%,620px);height:auto;background:#fbfcfe;border:1p
 <svg viewBox="0 0 560 420" role="img" aria-labelledby="title description">
 <title id="title">Analytic reachable set and recorded policy</title>
 <desc id="description">The exact stage-one reachable square extends from minus two to two on both axes. A red arrow starts at the origin and ends at one third on the horizontal axis.</desc>
-<path fill="#bfe4d2" stroke="#397b5d" stroke-width="3" d="M100 50H420V370H100Z"/>
+<path fill="#536326" stroke="#a6e22e" stroke-width="3" d="M100 50H420V370H100Z"/>
 <path class="axis" d="M260 390V30 M80 210H440"/>
-<path d="M260 210H286" stroke="#b64435" stroke-width="5"/><path d="M286 204L296 210L286 216Z" fill="#b64435"/>
-<circle cx="260" cy="210" r="5" fill="#18212b"/><circle cx="287" cy="210" r="6" fill="#b64435"/>
+<path d="M260 210H286" stroke="#fd971f" stroke-width="5"/><path d="M286 204L296 210L286 216Z" fill="#fd971f"/>
+<circle cx="260" cy="210" r="5" fill="#f8f8f2"/><circle cx="287" cy="210" r="6" fill="#fd971f"/>
 <text class="label" x="105" y="75">Exact F₁ = [-2,2]²</text><text class="label" x="291" y="194">recorded x₁ ≈ (1/3,0)</text>
 <text class="label" x="88" y="410">-2</text><text class="label" x="253" y="410">0</text><text class="label" x="413" y="410">2</text>
 <text class="label" x="56" y="57">2</text><text class="label" x="47" y="376">-2</text>
 <text class="label" x="446" y="215">x₁</text><text class="label" x="269" y="30">y₁</text>
 </svg>
 <p>The square is the independently derived exact reachable set; the recorded family sets are numerical outer enclosures and may be larger. The finite forward-relevant backward set and intersection are used in full state space. The global backward set is not asserted here.</p>
-<p>Substituting <code>x₁=u₀</code> gives an independently checkable minimum at <code>u₀=(1/3,0)</code> with cost <code>2/3</code>. The saved run returned this point to numerical tolerance for polytope, box, zonotope, parallelotope and ellipsoid memberships. Each family retained stage 0 and 1 forward, backward and intersection data; the independent audit replayed 24 support certificates per family and checked the original history and cost. The actual geometry providers were <code>csl.geometry.polyhedral-intersection</code> and <code>csl.geometry.polyhedral-projection</code>, with <code>csl.lp.highs</code> for support. These checks are numerical evidence, not a nonlinear-plant or global-optimality certificate.</p>
+<p>Substituting <code>x₁=u₀</code> gives an independently checkable minimum at <code>u₀=(1/3,0)</code> with cost <code>2/3</code>. The saved run returned this point to numerical tolerance for polytope, box, zonotope, parallelotope and ellipsoid memberships. Each family retained stage 0 and 1 forward, backward and intersection data; the independent audit replayed 24 support certificates per family and checked the original history and cost. The actual geometry providers were <code>csl.geometry.polyhedral-intersection</code> and <code>csl.geometry.polyhedral-projection</code>, with <code>csl.lp.highs</code> for support. These checks are numerical evidence; they do not certify nonlinear-plant behavior or global optimality for the source tasks.</p>
 <p>Read the <a href="feedback-geometry-tiny-fd28/independent-audit.json">independent audit</a>, the <a href="feedback-geometry-tiny-fd28/box/request.jsonl">box request</a> and <a href="feedback-geometry-tiny-fd28/box/response.jsonl">full native response</a>, or the corresponding files in each family directory. A <a href="feedback-geometry-tiny-fd28/files.sha256">SHA-256 file manifest</a> covers the saved bytes. The immutable record uses source <a href="https://github.com/butahlecoq/controlled-systems-lab/tree/fd28cb652bd8a20839b73abaf184881fd7bcf1b4">fd28cb652bd8a20839b73abaf184881fd7bcf1b4</a>, whose geometry parent was <code>77009646</code>. It predates the fixed/coupled-control repair and is not relabeled as a later build. The <a href="feedback-geometry-tiny-fd28/build-receipt.json">build receipt</a> identifies the current compiled sources and the installed f4 SDK used for other libraries; it is a mixed-source build, not a current-source full SDK.</p>
 <p>To rerun the capture, provide the clean source and corresponding built <code>geometry_policy</code> executable and run <code>CSL_CAPTURE_SOURCE_ROOT=&lt;source&gt; CSL_CAPTURE_BINARY=&lt;binary&gt; CSL_CAPTURE_OUTPUT=&lt;new-directory&gt; python producer.py</code> using the controller environment. The <a href="feedback-geometry-tiny-fd28/producer.py">saved producer</a>, <a href="feedback-geometry-tiny-fd28/sdk-manifest.json">SDK manifest</a>, and link/build records are included. Reproducing the mixed build requires the documented SDK and toolchain; this page does not claim an independently reproducible full SDK build.</p>
 </html>
