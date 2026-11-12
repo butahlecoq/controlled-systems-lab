@@ -46,6 +46,11 @@ bool finite(const Vector& x) { return std::all_of(x.begin(),x.end(),[](double v)
 Diagnostic invalid(std::string text) { return {DiagnosticCode::invalid_input,"inner_template",std::move(text)}; }
 void validate(const InnerTemplateInput& in) {
     const auto n=in.center.size();
+    if(in.norm!=InnerTemplateNorm::independent_intervals && in.norm!=InnerTemplateNorm::euclidean_ball)
+        throw std::invalid_argument("unknown inner-template norm");
+    const auto maximum=std::numeric_limits<std::size_t>::max();
+    if(n && (in.directions.cols>maximum/n || in.inequalities.rows>maximum/n || in.equalities.rows>maximum/n))
+        throw std::invalid_argument("inner-template dimensions overflow");
     if(!n || in.directions.rows!=n || in.directions.values.size()!=n*in.directions.cols ||
        in.inequalities.cols!=n || in.inequalities.values.size()!=in.inequalities.rows*n ||
        in.upper_bounds.size()!=in.inequalities.rows || in.equalities.cols!=n ||

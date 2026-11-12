@@ -162,15 +162,33 @@ void check_model(const FixedTailModel& model) {
        model.state_domains.size()!=T+1 || model.control_domains.size()!=T || model.input_carriers.size()!=T ||
        !std::all_of(model.observed.begin(),model.observed.end(),[](double v){return std::isfinite(v);}))
         throw Rejected{invalid("source model, cost and domain dimensions differ")};
+    const auto maximum=std::numeric_limits<std::size_t>::max();
+    if(T==maximum || n>maximum/(T+1) || m>(maximum-(T+1)*n)/T)
+        throw Rejected{invalid("source history dimensions overflow")};
     const auto N=(T+1)*n+T*m;
     if(model.source_cost.quadratic.dimension!=N || model.full_history.inequalities.cols!=N || model.full_history.equalities.cols!=N)
         throw Rejected{invalid("source history and cost coordinates differ")};
     const auto shape=[](const Matrix& A,std::size_t rows,std::size_t cols) {
-        return A.rows==rows && A.cols==cols && A.values.size()==rows*cols &&
+        return (!rows || cols<=std::numeric_limits<std::size_t>::max()/rows) && A.rows==rows && A.cols==cols && A.values.size()==rows*cols &&
             std::all_of(A.values.begin(),A.values.end(),[](double v){return std::isfinite(v);});
     };
-    for(const auto& stage:model.stages)if(!shape(stage.A,n,n) || !shape(stage.B,n,m) || stage.offset.size()!=n)
+    for(const auto& stage:model.stages)if(!shape(stage.A,n,n) || !shape(stage.B,n,m) || stage.offset.size()!=n ||
+        !std::all_of(stage.offset.begin(),stage.offset.end(),[](double v){return std::isfinite(v);}))
         throw Rejected{invalid("source predictor dimensions differ")};
+    const auto domain_shape=[&](const FixedTailHRows& h,std::size_t count) {
+        return shape(h.inequalities,h.upper_bounds.size(),count) && shape(h.equalities,h.equality_values.size(),count) &&
+            std::all_of(h.upper_bounds.begin(),h.upper_bounds.end(),[](double v){return std::isfinite(v);}) &&
+            std::all_of(h.equality_values.begin(),h.equality_values.end(),[](double v){return std::isfinite(v);});
+    };
+    if(!domain_shape(model.full_history,N) || !shape(model.source_cost.quadratic.Q,N,N) || model.source_cost.quadratic.linear.size()!=N)
+        throw Rejected{invalid("source H rows or polynomial dimensions differ")};
+    for(const auto& h:model.state_domains)if(!domain_shape(h,n))throw Rejected{invalid("state H dimensions differ")};
+    for(const auto& h:model.control_domains)if(!domain_shape(h,m))throw Rejected{invalid("control H dimensions differ")};
+    for(const auto& stage:model.input_carriers) {
+        if(stage.size()!=m)throw Rejected{invalid("input carrier dimensions differ")};
+        for(const auto& b:stage)if(!b.lower || !b.upper || !std::isfinite(*b.lower) || !std::isfinite(*b.upper) || *b.lower>*b.upper)
+            throw Rejected{invalid("input carrier must be finite")};
+    }
 }
 std::optional<OperationStopped> stopped(const ExecutionContext& c) {
     if(c.cancellation.stop_requested())return OperationStopped{StopReason::cancelled,"Fixed-tail policy cancelled"};
@@ -283,7 +301,7 @@ std::variant<FixedTailInitialization,Diagnostic> initialize_fixed_tail(const Fix
         const auto n=model.observed.size(),T=model.stages.size(),m=model.source_cost.coordinates.dimensions.control;
         if(previous) {
             const auto& p=*previous;
-            if(p.absolute_stage+1!=model.source_cost.absolute_stage_offset || p.coordinates.horizon!=T+1 ||
+            if(p.absolute_stage==std::numeric_limits<std::size_t>::max() || p.absolute_stage+1!=model.source_cost.absolute_stage_offset || p.coordinates.horizon!=T+1 ||
                (p.coordinates.dimensions.state!=n || p.coordinates.dimensions.control!=m || p.coordinates.dimensions.external!=0) ||
                p.source_objective_id!=model.source_cost.running_source.objective_id ||
                p.original_horizon!=model.source_cost.running_source.original_horizon ||
@@ -314,7 +332,13 @@ FixedTailPolicyOutcome fixed_tail_policy(const FixedTailPolicyRequest& request,
     FixedTailPolicyFailure failure{"preparation",invalid("unknown failure"),{},{},{},{}};
     try {
         if(auto stop=stopped(context))return *stop;
-        const auto& model=request.model;check_model(model);const auto n=model.observed.size(),horizon=model.stages.size(),m=model.source_cost.coordinates.dimensions.control;
+        const auto& model=request.model;check_model(model);
+        switch(request.family) {
+        case FixedTailFamily::polytope:case FixedTailFamily::box:case FixedTailFamily::zonotope:
+        case FixedTailFamily::parallelotope:case FixedTailFamily::ellipsoid:break;
+        default:throw Rejected{invalid("unknown physical fixed-tail family")};
+        }
+        const auto n=model.observed.size(),horizon=model.stages.size(),m=model.source_cost.coordinates.dimensions.control;
         const auto dimension=(horizon+1)*n+horizon*m;
         if(request.shifted_initial_history.size()!=dimension || model.state_domains.size()!=horizon+1 ||
            model.control_domains.size()!=horizon || model.stages.size()!=model.input_carriers.size())throw Rejected{invalid("source dimensions or shifted initial history differ")};

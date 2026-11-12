@@ -78,7 +78,7 @@ add_test(NAME inner_template_tests COMMAND inner_template_tests)
 csl_test_target(inner_template_tests reachability)
 
 if(TARGET CSL::casadi_fixed_tail)
-  add_executable(fixed_tail_native_tests tests/unit/reachability/fixed_tail_native_tests.cpp)
+  add_executable(fixed_tail_native_tests tests/installed/fixed_tail_policy_client.cpp)
   target_link_libraries(fixed_tail_native_tests PRIVATE CSL::casadi_fixed_tail)
   add_test(NAME fixed_tail_native_tests COMMAND fixed_tail_native_tests)
   csl_test_target(fixed_tail_native_tests reachability)

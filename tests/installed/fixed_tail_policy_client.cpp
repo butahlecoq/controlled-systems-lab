@@ -57,6 +57,16 @@ int main() {
     auto lift=take(fixed_control_tail_lift(model,anchor));
     const auto history=take(recover_fixed_tail_history(lift,Vector{1,0}));
     require(history==Vector({0,0,1,0,1.25,0,1,0,.25,0}),"native history lift did not freeze future controls");
+    const auto first=take(initialize_fixed_tail(model));
+    require(first.history==Vector(10,0),"native initial zero-control rollout differs");
+    auto next=example();next.source_cost.absolute_stage_offset=1;
+    next.source_cost.running_source=model.source_cost.running_source;
+    next.observed={1.1,0};
+    const FixedTailWarmHistory previous{model.source_cost.coordinates,0,model.source_cost.running_source.objective_id,2,history};
+    const auto shifted=take(initialize_fixed_tail(next,previous));
+    require(shifted.history==Vector({1.1,0,1.25,0,.25,0}),"native shift repeated terminal stage or lost observation");
+    auto invalid_previous=previous;invalid_previous.absolute_stage=3;
+    require(std::holds_alternative<Diagnostic>(initialize_fixed_tail(next,invalid_previous)),"native shift accepted a nonconsecutive stage");
     const auto tail=take(fixed_tail_state_lift(model,anchor,{1}));
     require(tail.maps.size()==2 && tail.offsets[1]==Vector({.25,0}),"tail-state lift lost control offset");
     std::cout<<"Native fixed-tail policy: all five physical families, all stages, full source J and frozen-tail recovery passed\n";

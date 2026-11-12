@@ -100,7 +100,7 @@ public:
             opti.set_initial(opti.lam_g(),DM::zeros(dual_count));
             const auto initial_readback=values(opti.debug().value(primary,opti.initial()));
             const auto dual_readback=values(opti.debug().value(opti.lam_g(),opti.initial()));
-            casadi::Dict options{{"print_level",0},{"max_iter",6000},{"tol",1e-11},{"acceptable_tol",1e-10},
+            casadi::Dict options{{"sb","yes"},{"print_level",0},{"max_iter",6000},{"tol",1e-11},{"acceptable_tol",1e-10},
                 {"bound_relax_factor",0.0},{"warm_start_init_point","yes"}};
             if(context.deadline)options["max_wall_time"]=std::max(0.001,std::chrono::duration<double>(*context.deadline-std::chrono::steady_clock::now()).count());
             opti.solver("ipopt",{{"print_time",false}},options);
