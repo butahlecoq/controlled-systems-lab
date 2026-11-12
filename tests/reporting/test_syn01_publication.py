@@ -61,6 +61,10 @@ def make_event(scenario, repetition):
 
 
 class Syn01PublicationTests(unittest.TestCase):
+    def test_future_capture_excludes_working_reproduction_note(self):
+        self.assertNotIn("README.md", adapter.FILES)
+        self.assertFalse((ROOT / "scripts/reports/syn01/README.md").exists())
+
     def make_bundle(self, root):
         root.mkdir(parents=True, exist_ok=True)
         trials = [make_event(name, repetition) for repetition in range(8) for name in report.SCENARIOS]
@@ -71,7 +75,6 @@ class Syn01PublicationTests(unittest.TestCase):
         bundle = root / record["report_id"]
         bundle.mkdir()
         contents = {
-            "README.md": b"fixture",
             "records.json": collect.canonical(record) + b"\n",
             "raw-events.jsonl": b"".join(collect.canonical(row) + b"\n" for row in trials),
             "trials.csv": collect.trials_csv(trials),
@@ -105,6 +108,7 @@ class Syn01PublicationTests(unittest.TestCase):
             self.assertEqual(bundle.name, item.source_report_id)
             files = adapter.publication_artifacts(bundle, item)
             self.assertIn("latency.svg", files)
+            self.assertNotIn("README.md", files)
             self.assertIn("report-envelope.json", files)
             self.assertIn("publication-manifest.json", files)
             self.assertTrue(registered_reports.validate_publication_manifest(

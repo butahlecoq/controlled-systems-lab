@@ -1,7 +1,6 @@
 {
   "authorization_issue": 531,
   "files": {
-    "README.md": "1696f044a750e393126952d44949896fa999d8253aef86aecfbcfa188bb84dee",
     "attempt-001/exit-code": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
     "attempt-001/host-before.txt": "12efc68ea6a07da7fc638dd78c2bff7d8d631df6b9645a3c530b47d5f2128bc6",
     "attempt-001/platform.txt": "384aa6c37ce906d6043b86076198ecc86680bde631654ace926dba3c68743af1",
@@ -18,7 +17,8 @@
     "attempt-002/record.json": "e2fde3e404aa4f1c5c846a449c72cda109a7adaecfb64dc75a5cc1aaea9d0449",
     "attempt-002/requirements.txt": "983665a6331eda07ab1f4b23ef92d66f4b024c27b360ee0e7420511ef3b28c64",
     "attempt-002/stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "attempt-002/stdout.json": "a00039e225b44cf25123f03bf603fb6a1de743336b0fa587192bc2ff7d6365d0"
+    "attempt-002/stdout.json": "a00039e225b44cf25123f03bf603fb6a1de743336b0fa587192bc2ff7d6365d0",
+    "README.txt": "1696f044a750e393126952d44949896fa999d8253aef86aecfbcfa188bb84dee"
   },
   "post_run_validation": {
     "docs/research/tools/check_b04_c_preliminary_record.py": "9c25f5ad58d19511cc34721e1e027035fbbfa3dd3cbf8e2d768b35f78fb4d3b2"

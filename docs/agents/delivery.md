@@ -12,6 +12,24 @@ choose a delivery outcome: no release needed, release candidate preparation, or
 an update to an existing release/package workflow. Include the reason and any
 remaining gates. A CMake project version is not evidence of a published release.
 
+The issue 966 documentation migration removes Markdown working documents from
+installed package trees. Installed consumers use public headers, JSON schemas
+and executable behavior; package checks must not require Markdown under
+`share/CSL` or `share/doc/CSL`. Record this removal in package impact notes
+because existing consumers may have linked to those paths.
+
+The installed `schemas/model/continuous-v1.schema.json` is an authoring aid for
+`input::load_continuous_model`. The loader accepts continuous affine rates
+`x'=Ax+Bu+Ew+a` with zero-order-held inputs on a strictly increasing T+1 time
+grid. LTI coefficients stay constant; LTV endpoint pairs interpolate linearly
+within each interval. Call `model::discretize` explicitly before using a
+discrete `SystemModel` in later builders. Its RK4 step-doubling difference is a
+local estimate, not a certified global error bound; failed or exhausted
+integration returns no discrete model. The native loader additionally checks
+duplicate keys, finite binary64 values, exact integers, dimensions, quotas,
+matrix shapes and the time grid. Descriptor mass matrices, nonlinear dynamics
+and alternate holds require separate capabilities.
+
 ## Choose the artifact
 
 | Consumer need | Delivery |
@@ -83,7 +101,8 @@ steps. If no supported low-dimensional case exists, record that limitation and
 the follow-up issue rather than fabricating a result.
 
 The [published algorithm results policy](../architecture/published-algorithm-results.md)
-and [record contract](../contracts/algorithm-report-records.md) still govern
-measurements and scientific claims. Functional example/CI durations do not become
-performance evidence. Verify local links and responsive plots, then open the
-deployed example before reporting it as published.
+governs measurements and scientific claims. Report record readers and publication
+checks live in [`scripts/reports`](../../scripts/reports/) and are exercised by
+[`tests/reporting`](../../tests/reporting/). Functional example/CI durations do
+not become performance evidence. Verify local links and responsive plots, then
+open the deployed example before reporting it as published.

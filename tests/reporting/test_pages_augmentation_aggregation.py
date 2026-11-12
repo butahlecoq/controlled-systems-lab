@@ -124,8 +124,57 @@ class PagesAugmentationAggregation(unittest.TestCase):
                 "mpc11-controller-comparison-967db980c95590a5150b": "a14f045212e4bbd3858e1efa2ea62e2387c648bbb7742ef8cd4ec1317873866e",
                 "mpc11-mesh-timing-e1d5ebe497051adfdfad": "c8a84931f056a25c0cfb88b7ec8a24b16be4c119794d6e3964247d3af4374854",
             }
-            self.assertEqual(routes["mpc11"], "mpc11-controller-comparison-967db980c95590a5150b")
-            self.assertEqual(routes["mpc11_studies"], "mpc11-mesh-timing-e1d5ebe497051adfdfad")
+            self.assertRegex(routes["mpc11"], r"^mpc11-controller-comparison-[0-9a-f]{20}$")
+            mpc11_route=site/routes["mpc11"]
+            mpc11_index=(mpc11_route/"index.html").read_bytes()
+            mpc11_manifest=json.loads((mpc11_route/"publication-manifest.json").read_text())
+            self.assertEqual(
+                routes["mpc11"],
+                "mpc11-controller-comparison-"+
+                hashlib.sha256(json.dumps(mpc11_manifest["identity"],sort_keys=True).encode()).hexdigest()[:20])
+            self.assertIn(f'href="../{routes["mpc11"]}.zip"',mpc11_index.decode())
+            mpc11_files=mpc11_manifest["published_files"]
+            self.assertTrue(mpc11_files)
+            for name,expected_hash in mpc11_files.items():
+                self.assertEqual(hashlib.sha256((mpc11_route/name).read_bytes()).hexdigest(),expected_hash)
+            mpc11_sums={**mpc11_files,"publication-manifest.json":hashlib.sha256(
+                (mpc11_route/"publication-manifest.json").read_bytes()).hexdigest()}
+            self.assertEqual((mpc11_route/"SHA256SUMS").read_text(),"".join(
+                f"{mpc11_sums[name]}  {name}\n" for name in sorted(mpc11_sums)))
+            with zipfile.ZipFile(site/(routes["mpc11"]+".zip")) as current_bundle:
+                expected_members=[f"{routes['mpc11']}/{name}" for name in sorted(set(mpc11_sums)|{"SHA256SUMS"})]
+                self.assertEqual(current_bundle.namelist(),expected_members)
+                for name in mpc11_sums:
+                    self.assertEqual(current_bundle.read(f"{routes['mpc11']}/{name}"),(mpc11_route/name).read_bytes())
+                self.assertEqual(current_bundle.read(f"{routes['mpc11']}/SHA256SUMS"),(mpc11_route/"SHA256SUMS").read_bytes())
+                self.assertEqual(current_bundle.read(routes["mpc11"]+"/index.html"),mpc11_index)
+                self.assertEqual(current_bundle.read(routes["mpc11"]+"/publication-manifest.json"),
+                                 (mpc11_route/"publication-manifest.json").read_bytes())
+            self.assertRegex(routes["mpc11_studies"], r"^mpc11-mesh-timing-[0-9a-f]{20}$")
+            studies_route = routes["mpc11_studies"]
+            studies_path = site/studies_route
+            studies_index = (studies_path/"index.html").read_bytes()
+            studies_manifest_bytes = (studies_path/"publication-manifest.json").read_bytes()
+            studies_manifest = json.loads(studies_manifest_bytes)
+            studies_identity = studies_manifest["identity"]
+            self.assertEqual(studies_manifest["report_id"], studies_route)
+            self.assertEqual(studies_route,
+                "mpc11-mesh-timing-"+
+                hashlib.sha256((json.dumps(studies_identity, indent=2, sort_keys=True)+"\n").encode()).hexdigest()[:20])
+            self.assertIn(f'href="../{studies_route}.zip"', studies_index.decode())
+            studies_files = studies_manifest["published_files"]
+            self.assertTrue(studies_files)
+            for name, expected_hash in studies_files.items():
+                self.assertEqual(hashlib.sha256((studies_path/name).read_bytes()).hexdigest(), expected_hash)
+            studies_sums = {**studies_files, "publication-manifest.json": hashlib.sha256(studies_manifest_bytes).hexdigest()}
+            self.assertEqual((studies_path/"SHA256SUMS").read_text(), "".join(
+                f"{studies_sums[name]}  {name}\n" for name in sorted(studies_sums)))
+            with zipfile.ZipFile(site/(studies_route+".zip")) as current_bundle:
+                expected_members = [f"{studies_route}/{name}" for name in sorted(set(studies_sums) | {"SHA256SUMS"})]
+                self.assertEqual(current_bundle.namelist(), expected_members)
+                for name in studies_sums:
+                    self.assertEqual(current_bundle.read(f"{studies_route}/{name}"), (studies_path/name).read_bytes())
+                self.assertEqual(current_bundle.read(f"{studies_route}/SHA256SUMS"), (studies_path/"SHA256SUMS").read_bytes())
             self.assertEqual(routes["retained_mpc11_variants"], retained_mpc11)
             for route, expected_zip_hash in retained_mpc11.items():
                 self.assertTrue((site / route / "index.html").is_file())

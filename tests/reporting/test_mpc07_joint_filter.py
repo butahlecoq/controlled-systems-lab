@@ -150,3 +150,14 @@ class JointModuleNamespaceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             result=subprocess.run([sys.executable,'-B',str(ROOT/'benchmarks/reporting/mpc07/joint_capture.py'),'--help'],cwd=temporary,capture_output=True,text=True,timeout=10)
         self.assertEqual(result.returncode,0,result.stderr);self.assertIn('usage:',result.stdout)
+
+class JointSourceAssetMigrationTests(unittest.TestCase):
+    def test_live_joint_capture_reads_exact_existing_sealed_note(self):
+        import hashlib
+        from benchmarks.reporting.mpc07 import joint_capture
+        expected='benchmarks/reporting/mpc07/evidence/joint-filter-04369201-recheck-v2/JOINT-FILTER.md'
+        self.assertEqual(joint_capture.SOURCE_PATHS['JOINT-FILTER.md'],expected)
+        source=ROOT/expected
+        self.assertEqual(hashlib.sha256(source.read_bytes()).hexdigest(),
+                         '592f2320bdc30f653bc7ccb0fc20de01fd80edb0b1ffb90d465cc951c953cbdb')
+        self.assertFalse((ROOT/'benchmarks/reporting/mpc07/JOINT-FILTER.md').exists())
