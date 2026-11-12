@@ -2892,6 +2892,12 @@
     "run_url": "https://github.com/butahlecoq/controlled-systems-lab/actions/runs/43197030720",
     "source_commit": "6603dbda00ba02332035ba8320b92889463ca693"
   },
+  "mutable_copy_reviewed_sha256": {
+    "examples/control-witness/ts01-strategy-ab-evidence.json": "f09d4cafccc8b6dfea37457ce86a79614842ba092e393e9e128697f0532b16d2",
+    "scripts/reports/mpc01/summarize_strategy_ab.py": "e5440358fb11bb8e666a38ab0968b3464fcf164755b845c496df39d97412e102",
+    "scripts/reports/mpc01/summarize_strategy_ab_ts02.py": "8b913a8ce783c68cc6327c827ef477209fd74be77acce06b799d519e7c47e80b",
+    "scripts/reports/mpc01/summarize_strategy_ab_ts03.py": "a240d9afc500f3dfa8e571db248f71825294e93d03c3d551274b9c1c3969301c"
+  },
   "mutable_routes_reviewed_separately": {
     "archive.html": "Mutable navigation regenerated to expose both legacy and current report routes.",
     "examples/control-witness/ts01-strategy-ab-evidence.json": "Derived renderer provenance checksum changed; all other JSON fields including numerical/source/event hashes are identical.",

@@ -34,7 +34,9 @@ def audit(baseline: Path, site: Path) -> dict:
             if route.endswith('.zip') and (route in missing or route in changed):
                 changed_zips.append(route)
     mutable = manifest['mutable_routes_reviewed_separately']
-    unexpected = [n for n in changed if n not in mutable]
+    reviewed_copies = manifest['mutable_copy_reviewed_sha256']
+    unexpected = [n for n in changed if n not in mutable or
+                  (n in reviewed_copies and digest((site / n).read_bytes()) != reviewed_copies[n])]
     return {'baseline_files': total, 'baseline_zip_count': zip_count,
             'missing': missing, 'changed_or_missing_zips': changed_zips,
             'unexpected_changed': unexpected,
