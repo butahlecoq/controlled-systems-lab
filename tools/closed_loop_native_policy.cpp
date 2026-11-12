@@ -61,7 +61,8 @@ using namespace csl;
 Json native_build_backend_profile() {
     return {{"build_type", CSL_NATIVE_BUILD_TYPE},
         {"CSL_ENABLE_HIGHS", CSL_NATIVE_HAS_HIGHS != 0},
-        {"CSL_ENABLE_QHULL", CSL_NATIVE_HAS_QHULL != 0}};
+        {"CSL_ENABLE_QHULL", CSL_NATIVE_HAS_QHULL != 0},
+        {"CSL_ENABLE_CASADI", CSL_NATIVE_HAS_CASADI != 0}};
 }
 
 template<class T> T take(std::variant<T, Diagnostic> result, const char* field) {
@@ -1021,14 +1022,20 @@ Json fixed_tail_query(const Json& in,const problem::ResolvedProblem& source,
         initialization.history,strict},std::get<registry::PreparedProvider<registry::FixedTailOptimizerPort>>(prepared),context);
     Json response{{"task_id",in.at("task_id")},{"task_sha256",in.at("task_sha256")},
         {"action_profile_id",in.at("action_profile_id")},{"policy_id",in.at("controller_id")},
-        {"requested_solver","casadi-ipopt"},{"family",family_name},
+        {"requested_solver","casadi-ipopt"},{"family",family_name},{"resolved_problem_id",source.identity().value},
         {"initialization",{{"policy",initialization.policy},{"initial_primal",initialization.history},
-            {"dual_policy","zero-every-solve"}}}};
+            {"dual_policy","zero-every-solve"},{"source_stage",initialization.source_stage?Json(*initialization.source_stage):Json(nullptr)}}}};
+    const auto receipt=[](const FixedTailSolveResult& solve) {
+        return Json{{"primary",solve.primary},{"history",solve.history},{"objective",solve.objective},
+            {"supplied_initial_primary",solve.supplied_initial_primary},{"supplied_initial_duals",solve.supplied_initial_duals},
+            {"provider_initial_primary_readback",solve.provider_initial_primary_readback},
+            {"region_factors",solve.region_factors},{"diagnostics",solve.diagnostics}};
+    };
     if(const auto* failure=std::get_if<FixedTailPolicyFailure>(&outcome)) {
         response.update({{"status","failed"},{"phase",failure->phase},{"reason",failure->cause.explanation},
             {"completed_region_prefix",failure->region_prefix.size()}});
-        if(failure->feasibility)response["feasibility_diagnostics"]=failure->feasibility->diagnostics;
-        if(failure->reduced_argmin)response["reduced_diagnostics"]=failure->reduced_argmin->diagnostics;
+        if(failure->feasibility)response["feasibility"]=receipt(*failure->feasibility);
+        if(failure->reduced_argmin)response["reduced_argmin"]=receipt(*failure->reduced_argmin);
         return response;
     }
     if(const auto* stop=std::get_if<OperationStopped>(&outcome)) {
@@ -1057,13 +1064,9 @@ Json fixed_tail_query(const Json& in,const problem::ResolvedProblem& source,
         item["tail_state_lift"]={{"maps",maps},{"offsets",r.tail.offsets}};
         regions.push_back(std::move(item));
     }
-    const auto receipt=[](const FixedTailSolveResult& solve) {
-        return Json{{"primary",solve.primary},{"history",solve.history},{"objective",solve.objective},
-            {"supplied_initial_primary",solve.supplied_initial_primary},{"supplied_initial_duals",solve.supplied_initial_duals},
-            {"provider_initial_primary_readback",solve.provider_initial_primary_readback},
-            {"region_factors",solve.region_factors},{"diagnostics",solve.diagnostics}};
-    };
     response.update({{"status","accepted"},{"control",result.control},{"history",result.history},
+        {"source_recovery",{{"anchor_history",result.recovered_anchor_history},{"applied_control",result.control},
+            {"rule","only coordinates fixed by authored axis constraints are recovered exactly; raw solver primals remain in the phase receipts"}}},
         {"source_cost",{{"terminal",result.cost.terminal},{"running",result.cost.running},{"total",result.cost.total}}},
         {"regions",regions},{"full_history_lift",{{"map",matrix_rows(result.lift.map)},{"offset",result.lift.offset}}},
         {"feasibility",receipt(result.feasibility)},{"reduced_argmin",receipt(result.reduced_argmin)},

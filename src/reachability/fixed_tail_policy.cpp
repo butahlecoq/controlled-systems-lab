@@ -74,7 +74,7 @@ FixedTailHRows rows(const AdmissibleSet& set,std::size_t n) {
         return out;
     },set);
 }
-std::vector<Interval> axis_bounds(const FixedTailHRows& h) {
+std::vector<Interval> axis_bounds(const FixedTailHRows& h,bool require_finite=true) {
     std::vector<Interval> bounds(h.inequalities.cols);
     const auto scan=[&](const Matrix& A,const Vector& b,bool equality) {
         for(std::size_t i=0;i<A.rows;++i) {
@@ -82,15 +82,31 @@ std::vector<Interval> axis_bounds(const FixedTailHRows& h) {
             for(std::size_t j=0;j<A.cols;++j)if(A.values[i*A.cols+j]!=0) {index=j;++count;}
             if(count!=1)continue;
             const auto a=A.values[i*A.cols+index];const auto value=b[i]/a;
+            const bool exact=b[i]==0 || a==1 || a==-1;
+            const auto lower=exact?value:std::nextafter(value,-inf);
+            const auto upper=exact?value:std::nextafter(value,inf);
             auto& interval=bounds[index];
-            if(a>0 || equality)interval.upper=std::min(interval.upper.value_or(inf),std::nextafter(value,inf));
-            if(a<0 || equality)interval.lower=std::max(interval.lower.value_or(-inf),std::nextafter(value,-inf));
+            if(a>0 || equality)interval.upper=std::min(interval.upper.value_or(inf),upper);
+            if(a<0 || equality)interval.lower=std::max(interval.lower.value_or(-inf),lower);
         }
     };
     scan(h.inequalities,h.upper_bounds,false);scan(h.equalities,h.equality_values,true);
-    for(const auto& b:bounds)if(!b.lower || !b.upper || !std::isfinite(*b.lower) || !std::isfinite(*b.upper) || *b.lower>*b.upper)
+    for(const auto& b:bounds)if(require_finite && (!b.lower || !b.upper || !std::isfinite(*b.lower) || !std::isfinite(*b.upper) || *b.lower>*b.upper))
         throw Rejected{{DiagnosticCode::unsupported,"fixed_tail.input_carrier","Finite explicit source input bounds required; arbitrary bounded H support can use the support-provider extension."}};
     return bounds;
+}
+void recover_authored_fixed_inputs(const FixedTailModel& model,Vector& history) {
+    const auto n=model.observed.size(),T=model.stages.size(),m=model.source_cost.coordinates.dimensions.control;
+    for(std::size_t k=0;k<T;++k) {
+        const auto bounds=axis_bounds(model.control_domains[k],false);
+        for(std::size_t j=0;j<m;++j)if(bounds[j].lower && bounds[j].upper && *bounds[j].lower==*bounds[j].upper)
+            history[(T+1)*n+k*m+j]=*bounds[j].lower;
+    }
+}
+void recover_authored_fixed_first_input(const FixedTailModel& model,Vector& control) {
+    const auto bounds=axis_bounds(model.control_domains[0],false);
+    for(std::size_t j=0;j<control.size();++j)if(bounds[j].lower && bounds[j].upper && *bounds[j].lower==*bounds[j].upper)
+        control[j]=*bounds[j].lower;
 }
 bool admitted(const FixedTailHRows& h,std::span<const double> value) {
     const auto check=[&](const Matrix& A,const Vector& b,bool equality) {
@@ -112,13 +128,28 @@ void pull_rows(FixedTailHRows& out,const FixedTailHRows& source,const Matrix& C,
     };
     pull(source.inequalities,source.upper_bounds,false);pull(source.equalities,source.equality_values,true);
 }
+double rounded_sum(double a,double b,bool upper) {
+    if(a==0)return b;
+    if(b==0)return a;
+    if(a==-b)return 0;
+    return std::nextafter(a+b,upper?inf:-inf);
+}
+double rounded_product(double a,double b,bool upper) {
+    if(a==0 || b==0)return 0;
+    if(a==1)return b;
+    if(a==-1)return -b;
+    if(b==1)return a;
+    if(b==-1)return -a;
+    return std::nextafter(a*b,upper?inf:-inf);
+}
 std::pair<Vector,Vector> interval_image(const Matrix& A,const Vector& lo,const Vector& hi,const Vector& c) {
     Vector lower=c,upper=c;
     for(std::size_t i=0;i<A.rows;++i)for(std::size_t j=0;j<A.cols;++j) {
         const double a=A.values[i*A.cols+j];if(a==0)continue;
-        const double l=a*(a>0?lo[j]:hi[j]),u=a*(a>0?hi[j]:lo[j]);
-        lower[i]=std::nextafter(lower[i]+std::nextafter(l,-inf),-inf);
-        upper[i]=std::nextafter(upper[i]+std::nextafter(u,inf),inf);
+        const double l=rounded_product(a,a>0?lo[j]:hi[j],false);
+        const double u=rounded_product(a,a>0?hi[j]:lo[j],true);
+        lower[i]=rounded_sum(lower[i],l,false);
+        upper[i]=rounded_sum(upper[i],u,true);
     }
     if(!std::all_of(lower.begin(),lower.end(),[](double v){return std::isfinite(v);}) ||
        !std::all_of(upper.begin(),upper.end(),[](double v){return std::isfinite(v);}))throw Rejected{invalid("derived carrier overflowed")};
@@ -132,7 +163,7 @@ std::vector<std::pair<Vector,Vector>> carriers(const FixedTailModel& model) {
         for(const auto& b:model.input_carriers[k]) {ulo.push_back(*b.lower);uhi.push_back(*b.upper);}
         auto [lo,hi]=interval_image(model.stages[k].A,out.back().first,out.back().second,model.stages[k].offset);
         const auto [left,right]=interval_image(model.stages[k].B,ulo,uhi,Vector(n,0));
-        for(std::size_t i=0;i<n;++i) {lo[i]=std::nextafter(lo[i]+left[i],-inf);hi[i]=std::nextafter(hi[i]+right[i],inf);}
+        for(std::size_t i=0;i<n;++i) {lo[i]=rounded_sum(lo[i],left[i],false);hi[i]=rounded_sum(hi[i],right[i],true);}
         out.emplace_back(std::move(lo),std::move(hi));
     }return out;
 }
@@ -344,9 +375,9 @@ FixedTailPolicyOutcome fixed_tail_policy(const FixedTailPolicyRequest& request,
            model.control_domains.size()!=horizon || model.stages.size()!=model.input_carriers.size())throw Rejected{invalid("source dimensions or shifted initial history differ")};
         FullHistoryLift full{model.source_cost.coordinates,identity(dimension),Vector(dimension,0)};
         std::vector<std::size_t> positives;
-        for(std::size_t k=0;k<=horizon;++k)for(const auto axis:request.strictly_positive_state_coordinates) {
-            if(axis>=n)throw Rejected{invalid("strict source coordinate differs")};
-            positives.push_back(k*n+axis);
+        for(const auto axis:request.strictly_positive_state_coordinates) {
+            if(axis>=n || model.observed[axis]<=0)throw Rejected{invalid("strict observed source coordinate is not positive")};
+            for(std::size_t k=1;k<=horizon;++k)positives.push_back(k*n+axis);
         }
         const auto run=[&](const FixedTailSolveRequest& input)->FixedTailSolveOutcome {
             auto prepared=provider.prepare(input);
@@ -366,8 +397,10 @@ FixedTailPolicyOutcome fixed_tail_policy(const FixedTailPolicyRequest& request,
         if(anchor.supplied_initial_primary!=request.shifted_initial_history ||
            std::any_of(anchor.supplied_initial_duals.begin(),anchor.supplied_initial_duals.end(),[](double v){return v!=0;}))
             throw Rejected{invalid("feasibility optimizer did not retain shifted primal and zero supplied duals")};
-        auto lift=take(fixed_control_tail_lift(model,anchor.history));
-        Vector first(anchor.history.begin()+static_cast<std::ptrdiff_t>((horizon+1)*n),anchor.history.begin()+static_cast<std::ptrdiff_t>((horizon+1)*n+m));
+        auto recovered_anchor=anchor.history;
+        recover_authored_fixed_inputs(model,recovered_anchor);
+        auto lift=take(fixed_control_tail_lift(model,recovered_anchor));
+        Vector first(recovered_anchor.begin()+static_cast<std::ptrdiff_t>((horizon+1)*n),recovered_anchor.begin()+static_cast<std::ptrdiff_t>((horizon+1)*n+m));
         auto center=take(recover_fixed_tail_history(lift,first));
         if(!admitted(model.full_history,center))throw Rejected{invalid("fixed-tail anchor failed full source H check")};
         for(const auto coordinate:positives)if(center[coordinate]<=0)throw Rejected{invalid("fixed-tail anchor violates strict source domain")};
@@ -385,7 +418,9 @@ FixedTailPolicyOutcome fixed_tail_policy(const FixedTailPolicyRequest& request,
             lift,failure.region_prefix,first,false,{}});
         if(const auto* stop=std::get_if<OperationStopped>(&solved_outcome))return *stop;
         auto solved=take(std::move(solved_outcome));failure.reduced_argmin=solved;
-        auto history=take(recover_fixed_tail_history(lift,solved.primary));
+        auto recovered_control=solved.primary;
+        recover_authored_fixed_first_input(model,recovered_control);
+        auto history=take(recover_fixed_tail_history(lift,recovered_control));
         if(solved.history.size()!=history.size() || !admitted(model.full_history,history))throw Rejected{invalid("reduced action failed independent full source H check")};
         for(std::size_t i=0;i<history.size();++i)if(std::abs(history[i]-solved.history[i])>1e-7+1e-8*std::abs(history[i]))throw Rejected{invalid("provider history differs from the native affine recovery")};
         for(const auto coordinate:positives)if(history[coordinate]<=0)throw Rejected{invalid("reduced history violates strict source domain")};
@@ -416,7 +451,7 @@ FixedTailPolicyOutcome fixed_tail_policy(const FixedTailPolicyRequest& request,
         auto cost=take(optimization::evaluate_history_cost(model.source_cost,states,controls));
         if(!std::isfinite(solved.objective) || std::abs(cost.total-solved.objective)>1e-7+1e-8*std::max(std::abs(cost.total),std::abs(solved.objective)))
             throw Rejected{invalid("reduced optimizer objective differs from full original source cost")};
-        return FixedTailPolicyResult{model.problem,request.request,request.family,solved.primary,std::move(history),cost,
+        return FixedTailPolicyResult{model.problem,request.request,request.family,std::move(recovered_control),std::move(history),center,cost,
             std::move(anchor),std::move(solved),std::move(lift),std::move(failure.region_prefix),std::move(failure.providers)};
     }catch(const Rejected& e){failure.cause=e.error;return failure;}
 }

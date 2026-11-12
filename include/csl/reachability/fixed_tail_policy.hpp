@@ -111,7 +111,7 @@ struct FixedTailPolicyResult {
     ProblemId problem;
     RequestId request;
     FixedTailFamily family;
-    Vector control,history;
+    Vector control,history,recovered_anchor_history;
     optimization::HistoryCostEvaluation cost;
     FixedTailSolveResult feasibility, reduced_argmin;
     FullHistoryLift lift;

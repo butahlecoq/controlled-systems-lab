@@ -13,7 +13,7 @@ using casadi::DM;
 DM dense(const Matrix& A) {
     DM out=DM::zeros(static_cast<casadi_int>(A.rows),static_cast<casadi_int>(A.cols));
     for(std::size_t i=0;i<A.rows;++i)for(std::size_t j=0;j<A.cols;++j)out(static_cast<casadi_int>(i),static_cast<casadi_int>(j))=A.values[i*A.cols+j];
-    return out;
+    return DM::sparsify(out);
 }
 Vector values(const DM& x) {return static_cast<Vector>(x);}
 void subject(casadi::Opti& opti,const MX& expression,bool equality=false) {
@@ -64,7 +64,8 @@ public:
                 } else {
                     const auto& set=*region.inner;
                     if(set.factor.cols==0 || set.point) {
-                        subject(opti,x-DM(set.center),true);factors.push_back({});
+                        subject(opti,x-DM(set.center));
+                        subject(opti,DM(set.center)-x);factors.push_back({});
                     } else {
                         auto f=opti.variable(static_cast<casadi_int>(set.factor.cols));
                         subject(opti,x-DM(set.center)-MX::mtimes(dense(set.factor),f),true);

@@ -18,20 +18,47 @@ SetHandle box(std::size_t n,double lower,double upper) {
     for(std::size_t i=0;i<n;++i){A.values[2*i*n+i]=1;A.values[(2*i+1)*n+i]=-1;b[2*i]=upper;b[2*i+1]=-lower;}
     return take(sets::make_h({{"test-control"},n,{}},{take(numeric::snapshot(A)),take(numeric::snapshot_vector(b)),take(numeric::snapshot(Matrix{0,n,{}})),take(numeric::snapshot_vector({}))})).as_handle();
 }
-FixedTailModel example(std::size_t horizon=1) {
+struct ExampleParameters {
+    std::size_t horizon{1};
+    Vector observed{0,0};
+    std::size_t offset{};
+    std::size_t original_horizon{};
+    Vector target{1,0};
+    double running_coefficient{2};
+    double control_lower{-2},control_upper{2};
+};
+FixedTailModel example(ExampleParameters options={}) {
+    const auto horizon=options.horizon;
+    const auto original=options.original_horizon?options.original_horizon:options.offset+horizon;
     const Matrix I{2,2,{1,0,0,1}};
     auto system=std::make_shared<const SystemModel>(SystemModel{{{2,2,0},TimeDomain::discrete,LinearStage{I,I,{2,0,{}},{0,0}}},{}});
-    Vector times(horizon+1);for(std::size_t k=0;k<=horizon;++k)times[k]=static_cast<double>(k);
-    Problem p{{"fixed-tail-native-analytic"},system,times,KnownInitial{{0,0}},ContinuousDomain{std::vector<AdmissibleSet>(horizon,box(2,-2,2))},
+    Vector times(horizon+1);for(std::size_t k=0;k<=horizon;++k)times[k]=static_cast<double>(options.offset+k);
+    Vector linear;double constant=0;
+    for(const auto value:options.target) {linear.push_back(-2*value);constant+=value*value;}
+    Problem p{{"fixed-tail-native-analytic"},system,times,KnownInitial{options.observed},
+        ContinuousDomain{std::vector<AdmissibleSet>(horizon,box(2,options.control_lower,options.control_upper))},
         std::vector<AdmissibleSet>(horizon+1,UniversalSet{2}),{},{},InformationPattern::nominal_open_loop,
-        QuadraticTerminal{{2,2,{2,0,0,2}},{-2,0},1}};
+        QuadraticTerminal{{2,2,{2,0,0,2}},linear,constant}};
     auto resolved=take(problem::resolve(p,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
-    optimization::RunningControlCost running{"fixed-tail-native-full-J",horizon,{}};
-    for(std::size_t k=0;k<horizon;++k)running.stages.push_back({k,{optimization::QuadraticControlPenalty{{0,0},{1,1},{1,1},2,horizon}}});
-    return take(prepare_fixed_tail(resolved,running,0));
+    optimization::RunningControlCost running{"fixed-tail-native-full-J",original,{}};
+    for(std::size_t k=0;k<original;++k)running.stages.push_back({k,{optimization::QuadraticControlPenalty{{0,0},{1,1},{1,1},options.running_coefficient,original}}});
+    return take(prepare_fixed_tail(resolved,running,options.offset));
+}
+FixedTailModel singular_four_state_example() {
+    Matrix I{4,4,Vector(16,0)},Q{4,4,Vector(16,0)};
+    for(std::size_t j=0;j<4;++j){I.values[j*4+j]=1;Q.values[j*4+j]=2;}
+    auto system=std::make_shared<const SystemModel>(SystemModel{{{4,2,0},TimeDomain::discrete,
+        LinearStage{I,{4,2,{1,0,0,1,0,0,0,0}},{4,0,{}},Vector(4,0)}},{}});
+    Problem p{{"fixed-tail-native-singular-four-state"},system,{0,1},KnownInitial{Vector(4,0)},
+        ContinuousDomain{{box(2,-2,2)}},{UniversalSet{4},UniversalSet{4}},{},{},InformationPattern::nominal_open_loop,
+        QuadraticTerminal{Q,{-2,0,0,0},1}};
+    auto source=take(problem::resolve(p,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+    optimization::RunningControlCost running{"fixed-tail-native-singular-J",1,
+        {{0,{optimization::QuadraticControlPenalty{{0,0},{1,1},{1,1},2,1}}}}};
+    return take(prepare_fixed_tail(source,running,0));
 }
 }
-int main() {
+int run() {
     registry::Registry<registry::FixedTailOptimizerPort> providers;
     auto registration=adapters::nlp::make_casadi_fixed_tail_registration();
     const registry::Method method{registration.identity.id,registration.identity.version};
@@ -52,16 +79,40 @@ int main() {
         require(answer.feasibility.supplied_initial_primary==Vector(6,0),"original warm input not submitted");
         require(answer.reduced_argmin.primary.size()==2,"final policy freed future history coordinates");
     }
-    auto model=example(2);
+    Vector polygon_control,parallelotope_control;
+    for(const auto family:{FixedTailFamily::polytope,FixedTailFamily::box,FixedTailFamily::zonotope,FixedTailFamily::parallelotope,FixedTailFamily::ellipsoid}) {
+        const auto run_case=[&](FixedTailModel model,const char* label) {
+            const auto hint=take(initialize_fixed_tail(model));
+            auto outcome=fixed_tail_policy({model,{label},family,hint.history,{}},selected,context);
+            if(const auto* f=std::get_if<FixedTailPolicyFailure>(&outcome))throw std::runtime_error(std::string(label)+": "+f->phase+": "+f->cause.explanation);
+            if(const auto* stop=std::get_if<OperationStopped>(&outcome))throw std::runtime_error(std::string(label)+": "+stop->diagnostics);
+            return std::get<FixedTailPolicyResult>(std::move(outcome));
+        };
+        const auto two=run_case(example({.horizon=2}),"two-stage distinct rollout");
+        require(two.regions.size()==3,"two-stage rollout lost a selected physical family");
+        require(std::abs(two.control[0]-.5)<1e-5 && std::abs(two.cost.total-.5)<1e-6,
+            "fixed-tail rollout was replaced by full-history MPC (which chooses u0=u1=1/3)");
+        const auto corner=run_case(example({.target={1.8,1.3},.running_coefficient=.02}),"family affects action");
+        if(family==FixedTailFamily::polytope)polygon_control=corner.control;
+        if(family==FixedTailFamily::parallelotope)parallelotope_control=corner.control;
+        const auto four=run_case(singular_four_state_example(),"four-state singular carrier");
+        require(std::abs(four.control[0]-1.0/3)<1e-5,"unused state coordinates changed the mathematical optimum");
+        require(four.regions[1].carrier_lower[2]==0 && four.regions[1].carrier_upper[2]==0,
+            "exact zero carrier widths were inflated");
+        const auto point=run_case(example({.control_lower=0,.control_upper=0}),"zero-input point region");
+        require(std::abs(point.control[0])<1e-7 && std::abs(point.control[1])<1e-7,
+            "zero-control source did not recover its single admissible action");
+        if(family!=FixedTailFamily::polytope)require(point.regions[1].inner->point,"zero-radius family was not retained as a point");
+    }
+    require(polygon_control[0]>parallelotope_control[0]+.1,"selected family memberships did not affect the source-cost argmin");
+    auto model=example({.horizon=2});
     Vector anchor{0,0,.5,0,.75,0,.5,0,.25,0};
     auto lift=take(fixed_control_tail_lift(model,anchor));
     const auto history=take(recover_fixed_tail_history(lift,Vector{1,0}));
     require(history==Vector({0,0,1,0,1.25,0,1,0,.25,0}),"native history lift did not freeze future controls");
     const auto first=take(initialize_fixed_tail(model));
     require(first.history==Vector(10,0),"native initial zero-control rollout differs");
-    auto next=example();next.source_cost.absolute_stage_offset=1;
-    next.source_cost.running_source=model.source_cost.running_source;
-    next.observed={1.1,0};
+    auto next=example({.observed={1.1,0},.offset=1,.original_horizon=2});
     const FixedTailWarmHistory previous{model.source_cost.coordinates,0,model.source_cost.running_source.objective_id,2,history};
     const auto shifted=take(initialize_fixed_tail(next,previous));
     require(shifted.history==Vector({1.1,0,1.25,0,.25,0}),"native shift repeated terminal stage or lost observation");
@@ -70,4 +121,9 @@ int main() {
     const auto tail=take(fixed_tail_state_lift(model,anchor,{1}));
     require(tail.maps.size()==2 && tail.offsets[1]==Vector({.25,0}),"tail-state lift lost control offset");
     std::cout<<"Native fixed-tail policy: all five physical families, all stages, full source J and frozen-tail recovery passed\n";
+    return 0;
+}
+int main() {
+    try { return run(); }
+    catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}
 }
