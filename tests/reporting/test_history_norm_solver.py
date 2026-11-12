@@ -79,13 +79,17 @@ class HistoryNormSolverTest(unittest.TestCase):
         manifest = build_history_manifest()
         self.assertEqual(validate_manifest(manifest_path=HISTORY_MANIFEST), manifest)
         graphs = manifest["graphs"]
-        self.assertEqual(len(graphs), 8)
+        self.assertEqual(len(graphs), 12)
         feedback = next(row for row in graphs if row["controller"]["id"] == "native-continuous-history-box-ipopt/1")
         self.assertEqual(feedback["role_bindings"]["representation"]["id"], "box")
         self.assertEqual(feedback["role_bindings"]["control_optimizer"]["id"], "casadi-ipopt")
         self.assertEqual(feedback["role_bindings"]["support_lp"]["id"], "csl.lp.highs")
         family_graphs = [row for row in graphs if row["controller"]["id"] == "native-continuous-history-box-ipopt/1"]
         self.assertEqual(len(family_graphs), 3)
+        for family in ("polytope", "zonotope", "parallelotope", "ellipsoid"):
+            matches = [row for row in graphs if row["controller"]["id"] == f"native-continuous-history-{family}-ipopt/1"]
+            self.assertEqual(len(matches), 1)
+            self.assertEqual(matches[0]["role_bindings"]["representation"]["id"], family)
         for name in ("syn-nl-lv-01", "syn-nl-fuel-01", "earth-orbit"):
             task = load_task(name)
             graph = next(row for row in graphs if row["task_id"] == task["task_id"] and

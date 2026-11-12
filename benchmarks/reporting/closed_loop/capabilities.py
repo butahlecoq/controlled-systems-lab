@@ -353,6 +353,19 @@ def _history_definitions() -> list[dict]:
             geometry["graph_fingerprint"] = fingerprint
             geometry["graph_id"] = f"closed-loop/{task_name}/continuous-history-box-ipopt/1/cfg-{fingerprint[:16]}"
             rows.append(geometry)
+            if task_name == "syn-nl-lv-01":
+                for family in ("polytope", "zonotope", "parallelotope", "ellipsoid"):
+                    family_graph = copy.deepcopy(geometry)
+                    family_graph.pop("graph_id")
+                    family_graph.pop("graph_fingerprint")
+                    family_graph["controller"]["id"] = f"native-continuous-history-{family}-ipopt/1"
+                    family_graph["controller"]["control_semantics"] = f"full-history MPC with full-state F/B/I {family} memberships"
+                    family_graph["role_bindings"]["representation"] = {"id": family}
+                    family_graph["admission"]["basis"] = f"source-bound full-history IPOPT with numerical F/B/I {family} memberships"
+                    fingerprint = canonical_sha256(family_graph)
+                    family_graph["graph_fingerprint"] = fingerprint
+                    family_graph["graph_id"] = f"closed-loop/{task_name}/continuous-history-{family}-ipopt/1/cfg-{fingerprint[:16]}"
+                    rows.append(family_graph)
     return rows
 
 
