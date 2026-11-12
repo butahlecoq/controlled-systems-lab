@@ -16,6 +16,35 @@ class ClosedLoopTaskContracts(unittest.TestCase):
         from check_contracts import main
         self.assertEqual(main(), 0)
 
+    @unittest.skipUnless(all(importlib.util.find_spec(name) for name in
+                             ("numpy", "scipy", "casadi", "do_mpc")),
+                         "qualified numerical dependencies are unavailable")
+    def test_source_objective_for_remaining_horizon_keeps_absolute_stages(self):
+        import numpy as np
+        from contracts import load_task
+        from task_models import objective
+
+        for name in ("syn-nl-lv-01", "syn-nl-fuel-01", "earth-orbit"):
+            with self.subTest(task=name):
+                task = load_task(name)
+                n = task["episode"]["intervals"]
+                nx = len(task["model"]["states"])
+                nu = len(task["model"]["controls"])
+                states = np.ones((n + 1, nx))
+                controls = np.full((n, nu), 0.2)
+                stage = n - 2
+                full = objective(task, states, controls)
+                prefix_zero = controls.copy()
+                prefix_zero[stage:] = 0
+                prefix_cost = objective(task, states, prefix_zero)
+                tail = objective(task, states[stage:], controls[stage:], absolute_stage_offset=stage)
+                zero_tail = objective(task, states[stage:], np.zeros_like(controls[stage:]), absolute_stage_offset=stage)
+                self.assertAlmostEqual(tail["running"] - zero_tail["running"], full["running"] - prefix_cost["running"], places=10)
+                self.assertAlmostEqual(tail["terminal"], full["terminal"], places=10)
+        orbit = load_task("earth-orbit")
+        last = objective(orbit, np.ones((2, 4)), np.array([[0.2, 0.3]]), absolute_stage_offset=19)
+        self.assertEqual(last["running"], 0.0)
+
     def test_bounded_candidates_keep_the_full_remaining_horizon_and_source_indices(self):
         from native_graph_policy import _candidate_action_histories
 
