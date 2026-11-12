@@ -1057,7 +1057,8 @@ Json fixed_tail_query(const Json& in,const problem::ResolvedProblem& source,
             {"relation","inner"},{"scope","fixed-feasible-tail intersect finite all-control carrier"},
             {"intersection_identity","F carrier intersect B equals B: carrier rows participate in B admission"}};
         if(r.inner)item["membership"]={{"center",r.inner->center},{"factor",matrix_rows(r.inner->factor)},
-            {"norm",r.inner->norm==InnerTemplateNorm::euclidean_ball?"l2":"l1"},
+            {"support_norm",r.inner->norm==InnerTemplateNorm::euclidean_ball?"l2":"l1"},
+            {"factor_domain_norm",r.inner->norm==InnerTemplateNorm::euclidean_ball?"l2":"linf"},
             {"radius",r.inner->radius},{"point",r.inner->point},{"rounding_shrinks",r.inner->rounding_shrinks}};
         else item["membership"]=h_rows(r.reference);
         Json maps=Json::array();for(const auto& C:r.tail.maps)maps.push_back(matrix_rows(C));
@@ -1067,6 +1068,7 @@ Json fixed_tail_query(const Json& in,const problem::ResolvedProblem& source,
     response.update({{"status","accepted"},{"control",result.control},{"history",result.history},
         {"source_recovery",{{"anchor_history",result.recovered_anchor_history},{"applied_control",result.control},
             {"rule","only coordinates fixed by authored axis constraints are recovered exactly; raw solver primals remain in the phase receipts"}}},
+        {"source_history",h_rows(model.full_history)},
         {"source_cost",{{"terminal",result.cost.terminal},{"running",result.cost.running},{"total",result.cost.total}}},
         {"regions",regions},{"full_history_lift",{{"map",matrix_rows(result.lift.map)},{"offset",result.lift.offset}}},
         {"feasibility",receipt(result.feasibility)},{"reduced_argmin",receipt(result.reduced_argmin)},

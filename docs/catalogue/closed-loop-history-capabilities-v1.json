@@ -1,6 +1,6 @@
 {
   "catalogue_parent": "csl.module-composition-inventory/1",
-  "claim_scope": "Numerical observed-state affine MPC; no set-representation, global nonlinear or safety guarantee.",
+  "claim_scope": "Numerical observed-state affine policies with explicitly distinct MPC/fixed-tail semantics; no global nonlinear or safety guarantee.",
   "graphs": [
     {
       "action_profile_id": "syn-nl-lv-01/continuous-receding/1/continuous-control/1",
@@ -63,8 +63,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "039c914f1791443a19d0bec96009160bf4ef49631a9d135fad72143dea4f452a",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-mpc/1/cfg-039c914f1791443a",
+      "graph_fingerprint": "58c4cf9da283cf212af929378b5370c18347640f8e09ac5187f5a81ab6033580",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-mpc/1/cfg-58c4cf9da283cf21",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -174,7 +174,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "92593d6619e64470c17aee7bc218f4d7939cbdd79b797ec567f30b079dfef781"
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -241,8 +241,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "a61bbcdc714ebead9ee07d841dd2288ebde0350a00435b74b6b4216a10988d46",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ipopt/1/cfg-a61bbcdc714ebead",
+      "graph_fingerprint": "a413f2a42a1f39031a6f9ca918e2ff4b48098652444d500d542b02a19c2ecf22",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ipopt/1/cfg-a413f2a42a1f3903",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -352,7 +352,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "92593d6619e64470c17aee7bc218f4d7939cbdd79b797ec567f30b079dfef781"
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -438,8 +438,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "8109b6e61a3a3a871a0149d30f408ea5a49e426cdde5bc5ce1460bc3ee03528b",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-box-ipopt/1/cfg-8109b6e61a3a3a87",
+      "graph_fingerprint": "c2e8fe15a4e96a3c86ec05f01ecd6c01f8362658d7aeee5bdd481f43c99d70ce",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-box-ipopt/1/cfg-c2e8fe15a4e96a3c",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -632,7 +632,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "92593d6619e64470c17aee7bc218f4d7939cbdd79b797ec567f30b079dfef781"
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -718,8 +718,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "915dee87bec5a38e43c4eb271658dcff6194cb0698e36072eafae568623f093d",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-polytope-ipopt/1/cfg-915dee87bec5a38e",
+      "graph_fingerprint": "2f37da8a3b6ac29b07391edec6c22c960efbe94b6298f8be907c039ca161f17e",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-polytope-ipopt/1/cfg-2f37da8a3b6ac29b",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -912,7 +912,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "92593d6619e64470c17aee7bc218f4d7939cbdd79b797ec567f30b079dfef781"
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -998,8 +998,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "206094f0c064b54d74b9bb9350cc9a4c4aeed3a7a19b62fab760f12bd69e6c85",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-zonotope-ipopt/1/cfg-206094f0c064b54d",
+      "graph_fingerprint": "efbe6bf799b561d29ecb6ed8a31203c7228b75fe798444c3ac4d262e5ec34e35",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-zonotope-ipopt/1/cfg-efbe6bf799b561d2",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1192,7 +1192,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "92593d6619e64470c17aee7bc218f4d7939cbdd79b797ec567f30b079dfef781"
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -1278,8 +1278,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "baba4a6ff247c759f958d3ddf56923b7e674a54ec778c090a0ec364aa05b7372",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-parallelotope-ipopt/1/cfg-baba4a6ff247c759",
+      "graph_fingerprint": "640f194ee5ffb2c7382db5d936a2be0a87c5ec203fb0f66c0cdf0a9e636280d6",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-parallelotope-ipopt/1/cfg-640f194ee5ffb2c7",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1472,7 +1472,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "92593d6619e64470c17aee7bc218f4d7939cbdd79b797ec567f30b079dfef781"
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -1558,8 +1558,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "59dcb72757ae6a1739ced0ea4c52034ba9682f49749794ab881d91b47a926238",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ellipsoid-ipopt/1/cfg-59dcb72757ae6a17",
+      "graph_fingerprint": "d1626f130734d5bb7ea9e723e8d7de8654ff06ccd9f40d70d0d13b30a400dde1",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ellipsoid-ipopt/1/cfg-d1626f130734d5bb",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1752,7 +1752,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "92593d6619e64470c17aee7bc218f4d7939cbdd79b797ec567f30b079dfef781"
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -1819,8 +1819,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "ae50ca621fc9b9d6389f995e651298b343caffe6532631d5024576e77eeabc2e",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-ae50ca621fc9b9d6",
+      "graph_fingerprint": "0f9c5f332243cc455e7cb70a24e0af7a7d91959d266ea4b3a028e4fc1b4187c5",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-0f9c5f332243cc45",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -1926,7 +1926,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "92593d6619e64470c17aee7bc218f4d7939cbdd79b797ec567f30b079dfef781"
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -2012,8 +2012,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "bf1460b05f7096724aaf65129669bc9ec71af10a993c41349d80318b17d103f9",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-box-ipopt/1/cfg-bf1460b05f709672",
+      "graph_fingerprint": "02cdf2286f20022c81adbcce79e4cc82f91df90cf9d38e72eeb3a8785d8c9033",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-box-ipopt/1/cfg-02cdf2286f20022c",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2202,7 +2202,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "92593d6619e64470c17aee7bc218f4d7939cbdd79b797ec567f30b079dfef781"
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -2288,8 +2288,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "89128424706c33ef03942532123a96a09fee5e2a70c607a5160957bb78f645e0",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-polytope-ipopt/1/cfg-89128424706c33ef",
+      "graph_fingerprint": "f7f79c629cffb04c4d4924a300bcd98eaca88564abfab84a65bfc3ae70836e22",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-polytope-ipopt/1/cfg-f7f79c629cffb04c",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2478,7 +2478,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "92593d6619e64470c17aee7bc218f4d7939cbdd79b797ec567f30b079dfef781"
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -2564,8 +2564,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "d9b8b512ca6c95d604adf14628652df06dbaa5e832bf2217bc92d575086bf8c7",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-zonotope-ipopt/1/cfg-d9b8b512ca6c95d6",
+      "graph_fingerprint": "7a44443bd718a64a735a82c447a714ea060d940574d8e44229a2f67a17944916",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-zonotope-ipopt/1/cfg-7a44443bd718a64a",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2754,7 +2754,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "92593d6619e64470c17aee7bc218f4d7939cbdd79b797ec567f30b079dfef781"
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -2840,8 +2840,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "c9a01bc8908f9ff6a58e2dc54ef8eb438c4416d60820b9b155f28a874173f0c1",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-parallelotope-ipopt/1/cfg-c9a01bc8908f9ff6",
+      "graph_fingerprint": "848ee46df6a24d86fb80822beb55c9014428047ef49ea592338db3260d2a9683",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-parallelotope-ipopt/1/cfg-848ee46df6a24d86",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3030,7 +3030,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "92593d6619e64470c17aee7bc218f4d7939cbdd79b797ec567f30b079dfef781"
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -3116,8 +3116,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "d97f372962379fc9fef55422e0b5a4fc9e3ab0454bf441ce030baf086fa17920",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-ellipsoid-ipopt/1/cfg-d97f372962379fc9",
+      "graph_fingerprint": "885b9faa44ebf92563fc0989529be3ba85ac8723c7297bc285861f52ab410e28",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-ellipsoid-ipopt/1/cfg-885b9faa44ebf925",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3306,7 +3306,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "92593d6619e64470c17aee7bc218f4d7939cbdd79b797ec567f30b079dfef781"
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -3373,8 +3373,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "7655a5d7c031fe9fdbf522a7e46666f0a64b36a088570e5959a4741e2303b181",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-mpc/1/cfg-7655a5d7c031fe9f",
+      "graph_fingerprint": "1060d492944567b610de11a09f797d31d33eb503bb650fb3450da8d4acf979b3",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-mpc/1/cfg-1060d492944567b6",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -3484,7 +3484,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "92593d6619e64470c17aee7bc218f4d7939cbdd79b797ec567f30b079dfef781"
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -3551,8 +3551,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "ec263d1e3f7289960ddc4050cdd468dd1294460c3453d11bedb8bb4b9da3e6a5",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ipopt/1/cfg-ec263d1e3f728996",
+      "graph_fingerprint": "33816be0205db55015a69a67dab3596d7df9dcedde921c0f37e911c2b2c65c7b",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ipopt/1/cfg-33816be0205db550",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -3662,7 +3662,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "92593d6619e64470c17aee7bc218f4d7939cbdd79b797ec567f30b079dfef781"
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -3748,8 +3748,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "1cf3af70686a4c9acb518e10126ab54094ca6b3d2b13384aa37433ac53b01d48",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-box-ipopt/1/cfg-1cf3af70686a4c9a",
+      "graph_fingerprint": "331080567e8e77fe244d209c520bdad94206c3b8c957b99959dfd79dda4aab09",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-box-ipopt/1/cfg-331080567e8e77fe",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -3942,7 +3942,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "92593d6619e64470c17aee7bc218f4d7939cbdd79b797ec567f30b079dfef781"
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -4028,8 +4028,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "239c5059007ef47d05c8ccf90aac9f06b28f2053aa30bf61f4a084cddff6c38e",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-polytope-ipopt/1/cfg-239c5059007ef47d",
+      "graph_fingerprint": "de981ef8ffcc5d7bbc030bb04452e3008656e6a5176a0bfc9d156670754cad24",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-polytope-ipopt/1/cfg-de981ef8ffcc5d7b",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4222,7 +4222,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "92593d6619e64470c17aee7bc218f4d7939cbdd79b797ec567f30b079dfef781"
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -4308,8 +4308,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "36f164d70978e5382a966087682c21d795eda6a84badbd1153ce282de6bc7aa2",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-zonotope-ipopt/1/cfg-36f164d70978e538",
+      "graph_fingerprint": "26ef085af8f17d2ae8c3210b55a105f05a731f032f0e7932ef8afde52f1927b5",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-zonotope-ipopt/1/cfg-26ef085af8f17d2a",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4502,7 +4502,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "92593d6619e64470c17aee7bc218f4d7939cbdd79b797ec567f30b079dfef781"
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -4588,8 +4588,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "d18621e5510f1c1c83b62274f65ae4a853181c8abd45b562d22466ce9287d5ff",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-parallelotope-ipopt/1/cfg-d18621e5510f1c1c",
+      "graph_fingerprint": "7e152995e8fe7bf76b05ef8c3dc8d764cda430be4dd8768ad87236f5c4fec0ec",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-parallelotope-ipopt/1/cfg-7e152995e8fe7bf7",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4782,7 +4782,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "92593d6619e64470c17aee7bc218f4d7939cbdd79b797ec567f30b079dfef781"
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -4868,8 +4868,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "ef849994677452067981361a22e9bdba05fd51efd4d1656444b62fde2f25070c",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ellipsoid-ipopt/1/cfg-ef84999467745206",
+      "graph_fingerprint": "53304fdcf652aca8172e768023a943f1ed75d68ec00a0a10cca6bc6a66ce047a",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ellipsoid-ipopt/1/cfg-53304fdcf652aca8",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5062,7 +5062,2897 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "92593d6619e64470c17aee7bc218f4d7939cbdd79b797ec567f30b079dfef781"
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
+        }
+      ],
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b"
+    },
+    {
+      "action_profile_id": "syn-nl-lv-01/continuous-receding/1/continuous-control/1",
+      "admission": {
+        "basis": "native C++ five-family original-task queries, all-stage H/J/membership and warm initialization checks; episode outcomes retained separately",
+        "status": "admitted"
+      },
+      "controller": {
+        "adapter": "native_fixed_tail",
+        "control_semantics": "C++ feasible frozen tail; continuous current-action argmin of complete original J under every selected physical stage region",
+        "factory_options": {
+          "build_backend_profile": {
+            "CSL_ENABLE_CASADI": true,
+            "CSL_ENABLE_HIGHS": false,
+            "CSL_ENABLE_QHULL": false,
+            "build_type": "Release"
+          },
+          "wall_seconds": 60
+        },
+        "id": "native-fixed-tail-polytope-ipopt/1",
+        "policy_factory": "native_fixed_tail_policy:create_policy",
+        "prediction": "full remaining source-bound affine physical predictor",
+        "solver": {
+          "assurance": "local numerical",
+          "provider": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "source_files": [
+          "CMakeLists.txt",
+          "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "benchmarks/reporting/closed_loop/history_policy.py",
+          "benchmarks/reporting/closed_loop/history_validation.py",
+          "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "benchmarks/reporting/closed_loop/task_models.py",
+          "cmake/CSLConfig.cmake.in",
+          "cmake/CasadiDependencies.cmake",
+          "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "include/csl/optimization/history_cost.hpp",
+          "include/csl/reachability/fixed_tail_policy.hpp",
+          "include/csl/reachability/inner_template.hpp",
+          "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "src/optimization/history_cost.cpp",
+          "src/optimization/running_control_cost.cpp",
+          "src/reachability/Module.cmake",
+          "src/reachability/fixed_tail_policy.cpp",
+          "src/reachability/inner_template.cpp",
+          "src/synthesis/control_recovery.cpp",
+          "tools/closed_loop_native_policy.cpp"
+        ],
+        "version": "1"
+      },
+      "execution": {
+        "abstol": 1e-10,
+        "id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+        "method": "adaptive RK4 step doubling",
+        "original_final_time": 3,
+        "original_intervals": 30,
+        "provider": "CSL::simulation",
+        "reltol": 1e-09,
+        "report_subintervals_per_hold": 20,
+        "source_files": [
+          "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "src/simulation/nonlinear_replay.cpp"
+        ],
+        "version": "1"
+      },
+      "geometry_work": {
+        "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
+      },
+      "graph_fingerprint": "5d2382e0ea4fdd5b7a622759b561e6a9f770b42833657d70345ce7acdbee7f54",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-polytope-ipopt/1/cfg-5d2382e0ea4fdd5b",
+      "model_id": "syn-nl-lv-01/ode/1",
+      "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
+      "operation_roles": {
+        "controller.solve": "control_optimizer",
+        "fixed-tail.regions": "reachable_set_method"
+      },
+      "role_bindings": {
+        "control_optimizer": {
+          "id": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "converter": "not_used",
+        "reachable_set_method": {
+          "id": "csl.reachability.inner-template/1"
+        },
+        "representation": {
+          "id": "polytope"
+        },
+        "vertex_lp": "not_used"
+      },
+      "source_files": [
+        {
+          "path": "CMakeLists.txt",
+          "sha256": "1dc0908724617d75eae414a1a3953103e409373e6d1af633d7a673c52e72da24"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_policy.py",
+          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_validation.py",
+          "sha256": "77b44c488d293888eafeeb9e811c0d4949855b3994eeed0f9316e669092e597c"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "sha256": "b426ae075f2e7886d5a6ca96726d32c6eea9cb19d32761aa1e9db520d185fe87"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "sha256": "bafa9d6d20e6a9d8aa0688e00e2df2c809105b531a4993c724b4e7cf07897cd4"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/task_models.py",
+          "sha256": "2069ea087c76ceb54776e51bdbc0964d7f0bf545d0b82a9b73456f3d5c85d4ac"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/affine.py",
+          "sha256": "54d31b9c21fef962cb2a5f09f2e341ef92b3a40b128114c3c06a5b039fb95149"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "sha256": "104adee4c3999daedae08bc6735e6058d7c3cd66e2bca8b306ea4d65142e2f21"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/scenarios/syn-nl-lv-01.json",
+          "sha256": "1a608a0a38f9c1d60d9272b948189e48f9f294048ddf9726aaa0ed8b5cee8464"
+        },
+        {
+          "path": "cmake/CSLConfig.cmake.in",
+          "sha256": "011497d39ba776d7fb808239fb5417558407247b97f38d940fd987410c173453"
+        },
+        {
+          "path": "cmake/CasadiDependencies.cmake",
+          "sha256": "4d61dbbfed21d207c921ec72aa49e11121285c1cf35ab2b30a5922292e0c6381"
+        },
+        {
+          "path": "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "sha256": "8ba664e675389edf11d056aeb131a282a3057710b2e779423cb99a3d685b71e7"
+        },
+        {
+          "path": "include/csl/optimization/history_cost.hpp",
+          "sha256": "8a3a7ad74ca31439af995a3009a669707af7440b31e04666f433c19cc59cc347"
+        },
+        {
+          "path": "include/csl/reachability/fixed_tail_policy.hpp",
+          "sha256": "cf7b12f6934eb887c56246940c1cc00949117f80877d7ddf60603c59e3dd515c"
+        },
+        {
+          "path": "include/csl/reachability/inner_template.hpp",
+          "sha256": "8616fa3eb8ca96c1a10722e872373ef2d38703c96e99bff61a30b6d58abca1da"
+        },
+        {
+          "path": "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "sha256": "58b912a71fea064c6c26827716f8337aa73454ec6c90c361fd38bfc67be51c46"
+        },
+        {
+          "path": "src/optimization/history_cost.cpp",
+          "sha256": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86"
+        },
+        {
+          "path": "src/optimization/running_control_cost.cpp",
+          "sha256": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0"
+        },
+        {
+          "path": "src/reachability/Module.cmake",
+          "sha256": "eb7d7b266e46c134f1eb6190386a23be655cfbe4b05a0ed8dca9baae9a3e2f85"
+        },
+        {
+          "path": "src/reachability/fixed_tail_policy.cpp",
+          "sha256": "2938534a6a21540fdc7f505b99cc11bea501238d4b572f8815bbebbc1c9898fb"
+        },
+        {
+          "path": "src/reachability/inner_template.cpp",
+          "sha256": "280fdc79c2621536c99fd05ed70ec48664751aeec49800e27be748cf1e9f5e3a"
+        },
+        {
+          "path": "src/simulation/nonlinear_replay.cpp",
+          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+        },
+        {
+          "path": "src/synthesis/control_recovery.cpp",
+          "sha256": "cb54b0608aacc45774e04d7ed2ba2f4ed6faf7c06db84f8b846d1cd2db5395f1"
+        },
+        {
+          "path": "tools/closed_loop_native_policy.cpp",
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
+        }
+      ],
+      "task_id": "syn-nl-lv-01/continuous-receding/1",
+      "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec"
+    },
+    {
+      "action_profile_id": "syn-nl-lv-01/continuous-receding/1/continuous-control/1",
+      "admission": {
+        "basis": "native C++ five-family original-task queries, all-stage H/J/membership and warm initialization checks; episode outcomes retained separately",
+        "status": "admitted"
+      },
+      "controller": {
+        "adapter": "native_fixed_tail",
+        "control_semantics": "C++ feasible frozen tail; continuous current-action argmin of complete original J under every selected physical stage region",
+        "factory_options": {
+          "build_backend_profile": {
+            "CSL_ENABLE_CASADI": true,
+            "CSL_ENABLE_HIGHS": false,
+            "CSL_ENABLE_QHULL": false,
+            "build_type": "Release"
+          },
+          "wall_seconds": 60
+        },
+        "id": "native-fixed-tail-box-ipopt/1",
+        "policy_factory": "native_fixed_tail_policy:create_policy",
+        "prediction": "full remaining source-bound affine physical predictor",
+        "solver": {
+          "assurance": "local numerical",
+          "provider": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "source_files": [
+          "CMakeLists.txt",
+          "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "benchmarks/reporting/closed_loop/history_policy.py",
+          "benchmarks/reporting/closed_loop/history_validation.py",
+          "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "benchmarks/reporting/closed_loop/task_models.py",
+          "cmake/CSLConfig.cmake.in",
+          "cmake/CasadiDependencies.cmake",
+          "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "include/csl/optimization/history_cost.hpp",
+          "include/csl/reachability/fixed_tail_policy.hpp",
+          "include/csl/reachability/inner_template.hpp",
+          "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "src/optimization/history_cost.cpp",
+          "src/optimization/running_control_cost.cpp",
+          "src/reachability/Module.cmake",
+          "src/reachability/fixed_tail_policy.cpp",
+          "src/reachability/inner_template.cpp",
+          "src/synthesis/control_recovery.cpp",
+          "tools/closed_loop_native_policy.cpp"
+        ],
+        "version": "1"
+      },
+      "execution": {
+        "abstol": 1e-10,
+        "id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+        "method": "adaptive RK4 step doubling",
+        "original_final_time": 3,
+        "original_intervals": 30,
+        "provider": "CSL::simulation",
+        "reltol": 1e-09,
+        "report_subintervals_per_hold": 20,
+        "source_files": [
+          "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "src/simulation/nonlinear_replay.cpp"
+        ],
+        "version": "1"
+      },
+      "geometry_work": {
+        "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
+      },
+      "graph_fingerprint": "6226821affea7326bf235d2cfb8cf0fd34034f52873e842e7478ce549ce91e79",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-box-ipopt/1/cfg-6226821affea7326",
+      "model_id": "syn-nl-lv-01/ode/1",
+      "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
+      "operation_roles": {
+        "controller.solve": "control_optimizer",
+        "fixed-tail.regions": "reachable_set_method"
+      },
+      "role_bindings": {
+        "control_optimizer": {
+          "id": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "converter": "not_used",
+        "reachable_set_method": {
+          "id": "csl.reachability.inner-template/1"
+        },
+        "representation": {
+          "id": "box"
+        },
+        "vertex_lp": "not_used"
+      },
+      "source_files": [
+        {
+          "path": "CMakeLists.txt",
+          "sha256": "1dc0908724617d75eae414a1a3953103e409373e6d1af633d7a673c52e72da24"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_policy.py",
+          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_validation.py",
+          "sha256": "77b44c488d293888eafeeb9e811c0d4949855b3994eeed0f9316e669092e597c"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "sha256": "b426ae075f2e7886d5a6ca96726d32c6eea9cb19d32761aa1e9db520d185fe87"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "sha256": "bafa9d6d20e6a9d8aa0688e00e2df2c809105b531a4993c724b4e7cf07897cd4"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/task_models.py",
+          "sha256": "2069ea087c76ceb54776e51bdbc0964d7f0bf545d0b82a9b73456f3d5c85d4ac"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/affine.py",
+          "sha256": "54d31b9c21fef962cb2a5f09f2e341ef92b3a40b128114c3c06a5b039fb95149"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "sha256": "104adee4c3999daedae08bc6735e6058d7c3cd66e2bca8b306ea4d65142e2f21"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/scenarios/syn-nl-lv-01.json",
+          "sha256": "1a608a0a38f9c1d60d9272b948189e48f9f294048ddf9726aaa0ed8b5cee8464"
+        },
+        {
+          "path": "cmake/CSLConfig.cmake.in",
+          "sha256": "011497d39ba776d7fb808239fb5417558407247b97f38d940fd987410c173453"
+        },
+        {
+          "path": "cmake/CasadiDependencies.cmake",
+          "sha256": "4d61dbbfed21d207c921ec72aa49e11121285c1cf35ab2b30a5922292e0c6381"
+        },
+        {
+          "path": "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "sha256": "8ba664e675389edf11d056aeb131a282a3057710b2e779423cb99a3d685b71e7"
+        },
+        {
+          "path": "include/csl/optimization/history_cost.hpp",
+          "sha256": "8a3a7ad74ca31439af995a3009a669707af7440b31e04666f433c19cc59cc347"
+        },
+        {
+          "path": "include/csl/reachability/fixed_tail_policy.hpp",
+          "sha256": "cf7b12f6934eb887c56246940c1cc00949117f80877d7ddf60603c59e3dd515c"
+        },
+        {
+          "path": "include/csl/reachability/inner_template.hpp",
+          "sha256": "8616fa3eb8ca96c1a10722e872373ef2d38703c96e99bff61a30b6d58abca1da"
+        },
+        {
+          "path": "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "sha256": "58b912a71fea064c6c26827716f8337aa73454ec6c90c361fd38bfc67be51c46"
+        },
+        {
+          "path": "src/optimization/history_cost.cpp",
+          "sha256": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86"
+        },
+        {
+          "path": "src/optimization/running_control_cost.cpp",
+          "sha256": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0"
+        },
+        {
+          "path": "src/reachability/Module.cmake",
+          "sha256": "eb7d7b266e46c134f1eb6190386a23be655cfbe4b05a0ed8dca9baae9a3e2f85"
+        },
+        {
+          "path": "src/reachability/fixed_tail_policy.cpp",
+          "sha256": "2938534a6a21540fdc7f505b99cc11bea501238d4b572f8815bbebbc1c9898fb"
+        },
+        {
+          "path": "src/reachability/inner_template.cpp",
+          "sha256": "280fdc79c2621536c99fd05ed70ec48664751aeec49800e27be748cf1e9f5e3a"
+        },
+        {
+          "path": "src/simulation/nonlinear_replay.cpp",
+          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+        },
+        {
+          "path": "src/synthesis/control_recovery.cpp",
+          "sha256": "cb54b0608aacc45774e04d7ed2ba2f4ed6faf7c06db84f8b846d1cd2db5395f1"
+        },
+        {
+          "path": "tools/closed_loop_native_policy.cpp",
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
+        }
+      ],
+      "task_id": "syn-nl-lv-01/continuous-receding/1",
+      "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec"
+    },
+    {
+      "action_profile_id": "syn-nl-lv-01/continuous-receding/1/continuous-control/1",
+      "admission": {
+        "basis": "native C++ five-family original-task queries, all-stage H/J/membership and warm initialization checks; episode outcomes retained separately",
+        "status": "admitted"
+      },
+      "controller": {
+        "adapter": "native_fixed_tail",
+        "control_semantics": "C++ feasible frozen tail; continuous current-action argmin of complete original J under every selected physical stage region",
+        "factory_options": {
+          "build_backend_profile": {
+            "CSL_ENABLE_CASADI": true,
+            "CSL_ENABLE_HIGHS": false,
+            "CSL_ENABLE_QHULL": false,
+            "build_type": "Release"
+          },
+          "wall_seconds": 60
+        },
+        "id": "native-fixed-tail-zonotope-ipopt/1",
+        "policy_factory": "native_fixed_tail_policy:create_policy",
+        "prediction": "full remaining source-bound affine physical predictor",
+        "solver": {
+          "assurance": "local numerical",
+          "provider": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "source_files": [
+          "CMakeLists.txt",
+          "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "benchmarks/reporting/closed_loop/history_policy.py",
+          "benchmarks/reporting/closed_loop/history_validation.py",
+          "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "benchmarks/reporting/closed_loop/task_models.py",
+          "cmake/CSLConfig.cmake.in",
+          "cmake/CasadiDependencies.cmake",
+          "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "include/csl/optimization/history_cost.hpp",
+          "include/csl/reachability/fixed_tail_policy.hpp",
+          "include/csl/reachability/inner_template.hpp",
+          "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "src/optimization/history_cost.cpp",
+          "src/optimization/running_control_cost.cpp",
+          "src/reachability/Module.cmake",
+          "src/reachability/fixed_tail_policy.cpp",
+          "src/reachability/inner_template.cpp",
+          "src/synthesis/control_recovery.cpp",
+          "tools/closed_loop_native_policy.cpp"
+        ],
+        "version": "1"
+      },
+      "execution": {
+        "abstol": 1e-10,
+        "id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+        "method": "adaptive RK4 step doubling",
+        "original_final_time": 3,
+        "original_intervals": 30,
+        "provider": "CSL::simulation",
+        "reltol": 1e-09,
+        "report_subintervals_per_hold": 20,
+        "source_files": [
+          "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "src/simulation/nonlinear_replay.cpp"
+        ],
+        "version": "1"
+      },
+      "geometry_work": {
+        "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
+      },
+      "graph_fingerprint": "9c1183635427db9f6e91db1d777d7c860a156bf6ab8ae18c1a6f080a2b2b119d",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-zonotope-ipopt/1/cfg-9c1183635427db9f",
+      "model_id": "syn-nl-lv-01/ode/1",
+      "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
+      "operation_roles": {
+        "controller.solve": "control_optimizer",
+        "fixed-tail.regions": "reachable_set_method"
+      },
+      "role_bindings": {
+        "control_optimizer": {
+          "id": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "converter": "not_used",
+        "reachable_set_method": {
+          "id": "csl.reachability.inner-template/1"
+        },
+        "representation": {
+          "id": "zonotope"
+        },
+        "vertex_lp": "not_used"
+      },
+      "source_files": [
+        {
+          "path": "CMakeLists.txt",
+          "sha256": "1dc0908724617d75eae414a1a3953103e409373e6d1af633d7a673c52e72da24"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_policy.py",
+          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_validation.py",
+          "sha256": "77b44c488d293888eafeeb9e811c0d4949855b3994eeed0f9316e669092e597c"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "sha256": "b426ae075f2e7886d5a6ca96726d32c6eea9cb19d32761aa1e9db520d185fe87"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "sha256": "bafa9d6d20e6a9d8aa0688e00e2df2c809105b531a4993c724b4e7cf07897cd4"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/task_models.py",
+          "sha256": "2069ea087c76ceb54776e51bdbc0964d7f0bf545d0b82a9b73456f3d5c85d4ac"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/affine.py",
+          "sha256": "54d31b9c21fef962cb2a5f09f2e341ef92b3a40b128114c3c06a5b039fb95149"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "sha256": "104adee4c3999daedae08bc6735e6058d7c3cd66e2bca8b306ea4d65142e2f21"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/scenarios/syn-nl-lv-01.json",
+          "sha256": "1a608a0a38f9c1d60d9272b948189e48f9f294048ddf9726aaa0ed8b5cee8464"
+        },
+        {
+          "path": "cmake/CSLConfig.cmake.in",
+          "sha256": "011497d39ba776d7fb808239fb5417558407247b97f38d940fd987410c173453"
+        },
+        {
+          "path": "cmake/CasadiDependencies.cmake",
+          "sha256": "4d61dbbfed21d207c921ec72aa49e11121285c1cf35ab2b30a5922292e0c6381"
+        },
+        {
+          "path": "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "sha256": "8ba664e675389edf11d056aeb131a282a3057710b2e779423cb99a3d685b71e7"
+        },
+        {
+          "path": "include/csl/optimization/history_cost.hpp",
+          "sha256": "8a3a7ad74ca31439af995a3009a669707af7440b31e04666f433c19cc59cc347"
+        },
+        {
+          "path": "include/csl/reachability/fixed_tail_policy.hpp",
+          "sha256": "cf7b12f6934eb887c56246940c1cc00949117f80877d7ddf60603c59e3dd515c"
+        },
+        {
+          "path": "include/csl/reachability/inner_template.hpp",
+          "sha256": "8616fa3eb8ca96c1a10722e872373ef2d38703c96e99bff61a30b6d58abca1da"
+        },
+        {
+          "path": "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "sha256": "58b912a71fea064c6c26827716f8337aa73454ec6c90c361fd38bfc67be51c46"
+        },
+        {
+          "path": "src/optimization/history_cost.cpp",
+          "sha256": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86"
+        },
+        {
+          "path": "src/optimization/running_control_cost.cpp",
+          "sha256": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0"
+        },
+        {
+          "path": "src/reachability/Module.cmake",
+          "sha256": "eb7d7b266e46c134f1eb6190386a23be655cfbe4b05a0ed8dca9baae9a3e2f85"
+        },
+        {
+          "path": "src/reachability/fixed_tail_policy.cpp",
+          "sha256": "2938534a6a21540fdc7f505b99cc11bea501238d4b572f8815bbebbc1c9898fb"
+        },
+        {
+          "path": "src/reachability/inner_template.cpp",
+          "sha256": "280fdc79c2621536c99fd05ed70ec48664751aeec49800e27be748cf1e9f5e3a"
+        },
+        {
+          "path": "src/simulation/nonlinear_replay.cpp",
+          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+        },
+        {
+          "path": "src/synthesis/control_recovery.cpp",
+          "sha256": "cb54b0608aacc45774e04d7ed2ba2f4ed6faf7c06db84f8b846d1cd2db5395f1"
+        },
+        {
+          "path": "tools/closed_loop_native_policy.cpp",
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
+        }
+      ],
+      "task_id": "syn-nl-lv-01/continuous-receding/1",
+      "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec"
+    },
+    {
+      "action_profile_id": "syn-nl-lv-01/continuous-receding/1/continuous-control/1",
+      "admission": {
+        "basis": "native C++ five-family original-task queries, all-stage H/J/membership and warm initialization checks; episode outcomes retained separately",
+        "status": "admitted"
+      },
+      "controller": {
+        "adapter": "native_fixed_tail",
+        "control_semantics": "C++ feasible frozen tail; continuous current-action argmin of complete original J under every selected physical stage region",
+        "factory_options": {
+          "build_backend_profile": {
+            "CSL_ENABLE_CASADI": true,
+            "CSL_ENABLE_HIGHS": false,
+            "CSL_ENABLE_QHULL": false,
+            "build_type": "Release"
+          },
+          "wall_seconds": 60
+        },
+        "id": "native-fixed-tail-parallelotope-ipopt/1",
+        "policy_factory": "native_fixed_tail_policy:create_policy",
+        "prediction": "full remaining source-bound affine physical predictor",
+        "solver": {
+          "assurance": "local numerical",
+          "provider": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "source_files": [
+          "CMakeLists.txt",
+          "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "benchmarks/reporting/closed_loop/history_policy.py",
+          "benchmarks/reporting/closed_loop/history_validation.py",
+          "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "benchmarks/reporting/closed_loop/task_models.py",
+          "cmake/CSLConfig.cmake.in",
+          "cmake/CasadiDependencies.cmake",
+          "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "include/csl/optimization/history_cost.hpp",
+          "include/csl/reachability/fixed_tail_policy.hpp",
+          "include/csl/reachability/inner_template.hpp",
+          "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "src/optimization/history_cost.cpp",
+          "src/optimization/running_control_cost.cpp",
+          "src/reachability/Module.cmake",
+          "src/reachability/fixed_tail_policy.cpp",
+          "src/reachability/inner_template.cpp",
+          "src/synthesis/control_recovery.cpp",
+          "tools/closed_loop_native_policy.cpp"
+        ],
+        "version": "1"
+      },
+      "execution": {
+        "abstol": 1e-10,
+        "id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+        "method": "adaptive RK4 step doubling",
+        "original_final_time": 3,
+        "original_intervals": 30,
+        "provider": "CSL::simulation",
+        "reltol": 1e-09,
+        "report_subintervals_per_hold": 20,
+        "source_files": [
+          "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "src/simulation/nonlinear_replay.cpp"
+        ],
+        "version": "1"
+      },
+      "geometry_work": {
+        "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
+      },
+      "graph_fingerprint": "4e21d04cbd937eda39ce12bedcdf91d09f44d62c60cbc9c0e8f981d56abe2788",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-parallelotope-ipopt/1/cfg-4e21d04cbd937eda",
+      "model_id": "syn-nl-lv-01/ode/1",
+      "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
+      "operation_roles": {
+        "controller.solve": "control_optimizer",
+        "fixed-tail.regions": "reachable_set_method"
+      },
+      "role_bindings": {
+        "control_optimizer": {
+          "id": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "converter": "not_used",
+        "reachable_set_method": {
+          "id": "csl.reachability.inner-template/1"
+        },
+        "representation": {
+          "id": "parallelotope"
+        },
+        "vertex_lp": "not_used"
+      },
+      "source_files": [
+        {
+          "path": "CMakeLists.txt",
+          "sha256": "1dc0908724617d75eae414a1a3953103e409373e6d1af633d7a673c52e72da24"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_policy.py",
+          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_validation.py",
+          "sha256": "77b44c488d293888eafeeb9e811c0d4949855b3994eeed0f9316e669092e597c"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "sha256": "b426ae075f2e7886d5a6ca96726d32c6eea9cb19d32761aa1e9db520d185fe87"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "sha256": "bafa9d6d20e6a9d8aa0688e00e2df2c809105b531a4993c724b4e7cf07897cd4"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/task_models.py",
+          "sha256": "2069ea087c76ceb54776e51bdbc0964d7f0bf545d0b82a9b73456f3d5c85d4ac"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/affine.py",
+          "sha256": "54d31b9c21fef962cb2a5f09f2e341ef92b3a40b128114c3c06a5b039fb95149"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "sha256": "104adee4c3999daedae08bc6735e6058d7c3cd66e2bca8b306ea4d65142e2f21"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/scenarios/syn-nl-lv-01.json",
+          "sha256": "1a608a0a38f9c1d60d9272b948189e48f9f294048ddf9726aaa0ed8b5cee8464"
+        },
+        {
+          "path": "cmake/CSLConfig.cmake.in",
+          "sha256": "011497d39ba776d7fb808239fb5417558407247b97f38d940fd987410c173453"
+        },
+        {
+          "path": "cmake/CasadiDependencies.cmake",
+          "sha256": "4d61dbbfed21d207c921ec72aa49e11121285c1cf35ab2b30a5922292e0c6381"
+        },
+        {
+          "path": "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "sha256": "8ba664e675389edf11d056aeb131a282a3057710b2e779423cb99a3d685b71e7"
+        },
+        {
+          "path": "include/csl/optimization/history_cost.hpp",
+          "sha256": "8a3a7ad74ca31439af995a3009a669707af7440b31e04666f433c19cc59cc347"
+        },
+        {
+          "path": "include/csl/reachability/fixed_tail_policy.hpp",
+          "sha256": "cf7b12f6934eb887c56246940c1cc00949117f80877d7ddf60603c59e3dd515c"
+        },
+        {
+          "path": "include/csl/reachability/inner_template.hpp",
+          "sha256": "8616fa3eb8ca96c1a10722e872373ef2d38703c96e99bff61a30b6d58abca1da"
+        },
+        {
+          "path": "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "sha256": "58b912a71fea064c6c26827716f8337aa73454ec6c90c361fd38bfc67be51c46"
+        },
+        {
+          "path": "src/optimization/history_cost.cpp",
+          "sha256": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86"
+        },
+        {
+          "path": "src/optimization/running_control_cost.cpp",
+          "sha256": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0"
+        },
+        {
+          "path": "src/reachability/Module.cmake",
+          "sha256": "eb7d7b266e46c134f1eb6190386a23be655cfbe4b05a0ed8dca9baae9a3e2f85"
+        },
+        {
+          "path": "src/reachability/fixed_tail_policy.cpp",
+          "sha256": "2938534a6a21540fdc7f505b99cc11bea501238d4b572f8815bbebbc1c9898fb"
+        },
+        {
+          "path": "src/reachability/inner_template.cpp",
+          "sha256": "280fdc79c2621536c99fd05ed70ec48664751aeec49800e27be748cf1e9f5e3a"
+        },
+        {
+          "path": "src/simulation/nonlinear_replay.cpp",
+          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+        },
+        {
+          "path": "src/synthesis/control_recovery.cpp",
+          "sha256": "cb54b0608aacc45774e04d7ed2ba2f4ed6faf7c06db84f8b846d1cd2db5395f1"
+        },
+        {
+          "path": "tools/closed_loop_native_policy.cpp",
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
+        }
+      ],
+      "task_id": "syn-nl-lv-01/continuous-receding/1",
+      "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec"
+    },
+    {
+      "action_profile_id": "syn-nl-lv-01/continuous-receding/1/continuous-control/1",
+      "admission": {
+        "basis": "native C++ five-family original-task queries, all-stage H/J/membership and warm initialization checks; episode outcomes retained separately",
+        "status": "admitted"
+      },
+      "controller": {
+        "adapter": "native_fixed_tail",
+        "control_semantics": "C++ feasible frozen tail; continuous current-action argmin of complete original J under every selected physical stage region",
+        "factory_options": {
+          "build_backend_profile": {
+            "CSL_ENABLE_CASADI": true,
+            "CSL_ENABLE_HIGHS": false,
+            "CSL_ENABLE_QHULL": false,
+            "build_type": "Release"
+          },
+          "wall_seconds": 60
+        },
+        "id": "native-fixed-tail-ellipsoid-ipopt/1",
+        "policy_factory": "native_fixed_tail_policy:create_policy",
+        "prediction": "full remaining source-bound affine physical predictor",
+        "solver": {
+          "assurance": "local numerical",
+          "provider": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "source_files": [
+          "CMakeLists.txt",
+          "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "benchmarks/reporting/closed_loop/history_policy.py",
+          "benchmarks/reporting/closed_loop/history_validation.py",
+          "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "benchmarks/reporting/closed_loop/task_models.py",
+          "cmake/CSLConfig.cmake.in",
+          "cmake/CasadiDependencies.cmake",
+          "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "include/csl/optimization/history_cost.hpp",
+          "include/csl/reachability/fixed_tail_policy.hpp",
+          "include/csl/reachability/inner_template.hpp",
+          "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "src/optimization/history_cost.cpp",
+          "src/optimization/running_control_cost.cpp",
+          "src/reachability/Module.cmake",
+          "src/reachability/fixed_tail_policy.cpp",
+          "src/reachability/inner_template.cpp",
+          "src/synthesis/control_recovery.cpp",
+          "tools/closed_loop_native_policy.cpp"
+        ],
+        "version": "1"
+      },
+      "execution": {
+        "abstol": 1e-10,
+        "id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+        "method": "adaptive RK4 step doubling",
+        "original_final_time": 3,
+        "original_intervals": 30,
+        "provider": "CSL::simulation",
+        "reltol": 1e-09,
+        "report_subintervals_per_hold": 20,
+        "source_files": [
+          "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "src/simulation/nonlinear_replay.cpp"
+        ],
+        "version": "1"
+      },
+      "geometry_work": {
+        "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
+      },
+      "graph_fingerprint": "1d4db1e35d9f1f36c9324af2df5af5900fca6307cc17274e8fb6a5634e7ca13d",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-ellipsoid-ipopt/1/cfg-1d4db1e35d9f1f36",
+      "model_id": "syn-nl-lv-01/ode/1",
+      "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
+      "operation_roles": {
+        "controller.solve": "control_optimizer",
+        "fixed-tail.regions": "reachable_set_method"
+      },
+      "role_bindings": {
+        "control_optimizer": {
+          "id": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "converter": "not_used",
+        "reachable_set_method": {
+          "id": "csl.reachability.inner-template/1"
+        },
+        "representation": {
+          "id": "ellipsoid"
+        },
+        "vertex_lp": "not_used"
+      },
+      "source_files": [
+        {
+          "path": "CMakeLists.txt",
+          "sha256": "1dc0908724617d75eae414a1a3953103e409373e6d1af633d7a673c52e72da24"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_policy.py",
+          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_validation.py",
+          "sha256": "77b44c488d293888eafeeb9e811c0d4949855b3994eeed0f9316e669092e597c"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "sha256": "b426ae075f2e7886d5a6ca96726d32c6eea9cb19d32761aa1e9db520d185fe87"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "sha256": "bafa9d6d20e6a9d8aa0688e00e2df2c809105b531a4993c724b4e7cf07897cd4"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/task_models.py",
+          "sha256": "2069ea087c76ceb54776e51bdbc0964d7f0bf545d0b82a9b73456f3d5c85d4ac"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/affine.py",
+          "sha256": "54d31b9c21fef962cb2a5f09f2e341ef92b3a40b128114c3c06a5b039fb95149"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "sha256": "104adee4c3999daedae08bc6735e6058d7c3cd66e2bca8b306ea4d65142e2f21"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/scenarios/syn-nl-lv-01.json",
+          "sha256": "1a608a0a38f9c1d60d9272b948189e48f9f294048ddf9726aaa0ed8b5cee8464"
+        },
+        {
+          "path": "cmake/CSLConfig.cmake.in",
+          "sha256": "011497d39ba776d7fb808239fb5417558407247b97f38d940fd987410c173453"
+        },
+        {
+          "path": "cmake/CasadiDependencies.cmake",
+          "sha256": "4d61dbbfed21d207c921ec72aa49e11121285c1cf35ab2b30a5922292e0c6381"
+        },
+        {
+          "path": "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "sha256": "8ba664e675389edf11d056aeb131a282a3057710b2e779423cb99a3d685b71e7"
+        },
+        {
+          "path": "include/csl/optimization/history_cost.hpp",
+          "sha256": "8a3a7ad74ca31439af995a3009a669707af7440b31e04666f433c19cc59cc347"
+        },
+        {
+          "path": "include/csl/reachability/fixed_tail_policy.hpp",
+          "sha256": "cf7b12f6934eb887c56246940c1cc00949117f80877d7ddf60603c59e3dd515c"
+        },
+        {
+          "path": "include/csl/reachability/inner_template.hpp",
+          "sha256": "8616fa3eb8ca96c1a10722e872373ef2d38703c96e99bff61a30b6d58abca1da"
+        },
+        {
+          "path": "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "sha256": "58b912a71fea064c6c26827716f8337aa73454ec6c90c361fd38bfc67be51c46"
+        },
+        {
+          "path": "src/optimization/history_cost.cpp",
+          "sha256": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86"
+        },
+        {
+          "path": "src/optimization/running_control_cost.cpp",
+          "sha256": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0"
+        },
+        {
+          "path": "src/reachability/Module.cmake",
+          "sha256": "eb7d7b266e46c134f1eb6190386a23be655cfbe4b05a0ed8dca9baae9a3e2f85"
+        },
+        {
+          "path": "src/reachability/fixed_tail_policy.cpp",
+          "sha256": "2938534a6a21540fdc7f505b99cc11bea501238d4b572f8815bbebbc1c9898fb"
+        },
+        {
+          "path": "src/reachability/inner_template.cpp",
+          "sha256": "280fdc79c2621536c99fd05ed70ec48664751aeec49800e27be748cf1e9f5e3a"
+        },
+        {
+          "path": "src/simulation/nonlinear_replay.cpp",
+          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+        },
+        {
+          "path": "src/synthesis/control_recovery.cpp",
+          "sha256": "cb54b0608aacc45774e04d7ed2ba2f4ed6faf7c06db84f8b846d1cd2db5395f1"
+        },
+        {
+          "path": "tools/closed_loop_native_policy.cpp",
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
+        }
+      ],
+      "task_id": "syn-nl-lv-01/continuous-receding/1",
+      "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec"
+    },
+    {
+      "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
+      "admission": {
+        "basis": "native C++ five-family original-task queries, all-stage H/J/membership and warm initialization checks; episode outcomes retained separately",
+        "status": "admitted"
+      },
+      "controller": {
+        "adapter": "native_fixed_tail",
+        "control_semantics": "C++ feasible frozen tail; continuous current-action argmin of complete original J under every selected physical stage region",
+        "factory_options": {
+          "build_backend_profile": {
+            "CSL_ENABLE_CASADI": true,
+            "CSL_ENABLE_HIGHS": false,
+            "CSL_ENABLE_QHULL": false,
+            "build_type": "Release"
+          },
+          "wall_seconds": 60
+        },
+        "id": "native-fixed-tail-polytope-ipopt/1",
+        "policy_factory": "native_fixed_tail_policy:create_policy",
+        "prediction": "full remaining source-bound affine physical predictor",
+        "solver": {
+          "assurance": "local numerical",
+          "provider": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "source_files": [
+          "CMakeLists.txt",
+          "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "benchmarks/reporting/closed_loop/history_policy.py",
+          "benchmarks/reporting/closed_loop/history_validation.py",
+          "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "benchmarks/reporting/closed_loop/task_models.py",
+          "cmake/CSLConfig.cmake.in",
+          "cmake/CasadiDependencies.cmake",
+          "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "include/csl/optimization/history_cost.hpp",
+          "include/csl/reachability/fixed_tail_policy.hpp",
+          "include/csl/reachability/inner_template.hpp",
+          "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "src/optimization/history_cost.cpp",
+          "src/optimization/running_control_cost.cpp",
+          "src/reachability/Module.cmake",
+          "src/reachability/fixed_tail_policy.cpp",
+          "src/reachability/inner_template.cpp",
+          "src/synthesis/control_recovery.cpp",
+          "tools/closed_loop_native_policy.cpp"
+        ],
+        "version": "1"
+      },
+      "execution": {
+        "abstol": 1e-10,
+        "id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+        "method": "adaptive RK4 step doubling",
+        "original_final_time": 2000.0,
+        "original_intervals": 20,
+        "provider": "CSL::simulation",
+        "reltol": 1e-09,
+        "report_subintervals_per_hold": 20,
+        "source_files": [
+          "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "src/simulation/nonlinear_replay.cpp"
+        ],
+        "version": "1"
+      },
+      "geometry_work": {
+        "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
+      },
+      "graph_fingerprint": "e847f196e1fba48ca879054bdbe8ad4b867fda41eb7bf7e32d90293c911db2b7",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-polytope-ipopt/1/cfg-e847f196e1fba48c",
+      "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
+      "objective_id": "env717-earth-orbit/source-cost-continuous/1",
+      "operation_roles": {
+        "controller.solve": "control_optimizer",
+        "fixed-tail.regions": "reachable_set_method"
+      },
+      "role_bindings": {
+        "control_optimizer": {
+          "id": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "converter": "not_used",
+        "reachable_set_method": {
+          "id": "csl.reachability.inner-template/1"
+        },
+        "representation": {
+          "id": "polytope"
+        },
+        "vertex_lp": "not_used"
+      },
+      "source_files": [
+        {
+          "path": "CMakeLists.txt",
+          "sha256": "1dc0908724617d75eae414a1a3953103e409373e6d1af633d7a673c52e72da24"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_policy.py",
+          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_validation.py",
+          "sha256": "77b44c488d293888eafeeb9e811c0d4949855b3994eeed0f9316e669092e597c"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "sha256": "b426ae075f2e7886d5a6ca96726d32c6eea9cb19d32761aa1e9db520d185fe87"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "sha256": "bafa9d6d20e6a9d8aa0688e00e2df2c809105b531a4993c724b4e7cf07897cd4"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/task_models.py",
+          "sha256": "2069ea087c76ceb54776e51bdbc0964d7f0bf545d0b82a9b73456f3d5c85d4ac"
+        },
+        {
+          "path": "benchmarks/reporting/env717/earth_orbit.cpp",
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "sha256": "104adee4c3999daedae08bc6735e6058d7c3cd66e2bca8b306ea4d65142e2f21"
+        },
+        {
+          "path": "cmake/CSLConfig.cmake.in",
+          "sha256": "011497d39ba776d7fb808239fb5417558407247b97f38d940fd987410c173453"
+        },
+        {
+          "path": "cmake/CasadiDependencies.cmake",
+          "sha256": "4d61dbbfed21d207c921ec72aa49e11121285c1cf35ab2b30a5922292e0c6381"
+        },
+        {
+          "path": "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "sha256": "8ba664e675389edf11d056aeb131a282a3057710b2e779423cb99a3d685b71e7"
+        },
+        {
+          "path": "include/csl/optimization/history_cost.hpp",
+          "sha256": "8a3a7ad74ca31439af995a3009a669707af7440b31e04666f433c19cc59cc347"
+        },
+        {
+          "path": "include/csl/reachability/fixed_tail_policy.hpp",
+          "sha256": "cf7b12f6934eb887c56246940c1cc00949117f80877d7ddf60603c59e3dd515c"
+        },
+        {
+          "path": "include/csl/reachability/inner_template.hpp",
+          "sha256": "8616fa3eb8ca96c1a10722e872373ef2d38703c96e99bff61a30b6d58abca1da"
+        },
+        {
+          "path": "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "sha256": "58b912a71fea064c6c26827716f8337aa73454ec6c90c361fd38bfc67be51c46"
+        },
+        {
+          "path": "src/optimization/history_cost.cpp",
+          "sha256": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86"
+        },
+        {
+          "path": "src/optimization/running_control_cost.cpp",
+          "sha256": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0"
+        },
+        {
+          "path": "src/reachability/Module.cmake",
+          "sha256": "eb7d7b266e46c134f1eb6190386a23be655cfbe4b05a0ed8dca9baae9a3e2f85"
+        },
+        {
+          "path": "src/reachability/fixed_tail_policy.cpp",
+          "sha256": "2938534a6a21540fdc7f505b99cc11bea501238d4b572f8815bbebbc1c9898fb"
+        },
+        {
+          "path": "src/reachability/inner_template.cpp",
+          "sha256": "280fdc79c2621536c99fd05ed70ec48664751aeec49800e27be748cf1e9f5e3a"
+        },
+        {
+          "path": "src/simulation/nonlinear_replay.cpp",
+          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+        },
+        {
+          "path": "src/synthesis/control_recovery.cpp",
+          "sha256": "cb54b0608aacc45774e04d7ed2ba2f4ed6faf7c06db84f8b846d1cd2db5395f1"
+        },
+        {
+          "path": "tools/closed_loop_native_policy.cpp",
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
+        }
+      ],
+      "task_id": "env717-earth-orbit/continuous-receding/1",
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
+    },
+    {
+      "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
+      "admission": {
+        "basis": "native C++ five-family original-task queries, all-stage H/J/membership and warm initialization checks; episode outcomes retained separately",
+        "status": "admitted"
+      },
+      "controller": {
+        "adapter": "native_fixed_tail",
+        "control_semantics": "C++ feasible frozen tail; continuous current-action argmin of complete original J under every selected physical stage region",
+        "factory_options": {
+          "build_backend_profile": {
+            "CSL_ENABLE_CASADI": true,
+            "CSL_ENABLE_HIGHS": false,
+            "CSL_ENABLE_QHULL": false,
+            "build_type": "Release"
+          },
+          "wall_seconds": 60
+        },
+        "id": "native-fixed-tail-box-ipopt/1",
+        "policy_factory": "native_fixed_tail_policy:create_policy",
+        "prediction": "full remaining source-bound affine physical predictor",
+        "solver": {
+          "assurance": "local numerical",
+          "provider": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "source_files": [
+          "CMakeLists.txt",
+          "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "benchmarks/reporting/closed_loop/history_policy.py",
+          "benchmarks/reporting/closed_loop/history_validation.py",
+          "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "benchmarks/reporting/closed_loop/task_models.py",
+          "cmake/CSLConfig.cmake.in",
+          "cmake/CasadiDependencies.cmake",
+          "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "include/csl/optimization/history_cost.hpp",
+          "include/csl/reachability/fixed_tail_policy.hpp",
+          "include/csl/reachability/inner_template.hpp",
+          "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "src/optimization/history_cost.cpp",
+          "src/optimization/running_control_cost.cpp",
+          "src/reachability/Module.cmake",
+          "src/reachability/fixed_tail_policy.cpp",
+          "src/reachability/inner_template.cpp",
+          "src/synthesis/control_recovery.cpp",
+          "tools/closed_loop_native_policy.cpp"
+        ],
+        "version": "1"
+      },
+      "execution": {
+        "abstol": 1e-10,
+        "id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+        "method": "adaptive RK4 step doubling",
+        "original_final_time": 2000.0,
+        "original_intervals": 20,
+        "provider": "CSL::simulation",
+        "reltol": 1e-09,
+        "report_subintervals_per_hold": 20,
+        "source_files": [
+          "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "src/simulation/nonlinear_replay.cpp"
+        ],
+        "version": "1"
+      },
+      "geometry_work": {
+        "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
+      },
+      "graph_fingerprint": "038987332fb2ca11038217228b207ca40edd38159ccb8193e184953537d94a58",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-box-ipopt/1/cfg-038987332fb2ca11",
+      "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
+      "objective_id": "env717-earth-orbit/source-cost-continuous/1",
+      "operation_roles": {
+        "controller.solve": "control_optimizer",
+        "fixed-tail.regions": "reachable_set_method"
+      },
+      "role_bindings": {
+        "control_optimizer": {
+          "id": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "converter": "not_used",
+        "reachable_set_method": {
+          "id": "csl.reachability.inner-template/1"
+        },
+        "representation": {
+          "id": "box"
+        },
+        "vertex_lp": "not_used"
+      },
+      "source_files": [
+        {
+          "path": "CMakeLists.txt",
+          "sha256": "1dc0908724617d75eae414a1a3953103e409373e6d1af633d7a673c52e72da24"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_policy.py",
+          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_validation.py",
+          "sha256": "77b44c488d293888eafeeb9e811c0d4949855b3994eeed0f9316e669092e597c"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "sha256": "b426ae075f2e7886d5a6ca96726d32c6eea9cb19d32761aa1e9db520d185fe87"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "sha256": "bafa9d6d20e6a9d8aa0688e00e2df2c809105b531a4993c724b4e7cf07897cd4"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/task_models.py",
+          "sha256": "2069ea087c76ceb54776e51bdbc0964d7f0bf545d0b82a9b73456f3d5c85d4ac"
+        },
+        {
+          "path": "benchmarks/reporting/env717/earth_orbit.cpp",
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "sha256": "104adee4c3999daedae08bc6735e6058d7c3cd66e2bca8b306ea4d65142e2f21"
+        },
+        {
+          "path": "cmake/CSLConfig.cmake.in",
+          "sha256": "011497d39ba776d7fb808239fb5417558407247b97f38d940fd987410c173453"
+        },
+        {
+          "path": "cmake/CasadiDependencies.cmake",
+          "sha256": "4d61dbbfed21d207c921ec72aa49e11121285c1cf35ab2b30a5922292e0c6381"
+        },
+        {
+          "path": "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "sha256": "8ba664e675389edf11d056aeb131a282a3057710b2e779423cb99a3d685b71e7"
+        },
+        {
+          "path": "include/csl/optimization/history_cost.hpp",
+          "sha256": "8a3a7ad74ca31439af995a3009a669707af7440b31e04666f433c19cc59cc347"
+        },
+        {
+          "path": "include/csl/reachability/fixed_tail_policy.hpp",
+          "sha256": "cf7b12f6934eb887c56246940c1cc00949117f80877d7ddf60603c59e3dd515c"
+        },
+        {
+          "path": "include/csl/reachability/inner_template.hpp",
+          "sha256": "8616fa3eb8ca96c1a10722e872373ef2d38703c96e99bff61a30b6d58abca1da"
+        },
+        {
+          "path": "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "sha256": "58b912a71fea064c6c26827716f8337aa73454ec6c90c361fd38bfc67be51c46"
+        },
+        {
+          "path": "src/optimization/history_cost.cpp",
+          "sha256": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86"
+        },
+        {
+          "path": "src/optimization/running_control_cost.cpp",
+          "sha256": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0"
+        },
+        {
+          "path": "src/reachability/Module.cmake",
+          "sha256": "eb7d7b266e46c134f1eb6190386a23be655cfbe4b05a0ed8dca9baae9a3e2f85"
+        },
+        {
+          "path": "src/reachability/fixed_tail_policy.cpp",
+          "sha256": "2938534a6a21540fdc7f505b99cc11bea501238d4b572f8815bbebbc1c9898fb"
+        },
+        {
+          "path": "src/reachability/inner_template.cpp",
+          "sha256": "280fdc79c2621536c99fd05ed70ec48664751aeec49800e27be748cf1e9f5e3a"
+        },
+        {
+          "path": "src/simulation/nonlinear_replay.cpp",
+          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+        },
+        {
+          "path": "src/synthesis/control_recovery.cpp",
+          "sha256": "cb54b0608aacc45774e04d7ed2ba2f4ed6faf7c06db84f8b846d1cd2db5395f1"
+        },
+        {
+          "path": "tools/closed_loop_native_policy.cpp",
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
+        }
+      ],
+      "task_id": "env717-earth-orbit/continuous-receding/1",
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
+    },
+    {
+      "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
+      "admission": {
+        "basis": "native C++ five-family original-task queries, all-stage H/J/membership and warm initialization checks; episode outcomes retained separately",
+        "status": "admitted"
+      },
+      "controller": {
+        "adapter": "native_fixed_tail",
+        "control_semantics": "C++ feasible frozen tail; continuous current-action argmin of complete original J under every selected physical stage region",
+        "factory_options": {
+          "build_backend_profile": {
+            "CSL_ENABLE_CASADI": true,
+            "CSL_ENABLE_HIGHS": false,
+            "CSL_ENABLE_QHULL": false,
+            "build_type": "Release"
+          },
+          "wall_seconds": 60
+        },
+        "id": "native-fixed-tail-zonotope-ipopt/1",
+        "policy_factory": "native_fixed_tail_policy:create_policy",
+        "prediction": "full remaining source-bound affine physical predictor",
+        "solver": {
+          "assurance": "local numerical",
+          "provider": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "source_files": [
+          "CMakeLists.txt",
+          "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "benchmarks/reporting/closed_loop/history_policy.py",
+          "benchmarks/reporting/closed_loop/history_validation.py",
+          "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "benchmarks/reporting/closed_loop/task_models.py",
+          "cmake/CSLConfig.cmake.in",
+          "cmake/CasadiDependencies.cmake",
+          "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "include/csl/optimization/history_cost.hpp",
+          "include/csl/reachability/fixed_tail_policy.hpp",
+          "include/csl/reachability/inner_template.hpp",
+          "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "src/optimization/history_cost.cpp",
+          "src/optimization/running_control_cost.cpp",
+          "src/reachability/Module.cmake",
+          "src/reachability/fixed_tail_policy.cpp",
+          "src/reachability/inner_template.cpp",
+          "src/synthesis/control_recovery.cpp",
+          "tools/closed_loop_native_policy.cpp"
+        ],
+        "version": "1"
+      },
+      "execution": {
+        "abstol": 1e-10,
+        "id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+        "method": "adaptive RK4 step doubling",
+        "original_final_time": 2000.0,
+        "original_intervals": 20,
+        "provider": "CSL::simulation",
+        "reltol": 1e-09,
+        "report_subintervals_per_hold": 20,
+        "source_files": [
+          "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "src/simulation/nonlinear_replay.cpp"
+        ],
+        "version": "1"
+      },
+      "geometry_work": {
+        "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
+      },
+      "graph_fingerprint": "f18eb335ef0b17f09eeede0486fa3426a79ddb6677a05a9a67046adab13c2529",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-zonotope-ipopt/1/cfg-f18eb335ef0b17f0",
+      "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
+      "objective_id": "env717-earth-orbit/source-cost-continuous/1",
+      "operation_roles": {
+        "controller.solve": "control_optimizer",
+        "fixed-tail.regions": "reachable_set_method"
+      },
+      "role_bindings": {
+        "control_optimizer": {
+          "id": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "converter": "not_used",
+        "reachable_set_method": {
+          "id": "csl.reachability.inner-template/1"
+        },
+        "representation": {
+          "id": "zonotope"
+        },
+        "vertex_lp": "not_used"
+      },
+      "source_files": [
+        {
+          "path": "CMakeLists.txt",
+          "sha256": "1dc0908724617d75eae414a1a3953103e409373e6d1af633d7a673c52e72da24"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_policy.py",
+          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_validation.py",
+          "sha256": "77b44c488d293888eafeeb9e811c0d4949855b3994eeed0f9316e669092e597c"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "sha256": "b426ae075f2e7886d5a6ca96726d32c6eea9cb19d32761aa1e9db520d185fe87"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "sha256": "bafa9d6d20e6a9d8aa0688e00e2df2c809105b531a4993c724b4e7cf07897cd4"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/task_models.py",
+          "sha256": "2069ea087c76ceb54776e51bdbc0964d7f0bf545d0b82a9b73456f3d5c85d4ac"
+        },
+        {
+          "path": "benchmarks/reporting/env717/earth_orbit.cpp",
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "sha256": "104adee4c3999daedae08bc6735e6058d7c3cd66e2bca8b306ea4d65142e2f21"
+        },
+        {
+          "path": "cmake/CSLConfig.cmake.in",
+          "sha256": "011497d39ba776d7fb808239fb5417558407247b97f38d940fd987410c173453"
+        },
+        {
+          "path": "cmake/CasadiDependencies.cmake",
+          "sha256": "4d61dbbfed21d207c921ec72aa49e11121285c1cf35ab2b30a5922292e0c6381"
+        },
+        {
+          "path": "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "sha256": "8ba664e675389edf11d056aeb131a282a3057710b2e779423cb99a3d685b71e7"
+        },
+        {
+          "path": "include/csl/optimization/history_cost.hpp",
+          "sha256": "8a3a7ad74ca31439af995a3009a669707af7440b31e04666f433c19cc59cc347"
+        },
+        {
+          "path": "include/csl/reachability/fixed_tail_policy.hpp",
+          "sha256": "cf7b12f6934eb887c56246940c1cc00949117f80877d7ddf60603c59e3dd515c"
+        },
+        {
+          "path": "include/csl/reachability/inner_template.hpp",
+          "sha256": "8616fa3eb8ca96c1a10722e872373ef2d38703c96e99bff61a30b6d58abca1da"
+        },
+        {
+          "path": "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "sha256": "58b912a71fea064c6c26827716f8337aa73454ec6c90c361fd38bfc67be51c46"
+        },
+        {
+          "path": "src/optimization/history_cost.cpp",
+          "sha256": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86"
+        },
+        {
+          "path": "src/optimization/running_control_cost.cpp",
+          "sha256": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0"
+        },
+        {
+          "path": "src/reachability/Module.cmake",
+          "sha256": "eb7d7b266e46c134f1eb6190386a23be655cfbe4b05a0ed8dca9baae9a3e2f85"
+        },
+        {
+          "path": "src/reachability/fixed_tail_policy.cpp",
+          "sha256": "2938534a6a21540fdc7f505b99cc11bea501238d4b572f8815bbebbc1c9898fb"
+        },
+        {
+          "path": "src/reachability/inner_template.cpp",
+          "sha256": "280fdc79c2621536c99fd05ed70ec48664751aeec49800e27be748cf1e9f5e3a"
+        },
+        {
+          "path": "src/simulation/nonlinear_replay.cpp",
+          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+        },
+        {
+          "path": "src/synthesis/control_recovery.cpp",
+          "sha256": "cb54b0608aacc45774e04d7ed2ba2f4ed6faf7c06db84f8b846d1cd2db5395f1"
+        },
+        {
+          "path": "tools/closed_loop_native_policy.cpp",
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
+        }
+      ],
+      "task_id": "env717-earth-orbit/continuous-receding/1",
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
+    },
+    {
+      "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
+      "admission": {
+        "basis": "native C++ five-family original-task queries, all-stage H/J/membership and warm initialization checks; episode outcomes retained separately",
+        "status": "admitted"
+      },
+      "controller": {
+        "adapter": "native_fixed_tail",
+        "control_semantics": "C++ feasible frozen tail; continuous current-action argmin of complete original J under every selected physical stage region",
+        "factory_options": {
+          "build_backend_profile": {
+            "CSL_ENABLE_CASADI": true,
+            "CSL_ENABLE_HIGHS": false,
+            "CSL_ENABLE_QHULL": false,
+            "build_type": "Release"
+          },
+          "wall_seconds": 60
+        },
+        "id": "native-fixed-tail-parallelotope-ipopt/1",
+        "policy_factory": "native_fixed_tail_policy:create_policy",
+        "prediction": "full remaining source-bound affine physical predictor",
+        "solver": {
+          "assurance": "local numerical",
+          "provider": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "source_files": [
+          "CMakeLists.txt",
+          "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "benchmarks/reporting/closed_loop/history_policy.py",
+          "benchmarks/reporting/closed_loop/history_validation.py",
+          "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "benchmarks/reporting/closed_loop/task_models.py",
+          "cmake/CSLConfig.cmake.in",
+          "cmake/CasadiDependencies.cmake",
+          "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "include/csl/optimization/history_cost.hpp",
+          "include/csl/reachability/fixed_tail_policy.hpp",
+          "include/csl/reachability/inner_template.hpp",
+          "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "src/optimization/history_cost.cpp",
+          "src/optimization/running_control_cost.cpp",
+          "src/reachability/Module.cmake",
+          "src/reachability/fixed_tail_policy.cpp",
+          "src/reachability/inner_template.cpp",
+          "src/synthesis/control_recovery.cpp",
+          "tools/closed_loop_native_policy.cpp"
+        ],
+        "version": "1"
+      },
+      "execution": {
+        "abstol": 1e-10,
+        "id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+        "method": "adaptive RK4 step doubling",
+        "original_final_time": 2000.0,
+        "original_intervals": 20,
+        "provider": "CSL::simulation",
+        "reltol": 1e-09,
+        "report_subintervals_per_hold": 20,
+        "source_files": [
+          "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "src/simulation/nonlinear_replay.cpp"
+        ],
+        "version": "1"
+      },
+      "geometry_work": {
+        "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
+      },
+      "graph_fingerprint": "70ff3d1aad6bb7ee9c312e56ac2603963d2e6b674ae9a9801b6aceb09fc2ecf1",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-parallelotope-ipopt/1/cfg-70ff3d1aad6bb7ee",
+      "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
+      "objective_id": "env717-earth-orbit/source-cost-continuous/1",
+      "operation_roles": {
+        "controller.solve": "control_optimizer",
+        "fixed-tail.regions": "reachable_set_method"
+      },
+      "role_bindings": {
+        "control_optimizer": {
+          "id": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "converter": "not_used",
+        "reachable_set_method": {
+          "id": "csl.reachability.inner-template/1"
+        },
+        "representation": {
+          "id": "parallelotope"
+        },
+        "vertex_lp": "not_used"
+      },
+      "source_files": [
+        {
+          "path": "CMakeLists.txt",
+          "sha256": "1dc0908724617d75eae414a1a3953103e409373e6d1af633d7a673c52e72da24"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_policy.py",
+          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_validation.py",
+          "sha256": "77b44c488d293888eafeeb9e811c0d4949855b3994eeed0f9316e669092e597c"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "sha256": "b426ae075f2e7886d5a6ca96726d32c6eea9cb19d32761aa1e9db520d185fe87"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "sha256": "bafa9d6d20e6a9d8aa0688e00e2df2c809105b531a4993c724b4e7cf07897cd4"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/task_models.py",
+          "sha256": "2069ea087c76ceb54776e51bdbc0964d7f0bf545d0b82a9b73456f3d5c85d4ac"
+        },
+        {
+          "path": "benchmarks/reporting/env717/earth_orbit.cpp",
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "sha256": "104adee4c3999daedae08bc6735e6058d7c3cd66e2bca8b306ea4d65142e2f21"
+        },
+        {
+          "path": "cmake/CSLConfig.cmake.in",
+          "sha256": "011497d39ba776d7fb808239fb5417558407247b97f38d940fd987410c173453"
+        },
+        {
+          "path": "cmake/CasadiDependencies.cmake",
+          "sha256": "4d61dbbfed21d207c921ec72aa49e11121285c1cf35ab2b30a5922292e0c6381"
+        },
+        {
+          "path": "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "sha256": "8ba664e675389edf11d056aeb131a282a3057710b2e779423cb99a3d685b71e7"
+        },
+        {
+          "path": "include/csl/optimization/history_cost.hpp",
+          "sha256": "8a3a7ad74ca31439af995a3009a669707af7440b31e04666f433c19cc59cc347"
+        },
+        {
+          "path": "include/csl/reachability/fixed_tail_policy.hpp",
+          "sha256": "cf7b12f6934eb887c56246940c1cc00949117f80877d7ddf60603c59e3dd515c"
+        },
+        {
+          "path": "include/csl/reachability/inner_template.hpp",
+          "sha256": "8616fa3eb8ca96c1a10722e872373ef2d38703c96e99bff61a30b6d58abca1da"
+        },
+        {
+          "path": "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "sha256": "58b912a71fea064c6c26827716f8337aa73454ec6c90c361fd38bfc67be51c46"
+        },
+        {
+          "path": "src/optimization/history_cost.cpp",
+          "sha256": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86"
+        },
+        {
+          "path": "src/optimization/running_control_cost.cpp",
+          "sha256": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0"
+        },
+        {
+          "path": "src/reachability/Module.cmake",
+          "sha256": "eb7d7b266e46c134f1eb6190386a23be655cfbe4b05a0ed8dca9baae9a3e2f85"
+        },
+        {
+          "path": "src/reachability/fixed_tail_policy.cpp",
+          "sha256": "2938534a6a21540fdc7f505b99cc11bea501238d4b572f8815bbebbc1c9898fb"
+        },
+        {
+          "path": "src/reachability/inner_template.cpp",
+          "sha256": "280fdc79c2621536c99fd05ed70ec48664751aeec49800e27be748cf1e9f5e3a"
+        },
+        {
+          "path": "src/simulation/nonlinear_replay.cpp",
+          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+        },
+        {
+          "path": "src/synthesis/control_recovery.cpp",
+          "sha256": "cb54b0608aacc45774e04d7ed2ba2f4ed6faf7c06db84f8b846d1cd2db5395f1"
+        },
+        {
+          "path": "tools/closed_loop_native_policy.cpp",
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
+        }
+      ],
+      "task_id": "env717-earth-orbit/continuous-receding/1",
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
+    },
+    {
+      "action_profile_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
+      "admission": {
+        "basis": "native C++ five-family original-task queries, all-stage H/J/membership and warm initialization checks; episode outcomes retained separately",
+        "status": "admitted"
+      },
+      "controller": {
+        "adapter": "native_fixed_tail",
+        "control_semantics": "C++ feasible frozen tail; continuous current-action argmin of complete original J under every selected physical stage region",
+        "factory_options": {
+          "build_backend_profile": {
+            "CSL_ENABLE_CASADI": true,
+            "CSL_ENABLE_HIGHS": false,
+            "CSL_ENABLE_QHULL": false,
+            "build_type": "Release"
+          },
+          "wall_seconds": 60
+        },
+        "id": "native-fixed-tail-ellipsoid-ipopt/1",
+        "policy_factory": "native_fixed_tail_policy:create_policy",
+        "prediction": "full remaining source-bound affine physical predictor",
+        "solver": {
+          "assurance": "local numerical",
+          "provider": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "source_files": [
+          "CMakeLists.txt",
+          "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "benchmarks/reporting/closed_loop/history_policy.py",
+          "benchmarks/reporting/closed_loop/history_validation.py",
+          "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "benchmarks/reporting/closed_loop/task_models.py",
+          "cmake/CSLConfig.cmake.in",
+          "cmake/CasadiDependencies.cmake",
+          "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "include/csl/optimization/history_cost.hpp",
+          "include/csl/reachability/fixed_tail_policy.hpp",
+          "include/csl/reachability/inner_template.hpp",
+          "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "src/optimization/history_cost.cpp",
+          "src/optimization/running_control_cost.cpp",
+          "src/reachability/Module.cmake",
+          "src/reachability/fixed_tail_policy.cpp",
+          "src/reachability/inner_template.cpp",
+          "src/synthesis/control_recovery.cpp",
+          "tools/closed_loop_native_policy.cpp"
+        ],
+        "version": "1"
+      },
+      "execution": {
+        "abstol": 1e-10,
+        "id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+        "method": "adaptive RK4 step doubling",
+        "original_final_time": 2000.0,
+        "original_intervals": 20,
+        "provider": "CSL::simulation",
+        "reltol": 1e-09,
+        "report_subintervals_per_hold": 20,
+        "source_files": [
+          "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "src/simulation/nonlinear_replay.cpp"
+        ],
+        "version": "1"
+      },
+      "geometry_work": {
+        "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
+      },
+      "graph_fingerprint": "75a164da0f9a5c09a68f5c46190e19f0adef0ef714407fc85972188f6255018d",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-ellipsoid-ipopt/1/cfg-75a164da0f9a5c09",
+      "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
+      "objective_id": "env717-earth-orbit/source-cost-continuous/1",
+      "operation_roles": {
+        "controller.solve": "control_optimizer",
+        "fixed-tail.regions": "reachable_set_method"
+      },
+      "role_bindings": {
+        "control_optimizer": {
+          "id": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "converter": "not_used",
+        "reachable_set_method": {
+          "id": "csl.reachability.inner-template/1"
+        },
+        "representation": {
+          "id": "ellipsoid"
+        },
+        "vertex_lp": "not_used"
+      },
+      "source_files": [
+        {
+          "path": "CMakeLists.txt",
+          "sha256": "1dc0908724617d75eae414a1a3953103e409373e6d1af633d7a673c52e72da24"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_policy.py",
+          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_validation.py",
+          "sha256": "77b44c488d293888eafeeb9e811c0d4949855b3994eeed0f9316e669092e597c"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "sha256": "b426ae075f2e7886d5a6ca96726d32c6eea9cb19d32761aa1e9db520d185fe87"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "sha256": "bafa9d6d20e6a9d8aa0688e00e2df2c809105b531a4993c724b4e7cf07897cd4"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/task_models.py",
+          "sha256": "2069ea087c76ceb54776e51bdbc0964d7f0bf545d0b82a9b73456f3d5c85d4ac"
+        },
+        {
+          "path": "benchmarks/reporting/env717/earth_orbit.cpp",
+          "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "sha256": "104adee4c3999daedae08bc6735e6058d7c3cd66e2bca8b306ea4d65142e2f21"
+        },
+        {
+          "path": "cmake/CSLConfig.cmake.in",
+          "sha256": "011497d39ba776d7fb808239fb5417558407247b97f38d940fd987410c173453"
+        },
+        {
+          "path": "cmake/CasadiDependencies.cmake",
+          "sha256": "4d61dbbfed21d207c921ec72aa49e11121285c1cf35ab2b30a5922292e0c6381"
+        },
+        {
+          "path": "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "sha256": "8ba664e675389edf11d056aeb131a282a3057710b2e779423cb99a3d685b71e7"
+        },
+        {
+          "path": "include/csl/optimization/history_cost.hpp",
+          "sha256": "8a3a7ad74ca31439af995a3009a669707af7440b31e04666f433c19cc59cc347"
+        },
+        {
+          "path": "include/csl/reachability/fixed_tail_policy.hpp",
+          "sha256": "cf7b12f6934eb887c56246940c1cc00949117f80877d7ddf60603c59e3dd515c"
+        },
+        {
+          "path": "include/csl/reachability/inner_template.hpp",
+          "sha256": "8616fa3eb8ca96c1a10722e872373ef2d38703c96e99bff61a30b6d58abca1da"
+        },
+        {
+          "path": "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "sha256": "58b912a71fea064c6c26827716f8337aa73454ec6c90c361fd38bfc67be51c46"
+        },
+        {
+          "path": "src/optimization/history_cost.cpp",
+          "sha256": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86"
+        },
+        {
+          "path": "src/optimization/running_control_cost.cpp",
+          "sha256": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0"
+        },
+        {
+          "path": "src/reachability/Module.cmake",
+          "sha256": "eb7d7b266e46c134f1eb6190386a23be655cfbe4b05a0ed8dca9baae9a3e2f85"
+        },
+        {
+          "path": "src/reachability/fixed_tail_policy.cpp",
+          "sha256": "2938534a6a21540fdc7f505b99cc11bea501238d4b572f8815bbebbc1c9898fb"
+        },
+        {
+          "path": "src/reachability/inner_template.cpp",
+          "sha256": "280fdc79c2621536c99fd05ed70ec48664751aeec49800e27be748cf1e9f5e3a"
+        },
+        {
+          "path": "src/simulation/nonlinear_replay.cpp",
+          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+        },
+        {
+          "path": "src/synthesis/control_recovery.cpp",
+          "sha256": "cb54b0608aacc45774e04d7ed2ba2f4ed6faf7c06db84f8b846d1cd2db5395f1"
+        },
+        {
+          "path": "tools/closed_loop_native_policy.cpp",
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
+        }
+      ],
+      "task_id": "env717-earth-orbit/continuous-receding/1",
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
+    },
+    {
+      "action_profile_id": "syn-nl-fuel-01/continuous-receding/1/continuous-control/1",
+      "admission": {
+        "basis": "native C++ five-family original-task queries, all-stage H/J/membership and warm initialization checks; episode outcomes retained separately",
+        "status": "admitted"
+      },
+      "controller": {
+        "adapter": "native_fixed_tail",
+        "control_semantics": "C++ feasible frozen tail; continuous current-action argmin of complete original J under every selected physical stage region",
+        "factory_options": {
+          "build_backend_profile": {
+            "CSL_ENABLE_CASADI": true,
+            "CSL_ENABLE_HIGHS": false,
+            "CSL_ENABLE_QHULL": false,
+            "build_type": "Release"
+          },
+          "wall_seconds": 60
+        },
+        "id": "native-fixed-tail-polytope-ipopt/1",
+        "policy_factory": "native_fixed_tail_policy:create_policy",
+        "prediction": "full remaining source-bound affine physical predictor",
+        "solver": {
+          "assurance": "local numerical",
+          "provider": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "source_files": [
+          "CMakeLists.txt",
+          "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "benchmarks/reporting/closed_loop/history_policy.py",
+          "benchmarks/reporting/closed_loop/history_validation.py",
+          "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "benchmarks/reporting/closed_loop/task_models.py",
+          "cmake/CSLConfig.cmake.in",
+          "cmake/CasadiDependencies.cmake",
+          "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "include/csl/optimization/history_cost.hpp",
+          "include/csl/reachability/fixed_tail_policy.hpp",
+          "include/csl/reachability/inner_template.hpp",
+          "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "src/optimization/history_cost.cpp",
+          "src/optimization/running_control_cost.cpp",
+          "src/reachability/Module.cmake",
+          "src/reachability/fixed_tail_policy.cpp",
+          "src/reachability/inner_template.cpp",
+          "src/synthesis/control_recovery.cpp",
+          "tools/closed_loop_native_policy.cpp"
+        ],
+        "version": "1"
+      },
+      "execution": {
+        "abstol": 1e-10,
+        "id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+        "method": "adaptive RK4 step doubling",
+        "original_final_time": 20,
+        "original_intervals": 40,
+        "provider": "CSL::simulation",
+        "reltol": 1e-09,
+        "report_subintervals_per_hold": 20,
+        "source_files": [
+          "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "src/simulation/nonlinear_replay.cpp"
+        ],
+        "version": "1"
+      },
+      "geometry_work": {
+        "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
+      },
+      "graph_fingerprint": "5c2dc0f4fe34540d491aa2db29b75a00b6d6862783019fb6349daeef32ca8153",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-polytope-ipopt/1/cfg-5c2dc0f4fe34540d",
+      "model_id": "syn-nl-fuel-01/ode/1",
+      "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
+      "operation_roles": {
+        "controller.solve": "control_optimizer",
+        "fixed-tail.regions": "reachable_set_method"
+      },
+      "role_bindings": {
+        "control_optimizer": {
+          "id": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "converter": "not_used",
+        "reachable_set_method": {
+          "id": "csl.reachability.inner-template/1"
+        },
+        "representation": {
+          "id": "polytope"
+        },
+        "vertex_lp": "not_used"
+      },
+      "source_files": [
+        {
+          "path": "CMakeLists.txt",
+          "sha256": "1dc0908724617d75eae414a1a3953103e409373e6d1af633d7a673c52e72da24"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_policy.py",
+          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_validation.py",
+          "sha256": "77b44c488d293888eafeeb9e811c0d4949855b3994eeed0f9316e669092e597c"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "sha256": "b426ae075f2e7886d5a6ca96726d32c6eea9cb19d32761aa1e9db520d185fe87"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "sha256": "bafa9d6d20e6a9d8aa0688e00e2df2c809105b531a4993c724b4e7cf07897cd4"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/task_models.py",
+          "sha256": "2069ea087c76ceb54776e51bdbc0964d7f0bf545d0b82a9b73456f3d5c85d4ac"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/affine.py",
+          "sha256": "54d31b9c21fef962cb2a5f09f2e341ef92b3a40b128114c3c06a5b039fb95149"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "sha256": "104adee4c3999daedae08bc6735e6058d7c3cd66e2bca8b306ea4d65142e2f21"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/scenarios/syn-nl-fuel-01.json",
+          "sha256": "5dd38a65f5ad6c5f90b8616fbc866eb9ef2735b1b7f7279bca0b2b0d05f9dce1"
+        },
+        {
+          "path": "cmake/CSLConfig.cmake.in",
+          "sha256": "011497d39ba776d7fb808239fb5417558407247b97f38d940fd987410c173453"
+        },
+        {
+          "path": "cmake/CasadiDependencies.cmake",
+          "sha256": "4d61dbbfed21d207c921ec72aa49e11121285c1cf35ab2b30a5922292e0c6381"
+        },
+        {
+          "path": "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "sha256": "8ba664e675389edf11d056aeb131a282a3057710b2e779423cb99a3d685b71e7"
+        },
+        {
+          "path": "include/csl/optimization/history_cost.hpp",
+          "sha256": "8a3a7ad74ca31439af995a3009a669707af7440b31e04666f433c19cc59cc347"
+        },
+        {
+          "path": "include/csl/reachability/fixed_tail_policy.hpp",
+          "sha256": "cf7b12f6934eb887c56246940c1cc00949117f80877d7ddf60603c59e3dd515c"
+        },
+        {
+          "path": "include/csl/reachability/inner_template.hpp",
+          "sha256": "8616fa3eb8ca96c1a10722e872373ef2d38703c96e99bff61a30b6d58abca1da"
+        },
+        {
+          "path": "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "sha256": "58b912a71fea064c6c26827716f8337aa73454ec6c90c361fd38bfc67be51c46"
+        },
+        {
+          "path": "src/optimization/history_cost.cpp",
+          "sha256": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86"
+        },
+        {
+          "path": "src/optimization/running_control_cost.cpp",
+          "sha256": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0"
+        },
+        {
+          "path": "src/reachability/Module.cmake",
+          "sha256": "eb7d7b266e46c134f1eb6190386a23be655cfbe4b05a0ed8dca9baae9a3e2f85"
+        },
+        {
+          "path": "src/reachability/fixed_tail_policy.cpp",
+          "sha256": "2938534a6a21540fdc7f505b99cc11bea501238d4b572f8815bbebbc1c9898fb"
+        },
+        {
+          "path": "src/reachability/inner_template.cpp",
+          "sha256": "280fdc79c2621536c99fd05ed70ec48664751aeec49800e27be748cf1e9f5e3a"
+        },
+        {
+          "path": "src/simulation/nonlinear_replay.cpp",
+          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+        },
+        {
+          "path": "src/synthesis/control_recovery.cpp",
+          "sha256": "cb54b0608aacc45774e04d7ed2ba2f4ed6faf7c06db84f8b846d1cd2db5395f1"
+        },
+        {
+          "path": "tools/closed_loop_native_policy.cpp",
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
+        }
+      ],
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b"
+    },
+    {
+      "action_profile_id": "syn-nl-fuel-01/continuous-receding/1/continuous-control/1",
+      "admission": {
+        "basis": "native C++ five-family original-task queries, all-stage H/J/membership and warm initialization checks; episode outcomes retained separately",
+        "status": "admitted"
+      },
+      "controller": {
+        "adapter": "native_fixed_tail",
+        "control_semantics": "C++ feasible frozen tail; continuous current-action argmin of complete original J under every selected physical stage region",
+        "factory_options": {
+          "build_backend_profile": {
+            "CSL_ENABLE_CASADI": true,
+            "CSL_ENABLE_HIGHS": false,
+            "CSL_ENABLE_QHULL": false,
+            "build_type": "Release"
+          },
+          "wall_seconds": 60
+        },
+        "id": "native-fixed-tail-box-ipopt/1",
+        "policy_factory": "native_fixed_tail_policy:create_policy",
+        "prediction": "full remaining source-bound affine physical predictor",
+        "solver": {
+          "assurance": "local numerical",
+          "provider": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "source_files": [
+          "CMakeLists.txt",
+          "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "benchmarks/reporting/closed_loop/history_policy.py",
+          "benchmarks/reporting/closed_loop/history_validation.py",
+          "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "benchmarks/reporting/closed_loop/task_models.py",
+          "cmake/CSLConfig.cmake.in",
+          "cmake/CasadiDependencies.cmake",
+          "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "include/csl/optimization/history_cost.hpp",
+          "include/csl/reachability/fixed_tail_policy.hpp",
+          "include/csl/reachability/inner_template.hpp",
+          "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "src/optimization/history_cost.cpp",
+          "src/optimization/running_control_cost.cpp",
+          "src/reachability/Module.cmake",
+          "src/reachability/fixed_tail_policy.cpp",
+          "src/reachability/inner_template.cpp",
+          "src/synthesis/control_recovery.cpp",
+          "tools/closed_loop_native_policy.cpp"
+        ],
+        "version": "1"
+      },
+      "execution": {
+        "abstol": 1e-10,
+        "id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+        "method": "adaptive RK4 step doubling",
+        "original_final_time": 20,
+        "original_intervals": 40,
+        "provider": "CSL::simulation",
+        "reltol": 1e-09,
+        "report_subintervals_per_hold": 20,
+        "source_files": [
+          "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "src/simulation/nonlinear_replay.cpp"
+        ],
+        "version": "1"
+      },
+      "geometry_work": {
+        "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
+      },
+      "graph_fingerprint": "0f84e8784b8f92a5088c17391c85fe479da09a6e0ad5a10c601a734a01cfc4aa",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-box-ipopt/1/cfg-0f84e8784b8f92a5",
+      "model_id": "syn-nl-fuel-01/ode/1",
+      "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
+      "operation_roles": {
+        "controller.solve": "control_optimizer",
+        "fixed-tail.regions": "reachable_set_method"
+      },
+      "role_bindings": {
+        "control_optimizer": {
+          "id": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "converter": "not_used",
+        "reachable_set_method": {
+          "id": "csl.reachability.inner-template/1"
+        },
+        "representation": {
+          "id": "box"
+        },
+        "vertex_lp": "not_used"
+      },
+      "source_files": [
+        {
+          "path": "CMakeLists.txt",
+          "sha256": "1dc0908724617d75eae414a1a3953103e409373e6d1af633d7a673c52e72da24"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_policy.py",
+          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_validation.py",
+          "sha256": "77b44c488d293888eafeeb9e811c0d4949855b3994eeed0f9316e669092e597c"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "sha256": "b426ae075f2e7886d5a6ca96726d32c6eea9cb19d32761aa1e9db520d185fe87"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "sha256": "bafa9d6d20e6a9d8aa0688e00e2df2c809105b531a4993c724b4e7cf07897cd4"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/task_models.py",
+          "sha256": "2069ea087c76ceb54776e51bdbc0964d7f0bf545d0b82a9b73456f3d5c85d4ac"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/affine.py",
+          "sha256": "54d31b9c21fef962cb2a5f09f2e341ef92b3a40b128114c3c06a5b039fb95149"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "sha256": "104adee4c3999daedae08bc6735e6058d7c3cd66e2bca8b306ea4d65142e2f21"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/scenarios/syn-nl-fuel-01.json",
+          "sha256": "5dd38a65f5ad6c5f90b8616fbc866eb9ef2735b1b7f7279bca0b2b0d05f9dce1"
+        },
+        {
+          "path": "cmake/CSLConfig.cmake.in",
+          "sha256": "011497d39ba776d7fb808239fb5417558407247b97f38d940fd987410c173453"
+        },
+        {
+          "path": "cmake/CasadiDependencies.cmake",
+          "sha256": "4d61dbbfed21d207c921ec72aa49e11121285c1cf35ab2b30a5922292e0c6381"
+        },
+        {
+          "path": "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "sha256": "8ba664e675389edf11d056aeb131a282a3057710b2e779423cb99a3d685b71e7"
+        },
+        {
+          "path": "include/csl/optimization/history_cost.hpp",
+          "sha256": "8a3a7ad74ca31439af995a3009a669707af7440b31e04666f433c19cc59cc347"
+        },
+        {
+          "path": "include/csl/reachability/fixed_tail_policy.hpp",
+          "sha256": "cf7b12f6934eb887c56246940c1cc00949117f80877d7ddf60603c59e3dd515c"
+        },
+        {
+          "path": "include/csl/reachability/inner_template.hpp",
+          "sha256": "8616fa3eb8ca96c1a10722e872373ef2d38703c96e99bff61a30b6d58abca1da"
+        },
+        {
+          "path": "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "sha256": "58b912a71fea064c6c26827716f8337aa73454ec6c90c361fd38bfc67be51c46"
+        },
+        {
+          "path": "src/optimization/history_cost.cpp",
+          "sha256": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86"
+        },
+        {
+          "path": "src/optimization/running_control_cost.cpp",
+          "sha256": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0"
+        },
+        {
+          "path": "src/reachability/Module.cmake",
+          "sha256": "eb7d7b266e46c134f1eb6190386a23be655cfbe4b05a0ed8dca9baae9a3e2f85"
+        },
+        {
+          "path": "src/reachability/fixed_tail_policy.cpp",
+          "sha256": "2938534a6a21540fdc7f505b99cc11bea501238d4b572f8815bbebbc1c9898fb"
+        },
+        {
+          "path": "src/reachability/inner_template.cpp",
+          "sha256": "280fdc79c2621536c99fd05ed70ec48664751aeec49800e27be748cf1e9f5e3a"
+        },
+        {
+          "path": "src/simulation/nonlinear_replay.cpp",
+          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+        },
+        {
+          "path": "src/synthesis/control_recovery.cpp",
+          "sha256": "cb54b0608aacc45774e04d7ed2ba2f4ed6faf7c06db84f8b846d1cd2db5395f1"
+        },
+        {
+          "path": "tools/closed_loop_native_policy.cpp",
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
+        }
+      ],
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b"
+    },
+    {
+      "action_profile_id": "syn-nl-fuel-01/continuous-receding/1/continuous-control/1",
+      "admission": {
+        "basis": "native C++ five-family original-task queries, all-stage H/J/membership and warm initialization checks; episode outcomes retained separately",
+        "status": "admitted"
+      },
+      "controller": {
+        "adapter": "native_fixed_tail",
+        "control_semantics": "C++ feasible frozen tail; continuous current-action argmin of complete original J under every selected physical stage region",
+        "factory_options": {
+          "build_backend_profile": {
+            "CSL_ENABLE_CASADI": true,
+            "CSL_ENABLE_HIGHS": false,
+            "CSL_ENABLE_QHULL": false,
+            "build_type": "Release"
+          },
+          "wall_seconds": 60
+        },
+        "id": "native-fixed-tail-zonotope-ipopt/1",
+        "policy_factory": "native_fixed_tail_policy:create_policy",
+        "prediction": "full remaining source-bound affine physical predictor",
+        "solver": {
+          "assurance": "local numerical",
+          "provider": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "source_files": [
+          "CMakeLists.txt",
+          "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "benchmarks/reporting/closed_loop/history_policy.py",
+          "benchmarks/reporting/closed_loop/history_validation.py",
+          "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "benchmarks/reporting/closed_loop/task_models.py",
+          "cmake/CSLConfig.cmake.in",
+          "cmake/CasadiDependencies.cmake",
+          "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "include/csl/optimization/history_cost.hpp",
+          "include/csl/reachability/fixed_tail_policy.hpp",
+          "include/csl/reachability/inner_template.hpp",
+          "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "src/optimization/history_cost.cpp",
+          "src/optimization/running_control_cost.cpp",
+          "src/reachability/Module.cmake",
+          "src/reachability/fixed_tail_policy.cpp",
+          "src/reachability/inner_template.cpp",
+          "src/synthesis/control_recovery.cpp",
+          "tools/closed_loop_native_policy.cpp"
+        ],
+        "version": "1"
+      },
+      "execution": {
+        "abstol": 1e-10,
+        "id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+        "method": "adaptive RK4 step doubling",
+        "original_final_time": 20,
+        "original_intervals": 40,
+        "provider": "CSL::simulation",
+        "reltol": 1e-09,
+        "report_subintervals_per_hold": 20,
+        "source_files": [
+          "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "src/simulation/nonlinear_replay.cpp"
+        ],
+        "version": "1"
+      },
+      "geometry_work": {
+        "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
+      },
+      "graph_fingerprint": "08b45ae8fd38a670c131b2b5def8e81521ace8022544c08d433c4621990d2d2b",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-zonotope-ipopt/1/cfg-08b45ae8fd38a670",
+      "model_id": "syn-nl-fuel-01/ode/1",
+      "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
+      "operation_roles": {
+        "controller.solve": "control_optimizer",
+        "fixed-tail.regions": "reachable_set_method"
+      },
+      "role_bindings": {
+        "control_optimizer": {
+          "id": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "converter": "not_used",
+        "reachable_set_method": {
+          "id": "csl.reachability.inner-template/1"
+        },
+        "representation": {
+          "id": "zonotope"
+        },
+        "vertex_lp": "not_used"
+      },
+      "source_files": [
+        {
+          "path": "CMakeLists.txt",
+          "sha256": "1dc0908724617d75eae414a1a3953103e409373e6d1af633d7a673c52e72da24"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_policy.py",
+          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_validation.py",
+          "sha256": "77b44c488d293888eafeeb9e811c0d4949855b3994eeed0f9316e669092e597c"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "sha256": "b426ae075f2e7886d5a6ca96726d32c6eea9cb19d32761aa1e9db520d185fe87"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "sha256": "bafa9d6d20e6a9d8aa0688e00e2df2c809105b531a4993c724b4e7cf07897cd4"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/task_models.py",
+          "sha256": "2069ea087c76ceb54776e51bdbc0964d7f0bf545d0b82a9b73456f3d5c85d4ac"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/affine.py",
+          "sha256": "54d31b9c21fef962cb2a5f09f2e341ef92b3a40b128114c3c06a5b039fb95149"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "sha256": "104adee4c3999daedae08bc6735e6058d7c3cd66e2bca8b306ea4d65142e2f21"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/scenarios/syn-nl-fuel-01.json",
+          "sha256": "5dd38a65f5ad6c5f90b8616fbc866eb9ef2735b1b7f7279bca0b2b0d05f9dce1"
+        },
+        {
+          "path": "cmake/CSLConfig.cmake.in",
+          "sha256": "011497d39ba776d7fb808239fb5417558407247b97f38d940fd987410c173453"
+        },
+        {
+          "path": "cmake/CasadiDependencies.cmake",
+          "sha256": "4d61dbbfed21d207c921ec72aa49e11121285c1cf35ab2b30a5922292e0c6381"
+        },
+        {
+          "path": "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "sha256": "8ba664e675389edf11d056aeb131a282a3057710b2e779423cb99a3d685b71e7"
+        },
+        {
+          "path": "include/csl/optimization/history_cost.hpp",
+          "sha256": "8a3a7ad74ca31439af995a3009a669707af7440b31e04666f433c19cc59cc347"
+        },
+        {
+          "path": "include/csl/reachability/fixed_tail_policy.hpp",
+          "sha256": "cf7b12f6934eb887c56246940c1cc00949117f80877d7ddf60603c59e3dd515c"
+        },
+        {
+          "path": "include/csl/reachability/inner_template.hpp",
+          "sha256": "8616fa3eb8ca96c1a10722e872373ef2d38703c96e99bff61a30b6d58abca1da"
+        },
+        {
+          "path": "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "sha256": "58b912a71fea064c6c26827716f8337aa73454ec6c90c361fd38bfc67be51c46"
+        },
+        {
+          "path": "src/optimization/history_cost.cpp",
+          "sha256": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86"
+        },
+        {
+          "path": "src/optimization/running_control_cost.cpp",
+          "sha256": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0"
+        },
+        {
+          "path": "src/reachability/Module.cmake",
+          "sha256": "eb7d7b266e46c134f1eb6190386a23be655cfbe4b05a0ed8dca9baae9a3e2f85"
+        },
+        {
+          "path": "src/reachability/fixed_tail_policy.cpp",
+          "sha256": "2938534a6a21540fdc7f505b99cc11bea501238d4b572f8815bbebbc1c9898fb"
+        },
+        {
+          "path": "src/reachability/inner_template.cpp",
+          "sha256": "280fdc79c2621536c99fd05ed70ec48664751aeec49800e27be748cf1e9f5e3a"
+        },
+        {
+          "path": "src/simulation/nonlinear_replay.cpp",
+          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+        },
+        {
+          "path": "src/synthesis/control_recovery.cpp",
+          "sha256": "cb54b0608aacc45774e04d7ed2ba2f4ed6faf7c06db84f8b846d1cd2db5395f1"
+        },
+        {
+          "path": "tools/closed_loop_native_policy.cpp",
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
+        }
+      ],
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b"
+    },
+    {
+      "action_profile_id": "syn-nl-fuel-01/continuous-receding/1/continuous-control/1",
+      "admission": {
+        "basis": "native C++ five-family original-task queries, all-stage H/J/membership and warm initialization checks; episode outcomes retained separately",
+        "status": "admitted"
+      },
+      "controller": {
+        "adapter": "native_fixed_tail",
+        "control_semantics": "C++ feasible frozen tail; continuous current-action argmin of complete original J under every selected physical stage region",
+        "factory_options": {
+          "build_backend_profile": {
+            "CSL_ENABLE_CASADI": true,
+            "CSL_ENABLE_HIGHS": false,
+            "CSL_ENABLE_QHULL": false,
+            "build_type": "Release"
+          },
+          "wall_seconds": 60
+        },
+        "id": "native-fixed-tail-parallelotope-ipopt/1",
+        "policy_factory": "native_fixed_tail_policy:create_policy",
+        "prediction": "full remaining source-bound affine physical predictor",
+        "solver": {
+          "assurance": "local numerical",
+          "provider": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "source_files": [
+          "CMakeLists.txt",
+          "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "benchmarks/reporting/closed_loop/history_policy.py",
+          "benchmarks/reporting/closed_loop/history_validation.py",
+          "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "benchmarks/reporting/closed_loop/task_models.py",
+          "cmake/CSLConfig.cmake.in",
+          "cmake/CasadiDependencies.cmake",
+          "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "include/csl/optimization/history_cost.hpp",
+          "include/csl/reachability/fixed_tail_policy.hpp",
+          "include/csl/reachability/inner_template.hpp",
+          "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "src/optimization/history_cost.cpp",
+          "src/optimization/running_control_cost.cpp",
+          "src/reachability/Module.cmake",
+          "src/reachability/fixed_tail_policy.cpp",
+          "src/reachability/inner_template.cpp",
+          "src/synthesis/control_recovery.cpp",
+          "tools/closed_loop_native_policy.cpp"
+        ],
+        "version": "1"
+      },
+      "execution": {
+        "abstol": 1e-10,
+        "id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+        "method": "adaptive RK4 step doubling",
+        "original_final_time": 20,
+        "original_intervals": 40,
+        "provider": "CSL::simulation",
+        "reltol": 1e-09,
+        "report_subintervals_per_hold": 20,
+        "source_files": [
+          "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "src/simulation/nonlinear_replay.cpp"
+        ],
+        "version": "1"
+      },
+      "geometry_work": {
+        "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
+      },
+      "graph_fingerprint": "ba9bcc2dcdc7e8b437d5ec3145a81cbba3df052c40da4d14b9fff7863001d737",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-parallelotope-ipopt/1/cfg-ba9bcc2dcdc7e8b4",
+      "model_id": "syn-nl-fuel-01/ode/1",
+      "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
+      "operation_roles": {
+        "controller.solve": "control_optimizer",
+        "fixed-tail.regions": "reachable_set_method"
+      },
+      "role_bindings": {
+        "control_optimizer": {
+          "id": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "converter": "not_used",
+        "reachable_set_method": {
+          "id": "csl.reachability.inner-template/1"
+        },
+        "representation": {
+          "id": "parallelotope"
+        },
+        "vertex_lp": "not_used"
+      },
+      "source_files": [
+        {
+          "path": "CMakeLists.txt",
+          "sha256": "1dc0908724617d75eae414a1a3953103e409373e6d1af633d7a673c52e72da24"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_policy.py",
+          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_validation.py",
+          "sha256": "77b44c488d293888eafeeb9e811c0d4949855b3994eeed0f9316e669092e597c"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "sha256": "b426ae075f2e7886d5a6ca96726d32c6eea9cb19d32761aa1e9db520d185fe87"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "sha256": "bafa9d6d20e6a9d8aa0688e00e2df2c809105b531a4993c724b4e7cf07897cd4"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/task_models.py",
+          "sha256": "2069ea087c76ceb54776e51bdbc0964d7f0bf545d0b82a9b73456f3d5c85d4ac"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/affine.py",
+          "sha256": "54d31b9c21fef962cb2a5f09f2e341ef92b3a40b128114c3c06a5b039fb95149"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "sha256": "104adee4c3999daedae08bc6735e6058d7c3cd66e2bca8b306ea4d65142e2f21"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/scenarios/syn-nl-fuel-01.json",
+          "sha256": "5dd38a65f5ad6c5f90b8616fbc866eb9ef2735b1b7f7279bca0b2b0d05f9dce1"
+        },
+        {
+          "path": "cmake/CSLConfig.cmake.in",
+          "sha256": "011497d39ba776d7fb808239fb5417558407247b97f38d940fd987410c173453"
+        },
+        {
+          "path": "cmake/CasadiDependencies.cmake",
+          "sha256": "4d61dbbfed21d207c921ec72aa49e11121285c1cf35ab2b30a5922292e0c6381"
+        },
+        {
+          "path": "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "sha256": "8ba664e675389edf11d056aeb131a282a3057710b2e779423cb99a3d685b71e7"
+        },
+        {
+          "path": "include/csl/optimization/history_cost.hpp",
+          "sha256": "8a3a7ad74ca31439af995a3009a669707af7440b31e04666f433c19cc59cc347"
+        },
+        {
+          "path": "include/csl/reachability/fixed_tail_policy.hpp",
+          "sha256": "cf7b12f6934eb887c56246940c1cc00949117f80877d7ddf60603c59e3dd515c"
+        },
+        {
+          "path": "include/csl/reachability/inner_template.hpp",
+          "sha256": "8616fa3eb8ca96c1a10722e872373ef2d38703c96e99bff61a30b6d58abca1da"
+        },
+        {
+          "path": "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "sha256": "58b912a71fea064c6c26827716f8337aa73454ec6c90c361fd38bfc67be51c46"
+        },
+        {
+          "path": "src/optimization/history_cost.cpp",
+          "sha256": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86"
+        },
+        {
+          "path": "src/optimization/running_control_cost.cpp",
+          "sha256": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0"
+        },
+        {
+          "path": "src/reachability/Module.cmake",
+          "sha256": "eb7d7b266e46c134f1eb6190386a23be655cfbe4b05a0ed8dca9baae9a3e2f85"
+        },
+        {
+          "path": "src/reachability/fixed_tail_policy.cpp",
+          "sha256": "2938534a6a21540fdc7f505b99cc11bea501238d4b572f8815bbebbc1c9898fb"
+        },
+        {
+          "path": "src/reachability/inner_template.cpp",
+          "sha256": "280fdc79c2621536c99fd05ed70ec48664751aeec49800e27be748cf1e9f5e3a"
+        },
+        {
+          "path": "src/simulation/nonlinear_replay.cpp",
+          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+        },
+        {
+          "path": "src/synthesis/control_recovery.cpp",
+          "sha256": "cb54b0608aacc45774e04d7ed2ba2f4ed6faf7c06db84f8b846d1cd2db5395f1"
+        },
+        {
+          "path": "tools/closed_loop_native_policy.cpp",
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
+        }
+      ],
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b"
+    },
+    {
+      "action_profile_id": "syn-nl-fuel-01/continuous-receding/1/continuous-control/1",
+      "admission": {
+        "basis": "native C++ five-family original-task queries, all-stage H/J/membership and warm initialization checks; episode outcomes retained separately",
+        "status": "admitted"
+      },
+      "controller": {
+        "adapter": "native_fixed_tail",
+        "control_semantics": "C++ feasible frozen tail; continuous current-action argmin of complete original J under every selected physical stage region",
+        "factory_options": {
+          "build_backend_profile": {
+            "CSL_ENABLE_CASADI": true,
+            "CSL_ENABLE_HIGHS": false,
+            "CSL_ENABLE_QHULL": false,
+            "build_type": "Release"
+          },
+          "wall_seconds": 60
+        },
+        "id": "native-fixed-tail-ellipsoid-ipopt/1",
+        "policy_factory": "native_fixed_tail_policy:create_policy",
+        "prediction": "full remaining source-bound affine physical predictor",
+        "solver": {
+          "assurance": "local numerical",
+          "provider": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "source_files": [
+          "CMakeLists.txt",
+          "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "benchmarks/reporting/closed_loop/history_policy.py",
+          "benchmarks/reporting/closed_loop/history_validation.py",
+          "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "benchmarks/reporting/closed_loop/task_models.py",
+          "cmake/CSLConfig.cmake.in",
+          "cmake/CasadiDependencies.cmake",
+          "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "include/csl/optimization/history_cost.hpp",
+          "include/csl/reachability/fixed_tail_policy.hpp",
+          "include/csl/reachability/inner_template.hpp",
+          "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "src/optimization/history_cost.cpp",
+          "src/optimization/running_control_cost.cpp",
+          "src/reachability/Module.cmake",
+          "src/reachability/fixed_tail_policy.cpp",
+          "src/reachability/inner_template.cpp",
+          "src/synthesis/control_recovery.cpp",
+          "tools/closed_loop_native_policy.cpp"
+        ],
+        "version": "1"
+      },
+      "execution": {
+        "abstol": 1e-10,
+        "id": "CSL::simulation/adaptive-rk4-step-doubling/1",
+        "method": "adaptive RK4 step doubling",
+        "original_final_time": 20,
+        "original_intervals": 40,
+        "provider": "CSL::simulation",
+        "reltol": 1e-09,
+        "report_subintervals_per_hold": 20,
+        "source_files": [
+          "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "src/simulation/nonlinear_replay.cpp"
+        ],
+        "version": "1"
+      },
+      "geometry_work": {
+        "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
+      },
+      "graph_fingerprint": "0bcf0fe183015d794f72b3d89b9673d8b41aa4d4f34557ae895026bf91081d35",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-ellipsoid-ipopt/1/cfg-0bcf0fe183015d79",
+      "model_id": "syn-nl-fuel-01/ode/1",
+      "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
+      "operation_roles": {
+        "controller.solve": "control_optimizer",
+        "fixed-tail.regions": "reachable_set_method"
+      },
+      "role_bindings": {
+        "control_optimizer": {
+          "id": "csl.nlp.casadi-ipopt.fixed-tail"
+        },
+        "converter": "not_used",
+        "reachable_set_method": {
+          "id": "csl.reachability.inner-template/1"
+        },
+        "representation": {
+          "id": "ellipsoid"
+        },
+        "vertex_lp": "not_used"
+      },
+      "source_files": [
+        {
+          "path": "CMakeLists.txt",
+          "sha256": "1dc0908724617d75eae414a1a3953103e409373e6d1af633d7a673c52e72da24"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_policy.py",
+          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/history_validation.py",
+          "sha256": "77b44c488d293888eafeeb9e811c0d4949855b3994eeed0f9316e669092e597c"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+          "sha256": "b426ae075f2e7886d5a6ca96726d32c6eea9cb19d32761aa1e9db520d185fe87"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
+          "sha256": "bafa9d6d20e6a9d8aa0688e00e2df2c809105b531a4993c724b4e7cf07897cd4"
+        },
+        {
+          "path": "benchmarks/reporting/closed_loop/task_models.py",
+          "sha256": "2069ea087c76ceb54776e51bdbc0964d7f0bf545d0b82a9b73456f3d5c85d4ac"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/affine.py",
+          "sha256": "54d31b9c21fef962cb2a5f09f2e341ef92b3a40b128114c3c06a5b039fb95149"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp",
+          "sha256": "104adee4c3999daedae08bc6735e6058d7c3cd66e2bca8b306ea4d65142e2f21"
+        },
+        {
+          "path": "benchmarks/reporting/mpc11/scenarios/syn-nl-fuel-01.json",
+          "sha256": "5dd38a65f5ad6c5f90b8616fbc866eb9ef2735b1b7f7279bca0b2b0d05f9dce1"
+        },
+        {
+          "path": "cmake/CSLConfig.cmake.in",
+          "sha256": "011497d39ba776d7fb808239fb5417558407247b97f38d940fd987410c173453"
+        },
+        {
+          "path": "cmake/CasadiDependencies.cmake",
+          "sha256": "4d61dbbfed21d207c921ec72aa49e11121285c1cf35ab2b30a5922292e0c6381"
+        },
+        {
+          "path": "include/csl/adapters/nlp/casadi_fixed_tail.hpp",
+          "sha256": "8ba664e675389edf11d056aeb131a282a3057710b2e779423cb99a3d685b71e7"
+        },
+        {
+          "path": "include/csl/optimization/history_cost.hpp",
+          "sha256": "8a3a7ad74ca31439af995a3009a669707af7440b31e04666f433c19cc59cc347"
+        },
+        {
+          "path": "include/csl/reachability/fixed_tail_policy.hpp",
+          "sha256": "cf7b12f6934eb887c56246940c1cc00949117f80877d7ddf60603c59e3dd515c"
+        },
+        {
+          "path": "include/csl/reachability/inner_template.hpp",
+          "sha256": "8616fa3eb8ca96c1a10722e872373ef2d38703c96e99bff61a30b6d58abca1da"
+        },
+        {
+          "path": "src/adapters/nlp/casadi_fixed_tail.cpp",
+          "sha256": "58b912a71fea064c6c26827716f8337aa73454ec6c90c361fd38bfc67be51c46"
+        },
+        {
+          "path": "src/optimization/history_cost.cpp",
+          "sha256": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86"
+        },
+        {
+          "path": "src/optimization/running_control_cost.cpp",
+          "sha256": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0"
+        },
+        {
+          "path": "src/reachability/Module.cmake",
+          "sha256": "eb7d7b266e46c134f1eb6190386a23be655cfbe4b05a0ed8dca9baae9a3e2f85"
+        },
+        {
+          "path": "src/reachability/fixed_tail_policy.cpp",
+          "sha256": "2938534a6a21540fdc7f505b99cc11bea501238d4b572f8815bbebbc1c9898fb"
+        },
+        {
+          "path": "src/reachability/inner_template.cpp",
+          "sha256": "280fdc79c2621536c99fd05ed70ec48664751aeec49800e27be748cf1e9f5e3a"
+        },
+        {
+          "path": "src/simulation/nonlinear_replay.cpp",
+          "sha256": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd"
+        },
+        {
+          "path": "src/synthesis/control_recovery.cpp",
+          "sha256": "cb54b0608aacc45774e04d7ed2ba2f4ed6faf7c06db84f8b846d1cd2db5395f1"
+        },
+        {
+          "path": "tools/closed_loop_native_policy.cpp",
+          "sha256": "0c4ca9b7c5c7a6e565adb6597abd711c2e17933e3b713ccf8d9271851a998f8b"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -5070,7 +7960,7 @@
     }
   ],
   "manifest_id": "source-bound-continuous-history-profiles/1",
-  "purpose": "Continuous full-source-cost affine-history MPC on the three common tasks.",
+  "purpose": "Continuous full-source-cost affine-history MPC and native fixed-tail set policies on the three common tasks.",
   "registration_status": "source-frozen",
   "schema": "csl.closed-loop-capability-manifest/2"
 }
