@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 import hashlib
+import json
 from pathlib import Path
 import subprocess
 import sys
@@ -19,6 +20,19 @@ SPEC.loader.exec_module(stage_module)
 
 
 class PerAttemptPublicationTests(unittest.TestCase):
+    def test_source_mapped_profile_text_asset_retains_its_sealed_link(self):
+        summary = stage_module.SOURCE / "benchmark-summary.txt"
+        relative = "../mpc01-source-mapped-profile-20261102/README.txt"
+        self.assertIn(relative, summary.read_text(encoding="utf-8"))
+        profile = (stage_module.SOURCE.parent / "mpc01-source-mapped-profile-20261102")
+        note = profile / "README.txt"
+        digest = hashlib.sha256(note.read_bytes()).hexdigest()
+        manifest = json.loads((profile / "profile-manifest.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["artifacts"]["README.txt"], digest)
+        sums = (profile / "SHA256SUMS").read_text(encoding="ascii")
+        self.assertIn(f"{digest}  docs/research/evidence/mpc01-source-mapped-profile-20261102/README.txt\n", sums)
+        self.assertNotIn("README.md", manifest["artifacts"])
+
     def test_strategy_ab_bundle_has_valid_checksums_and_reproducible_render(self):
         validator = ROOT / "scripts/reports/mpc01/validate_strategy_ab_ts03_bundle.py"
         result = subprocess.run([sys.executable, str(validator)], cwd=ROOT, check=True,
