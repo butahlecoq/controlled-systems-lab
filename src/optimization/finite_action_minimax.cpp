@@ -152,12 +152,11 @@ FiniteActionMinimaxOutcome finite_action_minimax(
                 return reject_validation(unsupported("finite_minimax.action", "Action rows must be finite.",DiagnosticCode::invalid_input));
     }
     if(horizon && request.actions.catalogue.empty()) return FiniteMinimaxEmptyCatalogue{};
-    std::size_t plan_count=1;
-    for(std::size_t stage=0;stage<horizon;++stage) {
-        if(plan_count>limits.max_plans/request.actions.catalogue.size())
-            return reject_validation(unsupported("finite_minimax.capacity", "Action product exceeds the caller plan limit."));
-        plan_count*=request.actions.catalogue.size();
-    }
+    if(!detail::valid_candidate_action_indices(request))
+        return reject_validation(unsupported("finite_minimax.candidate_plans",
+            "Candidate action histories must be unique, full-horizon, and index the unchanged action catalogue.",
+            DiagnosticCode::invalid_input));
+    const auto plan_count=detail::selected_plan_count(request);
     if(plan_count>limits.max_plans)
         return reject_validation(unsupported("finite_minimax.capacity", "Action product exceeds the caller plan limit."));
     if(timing_spans && (timing_spans->plans.size()!=plan_count ||
@@ -172,7 +171,7 @@ FiniteActionMinimaxOutcome finite_action_minimax(
     records.reserve(plan_count);
     double minimum=std::numeric_limits<double>::infinity();
     for(std::size_t plan_index=0;plan_index<plan_count;++plan_index) {
-        const auto choices=detail::action_plan_indices(plan_index,request.actions.catalogue.size(),horizon);
+        const auto choices=detail::selected_plan_indices(request,plan_index);
         const FiniteMinimaxPlanTimingSpans* spans=timing_spans&&plan_index<timing_spans->plans.size()?
             &timing_spans->plans[plan_index]:nullptr;
         PlannedPhase plan_setup{context,spans?std::optional{spans->plan_setup}:std::nullopt,&finalize};

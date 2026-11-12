@@ -1,0 +1,87 @@
+{
+  "schema": "csl.closed-loop.native-stage0-held-step/1",
+  "task_id": "env717-earth-orbit/continuous-receding/1",
+  "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+  "controller_id": "env717-earth-orbit/continuous-receding/1/native-exact-polytope-backward-graph/1",
+  "action_profile_id": "env717-earth-orbit/finite-nine-action-per-step-adaptation/1",
+  "source_model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
+  "objective_id": "env717-earth-orbit/source-cost-continuous/1",
+  "original_horizon": 20,
+  "absolute_update_index": 0,
+  "observed_state": [
+    7000.0,
+    0.0,
+    0.0,
+    0.0010780614796240577
+  ],
+  "selected_control": [
+    -0.5,
+    0.0
+  ],
+  "next_observed_state": [
+    6999.950048407347,
+    -0.0009980640728577334,
+    0.10780666103007236,
+    0.0010780768657567162
+  ],
+  "elapsed_seconds": 0.0859005069360137,
+  "query_validation": "task/profile identity echoed by the native policy response",
+  "execution_validation": "held-step response matched original task, derived slice, control, observation, and integration receipt",
+  "policy_invocations": [
+    {
+      "generated_edges": 351,
+      "module_id": "csl::optimization::finite_action_stage_layered_graph",
+      "operation": "full-authored-horizon stage-layered finite-action graph and backward Bellman selection",
+      "outcome": "selected",
+      "profile_id": "env717-earth-orbit/continuous-receding/1/native-exact-polytope-backward-graph/1",
+      "provider": "public-function",
+      "retained_nodes": 41
+    },
+    {
+      "assurance": "numerical, support unestablished",
+      "calls": 21,
+      "module_id": "csl::reachability::prepare_nominal_predecessor",
+      "operation": "numerical H predecessor membership followed by authored discrete transition witness",
+      "profile_id": "env717-earth-orbit/continuous-receding/1/native-exact-polytope-backward-graph/1",
+      "provider": "csl.geometry.polyhedral-projection@1.0.0"
+    },
+    {
+      "calls": 352,
+      "module_id": "csl::geometry::polyhedral::intersect_h",
+      "operation": "intersect each generated point with its authored stage H constraints",
+      "profile_id": "env717-earth-orbit/continuous-receding/1/native-exact-polytope-backward-graph/1",
+      "provider": "public-function"
+    },
+    {
+      "assurance": "numerical",
+      "calls": 39,
+      "module_id": "csl::geometry::affine-image",
+      "operation": "registered affine image of each retained observed-state parent",
+      "profile_id": "env717-earth-orbit/continuous-receding/1/native-exact-polytope-backward-graph/1",
+      "provider": "csl.geometry.affine-sum@1.0.0",
+      "relation": "equivalent",
+      "selected_method_id": "csl.geometry.affine-sum"
+    },
+    {
+      "assurance": "numerical",
+      "calls": 39,
+      "module_id": "csl::geometry::minkowski-sum",
+      "operation": "registered Minkowski sum with stage-transformed authored discrete action hull",
+      "profile_id": "env717-earth-orbit/continuous-receding/1/native-exact-polytope-backward-graph/1",
+      "provider": "csl.geometry.affine-sum@1.0.0",
+      "relation": "equivalent",
+      "selected_method_id": "csl.geometry.affine-sum"
+    }
+  ],
+  "query_receipt": null,
+  "files": {
+    "tools/closed_loop_native_policy.cpp": "12819b74df73bdd753a99ef1217319d78b454ac73389bd8d61143cc2f72cfe6d",
+    "src/optimization/finite_action_graph.cpp": "eea91035a26da884f8e10318a426106ffe575cbc78a12bdec5eac1e17bd56dcd",
+    "benchmarks/reporting/closed_loop/native_graph_policy.py": "8db2596a72c19a7c2631a820ea9d249377e83a4fe045562c5801d603b4d99b91",
+    "benchmarks/reporting/closed_loop/task_models.py": "788f17228e9172b74b7658246b2f780ba249ce5472c0b9ce0f2b5236df044344",
+    "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp": "104adee4c3999daedae08bc6735e6058d7c3cd66e2bca8b306ea4d65142e2f21"
+  },
+  "policy_executable_sha256": "f8629de14a29c6d4a46470f57d7a775a892bf9b40b89e64acaa38528c28d07bd",
+  "execution_executable_sha256": "b5d47c14c65f1d2f833eaec4d9713bcc4717b130bd688e943ade7442c363973f",
+  "python": "3.11.14 (main, Feb 12 2026, 00:42:50) [Clang 21.1.4 ]"
+}

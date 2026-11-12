@@ -1,0 +1,37 @@
+{
+  "schema": "csl.closed-loop.native-one-hold-independent-rk4-check/1",
+  "task_id": "env717-earth-orbit/continuous-receding/1",
+  "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+  "control": [
+    -0.5,
+    0.0
+  ],
+  "absolute_interval": [
+    0.0,
+    100.0
+  ],
+  "fixed_rk4_substeps": 20000,
+  "independent_equations": "Python task_models.physical_dynamics",
+  "common_bridge_endpoint": [
+    6999.950048407347,
+    -0.0009980640728577334,
+    0.10780666103007236,
+    0.0010780768657567162
+  ],
+  "independent_endpoint": [
+    6999.950048407346,
+    -0.0009980640728535985,
+    0.10780666103007236,
+    0.0010780768657567181
+  ],
+  "absolute_difference": [
+    9.094947017729282e-13,
+    4.134930245425217e-15,
+    0.0,
+    1.951563910473908e-18
+  ],
+  "max_absolute_difference": 9.094947017729282e-13,
+  "interpretation": "independent fixed-step implementation comparison; numerical only, not a validated error bound",
+  "python": "3.11.14 (main, Feb 12 2026, 00:42:50) [Clang 21.1.4 ]",
+  "source_sha256": "41268676a408b2af4de63dcbf1425e405341963f5f98a3e0020db28bb40434e9"
+}

@@ -1,0 +1,52 @@
+{
+  "schema": "csl.closed-loop.native-stage0-representation-probe/1",
+  "task_id": "syn-nl-fuel-01/continuous-receding/1",
+  "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b",
+  "controller_id": "syn-nl-fuel-01/continuous-receding/1/native-ellipsoid-mpc/1",
+  "action_profile_id": "syn-nl-fuel-01/continuous-receding/1/finite-catalog-adaptation/1",
+  "representation": "ellipsoid",
+  "limits": {
+    "wall_seconds": 300,
+    "max_plans": 256
+  },
+  "elapsed_seconds": 0.005449197022244334,
+  "preparation_receipt": {
+    "executable": "/home/butahlecoq/.local/share/codex/worktrees/native-feedback-composition-943-20261111/build/core/csl_closed_loop_native_policy",
+    "executable_sha256": "100f0a860fba14aa179169a61d62aa83d4428fc38bbfc814a65c3e52dcb83965",
+    "predictor_model_id": "syn-nl-fuel-01/midpoint-endpoint-matched-affine/1",
+    "predictor_assurance": "binary64 scipy.linalg.expm numerical exponential; no validated arithmetic",
+    "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
+    "original_horizon": 40,
+    "action_profile_id": "syn-nl-fuel-01/continuous-receding/1/finite-catalog-adaptation/1",
+    "representation": "ellipsoid",
+    "controller_semantics": "finite-action receding-horizon MPC; exact graph profile adds backward retained-graph filtering"
+  },
+  "response": {
+    "action_profile_id": "syn-nl-fuel-01/continuous-receding/1/finite-catalog-adaptation/1",
+    "invocations": [
+      {
+        "module_id": "csl::optimization::finite_action_nominal_profile",
+        "operation": "ellipsoid-plan-select",
+        "outcome": "unsupported",
+        "profile_id": "syn-nl-fuel-01/continuous-receding/1/native-ellipsoid-mpc/1",
+        "provider": "public-function"
+      }
+    ],
+    "policy_id": "syn-nl-fuel-01/continuous-receding/1/native-ellipsoid-mpc/1/receding-fixed-plan-mpc/1",
+    "reason": "Action plan count exceeds caller limit.",
+    "representation": 4,
+    "status": "unsupported",
+    "task_id": "syn-nl-fuel-01/continuous-receding/1",
+    "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b",
+    "policy_semantics": "finite-action receding-horizon MPC; exact graph profile adds backward retained-graph filtering",
+    "prediction_profile": {
+      "model_id": "syn-nl-fuel-01/midpoint-endpoint-matched-affine/1",
+      "assurance": "binary64 scipy.linalg.expm numerical exponential; no validated arithmetic",
+      "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b",
+      "remaining_prediction_steps": 40,
+      "original_update_index": 0
+    },
+    "coverage": "not_applicable"
+  },
+  "status": "unsupported"
+}

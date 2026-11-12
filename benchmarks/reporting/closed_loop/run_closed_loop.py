@@ -7,6 +7,7 @@ is atomically replaced after each stage, and retries never overwrite failures.
 from __future__ import annotations
 
 import argparse
+import functools
 import hashlib
 import importlib
 import importlib.metadata
@@ -28,11 +29,33 @@ from contracts import ROOT, load_task, manifest_sha256
 from task_models import (make_held_step_request, make_replay_request, objective,
                          source_scenario, validate_held_step_response,
                          validate_source_binding)
-from capabilities import MANIFEST, resolve_graph, validate_resolved_graph, SIDECAR
+from capabilities import MANIFEST, NATIVE_MANIFEST, resolve_graph, validate_resolved_graph, manifest_digest
 
 HERE = Path(__file__).resolve().parent
 MPC11 = ROOT / "benchmarks/reporting/mpc11"
 sys.path.insert(0, str(MPC11))
+DEFAULT_ATTEMPT_WALL_SECONDS = 300
+DEFAULT_ATTEMPT_CPU_SECONDS = 300
+
+
+def positive_seconds(value: str | int, name: str = "seconds") -> int:
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError) as error:
+        raise ValueError(f"{name} must be a positive integer") from error
+    if isinstance(value, bool) or parsed <= 0 or str(value).strip() not in {str(parsed), f"+{parsed}"}:
+        raise ValueError(f"{name} must be a positive integer")
+    return parsed
+
+
+def attempt_resource_profile(wall_seconds: int, cpu_seconds: int) -> dict:
+    wall = positive_seconds(wall_seconds, "attempt wall seconds")
+    cpu = positive_seconds(cpu_seconds, "attempt CPU seconds")
+    return {"profile_id": f"worker-wall-{wall}-cpu-{cpu}/1",
+        "requested": {"wall_seconds": wall, "cpu_seconds": cpu},
+        "enforced": {"wall_seconds": wall, "cpu_seconds_soft": cpu,
+            "cpu_seconds_hard": cpu + 1,
+            "wall_scope": "supervised worker process group; excludes replay, checkers and rendering"}}
 
 
 def atomic_json(path: Path, value: dict) -> None:
@@ -62,7 +85,8 @@ def prepare_graph(task: dict, graph: dict, bridge: Path) -> tuple[object | None,
     if graph["controller"].get("policy_factory"):
         factory_spec = graph["controller"]["policy_factory"]
         policy = load_policy_adapter(factory_spec)(task, task_sha256=graph["task_sha256"],
-            controller_id=graph["controller"]["id"], action_profile_id=graph["action_profile_id"])
+            controller_id=graph["controller"]["id"], action_profile_id=graph["action_profile_id"],
+            factory_options=graph["controller"].get("factory_options", {}))
         details = getattr(policy, "preparation_receipt", {})
         return policy, {"status": "prepared", "controller_id": graph["controller"]["id"],
             "profile_id": graph["graph_id"], "policy_factory": factory_spec,
@@ -136,7 +160,7 @@ def validate_policy_response(task: dict, task_hash: str, action_profile_id: str,
         raise ValueError("policy response is not bound to the original full task hash")
     if query.get("action_profile_id") != action_profile_id:
         raise ValueError("policy response action profile differs from the task control domain")
-    if query.get("status") not in {"accepted", "rejected", "unsupported", "failed"}:
+    if query.get("status") not in {"accepted", "rejected", "unsupported", "failed", "unavailable", "incompatible"}:
         raise ValueError("policy response has an unsupported outcome status")
     if not isinstance(query.get("policy_id"), str) or not query["policy_id"]:
         raise ValueError("policy response must identify the selected policy")
@@ -148,9 +172,51 @@ def validate_policy_response(task: dict, task_hash: str, action_profile_id: str,
     return query
 
 
+def trace_call_roles(query: dict, graph: dict) -> list[dict]:
+    """Attach declared role labels to observed calls, retaining their raw evidence."""
+    role_bindings = graph.get("role_bindings", graph.get("inactive_roles", {}))
+    operation_roles = graph.get("operation_roles", {})
+    rows = []
+    for call in query.get("invocations", []):
+        operation = call.get("operation")
+        role = call.get("role") or operation_roles.get(operation)
+        if role is None:
+            actual_ids = {call.get(key) for key in ("module_id", "selected_method_id", "actual_method_id")
+                          if call.get(key) is not None}
+            role = next((name for name, binding in role_bindings.items()
+                if isinstance(binding, dict) and actual_ids.intersection({value for value in (
+                    binding.get("module_id"), binding.get("id"), binding.get("symbol")) if value is not None})), None)
+        if role is None:
+            role = "controller" if operation == "controller.solve" else "unclassified"
+        rows.append({**call, "role": role, "selected_role_binding": role_bindings.get(role)})
+    for call in query.get("geometry_invocations", []):
+        operation = call.get("operation")
+        role = call.get("role") or operation_roles.get(operation, "reachable_set_method")
+        rows.append({**call, "role": role, "selected_role_binding": role_bindings.get(role)})
+        for evidence in call.get("evidence_assumptions", []):
+            if not isinstance(evidence, str):
+                continue
+            if evidence.startswith("HullReducerPort child LPPort invocation:") or evidence.startswith("vertex LP invocation record:"):
+                nested_role = "vertex_lp"
+            elif evidence.startswith("HullReducerPort invocation:"):
+                nested_role = "hull_provider"
+            elif evidence.startswith("checker invocation:"):
+                nested_role = "geometry_checker"
+            elif evidence.startswith("source-index generated ordered cloud:"):
+                nested_role = "reachable_set_method"
+            else:
+                continue
+            rows.append({"trace_source": "geometry_invocations.evidence_assumptions",
+                "role": nested_role, "selected_role_binding": role_bindings.get(nested_role),
+                "evidence": evidence})
+    return rows
+
+
 def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | None = None,
            requested_controller_id: str | None = None, requested_action_profile_id: str | None = None,
-           graph_path: Path | None = None) -> int:
+           graph_path: Path | None = None, attempt_wall_seconds: int = DEFAULT_ATTEMPT_WALL_SECONDS,
+           attempt_cpu_seconds: int = DEFAULT_ATTEMPT_CPU_SECONDS) -> int:
+    resource_profile = attempt_resource_profile(attempt_wall_seconds, attempt_cpu_seconds)
     task = load_task(task_name); validate_source_binding(task)
     task_hash = manifest_sha256(task)
     if graph_path is None: raise ValueError("worker requires an admitted resolved graph")
@@ -163,7 +229,20 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
     expected_action_profile = graph["action_profile_id"]
     if requested_action_profile_id and requested_action_profile_id != expected_action_profile:
         raise ValueError("requested action profile differs from the resolved capability graph")
-    prepared_controller, preparation = prepare_graph(task, graph, bridge)
+    try:
+        prepared_controller, preparation = prepare_graph(task, graph, bridge)
+    except Exception as error:
+        atomic_json(attempt / "attempt.json", {"schema": "csl.closed-loop.attempt/1",
+            "attempt_id": attempt.name, "task_id": task["task_id"], "task_sha256": task_hash,
+            "controller_id": graph["controller"]["id"], "resolved_graph": graph,
+            "resource_profile_id": resource_profile["profile_id"],
+            "resource_limits": {"requested": resource_profile["requested"],
+                "enforced": resource_profile["enforced"]},
+            "status": "preparation_failed", "algorithm_status": "preparation_failed",
+            "overall_status": "preparation_failed", "completed_holds": 0,
+            "preparation_failure": {"type": type(error).__name__, "reason": str(error)},
+            "mathematical_support_status": "not_evaluated"})
+        return 2
     scales = np.asarray([s["scale"] for s in task["model"]["states"]])
     state = np.asarray([s["initial"] for s in task["model"]["states"]], dtype=float)
     controls = []; states = [state.tolist()]; stages = []; previous = None
@@ -171,6 +250,8 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
     controller_id = requested_controller_id or default_controller_id
     action_profile_id = expected_action_profile
     policy = prepared_controller if graph["controller"].get("policy_factory") else None
+    geometry_method = graph.get("role_bindings", {}).get("reachable_set_method", "not_used")
+    geometry_active = geometry_method != "not_used"
     ledger = {"schema": "csl.closed-loop.attempt/1", "attempt_id": attempt.name,
         "task_id": task["task_id"], "task_sha256": task_hash, "source_sha256": task["source"]["sha256"],
         "model_id": task["model"]["model_id"], "action_profile_id": action_profile_id,
@@ -179,23 +260,22 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
         "selected_initial_state_physical": state.tolist(), "original_intervals": task["episode"]["intervals"],
         "original_final_time": task["episode"]["final_time"], "status": "in-progress", "controls": controls,
         "physical_states": states, "stages": stages,
-        "module_roles": {"vertex_lp": graph["inactive_roles"]["vertex_lp"],
-                         "set_reducer": graph["inactive_roles"]["set_reducer"],
-                         "representation": graph["inactive_roles"]["representation"],
-                         "converter": graph["inactive_roles"]["converter"], "controller": controller_id,
-                         "execution": graph["execution"]["id"]},
-        "geometry_work": {"vertices": 0, "set_operations": 0, "claim": "pure NMPC; no representation comparison"},
-        "resource_limits": {"requested": {"wall_seconds": 300, "address_space_bytes": 8 * 1024**3,
-              "cpu_seconds": 300, "worker_count": 1, "solver_threads": 1},
-            "enforced": {"wall_seconds": "subprocess timeout with process-group termination",
-              "address_space_bytes": "POSIX RLIMIT_AS on worker process", "cpu_seconds": "POSIX RLIMIT_CPU on worker process",
+        "module_roles": {**graph.get("role_bindings", graph.get("inactive_roles", {})),
+                         "controller": controller_id, "execution": graph["execution"]["id"]},
+        "geometry_work": {"vertices": None if geometry_active else 0, "set_operations": 0,
+            "claim": graph.get("claim_scope", "pure NMPC; no representation comparison")},
+        "resource_profile_id": resource_profile["profile_id"],
+        "resource_limits": {"requested": {**resource_profile["requested"], "address_space_bytes": 8 * 1024**3,
+              "worker_count": 1, "solver_threads": 1},
+            "enforced": {**resource_profile["enforced"],
+              "address_space_bytes": "POSIX RLIMIT_AS on worker process",
               "worker_count": "one worker", "solver_threads": "environment requests one BLAS/OMP/MKL thread"},
             "observed": {"worker_pid": os.getpid(), "platform": platform.platform(), "python": platform.python_version(),
                 "effective_cpu_seconds": resource.getrlimit(resource.RLIMIT_CPU),
                 "effective_address_space_bytes": resource.getrlimit(resource.RLIMIT_AS),
                 "thread_environment": {key: os.environ.get(key) for key in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS")},
                 "python_process_threads": threading.active_count()}},
-        "assurance": "observed-state single-player policy trajectory; local NLP diagnostics; no global optimality, reachability, safety, or robustness guarantee"}
+        "assurance": "observed-state single-player policy trajectory; no global optimality, reachability, safety, or robustness guarantee"}
     atomic_json(attempt / "attempt.json", ledger)
     n = task["episode"]["intervals"]
     for j in range(n):
@@ -204,24 +284,64 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
                "observed_physical": state.tolist(), "observed_scaled": (state / scales).tolist(),
                "original_task_sha256": task_hash, "status": "started", "module_calls": [],
                "requested_modules": {"controller": {"id": graph["controller"]["id"], "version": graph["controller"]["version"]},
-                   "vertex_lp": "not_used", "set_reducer": "not_used", "representation": "not_used", "converter": "not_used",
+                   **graph.get("role_bindings", graph.get("inactive_roles", {})),
                    "execution": {"id": graph["execution"]["id"], "version": graph["execution"]["version"]}}}
         atomic_json(attempt / f"stage-{j:03d}.json", row)
         try:
+            if policy is not None:
+                install_capture = getattr(policy, "set_query_capture_callback", None)
+                if callable(install_capture):
+                    def persist_native_capture(capture):
+                        row["native_query_capture"] = capture
+                        atomic_json(attempt / f"stage-{j:03d}.json", row)
+                    install_capture(persist_native_capture)
             query = (policy.query(task["task_id"], state.tolist(), j) if policy is not None
                      else controller_query(task, graph, state, j, previous, prepared_controller))
             if policy is not None:
+                capture = getattr(policy, "last_query_capture", None)
+                if capture is not None:
+                    row["native_query_capture"] = capture
+                    atomic_json(attempt / f"stage-{j:03d}.json", row)
                 query = validate_policy_response(task, task_hash, action_profile_id, query)
+                ledger["preparation_receipt"]["adapter_receipt"] = getattr(policy, "preparation_receipt", {})
             row.update({"status": query["status"], "policy_id": query["policy_id"],
                         "controller_invocations": query["invocations"]})
+            row["controller_status"] = query["status"]
+            if query.get("reason"):
+                row["controller_reason"] = query["reason"]
+            if query["status"] in {"unavailable", "incompatible"}:
+                row["failure_category"] = "backend_unavailable_or_incompatible"
+            elif query["status"] == "failed":
+                row["failure_category"] = "controller_execution_failed"
+            if query.get("mathematical_support"):
+                row["mathematical_support_status"] = query["mathematical_support"]
+            elif query["status"] in {"unavailable", "incompatible"}:
+                row["mathematical_support_status"] = "not_evaluated"
+            elif query["status"] == "failed":
+                row["mathematical_support_status"] = "not_evaluated"
+            elif query["status"] in {"unsupported", "rejected"}:
+                row["mathematical_support_status"] = "not_established"
             receipt = query.get("solve_receipt", query.get("query_receipt"))
             if receipt is not None: row["solve_receipt"] = receipt
-            row["invoked_modules"] = [call["module_id"] for call in query["invocations"]]
+            row["invoked_modules"] = ([call["module_id"] for call in query["invocations"] if call.get("module_id")]
+                + [call[key] for call in query.get("geometry_invocations", [])
+                   for key in ("actual_method_id",) if call.get(key)])
             for field in ("predicted_sets", "recovered_control", "composition_id", "profile_id", "query_receipt",
-                          "policy_semantics", "prediction_profile", "coverage"):
+                          "policy_semantics", "prediction_profile", "coverage", "geometry_selection",
+                          "geometry_invocations", "action_cloud_rows", "selected_representation",
+                          "finite_action_nominal_profile", "build_backend_profile", "candidate_plan_search",
+                          "selector", "selected_plan", "representation", "native_query_capture"):
                 if field in query: row[field] = query[field]
+            if "selected_representation" not in row and "representation" in query:
+                row["selected_representation"] = query["representation"]
+            row["module_call_roles"] = trace_call_roles(query, graph)
+            ledger["geometry_work"]["set_operations"] += len(query.get("geometry_invocations", []))
             if query["status"] != "accepted" or query["control"] is None:
-                row["failure"] = "controller-rejected; no fallback action applied"
+                row["failure"] = ("controller unavailable or incompatible; mathematical support was not evaluated"
+                    if query["status"] in {"unavailable", "incompatible"} else
+                    ("controller execution failed; mathematical support was not evaluated"
+                        if query["status"] == "failed" else
+                        "controller-rejected; no fallback action applied"))
                 stages.append(row); atomic_json(attempt / f"stage-{j:03d}.json", row)
                 break
             action = [float(v) for v in query["control"]]
@@ -242,7 +362,16 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
             controls.append(action); states.append(state.tolist()); previous = query.get("next_guess")
             row["status"] = "applied-and-observed"; row["applied_control"] = action
         except Exception as error:
+            failure = {"type": type(error).__name__, "reason": str(error)}
             row.update({"status": "failed", "failure": f"{type(error).__name__}: {error}"})
+            if policy is not None:
+                capture = getattr(policy, "last_query_capture", None)
+                if capture is not None:
+                    row["native_query_capture"] = capture
+                    failure["native_query_capture"] = capture
+                row["failure_category"] = "controller_protocol_or_execution_failure"
+                row["mathematical_support_status"] = "not_evaluated"
+                row["controller_failure"] = failure
         row["stage_elapsed_seconds"] = time.monotonic() - started
         stages.append(row); atomic_json(attempt / f"stage-{j:03d}.json", row)
         ledger.update({"controls": controls, "physical_states": states, "stages": stages,
@@ -253,9 +382,11 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
     complete = len(controls) == n
     ledger.update({"status": "complete" if complete else "incomplete", "completed_holds": len(controls),
         "controls": controls, "physical_states": states, "stages": stages,
-        "elapsed_seconds": sum(row.get("stage_elapsed_seconds", 0) for row in stages),
+        "stage_interval_seconds_sum": sum(row.get("stage_elapsed_seconds", 0) for row in stages),
         "physical_objective": objective(task, states, controls) if complete else None,
         "controls_sha256": hashlib.sha256(json.dumps(controls, separators=(",", ":")).encode()).hexdigest()})
+    if any(row.get("mathematical_support_status") == "not_evaluated" for row in stages):
+        ledger["mathematical_support_status"] = "not_evaluated"
     usage = resource.getrusage(resource.RUSAGE_SELF)
     if policy is not None:
         try:
@@ -264,15 +395,17 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
         except Exception as error:
             ledger["policy_adapter_lifecycle"] = {"close": "failed", "adapter": policy_adapter,
                                                    "error": f"{type(error).__name__}: {error}"}
-    ledger["resource_limits"]["observed"].update({"worker_wall_seconds": ledger["elapsed_seconds"],
+    ledger["resource_limits"]["observed"].update({
+        "worker_stage_interval_seconds_sum": ledger["stage_interval_seconds_sum"],
         "worker_cpu_seconds": usage.ru_utime + usage.ru_stime, "worker_max_rss_kib": usage.ru_maxrss,
         "rss_accounting_scope": "worker process only; bridge subprocess peaks are not included"})
     atomic_json(attempt / "attempt.json", ledger)
     return 0 if complete else 2
 
 
-def limited_worker():
-    resource.setrlimit(resource.RLIMIT_CPU, (300, 301))
+def limited_worker(cpu_seconds: int = DEFAULT_ATTEMPT_CPU_SECONDS):
+    cpu = positive_seconds(cpu_seconds, "attempt CPU seconds")
+    resource.setrlimit(resource.RLIMIT_CPU, (cpu, cpu + 1))
     cap = 8 * 1024**3
     resource.setrlimit(resource.RLIMIT_AS, (cap, cap))
 
@@ -326,26 +459,39 @@ def run_limited(command: list[str], stdout_path: Path, stderr_path: Path, *, wal
 
 
 def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | None = None,
-             controller_id: str | None = None, action_profile_id: str | None = None) -> dict:
+             controller_id: str | None = None, action_profile_id: str | None = None,
+             attempt_wall_seconds: int = DEFAULT_ATTEMPT_WALL_SECONDS,
+             attempt_cpu_seconds: int = DEFAULT_ATTEMPT_CPU_SECONDS) -> dict:
+    resource_profile = attempt_resource_profile(attempt_wall_seconds, attempt_cpu_seconds)
     attempt_started = time.monotonic()
     attempt_id = f"{task_name}-{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}-{uuid.uuid4().hex[:8]}"
     attempt = root / task_name / "attempts" / attempt_id
     attempt.mkdir(parents=True, exist_ok=False)
     requested = {"task_name": task_name, "controller_id": controller_id,
         "action_profile_id": action_profile_id, "policy_adapter": policy_adapter,
-        "bridge": str(bridge)}
+        "bridge": str(bridge), "resource_profile_id": resource_profile["profile_id"],
+        "resource_limits": resource_profile}
     atomic_json(attempt / "request.json", {"schema": "csl.closed-loop.run-request/1",
         "attempt_id": attempt_id, "requested": requested,
         "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()})
     initial = {"schema": "csl.closed-loop.attempt/1", "attempt_id": attempt_id,
         "task_id": None, "status": "resolving", "algorithm_status": "not_started",
-        "overall_status": "incomplete", "completed_holds": 0, "requested": requested}
+        "overall_status": "incomplete", "completed_holds": 0, "requested": requested,
+        "resource_profile_id": resource_profile["profile_id"],
+        "resource_limits": {"requested": resource_profile["requested"],
+            "enforced": resource_profile["enforced"]}}
     atomic_json(attempt / "attempt.json", initial)
     try:
         task = load_task(task_name); validate_source_binding(task)
         requested_action_profile_id = action_profile_id
+        native_controller = bool(controller_id and controller_id.startswith("native-"))
+        if native_controller and action_profile_id is None:
+            action_profile_id = task["control_domains"]["finite"]["problem_id"]
         action_profile_id = action_profile_id or task["control_domains"]["continuous"]["problem_id"]
-        capability_manifest, graph = resolve_graph(task, action_profile_id, controller_id)
+        selected_manifest_path = NATIVE_MANIFEST if native_controller else MANIFEST
+        capability_manifest, graph = resolve_graph(task, action_profile_id, controller_id,
+                                                    manifest_path=selected_manifest_path)
+        selected_manifest_sha256 = manifest_digest(capability_manifest)
         selected_controller_id = graph["controller"]["id"]
         if policy_adapter and policy_adapter != graph["controller"].get("policy_factory"):
             raise ValueError("requested policy adapter is not the factory selected by the admitted capability graph")
@@ -355,18 +501,24 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
         refusal = {**initial, "task_id": task.get("task_id") if "task" in locals() else None,
             "status": status, "algorithm_status": status, "overall_status": status,
             "refusal": {"type": type(error).__name__, "reason": str(error)},
-            "completed_holds": 0, "actual_solver_invocations": 0}
+            "completed_holds": 0, "actual_solver_invocations": 0,
+            "mathematical_support_status": "not_evaluated"}
         atomic_json(attempt / "resolution-refusal.json", refusal["refusal"] | {
-            "schema": "csl.closed-loop.resolution-refusal/1", "requested": requested})
+            "schema": "csl.closed-loop.resolution-refusal/1", "requested": requested,
+            "mathematical_support_status": "not_evaluated"})
         atomic_json(attempt / "attempt.json", refusal)
         return {"task_id": refusal["task_id"] or task_name, "attempt": str(attempt),
-            "status": status, "algorithm_status": status, "postcheck_status": "not_run",
+            "status": status, "resource_profile_id": resource_profile["profile_id"],
+            "algorithm_status": status, "postcheck_status": "not_run",
             "render_status": "not_run", "overall_status": status, "completed_holds": 0}
     controller_id = selected_controller_id
     source_hashes = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in [
         HERE / "run_closed_loop.py", HERE / "orbit_nmpc.py", HERE / "task_models.py", HERE / "check_episode.py",
         HERE / "check_replay.py", HERE / "capabilities.py", MPC11 / "nmpc.py", MPC11 / "affine.py"]}
-    source_hashes["docs/catalogue/closed-loop-pilot-capabilities-v1.json"] = hashlib.sha256(MANIFEST.read_bytes()).hexdigest()
+    selected_manifest_path = NATIVE_MANIFEST if graph["controller"]["id"].startswith("native-") else MANIFEST
+    source_hashes[str(selected_manifest_path.relative_to(ROOT))] = hashlib.sha256(selected_manifest_path.read_bytes()).hexdigest()
+    for source_file in graph.get("source_files", []):
+        source_hashes[source_file["path"]] = source_file["sha256"]
     mem_available = None
     try:
         for line in Path("/proc/meminfo").read_text().splitlines():
@@ -377,8 +529,10 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
             ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(), "source_hashes": source_hashes,
         "python": sys.version, "platform": platform.platform(), "bridge": str(bridge),
         "bridge_sha256": hashlib.sha256(bridge.read_bytes()).hexdigest(),
-        "capability_manifest_sha256": SIDECAR.read_text().split()[0],
+        "capability_manifest_sha256": selected_manifest_sha256,
         "graph_id": graph["graph_id"], "graph_fingerprint": graph["graph_fingerprint"],
+        "resource_profile_id": resource_profile["profile_id"],
+        "resource_limits": resource_profile,
         "resolved_modules": graph["controller"], "execution_module": graph["execution"],
         "host_allocation": {"logical_cpus": os.cpu_count(), "mem_available_bytes_at_start": mem_available,
             "suite_memory_request_bytes": min(2 * 1024**3, int(mem_available * .75)) if mem_available else None,
@@ -394,7 +548,7 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
     atomic_json(attempt / "resolution-receipt.json", {
         "schema": "csl.closed-loop.resolution-receipt/1",
         "capability_manifest_id": capability_manifest["manifest_id"],
-        "capability_manifest_sha256": SIDECAR.read_text().split()[0],
+        "capability_manifest_sha256": selected_manifest_sha256,
         "task_id": task["task_id"], "task_sha256": manifest_sha256(task),
         "requested_controller_id": requested["controller_id"] or controller_id,
         "requested_action_profile_id": requested_action_profile_id or action_profile_id,
@@ -411,10 +565,13 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
     if policy_adapter: command.extend(["--policy-adapter", policy_adapter])
     if controller_id: command.extend(["--controller-id", controller_id])
     if action_profile_id: command.extend(["--action-profile-id", action_profile_id])
+    command.extend(["--attempt-wall-seconds", str(resource_profile["requested"]["wall_seconds"]),
+        "--attempt-cpu-seconds", str(resource_profile["requested"]["cpu_seconds"])])
     started = time.monotonic(); proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        text=True, env=env, preexec_fn=limited_worker, start_new_session=True)
+        text=True, env=env, preexec_fn=functools.partial(limited_worker,
+            cpu_seconds=resource_profile["requested"]["cpu_seconds"]), start_new_session=True)
     try:
-        stdout, stderr = proc.communicate(timeout=300)
+        stdout, stderr = proc.communicate(timeout=resource_profile["requested"]["wall_seconds"])
         status = "completed" if proc.returncode == 0 else "failed"
     except subprocess.TimeoutExpired:
         os.killpg(proc.pid, signal.SIGTERM)
@@ -422,6 +579,7 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
         except subprocess.TimeoutExpired:
             os.killpg(proc.pid, signal.SIGKILL); stdout, stderr = proc.communicate()
         status = "timed_out"
+    worker_wall_seconds = time.monotonic() - started
     (attempt / "worker-stdout.txt").write_text(stdout or "")
     (attempt / "worker-stderr.txt").write_text(stderr or "")
     final_path = attempt / "attempt.json"
@@ -433,9 +591,24 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
         result["terminal_supervisor_failure"] = {"status": status, "return_code": proc.returncode,
             "prior_ledger_status": prior_ledger_status, "preserved_stage_records": True,
             "reason": "worker stopped before writing terminal attempt status" if prior_ledger_status == "in-progress" else None}
+        if prior_ledger_status == "in-progress":
+            result.setdefault("mathematical_support_status", "not_evaluated")
     result["supervisor"] = {"status": status, "return_code": proc.returncode,
-        "wall_seconds": time.monotonic() - started, "termination_scope": "worker process group",
+        "wall_seconds": worker_wall_seconds, "termination_scope": "worker process group",
+        "resource_profile_id": resource_profile["profile_id"],
+        "requested_wall_seconds": resource_profile["requested"]["wall_seconds"],
+        "enforced_wall_timeout_seconds": resource_profile["enforced"]["wall_seconds"],
+        "requested_cpu_seconds": resource_profile["requested"]["cpu_seconds"],
+        "enforced_cpu_rlimit_soft_hard_seconds": [resource_profile["enforced"]["cpu_seconds_soft"],
+            resource_profile["enforced"]["cpu_seconds_hard"]],
         "stdout": "worker-stdout.txt", "stderr": "worker-stderr.txt"}
+    # The parent spans worker launch through process exit, including preparation,
+    # checkpoints, lifecycle close, and the worker's terminal JSON write.
+    result.setdefault("resource_limits", {}).setdefault("observed", {})[
+        "worker_wall_seconds"] = result["supervisor"]["wall_seconds"]
+    result["resource_limits"]["observed"]["worker_wall_scope"] = (
+        "supervisor monotonic span from worker launch through process exit; includes preparation, "
+        "checkpoint I/O, early rejection, lifecycle close, and terminal serialization")
     if status == "completed" and result.get("status") == "complete":
         try:
             replay_attempt(task, result, attempt, bridge)
@@ -457,6 +630,7 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
     result.update(derive_outcome_status(result))
     atomic_json(final_path, result)
     return {"task_id": task["task_id"], "attempt": str(attempt), "status": status,
+            "resource_profile_id": resource_profile["profile_id"],
             "algorithm_status": result.get("algorithm_status"),
             "postcheck_status": result.get("postcheck_status"), "render_status": result.get("render_status"),
             "overall_status": result.get("overall_status"),
@@ -794,6 +968,8 @@ def write_coverage(root: Path) -> Path:
         overall_status = coverage_overall_status(algorithm_status, postcheck_status, render_status)
         rows.append({"attempt_id": record.get("attempt_id"), "task_id": record.get("task_id"),
             "task_sha256": record.get("task_sha256"),
+            "resource_profile_id": record.get("resource_profile_id"),
+            "resource_limits": record.get("resource_limits"),
             "status": overall_status, "overall_status": overall_status,
             "algorithm_status": algorithm_status, "postcheck_status": postcheck_status,
             "render_status": render_status, "ledger_status": record.get("status"),
@@ -843,14 +1019,20 @@ def main() -> int:
     parser.add_argument("--policy-adapter", help="persistent in-process policy factory as module:function")
     parser.add_argument("--controller-id", help="selected policy identity passed to an external adapter")
     parser.add_argument("--action-profile-id", help="task-declared continuous or finite per-step action-domain identity")
+    parser.add_argument("--attempt-wall-seconds", type=positive_seconds, default=DEFAULT_ATTEMPT_WALL_SECONDS,
+        help="positive worker-only wall timeout in seconds (default: 300; excludes replay, checkers and rendering)")
+    parser.add_argument("--attempt-cpu-seconds", type=positive_seconds, default=DEFAULT_ATTEMPT_CPU_SECONDS,
+        help="positive POSIX worker CPU limit in seconds (default: 300)")
     parser.add_argument("--replay-only", type=Path, help="independently replay a saved complete attempt without rerunning its controller")
     parser.add_argument("--render-only", type=Path, help="render source-defined views for a saved complete attempt without changing its record")
     parser.add_argument("--coverage-only", action="store_true", help="write a coverage index from saved append-only attempt records")
     args = parser.parse_args()
     if args.worker:
         if args.bridge is None or args.attempt is None or args.graph is None: parser.error("worker mode requires --bridge, --attempt, and --graph")
+        limited_worker(args.attempt_cpu_seconds)
         return worker(args.task, args.attempt, args.bridge.resolve(), args.policy_adapter, args.controller_id,
-                      args.action_profile_id, args.graph.resolve())
+                      args.action_profile_id, args.graph.resolve(), args.attempt_wall_seconds,
+                      args.attempt_cpu_seconds)
     if args.bridge is None and not args.render_only and not args.coverage_only: parser.error("--bridge is required")
     if args.coverage_only:
         path = write_coverage(args.output_root.resolve()); print(json.dumps({"coverage_record": str(path)})); return 0
@@ -902,12 +1084,14 @@ def main() -> int:
         return 0 if result["overall_status"] == "complete" else 1
     names = ["syn-nl-lv-01", "earth-orbit", "syn-nl-fuel-01"] if args.task == "all" else [args.task]
     rows = [run_task(name, args.output_root.resolve(), args.bridge.resolve(), args.policy_adapter,
-                     args.controller_id, args.action_profile_id) for name in names]
+                     args.controller_id, args.action_profile_id, args.attempt_wall_seconds,
+                     args.attempt_cpu_seconds) for name in names]
     coverage_path = write_coverage(args.output_root.resolve())
     print(json.dumps({"schema": "csl.closed-loop.coverage/1", "coverage_record": str(coverage_path), "attempts": rows,
         "coverage": [{"task_id": row["task_id"], "algorithm_status": row.get("algorithm_status"),
             "postcheck_status": row.get("postcheck_status"), "render_status": row.get("render_status"),
             "overall_status": row.get("overall_status"), "completed_holds": row["completed_holds"],
+            "resource_profile_id": row.get("resource_profile_id"),
             "actual_observed_state_updates": row["completed_holds"]} for row in rows]}, indent=2))
     return 0 if all(row.get("overall_status") == "complete" for row in rows) else 1
 

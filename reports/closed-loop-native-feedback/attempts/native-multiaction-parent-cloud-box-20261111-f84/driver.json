@@ -1,0 +1,27 @@
+{
+  "all_children_shape_membership_contained": true,
+  "authored_child_witnesses": 25,
+  "binary_sha256": "97835f1d6462ff96371c9d8fa6fe9878cb47fce3a81a1f14b80d29c284fd13f2",
+  "capture_scope": "bounded analytic query, not a source-task closed-loop episode",
+  "command": [
+    "/home/butahlecoq/.local/share/codex/worktrees/native-feedback-composition-943-20261111/build/core/csl_closed_loop_native_policy"
+  ],
+  "graph_cpp_sha256": "009e2af6b373ef6100340abbedee47eaa7e627114fb6a53da4b62d1f2be0bb0d",
+  "graph_header_sha256": "f172d3c33c09347d40b09a542044255038507992fc982aa30a06f16c8c7ae2f2",
+  "representation": "box",
+  "request_sha256": "3f99eb8bd34c426e8d581b42104bd1c0d77c3a6978d94a48ae0e0a7734aa3bd0",
+  "returncode": 0,
+  "selected_control": [
+    0.0,
+    0.0
+  ],
+  "shape_type_counts": {
+    "box": 5
+  },
+  "source_commit": "f84bf6fafe79be391dd7ae0c525ae95003146e60",
+  "status": "accepted",
+  "task_contract_path": "../native-multiaction-parent-cloud-cli-20261111-03/task-contract.json",
+  "task_sha256": "f60b9ef5d38bac3d0d202913b8e6ca5c219597b5cfe3751dcd8e3c71d642cc82",
+  "tracked_source_clean": true,
+  "whole_action_cloud_records": 5
+}

@@ -1,0 +1,50 @@
+{
+  "schema": "csl.closed-loop.native-graph-prototype-run-receipt/1",
+  "source_attempt": "../../probes/lv-stage0-full-replanning-20261111.json",
+  "base_commit": "9bbb23d93aae3c529bcfe5b6840fec16e8440686",
+  "branch": "codex/native-feedback-composition-943-20261111",
+  "working_tree_state": "dirty at episode run; source and binary hashes below identify exact built implementation",
+  "source_sha256": {
+    "tools/closed_loop_native_policy.cpp": "ed69ea7d7d6772c1a42d6eb3504026a5f5ea9c80307447477f8355268ec7ed3a",
+    "benchmarks/reporting/closed_loop/native_finite_action_policy.py": "d970c15c2fdfbcdd485fc3a20b9a4c551c881755d3dbe34b972e132947c0aaec",
+    "benchmarks/reporting/closed_loop/native_graph_probe.py": "1d0b1b1edd0c4e847ab725a172ddb2ec82275f4eeac7c7cfc032ac69450cb8ba",
+    "tools/closed_loop_native_policy.cpp_at_episode_run": "ed69ea7d7d6772c1a42d6eb3504026a5f5ea9c80307447477f8355268ec7ed3a",
+    "tools/closed_loop_native_policy.cpp_current_after_run": "ee4143447b64780a7c8bc236873dede00ca6c3a002f8a72b56da5ff8a1d32526"
+  },
+  "binary": {
+    "path": "build/core/csl_closed_loop_native_policy",
+    "sha256": "fbaec83eab223d1c87f2b3026d5f4dab0482f85ea151d1f64d602b56e790e3e4",
+    "target": "csl_closed_loop_native_policy",
+    "build_type": "Release",
+    "compiler": "/usr/bin/c++",
+    "parallelism": 1
+  },
+  "source_task": {
+    "task_id": "syn-nl-lv-01/continuous-receding/1",
+    "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+    "source_model_id": "syn-nl-lv-01/ode/1",
+    "predictor_model_id": "syn-nl-lv-01/frozen-coexistence-affine/1",
+    "action_profile_id": "syn-nl-lv-01/continuous-receding/1/finite-catalog-adaptation/1",
+    "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
+    "original_horizon": 30,
+    "controller_id": "native-graph/exact_polytope"
+  },
+  "episode": {
+    "completed_holds": 30,
+    "status": "all holds applied and observed",
+    "beam_width": 8,
+    "max_graph_nodes": 512,
+    "coverage": "incomplete at every stage; 30 stage updates; full-authored-horizon search each query"
+  },
+  "independent_replay_record": "full-replay-record.json",
+  "checker_attempts": {
+    "first_failure": "failed-common-checker-attempt-captured-error.md",
+    "raw_streams": "unavailable; disclosed in failure receipt",
+    "successful": [
+      "full-replay-common-check.json",
+      "full-replay-tight-check.json"
+    ]
+  },
+  "prototype_source_snapshot": "prototype-source/closed_loop_native_policy.cpp",
+  "post_run_source_changes": "Whitespace-only removal on the backward_edge_status declaration; exact episode-run source is retained in prototype-source/closed_loop_native_policy.cpp and its hash matches the built source recorded above."
+}
