@@ -33,6 +33,28 @@ class HistoryNormSolverTest(unittest.TestCase):
         self.assertAlmostEqual(result["primal"][2], 0, places=5)
         self.assertAlmostEqual(result["objective"], 2, places=5)
 
+    def test_history_verification_rejects_wrong_rows_and_cost(self):
+        import numpy as np
+        from contracts import load_task
+        from history_validation import validate
+        from task_models import objective
+
+        task = load_task("earth-orbit")
+        initial = np.array([7000.0, 0.0, 0.0, 0.001])
+        control = np.array([0.1, -0.1])
+        predictor = [{"A": np.eye(4).tolist(), "B": np.zeros((4, 2)).tolist(), "c": [0] * 4}]
+        primal = np.r_[initial, initial, control]
+        relation = {"inequalities": [[0] * 8 + [1, 0]], "upper_bounds": [0.2],
+                    "equalities": [], "equality_values": []}
+        source = objective(task, [initial, initial], [control], absolute_stage_offset=19)
+        check = lambda z, cost: validate(task, 19, initial, predictor, relation, z, cost)
+        self.assertTrue(check(primal, source["total"])["accepted"])
+        bad = primal.copy(); bad[4] += 2
+        self.assertFalse(check(bad, source["total"])["accepted"])
+        bad = primal.copy(); bad[8] = 0.3
+        self.assertFalse(check(bad, source["total"])["accepted"])
+        self.assertFalse(check(primal, source["total"] + 1)["accepted"])
+
 
 if __name__ == "__main__":
     unittest.main()
