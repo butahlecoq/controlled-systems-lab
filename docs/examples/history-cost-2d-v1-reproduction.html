@@ -34,5 +34,17 @@ cmake --build build-history-cost-api --target history_cost_tests finite_action_n
 ctest --test-dir build-history-cost-api --output-on-failure -R '^(history_cost_tests|finite_action_nominal_tests|finite_action_graph_tests)$'</code></pre>
 <p>Current API regression coverage includes large and small representable scales, refusal when a nonzero coefficient underflows binary64, zero coefficients and weights, parity with source evaluation, legacy <code>unsupported</code> diagnostics, and malformed controls on an empty schedule.</p>
 </section>
-<section><h2>Evidence boundary</h2><p>The saved result is a one-step convex two-state/two-control QP with <code>x₀=(0,0)</code>, <code>x₁=x₀+u</code>, and controls in <code>[−2,2]²</code>. It demonstrates this compiler/provider path; it does not establish the original nonlinear full-horizon feedback result or a nonlinear safety claim.</p><p><a href="history-cost-2d-v1/index.html">Return to the 2D example</a> · <a href="history-cost-2d-v1/history-cost-2d-v1.zip">Download the unchanged raw-evidence bundle</a></p></section>
+<section><h2>4. Re-run the current merged source capture</h2><p>This source tag contains the compiler fixes integrated with the live main branch. The recorded executable came from an incremental Release build; a fresh build below is for an independent behavioral replay, not a bit-identical binary reproduction.</p><pre tabindex="0" role="region" aria-label="Build and run the current-source analytic request"><code>git clone https://github.com/butahlecoq/controlled-systems-lab.git
+cd controlled-systems-lab
+git checkout evidence/full-history-source-536a5a9f-20261112
+mkdir -p /tmp/history-cost-current
+git show HEAD:docs/examples/history-cost-2d-v1/records/total-cost-request.jsonl > /tmp/history-cost-current/total-cost-request.jsonl
+git show HEAD:docs/examples/history-cost-2d-v1/records/terminal-only-request.jsonl > /tmp/history-cost-current/terminal-only-request.jsonl
+
+cmake -S . -B build-history-current -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=ON
+cmake --build build-history-current --target csl_closed_loop_native_policy -j1
+
+./build-history-current/csl_closed_loop_native_policy &lt; /tmp/history-cost-current/total-cost-request.jsonl
+./build-history-current/csl_closed_loop_native_policy &lt; /tmp/history-cost-current/terminal-only-request.jsonl</code></pre><p>Expected controls are approximately (1/3,0) with total source cost 2/3 and (1,0) with total source cost 0. The provider is <code>csl.convex.highs</code>.</p></section>
+<section><h2>Evidence boundary</h2><p>The saved result is a one-step convex two-state/two-control QP with <code>x₀=(0,0)</code>, <code>x₁=x₀+u</code>, and controls in <code>[−2,2]²</code>. It demonstrates this compiler/provider path; it does not establish the original nonlinear full-horizon feedback result or a nonlinear safety claim.</p><p><a href="history-cost-2d-v1/index.html">Return to the 2D example</a> · <a href="history-cost-2d-v1/history-cost-2d-v1.zip">Download the unchanged raw-evidence bundle</a> · <a href="history-cost-2d-v1-current-source.html">Open the post-fix current-source replay</a></p></section>
 </main></body></html>

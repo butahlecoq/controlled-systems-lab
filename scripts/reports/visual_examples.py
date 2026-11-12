@@ -765,6 +765,73 @@ def validate_history_cost_bundle(bundle: Path, repository_root: Path) -> dict:
     return manifest
 
 
+def validate_current_history_cost_bundle(bundle: Path, repository_root: Path) -> dict:
+    """Validate the separately captured post-fix native replay and archive."""
+    if bundle.is_symlink() or not bundle.is_dir():
+        raise ValueError("current-source history-cost bundle is missing or symlinked")
+    root = bundle.resolve(strict=True)
+    repo = repository_root.resolve(strict=True)
+    if not root.is_relative_to(repo):
+        raise ValueError("current-source history-cost bundle escapes the repository")
+    cursor = repository_root.absolute()
+    for part in bundle.absolute().relative_to(repository_root.absolute()).parts:
+        cursor = cursor / part
+        if cursor.is_symlink():
+            raise ValueError("current-source history-cost bundle has a symlinked path component")
+    manifest_path = root / "manifest.json"
+    if manifest_path.is_symlink() or not manifest_path.is_file():
+        raise ValueError("current-source history-cost manifest is missing or symlinked")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if (manifest.get("schema") != "csl.history-cost-2d-current-source/1" or
+            manifest.get("source_commit") != "536a5a9f81b49a164847d36ebef96501b0925312" or
+            manifest.get("native_binary_sha256") != "5ec2cf4411e1f183de4dcbf74398ae4acae2a5179d59ba5fa83b3ff651c08d62"):
+        raise ValueError("current-source history-cost provenance differs")
+    files = manifest.get("files")
+    if not isinstance(files, dict) or set(files) != {
+            "records/CMakeCache.txt", "records/build.log", "records/receipt-first-write-invalid.txt",
+            "records/receipt.json", "records/terminal-only-request.jsonl",
+            "records/terminal-only-stdout.jsonl", "records/terminal-only-stderr.txt",
+            "records/total-cost-request.jsonl", "records/total-cost-stdout.jsonl",
+            "records/total-cost-stderr.txt"}:
+        raise ValueError("current-source history-cost evidence file set differs")
+    for relative, expected in files.items():
+        path = root / relative
+        if Path(relative).is_absolute() or ".." in Path(relative).parts:
+            raise ValueError("current-source evidence path escapes its root")
+        cursor = root
+        for part in Path(relative).parts:
+            cursor = cursor / part
+            if cursor.is_symlink():
+                raise ValueError("current-source evidence contains a symlink: " + relative)
+        if not path.is_file() or not path.resolve().is_relative_to(root):
+            raise ValueError("current-source evidence is missing or escapes its root: " + relative)
+        if hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+            raise ValueError("current-source evidence digest differs: " + relative)
+    receipt = json.loads((root / "records/receipt.json").read_text(encoding="utf-8"))
+    if (receipt.get("source_commit") != manifest["source_commit"] or
+            receipt.get("binary_sha256") != manifest["native_binary_sha256"]):
+        raise ValueError("current-source capture receipt provenance differs")
+    for case in ("total-cost", "terminal-only"):
+        for kind, suffix in (("request", "request.jsonl"), ("stdout", "stdout.jsonl"), ("stderr", "stderr.txt")):
+            if receipt["cases"][case][kind + "_sha256"] != files[f"records/{case}-{suffix}"]:
+                raise ValueError("current-source receipt digest differs for " + case + " " + kind)
+    archive_path = root / "history-cost-2d-v1-current-source.zip"
+    if archive_path.is_symlink() or not archive_path.is_file():
+        raise ValueError("current-source evidence archive is missing or symlinked")
+    with zipfile.ZipFile(archive_path) as archive:
+        expected_names = set(files) | {"manifest.json"}
+        if set(archive.namelist()) != expected_names or archive.testzip() is not None:
+            raise ValueError("current-source archive entries differ")
+        for name in expected_names:
+            expected_bytes = manifest_path.read_bytes() if name == "manifest.json" else (root / name).read_bytes()
+            if archive.read(name) != expected_bytes:
+                raise ValueError("current-source archive content differs: " + name)
+    sidecar = archive_path.with_suffix(archive_path.suffix + ".sha256")
+    if sidecar.is_symlink() or not sidecar.is_file() or sidecar.read_text().split()[0] != hashlib.sha256(archive_path.read_bytes()).hexdigest():
+        raise ValueError("current-source archive checksum differs")
+    return manifest
+
+
 def build(catalog, site):
     examples = load_examples(catalog)
     site = Path(site).resolve(strict=True)
@@ -797,6 +864,12 @@ def build(catalog, site):
         '<p><a href="history-cost-2d-v1/index.html">Open the full-history cost example →</a> · '
         '<a href="history-cost-2d-v1-reproduction.html">Build and reproduction commands</a> · '
         '<a href="history-cost-2d-v1/history-cost-2d-v1.zip">Offline evidence bundle</a></p></article>')
+    saved_figures += ('<article class="saved-figure" id="history-cost-2d-v1-current-source"><p class="eyebrow">Nominal optimization · Current-source replay</p>'
+        '<h3><a href="history-cost-2d-v1-current-source.html">Current-source replay preserves the 2D optimum</a></h3>'
+        '<a href="history-cost-2d-v1-current-source.html"><img src="history-cost-2d-v1/history-cost-2d.svg" alt="Feasible control square, terminal-only optimum at (1,0), and full-cost HiGHS optimum at (1/3,0)"></a>'
+        '<p>The post-fix merged source again returns (1/3,0) for full cost and (1,0) for terminal only. The record bundle preserves the two raw solver replies and incremental build profile.</p>'
+        '<p><a href="history-cost-2d-v1-current-source.html">Open current-source record →</a> · '
+        '<a href="history-cost-2d-v1-current-source/history-cost-2d-v1-current-source.zip">Offline raw evidence</a></p></article>')
     last_topic_anchor = "visual-fuel-b06-viz03"
     last_topic_title = "B06 fuel terminal set: readable 4D-to-2D projections"
     analytic_files, analytic_inventory = visual_illustrations.build(Path(catalog))
@@ -824,6 +897,17 @@ def build(catalog, site):
             require(not path.is_symlink(), "saved full-history example file is a symlink")
             relative = path.relative_to(cost_root).as_posix()
             outputs["history-cost-2d-v1/" + relative] = path.read_bytes() if path.suffix == ".zip" else path.read_text(encoding="utf-8")
+    current_cost_root = repository_root / "docs/examples/history-cost-2d-v1-current-source"
+    validate_current_history_cost_bundle(current_cost_root, repository_root)
+    for path in sorted(current_cost_root.rglob("*")):
+        if path.is_file():
+            require(not path.is_symlink(), "current-source history-cost asset is symlinked")
+            relative = path.relative_to(current_cost_root).as_posix()
+            outputs["history-cost-2d-v1-current-source/" + relative] = path.read_bytes()
+    current_cost_page = repository_root / "docs/examples/history-cost-2d-v1-current-source.html"
+    require(current_cost_page.is_file() and not current_cost_page.is_symlink(),
+            "current-source history-cost page is missing or symlinked")
+    outputs["history-cost-2d-v1-current-source.html"] = current_cost_page.read_text(encoding="utf-8")
     reproduction_page = repository_root / "docs/examples/history-cost-2d-v1-reproduction.html"
     require(reproduction_page.is_file() and not reproduction_page.is_symlink(),
             "full-history reproduction commands page is missing or symlinked")
@@ -853,6 +937,13 @@ def build(catalog, site):
         "source_page": "history-cost-2d-v1/index.html",
         "walkthrough_page": "history-cost-2d-v1-reproduction.html",
         "raw_record": "history-cost-2d-v1/records/capture-receipt.json"}]
+    gallery_inventory.append({"family": "Nominal optimization · saved-data companion",
+        "title": "Current-source replay of the full-history 2D optimum",
+        "status": "saved-data-companion", "anchor": "history-cost-2d-v1-current-source",
+        "page": "history-cost-2d-v1-current-source.html",
+        "figure": "history-cost-2d-v1/history-cost-2d.svg",
+        "source_page": "https://github.com/butahlecoq/controlled-systems-lab/tree/evidence/full-history-source-536a5a9f-20261112",
+        "raw_record": "history-cost-2d-v1-current-source/records/receipt.json"})
     gallery_inventory.append({"family": "Numerical integration",
         "title": "Adaptive RK4 replay of a two-state oscillator",
         "status": "saved-data-companion", "anchor": "adaptive-ode-rk4",
