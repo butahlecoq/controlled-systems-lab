@@ -28,6 +28,13 @@ class HistoryBridgeTest(unittest.TestCase):
         self.assertEqual(response["solver_receipt"]["provider"], "csl.convex.highs")
         self.assertEqual(response["history_relation"]["representation"], "polytope-h")
         self.assertAlmostEqual(response["source_cost"]["total"], 2 / 3, places=5)
+        request["running_cost"]["stages"][0]["terms"][0]["coefficient"] = 0
+        terminal_run = subprocess.run([os.environ["CSL_NATIVE_POLICY_BRIDGE"]],
+            input=json.dumps(request) + "\n", text=True, capture_output=True, check=True)
+        terminal_only = json.loads(terminal_run.stdout)
+        self.assertEqual(terminal_only["status"], "accepted", terminal_only)
+        self.assertAlmostEqual(terminal_only["primal"][-2], 1, places=5)
+        self.assertAlmostEqual(terminal_only["primal"][-1], 0, places=5)
 
 
 if __name__ == "__main__":
