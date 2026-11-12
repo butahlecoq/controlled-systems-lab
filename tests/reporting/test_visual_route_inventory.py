@@ -19,6 +19,13 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertEqual(delivery["disposition"],"analytic-reference-checked-saved-run-renderer")
         self.assertEqual(inventory["schema"],"csl.visual-route-inventory/1")
         producers={entry["source"]:entry for entry in inventory["producers_and_routes"]}
+        tube_renderer=producers["scripts/reports/nominal_tube_figure.py"]
+        self.assertEqual(tube_renderer["disposition"],"saved-data-illustration-renderer")
+        self.assertIn("full-state H rows F, B and I",tube_renderer["role_and_disposition_reason"])
+        self.assertIn("checks plotted vertices against raw rows",tube_renderer["role_and_disposition_reason"])
+        self.assertIn("saved nonlinear NMPC trajectory",tube_renderer["role_and_disposition_reason"])
+        self.assertIn("does not claim nonlinear reachable sets or global control optimality",
+                      tube_renderer["role_and_disposition_reason"])
         pinned_lotka=producers["scripts/reports/lotka_volterra_sampled_frozen_321ac099.py"]
         self.assertEqual(pinned_lotka["disposition"],"pinned-historical-source-snapshot")
         self.assertEqual(pinned_lotka["source_snapshot"],{
@@ -172,7 +179,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
                  "regeneration-entrypoint-preserved-gallery-never-invokes-it",
                  "saved-control-witness-gallery-companion-builder",
                  "reviewed-analytic-diagram-preserved",
-                 "analytic-reference-checked-saved-run-renderer"}
+                 "analytic-reference-checked-saved-run-renderer",
+                 "saved-data-illustration-renderer"}
         self.assertTrue(all(entry["disposition"] in allowed for entry in producers.values()))
         deferred=[entry for entry in producers.values()
                   if entry["disposition"]=="deferred-family-specific-migration"]

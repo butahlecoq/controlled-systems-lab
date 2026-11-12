@@ -1060,6 +1060,15 @@
       "disposition": "composes-or-copies-existing-saved-figure"
     },
     {
+      "source": "scripts/reports/nominal_tube_figure.py",
+      "signal_count": 5,
+      "asset_name_literals": [
+        "__STEM__.svg"
+      ],
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Renders committed full-state H rows F, B and I from the original 30-stage frozen-affine Lotka capture; the numerical half-plane clipping keeps the saved coefficients and checks plotted vertices against raw rows. A saved nonlinear NMPC trajectory is overlaid separately. This does not claim nonlinear reachable sets or global control optimality."
+    },
+    {
       "source": "scripts/reports/opt04/render.py",
       "signal_count": 5,
       "asset_name_literals": [

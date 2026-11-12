@@ -183,6 +183,14 @@ SAVED_DATA_COMPANION_RENDERERS = {
     "benchmarks/reporting/review05/render_dimension_ladder.py",
     "benchmarks/reporting/review05/render_constraint_ladder.py",
 }
+SAVED_DATA_ILLUSTRATION_RENDERERS = {
+    "scripts/reports/nominal_tube_figure.py": (
+        "Renders committed full-state H rows F, B and I from the original 30-stage frozen-affine Lotka capture; "
+        "the numerical half-plane clipping keeps the saved coefficients and checks plotted vertices against raw rows. "
+        "A saved nonlinear NMPC trajectory is overlaid separately. This does not claim nonlinear reachable sets or "
+        "global control optimality."
+    ),
+}
 FROZEN_COMPANIONS = {
     "mpc06-online-anchor-v1": "mpc06-complete-6b7059d62473d32d4210/index.html",
     "mpc06-online-anchor-checked-v2": "mpc06-complete-6b7059d62473d32d4210/index.html",
@@ -311,6 +319,8 @@ def source_inventory(root: Path) -> list[dict]:
                 disposition = "composes-or-copies-existing-saved-figure"
             elif relative in SAVED_DATA_COMPANION_COLLECTORS:
                 disposition = "measurement-collector-preserved-with-saved-data-companion"
+            elif relative in SAVED_DATA_ILLUSTRATION_RENDERERS:
+                disposition = "saved-data-illustration-renderer"
             elif relative in SAVED_DATA_COMPANION_RENDERERS:
                 disposition = "analytic-reference-checked-saved-run-renderer"
             elif relative in FROZEN_DIAGRAM_EXCEPTIONS:
@@ -361,7 +371,9 @@ def source_inventory(root: Path) -> list[dict]:
             entries.append({"source": relative, "signal_count": len(matches),
                             "asset_name_literals": assets, "disposition": disposition,
                             **({"role_and_disposition_reason": VIZ10_ROLE_REASONS[relative]}
-                               if relative in VIZ10_ROLE_REASONS else {}),
+                               if relative in VIZ10_ROLE_REASONS else
+                               {"role_and_disposition_reason": SAVED_DATA_ILLUSTRATION_RENDERERS[relative]}
+                               if relative in SAVED_DATA_ILLUSTRATION_RENDERERS else {}),
                             **({"follow_up_issue": FOLLOW_UP_ISSUE_OVERRIDES.get(
                                     relative, migration_issue(relative))}
                                if disposition == "deferred-family-specific-migration" else {})})
