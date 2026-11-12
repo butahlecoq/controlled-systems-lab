@@ -728,16 +728,26 @@ def validate_history_cost_bundle(bundle: Path, repository_root: Path) -> dict:
     files = manifest.get("files")
     if not isinstance(files, dict) or not files:
         raise ValueError("full-history example has no file digest map")
+    page_root = repo / "docs/examples/history-cost-2d-v1"
+    if page_root.is_symlink() or not page_root.is_dir():
+        raise ValueError("full-history example page assets are missing or symlinked")
+    page_cursor = repo
+    for part in Path("docs/examples/history-cost-2d-v1").parts:
+        page_cursor = page_cursor / part
+        if page_cursor.is_symlink():
+            raise ValueError("full-history example page path has a symlinked component")
+    page_assets = {"history-cost-2d.svg", "index.html"}
     for relative, expected in files.items():
-        path = root / relative
         if Path(relative).is_absolute() or ".." in Path(relative).parts:
             raise ValueError("full-history example file path escapes its root")
-        cursor = root
+        path_root = page_root if relative in page_assets else root
+        path = path_root / relative
+        cursor = path_root
         for part in Path(relative).parts:
             cursor = cursor / part
             if cursor.is_symlink():
                 raise ValueError("full-history example contains a symlink: " + relative)
-        if not path.is_file() or not path.resolve().is_relative_to(root):
+        if not path.is_file() or not path.resolve().is_relative_to(path_root):
             raise ValueError("full-history example file is missing or escapes its root: " + relative)
         actual = hashlib.sha256(path.read_bytes()).hexdigest()
         if actual != expected:
@@ -759,7 +769,11 @@ def validate_history_cost_bundle(bundle: Path, repository_root: Path) -> dict:
         if set(archive.namelist()) != expected_names or archive.testzip() is not None:
             raise ValueError("full-history offline archive entries differ")
         for name in expected_names:
-            expected_bytes = (manifest_path.read_bytes() if name == "manifest.json" else (root / name).read_bytes())
+            if name == "manifest.json":
+                expected_bytes = manifest_path.read_bytes()
+            else:
+                name_root = page_root if name in page_assets else root
+                expected_bytes = (name_root / name).read_bytes()
             if archive.read(name) != expected_bytes:
                 raise ValueError("full-history offline archive content differs: " + name)
     return manifest
@@ -890,14 +904,19 @@ def build(catalog, site):
     outputs = {e["slug"] + ".svg": plot(e) for e in examples}
     outputs.update(analytic_files)
     repository_root = Path(__file__).resolve().parents[2]
-    cost_root = repository_root / "docs/examples/history-cost-2d-v1"
-    validate_history_cost_bundle(cost_root, repository_root)
-    for path in sorted(cost_root.rglob("*")):
+    cost_page_root = repository_root / "docs/examples/history-cost-2d-v1"
+    cost_evidence_root = repository_root / "reports/algorithm-results/history-cost-2d-v1"
+    validate_history_cost_bundle(cost_evidence_root, repository_root)
+    for name in ("index.html", "history-cost-2d.svg"):
+        path = cost_page_root / name
+        require(path.is_file() and not path.is_symlink(), "saved full-history page asset is missing or symlinked")
+        outputs["history-cost-2d-v1/" + name] = path.read_bytes()
+    for path in sorted(cost_evidence_root.rglob("*")):
         if path.is_file():
-            require(not path.is_symlink(), "saved full-history example file is a symlink")
-            relative = path.relative_to(cost_root).as_posix()
-            outputs["history-cost-2d-v1/" + relative] = path.read_bytes() if path.suffix == ".zip" else path.read_text(encoding="utf-8")
-    current_cost_root = repository_root / "docs/examples/history-cost-2d-v1-current-source"
+            require(not path.is_symlink(), "saved full-history evidence file is a symlink")
+            relative = path.relative_to(cost_evidence_root).as_posix()
+            outputs["history-cost-2d-v1/" + relative] = path.read_bytes()
+    current_cost_root = repository_root / "reports/algorithm-results/history-cost-2d-v1-current-source"
     validate_current_history_cost_bundle(current_cost_root, repository_root)
     for path in sorted(current_cost_root.rglob("*")):
         if path.is_file():

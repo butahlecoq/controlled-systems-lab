@@ -38,8 +38,8 @@ ctest --test-dir build-history-cost-api --output-on-failure -R '^(history_cost_t
 cd controlled-systems-lab
 git checkout evidence/full-history-source-536a5a9f-20261112
 mkdir -p /tmp/history-cost-current
-git show HEAD:docs/examples/history-cost-2d-v1/records/total-cost-request.jsonl > /tmp/history-cost-current/total-cost-request.jsonl
-git show HEAD:docs/examples/history-cost-2d-v1/records/terminal-only-request.jsonl > /tmp/history-cost-current/terminal-only-request.jsonl
+git show HEAD:reports/algorithm-results/history-cost-2d-v1/records/total-cost-request.jsonl > /tmp/history-cost-current/total-cost-request.jsonl
+git show HEAD:reports/algorithm-results/history-cost-2d-v1/records/terminal-only-request.jsonl > /tmp/history-cost-current/terminal-only-request.jsonl
 
 cmake -S . -B build-history-current -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=ON
 cmake --build build-history-current --target csl_closed_loop_native_policy -j1
