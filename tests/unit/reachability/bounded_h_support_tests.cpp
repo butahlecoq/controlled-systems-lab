@@ -1,5 +1,6 @@
 #include <csl/reachability/bounded_h_support.hpp>
 #include <csl/adapters/lp/highs.hpp>
+#include <csl/reachability/feedback_geometry.hpp>
 #include <cstdlib>
 
 void check(bool condition) { if (!condition) std::abort(); }
@@ -22,6 +23,24 @@ int main() {
     auto tiny_bound=residual_corrected_support(tiny,{1},{});
     check(std::holds_alternative<SupportUpperBound>(tiny_bound));
     check(std::get<SupportUpperBound>(tiny_bound).value>=1);
+    auto zonotope=axis_enclosure(FeedbackFamily::zonotope, {"z"},
+        {-1,-2,3,4}, {1,2,3,4}, {});
+    check(std::holds_alternative<FeedbackMembership>(zonotope));
+    const auto& z=std::get<FeedbackZonotopeMembership>(std::get<FeedbackMembership>(zonotope));
+    check(z.generators.rows==4 && z.generators.cols==4 && z.generators.values[10]==0);
+    auto ellipsoid=axis_enclosure(FeedbackFamily::ellipsoid, {"e"},
+        {-1,-2,3,4}, {1,2,3,4}, {});
+    check(std::holds_alternative<FeedbackMembership>(ellipsoid));
+    const auto& e=std::get<FeedbackEllipsoidMembership>(std::get<FeedbackMembership>(ellipsoid));
+    check(e.factor.rows==4 && e.factor.cols==4 && e.factor.values[10]==0);
+    check(e.factor.values[0]>=2 && e.factor.values[5]>=4);
+    auto box_shape=axis_enclosure(FeedbackFamily::box, {"box"}, {-1,0}, {1,2}, {"x","y"});
+    check(std::holds_alternative<FeedbackMembership>(box_shape));
+    const auto& box_h=std::get<FeedbackHMembership>(std::get<FeedbackMembership>(box_shape));
+    check(!box_h.parallelotope_frame.has_value());
+    auto para=axis_enclosure(FeedbackFamily::parallelotope, {"p"}, {-1,0}, {1,2}, {"x","y"});
+    check(std::holds_alternative<FeedbackMembership>(para));
+    check(std::get<FeedbackHMembership>(std::get<FeedbackMembership>(para)).parallelotope_frame.has_value());
     // A negative inequality multiplier cannot justify the bound.
     check(std::holds_alternative<Diagnostics>(residual_corrected_support(input, {-1}, {})));
     // Equality multipliers and cross-coordinate support in four dimensions.

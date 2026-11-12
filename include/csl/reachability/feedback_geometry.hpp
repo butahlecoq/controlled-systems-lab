@@ -44,4 +44,11 @@ struct FeedbackGeometryStage {
     FeedbackSet forward, backward, intersection;
 };
 
+// A deliberately coarse cover for a clipped bounded H intersection. This is
+// distinct from correlated native propagation. Polytope requires its original H
+// operand and is not constructed by this axis-only helper.
+std::variant<FeedbackMembership, Diagnostics> axis_enclosure(FeedbackFamily,
+    SetId, const Vector& lower, const Vector& upper,
+    const std::vector<std::string>& coordinate_labels);
+
 } // namespace csl::reachability
