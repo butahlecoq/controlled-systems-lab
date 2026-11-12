@@ -29,6 +29,8 @@ class B04PublicationSourceSnapshotTests(unittest.TestCase):
             bundle = root / BUNDLE.name
             shutil.copytree(BUNDLE, bundle)
             for name in publication.SOURCE_FILES:
+                if name in publication.FROZEN_SOURCE_HASHES:
+                    continue
                 relative = Path(name)
                 if name in publication.SNAPSHOT_FILES:
                     relative = publication.SNAPSHOT_ROOT / relative

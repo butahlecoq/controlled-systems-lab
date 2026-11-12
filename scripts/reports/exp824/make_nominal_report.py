@@ -40,7 +40,6 @@ SOURCE_FILES = (
     "scripts/reports/exp824/make_report.py", "scripts/reports/stage_issue824_nominal.py",
     "scripts/reports/audit_visual_routes.py",
     "scripts/reports/visual_examples.py", "tests/reporting/test_issue824_nominal_publication.py",
-    "docs/architecture/issue824-nominal-control.md",
 )
 
 
