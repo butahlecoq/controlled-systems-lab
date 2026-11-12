@@ -81,6 +81,23 @@ class LearningBookTests(unittest.TestCase):
                     self.assertEqual(result.stdout, (ROOT / source).read_bytes(),
                                      "Source permalink differs from the executed example")
 
+    def test_source_permalinks_are_reachable_from_the_checked_out_main_history(self):
+        prefix = "https://github.com/butahlecoq/controlled-systems-lab/blob/"
+        sources = {
+            record["href"][len(prefix):].partition("/")[0]
+            for chapter in self.manifest["chapters"]
+            for record in chapter.get("records", [])
+            if record["href"].startswith(prefix)
+        }
+        self.assertTrue(sources)
+        for commit in sorted(sources):
+            with self.subTest(commit=commit):
+                result = subprocess.run(["git", "merge-base", "--is-ancestor", commit, "HEAD"],
+                                        cwd=ROOT, capture_output=True)
+                self.assertEqual(result.returncode, 0,
+                                 f"Source permalink commit {commit} is unavailable from checked-out main history: "
+                                 f"{result.stderr.decode()}")
+
     def test_known_module_without_an_executable_source_witness_is_rejected(self):
         broken = json.loads(json.dumps(self.manifest))
         broken["chapters"][2]["module_ids"].append("csl.hull.grouped-membership")
