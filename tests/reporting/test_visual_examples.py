@@ -536,12 +536,56 @@ class GalleryTests(unittest.TestCase):
                 control_witness_companions._b04_repeated_companion(
                     ROOT / "scripts/reports/styles/control-v1.json")
 
+    def test_full_history_example_binds_raw_capture_and_rejects_tampering_or_unsafe_roots(self):
+        bundle = ROOT / "docs/examples/history-cost-2d-v1"
+        manifest = gallery.validate_history_cost_bundle(bundle, ROOT)
+        self.assertEqual(manifest["source_commit"], "f4e73e08908c472801aef6637d94b1a03cb0b2a7")
+        self.assertEqual(manifest["native_binary_sha256"],
+                         "2d336a436220fdc59cf2c2c5a00defceadc5fb330450b16693fd0637a5cded17")
+        total = json.loads((bundle / "records/total-cost-stdout.jsonl").read_text())
+        terminal = json.loads((bundle / "records/terminal-only-stdout.jsonl").read_text())
+        self.assertEqual(total["solver_receipt"]["provider"], "csl.convex.highs")
+        self.assertEqual(total["primal"], [0.0, 0.0, 0.33333333333333304,
+                                           0.0, 0.33333333333333304, 0.0])
+        self.assertEqual(terminal["primal"], [0.0, 0.0, 1.0, 0.0, 1.0, 0.0])
+        self.assertAlmostEqual(total["source_cost"]["total"], 2 / 3)
+        with tempfile.TemporaryDirectory() as temporary:
+            temp_root = Path(temporary) / "repo"
+            copied = temp_root / "docs/examples/history-cost-2d-v1"
+            copied.parent.mkdir(parents=True)
+            shutil.copytree(bundle, copied)
+            self.assertEqual(gallery.validate_history_cost_bundle(copied, temp_root)["case"],
+                             "one-step-identity-dynamics-2d")
+            response = copied / "records/total-cost-stdout.jsonl"
+            response.write_bytes(response.read_bytes() + b" ")
+            with self.assertRaisesRegex(ValueError, "digest differs"):
+                gallery.validate_history_cost_bundle(copied, temp_root)
+            link = temp_root / "docs/examples/linked-history-cost"
+            link.symlink_to(bundle, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "symlinked"):
+                gallery.validate_history_cost_bundle(link, temp_root)
+            alias_root = Path(temporary) / "alias"
+            alias_root.mkdir()
+            (alias_root / "docs").symlink_to(temp_root / "docs", target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "symlinked path component"):
+                gallery.validate_history_cost_bundle(
+                    alias_root / "docs/examples/history-cost-2d-v1", Path(temporary))
+
     def test_build_preserves_reports_and_has_resolvable_links(self):
         before = {p.relative_to(self.site): hashlib.sha256(p.read_bytes()).hexdigest()
                   for p in self.site.rglob("*") if p.is_file() and p.name != "index.html"}
         original_reports = {e["report_id"]: (self.site / e["report_id"] / "index.html").read_bytes()
                             for e in self.examples}
         gallery.build(self.catalog, self.site)
+        cost_page = self.site / "examples/history-cost-2d-v1/index.html"
+        self.assertTrue(cost_page.is_file())
+        self.assertTrue((self.site / "examples/history-cost-2d-v1/history-cost-2d-v1.zip").is_file())
+        gallery_html = (self.site / "examples/index.html").read_text(encoding="utf-8")
+        self.assertIn('id="history-cost-2d-v1"', gallery_html)
+        cost_inventory = json.loads((self.site / "examples/visual-coverage.json").read_text())
+        cost_route = next(entry for entry in cost_inventory["entries"]
+                          if entry.get("anchor") == "history-cost-2d-v1")
+        self.assertEqual(cost_route["status"], "saved-data-illustration")
         app01_page = self.site / "examples/app01-plan-timing-v1.html"
         app01_html = app01_page.read_text(encoding="utf-8")
         self.assertIn(f"../{self.app01_report_id}/index.html", app01_html)

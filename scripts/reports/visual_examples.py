@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 from html import escape
 import json
 import math
@@ -9,6 +10,7 @@ from pathlib import Path
 import re
 import shutil
 import tempfile
+import zipfile
 from urllib.parse import urlsplit
 
 import audit_visual_routes
@@ -482,7 +484,8 @@ def validate_gallery_inventory(out, entries):
         require(all(isinstance(entry.get(field), str) and entry[field] for field in required),
                 "visual inventory entry is missing required metadata or provenance")
         require(entry["status"] in {"educational-example", "saved-report-figure",
-                                    "saved-data-companion", "analytic-illustration"},
+                                    "saved-data-companion", "saved-data-illustration",
+                                    "analytic-illustration"},
                 "unknown visual inventory status")
         require(entry["anchor"] in anchors, "visual inventory target is missing from gallery")
         page_ref, _, page_anchor = entry["page"].partition("#")
@@ -689,6 +692,71 @@ def issue3_control_walkthrough(record_path, report_id):
     return figure, page
 
 
+def validate_history_cost_bundle(bundle: Path, repository_root: Path) -> dict:
+    """Verify source-bound saved evidence before exposing its gallery route."""
+    if bundle.is_symlink() or not bundle.is_dir():
+        raise ValueError("full-history example root is missing or symlinked")
+    root = bundle.resolve(strict=True)
+    repo = repository_root.resolve(strict=True)
+    if not root.is_relative_to(repo):
+        raise ValueError("full-history example root escapes the repository")
+    try:
+        lexical_parts = bundle.absolute().relative_to(repository_root.absolute()).parts
+    except ValueError:
+        raise ValueError("full-history example root escapes the repository") from None
+    lexical_cursor = repository_root.absolute()
+    for part in lexical_parts:
+        lexical_cursor = lexical_cursor / part
+        if lexical_cursor.is_symlink():
+            raise ValueError("full-history example root has a symlinked path component")
+    manifest_path = root / "manifest.json"
+    if manifest_path.is_symlink() or not manifest_path.is_file():
+        raise ValueError("full-history example manifest is missing or symlinked")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if (manifest.get("schema") != "csl.history-cost-2d/1" or
+            manifest.get("source_commit") != "f4e73e08908c472801aef6637d94b1a03cb0b2a7" or
+            manifest.get("native_binary_sha256") != "2d336a436220fdc59cf2c2c5a00defceadc5fb330450b16693fd0637a5cded17"):
+        raise ValueError("full-history example provenance differs")
+    files = manifest.get("files")
+    if not isinstance(files, dict) or not files:
+        raise ValueError("full-history example has no file digest map")
+    for relative, expected in files.items():
+        path = root / relative
+        if Path(relative).is_absolute() or ".." in Path(relative).parts:
+            raise ValueError("full-history example file path escapes its root")
+        cursor = root
+        for part in Path(relative).parts:
+            cursor = cursor / part
+            if cursor.is_symlink():
+                raise ValueError("full-history example contains a symlink: " + relative)
+        if not path.is_file() or not path.resolve().is_relative_to(root):
+            raise ValueError("full-history example file is missing or escapes its root: " + relative)
+        actual = hashlib.sha256(path.read_bytes()).hexdigest()
+        if actual != expected:
+            raise ValueError("full-history example digest differs: " + relative)
+    receipt_path = root / "records/capture-receipt.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    if receipt.get("source_commit") != manifest["source_commit"] or receipt.get("native_binary_sha256") != manifest["native_binary_sha256"]:
+        raise ValueError("full-history raw capture provenance differs from its manifest")
+    for case in ("total-cost", "terminal-only"):
+        for kind, suffix in (("request", "request.jsonl"), ("stdout", "stdout.jsonl"), ("stderr", "stderr.txt")):
+            relative = f"records/{case}-{suffix}"
+            if receipt["cases"][case][kind + "_sha256"] != files[relative]:
+                raise ValueError("full-history capture receipt digest differs: " + relative)
+    archive_path = root / "history-cost-2d-v1.zip"
+    if archive_path.is_symlink() or not archive_path.is_file():
+        raise ValueError("full-history offline archive is missing or symlinked")
+    with zipfile.ZipFile(archive_path) as archive:
+        expected_names = set(files) | {"manifest.json"}
+        if set(archive.namelist()) != expected_names or archive.testzip() is not None:
+            raise ValueError("full-history offline archive entries differ")
+        for name in expected_names:
+            expected_bytes = (manifest_path.read_bytes() if name == "manifest.json" else (root / name).read_bytes())
+            if archive.read(name) != expected_bytes:
+                raise ValueError("full-history offline archive content differs: " + name)
+    return manifest
+
+
 def build(catalog, site):
     examples = load_examples(catalog)
     site = Path(site).resolve(strict=True)
@@ -714,6 +782,11 @@ def build(catalog, site):
     fuel_layer_files, fuel_layer_inventory, fuel_layer_card = visual_example_fuel_layers.build(
         Path(__file__).resolve().parents[2])
     saved_figures += fuel_layer_card
+    saved_figures += ('<article class="saved-figure" id="history-cost-2d-v1"><p class="eyebrow">Nominal optimization · Saved-data illustration</p>'
+        '<h3><a href="history-cost-2d-v1/index.html">Full-history cost moves the 2D optimum</a></h3>'
+        '<a href="history-cost-2d-v1/index.html"><img src="history-cost-2d-v1/history-cost-2d.svg" alt="Feasible control square, terminal-only optimum at (1,0), and full-cost HiGHS optimum at (1/3,0) with both objective contours"></a>'
+        '<p>A one-step supported 2D QP from the full-history cost compiler. The saved HiGHS point is compared with a separate terminal-only solve; the page preserves raw requests and responses.</p>'
+        '<p><a href="history-cost-2d-v1/index.html">Open the full-history cost example →</a> · <a href="history-cost-2d-v1/history-cost-2d-v1.zip">Offline evidence bundle</a></p></article>')
     last_topic_anchor = "visual-fuel-b06-viz03"
     last_topic_title = "B06 fuel terminal set: readable 4D-to-2D projections"
     analytic_files, analytic_inventory = visual_illustrations.build(Path(catalog))
@@ -733,6 +806,14 @@ def build(catalog, site):
     require(not out.is_symlink(), "gallery output must not be a symlink")
     outputs = {e["slug"] + ".svg": plot(e) for e in examples}
     outputs.update(analytic_files)
+    repository_root = Path(__file__).resolve().parents[2]
+    cost_root = repository_root / "docs/examples/history-cost-2d-v1"
+    validate_history_cost_bundle(cost_root, repository_root)
+    for path in sorted(cost_root.rglob("*")):
+        if path.is_file():
+            require(not path.is_symlink(), "saved full-history example file is a symlink")
+            relative = path.relative_to(cost_root).as_posix()
+            outputs["history-cost-2d-v1/" + relative] = path.read_bytes() if path.suffix == ".zip" else path.read_text(encoding="utf-8")
     outputs.update(qhull_highs_strategy_a_example.build())
     adaptive_assets = Path(__file__).parents[2] / "docs/examples"
     for name in ("adaptive-ode-replay.html", "adaptive-ode-replay.csv",
@@ -751,7 +832,12 @@ def build(catalog, site):
         _, geometry_inventory, geometry_assets = geometry_opt_companions.build(geometry_root)
         for asset in geometry_assets:
             outputs[asset] = (geometry_root / asset).read_bytes()
-    gallery_inventory = []
+    gallery_inventory = [{"family": "Nominal optimization · saved-data illustration",
+        "title": "Full-history cost moves the 2D optimum",
+        "status": "saved-data-illustration", "anchor": "history-cost-2d-v1",
+        "page": "history-cost-2d-v1/index.html", "figure": "history-cost-2d-v1/history-cost-2d.svg",
+        "source_page": "history-cost-2d-v1/index.html",
+        "raw_record": "history-cost-2d-v1/records/capture-receipt.json"}]
     gallery_inventory.append({"family": "Numerical integration",
         "title": "Adaptive RK4 replay of a two-state oscillator",
         "status": "saved-data-companion", "anchor": "adaptive-ode-rk4",
