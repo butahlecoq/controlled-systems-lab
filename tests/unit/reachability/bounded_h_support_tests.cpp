@@ -3,6 +3,7 @@
 #include <csl/reachability/feedback_geometry.hpp>
 #include <csl/reachability/finite_plan_zonotope.hpp>
 #include <csl/reachability/finite_plan_box.hpp>
+#include <csl/reachability/finite_plan_ellipsoid.hpp>
 #include <cstdlib>
 
 void check(bool condition) { if (!condition) std::abort(); }
@@ -55,6 +56,11 @@ int main() {
     const auto& next_box=std::get<BoxStage>(propagated_box);
     check(next_box.lower[0]<=-2.5 && next_box.upper[0]>=2.5);
     check(next_box.lower[1]<=-1.5 && next_box.upper[1]>=1.5);
+    auto propagated_ellipsoid=propagate_existential_control_ellipsoid(dynamics,
+        {{0,0},{1,1}},{{-0.5},{0.5}},{});
+    check(std::holds_alternative<FinitePlanEllipsoidTrace::Stage>(propagated_ellipsoid));
+    const auto& next_e=std::get<FinitePlanEllipsoidTrace::Stage>(propagated_ellipsoid);
+    check(next_e.radii[0]>=std::sqrt(2.0)*(std::sqrt(2.0)+0.5));
     auto propagated=propagate_existential_control_zonotope(dynamics,state,control,20,{},0);
     check(std::holds_alternative<FinitePlanZonotopeTrace::Stage>(propagated));
     const auto& next=std::get<FinitePlanZonotopeTrace::Stage>(propagated);
