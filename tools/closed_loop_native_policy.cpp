@@ -740,6 +740,9 @@ template<class T, class... E> T take_history(std::variant<T, E...> result, const
 }
 
 Json continuous_history_query(const Json& in) {
+    const auto solver = in.at("history_solver").get<std::string>();
+    if (solver != "csl.convex.highs" && solver != "casadi-ipopt")
+        throw std::runtime_error("unknown continuous history solver");
     const auto initial = vector(in.at("observed_physical_state"));
     const auto n = initial.size();
     const auto m = in.at("control_bounds").size();
@@ -788,7 +791,13 @@ Json continuous_history_query(const Json& in) {
         {"coordinates", {{"state_dimension", n}, {"control_dimension", m}, {"horizon", horizon},
             {"layout", "x0..xT,u0..u(T-1)"}}}, {"geometry", "not_used"},
         {"assurance", "numerical affine history; no validated completeness or nonlinear safety claim"}};
-    if (!program.residual_norms.empty()) return response;
+    response["requested_solver"] = solver;
+    if (solver == "casadi-ipopt") return response;
+    if (!program.residual_norms.empty()) {
+        response["status"] = "unsupported";
+        response["reason"] = "the selected convex QP provider does not support a sum of residual norms";
+        return response;
+    }
 #if CSL_NATIVE_HAS_HIGHS
     SparseMatrix rows{h.inequalities.rows() + h.equalities.rows(), q.dimension, {0}, {}, {}};
     std::vector<Interval> bounds;

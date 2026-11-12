@@ -78,15 +78,23 @@ class HistoryNormSolverTest(unittest.TestCase):
         manifest = build_history_manifest()
         self.assertEqual(validate_manifest(manifest_path=HISTORY_MANIFEST), manifest)
         graphs = manifest["graphs"]
-        self.assertEqual(len(graphs), 3)
+        self.assertEqual(len(graphs), 5)
         for name in ("syn-nl-lv-01", "syn-nl-fuel-01", "earth-orbit"):
             task = load_task(name)
-            graph = next(row for row in graphs if row["task_id"] == task["task_id"])
+            graph = next(row for row in graphs if row["task_id"] == task["task_id"] and
+                         row["controller"]["id"] == "native-continuous-affine-history-mpc/1")
             self.assertEqual(graph["action_profile_id"], task["control_domains"]["continuous"]["problem_id"])
             self.assertEqual(graph["objective_id"], task["objective"]["objective_id"])
             self.assertIn(task["source"]["path"], {row["path"] for row in graph["source_files"]})
             self.assertEqual(graph["role_bindings"]["representation"], "not_used")
             self.assertEqual(graph["controller"]["policy_factory"], "history_policy:create_policy")
+            alternatives = [row for row in graphs if row["task_id"] == task["task_id"] and
+                            row["controller"]["id"] == "native-continuous-affine-history-ipopt/1"]
+            self.assertEqual(len(alternatives), 0 if name == "earth-orbit" else 1)
+            if alternatives:
+                self.assertEqual(alternatives[0]["action_profile_id"], graph["action_profile_id"])
+                self.assertEqual(alternatives[0]["objective_id"], graph["objective_id"])
+                self.assertEqual(alternatives[0]["role_bindings"]["control_optimizer"]["id"], "casadi-ipopt")
 
     def test_policy_refuses_a_task_hash_that_does_not_match_the_source_task(self):
         from contracts import load_task
@@ -104,11 +112,26 @@ class HistoryNormSolverTest(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            result = run_task("syn-nl-lv-01", root, root / "missing-bridge",
-                              controller_id="native-continuous-affine-history-mpc/1")
-            self.assertEqual(result["status"], "refused")
-            reason = json.loads((Path(result["attempt"]) / "resolution-refusal.json").read_text())["reason"]
-            self.assertIn("common execution bridge does not exist", reason)
+            for controller_id in ("native-continuous-affine-history-mpc/1", "native-continuous-affine-history-ipopt/1"):
+                result = run_task("syn-nl-lv-01", root, root / "missing-bridge", controller_id=controller_id)
+                self.assertEqual(result["status"], "refused")
+                reason = json.loads((Path(result["attempt"]) / "resolution-refusal.json").read_text())["reason"]
+                self.assertIn("common execution bridge does not exist", reason)
+
+    def test_ipopt_request_keeps_continuous_domain_and_selects_backend_explicitly(self):
+        from contracts import load_task, manifest_sha256
+        from task_models import prediction_receipt
+        from history_policy import make_request
+        for name in ("syn-nl-lv-01", "syn-nl-fuel-01"):
+            task = load_task(name)
+            state = [field["initial"] for field in task["model"]["states"]]
+            request = make_request(task, manifest_sha256(task), prediction_receipt(task), state, 2,
+                                   history_solver="casadi-ipopt")
+            self.assertEqual(request["history_solver"], "casadi-ipopt")
+            self.assertEqual(request["control_bounds"], task["control_domains"]["continuous"]["bounds"])
+            self.assertEqual(len(request["predictor_stages"]), task["episode"]["intervals"]-2)
+        with self.assertRaisesRegex(ValueError, "history solver"):
+            make_request(task, manifest_sha256(task), prediction_receipt(task), state, 2, history_solver="unknown")
 
     def test_history_verification_rejects_wrong_rows_and_cost(self):
         import numpy as np

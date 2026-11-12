@@ -1,6 +1,7 @@
 """Resolve the source-owned baseline task/controller/execution graphs."""
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 from pathlib import Path
@@ -305,6 +306,18 @@ def _history_definitions() -> list[dict]:
         graph["graph_fingerprint"] = fingerprint
         graph["graph_id"] = f"closed-loop/{task_name}/continuous-history-mpc/1/cfg-{fingerprint[:16]}"
         rows.append(graph)
+        if not orbit:
+            alternative = copy.deepcopy(graph)
+            alternative.pop("graph_id")
+            alternative.pop("graph_fingerprint")
+            alternative["controller"]["id"] = "native-continuous-affine-history-ipopt/1"
+            alternative["controller"]["solver"] = {"provider": "casadi-ipopt", "assurance": "local numerical"}
+            alternative["role_bindings"]["control_optimizer"] = {"id": "casadi-ipopt"}
+            alternative["admission"]["basis"] = "source-bound continuous full-history IPOPT profile"
+            alternative_fingerprint = canonical_sha256(alternative)
+            alternative["graph_fingerprint"] = alternative_fingerprint
+            alternative["graph_id"] = f"closed-loop/{task_name}/continuous-history-ipopt/1/cfg-{alternative_fingerprint[:16]}"
+            rows.append(alternative)
     return rows
 
 
