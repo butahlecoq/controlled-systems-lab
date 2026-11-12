@@ -184,6 +184,7 @@ TEST_CASE("nominal running-cost schedule rejects wrong full-horizon normalizatio
         {1, {QuadraticControlPenalty{{0.0}, {1.0}, {1.0}, 1.0, 2}}}}};
     const auto outcome = finite_action_nominal(request, {27, 1000, 100000, 1000, 0.0});
     REQUIRE(std::holds_alternative<Unsupported>(outcome));
+    CHECK(std::get<Unsupported>(outcome).diagnostics.front().code == DiagnosticCode::unsupported);
     CHECK(std::get<Unsupported>(outcome).diagnostics.front().field ==
         "finite_nominal.running_cost.quadratic");
 }

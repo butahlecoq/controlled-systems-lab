@@ -1,6 +1,8 @@
 #include <csl/optimization/history_cost.hpp>
 #include <csl/optimization/objectives.hpp>
 
+#include "running_cost_evaluation.hpp"
+
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -58,6 +60,40 @@ bool add_residual_norm(std::vector<WeightedHistoryResidualNorm>& destination,
         Matrix map, Vector target, Vector weights, double coefficient) {
     if(coefficient == 0.0) return true;
     destination.push_back({std::move(map), std::move(target), std::move(weights), coefficient});
+    return true;
+}
+
+detail::ScaledPositive quadratic_source_weight(const QuadraticControlPenalty& penalty,
+        double coordinate_weight, double scale) {
+    auto value = detail::multiply(detail::scaled(penalty.coefficient),
+        detail::scaled(coordinate_weight));
+    value = detail::divide(value,
+        detail::scaled(static_cast<double>(penalty.normalization_horizon)));
+    const auto scaled_coordinate = detail::scaled(std::abs(scale));
+    return detail::divide(value, detail::multiply(scaled_coordinate, scaled_coordinate));
+}
+
+std::optional<double> materialize_signed(detail::ScaledPositive magnitude, bool negative) {
+    const auto value = detail::materialize(magnitude);
+    if(!value) return std::nullopt;
+    return negative ? -*value : *value;
+}
+
+bool compile_quadratic_coordinate(const QuadraticControlPenalty& penalty, double scale,
+        double coordinate_weight, double reference, double& hessian, double& linear,
+        double& constant) {
+    if(penalty.coefficient == 0.0 || coordinate_weight == 0.0) return true;
+    const auto base = quadratic_source_weight(penalty, coordinate_weight, scale);
+    const auto h = detail::materialize(detail::multiply(detail::scaled(2.0), base));
+    const auto linear_magnitude = detail::multiply(
+        detail::multiply(detail::scaled(2.0), base), detail::scaled(std::abs(reference)));
+    const auto q = materialize_signed(linear_magnitude, !std::signbit(reference));
+    const auto ref = detail::scaled(std::abs(reference));
+    const auto r = detail::materialize(detail::multiply(base, detail::multiply(ref, ref)));
+    if(!h || !q || !r) return false;
+    hessian = *h;
+    linear = *q;
+    constant = *r;
     return true;
 }
 
@@ -136,13 +172,9 @@ HistoryCostCompilation compile_history_cost(const synthesis::JointHistoryRelatio
         for(const auto& term : stage.terms) {
             if(const auto* penalty = std::get_if<QuadraticControlPenalty>(&term)) {
                 for(std::size_t i = 0; i < history.coordinates.dimensions.control; ++i) {
-                    const auto weight = penalty->coefficient * penalty->weights[i] /
-                        static_cast<double>(penalty->normalization_horizon) /
-                        (penalty->scales[i] * penalty->scales[i]);
-                    const auto hessian = 2.0 * weight;
-                    const auto linear = -2.0 * weight * penalty->reference[i];
-                    const auto constant = weight * penalty->reference[i] * penalty->reference[i];
-                    if(!std::isfinite(hessian) || !std::isfinite(linear) || !std::isfinite(constant) ||
+                    double hessian = 0.0, linear = 0.0, constant = 0.0;
+                    if(!compile_quadratic_coordinate(*penalty, penalty->scales[i],
+                           penalty->weights[i], penalty->reference[i], hessian, linear, constant) ||
                        !add_finite(quadratic.Q.values[(control_stage_offset + i) * n + control_stage_offset + i], hessian) ||
                        !add_finite(quadratic.linear[control_stage_offset + i], linear) ||
                        !add_finite(quadratic.offset, constant))

@@ -96,10 +96,10 @@ RunningCostEvaluation evaluate_running_control_cost(const RunningControlCost& co
         return Diagnostics{invalid("running_cost.controls", "Control history length must match the requested horizon.")};
     if(auto errors = validate_running_control_cost(cost, absolute_stage_offset, horizon, control_dimension); !errors.empty())
         return errors;
-    if(cost.stages.empty()) return 0.0;
     for(const auto& control : controls)
         if(control.size() != control_dimension || !finite_values(control))
             return Diagnostics{invalid("running_cost.controls", "Every control must be finite and match the authored control dimension.")};
+    if(cost.stages.empty()) return 0.0;
 
     double total = 0.0;
     for(std::size_t local_stage = 0; local_stage < horizon; ++local_stage) {

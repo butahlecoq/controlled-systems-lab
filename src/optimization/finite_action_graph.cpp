@@ -788,7 +788,10 @@ static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(const Fin
         return unsupported("finite_graph.horizon", "Graph requires a nonempty horizon and finite initial state.");
     if(auto cost_errors = validate_running_control_cost(request.running_cost, request.absolute_stage_offset,
             horizon, dimensions.control); !cost_errors.empty()) {
-        for(auto& error : cost_errors) error.field = "finite_graph." + error.field;
+        for(auto& error : cost_errors) {
+            error.code = DiagnosticCode::unsupported;
+            error.field = "finite_graph." + error.field;
+        }
         return Unsupported{std::move(cost_errors)};
     }
     for(const auto& action : request.actions.catalogue)

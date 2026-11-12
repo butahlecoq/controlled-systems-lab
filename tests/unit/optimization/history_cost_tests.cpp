@@ -4,6 +4,7 @@
 #include <csl/optimization/history_cost.hpp>
 #include <csl/sets/data.hpp>
 
+#include <array>
 #include <cmath>
 #include <limits>
 
@@ -99,6 +100,79 @@ TEST_CASE("history cost keeps orbit-like residual norms as separate source terms
     CHECK(result.total == doctest::Approx(7.0));
     CHECK(result.total != doctest::Approx(std::sqrt(3.0 * 3.0 + 2.0 * 2.0 + 2.0 * 2.0)));
     CHECK(result.total != doctest::Approx(3.0 * 3.0 + 2.0 * 2.0 + 2.0 * 2.0));
+}
+
+
+TEST_CASE("history compiler preserves representable quadratic coefficients across extreme scales") {
+    const auto history = relation(1, 1, 1);
+    const TerminalObjective terminal = LinearTerminal{{0.0}, 0.0};
+    const optimization::RunningControlCost large{"large-scaled", 1, {{0, {
+        optimization::QuadraticControlPenalty{{0.0}, {1e160}, {1.0}, 1e160, 1}}}}};
+    const auto large_program = optimization::compile_history_cost(history, terminal, large, 0);
+    REQUIRE(std::holds_alternative<optimization::HistoryCostProgram>(large_program));
+    const auto& large_quadratic = std::get<optimization::HistoryCostProgram>(large_program).quadratic;
+    CHECK(large_quadratic.Q.values[2 * 3 + 2] == doctest::Approx(2e-160));
+    const std::vector<Vector> large_states{{0.0}, {0.0}};
+    const std::vector<Vector> large_controls{{1e160}};
+    const auto large_source = optimization::evaluate_running_control_cost(large, 0, 1, large_controls, 1);
+    REQUIRE(std::holds_alternative<double>(large_source));
+    CHECK(std::get<double>(large_source) == doctest::Approx(1e160));
+    const Vector large_history{0.0, 0.0, 1e160};
+    CHECK(polynomial_value(large_quadratic, large_history) ==
+        doctest::Approx(std::get<double>(large_source)).epsilon(1e-12));
+
+    const optimization::RunningControlCost small{"small-scaled", 1, {{0, {
+        optimization::QuadraticControlPenalty{{0.0}, {1e-160}, {1.0}, 1e-160, 1}}}}};
+    const auto small_program = optimization::compile_history_cost(history, terminal, small, 0);
+    REQUIRE(std::holds_alternative<optimization::HistoryCostProgram>(small_program));
+    const auto& small_quadratic = std::get<optimization::HistoryCostProgram>(small_program).quadratic;
+    CHECK(small_quadratic.Q.values[2 * 3 + 2] == doctest::Approx(2e160));
+    const std::vector<Vector> small_controls{{1e-160}};
+    const auto small_source = optimization::evaluate_running_control_cost(small, 0, 1, small_controls, 1);
+    REQUIRE(std::holds_alternative<double>(small_source));
+    CHECK(std::get<double>(small_source) == doctest::Approx(1e-160));
+    const Vector small_history{0.0, 0.0, 1e-160};
+    CHECK(polynomial_value(small_quadratic, small_history) ==
+        doctest::Approx(std::get<double>(small_source)).epsilon(1e-12));
+}
+
+TEST_CASE("history compiler refuses nonzero quadratic coefficients outside binary64") {
+    const auto history = relation(1, 1, 1);
+    const TerminalObjective terminal = LinearTerminal{{0.0}, 0.0};
+    const optimization::RunningControlCost underflow{"unrepresentable", 1, {{0, {
+        optimization::QuadraticControlPenalty{{0.0}, {1e160}, {1.0}, 1e-160, 1}}}}};
+    const auto compiled = optimization::compile_history_cost(history, terminal, underflow, 0);
+    REQUIRE(std::holds_alternative<Diagnostics>(compiled));
+    CHECK(std::get<Diagnostics>(compiled).front().code == DiagnosticCode::unsupported);
+    CHECK(std::get<Diagnostics>(compiled).front().field == "history_cost.running.quadratic");
+}
+
+TEST_CASE("history compiler safely omits zero-coefficient and zero-weight coordinates") {
+    const auto history = relation(1, 1, 1);
+    const TerminalObjective terminal = LinearTerminal{{0.0}, 0.0};
+    const optimization::RunningControlCost zero_terms{"zero-terms", 1, {{0, {
+        optimization::QuadraticControlPenalty{{1e300}, {1e-200}, {1.0}, 0.0, 1},
+        optimization::QuadraticControlPenalty{{1e300}, {1e-200}, {0.0}, 1.0, 1}}}}};
+    const auto compiled = optimization::compile_history_cost(history, terminal, zero_terms, 0);
+    REQUIRE(std::holds_alternative<optimization::HistoryCostProgram>(compiled));
+    const std::vector<Vector> states{{0.0}, {0.0}};
+    const std::vector<Vector> controls{{1e300}};
+    const auto evaluated = optimization::evaluate_history_cost(
+        std::get<optimization::HistoryCostProgram>(compiled), states, controls);
+    REQUIRE(std::holds_alternative<optimization::HistoryCostEvaluation>(evaluated));
+    CHECK(std::get<optimization::HistoryCostEvaluation>(evaluated).running == 0.0);
+}
+
+TEST_CASE("empty running schedule still validates control history shape and finiteness") {
+    const std::array<Vector, 1> wrong_dimension{Vector{}};
+    const auto wrong = optimization::evaluate_running_control_cost({}, 0, 1, wrong_dimension, 1);
+    REQUIRE(std::holds_alternative<Diagnostics>(wrong));
+    CHECK(std::get<Diagnostics>(wrong).front().field == "running_cost.controls");
+
+    const std::array<Vector, 1> nonfinite{Vector{std::numeric_limits<double>::quiet_NaN()}};
+    const auto bad_value = optimization::evaluate_running_control_cost({}, 0, 1, nonfinite, 1);
+    REQUIRE(std::holds_alternative<Diagnostics>(bad_value));
+    CHECK(std::get<Diagnostics>(bad_value).front().field == "running_cost.controls");
 }
 
 TEST_CASE("history cost rejects shape, schedule, and nonfinite source data") {
