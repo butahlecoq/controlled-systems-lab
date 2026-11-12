@@ -26,6 +26,20 @@ template<class T,class... E> T take(std::variant<T,E...> result) {
 bool finite_values(std::span<const double> values) {
     return std::all_of(values.begin(),values.end(),[](double value){return std::isfinite(value);});
 }
+constexpr double log_exp_initial_readback_roundoff_units=64;
+bool initial_readback_matches(std::span<const double> expected,std::span<const double> actual,
+        std::span<const std::size_t> positive_coordinates={}) {
+    for(std::size_t i=0;i<expected.size();++i) {
+        if(expected[i]==actual[i])continue;
+        if(std::find(positive_coordinates.begin(),positive_coordinates.end(),i)==positive_coordinates.end() ||
+           expected[i]<=0 || actual[i]<=0)return false;
+        const auto allowance=log_exp_initial_readback_roundoff_units*
+            std::numeric_limits<double>::epsilon()*(1+std::abs(std::log(expected[i])))*std::abs(expected[i])+
+            log_exp_initial_readback_roundoff_units*std::numeric_limits<double>::denorm_min();
+        if(std::abs(expected[i]-actual[i])>allowance)return false;
+    }
+    return true;
+}
 bool matrix_shape(const Matrix& A,std::size_t rows,std::size_t cols) {
     return (!rows || cols<=std::numeric_limits<std::size_t>::max()/rows) &&
         A.rows==rows && A.cols==cols && A.values.size()==rows*cols && finite_values(A.values);
@@ -517,8 +531,9 @@ FixedTailPolicyOutcome fixed_tail_policy(const FixedTailPolicyRequest& request,
             throw Rejected{invalid("feasibility provider returned malformed or nonfinite history storage")};
         if(anchor.supplied_initial_primary!=request.shifted_initial_history ||
            anchor.provider_initial_primary_readback.size()!=dimension || !finite_values(anchor.provider_initial_primary_readback) ||
+            !initial_readback_matches(request.shifted_initial_history,anchor.provider_initial_primary_readback,positives) ||
            std::any_of(anchor.supplied_initial_duals.begin(),anchor.supplied_initial_duals.end(),[](double v){return v!=0;}))
-            throw Rejected{invalid("feasibility optimizer did not retain shifted primal and zero supplied duals")};
+            throw Rejected{invalid("feasibility optimizer changed the submitted primal/readback or supplied nonzero duals")};
         auto recovered_anchor=anchor.history;
         auto anchor_adjustments=recover_anchor_commands(model,recovered_anchor);
         auto lift=take(fixed_control_tail_lift(model,recovered_anchor));
@@ -545,8 +560,9 @@ FixedTailPolicyOutcome fixed_tail_policy(const FixedTailPolicyRequest& request,
             throw Rejected{invalid("reduced provider returned malformed or nonfinite history storage")};
         if(solved.supplied_initial_primary!=first || solved.provider_initial_primary_readback.size()!=m ||
            !finite_values(solved.provider_initial_primary_readback) ||
+           !initial_readback_matches(first,solved.provider_initial_primary_readback) ||
            std::any_of(solved.supplied_initial_duals.begin(),solved.supplied_initial_duals.end(),[](double value){return value!=0;}))
-            throw Rejected{invalid("reduced optimizer did not retain the recovered initial primal and zero supplied duals")};
+            throw Rejected{invalid("reduced optimizer changed the recovered initial primal/readback or supplied nonzero duals")};
         auto recovered_control=solved.primary;
         auto command_adjustments=recover_authored_command_bounds(model.control_domains[0],recovered_control,{0});
         auto history=take(recover_fixed_tail_history(lift,recovered_control));

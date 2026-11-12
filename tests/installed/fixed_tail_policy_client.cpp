@@ -132,6 +132,19 @@ int run() {
     require(std::holds_alternative<Diagnostic>(initialize_fixed_tail(next,invalid_previous)),"native shift accepted a nonconsecutive stage");
     const auto tail=take(fixed_tail_state_lift(model,anchor,{1}));
     require(tail.maps.size()==2 && tail.offsets[1]==Vector({.25,0}),"tail-state lift lost control offset");
+    auto positive_model=example({.horizon=2,.observed={.1,0},.target={1.1,0}});
+    const auto positive_initial=take(initialize_fixed_tail(positive_model));
+    auto positive_outcome=fixed_tail_policy({positive_model,{"strict-positive-readback"},FixedTailFamily::box,
+        positive_initial.history,{0}},selected,context);
+    if(const auto* failure=std::get_if<FixedTailPolicyFailure>(&positive_outcome))
+        throw std::runtime_error(failure->phase+": "+failure->cause.explanation);
+    const auto& positive=std::get<FixedTailPolicyResult>(positive_outcome);
+    require(positive.feasibility.supplied_initial_primary==positive_initial.history,
+        "positive-state solver did not retain literal requested initialization");
+    require(positive.feasibility.provider_initial_primary_readback[0]==.1,
+        "known observed initial state was unnecessarily log/exp encoded");
+    for(std::size_t k=0;k<=2;++k)require(positive.history[k*2]>0,
+        "strict-positive native history lost its source domain");
     std::cout<<"Native fixed-tail policy: all five physical families, all stages, full source J and frozen-tail recovery passed\n";
     return 0;
 }

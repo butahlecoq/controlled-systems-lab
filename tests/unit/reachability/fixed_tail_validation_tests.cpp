@@ -41,7 +41,7 @@ FixedTailModel endpoint_model(bool future) {
 }
 class EndpointWorkspace final:public FixedTailOptimizerWorkspace {
 public:
-    EndpointWorkspace(double delta,bool future):delta_(delta),future_(future){}
+    EndpointWorkspace(double delta,bool future,int bad_readback):delta_(delta),future_(future),bad_readback_(bad_readback){}
     FixedTailSolveOutcome solve(const FixedTailSolveRequest& r,const ExecutionContext&) override {
         const auto T=r.lift.coordinates.horizon;
         Vector primary=r.initial_primary,history;
@@ -56,18 +56,20 @@ public:
         const auto objective=r.feasibility_only?0:(history[T]-1)*(history[T]-1);
         std::vector<Vector> factors(T+1);
         if(!r.feasibility_only)for(std::size_t j=1;j<=T;++j)factors[j]={future_?0:primary[0]};
-        return FixedTailSolveResult{primary,history,objective,r.initial_primary,{},r.initial_primary,factors,"endpoint-recovery fixture"};
+        auto readback=r.initial_primary;
+        if(bad_readback_==(r.feasibility_only?1:2))readback[0]+=1;
+        return FixedTailSolveResult{primary,history,objective,r.initial_primary,{},readback,factors,"endpoint-recovery fixture"};
     }
 private:
-    double delta_;bool future_;
+    double delta_;bool future_;int bad_readback_;
 };
-FixedTailPolicyOutcome endpoint_policy(double delta,bool future) {
+FixedTailPolicyOutcome endpoint_policy(double delta,bool future,int bad_readback=0) {
     registry::Registry<registry::FixedTailOptimizerPort> registry;
     registry::Registration<registry::FixedTailOptimizerPort> entry{{{"test.endpoint-provider"},"1"},
         [](const FixedTailSolveRequest&,const registry::Requirements&)->registry::Capability {
             return registry::Offer{{{"csl.fixed-tail-solve.v1"},Assurance::numerical,{},{},{}}};
         },[=](const FixedTailSolveRequest&)->std::unique_ptr<FixedTailOptimizerWorkspace> {
-            return std::make_unique<EndpointWorkspace>(delta,future);
+            return std::make_unique<EndpointWorkspace>(delta,future,bad_readback);
         }};
     const registry::Method method{entry.identity.id,entry.identity.version};
     require(!registry.add(std::move(entry)),"endpoint fixture registration failed");
@@ -158,6 +160,16 @@ int run() {
         require(failure && failure->cause.explanation.find("materially")!=std::string::npos,
             "material authored endpoint violation was repaired or misclassified");
     }
+    bool readbacks_rejected=true;
+    for(const int phase:{1,2}) {
+        const auto malformed=endpoint_policy(0,false,phase);
+        const auto* failure=std::get_if<FixedTailPolicyFailure>(&malformed);
+        if(!failure) {
+            std::cerr<<"materially different provider readback accepted in phase "<<phase<<"\n";
+            readbacks_rejected=false;
+        }
+    }
+    require(readbacks_rejected,"materially different actual provider initialization was not rejected");
     std::cout<<"Native fixed-tail boundaries: malformed lift, request and provider result rejection passed\n";
     return 0;
 }
