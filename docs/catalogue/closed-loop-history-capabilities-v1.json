@@ -384,7 +384,14 @@
           "src/reachability/finite_plan_box.cpp",
           "src/reachability/finite_plan_zonotope.cpp",
           "src/reachability/finite_plan_ellipsoid.cpp",
-          "src/geometry/polyhedral/intersection.cpp"
+          "src/geometry/polyhedral/intersection.cpp",
+          "src/geometry/polyhedral/projection.cpp",
+          "src/geometry/polyhedral/support.cpp",
+          "src/adapters/lp/highs.cpp",
+          "src/adapters/polyhedral/qhull.cpp",
+          "src/adapters/highs_session.hpp",
+          "include/csl/reachability/nominal_tube.hpp",
+          "include/csl/sets/generator_sets.hpp"
         ],
         "version": "1"
       },
@@ -408,8 +415,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "04afb4b83d5f5ad32f7dd30159e7b720c7e5d4bcc64571882e53b6bd981d6e79",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-box-ipopt/1/cfg-04afb4b83d5f5ad3",
+      "graph_fingerprint": "2605d378d1d9b976d02263e76d9d096c607724c89b4cd1c7fd9e825ead357351",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-box-ipopt/1/cfg-2605d378d1d9b976",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -489,12 +496,40 @@
           "sha256": "c06b641b23bf368475838356b038fe583e54d4ad94fcd34545e190eea26d8391"
         },
         {
+          "path": "include/csl/reachability/nominal_tube.hpp",
+          "sha256": "340019fa097a13ea508749b9f7c2192dfcc6a67b5ccc73ceef3180b0b719078e"
+        },
+        {
+          "path": "include/csl/sets/generator_sets.hpp",
+          "sha256": "4071442875dba5fbbaa00c599e4dd275354b47886c071214929283774300834d"
+        },
+        {
           "path": "src/adapters/convex/highs.cpp",
           "sha256": "29686fa8e0f0bd18748a1eabdd9230fbc7f48c0192b896866d46bb7600e21d0b"
         },
         {
+          "path": "src/adapters/highs_session.hpp",
+          "sha256": "cd529bf31c0e2ec08395412f35a6b4cd88c54e22bf0857be3c1349b6fd76e538"
+        },
+        {
+          "path": "src/adapters/lp/highs.cpp",
+          "sha256": "59326e94e87b8e9c1a48c58f4c1bb42a03641f855353b922b3454d50918c9e83"
+        },
+        {
+          "path": "src/adapters/polyhedral/qhull.cpp",
+          "sha256": "117ce16b9b3c9e91da3ddf2575a87358cedace4d969d552024d552bc65e4e7c6"
+        },
+        {
           "path": "src/geometry/polyhedral/intersection.cpp",
           "sha256": "5a583fb352729d2d019dfead7733247fec4b0ca8651519a130b5095c5478821a"
+        },
+        {
+          "path": "src/geometry/polyhedral/projection.cpp",
+          "sha256": "d9aa374a643978b821acf2c520fe2556588738defa22221b3a16108973718926"
+        },
+        {
+          "path": "src/geometry/polyhedral/support.cpp",
+          "sha256": "a78f9acadd920615eb4109092cc17a4fa3825d52907a0f903fca50f0fc5d4bf0"
         },
         {
           "path": "src/model/linear_system.cpp",

@@ -329,7 +329,10 @@ def _history_definitions() -> list[dict]:
                 "src/reachability/bounded_h_support.cpp", "src/reachability/nominal_tube.cpp",
                 "src/reachability/nominal_forward.cpp", "src/reachability/finite_plan_box.cpp",
                 "src/reachability/finite_plan_zonotope.cpp", "src/reachability/finite_plan_ellipsoid.cpp",
-                "src/geometry/polyhedral/intersection.cpp"]
+                "src/geometry/polyhedral/intersection.cpp", "src/geometry/polyhedral/projection.cpp",
+                "src/geometry/polyhedral/support.cpp", "src/adapters/lp/highs.cpp",
+                "src/adapters/polyhedral/qhull.cpp", "src/adapters/highs_session.hpp",
+                "include/csl/reachability/nominal_tube.hpp", "include/csl/sets/generator_sets.hpp"]
             geometry["controller"]["id"] = "native-continuous-history-box-ipopt/1"
             geometry["controller"]["control_semantics"] = "full-history MPC with full-state F/B/I box memberships"
             geometry["controller"]["solver"] = {"provider": "casadi-ipopt", "assurance": "local numerical"}
