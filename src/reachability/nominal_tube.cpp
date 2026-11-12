@@ -386,15 +386,7 @@ NominalTubeOutcome nominal_tube(const problem::ResolvedProblem& resolved, Reques
         auto terminal_i = std::get<OperationResult>(std::move(terminal_intersection));
         if (!is_state_h(terminal_i, dimension, state_labels))
             return fail(Unsupported{error("tube.intersection.result", "Full-state terminal intersection changed representation or coordinates.", DiagnosticCode::evidence_mismatch)});
-        tube.stages[horizon].intersection = terminal_i;
-        auto compacted_terminal_i = compact_h(std::move(terminal_i), tube.problem, request, active_stage,
-            active_phase, dependencies, tube.stages[horizon], active_request, context);
-        if (auto* rejected = std::get_if<Unsupported>(&compacted_terminal_i)) return fail(*rejected);
-        if (auto* stopped = std::get_if<OperationStopped>(&compacted_terminal_i)) return fail(*stopped);
-        auto terminal_intersection_set = std::get<OperationResult>(std::move(compacted_terminal_i));
-        if (!is_state_h(terminal_intersection_set, dimension, state_labels))
-            return fail(Unsupported{error("tube.intersection.compaction", "Compacted terminal intersection changed state coordinates.", DiagnosticCode::evidence_mismatch)});
-        tube.stages[horizon].intersection = std::move(terminal_intersection_set);
+        tube.stages[horizon].intersection = std::move(terminal_i);
 
         for (std::size_t reverse = horizon; reverse > 0; --reverse) {
             const auto stage_index = reverse - 1;
@@ -454,16 +446,7 @@ NominalTubeOutcome nominal_tube(const problem::ResolvedProblem& resolved, Reques
             auto full_state_intersection = std::get<OperationResult>(std::move(intersection_result));
             if (!is_state_h(full_state_intersection, dimension, state_labels))
                 return fail(Unsupported{error("tube.intersection.result", "Full-state stage intersection changed representation or coordinates.", DiagnosticCode::evidence_mismatch)});
-            tube.stages[stage_index].intersection = full_state_intersection;
-            auto compacted_intersection = compact_h(std::move(full_state_intersection), tube.problem,
-                request, active_stage, active_phase, dependencies, tube.stages[stage_index],
-                active_request, context);
-            if (auto* rejected = std::get_if<Unsupported>(&compacted_intersection)) return fail(*rejected);
-            if (auto* stopped = std::get_if<OperationStopped>(&compacted_intersection)) return fail(*stopped);
-            auto intersection_set = std::get<OperationResult>(std::move(compacted_intersection));
-            if (!is_state_h(intersection_set, dimension, state_labels))
-                return fail(Unsupported{error("tube.intersection.compaction", "Compacted full-state intersection changed state coordinates.", DiagnosticCode::evidence_mismatch)});
-            tube.stages[stage_index].intersection = std::move(intersection_set);
+            tube.stages[stage_index].intersection = std::move(full_state_intersection);
         }
         return tube;
     } catch (const std::bad_alloc&) {
