@@ -266,7 +266,12 @@ int main() {
                 return 21;
             }
             const auto& g=std::get<reachability::FeedbackGeometry>(result);
-            if(!g.stages[1].intersection) return 22;
+            if(!g.stages[1].intersection || !g.stages[1].forward || g.stages[1].forward->auxiliary_input_carriers.size()!=1) return 22;
+            auto carrier_data=take(sets::from_handle(g.stages[1].forward->auxiliary_input_carriers[0]));
+            auto carrier_repr=carrier_data.representation();
+            const auto* carrier=std::get_if<sets::HRepresentation>(&carrier_repr);
+            if(!carrier || !contains(*carrier,{1,0,0,0}) || !contains(*carrier,{-1,0,0,0}) ||
+                !contains(*carrier,{0,1,0,0}) || !contains(*carrier,{0,-1,0,0})) return 23;
             for(const Vector& point : std::vector<Vector>{{0.2,0.4},{1.2,0.4},{-0.8,0.4},{0.2,1.4},{0.2,-0.6}})
                 if(!axis_membership_contains(g.stages[1].intersection->membership,point)) return 22;
         }
