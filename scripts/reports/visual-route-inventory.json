@@ -1149,8 +1149,7 @@
         "phase.png",
         "trajectory.png"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 687
+      "disposition": "publication-validation-or-frozen-route"
     },
     {
       "source": "scripts/reports/plot.py",
@@ -1228,8 +1227,8 @@
         "phase.png",
         "trajectory.png"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 687
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Renders corrected labels on saved affine-history state and control records using the existing closed-loop plotter; it does not execute a controller or solver."
     },
     {
       "source": "scripts/reports/report_data.py",
