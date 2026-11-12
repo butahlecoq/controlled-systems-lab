@@ -649,7 +649,7 @@ class GalleryTests(unittest.TestCase):
             if not urlsplit(link).scheme and not link.startswith("#"):
                 self.assertTrue((self.site / "examples" / link.split("#")[0]).is_file(), link)
         figures = list((self.site / "examples").glob("*.svg"))
-        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 24)
+        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 25)
         self.assertIn('id="source-index-geometry-2d"', page)
         self.assertTrue((self.site / "examples/source-index-geometry-2d-records.json").is_file())
         for figure in figures:
