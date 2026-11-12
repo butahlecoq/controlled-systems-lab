@@ -220,6 +220,56 @@ int main() {
             const auto& g=std::get<reachability::FeedbackGeometry>(result);
             if(!g.stages[1].intersection || !axis_membership_contains(g.stages[1].intersection->membership,{0.2,0})) return 16;
         }
+        const auto fixed_model=std::make_shared<const SystemModel>(SystemModel{{{2,1,0}, TimeDomain::discrete,
+            std::vector<LinearStage>{{{2,2,{1,0,0,1}}, {2,1,{1,0}}, {2,0,{}}, {0,0}}}}, {}});
+        for(double fixed : {0.0,0.75}) {
+            Problem fixed_problem{{"fixed-control"},fixed_model,{0,1},KnownInitial{{0.2,0.4}},
+                ContinuousDomain{{Singleton{{fixed}}}},
+                {box("fixed-X0",{-2,-2},{2,2}),box("fixed-X1",{-2,-2},{2,2})}, {},{},
+                InformationPattern::nominal_open_loop,QuadraticTerminal{{2,2,{2,0,0,2}},{0,0},0}};
+            const auto fixed_resolved=take(problem::resolve(fixed_problem,
+                {problem::UncertaintyStructure::stage_product_uncoupled,{}, {}}));
+            for(auto family : {reachability::FeedbackFamily::polytope, reachability::FeedbackFamily::box,
+                    reachability::FeedbackFamily::zonotope, reachability::FeedbackFamily::parallelotope,
+                    reachability::FeedbackFamily::ellipsoid}) {
+                auto result=reachability::feedback_geometry(fixed_resolved,{"fixed-control"},
+                    box("fixed-terminal",{-2,-2},{2,2}),family,{},
+                    {{forward,intersection},selected(lp,"csl.program-result.v1"),1000},{});
+                if(auto* failure=std::get_if<reachability::FeedbackGeometryFailure>(&result)) {
+                    std::cerr << "fixed control " << fixed << " family " << static_cast<int>(family) << " failed at " << failure->stage.value << "\n";
+                    return 19;
+                }
+                const auto& g=std::get<reachability::FeedbackGeometry>(result);
+                if(!g.stages[1].intersection || !axis_membership_contains(g.stages[1].intersection->membership,{0.2+fixed,0.4})) return 20;
+            }
+        }
+        const auto coupled_control=take(sets::make_h({{"rotated-control"},4,{}},
+            {take(numeric::snapshot(Matrix{4,4,{1,1,0,0, -1,-1,0,0, 1,-1,0,0, -1,1,0,0}})),
+             take(numeric::snapshot_vector(Vector{1,1,1,1})),
+             take(numeric::snapshot(Matrix{2,4,{0,0,1,1, 0,0,1,-1}})),
+             take(numeric::snapshot_vector(Vector{0,0}))})).as_handle();
+        const auto rotated_model=std::make_shared<const SystemModel>(SystemModel{{{2,4,0},TimeDomain::discrete,
+            std::vector<LinearStage>{{{2,2,{1,0,0,1}}, {2,4,{1,0,0,0, 0,1,0,0}}, {2,0,{}}, {0,0}}}}, {}});
+        Problem rotated{{"rotated-control"},rotated_model,{0,1},KnownInitial{{0.2,0.4}},
+            ContinuousDomain{{coupled_control}}, {box("R0",{-2,-2},{2,2}),box("R1",{-2,-2},{2,2})}, {},{},
+            InformationPattern::nominal_open_loop,QuadraticTerminal{{2,2,{2,0,0,2}},{0,0},0}};
+        const auto resolved_rotated=take(problem::resolve(rotated,
+            {problem::UncertaintyStructure::stage_product_uncoupled,{}, {}}));
+        for(auto family : {reachability::FeedbackFamily::polytope, reachability::FeedbackFamily::box,
+                reachability::FeedbackFamily::zonotope, reachability::FeedbackFamily::parallelotope,
+                reachability::FeedbackFamily::ellipsoid}) {
+            auto result=reachability::feedback_geometry(resolved_rotated,{"rotated-control"},
+                box("RT",{-2,-2},{2,2}),family,{},
+                {{forward,intersection},selected(lp,"csl.program-result.v1"),1000},{});
+            if(auto* failure=std::get_if<reachability::FeedbackGeometryFailure>(&result)) {
+                std::cerr << "rotated control family " << static_cast<int>(family) << " failed at " << failure->stage.value << "\n";
+                return 21;
+            }
+            const auto& g=std::get<reachability::FeedbackGeometry>(result);
+            if(!g.stages[1].intersection) return 22;
+            for(const Vector& point : std::vector<Vector>{{0.2,0.4},{1.2,0.4},{-0.8,0.4},{0.2,1.4},{0.2,-0.6}})
+                if(!axis_membership_contains(g.stages[1].intersection->membership,point)) return 22;
+        }
         auto limited=reachability::feedback_geometry(resolved,{"limited"},
             box("limited-terminal",{0.0,0.1},{0.8,0.9}),reachability::FeedbackFamily::zonotope,{},
             {{forward,intersection},selected(lp,"csl.program-result.v1"),0},{});
