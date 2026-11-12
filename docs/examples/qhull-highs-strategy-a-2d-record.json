@@ -297,8 +297,8 @@
     "conversion_test": "tests/contract/geometry/qhull_highs_interop_tests.cpp"
   },
   "illustration_source": {
-    "commit": "15124702bc4e476a4ec4f67ba350bcc65005c0e7",
+    "commit": "1791bc83ca0424a7fab3fe1884fdbce579c21906",
     "source_path": "scripts/reports/qhull_highs_strategy_a_example.py",
-    "source_sha256": "3fa007d8011dba1d86c9f0119dc7cf52ecc6746210c8cb2a0fad660e247a71e3"
+    "source_sha256": "670452ae61d6838646b05c1aef6f6056d1924f327b5eda4cb83c773b96df310c"
   }
 }
