@@ -651,7 +651,20 @@ projection backend. Its two-dimensional box quadratic has the analytic
 constrained solution `(1, -1)` and objective `1`. Every observed call checks
 that literal result. The saved raw rows, source and build receipts, manifest,
 offline ZIP, and illustrative two-dimensional figure are catalogued for
-main-only Pages staging. See the [reproduction notes](../../scripts/reports/opt10/README.md).
+main-only Pages staging. Reproduce from a clean detached checkout at the frozen
+source commit, using a new capture directory:
+
+```powershell
+python -B scripts/reports/opt10/capture.py --source D:\path\to\frozen-checkout --capture D:\path\to\fresh-capture --commit 9becda80d9a0eb7383fa2215f6b5c1932d3502a0 --cmake C:\path\to\cmake.exe
+python -B scripts/reports/opt10/collect.py --capture D:\path\to\fresh-capture --source D:\path\to\frozen-checkout --out reports/algorithm-results
+python -B scripts/reports/opt10/render_saved.py --bundle reports/algorithm-results/opt10-smooth-REPORT_ID --check
+python -B scripts/reports/stage_opt10.py --source reports/algorithm-results/opt10-smooth-REPORT_ID
+```
+
+The capture validates clean source receipts, the frozen driver and executable,
+the Release CMake configuration, raw CSV rows and analytic literals. Rendering
+uses saved bytes. The staging command returns catalogue JSON and accepts only
+the registered file inventory.
 
 The seven batches are descriptive single-adapter observations. They have no
 comparator, speedup, or global-optimality certificate. Main-only deployment
