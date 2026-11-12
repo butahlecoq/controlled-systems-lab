@@ -44,7 +44,10 @@
       "holds_completed": 30,
       "holds_total": 30,
       "source_objective": 0.09207050915639435,
-      "directory": "lv-box-fd28"
+      "directory": "lv-box-fd28",
+      "all_stage_plot": "lv-box-stages-fd28/all-stages-0-1.png",
+      "plot_scope": "all predicted stages of the first observed query",
+      "warm_start_protocol": "cold at each observed query; source shift-prior-primal contract not implemented in this capture"
     }
   ],
   "bundle_files": "Each directory contains receipt.json, raw.zip, SHA256SUMS, independent audit source and build receipt. Completed episodes also contain corrected plots and renderer receipt.",

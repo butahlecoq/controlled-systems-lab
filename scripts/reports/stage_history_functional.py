@@ -33,6 +33,17 @@ def stage(source: Path, site: Path) -> None:
         with zipfile.ZipFile(directory / "raw.zip") as archive:
             if archive.testzip() is not None:
                 raise ValueError("Evidence ZIP CRC failure: " + record)
+    for name in ("lv-box-stages-fd28",):
+        directory = source / name
+        sums = directory / "SHA256SUMS"
+        if not sums.is_file() or sums.is_symlink():
+            raise ValueError("Missing or unsafe figure checksums: " + name)
+        for line in sums.read_text(encoding="utf-8").splitlines():
+            expected, member = line.split("  ", 1)
+            path = directory / member
+            if (path.is_symlink() or path.resolve().parent != directory.resolve() or not path.is_file()
+                    or hashlib.sha256(path.read_bytes()).hexdigest() != expected):
+                raise ValueError("Unsafe or changed figure member: " + member)
     files = [path for path in sorted(source.rglob("*")) if path.is_file()]
     if any(path.is_symlink() or source not in path.resolve().parents for path in files):
         raise ValueError("Unsafe source path")
