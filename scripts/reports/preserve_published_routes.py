@@ -101,7 +101,8 @@ def stage(site: Path, source: Path = SOURCE) -> dict:
     if any(p.is_symlink() for p in (site, *site.parents)) or not site.is_dir():
         raise ValueError('preservation needs an existing regular site directory')
     assets = payloads(source)
-    aliases = json.loads(regular(source / 'manifest.json'))['aliases']
+    manifest = json.loads(regular(source / 'manifest.json'))
+    aliases = manifest['aliases']
     replacements = {a['route']: a.get('replaces_sha256') for a in aliases}
     # Validate the entire input and destination before changing any output.
     for route, data in assets.items():
@@ -113,7 +114,7 @@ def stage(site: Path, source: Path = SOURCE) -> dict:
         path = destination(site, route)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(data)
-    return {'preserved_routes': len(assets), 'preserved_top_level_zips': 3}
+    return {'preserved_routes': len(assets), 'preserved_top_level_zips': len(manifest['archives'])}
 
 
 def main() -> None:

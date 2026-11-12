@@ -26,6 +26,7 @@ struct ConvexProgram::Storage {
     optimization::Objective original;
     QuadraticProgram quadratic;
     std::optional<optimization::NormSquareReformulation> reformulation;
+    std::optional<Vector> primal_start;
 };
 const ProgramIdentity& QuadraticProgram::identity() const noexcept { return storage_->identity; }
 const optimization::Objective& QuadraticProgram::objective() const noexcept { return storage_->objective; }
@@ -39,13 +40,22 @@ const QuadraticProgram& ConvexProgram::quadratic_program() const noexcept { retu
 const optimization::NormSquareReformulation* ConvexProgram::reformulation() const noexcept {
     return storage_->reformulation ? &*storage_->reformulation : nullptr;
 }
+std::optional<std::span<const double>> ConvexProgram::primal_start() const noexcept {
+    if(storage_->primal_start) return std::span<const double>(*storage_->primal_start);
+    return {};
+}
 namespace optimization {
 struct ConvexAccess {
+    static ConvexProgram with_start(const ConvexProgram& p,std::span<const double> x) {
+        auto storage=*p.storage_;
+        storage.primal_start=Vector(x.begin(),x.end());
+        return ConvexProgram{std::make_shared<const ConvexProgram::Storage>(std::move(storage))};
+    }
     static ConvexProgram create(Objective original,Objective solver,numeric::MatrixView hessian,
         LinearProgram geometry,ProgramIdentity solver_id,std::optional<NormSquareReformulation> reformulation) {
         QuadraticProgram q{std::make_shared<const QuadraticProgram::Storage>(QuadraticProgram::Storage{
             std::move(solver_id),solver,hessian,geometry})};
-        return ConvexProgram{std::make_shared<const ConvexProgram::Storage>(ConvexProgram::Storage{geometry.identity(),original,q,reformulation})};
+        return ConvexProgram{std::make_shared<const ConvexProgram::Storage>(ConvexProgram::Storage{geometry.identity(),original,q,reformulation,{}})};
     }
     static const LinearProgram& geometry(const ConvexProgram& p) { return p.storage_->quadratic.storage_->geometry; }
 };
@@ -83,6 +93,12 @@ ConvexDataResult<ConvexProgram> make_convex_program(const ConvexProgramInput& in
     auto zero=numeric::snapshot(SparseMatrix{n,n,std::vector<std::size_t>(n+1,0),{}, {}});
     if(auto* d=std::get_if<Diagnostic>(&zero)) return Diagnostics{*d};
     return ConvexAccess::create(original,solver,std::get<numeric::MatrixView>(zero),std::get<LinearProgram>(geometry_result),solver_id,reformulation);
+}
+ConvexDataResult<ConvexProgram> with_primal_start(const ConvexProgram& p,std::span<const double> x) {
+    if(x.size()!=p.quadratic_program().variables().size() ||
+       !std::all_of(x.begin(),x.end(),[](double v){return std::isfinite(v);}))
+        return Diagnostics{{DiagnosticCode::invalid_input,"convex.primal_start","expected a finite dimension-matched primal"}};
+    return ConvexAccess::with_start(p,x);
 }
 ConvexDataResult<ConvexPrimalEvaluation> evaluate_primal(const ConvexProgram& p,std::span<const double> x,NumericalPolicy policy,const Verifier& verifier) {
     auto geometry=evaluate_primal(ConvexAccess::geometry(p),x,policy,verifier);

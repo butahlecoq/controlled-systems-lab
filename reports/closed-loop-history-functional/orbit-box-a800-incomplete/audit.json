@@ -1,0 +1,26 @@
+{
+  "schema": "history-episode-independent-audit/1",
+  "source_commit": "a800b95b9be6a874c0bab188d1cf3394fbb836b1",
+  "tasks": {
+    "earth-orbit": {
+      "status": "incomplete",
+      "completed_holds": 3,
+      "expected_holds": 20,
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+      "original_horizon": 20,
+      "recorded_overall_status": "incomplete",
+      "errors": [],
+      "max_h_inequality_violation": 0.0,
+      "max_h_equality_residual": 1.4738361642230302e-09,
+      "max_initial_residual": 1.3516965324811281e-14,
+      "max_dynamics_residual": 1.4742909115739167e-09,
+      "max_source_cost_difference": 0.0,
+      "provider_ids": [
+        "casadi-ipopt"
+      ],
+      "geometry_memberships_checked": 180,
+      "support_certificates_replayed": 1440,
+      "audit_status": "pass-partial"
+    }
+  }
+}

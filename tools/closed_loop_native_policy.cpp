@@ -7,18 +7,31 @@
 #include <csl/optimization/phase_one.hpp>
 #if CSL_NATIVE_HAS_HIGHS
 #include <csl/adapters/lp/highs.hpp>
+#if CSL_NATIVE_HAS_QHULL
+#include <csl/adapters/polyhedral/qhull.hpp>
+#endif
 #endif
 #include <csl/optimization/finite_action_nominal.hpp>
 #include <csl/optimization/finite_action_graph.hpp>
 #include <csl/optimization/objectives.hpp>
+#include <csl/optimization/history_cost.hpp>
+#include <csl/reachability/feedback_geometry.hpp>
+#include <csl/geometry/polyhedral_intersection.hpp>
+#include <csl/optimization/convex_backend.hpp>
+#include <csl/problem/resolved_problem.hpp>
+#if CSL_NATIVE_HAS_HIGHS
+#include <csl/adapters/convex/highs.hpp>
+#endif
 #include <csl/registry/registry.hpp>
 #include <csl/sets/data.hpp>
 #include <nlohmann/json.hpp>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <map>
 #include <numeric>
 #include <stdexcept>
 #include <string>
@@ -182,23 +195,25 @@ sets::SetData safe_box(const Json& bounds, std::size_t dimension, const std::str
          take(numeric::snapshot_vector(b), "safe-bounds"), empty_matrix, empty_vector}), "bounded-safe-set");
 }
 
-optimization::Objective terminal_objective(const Json& spec, std::size_t state_dimension) {
+TerminalObjective terminal_source(const Json& spec, std::size_t state_dimension) {
     if(spec.at("kind") == "quadratic") {
         const auto q = matrix(spec.at("Q"));
         const auto linear = vector(spec.at("linear"));
         const auto offset = spec.at("offset").get<double>();
         if(q.rows != state_dimension || q.cols != state_dimension || linear.size() != state_dimension)
             throw std::runtime_error("terminal quadratic dimension mismatch");
-        return take(optimization::snapshot(QuadraticTerminal{q, linear, offset}),
-            "terminal-quadratic");
+        return QuadraticTerminal{q, linear, offset};
     }
     const auto map = matrix(spec.at("map"));
     const auto target = vector(spec.at("target"));
     const auto weights = vector(spec.at("weights"));
     if(map.cols != state_dimension || map.rows != target.size())
         throw std::runtime_error("terminal norm dimension mismatch");
-    return take(optimization::snapshot(ResidualNormTerminal{map, target, weights}),
-        "terminal-euclidean-norm");
+    return ResidualNormTerminal{map, target, weights};
+}
+
+optimization::Objective terminal_objective(const Json& spec, std::size_t state_dimension) {
+    return take(optimization::snapshot(terminal_source(spec, state_dimension)), "terminal-objective");
 }
 
 optimization::RunningControlCost running_cost(const Json& spec, std::size_t full_horizon,
@@ -717,7 +732,394 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
     return response;
 }
 
+template<class T, class... E> T take_history(std::variant<T, E...> result, const char* field) {
+    if (const auto* value = std::get_if<T>(&result)) return *value;
+    std::string detail = "history operation failed";
+    std::visit([&](const auto& item) {
+        using V = std::decay_t<decltype(item)>;
+        if constexpr (std::is_same_v<V, Diagnostic>) detail = item.field + ": " + item.explanation;
+        else if constexpr (std::is_same_v<V, Diagnostics>) {
+            if (!item.empty()) detail = item.front().field + ": " + item.front().explanation;
+        } else if constexpr (std::is_same_v<V, OperationStopped>) detail = item.diagnostics;
+    }, result);
+    throw std::runtime_error(std::string(field) + ": " + detail);
+}
+
+#if CSL_NATIVE_HAS_HIGHS && CSL_NATIVE_HAS_QHULL
+template<class Port>
+registry::PreparedProvider<Port> feedback_provider(registry::Registration<Port> registration,
+        const std::string& representation) {
+    registry::Requirements requirements;
+    requirements.output.representation = {representation};
+    if constexpr(std::is_same_v<Port, registry::GeometryPort> ||
+                 std::is_same_v<Port, registry::ConversionPort>)
+        requirements.output.relation = SetRelation::equivalent;
+    return prepare_provider(std::move(registration), requirements);
+}
+
+Json support_call_json(const registry::LPQueryRecord& record) {
+    return std::visit([](const auto& call) -> Json {
+        using T = std::decay_t<decltype(call)>;
+        const char* status = std::is_same_v<T, registry::LPQueryCompleted> ? "completed" :
+            std::is_same_v<T, registry::LPQueryRejected> ? "rejected" :
+            std::is_same_v<T, registry::LPQueryStopped> ? "stopped" :
+            std::is_same_v<T, registry::LPQuerySolverUnsupported> ? "unsupported" : "not_run";
+        const auto& provenance = [&]() -> const registry::Provenance& {
+            if constexpr(std::is_same_v<T, registry::LPQueryRejected>) return call.rejection.provenance;
+            else return call.provider;
+        }();
+        Json result{{"program", call.request.program.value}, {"status", status},
+            {"requested", provenance.requested.id.value},
+            {"requested_version", provenance.requested.version ? Json(*provenance.requested.version) : Json(nullptr)},
+            {"actual", provenance.actual ? Json(provenance.actual->id.value) : Json(nullptr)},
+            {"actual_version", provenance.actual ? Json(provenance.actual->version) : Json(nullptr)}};
+        if constexpr(std::is_same_v<T, registry::LPQueryRejected>) {
+            result["diagnostics"] = Json::array();
+            for(const auto& diagnostic : call.rejection.diagnostics)
+                result["diagnostics"].push_back({{"field", diagnostic.field}, {"explanation", diagnostic.explanation}});
+        } else if constexpr(std::is_same_v<T, registry::LPQuerySolverUnsupported>) {
+            result["diagnostics"] = Json::array();
+            for(const auto& diagnostic : call.diagnostics)
+                result["diagnostics"].push_back({{"field", diagnostic.field}, {"explanation", diagnostic.explanation}});
+        } else if constexpr(std::is_same_v<T, registry::LPQueryStopped> || std::is_same_v<T, registry::LPQueryNotRun>) {
+            result["reason"] = static_cast<int>(call.reason);
+        } else if constexpr(std::is_same_v<T, registry::LPQueryCompleted>) {
+            result["outcome"] = static_cast<int>(call.outcome);
+        }
+        return result;
+    }, record);
+}
+
+Json support_certificate_json(const reachability::SupportBoundCertificate& certificate) {
+    return {{"input_set", certificate.input_set ? Json(certificate.input_set->value) : Json(nullptr)},
+        {"direction", certificate.direction}, {"carrier_lower", certificate.carrier_lower},
+        {"carrier_upper", certificate.carrier_upper}, {"bound", certificate.bound.value},
+        {"method", certificate.bound.method == reachability::SupportBoundMethod::dual_candidate ?
+            "dual_candidate" : "carrier_only"},
+        {"inequality_multipliers", certificate.bound.inequality_multipliers},
+        {"equality_multipliers", certificate.bound.equality_multipliers}};
+}
+
+Json feedback_membership_json(const reachability::FeedbackSet& shape,
+        const std::vector<std::size_t>& indices, const std::string& role) {
+    Json membership = std::visit([&](const auto& value) -> Json {
+        using T = std::decay_t<decltype(value)>;
+        if constexpr(std::is_same_v<T, reachability::FeedbackHMembership>) {
+            auto result = set_json(take_history(sets::from_handle(value.set), "feedback-membership"));
+            if(result.at("representation") != "polytope-h")
+                throw std::runtime_error("feedback H membership is not H-represented");
+            result["kind"] = "h";
+            if(value.parallelotope_frame)
+                result["parallelotope_frame"] = matrix_json(value.parallelotope_frame->rows,
+                    value.parallelotope_frame->cols, [&](auto i, auto j) {
+                        return value.parallelotope_frame->values[i*value.parallelotope_frame->cols+j]; });
+            return result;
+        } else {
+            const auto& factor = [&]() -> const Matrix& {
+                if constexpr(std::is_same_v<T, reachability::FeedbackZonotopeMembership>) return value.generators;
+                else return value.factor;
+            }();
+            Json result{{"kind", std::is_same_v<T, reachability::FeedbackZonotopeMembership> ? "zonotope" : "ellipsoid"},
+                {"center", value.center}, {"factor_count", factor.cols},
+                {"factor", matrix_json(factor.rows, factor.cols, [&](auto i, auto j) {
+                    return factor.values[i*factor.cols+j]; })}};
+            if constexpr(std::is_same_v<T, reachability::FeedbackZonotopeMembership>) {
+                result["factor_ids"] = Json::array();
+                for(const auto& id : value.factors) result["factor_ids"].push_back(id.value);
+            }
+            return result;
+        }
+    }, shape.membership);
+    membership["set_id"] = shape.id.value;
+    membership["indices"] = indices;
+    membership["role"] = role;
+    membership["scope"] = "forward_relevant_from_observation";
+    membership["relation"] = shape.relation == SetRelation::outer ? "outer" :
+        shape.relation == SetRelation::equivalent ? "equivalent" : "other";
+    membership["assurance"] = shape.assurance == Assurance::numerical ? "numerical" : "validated";
+    membership["auxiliary_input_carriers"] = Json::array();
+    for(const auto& carrier : shape.auxiliary_input_carriers) {
+        auto encoded = set_json(take_history(sets::from_handle(carrier), "feedback-input-carrier"));
+        encoded["set_id"] = carrier.id.value;
+        membership["auxiliary_input_carriers"].push_back(std::move(encoded));
+    }
+    membership["source_sets"] = Json::array();
+    for(const auto& id : shape.source_sets) membership["source_sets"].push_back(id.value);
+    membership["construction"] = shape.construction;
+    membership["strict_source_domain"] = Json::array();
+    for(const auto& predicate : shape.strict_source_domain)
+        membership["strict_source_domain"].push_back({{"coordinate", predicate.coordinate},
+            {"lower_bound", predicate.lower_bound}, {"strict", true}});
+    membership["requests"] = Json::array();
+    for(const auto& reference : shape.requests)
+        membership["requests"].push_back({{"request", reference.identity.request.value},
+            {"ideal_output", reference.identity.ideal_output.value}});
+    membership["providers"] = Json::array();
+    for(const auto& call : shape.providers) membership["providers"].push_back({
+        {"request", call.request.value}, {"port", call.port},
+        {"requested", call.requested_module.value},
+        {"requested_version", call.requested_version ? Json(*call.requested_version) : Json(nullptr)},
+        {"actual", call.actual_module ? Json(call.actual_module->value) : Json(nullptr)},
+        {"actual_version", call.actual_version ? Json(*call.actual_version) : Json(nullptr)}});
+    membership["support_calls"] = Json::array();
+    for(const auto& record : shape.support_calls)
+        membership["support_calls"].push_back(support_call_json(record));
+    membership["support_certificates"] = Json::array();
+    for(const auto& certificate : shape.support_certificates)
+        membership["support_certificates"].push_back(support_certificate_json(certificate));
+    membership["support_methods"] = Json::array();
+    for(const auto method : shape.support_methods)
+        membership["support_methods"].push_back(method == reachability::SupportBoundMethod::dual_candidate ?
+            "dual_candidate" : "carrier_only");
+    return membership;
+}
+
+Json feedback_stage_json(const reachability::FeedbackGeometryStage& stage, std::size_t n) {
+    Json result{{"stage", stage.stage.value}, {"coordinates", stage.coordinates}, {"memberships", Json::array()}};
+    std::vector<std::size_t> indices;
+    for(const auto coordinate : stage.coordinates) indices.push_back(stage.stage.value*n+coordinate);
+    for(const auto& [role, value] : std::array{
+        std::pair{"forward", &stage.forward}, std::pair{"backward", &stage.backward},
+        std::pair{"intersection", &stage.intersection}})
+        if(*value) result["memberships"].push_back(feedback_membership_json(**value, indices, role));
+    for(const auto& [role, value] : std::array{
+        std::pair{"forward_h", &stage.forward_h}, std::pair{"backward_h", &stage.backward_h},
+        std::pair{"intersection_h", &stage.intersection_h}})
+        if(*value) {
+            result[role] = set_json(take_history(sets::from_handle((*value)->output), "feedback-source-h"));
+            result[role]["set_id"] = (*value)->output.id.value;
+        }
+    return result;
+}
+
+Json feedback_export(const problem::ResolvedProblem& resolved, const Json& in,
+        const sets::SetData& terminal, std::size_t n) {
+    using namespace reachability;
+    const auto name = in.at("geometry_family").get<std::string>();
+    const std::map<std::string, FeedbackFamily> families{
+        {"polytope",FeedbackFamily::polytope}, {"box",FeedbackFamily::box},
+        {"zonotope",FeedbackFamily::zonotope}, {"parallelotope",FeedbackFamily::parallelotope},
+        {"ellipsoid",FeedbackFamily::ellipsoid}};
+    const auto found = families.find(name);
+    if(found == families.end()) throw std::runtime_error("unknown feedback family");
+    const auto requested_generators = in.at("geometry_max_generators").get<std::int64_t>();
+    if(requested_generators <= 0) throw std::runtime_error("geometry generator budget must be positive");
+    const auto max_generators = static_cast<std::size_t>(requested_generators);
+    auto lp = take_history(adapters::lp::make_highs_registration(), "feedback-highs");
+    auto converter = take_history(adapters::polyhedral::make_qhull_registration(lp), "feedback-qhull");
+    auto affine = geometry::make_affine_sum_registration({
+        feedback_provider(geometry::make_lp_hull_reducer_registration(), ""),
+        feedback_provider(lp, "csl.program-result.v1"),
+        feedback_provider(converter, "csl.polyhedron.v")}, {{}, {}});
+    ForwardDependencies forward{
+        feedback_provider(geometry::polyhedral::make_projection_registration(), "csl.polyhedron.h"),
+        feedback_provider(std::move(affine), "csl.polyhedron.v"),
+        feedback_provider(converter, "csl.polyhedron.h")};
+    auto intersection = feedback_provider(geometry::polyhedral::make_intersection_registration(), "csl.polyhedron.h");
+    std::vector<StrictCoordinateLowerBound> strict;
+    if(in.at("task_id") == "env717-earth-orbit/continuous-receding/1") strict.push_back({0, 0});
+    auto outcome = feedback_geometry(resolved, {in.at("request_id").get<std::string>()},
+        terminal.as_handle(), found->second, strict,
+        {{forward, intersection}, feedback_provider(lp, "csl.program-result.v1"), max_generators}, {});
+    const auto* failure = std::get_if<FeedbackGeometryFailure>(&outcome);
+    const auto& geometry = failure ? failure->prefix : std::get<FeedbackGeometry>(outcome);
+    Json result{{"family", name}, {"scope", "forward_relevant_from_observation"},
+        {"status", failure ? "stopped" : "complete"}, {"stages", Json::array()}};
+    for(const auto& row : geometry.stages) result["stages"].push_back(feedback_stage_json(row, n));
+    if(failure) {
+        result["stop_stage"] = failure->stage.value;
+        result["stop_phase"] = static_cast<int>(failure->phase);
+        result["pending_requests"] = Json::array();
+        for(const auto& reference : failure->pending_requests)
+            result["pending_requests"].push_back({{"request", reference.identity.request.value},
+                {"ideal_output", reference.identity.ideal_output.value}});
+        result["pending_providers"] = Json::array();
+        for(const auto& call : failure->pending_providers)
+            result["pending_providers"].push_back({{"request", call.request.value},
+                {"port", call.port}, {"requested", call.requested_module.value},
+                {"actual", call.actual_module ? Json(call.actual_module->value) : Json(nullptr)},
+                {"actual_version", call.actual_version ? Json(*call.actual_version) : Json(nullptr)}});
+        result["pending_support_calls"] = Json::array();
+        for(const auto& record : failure->pending_support_calls)
+            result["pending_support_calls"].push_back(support_call_json(record));
+        result["pending_input_carriers"] = Json::array();
+        for(const auto& carrier : failure->pending_input_carriers) {
+            auto encoded = set_json(take_history(sets::from_handle(carrier), "feedback-pending-carrier"));
+            encoded["set_id"] = carrier.id.value;
+            result["pending_input_carriers"].push_back(std::move(encoded));
+        }
+        result["pending_support_certificates"] = Json::array();
+        for(const auto& certificate : failure->pending_support_certificates)
+            result["pending_support_certificates"].push_back(support_certificate_json(certificate));
+        std::visit([&](const auto& cause) {
+            using T = std::decay_t<decltype(cause)>;
+            if constexpr(std::is_same_v<T, Unsupported>) {
+                result["stop_kind"] = "unsupported";
+                result["diagnostics"] = Json::array();
+                for(const auto& d : cause.diagnostics) result["diagnostics"].push_back({{"field",d.field},{"explanation",d.explanation}});
+            } else {
+                result["stop_kind"] = "operation_stopped";
+                result["diagnostics"] = cause.diagnostics;
+            }
+        }, failure->cause);
+    }
+    return result;
+}
+#endif
+
+Json continuous_history_query(const Json& in) {
+    const auto solver = in.at("history_solver").get<std::string>();
+    if (solver != "csl.convex.highs" && solver != "casadi-ipopt")
+        throw std::runtime_error("unknown continuous history solver");
+    const auto initial = vector(in.at("observed_physical_state"));
+    const auto n = initial.size();
+    const auto m = in.at("control_bounds").size();
+    const auto& coefficients = in.at("predictor_stages");
+    const auto horizon = coefficients.size();
+    const auto stage = in.at("absolute_update_index").get<std::size_t>();
+    const auto original = in.at("original_horizon").get<std::size_t>();
+    if (!n || !m || !horizon || stage >= original || horizon != original - stage)
+        throw std::runtime_error("invalid continuous remaining horizon or dimensions");
+    std::vector<LinearStage> stages;
+    for (const auto& row : coefficients)
+        stages.push_back({matrix(row.at("A")), matrix(row.at("B")), Matrix{n, 0, {}}, vector(row.at("c"))});
+    auto model = std::make_shared<const SystemModel>(SystemModel{
+        {{n, m, 0}, TimeDomain::discrete, Coefficients{std::move(stages)}}, {}});
+    const double dt = in.at("dt").get<double>();
+    Vector times(horizon + 1);
+    for (std::size_t i = 0; i <= horizon; ++i) times[i] = (stage + i) * dt;
+    std::vector<AdmissibleSet> states, controls;
+    for (std::size_t i = 0; i <= horizon; ++i)
+        states.emplace_back(safe_box(in.at("state_bounds"), n, "history-state-" + std::to_string(i)).as_handle());
+    for (std::size_t i = 0; i < horizon; ++i)
+        controls.emplace_back(safe_box(in.at("control_bounds"), m, "history-control-" + std::to_string(i)).as_handle());
+    const auto terminal = terminal_source(in.at("terminal_objective"), n);
+    Problem source{{in.at("problem_id").get<std::string>()}, std::move(model), std::move(times),
+        KnownInitial{initial}, ContinuousDomain{std::move(controls)}, std::move(states), {}, {},
+        InformationPattern::nominal_open_loop, terminal};
+    const auto resolved = take_history(problem::resolve(source,
+        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}), "resolve");
+    const auto universal = take(sets::make_universal({{"history-universal-terminal"}, n, {}}), "terminal-domain");
+    const auto history = take_history(synthesis::recover_joint_history(resolved, universal), "recover-history");
+    const auto cost = running_cost(in.at("running_cost"), original, m);
+    const auto program = take_history(optimization::compile_history_cost(history, terminal, cost, stage), "compile-history-cost");
+    const auto h = std::get<sets::HRepresentation>(history.relation.representation());
+    const auto& q = program.quadratic;
+    Json norms = Json::array();
+    for (const auto& term : program.residual_norms)
+        norms.push_back({{"map", matrix_json(term.map.rows, term.map.cols,
+            [&](std::size_t i, std::size_t j) { return term.map.values[i * term.map.cols + j]; })},
+            {"target", term.target}, {"weights", term.weights}, {"coefficient", term.coefficient}});
+    Json response{{"status", "exported"}, {"task_id", in.at("task_id")}, {"task_sha256", in.at("task_sha256")},
+        {"action_profile_id", in.at("action_profile_id")}, {"policy_id", in.at("controller_id")},
+        {"history_relation", set_json(history.relation)},
+        {"history_objective", {{"quadratic", {{"Q", matrix_json(q.Q.rows, q.Q.cols,
+            [&](std::size_t i, std::size_t j) { return q.Q.values[i * q.Q.cols + j]; })},
+            {"linear", q.linear}, {"offset", q.offset}}}, {"residual_norms", std::move(norms)}}},
+        {"coordinates", {{"state_dimension", n}, {"control_dimension", m}, {"horizon", horizon},
+            {"layout", "x0..xT,u0..u(T-1)"}}}, {"geometry", "not_used"},
+        {"assurance", "numerical affine history; no validated completeness or nonlinear safety claim"}};
+    response["requested_solver"] = solver;
+    if(in.contains("geometry_family")) {
+        if(solver != "casadi-ipopt") throw std::runtime_error("feedback family requires explicitly selected casadi-ipopt");
+#if CSL_NATIVE_HAS_HIGHS && CSL_NATIVE_HAS_QHULL
+        response["geometry"] = feedback_export(resolved, in, universal, n);
+        if(response["geometry"].at("status") != "complete") {
+            response["status"] = "failed";
+            response["reason"] = "feedback geometry stopped; partial stage prefix retained";
+            return response;
+        }
+#else
+        response["status"] = "unavailable";
+        response["reason"] = "feedback geometry requires registered HiGHS and Qhull";
+        return response;
+#endif
+    }
+    if (solver == "casadi-ipopt") return response;
+    if (!program.residual_norms.empty()) {
+        response["status"] = "unsupported";
+        response["reason"] = "the selected convex QP provider does not support a sum of residual norms";
+        return response;
+    }
+#if CSL_NATIVE_HAS_HIGHS
+    SparseMatrix rows{h.inequalities.rows() + h.equalities.rows(), q.dimension, {0}, {}, {}};
+    std::vector<Interval> bounds;
+    const auto append_rows = [&](const auto& matrix, const auto& values, bool equality) {
+        for (std::size_t i = 0; i < matrix.rows(); ++i) {
+            for (std::size_t j = 0; j < matrix.cols(); ++j) {
+                if (const double value = matrix(i, j); value != 0) {
+                    rows.column_indices.push_back(j); rows.values.push_back(value);
+                }
+            }
+            rows.row_offsets.push_back(rows.values.size());
+            const auto value = values[i];
+            bounds.push_back(equality ? Interval{value, value} : Interval{{}, value});
+        }
+    };
+    append_rows(h.inequalities, h.upper_bounds, false);
+    append_rows(h.equalities, h.equality_values, true);
+    auto qp = take_history(optimization::make_convex_program({
+        {{in.at("problem_id").get<std::string>()}, {in.at("request_id").get<std::string>()}},
+        QuadraticTerminal{q.Q, q.linear, q.offset}, std::move(rows),
+        std::vector<Interval>(q.dimension), std::move(bounds), {}}), "make-history-qp");
+    if(in.contains("initial_primal"))
+        qp=take_history(optimization::with_primal_start(qp,vector(in.at("initial_primal"))), "history-primal-start");
+    response["warm_start"]={{"initial_primal",in.value("initial_primal",Json(nullptr))},
+        {"dual_policy","zero-every-solve"}};
+    using namespace registry;
+    Registry<ConvexPort> registry;
+    auto entry = take_history(adapters::convex::make_highs_registration(), "highs-registration");
+    if (registry.add(std::move(entry))) throw std::runtime_error("convex registration failed");
+    Requirements requirements;
+    requirements.output.representation = {"csl.program-result.v1"};
+    auto preparation = prepare_pipeline(select(registry, {{"csl.convex.highs"}, {}}, qp, requirements));
+    if (std::holds_alternative<Rejection>(preparation)) throw std::runtime_error("convex provider rejected history QP");
+    const auto& prepared = std::get<PreparedPipeline<ConvexPort>>(preparation);
+    auto [workspace] = prepared.create();
+    const auto resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    const auto actual = prepared.provenance()[0].actual.value();
+    const auto outcome = workspace->run({resources, {}, {}, {1e-8, 1e-8}, "continuous-history"});
+    const auto* result = std::get_if<ProgramResult>(&outcome);
+    if (!result || result->termination != Termination::completed ||
+        result->outcome.value != MathematicalOutcome::optimal || !result->primal ||
+        !optimization::check_program_result(*result, qp, Assurance::numerical).empty()) {
+        response["status"] = "failed";
+        response["reason"] = "convex history provider did not return a completed optimum";
+        response["solver_receipt"] = {{"provider", actual.id.value}, {"version", actual.version},
+            {"raw_diagnostics", result ? result->raw_diagnostics : "provider returned unsupported"}};
+        return response;
+    }
+    const auto& primal = *result->primal;
+    if (primal.size() != q.dimension || !std::all_of(primal.begin(), primal.end(), [](double value) { return std::isfinite(value); })) {
+        response["status"] = "failed";
+        response["reason"] = "convex history provider returned an invalid primal";
+        response["solver_receipt"] = {{"provider", actual.id.value}, {"version", actual.version},
+            {"raw_diagnostics", result->raw_diagnostics}};
+        return response;
+    }
+    std::vector<Vector> xs, us;
+    for (std::size_t k = 0; k <= horizon; ++k)
+        xs.emplace_back(primal.begin() + k*n, primal.begin() + (k+1)*n);
+    const auto control_offset = (horizon+1)*n;
+    for (std::size_t k = 0; k < horizon; ++k)
+        us.emplace_back(primal.begin() + control_offset+k*m, primal.begin() + control_offset+(k+1)*m);
+    const auto evaluated = take_history(optimization::evaluate_history_cost(program, xs, us), "evaluate-history-cost");
+    response["status"] = "solved";
+    response["primal"] = primal;
+    response["source_cost"] = {{"terminal", evaluated.terminal}, {"running", evaluated.running}, {"total", evaluated.total}};
+    response["solver_receipt"] = {{"provider", actual.id.value}, {"version", actual.version},
+        {"termination", "completed"}, {"outcome", "optimal"}, {"assurance", "numerical"},
+        {"raw_diagnostics", result->raw_diagnostics}};
+    return response;
+#else
+    response["status"] = "unavailable";
+    response["reason"] = "compiled native executable has no registered convex QP provider";
+    return response;
+#endif
+}
+
 Json query(const Json& in) {
+    if(in.value("mode", std::string{}) == "continuous-history/1") return continuous_history_query(in);
     if(in.contains("candidate_action_indices") &&
             (!in.at("candidate_action_indices").is_array() || in.at("candidate_action_indices").empty())) {
         auto result=query_failure(in,"rejected",

@@ -12,6 +12,12 @@
       "sha256": "7fc54148e578b866aeeaf127d89108f67f021a2ecd251b5b63a6493c802647ad",
       "size": 2312,
       "source": "setup-SHA256SUMS"
+    },
+    {
+      "route": "publication-provenance/historical-helper-ownership-v1.json",
+      "sha256": "428dc22d96e8934531c88611c148ddebd85a60acdaa2392ecd9fde5ba7e3d8d9",
+      "size": 15560,
+      "source": "historical-helper-ownership-v1.json"
     }
   ],
   "archives": [
@@ -2885,6 +2891,554 @@
       "path": "review05-family-query-d6af180b0e398d78ebd2.zip",
       "sha256": "5b11b80a212ee11973fad1270fbf108923fe8231dc17bd6bdaa922babad26067",
       "size": 1600557
+    },
+    {
+      "members": {
+        "b04-source-moments-11fb3cd7d83f868d3c3d/README.md": {
+          "publish": true,
+          "sha256": "3ba9b33c5a62cfc3824ec01626e773f5e207ef258b657891752b11049f69be79",
+          "size": 1420
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/SHA256SUMS": {
+          "publish": true,
+          "sha256": "cbbd4948e8930ac68d7bd15ae5eadac1a5374c401c1f0a260d3900d56c9bab2a",
+          "size": 2600
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/adapter/stage_b04_source_moments.py": {
+          "publish": true,
+          "sha256": "e0b98e392a37e0e8fc5e72fd18a52a215ed9ea6efaf6114e2d27a452c991c401",
+          "size": 31398
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/certificate.json": {
+          "publish": true,
+          "sha256": "3414a40240fa6ec9617176c6511043c6b27188d7797210115718d43a194a8982",
+          "size": 139330
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/figure-export.json": {
+          "publish": true,
+          "sha256": "bb558e1b2e440a0d3b2cf2d33db2ccea9ed942d8562095ae951e0357cddcfdf3",
+          "size": 1600
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/figures/b04-all-stage-reachability.png": {
+          "publish": true,
+          "sha256": "a878e3ade862885ca52a47dc386030c173eac8fbd0356bc4bfcb51196f98301e",
+          "size": 580306
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/figures/b04-all-stage-reachability.svg": {
+          "publish": true,
+          "sha256": "331a1755e65a8cf7ba1fc46ae0909b6cfc314f313b54cefe00957f205a582a15",
+          "size": 104539
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/index.html": {
+          "publish": true,
+          "sha256": "0dbe72ef55a59cf9f1cb50b497c748f1db55dbb456e2ff0bccd2b30aec1c1c82",
+          "size": 13913
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/minimal-inputs.json": {
+          "publish": true,
+          "sha256": "9b0df56c970af0553763f93f083bb9b5820b7e1ac25bc51061d0ee3b641069ee",
+          "size": 3489
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/offline_check.py": {
+          "publish": true,
+          "sha256": "dc898afeea93fd4e90429f808b837255fb9b67f43b79e4ec48eb33e4489cad61",
+          "size": 3148
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/publication-manifest.json": {
+          "publish": true,
+          "sha256": "e4a91fe6b6e7fdb17248f9f08f785b6a88718db6e7b0d2b96d05a5897644151d",
+          "size": 8995
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/source-root/benchmarks/reporting/mpc08_explicit/exact_regions.py": {
+          "publish": true,
+          "sha256": "f8ea15f578c377fb56bcf378af843221ca09bfe9bdf4d25f101a81c00fdd38cc",
+          "size": 12714
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/source-root/benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py": {
+          "publish": true,
+          "sha256": "5dc48dc9fd0978b855539754b62a1f3005a260e90f887f708fcc33f62fc468ef",
+          "size": 17782
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/source-root/docs/research/evidence/b04-source-moment-certificate.json": {
+          "publish": true,
+          "sha256": "dea7e24892a50b17debe541cce525492193c7951bfd4254a0c9b2faf68e94173",
+          "size": 139330
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/source-root/docs/research/evidence/b04-source-moment-figures/b04-all-stage-reachability.png": {
+          "publish": true,
+          "sha256": "a878e3ade862885ca52a47dc386030c173eac8fbd0356bc4bfcb51196f98301e",
+          "size": 580306
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/source-root/docs/research/evidence/b04-source-moment-figures/b04-all-stage-reachability.svg": {
+          "publish": true,
+          "sha256": "331a1755e65a8cf7ba1fc46ae0909b6cfc314f313b54cefe00957f205a582a15",
+          "size": 104539
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/source-root/docs/research/evidence/b04-source-moment-figures/figure-export.json": {
+          "publish": true,
+          "sha256": "beefa4f83df9119dcb4e79ca2c494bf8cbbc318c1db19b863e47b8ea03cd51b3",
+          "size": 1600
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/source-root/docs/research/evidence/b04-source-moment-inputs.json": {
+          "publish": true,
+          "sha256": "3ae80d55d61febf7074bad1844735168e49c139b91d6b794a84ef60b51fcfe40",
+          "size": 3163
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/source-root/docs/research/evidence/b04-source-moment-stage-sets.json": {
+          "publish": true,
+          "sha256": "d91dadf0d9de1fd27bd43ef3380941c6a554c5d8c933ff4b175d01e0def9aa32",
+          "size": 125495
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/source-root/docs/research/tools/check_b04_source_moments.py": {
+          "publish": true,
+          "sha256": "78bc6bfada186dfb3e3cd078ea8d300708edd96c49893d30876de30762336946",
+          "size": 14191
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/source-root/scripts/reports/b04_source_moments/figures.py": {
+          "publish": true,
+          "sha256": "f080be5620482b35af4368b87a366869cc3fd93d3705a33265da6ab949a045e8",
+          "size": 8278
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/source-root/scripts/reports/b04_source_moments/geometry.py": {
+          "publish": true,
+          "sha256": "eb74d5a1aa5561ad33a98f9dab494022817169338e3d7b0592a336a7c80047b1",
+          "size": 11610
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/source-root/scripts/reports/figure_style.py": {
+          "publish": true,
+          "sha256": "c2f7078df95b9d75fe90f0f407023383cae4b58dd688dfa5fa5ac5b9d18664c6",
+          "size": 1833
+        },
+        "b04-source-moments-11fb3cd7d83f868d3c3d/stage-sets.json": {
+          "publish": true,
+          "sha256": "88e765035876939f90c495218c25a75c1ac0279196e0993fe2e8fb05177c7031",
+          "size": 125495
+        }
+      },
+      "path": "b04-source-moments-11fb3cd7d83f868d3c3d.zip",
+      "qualification": "Exact deterministic pre-change source staging; retained as the predecessor of the historical-helper ownership variant. This receipt does not claim a live deployment.",
+      "sha256": "509c9293a4b23e3e16024f702a377b685bfb654b40dd3d74a5334e29f3790db1",
+      "size": 1202670,
+      "source_commit": "dfc708d22a9f7e9247c0a7177e3e401478991a2e"
+    },
+    {
+      "members": {
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/README.md": {
+          "publish": true,
+          "sha256": "b76ccc1881be56ce069f4fed8c1c1b2ae585379501fb1442204cf88067ab3bf6",
+          "size": 1716
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/SHA256SUMS": {
+          "publish": true,
+          "sha256": "7e0543c66fd68f2c0ad702d419661226cf63d74dbc0bdfdcd383ba7e790333f8",
+          "size": 10088
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/AFFINE-RECHECK.md": {
+          "publish": true,
+          "sha256": "9cb919d44f0c942c98989b86d812c1782788ade8fe30c791ba1d6eedfbfb76aa",
+          "size": 3415
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/FIGURES.md": {
+          "publish": true,
+          "sha256": "0f9d16078fbb6b22a660e06be4a41181cb97fc83c2cb0208243cc60098f94009",
+          "size": 1849
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/affine.py": {
+          "publish": true,
+          "sha256": "54d31b9c21fef962cb2a5f09f2e341ef92b3a40b128114c3c06a5b039fb95149",
+          "size": 16460
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/check_affine_saved.py": {
+          "publish": true,
+          "sha256": "4cb46b15b2600db5b4cd43c163f100227551b22d5e880e727222fbc6fc7df599",
+          "size": 7114
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/check_nmpc_saved.py": {
+          "publish": true,
+          "sha256": "dc785a2e00a4ff122845f5bb1a64dfa664e0af14e80aaf6892b5b6fcc048a14c",
+          "size": 21577
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/check_nonlinear_saved.py": {
+          "publish": true,
+          "sha256": "775c24080c9516b8c5aff1b08e460150b8086dcbc3cdca0bc9078f2b27f65935",
+          "size": 6686
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/check_scenarios.py": {
+          "publish": true,
+          "sha256": "c1a29f755a8d3fa63f495c7ad15ad0c138e57bdc1e2b8f85e7b0217ef7bc16fb",
+          "size": 6709
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/check_timing.py": {
+          "publish": true,
+          "sha256": "608f289838c24227ac6737d70cd2f0801e7d1515d02dce0a67c05d26ed6f674f",
+          "size": 11060
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/environment/README.md": {
+          "publish": true,
+          "sha256": "cb6ba1ee49fa53e88a2a16bb1173ab1fd64df4e20d5e68f5d6e6ba1f00d7c137",
+          "size": 5993
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/environment/lock_wheels.py": {
+          "publish": true,
+          "sha256": "96eee5cd923b6524f1dce187a200a85e72e07736a08bc545c96c15c457eef464",
+          "size": 3497
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/environment/notices.zip": {
+          "publish": true,
+          "sha256": "261ec75dc33a470a3776faec3fc85a6bab1f6b1b0235c635d3b8e5cf8839b6ba",
+          "size": 370684
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/environment/pip-check.txt": {
+          "publish": true,
+          "sha256": "9261363b733079a641c2e4cc9bc46ffa1d8336945a87f807b6cf68847dbc9b09",
+          "size": 30
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/environment/requirements-linux-cp311.lock": {
+          "publish": true,
+          "sha256": "f6469950a7ceb0fd1c0f1ab5fae94cd0a4963219945122dd362aeb9c6ebb4ad7",
+          "size": 1427
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/environment/smoke-receipt.json": {
+          "publish": true,
+          "sha256": "00e5722ad8c2b5955444df228622bd30c311b22a42fe23c770be00dac2a94d80",
+          "size": 5297
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/environment/smoke-stderr.txt": {
+          "publish": true,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "size": 0
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/environment/smoke.py": {
+          "publish": true,
+          "sha256": "2b151b6ecac335d283106fc32b365cc73e82ae27f8f8438dacc39afb6db3be49",
+          "size": 3676
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/environment/smoke_requirements.py": {
+          "publish": true,
+          "sha256": "143ff89e08a8493e7e129dbbc7dc9e80b54923bd22d51032b05311d87aa855f2",
+          "size": 266
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/environment/upstream-mumps-license.json": {
+          "publish": true,
+          "sha256": "6c28766c5d54a9eb19de4870a045bbb5e243ae41f31105714b2fb4c7497d4d13",
+          "size": 1132
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/environment/upstream-mumps-license.zip": {
+          "publish": true,
+          "sha256": "a791020cb1eddbe70fe5ca9d65bfab54cf849127b5820026a3c8c9f03e119e55",
+          "size": 17778
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/environment/wheel-manifest.json": {
+          "publish": true,
+          "sha256": "642ede82d4dbc5936b05523c3d10c31d03d2fa9943289c452cc2edec662f1f27",
+          "size": 213465
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/affine-pilot-b3978a98/README.md": {
+          "publish": true,
+          "sha256": "3e6fd29a2aa235fb668edee5036e41d3c2022157b1084d2776cef23440195188",
+          "size": 4237
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/affine-pilot-b3978a98/SHA256SUMS": {
+          "publish": true,
+          "sha256": "2f0baed80a5b0e232802560b2baec85a4758077291cd04603e7793152b816830",
+          "size": 78
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/affine-pilot-b3978a98/capture.zip": {
+          "publish": true,
+          "sha256": "98c6d9663bad80757ddef1adb150706ca8f7e19633267dc436bc4b84f09fe9b3",
+          "size": 475585
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/affine-pilot-b3978a98/summary.json": {
+          "publish": true,
+          "sha256": "cf1bbaf486102930b1353a91b169959442e930fc7b6d48d1aa12f095223d623f",
+          "size": 3293
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/README.md": {
+          "publish": true,
+          "sha256": "bb3190a092ceca3225ab23bbbba2b2af93e6ae610ccc27d2eec39edec3db0f6d",
+          "size": 1019
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/SHA256SUMS": {
+          "publish": true,
+          "sha256": "8e384775137d4f717170d11835faa2dde87a728565f3e13b28c86b6300ca4140",
+          "size": 2230
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/receipt.json": {
+          "publish": true,
+          "sha256": "58de5351469f983be5198b61d4a34619abb894793360e5efa80a7c503378d46d",
+          "size": 9474
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/affine.py": {
+          "publish": true,
+          "sha256": "f6c34b2ffa53fd96f366e84cc1e3ac244bdb1fe4b2f16da8b25a927324cee2dd",
+          "size": 16325
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/check_affine_saved.py": {
+          "publish": true,
+          "sha256": "658d326941bb761654de417a8ca3b5be5144088b0a62b3d6496511a8c167ca24",
+          "size": 5608
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/check_nmpc_saved.py": {
+          "publish": true,
+          "sha256": "dc785a2e00a4ff122845f5bb1a64dfa664e0af14e80aaf6892b5b6fcc048a14c",
+          "size": 21577
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/check_nonlinear_saved.py": {
+          "publish": true,
+          "sha256": "84056242a0f5c0ea8406ac479cbcd01bc7fed3ce1a4f46a9c9990a5b0703a856",
+          "size": 6340
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/check_scenarios.py": {
+          "publish": true,
+          "sha256": "ae6f12f0c3986c73a1840ce4ab9fe9f9f390a2aa99b0c996c750b8a18717728f",
+          "size": 6565
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/figure_style.py": {
+          "publish": true,
+          "sha256": "c2f7078df95b9d75fe90f0f407023383cae4b58dd688dfa5fa5ac5b9d18664c6",
+          "size": 1833
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/figures.py": {
+          "publish": true,
+          "sha256": "1f6d57ba4dbfa233600a0c489a90c1018e3f35ed085fb9fa7d0400fc4d54d13f",
+          "size": 10204
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/nmpc.py": {
+          "publish": true,
+          "sha256": "8d769a66011c546d20d796ea7424536eb7c8c09a9143b6f97fb5bc01bbec4777",
+          "size": 10988
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/nonlinear.py": {
+          "publish": true,
+          "sha256": "5e0c97ae2da5164acebfd6219e127a88cba12130169a22efbb3a0849df6133b0",
+          "size": 5788
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/replay_evidence.py": {
+          "publish": true,
+          "sha256": "3913e92d4f9e3d4b731ed216393ce84bbd1db373383f3505bff046b2c5fea43b",
+          "size": 3412
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/run_affine.py": {
+          "publish": true,
+          "sha256": "aa7663b488d220b01faf16f4de543d928bbdc28f76c3d216cb8f38c0ec4bfd6e",
+          "size": 7053
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/run_nmpc.py": {
+          "publish": true,
+          "sha256": "dcc5d198e5cf41a62132695dbf6261b77546277d07a2d87019636a97b3ae8134",
+          "size": 11665
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/run_nonlinear.py": {
+          "publish": true,
+          "sha256": "f235cfe233f2fb74905c7b34843671381045f2e4950012e35f1af84298f8d013",
+          "size": 6478
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/syn-nl-fuel-01-phase.png": {
+          "publish": true,
+          "sha256": "d46e95fa82b1073488ba7fbf4c171266ab25f9c1056b2943001f6ee967427ae4",
+          "size": 164479
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/syn-nl-fuel-01-phase.svg": {
+          "publish": true,
+          "sha256": "8f3a250b3376980a2f3a46b2c2c5ae591b0f877570a2e8682e454d4a3b818f93",
+          "size": 85991
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/syn-nl-fuel-01-plotted-data.json": {
+          "publish": true,
+          "sha256": "626998255648b3ce8f62d8889fe6914f48502f4ee4b03960e07bf78f553ed215",
+          "size": 268407
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/syn-nl-fuel-01-traces.png": {
+          "publish": true,
+          "sha256": "e8c22fbaaf2cd26d4cd289842320390f8ff26589dba4c042b4d77d27df1052c7",
+          "size": 250299
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/syn-nl-fuel-01-traces.svg": {
+          "publish": true,
+          "sha256": "1b787ff35819beeff73231ad7ebeff5d06aae1180f499d394f5dce170e2dfec2",
+          "size": 108171
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/syn-nl-lv-01-phase.png": {
+          "publish": true,
+          "sha256": "3dcfc2e3095bd858b86b777068a2b144b25c945bf14b79020d8f1ed87655009f",
+          "size": 107423
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/syn-nl-lv-01-phase.svg": {
+          "publish": true,
+          "sha256": "eb20b1c426b6d944be79b7dd00ef7c9269600562eb147d0780ddacdc54e382ed",
+          "size": 65403
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/syn-nl-lv-01-plotted-data.json": {
+          "publish": true,
+          "sha256": "c958b8af3f933a077a53b1fe87872788f6c459b01794a5e7e1941204f165ad8d",
+          "size": 128802
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/syn-nl-lv-01-traces.png": {
+          "publish": true,
+          "sha256": "ac882d6ba4fa29f5e50d1dfd5ca008bef3d1aa95c4a6ded4d19788baee65216b",
+          "size": 152894
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/figures-60bda0fb/syn-nl-lv-01-traces.svg": {
+          "publish": true,
+          "sha256": "5a2f056035401b25fc982d923550fead3825a2874179ab0586400b354162d446",
+          "size": 68989
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/nmpc-pilot-55f65110/README.md": {
+          "publish": true,
+          "sha256": "8238d7929f9f8e62a10cb155ed85809e7389967920c114138fcd1791b1554ca6",
+          "size": 7699
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/nmpc-pilot-55f65110/SHA256SUMS": {
+          "publish": true,
+          "sha256": "d50109507dadc49d8fe279058d5643c2e51f5dd2fe9c13b7aacdeb470b6ce60a",
+          "size": 78
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/nmpc-pilot-55f65110/capture.zip": {
+          "publish": true,
+          "sha256": "c13fb2db4f5492f5be85d42b3d5866c2a07ec24f78eb3a6a457d37ac15186253",
+          "size": 2105817
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/nmpc-pilot-55f65110/summary.json": {
+          "publish": true,
+          "sha256": "3c48e559def6784d4d3bb0c803945b34ca37400aa1cb143f3548469f72343b35",
+          "size": 3592
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/nonlinear-pilot-0092081b/README.md": {
+          "publish": true,
+          "sha256": "ebdbe8def4db98c4ad2cdc9ee9ad0614258627c1f4a22557f5feb37c066b6c43",
+          "size": 3644
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/nonlinear-pilot-0092081b/SHA256SUMS": {
+          "publish": true,
+          "sha256": "9e2f4d113d68f7b2f1e0a607ad8571dd62ca03a0db9b35d5733414e7cffc8176",
+          "size": 78
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/nonlinear-pilot-0092081b/capture.zip": {
+          "publish": true,
+          "sha256": "c8be3f89a377c5f9be3c0da4c818df26475c17ae282186cd16869c9a923f437e",
+          "size": 1612629
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/evidence/nonlinear-pilot-0092081b/summary.json": {
+          "publish": true,
+          "sha256": "df8b7e514d7d36406a023f5ad0a6b7d11b66adb9c86dd297382ca8e6a4b70554",
+          "size": 4431
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/figures.py": {
+          "publish": true,
+          "sha256": "1f6d57ba4dbfa233600a0c489a90c1018e3f35ed085fb9fa7d0400fc4d54d13f",
+          "size": 10204
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/mesh_summary.py": {
+          "publish": true,
+          "sha256": "83bc2120171ef009ce9011612bb31caa13aa5490e98db19f624428b11b89bee6",
+          "size": 9233
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/nmpc.py": {
+          "publish": true,
+          "sha256": "41462f02fac817012a0884f176fbac617320fadc0eb945638cb1b7678b9ef11e",
+          "size": 11206
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/nonlinear.py": {
+          "publish": true,
+          "sha256": "5e0c97ae2da5164acebfd6219e127a88cba12130169a22efbb3a0849df6133b0",
+          "size": 5788
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/replay_evidence.py": {
+          "publish": true,
+          "sha256": "3913e92d4f9e3d4b731ed216393ce84bbd1db373383f3505bff046b2c5fea43b",
+          "size": 3412
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/run_affine.py": {
+          "publish": true,
+          "sha256": "aa7663b488d220b01faf16f4de543d928bbdc28f76c3d216cb8f38c0ec4bfd6e",
+          "size": 7053
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/run_nmpc.py": {
+          "publish": true,
+          "sha256": "df1029456f6d2e52b4f12adec97fde4d44cd852e16c2a45fde2d556f397e4f35",
+          "size": 11778
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/run_nonlinear.py": {
+          "publish": true,
+          "sha256": "2dd049753a13c72529d95aab42847a20af6c20ec6b4a7f0bee3d7a500035a69a",
+          "size": 6503
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/run_timing.py": {
+          "publish": true,
+          "sha256": "548527e8641eedaefded9879996b5cf018ac1bbb95f0f0b921123fd470719456",
+          "size": 6347
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/scenarios/config-checks.jsonl": {
+          "publish": true,
+          "sha256": "9c10e2c05e84c360e45d6a65d2fe5e5c99122f73e7f3f8975cc7c2d74bca9016",
+          "size": 318
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/scenarios/mesh-ni2/syn-nl-fuel-01.json": {
+          "publish": true,
+          "sha256": "b7efc84508bfc52abdaed14d73d0894807c54ca5ddf9c14c656992623ee25092",
+          "size": 6117
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/scenarios/mesh-ni2/syn-nl-lv-01.json": {
+          "publish": true,
+          "sha256": "173ef948c6e4a30d3d2402651e8742492477c35d5724393d8cd95f5c84b7f987",
+          "size": 4931
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/scenarios/syn-nl-fuel-01.json": {
+          "publish": true,
+          "sha256": "5dd38a65f5ad6c5f90b8616fbc866eb9ef2735b1b7f7279bca0b2b0d05f9dce1",
+          "size": 6113
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/scenarios/syn-nl-lv-01.json": {
+          "publish": true,
+          "sha256": "1a608a0a38f9c1d60d9272b948189e48f9f294048ddf9726aaa0ed8b5cee8464",
+          "size": 4927
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/benchmarks/reporting/mpc11/study_report.py": {
+          "publish": true,
+          "sha256": "9f826ed057c589d979eab5adc604f1300e56ce0ca7f49a23b2fb19b74394ab06",
+          "size": 13497
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/index.html": {
+          "publish": true,
+          "sha256": "20f55a3fab25342798cef26d723514e44aacd42fc003752b1f69a1e171e769a2",
+          "size": 16956
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/publication-manifest.json": {
+          "publish": true,
+          "sha256": "c81093467ecd3b59e0d4ec2de50a66cf787bd41a2c5c3206f3a86a4f1164bf5a",
+          "size": 22118
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/raw/affine.zip": {
+          "publish": true,
+          "sha256": "98c6d9663bad80757ddef1adb150706ca8f7e19633267dc436bc4b84f09fe9b3",
+          "size": 475585
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/raw/nmpc.zip": {
+          "publish": true,
+          "sha256": "c13fb2db4f5492f5be85d42b3d5866c2a07ec24f78eb3a6a457d37ac15186253",
+          "size": 2105817
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/raw/nonlinear.zip": {
+          "publish": true,
+          "sha256": "c8be3f89a377c5f9be3c0da4c818df26475c17ae282186cd16869c9a923f437e",
+          "size": 1612629
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/scripts/reports/figure_style.py": {
+          "publish": true,
+          "sha256": "c2f7078df95b9d75fe90f0f407023383cae4b58dd688dfa5fa5ac5b9d18664c6",
+          "size": 1833
+        },
+        "mpc11-controller-comparison-cc50fc8473b24ee929ac/scripts/reports/stage_mpc11_controller_comparison.py": {
+          "publish": true,
+          "sha256": "46d56ea1f7f9a3f0b1128a65dfc77095aa45604f305c6ac27456272caed25b88",
+          "size": 25902
+        }
+      },
+      "path": "mpc11-controller-comparison-cc50fc8473b24ee929ac.zip",
+      "qualification": "Exact deterministic pre-change source staging; retained as the predecessor of the historical-helper ownership variant. This receipt does not claim a live deployment.",
+      "sha256": "14a7f042fb3fb4ffb3268f55a7ff3f0b3436fcf9a1a59e51aa65106955a9ae3c",
+      "size": 9166126,
+      "source_commit": "dfc708d22a9f7e9247c0a7177e3e401478991a2e"
     }
   ],
   "baseline": {

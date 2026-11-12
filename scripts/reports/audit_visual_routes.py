@@ -64,6 +64,8 @@ FROZEN_DIAGRAM_EXCEPTIONS = {
     "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py",
 }
 PUBLICATION_EXPORT_ROUTES = {
+    "scripts/reports/package_feedback_history.py",
+    "scripts/reports/package_history_functional.py",
     "scripts/reports/stage_b04_source_moments.py",
     "scripts/reports/stage_btulshor.py",
     "scripts/reports/btulshor/render.py",
@@ -172,6 +174,8 @@ SAVED_DATA_ILLUSTRATION_RENDERERS = {
         "Renders all saved source-qualified native affine 2D stages and a terminal overlay; the factor matrix is "
         "retained in each ellipse record and the sampled boundary is checked against that represented set. "
         "The page makes no nonlinear, feedback, minimax or timing claim."),
+    "scripts/reports/plot_feedback_history.py": "Projects complete saved full-state H, generator and ellipsoid F/B/I sets from one observed query, preserving every stage and physical coordinate order with shared quantitative axis styling.",
+    "scripts/reports/render_history_functional.py": "Renders corrected labels on saved affine-history state and control records using the existing closed-loop plotter; it does not execute a controller or solver.",
     "scripts/reports/render_issue944_each_choice.py": (
         "Renders the immutable source-bound Strategy A choice records and independent recovered-history values "
         "with shared screen/print tokens; it runs no solver and makes no full-family or performance claim."),

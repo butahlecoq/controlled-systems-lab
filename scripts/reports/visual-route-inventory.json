@@ -1169,6 +1169,26 @@
       "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
+      "source": "scripts/reports/package_feedback_history.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "controls.png",
+        "phase.png",
+        "trajectory.png"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/package_history_functional.py",
+      "signal_count": 6,
+      "asset_name_literals": [
+        "controls.png",
+        "phase.png",
+        "trajectory.png"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/plot.py",
       "signal_count": 7,
       "asset_name_literals": [
@@ -1176,6 +1196,13 @@
         "latency.svg"
       ],
       "disposition": "adopted-shared-quantitative-policy"
+    },
+    {
+      "source": "scripts/reports/plot_feedback_history.py",
+      "signal_count": 4,
+      "asset_name_literals": [],
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Projects complete saved full-state H, generator and ellipsoid F/B/I sets from one observed query, preserving every stage and physical coordinate order with shared quantitative axis styling."
     },
     {
       "source": "scripts/reports/qhull_highs_strategy_a_example.py",
@@ -1235,6 +1262,17 @@
       ],
       "disposition": "analytic-reference-checked-saved-run-renderer",
       "role_and_disposition_reason": "Validates and renders the fixed source-bound attempt, replay, and coverage records into a versioned standalone report and 2D example; it does not execute a solver or plant."
+    },
+    {
+      "source": "scripts/reports/render_history_functional.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "controls.png",
+        "phase.png",
+        "trajectory.png"
+      ],
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Renders corrected labels on saved affine-history state and control records using the existing closed-loop plotter; it does not execute a controller or solver."
     },
     {
       "source": "scripts/reports/render_issue944_each_choice.py",

@@ -1,0 +1,216 @@
+{
+  "description": "Observed-state affine-history functional evidence for direct and selected F/B/I family profiles. Original source costs, continuous bounds and full remaining horizons are retained.",
+  "scope": "Individual numerical results; no global optimality, continuous-time safety, performance ranking, or five-representation coverage claim. IPOPT results are local.",
+  "plot_label_correction": "Earlier direct-profile raw images and coverage text labeled the controller as NMPC. Their corrected plots were separately rendered from saved records without controller reruns.",
+  "binary_provenance": "Original attempt preparation recorded binary source unknown; separate build receipts record clean source revision, incremental build, executable and source capsule hashes.",
+  "records": [
+    {
+      "task": "Lotka-Volterra",
+      "solver": "HiGHS QP",
+      "holds_completed": 30,
+      "holds_total": 30,
+      "source_objective": 0.09206356098706904,
+      "directory": "lv-highs-f4"
+    },
+    {
+      "task": "Earth orbit",
+      "solver": "CasADi/IPOPT",
+      "holds_completed": 20,
+      "holds_total": 20,
+      "source_objective": 65.22966483569324,
+      "directory": "orbit-ipopt-f4"
+    },
+    {
+      "task": "Fuel",
+      "solver": "CasADi/IPOPT",
+      "holds_completed": 40,
+      "holds_total": 40,
+      "source_objective": 0.003834213429545932,
+      "directory": "fuel-ipopt-3c"
+    },
+    {
+      "task": "Fuel",
+      "solver": "HiGHS QP",
+      "holds_completed": 2,
+      "holds_total": 40,
+      "status": "worker timeout at declared 1800-second budget; no solver response to third query",
+      "directory": "fuel-highs-f4-timeout"
+    },
+    {
+      "task": "Lotka-Volterra",
+      "solver": "CasADi/IPOPT",
+      "family": "box",
+      "controller": "affine-history MPC with F/B/I",
+      "holds_completed": 30,
+      "holds_total": 30,
+      "source_objective": 0.09207050915639435,
+      "directory": "lv-box-fd28",
+      "all_stage_plot": "lv-box-overlay-fd28/all-stages-0-1-screen.svg",
+      "plot_scope": "all predicted stages of the first observed query",
+      "warm_start_protocol": "cold at each observed query; source shift-prior-primal contract not implemented in this capture"
+    },
+    {
+      "task": "Fuel",
+      "solver": "CasADi/IPOPT",
+      "family": "box",
+      "controller": "affine-history MPC with F/B/I",
+      "holds_completed": 40,
+      "holds_total": 40,
+      "source_objective": 0.0038341007246844383,
+      "directory": "fuel-box-a800",
+      "all_stage_plots": [
+        "fuel-box-overlay-a800/all-stages-2-0-screen.svg",
+        "fuel-box-overlay-a800/all-stages-3-1-screen.svg"
+      ],
+      "plot_scope": "all predicted stages of first observed query, with actual full nonlinear trajectory",
+      "warm_start_protocol": "cold at each observed query; source shift-prior-primal contract not implemented",
+      "postcheck_source_timing": "policy and solver source edited after worker completed holds while parent performed postcheck/render"
+    },
+    {
+      "task": "Earth orbit",
+      "solver": "CasADi/IPOPT",
+      "family": "box",
+      "status": "incomplete",
+      "holds_completed": 3,
+      "holds_total": 20,
+      "directory": "orbit-box-a800-incomplete",
+      "stop": "independent source-cost validation rejected epigraph discrepancy"
+    },
+    {
+      "task": "Earth orbit",
+      "solver": "CasADi/IPOPT",
+      "family": "box",
+      "status": "incomplete",
+      "holds_completed": 4,
+      "holds_total": 20,
+      "directory": "orbit-box-aeac-incomplete",
+      "stop": "local optimizer reported infeasibility; source infeasibility not established"
+    },
+    {
+      "task": "Lotka-Volterra",
+      "solver": "CasADi/IPOPT",
+      "family": "zonotope",
+      "controller": "affine-history MPC with F/B/I",
+      "holds_completed": 30,
+      "holds_total": 30,
+      "source_objective": 0.09206357506388757,
+      "directory": "lv-zonotope-b78",
+      "warm_start_protocol": "cold at each observed query; source shift-prior-primal contract not implemented"
+    },
+    {
+      "task": "Lotka-Volterra",
+      "solver": "CasADi/IPOPT",
+      "family": "parallelotope",
+      "controller": "affine-history MPC with F/B/I",
+      "holds_completed": 30,
+      "holds_total": 30,
+      "source_objective": 0.09207050915639435,
+      "directory": "lv-parallelotope-b78",
+      "warm_start_protocol": "cold at each observed query; source shift-prior-primal contract not implemented"
+    },
+    {
+      "task": "Lotka\u2013Volterra with F/B/I ellipsoid geometry",
+      "solver": "CasADi/IPOPT",
+      "holds_completed": 30,
+      "holds_total": 30,
+      "source_objective": 0.09206356266610233,
+      "directory": "lv-ellipsoid-b78"
+    },
+    {
+      "task": "Lotka\u2013Volterra with F/B/I box geometry, shifted history warm start",
+      "solver": "CasADi/IPOPT",
+      "holds_completed": 30,
+      "holds_total": 30,
+      "source_objective": 0.09206723732293642,
+      "directory": "lv-box-warm-a488",
+      "execution_protocol": "initial zero-control affine rollout; shifted accepted history at subsequent queries; zero supplied duals and provider initialization checked"
+    },
+    {
+      "task": "Lotka-Volterra",
+      "solver": "CasADi/IPOPT",
+      "family": "zonotope",
+      "controller": "affine-history MPC with F/B/I",
+      "holds_completed": 30,
+      "holds_total": 30,
+      "source_objective": 0.09206357498047332,
+      "directory": "lv-zonotope-warm-a488",
+      "all_stage_plots": [
+        "lv-zonotope-warm-overlay-a488/all-stages-0-1-screen.svg"
+      ],
+      "plot_scope": "all predicted stages of the first observed query with the full observed nonlinear trajectory",
+      "warm_start_protocol": "shift prior primal, drop applied stage, retain original terminal time; zero supplied duals",
+      "warm_queries_checked": 30,
+      "capture_source": "a4889d4727cf5ba0bc2dbf64c8c39b7792a18ae5"
+    },
+    {
+      "task": "Lotka-Volterra",
+      "solver": "CasADi/IPOPT",
+      "family": "parallelotope",
+      "controller": "affine-history MPC with F/B/I",
+      "holds_completed": 30,
+      "holds_total": 30,
+      "source_objective": 0.09206723732293642,
+      "directory": "lv-parallelotope-warm-a488",
+      "all_stage_plots": [
+        "lv-parallelotope-warm-overlay-a488/all-stages-0-1-screen.svg"
+      ],
+      "plot_scope": "all predicted stages of the first observed query with the full observed nonlinear trajectory",
+      "warm_start_protocol": "shift prior primal, drop applied stage, retain original terminal time; zero supplied duals",
+      "warm_queries_checked": 30,
+      "capture_source": "a4889d4727cf5ba0bc2dbf64c8c39b7792a18ae5"
+    },
+    {
+      "task": "Lotka-Volterra",
+      "solver": "CasADi/IPOPT",
+      "family": "ellipsoid",
+      "controller": "affine-history MPC with F/B/I",
+      "holds_completed": 30,
+      "holds_total": 30,
+      "source_objective": 0.0920635650654387,
+      "directory": "lv-ellipsoid-warm-a488",
+      "all_stage_plots": [
+        "lv-ellipsoid-warm-overlay-a488/all-stages-0-1-screen.svg"
+      ],
+      "plot_scope": "all predicted stages of the first observed query with the full observed nonlinear trajectory",
+      "warm_start_protocol": "shift prior primal, drop applied stage, retain original terminal time; zero supplied duals",
+      "warm_queries_checked": 30,
+      "capture_source": "a4889d4727cf5ba0bc2dbf64c8c39b7792a18ae5"
+    },
+    {
+      "task": "Fuel",
+      "solver": "CasADi/IPOPT",
+      "family": "box",
+      "controller": "affine-history MPC with F/B/I",
+      "holds_completed": 40,
+      "holds_total": 40,
+      "source_objective": 0.003848866690029367,
+      "directory": "fuel-box-warm-a488",
+      "all_stage_plots": [
+        "fuel-box-warm-overlay-a488/all-stages-2-0-screen.svg",
+        "fuel-box-warm-overlay-a488/all-stages-3-1-screen.svg"
+      ],
+      "plot_scope": "all predicted stages of the first observed query with the full observed nonlinear trajectory",
+      "warm_start_protocol": "shift prior primal, drop applied stage, retain original terminal time; zero supplied duals",
+      "warm_queries_checked": 40,
+      "capture_source": "a4889d4727cf5ba0bc2dbf64c8c39b7792a18ae5"
+    }
+  ],
+  "bundle_files": "Each directory contains receipt.json, raw.zip, SHA256SUMS, independent audit source and build receipt. Completed episodes also contain corrected plots and renderer receipt.",
+  "verification": "Run sha256sum -c SHA256SUMS and python -m zipfile -t raw.zip in each directory.",
+  "warm_start_evidence": {
+    "source_commit": "a4889d4727cf5ba0bc2dbf64c8c39b7792a18ae5",
+    "tiny_queries": "warm-tiny-a488",
+    "lotka_complete": "lv-box-warm-a488",
+    "orbit_incomplete": {
+      "directory": "orbit-box-warm-a488-incomplete",
+      "completed_holds": 12,
+      "holds_total": 20,
+      "failed_update_index": 12,
+      "reason": "IPOPT Infeasible_Problem_Detected; no source infeasibility claim"
+    },
+    "preserved_setup_failures": [
+      "lv-box-warm-a488-execution-failure",
+      "orbit-box-warm-a488-execution-failure"
+    ]
+  }
+}

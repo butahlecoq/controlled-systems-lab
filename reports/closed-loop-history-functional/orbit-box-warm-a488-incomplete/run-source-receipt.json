@@ -1,0 +1,16 @@
+{
+  "schema": "csl.functional-build-verification/1",
+  "build_receipt_sha256": "757e3a807e60479f568e23f6e01f18a01b09a1d5c8afa99362115c3921134561",
+  "build_log_sha256": "87d92d0b5c00eb6dc8422d45249cce773265203887b3cb51828b3ea9214b666a",
+  "native_tests": {
+    "passed": 18,
+    "assertions": 825
+  },
+  "python_native_tests": {
+    "passed": 20,
+    "skipped": 1
+  },
+  "physical_executable_mode": "0o555",
+  "mode_correction_disclosed": "First01 runs retained as execution failures;02 runs use samebytes withcorrectmode.",
+  "tiny_probe": "../988-warm-tiny-a488-02"
+}

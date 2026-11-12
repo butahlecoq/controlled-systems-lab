@@ -1,0 +1,42 @@
+{
+  "source_commit": "3c797ddbaf65aac6417ce405ce04afbcb475cb66",
+  "worktree_status": "clean before and after external consumer build",
+  "sdk_source_commit": "f4e73e08908c472801aef6637d94b1a03cb0b2a7",
+  "source_equivalence": "git diff --exit-code confirms src, include, cmake, root CMakeLists and physical bridge source are identical between commits",
+  "build": "Release GCC 16.2.1 external find_package(CSL) consumer, linked to genuine f4 installed SDK; single worker; pinned JSON headers",
+  "assurance": "source capsule, SDK file hashes and clean tree; SDK archives derive from incremental build, not independently reproduced binaries",
+  "artifacts": {
+    "source_capsule": {
+      "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/history-ipopt-3c-source.tar",
+      "sha256": "ff696da2dafc4853b2b472952db059aa46a427de9862c1b304ad3694b5f84cb1"
+    },
+    "native_policy": {
+      "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/history-ipopt-consumer-build/csl_closed_loop_native_policy",
+      "sha256": "8a0e48da3530050c5655fdddd39446ed30fb18fcc49f9faa2e7fe09df93ca7f1"
+    },
+    "physical_bridge": {
+      "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-history-bridge-build/csl_mpc11_nonlinear_replay",
+      "sha256": "fcbb9170d1fbfc7cd1a1324087a0d049f8a078a16a8c450de4a9623be5942e36"
+    },
+    "sdk_manifest": {
+      "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/history-ipopt-3c-sdk-manifest.json",
+      "sha256": "7b31b58248937c147ced8cee3de00b54a96968da029859141ffa0c93903170b5"
+    },
+    "consumer_cmake": {
+      "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/history-ipopt-consumer-source/CMakeLists.txt",
+      "sha256": "1b27ccd2d0911892dbbedb71a395aa51e82814d6af60268549459d2e2d2de187"
+    },
+    "configure_log": {
+      "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/history-ipopt-consumer-configure.log",
+      "sha256": "b17be91bddcff1a1e1a8e27e72d1423b16330590ba9d0295ee6574d3111f2037"
+    },
+    "build_log": {
+      "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/history-ipopt-consumer-build.log",
+      "sha256": "a95ed72dc09b5cfd92c47d8577f5ee905be6ad1941abd2ff5ba246fab246e167"
+    },
+    "sdk_install_log": {
+      "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/history-f4-sdk-install.log",
+      "sha256": "179e94156d0778e1eec344b19561109e6a36dd03a0ffbf3a3d2468905c1ea797"
+    }
+  }
+}

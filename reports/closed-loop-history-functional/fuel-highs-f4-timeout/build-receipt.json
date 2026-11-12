@@ -1,0 +1,35 @@
+{
+  "source_commit": "f4e73e08908c472801aef6637d94b1a03cb0b2a7",
+  "worktree_status": "clean before and after build",
+  "compiler_parent": "243da5711a31bbf8384a686b2c364a3bd661e449",
+  "terminal_fix_parent": "608905254218e2bd7940ab60b065d8fadb0c8ece",
+  "native_build": "incremental CMake Release, GCC 16.2.1, HiGHS 1.11.0 and Qhull enabled, single worker; build log and cache retained",
+  "physical_build": "standalone C++20 -O2 from source at this commit and pinned JSON",
+  "assurance": "source capsule and clean recorded tree; prior cached object source is supported by build dependency tracking, not independent reproducible-build verification",
+  "artifacts": {
+    "source_capsule": {
+      "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/history-final-f4-source.tar",
+      "sha256": "8bc9e1cfd435300b0e079cab72572c442dd2bcd4b61fcda74fbbb008f26e8bac"
+    },
+    "native_policy": {
+      "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-history-bridge-build/csl_closed_loop_native_policy",
+      "sha256": "2d336a436220fdc59cf2c2c5a00defceadc5fb330450b16693fd0637a5cded17"
+    },
+    "physical_bridge": {
+      "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-history-bridge-build/csl_mpc11_nonlinear_replay",
+      "sha256": "fcbb9170d1fbfc7cd1a1324087a0d049f8a078a16a8c450de4a9623be5942e36"
+    },
+    "build_log": {
+      "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/history-final-f4-build.log",
+      "sha256": "0993e6ccae127577335983a0f8da4825e82c9b69a1a78f2eaabb664a072b46f6"
+    },
+    "physical_build_log": {
+      "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/history-final-f4-physical-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "cmake_cache": {
+      "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/history-final-f4-CMakeCache.txt",
+      "sha256": "41cb4eaf1dc1a41e689043173d99c69190a01690314cfce951c99846620bedb7"
+    }
+  }
+}

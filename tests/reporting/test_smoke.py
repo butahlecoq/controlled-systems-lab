@@ -20,8 +20,8 @@ class SmokeTests(unittest.TestCase):
         if not EXE:
             self.skipTest("run with --exe; ordinary discovery does not execute the smoke")
         self.assertTrue(Path(EXE).is_file(), "real report driver is missing")
-        self.assertIsNotNone(importlib.util.find_spec("collect_lp"), "collector is missing")
-        import collect_lp
+        self.assertIsNotNone(importlib.util.find_spec("collector_common"), "collector is missing")
+        import collector_common
         import render
         completed=subprocess.run([EXE,"--smoke"],capture_output=True,timeout=60)
         self.assertEqual(completed.returncode,0,completed.stderr.decode(errors="replace"))
@@ -30,17 +30,17 @@ class SmokeTests(unittest.TestCase):
         self.assertEqual(events[-1]["emitted_trials"],5)
         build=next(parent for parent in Path(EXE).parents if (parent/"report-build-info.json").is_file())
         configured=data.parse_json((build/"report-build-info.json").read_text(encoding="utf-8"))
-        collect_lp.verify_build_identity(events[0],configured["source_commit"],functional=True)
-        graph=collect_lp.file_api(build,events[0]["build"]["configuration"])
-        collect_lp.verify_artifact(events[0],graph,build,EXE)
+        collector_common.verify_build_identity(events[0],configured["source_commit"],functional=True)
+        graph=collector_common.file_api(build,events[0]["build"]["configuration"])
+        collector_common.verify_artifact(events[0],graph,build,EXE)
         targets={target["name"]:target for target in graph["targets"]}
         self.assertTrue(targets["highs"]["compileGroups"])
         self.assertTrue(targets["csl_lp_report"]["link"]["commandFragments"])
         self.assertTrue(all(targets[name]["artifacts"] for name in ("highs","csl_highs_lp","csl_lp_report")))
-        with self.assertRaises(ValueError): collect_lp.verify_build_identity(events[0],"f"*40)
+        with self.assertRaises(ValueError): collector_common.verify_build_identity(events[0],"f"*40)
         if events[0]["build"]["configuration"]=="Debug":
-            with self.assertRaises(ValueError): collect_lp.verify_build_identity(events[0],configured["source_commit"])
-        view=collect_lp.test_view(events,EXE,completed.returncode,completed.stdout,completed.stderr)
+            with self.assertRaises(ValueError): collector_common.verify_build_identity(events[0],configured["source_commit"])
+        view=collector_common.test_view(events,EXE,completed.returncode,completed.stdout,completed.stderr)
         self.assertFalse(data.publishable(view))
         self.assertEqual([t["result"]["outcome"] for t in view["payload"]["trials"]],
                          ["optimal","optimal","optimal","infeasible","unbounded"])

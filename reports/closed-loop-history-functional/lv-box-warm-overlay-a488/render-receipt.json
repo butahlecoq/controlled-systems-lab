@@ -1,0 +1,70 @@
+{
+  "schema": "csl.feedback-history-stage-figure/1",
+  "task_id": "syn-nl-lv-01/continuous-receding/1",
+  "input_response_sha256": "d83b380f42720259f606498a0fe9bdd71543121967e7f3b8a3288f54d76820f2",
+  "input_attempt_sha256": "dc7547d1eefbec4c9b945efd117101c01e0ae4cdd0c0d3715e40aea80462465b",
+  "capture_source_commit": "a4889d4727cf5ba0bc2dbf64c8c39b7792a18ae5",
+  "renderer_source_commit": "867cc6d2b9cb02a32d3c346d9bb0e21e3e982f38",
+  "renderer_sha256": "775b0d099336db028a9991aae9f0d4897b364f29a61151dba69a63788f27b517",
+  "query_scope": "first observed-state query; all predicted stages, not all replans",
+  "trajectory_scope": "observed nonlinear plant across full episode",
+  "terminal_feasibility": "projected physical terminal state bounds; source terminal set otherwise universal",
+  "terminal_reference": "soft objective reference, not a terminal constraint",
+  "full_state_before_projection": true,
+  "family": "box",
+  "stages": 31,
+  "quantitative_style": "csl-report-quantitative-v1",
+  "palette": "shared Omarchy stage palette",
+  "execution_protocol": "initial observed-state rollout; subsequent shifted history primal and zero supplied duals",
+  "initialization_sources": [
+    {
+      "path": "native-query-000-request.jsonl",
+      "bytes": 14626,
+      "sha256": "81516bbafb01894382e5a801f8b8292b4c9c4f84e091662432b8f85dd5c80655"
+    },
+    {
+      "path": "native-query-001-request.jsonl",
+      "bytes": 15348,
+      "sha256": "2cb056a5477e9b6dd6b6ab036f0a0e6b846df46ac8b72ce6760418e0f80f8235"
+    }
+  ],
+  "build_scope": "composite current compiled sources and f4 installed SDK",
+  "figures": [
+    {
+      "path": "all-stages-0-1-screen.png",
+      "sha256": "e4a8de41db4c6bc31b352e62eb3feab452858a6174eaaced402cda3776f1fdd4",
+      "raw_state_indices": [
+        0,
+        1
+      ],
+      "variant": "screen"
+    },
+    {
+      "path": "all-stages-0-1-screen.svg",
+      "sha256": "13a004287f490e5b2b1b6d496a1a68cea09252c348ec3de710b6ecacb392a241",
+      "raw_state_indices": [
+        0,
+        1
+      ],
+      "variant": "screen"
+    },
+    {
+      "path": "all-stages-0-1-print.png",
+      "sha256": "dcceb8ade406f83878754972a7addfdb53f695d33f556a8fa22f9dc73d88fe0e",
+      "raw_state_indices": [
+        0,
+        1
+      ],
+      "variant": "print"
+    },
+    {
+      "path": "all-stages-0-1-print.svg",
+      "sha256": "812041fe0a58b36af7c8bd0d1d93bc0091d79070f14b1f1e300495b1883d90fa",
+      "raw_state_indices": [
+        0,
+        1
+      ],
+      "variant": "print"
+    }
+  ]
+}

@@ -30,7 +30,7 @@ from contracts import ROOT, load_task, manifest_sha256
 from task_models import (make_held_step_request, make_replay_request, objective,
                          source_scenario, validate_held_step_response,
                          validate_source_binding)
-from capabilities import MANIFEST, NATIVE_MANIFEST, resolve_graph, validate_resolved_graph, manifest_digest
+from capabilities import HISTORY_MANIFEST, MANIFEST, NATIVE_MANIFEST, resolve_graph, validate_resolved_graph, manifest_digest
 from attempt_records import (ATTEMPT_SCHEMA_V2, IO_LOG, STAGE_INDEX, append_io_event,
     atomic_json, finalize_stage, iter_stage_references, materialize_episode_summary,
     persist_native_capture, read_attempt, register_orphan_stages, summarize_io, verify_v2_attempt,
@@ -280,7 +280,7 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
             "module_roles": {**graph.get("role_bindings", graph.get("inactive_roles", {})),
                              "controller": controller_id, "execution": graph["execution"]["id"]},
             "geometry_work": {"vertices": None if geometry_active else 0, "set_operations": 0,
-                "claim": graph.get("claim_scope", "pure NMPC; no representation comparison")},
+                "claim": graph.get("geometry_work", {}).get("claim", "no representation comparison is made")},
             "resource_profile_id": resource_profile["profile_id"],
             "resource_limits": {"requested": {**resource_profile["requested"], "address_space_bytes": 8 * 1024**3,
                   "worker_count": 1, "solver_threads": 1},
@@ -541,11 +541,15 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
     try:
         task = load_task(task_name); validate_source_binding(task)
         requested_action_profile_id = action_profile_id
-        native_controller = bool(controller_id and controller_id.startswith("native-"))
+        history_controller = controller_id in {"native-continuous-affine-history-mpc/1",
+            "native-continuous-affine-history-ipopt/1", *(
+                f"native-continuous-history-{family}-ipopt/1"
+                for family in ("polytope", "box", "zonotope", "parallelotope", "ellipsoid"))}
+        native_controller = bool(controller_id and controller_id.startswith("native-")) and not history_controller
         if native_controller and action_profile_id is None:
             action_profile_id = task["control_domains"]["finite"]["problem_id"]
         action_profile_id = action_profile_id or task["control_domains"]["continuous"]["problem_id"]
-        selected_manifest_path = NATIVE_MANIFEST if native_controller else MANIFEST
+        selected_manifest_path = HISTORY_MANIFEST if history_controller else NATIVE_MANIFEST if native_controller else MANIFEST
         capability_manifest, graph = resolve_graph(task, action_profile_id, controller_id,
                                                     manifest_path=selected_manifest_path)
         selected_manifest_sha256 = manifest_digest(capability_manifest)
@@ -572,7 +576,6 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
     source_hashes = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in [
         HERE / "run_closed_loop.py", HERE / "attempt_records.py", HERE / "orbit_nmpc.py", HERE / "task_models.py", HERE / "check_episode.py",
         HERE / "check_replay.py", HERE / "capabilities.py", MPC11 / "nmpc.py", MPC11 / "affine.py"]}
-    selected_manifest_path = NATIVE_MANIFEST if graph["controller"]["id"].startswith("native-") else MANIFEST
     source_hashes[str(selected_manifest_path.relative_to(ROOT))] = hashlib.sha256(selected_manifest_path.read_bytes()).hexdigest()
     for source_file in graph.get("source_files", []):
         source_hashes[source_file["path"]] = source_file["sha256"]
@@ -895,7 +898,22 @@ def render_attempt(task: dict, result: dict, attempt: Path, tag: str | None = No
         ax.set_ylabel(f"{field['name']} ({field['unit']})"); ax.grid(alpha=.25)
     axes[-1].set_xlabel(f"Time ({task['episode']['time_unit']})")
     short_name = {"SYN-NL-LV-01": "Lotka–Volterra", "SYN-NL-FUEL-01": "Fuel", "ENV717-EARTH-ORBIT-CONTINUOUS-01": "Earth orbit"}[task["model"]["case_id"]]
-    fig.suptitle(f"{short_name} observed-state NMPC, {result.get('completed_holds', 0)}/{task['episode']['intervals']} holds")
+    adapter = result.get("resolved_graph", {}).get("controller", {}).get("adapter")
+    controller_label = {"continuous_history": "Affine-history MPC", "native_graph_policy": "Finite-action MPC",
+                        "mpc11_nmpc": "Nonlinear MPC", "orbit_direct_shooting": "Nonlinear MPC"}.get(adapter, "Control")
+    providers = set()
+    for stage_path in sorted(attempt.glob("stage-[0-9][0-9][0-9].json")):
+        try:
+            stage = json.loads(stage_path.read_text())
+            for call in stage.get("controller_invocations", []):
+                if call.get("operation") == "controller.solve" and call.get("provider"):
+                    provider = call["provider"]
+                    providers.add("HiGHS" if "highs" in provider.lower() else
+                                  "IPOPT" if "ipopt" in provider.lower() else provider)
+        except (OSError, ValueError, TypeError):
+            continue
+    provider_label = ", ".join(sorted(providers)) if providers else "backend not recorded"
+    fig.suptitle(f"{short_name} observed-state {controller_label} ({provider_label}), {result.get('completed_holds', 0)}/{task['episode']['intervals']} holds")
     trajectory_name = f"{tag}-trajectory.png" if tag else "trajectory.png"
     controls_name = f"{tag}-controls.png" if tag else "controls.png"
     fig.tight_layout(); fig.savefig(attempt / trajectory_name, dpi=150); plt.close(fig)
@@ -1096,7 +1114,7 @@ def write_coverage(root: Path) -> Path:
     rows.sort(key=lambda row: row.get("attempt_id", ""))
     coverage = {"schema": "csl.closed-loop.coverage/1", "source_commit": subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(), "attempts": rows,
-        "representation_claim": "pure NMPC graph bypasses set modules; zero set work is recorded and no representation performance is inferred"}
+        "representation_claim": "Per-graph geometry roles and work are recorded; no representation performance is inferred from zero set work"}
     output = root / ("coverage-" + time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()) + "-" + uuid.uuid4().hex[:8] + ".json")
     atomic_json(output, coverage)
     return output

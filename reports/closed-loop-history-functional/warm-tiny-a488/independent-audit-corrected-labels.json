@@ -1,0 +1,717 @@
+{
+  "polytope/0": {
+    "primal": [
+      9.788155838486678e-55,
+      1.6179839722438968e-59,
+      0.33333333251928443,
+      7.125601302015161e-25,
+      0.6666666661521263,
+      5.503603750386053e-25,
+      0.33333333251928443,
+      7.125601302015161e-25,
+      0.33333333363284184,
+      -1.6219975515689228e-25
+    ],
+    "original_cost": 0.3333333333333333,
+    "max_H_equality": 5.551115123125783e-17,
+    "max_H_inequality": 0.0,
+    "certificate_count": 36,
+    "geometry_providers": [
+      "csl.geometry.polyhedral-intersection",
+      "csl.geometry.polyhedral-projection"
+    ],
+    "support_providers": [
+      "csl.lp.highs"
+    ],
+    "geometry_validation": {
+      "accepted": true,
+      "checks": [
+        {
+          "kind": "h",
+          "max_residual": 9.788155838486678e-55,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 9.788155838486678e-55,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 9.788155838486678e-55,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        }
+      ]
+    },
+    "files": {
+      "request.jsonl": "22a728c844f59f17517f819f9952e8535cc149c368492bffd18c1bb3fa1aee3f",
+      "response.jsonl": "1558e57a4b9de726e10264f76cb8764d349ddc53b0e63681f71228402a5a18d6",
+      "solver-result.json": "013525dc377512a12bd1f7e3eda51e50356c85e27bbd4cc01ac5fe2aa8e56fda",
+      "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "polytope/1": {
+    "primal": [
+      0.3333343325192844,
+      7.125601302015161e-25,
+      0.6666671661973046,
+      3.56280059875286e-25,
+      0.3333328336780202,
+      -3.5628007032623013e-25
+    ],
+    "original_cost": 0.22222155609875402,
+    "max_H_equality": 0.0,
+    "max_H_inequality": 0.0,
+    "certificate_count": 24,
+    "geometry_providers": [
+      "csl.geometry.polyhedral-intersection",
+      "csl.geometry.polyhedral-projection"
+    ],
+    "support_providers": [
+      "csl.lp.highs"
+    ],
+    "geometry_validation": {
+      "accepted": true,
+      "checks": [
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        }
+      ]
+    },
+    "files": {
+      "request.jsonl": "c5db01041703edafb6206d65c7c61a35cde7c7dc36efd7b7d52bd6c7d8392dc9",
+      "response.jsonl": "5ccfd0a66d5a02072edcaffaa06261699c6291995f8115be12a2ff357c0e377a",
+      "solver-result.json": "07968940224c1ee9fdeae96543a269be53d19acd64f17708cd990ab6cd3ce22e",
+      "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "box/0": {
+    "primal": [
+      -4.779275733397357e-58,
+      7.452060795238717e-59,
+      0.33333333330967957,
+      -2.3376449363490463e-26,
+      0.6666666666450632,
+      -1.2990137691016532e-26,
+      0.33333333330967957,
+      -2.3376449363490463e-26,
+      0.3333333333353837,
+      1.0386311670969298e-26
+    ],
+    "original_cost": 0.33333333333333337,
+    "max_H_equality": 1.504632769052528e-36,
+    "max_H_inequality": 0.0,
+    "certificate_count": 36,
+    "geometry_providers": [
+      "csl.geometry.polyhedral-intersection",
+      "csl.geometry.polyhedral-projection"
+    ],
+    "support_providers": [
+      "csl.lp.highs"
+    ],
+    "geometry_validation": {
+      "accepted": true,
+      "checks": [
+        {
+          "kind": "h",
+          "max_residual": 4.779275733397357e-58,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 4.779275733397357e-58,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 4.779275733397357e-58,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        }
+      ]
+    },
+    "files": {
+      "request.jsonl": "a65cb1eb0b25c6e013f43e8530feaf3d212b29b7aa02c36e6bb92accb928da86",
+      "response.jsonl": "824ec0e585949bbb96962304506597f78827863277cd4e8b9899ff11732cfef6",
+      "solver-result.json": "f4a60868b5e53496189d0261b9c7e330155f0a5153dd058bc306ae6b6fd9ebef",
+      "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "box/1": {
+    "primal": [
+      0.33333433330967954,
+      -2.3376449363490463e-26,
+      0.6666671666392554,
+      -1.1688224681745174e-26,
+      0.33333283332957586,
+      1.1688224681745289e-26
+    ],
+    "original_cost": 0.2222215555718247,
+    "max_H_equality": 0.0,
+    "max_H_inequality": 0.0,
+    "certificate_count": 24,
+    "geometry_providers": [
+      "csl.geometry.polyhedral-intersection",
+      "csl.geometry.polyhedral-projection"
+    ],
+    "support_providers": [
+      "csl.lp.highs"
+    ],
+    "geometry_validation": {
+      "accepted": true,
+      "checks": [
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        }
+      ]
+    },
+    "files": {
+      "request.jsonl": "09b52b94bd07dfbf1a9b4a42a0fa09c9eb8e8b3f4eb25fc29cb48c9d857159a2",
+      "response.jsonl": "65832642c2c5079afe297619a029caaf59206d2362d15a87d89d49719845149e",
+      "solver-result.json": "fda6b402f752589bb401f198b6ac86e7dd1f23fb2a423e7769ec4006de67d5af",
+      "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "zonotope/0": {
+    "primal": [
+      6.3991773033054e-21,
+      -1.2309572712298869e-34,
+      0.33333333330995674,
+      -1.153946234951054e-26,
+      0.6666666666432901,
+      5.6816249229472945e-27,
+      0.33333333330995674,
+      -1.1539461734031983e-26,
+      0.33333333333333337,
+      1.7221087764839357e-26
+    ],
+    "original_cost": 0.3333333333333333,
+    "max_H_equality": 6.3991773033054e-21,
+    "max_H_inequality": 0.0,
+    "certificate_count": 36,
+    "geometry_providers": [
+      "csl.geometry.polyhedral-intersection",
+      "csl.geometry.polyhedral-projection"
+    ],
+    "support_providers": [
+      "csl.lp.highs"
+    ],
+    "geometry_validation": {
+      "accepted": true,
+      "checks": [
+        {
+          "kind": "zonotope",
+          "max_residual": 6.3991773033054e-21,
+          "passed": true
+        },
+        {
+          "kind": "zonotope",
+          "max_residual": 6.3991773033054e-21,
+          "passed": true
+        },
+        {
+          "kind": "zonotope",
+          "max_residual": 6.3991773033054e-21,
+          "passed": true
+        },
+        {
+          "kind": "zonotope",
+          "max_residual": 7.418586174012728e-40,
+          "passed": true
+        },
+        {
+          "kind": "zonotope",
+          "max_residual": 8.753070727558537e-41,
+          "passed": true
+        },
+        {
+          "kind": "zonotope",
+          "max_residual": 8.753070727558537e-41,
+          "passed": true
+        },
+        {
+          "kind": "zonotope",
+          "max_residual": 7.310966451952582e-40,
+          "passed": true
+        },
+        {
+          "kind": "zonotope",
+          "max_residual": 1.4277549793312696e-39,
+          "passed": true
+        },
+        {
+          "kind": "zonotope",
+          "max_residual": 4.663521289272991e-41,
+          "passed": true
+        }
+      ]
+    },
+    "files": {
+      "request.jsonl": "3bb30090d1ee71363a89c9804a7f23eb241a65823d13202aa0f4e5de370c274c",
+      "response.jsonl": "eb58b345ed110d18417b71a65c59b457ac09a7773aa7bdc5ea68d1628df6f80e",
+      "solver-result.json": "5cfdca27d078d758cc8d415a12ea3dce34ae9a137cc06c725b3e9351f35cd045",
+      "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "zonotope/1": {
+    "primal": [
+      0.33333433330995693,
+      -1.1539462349246029e-26,
+      0.6666671666393941,
+      -1.4336169914203026e-26,
+      0.33333283332943714,
+      -2.7967075660150554e-27
+    ],
+    "original_cost": 0.2222215555716398,
+    "max_H_equality": 2.220446049250313e-16,
+    "max_H_inequality": 0.0,
+    "certificate_count": 24,
+    "geometry_providers": [
+      "csl.geometry.polyhedral-intersection",
+      "csl.geometry.polyhedral-projection"
+    ],
+    "support_providers": [
+      "csl.lp.highs"
+    ],
+    "geometry_validation": {
+      "accepted": true,
+      "checks": [
+        {
+          "kind": "zonotope",
+          "max_residual": 2.220446049250313e-16,
+          "passed": true
+        },
+        {
+          "kind": "zonotope",
+          "max_residual": 1.665335230541694e-16,
+          "passed": true
+        },
+        {
+          "kind": "zonotope",
+          "max_residual": 1.665335230541694e-16,
+          "passed": true
+        },
+        {
+          "kind": "zonotope",
+          "max_residual": 5.551115123125783e-17,
+          "passed": true
+        },
+        {
+          "kind": "zonotope",
+          "max_residual": 5.551115123125783e-17,
+          "passed": true
+        },
+        {
+          "kind": "zonotope",
+          "max_residual": 5.551115123125783e-17,
+          "passed": true
+        }
+      ]
+    },
+    "files": {
+      "request.jsonl": "7215e6146ede80596f9cd639ba10a5b7e3ed95c609fb8f0096ac02a1f6361de1",
+      "response.jsonl": "d020d2fcee4fbadf25493b54776b80f8314b5222dc10987878fe0e8516e79adf",
+      "solver-result.json": "065aba30fd5f833422b221938feb205bf7c91f8aa3b90c8e9e82fae529328a47",
+      "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "parallelotope/0": {
+    "primal": [
+      -4.779275733397357e-58,
+      7.452060795238717e-59,
+      0.33333333330967957,
+      -2.3376449363490463e-26,
+      0.6666666666450632,
+      -1.2990137691016532e-26,
+      0.33333333330967957,
+      -2.3376449363490463e-26,
+      0.3333333333353837,
+      1.0386311670969298e-26
+    ],
+    "original_cost": 0.33333333333333337,
+    "max_H_equality": 1.504632769052528e-36,
+    "max_H_inequality": 0.0,
+    "certificate_count": 36,
+    "geometry_providers": [
+      "csl.geometry.polyhedral-intersection",
+      "csl.geometry.polyhedral-projection"
+    ],
+    "support_providers": [
+      "csl.lp.highs"
+    ],
+    "geometry_validation": {
+      "accepted": true,
+      "checks": [
+        {
+          "kind": "h",
+          "max_residual": 4.779275733397357e-58,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 4.779275733397357e-58,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 4.779275733397357e-58,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        }
+      ]
+    },
+    "files": {
+      "request.jsonl": "2849b747a48dafdb93cc08087840c7cc74600fa4000b1f63588b68cec8aa9042",
+      "response.jsonl": "c51fd86e0637482901806805b8c1b91957a92f63b9afbf31c40bd0bb8e12593a",
+      "solver-result.json": "f4a60868b5e53496189d0261b9c7e330155f0a5153dd058bc306ae6b6fd9ebef",
+      "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "parallelotope/1": {
+    "primal": [
+      0.33333433330967954,
+      -2.3376449363490463e-26,
+      0.6666671666392554,
+      -1.1688224681745174e-26,
+      0.33333283332957586,
+      1.1688224681745289e-26
+    ],
+    "original_cost": 0.2222215555718247,
+    "max_H_equality": 0.0,
+    "max_H_inequality": 0.0,
+    "certificate_count": 24,
+    "geometry_providers": [
+      "csl.geometry.polyhedral-intersection",
+      "csl.geometry.polyhedral-projection"
+    ],
+    "support_providers": [
+      "csl.lp.highs"
+    ],
+    "geometry_validation": {
+      "accepted": true,
+      "checks": [
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        },
+        {
+          "kind": "h",
+          "max_residual": 0.0,
+          "passed": true
+        }
+      ]
+    },
+    "files": {
+      "request.jsonl": "5e53158d5ad4d1010d0fa17b76983769a57a2b35519812538d65063b5fd62d39",
+      "response.jsonl": "39a2f94a5c5cf0eb6d12f15a5ed398b0e993efd80e801ac4ba7c569192c88243",
+      "solver-result.json": "fda6b402f752589bb401f198b6ac86e7dd1f23fb2a423e7769ec4006de67d5af",
+      "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "ellipsoid/0": {
+    "primal": [
+      3.2101857187424903e-22,
+      1.6684637052958296e-34,
+      0.33333333332475945,
+      1.1056036899625355e-26,
+      0.6666666666571744,
+      -9.521381861975161e-27,
+      0.33333333332475945,
+      1.1056036065393453e-26,
+      0.33333333333241494,
+      -2.0577419428992577e-26
+    ],
+    "original_cost": 0.3333333333333333,
+    "max_H_equality": 5.551115123125783e-17,
+    "max_H_inequality": 0.0,
+    "certificate_count": 36,
+    "geometry_providers": [
+      "csl.geometry.polyhedral-intersection",
+      "csl.geometry.polyhedral-projection"
+    ],
+    "support_providers": [
+      "csl.lp.highs"
+    ],
+    "geometry_validation": {
+      "accepted": true,
+      "checks": [
+        {
+          "kind": "ellipsoid",
+          "max_residual": 3.2101857187424903e-22,
+          "passed": true
+        },
+        {
+          "kind": "ellipsoid",
+          "max_residual": 3.2101857187424903e-22,
+          "passed": true
+        },
+        {
+          "kind": "ellipsoid",
+          "max_residual": 3.2101857187424903e-22,
+          "passed": true
+        },
+        {
+          "kind": "ellipsoid",
+          "max_residual": 3.7953888646544805e-39,
+          "passed": true
+        },
+        {
+          "kind": "ellipsoid",
+          "max_residual": 1.929980348945284e-39,
+          "passed": true
+        },
+        {
+          "kind": "ellipsoid",
+          "max_residual": 1.929980348945284e-39,
+          "passed": true
+        },
+        {
+          "kind": "ellipsoid",
+          "max_residual": 1.9098913341607235e-39,
+          "passed": true
+        },
+        {
+          "kind": "ellipsoid",
+          "max_residual": 9.585329911490333e-40,
+          "passed": true
+        },
+        {
+          "kind": "ellipsoid",
+          "max_residual": 8.07865380264829e-40,
+          "passed": true
+        }
+      ]
+    },
+    "files": {
+      "request.jsonl": "cc624f139f240e986d5c0e93219c9292632e42528c100cf869900b2ca04155bc",
+      "response.jsonl": "95856ae03c5eee536488bafdcfabd4b32dfd2cc55a69e537724775a7913c711d",
+      "solver-result.json": "76eb69b013164e9047c40312e285d314e723172612c2700e72f376ad8368714d",
+      "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "ellipsoid/1": {
+    "primal": [
+      0.33333433332475965,
+      1.1056036899318633e-26,
+      0.6666671666546559,
+      1.546135986702783e-26,
+      0.33333283332989627,
+      4.405322968936091e-27
+    ],
+    "original_cost": 0.22222155556177137,
+    "max_H_equality": 2.220446049250313e-16,
+    "max_H_inequality": 0.0,
+    "certificate_count": 24,
+    "geometry_providers": [
+      "csl.geometry.polyhedral-intersection",
+      "csl.geometry.polyhedral-projection"
+    ],
+    "support_providers": [
+      "csl.lp.highs"
+    ],
+    "geometry_validation": {
+      "accepted": true,
+      "checks": [
+        {
+          "kind": "ellipsoid",
+          "max_residual": 2.220446049250313e-16,
+          "passed": true
+        },
+        {
+          "kind": "ellipsoid",
+          "max_residual": 1.6653359241569235e-16,
+          "passed": true
+        },
+        {
+          "kind": "ellipsoid",
+          "max_residual": 1.6653359241569235e-16,
+          "passed": true
+        },
+        {
+          "kind": "ellipsoid",
+          "max_residual": 5.739718509874451e-42,
+          "passed": true
+        },
+        {
+          "kind": "ellipsoid",
+          "max_residual": 2.8698592549372254e-42,
+          "passed": true
+        },
+        {
+          "kind": "ellipsoid",
+          "max_residual": 5.551115123125783e-17,
+          "passed": true
+        }
+      ]
+    },
+    "files": {
+      "request.jsonl": "e33368a597ba491aa150ef4f0d8f53a746f7679f58335eb858d3e834f2d38f1a",
+      "response.jsonl": "61453771f14bd1dc139c57da568d153e910426dbc5057c20a15701f63ff38a28",
+      "solver-result.json": "10486d9bc77010c17d9b3d13e6462acfaf64069dcc17ed3c6c87a8eb737060e6",
+      "stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

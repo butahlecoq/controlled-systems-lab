@@ -1,0 +1,1013 @@
+{
+  "sdk_source_commit": "f4e73e08908c472801aef6637d94b1a03cb0b2a7",
+  "files": [
+    {
+      "path": "include/csl/adapters/convex/highs.hpp",
+      "sha256": "f7fd464a6e7a50784c81e44338121cfe9a3f63413c75c1e53f272334b953eeb0"
+    },
+    {
+      "path": "include/csl/adapters/lp/highs.hpp",
+      "sha256": "387dd6ded83de97aaa8fe0c380cae649ef551c21c5ee85303c3ca87d5c5dd282"
+    },
+    {
+      "path": "include/csl/adapters/polyhedral/qhull.hpp",
+      "sha256": "cce1ebd7bda6c791162cb1a3771f5dacb0b5394ee5311c43a952363fb18d58b4"
+    },
+    {
+      "path": "include/csl/application/comparison.hpp",
+      "sha256": "1fe49afaf28bdb1d0ab53e6c96812770bd1a4303bd41f45adc68919c41df5c8b"
+    },
+    {
+      "path": "include/csl/artifacts/bounded_hull_check.hpp",
+      "sha256": "560d148d09a2b4844c1c74f6b206205d247d66fc179f212b994819b20f4b15ac"
+    },
+    {
+      "path": "include/csl/artifacts/comparison_manifest.hpp",
+      "sha256": "221262d4cfae5f1b6ae9c2fc77245e24d115c37fe8f42b20a1495c975b8b0eee"
+    },
+    {
+      "path": "include/csl/artifacts/h_relation_attachment.hpp",
+      "sha256": "9531cd70b83487b63605470fb47d811025c6981cc437b025d4432ace82458cfd"
+    },
+    {
+      "path": "include/csl/artifacts/plot_data.hpp",
+      "sha256": "d06934ba7d8d0809dcf7c9bfcc697afdc6665e5414077133502ef8e12e141396"
+    },
+    {
+      "path": "include/csl/artifacts/plot_document_json.hpp",
+      "sha256": "afd9a53bee875fe237b45188b387ac9511637cbda58d12a6c41ec2b28e95df75"
+    },
+    {
+      "path": "include/csl/artifacts/plot_request.hpp",
+      "sha256": "93fbc2528b671a414409e5337de09f26e151d0165247f618e46890d385d0696a"
+    },
+    {
+      "path": "include/csl/artifacts/run_statistics.hpp",
+      "sha256": "4717536de47b85c5d53a82b45b867e34739d6b0f10d81a1a7a9d1e0219cd55b5"
+    },
+    {
+      "path": "include/csl/artifacts/scenario_sweep.hpp",
+      "sha256": "188070e9319d2d5b3215e4dc285a41c6e24d6fe0e9577d78847ac3109c7075ef"
+    },
+    {
+      "path": "include/csl/artifacts/stage_projection_batch.hpp",
+      "sha256": "1678dc4b5d730c29d4bcef972371af7d0814f37a10b64a9fdab3a3bc96d335e4"
+    },
+    {
+      "path": "include/csl/artifacts/stage_projection_capture.hpp",
+      "sha256": "a251dbcd1cd7b47007d2bf83ca137b5a204dcdf802cad1b7f9513384cdcf1cc7"
+    },
+    {
+      "path": "include/csl/artifacts/stage_projection_request.hpp",
+      "sha256": "e0cdfcc444cac630de2a397537e553d73b12def6ead762ec292d4fda92b1519e"
+    },
+    {
+      "path": "include/csl/contracts.hpp",
+      "sha256": "98d62ab08643c2024bb8aa4d12013d2e9c12c2f9321d587d8d6cb683df05eb43"
+    },
+    {
+      "path": "include/csl/controllers/continuous_policy.hpp",
+      "sha256": "010e0b8eeba28c429644d81f9d0c5529f1e06006711101f35fa2ef42fd9cc9b4"
+    },
+    {
+      "path": "include/csl/controllers/finite_policy.hpp",
+      "sha256": "9385dbed79c17a395d697d04b8d2fa1fa32e584ae169b1c567a43df9b1e3f314"
+    },
+    {
+      "path": "include/csl/controllers/observed_replay.hpp",
+      "sha256": "50e46a2bdeef5fd13deab525192f08dad8ab082f97646a6c84c81ec6ea5485bc"
+    },
+    {
+      "path": "include/csl/core/diagnostics.hpp",
+      "sha256": "c4ee03b39cd42ecb4f89c06942684dc54dcdd8aa12006d96c0988bd4c869db0a"
+    },
+    {
+      "path": "include/csl/core/outcomes.hpp",
+      "sha256": "81d52044f498dc3623361dedd7fff10e16219213a18b551cb7d0e7507d7a342f"
+    },
+    {
+      "path": "include/csl/core/values.hpp",
+      "sha256": "c5c5cba5f91200610443cbaafae917c68bfe9b1ffee96cb662b75226350d8baf"
+    },
+    {
+      "path": "include/csl/evidence/contracts.hpp",
+      "sha256": "651a08549cd6587c6b3eadfaf2fb546b64157511b1b0e989efd2cccea5cf032e"
+    },
+    {
+      "path": "include/csl/execution/contracts.hpp",
+      "sha256": "7d3b8f852f58147982d29dc2a71719c916908e09f2cb1a2d632d32fa0badee1a"
+    },
+    {
+      "path": "include/csl/execution/executor.hpp",
+      "sha256": "9a336f78320f351eed63512a9f6046c413214ff6cbae93b462a49f6d54ec5726"
+    },
+    {
+      "path": "include/csl/execution/instrumented_operation.hpp",
+      "sha256": "cae57220566836307e7da9c04927ba934497e8504a1987bddb6d596c452ff570"
+    },
+    {
+      "path": "include/csl/execution/observability.hpp",
+      "sha256": "90a893e689fd2f63b16f8ed19b2be7a032a392f3f695d2985000aee5034738ac"
+    },
+    {
+      "path": "include/csl/execution/timing_collector.hpp",
+      "sha256": "f571c8917e7ae58d2c35bad48f0469bebde35033f0b2f9751af13cf71224d795"
+    },
+    {
+      "path": "include/csl/experiments/batch_runner.hpp",
+      "sha256": "2ff50e26b4739fcee0d32b69ca1926116e9b8328ef17daf4ce9e695c1198455a"
+    },
+    {
+      "path": "include/csl/experiments/replay_artifact.hpp",
+      "sha256": "94ef2be1413bf8ef21ea2e0ad928af404e6fdb1b65c62270286c201fad350ff2"
+    },
+    {
+      "path": "include/csl/geometry/affine_sum.hpp",
+      "sha256": "84f122f0b6da78d68350c964858eb362e72662c85aefc0e2c5f4f178d786f24c"
+    },
+    {
+      "path": "include/csl/geometry/approximation.hpp",
+      "sha256": "0af6926b4cd210097c0d18d1ed93ac3e30839ca05df2b7b44c1bad5eb09d266b"
+    },
+    {
+      "path": "include/csl/geometry/basis_reuse_reducer.hpp",
+      "sha256": "202b57b30aff4f5887e4722835e34cb510386128dcfcfd91657b93b87c7e71f7"
+    },
+    {
+      "path": "include/csl/geometry/bounded_hull_checker.hpp",
+      "sha256": "1514c07f563f44548bacd95d65e2a392764fccc86f842ef84d41f920ebdddfcd"
+    },
+    {
+      "path": "include/csl/geometry/box_parallelotope.hpp",
+      "sha256": "52eacac38a94dacace78b755d6d208b77bc902915c939b9d1572750f4dea730f"
+    },
+    {
+      "path": "include/csl/geometry/composition_catalogue.hpp",
+      "sha256": "8af0147449034feb767d32b7fe9237c8722f7250c1b59cc293ccb5be12f56d0f"
+    },
+    {
+      "path": "include/csl/geometry/contracts.hpp",
+      "sha256": "ca4c5cdf9f9dc79d8f9a2de9251a84ba603c7ee21e24612895518579de9fe865"
+    },
+    {
+      "path": "include/csl/geometry/ellipsoidal.hpp",
+      "sha256": "959f00daaa367fa50b173fb217d74f820c5c2c38b23a494bc21781a89ccbda39"
+    },
+    {
+      "path": "include/csl/geometry/generator_adapter.hpp",
+      "sha256": "f5ce2832f70a534fda6f0b69d900a02a1d49f0236ff9d387fd507d38717763ed"
+    },
+    {
+      "path": "include/csl/geometry/generators.hpp",
+      "sha256": "e6ddde5f3de7e0fa9208e9543bba952459251014e4a31b6163f0da1eaf43e4f4"
+    },
+    {
+      "path": "include/csl/geometry/hull_reducer.hpp",
+      "sha256": "b00884d35629f17606157315e9b8f9d6b09b66397b324fc5dfb205160eb91865"
+    },
+    {
+      "path": "include/csl/geometry/lazy.hpp",
+      "sha256": "4ba580782aa6451f0665f223799eb1d412414db6a6e70d005dcf9cf0a3470ff2"
+    },
+    {
+      "path": "include/csl/geometry/legacy_btulshor.hpp",
+      "sha256": "c55d41c3c9a5f5899709d8c0bc15c0075d54159676c2651239e499857a2019f6"
+    },
+    {
+      "path": "include/csl/geometry/operation_admission.hpp",
+      "sha256": "ee4fb61015ab886486ec48d5e54b3ac20604f37588da0f6f82916a4fa2b4bbe2"
+    },
+    {
+      "path": "include/csl/geometry/polyhedral_intersection.hpp",
+      "sha256": "9280c5bba0ada04d8ed234839b6ca8b0a80fbca12a83d54003574170e4c438b6"
+    },
+    {
+      "path": "include/csl/geometry/polyhedral_projection.hpp",
+      "sha256": "a3946f5a5bee4a29be0ad46a8cbe87c17c26549572698f28f5703fca392a6f5f"
+    },
+    {
+      "path": "include/csl/geometry/polyhedral_support.hpp",
+      "sha256": "1a86c5b3218117c571481b86d30e5b99e86c2227eaee01b43f20ceb01a55747d"
+    },
+    {
+      "path": "include/csl/geometry/quickhull_2d.hpp",
+      "sha256": "ca42d99059f55cc64bec4386f0a57e87d84a3f2a96231bdddd2bb7231e564a70"
+    },
+    {
+      "path": "include/csl/geometry/reachable_plan.hpp",
+      "sha256": "8b6c0e9129210f280ebb0488acdb4fca921c1eaad66432d56aa62bd85bd9b9ef"
+    },
+    {
+      "path": "include/csl/geometry/source_index_hull.hpp",
+      "sha256": "36fb82405f8ed12bb19b64f59276af5921cfd06355f65308bc8d92279107dd0e"
+    },
+    {
+      "path": "include/csl/geometry/zonotope_reduction.hpp",
+      "sha256": "16eff6490e5768be2ddc0e426b83f19f4d36d1985d4ee719e4266a733da29432"
+    },
+    {
+      "path": "include/csl/input/continuous_model.hpp",
+      "sha256": "ccc366e50d4da24e474f72a75bda27859325d4dc0c494801ca01eb1ef7a74abb"
+    },
+    {
+      "path": "include/csl/input/scenario_loader.hpp",
+      "sha256": "a37a01285ff809dc01ea65a2626ff09a734ab49b2fe55707c7cb874fc59d5982"
+    },
+    {
+      "path": "include/csl/model/contracts.hpp",
+      "sha256": "d14a5c78764c3b1574f676d1662937f9fadb472b5976b2a07857326742dcf52c"
+    },
+    {
+      "path": "include/csl/model/discretization.hpp",
+      "sha256": "aaaf6f0fdcc60dfa4dbd4ac7c96147570e75b53b938e8dcf01cb02c55a788f47"
+    },
+    {
+      "path": "include/csl/model/hybrid_system.hpp",
+      "sha256": "b7f2293eb56ae226752d2b80dd7f5c6ca67cfa9d6113d4423e3de1df40e19483"
+    },
+    {
+      "path": "include/csl/model/linear_system.hpp",
+      "sha256": "cc8bbbb042a284d24f68e0d3240a8ebfded20980040c18434e64c02d212bb683"
+    },
+    {
+      "path": "include/csl/numeric/data.hpp",
+      "sha256": "a7c11d8e775b3e86da52b476229db5a253a4a35653844968743e4ccf7c5b9de9"
+    },
+    {
+      "path": "include/csl/optimization/contracts.hpp",
+      "sha256": "2837e361121f43002dc2f8abeb043f3aedfeea46269bc6e11e60272d369b78d9"
+    },
+    {
+      "path": "include/csl/optimization/convex_backend.hpp",
+      "sha256": "1f8504e174d3e5c9f77f5da2ce92975f7aec66df0894129103ef4ec7f00e6ba9"
+    },
+    {
+      "path": "include/csl/optimization/feasible_directions/smooth_convex.hpp",
+      "sha256": "9ac6442a0c8df88600554dea4a5f2f8776ad5fbd56dd96dc15402e2266fea421"
+    },
+    {
+      "path": "include/csl/optimization/finite_action_box_minimax.hpp",
+      "sha256": "15e569c195f3f916366c7934e6a152a8ec92195d2ef7cd2537201a794ffe96c4"
+    },
+    {
+      "path": "include/csl/optimization/finite_action_ellipsoid_minimax.hpp",
+      "sha256": "78a5974e5dd4dffed486bf26bebebf6376fa6a525e8fbca1aa35010bc2123f5e"
+    },
+    {
+      "path": "include/csl/optimization/finite_action_graph.hpp",
+      "sha256": "eb04f6b56896f5ed6d7d82dfaa56d5d3a054ccc7f261019a2f4da23b0e74291c"
+    },
+    {
+      "path": "include/csl/optimization/finite_action_minimax.hpp",
+      "sha256": "18bd6bf94324859d586a932c72a56349a5c75d03de9420d3150e073a519ab86d"
+    },
+    {
+      "path": "include/csl/optimization/finite_action_minimax_port.hpp",
+      "sha256": "57d7c1da2951d9b51e96d4577dba0f0cd524686b443b1ab06eab67e30385fc50"
+    },
+    {
+      "path": "include/csl/optimization/finite_action_nominal.hpp",
+      "sha256": "4b26514f962db92f24b8b5db0824432b4d2cd6ff2c087cad41d6eec65fd50a4d"
+    },
+    {
+      "path": "include/csl/optimization/finite_action_parallelotope_minimax.hpp",
+      "sha256": "e3002536cab1c3216293f7f70fd08bcb308addde53b58029b57898edb8296b3f"
+    },
+    {
+      "path": "include/csl/optimization/finite_action_zonotope_minimax.hpp",
+      "sha256": "f541ddbfbe4469589efb4a6996dc4ea4f174f7477d53b6e1cd60dd838ed51302"
+    },
+    {
+      "path": "include/csl/optimization/finite_causal_minimax.hpp",
+      "sha256": "2b71f6a5029b016444ec72b0cf528043eea83ce202cba4817d76f8d1805b0c18"
+    },
+    {
+      "path": "include/csl/optimization/history_cost.hpp",
+      "sha256": "8a3a7ad74ca31439af995a3009a669707af7440b31e04666f433c19cc59cc347"
+    },
+    {
+      "path": "include/csl/optimization/linear_infeasibility_certificate.hpp",
+      "sha256": "411045f3c73026114726f9cd5773b625a8efbe411e7801dfc9b2fe5609dd7297"
+    },
+    {
+      "path": "include/csl/optimization/linear_program.hpp",
+      "sha256": "1b4cae8ae8b48e3a12641e2f4c08890819eec4730c58aea4645ff663b7722085"
+    },
+    {
+      "path": "include/csl/optimization/lp_backend.hpp",
+      "sha256": "917fa83c61e980cd84b5bc2d41bf9eda4b9310ac24fb39367a387bd2e64f5828"
+    },
+    {
+      "path": "include/csl/optimization/objective_contracts.hpp",
+      "sha256": "441c0f048ac16f86bd24df0b26fad790f1f25d69921ae2a60dec2f71922ceaf4"
+    },
+    {
+      "path": "include/csl/optimization/objectives.hpp",
+      "sha256": "732320f3fde6335561e50cb5a4ed4f5f7f4398d497b74ec2cc428940b59fe962"
+    },
+    {
+      "path": "include/csl/optimization/phase_one.hpp",
+      "sha256": "a2554180e13c436579370555e2a8f870e33d8d32c234cdda0bbfc10d6915eb4e"
+    },
+    {
+      "path": "include/csl/optimization/running_control_cost.hpp",
+      "sha256": "9b89f3b8b90df4305347c7a3af5d2bc6570c905d0c6b471023205b8c255cd94a"
+    },
+    {
+      "path": "include/csl/optimization/validated_finite_action_minimax.hpp",
+      "sha256": "6c60468f31a9dce5a386f36b469c5277e1719edb71b5cc52a3fa3aeaf8450eac"
+    },
+    {
+      "path": "include/csl/optimization/validated_finite_action_minimax_port.hpp",
+      "sha256": "24b0b81328cdfde62d891263da3f0ae83327e4a241f8fcf3dfbcc0c2d925bad0"
+    },
+    {
+      "path": "include/csl/optimization/worst_case_interval.hpp",
+      "sha256": "e9e4c714c7ee66350877597f57072aea4a37f9bba51def39b2bf6f89cdfcf985"
+    },
+    {
+      "path": "include/csl/optimization/worst_case_vertex.hpp",
+      "sha256": "ea53faf71aacd11615d48fd0e4987e680d287a12c4c9ddde19c45ca345faf87e"
+    },
+    {
+      "path": "include/csl/optimization/zoutendijk/projection.hpp",
+      "sha256": "c63a4b2d6649e820e8e2cb567a9950c176421dd2ffc9120dad5bab8714fb84d4"
+    },
+    {
+      "path": "include/csl/problem/constraints.hpp",
+      "sha256": "78d376e20c6c0167bf8a14e65e5b78b8e0cd179171a1ccc3536a8166bba60319"
+    },
+    {
+      "path": "include/csl/problem/contracts.hpp",
+      "sha256": "16aee1a7401f28aecfdba1725e40face12857ebedb15519e538cba9339bf5437"
+    },
+    {
+      "path": "include/csl/problem/domains.hpp",
+      "sha256": "b030786a979b5e9253cf4c057419b587354bb18656cc3cff10dfbf16adad1253"
+    },
+    {
+      "path": "include/csl/problem/initial_information.hpp",
+      "sha256": "317481f471b6d7a2a3f241a764e323fa8144bbccace71bee0e25ea3ca0918bab"
+    },
+    {
+      "path": "include/csl/problem/resolved_problem.hpp",
+      "sha256": "b10f41e9d299abbeba8087f5a085aeb3609b0ec967dbf8a313903cb96c7a7007"
+    },
+    {
+      "path": "include/csl/problem/temporal_lifts.hpp",
+      "sha256": "043b5dbd90b80c48504c09e9bd38b2762ecf207a72248e2ee25522866ea48c1e"
+    },
+    {
+      "path": "include/csl/problem/validator.hpp",
+      "sha256": "49efebc7c96c0fd703c136d026fa24d1ea85af34fa2a35599a7ec174422436a4"
+    },
+    {
+      "path": "include/csl/reachability/detail/outer_safety.hpp",
+      "sha256": "887b051cbc45bab8703f83b0a4a45ee0eb46494dc4dffffb2b7cb85526e3c022"
+    },
+    {
+      "path": "include/csl/reachability/finite_feedback.hpp",
+      "sha256": "e25899872c15eed9087c164d5a6b226218d06f57af607ebe81f389a299a21251"
+    },
+    {
+      "path": "include/csl/reachability/finite_feedback_port.hpp",
+      "sha256": "225a87ba9019fcd23ae1be25276a5308da2f44d0e331d62d6ad5081af3f82e04"
+    },
+    {
+      "path": "include/csl/reachability/finite_plan_box.hpp",
+      "sha256": "4c9873863fe083d483bd3e6d294672208498f26b837488c2f9a859b0151bd5cf"
+    },
+    {
+      "path": "include/csl/reachability/finite_plan_ellipsoid.hpp",
+      "sha256": "7539ac2014e0534eeac66818de2bd64d1a6f81b2ffd98cff7ff90a2487b6a498"
+    },
+    {
+      "path": "include/csl/reachability/finite_plan_parallelotope.hpp",
+      "sha256": "2900e340c04c47f80d2032d09f74655ed331843e47de2d0624d30c36acfb0a95"
+    },
+    {
+      "path": "include/csl/reachability/finite_plan_zonotope.hpp",
+      "sha256": "67683dc67e346cda8b95bcbfb4e134b22da7cd68ab39be677507980c95daaac6"
+    },
+    {
+      "path": "include/csl/reachability/fixed_plan_disturbance.hpp",
+      "sha256": "2c0c3226c9515b2171dd5d20e97e9620789f50118d6431960f10232bbcfa5071"
+    },
+    {
+      "path": "include/csl/reachability/nominal_forward.hpp",
+      "sha256": "0040365b70fbf639f85097023c51dd137ba559f866dbdaab82dee23bb4f45e65"
+    },
+    {
+      "path": "include/csl/reachability/nominal_predecessor.hpp",
+      "sha256": "61548426d59bd8437e77232b9d9d50efc20dd6799be584e44fb86eca2d087be4"
+    },
+    {
+      "path": "include/csl/registry/provider.hpp",
+      "sha256": "d3447f16fa72239411d7a98b4559a3dd9125b93df4f043114f0b0fb15b805c40"
+    },
+    {
+      "path": "include/csl/registry/registry.hpp",
+      "sha256": "1d71d530b43de11d5a5b3e28ef2b89eeedcacd91309d54c6353a09d8e17854de"
+    },
+    {
+      "path": "include/csl/registry/strategy_catalogue.hpp",
+      "sha256": "5a1605a683bc3ab675051a4cc80ff6de660a4948bff0a260e1435c04968ff0bc"
+    },
+    {
+      "path": "include/csl/sets/contracts.hpp",
+      "sha256": "b3d3885769eff0cce1cd7268dbd7fb1f3c19d849df95d50d74cd1c94130144a7"
+    },
+    {
+      "path": "include/csl/sets/data.hpp",
+      "sha256": "cac3d77cfc3030deeeb0733677d0bfe0d7aef03821e424a6a5e0559751da1a60"
+    },
+    {
+      "path": "include/csl/sets/generator_sets.hpp",
+      "sha256": "4071442875dba5fbbaa00c599e4dd275354b47886c071214929283774300834d"
+    },
+    {
+      "path": "include/csl/simulation/nonlinear_replay.hpp",
+      "sha256": "cab203c3f035417be29b4dc74f576d93be9c9513fda46550a5806366864e7d4e"
+    },
+    {
+      "path": "include/csl/synthesis/b04_c_exact_family.hpp",
+      "sha256": "6f326203e47271493c9d6e5f0c9f9b241c1cf0dbe166182407897bebdf527462"
+    },
+    {
+      "path": "include/csl/synthesis/contracts.hpp",
+      "sha256": "0bdd937fb6346d9015b15bde6cbb347ee350ce0253f171eda65d86493a020437"
+    },
+    {
+      "path": "include/csl/synthesis/control_recovery.hpp",
+      "sha256": "1e88050939744e68c4f81b933843d1e56b26f57f8adc11b1106fb18d9eb5c1ae"
+    },
+    {
+      "path": "include/csl/synthesis/finite_action_histories.hpp",
+      "sha256": "641995e31fa64cd9df71811dbf63f08641d5d8a9ddb4384a4f433f7a6d82ee36"
+    },
+    {
+      "path": "include/csl/synthesis/finite_mixed_branch.hpp",
+      "sha256": "c4106ccf67a5a00afc725121224be39dc64eeeabfcd4823bf71e83d21d890656"
+    },
+    {
+      "path": "include/csl/synthesis/hybrid_admission.hpp",
+      "sha256": "ab6f9d7f3e1b9a8c3d9f696277f5d9409bbd18c20aaf7fb797fe10da4f7b04c3"
+    },
+    {
+      "path": "include/csl/synthesis/hybrid_path_program.hpp",
+      "sha256": "f7252d49e35bfa5184e925e07269e5ce456f7f55f8e423da9217d30db9ab939b"
+    },
+    {
+      "path": "include/csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp",
+      "sha256": "4d07f4a816f49afcfe9ac26179cfe38b1ce2aa066cbfd01727697fc783ede9e0"
+    },
+    {
+      "path": "include/csl/synthesis/strategy_a/strategy.hpp",
+      "sha256": "335cab2e3dc0401f10d926f1e5fc9be8962e1cf420fd48cc82a852b354e235e6"
+    },
+    {
+      "path": "include/csl/synthesis/strategy_b/direct_joint.hpp",
+      "sha256": "0efa95a5c2c098c5f2c5ef2382da4b166862869feb008bf57b1c219ca45dc53f"
+    },
+    {
+      "path": "include/csl/synthesis/strategy_ts01/analytic_profile.hpp",
+      "sha256": "9056aea48137abe7b997fc44bddb58268180176702dc0aed81c0b74ac9c7b479"
+    },
+    {
+      "path": "include/csl/synthesis/terminal_minimizers.hpp",
+      "sha256": "59a93a624e39fbaffc61942db08c15d30ca51232871b9a4a237ca1e3e6d8173d"
+    },
+    {
+      "path": "include/csl/synthesis/ts02_constant_integrator.hpp",
+      "sha256": "6e9b4424c1cf9376dcd770e767c443d31326639b9089c92f48d4f3d2bc6cf2aa"
+    },
+    {
+      "path": "include/csl/synthesis/ts03_singular_integrator.hpp",
+      "sha256": "58a11c067b765d6b0013a1775d656c433a9cf0435b589a5d6cf397193f56021e"
+    },
+    {
+      "path": "include/csl/synthesis/witness_selector.hpp",
+      "sha256": "8a6cac075aa10ef6bf0ea5d740d3d51328e940487adddf73cce4aba56a23bae9"
+    },
+    {
+      "path": "include/csl/verification/trajectory.hpp",
+      "sha256": "dcf46a6be03d6e9e5902f7820674e9cb18619d860dcde5c65a4222507dd63b04"
+    },
+    {
+      "path": "lib/cmake/CSL/CSLConfig.cmake",
+      "sha256": "d58d19e565849210d562656d74cbdfd94c6d72fee52e92e428ce7e86a690a8df"
+    },
+    {
+      "path": "lib/cmake/CSL/CSLConfigVersion.cmake",
+      "sha256": "6cecb804c170b7d5262a13684a8949f8d1c01a5d72898b1cd64f9e3ebfe448dd"
+    },
+    {
+      "path": "lib/cmake/CSL/CSLTargets-release.cmake",
+      "sha256": "c60f6e2190f3a8c50a1f3820605f85306c0db2326f8711d068001a902c71008f"
+    },
+    {
+      "path": "lib/cmake/CSL/CSLTargets.cmake",
+      "sha256": "1720f3a3fdaf292a67db96e9eaaed3f10dc8bd375aab2ed602231ed8cc24c3af"
+    },
+    {
+      "path": "lib/libcsl_affine_sum.a",
+      "sha256": "7299bffdcf70aeb2186d42225d649a697f96b78725f1586cbe62114c0ce8db36"
+    },
+    {
+      "path": "lib/libcsl_application.a",
+      "sha256": "e897e094197316fe66e5e278292874fe71be177dd6232054c57e11891877dd40"
+    },
+    {
+      "path": "lib/libcsl_approximation.a",
+      "sha256": "d11299a3bcccf2e0852aab1f3cf1b2836e2cdc19d813cb1073007f4573f13d55"
+    },
+    {
+      "path": "lib/libcsl_artifacts.a",
+      "sha256": "272e851c9ec76fefd56183eb6eea34ba84f5e68db3913781e57f6cbc6462e399"
+    },
+    {
+      "path": "lib/libcsl_bounded_hull_checker.a",
+      "sha256": "a9c4883d947c43ca75fed69f40915a869e52d5d162fe5ff336965dcaf5fcbadd"
+    },
+    {
+      "path": "lib/libcsl_contracts.a",
+      "sha256": "afbecd584d1732402bb15f9ab6d2773b356ec3ae69c8389afb2350f99c1d73f4"
+    },
+    {
+      "path": "lib/libcsl_control_recovery.a",
+      "sha256": "9641143c4fc26115b6893de229ef6b762de1ca60a05cfd6ea2dc904d0cf41898"
+    },
+    {
+      "path": "lib/libcsl_controllers.a",
+      "sha256": "44853933f61bd0cbdd2da2943aa5b91a234e2d2950bd28667119eade43ced9f8"
+    },
+    {
+      "path": "lib/libcsl_convex.a",
+      "sha256": "67e635eefbc54efaa414ba41e4f70a82925f5271a0562b56a0eee4554c6165ff"
+    },
+    {
+      "path": "lib/libcsl_execution.a",
+      "sha256": "eda285da62afd8ad51a29e18fb9d0543a2da57dc8f07db2172cbb152d7c07ab6"
+    },
+    {
+      "path": "lib/libcsl_experiments.a",
+      "sha256": "c1dc7880b565ef6cc3073e27edabb90b84f67c4c7dea047fa40739afb58f3c96"
+    },
+    {
+      "path": "lib/libcsl_feasible_directions.a",
+      "sha256": "cb2c6b232d0858649e7b176137968cdb4341c37caae9935c9c608b6778abb037"
+    },
+    {
+      "path": "lib/libcsl_finite_action_box_minimax.a",
+      "sha256": "885982b20d657d0270a11466eb8966d9121e9fd947b468d5a2fc43968808708f"
+    },
+    {
+      "path": "lib/libcsl_finite_action_ellipsoid_minimax.a",
+      "sha256": "79e30b27d5f02f40d8f1044ae1f55217000b8d2f0b4dca2fea01dfefce1936a0"
+    },
+    {
+      "path": "lib/libcsl_finite_action_histories.a",
+      "sha256": "85e37a21407ca1cb39ef46ec6cc7937a8e3b3ccc754aadf38bb00979d47c69bd"
+    },
+    {
+      "path": "lib/libcsl_finite_action_minimax.a",
+      "sha256": "c0e36d58cc658294747e187c0b9e8734831c1adf86e70f8eca4464887cc74ad5"
+    },
+    {
+      "path": "lib/libcsl_finite_action_minimax_port.a",
+      "sha256": "09eca30815549e3e40b5249ca5ac1d30517090692c0006e116a0a8ab0661730e"
+    },
+    {
+      "path": "lib/libcsl_finite_action_nominal.a",
+      "sha256": "811f4b40169cab505aeda980fba26ca7043534d0c9f1c0de3b1b651d50d1d5ae"
+    },
+    {
+      "path": "lib/libcsl_finite_action_parallelotope_minimax.a",
+      "sha256": "dceb98f50ddae6ebb0a23406410cc9aab9839f4a23e96f8a4ca944fb10fdb1bf"
+    },
+    {
+      "path": "lib/libcsl_finite_action_replay.a",
+      "sha256": "776e910f66b62b310030e5b6a7a0051d3dff4843bd7fba9201963c0da0f9d09c"
+    },
+    {
+      "path": "lib/libcsl_finite_action_zonotope_minimax.a",
+      "sha256": "8a59fcdc756155c6cb32e1c6526f292ccea01d1710e801ba2f3e5eb9baec5281"
+    },
+    {
+      "path": "lib/libcsl_finite_causal_minimax.a",
+      "sha256": "ddd8b70519e93c24c0ba4fa1e4d329a348d6c21728ae6c33851f2a5b344e8cb5"
+    },
+    {
+      "path": "lib/libcsl_finite_feedback.a",
+      "sha256": "02a721a843a08aaeb0c77ec3be6bd009d60c9432b50f78126adb97517d87e658"
+    },
+    {
+      "path": "lib/libcsl_finite_feedback_port.a",
+      "sha256": "e8dd0f4f30612060d0d58fa47be4aa8313b8f2217dbfb1de5469103c519e6b56"
+    },
+    {
+      "path": "lib/libcsl_finite_mixed_branch.a",
+      "sha256": "6b84408388cf84517dad0eb18e13dcf7d91caade5a380fc664cf8074ffafaba7"
+    },
+    {
+      "path": "lib/libcsl_finite_plan_box.a",
+      "sha256": "44e4034659f1f762cd08dd2fe1432220e8ff718fbefbd4373967aeeb76bccf3d"
+    },
+    {
+      "path": "lib/libcsl_finite_plan_ellipsoid.a",
+      "sha256": "f27f8e7868ceaf3aae7fe823f8b72e7d3545c2372bb7e228399bea84dde771d0"
+    },
+    {
+      "path": "lib/libcsl_finite_plan_parallelotope.a",
+      "sha256": "34040a5d038efd9081f7d42f812dc322d37d02cac1e79c83942e97cb020c774d"
+    },
+    {
+      "path": "lib/libcsl_finite_plan_zonotope.a",
+      "sha256": "03b82e91b003d1d2bc42f3129ca2dd6e7c1e2a9e27bb9109c276aa62131581a7"
+    },
+    {
+      "path": "lib/libcsl_fixed_plan_disturbance.a",
+      "sha256": "eea7d24d5fe0b99316e473970f4ec86fbc70b77b518281b5ebbe7a72a665d3b8"
+    },
+    {
+      "path": "lib/libcsl_generator_adapter.a",
+      "sha256": "5732be3cd5587145da5083f20189d701b3b866e99424a3bd9abf56324b24a496"
+    },
+    {
+      "path": "lib/libcsl_geometry_generators.a",
+      "sha256": "e97953fa1dc10b31fba56d15e45f61a678829889a489af800d48fd1b83ee0651"
+    },
+    {
+      "path": "lib/libcsl_highs_convex.a",
+      "sha256": "cacf322b62eac8e53bc18bf591773ed0c8eea18bbbdf9972edac1e1b85d883fb"
+    },
+    {
+      "path": "lib/libcsl_highs_lp.a",
+      "sha256": "cf1b87babbf0ba32d540632e96e63b175d851d6fa8fcc73891b01ef485a7fc27"
+    },
+    {
+      "path": "lib/libcsl_history_cost.a",
+      "sha256": "68a7e181ef320d1334498a4a395a18d74e4519d38ce84adf66ee2c1c74447b57"
+    },
+    {
+      "path": "lib/libcsl_hull.a",
+      "sha256": "67c1b49009f1d37762a7c2dd45aeeb69ffee47c3866b65248a895d4819a0ff46"
+    },
+    {
+      "path": "lib/libcsl_hybrid_path_program.a",
+      "sha256": "80bee9ddb527b07143280f14f5380efaa7709e7ccb9dece97019cada724cd2aa"
+    },
+    {
+      "path": "lib/libcsl_input.a",
+      "sha256": "56433c187e28d2ca20a0fa41b00d0ea397fbcc4924c0ff1bbaf6f2ca7df943cc"
+    },
+    {
+      "path": "lib/libcsl_lazy_geometry.a",
+      "sha256": "ba0a1d6b9e91855bb4bbfa26adbeda3d8235116ef83c124f246aba84ff4455b7"
+    },
+    {
+      "path": "lib/libcsl_legacy_btulshor.a",
+      "sha256": "4f5a666692818025234ebd52e3ed30391806f389c15ce878b861918e15f3b8a1"
+    },
+    {
+      "path": "lib/libcsl_model.a",
+      "sha256": "b57bcad1f0ee3630dc7a087ba0123fadcf3d551c34331b4a8bdf631453967efd"
+    },
+    {
+      "path": "lib/libcsl_nominal_forward.a",
+      "sha256": "5919ac1e4740927a61ed55d0df62d52795d1afc65f65dc44251465e514bf5c47"
+    },
+    {
+      "path": "lib/libcsl_numeric.a",
+      "sha256": "9160133e117685818d4dc87fb0179633da777fc10fc043401fdc7e4a944ee1f8"
+    },
+    {
+      "path": "lib/libcsl_objectives.a",
+      "sha256": "8b97e48614bcfbad6e04fc1b2d5e2c8f9bc5123d5c18b831b9cf040987560eff"
+    },
+    {
+      "path": "lib/libcsl_optimization.a",
+      "sha256": "8edba0f5b921e3173ee2b800d5eb2736a769afc82bca07abb5ea18652c96e43a"
+    },
+    {
+      "path": "lib/libcsl_phase_one.a",
+      "sha256": "b2a436c38a683032df7542cc19781eb9158f7776a5cff7d87885616210834b93"
+    },
+    {
+      "path": "lib/libcsl_polyhedral.a",
+      "sha256": "750c381973995013a50134227533fb4c3f057293251239f990c1e77b1aec4b6c"
+    },
+    {
+      "path": "lib/libcsl_problem.a",
+      "sha256": "035734b1c901c8dc2a85629aa16be12b15c8b9e3399c2aed53e4fa5a034d2e8e"
+    },
+    {
+      "path": "lib/libcsl_qhull_conversion.a",
+      "sha256": "a2587c9793b39d6f9e37710756ec3948acf78b507249d50e1b19e97cbf096d2c"
+    },
+    {
+      "path": "lib/libcsl_qhull_r.a",
+      "sha256": "cea825ae2f5bb9dbeed2de53477648a4cfff27cbc31cda30d30cb50aca963855"
+    },
+    {
+      "path": "lib/libcsl_quickhull_2d.a",
+      "sha256": "0c093d9e5cbbbb733560804435c335ea21fa83a986601fa9dcb90887d6671684"
+    },
+    {
+      "path": "lib/libcsl_registry.a",
+      "sha256": "9957db3a9e0ffe3161449484a03d8665219283d0f71bbe07110a7fcd1e6828f3"
+    },
+    {
+      "path": "lib/libcsl_resolved_core.a",
+      "sha256": "62059356d7152ec11089595050e92ce6c1aa41fc1f0ac44c9795b143b61e08d0"
+    },
+    {
+      "path": "lib/libcsl_resolved_problem.a",
+      "sha256": "422fa8fa56479f04c05d8b85cd7b0e50dd24becab90d1b52950cf04bee92c825"
+    },
+    {
+      "path": "lib/libcsl_running_control_cost.a",
+      "sha256": "9d899da68a6a9a522eb2f1a83c77d727967dfb4bd4a1729a427055e32a2dd55d"
+    },
+    {
+      "path": "lib/libcsl_sets.a",
+      "sha256": "c9c8889bbc52dfad785246a8a9a67339576bae4b29f324760f07ecad256b8d15"
+    },
+    {
+      "path": "lib/libcsl_simulation.a",
+      "sha256": "9553649dd86502822ddcedcce60a72b08b26701aef1f8522dc3c6912b8c4f7de"
+    },
+    {
+      "path": "lib/libcsl_strategy_a.a",
+      "sha256": "3977afc27d18d5adbd79cff16e216f1394898a115e5f574c17c0544ea2a8648b"
+    },
+    {
+      "path": "lib/libcsl_strategy_b.a",
+      "sha256": "b6753d29953de6191ca0c96b182ba7bb85d53788734991a4aa312a6cb08902d2"
+    },
+    {
+      "path": "lib/libcsl_strategy_ts01.a",
+      "sha256": "fdf6637622dd0f2a2fd57c708cf8a935dec9cb8291c9c2d1636699e5f689bad3"
+    },
+    {
+      "path": "lib/libcsl_terminal_minimizers.a",
+      "sha256": "67f2c555999b9497418563b52395d1b0bdd3984473d339e4813946f472fb7f01"
+    },
+    {
+      "path": "lib/libcsl_validated_finite_action_minimax.a",
+      "sha256": "5b528673d75b1de293b9129f38e4163e22540f29ce790ef1cd83d1dd2fc2e7f8"
+    },
+    {
+      "path": "lib/libcsl_validated_finite_action_minimax_port.a",
+      "sha256": "3fd3b65b07e63a2c9322fccae16db99fad53c84d1401fafdf0909d2974b63e98"
+    },
+    {
+      "path": "lib/libcsl_verification.a",
+      "sha256": "2d43c96a29d7974cc2813bda728bf33127e442020d7a9ca45f2bdc9ad71435dc"
+    },
+    {
+      "path": "lib/libcsl_verifiers.a",
+      "sha256": "408913f944a2f75b51bed292d08eb02cdf3b56f6447c4d0a5208ec7071d0ce9a"
+    },
+    {
+      "path": "lib/libcsl_witness_selector.a",
+      "sha256": "e571fb7685c39afc0b7d298fbf5067404176d4497072211e2ef4708e9359d9bb"
+    },
+    {
+      "path": "lib/libcsl_worst_case_interval.a",
+      "sha256": "574feb5fb6469d0d24d2c0b60fd9fdb718b8c534be53ea24aab0b07fbf2edf78"
+    },
+    {
+      "path": "lib/libcsl_worst_case_vertex.a",
+      "sha256": "9ef359158d30b67fe4ce62c5e689c33e34234181a556dff14ae5f63de52c9353"
+    },
+    {
+      "path": "lib/libcsl_zoutendijk_projection.a",
+      "sha256": "ffc017c2d67d9500edee2179adceb74e90a5369c6e86540e90665c0f926f898a"
+    },
+    {
+      "path": "lib/libhighs.a",
+      "sha256": "3f8aa1c9dcda1e3b5ba07fa8996ecec33956ed4b6cd6d5e8f9007c56a74f75e1"
+    },
+    {
+      "path": "share/CSL/docs/contracts/certificates.md",
+      "sha256": "4440e0c742ab80e66d3a5cdb22035fb90d71b2270bf15c2ee5cbb691d02c1a69"
+    },
+    {
+      "path": "share/CSL/docs/contracts/control-recovery.md",
+      "sha256": "49f6500deec56eb9a8d225c82d70eb2387765d5ecc75cf99933ebbe124d04722"
+    },
+    {
+      "path": "share/CSL/docs/contracts/finite-action-histories.md",
+      "sha256": "8c55041030ad89fa2860d2ee1ea54b2fed9f929356d8ac6deb877320f90f6e59"
+    },
+    {
+      "path": "share/CSL/docs/contracts/finite-causal-minimax.md",
+      "sha256": "f3e4b38463d6bd00c2cccc52f2a54b80d9de2f3e71bd3e82ea473081330d00e6"
+    },
+    {
+      "path": "share/CSL/docs/contracts/finite-mixed-branch-portfolios.md",
+      "sha256": "e82cb76984b7de5c4351d77e4839d5b50006daf567b21f1b0704749050975188"
+    },
+    {
+      "path": "share/CSL/docs/contracts/hybrid-systems.md",
+      "sha256": "fa435f4d27855662a2fbdbdf4f8a1b2f5b98effa9eda79ccd3362deb826d7ef9"
+    },
+    {
+      "path": "share/CSL/docs/contracts/information-patterns.md",
+      "sha256": "5ec89067e4800b76da58484aa457a4cdf8606eff8d8fa5741344ebc35e5e86f7"
+    },
+    {
+      "path": "share/CSL/docs/contracts/nonlinear-replay.md",
+      "sha256": "62ab4d0091652dc01de81a17a2ab202d76ae477ebaa9d7056baca7a5f4fd3670"
+    },
+    {
+      "path": "share/CSL/docs/contracts/scenario-input.md",
+      "sha256": "89ae398e47a1f16732a37d4b5226fbd8c7db03a805407af0fdbfec416958c5cf"
+    },
+    {
+      "path": "share/CSL/docs/contracts/time-domains.md",
+      "sha256": "9d55987a665e016e6c42d65dba49160a8f34bcc40252b936d3be34d49b4d6641"
+    },
+    {
+      "path": "share/CSL/docs/contracts/timing-collector.md",
+      "sha256": "9901c45d6e59508f0fa8eca95b31c24bd23e24dd4864939944b628807a23cb97"
+    },
+    {
+      "path": "share/CSL/docs/contracts/trajectory-verification.md",
+      "sha256": "5438d97f7b11e6d155c2a2bb46393673cd6a809b889dc1d5c9d55f5b3a302da4"
+    },
+    {
+      "path": "share/CSL/docs/contracts/ts01-exact-analytic-profile.md",
+      "sha256": "83aa4f4bb37733ae5247d22d30c0ffd228b294ac6104f361dfc223438c255467"
+    },
+    {
+      "path": "share/CSL/notices/Eigen-3.4.0/COPYING.APACHE",
+      "sha256": "03379001a7b12a2ec997a25554247d985270b353c10d5bafee9ac8d6519820b7"
+    },
+    {
+      "path": "share/CSL/notices/Eigen-3.4.0/COPYING.BSD",
+      "sha256": "51928dce36213c5333ba3172e847d735d4c6e9b7ff2722a326c49067155b82eb"
+    },
+    {
+      "path": "share/CSL/notices/Eigen-3.4.0/COPYING.MINPACK",
+      "sha256": "c87b7f8ee88f6195e91743820c00354833583aef091b72e2d4a49c8e28e798a0"
+    },
+    {
+      "path": "share/CSL/notices/Eigen-3.4.0/COPYING.MPL2",
+      "sha256": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85"
+    },
+    {
+      "path": "share/CSL/notices/Eigen-3.4.0/COPYING.README",
+      "sha256": "c83230b770f17ef1386ea1fd3681271dd98aa93646bdbfb5bff3a1b7050fff9d"
+    },
+    {
+      "path": "share/CSL/notices/HiGHS-1.11.0/LICENSE.txt",
+      "sha256": "10b39dba7b7731175f0705398b6db4320b64add1bd2ed9f9ec5b512a9ef1bd95"
+    },
+    {
+      "path": "share/CSL/notices/HiGHS-1.11.0/extern/filereaderlp/LICENSE",
+      "sha256": "4374bb8064e5302f5ac6b82fd3e153a36670f04d0a6ee1bc55b3dc3faee923cc"
+    },
+    {
+      "path": "share/CSL/notices/HiGHS-1.11.0/extern/pdqsort/license.txt",
+      "sha256": "323fc18e35fcf058d69d684022ef844f206cb8fefb2bac1298fa1767e0b9ae38"
+    },
+    {
+      "path": "share/CSL/notices/Qhull-8.0.2/COPYING.txt",
+      "sha256": "106d55c931fd6a84822e5345d900273d059f1c27310d02567ccb313c5d18c55d"
+    },
+    {
+      "path": "share/CSL/notices/nlohmann-json-3.11.3/LICENSE.MIT",
+      "sha256": "86b998c792894ccb911a1cb7994f7a9652894e7a094c0b5e45be2f553f45cf14"
+    },
+    {
+      "path": "share/CSL/schemas/model/README.md",
+      "sha256": "3fe3d6133608b83ce4a2d496e8deb6c17bc7bae02e0f028049e82aa2b9c1af49"
+    },
+    {
+      "path": "share/CSL/schemas/model/continuous-v1.schema.json",
+      "sha256": "17c0664d8c92993661c6561c53f94608db5bd7141ec82f7265433a635c02a621"
+    },
+    {
+      "path": "share/CSL/schemas/scenario/README.md",
+      "sha256": "9977b66e66cc44e16be58da8db3652fbdf15ae2348c347c70489666bf3779214"
+    },
+    {
+      "path": "share/CSL/schemas/scenario/v1.schema.json",
+      "sha256": "afeccb6d09233cdb6a4ed19012c656a15eaff4c6786e5d8b290eff80ca8b4340"
+    },
+    {
+      "path": "share/CSL/tests/fixtures/input/affine-ltv.json",
+      "sha256": "414518ae6c0ae77a7d67949c0db5e2ba1bf2cbd2a29609c0906c7a29a73495b3"
+    },
+    {
+      "path": "share/CSL/tests/fixtures/input/continuous-double-integrator.json",
+      "sha256": "4a93bc4a2370f427aa245f284ba04cd223453759212bedb3089ea0cd642cb034"
+    },
+    {
+      "path": "share/CSL/tests/fixtures/input/minimal-integrator.json",
+      "sha256": "5aa98c4f249606ff4fdb141a35ed7ac8d1bf75aa06d2f664fc15ba9b21e2b352"
+    },
+    {
+      "path": "share/csl/schemas/bounded-hull-check-v1.schema.json",
+      "sha256": "9840587ce3ea1b558c6bd6d84ad87ad8ff9876d64939e86519eb30efb6e281b6"
+    },
+    {
+      "path": "share/csl/schemas/comparison-spec-v1.schema.json",
+      "sha256": "f523d115f0a4c40e2b194b07e0abf44de7e3c4a23c61dabfbed59003d7043e6c"
+    },
+    {
+      "path": "share/csl/schemas/comparison-v1.schema.json",
+      "sha256": "0046d2317f8dadd9aecebf7729ebd2ba06ac37356b890ff40b297836d2b45848"
+    },
+    {
+      "path": "share/csl/schemas/run-statistics-v1.schema.json",
+      "sha256": "714ff44fdea236918a5491634b5d843f3313e559a212b3787dc8c42db797241f"
+    },
+    {
+      "path": "share/csl/schemas/run-statistics-v2.schema.json",
+      "sha256": "e5619a65235e82ee060601f50550e84ca72f04d9fb7736b17bbe1efa6503acfe"
+    },
+    {
+      "path": "share/csl/schemas/run-statistics-v3.schema.json",
+      "sha256": "9a59c5346edb628f03d160628064dc854d1855a3ba4a5706a7fd249112d1aeac"
+    },
+    {
+      "path": "share/csl/schemas/run-statistics-v4.schema.json",
+      "sha256": "57961935f06adde311f35d43a919ca41a0e896da764a7dc2c9dd33015c0071eb"
+    },
+    {
+      "path": "share/csl/schemas/run-statistics-v5.schema.json",
+      "sha256": "110075717dae1ee8ecb0aaad237b92a49eb20adc93a5fe614965cd1034c92879"
+    },
+    {
+      "path": "share/csl/schemas/run-statistics-v6.schema.json",
+      "sha256": "b267be9e529a9198df2b34d0b4860467442a91632056faa25eda2eb72c2009c4"
+    },
+    {
+      "path": "share/csl/schemas/scenario-sweep-v1.schema.json",
+      "sha256": "f760c00baf483eb4041884ae0617650393f7a9106cf5805d46abcbfd54cbf8aa"
+    },
+    {
+      "path": "share/csl/schemas/scenario-sweep-v2.schema.json",
+      "sha256": "bf0d43d3e9d4eabd76d54ae8af28f315d753d3d57c733f4ada6448cda87a01c8"
+    },
+    {
+      "path": "share/csl/schemas/stage-projection-batch-v1.schema.json",
+      "sha256": "928710b7784184b71366bdfc18e2b7c236a969d83cbe66705a620a13178dba80"
+    },
+    {
+      "path": "share/csl/schemas/trajectory-verification-reports-v1.schema.json",
+      "sha256": "43e3a035b7b6b5acedf3ee3227eef6f44134dbb917378469cf97a6fe3477e06f"
+    },
+    {
+      "path": "share/doc/CSL/contracts/affine-sum-operations.md",
+      "sha256": "2b5e74b320b47048abf674c62ba34f8de4892cfb2a8823a598de4bad5152c3a7"
+    },
+    {
+      "path": "share/doc/CSL/contracts/approximation.md",
+      "sha256": "d3ae2ceb4ab5ef61199ece18532e520790196f1d1680b319e79aad669bb8f642"
+    },
+    {
+      "path": "share/doc/CSL/contracts/bounded-hull-checker.md",
+      "sha256": "a955e80a3f277a10bd289efad3cc82fb4c08dd8e84502a411c41b8a527443840"
+    },
+    {
+      "path": "share/doc/CSL/contracts/ellipsoidal-approximation.md",
+      "sha256": "9b0576892f4a643278e685f48ae3f6ca167d4786055515ae5190fe8d0042438f"
+    },
+    {
+      "path": "share/doc/CSL/contracts/generator-sets.md",
+      "sha256": "e66788ca052c7f3b97e392830e6eefc119bd34e3aff81a8b6763ab7ebab2b304"
+    },
+    {
+      "path": "share/doc/CSL/contracts/hull-reduction.md",
+      "sha256": "748ec1fcc2f1994594a8fcbb855d128eca09647383f3621443afead521931ae4"
+    },
+    {
+      "path": "share/doc/CSL/contracts/lazy-geometry.md",
+      "sha256": "550b0c27afe31253d5a0682160e7dc031d3b3c7689f2b6a6c99759ea0d9ce29e"
+    },
+    {
+      "path": "share/doc/CSL/contracts/legacy-btulshor.md",
+      "sha256": "a1100f67eeae6ffd403939c4934e045a657cdb61595aa62ac2444e825c8bdb3f"
+    },
+    {
+      "path": "share/doc/CSL/contracts/polyhedral-intersection.md",
+      "sha256": "5d9acb544c7dd4a9444de4b9100f93955d0cf9b4252cada34007b79871560ef0"
+    },
+    {
+      "path": "share/doc/CSL/contracts/polyhedral-support.md",
+      "sha256": "4342497b0add9e74440742a4940c8b827537ee6997151a44b74bf75d2b4abf1a"
+    },
+    {
+      "path": "share/doc/CSL/contracts/projection-and-predecessor.md",
+      "sha256": "94003f353c14f017549bbcbe6a8d123910fc87529296e27ec487efd9878c01d5"
+    },
+    {
+      "path": "share/doc/CSL/contracts/quickhull-2d.md",
+      "sha256": "4c4cea9ac6896dc1c5501e89138152d9cdb0181ac19707bbf50d3c833d8da82a"
+    }
+  ]
+}
