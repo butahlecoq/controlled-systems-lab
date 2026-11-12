@@ -19,7 +19,7 @@ class Issue944ChoicePipelinePublicationTests(unittest.TestCase):
 
     def test_saved_bundle_and_page_are_source_bound_and_complete(self):
         checks = (self.bundle / "SHA256SUMS").read_text(encoding="ascii").splitlines()
-        self.assertEqual(len(checks), 7)
+        self.assertEqual(len(checks), 10)
         for line in checks:
             expected, name = line.split("  ", 1)
             self.assertEqual(hashlib.sha256((self.bundle / name).read_bytes()).hexdigest(), expected)
@@ -49,7 +49,14 @@ class Issue944ChoicePipelinePublicationTests(unittest.TestCase):
         self.assertIn("A = [[1, 0], [0, 1]]", html)
         self.assertIn("H = [[2,0],[0,2]]", html)
         self.assertIn("X₀ = [−1,1]", html)
+        self.assertIn((ROOT / "docs/examples/examples.css").read_text(encoding="utf-8"), html)
+        self.assertIn("@media print", html)
         self.assertIn("@media(max-width:600px)", html)
+        self.assertIn(".issue944-print{display:block!important}", html)
+        self.assertIn(".issue944-stat{", html)
+        self.assertIn("background:var(--surface)", html)
+        self.assertNotIn("--bg:", html)
+        self.assertNotIn("--ink:", html)
         self.assertIn("one-step nominal open-loop", html)
         self.assertIn("complete-family", html)
         self.assertIn("https://github.com/butahlecoq/controlled-systems-lab/pull/976", html)
@@ -64,6 +71,22 @@ class Issue944ChoicePipelinePublicationTests(unittest.TestCase):
                             ("plot_renderer_sha256", ROOT / "scripts/catalogue/render_944_each_choice_example.py"),
                             ("shared_stylesheet_sha256", ROOT / "docs/examples/examples.css")):
             self.assertEqual(provenance[key], hashlib.sha256(source.read_bytes()).hexdigest())
+        pipeline = (self.bundle / "pipeline-2d.svg").read_text(encoding="utf-8")
+        mobile_pipeline = (self.bundle / "pipeline-2d-mobile.svg").read_text(encoding="utf-8")
+        pipeline_print = (self.bundle / "pipeline-2d-print.svg").read_text(encoding="utf-8")
+        regression_svg = (self.bundle / "terminal-membership-regression.svg").read_text(encoding="utf-8")
+        regression_print = (self.bundle / "terminal-membership-regression-print.svg").read_text(encoding="utf-8")
+        self.assertIn("#a6e22e", pipeline)
+        self.assertIn("#a6e22e", mobile_pipeline)
+        self.assertIn("#a6e22e", regression_svg)
+        self.assertIn("LP: x₀=(0,0), x₁=(1,0), u₀=(1,0)", mobile_pipeline)
+        self.assertIn("QP: x₀=(0,0), x₁=(0,0), u₀=(0,0)", mobile_pipeline)
+        self.assertIn("#fff", pipeline_print)
+        self.assertIn("#111", pipeline_print)
+        self.assertIn("#fff", regression_print)
+        self.assertIn("#111", regression_print)
+        self.assertNotIn("#2878b5", pipeline)
+        self.assertNotIn("#101615", regression_svg)
 
     def test_stage_checks_hashes_local_links_and_fresh_route(self):
         with tempfile.TemporaryDirectory() as temporary:

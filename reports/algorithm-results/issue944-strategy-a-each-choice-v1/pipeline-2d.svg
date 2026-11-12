@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="900" height="620" viewBox="0 0 900 620">
-<style>text{font-family:Arial,sans-serif;fill:#202124}.title{font-size:24px;font-weight:bold}.label{font-size:16px}.small{font-size:13px}.muted{fill:#5f6368}</style>
-<rect width="100%" height="100%" fill="#fff"/>
+<style>text{font-family:Inter,system-ui,sans-serif;fill:#f8f8f2}.title{font-size:24px;font-weight:bold}.label{font-size:16px}.small{font-size:13px}.muted{fill:#b7b7af}.svg-bg{fill:#272822}.plot{fill:#303129;stroke:#504945}.grid{stroke:#504945}.hull{fill:#a6e22e;stroke:#a6e22e}</style>
+<rect class="svg-bg" width="100%" height="100%" fill="#272822"/>
 <text x="40" y="42" class="title">Two-state reachable set and selected control history</text>
 <text x="40" y="70" class="label muted">Strategy A, x_next = x + u, x0 = (0,0), u in [0,1]^2</text>
-<rect x="110" y="100" width="520" height="400" fill="#fbfcfe" stroke="#202124"/>
-<line x1="110" y1="300.0" x2="630" y2="300.0" stroke="#d5d9df"/>
-<line x1="370.0" y1="100" x2="370.0" y2="500" stroke="#d5d9df"/>
-<polygon points="110,500 630,500 630,100 110,100" fill="#7fb4d8" fill-opacity="0.35" stroke="#2878b5" stroke-width="3"/>
-<line x1="110" y1="500" x2="630" y2="500" stroke="#2878b5" stroke-width="4" opacity="0.8"/><circle cx="110" cy="500" r="5" fill="#2878b5"/><text x="120" y="488" class="small">u=(1,0)</text><line x1="110" y1="500" x2="110" y2="500" stroke="#c04b32" stroke-width="4" opacity="0.8"/><circle cx="110" cy="500" r="5" fill="#c04b32"/><text x="120" y="474" class="small">u=(0,0)</text><circle cx="630" cy="500" r="8" fill="#2878b5" stroke="#fff" stroke-width="2"/><circle cx="110" cy="500" r="8" fill="#c04b32" stroke="#fff" stroke-width="2"/>
+<rect class="plot" x="110" y="100" width="520" height="400" fill="#303129" stroke="#504945"/>
+<line class="grid" x1="110" y1="300.0" x2="630" y2="300.0" stroke="#504945"/>
+<line class="grid" x1="370.0" y1="100" x2="370.0" y2="500" stroke="#504945"/>
+<polygon class="hull" points="110,500 630,500 630,100 110,100" fill="#a6e22e" fill-opacity="0.2" stroke="#a6e22e" stroke-width="3"/>
+<line class="history-0" x1="110" y1="500" x2="630" y2="500" stroke="#66d9ef" stroke-width="4" opacity="0.8"/><circle class="history-0" cx="110" cy="500" r="5" fill="#66d9ef"/><text x="120" y="488" class="small">u=(1,0)</text><line class="history-1" x1="110" y1="500" x2="110" y2="500" stroke="#fd971f" stroke-width="4" opacity="0.8"/><circle class="history-1" cx="110" cy="500" r="5" fill="#fd971f"/><text x="120" y="474" class="small">u=(0,0)</text><circle class="terminal" cx="630" cy="500" r="8" fill="#66d9ef" stroke="#272822" stroke-width="2"/><circle class="terminal" cx="110" cy="500" r="8" fill="#fd971f" stroke="#272822" stroke-width="2"/>
 <text x="352.0" y="534" class="label">position</text>
 <text x="24" y="300.0" class="label" transform="rotate(-90 24 300.0)">velocity</text>
 <text x="92" y="518" class="small">0</text><text x="625" y="518" class="small">1</text>
