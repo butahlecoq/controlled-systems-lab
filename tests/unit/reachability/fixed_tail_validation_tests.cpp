@@ -13,7 +13,7 @@ FixedTailHRows empty(std::size_t n) {return {{0,n,{}},{},{0,n,{}},{}};}
 optimization::HistoryCostProgram cost() {
     Matrix Q{3,3,Vector(9,0)};Q.values[4]=2;
     return {{{1,1,0},1},{3,Q,{0,-2,0},1},{},QuadraticTerminal{{1,1,{2}},{-2},1},
-        {"validation-J",1,{}},0};
+        {},0};
 }
 FixedTailSolveRequest request() {
     return {{{"validation-problem"},{"validation-solve"}},empty(3),cost(),
@@ -36,7 +36,7 @@ FixedTailModel endpoint_model(bool future) {
         {3,5,{1,0,0,0,0,-1,1,0,-1,0,0,-1,1,0,-1}},{0,0,0}};
     Matrix Q{5,5,Vector(25,0)};Q.values[12]=2;
     out.source_cost={{{1,1,0},2},{5,Q,{0,0,-2,0,0},1},{},QuadraticTerminal{{1,1,{2}},{-2},1},
-        {"validation-J",2,{}},0};
+        {},0};
     return out;
 }
 class EndpointWorkspace final:public FixedTailOptimizerWorkspace {
@@ -139,6 +139,8 @@ int run() {
     for(const bool future:{false,true}) {
         const auto answer=endpoint_policy(5e-13,future);
         const auto* result=std::get_if<FixedTailPolicyResult>(&answer);
+        if(const auto* failure=std::get_if<FixedTailPolicyFailure>(&answer))
+            std::cerr<<"endpoint future="<<future<<" phase="<<failure->phase<<" reason="<<failure->cause.explanation<<"\n";
         require(result!=nullptr,"tiny literal endpoint violation was not recovered");
         require(result->history.back()==1,"recovered history retained an out-of-bound command");
         require(result->cost.total==0,"complete original J was not recomputed at recovered history");
