@@ -1,0 +1,191 @@
+{
+  "schema": "csl.native-terminal-objective-diagnostic/1",
+  "source_commit": "33f907a0af18e49e52b9c7bbc6f6a49c6dc29d50",
+  "source_files": [
+    {
+      "path": "benchmarks/reporting/closed_loop/terminal_objective_probe.py",
+      "sha256": "47dd2c678243d038aa584e8ed2c8322856f921b46eb8b3ee4c1f7c340b863ff2"
+    },
+    {
+      "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
+      "sha256": "bafa9d6d20e6a9d8aa0688e00e2df2c809105b531a4993c724b4e7cf07897cd4"
+    },
+    {
+      "path": "benchmarks/reporting/closed_loop/task_models.py",
+      "sha256": "41268676a408b2af4de63dcbf1425e405341963f5f98a3e0020db28bb40434e9"
+    },
+    {
+      "path": "tools/closed_loop_native_policy.cpp",
+      "sha256": "95f82bc78284d6c316cd30051ffabc969f99b5810c0c3013c1bb8b0944f10c28"
+    },
+    {
+      "path": "src/optimization/objective_reformulation.cpp",
+      "sha256": "3bd91bef3e3fafcf1022096c03baccf458e48f67033d01b75357f73b2891f7e8"
+    }
+  ],
+  "binary_sha256": "6d9c64f81c7de4e171aa0252ed9ae56f4729b9abc5c8c71607bd4a452b22e0dd",
+  "binary_build_source_revision": null,
+  "binary_origin": "Caller-supplied existing artifact; build revision is not inferred from its path.",
+  "scope": "Two final-stage queries from source target states, not full episodes or performance measurements. Running comparisons cover only the remaining decision and keep the original horizon normalization.",
+  "rows": [
+    {
+      "task": "syn-nl-lv-01",
+      "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+      "absolute_stage": 29,
+      "observed_state": [
+        100,
+        80
+      ],
+      "source_definition": {
+        "running_formula": "running_weight/N*sum_k(sum_i(((u[k,i]-running_reference[i])/running_scale[i])^2))",
+        "running_reference": [
+          0
+        ],
+        "running_scale": [
+          0.05
+        ],
+        "running_weight": 0.05,
+        "terminal_formula": "sum_i(terminal_weights[i]*((x[N,i]-terminal_target[i])/terminal_scale[i])^2)",
+        "terminal_scale": [
+          100,
+          80
+        ],
+        "terminal_target": [
+          100,
+          80
+        ],
+        "terminal_weights": [
+          1,
+          1
+        ]
+      },
+      "adapter_status": "accepted",
+      "native_status": "accepted",
+      "selected_plan": {
+        "controls": [
+          [
+            0.0
+          ]
+        ],
+        "running_objective": 0.0,
+        "states": [
+          [
+            100.0,
+            80.0
+          ],
+          [
+            100.0,
+            80.0
+          ]
+        ],
+        "terminal_objective": 0.0,
+        "total_objective": 0.0
+      },
+      "last_running_reference": [
+        0.0
+      ],
+      "expected_source_cost": {
+        "terminal": 0.0,
+        "running": 0.0,
+        "total": 0.0
+      },
+      "reported_cost": {
+        "terminal": 0.0,
+        "running": 0.0,
+        "total": 0.0
+      },
+      "differences": {
+        "terminal": 0.0,
+        "running": 0.0,
+        "total": 0.0
+      },
+      "parity_passed": true
+    },
+    {
+      "task": "syn-nl-fuel-01",
+      "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b",
+      "absolute_stage": 39,
+      "observed_state": [
+        75,
+        23,
+        1.5,
+        0.45
+      ],
+      "source_definition": {
+        "running_formula": "running_weight/N*sum_k(sum_i(((u[k,i]-ubar[k,i])/running_scale[i])^2))",
+        "running_reference": "midpoint-sampled-nominal-command",
+        "running_scale": [
+          1,
+          1
+        ],
+        "running_weight": 0.02,
+        "terminal_formula": "sum_i(terminal_weights[i]*((x[N,i]-terminal_target[i])/terminal_scale[i])^2)",
+        "terminal_scale": [
+          100,
+          30,
+          3,
+          1
+        ],
+        "terminal_target": [
+          75,
+          23,
+          1.5,
+          0.45
+        ],
+        "terminal_weights": [
+          1,
+          1,
+          0.1,
+          0.1
+        ]
+      },
+      "adapter_status": "accepted",
+      "native_status": "accepted",
+      "selected_plan": {
+        "controls": [
+          [
+            1.0,
+            1.0
+          ]
+        ],
+        "running_objective": 3.634177482473721e-05,
+        "states": [
+          [
+            75.0,
+            23.0,
+            1.5,
+            0.45
+          ],
+          [
+            74.18859197271729,
+            22.75162203424615,
+            1.7359405564150618,
+            0.539808974225497
+          ]
+        ],
+        "terminal_objective": 0.0015594824565799206,
+        "total_objective": 0.0015958242314046578
+      },
+      "last_running_reference": [
+        0.8570991287109667,
+        0.77138921583987
+      ],
+      "expected_source_cost": {
+        "terminal": 0.0015594824565802697,
+        "running": 3.634177482473721e-05,
+        "total": 0.001595824231405007
+      },
+      "reported_cost": {
+        "terminal": 0.0015594824565799206,
+        "running": 3.634177482473721e-05,
+        "total": 0.0015958242314046578
+      },
+      "differences": {
+        "terminal": -3.4911309954033243e-16,
+        "running": 0.0,
+        "total": -3.4911309954033243e-16
+      },
+      "parity_passed": true
+    }
+  ]
+}
