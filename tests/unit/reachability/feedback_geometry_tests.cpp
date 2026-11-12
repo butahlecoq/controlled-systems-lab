@@ -272,8 +272,35 @@ int main() {
             const auto* carrier=std::get_if<sets::HRepresentation>(&carrier_repr);
             if(!carrier || !contains(*carrier,{1,0,0,0}) || !contains(*carrier,{-1,0,0,0}) ||
                 !contains(*carrier,{0,1,0,0}) || !contains(*carrier,{0,-1,0,0})) return 23;
+            bool found_carrier_evidence=false;
+            for(const auto& evidence:g.stages[1].forward->lineage)
+                if(evidence.reference.identity.request.value.find("exact-control-carrier")!=std::string::npos) {
+                    found_carrier_evidence=true;
+                    if(evidence.reference.identity.ideal_output.value!=g.stages[1].forward->auxiliary_input_carriers[0].id.value) return 24;
+                }
+            if(!found_carrier_evidence) return 25;
             for(const Vector& point : std::vector<Vector>{{0.2,0.4},{1.2,0.4},{-0.8,0.4},{0.2,1.4},{0.2,-0.6}})
                 if(!axis_membership_contains(g.stages[1].intersection->membership,point)) return 22;
+        }
+        const auto unbounded_control=take(sets::make_h({{"unbounded-control"},4,{}},
+            {take(numeric::snapshot(Matrix{0,4,{}})),take(numeric::snapshot_vector(Vector{})),
+             take(numeric::snapshot(Matrix{2,4,{1,-1,0,0, 0,0,1,-1}})),
+             take(numeric::snapshot_vector(Vector{0,0}))})).as_handle();
+        auto unbounded=rotated; unbounded.id={"unbounded-control"};
+        unbounded.controls=ContinuousDomain{{unbounded_control}};
+        const auto resolved_unbounded=take(problem::resolve(unbounded,
+            {problem::UncertaintyStructure::stage_product_uncoupled,{}, {}}));
+        for(auto family : {reachability::FeedbackFamily::polytope, reachability::FeedbackFamily::box,
+                reachability::FeedbackFamily::zonotope, reachability::FeedbackFamily::parallelotope,
+                reachability::FeedbackFamily::ellipsoid}) {
+            auto result=reachability::feedback_geometry(resolved_unbounded,{"unbounded-control"},
+                box("UT",{-2,-2},{2,2}),family,{},
+                {{forward,intersection},selected(lp,"csl.program-result.v1"),1000},{});
+            auto* failure=std::get_if<reachability::FeedbackGeometryFailure>(&result);
+            if(!failure || failure->stage.value!=1 || !failure->prefix.stages[0].forward ||
+                !failure->pending_input_carriers.empty()) return 26;
+            auto* unsupported=std::get_if<Unsupported>(&failure->cause);
+            if(!unsupported || unsupported->diagnostics.empty() || unsupported->diagnostics[0].field!="feedback.control.bounds") return 27;
         }
         auto limited=reachability::feedback_geometry(resolved,{"limited"},
             box("limited-terminal",{0.0,0.1},{0.8,0.9}),reachability::FeedbackFamily::zonotope,{},
