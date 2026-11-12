@@ -4,8 +4,8 @@
   "input_response_sha256": "17adbec9b05e7841f1270bb1d27d8fc535330340f17aec2003eb5f26f52be953",
   "input_attempt_sha256": "435c3ed0b754e181c1c87d4ef8117504ea595daae908e04e7308f1fd0570dcce",
   "capture_source_commit": "fd28cb652bd8a20839b73abaf184881fd7bcf1b4",
-  "renderer_source_commit": "8d805d7aee1880365e38878cc8b0adb33d76301c",
-  "renderer_sha256": "bfd89c19f353437521057d33094a12bf8eabd6861875f580f790e78423a0792e",
+  "renderer_source_commit": "7ff81ffe7963bbe707392b85a987e2b0b9814121",
+  "renderer_sha256": "3318291b93829dc68f2623eaac009768a23494b253dad7698b5f2ad2cf22dd88",
   "query_scope": "first observed-state query; all predicted stages, not all replans",
   "trajectory_scope": "observed nonlinear plant across full episode",
   "terminal_feasibility": "projected physical terminal state bounds; source terminal set otherwise universal",
@@ -29,7 +29,7 @@
     },
     {
       "path": "all-stages-0-1-screen.svg",
-      "sha256": "0764cf4e31dff7fb9d21801f25c620b390f49e93a3ca66a0c5b57dc948bc7a58",
+      "sha256": "ae3707b8b695f20cc7d4895accaa45ea4c8b6ebc2520480f7670eb1f79e606d8",
       "raw_state_indices": [
         0,
         1
@@ -47,7 +47,7 @@
     },
     {
       "path": "all-stages-0-1-print.svg",
-      "sha256": "7ef1186dd6698de2b1d490f2daf207fb8934cb81a1953dcaab648ee6f2a7ca77",
+      "sha256": "8b7f598464d4bb8f9e6bf8f382547a8a24ed3ab2fefd960d800344c9ea279e30",
       "raw_state_indices": [
         0,
         1
