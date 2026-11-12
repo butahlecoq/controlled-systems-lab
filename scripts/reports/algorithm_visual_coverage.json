@@ -378,7 +378,9 @@
         "syn03-strategy-a-ts01",
         "syn03-strategy-a-ts02"
       ],
-      "report_routes": [],
+      "report_routes": [
+        "issue944-strategy-a-each-choice-postfix-v1"
+      ],
       "examples": [
         "qhull-highs-strategy-a-2d"
       ],

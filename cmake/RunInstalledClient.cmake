@@ -1,5 +1,11 @@
 # Copy only consumer inputs into a separate source tree. Its sole product
 # dependency is find_package(CSL CONFIG), resolved from the installed prefix.
+if(NOT DEFINED CSL_BUILD_PARALLELISM)
+  set(CSL_BUILD_PARALLELISM 4)
+endif()
+if(NOT CSL_BUILD_PARALLELISM MATCHES "^[1-9][0-9]*$")
+  message(FATAL_ERROR "CSL_BUILD_PARALLELISM must be a positive integer")
+endif()
 if(IS_ABSOLUTE "${CSL_INSTALL_LIBDIR}" OR
    IS_ABSOLUTE "${CSL_INSTALL_INCLUDEDIR}" OR
    IS_ABSOLUTE "${CSL_INSTALL_DATADIR}")
@@ -33,9 +39,14 @@ if(CSL_STAGE_ONLY)
 endif()
 execute_process(COMMAND "${CMAKE_COMMAND}" --install "${CSL_BUILD_DIR}"
   --config "${CSL_CONFIG}" --prefix "${prefix}" COMMAND_ERROR_IS_FATAL ANY)
-set(hybrid_contract "${prefix}/${CSL_INSTALL_DATADIR}/CSL/docs/contracts/hybrid-systems.md")
-if(NOT EXISTS "${hybrid_contract}")
-  message(FATAL_ERROR "Installed hybrid API contract is missing: ${hybrid_contract}")
+# Installed packages expose behavior through headers and executable consumers;
+# Markdown working documents stay in the source repository and are not packaged.
+file(GLOB_RECURSE installed_markdown_docs LIST_DIRECTORIES false
+  "${prefix}/${CSL_INSTALL_DATADIR}/CSL/*.md"
+  "${prefix}/${CSL_INSTALL_DATADIR}/doc/CSL/*.md")
+if(installed_markdown_docs)
+  message(FATAL_ERROR
+    "Markdown working documents must not be installed: ${installed_markdown_docs}")
 endif()
 # Inspect the installed artifacts, ignoring comments that discuss dependency names.
 set(notices_root "${prefix}/${CSL_INSTALL_DATADIR}/CSL/notices")
@@ -113,7 +124,8 @@ execute_process(COMMAND "${CMAKE_COMMAND}" -S "${work}/source" -B "${work}/build
   "-DCSL_EXPECT_HIGHS=${CSL_EXPECT_HIGHS}" "-DCSL_EXPECT_QHULL=${CSL_EXPECT_QHULL}"
   COMMAND_ERROR_IS_FATAL ANY)
 execute_process(COMMAND "${CMAKE_COMMAND}" --build "${work}/build"
-  --config "${CSL_CONFIG}" --parallel 4 COMMAND_ERROR_IS_FATAL ANY)
+  --config "${CSL_CONFIG}" --parallel "${CSL_BUILD_PARALLELISM}"
+  COMMAND_ERROR_IS_FATAL ANY)
 execute_process(COMMAND "${CMAKE_CTEST_COMMAND}" --test-dir "${work}/build"
   -C "${CSL_CONFIG}" --output-on-failure --no-tests=error COMMAND_ERROR_IS_FATAL ANY)
 
@@ -146,6 +158,7 @@ execute_process(COMMAND "${CMAKE_COMMAND}" -S "${example_source}" -B "${work}/ex
   "-DCMAKE_EXE_LINKER_FLAGS=${CSL_EXE_LINKER_FLAGS}"
   COMMAND_ERROR_IS_FATAL ANY)
 execute_process(COMMAND "${CMAKE_COMMAND}" --build "${work}/examples-build"
-  --config "${CSL_CONFIG}" --parallel 4 COMMAND_ERROR_IS_FATAL ANY)
+  --config "${CSL_CONFIG}" --parallel "${CSL_BUILD_PARALLELISM}"
+  COMMAND_ERROR_IS_FATAL ANY)
 execute_process(COMMAND "${CMAKE_CTEST_COMMAND}" --test-dir "${work}/examples-build"
   -C "${CSL_CONFIG}" --output-on-failure --no-tests=error COMMAND_ERROR_IS_FATAL ANY)

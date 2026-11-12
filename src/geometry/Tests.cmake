@@ -40,6 +40,12 @@ add_test(NAME module_composition_catalogue_cli
     $<TARGET_FILE:csl_module_composition_catalogue> ${PROJECT_SOURCE_DIR})
 set_tests_properties(module_composition_inventory_source_check module_composition_catalogue_cli
   PROPERTIES LABELS geometry)
+if(TARGET csl_strategy_a_each_choice_pipeline)
+  add_test(NAME strategy_a_each_choice_pipeline_contract
+    COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/catalogue/check_944_each_choice_pipeline.py
+      $<TARGET_FILE:csl_strategy_a_each_choice_pipeline>)
+  set_tests_properties(strategy_a_each_choice_pipeline_contract PROPERTIES LABELS geometry)
+endif()
 
 add_executable(quickhull_2d_test tests/unit/geometry/quickhull_2d_test.cpp)
 target_link_libraries(quickhull_2d_test PRIVATE CSL::quickhull_2d doctest::doctest)

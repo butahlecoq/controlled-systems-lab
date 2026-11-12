@@ -14,6 +14,8 @@ struct ConvexProgramInput {
 };
 template<class T> using ConvexDataResult = std::variant<T, Diagnostics, OperationStopped>;
 ConvexDataResult<ConvexProgram> make_convex_program(const ConvexProgramInput&, ObjectivePolicy = {});
+// Snapshot a finite, dimension-matched primal hint without changing the problem identity.
+ConvexDataResult<ConvexProgram> with_primal_start(const ConvexProgram&, std::span<const double>);
 struct ConvexPrimalEvaluation {
     double original_objective, solver_objective;
     PrimalResiduals residuals;

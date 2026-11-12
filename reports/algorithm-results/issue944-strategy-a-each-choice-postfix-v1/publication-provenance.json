@@ -1,0 +1,11 @@
+{
+  "capture_provenance_sha256": "e9881cdbc615853c8033cb6d41718bd9370e224cf3cdc68b25ff1078a0a1c823",
+  "capture_sha256sums_sha256": "07abb380912d3feb39949431cf1a683560917cf2f9497a1e815bd922a3e997fa",
+  "capture_source_commit": "ee677acf13fb38330dbde696a7b7bb7247eab792",
+  "plot_renderer_sha256": "bf91caa8d109240b3443bdf2896a719959d1663479f037a67f2e5dab2c2261a3",
+  "publication_renderer_sha256": "6cf585f465b9409d6ca991f7545be8897d52f635c3e1ce22ee5d2c19af442470",
+  "records_sha256": "abf2ea6b80260a14e344ab004e9bed7b6d4a11e4d8bc2083ebd6c10d5404d73c",
+  "regression_sha256": "2bfce10402b25884b5de16f3ca97abb1ed6d4dac8b94b62939444938c22bfdb1",
+  "schema": "csl.issue944-postfix-publication-provenance/1",
+  "shared_stylesheet_sha256": "11ded2b69cec694ff61ecad0493f175becbfc47bce3d641f2ee512543bb82cf4"
+}

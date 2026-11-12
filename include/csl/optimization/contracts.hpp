@@ -65,6 +65,8 @@ public:
     const optimization::Objective& original_objective() const noexcept;
     const QuadraticProgram& quadratic_program() const noexcept;
     const optimization::NormSquareReformulation* reformulation() const noexcept;
+    // Execution hint only; providers report whether they accepted it. Duals start at zero.
+    std::optional<std::span<const double>> primal_start() const noexcept;
 private:
     struct Storage;
     std::shared_ptr<const Storage> storage_;
