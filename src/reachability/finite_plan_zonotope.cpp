@@ -254,6 +254,38 @@ auto zonotope_support(const FinitePlanZonotopeTrace::Stage& stage) {
 
 } // namespace
 
+std::variant<FinitePlanZonotopeTrace::Stage, Unsupported, OperationStopped>
+propagate_existential_control_zonotope(const model::DynamicsStage& dynamics,
+        const FinitePlanZonotopeTrace::Stage& current,
+        const FinitePlanZonotopeTrace::Stage& controls, std::size_t generator_limit,
+        const ExecutionContext& context, std::size_t stage) {
+    const auto valid=[](const FinitePlanZonotopeTrace::Stage& shape) {
+        const auto rows=shape.generators.rows, cols=shape.generators.cols;
+        if (rows!=shape.center.size() || cols!=shape.factors.size() ||
+            (rows && cols>std::numeric_limits<std::size_t>::max()/rows) ||
+            shape.generators.values.size()!=rows*cols) return false;
+        for (double value:shape.center) if (!std::isfinite(value)) return false;
+        for (double value:shape.generators.values) if (!std::isfinite(value)) return false;
+        return true;
+    };
+    if (!valid(current) || !valid(controls) || dynamics.E.cols()!=0)
+        return unsupported("feedback.zonotope.inputs", "Finite shape data and no physical external port are required.");
+    auto zero=numeric::snapshot(Matrix{dynamics.A.rows(),0,{}});
+    if (auto* error=std::get_if<Diagnostic>(&zero)) return Unsupported{{*error}};
+    const model::DynamicsStage mapped{dynamics.A,std::get<numeric::MatrixView>(zero),
+        dynamics.B,dynamics.offset};
+    auto result=propagate(mapped,current,controls,{},generator_limit,context,stage);
+    if (auto* output=std::get_if<FinitePlanZonotopeTrace::Stage>(&result)) {
+        std::vector<std::string> ids;
+        for (const auto& factor:output->factors) {
+            if (factor.value.empty() || std::find(ids.begin(),ids.end(),factor.value)!=ids.end())
+                return unsupported("feedback.zonotope.factors", "Independent factor identities must be nonempty and distinct.");
+            ids.push_back(factor.value);
+        }
+    }
+    return result;
+}
+
 FinitePlanZonotopeOutcome finite_plan_zonotope(const FixedPlanRequest& request,
     FinitePlanZonotopeLimits limits, const ExecutionContext& context) {
     const auto n = request.system.dimensions().state;

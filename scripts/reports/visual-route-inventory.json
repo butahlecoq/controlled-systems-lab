@@ -1070,6 +1070,15 @@
       "role_and_disposition_reason": "Renders the source-bound before/after native diagnostic exchanges and analytic terminal-cost contours with shared screen/print tokens; it runs no solver and makes no full-episode or performance claim."
     },
     {
+      "source": "scripts/reports/nominal_tube_figure.py",
+      "signal_count": 5,
+      "asset_name_literals": [
+        "__STEM__.svg"
+      ],
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Renders committed full-state H rows F, B and I from the original 30-stage frozen-affine Lotka capture; the numerical half-plane clipping keeps the saved coefficients and checks plotted vertices against raw rows. A saved nonlinear NMPC trajectory is overlaid separately. This does not claim nonlinear reachable sets or global control optimality."
+    },
+    {
       "source": "scripts/reports/opt04/render.py",
       "signal_count": 5,
       "asset_name_literals": [
@@ -1229,6 +1238,34 @@
       ],
       "disposition": "saved-data-illustration-renderer",
       "role_and_disposition_reason": "Renders corrected labels on saved affine-history state and control records using the existing closed-loop plotter; it does not execute a controller or solver."
+    },
+    {
+      "source": "scripts/reports/render_issue944_each_choice.py",
+      "signal_count": 20,
+      "asset_name_literals": [
+        "pipeline-2d-mobile.svg",
+        "pipeline-2d-print.svg",
+        "pipeline-2d.svg",
+        "terminal-membership-regression-mobile.svg",
+        "terminal-membership-regression-print.svg",
+        "terminal-membership-regression.svg"
+      ],
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Renders the immutable source-bound Strategy A choice records and independent recovered-history values with shared screen/print tokens; it runs no solver and makes no full-family or performance claim."
+    },
+    {
+      "source": "scripts/reports/render_issue944_postfix.py",
+      "signal_count": 15,
+      "asset_name_literals": [
+        "pipeline-2d-mobile.svg",
+        "pipeline-2d-print.svg",
+        "pipeline-2d.svg",
+        "terminal-membership-regression-mobile.svg",
+        "terminal-membership-regression-print.svg",
+        "terminal-membership-regression.svg"
+      ],
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Renders the source-bound post-fix Strategy A choice records and independent recovered-history values with shared screen/print tokens; it runs no solver and makes no full-family or performance claim."
     },
     {
       "source": "scripts/reports/report_data.py",
@@ -1595,6 +1632,33 @@
       "asset_name_literals": [
         "planar-example.svg",
         "projections.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_issue944_each_choice.py",
+      "signal_count": 6,
+      "asset_name_literals": [
+        "pipeline-2d-mobile.svg",
+        "pipeline-2d-print.svg",
+        "pipeline-2d.svg",
+        "terminal-membership-regression-mobile.svg",
+        "terminal-membership-regression-print.svg",
+        "terminal-membership-regression.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_issue944_postfix.py",
+      "signal_count": 8,
+      "asset_name_literals": [
+        "pipeline-2d-mobile.svg",
+        "pipeline-2d-print.svg",
+        "pipeline-2d.svg",
+        "qhull-highs-strategy-a-2d.svg",
+        "terminal-membership-regression-mobile.svg",
+        "terminal-membership-regression-print.svg",
+        "terminal-membership-regression.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
     },
@@ -2055,7 +2119,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 91,
+      "signal_count": 93,
       "asset_name_literals": [
         "adaptive-ode-replay.svg",
         "app01-plan-timing-v1.svg",
@@ -2102,6 +2166,7 @@
         "lotka-volterra-sampled-v1.svg",
         "mpc06-tube.svg",
         "optimal-face.svg",
+        "pipeline-2d.svg",
         "planar-example.svg",
         "point-projections.svg",
         "polygons.svg",
@@ -3404,6 +3469,36 @@
         "projections.svg"
       ],
       "index_sha256": "0bf8ded5f8788fba839ee346be6fb8937a1d5e972939d9556e3ad794583a20f8",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "issue944-strategy-a-each-choice-postfix-v1",
+      "source_bundle": "issue944-strategy-a-each-choice-postfix-v1",
+      "assets": [
+        "pipeline-2d-mobile.svg",
+        "pipeline-2d-print.svg",
+        "pipeline-2d.svg",
+        "terminal-membership-regression-mobile.svg",
+        "terminal-membership-regression-print.svg",
+        "terminal-membership-regression.svg"
+      ],
+      "index_sha256": "3d9e3200345b967b8f00ccfd3a33b7b38f307cc2b7234c1203f3c3a7d358ab07",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "issue944-strategy-a-each-choice-v1",
+      "source_bundle": "issue944-strategy-a-each-choice-v1",
+      "assets": [
+        "pipeline-2d-mobile.svg",
+        "pipeline-2d-print.svg",
+        "pipeline-2d.svg",
+        "terminal-membership-regression-mobile.svg",
+        "terminal-membership-regression-print.svg",
+        "terminal-membership-regression.svg"
+      ],
+      "index_sha256": "5d638e285fd10398cf2c55e0ff1e96d9437338d0c3ce2949f8916397c6b2dcef",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },

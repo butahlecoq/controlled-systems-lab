@@ -1,4 +1,16 @@
+if(TARGET CSL::highs_lp)
+  add_executable(bounded_h_support_tests tests/unit/reachability/bounded_h_support_tests.cpp)
+  target_link_libraries(bounded_h_support_tests PRIVATE CSL::bounded_h_support CSL::finite_plan_zonotope CSL::highs_lp)
+  add_test(NAME bounded_h_support_tests COMMAND bounded_h_support_tests)
+  csl_test_target(bounded_h_support_tests reachability)
+endif()
+
 if(TARGET CSL::highs_lp AND TARGET CSL::qhull_conversion)
+  add_executable(nominal_tube_tests tests/unit/reachability/nominal_tube_tests.cpp)
+  target_link_libraries(nominal_tube_tests PRIVATE CSL::nominal_tube CSL::affine_sum CSL::qhull_conversion CSL::highs_lp CSL::artifacts doctest::doctest)
+  add_test(NAME nominal_tube_tests COMMAND nominal_tube_tests)
+  csl_test_target(nominal_tube_tests reachability)
+
   add_executable(nominal_forward_tests tests/unit/reachability/nominal_forward_tests.cpp)
   target_link_libraries(nominal_forward_tests PRIVATE CSL::nominal_forward CSL::affine_sum CSL::qhull_conversion CSL::highs_lp CSL::artifacts doctest::doctest)
   add_test(NAME nominal_forward_tests COMMAND nominal_forward_tests)
@@ -10,6 +22,11 @@ if(TARGET CSL::highs_lp AND TARGET CSL::qhull_conversion)
   target_link_libraries(nominal_forward_public_client PRIVATE CSL::nominal_forward CSL::affine_sum CSL::qhull_conversion CSL::highs_lp)
   add_test(NAME nominal_forward_public_client COMMAND nominal_forward_public_client)
   csl_test_target(nominal_forward_public_client reachability)
+
+  add_executable(nominal_tube_public_client tests/installed/nominal_tube_client.cpp)
+  target_link_libraries(nominal_tube_public_client PRIVATE CSL::nominal_tube CSL::affine_sum CSL::qhull_conversion CSL::highs_lp)
+  add_test(NAME nominal_tube_public_client COMMAND nominal_tube_public_client)
+  csl_test_target(nominal_tube_public_client reachability)
 endif()
 
 add_executable(fixed_plan_disturbance_tests tests/unit/reachability/fixed_plan_disturbance_tests.cpp)

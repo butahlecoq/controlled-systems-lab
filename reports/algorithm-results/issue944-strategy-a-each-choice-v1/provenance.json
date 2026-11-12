@@ -1,0 +1,14 @@
+{
+  "binary_sha256": "1c52ab404b11398b0d7ae45aaae1934047dac9a1af77840f06d56307438ee032",
+  "checker_sha256": "30b2ae4c28bac51c914526fa59373da3ed350176489a95dfe76b38d20fe7a6d3",
+  "checker_source_sha256": "30b2ae4c28bac51c914526fa59373da3ed350176489a95dfe76b38d20fe7a6d3",
+  "plot_renderer_sha256": "bf91caa8d109240b3443bdf2896a719959d1663479f037a67f2e5dab2c2261a3",
+  "publication_renderer_sha256": "4803385d43ee071ea5c752e3bfb72bc7d0601c1087df57edef6417a59a59296d",
+  "records.json": "5c3bfa78199f2f75a54d23d4aca078169fd3529fb2cd730354fb60ad71b45954",
+  "runner_sha256": "34cdaa1a6d85902b5188797e11a31b976ebb87ce8327a6bea012aef80ae23c8a",
+  "runner_source_sha256": "34cdaa1a6d85902b5188797e11a31b976ebb87ce8327a6bea012aef80ae23c8a",
+  "schema": "csl.issue944-publication-provenance/1",
+  "shared_stylesheet_sha256": "11ded2b69cec694ff61ecad0493f175becbfc47bce3d641f2ee512543bb82cf4",
+  "solver_source_commit": "5a4730c517a875400ec7b69e4c8e2c265e49016c",
+  "terminal-membership-regression.json": "e0938f9c1cf69aba77ecc77c58c16ad1d6f12696f54fbbcf7e4023a0cbafffd7"
+}

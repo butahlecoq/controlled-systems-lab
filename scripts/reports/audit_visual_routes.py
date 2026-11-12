@@ -170,9 +170,20 @@ SAVED_COMPANION_ROUTES = {
 SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
 SAVED_DATA_ILLUSTRATION_RENDERERS = {
     "scripts/reports/render_history_functional.py": "Renders corrected labels on saved affine-history state and control records using the existing closed-loop plotter; it does not execute a controller or solver.",
+    "scripts/reports/render_issue944_each_choice.py": (
+        "Renders the immutable source-bound Strategy A choice records and independent recovered-history values "
+        "with shared screen/print tokens; it runs no solver and makes no full-family or performance claim."),
+    "scripts/reports/render_issue944_postfix.py": (
+        "Renders the source-bound post-fix Strategy A choice records and independent recovered-history values "
+        "with shared screen/print tokens; it runs no solver and makes no full-family or performance claim."),
     "scripts/reports/native_terminal_cost_example.py": (
         "Renders the source-bound before/after native diagnostic exchanges and analytic terminal-cost contours "
         "with shared screen/print tokens; it runs no solver and makes no full-episode or performance claim."),
+    "scripts/reports/nominal_tube_figure.py": (
+        "Renders committed full-state H rows F, B and I from the original 30-stage frozen-affine Lotka capture; "
+        "the numerical half-plane clipping keeps the saved coefficients and checks plotted vertices against raw rows. "
+        "A saved nonlinear NMPC trajectory is overlaid separately. This does not claim nonlinear reachable sets or "
+        "global control optimality."),
 }
 SAVED_DATA_COMPANION_RENDERERS = {
     "benchmarks/reporting/closed_loop/run_closed_loop.py",
@@ -318,10 +329,10 @@ def source_inventory(root: Path) -> list[dict]:
                 disposition = "composes-or-copies-existing-saved-figure"
             elif relative in SAVED_DATA_COMPANION_COLLECTORS:
                 disposition = "measurement-collector-preserved-with-saved-data-companion"
-            elif relative in SAVED_DATA_COMPANION_RENDERERS:
-                disposition = "analytic-reference-checked-saved-run-renderer"
             elif relative in SAVED_DATA_ILLUSTRATION_RENDERERS:
                 disposition = "saved-data-illustration-renderer"
+            elif relative in SAVED_DATA_COMPANION_RENDERERS:
+                disposition = "analytic-reference-checked-saved-run-renderer"
             elif relative in FROZEN_DIAGRAM_EXCEPTIONS:
                 disposition = "reviewed-static-diagram-exception"
             elif relative in PUBLICATION_EXPORT_ROUTES:
