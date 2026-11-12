@@ -151,7 +151,7 @@ See <a href="build-provenance.json">build provenance</a>.</p>
 <p>Attempt checks: <span class="counts">{''.join(f'<span>{escape(k)}: {v}</span>' for k,v in statuses.items())}</span></p>
 <p>Measurement source hashes: <code>{sources}</code></p>
 <p>Fixture inputs: <a href="inputs/horizon01-t02.json">T=2</a>, <a href="inputs/horizon01-t04.json">T=4</a>,
-<a href="inputs/horizon01-t08.json">T=8</a>. See the <a href="README.md">benchmark instructions</a> for rebuild and replay commands.</p>
+<a href="inputs/horizon01-t08.json">T=8</a>. Replay a bounded capture with <code>run_horizon_ladder.py --driver &lt;Release-driver&gt; --scenarios &lt;fixture-directory&gt; --output &lt;new-empty-directory&gt; --resource-receipts</code>; the runner verifies the source worktree is clean and records the exact source revision and fixture hashes.</p>
 </body></html>
 """
     (bundle / "index.html").write_text(document, encoding="utf-8")

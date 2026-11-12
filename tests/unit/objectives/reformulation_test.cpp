@@ -50,7 +50,7 @@ TEST_CASE("wide rectangular reformulation retains literal coefficients and origi
     check_costs(record, {4, 1, 7}, 5, 25);
 }
 
-// Complete analytic sets are derived in docs/contracts/objective-test-oracles.md.
+// Literal expected values below are independent of the implementation under test.
 // These finite witnesses check evaluation; the API is not enumerating minimizers.
 TEST_CASE("zero minimum on the bounded segment retains endpoints and interior") {
     const auto record = accepted(square_residual_norm(accepted(snapshot(
