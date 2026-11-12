@@ -23,6 +23,25 @@ template<class T,class... E> T take(std::variant<T,E...> result) {
     },result);
     throw Rejected{invalid(std::move(reason))};
 }
+bool finite_values(std::span<const double> values) {
+    return std::all_of(values.begin(),values.end(),[](double value){return std::isfinite(value);});
+}
+bool matrix_shape(const Matrix& A,std::size_t rows,std::size_t cols) {
+    return (!rows || cols<=std::numeric_limits<std::size_t>::max()/rows) &&
+        A.rows==rows && A.cols==cols && A.values.size()==rows*cols && finite_values(A.values);
+}
+bool row_shape(const FixedTailHRows& h,std::size_t dimension) {
+    return matrix_shape(h.inequalities,h.upper_bounds.size(),dimension) &&
+        matrix_shape(h.equalities,h.equality_values.size(),dimension) &&
+        finite_values(h.upper_bounds) && finite_values(h.equality_values);
+}
+std::size_t history_size(const JointCoordinates& coordinates) {
+    const auto n=coordinates.dimensions.state,m=coordinates.dimensions.control,T=coordinates.horizon;
+    const auto maximum=std::numeric_limits<std::size_t>::max();
+    if(!n || coordinates.dimensions.external!=0 || T==maximum || n>maximum/(T+1) ||
+       (T && m>(maximum-(T+1)*n)/T))throw Rejected{invalid("canonical history dimensions are invalid or overflow")};
+    return (T+1)*n+T*m;
+}
 Matrix identity(std::size_t n) { Matrix out{n,n,Vector(n*n,0)};for(std::size_t i=0;i<n;++i)out.values[i*n+i]=1;return out; }
 Matrix copy(numeric::MatrixView A) {
     Matrix out{A.rows(),A.cols(),{}};
@@ -258,6 +277,74 @@ FixedTailRegion region(const FixedTailModel& model,const Vector& anchor,std::siz
 }
 }
 
+Diagnostics check_full_history_lift(const FullHistoryLift& lift,std::size_t primary_dimension) {
+    try {
+        const auto dimension=history_size(lift.coordinates);
+        if(!matrix_shape(lift.map,dimension,primary_dimension) || lift.offset.size()!=dimension || !finite_values(lift.offset))
+            return {invalid("history lift requires finite dimension-matched matrix storage and offset")};
+        return {};
+    }catch(const Rejected& error){return {error.error};}
+}
+Diagnostics check_fixed_tail_solve_request(const FixedTailSolveRequest& request) {
+    auto errors=check_full_history_lift(request.lift,request.initial_primary.size());
+    if(!errors.empty())return errors;
+    const auto dimension=request.lift.offset.size();
+    const auto n=request.lift.coordinates.dimensions.state;
+    const auto horizon=request.lift.coordinates.horizon;
+    const auto& cost=request.source_cost;
+    const auto& c=cost.coordinates;
+    if(request.identity.problem.value.empty() || request.identity.program.value.empty() || request.initial_primary.empty() ||
+       !finite_values(request.initial_primary) || c.horizon!=horizon || c.dimensions.state!=n ||
+       c.dimensions.control!=request.lift.coordinates.dimensions.control || c.dimensions.external!=0)
+        return {invalid("optimizer identity, initialization or source cost coordinates differ")};
+    if(!row_shape(request.domain,dimension))return {invalid("optimizer H rows require finite complete matrix and bound storage")};
+    const auto& q=cost.quadratic;
+    if(q.dimension!=dimension || !matrix_shape(q.Q,dimension,dimension) || q.linear.size()!=dimension ||
+       !finite_values(q.linear) || !std::isfinite(q.offset))return {invalid("optimizer quadratic storage is malformed or nonfinite")};
+    for(const auto& term:cost.residual_norms) {
+        if(!matrix_shape(term.map,term.target.size(),dimension) || term.weights.size()!=term.target.size() ||
+           !finite_values(term.target) || !finite_values(term.weights) ||
+           std::any_of(term.weights.begin(),term.weights.end(),[](double value){return value<0;}) ||
+           !std::isfinite(term.coefficient) || term.coefficient<0)
+            return {invalid("optimizer residual norm storage or weights are malformed")};
+    }
+    if(request.feasibility_only) {
+        if(request.lift.map.cols!=dimension || !request.regions.empty())return {invalid("feasibility requires the unrestricted canonical base history")};
+        for(std::size_t i=0;i<dimension;++i) {
+            if(request.lift.offset[i]!=0)return {invalid("feasibility base-history lift must be identity")};
+            for(std::size_t j=0;j<dimension;++j)if(request.lift.map.values[i*dimension+j]!=(i==j?1.0:0.0))
+                return {invalid("feasibility base-history lift must be identity")};
+        }
+    } else {
+        if(!request.strictly_positive_history_coordinates.empty() || request.lift.map.cols!=c.dimensions.control)
+            return {invalid("reduced solve frees only the current action and uses explicit inner strict-domain margins")};
+        for(std::size_t i=0;i<n*request.lift.map.cols;++i)if(request.lift.map.values[i]!=0)
+            return {invalid("reduced history lift must keep the observed initial state fixed")};
+    }
+    for(const auto index:request.strictly_positive_history_coordinates)
+        if(index>=dimension || request.initial_primary[index]<=0)return {invalid("positive history initialization is invalid")};
+    for(const auto& region:request.regions) {
+        if(region.stage.value>horizon || !row_shape(region.reference,n))return {invalid("region stage or H storage is malformed")};
+        switch(region.family) {
+        case FixedTailFamily::polytope:
+            if(region.inner)return {invalid("polytope membership must retain its original H reference")};
+            break;
+        case FixedTailFamily::box:case FixedTailFamily::parallelotope:case FixedTailFamily::zonotope:case FixedTailFamily::ellipsoid: {
+            if(!region.inner)return {invalid("selected physical family is missing its inner factor")};
+            const auto& set=*region.inner;
+            const auto expected=region.family==FixedTailFamily::ellipsoid?InnerTemplateNorm::euclidean_ball:InnerTemplateNorm::independent_intervals;
+            if(set.center.size()!=n || !finite_values(set.center) || !matrix_shape(set.factor,n,set.factor.cols) ||
+               set.norm!=expected || !std::isfinite(set.radius) || set.radius<0 ||
+               set.point!=std::all_of(set.factor.values.begin(),set.factor.values.end(),[](double value){return value==0;}))
+                return {invalid("physical inner factor storage, norm or point claim is malformed")};
+            break;
+        }
+        default:return {invalid("unknown physical inner family")};
+        }
+    }
+    return {};
+}
+
 FixedTailModelResult prepare_fixed_tail(const problem::ResolvedProblem& source,
         const optimization::RunningControlCost& running,std::size_t offset) {
     try {
@@ -323,6 +410,9 @@ std::variant<TailStateLift,Diagnostic> fixed_tail_state_lift(const FixedTailMode
     }catch(const Rejected& e){return e.error;}
 }
 std::variant<Vector,Diagnostic> recover_fixed_tail_history(const FullHistoryLift& lift,std::span<const double> current) {
+    const auto errors=check_full_history_lift(lift,current.size());
+    if(!errors.empty())return errors.front();
+    if(!finite_values(current))return invalid("recovered current control must be finite");
     try {return image(lift.map,current,lift.offset);}catch(const Rejected& e){return e.error;}
 }
 std::variant<FixedTailInitialization,Diagnostic> initialize_fixed_tail(const FixedTailModel& model,
@@ -394,7 +484,11 @@ FixedTailPolicyOutcome fixed_tail_policy(const FixedTailPolicyRequest& request,
             std::move(full),{},request.shifted_initial_history,true,positives});
         if(const auto* stop=std::get_if<OperationStopped>(&anchor_outcome))return *stop;
         auto anchor=take(std::move(anchor_outcome));failure.feasibility=anchor;
+        if(anchor.history.size()!=dimension || anchor.primary.size()!=dimension || !finite_values(anchor.history) ||
+           !finite_values(anchor.primary) || !std::isfinite(anchor.objective))
+            throw Rejected{invalid("feasibility provider returned malformed or nonfinite history storage")};
         if(anchor.supplied_initial_primary!=request.shifted_initial_history ||
+           anchor.provider_initial_primary_readback.size()!=dimension || !finite_values(anchor.provider_initial_primary_readback) ||
            std::any_of(anchor.supplied_initial_duals.begin(),anchor.supplied_initial_duals.end(),[](double v){return v!=0;}))
             throw Rejected{invalid("feasibility optimizer did not retain shifted primal and zero supplied duals")};
         auto recovered_anchor=anchor.history;
@@ -418,6 +512,13 @@ FixedTailPolicyOutcome fixed_tail_policy(const FixedTailPolicyRequest& request,
             lift,failure.region_prefix,first,false,{}});
         if(const auto* stop=std::get_if<OperationStopped>(&solved_outcome))return *stop;
         auto solved=take(std::move(solved_outcome));failure.reduced_argmin=solved;
+        if(solved.primary.size()!=m || solved.history.size()!=dimension || !finite_values(solved.primary) ||
+           !finite_values(solved.history) || !std::isfinite(solved.objective))
+            throw Rejected{invalid("reduced provider returned malformed or nonfinite history storage")};
+        if(solved.supplied_initial_primary!=first || solved.provider_initial_primary_readback.size()!=m ||
+           !finite_values(solved.provider_initial_primary_readback) ||
+           std::any_of(solved.supplied_initial_duals.begin(),solved.supplied_initial_duals.end(),[](double value){return value!=0;}))
+            throw Rejected{invalid("reduced optimizer did not retain the recovered initial primal and zero supplied duals")};
         auto recovered_control=solved.primary;
         recover_authored_fixed_first_input(model,recovered_control);
         auto history=take(recover_fixed_tail_history(lift,recovered_control));

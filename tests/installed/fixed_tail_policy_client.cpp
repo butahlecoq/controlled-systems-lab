@@ -65,6 +65,18 @@ int run() {
     require(!providers.add(std::move(registration)),"native provider registration failed");
     registry::Requirements requirements;requirements.output.representation={"csl.fixed-tail-solve.v1"};
     auto selected=take(registry::prepare_provider(registry::select_provider(providers,method,requirements)));
+    {
+        const auto model=example();
+        const auto count=model.source_cost.quadratic.dimension;
+        Matrix I{count,count,Vector(count*count,0)};
+        for(std::size_t j=0;j<count;++j)I.values[j*count+j]=1;
+        FixedTailSolveRequest malformed{{model.problem,{"malformed-native-admission"}},model.full_history,model.source_cost,
+            {model.source_cost.coordinates,I,Vector(count,0)},{},Vector(count,0),true,{}};
+        malformed.domain.inequalities.values.clear();
+        const auto adapter=adapters::nlp::make_casadi_fixed_tail_registration();
+        require(std::holds_alternative<Diagnostics>(adapter.capabilities(malformed,requirements)),
+                "native CasADi adapter offered malformed external H storage");
+    }
     const ExecutionContext context{std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}}),{},{},{1e-7,1e-8},"fixed-tail-native-test"};
     for(const auto family:{FixedTailFamily::polytope,FixedTailFamily::box,FixedTailFamily::zonotope,FixedTailFamily::parallelotope,FixedTailFamily::ellipsoid}) {
         auto model=example();

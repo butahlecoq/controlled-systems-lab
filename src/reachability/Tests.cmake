@@ -83,3 +83,8 @@ if(TARGET CSL::casadi_fixed_tail)
   add_test(NAME fixed_tail_native_tests COMMAND fixed_tail_native_tests)
   csl_test_target(fixed_tail_native_tests reachability)
 endif()
+
+add_executable(fixed_tail_validation_tests tests/unit/reachability/fixed_tail_validation_tests.cpp)
+target_link_libraries(fixed_tail_validation_tests PRIVATE CSL::fixed_tail_policy)
+add_test(NAME fixed_tail_validation_tests COMMAND fixed_tail_validation_tests)
+csl_test_target(fixed_tail_validation_tests reachability)

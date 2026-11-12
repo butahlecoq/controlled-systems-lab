@@ -122,11 +122,8 @@ public:
 registry::Registration<registry::FixedTailOptimizerPort> make_casadi_fixed_tail_registration() {
     return {{{"csl.nlp.casadi-ipopt.fixed-tail"},"1"},
         [](const FixedTailSolveRequest& request,const registry::Requirements&)->registry::Capability {
-            const auto dim=request.lift.offset.size();const auto count=request.initial_primary.size();
-            if(!count || !dim || request.lift.map.rows!=dim || request.lift.map.cols!=count || request.lift.map.values.size()!=dim*count ||
-               request.domain.inequalities.cols!=dim || request.domain.equalities.cols!=dim ||
-               request.source_cost.quadratic.dimension!=dim)
-                return Diagnostics{{DiagnosticCode::invalid_input,"fixed_tail.casadi_shape","source cost, lift and domain dimensions differ"}};
+            auto diagnostics=check_fixed_tail_solve_request(request);
+            if(!diagnostics.empty())return diagnostics;
             return registry::Offer{{{"csl.fixed-tail-solve.v1"},Assurance::numerical,{},{},{}}};
         },
         [](const FixedTailSolveRequest&)->std::unique_ptr<FixedTailOptimizerWorkspace> {return std::make_unique<NativeWorkspace>();}};

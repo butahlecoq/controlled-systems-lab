@@ -18,6 +18,8 @@ struct FullHistoryLift {
     Matrix map;
     Vector offset;
 };
+Diagnostics check_full_history_lift(const FullHistoryLift&,std::size_t primary_dimension);
+
 struct FixedTailModel {
     ProblemId problem;
     std::vector<LinearStage> stages;
@@ -74,6 +76,8 @@ struct FixedTailSolveRequest {
     bool feasibility_only;
     std::vector<std::size_t> strictly_positive_history_coordinates;
 };
+Diagnostics check_fixed_tail_solve_request(const FixedTailSolveRequest&);
+
 struct FixedTailSolveResult {
     Vector primary,history;
     double objective;
