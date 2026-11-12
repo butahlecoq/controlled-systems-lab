@@ -194,6 +194,21 @@ void set_hint(Highs& h,const HighsSolution& start,std::ostringstream& raw,const 
     require(status);
     if(!retained) throw SetupError("native primal hint readback differs");
 }
+HighsBasis qp_start_basis(const HighsLp& lp,HighsBasis basis,std::ostringstream& raw) {
+    std::size_t inactive_free_rows=0;
+    for(std::size_t i=0;i<basis.row_status.size();++i) {
+        // The QP initializer represents inactive rows with kNonbasic. A warm
+        // simplex basis can instead label a nonbasic free slack kZero.
+        // Preserve the basic partition, primal values and all bound statuses.
+        if(lp.row_lower_[i]==-kHighsInf && lp.row_upper_[i]==kHighsInf &&
+            basis.row_status[i]==HighsBasisStatus::kZero) {
+            basis.row_status[i]=HighsBasisStatus::kNonbasic;
+            ++inactive_free_rows;
+        }
+    }
+    raw<<"\nphase.qp.basis.inactive_free_rows="<<inactive_free_rows;
+    return basis;
+}
 bool feasible_start(const Highs& h,const HighsLp& lp,const ConvexProgram& p,double tolerance) {
     const auto& s=h.getSolution(); const auto& b=h.getBasis();
     const auto n=static_cast<std::size_t>(lp.num_col_),m=static_cast<std::size_t>(lp.num_row_);
@@ -385,13 +400,14 @@ class Workspace final : public ConvexWorkspace {
                 auto& h=*solver_; configure(h,c,options_,true); highs_detail::CallbackGuard qp_callbacks(h,capture,require);
                 require(h.passModel(model));
                 HighsSolution start=phase.getSolution(); start.dual_valid=false; start.col_dual.clear(); start.row_dual.clear();
-                require(h.setSolution(start)); require(h.setBasis(phase.getBasis()));
+                const auto basis=qp_start_basis(model.lp_,phase.getBasis(),raw);
+                require(h.setSolution(start)); require(h.setBasis(basis));
                 bool warm=false; double tolerance=0;
                 require(h.getOptionValue("use_warm_start",warm)); require(h.getOptionValue("dual_feasibility_tolerance",tolerance));
                 if(!warm || !feasible_start(h,model.lp_,p,tolerance)) {raw<<"\nqp_run=false\nstart.valid=false";return finish();}
                 if(auto hint=p.primal_start()) {
                     set_hint(h,primal_hint(model.lp_,*hint),raw,"phase.qp");
-                    require(h.setBasis(phase.getBasis()));
+                    require(h.setBasis(basis));
                     const bool hint_feasible=feasible_start(h,model.lp_,p,tolerance);
                     raw<<"\nphase.qp.primal_start.feasible="<<(hint_feasible?"true":"false");
                     if(!hint_feasible) {
@@ -400,7 +416,7 @@ class Workspace final : public ConvexWorkspace {
                         start.col_dual.assign(model.lp_.num_col_,0);
                         start.row_dual.assign(model.lp_.num_row_,0);
                         require(h.setSolution(start));
-                        require(h.setBasis(phase.getBasis()));
+                        require(h.setBasis(basis));
                     }
                 }
                 if(p.primal_start()) {

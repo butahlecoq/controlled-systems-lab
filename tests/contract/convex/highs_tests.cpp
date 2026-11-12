@@ -89,6 +89,30 @@ TEST_CASE("primal hints are owned snapshots with unchanged problem identity and 
     CHECK(result.raw_diagnostics.find("phase.qp.primal_start.feasible=true")!=std::string::npos);
     CHECK(result.raw_diagnostics.find("phase.qp.actual_start.source=submitted-primal")!=std::string::npos);
     CHECK(result.raw_diagnostics.find("phase.qp.actual_start.primal=1.25,")!=std::string::npos);
+    CHECK(result.raw_diagnostics.find("phase.qp.basis.inactive_free_rows=1")!=std::string::npos);
+}
+
+TEST_CASE("QP starts retain free-row primal hints and disclose infeasible-hint repair") {
+    for(const double hint:{1.25,6.0,-1.0}) {
+        auto input=parabola();
+        input.constraints={1,1,{0,1},{0},{1}};
+        input.rows={{}};
+        const auto source=accepted(make_convex_program(input));
+        const auto hinted=accepted(with_primal_start(source,Vector{hint}));
+        auto [worker]=prepare(hinted).create();
+        const auto result=accepted(worker->run(context()));
+        optimum(result,hinted,0);
+        CHECK(result.raw_diagnostics.find("model.private_free_row=false")!=std::string::npos);
+        CHECK(result.raw_diagnostics.find("phase.qp.primal_start.retained=true")!=std::string::npos);
+        if(hint==1.25) {
+            CHECK(result.raw_diagnostics.find("phase.qp.basis.inactive_free_rows=1")!=std::string::npos);
+            CHECK(result.raw_diagnostics.find("phase.qp.actual_start.source=submitted-primal")!=std::string::npos);
+        } else {
+            CHECK(result.raw_diagnostics.find("phase.qp.primal_start.repair=feasibility-phase-solution")!=std::string::npos);
+            CHECK(result.raw_diagnostics.find("phase.qp.actual_start.source=feasibility-phase-repair")!=std::string::npos);
+        }
+        CHECK(result.raw_diagnostics.find("phase.qp.actual_start.row_duals=0,")!=std::string::npos);
+    }
 }
 
 TEST_CASE("registered quadratic interior and boundary optima retain original numerical KKT evidence") {
