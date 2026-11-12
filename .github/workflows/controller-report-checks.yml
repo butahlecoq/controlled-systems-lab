@@ -74,6 +74,8 @@ jobs:
           build/controller-report-env/bin/python -m pip check
       - name: Require actual controller dependencies before selecting full tests
         run: build/controller-report-env/bin/python -c 'import sys,numpy,scipy,casadi,do_mpc; assert sys.version_info[:3] == (3,11,14)'
+      - name: Check source-bound native capability catalogue before discovery
+        run: build/controller-report-env/bin/python -m unittest tests.reporting.test_closed_loop_native_capabilities
       - name: Install the CMake version required by CSL
         run: python -m pip install cmake==3.31.6
       - name: Build the shared CSL nonlinear replay bridge

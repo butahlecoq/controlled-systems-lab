@@ -16,6 +16,7 @@ def read_jsonl(path: Path) -> list[dict]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--bundle", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     root = args.bundle
     attempts = read_jsonl(root / "attempts.jsonl")
@@ -97,7 +98,7 @@ def main() -> int:
         "",
         f"The independent exact-rational checker verified feasibility and objective bounds for {len(exact)} native attempts classified as optimal. Native solver classifications for singular, infeasible and unbounded cases remain separate; non-optimal attempts are retained in `attempts.jsonl` and their canonical records.",
         "",
-        "A separate [source-mapped gprof limiter profile](../mpc01-source-mapped-profile-20261102/README.md) attributes sampled OSQP time to QDLDL triangular solves on its 20-repetition workload. It was instrumented with `-pg` and is excluded from these Release timings; the current measurements do not establish a general limiter outside that workload.",
+        "A separate [source-mapped gprof limiter profile](../mpc01-source-mapped-profile-20261102/README.txt) attributes sampled OSQP time to QDLDL triangular solves on its 20-repetition workload. It was instrumented with `-pg` and is excluded from these Release timings; the current measurements do not establish a general limiter outside that workload.",
         "",
         "Solve timings below are native solver phase timings, reported as descriptive medians and ranges of five repetitions per fixture/arm. Warm attempts include a same-process cold seed solve inside their attempt resource budget; the seed solve time is retained separately in each event. These rows do not establish a general solver winner or end-to-end MPC latency.",
         "",
@@ -129,7 +130,8 @@ def main() -> int:
         "- `SHA256SUMS`: bundle integrity manifest.",
         "",
     ]
-    (root / "benchmark-summary.md").write_text("\n".join(lines), encoding="utf-8")
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text("\n".join(lines), encoding="utf-8")
     return 0
 
 

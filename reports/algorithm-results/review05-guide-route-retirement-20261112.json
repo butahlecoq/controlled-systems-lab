@@ -1,0 +1,49 @@
+{
+  "schema": "csl.retired-working-guide-route/1",
+  "status": "working-guide-retired-from-current-tree",
+  "historical_citations": [
+    {
+      "report_route": "review05-horizon-match-20261031/README.md",
+      "href": "../../../benchmarks/reporting/review05/README.md",
+      "page_url": "https://butahlecoq.github.io/controlled-systems-lab/review05-horizon-match-20261031/README.md",
+      "historical_resolution": "https://butahlecoq.github.io/benchmarks/reporting/review05/README.md",
+      "resolution_scope": "outside-project"
+    },
+    {
+      "report_route": "review05-dimension-20261031/README.md",
+      "href": "../../../benchmarks/reporting/review05/README.md",
+      "page_url": "https://butahlecoq.github.io/controlled-systems-lab/review05-dimension-20261031/README.md",
+      "historical_resolution": "https://butahlecoq.github.io/benchmarks/reporting/review05/README.md",
+      "resolution_scope": "outside-project"
+    }
+  ],
+  "current_project_route": {
+    "repository_path": "benchmarks/reporting/review05/README.md",
+    "status": "retired-from-current-tree",
+    "public_alias": "https://butahlecoq.github.io/controlled-systems-lab/benchmarks/reporting/review05/README.md",
+    "source_metadata": "https://butahlecoq.github.io/controlled-systems-lab/benchmarks/reporting/review05/route-retirement.json"
+  },
+  "retained_source": {
+    "git": {
+      "commit": "8abaf50b1dc612eeb9deaf1827c8e57042e8364f",
+      "path": "benchmarks/reporting/review05/README.md",
+      "sha256": "838d25b02d6514fc8270df78fc8bdbee04d8baaaf66cbccd0f90a2b19bb99386",
+      "reachable_from": "refs/remotes/origin/main"
+    },
+    "sealed_capture": {
+      "path": "reports/algorithm-results/review05-highs-clocks-8abaf50b-20261109/capture.zip",
+      "sha256": "f7c8f38f30ce3152f87f95fe0563404069b8d0c3dfc78d6bdaec675180e4d836",
+      "outer_manifest_path": "reports/algorithm-results/review05-highs-clocks-8abaf50b-20261109/SHA256SUMS",
+      "outer_manifest_sha256": "beee799a2bebedf489f165079b172c4967da6ab79b42642ffa0226bbb961c1c7",
+      "member": "README.md",
+      "member_size_bytes": 11761,
+      "member_sha256": "838d25b02d6514fc8270df78fc8bdbee04d8baaaf66cbccd0f90a2b19bb99386"
+    }
+  },
+  "preservation": {
+    "sealed_report_readmes_and_capture_zip_modified": false,
+    "current_working_guide_restored": false,
+    "historical_relative_citations_rewritten": false,
+    "old_host_root_citation_fixed": false
+  }
+}

@@ -30,8 +30,9 @@ def authenticated(folder):
         expected[m[2]]=m[1]
     builder.require(expected==hashes,'capture inventory differs');env=load(folder/'environment.json');revision=env.get('source_revision')
     builder.require(env['schema']=='csl.mpc06.offline-capture/1' and isinstance(revision,str) and re.fullmatch('[0-9a-f]{40}',revision),'invalid capture source identity')
-    builder.require(set(env['source_sha256'])==set(study.FILES),'mandatory captured source inventory differs')
-    builder.require({n[7:] for n in hashes if n.startswith('source/')}==set(study.FILES),'copied source inventory differs')
+    captured_sources=set(env['source_sha256'])
+    builder.require(captured_sources in (set(study.FILES),set(study.HISTORICAL_FILES)),'mandatory captured source inventory differs')
+    builder.require({n[7:] for n in hashes if n.startswith('source/')}==captured_sources,'copied source inventory differs')
     for name,checksum in env['source_sha256'].items():
         data=(folder/'source'/name).read_bytes();committed=subprocess.check_output(['git','show','--end-of-options',revision+':'+name],cwd=ROOT)
         builder.require(study.sha(data)==checksum and data==committed,'captured source differs from Git')
@@ -97,9 +98,11 @@ def check(folder):
 
 def checked_receipt(folder,path):
     saved=load(path);revision=saved.get('checking_revision');builder.require(isinstance(revision,str) and re.fullmatch('[0-9a-f]{40}',revision),'full checking revision required')
-    _,sources=reader_identity();builder.require(saved.get('checking_sources')==sources,'mandatory checking source inventory differs')
+    sources=saved.get('checking_sources')
+    builder.require(isinstance(sources,dict) and set(sources) in (set(study.FILES),set(study.HISTORICAL_FILES)),'mandatory checking source inventory differs')
     for name,checksum in sources.items():builder.require(study.sha(subprocess.check_output(['git','show','--end-of-options',revision+':'+name],cwd=ROOT))==checksum,'checking source differs from recorded Git')
-    current=check(folder);builder.require({k:v for k,v in current.items() if k!='checking_revision'}=={k:v for k,v in saved.items() if k!='checking_revision'},'receipt differs from actual saved replay');return saved
+    current=check(folder);current['checking_revision']=revision;current['checking_sources']=sources
+    builder.require(current==saved,'receipt differs from actual saved replay');return saved
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--capture',type=Path,required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args()

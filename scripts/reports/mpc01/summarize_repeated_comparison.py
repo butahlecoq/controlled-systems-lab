@@ -273,7 +273,7 @@ def main() -> None:
         f"Solver iteration counts explain work per solve: cold B04 OSQP used 33,125 iterations, while HPIPM used 30. {profile_summary} The timed run did not enforce per-attempt wall or memory caps; its records mark memory as unlimited. It is a local exploratory measurement rather than the enforced-comparison resource profile. These tiny QP cases are microbenchmarks. They do not establish end-to-end planning latency or a control-strategy winner. Host load sampled just after this run was {args.host_load} with 8 logical CPUs.",
         "",
     ])
-    (output / "benchmark-summary.md").write_text("\n".join(markdown), encoding="utf-8")
+    (output / "benchmark-summary.txt").write_text("\n".join(markdown), encoding="utf-8")
 
     chosen_rows = []
     chosen_meta = []
@@ -323,7 +323,7 @@ def main() -> None:
     html = html.replace("Download the two saved native attempt rows", "Download the two representative native attempt rows")
     html = html.replace('</p>\n<div class="scope">',
         ' · <a href="comparison-records.jsonl" download>Download canonical comparison records</a>'
-        ' · <a href="benchmark-summary.md">Open timing summary</a></p>\n<div class="scope">')
+        ' · <a href="benchmark-summary.txt">Open timing summary</a></p>\n<div class="scope">')
     html = html.replace("This is one smoke capture, with one cold attempt per solver. It is an illustration of returned solver trajectories, not a repeated benchmark, canonical comparison record, independent optimality proof, or reconstruction of historical B04.",
                         "This figure summarizes a five-repetition comparison through representative individual cold trajectories selected by median solve-time proximity. It is not an averaged path, independent optimality proof, or reconstruction of historical B04.")
     html = html.replace("python3 scripts/reports/mpc01/b04_native_smoke_projection.py",

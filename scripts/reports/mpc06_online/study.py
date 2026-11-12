@@ -92,7 +92,7 @@ def run(driver,output,repetitions):
         representations=representation_checks(),grid=grid(),attempts=[],processes=[],repetitions=repetitions,
         timing_scope='native prepare/setup/solve separate; Python exact construction and checker separate; IPC/end-to-end separate; no performance winner')
     (output/'source').mkdir()
-    for path in (Path(__file__),Path(__file__).with_name('model.py'),Path(__file__).with_name('check.py'),Path(__file__).with_name('render.py'),Path(__file__).with_name('evidence.py'),root/'benchmarks/reporting/mpc06_online/README.md',root/'benchmarks/reporting/mpc06_online/driver.cpp',root/'benchmarks/reporting/mpc06_online/CMakeLists.txt'):
+    for path in (Path(__file__),Path(__file__).with_name('model.py'),Path(__file__).with_name('check.py'),Path(__file__).with_name('render.py'),Path(__file__).with_name('evidence.py'),root/'benchmarks/reporting/mpc06_online/driver.cpp',root/'benchmarks/reporting/mpc06_online/CMakeLists.txt'):
         (output/'source'/path.name).write_bytes(path.read_bytes())
     cache=driver.parent/'CMakeCache.txt'
     if cache.exists():(output/'CMakeCache.txt').write_bytes(cache.read_bytes())

@@ -8,7 +8,7 @@ MAP_SCHEMA = "csl.algorithm-report-publication-map/1"
 CATALOG_SCHEMA = "csl.algorithm-report-catalog/3"
 ENVELOPE_SCHEMA = "csl.algorithm-report-envelope/1"
 STAGED_SOURCE_FILES = [
-    "README.md", "build-log.txt", "build-provenance.json", "collect.py",
+    "build-log.txt", "build-provenance.json", "collect.py",
     "configure-log.txt", "environment.json", "etw-profile-attempt.txt",
     "latency.svg", "manifest.json", "measurement-command.txt",
     "profile-evidence.json", "profile-note.txt", "profile-raw.jsonl",
@@ -16,6 +16,8 @@ STAGED_SOURCE_FILES = [
     "render_saved.py", "summary.csv", "terminal_driver.cpp", "test_report.py", "trials.csv",
 ]
 STAGED_FILES = sorted([*STAGED_SOURCE_FILES, "index.html", "report-envelope.json"])
+HISTORICAL_STAGED_SOURCE_FILES = sorted([*STAGED_SOURCE_FILES, "README.md"])
+HISTORICAL_STAGED_FILES = sorted([*HISTORICAL_STAGED_SOURCE_FILES, "index.html", "report-envelope.json"])
 
 
 def canonical(value):

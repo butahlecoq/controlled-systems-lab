@@ -80,12 +80,12 @@ def source_export(raw,checking):
         for name,checksum in paths.items():
             parts=safe(name).parts;require(digest(subprocess.check_output(['git','show','--end-of-options',commit+':'+name],cwd=ROOT))==checksum,'source digest differs from Git')
             for size in range(1,len(parts)+1):include(subprocess.check_output(['git','rev-parse',commit+':'+str(PurePosixPath(*parts[:size]))],cwd=ROOT,text=True).strip())
-    files['.git/HEAD']=b'ref: refs/heads/evidence\n';files['.git/refs/heads/evidence']=(checking['checking_revision']+'\n').encode();files['.git/config']=b'[core]\nrepositoryformatversion = 0\nbare = false\n'
+    files['.git/HEAD']=b'ref: refs/heads/evidence\n';files['.git/refs/heads/evidence']=(revision+'\n').encode();files['.git/config']=b'[core]\nrepositoryformatversion = 0\nbare = false\n'
     return files,dict(helper_revision=revision,checking_revision=checking['checking_revision'],helper_sha256={n:digest(files[n]) for n in HELPERS},object_count=len(objects))
 
 def verify_export(root,receipt):
     require(set(receipt['helper_sha256'])==set(HELPERS),'mandatory helper inventory differs');revision=receipt['helper_revision'];checked=receipt['checking_revision'];require(all(isinstance(v,str) and re.fullmatch('[0-9a-f]{40}',v) for v in (revision,checked)),'invalid source revision')
-    git=root/'.git';require((git/'config').read_bytes()==b'[core]\nrepositoryformatversion = 0\nbare = false\n' and (git/'HEAD').read_bytes()==b'ref: refs/heads/evidence\n' and (git/'refs/heads/evidence').read_bytes()==(checked+'\n').encode(),'Git configuration differs')
+    git=root/'.git';require((git/'config').read_bytes()==b'[core]\nrepositoryformatversion = 0\nbare = false\n' and (git/'HEAD').read_bytes()==b'ref: refs/heads/evidence\n' and (git/'refs/heads/evidence').read_bytes()==(revision+'\n').encode(),'Git configuration differs')
     count=0
     for p in git.rglob('*'):
         require(not p.is_symlink(),'source proof symlink')
