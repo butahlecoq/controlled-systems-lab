@@ -15,6 +15,13 @@ from render_b04_c_exact_fiber_report import main as render_report
 ROOT = Path(__file__).resolve().parents[3]
 BUNDLE = ROOT / "docs/research/evidence/b04-c-exact-dyadic-v1"
 PUBLICATION_BUNDLE = ROOT / "reports/algorithm-results/b04-c-exact-dyadic-v1"
+FROZEN_SOURCE_HASHES = {
+    # These hashes identify historical inputs to the published report. They
+    # remain part of its provenance after working prose is removed or tooling
+    # changes; neither is a current runtime dependency.
+    "docs/research/tools/README.md": "cfefd0e48e8dba4789af5b1055c4dae997b5a8216287ebf97622161803d50d25",
+    "docs/research/tools/finalize_b04_c_exact_fiber.py": "b6ea85fe3835344f6ec17ec003e0dbf6ccd501f035212ea54879a2c2f9e0367d",
+}
 
 
 def digest(path: Path) -> str:
@@ -62,7 +69,10 @@ def main() -> None:
         "source_commit": json.loads(DEFAULT_RECORD.read_text(encoding="utf-8"))["source_commit"],
         "publication_scope": "Research-only report-index entry: external Python exact-arithmetic audit, not a registered Strategy A result or compiled complete-family publication. The numerical source commit remains the record source_commit.",
         "evidence_files": {name: digest(BUNDLE / name) for name in evidence_files},
-        "source_files": {name: digest(ROOT / name) for name in source_files},
+        "source_files": {
+            name: FROZEN_SOURCE_HASHES[name] if name in FROZEN_SOURCE_HASHES else digest(ROOT / name)
+            for name in source_files
+        },
         "verification": verified,
         "commands": [
             "python docs/research/tools/build_b04_c_exact_fiber.py",

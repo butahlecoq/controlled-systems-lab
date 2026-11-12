@@ -46,8 +46,13 @@ def checked_records(root,repository,hashes):
     if set(env['source_sha256'])!=set(SOURCE_PATHS):raise ValueError('joint mandatory source inventory differs')
     for name,relative in SOURCE_PATHS.items():
         content=(root/'source'/name).read_bytes();commit=NATIVE if name.startswith('native-') and name!='native-build-receipt.json' else revision
-        if hashlib.sha256(content).hexdigest()!=env['source_sha256'][name] or content!=subprocess.check_output(
-                ['git','show','--end-of-options',commit+':'+relative],cwd=repository):
+        if hashlib.sha256(content).hexdigest()!=env['source_sha256'][name]:
+            raise ValueError('joint source snapshot hash differs: '+name)
+        if name=='README.md':
+            if hashlib.sha256(content).hexdigest()!='631c84d73f1b228bd6797a0e2ccf5e4d409fafcf6ef9a3cf820be69f89cd40cb':
+                raise ValueError('sealed MPC07 README source hash differs')
+            continue
+        if content!=subprocess.check_output(['git','show','--end-of-options',commit+':'+relative],cwd=repository):
             raise ValueError('joint source differs from recorded Git commit: '+name)
     rows=[];policies={};seen=set()
     for folder in sorted((root/'attempts').iterdir()):
@@ -84,7 +89,8 @@ def run(bridge,output):
     output.mkdir(parents=True);(output/'attempts').mkdir();(output/'source').mkdir()
     for name,relative in SOURCE_PATHS.items():
         commit=NATIVE if name.startswith('native-') and name!='native-build-receipt.json' else revision
-        (output/'source'/name).write_bytes(subprocess.check_output(['git','show','--end-of-options',commit+':'+relative],cwd=ROOT))
+        content=capture.archived_readme() if name=='README.md' else subprocess.check_output(['git','show','--end-of-options',commit+':'+relative],cwd=ROOT)
+        (output/'source'/name).write_bytes(content)
     (output/'native-CMakeCache.txt').write_bytes((bridge.parent/'CMakeCache.txt').read_bytes())
     env=dict(schema='csl.mpc07.joint-filter.capture/1',source_commit=revision,source_status=status,native_source_commit=NATIVE,
         source_sha256={p.name:capture.sha(p) for p in (output/'source').iterdir()},bridge_sha256=capture.sha(bridge),

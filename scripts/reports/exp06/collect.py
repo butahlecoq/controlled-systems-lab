@@ -136,8 +136,7 @@ def main() -> int:
     if args.lp_reducer:
         harness_sources.extend(identity_file(path) for path in (
             "benchmarks/reporting/exp06/lp_reducer_run.cpp", "src/geometry/a43_paper_reducer.cpp",
-            "src/geometry/hull/itis17_reducers.cpp", "src/optimization/phase_one/simplex.cpp",
-            "docs/research/itis17-paper-reducers-cpp-adaptation.md"))
+            "src/geometry/hull/itis17_reducers.cpp", "src/optimization/phase_one/simplex.cpp"))
     load_average = os.getloadavg() if hasattr(os, "getloadavg") else None
     cpu_model = "unknown"
     cpu_info = Path("/proc/cpuinfo")
@@ -191,12 +190,10 @@ def main() -> int:
         source_lp = [identity_file("src/geometry/a43_paper_reducer.cpp"),
             identity_file("src/geometry/hull/itis17_reducers.cpp"),
             identity_file("src/optimization/phase_one/simplex.cpp"),
-            identity_file("benchmarks/reporting/exp06/lp_reducer_run.cpp"),
-            identity_file("docs/research/itis17-paper-reducers-cpp-adaptation.md")]
-        adaptation_sha256 = file_hash(ROOT / "docs/research/itis17-paper-reducers-cpp-adaptation.md")
+            identity_file("benchmarks/reporting/exp06/lp_reducer_run.cpp")]
         for method_id in LP_METHODS:
             methods.append({"id": method_id, "version": "1.0.0", "sources": source_lp,
-                "deviations_sha256": adaptation_sha256, "runtime_base": None, "attempts": []})
+                "deviations_sha256": None, "runtime_base": None, "attempts": []})
     raw_dir = out / "raw-attempts"
     raw_dir.mkdir(parents=True)
 

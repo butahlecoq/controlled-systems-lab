@@ -301,7 +301,7 @@ code{{overflow-wrap:anywhere}}.muted{{color:#4c5863}}
 <h2>Runtime and reproduction</h2><p>Historical reported runtime: {_escape(report['runtime']['historical_reported_seconds'])} seconds ({_escape(report['runtime']['historical_context'].get('software', 'source software unavailable'))}; scope {_escape(report['runtime']['historical_context'].get('timing_scope', 'not specified'))}). Current measurement: unavailable. Reproduction: unavailable. {_escape(report['reproduction']['reason'])}</p>
 <h2>Sources</h2><ul>{citations}</ul><p>Archive paths and source roles are recorded in the <a href="archive-selected-sources.json">hash-identified source register</a>. Original archive files are not redistributed.</p>
 <p>Source manifest SHA-256: <code>{_escape(report['manifest_sha256'])}</code>. Audit SHA-256: <code>{_escape(report['consistency_audit_sha256'])}</code>.</p>
-<p><a href="b04-historical-comparison.json">Machine-readable report data</a> · <a href="b04-restoration.md">Restoration dossier</a> · <a href="b04-tables.md">Table transcription</a></p>
+<p><a href="b04-historical-comparison.json">Machine-readable report data</a></p>
 </main></body></html>
 """
     return html_text

@@ -14,6 +14,7 @@ import zipfile
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT))
 from scripts.reports import stage_mpc08_complete as S
+from scripts.reports import stage_mpc08 as explicit_pilot
 
 
 def site(folder):
@@ -27,6 +28,16 @@ def files(folder):return {p.relative_to(folder).as_posix():p.read_bytes() for p 
 
 
 class MPC08PublicationTests(unittest.TestCase):
+    def test_explicit_pilot_uses_its_verified_historical_readme_capsule(self):
+        content = explicit_pilot.historical_readme()
+        self.assertEqual(hashlib.sha256(content).hexdigest(), explicit_pilot.README_SOURCE_SHA256)
+        provenance = json.loads((explicit_pilot.BUNDLE / "build-provenance.json").read_text())
+        self.assertEqual(provenance["source_files_sha256"][explicit_pilot.README_SOURCE_PATH],
+                         explicit_pilot.README_SOURCE_SHA256)
+        record = json.loads((explicit_pilot.BUNDLE / "record.json").read_text())
+        self.assertIn(
+            "blob/ea756e66ccef9aef633798016b7acd87d01fccc7/"
+            "benchmarks/reporting/mpc08_explicit/README.md", explicit_pilot.render_html(record))
     def test_source_identity_ignores_unrelated_commits_and_tracks_merged_helpers(self):
         with tempfile.TemporaryDirectory(prefix='mpc08-helper-history-') as temporary:
             repository=Path(temporary)
