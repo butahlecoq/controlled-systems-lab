@@ -117,8 +117,16 @@ BoundedHSupportOutcome bounded_h_support(const BoundedHSupportInput& in,
     registry::RegisteredLPQueryRunner runner(provider);
     auto answer=runner.solve(program,context);
     auto records=runner.records();
-    if (auto* unsupported=std::get_if<Unsupported>(&answer))
-        return BoundedHSupportFailure{*unsupported,std::move(records)};
+    if (auto* unsupported=std::get_if<Unsupported>(&answer)) {
+        const bool coefficient_threshold=std::any_of(unsupported->diagnostics.begin(),unsupported->diagnostics.end(),
+            [](const Diagnostic& d) { return d.field=="highs.matrix" && d.explanation.find("removal threshold")!=std::string::npos; });
+        if (!coefficient_threshold) return BoundedHSupportFailure{*unsupported,std::move(records)};
+        // The untouched H object is bounded with the exact zero multipliers.
+        // The rejected LP remains in lp_calls; no source coefficient is dropped.
+        auto fallback=std::get<SupportUpperBound>(validation);
+        fallback.method=SupportBoundMethod::carrier_only;
+        return BoundedHSupportResult{fallback,std::move(records)};
+    }
     const auto& result=std::get<ProgramResult>(answer);
     if (result.termination!=Termination::completed || result.outcome.value!=MathematicalOutcome::optimal ||
         result.outcome.subject!=program.identity() || !result.primal || result.primal->size()!=columns || !finite(*result.primal)) {
@@ -173,6 +181,7 @@ BoundedHAxisOutcome bounded_h_axis_cover(const BoundedHSupportInput& input,
             }
             auto result=std::get<BoundedHSupportResult>(std::move(answer));
             cover.lp_calls.insert(cover.lp_calls.end(),result.lp_calls.begin(),result.lp_calls.end());
+            cover.methods.push_back(result.bound.method);
             if (upper) cover.upper.push_back(result.bound.value);
             else cover.lower.push_back(-result.bound.value);
         }

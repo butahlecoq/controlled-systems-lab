@@ -6,6 +6,11 @@ if(TARGET CSL::highs_lp)
 endif()
 
 if(TARGET CSL::highs_lp AND TARGET CSL::qhull_conversion)
+  add_executable(feedback_geometry_tests tests/unit/reachability/feedback_geometry_tests.cpp)
+  target_link_libraries(feedback_geometry_tests PRIVATE CSL::bounded_h_support CSL::affine_sum CSL::qhull_conversion CSL::highs_lp)
+  add_test(NAME feedback_geometry_tests COMMAND feedback_geometry_tests)
+  csl_test_target(feedback_geometry_tests reachability)
+
   add_executable(nominal_tube_tests tests/unit/reachability/nominal_tube_tests.cpp)
   target_link_libraries(nominal_tube_tests PRIVATE CSL::nominal_tube CSL::affine_sum CSL::qhull_conversion CSL::highs_lp CSL::artifacts doctest::doctest)
   add_test(NAME nominal_tube_tests COMMAND nominal_tube_tests)

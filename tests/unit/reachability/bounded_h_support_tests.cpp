@@ -108,10 +108,12 @@ int main() {
     check(solved.lp_calls.size()==1);
     auto tiny_answer=bounded_h_support(tiny,{{"test"},{"dual-tiny"}},
         std::get<csl::registry::PreparedProvider<csl::registry::LPPort>>(prepared),{});
-    // HiGHS explicitly rejects coefficients at its removal threshold. The
-    // source coefficient remains intact; this is not an empty-set conclusion.
-    check(std::holds_alternative<BoundedHSupportFailure>(tiny_answer));
-    check(std::holds_alternative<Unsupported>(std::get<BoundedHSupportFailure>(tiny_answer).cause));
+    // HiGHS rejects the candidate LP threshold. The carrier-only result uses
+    // zero multipliers and retains that rejection without altering the H rows.
+    check(std::holds_alternative<BoundedHSupportResult>(tiny_answer));
+    const auto& tiny_result=std::get<BoundedHSupportResult>(tiny_answer);
+    check(tiny_result.bound.method==SupportBoundMethod::carrier_only);
+    check(tiny_result.bound.value>=1 && tiny_result.lp_calls.size()==1);
     auto four_answer=bounded_h_support(four,{{"test"},{"dual-four"}},
         std::get<csl::registry::PreparedProvider<csl::registry::LPPort>>(prepared),{});
     check(std::holds_alternative<BoundedHSupportResult>(four_answer));
@@ -140,4 +142,12 @@ int main() {
 void lp_api_must_exist(const csl::reachability::BoundedHSupportInput& input,
     const csl::registry::PreparedProvider<csl::registry::LPPort>& lp) {
     (void)csl::reachability::bounded_h_support(input, {{"support"},{"dual"}}, lp, {});
+}
+
+// API compilation gate for the staged full-state recurrence.
+void coordinator_api_must_exist(const csl::problem::ResolvedProblem& problem,
+    const csl::SetHandle& terminal,
+    const csl::reachability::FeedbackGeometryDependencies& providers) {
+    (void)csl::reachability::feedback_geometry(problem,{"analytic"},terminal,
+        csl::reachability::FeedbackFamily::zonotope,{},providers,{});
 }
