@@ -2,6 +2,7 @@
 
 #include <csl/reachability/nominal_tube.hpp>
 #include <csl/sets/generator_sets.hpp>
+#include <csl/registry/provider.hpp>
 
 namespace csl::reachability {
 
@@ -37,7 +38,9 @@ struct FeedbackSet {
     FeedbackMembership membership;
     std::vector<StrictCoordinateLowerBound> strict_source_domain;
     std::vector<SetId> source_sets;
+    std::vector<GeometryReference> requests;
     std::vector<RequestProvenance> providers;
+    std::vector<registry::LPQueryRecord> support_calls;
     std::vector<GeometryEvidence> lineage;
 };
 

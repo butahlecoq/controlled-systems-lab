@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <new>
+#include <stdexcept>
 
 namespace csl::reachability {
 namespace {
@@ -71,6 +73,7 @@ namespace csl::reachability {
 BoundedHSupportOutcome bounded_h_support(const BoundedHSupportInput& in,
         ProgramIdentity id, const registry::PreparedProvider<registry::LPPort>& provider,
         const ExecutionContext& context) {
+    try {
     const std::size_t n=in.direction.size(), m=in.upper_bounds.size(), q=in.equality_values.size();
     // Validate the dimensions and finite carrier even when the zero dual is used.
     auto validation=residual_corrected_support(in,Vector(m,0),Vector(q,0));
@@ -132,6 +135,11 @@ BoundedHSupportOutcome bounded_h_support(const BoundedHSupportInput& in,
     if (auto* diagnostics=std::get_if<Diagnostics>(&corrected))
         return BoundedHSupportFailure{*diagnostics,std::move(records)};
     return BoundedHSupportResult{std::get<SupportUpperBound>(corrected),std::move(records)};
+    } catch (const std::bad_alloc&) {
+        return BoundedHSupportFailure{OperationStopped{StopReason::resource_limit,"Support LP allocation failed."},{}};
+    } catch (const std::length_error&) {
+        return BoundedHSupportFailure{OperationStopped{StopReason::resource_limit,"Support LP capacity exceeded."},{}};
+    }
 }
 } // namespace csl::reachability
 
@@ -140,6 +148,9 @@ BoundedHAxisOutcome bounded_h_axis_cover(const BoundedHSupportInput& input,
         ProgramIdentity identity, const registry::PreparedProvider<registry::LPPort>& provider,
         const ExecutionContext& context) {
     BoundedHAxisCover cover;
+    std::size_t active_coordinate=0;
+    bool active_upper=false;
+    try {
     const auto n=input.direction.size();
     cover.lower.reserve(n);
     cover.upper.reserve(n);
@@ -150,6 +161,7 @@ BoundedHAxisOutcome bounded_h_axis_cover(const BoundedHSupportInput& input,
     auto query=input;
     for (std::size_t j=0;j<n;++j) {
         for (bool upper : {false,true}) {
+            active_coordinate=j; active_upper=upper;
             query.direction.assign(n,0);
             query.direction[j]=upper ? 1 : -1;
             ProgramIdentity id=identity;
@@ -169,5 +181,12 @@ BoundedHAxisOutcome bounded_h_axis_cover(const BoundedHSupportInput& input,
                 OperationStopped{StopReason::numerical_failure,"Axis bounds are inconsistent; no emptiness conclusion is drawn."}};
     }
     return cover;
+    } catch (const std::bad_alloc&) {
+        return BoundedHAxisFailure{std::move(cover),active_coordinate,active_upper,
+            OperationStopped{StopReason::resource_limit,"Axis cover allocation failed."}};
+    } catch (const std::length_error&) {
+        return BoundedHAxisFailure{std::move(cover),active_coordinate,active_upper,
+            OperationStopped{StopReason::resource_limit,"Axis cover capacity exceeded."}};
+    }
 }
 } // namespace csl::reachability

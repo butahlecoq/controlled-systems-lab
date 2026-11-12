@@ -106,6 +106,12 @@ int main() {
     const auto& solved=std::get<BoundedHSupportResult>(answer);
     check(solved.bound.value>=1 && solved.bound.value<1.00000001);
     check(solved.lp_calls.size()==1);
+    auto tiny_answer=bounded_h_support(tiny,{{"test"},{"dual-tiny"}},
+        std::get<csl::registry::PreparedProvider<csl::registry::LPPort>>(prepared),{});
+    // HiGHS explicitly rejects coefficients at its removal threshold. The
+    // source coefficient remains intact; this is not an empty-set conclusion.
+    check(std::holds_alternative<BoundedHSupportFailure>(tiny_answer));
+    check(std::holds_alternative<Unsupported>(std::get<BoundedHSupportFailure>(tiny_answer).cause));
     auto four_answer=bounded_h_support(four,{{"test"},{"dual-four"}},
         std::get<csl::registry::PreparedProvider<csl::registry::LPPort>>(prepared),{});
     check(std::holds_alternative<BoundedHSupportResult>(four_answer));
