@@ -78,7 +78,7 @@ struct Runner {
     const FeedbackGeometryDependencies& deps; const ExecutionContext& context;
     ProblemId problem; RequestId request; std::vector<SetId> source_ids; std::size_t stage{}; std::size_t serial{};
     std::vector<GeometryReference> requests; std::vector<RequestProvenance> providers;
-    std::vector<GeometryEvidence> lineage; std::vector<registry::LPQueryRecord> support_calls; std::vector<SupportBoundMethod> support_methods; std::vector<SupportBoundCertificate> support_certificates;
+    std::vector<GeometryEvidence> lineage; std::vector<registry::LPQueryRecord> support_calls; std::vector<SupportBoundMethod> support_methods; std::vector<SupportBoundCertificate> support_certificates; std::vector<SetHandle> input_carriers;
     Runner(const FeedbackGeometryDependencies& d,const ExecutionContext& c,ProblemId p,RequestId r)
         : deps(d),context(c),problem(std::move(p)),request(std::move(r)) {}
     std::string id(const char* role) { return "feedback/"+request.value+"/"+std::to_string(stage)+"/"+role+"/"+std::to_string(serial++); }
@@ -243,8 +243,8 @@ FeedbackSet record(Runner& r,FeedbackFamily family,FeedbackMembership membership
         ? std::get<FeedbackHMembership>(membership).set.id : SetId{r.id("family-result")};
     FeedbackSet result{family,FeedbackScope::forward_relevant_from_observation,SetRelation::outer,Assurance::numerical,
         std::move(membership),strict,std::move(sources),r.requests,r.providers,r.support_calls,r.support_methods,r.support_certificates,
-        {"H embeddings of generator and ellipsoid families are coordinate outer covers; family clipping uses an axis cover when needed."},r.lineage,std::move(output_id)};
-    r.requests.clear(); r.providers.clear(); r.support_calls.clear(); r.support_methods.clear(); r.support_certificates.clear(); r.lineage.clear(); return result;
+        {"H embeddings of generator and ellipsoid families are coordinate outer covers; family clipping uses an axis cover when needed."},r.lineage,std::move(output_id),r.input_carriers};
+    r.requests.clear(); r.providers.clear(); r.support_calls.clear(); r.support_methods.clear(); r.support_certificates.clear(); r.input_carriers.clear(); r.lineage.clear(); return result;
 }
 } // namespace
 namespace {
@@ -373,6 +373,7 @@ FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem& resolv
                 const auto dynamics=std::get<model::DynamicsStage>(dynamics_result);
                 bool exact_control_carrier=false;
                 auto [ulo,uhi]=explicit_bounds(controls[k-1],context,&exact_control_carrier);
+                run.input_carriers.push_back(axis_h(ulo,uhi,{run.id("control-carrier")},{}));
                 if(exact_control_carrier) run.lineage.push_back({{{resolved.identity(),{run.id("exact-control-carrier")},{run.id("control-carrier")}},
                     {controls[k-1].id}},GeometryClaimScope::support_value,
                     SymbolicArgument{"Exact stored-binary64 H elimination", "Built-in bounded exact H linear minimization; outward binary64 bracketing"},
@@ -471,8 +472,8 @@ FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem& resolv
             stage.intersection->construction.push_back("Full-state forward and backward H embeddings intersected with the explicit forward-relevant carrier before family enclosure.");
         }
         return output;
-    } catch(const Failure& failure) { return FeedbackGeometryFailure{std::move(output),active,phase,failure.cause,std::move(run.requests),std::move(run.providers),std::move(run.lineage),std::move(run.support_calls),std::move(run.support_certificates)}; }
-      catch(const std::bad_alloc&) { return FeedbackGeometryFailure{std::move(output),active,phase,OperationStopped{StopReason::resource_limit,"Feedback geometry allocation failed."},std::move(run.requests),std::move(run.providers),std::move(run.lineage),std::move(run.support_calls),std::move(run.support_certificates)}; }
-      catch(const std::length_error&) { return FeedbackGeometryFailure{std::move(output),active,phase,OperationStopped{StopReason::resource_limit,"Feedback geometry capacity exceeded."},std::move(run.requests),std::move(run.providers),std::move(run.lineage),std::move(run.support_calls),std::move(run.support_certificates)}; }
+    } catch(const Failure& failure) { return FeedbackGeometryFailure{std::move(output),active,phase,failure.cause,std::move(run.requests),std::move(run.providers),std::move(run.lineage),std::move(run.support_calls),std::move(run.support_certificates),std::move(run.input_carriers)}; }
+      catch(const std::bad_alloc&) { return FeedbackGeometryFailure{std::move(output),active,phase,OperationStopped{StopReason::resource_limit,"Feedback geometry allocation failed."},std::move(run.requests),std::move(run.providers),std::move(run.lineage),std::move(run.support_calls),std::move(run.support_certificates),std::move(run.input_carriers)}; }
+      catch(const std::length_error&) { return FeedbackGeometryFailure{std::move(output),active,phase,OperationStopped{StopReason::resource_limit,"Feedback geometry capacity exceeded."},std::move(run.requests),std::move(run.providers),std::move(run.lineage),std::move(run.support_calls),std::move(run.support_certificates),std::move(run.input_carriers)}; }
 }
 } // namespace csl::reachability

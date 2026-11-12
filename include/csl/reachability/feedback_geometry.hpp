@@ -47,6 +47,9 @@ struct FeedbackSet {
     std::vector<std::string> construction;
     std::vector<GeometryEvidence> lineage;
     SetId id; // selected-family result identity, including generator and ellipsoid sets
+    // Native all-control propagation uses these explicit outer input carriers;
+    // the authored control H set remains the predecessor/feasibility authority.
+    std::vector<SetHandle> auxiliary_input_carriers;
 };
 
 struct FeedbackGeometryStage {
@@ -76,6 +79,7 @@ struct FeedbackGeometryFailure {
     std::vector<GeometryEvidence> pending_lineage;
     std::vector<registry::LPQueryRecord> pending_support_calls;
     std::vector<SupportBoundCertificate> pending_support_certificates;
+    std::vector<SetHandle> pending_input_carriers;
 };
 using FeedbackGeometryOutcome = std::variant<FeedbackGeometry, FeedbackGeometryFailure>;
 struct FeedbackGeometryDependencies {
