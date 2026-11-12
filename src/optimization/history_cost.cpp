@@ -114,6 +114,8 @@ HistoryCostCompilation compile_history_cost(const synthesis::JointHistoryRelatio
             }
             quadratic.offset = source.offset;
         } else {
+            if(n != 0 && source.map.rows > std::numeric_limits<std::size_t>::max() / n)
+                return invalid("history_cost.terminal", "Residual map dimensions overflow the history coordinate space.");
             Matrix map{source.map.rows, n, Vector(source.map.rows * n, 0.0)};
             for(std::size_t row = 0; row < source.map.rows; ++row)
                 for(std::size_t column = 0; column < state_dimension; ++column)
@@ -148,6 +150,8 @@ HistoryCostCompilation compile_history_cost(const synthesis::JointHistoryRelatio
                 }
             } else {
                 const auto& norm_penalty = std::get<EuclideanControlPenalty>(term);
+                if(n != 0 && norm_penalty.map.rows > std::numeric_limits<std::size_t>::max() / n)
+                    return compile_failure(invalid("history_cost.running.euclidean", "Residual map dimensions overflow the history coordinate space."));
                 Matrix map{norm_penalty.map.rows, n, Vector(norm_penalty.map.rows * n, 0.0)};
                 Vector target(norm_penalty.map.rows);
                 for(std::size_t row = 0; row < norm_penalty.map.rows; ++row) {

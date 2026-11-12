@@ -47,7 +47,8 @@ TEST_CASE("history cost compiles the original terminal and absolute-stage quadra
     const TerminalObjective terminal = QuadraticTerminal{
         {1, 1, {2.0}}, {-4.0}, 4.0};
     const optimization::RunningControlCost running{"source-quadratic", 4, {
-        {1, {}},
+        {1, {optimization::QuadraticControlPenalty{{0.0, 0.0}, {1.0, 1.0},
+            {1.0, 1.0}, 100.0, 4}}},
         {2, {optimization::QuadraticControlPenalty{{0.5, -1.0}, {2.0, 0.5},
             {3.0, 0.25}, 4.0, 4}}},
         {3, {optimization::EuclideanControlPenalty{{1, 2, {1.0, 2.0}}, {3.0}, 0.5}}}
@@ -97,6 +98,7 @@ TEST_CASE("history cost keeps orbit-like residual norms as separate source terms
     CHECK(result.running == doctest::Approx(4.0));
     CHECK(result.total == doctest::Approx(7.0));
     CHECK(result.total != doctest::Approx(std::sqrt(3.0 * 3.0 + 2.0 * 2.0 + 2.0 * 2.0)));
+    CHECK(result.total != doctest::Approx(3.0 * 3.0 + 2.0 * 2.0 + 2.0 * 2.0));
 }
 
 TEST_CASE("history cost rejects shape, schedule, and nonfinite source data") {
@@ -104,6 +106,9 @@ TEST_CASE("history cost rejects shape, schedule, and nonfinite source data") {
     const TerminalObjective terminal = LinearTerminal{{1.0}, 0.0};
     const optimization::RunningControlCost duplicate{"bad", 4, {{2, {}}, {2, {}}}};
     CHECK(std::holds_alternative<Diagnostics>(optimization::compile_history_cost(history, terminal, duplicate, 1)));
+
+    const optimization::RunningControlCost unsorted{"bad", 4, {{2, {}}, {1, {}}}};
+    CHECK(std::holds_alternative<Diagnostics>(optimization::compile_history_cost(history, terminal, unsorted, 1)));
 
     const optimization::RunningControlCost out_of_range{"bad", 4, {{4, {}}}};
     CHECK(std::holds_alternative<Diagnostics>(optimization::compile_history_cost(history, terminal, out_of_range, 1)));

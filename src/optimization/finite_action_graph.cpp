@@ -9,9 +9,8 @@
 #include <csl/sets/data.hpp>
 #include <csl/model/linear_system.hpp>
 
-#include "running_cost_evaluation.hpp"
-
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <functional>
 #include <limits>
@@ -105,73 +104,6 @@ SetOutcome stage_intersection(const sets::SetData& admissible, std::span<const d
         return unsupported(diagnostics->empty() ? "finite_graph.intersection" : diagnostics->front().field,
             diagnostics->empty() ? "Stage H intersection was not admitted." : diagnostics->front().explanation);
     return std::get<sets::SetData>(intersection);
-}
-
-Unsupported validate_running_cost(const RunningControlCost& cost, std::size_t stage_offset,
-        std::size_t horizon, std::size_t control_dimension) {
-    if(cost.stages.empty()) {
-        if(!cost.objective_id.empty() || cost.original_horizon != 0)
-            return unsupported("finite_graph.running_cost", "An inactive running-cost schedule must have empty identity and zero original horizon.");
-        return {};
-    }
-    if(cost.objective_id.empty() || cost.original_horizon == 0 || stage_offset > cost.original_horizon ||
-       horizon > cost.original_horizon - stage_offset)
-        return unsupported("finite_graph.running_cost", "The running-cost identity and original horizon must cover the requested absolute-stage slice.");
-    std::size_t previous = 0;
-    bool first = true;
-    for(const auto& row : cost.stages) {
-        if(row.stage >= cost.original_horizon || (!first && row.stage <= previous))
-            return unsupported("finite_graph.running_cost.stages", "Running-cost stages must be unique, increasing, and inside the original horizon.");
-        previous = row.stage;
-        first = false;
-        for(const auto& term : row.terms) {
-            if(const auto* quadratic = std::get_if<QuadraticControlPenalty>(&term)) {
-                if(quadratic->reference.size() != control_dimension || quadratic->scales.size() != control_dimension ||
-                   quadratic->weights.size() != control_dimension || quadratic->normalization_horizon != cost.original_horizon ||
-                   !finite(quadratic->reference) || !finite(quadratic->scales) || !finite(quadratic->weights) ||
-                   !std::isfinite(quadratic->coefficient) || quadratic->coefficient < 0.0 ||
-                   !std::ranges::all_of(quadratic->scales, [](double value) { return value != 0.0; }) ||
-                   !std::ranges::all_of(quadratic->weights, [](double value) { return value >= 0.0; }))
-                    return unsupported("finite_graph.running_cost.quadratic", "Quadratic cost dimensions, original-horizon normalization, scales, weights, or coefficient are invalid.");
-            } else {
-                const auto& norm = std::get<EuclideanControlPenalty>(term);
-                if(norm.map.cols != control_dimension || norm.map.rows == 0 ||
-                   norm.offset.size() != norm.map.rows ||
-                   norm.map.values.size() != norm.map.rows * norm.map.cols ||
-                   !finite(norm.map.values) || !finite(norm.offset) ||
-                   !std::isfinite(norm.coefficient) || norm.coefficient < 0.0)
-                    return unsupported("finite_graph.running_cost.euclidean", "Euclidean cost map, offset, or coefficient is invalid.");
-            }
-        }
-    }
-    return {};
-}
-
-double stage_cost(const RunningControlCost& cost, std::size_t stage, std::span<const double> control) {
-    const auto found = std::lower_bound(cost.stages.begin(), cost.stages.end(), stage,
-        [](const AbsoluteStageControlCost& row, std::size_t value) { return row.stage < value; });
-    if(found == cost.stages.end() || found->stage != stage) return 0.0;
-    double total = 0.0;
-    for(const auto& term : found->terms) {
-        if(const auto* quadratic = std::get_if<QuadraticControlPenalty>(&term)) {
-            if(quadratic->coefficient == 0.0) continue;
-            const auto quadratic_cost = detail::quadratic_stage_cost(*quadratic, control);
-            if(!quadratic_cost) return std::numeric_limits<double>::quiet_NaN();
-            total += *quadratic_cost;
-        } else {
-            const auto& norm = std::get<EuclideanControlPenalty>(term);
-            if(norm.coefficient == 0.0) continue;
-            double squared = 0.0;
-            for(std::size_t row = 0; row < norm.map.rows; ++row) {
-                double value = norm.offset[row];
-                for(std::size_t col = 0; col < norm.map.cols; ++col)
-                    value += norm.map.values[row * norm.map.cols + col] * control[col];
-                squared += value * value;
-            }
-            total += norm.coefficient * std::sqrt(squared);
-        }
-    }
-    return total;
 }
 
 struct Candidate {
@@ -854,11 +786,33 @@ static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(const Fin
             return unsupported("finite_graph.disturbances","Each authored nominal external input must be finite and match the source model external dimension.");
     if(horizon == 0 || !finite(request.initial_state))
         return unsupported("finite_graph.horizon", "Graph requires a nonempty horizon and finite initial state.");
-    if(const auto invalid_cost = validate_running_cost(request.running_cost, request.absolute_stage_offset,
-            horizon, dimensions.control); !invalid_cost.diagnostics.empty()) return invalid_cost;
+    if(auto cost_errors = validate_running_control_cost(request.running_cost, request.absolute_stage_offset,
+            horizon, dimensions.control); !cost_errors.empty()) {
+        for(auto& error : cost_errors) error.field = "finite_graph." + error.field;
+        return Unsupported{std::move(cost_errors)};
+    }
     for(const auto& action : request.actions.catalogue)
         if(action.size() != dimensions.control || !finite(action))
             return unsupported("finite_graph.actions", "Each authored discrete action must be finite and have the declared control dimension.");
+
+    std::vector<std::vector<double>> running_costs(horizon,
+        std::vector<double>(request.actions.catalogue.size(), 0.0));
+    for(std::size_t stage = 0; stage < horizon; ++stage) {
+        const auto absolute_stage = request.absolute_stage_offset + stage;
+        for(std::size_t action = 0; action < request.actions.catalogue.size(); ++action) {
+            const std::array<Vector, 1> control_history{request.actions.catalogue[action]};
+            const auto cost = evaluate_running_control_cost(request.running_cost, absolute_stage, 1,
+                control_history, dimensions.control);
+            if(const auto* diagnostics = std::get_if<Diagnostics>(&cost)) {
+                auto scoped = *diagnostics;
+                for(auto& error : scoped) error.field = "finite_graph." + error.field;
+                return Unsupported{std::move(scoped)};
+            }
+            if(std::holds_alternative<OperationStopped>(cost))
+                return unsupported("finite_graph.running_cost.overflow", "Authored running cost overflowed for a finite discrete edge; graph scores are not ranked.");
+            running_costs[stage][action] = std::get<double>(cost);
+        }
+    }
 
     Vector control_lower(dimensions.control, std::numeric_limits<double>::infinity());
     Vector control_upper(dimensions.control, -std::numeric_limits<double>::infinity());
@@ -937,8 +891,7 @@ static FiniteActionGraphOutcome finite_action_stage_layered_graph_impl(const Fin
                     if(!*envelope_ok)
                         return unsupported("finite_graph.reachable.witness", "The registered forward outer set failed to contain a child generated by the same authored affine dynamics and discrete action.");
                 }
-                const auto absolute = request.absolute_stage_offset + stage;
-                const auto edge_cost = stage_cost(request.running_cost, absolute, request.actions.catalogue[action_index]);
+                const auto edge_cost = running_costs[stage][action_index];
                 if(!std::isfinite(edge_cost))
                     return unsupported("finite_graph.running_cost.overflow", "Authored running cost overflowed for a finite discrete edge; graph scores are not ranked.");
                 std::optional<bool> representation_filter_passed;
