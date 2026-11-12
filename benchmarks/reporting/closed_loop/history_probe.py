@@ -11,6 +11,7 @@ import traceback
 import numpy as np
 
 from contracts import load_task, manifest_sha256
+from attempt_records import atomic_json
 from history_policy import create_policy
 from run_closed_loop import execute_held_step_bridge, physical_constraints
 from task_models import make_held_step_request, validate_held_step_response, validate_source_binding
@@ -52,6 +53,8 @@ def main():
             for stage in range(min(args.holds, task["episode"]["intervals"])):
                 record = {"stage": stage, "observed": state}
                 records.append(record)
+                capture_path = directory / f"query-capture-{stage:03d}.json"
+                policy.set_query_capture_callback(lambda capture: atomic_json(capture_path, capture))
                 query = policy.query(task["task_id"], state, stage)
                 record["query"] = query
                 (directory / "record.json").write_text(json.dumps(summary, indent=2, allow_nan=False) + "\n")
