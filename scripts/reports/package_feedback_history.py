@@ -56,6 +56,12 @@ def package(attempt: Path, output: Path, audit: Path, auditor: Path,
             or graph["graph_fingerprint"] != run["graph_fingerprint"]
             or digest(sdk.read_bytes()) != build_record["sdk_manifest_sha256"]):
         raise ValueError("source, provider, graph or build identity differs")
+    warm_queries = task.get("warm_start_queries_checked")
+    if warm_queries is not None and warm_queries != horizon:
+        raise ValueError("warm-start audit must check every original query")
+    protocol = ("Initial query uses the observed-state zero-control affine rollout; later queries drop the applied prior state/control stage, replace the initial observation and supply zero duals, with provider initialization readback checked independently."
+                if warm_queries == horizon else
+                "Cold start at each observed query; source shift-prior-primal warm-start contract was not implemented.")
     output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(dir=output.parent) as tmp:
         stage = Path(tmp) / "bundle"
@@ -78,7 +84,8 @@ def package(attempt: Path, output: Path, audit: Path, auditor: Path,
             "optimizer": "casadi-ipopt", "scope": "one numerical F/B/I affine-history MPC episode",
             "raw_metadata_correction": ("The adapter preparation controller_semantics says direct affine-history MPC; the run used selected-family F/B/I memberships as established by the resolved graph and native records."
                 if "direct" in native["controller_semantics"] else None),
-            "execution_protocol": "Cold start at each observed query; source shift-prior-primal warm-start contract was not implemented.",
+            "execution_protocol": protocol,
+            "warm_start_queries_checked": warm_queries,
             "postcheck_source_timing": ("After all 40 fuel controls were applied, history_policy.py and history_norm_solver.py were edited while the parent performed postcheck/render; the worker had already imported them and the independent source-cost/replay modules were unchanged."
                 if task_name == "syn-nl-fuel-01" else None),
             "audit": task, "archive_sha256": digest((stage / "raw.zip").read_bytes()),

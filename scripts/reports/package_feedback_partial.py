@@ -29,7 +29,7 @@ def package(attempt, output, audit, auditor, build, source_receipt, producer_com
     completed = episode["completed_holds"]
     if (episode["status"] != "incomplete" or episode["overall_status"] != "incomplete"
             or episode["postcheck_status"] != "not_run" or episode["render_status"] != "not_run"
-            or episode["original_intervals"] != 20 or completed not in (3, 4)
+            or episode["original_intervals"] != 20 or not 0 <= completed < 20
             or result["audit_status"] != "pass-partial" or result["completed_holds"] != completed
             or result["errors"] or result["expected_holds"] != 20
             or episode["task_sha256"] != result["task_sha256"] or run["source_commit"] != checked["source_commit"]
@@ -39,8 +39,8 @@ def package(attempt, output, audit, auditor, build, source_receipt, producer_com
     failed = json.loads((attempt / f"stage-{completed:03d}.json").read_text())
     if failed.get("status") != "failed":
         raise ValueError("expected a saved failed controller stage")
-    if completed == 3:
-        validation = failed["solve_receipt"]["independent_validation"]["checks"]["source_cost"]
+    validation = failed.get("solve_receipt", {}).get("independent_validation", {}).get("checks", {}).get("source_cost")
+    if validation is not None and not validation["passed"]:
         if validation["passed"]:
             raise ValueError("expected rejected source-cost discrepancy")
         stop = {"kind": "source_cost_check_failed", "residual": validation["max_residual"]}
@@ -49,6 +49,11 @@ def package(attempt, output, audit, auditor, build, source_receipt, producer_com
         if solver["status"] != "solver-error" or "Infeasible_Problem_Detected" not in solver.get("error", ""):
             raise ValueError("expected saved local optimizer failure")
         stop = {"kind": "local_optimizer_failure", "reported_status": "Infeasible_Problem_Detected"}
+    warm_queries = result.get("warm_start_queries_checked")
+    if warm_queries is not None and (warm_queries != completed or not result.get("failed_query_warm_start_checked")):
+        raise ValueError("warm-start audit must check the accepted prefix and failed query")
+    protocol = ("Initial observed-state zero-control rollout, then shifted accepted histories with the new observation and zero supplied duals; provider initialization checked for every accepted and failed query."
+                if warm_queries == completed else "cold at observed queries; source warm-start contract not implemented")
     output.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(dir=output.parent) as tmp:
         stage = Path(tmp) / "bundle"
@@ -65,7 +70,7 @@ def package(attempt, output, audit, auditor, build, source_receipt, producer_com
             "original_intervals": 20, "completed_holds": completed, "family": "box",
             "optimizer": "casadi-ipopt", "outcome": "incomplete", "stop": stop,
             "scope": "partial numerical observations; no source infeasibility or full-objective claim",
-            "warm_start_protocol": "cold at observed queries; source warm-start contract not implemented",
+            "warm_start_protocol": protocol,
             "audit": result, "archive_sha256": digest((stage / "raw.zip").read_bytes()),
             "archive_members": inventory}
         (stage / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
