@@ -1,7 +1,7 @@
 # Target and installation ownership for reachability. Included from the project root.
 
-csl_add_library(csl_bounded_h_support STATIC src/reachability/bounded_h_support.cpp src/reachability/feedback_geometry.cpp src/reachability/feedback_coordinator.cpp)
-target_link_libraries(csl_bounded_h_support PUBLIC CSL::registry CSL::optimization CSL::sets CSL::nominal_tube CSL::finite_plan_box CSL::finite_plan_zonotope CSL::finite_plan_ellipsoid)
+csl_add_library(csl_feedback_geometry STATIC src/reachability/bounded_h_support.cpp src/reachability/feedback_geometry.cpp src/reachability/feedback_coordinator.cpp)
+target_link_libraries(csl_feedback_geometry PUBLIC CSL::registry CSL::optimization CSL::sets CSL::nominal_tube CSL::finite_plan_box CSL::finite_plan_zonotope CSL::finite_plan_ellipsoid)
 
 csl_add_library(csl_nominal_forward STATIC src/reachability/nominal_forward.cpp)
 

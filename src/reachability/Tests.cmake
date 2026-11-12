@@ -1,13 +1,13 @@
 if(TARGET CSL::highs_lp)
   add_executable(bounded_h_support_tests tests/unit/reachability/bounded_h_support_tests.cpp)
-  target_link_libraries(bounded_h_support_tests PRIVATE CSL::bounded_h_support CSL::finite_plan_zonotope CSL::finite_plan_box CSL::finite_plan_ellipsoid CSL::highs_lp)
+  target_link_libraries(bounded_h_support_tests PRIVATE CSL::feedback_geometry CSL::finite_plan_zonotope CSL::finite_plan_box CSL::finite_plan_ellipsoid CSL::highs_lp)
   add_test(NAME bounded_h_support_tests COMMAND bounded_h_support_tests)
   csl_test_target(bounded_h_support_tests reachability)
 endif()
 
 if(TARGET CSL::highs_lp AND TARGET CSL::qhull_conversion)
   add_executable(feedback_geometry_tests tests/unit/reachability/feedback_geometry_tests.cpp)
-  target_link_libraries(feedback_geometry_tests PRIVATE CSL::bounded_h_support CSL::affine_sum CSL::qhull_conversion CSL::highs_lp)
+  target_link_libraries(feedback_geometry_tests PRIVATE CSL::feedback_geometry CSL::affine_sum CSL::qhull_conversion CSL::highs_lp)
   add_test(NAME feedback_geometry_tests COMMAND feedback_geometry_tests)
   csl_test_target(feedback_geometry_tests reachability)
 
