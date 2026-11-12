@@ -66,6 +66,37 @@ class NativeTerminalCostPublicationTests(unittest.TestCase):
                     example.stage(site)
             self.assertFalse(site.exists())
 
+    def test_stage_rejects_symlinked_roots_without_writing_outside(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary)
+            outside=root/"outside"
+            outside.mkdir()
+            link=root/"link"
+            link.symlink_to(outside,target_is_directory=True)
+            with mock.patch.object(example,"BUNDLE",link):
+                with self.assertRaisesRegex(ValueError,"Source bundle"):
+                    example.stage(root/"site")
+            with self.assertRaisesRegex(ValueError,"Site root"):
+                example.stage(link)
+            site=root/"site"
+            site.mkdir()
+            (site/example.ROUTE).symlink_to(outside,target_is_directory=True)
+            with self.assertRaisesRegex(ValueError,"Staged bundle"):
+                example.stage(site)
+            self.assertEqual(list(outside.iterdir()),[])
+
+    def test_stage_rejects_file_roots_before_reading_bundle_contents(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary)
+            file=root/"file"
+            file.write_text("preserve")
+            with mock.patch.object(example,"BUNDLE",file):
+                with self.assertRaisesRegex(ValueError,"Source bundle"):
+                    example.stage(root/"site")
+            with self.assertRaisesRegex(ValueError,"Site root"):
+                example.stage(file)
+            self.assertEqual(file.read_text(),"preserve")
+
     def test_gallery_card_resolves_to_the_actual_flat_publication_route(self):
         import visual_examples
 

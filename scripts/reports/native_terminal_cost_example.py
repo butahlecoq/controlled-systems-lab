@@ -166,9 +166,20 @@ def render(bundle: Path) -> None:
 
 
 def stage(site: Path) -> None:
+    if BUNDLE.is_symlink() or not BUNDLE.is_dir():
+        raise ValueError('Source bundle must be a real directory')
+    if site.is_symlink() or (site.exists() and not site.is_dir()):
+        raise ValueError('Site root must be a real directory')
+    target=site/ROUTE
+    if target.is_symlink() or (target.exists() and not target.is_dir()):
+        raise ValueError('Staged bundle must be a real directory')
+    if target.exists() and any(path.is_symlink() for path in target.rglob('*')):
+        raise ValueError('Staged bundle contains a symlink')
     if any(path.is_symlink() for path in BUNDLE.rglob('*')):
         raise ValueError('Source bundle contains a symlink')
     archive=BUNDLE.parent/(ROUTE+'.zip')
+    if any(path.is_symlink() for path in (archive,archive.with_suffix('.zip.sha256'),site/archive.name)):
+        raise ValueError('Archive paths must not be symlinks')
     expected=(archive.with_suffix('.zip.sha256')).read_text().split()[0]
     if hashlib.sha256(archive.read_bytes()).hexdigest()!=expected:
         raise ValueError('Offline archive checksum differs')
