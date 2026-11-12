@@ -184,6 +184,14 @@ if _catalog_path.is_file():
         SAVED_FIGURES = (*SAVED_FIGURES, _BTULSHOR_FIGURE)
 
 
+SAVED_FIGURES = (*SAVED_FIGURES, dict(
+    route="native-terminal-cost-33f907a0", image="cost-contours.svg", page="index.html",
+    records="after/record.json", family="Optimization · source-cost correction",
+    title="Match the source terminal cost",
+    alt="Lotka source minimum and previous adapter minimum with quadratic cost contours",
+    summary="Two saved native diagnostic queries and an analytic 2D illustration of the quadratic coefficient correction; no full episode or benchmark claim."))
+
+
 require = report_data.require
 
 
