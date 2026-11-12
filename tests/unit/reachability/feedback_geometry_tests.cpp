@@ -74,6 +74,26 @@ bool contains(const csl::sets::HRepresentation& h, const csl::Vector& point) {
     }
     return true;
 }
+
+bool axis_membership_contains(const csl::reachability::FeedbackMembership& member, const csl::Vector& point) {
+    using namespace csl;
+    if(const auto* h=std::get_if<reachability::FeedbackHMembership>(&member)) {
+        auto data=take(sets::from_handle(h->set)); auto repr=data.representation();
+        const auto* rows=std::get_if<sets::HRepresentation>(&repr);
+        return rows && contains(*rows,point);
+    }
+    Vector center; Matrix factor; bool ball=false;
+    if(const auto* z=std::get_if<reachability::FeedbackZonotopeMembership>(&member)) { center=z->center; factor=z->generators; }
+    else { const auto& e=std::get<reachability::FeedbackEllipsoidMembership>(member); center=e.center; factor=e.factor; ball=true; }
+    if(center.size()!=point.size() || factor.rows!=point.size() || factor.cols!=point.size()) return false;
+    double norm=0;
+    for(std::size_t j=0;j<point.size();++j) {
+        const auto d=factor.values[j*factor.cols+j];
+        if(d==0) { if(std::abs(center[j]-point[j])>1e-10) return false; }
+        else { const auto x=(point[j]-center[j])/d; norm+=x*x; if(!ball && std::abs(x)>1+1e-10) return false; }
+    }
+    return !ball || norm<=1+1e-10;
+}
 }
 
 int main() {
@@ -174,7 +194,26 @@ int main() {
                 g.stages[1].intersection->strict_source_domain[0].lower_bound!=0) return 11;
             auto hdata=take(sets::from_handle(g.stages[1].intersection_h->output));
             auto hrepr=hdata.representation(); auto* h=std::get_if<sets::HRepresentation>(&hrepr);
-            if(!h || !contains(*h,{0.6,0.4,1.4,0})) return 12;
+            if(!h || !contains(*h,{0.6,0.4,1.4,0}) ||
+                !axis_membership_contains(g.stages[1].intersection->membership,{0.6,0.4,1.4,0})) return 12;
+        }
+        const auto no_control_model=std::make_shared<const SystemModel>(SystemModel{{{2,0,0}, TimeDomain::discrete,
+            std::vector<LinearStage>{{{2,2,{1,0,0,0}}, {2,0,{}}, {2,0,{}}, {0,0}}}}, {}});
+        Problem no_control{{"no-control"},no_control_model,{0,1},KnownInitial{{0.2,0.4}},
+            ContinuousDomain{{UniversalSet{0}}},
+            {box("N0",{-2,-2},{2,2}),box("N1",{-2,-2},{2,2})}, {},{},
+            InformationPattern::nominal_open_loop,QuadraticTerminal{{2,2,{2,0,0,2}},{0,0},0}};
+        const auto resolved_no_control=take(problem::resolve(no_control,
+            {problem::UncertaintyStructure::stage_product_uncoupled,{}, {}}));
+        for(auto family : {reachability::FeedbackFamily::polytope, reachability::FeedbackFamily::box,
+                reachability::FeedbackFamily::zonotope, reachability::FeedbackFamily::parallelotope,
+                reachability::FeedbackFamily::ellipsoid}) {
+            auto result=reachability::feedback_geometry(resolved_no_control,{"no-control"},
+                box("NT",{-2,-2},{2,2}),family,{},
+                {{forward,intersection},selected(lp,"csl.program-result.v1"),1000},{});
+            if(!std::holds_alternative<reachability::FeedbackGeometry>(result)) return 15;
+            const auto& g=std::get<reachability::FeedbackGeometry>(result);
+            if(!g.stages[1].intersection || !axis_membership_contains(g.stages[1].intersection->membership,{0.2,0})) return 16;
         }
         auto limited=reachability::feedback_geometry(resolved,{"limited"},
             box("limited-terminal",{0.0,0.1},{0.8,0.9}),reachability::FeedbackFamily::zonotope,{},

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forward-relevant feedback geometry in two dimensions</title>
+<style>
+body{font:16px/1.5 system-ui,sans-serif;max-width:880px;margin:2rem auto;padding:0 1rem;color:#18212b}
+svg{display:block;width:min(100%,620px);height:auto;background:#fbfcfe;border:1px solid #ccd5df}
+.axis{stroke:#405366;stroke-width:2}.label{font-size:16px;fill:#18212b}code{background:#eef2f5;padding:.1rem .3rem;border-radius:3px}
+</style>
+<h1>One-step forward-relevant sets</h1>
+<p>Start at <code>x₀=(0.2,0.4)</code>. Use <code>x₁=x₀+u₀</code> with the whole continuous control box
+<code>u₀∈[-0.2,0.3]×[-0.1,0.2]</code>. The physical stage-one set and terminal feasibility set are
+<code>X₁=[0,0.8]×[0.1,0.9]</code>; the terminal set is a feasibility constraint, not a target cost.</p>
+<svg viewBox="0 0 560 430" role="img" aria-labelledby="title description">
+<title id="title">One-step forward-relevant intersection</title>
+<desc id="description">A green rectangle from zero to 0.5 in x and 0.3 to 0.6 in y lies inside the larger physical state rectangle. The initial point at 0.2, 0.4 lies in both.</desc>
+<path fill="#f0f3f6" stroke="#93a1af" stroke-width="2" d="M90 80H410V400H90Z"/>
+<path fill="#bfe4d2" stroke="#397b5d" stroke-width="3" d="M90 200H290V320H90Z"/>
+<path class="axis" d="M90 410V60 M75 400H435"/>
+<circle cx="170" cy="280" r="6" fill="#b64435"/>
+<text class="label" x="175" y="270">x₀</text><text class="label" x="99" y="225">F₁ = B₁ relevant = I₁</text>
+<text class="label" x="86" y="423">0</text><text class="label" x="277" y="423">0.5</text><text class="label" x="397" y="423">0.8</text>
+<text class="label" x="47" y="326">0.3</text><text class="label" x="47" y="205">0.6</text><text class="label" x="47" y="85">0.9</text>
+<text class="label" x="438" y="405">x₁</text><text class="label" x="72" y="48">y₁</text>
+</svg>
+<p>Direct addition gives <code>F₁=[0,0.5]×[0.3,0.6]</code>. This is inside the physical terminal set, so the backward set restricted to this forward carrier and the full-state intersection are the same rectangle. The initial intersection is the single point <code>(0.2,0.4)</code>. For example, <code>u₀=(0,0)</code> reaches that point at stage one.</p>
+<p>This figure is an independent analytic illustration, not a replay of the numerical enclosures. The numerical implementations may return larger outer sets and report their provider and support evidence. The source constraints and a recovered full history remain responsible for action feasibility. See the <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/d19e69e7/tests/unit/reachability/feedback_geometry_tests.cpp">2D and 4D executable fixture</a>. With HiGHS and Qhull enabled, build the project and run <code>ctest --test-dir BUILD -R '^feedback_geometry_tests$' --output-on-failure</code>.</p>
+</html>
