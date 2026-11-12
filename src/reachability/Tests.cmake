@@ -71,3 +71,15 @@ add_executable(finite_feedback_port_tests tests/unit/reachability/finite_feedbac
 target_link_libraries(finite_feedback_port_tests PRIVATE CSL::finite_feedback_port doctest::doctest)
 add_test(NAME finite_feedback_port_tests COMMAND finite_feedback_port_tests)
 csl_test_target(finite_feedback_port_tests reachability)
+
+add_executable(inner_template_tests tests/unit/reachability/inner_template_tests.cpp)
+target_link_libraries(inner_template_tests PRIVATE CSL::inner_template)
+add_test(NAME inner_template_tests COMMAND inner_template_tests)
+csl_test_target(inner_template_tests reachability)
+
+if(TARGET CSL::casadi_fixed_tail)
+  add_executable(fixed_tail_native_tests tests/unit/reachability/fixed_tail_native_tests.cpp)
+  target_link_libraries(fixed_tail_native_tests PRIVATE CSL::casadi_fixed_tail)
+  add_test(NAME fixed_tail_native_tests COMMAND fixed_tail_native_tests)
+  csl_test_target(fixed_tail_native_tests reachability)
+endif()

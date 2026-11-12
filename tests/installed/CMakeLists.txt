@@ -566,3 +566,10 @@ add_test(NAME installed_application_client COMMAND installed_application_client)
 set_tests_properties(installed_application_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed application client: guarded profile rejection passed")
 endif()
+
+add_executable(installed_inner_template_client inner_template_client.cpp)
+target_link_libraries(installed_inner_template_client PRIVATE CSL::inner_template)
+set_target_properties(installed_inner_template_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_inner_template_client COMMAND installed_inner_template_client)
+set_tests_properties(installed_inner_template_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed ND inner-template client passed")
