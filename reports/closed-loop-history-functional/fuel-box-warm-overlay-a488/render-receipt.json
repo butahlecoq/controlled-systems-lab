@@ -1,0 +1,106 @@
+{
+  "schema": "csl.feedback-history-stage-figure/1",
+  "task_id": "syn-nl-fuel-01/continuous-receding/1",
+  "input_response_sha256": "3f07a8d379af4820c56d6370b9053a4324ddd9baa681bc260504827a7748744e",
+  "input_attempt_sha256": "d729c461bbaf7ee19dba39a035d68a6b144739ffb0199fd8f58d4d61c735f872",
+  "capture_source_commit": "a4889d4727cf5ba0bc2dbf64c8c39b7792a18ae5",
+  "renderer_source_commit": "4329973fee10e126cd6aa19ca4a26e0b38c5262d",
+  "renderer_sha256": "775b0d099336db028a9991aae9f0d4897b364f29a61151dba69a63788f27b517",
+  "query_scope": "first observed-state query; all predicted stages, not all replans",
+  "trajectory_scope": "observed nonlinear plant across full episode",
+  "terminal_feasibility": "projected physical terminal state bounds; source terminal set otherwise universal",
+  "terminal_reference": "soft objective reference, not a terminal constraint",
+  "full_state_before_projection": true,
+  "family": "box",
+  "stages": 41,
+  "quantitative_style": "csl-report-quantitative-v1",
+  "palette": "shared Omarchy stage palette",
+  "execution_protocol": "initial observed-state rollout; subsequent shifted history primal and zero supplied duals",
+  "initialization_sources": [
+    {
+      "path": "native-query-000-request.jsonl",
+      "bytes": 38809,
+      "sha256": "52f0ce33ee54d9673998ceb6795e4c3382c18ea767b059e2d781240d0d4e0203"
+    },
+    {
+      "path": "native-query-001-request.jsonl",
+      "bytes": 40528,
+      "sha256": "8aa5de371e0d044747b2b2c722e2ac5a207453466e48b92daec2381f9af860ce"
+    }
+  ],
+  "build_scope": "composite current compiled sources and f4 installed SDK",
+  "figures": [
+    {
+      "path": "all-stages-2-0-screen.png",
+      "sha256": "a6c3a023e6ed82f96c30839e05d9245b31e88b8f08d47170079726c0c4699084",
+      "raw_state_indices": [
+        2,
+        0
+      ],
+      "variant": "screen"
+    },
+    {
+      "path": "all-stages-2-0-screen.svg",
+      "sha256": "6a2b0f641d5c5455c90ac978736d990996ef2e33634e99e63626662e0bf5c970",
+      "raw_state_indices": [
+        2,
+        0
+      ],
+      "variant": "screen"
+    },
+    {
+      "path": "all-stages-2-0-print.png",
+      "sha256": "906aea3e3326ecafe4645f00b1cb0bdabfda4a8e7a3694b7e8e80134724dedda",
+      "raw_state_indices": [
+        2,
+        0
+      ],
+      "variant": "print"
+    },
+    {
+      "path": "all-stages-2-0-print.svg",
+      "sha256": "9bc7ba360b8fe2776305b960051d8a9193577668888429a89e2e6545508e695f",
+      "raw_state_indices": [
+        2,
+        0
+      ],
+      "variant": "print"
+    },
+    {
+      "path": "all-stages-3-1-screen.png",
+      "sha256": "81ab149185589f1a70e5137ca7df870e318046abe3e6277e59a500e8c9c3477b",
+      "raw_state_indices": [
+        3,
+        1
+      ],
+      "variant": "screen"
+    },
+    {
+      "path": "all-stages-3-1-screen.svg",
+      "sha256": "09b59f2ee66f13695625b5563ba5552ebfb3e8cdb7d6b7318fdbada358ca7c4e",
+      "raw_state_indices": [
+        3,
+        1
+      ],
+      "variant": "screen"
+    },
+    {
+      "path": "all-stages-3-1-print.png",
+      "sha256": "7a5aacc931349148479011fa9973c9be99e5f599db2fb8356aedaed5f5603a52",
+      "raw_state_indices": [
+        3,
+        1
+      ],
+      "variant": "print"
+    },
+    {
+      "path": "all-stages-3-1-print.svg",
+      "sha256": "f5e8ff235115dce615a4daedbd36ec346a26bf58ccd58ca92cef42f9e154cdc6",
+      "raw_state_indices": [
+        3,
+        1
+      ],
+      "variant": "print"
+    }
+  ]
+}

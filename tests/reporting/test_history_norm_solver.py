@@ -3,6 +3,7 @@ import importlib.util
 from pathlib import Path
 import sys
 import unittest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "benchmarks/reporting/closed_loop"))
@@ -124,7 +125,18 @@ class HistoryNormSolverTest(unittest.TestCase):
         manifest = build_history_manifest()
         self.assertEqual(validate_manifest(manifest_path=HISTORY_MANIFEST), manifest)
         graphs = manifest["graphs"]
-        self.assertEqual(len(graphs), 5)
+        self.assertEqual(len(graphs), 20)
+        feedback = next(row for row in graphs if row["controller"]["id"] == "native-continuous-history-box-ipopt/1")
+        self.assertEqual(feedback["role_bindings"]["representation"]["id"], "box")
+        self.assertEqual(feedback["role_bindings"]["control_optimizer"]["id"], "casadi-ipopt")
+        self.assertEqual(feedback["role_bindings"]["support_lp"]["id"], "csl.lp.highs")
+        family_graphs = [row for row in graphs if row["controller"]["id"] == "native-continuous-history-box-ipopt/1"]
+        self.assertEqual(len(family_graphs), 3)
+        for family in ("polytope", "zonotope", "parallelotope", "ellipsoid"):
+            matches = [row for row in graphs if row["controller"]["id"] == f"native-continuous-history-{family}-ipopt/1"]
+            self.assertEqual({row["task_id"] for row in matches},
+                             {load_task(name)["task_id"] for name in ("syn-nl-lv-01", "earth-orbit", "syn-nl-fuel-01")})
+            self.assertTrue(all(row["role_bindings"]["representation"]["id"] == family for row in matches))
         for name in ("syn-nl-lv-01", "syn-nl-fuel-01", "earth-orbit"):
             task = load_task(name)
             graph = next(row for row in graphs if row["task_id"] == task["task_id"] and
@@ -142,6 +154,31 @@ class HistoryNormSolverTest(unittest.TestCase):
                 self.assertEqual(alternatives[0]["objective_id"], graph["objective_id"])
                 self.assertEqual(alternatives[0]["role_bindings"]["control_optimizer"]["id"], "casadi-ipopt")
 
+    def test_refinement_requires_epigraph_cost_to_be_only_failed_check(self):
+        from history_policy import should_refine_epigraph
+        checks = {"checks": {"source_cost": {"passed": False}, "dynamics": {"passed": True},
+                              "geometry": {"passed": True}}}
+        solver = {"provider": "casadi-ipopt"}
+        cost = {"residual_norms": [{"coefficient": 1}]}
+        self.assertTrue(should_refine_epigraph(checks, solver, cost))
+        checks["checks"]["geometry"]["passed"] = False
+        self.assertFalse(should_refine_epigraph(checks, solver, cost))
+        checks["checks"]["geometry"]["passed"] = True
+        self.assertFalse(should_refine_epigraph(checks, {"provider": "csl.convex.highs"}, cost))
+        self.assertFalse(should_refine_epigraph(checks, solver, {"residual_norms": []}))
+
+    def test_feedback_profile_preparation_identifies_geometry_semantics(self):
+        from contracts import load_task, manifest_sha256
+        from history_policy import create_policy
+        task = load_task("syn-nl-lv-01")
+        with mock.patch.dict("os.environ", {"CSL_NATIVE_POLICY_BRIDGE": "/bin/true"}), \
+                mock.patch("subprocess.Popen"):
+            policy = create_policy(task, task_sha256=manifest_sha256(task),
+                controller_id="native-continuous-history-box-ipopt/1",
+                action_profile_id=task["control_domains"]["continuous"]["problem_id"])
+            self.assertEqual(policy.preparation_receipt["geometry"], "box")
+            self.assertIn("F/B/I", policy.preparation_receipt["controller_semantics"])
+
     def test_policy_refuses_a_task_hash_that_does_not_match_the_source_task(self):
         from contracts import load_task
         from history_policy import create_policy
@@ -158,7 +195,9 @@ class HistoryNormSolverTest(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            for controller_id in ("native-continuous-affine-history-mpc/1", "native-continuous-affine-history-ipopt/1"):
+            for controller_id in ("native-continuous-affine-history-mpc/1",
+                                  "native-continuous-affine-history-ipopt/1",
+                                  "native-continuous-history-box-ipopt/1"):
                 result = run_task("syn-nl-lv-01", root, root / "missing-bridge", controller_id=controller_id)
                 self.assertEqual(result["status"], "refused")
                 reason = json.loads((Path(result["attempt"]) / "resolution-refusal.json").read_text())["reason"]

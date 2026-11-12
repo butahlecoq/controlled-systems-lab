@@ -5,7 +5,8 @@ import casadi as ca
 import numpy as np
 
 
-def solve(relation: dict, objective: dict, *, initial, positive_indices=()) -> dict:
+def solve(relation: dict, objective: dict, *, initial, positive_indices=(), geometry_memberships=(),
+          tighten_epigraph=False) -> dict:
     """Solve the complete H relation with separate exact norm epigraphs.
 
     Positive coordinates are parameterized as exp(s), with no artificial
@@ -38,6 +39,9 @@ def solve(relation: dict, objective: dict, *, initial, positive_indices=()) -> d
                 raise ValueError("invalid history relation")
             expression = ca.DM(matrix) @ z
             opti.subject_to(expression == ca.DM(bound) if equality else expression <= ca.DM(bound))
+    from history_geometry import constrain, parse, verify
+    geometry = parse(geometry_memberships, dimension)
+    factor_variables = constrain(opti, z, geometry, initial)
     quadratic = objective["quadratic"]
     q = np.asarray(quadratic["Q"], dtype=float)
     linear = np.asarray(quadratic["linear"], dtype=float)
@@ -70,8 +74,13 @@ def solve(relation: dict, objective: dict, *, initial, positive_indices=()) -> d
                   "provider_initial_primal": np.asarray(opti.debug.value(z, opti.initial()), dtype=float).reshape(-1).tolist(),
                   "provider_initial_duals": np.asarray(opti.debug.value(opti.lam_g, opti.initial()), dtype=float).reshape(-1).tolist(),
                   "initialization_status": "submitted-and-read-back"}
-    opti.solver("ipopt", {"print_time": False}, {"print_level": 0, "max_iter": 3000,
-        "warm_start_init_point": "yes", "tol": 1e-9, "acceptable_tol": 1e-8, "bound_relax_factor": 0.0})
+    options = {"warm_start_init_point": "yes", "print_level": 0, "max_iter": 3000, "tol": 1e-9,
+               "acceptable_tol": 1e-8, "bound_relax_factor": 0.0}
+    if tighten_epigraph:
+        options.update({"max_iter": 6000, "tol": 1e-12, "acceptable_tol": 1e-11,
+                        "constr_viol_tol": 1e-12, "compl_inf_tol": 1e-12})
+    opti.solver("ipopt", {"print_time": False}, options)
+
     try:
         solution = opti.solve()
         primal = np.asarray(solution.value(z), dtype=float).reshape(-1)
@@ -81,7 +90,13 @@ def solve(relation: dict, objective: dict, *, initial, positive_indices=()) -> d
             return {"warm_start": warm_start, "success": False, "status": "nonfinite-solution",
                     "solver": "casadi-ipopt/full-history-separate-norm-epigraphs/1",
                     "provider": "casadi-ipopt", "version": f"casadi {ca.__version__}; IPOPT version unavailable"}
-        return {"warm_start": warm_start, "success": bool(stats.get("success")),
+        factor_values = [([] if variable is None else np.asarray(solution.value(variable), dtype=float).reshape(-1).tolist())
+                         for variable in factor_variables]
+        geometry_check = verify(geometry, primal, factor_values)
+        return {"warm_start": warm_start, "success": bool(stats.get("success")) and geometry_check["accepted"],
+                "geometry_factors": factor_values, "geometry_validation": geometry_check,
+                "numerical_profile": "tight-epigraph" if tighten_epigraph else "standard",
+
                 "status": str(stats.get("return_status", "unknown")), "primal": primal.tolist(),
                 "objective": objective_value, "iterations": stats.get("iter_count"),
                 "solver": "casadi-ipopt/full-history-separate-norm-epigraphs/1",

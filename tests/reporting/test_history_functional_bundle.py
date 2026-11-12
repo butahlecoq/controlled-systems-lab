@@ -12,6 +12,15 @@ sys.path.insert(0, str(ROOT / "scripts/reports"))
 
 
 class HistoryBundleTest(unittest.TestCase):
+    def test_source_edit_disclosure_belongs_only_to_the_recorded_historical_attempt(self):
+        from package_feedback_history import postcheck_source_timing
+        historical_source = "a800b95b9be6a874c0bab188d1cf3394fbb836b1"
+        historical_attempt = "syn-nl-fuel-01-20261112T113606Z-6e1a2885"
+        self.assertIn("were edited", postcheck_source_timing(historical_source, historical_attempt))
+        self.assertIsNone(postcheck_source_timing(historical_source, "another-fuel-attempt"))
+        self.assertIsNone(postcheck_source_timing(
+            "a4889d4727cf5ba0bc2dbf64c8c39b7792a18ae5", historical_attempt))
+
     def test_archive_preserves_every_original_byte_and_refuses_incomplete_attempt(self):
         from package_history_functional import package
         with tempfile.TemporaryDirectory() as tmp:

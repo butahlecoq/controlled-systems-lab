@@ -1,0 +1,129 @@
+{
+  "producer_commit": "d73b455c8bd3f0951e9690ef5073ddb965a0b005",
+  "source_commit": "a4889d4727cf5ba0bc2dbf64c8c39b7792a18ae5",
+  "native_sha256": "96e0ecb805d2949ca06817e11bf4721df165a4cb1c996a35926c429027fd38a4",
+  "raw_zip_sha256": "c6cafbdff907836b8cb8b0372aca01f9d2ddcbe09ceb872fc699bee6dcfb2917",
+  "archive_members": {
+    "attempt.json": {
+      "bytes": 19800,
+      "sha256": "f70a1252f528686611cd9b24c2120bac77d00b9ecec2ad7b3a014285f11eedf2",
+      "crc32": "f0f6d661"
+    },
+    "execution-request-000.json": {
+      "bytes": 4066,
+      "sha256": "1225c595e6607d55e6b834d7c296bb2f9e7dc5bc868748ba7cdf4908752ea2cf",
+      "crc32": "bc85f814"
+    },
+    "native-query-000-2fb9a96faec5492377409c2dedeed7b9111b80ba97f3454ff062dca0ed12554a.json": {
+      "bytes": 759,
+      "sha256": "2fb9a96faec5492377409c2dedeed7b9111b80ba97f3454ff062dca0ed12554a",
+      "crc32": "3a4cf802"
+    },
+    "native-query-000-6e35ad207d0fd6b538935f8eecfbe4c1cd8527419b8a998b52b37d10764a5bc1.json": {
+      "bytes": 546,
+      "sha256": "6e35ad207d0fd6b538935f8eecfbe4c1cd8527419b8a998b52b37d10764a5bc1",
+      "crc32": "259245dc"
+    },
+    "native-query-000-886859e87bb5428fe99609a06a20e03b71316288cae9bab8c1e19300f8b63a46.json": {
+      "bytes": 759,
+      "sha256": "886859e87bb5428fe99609a06a20e03b71316288cae9bab8c1e19300f8b63a46",
+      "crc32": "dd2554c0"
+    },
+    "native-query-000-8eeb38c1197df39249086de3748649c1158b50bb4428bfb3a7c8ee0ed5c73537.json": {
+      "bytes": 753,
+      "sha256": "8eeb38c1197df39249086de3748649c1158b50bb4428bfb3a7c8ee0ed5c73537",
+      "crc32": "dd16487d"
+    },
+    "native-query-000-9818ba249761c314844cbb2d6cfd7eff7ca941bba152e26215dc251a3b546727.json": {
+      "bytes": 552,
+      "sha256": "9818ba249761c314844cbb2d6cfd7eff7ca941bba152e26215dc251a3b546727",
+      "crc32": "08ba0e0d"
+    },
+    "native-query-000-de69e57f2c3c3cdb34b6a7c5a01761ecb8634b4a0575af44a10620b58ebe27c8.json": {
+      "bytes": 551,
+      "sha256": "de69e57f2c3c3cdb34b6a7c5a01761ecb8634b4a0575af44a10620b58ebe27c8",
+      "crc32": "fcc239f2"
+    },
+    "native-query-000-request.jsonl": {
+      "bytes": 18232,
+      "sha256": "afd5cd76d9fddcaf8f07be20f7afabbbb5fe87c45fc7f6d630811783f184e46c",
+      "crc32": "32801512"
+    },
+    "native-query-000-response.jsonl": {
+      "bytes": 1130249,
+      "sha256": "d2b1fcb5ec910960735f2ff58d25bda587a351875788975ee6c3dbfe7e42cf79",
+      "crc32": "82ccd432"
+    },
+    "record-io.jsonl": {
+      "bytes": 12074,
+      "sha256": "f2efce756c0581445a82819375c66db8542c4f3a821784c6692346ccd41685c4",
+      "crc32": "85ae2abd"
+    },
+    "request.json": {
+      "bytes": 951,
+      "sha256": "4fa862f3ad83f26b2f4fb8b82a3f87b7f48b40433a9487a36725c7847a018479",
+      "crc32": "cb330e6d"
+    },
+    "resolution-receipt.json": {
+      "bytes": 986,
+      "sha256": "98c4e35352a9ed81634906fe9e7341fe5fbc717afc9b461816439dbe3eeae5e0",
+      "crc32": "5c23fbd6"
+    },
+    "resolved-graph.json": {
+      "bytes": 10566,
+      "sha256": "d4dcd73068793ff9a6562d4346bb24d41d5ed5990110e749926cc9e251c0f38f",
+      "crc32": "2b9cb519"
+    },
+    "run-manifest.json": {
+      "bytes": 10495,
+      "sha256": "7a1ba60a1ce6cd8eb0280b6cffbc68b4c2d4fa53ade42dc21bff72d4c95288e5",
+      "crc32": "cdf72768"
+    },
+    "stage-000.json": {
+      "bytes": 3771628,
+      "sha256": "aed904b6e31576ad3c9ef18edee3230be8155039bd4c2e81d6292d8f55d04cf8",
+      "crc32": "9c6f76dd"
+    },
+    "stage-records.jsonl": {
+      "bytes": 180,
+      "sha256": "b36c67e97423a4b0b1e0b50292a717e5e84b2b0fa7dd19b402a94f69b489cd26",
+      "crc32": "b21fcd7b"
+    },
+    "worker-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    },
+    "worker-stdout.txt": {
+      "bytes": 387,
+      "sha256": "41b8c85d13285798fd486c9431da59fb4e382867d11077b44b0cdf30e0ee23c9",
+      "crc32": "b2085586"
+    }
+  },
+  "scope": "functional verification; no timing comparison or global guarantees",
+  "schema": "csl.feedback-history-execution-failure/1",
+  "task_id": "env717-earth-orbit/continuous-receding/1",
+  "completed_holds": 0,
+  "original_intervals": 20,
+  "outcome": "execution_failure",
+  "supervisor": {
+    "status": "failed",
+    "return_code": 2,
+    "wall_seconds": 4.658957395935431,
+    "termination_scope": "worker process group",
+    "resource_profile_id": "worker-wall-1800-cpu-1800/1",
+    "requested_wall_seconds": 1800,
+    "enforced_wall_timeout_seconds": 1800,
+    "requested_cpu_seconds": 1800,
+    "enforced_cpu_rlimit_soft_hard_seconds": [
+      1800,
+      1801
+    ],
+    "stdout": "worker-stdout.txt",
+    "stderr": "worker-stderr.txt"
+  },
+  "failure": "PermissionError: [Errno 13] Permission denied: '/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/988-warm-native-build/physical_bridge'",
+  "cause": "shutil.copyfile did not preserve physical bridge executable mode",
+  "correction": "Copied executable mode from original immutable bridge; bytes unchanged; saved held-step requests preflighted before new02attempts.",
+  "scientific_claim": "No physical hold executed, no complete objective or trajectory claimed."
+}

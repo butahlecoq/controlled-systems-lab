@@ -4,7 +4,47 @@ from __future__ import annotations
 from native_graph_policy import _prediction_stages, _source_cost, _terminal_objective
 
 
-def make_request(task, task_sha256, receipt, observed, stage, *, history_solver=None):
+FAMILIES = ("polytope", "box", "zonotope", "parallelotope", "ellipsoid")
+GEOMETRY_IDS = {f"native-continuous-history-{family}-ipopt/1": family for family in FAMILIES}
+
+
+def should_refine_epigraph(checks, solver, compiled):
+    """Retry the same NLP only when epigraph cost is the sole failed check."""
+    rows = checks.get("checks", {})
+    return (solver.get("provider") == "casadi-ipopt" and bool(compiled.get("residual_norms"))
+            and "source_cost" in rows and not rows["source_cost"].get("passed", False)
+            and all(value.get("passed", False) for key, value in rows.items() if key != "source_cost"))
+
+
+def geometry_memberships(export, family, state_dimension, horizon, strict_source_domain=None):
+    if (not isinstance(export, dict) or export.get("status") != "complete"
+            or export.get("family") != family or export.get("scope") != "forward_relevant_from_observation"):
+        raise ValueError("feedback geometry does not match the selected family and scope")
+    stages = export.get("stages")
+    if not isinstance(stages, list) or len(stages) != horizon + 1:
+        raise ValueError("feedback geometry must cover every history stage")
+    memberships = []
+    for k, stage in enumerate(stages):
+        if stage.get("stage") != k or stage.get("coordinates") != list(range(state_dimension)):
+            raise ValueError("feedback geometry stage or state coordinate order differs")
+        rows = stage.get("memberships")
+        if not isinstance(rows, list) or len(rows) != 3 or {row.get("role") for row in rows} != {"forward", "backward", "intersection"}:
+            raise ValueError("feedback geometry must retain forward, backward and intersection sets")
+        for row in rows:
+            if row.get("indices") != list(range(k * state_dimension, (k + 1) * state_dimension)):
+                raise ValueError("feedback geometry membership has wrong history coordinates")
+            expected = "h" if family in {"polytope", "box", "parallelotope"} else family
+            if row.get("kind") != expected:
+                raise ValueError("feedback geometry membership differs from requested family")
+            if strict_source_domain is not None and row.get("strict_source_domain") != strict_source_domain:
+                raise ValueError("feedback geometry strict source domain differs from the task")
+            if row.get("relation") not in {"outer", "equivalent"}:
+                raise ValueError("feedback geometry is not an outer set")
+            memberships.append(row)
+    return memberships
+
+
+def make_request(task, task_sha256, receipt, observed, stage, *, history_solver=None, geometry_family=None):
     n = task["episode"]["intervals"]
     if not isinstance(stage, int) or not 0 <= stage < n:
         raise ValueError("query stage must belong to the original horizon")
@@ -14,7 +54,7 @@ def make_request(task, task_sha256, receipt, observed, stage, *, history_solver=
     if history_solver not in {"csl.convex.highs", "casadi-ipopt"}:
         raise ValueError("unknown history solver")
     action_profile = task["control_domains"]["continuous"]
-    return {"schema": "csl.closed-loop.native-policy-query/1", "mode": "continuous-history/1",
+    result = {"schema": "csl.closed-loop.native-policy-query/1", "mode": "continuous-history/1",
             "history_solver": history_solver,
             "task_id": task["task_id"], "task_sha256": task_sha256,
             "source_model_id": task["model"]["model_id"],
@@ -29,6 +69,11 @@ def make_request(task, task_sha256, receipt, observed, stage, *, history_solver=
             "state_bounds": [field.get("bounds") for field in task["model"]["states"]],
             "control_bounds": action_profile["bounds"],
             "terminal_objective": _terminal_objective(task), "running_cost": _source_cost(task)}
+    if geometry_family is not None:
+        if geometry_family not in FAMILIES or history_solver != "casadi-ipopt":
+            raise ValueError("feedback family requires explicitly selected IPOPT")
+        result.update({"geometry_family": geometry_family, "geometry_max_generators": 1000})
+    return result
 
 
 def initial_history(request, previous=None):
@@ -77,12 +122,13 @@ class HistoryPolicy:
         validate_source_binding(task)
         if manifest_sha256(task) != task_sha256:
             raise ValueError("history policy task hash differs from the source-bound task")
-        if controller_id not in {"native-continuous-affine-history-mpc/1", "native-continuous-affine-history-ipopt/1"}:
+        if controller_id not in {"native-continuous-affine-history-mpc/1", "native-continuous-affine-history-ipopt/1", *GEOMETRY_IDS}:
             raise ValueError("unknown continuous history policy profile")
         if (controller_id == "native-continuous-affine-history-ipopt/1"
                 and task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01"):
             raise ValueError("orbit already selects the IPOPT history solver in the original profile")
-        self.history_solver = ("casadi-ipopt" if controller_id == "native-continuous-affine-history-ipopt/1"
+        self.geometry_family = GEOMETRY_IDS.get(controller_id)
+        self.history_solver = ("casadi-ipopt" if self.geometry_family is not None or controller_id == "native-continuous-affine-history-ipopt/1"
             or task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01" else "csl.convex.highs")
         if action_profile_id != task["control_domains"]["continuous"]["problem_id"]:
             raise ValueError("continuous history policy requires the original continuous action domain")
@@ -102,8 +148,9 @@ class HistoryPolicy:
             "executable_sha256": hashlib.sha256(executable.read_bytes()).hexdigest(),
             "binary_source": "unknown",
             "action_profile_id": action_profile_id, "original_horizon": task["episode"]["intervals"],
-            "geometry": "not_used", "history_solver": self.history_solver,
-            "controller_semantics": "observed-state direct affine-history MPC"}
+            "geometry": self.geometry_family or "not_used", "history_solver": self.history_solver,
+            "controller_semantics": ("observed-state affine-history MPC with F/B/I family memberships"
+                if self.geometry_family else "observed-state direct affine-history MPC")}
 
     def set_query_capture_callback(self, callback):
         self.query_capture_callback = callback
@@ -126,7 +173,8 @@ class HistoryPolicy:
                 and observed_physical_state[0] <= 0):
             raise ValueError("observed orbit radius must be positive")
         request = make_request(self.task, self.task_sha256, self.receipt,
-                               observed_physical_state, absolute_update_index, history_solver=self.history_solver)
+                               observed_physical_state, absolute_update_index, history_solver=self.history_solver,
+                               geometry_family=self.geometry_family)
         request["controller_id"] = self.controller_id
         initial, warm_start = initial_history(request, self.previous_history)
         request["initial_primal"] = initial.tolist()
@@ -174,6 +222,24 @@ class HistoryPolicy:
                  "profile_id": self.controller_id, "provider": "public-function"},
                 {"operation": "history.compile-cost", "module_id": "csl::optimization::compile_history_cost",
                  "profile_id": self.controller_id, "provider": "public-function"}])
+        if isinstance(response.get("geometry"), dict):
+            for stage_record in response["geometry"].get("stages", []):
+                for membership in stage_record.get("memberships", []):
+                    for call in membership.get("providers", []):
+                        if call.get("actual"):
+                            result.setdefault("geometry_invocations", []).append({
+                                "operation": "feedback.geometry", "actual_method_id": call["actual"],
+                                "version": call.get("actual_version") or "unknown", "role": "reachable_set_method",
+                                "absolute_stage": absolute_update_index + stage_record["stage"],
+                                "geometry_role": membership["role"], "request_id": call["request"]})
+                    for call in membership.get("support_calls", []):
+                        if call.get("actual"):
+                            result.setdefault("geometry_invocations", []).append({
+                                "operation": "feedback.support", "actual_method_id": call["actual"],
+                                "version": call.get("actual_version") or "unknown", "role": "support_lp",
+                                "absolute_stage": absolute_update_index + stage_record["stage"],
+                                "geometry_role": membership["role"], "program_id": call["program"],
+                                "outcome": call["status"]})
         if response.get("status") not in {"solved", "exported"}:
             result["status"] = response.get("status", "failed")
             result["reason"] = response.get("reason", "native history export failed")
@@ -189,6 +255,11 @@ class HistoryPolicy:
         if response["status"] != expected_status:
             raise ValueError("native history response does not match the explicitly selected solver route")
         relation, compiled = response["history_relation"], response["history_objective"]
+        memberships = (geometry_memberships(response.get("geometry"), self.geometry_family,
+            len(observed_physical_state), len(request["predictor_stages"]),
+            [{"coordinate": 0, "lower_bound": 0, "strict": True}]
+                if self.task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01" else [])
+            if self.geometry_family is not None else None)
         if response["status"] == "solved":
             primal = np.asarray(response["primal"], dtype=float)
             solver_receipt = response["solver_receipt"]
@@ -199,7 +270,8 @@ class HistoryPolicy:
             n = len(observed_physical_state)
             m = len(request["control_bounds"])
             positive = [n * k for k in range(1, len(request["predictor_stages"]) + 1)] if self.task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01" else []
-            solver_receipt = solve(relation, compiled, initial=initial, positive_indices=positive)
+            solver_receipt = solve(relation, compiled, initial=initial, positive_indices=positive,
+                                   geometry_memberships=memberships or ())
             result["invocations"].append({"operation": "controller.solve", "module_id": "continuous-history-mpc",
                 "profile_id": self.controller_id, "provider": "casadi-ipopt",
                 "version": solver_receipt.get("version", "unknown")})
@@ -218,11 +290,38 @@ class HistoryPolicy:
         result["solve_receipt"] = {"bridge_response": response, "solver": solver_receipt}
         try:
             checks = validate(self.task, absolute_update_index, observed_physical_state,
-                              request["predictor_stages"], relation, primal, solver_cost)
+                              request["predictor_stages"], relation, primal, solver_cost,
+                              geometry_memberships=memberships,
+                              geometry_factors=solver_receipt.get("geometry_factors") if memberships else None)
         except (ValueError, FloatingPointError) as error:
             result["reason"] = "history validation failed: " + str(error)
             return result
         result["solve_receipt"]["independent_validation"] = checks
+        if not checks["accepted"] and should_refine_epigraph(checks, solver_receipt, compiled):
+            from history_norm_solver import solve
+            first_solver, first_checks = solver_receipt, checks
+            solver_receipt = solve(relation, compiled, initial=primal, positive_indices=positive,
+                geometry_memberships=memberships or (), tighten_epigraph=True)
+            result["invocations"].append({"operation": "controller.solve", "module_id": "continuous-history-mpc",
+                "profile_id": self.controller_id, "provider": "casadi-ipopt",
+                "version": solver_receipt.get("version", "unknown"), "reason": "source-cost epigraph refinement"})
+            result["solve_receipt"]["initial_solver"] = first_solver
+            result["solve_receipt"]["initial_validation"] = first_checks
+            result["solve_receipt"]["solver"] = solver_receipt
+            self.last_query_capture["solver_receipt"] = solver_receipt
+            self.last_query_capture["initial_solver_receipt"] = first_solver
+            self._capture()
+            if solver_receipt.get("success"):
+                try:
+                    primal, solver_cost = solver_receipt["primal"], solver_receipt["objective"]
+                    checks = validate(self.task, absolute_update_index, observed_physical_state,
+                        request["predictor_stages"], relation, primal, solver_cost,
+                        geometry_memberships=memberships,
+                        geometry_factors=solver_receipt.get("geometry_factors") if memberships else None)
+                    result["solve_receipt"]["independent_validation"] = checks
+                except (ValueError, FloatingPointError) as error:
+                    result["reason"] = "refined history validation failed: " + str(error)
+                    return result
         if not checks["accepted"]:
             result["reason"] = "full-history source or feasibility verification failed"
             return result
@@ -230,8 +329,12 @@ class HistoryPolicy:
         result.update({"status": "accepted", "control": checks["controls"][0],
             "selected_plan": {"states": checks["states"], "controls": checks["controls"],
                               "source_cost": checks["source_cost"]},
-            "policy_semantics": "fresh observed-state affine history MPC; numerical local evidence",
-            "coverage": "not_applicable"})
+            "policy_semantics": ("observed-state affine-history MPC with full-state F/B/I family memberships"
+                if self.geometry_family else "fresh observed-state affine history MPC; numerical local evidence"),
+            "coverage": ("single selected family, numerical full-state geometry only"
+                if self.geometry_family else "not_applicable")})
+        if self.geometry_family:
+            result["selected_representation"] = self.geometry_family
         return result
 
     def close(self):

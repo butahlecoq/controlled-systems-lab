@@ -1,0 +1,21 @@
+{
+  "python_source_commit": "aeac7d93908abce9c734ca9965633a329596f514",
+  "native_source_commit": "a800b95b9be6a874c0bab188d1cf3394fbb836b1",
+  "python_source_capsule": {
+    "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/history-orbit-refinement-source-aeac7d93.tar",
+    "sha256": "557268872228980087ba786695c7167372fea8246f708ade33a089d68e4a5b56"
+  },
+  "native_build_receipt_sha256": "fd74b2081b808f33dd83d3521410d3d7a244fb0739b4eedb07de459210ee7817",
+  "native_binary_sha256": "4be7fb205630b615fcbead74dc4c3ad3766104336920c4bf61a9b4d094ff1223",
+  "physical_binary_sha256": "fcbb9170d1fbfc7cd1a1324087a0d049f8a078a16a8c450de4a9623be5942e36",
+  "source_relation": "git diff a800b95b..aeac7d93 -- tools/closed_loop_native_policy.cpp src include CMakeLists.txt was empty",
+  "task": "earth-orbit",
+  "horizon": 20,
+  "controller": "native-continuous-history-box-ipopt/1",
+  "warm_start_protocol": "cold at each observed query; known shift-primal protocol gap; refinement uses rejected query primal only",
+  "concurrent_load": "fuel box worker completed algorithm and was still performing postcheck/render; no performance comparison",
+  "budget": {
+    "wall_seconds": 1800,
+    "cpu_seconds": 1800
+  }
+}
