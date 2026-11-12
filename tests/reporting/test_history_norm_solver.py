@@ -82,6 +82,7 @@ class HistoryNormSolverTest(unittest.TestCase):
             graph = next(row for row in graphs if row["task_id"] == task["task_id"])
             self.assertEqual(graph["action_profile_id"], task["control_domains"]["continuous"]["problem_id"])
             self.assertEqual(graph["objective_id"], task["objective"]["objective_id"])
+            self.assertIn(task["source"]["path"], {row["path"] for row in graph["source_files"]})
             self.assertEqual(graph["role_bindings"]["representation"], "not_used")
             self.assertEqual(graph["controller"]["policy_factory"], "history_policy:create_policy")
 

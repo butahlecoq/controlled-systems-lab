@@ -287,8 +287,9 @@ def _history_definitions() -> list[dict]:
             "control_semantics": "continuous full-history receding-horizon MPC",
             "solver": {"provider": provider, "assurance": "local numerical" if orbit else "numerical"}}
         source_paths = set(common_sources + base["execution"]["source_files"])
+        source_paths.add(task["source"]["path"])
         if task["source"]["kind"] == "mpc11-scenario":
-            source_paths.update([task["source"]["path"], "benchmarks/reporting/mpc11/affine.py"])
+            source_paths.add("benchmarks/reporting/mpc11/affine.py")
         graph = {key: base[key] for key in ("task_id", "task_sha256", "model_id", "objective_id",
                                              "action_profile_id", "execution")}
         graph.update({"controller": controller,
