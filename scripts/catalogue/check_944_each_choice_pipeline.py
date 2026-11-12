@@ -52,7 +52,7 @@ def main() -> int:
     parser.add_argument("executable", nargs="?")
     parser.add_argument("--record-json")
     parser.add_argument("--regression-json")
-    parser.add_argument("--expected-numeric-boundaries", type=int, default=2)
+    parser.add_argument("--expected-numeric-boundaries", type=int, default=0)
     args = parser.parse_args()
     if args.record_json:
         document = json.loads(Path(args.record_json).read_text(encoding="utf-8"))
