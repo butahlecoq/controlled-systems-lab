@@ -18,6 +18,7 @@
 #include <iostream>
 #include <limits>
 #include <numeric>
+#include <string_view>
 
 using namespace csl;
 using namespace csl::registry;
@@ -129,6 +130,17 @@ problem::ResolvedProblem planar_control_problem() {
          bounded_box_2d("source-index-planar-x1","position","velocity",0,1,0,1)}, {},{},
         InformationPattern::nominal_open_loop,
         QuadraticTerminal{Matrix{2,2,{2,0,0,2}},Vector{-2,-2},2}};
+    return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
+}
+problem::ResolvedProblem qhull_highs_strategy_problem(TerminalObjective objective) {
+    Problem source{{"qhull-highs-strategy-a"},
+        std::make_shared<const SystemModel>(SystemModel{{{2,2,0},TimeDomain::discrete,
+            LinearStage{Matrix{2,2,{1,0,0,1}},Matrix{2,2,{1,0,0,1}},Matrix{2,0,{}},Vector{0,0}}},{}}),
+        {0,1},KnownInitial{{0,0}},ContinuousDomain{{bounded_box_2d("qhull-highs-u0",
+            "position","velocity",0,1,0,1)}},
+        {bounded_box_2d("qhull-highs-x0","position","velocity",-1,1,-1,1),
+         bounded_box_2d("qhull-highs-x1","position","velocity",0,1,0,1)}, {},{},
+        InformationPattern::nominal_open_loop,std::move(objective)};
     return take(problem::resolve(source,{problem::UncertaintyStructure::stage_product_uncoupled,{},{}}));
 }
 problem::ResolvedProblem nominal_linear_exact_three_stage_multivariable() {
@@ -678,6 +690,74 @@ TEST_CASE("Strategy A records faithful legacy source-index proposals in the same
     REQUIRE(history.terminal->provider->actual);
     CHECK(history.terminal->provider->port=="convex");
     CHECK(history.terminal->provider->actual->id==ModuleId{"csl.convex.highs"});
+}
+TEST_CASE("public Strategy A Qhull output reaches both HiGHS terminal optimizer paths") {
+    struct Case {
+        std::string_view name;
+        TerminalObjective objective;
+        ModuleId terminal_provider;
+        std::array<double,2> state;
+        std::array<double,2> control;
+        double value;
+    };
+    const std::array cases{
+        Case{"linear",LinearTerminal{{-1,0},0},{"csl.lp.highs"},{1,0},{1,0},-1},
+        Case{"quadratic",QuadraticTerminal{Matrix{2,2,{2,0,0,2}},Vector{0,0},0},
+            {"csl.convex.highs"},{0,0},{0,0},0}};
+    for (const auto& test_case : cases) {
+        CAPTURE(test_case.name);
+        const auto query=request(qhull_highs_strategy_problem(test_case.objective));
+        const auto result=run_source_index_strategy(query,{},true);
+        if(result.termination!=Termination::completed)std::visit([](const auto& stop) {
+            if constexpr(requires {stop.diagnostics.begin()->field;})
+                for(const auto& diagnostic:stop.diagnostics)
+                    std::cerr<<diagnostic.field<<": "<<diagnostic.explanation<<'\n';
+        },result.stop);
+        REQUIRE(result.termination==Termination::completed);
+        REQUIRE(result.family);
+        const auto& history=payload(result);
+        REQUIRE(history.forward.stages.size()==2);
+        bool saw_legacy_source=false,saw_verified_checker=false,saw_qhull=false;
+        for (const auto& stage:history.forward.stages)
+            for (const auto& evidence:stage.operation_lineage)
+                for (const auto& assumption:evidence.assumptions) {
+                    saw_legacy_source|=assumption.find(
+                        "source-index invocation: provider=csl.hull.source.btulshor-kpabep@1.0.0; status=completed")
+                        !=std::string::npos;
+                    saw_verified_checker|=assumption.find(
+                        "checker invocation: provider=csl.geometry.bounded-hull-checker@1; status=verified")
+                        !=std::string::npos;
+                    saw_qhull|=assumption.find("Qhull 8.0.2 Qx facet enumeration")!=std::string::npos;
+                }
+        CHECK(saw_legacy_source);
+        CHECK(saw_verified_checker);
+        CHECK(saw_qhull);
+        REQUIRE(history.terminal);
+        REQUIRE(history.terminal->provider);
+        REQUIRE(history.terminal->provider->actual);
+        CHECK(history.terminal->provider->actual->id==test_case.terminal_provider);
+        REQUIRE(history.terminal->optimization);
+        REQUIRE(history.terminal->optimization->primal);
+        const auto& state=*history.terminal->optimization->primal;
+        REQUIRE(state.size()==2);
+        CHECK(state[0]==doctest::Approx(test_case.state[0]));
+        CHECK(state[1]==doctest::Approx(test_case.state[1]));
+        const double analytic_value=std::holds_alternative<LinearTerminal>(test_case.objective)
+            ? -state[0] : state[0]*state[0]+state[1]*state[1];
+        CHECK(analytic_value==doctest::Approx(test_case.value));
+        CHECK(take(optimization::evaluate(query.problem.objective(),state))==
+            doctest::Approx(test_case.value));
+        const Vector joint{0,0,test_case.state[0],test_case.state[1],
+            test_case.control[0],test_case.control[1]};
+        CHECK(contains(history.history.relation,joint));
+        CHECK(test_case.state[0]==doctest::Approx(test_case.control[0]));
+        CHECK(test_case.state[1]==doctest::Approx(test_case.control[1]));
+        std::cout<<"qhull_highs_strategy_a case="<<test_case.name
+            <<" terminal_provider="<<test_case.terminal_provider.value
+            <<" state=("<<state[0]<<","<<state[1]<<") control=("
+            <<test_case.control[0]<<","<<test_case.control[1]
+            <<") objective="<<test_case.value<<'\n';
+    }
 }
 TEST_CASE("T-S01 registered candidate retains u0+u1=1 and rejects the marginal product") {
     const auto query=request(integrator());auto result=run(query);CHECK(result.termination==Termination::completed);
