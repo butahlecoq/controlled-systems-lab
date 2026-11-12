@@ -71,6 +71,20 @@ class HistoryNormSolverTest(unittest.TestCase):
                 compiled = quadratic + sum(a * b for a, b in zip(spec["linear"], state)) + spec["offset"]
                 self.assertAlmostEqual(compiled, source, places=9)
 
+    def test_history_manifest_has_one_continuous_geometry_free_route_per_task(self):
+        from capabilities import build_history_manifest
+        from contracts import load_task
+
+        graphs = build_history_manifest()["graphs"]
+        self.assertEqual(len(graphs), 3)
+        for name in ("syn-nl-lv-01", "syn-nl-fuel-01", "earth-orbit"):
+            task = load_task(name)
+            graph = next(row for row in graphs if row["task_id"] == task["task_id"])
+            self.assertEqual(graph["action_profile_id"], task["control_domains"]["continuous"]["problem_id"])
+            self.assertEqual(graph["objective_id"], task["objective"]["objective_id"])
+            self.assertEqual(graph["role_bindings"]["representation"], "not_used")
+            self.assertEqual(graph["controller"]["policy_factory"], "history_policy:create_policy")
+
     def test_history_verification_rejects_wrong_rows_and_cost(self):
         import numpy as np
         from contracts import load_task
