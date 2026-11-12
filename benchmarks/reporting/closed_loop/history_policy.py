@@ -118,7 +118,7 @@ class HistoryPolicy:
                  "profile_id": self.controller_id, "provider": "public-function"},
                 {"operation": "history.compile-cost", "module_id": "csl::optimization::compile_history_cost",
                  "profile_id": self.controller_id, "provider": "public-function"}])
-        if response.get("status") not in {"accepted", "exported"}:
+        if response.get("status") not in {"solved", "exported"}:
             result["status"] = response.get("status", "failed")
             result["reason"] = response.get("reason", "native history export failed")
             if "solver_receipt" in response:
@@ -128,7 +128,7 @@ class HistoryPolicy:
                     "version": response["solver_receipt"].get("version", "unknown")})
             return result
         relation, compiled = response["history_relation"], response["history_objective"]
-        if response["status"] == "accepted":
+        if response["status"] == "solved":
             primal = np.asarray(response["primal"], dtype=float)
             solver_receipt = response["solver_receipt"]
             q = compiled["quadratic"]
@@ -156,7 +156,7 @@ class HistoryPolicy:
                 return result
             primal, solver_cost = solver_receipt["primal"], solver_receipt["objective"]
         provider = solver_receipt.get("provider", "casadi-ipopt")
-        if response["status"] == "accepted":
+        if response["status"] == "solved":
             result["invocations"].append({"operation": "controller.solve", "module_id": "continuous-history-mpc",
                 "profile_id": self.controller_id, "provider": provider,
                 "version": solver_receipt.get("version", "unknown")})

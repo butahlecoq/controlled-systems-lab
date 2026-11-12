@@ -22,7 +22,7 @@ class HistoryBridgeTest(unittest.TestCase):
         result = subprocess.run([os.environ["CSL_NATIVE_POLICY_BRIDGE"]], input=json.dumps(request) + "\n",
                                 text=True, capture_output=True, check=True)
         response = json.loads(result.stdout)
-        self.assertEqual(response["status"], "accepted", response)
+        self.assertEqual(response["status"], "solved", response)
         self.assertAlmostEqual(response["primal"][-2], 1 / 3, places=5)
         self.assertAlmostEqual(response["primal"][-1], 0, places=5)
         self.assertEqual(response["solver_receipt"]["provider"], "csl.convex.highs")
@@ -32,7 +32,7 @@ class HistoryBridgeTest(unittest.TestCase):
         terminal_run = subprocess.run([os.environ["CSL_NATIVE_POLICY_BRIDGE"]],
             input=json.dumps(request) + "\n", text=True, capture_output=True, check=True)
         terminal_only = json.loads(terminal_run.stdout)
-        self.assertEqual(terminal_only["status"], "accepted", terminal_only)
+        self.assertEqual(terminal_only["status"], "solved", terminal_only)
         self.assertAlmostEqual(terminal_only["primal"][-2], 1, places=5)
         self.assertAlmostEqual(terminal_only["primal"][-1], 0, places=5)
 

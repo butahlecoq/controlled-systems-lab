@@ -848,7 +848,7 @@ Json continuous_history_query(const Json& in) {
     for (std::size_t k = 0; k < horizon; ++k)
         us.emplace_back(primal.begin() + control_offset+k*m, primal.begin() + control_offset+(k+1)*m);
     const auto evaluated = take_history(optimization::evaluate_history_cost(program, xs, us), "evaluate-history-cost");
-    response["status"] = "accepted";
+    response["status"] = "solved";
     response["primal"] = primal;
     response["source_cost"] = {{"terminal", evaluated.terminal}, {"running", evaluated.running}, {"total", evaluated.total}};
     response["solver_receipt"] = {{"provider", actual.id.value}, {"version", actual.version},
