@@ -151,6 +151,104 @@ std::variant<OperationResult, Unsupported, OperationStopped> compact_h(
     const auto& to_h = dependencies.forward.to_h;
     if (!to_v.provenance().actual || !to_h.provenance().actual)
         return Unsupported{error("tube.compaction.provider", "Bounded H compaction requires resolved H-to-V and V-to-H providers.")};
+    auto imported_input = sets::from_handle(input.output);
+    if (auto* rejected = std::get_if<Diagnostic>(&imported_input)) return Unsupported{{*rejected}};
+    auto input_data = std::get<sets::SetData>(std::move(imported_input));
+    const auto input_representation = input_data.representation();
+    const auto* input_h = std::get_if<sets::HRepresentation>(&input_representation);
+    if (!input_h) return Unsupported{error("tube.compaction.representation", "Bounded H compaction requires a materialized H input.", DiagnosticCode::evidence_mismatch)};
+
+    // Redundancy that follows directly from explicit coordinate-axis rows can
+    // be removed before asking H-to-V to interpret a coefficient near its
+    // backend threshold. Every quotient, product, and sum is rounded one ULP
+    // outward. Rows without a finite box-derived support bound are retained.
+    const auto dimension = input_data.metadata()->set.dimension;
+    std::vector<double> lower(dimension, -std::numeric_limits<double>::infinity());
+    std::vector<double> upper(dimension, std::numeric_limits<double>::infinity());
+    for (std::size_t row = 0; row < input_h->inequalities.rows(); ++row) {
+        std::size_t coordinate = dimension;
+        for (std::size_t column = 0; column < dimension; ++column) {
+            if (input_h->inequalities(row, column) == 0.0) continue;
+            if (coordinate != dimension) { coordinate = dimension; break; }
+            coordinate = column;
+        }
+        if (coordinate == dimension) continue;
+        const auto coefficient = input_h->inequalities(row, coordinate);
+        const auto quotient = input_h->upper_bounds[row] / coefficient;
+        if (!std::isfinite(quotient)) continue;
+        const auto bound = std::nextafter(quotient, coefficient > 0.0
+            ? std::numeric_limits<double>::infinity() : -std::numeric_limits<double>::infinity());
+        if (coefficient > 0.0) upper[coordinate] = std::min(upper[coordinate], bound);
+        else lower[coordinate] = std::max(lower[coordinate], bound);
+    }
+    std::vector<std::size_t> retained_rows;
+    retained_rows.reserve(input_h->inequalities.rows());
+    std::vector<std::size_t> removed_rows;
+    for (std::size_t row = 0; row < input_h->inequalities.rows(); ++row) {
+        double support_upper = 0.0;
+        bool bounded = true;
+        for (std::size_t column = 0; column < dimension; ++column) {
+            const auto coefficient = input_h->inequalities(row, column);
+            if (coefficient == 0.0) continue;
+            const auto bound = coefficient > 0.0 ? upper[column] : lower[column];
+            if (!std::isfinite(bound)) { bounded = false; break; }
+            const auto product = coefficient * bound;
+            if (!std::isfinite(product)) { bounded = false; break; }
+            const auto product_upper = std::nextafter(product,
+                std::numeric_limits<double>::infinity());
+            const auto sum = support_upper + product_upper;
+            if (!std::isfinite(sum)) { bounded = false; break; }
+            support_upper = std::nextafter(sum, std::numeric_limits<double>::infinity());
+        }
+        if (bounded && support_upper <= input_h->upper_bounds[row]) removed_rows.push_back(row);
+        else retained_rows.push_back(row);
+    }
+    if (!removed_rows.empty()) {
+        Matrix a{retained_rows.size(), dimension, {}};
+        Vector b; b.reserve(retained_rows.size());
+        for (const auto row : retained_rows) {
+            for (std::size_t column = 0; column < dimension; ++column)
+                a.values.push_back(input_h->inequalities(row, column));
+            b.push_back(input_h->upper_bounds[row]);
+        }
+        Matrix e{input_h->equalities.rows(), dimension, {}};
+        Vector f; f.reserve(input_h->equalities.rows());
+        for (std::size_t row = 0; row < input_h->equalities.rows(); ++row) {
+            for (std::size_t column = 0; column < dimension; ++column)
+                e.values.push_back(input_h->equalities(row, column));
+            f.push_back(input_h->equality_values[row]);
+        }
+        const auto a_view = numeric::snapshot(a);
+        const auto b_view = numeric::snapshot_vector(b);
+        const auto e_view = numeric::snapshot(e);
+        const auto f_view = numeric::snapshot_vector(f);
+        if (!std::holds_alternative<numeric::MatrixView>(a_view) ||
+            !std::holds_alternative<numeric::VectorView>(b_view) ||
+            !std::holds_alternative<numeric::MatrixView>(e_view) ||
+            !std::holds_alternative<numeric::VectorView>(f_view))
+            return Unsupported{error("tube.compaction.box-reduction", "Could not snapshot box-reduced H rows.", DiagnosticCode::invalid_input)};
+        const auto output_id = child_id(problem, request, stage.value, "backward/compact-h/box-reduced");
+        auto reduced = sets::make_h({{output_id}, dimension, input_data.metadata()->coordinate_labels},
+            {std::get<numeric::MatrixView>(a_view), std::get<numeric::VectorView>(b_view),
+             std::get<numeric::MatrixView>(e_view), std::get<numeric::VectorView>(f_view)});
+        if (auto* rejected = std::get_if<Diagnostic>(&reduced)) return Unsupported{{*rejected}};
+        auto reduced_handle = std::get<sets::SetData>(std::move(reduced)).as_handle();
+        const GeometryRequestIdentity identity{{problem.value},
+            {child_id(problem, request, stage.value, "backward/compact-h/box-reduction")}, {output_id}};
+        record.requests.push_back({identity, {input.output.id}});
+        record.source_sets.push_back(input.output.id);
+        const auto evidence = GeometryEvidence{{identity, {input.output.id}},
+            GeometryClaimScope::set_relation,
+            SymbolicArgument{"outward-rounded coordinate-box implication",
+                "Each removed H row has an outward-rounded support upper bound over finite axis bounds already contained in the input set; that bound is no greater than the row RHS."},
+            {"only finite coordinate bounds extracted from explicit single-coordinate H inequalities are used",
+             "each quotient, product, and sum is rounded one binary64 ULP outward; rows without a finite support bound are retained"}, {}};
+        record.lineage.push_back(evidence);
+        input.output = std::move(reduced_handle);
+        input.relation = SetRelation::equivalent;
+        input.evidence = evidence;
+        record.backward = input;
+    }
     const auto phase_name = phase == NominalTubePhase::terminal ? "terminal" :
         phase == NominalTubePhase::backward ? "backward" : "intersection";
     const auto make_request = [&](const SetHandle& source, const char* direction) {

@@ -283,7 +283,10 @@ TEST_CASE("empty terminal feasibility remains an empty full-state intersection")
 }
 
 TEST_CASE("optional bounded H compaction records H-to-V-to-H and preserves membership") {
-    const auto terminal = box("z-slab", {"x", "y", "z"}, {-1, -1, 2}, {1, 1, 3});
+    const auto terminal = take(sets::make_h({{"z-slab-with-small-redundant-row"}, 3, {"x", "y", "z"}},
+        {matrix(7, 3, {1,0,0,-1,0,0,0,1,0,0,-1,0,0,0,1,0,0,-1,
+                1.0e-17,-2.0e-17,0}),
+         vector({1,1,1,1,3,-2,20}), matrix(0, 3, {}), vector({})})).as_handle();
     const auto result = run(zero_step_3d_problem(), terminal, providers({}, true));
     INFO(describe(result));
     REQUIRE(std::holds_alternative<NominalTube>(result));
@@ -293,13 +296,20 @@ TEST_CASE("optional bounded H compaction records H-to-V-to-H and preserves membe
     const auto representation = backward.representation();
     REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
     const auto& h = std::get<sets::HRepresentation>(representation);
-    CHECK(h.inequalities.rows() < 12);
+    CHECK(h.inequalities.rows() == 6);
     CHECK(stage.backward->relation == SetRelation::equivalent);
     CHECK(std::any_of(stage.requests.begin(), stage.requests.end(), [](const auto& request) {
         return request.identity.request.value.find("compact-h/to-v") != std::string::npos;
     }));
     CHECK(std::any_of(stage.requests.begin(), stage.requests.end(), [](const auto& request) {
         return request.identity.request.value.find("compact-h/to-h") != std::string::npos;
+    }));
+    CHECK(std::any_of(stage.requests.begin(), stage.requests.end(), [](const auto& request) {
+        return request.identity.request.value.find("compact-h/box-reduction") != std::string::npos;
+    }));
+    CHECK(std::any_of(stage.lineage.begin(), stage.lineage.end(), [](const auto& evidence) {
+        return std::holds_alternative<SymbolicArgument>(evidence.support) &&
+            std::get<SymbolicArgument>(evidence.support).reference.find("coordinate-box") != std::string::npos;
     }));
     CHECK(std::count_if(stage.providers.begin(), stage.providers.end(), [](const auto& provider) {
         return provider.port == "conversion" && provider.actual_module &&
