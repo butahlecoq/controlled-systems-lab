@@ -5,7 +5,8 @@ import casadi as ca
 import numpy as np
 
 
-def solve(relation: dict, objective: dict, *, initial, positive_indices=(), geometry_memberships=()) -> dict:
+def solve(relation: dict, objective: dict, *, initial, positive_indices=(), geometry_memberships=(),
+          tighten_epigraph=False) -> dict:
     """Solve the complete H relation with separate exact norm epigraphs.
 
     Positive coordinates are parameterized as exp(s), with no artificial
@@ -62,8 +63,12 @@ def solve(relation: dict, objective: dict, *, initial, positive_indices=(), geom
         opti.set_initial(epigraph, float(np.linalg.norm(np.sqrt(weights) * (matrix @ initial - target))) + 0.01)
         cost += coefficient * epigraph
     opti.minimize(cost)
-    opti.solver("ipopt", {"print_time": False}, {"print_level": 0, "max_iter": 3000,
-        "tol": 1e-9, "acceptable_tol": 1e-8, "bound_relax_factor": 0.0})
+    options = {"print_level": 0, "max_iter": 3000, "tol": 1e-9,
+               "acceptable_tol": 1e-8, "bound_relax_factor": 0.0}
+    if tighten_epigraph:
+        options.update({"max_iter": 6000, "tol": 1e-12, "acceptable_tol": 1e-11,
+                        "constr_viol_tol": 1e-12, "compl_inf_tol": 1e-12})
+    opti.solver("ipopt", {"print_time": False}, options)
     try:
         solution = opti.solve()
         primal = np.asarray(solution.value(z), dtype=float).reshape(-1)
@@ -78,6 +83,7 @@ def solve(relation: dict, objective: dict, *, initial, positive_indices=(), geom
         geometry_check = verify(geometry, primal, factor_values)
         return {"success": bool(stats.get("success")) and geometry_check["accepted"],
                 "geometry_factors": factor_values, "geometry_validation": geometry_check,
+                "numerical_profile": "tight-epigraph" if tighten_epigraph else "standard",
                 "status": str(stats.get("return_status", "unknown")), "primal": primal.tolist(),
                 "objective": objective_value, "iterations": stats.get("iter_count"),
                 "solver": "casadi-ipopt/full-history-separate-norm-epigraphs/1",

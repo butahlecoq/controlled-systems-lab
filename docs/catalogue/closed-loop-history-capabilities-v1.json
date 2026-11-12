@@ -61,8 +61,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "4ac9265ed332dbe23521d8d711eb9a69fdbab6b4ec146c5a87484ddc6b9f4ed5",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-mpc/1/cfg-4ac9265ed332dbe2",
+      "graph_fingerprint": "aae4c7b5d45d28a22ef61631e9a1fa660575935b55638ed7887598910817197c",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-mpc/1/cfg-aae4c7b5d45d28a2",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -88,11 +88,11 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_norm_solver.py",
-          "sha256": "7365e8789cbae84e6cc04a461a28c1d932ca65d7d1436068d4fac8de5663884c"
+          "sha256": "2c1b8939d7449abf2fdb5d67b8cf4bab946c690d9ba01b88fa19232fbe2e8dcd"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "e20f5a042b9dff8232b5623967b91863a778adb5ddbaa7d8154f8dcfa5e6b917"
+          "sha256": "2aeb6ccf96468b49526960d02a7a4e86bb76c76e20c79689fbf273773c1addbf"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -229,8 +229,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "278ded297009fd3f1ca5205dd101ae816e0c9ad3554cf803e05f12dc624506be",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ipopt/1/cfg-278ded297009fd3f",
+      "graph_fingerprint": "ec2dd140e21231b32ee37508b524cfe52c428008e4db93679f0b1e59343763ee",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ipopt/1/cfg-ec2dd140e21231b3",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -256,11 +256,11 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_norm_solver.py",
-          "sha256": "7365e8789cbae84e6cc04a461a28c1d932ca65d7d1436068d4fac8de5663884c"
+          "sha256": "2c1b8939d7449abf2fdb5d67b8cf4bab946c690d9ba01b88fa19232fbe2e8dcd"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "e20f5a042b9dff8232b5623967b91863a778adb5ddbaa7d8154f8dcfa5e6b917"
+          "sha256": "2aeb6ccf96468b49526960d02a7a4e86bb76c76e20c79689fbf273773c1addbf"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -416,8 +416,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "cf982107a4946a3834036a0a6a2791279bf76087191e449229ec7e9e8e9bc47d",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-box-ipopt/1/cfg-cf982107a4946a38",
+      "graph_fingerprint": "525105a36e070add3cc8f138df4d88120ca16eefb0df35cce28c10f2cf68ef66",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-box-ipopt/1/cfg-525105a36e070add",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -450,11 +450,11 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_norm_solver.py",
-          "sha256": "7365e8789cbae84e6cc04a461a28c1d932ca65d7d1436068d4fac8de5663884c"
+          "sha256": "2c1b8939d7449abf2fdb5d67b8cf4bab946c690d9ba01b88fa19232fbe2e8dcd"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "e20f5a042b9dff8232b5623967b91863a778adb5ddbaa7d8154f8dcfa5e6b917"
+          "sha256": "2aeb6ccf96468b49526960d02a7a4e86bb76c76e20c79689fbf273773c1addbf"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -667,8 +667,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "dba7eb76cc67321faf20cc298f9a3b5f67de37caa161800fa43704658497dbfb",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-dba7eb76cc67321f",
+      "graph_fingerprint": "53a543dd03ed43e10cdb9ad703e6b6c253afe688d5f70b92e90f27b9817cb69f",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-53a543dd03ed43e1",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -694,11 +694,11 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_norm_solver.py",
-          "sha256": "7365e8789cbae84e6cc04a461a28c1d932ca65d7d1436068d4fac8de5663884c"
+          "sha256": "2c1b8939d7449abf2fdb5d67b8cf4bab946c690d9ba01b88fa19232fbe2e8dcd"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "e20f5a042b9dff8232b5623967b91863a778adb5ddbaa7d8154f8dcfa5e6b917"
+          "sha256": "2aeb6ccf96468b49526960d02a7a4e86bb76c76e20c79689fbf273773c1addbf"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -850,8 +850,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "633f04875e1b03412168b24a85387fe3440d6cbc472fb7866d808230c05c00c3",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-box-ipopt/1/cfg-633f04875e1b0341",
+      "graph_fingerprint": "cbdba5f01f9b9d46032d25c517ef28a231bef62b26a6552078df5a9d98581412",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-box-ipopt/1/cfg-cbdba5f01f9b9d46",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -884,11 +884,11 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_norm_solver.py",
-          "sha256": "7365e8789cbae84e6cc04a461a28c1d932ca65d7d1436068d4fac8de5663884c"
+          "sha256": "2c1b8939d7449abf2fdb5d67b8cf4bab946c690d9ba01b88fa19232fbe2e8dcd"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "e20f5a042b9dff8232b5623967b91863a778adb5ddbaa7d8154f8dcfa5e6b917"
+          "sha256": "2aeb6ccf96468b49526960d02a7a4e86bb76c76e20c79689fbf273773c1addbf"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -1097,8 +1097,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "afb20e6a00cdc40922cf38967feb238fddd54fbc3401cd141e57001ce4568d49",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-mpc/1/cfg-afb20e6a00cdc409",
+      "graph_fingerprint": "56dbeb9bc94e4f277e50bc1fc3c2bcb4e73f1124a74a1c830195448a4dba773c",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-mpc/1/cfg-56dbeb9bc94e4f27",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1124,11 +1124,11 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_norm_solver.py",
-          "sha256": "7365e8789cbae84e6cc04a461a28c1d932ca65d7d1436068d4fac8de5663884c"
+          "sha256": "2c1b8939d7449abf2fdb5d67b8cf4bab946c690d9ba01b88fa19232fbe2e8dcd"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "e20f5a042b9dff8232b5623967b91863a778adb5ddbaa7d8154f8dcfa5e6b917"
+          "sha256": "2aeb6ccf96468b49526960d02a7a4e86bb76c76e20c79689fbf273773c1addbf"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -1265,8 +1265,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "7604c69532026902f7c98613fd14101f2bf26c104d0d909d392a565db0176298",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ipopt/1/cfg-7604c69532026902",
+      "graph_fingerprint": "d0bc23163af75146dfcf6b0697bf40b6e2af35689c6bf47e834f3527db4c18d7",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ipopt/1/cfg-d0bc23163af75146",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1292,11 +1292,11 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_norm_solver.py",
-          "sha256": "7365e8789cbae84e6cc04a461a28c1d932ca65d7d1436068d4fac8de5663884c"
+          "sha256": "2c1b8939d7449abf2fdb5d67b8cf4bab946c690d9ba01b88fa19232fbe2e8dcd"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "e20f5a042b9dff8232b5623967b91863a778adb5ddbaa7d8154f8dcfa5e6b917"
+          "sha256": "2aeb6ccf96468b49526960d02a7a4e86bb76c76e20c79689fbf273773c1addbf"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -1452,8 +1452,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "90fe7e5a8d71987a920ee26db0f4ec6130873852fe672b61b8c56a35007d270f",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-box-ipopt/1/cfg-90fe7e5a8d71987a",
+      "graph_fingerprint": "ed9e770303cf86d2ba6316a2bc4eea2a0eda9f2cb1ed6fa4a222b046a768a343",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-box-ipopt/1/cfg-ed9e770303cf86d2",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1486,11 +1486,11 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_norm_solver.py",
-          "sha256": "7365e8789cbae84e6cc04a461a28c1d932ca65d7d1436068d4fac8de5663884c"
+          "sha256": "2c1b8939d7449abf2fdb5d67b8cf4bab946c690d9ba01b88fa19232fbe2e8dcd"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "e20f5a042b9dff8232b5623967b91863a778adb5ddbaa7d8154f8dcfa5e6b917"
+          "sha256": "2aeb6ccf96468b49526960d02a7a4e86bb76c76e20c79689fbf273773c1addbf"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",

@@ -8,6 +8,14 @@ FAMILIES = ("polytope", "box", "zonotope", "parallelotope", "ellipsoid")
 GEOMETRY_IDS = {f"native-continuous-history-{family}-ipopt/1": family for family in FAMILIES}
 
 
+def should_refine_epigraph(checks, solver, compiled):
+    """Retry the same NLP only when epigraph cost is the sole failed check."""
+    rows = checks.get("checks", {})
+    return (solver.get("provider") == "casadi-ipopt" and bool(compiled.get("residual_norms"))
+            and "source_cost" in rows and not rows["source_cost"].get("passed", False)
+            and all(value.get("passed", False) for key, value in rows.items() if key != "source_cost"))
+
+
 def geometry_memberships(export, family, state_dimension, horizon, strict_source_domain=None):
     if (not isinstance(export, dict) or export.get("status") != "complete"
             or export.get("family") != family or export.get("scope") != "forward_relevant_from_observation"):
@@ -258,6 +266,31 @@ class HistoryPolicy:
             result["reason"] = "history validation failed: " + str(error)
             return result
         result["solve_receipt"]["independent_validation"] = checks
+        if not checks["accepted"] and should_refine_epigraph(checks, solver_receipt, compiled):
+            from history_norm_solver import solve
+            first_solver, first_checks = solver_receipt, checks
+            solver_receipt = solve(relation, compiled, initial=primal, positive_indices=positive,
+                geometry_memberships=memberships or (), tighten_epigraph=True)
+            result["invocations"].append({"operation": "controller.solve", "module_id": "continuous-history-mpc",
+                "profile_id": self.controller_id, "provider": "casadi-ipopt",
+                "version": solver_receipt.get("version", "unknown"), "reason": "source-cost epigraph refinement"})
+            result["solve_receipt"]["initial_solver"] = first_solver
+            result["solve_receipt"]["initial_validation"] = first_checks
+            result["solve_receipt"]["solver"] = solver_receipt
+            self.last_query_capture["solver_receipt"] = solver_receipt
+            self.last_query_capture["initial_solver_receipt"] = first_solver
+            self._capture()
+            if solver_receipt.get("success"):
+                try:
+                    primal, solver_cost = solver_receipt["primal"], solver_receipt["objective"]
+                    checks = validate(self.task, absolute_update_index, observed_physical_state,
+                        request["predictor_stages"], relation, primal, solver_cost,
+                        geometry_memberships=memberships,
+                        geometry_factors=solver_receipt.get("geometry_factors") if memberships else None)
+                    result["solve_receipt"]["independent_validation"] = checks
+                except (ValueError, FloatingPointError) as error:
+                    result["reason"] = "refined history validation failed: " + str(error)
+                    return result
         if not checks["accepted"]:
             result["reason"] = "full-history source or feasibility verification failed"
             return result

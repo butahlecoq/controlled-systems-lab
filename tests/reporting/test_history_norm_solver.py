@@ -103,6 +103,19 @@ class HistoryNormSolverTest(unittest.TestCase):
                 self.assertEqual(alternatives[0]["objective_id"], graph["objective_id"])
                 self.assertEqual(alternatives[0]["role_bindings"]["control_optimizer"]["id"], "casadi-ipopt")
 
+    def test_refinement_requires_epigraph_cost_to_be_only_failed_check(self):
+        from history_policy import should_refine_epigraph
+        checks = {"checks": {"source_cost": {"passed": False}, "dynamics": {"passed": True},
+                              "geometry": {"passed": True}}}
+        solver = {"provider": "casadi-ipopt"}
+        cost = {"residual_norms": [{"coefficient": 1}]}
+        self.assertTrue(should_refine_epigraph(checks, solver, cost))
+        checks["checks"]["geometry"]["passed"] = False
+        self.assertFalse(should_refine_epigraph(checks, solver, cost))
+        checks["checks"]["geometry"]["passed"] = True
+        self.assertFalse(should_refine_epigraph(checks, {"provider": "csl.convex.highs"}, cost))
+        self.assertFalse(should_refine_epigraph(checks, solver, {"residual_norms": []}))
+
     def test_feedback_profile_preparation_identifies_geometry_semantics(self):
         from contracts import load_task, manifest_sha256
         from history_policy import create_policy
