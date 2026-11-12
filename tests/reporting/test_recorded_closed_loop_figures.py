@@ -11,6 +11,67 @@ import recorded_closed_loop_figures as figures
 
 
 class RecordedClosedLoopFigureTests(unittest.TestCase):
+    def test_v2_stage_collector_checks_references_and_keeps_canonical_plot_inputs(self) -> None:
+        import hashlib
+        import json
+        import tempfile
+
+        from attempt_records import STAGE_INDEX, finalize_stage, write_attempt
+
+        with tempfile.TemporaryDirectory() as raw:
+            capture_root = Path(raw)
+            plane = figures.PLANES["syn-nl-lv-01"]
+            attempt_id = "v2-collector-fixture"
+            attempt_dir = capture_root / plane.case_id / "attempts" / attempt_id
+            attempt_dir.mkdir(parents=True)
+            initial, final = [1.0, 2.0], [1.1, 2.1]
+            task_sha = "a" * 64
+            finalize_stage(attempt_dir, 0, {
+                "update_index": 0,
+                "original_task_sha256": task_sha,
+                "status": "applied-and-observed",
+                "observed_physical": initial,
+                "applied_control": [0.0],
+                "observed_next_physical": final,
+                "selected_plan": {"states": [initial, final]},
+                "execution": {"status": "complete", "physical_states": [initial, final],
+                              "times": [0.0, plane.dt]},
+            })
+            controls = [[0.0]]
+            record = {
+                "schema": "csl.closed-loop.attempt/2", "format_version": 2,
+                "attempt_id": attempt_id, "task_id": plane.task_id, "task_sha256": task_sha,
+                "status": "complete", "completed_holds": 1, "original_intervals": 1,
+                "selected_initial_state_physical": initial, "controls": controls,
+                "physical_states": [initial, final],
+                "controls_sha256": hashlib.sha256(json.dumps(controls, separators=(",", ":"),
+                    allow_nan=False).encode()).hexdigest(),
+                "stage_records": {"path": STAGE_INDEX, "count": 1},
+            }
+            write_attempt(attempt_dir, record)
+            (attempt_dir / "run-manifest.json").write_text(json.dumps({
+                "attempt_id": attempt_id, "source_commit": figures.SOURCE_COMMIT,
+                "task_sha256": task_sha, "resource_profile_id": "worker-wall-1800-cpu-1800/1",
+            }))
+            (attempt_dir / "resolution-receipt.json").write_text(json.dumps({
+                "task_id": plane.task_id, "task_sha256": task_sha,
+                "selected_controller_id": "fixture-controller",
+            }))
+            (attempt_dir / "postcheck-initial.json").write_text(json.dumps({
+                "original_attempt_id": attempt_id, "task_sha256": task_sha,
+                "overall_status": "complete",
+            }))
+
+            collected = figures._collect_run(plane, attempt_id, capture_root)
+            self.assertEqual(collected["stage_count"], 1)
+            self.assertEqual(collected["plant_replay"][-1]["state"], final)
+            self.assertEqual(collected["raw_record"]["stage_files"][0]["path"], "stage-000.json")
+
+            stage_path = attempt_dir / "stage-000.json"
+            stage_path.write_text(stage_path.read_text() + " ")
+            with self.assertRaisesRegex(ValueError, "v2 stage evidence is invalid"):
+                figures._collect_run(plane, attempt_id, capture_root)
+
     def test_fuel_planes_apply_requested_indices_to_physical_state_once(self) -> None:
         state = [100.0, 30.0, 2.0, 0.6]
         self.assertEqual(figures.PLANES["syn-nl-fuel-01"].project(state), (2.0, 100.0))

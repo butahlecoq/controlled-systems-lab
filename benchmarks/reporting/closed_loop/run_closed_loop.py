@@ -21,6 +21,7 @@ import signal
 import subprocess
 import sys
 import time
+import tracemalloc
 import uuid
 
 import numpy as np
@@ -30,6 +31,10 @@ from task_models import (make_held_step_request, make_replay_request, objective,
                          source_scenario, validate_held_step_response,
                          validate_source_binding)
 from capabilities import MANIFEST, NATIVE_MANIFEST, resolve_graph, validate_resolved_graph, manifest_digest
+from attempt_records import (ATTEMPT_SCHEMA_V2, IO_LOG, STAGE_INDEX, append_io_event,
+    atomic_json, finalize_stage, iter_stage_references, materialize_episode_summary,
+    persist_native_capture, read_attempt, register_orphan_stages, summarize_io, verify_v2_attempt,
+    write_attempt, write_record_artifact, write_stage)
 
 HERE = Path(__file__).resolve().parent
 MPC11 = ROOT / "benchmarks/reporting/mpc11"
@@ -58,24 +63,28 @@ def attempt_resource_profile(wall_seconds: int, cpu_seconds: int) -> dict:
             "wall_scope": "supervised worker process group; excludes replay, checkers and rendering"}}
 
 
-def atomic_json(path: Path, value: dict) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temp = path.with_name(path.name + f".tmp-{os.getpid()}")
-    try:
-        with temp.open("w") as stream:
-            json.dump(json_safe(value), stream, indent=2, allow_nan=False)
-            stream.write("\n"); stream.flush(); os.fsync(stream.fileno())
-        os.replace(temp, path)
-    finally:
-        temp.unlink(missing_ok=True)
+def attempt_format(attempt_id: str, **fields) -> dict:
+    return {"schema": ATTEMPT_SCHEMA_V2, "format_version": 2, "attempt_id": attempt_id,
+        "stage_records": {"path": STAGE_INDEX, "count": 0}, **fields}
 
 
-def json_safe(value):
-    if isinstance(value, np.ndarray): return value.tolist()
-    if isinstance(value, np.generic): return value.item()
-    if isinstance(value, dict): return {str(k): json_safe(v) for k, v in value.items()}
-    if isinstance(value, (list, tuple)): return [json_safe(v) for v in value]
-    return value
+def persist_stage_checkpoint(attempt: Path, index: int, row: dict) -> None:
+    write_stage(attempt, index, row)
+
+
+def persist_stage_final(attempt: Path, index: int, row: dict, ledger: dict) -> None:
+    finalize_stage(attempt, index, row)
+    ledger["stage_records"]["count"] = index + 1
+
+
+def persist_native_capture_payload(attempt: Path, index: int, capture: dict,
+                                  saved: dict) -> dict:
+    return persist_native_capture(attempt, index, capture, saved)
+
+
+def record_read_io(attempt: Path, receipt, operation: str) -> None:
+    append_io_event(attempt, {"operation": operation, "path": receipt.path,
+        "bytes_read": receipt.bytes_read, "parse_seconds": receipt.parse_seconds})
 
 
 def prepare_graph(task: dict, graph: dict, bridge: Path) -> tuple[object | None, dict]:
@@ -217,6 +226,9 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
            graph_path: Path | None = None, attempt_wall_seconds: int = DEFAULT_ATTEMPT_WALL_SECONDS,
            attempt_cpu_seconds: int = DEFAULT_ATTEMPT_CPU_SECONDS) -> int:
     resource_profile = attempt_resource_profile(attempt_wall_seconds, attempt_cpu_seconds)
+    tracing_started_here = not tracemalloc.is_tracing()
+    if tracing_started_here:
+        tracemalloc.start()
     task = load_task(task_name); validate_source_binding(task)
     task_hash = manifest_sha256(task)
     if graph_path is None: raise ValueError("worker requires an admitted resolved graph")
@@ -232,8 +244,8 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
     try:
         prepared_controller, preparation = prepare_graph(task, graph, bridge)
     except Exception as error:
-        atomic_json(attempt / "attempt.json", {"schema": "csl.closed-loop.attempt/1",
-            "attempt_id": attempt.name, "task_id": task["task_id"], "task_sha256": task_hash,
+        write_attempt(attempt, attempt_format(attempt.name, **{
+            "task_id": task["task_id"], "task_sha256": task_hash,
             "controller_id": graph["controller"]["id"], "resolved_graph": graph,
             "resource_profile_id": resource_profile["profile_id"],
             "resource_limits": {"requested": resource_profile["requested"],
@@ -241,25 +253,29 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
             "status": "preparation_failed", "algorithm_status": "preparation_failed",
             "overall_status": "preparation_failed", "completed_holds": 0,
             "preparation_failure": {"type": type(error).__name__, "reason": str(error)},
-            "mathematical_support_status": "not_evaluated"})
+            "mathematical_support_status": "not_evaluated"}))
         return 2
     scales = np.asarray([s["scale"] for s in task["model"]["states"]])
     state = np.asarray([s["initial"] for s in task["model"]["states"]], dtype=float)
-    controls = []; states = [state.tolist()]; stages = []; previous = None
+    controls = []; states = [state.tolist()]; previous = None
+    mathematical_support_not_evaluated = False
     default_controller_id = graph["controller"]["id"]
     controller_id = requested_controller_id or default_controller_id
     action_profile_id = expected_action_profile
     policy = prepared_controller if graph["controller"].get("policy_factory") else None
     geometry_method = graph.get("role_bindings", {}).get("reachable_set_method", "not_used")
     geometry_active = geometry_method != "not_used"
-    ledger = {"schema": "csl.closed-loop.attempt/1", "attempt_id": attempt.name,
+    ledger = attempt_format(attempt.name, **{
         "task_id": task["task_id"], "task_sha256": task_hash, "source_sha256": task["source"]["sha256"],
         "model_id": task["model"]["model_id"], "action_profile_id": action_profile_id,
         "objective_id": task["objective"]["objective_id"], "controller_id": controller_id,
         "resolved_graph": graph, "preparation_receipt": preparation,
         "selected_initial_state_physical": state.tolist(), "original_intervals": task["episode"]["intervals"],
-        "original_final_time": task["episode"]["final_time"], "status": "in-progress", "controls": controls,
-        "physical_states": states, "stages": stages,
+        "original_final_time": task["episode"]["final_time"], "status": "in-progress",
+        "timing_scopes": {"stage_interval_seconds": "one stage from before its initial checkpoint through controller query and held-step execution; sampled immediately before the final stage record/index write, so excludes stage finalization and the subsequent attempt checkpoint; overlaps controller and execution subscopes",
+            "controller_query_wall_seconds": "controller query including any native capture checkpoint callbacks",
+            "execution_process_wall_seconds": "held-step child launch through child completion and stdout/stderr persistence; excludes response parsing, replay and rendering",
+            "record_io": "actual JSON bytes, serialization and fsync, plus selective parsing; telemetry log append is excluded"},
         "module_roles": {**graph.get("role_bindings", graph.get("inactive_roles", {})),
                          "controller": controller_id, "execution": graph["execution"]["id"]},
         "geometry_work": {"vertices": None if geometry_active else 0, "set_operations": 0,
@@ -275,9 +291,10 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
                 "effective_address_space_bytes": resource.getrlimit(resource.RLIMIT_AS),
                 "thread_environment": {key: os.environ.get(key) for key in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS")},
                 "python_process_threads": threading.active_count()}},
-        "assurance": "observed-state single-player policy trajectory; no global optimality, reachability, safety, or robustness guarantee"}
-    atomic_json(attempt / "attempt.json", ledger)
+        "assurance": "observed-state single-player policy trajectory; no global optimality, reachability, safety, or robustness guarantee"})
+    write_attempt(attempt, ledger)
     n = task["episode"]["intervals"]
+    stage_elapsed_seconds_sum = 0.0
     for j in range(n):
         started = time.monotonic()
         row = {"update_index": j, "absolute_time": j * task["episode"]["dt"],
@@ -286,22 +303,30 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
                "requested_modules": {"controller": {"id": graph["controller"]["id"], "version": graph["controller"]["version"]},
                    **graph.get("role_bindings", graph.get("inactive_roles", {})),
                    "execution": {"id": graph["execution"]["id"], "version": graph["execution"]["version"]}}}
-        atomic_json(attempt / f"stage-{j:03d}.json", row)
+        persist_stage_checkpoint(attempt, j, row)
+        controller_query_started = None
         try:
             if policy is not None:
                 install_capture = getattr(policy, "set_query_capture_callback", None)
+                capture_payload_refs = {}
                 if callable(install_capture):
                     def persist_native_capture(capture):
-                        row["native_query_capture"] = capture
-                        atomic_json(attempt / f"stage-{j:03d}.json", row)
+                        row["native_query_capture"] = persist_native_capture_payload(
+                            attempt, j, capture, capture_payload_refs)
+                        persist_stage_checkpoint(attempt, j, row)
                     install_capture(persist_native_capture)
+            controller_query_started = time.monotonic()
             query = (policy.query(task["task_id"], state.tolist(), j) if policy is not None
                      else controller_query(task, graph, state, j, previous, prepared_controller))
+            row["controller_query_wall_seconds"] = time.monotonic() - controller_query_started
             if policy is not None:
                 capture = getattr(policy, "last_query_capture", None)
                 if capture is not None:
-                    row["native_query_capture"] = capture
-                    atomic_json(attempt / f"stage-{j:03d}.json", row)
+                    if row.get("native_query_capture", {}).get("schema") != \
+                            "csl.closed-loop.native-query-capture-reference/1":
+                        row["native_query_capture"] = persist_native_capture_payload(
+                            attempt, j, capture, capture_payload_refs)
+                        persist_stage_checkpoint(attempt, j, row)
                 query = validate_policy_response(task, task_hash, action_profile_id, query)
                 ledger["preparation_receipt"]["adapter_receipt"] = getattr(policy, "preparation_receipt", {})
             row.update({"status": query["status"], "policy_id": query["policy_id"],
@@ -321,16 +346,28 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
                 row["mathematical_support_status"] = "not_evaluated"
             elif query["status"] in {"unsupported", "rejected"}:
                 row["mathematical_support_status"] = "not_established"
-            receipt = query.get("solve_receipt", query.get("query_receipt"))
+            if row.get("mathematical_support_status") == "not_evaluated":
+                mathematical_support_not_evaluated = True
+            receipt = query.get("solve_receipt")
+            if receipt is None and row.get("native_query_capture", {}).get("schema") != \
+                    "csl.closed-loop.native-query-capture-reference/1":
+                receipt = query.get("query_receipt")
             if receipt is not None: row["solve_receipt"] = receipt
+            if query.get("query_receipt") is not None and row.get("native_query_capture", {}).get("schema") == \
+                    "csl.closed-loop.native-query-capture-reference/1":
+                row["query_receipt"] = query["query_receipt"]
             row["invoked_modules"] = ([call["module_id"] for call in query["invocations"] if call.get("module_id")]
                 + [call[key] for call in query.get("geometry_invocations", [])
                    for key in ("actual_method_id",) if call.get(key)])
-            for field in ("predicted_sets", "recovered_control", "composition_id", "profile_id", "query_receipt",
-                          "policy_semantics", "prediction_profile", "coverage", "geometry_selection",
-                          "geometry_invocations", "action_cloud_rows", "selected_representation",
-                          "finite_action_nominal_profile", "build_backend_profile", "candidate_plan_search",
-                          "selector", "selected_plan", "representation", "native_query_capture"):
+            raw_capture_is_referenced = row.get("native_query_capture", {}).get("schema") == \
+                "csl.closed-loop.native-query-capture-reference/1"
+            retained_query_fields = {"policy_semantics", "prediction_profile", "coverage",
+                "selected_representation", "finite_action_nominal_profile", "build_backend_profile"}
+            if not raw_capture_is_referenced:
+                retained_query_fields.update({"predicted_sets", "recovered_control", "composition_id",
+                    "profile_id", "geometry_selection", "geometry_invocations", "action_cloud_rows",
+                    "candidate_plan_search", "selector", "selected_plan", "representation"})
+            for field in retained_query_fields:
                 if field in query: row[field] = query[field]
             if "selected_representation" not in row and "representation" in query:
                 row["selected_representation"] = query["representation"]
@@ -342,14 +379,19 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
                     ("controller execution failed; mathematical support was not evaluated"
                         if query["status"] == "failed" else
                         "controller-rejected; no fallback action applied"))
-                stages.append(row); atomic_json(attempt / f"stage-{j:03d}.json", row)
+                row["stage_elapsed_seconds"] = time.monotonic() - started
+                stage_elapsed_seconds_sum += row["stage_elapsed_seconds"]
+                persist_stage_final(attempt, j, row, ledger)
+                ledger.update({"completed_holds": len(controls), "status": "in-progress"})
+                write_attempt(attempt, ledger)
                 break
             action = [float(v) for v in query["control"]]
             held = make_held_step_request(task, state, action, j,
                 hashlib.sha256((task_hash + json.dumps(controls, separators=(",", ":"))).encode()).hexdigest(),
                 action_profile_id=action_profile_id)
             row["held_step_request"] = held
-            req_path = attempt / f"execution-request-{j:03d}.json"; atomic_json(req_path, held["bridge_request"])
+            req_path = attempt / f"execution-request-{j:03d}.json"
+            write_record_artifact(attempt, req_path, held["bridge_request"], "held-step-execution-request")
             response = execute_held_step_bridge(bridge, req_path, attempt, j, row)
             execution = validate_held_step_response(held, response)
             row["execution"] = execution
@@ -360,32 +402,34 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
                 "rejected_steps": sum(r["rejected_steps"] for r in execution["integration_receipts"])})
             state = np.asarray(execution["physical_states"][-1])
             controls.append(action); states.append(state.tolist()); previous = query.get("next_guess")
+            row["observed_next_physical"] = state.tolist()
             row["status"] = "applied-and-observed"; row["applied_control"] = action
         except Exception as error:
+            if controller_query_started is not None and "controller_query_wall_seconds" not in row:
+                row["controller_query_wall_seconds"] = time.monotonic() - controller_query_started
             failure = {"type": type(error).__name__, "reason": str(error)}
             row.update({"status": "failed", "failure": f"{type(error).__name__}: {error}"})
             if policy is not None:
                 capture = getattr(policy, "last_query_capture", None)
                 if capture is not None:
-                    row["native_query_capture"] = capture
-                    failure["native_query_capture"] = capture
+                    failure["native_query_capture_ref"] = row.get("native_query_capture")
                 row["failure_category"] = "controller_protocol_or_execution_failure"
                 row["mathematical_support_status"] = "not_evaluated"
+                mathematical_support_not_evaluated = True
                 row["controller_failure"] = failure
         row["stage_elapsed_seconds"] = time.monotonic() - started
-        stages.append(row); atomic_json(attempt / f"stage-{j:03d}.json", row)
-        ledger.update({"controls": controls, "physical_states": states, "stages": stages,
-                       "completed_holds": len(controls), "status": "in-progress"})
-        atomic_json(attempt / "attempt.json", ledger)
+        stage_elapsed_seconds_sum += row["stage_elapsed_seconds"]
+        persist_stage_final(attempt, j, row, ledger)
+        ledger.update({"completed_holds": len(controls), "status": "in-progress"})
+        write_attempt(attempt, ledger)
         if row["status"] != "applied-and-observed":
             break
     complete = len(controls) == n
     ledger.update({"status": "complete" if complete else "incomplete", "completed_holds": len(controls),
-        "controls": controls, "physical_states": states, "stages": stages,
-        "stage_interval_seconds_sum": sum(row.get("stage_elapsed_seconds", 0) for row in stages),
+        "stage_interval_seconds_sum": stage_elapsed_seconds_sum,
         "physical_objective": objective(task, states, controls) if complete else None,
         "controls_sha256": hashlib.sha256(json.dumps(controls, separators=(",", ":")).encode()).hexdigest()})
-    if any(row.get("mathematical_support_status") == "not_evaluated" for row in stages):
+    if mathematical_support_not_evaluated:
         ledger["mathematical_support_status"] = "not_evaluated"
     usage = resource.getrusage(resource.RUSAGE_SELF)
     if policy is not None:
@@ -399,7 +443,14 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
         "worker_stage_interval_seconds_sum": ledger["stage_interval_seconds_sum"],
         "worker_cpu_seconds": usage.ru_utime + usage.ru_stime, "worker_max_rss_kib": usage.ru_maxrss,
         "rss_accounting_scope": "worker process only; bridge subprocess peaks are not included"})
-    atomic_json(attempt / "attempt.json", ledger)
+    traced_current, traced_peak = tracemalloc.get_traced_memory()
+    ledger["resource_limits"]["observed"].update({
+        "worker_python_traced_current_bytes": traced_current,
+        "worker_python_traced_peak_bytes": traced_peak,
+        "python_traced_memory_scope": "worker Python allocations; excludes native allocations and bridge subprocesses"})
+    if tracing_started_here:
+        tracemalloc.stop()
+    write_attempt(attempt, ledger)
     return 0 if complete else 2
 
 
@@ -474,13 +525,13 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
     atomic_json(attempt / "request.json", {"schema": "csl.closed-loop.run-request/1",
         "attempt_id": attempt_id, "requested": requested,
         "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()})
-    initial = {"schema": "csl.closed-loop.attempt/1", "attempt_id": attempt_id,
+    initial = attempt_format(attempt_id, **{
         "task_id": None, "status": "resolving", "algorithm_status": "not_started",
         "overall_status": "incomplete", "completed_holds": 0, "requested": requested,
         "resource_profile_id": resource_profile["profile_id"],
         "resource_limits": {"requested": resource_profile["requested"],
-            "enforced": resource_profile["enforced"]}}
-    atomic_json(attempt / "attempt.json", initial)
+            "enforced": resource_profile["enforced"]}})
+    write_attempt(attempt, initial)
     try:
         task = load_task(task_name); validate_source_binding(task)
         requested_action_profile_id = action_profile_id
@@ -506,14 +557,14 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
         atomic_json(attempt / "resolution-refusal.json", refusal["refusal"] | {
             "schema": "csl.closed-loop.resolution-refusal/1", "requested": requested,
             "mathematical_support_status": "not_evaluated"})
-        atomic_json(attempt / "attempt.json", refusal)
+        write_attempt(attempt, refusal)
         return {"task_id": refusal["task_id"] or task_name, "attempt": str(attempt),
             "status": status, "resource_profile_id": resource_profile["profile_id"],
             "algorithm_status": status, "postcheck_status": "not_run",
             "render_status": "not_run", "overall_status": status, "completed_holds": 0}
     controller_id = selected_controller_id
     source_hashes = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in [
-        HERE / "run_closed_loop.py", HERE / "orbit_nmpc.py", HERE / "task_models.py", HERE / "check_episode.py",
+        HERE / "run_closed_loop.py", HERE / "attempt_records.py", HERE / "orbit_nmpc.py", HERE / "task_models.py", HERE / "check_episode.py",
         HERE / "check_replay.py", HERE / "capabilities.py", MPC11 / "nmpc.py", MPC11 / "affine.py"]}
     selected_manifest_path = NATIVE_MANIFEST if graph["controller"]["id"].startswith("native-") else MANIFEST
     source_hashes[str(selected_manifest_path.relative_to(ROOT))] = hashlib.sha256(selected_manifest_path.read_bytes()).hexdigest()
@@ -542,7 +593,7 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
     initial.update({"task_id": task["task_id"], "task_sha256": manifest_sha256(task),
         "status": "prepared", "resolved_graph_id": graph["graph_id"],
         "graph_fingerprint": graph["graph_fingerprint"]})
-    atomic_json(attempt / "attempt.json", initial)
+    write_attempt(attempt, initial)
     graph_path = attempt / "resolved-graph.json"
     atomic_json(graph_path, graph)
     atomic_json(attempt / "resolution-receipt.json", {
@@ -583,7 +634,34 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
     (attempt / "worker-stdout.txt").write_text(stdout or "")
     (attempt / "worker-stderr.txt").write_text(stderr or "")
     final_path = attempt / "attempt.json"
-    result = json.loads(final_path.read_text()) if final_path.exists() else {"status": "incomplete", "completed_holds": 0}
+    if final_path.exists():
+        result, read_receipt = read_attempt(final_path)
+        record_read_io(attempt, read_receipt, "attempt-read")
+    else:
+        result = {"status": "incomplete", "completed_holds": 0}
+    if result.get("format_version") == 2:
+        recovery_diagnostics = []
+        recovered_stages = register_orphan_stages(attempt, recovery_diagnostics)
+        if recovered_stages or recovery_diagnostics:
+            result["stage_recovery"] = {"recovered_orphan_stages": recovered_stages,
+                "diagnostics": recovery_diagnostics}
+        result["stage_records"]["count"] = sum(1 for _ in iter_stage_references(attempt, verify_hashes=False))
+        controls, physical_states, stage_reads = materialize_episode_summary(attempt, result)
+        result["controls"] = controls
+        result["physical_states"] = physical_states
+        result["completed_holds"] = len(controls)
+        result["original_intervals"] = task["episode"]["intervals"]
+        result["original_final_time"] = task["episode"]["final_time"]
+        if physical_states:
+            result["selected_initial_state_physical"] = physical_states[0]
+        result["controls_sha256"] = hashlib.sha256(json.dumps(
+            controls, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+        result["physical_objective"] = (objective(task, physical_states, controls)
+            if len(controls) == task["episode"]["intervals"] else None)
+        for read_receipt in stage_reads:
+            record_read_io(attempt, read_receipt, "stage-summary-read")
+        result["record_io"] = {"path": IO_LOG,
+            "scope": "actual serialization, fsync, bytes and selective parse receipts; stage/worker/controller/execution/supervisor/replay/render scopes remain separate"}
     prior_ledger_status = result.get("status")
     if status != "completed" and prior_ledger_status not in {"complete", "incomplete", "refused", "preparation_failed"}:
         result["status"] = "incomplete"
@@ -628,7 +706,19 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
         "worker_wall_seconds": result["supervisor"]["wall_seconds"],
         "performance_claim": "descriptive single attempt; no speed comparison"}
     result.update(derive_outcome_status(result))
-    atomic_json(final_path, result)
+    if result.get("format_version") == 2:
+        try:
+            io_summary = summarize_io(attempt)
+            result["record_io"].update(io_summary)
+            result["record_io"]["summary_scope"] = (
+                "all instrumented attempt, stage, native-payload, held-step-request and selective-read events "
+                "before this terminal attempt checkpoint; the terminal checkpoint receipt is appended to record-io.jsonl")
+        except (OSError, ValueError, json.JSONDecodeError) as error:
+            result["record_io"].update({"integrity_status": "invalid",
+                "metric_totals_complete": False,
+                "integrity_diagnostic": f"{type(error).__name__}: {error}",
+                "metric_totals_scope": "metric totals withheld because a completed telemetry row is malformed"})
+    write_attempt(attempt, result)
     return {"task_id": task["task_id"], "attempt": str(attempt), "status": status,
             "resource_profile_id": resource_profile["profile_id"],
             "algorithm_status": result.get("algorithm_status"),
@@ -760,7 +850,8 @@ def replay_attempt(task: dict, result: dict, attempt: Path, bridge: Path, tag: s
     outcome = derive_outcome_status(result)
     result.update(outcome)
     source_hashes = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in [
-        "benchmarks/reporting/closed_loop/run_closed_loop.py", "benchmarks/reporting/closed_loop/check_episode.py",
+        "benchmarks/reporting/closed_loop/run_closed_loop.py", "benchmarks/reporting/closed_loop/attempt_records.py",
+        "benchmarks/reporting/closed_loop/check_episode.py",
         "benchmarks/reporting/closed_loop/check_replay.py", "benchmarks/reporting/closed_loop/task_models.py"]}
     checker_id = tag or "initial"
     postcheck = {"schema": "csl.closed-loop.postcheck/1", "postcheck_id": checker_id,
@@ -884,8 +975,10 @@ def append_phase_event(attempt: Path, event_type: str, receipt_id: str, receipt_
 def write_coverage(root: Path) -> Path:
     rows = []
     for path in sorted(root.glob("*/attempts/*/attempt.json")):
-        try: record = json.loads(path.read_text())
-        except (OSError, json.JSONDecodeError): continue
+        try:
+            record, attempt_read = read_attempt(path)
+            verify_v2_attempt(path.parent, record)
+        except (OSError, ValueError, json.JSONDecodeError): continue
         replay = record.get("independent_replay", {})
         postcheck_paths = {item.name: item for item in path.parent.glob("postcheck-*.json")}
         postchecks = []
@@ -981,6 +1074,9 @@ def write_coverage(root: Path) -> Path:
             "phase_receipt_ordering": phase_ordering,
             "graph_id": record.get("resolved_graph", {}).get("graph_id"),
             "graph_fingerprint": record.get("resolved_graph", {}).get("graph_fingerprint"),
+            "attempt_record_parse": {"bytes_read": attempt_read.bytes_read,
+                "parse_seconds": attempt_read.parse_seconds,
+                "scope": "attempt top-level fields; the duplicated v1 stages value is skipped without object construction"},
             "attempt_record": str(path.relative_to(root))})
     for path in sorted(root.glob("*/attempts/*/runner-startup-failure.json")):
         try: failure = json.loads(path.read_text())
@@ -1037,7 +1133,11 @@ def main() -> int:
     if args.coverage_only:
         path = write_coverage(args.output_root.resolve()); print(json.dumps({"coverage_record": str(path)})); return 0
     if args.render_only:
-        attempt = args.render_only.resolve(); result = json.loads((attempt / "attempt.json").read_text())
+        attempt = args.render_only.resolve(); result, _ = read_attempt(attempt / "attempt.json")
+        try:
+            verify_v2_attempt(attempt, result)
+        except ValueError as error:
+            parser.error(f"saved v2 stage evidence is invalid: {error}")
         task_name = {"syn-nl-lv-01/continuous-receding/1": "syn-nl-lv-01",
                      "env717-earth-orbit/continuous-receding/1": "earth-orbit",
                      "syn-nl-fuel-01/continuous-receding/1": "syn-nl-fuel-01"}.get(result.get("task_id"))
@@ -1055,7 +1155,8 @@ def main() -> int:
             render_status = "failed"
             error = result["render"]["error"]
         source_hashes = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in [
-            "benchmarks/reporting/closed_loop/run_closed_loop.py", "benchmarks/reporting/closed_loop/task_models.py"]}
+            "benchmarks/reporting/closed_loop/run_closed_loop.py", "benchmarks/reporting/closed_loop/attempt_records.py",
+            "benchmarks/reporting/closed_loop/task_models.py"]}
         render_record = {"schema": "csl.closed-loop.render/1", "render_id": tag,
             "attempt_id": result["attempt_id"], "task_sha256": result["task_sha256"],
             "controls_sha256": result["controls_sha256"], "source_commit": subprocess.check_output(
@@ -1066,7 +1167,11 @@ def main() -> int:
         print(json.dumps(render_record, indent=2))
         return 0 if render_status == "complete" else 1
     if args.replay_only:
-        attempt = args.replay_only.resolve(); result = json.loads((attempt / "attempt.json").read_text())
+        attempt = args.replay_only.resolve(); result, _ = read_attempt(attempt / "attempt.json")
+        try:
+            verify_v2_attempt(attempt, result)
+        except ValueError as error:
+            parser.error(f"saved v2 stage evidence is invalid: {error}")
         task_name = {"syn-nl-lv-01/continuous-receding/1": "syn-nl-lv-01",
                      "env717-earth-orbit/continuous-receding/1": "earth-orbit",
                      "syn-nl-fuel-01/continuous-receding/1": "syn-nl-fuel-01"}.get(result.get("task_id"))
