@@ -49,6 +49,7 @@ def solve(relation: dict, objective: dict, *, initial, positive_indices=(), geom
     if q.shape != (dimension, dimension) or linear.shape != (dimension,) or not np.isfinite(q).all() or not np.isfinite(linear).all() or not np.isfinite(offset):
         raise ValueError("invalid history quadratic")
     cost = 0.5 * ca.mtimes([z.T, ca.DM(q), z]) + ca.dot(ca.DM(linear), z) + offset
+    epigraph_initial = []
     for norm in objective["residual_norms"]:
         matrix = np.asarray(norm["map"], dtype=float)
         target = np.asarray(norm["target"], dtype=float)
@@ -60,36 +61,48 @@ def solve(relation: dict, objective: dict, *, initial, positive_indices=(), geom
         epigraph = opti.variable()
         opti.subject_to(epigraph >= 0)
         opti.subject_to(ca.sumsqr(residual) <= epigraph ** 2)
-        opti.set_initial(epigraph, float(np.linalg.norm(np.sqrt(weights) * (matrix @ initial - target))) + 0.01)
+        epigraph_start = float(np.linalg.norm(np.sqrt(weights) * (matrix @ initial - target))) + 0.01
+        opti.set_initial(epigraph, epigraph_start)
+        epigraph_initial.append(epigraph_start)
         cost += coefficient * epigraph
     opti.minimize(cost)
-    options = {"print_level": 0, "max_iter": 3000, "tol": 1e-9,
+    initial_duals = np.zeros(int(opti.g.numel()))
+    opti.set_initial(opti.lam_g, initial_duals)
+    warm_start = {"initial_primal": initial.tolist(), "raw_initial": start.tolist(),
+                  "epigraph_initial": epigraph_initial, "initial_duals": initial_duals.tolist(),
+                  "dual_policy": "zero-every-solve", "provider_initialization": "opti.set_initial",
+                  "provider_initial_primal": np.asarray(opti.debug.value(z, opti.initial()), dtype=float).reshape(-1).tolist(),
+                  "provider_initial_duals": np.asarray(opti.debug.value(opti.lam_g, opti.initial()), dtype=float).reshape(-1).tolist(),
+                  "initialization_status": "submitted-and-read-back"}
+    options = {"warm_start_init_point": "yes", "print_level": 0, "max_iter": 3000, "tol": 1e-9,
                "acceptable_tol": 1e-8, "bound_relax_factor": 0.0}
     if tighten_epigraph:
         options.update({"max_iter": 6000, "tol": 1e-12, "acceptable_tol": 1e-11,
                         "constr_viol_tol": 1e-12, "compl_inf_tol": 1e-12})
     opti.solver("ipopt", {"print_time": False}, options)
+
     try:
         solution = opti.solve()
         primal = np.asarray(solution.value(z), dtype=float).reshape(-1)
         stats = opti.stats()
         objective_value = float(solution.value(cost))
         if not np.isfinite(primal).all() or not np.isfinite(objective_value):
-            return {"success": False, "status": "nonfinite-solution",
+            return {"warm_start": warm_start, "success": False, "status": "nonfinite-solution",
                     "solver": "casadi-ipopt/full-history-separate-norm-epigraphs/1",
                     "provider": "casadi-ipopt", "version": f"casadi {ca.__version__}; IPOPT version unavailable"}
         factor_values = [([] if variable is None else np.asarray(solution.value(variable), dtype=float).reshape(-1).tolist())
                          for variable in factor_variables]
         geometry_check = verify(geometry, primal, factor_values)
-        return {"success": bool(stats.get("success")) and geometry_check["accepted"],
+        return {"warm_start": warm_start, "success": bool(stats.get("success")) and geometry_check["accepted"],
                 "geometry_factors": factor_values, "geometry_validation": geometry_check,
                 "numerical_profile": "tight-epigraph" if tighten_epigraph else "standard",
+
                 "status": str(stats.get("return_status", "unknown")), "primal": primal.tolist(),
                 "objective": objective_value, "iterations": stats.get("iter_count"),
                 "solver": "casadi-ipopt/full-history-separate-norm-epigraphs/1",
                 "provider": "casadi-ipopt", "version": f"casadi {ca.__version__}; IPOPT version unavailable",
                 "assurance": "local numerical NLP solution; no global optimality certificate"}
     except Exception as error:
-        return {"success": False, "status": "solver-error", "error": str(error),
+        return {"warm_start": warm_start, "success": False, "status": "solver-error", "error": str(error),
                 "solver": "casadi-ipopt/full-history-separate-norm-epigraphs/1",
                 "provider": "casadi-ipopt", "version": f"casadi {ca.__version__}; IPOPT version unavailable"}

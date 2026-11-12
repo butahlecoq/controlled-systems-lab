@@ -166,6 +166,34 @@ HighsModel translate(const ConvexProgram& p) {
     }
     return model;
 }
+HighsSolution primal_hint(const HighsLp& lp,std::span<const double> x) {
+    HighsSolution start;
+    start.value_valid=true;
+    start.dual_valid=true;
+    start.col_value.assign(x.begin(),x.end());
+    start.row_value.assign(lp.num_row_,0);
+    start.col_dual.assign(lp.num_col_,0);
+    start.row_dual.assign(lp.num_row_,0);
+    for(HighsInt j=0;j<lp.num_col_;++j)
+        for(auto k=lp.a_matrix_.start_[j];k<lp.a_matrix_.start_[j+1];++k)
+            start.row_value[lp.a_matrix_.index_[k]]+=lp.a_matrix_.value_[k]*x[j];
+    return start;
+}
+void set_hint(Highs& h,const HighsSolution& start,std::ostringstream& raw,const char* phase) {
+    const auto status=h.setSolution(start);
+    raw<<"\n"<<phase<<".primal_start.api_status="<<static_cast<int>(status)
+       <<"\n"<<phase<<".primal_start.zero_duals=true"
+       <<"\n"<<phase<<".primal_start.input=";
+    for(const double value:start.col_value) raw<<value<<",";
+    const auto& actual=h.getSolution();
+    const bool retained=actual.value_valid && actual.col_value==start.col_value;
+    raw<<"\n"<<phase<<".primal_start.retained="<<(retained?"true":"false")
+       <<"\n"<<phase<<".primal_start.native_column_duals=derived-by-highs-from-objective-and-zero-row-duals";
+    raw<<"\n"<<phase<<".primal_start.native_row_duals=";
+    for(const double value:actual.row_dual) raw<<value<<",";
+    require(status);
+    if(!retained) throw SetupError("native primal hint readback differs");
+}
 bool feasible_start(const Highs& h,const HighsLp& lp,const ConvexProgram& p,double tolerance) {
     const auto& s=h.getSolution(); const auto& b=h.getBasis();
     const auto n=static_cast<std::size_t>(lp.num_col_),m=static_cast<std::size_t>(lp.num_row_);
@@ -339,7 +367,9 @@ class Workspace final : public ConvexWorkspace {
                 if(!feasibility_) feasibility_=std::make_unique<Highs>();
                 auto& phase=*feasibility_; configure(phase,c,options_,false); highs_detail::CallbackGuard phase_callbacks(phase,capture,require);
                 auto lp=model.lp_; lp.col_cost_.assign(q.variables().size(),0); lp.offset_=0;
-                require(phase.passModel(lp)); raw<<"\nphase.feasibility.time_limit="<<highs_detail::deadline(phase,c,require); capture.poll(); if(capture.stop) return finish();
+                require(phase.passModel(lp));
+                if(auto hint=p.primal_start()) set_hint(phase,primal_hint(lp,*hint),raw,"phase.feasibility");
+                raw<<"\nphase.feasibility.time_limit="<<highs_detail::deadline(phase,c,require); capture.poll(); if(capture.stop) return finish();
                 auto api=phase.run(); const auto status=phase.getModelStatus();
                 highs_detail::observe_scheduler_threads(phase,c,raw,"phase.feasibility");
                 raw<<"\nphase.feasibility.api_status="<<static_cast<int>(api)<<"\nphase.feasibility.model_status="<<static_cast<int>(status);
@@ -359,6 +389,32 @@ class Workspace final : public ConvexWorkspace {
                 bool warm=false; double tolerance=0;
                 require(h.getOptionValue("use_warm_start",warm)); require(h.getOptionValue("dual_feasibility_tolerance",tolerance));
                 if(!warm || !feasible_start(h,model.lp_,p,tolerance)) {raw<<"\nqp_run=false\nstart.valid=false";return finish();}
+                if(auto hint=p.primal_start()) {
+                    set_hint(h,primal_hint(model.lp_,*hint),raw,"phase.qp");
+                    require(h.setBasis(phase.getBasis()));
+                    const bool hint_feasible=feasible_start(h,model.lp_,p,tolerance);
+                    raw<<"\nphase.qp.primal_start.feasible="<<(hint_feasible?"true":"false");
+                    if(!hint_feasible) {
+                        raw<<"\nphase.qp.primal_start.repair=feasibility-phase-solution";
+                        start.dual_valid=true;
+                        start.col_dual.assign(model.lp_.num_col_,0);
+                        start.row_dual.assign(model.lp_.num_row_,0);
+                        require(h.setSolution(start));
+                        require(h.setBasis(phase.getBasis()));
+                    }
+                }
+                if(p.primal_start()) {
+                    const auto& actual=h.getSolution();
+                    raw<<"\nphase.qp.actual_start.value_valid="<<(actual.value_valid?"true":"false")
+                       <<"\nphase.qp.actual_start.basis_valid="<<(h.getBasis().valid?"true":"false")
+                       <<"\nphase.qp.actual_start.source="
+                       <<(actual.col_value==Vector(p.primal_start()->begin(),p.primal_start()->end())?"submitted-primal":"feasibility-phase-repair")
+                       <<"\nphase.qp.actual_start.primal=";
+                    for(const double value:actual.col_value) raw<<value<<",";
+                    raw<<"\nphase.qp.actual_start.row_duals=";
+                    for(const double value:actual.row_dual) raw<<value<<",";
+                    if(!feasible_start(h,model.lp_,p,tolerance)) throw SetupError("post-basis QP start invalid");
+                }
                 raw<<"\nstart.valid=true\nstart.default_fallback=false";
                 raw<<"\nphase.qp.time_limit="<<highs_detail::deadline(h,c,require); capture.poll(); if(capture.stop) return finish();
                 api=h.run(); const auto qp_status=h.getModelStatus();
@@ -372,6 +428,10 @@ class Workspace final : public ConvexWorkspace {
                     result.outcome.value==MathematicalOutcome::optimal && !passes(result,c.numerical)) {
                     raw<<"\nphase.qp.attempt1=optimal_but_original_checks_rejected";
                     append_attempt_residuals(raw,"phase.qp.attempt1",result);
+                    if(p.primal_start()) {
+                        raw<<"\nphase.qp.retry=false\nphase.qp.retry.skipped=explicit-primal-start-contract";
+                        return finish();
+                    }
                     result=result_for(p);
                     Highs retry; configure(retry,c,options_,true); highs_detail::CallbackGuard retry_callbacks(retry,capture,require);
                     require(retry.passModel(model)); require(retry.setOptionValue("use_warm_start",false));
@@ -388,7 +448,9 @@ class Workspace final : public ConvexWorkspace {
             } else {
                 if(!solver_) solver_=std::make_unique<Highs>();
                 auto& h=*solver_; configure(h,c,options_,false); highs_detail::CallbackGuard callbacks(h,capture,require);
-                require(h.passModel(model.lp_)); raw<<"\nphase.linear.time_limit="<<highs_detail::deadline(h,c,require); capture.poll(); if(capture.stop) return finish();
+                require(h.passModel(model.lp_));
+                if(auto hint=p.primal_start()) set_hint(h,primal_hint(model.lp_,*hint),raw,"phase.linear");
+                raw<<"\nphase.linear.time_limit="<<highs_detail::deadline(h,c,require); capture.poll(); if(capture.stop) return finish();
                 const auto api=h.run(); const auto status=h.getModelStatus();
                 highs_detail::observe_scheduler_threads(h,c,raw,"phase.linear");
                 raw<<"\nphase.linear.api_status="<<static_cast<int>(api)<<"\nphase.linear.model_status="<<static_cast<int>(status);

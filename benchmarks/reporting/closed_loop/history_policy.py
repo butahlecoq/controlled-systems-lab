@@ -76,6 +76,39 @@ def make_request(task, task_sha256, receipt, observed, stage, *, history_solver=
     return result
 
 
+def initial_history(request, previous=None):
+    """Drop the applied state/control stage without extending the fixed terminal time."""
+    import numpy as np
+    observed = np.asarray(request["observed_physical_state"], dtype=float)
+    n, m = len(observed), len(request["control_bounds"])
+    horizon = len(request["predictor_stages"])
+    if previous is not None:
+        if request["absolute_update_index"] != previous["stage"] + 1:
+            raise ValueError("warm start requires the next observed stage")
+        old = np.asarray(previous["primal"], dtype=float)
+        old_horizon = horizon + 1
+        if old.shape != ((old_horizon + 1) * n + old_horizon * m,):
+            raise ValueError("prior history has a different remaining horizon")
+        states = old[:(old_horizon + 1)*n].reshape(-1, n)[1:].copy()
+        controls = old[(old_horizon + 1)*n:].reshape(-1, m)[1:]
+        states[0] = observed
+        initial = np.concatenate([states.ravel(), controls.ravel()])
+        policy = "shift-prior-primal-drop-applied-stage-no-terminal-repeat"
+    else:
+        bounds = np.asarray(request["control_bounds"])
+        controls = [np.clip(np.zeros(m), bounds[:, 0], bounds[:, 1]) for _ in range(horizon)]
+        states = [observed]
+        for row, control in zip(request["predictor_stages"], controls):
+            states.append(np.asarray(row["A"]) @ states[-1] + np.asarray(row["B"]) @ control + np.asarray(row["c"]))
+        initial = np.concatenate([*states, *controls])
+        policy = "initial-zero-control-rollout"
+    if not np.isfinite(initial).all():
+        raise ValueError("initial history must be finite")
+    return initial, {"policy": policy, "dual_policy": "zero-every-solve",
+                     "source_stage": None if previous is None else previous["stage"],
+                     "initial_primal": initial.tolist()}
+
+
 class HistoryPolicy:
     """Re-solve the full remaining affine history from each observation."""
     def __init__(self, task, task_sha256, controller_id, action_profile_id, factory_options=None):
@@ -110,6 +143,7 @@ class HistoryPolicy:
         self.receipt = receipt
         self.last_query_capture = None
         self.query_capture_callback = None
+        self.previous_history = None
         self.preparation_receipt = {"executable": str(executable),
             "executable_sha256": hashlib.sha256(executable.read_bytes()).hexdigest(),
             "binary_source": "unknown",
@@ -142,6 +176,9 @@ class HistoryPolicy:
                                observed_physical_state, absolute_update_index, history_solver=self.history_solver,
                                geometry_family=self.geometry_family)
         request["controller_id"] = self.controller_id
+        initial, warm_start = initial_history(request, self.previous_history)
+        request["initial_primal"] = initial.tolist()
+        request["warm_start"] = warm_start
         raw = json.dumps(request, separators=(",", ":"), allow_nan=False) + "\n"
         self.last_query_capture = {"schema": "csl.closed-loop.native-query-capture/2",
             "capture_kind": "bridge-exchange", "request": request, "bridge_request_raw": raw,
@@ -232,13 +269,7 @@ class HistoryPolicy:
             from history_norm_solver import solve
             n = len(observed_physical_state)
             m = len(request["control_bounds"])
-            controls = [np.clip(np.zeros(m), np.asarray(request["control_bounds"])[:, 0],
-                                np.asarray(request["control_bounds"])[:, 1]) for _ in request["predictor_stages"]]
-            states = [np.asarray(observed_physical_state, dtype=float)]
-            for row, control in zip(request["predictor_stages"], controls):
-                states.append(np.asarray(row["A"]) @ states[-1] + np.asarray(row["B"]) @ control + np.asarray(row["c"]))
-            initial = np.concatenate([*states, *controls])
-            positive = [n * k for k in range(1, len(states))] if self.task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01" else []
+            positive = [n * k for k in range(1, len(request["predictor_stages"]) + 1)] if self.task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01" else []
             solver_receipt = solve(relation, compiled, initial=initial, positive_indices=positive,
                                    geometry_memberships=memberships or ())
             result["invocations"].append({"operation": "controller.solve", "module_id": "continuous-history-mpc",
@@ -294,6 +325,7 @@ class HistoryPolicy:
         if not checks["accepted"]:
             result["reason"] = "full-history source or feasibility verification failed"
             return result
+        self.previous_history = {"stage": absolute_update_index, "primal": np.asarray(primal).tolist()}
         result.update({"status": "accepted", "control": checks["controls"][0],
             "selected_plan": {"states": checks["states"], "controls": checks["controls"],
                               "source_cost": checks["source_cost"]},

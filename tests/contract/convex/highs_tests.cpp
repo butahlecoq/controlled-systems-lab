@@ -70,6 +70,27 @@ TEST_CASE("HiGHS convex provider declares bounded hybrid quadratic envelopes") {
     CHECK(unrelated.status==AdmissionStatus::unknown);
 }
 
+TEST_CASE("primal hints are owned snapshots with unchanged problem identity and typed validation") {
+    const auto p=accepted(make_convex_program(parabola()));
+    CHECK_FALSE(p.primal_start());
+    Vector input{1.25};
+    const auto hinted=accepted(with_primal_start(p,input));
+    input[0]=4;
+    REQUIRE(hinted.primal_start());
+    CHECK((*hinted.primal_start())[0]==1.25);
+    CHECK(hinted.identity()==p.identity());
+    CHECK(std::holds_alternative<Diagnostics>(with_primal_start(p,Vector{})));
+    CHECK(std::holds_alternative<Diagnostics>(with_primal_start(p,Vector{std::numeric_limits<double>::infinity()})));
+    auto [worker]=prepare(hinted).create();
+    const auto result=accepted(worker->run(context()));
+    optimum(result,hinted,0);
+    CHECK(result.raw_diagnostics.find("phase.qp.primal_start.input=1.25,")!=std::string::npos);
+    CHECK(result.raw_diagnostics.find("phase.qp.primal_start.retained=true")!=std::string::npos);
+    CHECK(result.raw_diagnostics.find("phase.qp.primal_start.feasible=true")!=std::string::npos);
+    CHECK(result.raw_diagnostics.find("phase.qp.actual_start.source=submitted-primal")!=std::string::npos);
+    CHECK(result.raw_diagnostics.find("phase.qp.actual_start.primal=1.25,")!=std::string::npos);
+}
+
 TEST_CASE("registered quadratic interior and boundary optima retain original numerical KKT evidence") {
     for(double upper:{5.0,2.0}) {
         const auto p=accepted(make_convex_program(parabola(upper)));

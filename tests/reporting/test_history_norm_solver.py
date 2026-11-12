@@ -34,6 +34,52 @@ class HistoryNormSolverTest(unittest.TestCase):
         self.assertAlmostEqual(result["primal"][2], 0, places=5)
         self.assertAlmostEqual(result["objective"], 2, places=5)
 
+    def test_shifted_history_drops_only_applied_stage_and_overwrites_observation(self):
+        import numpy as np
+        from history_policy import initial_history
+        request = {"observed_physical_state": [90, 91], "control_bounds": [[-9, 9], [-9, 9]],
+                   "absolute_update_index": 1, "predictor_stages": [{}, {}]}
+        previous = {"stage": 0, "primal": [0, 1, 10, 11, 20, 21, 30, 31, 2, 3, 4, 5, 6, 7]}
+        initial, receipt = initial_history(request, previous)
+        np.testing.assert_array_equal(initial, [90, 91, 20, 21, 30, 31, 4, 5, 6, 7])
+        self.assertEqual(receipt["source_stage"], 0)
+        self.assertEqual(receipt["dual_policy"], "zero-every-solve")
+        request.update(absolute_update_index=2, observed_physical_state=[80, 81], predictor_stages=[{}])
+        final, _ = initial_history(request, {"stage": 1, "primal": initial})
+        np.testing.assert_array_equal(final, [80, 81, 30, 31, 6, 7])
+        with self.assertRaisesRegex(ValueError, "next observed stage"):
+            initial_history(request, previous)
+
+    def test_nlp_receipt_retains_shifted_input_and_explicit_zero_duals(self):
+        import numpy as np
+        from history_norm_solver import solve
+        from history_policy import initial_history
+        previous = None
+        for stage in range(3):
+            horizon = 3 - stage
+            request = {"absolute_update_index": stage, "observed_physical_state": [2 + stage * 0.1],
+                       "control_bounds": [[-2, 2]],
+                       "predictor_stages": [{"A": [[1]], "B": [[1]], "c": [0]}] * horizon}
+            initial, _ = initial_history(request, previous)
+            dimension = 2 * horizon + 1
+            rows = [np.eye(dimension)[0]]
+            for k in range(horizon):
+                row = np.zeros(dimension)
+                row[k], row[k+1], row[horizon+1+k] = -1, 1, -1
+                rows.append(row)
+            relation = {"inequalities": [], "upper_bounds": [], "equalities": np.asarray(rows).tolist(),
+                        "equality_values": [request["observed_physical_state"][0]] + [0]*horizon}
+            objective = {"quadratic": {"Q": (np.eye(dimension)*2).tolist(),
+                                      "linear": [0]*dimension, "offset": 0}, "residual_norms": []}
+            result = solve(relation, objective, initial=initial)
+            self.assertTrue(result["success"], result)
+            np.testing.assert_array_equal(result["warm_start"]["initial_primal"], initial)
+            self.assertEqual(result["warm_start"]["initial_duals"], [0]*(horizon+1))
+            self.assertEqual(result["warm_start"]["provider_initial_duals"], [0]*(horizon+1))
+            np.testing.assert_allclose(result["warm_start"]["provider_initial_primal"], initial)
+            self.assertAlmostEqual(result["primal"][0], request["observed_physical_state"][0])
+            previous = {"stage": stage, "primal": result["primal"]}
+
     def test_continuous_request_keeps_task_identity_and_remaining_horizon(self):
         from contracts import load_task, manifest_sha256
         from task_models import prediction_receipt
