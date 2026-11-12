@@ -82,6 +82,8 @@ class HistoryPolicy:
             "bridge_request_sent": False, "bridge_request_transmission_status": "prepared",
             "response_parse_status": "not_received", "bridge_response_raw": None}
         self._capture()
+        self.last_query_capture["bridge_request_transmission_status"] = "attempted"
+        self._capture()
         self.process.stdin.write(raw); self.process.stdin.flush()
         self.last_query_capture["bridge_request_sent"] = True
         self.last_query_capture["bridge_request_transmission_status"] = "sent"
@@ -91,8 +93,17 @@ class HistoryPolicy:
         self.last_query_capture["bridge_response_sha256"] = hashlib.sha256(response_raw.encode()).hexdigest()
         self._capture()
         if not response_raw:
+            self.last_query_capture["response_parse_status"] = "missing_response"
+            self._capture()
             raise RuntimeError("native history bridge exited before responding")
-        response = json.loads(response_raw)
+        self.last_query_capture["response_parse_status"] = "raw_received"
+        self._capture()
+        try:
+            response = json.loads(response_raw)
+        except (json.JSONDecodeError, ValueError):
+            self.last_query_capture["response_parse_status"] = "malformed_json"
+            self._capture()
+            raise
         self.last_query_capture["parsed_response"] = response
         self.last_query_capture["response_parse_status"] = "parsed"
         self._capture()
@@ -104,6 +115,10 @@ class HistoryPolicy:
         if response.get("status") not in {"accepted", "exported"}:
             result["status"] = response.get("status", "failed")
             result["reason"] = response.get("reason", "native history export failed")
+            if "solver_receipt" in response:
+                result["solve_receipt"] = {"bridge_response": response, "solver": response["solver_receipt"]}
+                result["invocations"] = [{"operation": "controller.solve", "module_id": "continuous-history-mpc",
+                    "profile_id": self.controller_id, "provider": response["solver_receipt"]["provider"]}]
             return result
         relation, compiled = response["history_relation"], response["history_objective"]
         if response["status"] == "accepted":
@@ -123,24 +138,33 @@ class HistoryPolicy:
             initial = np.concatenate([*states, *controls])
             positive = [n * k for k in range(1, len(states))] if self.task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01" else []
             solver_receipt = solve(relation, compiled, initial=initial, positive_indices=positive)
+            result["invocations"] = [{"operation": "controller.solve", "module_id": "continuous-history-mpc",
+                "profile_id": self.controller_id, "provider": "casadi-ipopt"}]
+            self.last_query_capture["solver_receipt"] = solver_receipt
+            self._capture()
             if not solver_receipt["success"]:
+                result["solve_receipt"] = {"bridge_response": response, "solver": solver_receipt}
                 result["reason"] = "history norm solver failed: " + str(solver_receipt)
                 return result
             primal, solver_cost = solver_receipt["primal"], solver_receipt["objective"]
-        checks = validate(self.task, absolute_update_index, observed_physical_state,
-                          request["predictor_stages"], relation, primal, solver_cost)
-        result["solve_receipt"] = {"bridge_response": response, "solver": solver_receipt,
-                                   "independent_validation": checks}
+        provider = solver_receipt.get("provider", "casadi-ipopt")
+        result["invocations"] = [{"operation": "controller.solve", "module_id": "continuous-history-mpc",
+                                  "profile_id": self.controller_id, "provider": provider}]
+        result["solve_receipt"] = {"bridge_response": response, "solver": solver_receipt}
+        try:
+            checks = validate(self.task, absolute_update_index, observed_physical_state,
+                              request["predictor_stages"], relation, primal, solver_cost)
+        except (ValueError, FloatingPointError) as error:
+            result["reason"] = "history validation failed: " + str(error)
+            return result
+        result["solve_receipt"]["independent_validation"] = checks
         if not checks["accepted"]:
             result["reason"] = "full-history source or feasibility verification failed"
             return result
-        provider = solver_receipt.get("provider", "casadi-ipopt")
         result.update({"status": "accepted", "control": checks["controls"][0],
             "selected_plan": {"states": checks["states"], "controls": checks["controls"],
                               "source_cost": checks["source_cost"]},
             "policy_semantics": "fresh observed-state affine history MPC; numerical local evidence",
-            "invocations": [{"operation": "controller.solve", "module_id": "continuous-history-mpc",
-                             "profile_id": self.controller_id, "provider": provider}],
             "coverage": "not_applicable"})
         return result
 

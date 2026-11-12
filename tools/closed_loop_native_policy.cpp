@@ -821,15 +821,26 @@ Json continuous_history_query(const Json& in) {
     const auto& prepared = std::get<PreparedPipeline<ConvexPort>>(preparation);
     auto [workspace] = prepared.create();
     const auto resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    const auto actual = prepared.provenance()[0].actual.value();
     const auto outcome = workspace->run({resources, {}, {}, {1e-8, 1e-8}, "continuous-history"});
     const auto* result = std::get_if<ProgramResult>(&outcome);
     if (!result || result->termination != Termination::completed ||
         result->outcome.value != MathematicalOutcome::optimal || !result->primal ||
-        !optimization::check_program_result(*result, qp, Assurance::numerical).empty())
-        throw std::runtime_error("convex history provider did not return a completed optimum");
+        !optimization::check_program_result(*result, qp, Assurance::numerical).empty()) {
+        response["status"] = "failed";
+        response["reason"] = "convex history provider did not return a completed optimum";
+        response["solver_receipt"] = {{"provider", actual.id.value}, {"version", actual.version},
+            {"raw_diagnostics", result ? result->raw_diagnostics : "provider returned unsupported"}};
+        return response;
+    }
     const auto& primal = *result->primal;
-    if (primal.size() != q.dimension || !std::all_of(primal.begin(), primal.end(), [](double value) { return std::isfinite(value); }))
-        throw std::runtime_error("convex history provider returned an invalid primal");
+    if (primal.size() != q.dimension || !std::all_of(primal.begin(), primal.end(), [](double value) { return std::isfinite(value); })) {
+        response["status"] = "failed";
+        response["reason"] = "convex history provider returned an invalid primal";
+        response["solver_receipt"] = {{"provider", actual.id.value}, {"version", actual.version},
+            {"raw_diagnostics", result->raw_diagnostics}};
+        return response;
+    }
     std::vector<Vector> xs, us;
     for (std::size_t k = 0; k <= horizon; ++k)
         xs.emplace_back(primal.begin() + k*n, primal.begin() + (k+1)*n);
@@ -837,7 +848,6 @@ Json continuous_history_query(const Json& in) {
     for (std::size_t k = 0; k < horizon; ++k)
         us.emplace_back(primal.begin() + control_offset+k*m, primal.begin() + control_offset+(k+1)*m);
     const auto evaluated = take_history(optimization::evaluate_history_cost(program, xs, us), "evaluate-history-cost");
-    const auto actual = prepared.provenance()[0].actual.value();
     response["status"] = "accepted";
     response["primal"] = primal;
     response["source_cost"] = {{"terminal", evaluated.terminal}, {"running", evaluated.running}, {"total", evaluated.total}};
