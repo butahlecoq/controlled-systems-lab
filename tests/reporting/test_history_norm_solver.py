@@ -33,6 +33,44 @@ class HistoryNormSolverTest(unittest.TestCase):
         self.assertAlmostEqual(result["primal"][2], 0, places=5)
         self.assertAlmostEqual(result["objective"], 2, places=5)
 
+    def test_continuous_request_keeps_task_identity_and_remaining_horizon(self):
+        from contracts import load_task, manifest_sha256
+        from task_models import prediction_receipt
+        from history_policy import make_request
+
+        for name in ("syn-nl-lv-01", "syn-nl-fuel-01", "earth-orbit"):
+            with self.subTest(task=name):
+                task = load_task(name)
+                receipt = prediction_receipt(task)
+                stage = 2
+                observed = [row["initial"] for row in task["model"]["states"]]
+                request = make_request(task, manifest_sha256(task), receipt, observed, stage)
+                self.assertEqual(request["action_profile_id"], task["control_domains"]["continuous"]["problem_id"])
+                self.assertEqual(request["control_bounds"], task["control_domains"]["continuous"]["bounds"])
+                self.assertEqual(request["absolute_update_index"], stage)
+                self.assertEqual(request["original_horizon"], task["episode"]["intervals"])
+                self.assertEqual(len(request["predictor_stages"]), task["episode"]["intervals"] - stage)
+                self.assertEqual(request["observed_physical_state"], observed)
+                self.assertNotIn("actions", request)
+
+    def test_continuous_request_preserves_quadratic_terminal_source_cost(self):
+        from contracts import load_task, manifest_sha256
+        from task_models import objective, prediction_receipt
+        from history_policy import make_request
+
+        for name in ("syn-nl-lv-01", "syn-nl-fuel-01"):
+            with self.subTest(task=name):
+                task = load_task(name)
+                n = task["episode"]["intervals"]
+                state = [field["initial"] for field in task["model"]["states"]]
+                controls = [[0.0] * len(task["model"]["controls"]) for _ in range(n)]
+                source = objective(task, [state] * (n + 1), controls)["terminal"]
+                spec = make_request(task, manifest_sha256(task), prediction_receipt(task), state, 0)["terminal_objective"]
+                quadratic = sum(0.5 * state[i] * value * state[j]
+                    for i, row in enumerate(spec["Q"]) for j, value in enumerate(row))
+                compiled = quadratic + sum(a * b for a, b in zip(spec["linear"], state)) + spec["offset"]
+                self.assertAlmostEqual(compiled, source, places=9)
+
     def test_history_verification_rejects_wrong_rows_and_cost(self):
         import numpy as np
         from contracts import load_task
