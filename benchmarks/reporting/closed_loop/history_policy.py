@@ -66,6 +66,7 @@ class HistoryPolicy:
         import numpy as np
         from history_validation import validate
 
+        self.last_query_capture = None
         if task_id != self.task["task_id"]:
             raise ValueError("query task differs from source-bound task")
         if (self.task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01"
@@ -155,6 +156,8 @@ class HistoryPolicy:
         for stream in (self.process.stdout, self.process.stderr):
             if stream is not None:
                 stream.close()
+        if self.process.returncode not in (0, None):
+            raise RuntimeError(f"native history bridge exited with status {self.process.returncode}")
 
 
 def create_policy(task, *, task_sha256, controller_id, action_profile_id, factory_options=None):

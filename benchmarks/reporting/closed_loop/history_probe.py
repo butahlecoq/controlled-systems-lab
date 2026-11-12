@@ -82,6 +82,11 @@ def main():
                 state = execution["physical_states"][-1]
                 states.append(state)
                 record["sampled_constraints"] = physical_constraints(task, execution["physical_states"], [query["control"]])
+                sampled = record["sampled_constraints"]
+                if (max(sampled["sampled_state_bound_violation_by_coordinate"], default=0) > 1e-7
+                        or sampled["control_bound_violation_max"] > 1e-7
+                        or sampled["model_domain"].get("positive_radius") is False):
+                    raise RuntimeError("sampled physical state or action constraint violated")
                 (directory / "record.json").write_text(json.dumps(summary, indent=2, allow_nan=False) + "\n")
             summary["status"] = "complete"
         except Exception as error:
