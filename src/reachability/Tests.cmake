@@ -1,6 +1,6 @@
 if(TARGET CSL::highs_lp)
   add_executable(bounded_h_support_tests tests/unit/reachability/bounded_h_support_tests.cpp)
-  target_link_libraries(bounded_h_support_tests PRIVATE CSL::bounded_h_support CSL::highs_lp)
+  target_link_libraries(bounded_h_support_tests PRIVATE CSL::bounded_h_support CSL::finite_plan_zonotope CSL::highs_lp)
   add_test(NAME bounded_h_support_tests COMMAND bounded_h_support_tests)
   csl_test_target(bounded_h_support_tests reachability)
 endif()

@@ -1,6 +1,7 @@
 #include <csl/reachability/bounded_h_support.hpp>
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/reachability/feedback_geometry.hpp>
+#include <csl/reachability/finite_plan_zonotope.hpp>
 #include <cstdlib>
 
 void check(bool condition) { if (!condition) std::abort(); }
@@ -41,6 +42,31 @@ int main() {
     auto para=axis_enclosure(FeedbackFamily::parallelotope, {"p"}, {-1,0}, {1,2}, {"x","y"});
     check(std::holds_alternative<FeedbackMembership>(para));
     check(std::get<FeedbackHMembership>(std::get<FeedbackMembership>(para)).parallelotope_frame.has_value());
+    auto matrix=[](Matrix m) { return std::get<numeric::MatrixView>(numeric::snapshot(m)); };
+    auto vector=[](Vector v) { return std::get<numeric::VectorView>(numeric::snapshot_vector(v)); };
+    model::DynamicsStage dynamics{matrix({2,2,{1,1,0,1}}),matrix({2,1,{1,1}}),
+        matrix({2,0,{}}),vector({0,0})};
+    FinitePlanZonotopeTrace::Stage state{{0,0},{2,1,{1,1}},{{"state"}}};
+    FinitePlanZonotopeTrace::Stage control{{0},{1,1,{0.5}},{{"u"}}};
+    auto propagated=propagate_existential_control_zonotope(dynamics,state,control,20,{},0);
+    check(std::holds_alternative<FinitePlanZonotopeTrace::Stage>(propagated));
+    const auto& next=std::get<FinitePlanZonotopeTrace::Stage>(propagated);
+    check(next.generators.cols==4 && next.generators.values[0]==2 && next.generators.values[4]==1);
+    check(next.generators.values[1]==0.5 && next.generators.values[5]==0.5);
+    check(next.factors[0].value!=next.factors[1].value);
+    auto dynamics4=model::DynamicsStage{matrix({4,4,{1,1,0,0, 0,1,0,0, 0,0,1,1, 0,0,0,1}}),
+        matrix({4,0,{}}),matrix({4,0,{}}),vector({0,0,0,0})};
+    FinitePlanZonotopeTrace::Stage state4{{0,0,0,0},{4,1,{1,1,1,1}},{{"coupled"}}};
+    FinitePlanZonotopeTrace::Stage no_controls{{},{0,0,{}},{}};
+    auto propagated4=propagate_existential_control_zonotope(dynamics4,state4,no_controls,20,{},1);
+    check(std::holds_alternative<FinitePlanZonotopeTrace::Stage>(propagated4));
+    const auto& next4=std::get<FinitePlanZonotopeTrace::Stage>(propagated4);
+    check(next4.generators.values[0]==2 && next4.generators.values[5]==1 &&
+        next4.generators.values[10]==2 && next4.generators.values[15]==1);
+    auto duplicate=state;
+    duplicate.factors[0].value="stage/0/u";
+    auto invalid_factors=propagate_existential_control_zonotope(dynamics,duplicate,control,20,{},0);
+    check(std::holds_alternative<Unsupported>(invalid_factors));
     // A negative inequality multiplier cannot justify the bound.
     check(std::holds_alternative<Diagnostics>(residual_corrected_support(input, {-1}, {})));
     // Equality multipliers and cross-coordinate support in four dimensions.
