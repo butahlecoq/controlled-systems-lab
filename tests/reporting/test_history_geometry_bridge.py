@@ -4,6 +4,7 @@ import os
 import subprocess
 import sys
 import unittest
+import numpy as np
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "benchmarks/reporting/closed_loop"))
@@ -37,6 +38,21 @@ class GeometryBridgeTest(unittest.TestCase):
                 memberships = geometry_memberships(geometry, family, 2, 1)
                 self.assertTrue(any(m["providers"] for m in memberships))
                 self.assertTrue(any(m["support_calls"] for m in memberships))
+                for stage in geometry["stages"]:
+                    for membership in stage["memberships"]:
+                        h = stage[membership["role"] + "_h"]
+                        for cert in membership["support_certificates"]:
+                            self.assertEqual(cert["input_set"], h["set_id"])
+                            A = np.asarray(h["inequalities"], dtype=float).reshape(-1, 2)
+                            E = np.asarray(h["equalities"], dtype=float).reshape(-1, 2)
+                            lam = np.asarray(cert["inequality_multipliers"])
+                            mu = np.asarray(cert["equality_multipliers"])
+                            self.assertTrue(np.all(lam >= 0))
+                            residual = np.asarray(cert["direction"]) - A.T @ lam - E.T @ mu
+                            check = (lam @ np.asarray(h["upper_bounds"]) + mu @ np.asarray(h["equality_values"])
+                                     + np.maximum(residual * cert["carrier_lower"],
+                                                  residual * cert["carrier_upper"]).sum())
+                            self.assertLessEqual(check, cert["bound"] + 1e-9 * (1 + abs(check)))
                 answer = solve(response["history_relation"], response["history_objective"],
                                initial=[0]*6, geometry_memberships=memberships)
                 self.assertTrue(answer["success"], answer)

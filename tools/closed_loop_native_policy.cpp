@@ -757,6 +757,49 @@ registry::PreparedProvider<Port> feedback_provider(registry::Registration<Port> 
     return prepare_provider(std::move(registration), requirements);
 }
 
+Json support_call_json(const registry::LPQueryRecord& record) {
+    return std::visit([](const auto& call) -> Json {
+        using T = std::decay_t<decltype(call)>;
+        const char* status = std::is_same_v<T, registry::LPQueryCompleted> ? "completed" :
+            std::is_same_v<T, registry::LPQueryRejected> ? "rejected" :
+            std::is_same_v<T, registry::LPQueryStopped> ? "stopped" :
+            std::is_same_v<T, registry::LPQuerySolverUnsupported> ? "unsupported" : "not_run";
+        const auto& provenance = [&]() -> const registry::Provenance& {
+            if constexpr(std::is_same_v<T, registry::LPQueryRejected>) return call.rejection.provenance;
+            else return call.provider;
+        }();
+        Json result{{"program", call.request.program.value}, {"status", status},
+            {"requested", provenance.requested.id.value},
+            {"requested_version", provenance.requested.version ? Json(*provenance.requested.version) : Json(nullptr)},
+            {"actual", provenance.actual ? Json(provenance.actual->id.value) : Json(nullptr)},
+            {"actual_version", provenance.actual ? Json(provenance.actual->version) : Json(nullptr)}};
+        if constexpr(std::is_same_v<T, registry::LPQueryRejected>) {
+            result["diagnostics"] = Json::array();
+            for(const auto& diagnostic : call.rejection.diagnostics)
+                result["diagnostics"].push_back({{"field", diagnostic.field}, {"explanation", diagnostic.explanation}});
+        } else if constexpr(std::is_same_v<T, registry::LPQuerySolverUnsupported>) {
+            result["diagnostics"] = Json::array();
+            for(const auto& diagnostic : call.diagnostics)
+                result["diagnostics"].push_back({{"field", diagnostic.field}, {"explanation", diagnostic.explanation}});
+        } else if constexpr(std::is_same_v<T, registry::LPQueryStopped> || std::is_same_v<T, registry::LPQueryNotRun>) {
+            result["reason"] = static_cast<int>(call.reason);
+        } else if constexpr(std::is_same_v<T, registry::LPQueryCompleted>) {
+            result["outcome"] = static_cast<int>(call.outcome);
+        }
+        return result;
+    }, record);
+}
+
+Json support_certificate_json(const reachability::SupportBoundCertificate& certificate) {
+    return {{"input_set", certificate.input_set ? Json(certificate.input_set->value) : Json(nullptr)},
+        {"direction", certificate.direction}, {"carrier_lower", certificate.carrier_lower},
+        {"carrier_upper", certificate.carrier_upper}, {"bound", certificate.bound.value},
+        {"method", certificate.bound.method == reachability::SupportBoundMethod::dual_candidate ?
+            "dual_candidate" : "carrier_only"},
+        {"inequality_multipliers", certificate.bound.inequality_multipliers},
+        {"equality_multipliers", certificate.bound.equality_multipliers}};
+}
+
 Json feedback_membership_json(const reachability::FeedbackSet& shape,
         const std::vector<std::size_t>& indices, const std::string& role) {
     Json membership = std::visit([&](const auto& value) -> Json {
@@ -812,22 +855,11 @@ Json feedback_membership_json(const reachability::FeedbackSet& shape,
         {"actual", call.actual_module ? Json(call.actual_module->value) : Json(nullptr)},
         {"actual_version", call.actual_version ? Json(*call.actual_version) : Json(nullptr)}});
     membership["support_calls"] = Json::array();
-    for(const auto& record : shape.support_calls) std::visit([&](const auto& call) {
-        using T = std::decay_t<decltype(call)>;
-        const char* status = std::is_same_v<T, registry::LPQueryCompleted> ? "completed" :
-            std::is_same_v<T, registry::LPQueryRejected> ? "rejected" :
-            std::is_same_v<T, registry::LPQueryStopped> ? "stopped" :
-            std::is_same_v<T, registry::LPQuerySolverUnsupported> ? "unsupported" : "not_run";
-        const auto& provenance = [&]() -> const registry::Provenance& {
-            if constexpr(std::is_same_v<T, registry::LPQueryRejected>) return call.rejection.provenance;
-            else return call.provider;
-        }();
-        membership["support_calls"].push_back({{"program", call.request.program.value}, {"status", status},
-            {"requested", provenance.requested.id.value},
-            {"requested_version", provenance.requested.version ? Json(*provenance.requested.version) : Json(nullptr)},
-            {"actual", provenance.actual ? Json(provenance.actual->id.value) : Json(nullptr)},
-            {"actual_version", provenance.actual ? Json(provenance.actual->version) : Json(nullptr)}});
-    }, record);
+    for(const auto& record : shape.support_calls)
+        membership["support_calls"].push_back(support_call_json(record));
+    membership["support_certificates"] = Json::array();
+    for(const auto& certificate : shape.support_certificates)
+        membership["support_certificates"].push_back(support_certificate_json(certificate));
     membership["support_methods"] = Json::array();
     for(const auto method : shape.support_methods)
         membership["support_methods"].push_back(method == reachability::SupportBoundMethod::dual_candidate ?
@@ -846,7 +878,10 @@ Json feedback_stage_json(const reachability::FeedbackGeometryStage& stage, std::
     for(const auto& [role, value] : std::array{
         std::pair{"forward_h", &stage.forward_h}, std::pair{"backward_h", &stage.backward_h},
         std::pair{"intersection_h", &stage.intersection_h}})
-        if(*value) result[role] = set_json(take_history(sets::from_handle((*value)->output), "feedback-source-h"));
+        if(*value) {
+            result[role] = set_json(take_history(sets::from_handle((*value)->output), "feedback-source-h"));
+            result[role]["set_id"] = (*value)->output.id.value;
+        }
     return result;
 }
 
@@ -897,7 +932,12 @@ Json feedback_export(const problem::ResolvedProblem& resolved, const Json& in,
                 {"port", call.port}, {"requested", call.requested_module.value},
                 {"actual", call.actual_module ? Json(call.actual_module->value) : Json(nullptr)},
                 {"actual_version", call.actual_version ? Json(*call.actual_version) : Json(nullptr)}});
-        result["pending_support_calls"] = failure->pending_support_calls.size();
+        result["pending_support_calls"] = Json::array();
+        for(const auto& record : failure->pending_support_calls)
+            result["pending_support_calls"].push_back(support_call_json(record));
+        result["pending_support_certificates"] = Json::array();
+        for(const auto& certificate : failure->pending_support_certificates)
+            result["pending_support_certificates"].push_back(support_certificate_json(certificate));
         std::visit([&](const auto& cause) {
             using T = std::decay_t<decltype(cause)>;
             if constexpr(std::is_same_v<T, Unsupported>) {
