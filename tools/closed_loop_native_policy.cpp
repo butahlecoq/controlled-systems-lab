@@ -21,6 +21,7 @@
 #include <csl/sets/data.hpp>
 #include <nlohmann/json.hpp>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <iostream>
@@ -827,6 +828,8 @@ Json continuous_history_query(const Json& in) {
         !optimization::check_program_result(*result, qp, Assurance::numerical).empty())
         throw std::runtime_error("convex history provider did not return a completed optimum");
     const auto& primal = *result->primal;
+    if (primal.size() != q.dimension || !std::all_of(primal.begin(), primal.end(), [](double value) { return std::isfinite(value); }))
+        throw std::runtime_error("convex history provider returned an invalid primal");
     std::vector<Vector> xs, us;
     for (std::size_t k = 0; k <= horizon; ++k)
         xs.emplace_back(primal.begin() + k*n, primal.begin() + (k+1)*n);
