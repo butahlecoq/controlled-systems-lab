@@ -271,6 +271,7 @@ def _history_definitions() -> list[dict]:
         "benchmarks/reporting/closed_loop/native_graph_policy.py",
         "benchmarks/reporting/closed_loop/task_models.py",
         "tools/closed_loop_native_policy.cpp", "include/csl/optimization/history_cost.hpp",
+        "include/csl/optimization/contracts.hpp", "include/csl/optimization/convex_backend.hpp",
         "include/csl/optimization/running_control_cost.hpp", "src/optimization/history_cost.cpp",
         "src/optimization/running_control_cost.cpp", "src/optimization/objective_reformulation.cpp",
         "src/optimization/convex_backend.cpp", "src/problem/resolved.cpp", "src/model/linear_system.cpp",

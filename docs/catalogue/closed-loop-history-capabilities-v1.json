@@ -27,6 +27,8 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "tools/closed_loop_native_policy.cpp",
           "include/csl/optimization/history_cost.hpp",
+          "include/csl/optimization/contracts.hpp",
+          "include/csl/optimization/convex_backend.hpp",
           "include/csl/optimization/running_control_cost.hpp",
           "src/optimization/history_cost.cpp",
           "src/optimization/running_control_cost.cpp",
@@ -60,8 +62,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "1843876d5e45d90c49027ad3309a2ff858ff6d1d1f21db62c516c57a843f92e1",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-mpc/1/cfg-1843876d5e45d90c",
+      "graph_fingerprint": "3516611b5762c9a091d670ad23025d817c57a8c4f21368ee064aea2c81d1a52a",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-mpc/1/cfg-3516611b5762c9a0",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -83,11 +85,11 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_norm_solver.py",
-          "sha256": "d4c2ff799a2fe46ebf32fc4c3829f7cf9b7c0c586d503626fcefaf17766f204d"
+          "sha256": "22baa6022a7636f1236f10226900d8c7fb2cfa3a6c695312ff7a3f35d4c248bb"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "734ba6633fab471ba7a6287b9cd02d86e84db75393746dca925aeada6edc49a8"
+          "sha256": "31cda6461f29e11257452117a33ba1679ac00337cc1b1338f1ac9550636019e7"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -114,6 +116,14 @@
           "sha256": "1a608a0a38f9c1d60d9272b948189e48f9f294048ddf9726aaa0ed8b5cee8464"
         },
         {
+          "path": "include/csl/optimization/contracts.hpp",
+          "sha256": "2d4c506d43c11305256265bc4b4c3c067f6162be5d3d40bb68d324b4b5b6ecf6"
+        },
+        {
+          "path": "include/csl/optimization/convex_backend.hpp",
+          "sha256": "ec2cbe83abf491c43de43fe2c81e572ecee2f267836e21dd5c2b33a78caee75f"
+        },
+        {
           "path": "include/csl/optimization/history_cost.hpp",
           "sha256": "8a3a7ad74ca31439af995a3009a669707af7440b31e04666f433c19cc59cc347"
         },
@@ -123,7 +133,7 @@
         },
         {
           "path": "src/adapters/convex/highs.cpp",
-          "sha256": "29686fa8e0f0bd18748a1eabdd9230fbc7f48c0192b896866d46bb7600e21d0b"
+          "sha256": "4fa02f0d75e43b5a318d422e1f1311f59889390df181abf9c67208e84c3dbec3"
         },
         {
           "path": "src/model/linear_system.cpp",
@@ -131,7 +141,7 @@
         },
         {
           "path": "src/optimization/convex_backend.cpp",
-          "sha256": "aa23047e2c11ea70309a1442ef9cb2fb683a2efc3f32a5dbcc89fd307ce3bcdc"
+          "sha256": "4736cb2a05298f00a52db2d1ffc7785b076b9e76aae26ccfe145d80e29bf2931"
         },
         {
           "path": "src/optimization/history_cost.cpp",
@@ -159,7 +169,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "4f3caf60a02254fe330eeb56e80564829c10fc19bf5ee96540f1fca1acea1538"
+          "sha256": "d17d7531348e96c82e5065a8d09f986785c167e4919fa18ca90ff8b4ec1e011c"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -190,6 +200,8 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "tools/closed_loop_native_policy.cpp",
           "include/csl/optimization/history_cost.hpp",
+          "include/csl/optimization/contracts.hpp",
+          "include/csl/optimization/convex_backend.hpp",
           "include/csl/optimization/running_control_cost.hpp",
           "src/optimization/history_cost.cpp",
           "src/optimization/running_control_cost.cpp",
@@ -223,8 +235,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "ff5a654cab27e29436a13eb6cfc2ff061629f3fe9cf2dc216cae78af6e46cf85",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-ff5a654cab27e294",
+      "graph_fingerprint": "f2e52800ea7b0c15ba9ab9b388f9e78cbaea9e9d0472eeedddbab7b149a9c231",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-f2e52800ea7b0c15",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -246,11 +258,11 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_norm_solver.py",
-          "sha256": "d4c2ff799a2fe46ebf32fc4c3829f7cf9b7c0c586d503626fcefaf17766f204d"
+          "sha256": "22baa6022a7636f1236f10226900d8c7fb2cfa3a6c695312ff7a3f35d4c248bb"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "734ba6633fab471ba7a6287b9cd02d86e84db75393746dca925aeada6edc49a8"
+          "sha256": "31cda6461f29e11257452117a33ba1679ac00337cc1b1338f1ac9550636019e7"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -273,6 +285,14 @@
           "sha256": "104adee4c3999daedae08bc6735e6058d7c3cd66e2bca8b306ea4d65142e2f21"
         },
         {
+          "path": "include/csl/optimization/contracts.hpp",
+          "sha256": "2d4c506d43c11305256265bc4b4c3c067f6162be5d3d40bb68d324b4b5b6ecf6"
+        },
+        {
+          "path": "include/csl/optimization/convex_backend.hpp",
+          "sha256": "ec2cbe83abf491c43de43fe2c81e572ecee2f267836e21dd5c2b33a78caee75f"
+        },
+        {
           "path": "include/csl/optimization/history_cost.hpp",
           "sha256": "8a3a7ad74ca31439af995a3009a669707af7440b31e04666f433c19cc59cc347"
         },
@@ -282,7 +302,7 @@
         },
         {
           "path": "src/adapters/convex/highs.cpp",
-          "sha256": "29686fa8e0f0bd18748a1eabdd9230fbc7f48c0192b896866d46bb7600e21d0b"
+          "sha256": "4fa02f0d75e43b5a318d422e1f1311f59889390df181abf9c67208e84c3dbec3"
         },
         {
           "path": "src/model/linear_system.cpp",
@@ -290,7 +310,7 @@
         },
         {
           "path": "src/optimization/convex_backend.cpp",
-          "sha256": "aa23047e2c11ea70309a1442ef9cb2fb683a2efc3f32a5dbcc89fd307ce3bcdc"
+          "sha256": "4736cb2a05298f00a52db2d1ffc7785b076b9e76aae26ccfe145d80e29bf2931"
         },
         {
           "path": "src/optimization/history_cost.cpp",
@@ -318,7 +338,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "4f3caf60a02254fe330eeb56e80564829c10fc19bf5ee96540f1fca1acea1538"
+          "sha256": "d17d7531348e96c82e5065a8d09f986785c167e4919fa18ca90ff8b4ec1e011c"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -349,6 +369,8 @@
           "benchmarks/reporting/closed_loop/task_models.py",
           "tools/closed_loop_native_policy.cpp",
           "include/csl/optimization/history_cost.hpp",
+          "include/csl/optimization/contracts.hpp",
+          "include/csl/optimization/convex_backend.hpp",
           "include/csl/optimization/running_control_cost.hpp",
           "src/optimization/history_cost.cpp",
           "src/optimization/running_control_cost.cpp",
@@ -382,8 +404,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "19c1185682946f37415b3cfdd8ade98af95d70856dbf932eb50cce2b8b34b28f",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-mpc/1/cfg-19c1185682946f37",
+      "graph_fingerprint": "18a81ea301e86a7fcd3128620cbe3ae0d581de0732f509fb6d3cdeec5a7080d7",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-mpc/1/cfg-18a81ea301e86a7f",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -405,11 +427,11 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_norm_solver.py",
-          "sha256": "d4c2ff799a2fe46ebf32fc4c3829f7cf9b7c0c586d503626fcefaf17766f204d"
+          "sha256": "22baa6022a7636f1236f10226900d8c7fb2cfa3a6c695312ff7a3f35d4c248bb"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "734ba6633fab471ba7a6287b9cd02d86e84db75393746dca925aeada6edc49a8"
+          "sha256": "31cda6461f29e11257452117a33ba1679ac00337cc1b1338f1ac9550636019e7"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -436,6 +458,14 @@
           "sha256": "5dd38a65f5ad6c5f90b8616fbc866eb9ef2735b1b7f7279bca0b2b0d05f9dce1"
         },
         {
+          "path": "include/csl/optimization/contracts.hpp",
+          "sha256": "2d4c506d43c11305256265bc4b4c3c067f6162be5d3d40bb68d324b4b5b6ecf6"
+        },
+        {
+          "path": "include/csl/optimization/convex_backend.hpp",
+          "sha256": "ec2cbe83abf491c43de43fe2c81e572ecee2f267836e21dd5c2b33a78caee75f"
+        },
+        {
           "path": "include/csl/optimization/history_cost.hpp",
           "sha256": "8a3a7ad74ca31439af995a3009a669707af7440b31e04666f433c19cc59cc347"
         },
@@ -445,7 +475,7 @@
         },
         {
           "path": "src/adapters/convex/highs.cpp",
-          "sha256": "29686fa8e0f0bd18748a1eabdd9230fbc7f48c0192b896866d46bb7600e21d0b"
+          "sha256": "4fa02f0d75e43b5a318d422e1f1311f59889390df181abf9c67208e84c3dbec3"
         },
         {
           "path": "src/model/linear_system.cpp",
@@ -453,7 +483,7 @@
         },
         {
           "path": "src/optimization/convex_backend.cpp",
-          "sha256": "aa23047e2c11ea70309a1442ef9cb2fb683a2efc3f32a5dbcc89fd307ce3bcdc"
+          "sha256": "4736cb2a05298f00a52db2d1ffc7785b076b9e76aae26ccfe145d80e29bf2931"
         },
         {
           "path": "src/optimization/history_cost.cpp",
@@ -481,7 +511,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "4f3caf60a02254fe330eeb56e80564829c10fc19bf5ee96540f1fca1acea1538"
+          "sha256": "d17d7531348e96c82e5065a8d09f986785c167e4919fa18ca90ff8b4ec1e011c"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",

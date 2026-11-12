@@ -810,6 +810,10 @@ Json continuous_history_query(const Json& in) {
         {{in.at("problem_id").get<std::string>()}, {in.at("request_id").get<std::string>()}},
         QuadraticTerminal{q.Q, q.linear, q.offset}, std::move(rows),
         std::vector<Interval>(q.dimension), std::move(bounds), {}}), "make-history-qp");
+    if(in.contains("initial_primal"))
+        qp=take_history(optimization::with_primal_start(qp,vector(in.at("initial_primal"))), "history-primal-start");
+    response["warm_start"]={{"initial_primal",in.value("initial_primal",Json(nullptr))},
+        {"dual_policy","zero-every-solve"}};
     using namespace registry;
     Registry<ConvexPort> registry;
     auto entry = take_history(adapters::convex::make_highs_registration(), "highs-registration");
