@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import importlib.util
+from html.parser import HTMLParser
 import json
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
+from urllib.parse import unquote, urlsplit
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -15,6 +17,23 @@ SPEC = importlib.util.spec_from_file_location("learning_book", SCRIPT)
 learning_book = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = learning_book
 SPEC.loader.exec_module(learning_book)
+
+
+class PageElements(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.links = []
+        self.ids = set()
+        self.main_classes = set()
+
+    def handle_starttag(self, tag, attributes):
+        attributes = dict(attributes)
+        if "id" in attributes:
+            self.ids.add(attributes["id"])
+        if tag == "a" and "href" in attributes:
+            self.links.append(attributes["href"])
+        if tag == "main":
+            self.main_classes.update(attributes.get("class", "").split())
 
 
 class LearningBookTests(unittest.TestCase):
@@ -336,6 +355,36 @@ Q subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2
                 for value in values:
                     with self.subTest(chapter=chapter_id, value=value):
                         self.assertIn(value, primary)
+
+    def test_built_pages_retain_shared_layout_and_resolve_saved_report_targets(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            site = Path(tmp)
+            index = site / "figure-index.json"
+            index.write_text(json.dumps(self.figures))
+            (site / "examples").mkdir()
+            (site / "examples/index.html").write_text('<h1 id="gallery">Examples</h1>')
+            report = "issue824-two-points-nominal-v2/index.html"
+            (site / report).parent.mkdir()
+            (site / report).write_bytes((ROOT / "reports/algorithm-results" / report).read_bytes())
+            learning_book.build(site, figure_index_path=index)
+            for path in (site / "learn").glob("*.html"):
+                page = PageElements()
+                page.feed(path.read_text())
+                with self.subTest(page=path.name):
+                    self.assertIn("page-content", page.main_classes)
+            path = site / "learn/simplex-and-comparators.html"
+            page = PageElements()
+            page.feed(path.read_text())
+            links = [href for href in page.links if "issue824-two-points-nominal-v2" in href]
+            self.assertEqual(len(links), 2)
+            for href in links:
+                target = urlsplit(href)
+                destination = (path.parent / unquote(target.path)).resolve()
+                self.assertTrue(destination.is_file(), href)
+                if target.fragment:
+                    destination_page = PageElements()
+                    destination_page.feed(destination.read_text())
+                    self.assertIn(unquote(target.fragment), destination_page.ids, href)
 
     def test_build_joins_and_copies_ready_recorded_figure_assets(self):
         entries = []

@@ -315,7 +315,7 @@
         },
         {
           "label": "Classic nominal versus finite minimax TwoPoints report",
-          "href": "../examples/index.html#issue824-two-points-nominal-v2"
+          "href": "../issue824-two-points-nominal-v2/index.html"
         }
       ],
       "example_sources": [

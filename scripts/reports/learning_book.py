@@ -259,7 +259,7 @@ def _chapter_page(chapter: dict, chapters: list[dict], chapter_html: str,
     crumbs = [("Learn", "../index.html"), ("Learning book", "index.html"),
               (chapter["title"], f"{chapter['id']}.html")]
     parts = [site_design.page_start(chapter["title"], stylesheet_href="../examples/examples.css",
-                                    crumbs=crumbs, main_class="learning-page",
+                                    crumbs=crumbs, main_class="page-content learning-page",
                                     current_href=f"{chapter['id']}.html")]
     parts.append(f'<p class="eyebrow">{escape(chapter["group_label"])}</p>')
     parts.append(f'<h1>{escape(chapter["title"])}</h1>')
@@ -319,7 +319,7 @@ def _chapter_page(chapter: dict, chapters: list[dict], chapter_html: str,
     if chapter.get("records"):
         parts.append('<section><h2>Source records</h2><ul>')
         for record in chapter["records"]:
-            parts.append('<li><a href="' + escape(record["href"], quote=True) + '">' +
+            parts.append('<li><a style="overflow-wrap:anywhere" href="' + escape(record["href"], quote=True) + '">' +
                          escape(record["label"]) + '</a></li>')
         parts.append('</ul></section>')
     if chapter.get("figure_ids"):
@@ -368,7 +368,7 @@ def _module_catalogue_page(manifest: dict, inventory: dict) -> str:
         stylesheet_href="../examples/examples.css",
         crumbs=[("Learn", "../index.html"), ("Learning book", "index.html"),
                 ("Module inventory", "module-catalogue.html")],
-        main_class="learning-reference", current_href="module-catalogue.html")]
+        main_class="page-content learning-reference", current_href="module-catalogue.html")]
     page.extend(['<p class="eyebrow">Generated reference</p><h1>Module inventory and lesson evidence</h1>',
         '<p>The inventory lists declared module contracts. A chapter claims a module only when it links to an executable installed consumer source. An inventory entry without a lesson link is reference-only in this book.</p>'])
     chapter_links = {}
@@ -428,7 +428,7 @@ def build(site: Path, manifest_path: Path = MANIFEST,
                       ''.join(links[chapter["id"]] for chapter in entries) + '</ol></section>')
     page = [site_design.page_start(manifest["title"], stylesheet_href="../examples/examples.css",
                                    crumbs=[("Learn", "../index.html"), ("Learning book", "index.html")],
-                                   main_class="learning-book", current_href="index.html")]
+                                   main_class="page-content learning-book", current_href="index.html")]
     page.extend(['<p class="eyebrow">Progressive guide</p><h1>', escape(manifest["title"]),
                  '</h1><p class="lede">', escape(manifest["intro"]), '</p>'])
     page.extend(groups)
