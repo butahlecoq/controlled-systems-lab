@@ -167,6 +167,22 @@ SAVED_COMPANION_ROUTES = {
     "benchmarks/reporting/issue6/b09_render_projection.py",
 }
 SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
+SAVED_DATA_ILLUSTRATION_RENDERERS = {
+    "scripts/reports/render_issue944_each_choice.py": (
+        "Renders the immutable source-bound Strategy A choice records and independent recovered-history values "
+        "with shared screen/print tokens; it runs no solver and makes no full-family or performance claim."),
+    "scripts/reports/render_issue944_postfix.py": (
+        "Renders the source-bound post-fix Strategy A choice records and independent recovered-history values "
+        "with shared screen/print tokens; it runs no solver and makes no full-family or performance claim."),
+    "scripts/reports/native_terminal_cost_example.py": (
+        "Renders the source-bound before/after native diagnostic exchanges and analytic terminal-cost contours "
+        "with shared screen/print tokens; it runs no solver and makes no full-episode or performance claim."),
+    "scripts/reports/nominal_tube_figure.py": (
+        "Renders committed full-state H rows F, B and I from the original 30-stage frozen-affine Lotka capture; "
+        "the numerical half-plane clipping keeps the saved coefficients and checks plotted vertices against raw rows. "
+        "A saved nonlinear NMPC trajectory is overlaid separately. This does not claim nonlinear reachable sets or "
+        "global control optimality."),
+}
 SAVED_DATA_COMPANION_RENDERERS = {
     "benchmarks/reporting/closed_loop/run_closed_loop.py",
     "scripts/reports/recorded_closed_loop_figures.py",
@@ -182,14 +198,6 @@ SAVED_DATA_COMPANION_RENDERERS = {
     "benchmarks/reporting/review05/render_profile_matrix.py",
     "benchmarks/reporting/review05/render_dimension_ladder.py",
     "benchmarks/reporting/review05/render_constraint_ladder.py",
-}
-SAVED_DATA_ILLUSTRATION_RENDERERS = {
-    "scripts/reports/nominal_tube_figure.py": (
-        "Renders committed full-state H rows F, B and I from the original 30-stage frozen-affine Lotka capture; "
-        "the numerical half-plane clipping keeps the saved coefficients and checks plotted vertices against raw rows. "
-        "A saved nonlinear NMPC trajectory is overlaid separately. This does not claim nonlinear reachable sets or "
-        "global control optimality."
-    ),
 }
 FROZEN_COMPANIONS = {
     "mpc06-online-anchor-v1": "mpc06-complete-6b7059d62473d32d4210/index.html",

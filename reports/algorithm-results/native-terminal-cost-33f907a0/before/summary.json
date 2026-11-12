@@ -1,0 +1,48 @@
+{
+  "source_commit": "0ef47d9a1593c57039eda572db3ccda7d620fc19",
+  "binary": "/home/butahlecoq/.local/share/codex/worktrees/remaining-corpus-966-20261112/build/issue966-package-verify/csl_closed_loop_native_policy",
+  "binary_sha256": "6d9c64f81c7de4e171aa0252ed9ae56f4729b9abc5c8c71607bd4a452b22e0dd",
+  "scope": "Two last-stage controller diagnostic queries from source target states, not full episodes or performance measurements. Existing package binary reused without rebuilding.",
+  "rows": [
+    {
+      "task": "syn-nl-lv-01",
+      "native_status": "accepted",
+      "source_task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+      "observed_state": [
+        100,
+        80
+      ],
+      "request_stage": 29,
+      "final_state": [
+        100.0,
+        80.0
+      ],
+      "reported_terminal": -1.0,
+      "source_terminal": 0.0,
+      "adapter_polynomial": -1.0,
+      "difference": -1.0
+    },
+    {
+      "task": "syn-nl-fuel-01",
+      "native_status": "accepted",
+      "source_task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b",
+      "observed_state": [
+        75,
+        23,
+        1.5,
+        0.45
+      ],
+      "request_stage": 39,
+      "final_state": [
+        74.18859197271729,
+        22.75162203424615,
+        1.7359405564150618,
+        0.539808974225497
+      ],
+      "reported_terminal": -0.5925248970004452,
+      "source_terminal": 0.0015594824565802697,
+      "adapter_polynomial": -0.5925248970004455,
+      "difference": -0.5940843794570254
+    }
+  ]
+}

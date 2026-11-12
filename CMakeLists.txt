@@ -118,6 +118,15 @@ else()
 endif()
 set_target_properties(csl_module_composition_catalogue PROPERTIES CXX_EXTENSIONS OFF)
 
+if(CSL_ENABLE_HIGHS AND CSL_ENABLE_QHULL)
+  add_executable(csl_strategy_a_each_choice_pipeline tools/strategy_a_each_choice_pipeline.cpp)
+  target_link_libraries(csl_strategy_a_each_choice_pipeline PRIVATE
+    CSL::strategy_a CSL::affine_sum CSL::polyhedral CSL::qhull_conversion CSL::highs_lp CSL::highs_convex)
+  target_compile_definitions(csl_strategy_a_each_choice_pipeline PRIVATE
+    CSL_PIPELINE_HAS_HIGHS=1 CSL_PIPELINE_HAS_QHULL=1)
+  set_target_properties(csl_strategy_a_each_choice_pipeline PROPERTIES CXX_EXTENSIONS OFF)
+endif()
+
 add_executable(csl_closed_loop_native_policy tools/closed_loop_native_policy.cpp)
 target_link_libraries(csl_closed_loop_native_policy PRIVATE CSL::finite_action_nominal CSL::polyhedral
   CSL::affine_sum CSL::phase_one)

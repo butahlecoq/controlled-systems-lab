@@ -38,6 +38,8 @@ jobs:
         run: python -m pip install --cache-dir build/report-pip-cache -r scripts/reports/requirements.txt
       - name: Install closed-loop numerical replay dependencies
         run: python -m pip install --cache-dir build/report-pip-cache -r benchmarks/reporting/closed_loop/requirements.txt
+      - name: Fail fast on visual inventory and closed-loop capability freshness
+        run: python -m unittest tests.reporting.test_visual_route_inventory tests.reporting.test_closed_loop_native_capabilities
       - name: Validate literal records, safe export and real pinned plotting pipeline
         env:
           MPLCONFIGDIR: ${{ github.workspace }}/build/report-mpl-config
@@ -501,9 +503,18 @@ jobs:
       - name: Stage the resource-limited issue 824 minimax comparison
         if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-matched-minimax-resource-v1/result.json') != ''
         run: python scripts/reports/stage_issue824_limited_minimax.py --source reports/algorithm-results/issue824-two-points-matched-minimax-resource-v1 --site build/report-site
+      - name: Stage the saved issue 944 Strategy A choice-pipeline report
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue944-strategy-a-each-choice-v1/records.json') != ''
+        run: python scripts/reports/stage_issue944_each_choice.py --source reports/algorithm-results/issue944-strategy-a-each-choice-v1 --site build/report-site
       - name: Validate the resource-limited issue 824 publication bundle
         if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-matched-minimax-resource-v1/result.json') != ''
         run: python tests/reporting/test_issue824_limited_minimax_publication.py
+      - name: Stage the post-fix issue 944 Strategy A choice-pipeline report
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue944-strategy-a-each-choice-postfix-v1/records.json') != ''
+        run: python scripts/reports/stage_issue944_postfix.py --source reports/algorithm-results/issue944-strategy-a-each-choice-postfix-v1 --site build/report-site
+      - name: Stage the saved native terminal-cost diagnostic
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/native-terminal-cost-33f907a0/after/record.json') != ''
+        run: python scripts/reports/native_terminal_cost_example.py --site build/report-site
       - name: Stage minimal 2D visual examples from reviewed saved results
         if: steps.catalog.outputs.has_reports == 'true'
         run: python scripts/reports/visual_examples.py --catalog reports/algorithm-results/catalog.json --site build/report-site

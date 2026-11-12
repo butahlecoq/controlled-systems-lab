@@ -165,6 +165,16 @@ SAVED_FIGURES = (
          title="Compare five minimax set tracks under shared resource limits",
          alt="The two player phase planes show saved forward and backward reachable geometry, intersections, and replayed finite-game paths.",
          summary="Five order-rotated Release repetitions per method ran inside an enforced 300-second and 8 GiB process-tree profile. The report records cgroup peak memory, exact-rational replay checks, and the separate zonotope limiter profile. This finite adaptation makes no general winner claim."),
+    dict(route="issue944-strategy-a-each-choice-v1", image="pipeline-2d.svg", page="index.html",
+         records="records.json", family="Strategy A · Nominal one-step control",
+         title="Exercise each admitted Strategy A pipeline choice",
+         alt="Returned unit-square terminal family with public recovered linear and quadratic histories.",
+         summary="A saved 128-tuple run records 64 structural contract exclusions, 62 complete admitted attempts, and two retained KPABEP-to-HiGHS numerical refusals. The one-step open-loop case makes no feedback, complete-family, or performance claim."),
+    dict(route="issue944-strategy-a-each-choice-postfix-v1", image="pipeline-2d.svg", page="index.html",
+         records="records.json", family="Strategy A · Nominal one-step control",
+         title="Exercise the admitted Strategy A choices after the Qhull fix",
+         alt="Returned unit-square terminal candidate family and public recovered linear and quadratic histories.",
+         summary="A source-qualified 128-tuple follow-up records 64 Phase-I contract exclusions and 64 completed admitted attempts after the Qhull affine-basis correction. This is one-step open-loop candidate evidence, with no feedback, complete-family, global-optimality, or performance claim."),
 )
 
 _BTULSHOR_FIGURE = dict(
@@ -180,6 +190,14 @@ if _catalog_path.is_file():
     if any(row.get("source_report_id") == _BTULSHOR_FIGURE["source_report_id"]
            for row in _catalog.get("reports", [])):
         SAVED_FIGURES = (*SAVED_FIGURES, _BTULSHOR_FIGURE)
+
+
+SAVED_FIGURES = (*SAVED_FIGURES, dict(
+    route="native-terminal-cost-33f907a0", image="cost-contours.svg", page="index.html",
+    records="after/record.json", family="Optimization · source-cost correction",
+    title="Match the source terminal cost",
+    alt="Lotka source minimum and previous adapter minimum with quadratic cost contours",
+    summary="Two saved native diagnostic queries and an analytic 2D illustration of the quadratic coefficient correction; no full episode or benchmark claim."))
 
 
 require = report_data.require
