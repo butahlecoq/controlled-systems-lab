@@ -542,7 +542,8 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
         task = load_task(task_name); validate_source_binding(task)
         requested_action_profile_id = action_profile_id
         history_controller = controller_id in {"native-continuous-affine-history-mpc/1",
-                                             "native-continuous-affine-history-ipopt/1"}
+                                             "native-continuous-affine-history-ipopt/1",
+                                             "native-continuous-history-box-ipopt/1"}
         native_controller = bool(controller_id and controller_id.startswith("native-")) and not history_controller
         if native_controller and action_profile_id is None:
             action_profile_id = task["control_domains"]["finite"]["problem_id"]

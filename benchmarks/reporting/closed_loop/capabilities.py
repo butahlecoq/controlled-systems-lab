@@ -319,6 +319,36 @@ def _history_definitions() -> list[dict]:
             alternative["graph_fingerprint"] = alternative_fingerprint
             alternative["graph_id"] = f"closed-loop/{task_name}/continuous-history-ipopt/1/cfg-{alternative_fingerprint[:16]}"
             rows.append(alternative)
+        if task_name == "syn-nl-lv-01":
+            geometry = copy.deepcopy(graph)
+            geometry.pop("graph_id")
+            geometry.pop("graph_fingerprint")
+            geometry_sources = ["include/csl/reachability/feedback_geometry.hpp",
+                "include/csl/reachability/bounded_h_support.hpp",
+                "src/reachability/feedback_coordinator.cpp", "src/reachability/feedback_geometry.cpp",
+                "src/reachability/bounded_h_support.cpp", "src/reachability/nominal_tube.cpp",
+                "src/reachability/nominal_forward.cpp", "src/reachability/finite_plan_box.cpp",
+                "src/reachability/finite_plan_zonotope.cpp", "src/reachability/finite_plan_ellipsoid.cpp",
+                "src/geometry/polyhedral/intersection.cpp"]
+            geometry["controller"]["id"] = "native-continuous-history-box-ipopt/1"
+            geometry["controller"]["control_semantics"] = "full-history MPC with full-state F/B/I box memberships"
+            geometry["controller"]["solver"] = {"provider": "casadi-ipopt", "assurance": "local numerical"}
+            geometry["controller"]["source_files"] += geometry_sources
+            geometry["role_bindings"] = {"reachable_set_method": {"id": "csl.reachability.feedback-geometry"},
+                "representation": {"id": "box"}, "support_lp": {"id": "csl.lp.highs"},
+                "vertex_lp": "not_used", "converter": "not_used",
+                "control_optimizer": {"id": "casadi-ipopt"}}
+            geometry["operation_roles"] = {"controller.solve": "control_optimizer"}
+            geometry["admission"]["basis"] = "source-bound full-history IPOPT with numerical F/B/I box memberships"
+            geometry["geometry_work"] = {"vertices": 0, "set_operations": 0,
+                "claim": "numerical full-state forward, forward-relevant backward and intersection sets"}
+            paths = source_paths | set(geometry_sources)
+            geometry["source_files"] = [{"path": path, "sha256": hashlib.sha256((ROOT / path).read_bytes()).hexdigest()}
+                                        for path in sorted(paths)]
+            fingerprint = canonical_sha256(geometry)
+            geometry["graph_fingerprint"] = fingerprint
+            geometry["graph_id"] = f"closed-loop/{task_name}/continuous-history-box-ipopt/1/cfg-{fingerprint[:16]}"
+            rows.append(geometry)
     return rows
 
 

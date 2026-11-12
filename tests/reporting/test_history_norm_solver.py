@@ -78,7 +78,11 @@ class HistoryNormSolverTest(unittest.TestCase):
         manifest = build_history_manifest()
         self.assertEqual(validate_manifest(manifest_path=HISTORY_MANIFEST), manifest)
         graphs = manifest["graphs"]
-        self.assertEqual(len(graphs), 5)
+        self.assertEqual(len(graphs), 6)
+        feedback = next(row for row in graphs if row["controller"]["id"] == "native-continuous-history-box-ipopt/1")
+        self.assertEqual(feedback["role_bindings"]["representation"]["id"], "box")
+        self.assertEqual(feedback["role_bindings"]["control_optimizer"]["id"], "casadi-ipopt")
+        self.assertEqual(feedback["role_bindings"]["support_lp"]["id"], "csl.lp.highs")
         for name in ("syn-nl-lv-01", "syn-nl-fuel-01", "earth-orbit"):
             task = load_task(name)
             graph = next(row for row in graphs if row["task_id"] == task["task_id"] and
@@ -112,7 +116,9 @@ class HistoryNormSolverTest(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            for controller_id in ("native-continuous-affine-history-mpc/1", "native-continuous-affine-history-ipopt/1"):
+            for controller_id in ("native-continuous-affine-history-mpc/1",
+                                  "native-continuous-affine-history-ipopt/1",
+                                  "native-continuous-history-box-ipopt/1"):
                 result = run_task("syn-nl-lv-01", root, root / "missing-bridge", controller_id=controller_id)
                 self.assertEqual(result["status"], "refused")
                 reason = json.loads((Path(result["attempt"]) / "resolution-refusal.json").read_text())["reason"]

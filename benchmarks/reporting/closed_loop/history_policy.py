@@ -179,12 +179,19 @@ class HistoryPolicy:
                 for membership in stage_record.get("memberships", []):
                     for call in membership.get("providers", []):
                         if call.get("actual"):
-                            result["invocations"].append({"operation": "controller.geometry",
-                                "module_id": call["actual"], "provider": call["actual"],
-                                "version": call.get("actual_version") or "unknown",
-                                "profile_id": self.controller_id, "absolute_stage":
-                                    absolute_update_index + stage_record["stage"],
+                            result.setdefault("geometry_invocations", []).append({
+                                "operation": "feedback.geometry", "actual_method_id": call["actual"],
+                                "version": call.get("actual_version") or "unknown", "role": "reachable_set_method",
+                                "absolute_stage": absolute_update_index + stage_record["stage"],
                                 "geometry_role": membership["role"], "request_id": call["request"]})
+                    for call in membership.get("support_calls", []):
+                        if call.get("actual"):
+                            result.setdefault("geometry_invocations", []).append({
+                                "operation": "feedback.support", "actual_method_id": call["actual"],
+                                "version": call.get("actual_version") or "unknown", "role": "support_lp",
+                                "absolute_stage": absolute_update_index + stage_record["stage"],
+                                "geometry_role": membership["role"], "program_id": call["program"],
+                                "outcome": call["status"]})
         if response.get("status") not in {"solved", "exported"}:
             result["status"] = response.get("status", "failed")
             result["reason"] = response.get("reason", "native history export failed")
