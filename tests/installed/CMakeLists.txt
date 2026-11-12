@@ -2,14 +2,14 @@ cmake_minimum_required(VERSION 3.31)
 project(CSLInstalledConsumer LANGUAGES CXX)
 find_package(CSL 0.1 CONFIG REQUIRED)
 
-add_executable(installed_model_catalogue_client ../../examples/native_model_catalogue.cpp)
+add_executable(installed_model_catalogue_client native_model_catalogue.cpp)
 target_link_libraries(installed_model_catalogue_client PRIVATE CSL::model_catalogue CSL::generator_adapter CSL::quickhull_2d)
 set_target_properties(installed_model_catalogue_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_model_catalogue_client COMMAND installed_model_catalogue_client)
 set_tests_properties(installed_model_catalogue_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Native model catalogue: 2 source cases and all full-state corner checks passed")
 
-add_executable(installed_four_state_catalogue_client ../../examples/native_four_state_reachability.cpp)
+add_executable(installed_four_state_catalogue_client native_four_state_reachability.cpp)
 target_link_libraries(installed_four_state_catalogue_client PRIVATE CSL::model_catalogue CSL::geometry_generators CSL::quickhull_2d)
 set_target_properties(installed_four_state_catalogue_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_four_state_catalogue_client COMMAND installed_four_state_catalogue_client)

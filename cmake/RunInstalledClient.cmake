@@ -34,6 +34,11 @@ foreach(consumer_source IN LISTS installed_consumer_sources)
 endforeach()
 file(COPY "${CSL_SOURCE_DIR}/tests/contract/public_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/contract/public_headers_client.cpp" DESTINATION "${work}/source")
+file(COPY
+  "${CSL_SOURCE_DIR}/examples/native_model_catalogue.cpp"
+  "${CSL_SOURCE_DIR}/examples/native_four_state_reachability.cpp"
+  "${CSL_SOURCE_DIR}/examples/native_catalogue_projection.hpp"
+  DESTINATION "${work}/source")
 if(CSL_STAGE_ONLY)
   return()
 endif()
