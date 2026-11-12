@@ -86,9 +86,10 @@ def _terminal_objective(task: dict) -> dict:
         linear = [0.0] * dimension
         offset = 0.0
         for i in range(dimension):
-            q[i][i] = weights[i] / (scales[i] * scales[i])
-            linear[i] = -2.0 * q[i][i] * target[i]
-            offset += q[i][i] * target[i] * target[i]
+            weight = weights[i] / (scales[i] * scales[i])
+            q[i][i] = 2.0 * weight
+            linear[i] = -2.0 * weight * target[i]
+            offset += weight * target[i] * target[i]
         return {"kind": "quadratic", "Q": q, "linear": linear, "offset": offset}
     if case == "ENV717-EARTH-ORBIT-CONTINUOUS-01":
         target = task["objective"]["target"]
