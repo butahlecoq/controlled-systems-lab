@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="620" viewBox="0 0 900 620">
+<style>text{font-family:Arial,sans-serif;fill:#202124}.title{font-size:24px;font-weight:bold}.label{font-size:16px}.small{font-size:13px}.muted{fill:#5f6368}</style>
+<rect width="100%" height="100%" fill="#fff"/>
+<text x="40" y="42" class="title">Two-state reachable set and selected control history</text>
+<text x="40" y="70" class="label muted">Strategy A, x_next = x + u, x0 = (0,0), u in [0,1]^2</text>
+<rect x="110" y="100" width="520" height="400" fill="#fbfcfe" stroke="#202124"/>
+<line x1="110" y1="300.0" x2="630" y2="300.0" stroke="#d5d9df"/>
+<line x1="370.0" y1="100" x2="370.0" y2="500" stroke="#d5d9df"/>
+<polygon points="110,500 630,500 630,100 110,100" fill="#7fb4d8" fill-opacity="0.35" stroke="#2878b5" stroke-width="3"/>
+<line x1="110" y1="500" x2="630" y2="500" stroke="#2878b5" stroke-width="4" opacity="0.8"/><circle cx="110" cy="500" r="5" fill="#2878b5"/><text x="120" y="488" class="small">u=(1,0)</text><line x1="110" y1="500" x2="110" y2="500" stroke="#c04b32" stroke-width="4" opacity="0.8"/><circle cx="110" cy="500" r="5" fill="#c04b32"/><text x="120" y="474" class="small">u=(0,0)</text><circle cx="630" cy="500" r="8" fill="#2878b5" stroke="#fff" stroke-width="2"/><circle cx="110" cy="500" r="8" fill="#c04b32" stroke="#fff" stroke-width="2"/>
+<text x="352.0" y="534" class="label">position</text>
+<text x="24" y="300.0" class="label" transform="rotate(-90 24 300.0)">velocity</text>
+<text x="92" y="518" class="small">0</text><text x="625" y="518" class="small">1</text>
+<text x="82" y="504" class="small">0</text><text x="82" y="112" class="small">1</text>
+<text x="680" y="145" class="label">Independent checks</text>
+<text x="680" y="178" class="small">Reachable hull = unit square</text>
+<text x="680" y="203" class="small">Both recovered histories replay</text>
+<text x="680" y="228" class="small">LP optimum: (1,0); convex: (0,0)</text>
+<text x="680" y="260" class="small">Reducer: csl.hull.lp-membership</text>
+<text x="680" y="285" class="small">Vertex LP: csl.lp.highs</text>
+<text x="680" y="310" class="small">Converter: Qhull, both directions</text>
+<text x="40" y="570" class="small muted">Histories use public recovery and LP selection from the returned terminal-optimal family.</text>
+<text x="40" y="592" class="small muted">No complete-family or feedback-optimality claim is made.</text>
+</svg>

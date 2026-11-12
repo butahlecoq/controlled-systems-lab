@@ -163,6 +163,11 @@ SAVED_FIGURES = (
          title="Compare five minimax set tracks under shared resource limits",
          alt="The two player phase planes show saved forward and backward reachable geometry, intersections, and replayed finite-game paths.",
          summary="Five order-rotated Release repetitions per method ran inside an enforced 300-second and 8 GiB process-tree profile. The report records cgroup peak memory, exact-rational replay checks, and the separate zonotope limiter profile. This finite adaptation makes no general winner claim."),
+    dict(route="issue944-strategy-a-each-choice-v1", image="pipeline-2d.svg", page="index.html",
+         records="records.json", family="Strategy A · Nominal one-step control",
+         title="Exercise each admitted Strategy A pipeline choice",
+         alt="Returned unit-square terminal family with public recovered linear and quadratic histories.",
+         summary="A saved 128-tuple run records 64 structural contract exclusions, 62 complete admitted attempts, and two retained KPABEP-to-HiGHS numerical refusals. The one-step open-loop case makes no feedback, complete-family, or performance claim."),
 )
 
 _BTULSHOR_FIGURE = dict(

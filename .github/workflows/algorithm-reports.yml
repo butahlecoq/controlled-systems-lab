@@ -501,6 +501,9 @@ jobs:
       - name: Stage the resource-limited issue 824 minimax comparison
         if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-matched-minimax-resource-v1/result.json') != ''
         run: python scripts/reports/stage_issue824_limited_minimax.py --source reports/algorithm-results/issue824-two-points-matched-minimax-resource-v1 --site build/report-site
+      - name: Stage the saved issue 944 Strategy A choice-pipeline report
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue944-strategy-a-each-choice-v1/records.json') != ''
+        run: python scripts/reports/stage_issue944_each_choice.py --source reports/algorithm-results/issue944-strategy-a-each-choice-v1 --site build/report-site
       - name: Validate the resource-limited issue 824 publication bundle
         if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/issue824-two-points-matched-minimax-resource-v1/result.json') != ''
         run: python tests/reporting/test_issue824_limited_minimax_publication.py

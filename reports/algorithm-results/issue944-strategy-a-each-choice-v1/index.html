@@ -1,0 +1,196 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Strategy A choice pipeline · #944</title><style>:root {
+  color-scheme: dark;
+  --page: #272822;
+  --surface: #303129;
+  --surface-raised: #37382f;
+  --text: #f8f8f2;
+  --text-soft: #d5c4a1;
+  --text-muted: #b7b7af;
+  --accent: #a6e22e;
+  --link: #66d9ef;
+  --warm: #fd971f;
+  --line: #504945;
+  --focus: #f0c674;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 1rem; }
+body { margin: 0; background: var(--page); color: var(--text); font-size: 1rem; line-height: 1.65; }
+a { color: var(--link); text-underline-offset: .2em; text-decoration-thickness: .08em; }
+a:hover { color: #8be9fd; }
+a:focus-visible, button:focus-visible, summary:focus-visible, nav:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--focus); outline-offset: 4px; border-radius: 2px;
+}
+img, svg { max-width: 100%; }
+img { height: auto; }
+p, li { max-width: 86ch; }
+h1, h2, h3, h4 { line-height: 1.2; text-wrap: balance; }
+h1, h2, h3, dt { color: var(--accent); }
+h1 { font-size: clamp(2rem, 5vw, 3.4rem); letter-spacing: -.035em; margin: .6rem 0 1rem; }
+h2 { font-size: clamp(1.4rem, 3vw, 2rem); letter-spacing: -.02em; }
+h3 { font-size: 1.15rem; }
+code, pre { font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace; }
+code { color: var(--warm); overflow-wrap: anywhere; }
+pre { max-width: 100%; overflow: auto; padding: 1rem; border: 1px solid var(--line); background: #1d1e19; line-height: 1.5; }
+pre code { color: var(--text); }
+figure { margin: 1.5rem 0; min-width: 0; border: 1px solid var(--line); background: var(--surface); }
+figure img { display: block; width: 100%; }
+figcaption { padding: .75rem 1rem; border-top: 1px solid var(--line); color: var(--text-muted); font-size: .9rem; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { border-bottom: 1px solid var(--line); padding: .55rem .7rem; text-align: left; vertical-align: top; }
+th { color: var(--accent); background: var(--surface-raised); }
+th, td { overflow-wrap: anywhere; }
+.math-input { margin: 1.25rem 0; padding: .75rem 1rem; border-left: 3px solid var(--accent); background: var(--surface); }
+.math-input > p:first-child { margin-top: 0; }
+.math-matrix { display: inline-flex; align-items: stretch; gap: .1em; white-space: nowrap; vertical-align: middle; }
+.math-matrix math { align-self: center; }
+.math-matrix mtd { padding: .08em .35em; text-align: right; font-variant-numeric: tabular-nums; }
+.math-bracket { position: relative; flex: 0 0 .42em; align-self: stretch; color: var(--text-soft); }
+.math-bracket-left { border-left: 1px solid currentColor; }
+.math-bracket-right { border-right: 1px solid currentColor; }
+.math-bracket::before, .math-bracket::after { position: absolute; width: .32em; border-top: 1px solid currentColor; content: ""; }
+.math-bracket-left::before, .math-bracket-left::after { left: 0; }
+.math-bracket-right::before, .math-bracket-right::after { right: 0; }
+.math-bracket::before { top: 0; }
+.math-bracket::after { bottom: 0; }
+.math-systems { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.math-system { min-width: 0; }
+.math-system h3 { margin-bottom: .4rem; }
+.math-expression { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; }
+details { margin: 1rem 0; padding: .65rem .8rem; border: 1px solid var(--line); }
+summary { color: var(--link); cursor: pointer; }
+.skip { position: absolute; z-index: 10; top: -5rem; left: 1rem; padding: .7rem 1rem; background: var(--surface-raised); }
+.skip:focus { top: 1rem; }
+.eyebrow { color: var(--text-muted); font-size: .76rem; letter-spacing: .09em; text-transform: uppercase; }
+.limits, .provenance, .note { color: var(--text-muted); }
+.note, .scope { border-left: 3px solid var(--accent); padding: .5rem 1rem; background: var(--surface); }
+.page-content > svg { display: block; width: min(100%, 46rem); height: auto; margin-block: 1rem; }
+.page-content { width: min(100% - 3rem, 76rem); margin-inline: auto; padding: 2.25rem 0 4rem; }
+.page-content > p, .page-content > ul, .page-content > ol { max-width: 86ch; }
+.page-content > section { border-top: 1px solid var(--line); padding: 1.5rem 0; scroll-margin-top: 1rem; }
+.page-content .scroll, .scroll { max-width: 100%; overflow: auto; overscroll-behavior-x: contain; border: 1px solid var(--line); }
+.breadcrumbs { margin: 0 0 1.5rem; color: var(--text-muted); font-size: .9rem; }
+.breadcrumbs ol { display: flex; flex-wrap: wrap; gap: .35rem .7rem; list-style: none; margin: 0; padding: 0; }
+.breadcrumbs li + li::before { content: "/"; color: var(--text-muted); margin-right: .7rem; }
+.breadcrumbs [aria-current="page"] { color: var(--text); }
+.lesson-neighbors { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 3rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+.lesson-neighbors a { min-width: 0; display: grid; padding: .8rem 1rem; border: 1px solid var(--line); background: var(--surface); text-decoration: none; }
+.lesson-neighbors a:last-of-type { text-align: right; }
+.lesson-neighbors span { color: var(--text-muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; }
+.lesson-neighbors strong { overflow-wrap: anywhere; }
+.shell { max-width: 1500px; margin: auto; display: grid; grid-template-columns: minmax(13rem, 17rem) minmax(0, 1fr); gap: clamp(2rem, 5vw, 5rem); padding: clamp(1.5rem, 4vw, 4rem); }
+.shell aside { position: sticky; top: 1rem; align-self: start; max-height: calc(100vh - 2rem); display: flex; flex-direction: column; min-width: 0; border-right: 1px solid var(--line); padding-right: 1.25rem; }
+.shell aside .brand { color: var(--text); font-weight: 650; text-decoration: none; }
+.shell aside .eyebrow { margin: 1.5rem 0 .6rem; }
+.shell aside .nav-shortcut { margin: .5rem 0 1rem; padding: .6rem .7rem; border: 1px solid var(--line); background: var(--surface); text-decoration: none; font-size: .85rem; }
+.shell aside nav { display: grid; gap: .35rem; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; padding: .25rem .45rem .25rem 0; }
+.shell aside nav a { display: block; padding: .4rem .5rem; border-radius: .25rem; font-size: .86rem; }
+.shell aside nav a:hover { background: var(--surface-raised); }
+.shell > main { min-width: 0; }
+.shell header { padding-bottom: 1.2rem; }
+.shell header > p { color: var(--text-soft); }
+.shell section { border-top: 1px solid var(--line); padding: 2rem 0; scroll-margin-top: 1rem; }
+.shell section figure { border-radius: .25rem; overflow: hidden; }
+.shell footer { border-top: 1px solid var(--line); padding-top: 1rem; color: var(--text-muted); font-size: .9rem; }
+.saved-grid, .coverage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 1rem; }
+.saved-figure, .coverage-row, .cards li { min-width: 0; border: 1px solid var(--line); background: var(--surface); padding: 1rem; }
+.saved-figure img { width: 100%; }
+.saved-figure p, .coverage-row p { color: var(--text-soft); }
+.coverage-row a { overflow-wrap: anywhere; }
+.answer { color: var(--accent); border-left: 2px solid var(--accent); padding-left: 1rem; }
+.cards ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 25rem), 1fr)); gap: 1rem; list-style: none; padding: 0; }
+.cards li:has(> h2) { grid-column: 1 / -1; padding: 1.3rem 0 .3rem; border: 0; background: transparent; }
+.cards h3 a { text-decoration: none; }
+.cards .summary { color: var(--text-soft); }
+.cards .card-provenance { color: var(--text-muted); font-size: .8rem; }
+.cards .card-provenance code { display: block; }
+.report-home { width: min(100% - 3rem, 76rem); margin: auto; padding: 2rem 0 4rem; }
+.report-home a, .cards a { overflow-wrap: anywhere; }
+.report-home .cards li { display: flex; flex-direction: column; }
+.report-home dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: .6rem 1.5rem; }
+.report-home dd { margin: 0; color: var(--text-soft); }
+.report-home .footer { margin-top: 2rem; border-top: 1px solid var(--line); padding-top: 1rem; color: var(--text-muted); }
+.gallery-meta { color: var(--text-muted); }
+.control-witness-page #b04-native-smoke th, .control-witness-page #b04-native-smoke td { white-space: normal; vertical-align: top; }
+.viz10-page section { border-bottom: 1px solid var(--line); padding: 1rem 0; }
+.viz10-page .limit { background: var(--surface); border-left: 3px solid var(--accent); padding: 1rem; }
+.fuel-layers section { border-top: 1px solid var(--line); padding: 1rem 0; break-inside: avoid; }
+.notice { padding: 1rem; border-left: 3px solid var(--warm); background: var(--surface); }
+
+@media (max-width: 780px) {
+  .shell { display: block; padding: 1.25rem; }
+  .shell aside { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--line); padding: 0 0 1rem; margin-bottom: 1.5rem; }
+  .shell aside .eyebrow { margin: .9rem 0 .3rem; }
+  .shell aside nav { display: flex; max-height: none; overflow-x: auto; overflow-y: hidden; white-space: nowrap; scrollbar-gutter: auto; padding: .25rem; }
+  .shell aside nav a { flex: 0 0 auto; }
+  .math-systems { grid-template-columns: 1fr; }
+  .shell aside .brand br { display: none; }
+  .page-content, .report-home { width: min(100% - 2rem, 76rem); padding-top: 1.25rem; }
+}
+@media (max-width: 520px) {
+  .lesson-neighbors { grid-template-columns: 1fr; }
+  .lesson-neighbors a:last-of-type { text-align: left; }
+  .cards ul { grid-template-columns: 1fr; }
+  th, td { padding: .45rem; }
+  .report-home { width: min(100% - 1.5rem, 76rem); }
+  .continuous-policy-table th:nth-child(3) { white-space: nowrap; }
+}
+@media (max-height: 520px) and (min-width: 781px) {
+  .shell aside { top: .5rem; max-height: calc(100vh - 1rem); }
+  .shell aside .eyebrow { margin-top: .75rem; }
+  .shell aside .nav-shortcut { margin: .3rem 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+@media print {
+  :root { color-scheme: light; --page: #fff; --surface: #fff; --surface-raised: #eee; --text: #111; --text-soft: #222; --text-muted: #444; --accent: #294717; --link: #164e87; --warm: #864800; --line: #aaa; }
+  body { background: #fff; color: #111; font-size: 10.5pt; }
+  .shell { display: block; padding: 0; }
+  .shell aside, .skip { display: none; }
+  .page-content, .report-home { width: auto; max-width: none; margin: 0; padding: 0; }
+  a { color: #164e87; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .75em; overflow-wrap: anywhere; }
+  figure, .cards li, .saved-figure, .coverage-row { break-inside: avoid; background: #fff; }
+  figure img { max-height: 8in; object-fit: contain; }
+  .lesson-neighbors { display: none; }
+  .scroll { overflow: visible !important; }
+  .control-witness-page article { break-inside: avoid; page-break-inside: avoid; }
+  .control-witness-page article h2 { break-after: avoid; page-break-after: avoid; }
+  .control-witness-page figure { margin: .75rem 0; }
+  .control-witness-page figure img { width: auto; max-width: 100%; max-height: 260px; margin: auto; }
+  .control-witness-page #b04-native-smoke { break-inside: auto; page-break-inside: auto; }
+  .control-witness-page #b04-native-smoke h2 { break-after: avoid; page-break-after: avoid; }
+  .control-witness-page #b04-native-smoke figure { break-inside: avoid; page-break-inside: avoid; }
+  .control-witness-page #b04-native-smoke .scroll { overflow: visible; margin: .5rem 0; }
+  .control-witness-page #mpc06-tube { font-size: 10pt; line-height: 1.35; }
+  .control-witness-page #mpc06-tube figure img { max-height: 210px; }
+  .control-witness-page #mpc06-tube .scroll { overflow: visible; margin: .5rem 0; }
+  .control-witness-page #mpc06-tube th { background: #fff; color: #111; }
+  .control-witness-page #mpc06-tube > p:last-child { font-size: 8pt; line-height: 1.2; margin: .25rem 0 0; }
+}
+
+:root{color-scheme:dark;--bg:#101615;--panel:#19211f;--ink:#e7e9e5;--muted:#b3bdb5;--line:#46524c;--accent:#b3c99c;--gold:#e5a84b}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,sans-serif}main{max-width:1100px;margin:auto;padding:clamp(20px,5vw,64px)}h1,h2,h3{line-height:1.2}h1{font-size:clamp(2rem,6vw,4rem);max-width:850px}h2{margin-top:2.2em}a{color:var(--accent)}.eyebrow,.muted{color:var(--muted)}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}.stat{background:#111918;border:1px solid var(--line);border-radius:10px;padding:16px}.stat strong{display:block;font-size:1.9rem;color:var(--gold)}table{border-collapse:collapse;width:100%;white-space:nowrap}.table-scroll{overflow-x:auto}th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--accent)}pre{overflow:auto;background:#111918;padding:16px;border-radius:8px}code{overflow-wrap:anywhere}img,svg{max-width:100%;height:auto}figure{margin:0}figcaption{color:var(--muted);font-size:.92rem}.matrix{font-family:ui-monospace,monospace}footer{margin-top:56px;color:var(--muted);border-top:1px solid var(--line);padding-top:18px}@media(max-width:600px){main{padding:18px}}
+</style></head><body><main><p class="eyebrow">Saved numerical example · issue #944 · source commit 5a4730c517a8</p><h1>Run every admitted Strategy A choice through one small control task</h1><p>This publication records one-step nominal open-loop candidate-family construction in the public Strategy A pipeline. It exercises admitted reducer, vertex-LP, converter, terminal optimizer and witness-recovery roles. It is not completed feedback/MPC work, a full-family proof, or a global optimality claim.</p>
+<section><h2>Declared task</h2><p>One transition with <span class="matrix">x₁ = A x₀ + B u₀</span>:</p><p class="matrix">A = [[1, 0], [0, 1]] &nbsp; B = [[1, 0], [0, 1]] &nbsp; c = [0, 0]</p><p class="matrix">x₀ = [0, 0] &nbsp; X₀ = [−1,1] × [−1,1] &nbsp; U = [0,1] × [0,1] &nbsp; X₁ = [0,1] × [0,1]</p><p class="matrix">linear terminal: c = [−1,0], constant = 0; quadratic terminal: H = [[2,0],[0,2]], center = [0,0], constant = 0</p><p>The optimizer's recovered history is stored in the result record and independently replayed by the checker.</p><figure><img src="pipeline-2d.svg" alt="Returned unit-square terminal family with public recovered linear and quadratic histories"><figcaption>The plot shows the returned terminal family and histories selected through public recovery. It illustrates these saved outcomes; it does not claim complete-family verification.</figcaption></figure></section>
+<section><h2>Full admitted-choice accounting</h2><div class="stats"><div class="stat"><strong>128</strong>role tuples</div><div class="stat"><strong>64</strong>structural contract exclusions</div><div class="stat"><strong>62</strong>completed attempts</div><div class="stat"><strong>2</strong>numeric refusals</div></div><ul><li><strong>62</strong> completed</li><li><strong>2</strong> numeric-refusal</li><li><strong>64</strong> structural-contract-exclusion</li></ul><p>The 64 exclusions are Phase-I profiles paired with nonzero terminal objectives, which the declared contracts disallow. Of 64 admitted attempts, 62 completed and 2 reached value-level numeric refusal. The refusals are retained attempts, not structural incompatibilities.</p><p><a href="role-matrix.csv" download>Download all 128 tuples with provider roles and statuses (CSV)</a> · <a href="records.json" download>Download complete raw execution record (JSON)</a></p><div class="table-scroll"><table><thead><tr><th>Reducer</th><th>Vertex LP</th><th>Terminal optimizer</th><th>Attempts</th><th>Complete</th><th>Numeric refusal</th></tr></thead><tbody><tr><td>csl.hull.grouped-membership</td><td>csl.lp.highs</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.grouped-membership</td><td>csl.lp.highs</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.grouped-membership</td><td>phase-one-bland</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.grouped-membership</td><td>phase-one-bland</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.grouped-membership</td><td>phase-one-priority-tie</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.grouped-membership</td><td>phase-one-priority-tie</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a43-artificial-basis</td><td>csl.lp.highs</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a43-artificial-basis</td><td>csl.lp.highs</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a43-artificial-basis</td><td>phase-one-bland</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a43-artificial-basis</td><td>phase-one-bland</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a43-artificial-basis</td><td>phase-one-priority-tie</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a43-artificial-basis</td><td>phase-one-priority-tie</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a43-certified-basis-reuse</td><td>csl.lp.highs</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a43-certified-basis-reuse</td><td>csl.lp.highs</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a43-certified-basis-reuse</td><td>phase-one-bland</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a43-certified-basis-reuse</td><td>phase-one-bland</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a43-certified-basis-reuse</td><td>phase-one-priority-tie</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a43-certified-basis-reuse</td><td>phase-one-priority-tie</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a43-largest-norm-tie</td><td>csl.lp.highs</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a43-largest-norm-tie</td><td>csl.lp.highs</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a43-largest-norm-tie</td><td>phase-one-bland</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a43-largest-norm-tie</td><td>phase-one-bland</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a43-largest-norm-tie</td><td>phase-one-priority-tie</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a43-largest-norm-tie</td><td>phase-one-priority-tie</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a44-incremental-lp</td><td>csl.lp.highs</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a44-incremental-lp</td><td>csl.lp.highs</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a44-incremental-lp</td><td>phase-one-bland</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a44-incremental-lp</td><td>phase-one-bland</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a44-incremental-lp</td><td>phase-one-priority-tie</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a44-incremental-lp</td><td>phase-one-priority-tie</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a44-paper-farthest-incremental-lp</td><td>csl.lp.highs</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a44-paper-farthest-incremental-lp</td><td>csl.lp.highs</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a44-paper-farthest-incremental-lp</td><td>phase-one-bland</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a44-paper-farthest-incremental-lp</td><td>phase-one-bland</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a44-paper-farthest-incremental-lp</td><td>phase-one-priority-tie</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.itis17.a44-paper-farthest-incremental-lp</td><td>phase-one-priority-tie</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.lp-membership</td><td>csl.lp.highs</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.lp-membership</td><td>csl.lp.highs</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.lp-membership</td><td>phase-one-bland</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.lp-membership</td><td>phase-one-bland</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.lp-membership</td><td>phase-one-priority-tie</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.lp-membership</td><td>phase-one-priority-tie</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.ordered-membership</td><td>csl.lp.highs</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.ordered-membership</td><td>csl.lp.highs</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.ordered-membership</td><td>phase-one-bland</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.ordered-membership</td><td>phase-one-bland</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.ordered-membership</td><td>phase-one-priority-tie</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.ordered-membership</td><td>phase-one-priority-tie</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.phase-one-basis-bulk</td><td>csl.lp.highs</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.phase-one-basis-bulk</td><td>csl.lp.highs</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.phase-one-basis-bulk</td><td>phase-one-bland</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.phase-one-basis-bulk</td><td>phase-one-bland</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.phase-one-basis-bulk</td><td>phase-one-priority-tie</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.phase-one-basis-bulk</td><td>phase-one-priority-tie</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.recursive-split-merge</td><td>csl.lp.highs</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.recursive-split-merge</td><td>csl.lp.highs</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.recursive-split-merge</td><td>phase-one-bland</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.recursive-split-merge</td><td>phase-one-bland</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.recursive-split-merge</td><td>phase-one-priority-tie</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.recursive-split-merge</td><td>phase-one-priority-tie</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr><tr><td>csl.hull.source.btulshor-kpabep</td><td>not_used</td><td>csl.convex.highs</td><td>1</td><td>0</td><td>1</td></tr><tr><td>csl.hull.source.btulshor-kpabep</td><td>not_used</td><td>csl.lp.highs</td><td>3</td><td>0</td><td>1</td></tr><tr><td>csl.hull.source.quickhull-2d</td><td>not_used</td><td>csl.convex.highs</td><td>1</td><td>1</td><td>0</td></tr><tr><td>csl.hull.source.quickhull-2d</td><td>not_used</td><td>csl.lp.highs</td><td>3</td><td>1</td><td>0</td></tr></tbody></table></div></section>
+<section><h2>Observed converter boundary</h2><p>The faithful KPABEP provider produced ordered V input [(0,1),(1,1),(0,0),(1,0)]. Qhull returned H rows containing ±1.1102230246251565×10⁻¹⁶ coefficients. Separate HiGHS LP and convex checks refused those matrices under the 10⁻¹² removal threshold. The exact requests and diagnostics are in the raw record and linked follow-up <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/974">issue #974</a>. Coefficients were not rounded or dropped.</p></section>
+<section><h2>Recovered-history indexing regression</h2><p>This separate fixture has nonzero origin and distinct state/control domains. The returned witness is x₀=(2,3), x₁=(3,4), u₀=(1,1). Since x₁ and u₀ differ, checking the terminal family against control coordinates would fail the public membership check. The saved independent record confirms initial membership, dynamics, control bounds, endpoint membership, and returned-family recovery; it does not assert an arbitrary LP tie-break.</p><figure><img src="terminal-membership-regression.svg" alt="Distinct initial state, terminal state, and control boxes with recovered witness points"><figcaption>Separate coordinate panels make the terminal state and control vectors visibly distinct.</figcaption></figure><p><a href="terminal-membership-regression.json" download>Download the independent regression record</a></p></section>
+<section><h2>Reproduction and source identity</h2><p>Rebuild target: <code>csl_strategy_a_each_choice_pipeline</code> with CMake Release, HiGHS and Qhull enabled. Run <code>ctest --test-dir &lt;build&gt; -C Release --output-on-failure -R '^strategy_a_each_choice_pipeline_contract$'</code>, then run the native executable and <code>scripts/catalogue/check_944_each_choice_pipeline.py</code> against the emitted JSON. These are functional checks; elapsed times in the record are not performance results.</p><p>Solver source commit: <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/5a4730c517a875400ec7b69e4c8e2c265e49016c">5a4730c517a875400ec7b69e4c8e2c265e49016c</a>. The matrix and regression records below are checksummed in <code>SHA256SUMS</code>. Implementation source and executable hashes are retained in provenance:</p><pre>{
+  &quot;binary_sha256&quot;: &quot;1c52ab404b11398b0d7ae45aaae1934047dac9a1af77840f06d56307438ee032&quot;,
+  &quot;checker_sha256&quot;: &quot;30b2ae4c28bac51c914526fa59373da3ed350176489a95dfe76b38d20fe7a6d3&quot;,
+  &quot;checker_source_sha256&quot;: &quot;30b2ae4c28bac51c914526fa59373da3ed350176489a95dfe76b38d20fe7a6d3&quot;,
+  &quot;plot_renderer_sha256&quot;: &quot;d4c24f233b5a118c90098132fb5c55b1a71daf3a36780def61d6f2dcf4871480&quot;,
+  &quot;publication_renderer_sha256&quot;: &quot;ce540d75d5c10f3576fd7801b98c85fe6a20143551cde07c2ba2bc0da41cca3f&quot;,
+  &quot;records.json&quot;: &quot;5c3bfa78199f2f75a54d23d4aca078169fd3529fb2cd730354fb60ad71b45954&quot;,
+  &quot;runner_sha256&quot;: &quot;34cdaa1a6d85902b5188797e11a31b976ebb87ce8327a6bea012aef80ae23c8a&quot;,
+  &quot;runner_source_sha256&quot;: &quot;34cdaa1a6d85902b5188797e11a31b976ebb87ce8327a6bea012aef80ae23c8a&quot;,
+  &quot;shared_stylesheet_sha256&quot;: &quot;11ded2b69cec694ff61ecad0493f175becbfc47bce3d641f2ee512543bb82cf4&quot;,
+  &quot;solver_source_commit&quot;: &quot;5a4730c517a875400ec7b69e4c8e2c265e49016c&quot;,
+  &quot;terminal-membership-regression.json&quot;: &quot;e0938f9c1cf69aba77ecc77c58c16ad1d6f12696f54fbbcf7e4023a0cbafffd7&quot;
+}</pre><p><a href="SHA256SUMS">Checksums</a> · <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/5a4730c517a875400ec7b69e4c8e2c265e49016c">Runner and checker source commit</a> · <a href="https://github.com/butahlecoq/controlled-systems-lab/pull/976">Related #976 Qhull follow-up and public Strategy A example</a></p></section>
+<footer>Controlled Systems Lab · Saved execution record · #944 remains open while two admitted KPABEP→HiGHS outcomes await the #974 conversion fix.</footer></main></body></html>
