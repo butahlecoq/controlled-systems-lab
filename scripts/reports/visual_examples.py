@@ -14,6 +14,7 @@ from urllib.parse import urlsplit
 import audit_visual_routes
 import approx_extension_companions
 import control_witness_companions
+import feedback_geometry_example
 import geometry_opt_companions
 import report_data
 import site_additions
@@ -750,6 +751,8 @@ def build(catalog, site):
     out = site / "examples"
     require(not out.is_symlink(), "gallery output must not be a symlink")
     outputs = {e["slug"] + ".svg": plot(e) for e in examples}
+    feedback_assets, feedback_entry, feedback_card = feedback_geometry_example.build()
+    outputs.update(feedback_assets)
     outputs.update(analytic_files)
     outputs.update(qhull_highs_strategy_a_example.build())
     adaptive_assets = Path(__file__).parents[2] / "docs/examples"
@@ -769,7 +772,7 @@ def build(catalog, site):
         _, geometry_inventory, geometry_assets = geometry_opt_companions.build(geometry_root)
         for asset in geometry_assets:
             outputs[asset] = (geometry_root / asset).read_bytes()
-    gallery_inventory = []
+    gallery_inventory = [feedback_entry]
     gallery_inventory.append({"family": "Numerical integration",
         "title": "Adaptive RK4 replay of a two-state oscillator",
         "status": "saved-data-companion", "anchor": "adaptive-ode-rk4",
@@ -1029,7 +1032,7 @@ def build(catalog, site):
             '<h2>More algorithms, from saved evidence</h2><p>Most displayed figures are published inside their original reports. '
             'Cards marked “Saved-data companion” are generated into this gallery from frozen records; they do not change those reports. '
             'Open a report for exact inputs, answers, reproduction commands, provenance and evidence limits.</p>'
-            '<div class="saved-grid">' + saved_figures +
+            '<div class="saved-grid">' + saved_figures + feedback_card +
             '<article class="saved-figure" id="geometry-optimization-companions"><p class="eyebrow">Geometry and optimization · Saved-data companion</p>'
             '<h3>Readable geometry and timing figures</h3><p>Eleven companions replot frozen report records with the shared quantitative axis policy. '
             'The geometry examples use saved 2D coordinates; timing charts show saved medians and observed ranges.</p>'
