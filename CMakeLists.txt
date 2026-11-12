@@ -64,6 +64,7 @@ option(CSL_BUILD_MPC01_REPORT "Build the optional external MPC comparison driver
 option(CSL_BUILD_MPC04_REPORT "Build the finite MPC-04 closed-loop report driver" OFF)
 
 option(CSL_BUILD_REPORTS "Build the non-installed algorithm report driver" OFF)
+option(CSL_BUILD_NOMINAL_TUBE_CAPTURE "Build the source-bound closed-H nominal tube capture tool" OFF)
 option(CSL_ENABLE_HIGHS "Build the native HiGHS LP/convex adapters" ON)
 option(CSL_ENABLE_QHULL "Build the native Qhull converter (requires HiGHS)" ${CSL_ENABLE_HIGHS})
 if(CSL_ENABLE_QHULL AND NOT CSL_ENABLE_HIGHS)
@@ -83,6 +84,17 @@ set(csl_modules contracts numeric optimization registry sets model geometry prob
 foreach(module IN LISTS csl_modules)
   include(src/${module}/Module.cmake)
 endforeach()
+if(CSL_BUILD_NOMINAL_TUBE_CAPTURE)
+  if(NOT CSL_ENABLE_HIGHS OR NOT CSL_ENABLE_QHULL)
+    message(FATAL_ERROR "The nominal H tube capture tool requires the native HiGHS and Qhull adapters")
+  endif()
+  add_executable(nominal_tube_capture tools/nominal_tube_capture.cpp)
+  target_link_libraries(nominal_tube_capture PRIVATE
+    CSL::nominal_tube CSL::affine_sum CSL::qhull_conversion CSL::highs_lp)
+  target_include_directories(nominal_tube_capture SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
+  target_compile_features(nominal_tube_capture PRIVATE cxx_std_20)
+  set_target_properties(nominal_tube_capture PROPERTIES CXX_EXTENSIONS OFF)
+endif()
 add_executable(csl_module_composition_catalogue tools/module_composition_catalogue.cpp)
 target_link_libraries(csl_module_composition_catalogue PRIVATE
   CSL::hull CSL::affine_sum CSL::phase_one CSL::strategy_ts01 CSL::finite_action_nominal CSL::approximation
@@ -105,6 +117,15 @@ else()
   target_compile_definitions(csl_module_composition_catalogue PRIVATE CSL_CATALOGUE_HAS_QHULL=0)
 endif()
 set_target_properties(csl_module_composition_catalogue PROPERTIES CXX_EXTENSIONS OFF)
+
+if(CSL_ENABLE_HIGHS AND CSL_ENABLE_QHULL)
+  add_executable(csl_strategy_a_each_choice_pipeline tools/strategy_a_each_choice_pipeline.cpp)
+  target_link_libraries(csl_strategy_a_each_choice_pipeline PRIVATE
+    CSL::strategy_a CSL::affine_sum CSL::polyhedral CSL::qhull_conversion CSL::highs_lp CSL::highs_convex)
+  target_compile_definitions(csl_strategy_a_each_choice_pipeline PRIVATE
+    CSL_PIPELINE_HAS_HIGHS=1 CSL_PIPELINE_HAS_QHULL=1)
+  set_target_properties(csl_strategy_a_each_choice_pipeline PROPERTIES CXX_EXTENSIONS OFF)
+endif()
 
 add_executable(csl_closed_loop_native_policy tools/closed_loop_native_policy.cpp)
 target_link_libraries(csl_closed_loop_native_policy PRIVATE CSL::finite_action_nominal CSL::polyhedral

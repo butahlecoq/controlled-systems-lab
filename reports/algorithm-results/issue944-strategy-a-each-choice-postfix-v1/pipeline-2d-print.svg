@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="620" viewBox="0 0 900 620">
+<style>text{font-family:Inter,system-ui,sans-serif;fill:#111}.title{font-size:24px;font-weight:bold}.label{font-size:16px}.small{font-size:13px}.muted{fill:#444}.svg-bg{fill:#fff}.plot{fill:#fff;stroke:#aaa}.grid{stroke:#aaa}.hull{fill:#294717;stroke:#294717}</style>
+<rect class="svg-bg" width="100%" height="100%" fill="#fff"/>
+<text x="40" y="42" class="title">Two-state reachable set and selected control history</text>
+<text x="40" y="70" class="label muted">Strategy A, x_next = x + u, x0 = (0,0), u in [0,1]^2</text>
+<rect class="plot" x="110" y="100" width="520" height="400" fill="#fff" stroke="#aaa"/>
+<line class="grid" x1="110" y1="300.0" x2="630" y2="300.0" stroke="#aaa"/>
+<line class="grid" x1="370.0" y1="100" x2="370.0" y2="500" stroke="#aaa"/>
+<polygon class="hull" points="110,500 630,500 630,100 110,100" fill="#294717" fill-opacity="0.2" stroke="#294717" stroke-width="3"/>
+<line class="history-0" x1="110" y1="500" x2="630" y2="500" stroke="#294717" stroke-width="4" opacity="0.8"/><circle class="history-0" cx="110" cy="500" r="5" fill="#294717"/><text x="120" y="488" class="small">u=(1,0)</text><line class="history-1" x1="110" y1="500" x2="110" y2="500" stroke="#864800" stroke-width="4" opacity="0.8"/><circle class="history-1" cx="110" cy="500" r="5" fill="#864800"/><text x="120" y="474" class="small">u=(0,0)</text><circle class="terminal" cx="630" cy="500" r="8" fill="#294717" stroke="#fff" stroke-width="2"/><circle class="terminal" cx="110" cy="500" r="8" fill="#864800" stroke="#fff" stroke-width="2"/>
+<text x="352.0" y="534" class="label">position</text>
+<text x="24" y="300.0" class="label" transform="rotate(-90 24 300.0)">velocity</text>
+<text x="92" y="518" class="small">0</text><text x="625" y="518" class="small">1</text>
+<text x="82" y="504" class="small">0</text><text x="82" y="112" class="small">1</text>
+<text x="680" y="145" class="label">Independent checks</text>
+<text x="680" y="178" class="small">Reachable hull = unit square</text>
+<text x="680" y="203" class="small">Both recovered histories replay</text>
+<text x="680" y="228" class="small">LP x₁=(1,0); QP x₁=(0,0)</text>
+<text x="680" y="260" class="small">Reducer: csl.hull.lp-membership</text>
+<text x="680" y="285" class="small">Vertex LP: csl.lp.highs</text>
+<text x="680" y="310" class="small">Converter: Qhull, both directions</text>
+<text x="40" y="570" class="small muted">Histories use public recovery and LP selection from the returned terminal candidate family.</text>
+<text x="40" y="592" class="small muted">No complete-family or feedback-optimality claim is made.</text>
+</svg>

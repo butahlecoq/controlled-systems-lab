@@ -15,7 +15,8 @@ import time
 from scripts.reports.mpc06_offline import builder
 
 ROOT=Path(__file__).resolve().parents[3]
-FILES=('scripts/reports/mpc06_offline/builder.py','scripts/reports/mpc06_offline/study.py','scripts/reports/mpc06_offline/check.py','scripts/reports/mpc06_offline/inputs.json','scripts/reports/mpc06_offline/README.md','scripts/reports/mpc06_online/model.py','reports/algorithm-results/mpc06-online-anchor-v1/result.json')
+FILES=('scripts/reports/mpc06_offline/builder.py','scripts/reports/mpc06_offline/study.py','scripts/reports/mpc06_offline/check.py','scripts/reports/mpc06_offline/inputs.json','scripts/reports/mpc06_online/model.py','reports/algorithm-results/mpc06-online-anchor-v1/result.json')
+HISTORICAL_FILES=tuple(sorted((*FILES,'scripts/reports/mpc06_offline/README.md')))
 LIMITS=dict(cpu_seconds=15,wall_seconds=30,address_space_bytes=512*1024**2)
 def sha(data):return hashlib.sha256(data).hexdigest()
 def encoded(value):return (json.dumps(value,sort_keys=True,indent=2,allow_nan=False)+'\n').encode()

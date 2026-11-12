@@ -419,6 +419,13 @@ add_test(NAME installed_nominal_forward_client COMMAND installed_nominal_forward
 set_tests_properties(installed_nominal_forward_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed nominal-forward client: provider-backed integrator tube and authored labels passed")
 
+add_executable(installed_nominal_tube_client nominal_tube_client.cpp)
+target_link_libraries(installed_nominal_tube_client PRIVATE CSL::nominal_tube CSL::affine_sum CSL::qhull_conversion CSL::highs_lp)
+set_target_properties(installed_nominal_tube_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_nominal_tube_client COMMAND installed_nominal_tube_client)
+set_tests_properties(installed_nominal_tube_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed nominal-tube client: exported H stages and point membership passed")
+
 
 endif()
 

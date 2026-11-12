@@ -56,21 +56,4 @@ csl_add_library(csl_approximation STATIC src/geometry/approximation/policy.cpp s
 target_link_libraries(csl_approximation PUBLIC CSL::sets CSL::registry CSL::verification
   PRIVATE CSL::geometry_generators CSL::artifacts)
 
-install(FILES docs/contracts/projection-and-predecessor.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
-
-install(FILES docs/contracts/polyhedral-intersection.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
-install(FILES docs/contracts/polyhedral-support.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
-
-install(FILES docs/contracts/hull-reduction.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
-
-install(FILES docs/contracts/quickhull-2d.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
-install(FILES docs/contracts/legacy-btulshor.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
-install(FILES docs/contracts/bounded-hull-checker.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
-
-install(FILES docs/contracts/affine-sum-operations.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
-install(FILES docs/contracts/lazy-geometry.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
-install(FILES docs/contracts/approximation.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
-install(FILES docs/contracts/ellipsoidal-approximation.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
-install(FILES docs/contracts/generator-sets.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/CSL/contracts)
-
 csl_install_headers(geometry)

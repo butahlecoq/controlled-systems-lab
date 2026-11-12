@@ -17,6 +17,19 @@ spec.loader.exec_module(STAGER)
 
 
 class PublicationTests(unittest.TestCase):
+    def test_published_guides_are_read_from_existing_sealed_source_commits(self):
+        expected={
+            'FIGURES.md':'0f9d16078fbb6b22a660e06be4a41181cb97fc83c2cb0208243cc60098f94009',
+            'AFFINE-RECHECK.md':'9cb919d44f0c942c98989b86d812c1782788ade8fe30c791ba1d6eedfbfb76aa',
+            'environment/README.md':'cb6ba1ee49fa53e88a2a16bb1173ab1fd64df4e20d5e68f5d6e6ba1f00d7c137',
+        }
+        for name,digest in expected.items():
+            with self.subTest(name=name):
+                commit,content=STAGER.captured_source_asset('benchmarks/reporting/mpc11/'+name)
+                self.assertEqual(hashlib.sha256(content).hexdigest(),digest)
+                self.assertIn(commit,{'ed2dda1ef049ac4fbe259a800d3314e446ceee28',
+                                      '73463ec9bc1c2b82e654e61afed1aa07b56f0e53'})
+
     def test_host_diagnostics_do_not_change_immutable_publication_bytes(self):
         import contextlib,copy,io
         from types import SimpleNamespace

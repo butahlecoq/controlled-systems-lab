@@ -629,7 +629,7 @@ historical questions in issue #6.
 
 ## Reference-LP pipeline
 
-The [report-record contract](../contracts/algorithm-report-records.md) specifies the executable, saved schemas, exact timing scopes, independent literals, build/environment provenance, commands and OBS migration. `csl_lp_report --smoke` is a bounded functional test. Accepted seven-trial measurements and the separate counter profile follow review of a fixed clean Release code commit; their source identity is distinct from the later artifact commit.
+The report executable, saved record readers, timing scopes, independent literals, build/environment provenance and publication checks are implemented under [`scripts/reports`](../../scripts/reports/) and verified under [`tests/reporting`](../../tests/reporting/). `csl_lp_report --smoke` is a bounded functional test. Accepted seven-trial measurements and the separate counter profile follow review of a fixed clean Release code commit; their source identity is distinct from the later artifact commit.
 
 Collection, plotting, rendering and static staging are separate commands under `scripts/reports`. Regenerate a reviewed bundle from saved `records.json` without rerunning the solver. Keep all failures and unavailable fields, inspect actual figures/pages, and retain raw JSONL, JSON/CSV, profile/build evidence and exact-byte manifests. Bundles live under `reports/algorithm-results/<report-id>/`, with a catalogue/index and adjacent offline ZIP. Destinations are immutable, and only allowlisted reviewed files enter the main-only Pages deployment workflow. The actual deployed versioned URL and downloads must be verified before algorithm-report completion is claimed.
 
@@ -670,7 +670,20 @@ projection backend. Its two-dimensional box quadratic has the analytic
 constrained solution `(1, -1)` and objective `1`. Every observed call checks
 that literal result. The saved raw rows, source and build receipts, manifest,
 offline ZIP, and illustrative two-dimensional figure are catalogued for
-main-only Pages staging. See the [reproduction notes](../../scripts/reports/opt10/README.md).
+main-only Pages staging. Reproduce from a clean detached checkout at the frozen
+source commit, using a new capture directory:
+
+```powershell
+python -B scripts/reports/opt10/capture.py --source D:\path\to\frozen-checkout --capture D:\path\to\fresh-capture --commit 9becda80d9a0eb7383fa2215f6b5c1932d3502a0 --cmake C:\path\to\cmake.exe
+python -B scripts/reports/opt10/collect.py --capture D:\path\to\fresh-capture --source D:\path\to\frozen-checkout --out reports/algorithm-results
+python -B scripts/reports/opt10/render_saved.py --bundle reports/algorithm-results/opt10-smooth-REPORT_ID --check
+python -B scripts/reports/stage_opt10.py --source reports/algorithm-results/opt10-smooth-REPORT_ID
+```
+
+The capture validates clean source receipts, the frozen driver and executable,
+the Release CMake configuration, raw CSV rows and analytic literals. Rendering
+uses saved bytes. The staging command returns catalogue JSON and accepts only
+the registered file inventory.
 
 The seven batches are descriptive single-adapter observations. They have no
 comparator, speedup, or global-optimality certificate. Main-only deployment

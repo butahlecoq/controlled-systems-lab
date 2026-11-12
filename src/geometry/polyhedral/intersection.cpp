@@ -1,6 +1,11 @@
 #include <csl/geometry/polyhedral_intersection.hpp>
 
+#include <chrono>
 #include <limits>
+#include <memory>
+#include <new>
+#include <stdexcept>
+#include <string>
 #include <utility>
 
 namespace csl::geometry::polyhedral {
@@ -75,5 +80,117 @@ SetResult intersect_h(const sets::SetData& left, const sets::SetData& right, Set
         inequalities, bounds, equalities, values);
     if (!result) return Diagnostics{invalid("geometry.intersection.storage", "Could not create immutable intersection data.")};
     return *result;
+}
+namespace {
+constexpr const char* intersection_module = "csl.geometry.polyhedral-intersection";
+
+Diagnostics registration_error(std::string field, std::string explanation,
+        DiagnosticCode code = DiagnosticCode::unsupported) {
+    return {{code, std::move(field), std::move(explanation)}};
+}
+
+bool complete_identity(const GeometryRequestIdentity& identity) {
+    return !identity.problem.value.empty() && !identity.request.value.empty() &&
+        !identity.ideal_output.value.empty();
+}
+
+bool stopped(const ExecutionContext& context) {
+    return context.cancellation.stop_requested() ||
+        (context.deadline && std::chrono::steady_clock::now() >= *context.deadline);
+}
+
+OperationStopped stop_reason(const ExecutionContext& context) {
+    if (context.cancellation.stop_requested())
+        return {StopReason::cancelled, "Native H intersection cancelled before publishing its result."};
+    return {StopReason::deadline_expired, "Native H intersection deadline expired before publishing its result."};
+}
+
+Diagnostics h_operands(const Intersection& operation) {
+    const auto left = sets::from_handle(operation.left);
+    if (const auto* failure = std::get_if<Diagnostic>(&left)) return {*failure};
+    const auto right = sets::from_handle(operation.right);
+    if (const auto* failure = std::get_if<Diagnostic>(&right)) return {*failure};
+    const auto& left_data = std::get<sets::SetData>(left);
+    const auto& right_data = std::get<sets::SetData>(right);
+    if (!std::holds_alternative<sets::HRepresentation>(left_data.representation()) ||
+        !std::holds_alternative<sets::HRepresentation>(right_data.representation()))
+        return registration_error("geometry.intersection.representation",
+            "Registered native intersection accepts H operands; convert other representations explicitly.");
+    if (left_data.metadata()->set.dimension != right_data.metadata()->set.dimension)
+        return registration_error("geometry.intersection.dimension",
+            "H operands must have the same ambient dimension.", DiagnosticCode::invalid_input);
+    if (left_data.metadata()->coordinate_labels != right_data.metadata()->coordinate_labels)
+        return registration_error("geometry.intersection.coordinates",
+            "H operands must use the same coordinate labels and ordering.", DiagnosticCode::invalid_input);
+    return {};
+}
+
+registry::Capability intersection_capabilities(const OperationRequest& request,
+        const registry::Requirements& requirements) {
+    if (!std::holds_alternative<Intersection>(request.operation))
+        return registration_error("geometry.intersection.operation", "Only native H Intersection is supported.");
+    if (!complete_identity(request.identity))
+        return registration_error("geometry.intersection.identity", "Complete immutable request identity required.",
+            DiagnosticCode::invalid_input);
+    if (request.assurance != Assurance::numerical || requirements.output.assurance != Assurance::numerical)
+        return registration_error("geometry.intersection.assurance", "Validated intersection arithmetic is not implemented.");
+    if (request.required_relation != SetRelation::equivalent ||
+        (requirements.output.relation && *requirements.output.relation != SetRelation::equivalent))
+        return registration_error("geometry.intersection.relation", "Only equivalent numerical H intersections are supported.");
+    if (requirements.output.representation.value != "csl.polyhedron.h")
+        return registration_error("geometry.intersection.output", "Registered intersection produces native H.");
+    if (const auto shape = check_operation_shape(request); !shape.empty()) return shape;
+    const auto diagnostics = h_operands(std::get<Intersection>(request.operation));
+    if (!diagnostics.empty()) return diagnostics;
+    registry::Output output;
+    output.representation = {"csl.polyhedron.h"};
+    output.assurance = Assurance::numerical;
+    output.relation = SetRelation::equivalent;
+    return registry::Offer{output};
+}
+
+class IntersectionWorkspace final : public SetOperatorWorkspace {
+    OperationRequest request_;
+public:
+    explicit IntersectionWorkspace(OperationRequest request) : request_(std::move(request)) {}
+
+    OperationOutcome apply(const OperationRequest&, const ExecutionContext& context) override {
+        if (stopped(context)) return stop_reason(context);
+        if (request_.assurance != Assurance::numerical || request_.required_relation != SetRelation::equivalent)
+            return Unsupported{registration_error("geometry.intersection.policy",
+                "Only equivalent numerical intersection is implemented.")};
+        if (const auto shape = check_operation_shape(request_); !shape.empty()) return Unsupported{shape};
+        const auto* operation = std::get_if<Intersection>(&request_.operation);
+        if (!operation) return Unsupported{registration_error("geometry.intersection.operation",
+            "Only native H Intersection is supported.")};
+        if (const auto diagnostics = h_operands(*operation); !diagnostics.empty()) return Unsupported{diagnostics};
+        try {
+            auto result = intersect_h(std::get<sets::SetData>(sets::from_handle(operation->left)),
+                std::get<sets::SetData>(sets::from_handle(operation->right)),
+                {request_.identity.ideal_output.value});
+            if (const auto* failure = std::get_if<Diagnostics>(&result)) return Unsupported{*failure};
+            if (stopped(context)) return stop_reason(context);
+            auto output = std::get<sets::SetData>(std::move(result)).as_handle();
+            GeometryEvidence evidence{geometry_reference(request_), GeometryClaimScope::set_relation,
+                Unestablished{}, {}, {}};
+            evidence.assumptions.push_back(
+                "The output concatenates the two represented H row systems as a conjunction; numerical relation is scoped to the stored binary64 rows, not validated arithmetic.");
+            if (const auto errors = check_geometry_evidence(evidence, request_); !errors.empty())
+                return Unsupported{errors};
+            return OperationResult{std::move(output), SetRelation::equivalent, std::move(evidence)};
+        } catch (const std::bad_alloc&) {
+            return OperationStopped{StopReason::resource_limit,
+                "Allocation failed while assembling native H intersection rows."};
+        } catch (const std::length_error&) {
+            return OperationStopped{StopReason::resource_limit,
+                "Native H intersection rows exceed container capacity."};
+        }
+    }
+};
+} // namespace
+
+registry::Registration<registry::GeometryPort> make_intersection_registration() {
+    return {{{intersection_module}, "1.0.0"}, intersection_capabilities,
+        [](const OperationRequest& request) { return std::make_unique<IntersectionWorkspace>(request); }};
 }
 } // namespace csl::geometry::polyhedral

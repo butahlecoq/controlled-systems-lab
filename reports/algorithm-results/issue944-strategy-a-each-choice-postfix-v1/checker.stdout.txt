@@ -1,0 +1,1 @@
+#944 2D Strategy A pipeline: 128 task/choice tuples checked; 64 completed with recovered selected histories, 64 Phase-I/nonzero-objective rejections, 0 Qhull/HiGHS numeric-boundary rejections; terminal-state membership indexing regression passed
