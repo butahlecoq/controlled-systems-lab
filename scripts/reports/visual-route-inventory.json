@@ -1210,8 +1210,8 @@
         "terminal-membership-regression-print.svg",
         "terminal-membership-regression.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 687
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Renders the immutable source-bound Strategy A choice records and independent recovered-history values with shared screen/print tokens; it runs no solver and makes no full-family or performance claim."
     },
     {
       "source": "scripts/reports/render_issue944_postfix.py",
@@ -1224,8 +1224,8 @@
         "terminal-membership-regression-print.svg",
         "terminal-membership-regression.svg"
       ],
-      "disposition": "deferred-family-specific-migration",
-      "follow_up_issue": 687
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Renders the source-bound post-fix Strategy A choice records and independent recovered-history values with shared screen/print tokens; it runs no solver and makes no full-family or performance claim."
     },
     {
       "source": "scripts/reports/report_data.py",
