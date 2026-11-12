@@ -26,5 +26,5 @@ python3 scripts/reports/mpc01/summarize_strategy_ab.py \
   --scenario examples/scenarios/two-stage-integrator.json \
   --environment docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-limited-capture/strategy-ab-ts01-environment.json \
   --resource-profile docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-limited-capture/resource-profile.json \
-  --output docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-limited-capture/strategy-ab-ts01-summary.txt
+  --output docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-limited-capture/strategy-ab-ts01-summary.md
 ```

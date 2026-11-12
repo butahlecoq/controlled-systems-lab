@@ -16,6 +16,7 @@ def read_jsonl(path: Path) -> list[dict]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--bundle", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     root = args.bundle
     attempts = read_jsonl(root / "attempts.jsonl")
@@ -129,7 +130,8 @@ def main() -> int:
         "- `SHA256SUMS`: bundle integrity manifest.",
         "",
     ]
-    (root / "benchmark-summary.txt").write_text("\n".join(lines), encoding="utf-8")
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text("\n".join(lines), encoding="utf-8")
     return 0
 
 

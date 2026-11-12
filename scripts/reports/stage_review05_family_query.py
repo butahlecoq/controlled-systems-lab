@@ -28,6 +28,10 @@ PHASE_SOURCE=ROOT/'reports/algorithm-results'/PHASE_ID
 ANCHORS={QUERY_ID:'887b3109a132053ba284a34aa50373ff106108bc08bb6ace2ca70eeddb45cc2b',
          PHASE_ID:'988aa80683ca1dddbd7bacd8c7a1b0bebe42babb3da3f6ed1b361cbc086a0214'}
 CAPTURES={QUERY_ID:'3b98f5b02838909981b7ce70378f58dc25c74457',PHASE_ID:'468cc0eb2d3d8e3f7f3ade632db8a2e88cf2cd85'}
+HISTORICAL_ROUTE_CAPTURE=ROOT/'reports/algorithm-results/review05-highs-clocks-8abaf50b-20261109'
+HISTORICAL_ROUTE_CAPTURE_SHA='f7c8f38f30ce3152f87f95fe0563404069b8d0c3dfc78d6bdaec675180e4d836'
+HISTORICAL_ROUTE_README_SHA='838d25b02d6514fc8270df78fc8bdbee04d8baaaf66cbccd0f90a2b19bb99386'
+HISTORICAL_ROUTE_ALIAS=PurePosixPath('benchmarks/reporting/review05/README.md')
 MAX_ARCHIVE_BYTES=256*1024**2
 
 
@@ -106,6 +110,38 @@ def checked_zip(content,expected_manifest=None):
     except (zipfile.BadZipFile,RuntimeError,EOFError) as error:
         raise ValueError('invalid REVIEW-05 ZIP: '+str(error)) from error
     return kept
+
+
+def _historical_route_readme():
+    sums_path=HISTORICAL_ROUTE_CAPTURE/'SHA256SUMS';archive_path=HISTORICAL_ROUTE_CAPTURE/'capture.zip'
+    require(not HISTORICAL_ROUTE_CAPTURE.is_symlink() and not sums_path.is_symlink() and not archive_path.is_symlink() and
+            sums_path.is_file() and archive_path.is_file(),'sealed REVIEW-05 route capture is missing or unsafe')
+    outer_sums=_sums(sums_path.read_bytes())
+    content=archive_path.read_bytes()
+    require(outer_sums.get('capture.zip')==HISTORICAL_ROUTE_CAPTURE_SHA and
+            digest(content)==HISTORICAL_ROUTE_CAPTURE_SHA,'sealed REVIEW-05 route ZIP hash differs')
+    try:
+        with zipfile.ZipFile(io.BytesIO(content)) as archive:
+            require('SHA256SUMS' in archive.namelist(),'sealed REVIEW-05 route ZIP has no inner manifest')
+            inner_manifest=archive.read('SHA256SUMS')
+    except (zipfile.BadZipFile,RuntimeError,EOFError) as error:
+        raise ValueError('invalid sealed REVIEW-05 route ZIP: '+str(error)) from error
+    files=checked_zip(content,inner_manifest)
+    readme=files.get('README.md')
+    require(readme is not None and digest(readme)==HISTORICAL_ROUTE_README_SHA,
+            'sealed REVIEW-05 route README differs from the published source bytes')
+    return readme
+
+
+def _write_historical_route_alias(site,readme):
+    alias=site.joinpath(*HISTORICAL_ROUTE_ALIAS.parts)
+    parent=alias.parent
+    require(not parent.is_symlink() and not alias.is_symlink(),'historical REVIEW-05 route alias is unsafe')
+    parent.mkdir(parents=True,exist_ok=True)
+    if alias.exists():
+        require(alias.is_file() and alias.read_bytes()==readme,'historical REVIEW-05 route alias conflicts with sealed bytes')
+    else:
+        alias.write_bytes(readme)
 
 
 def _module(name):
@@ -208,6 +244,11 @@ def stage(site,query_source=QUERY_SOURCE,phase_source=PHASE_SOURCE,*,example_car
     site=Path(site);require(not site.is_symlink() and site.is_dir(),'Pages site must be a regular directory')
     require(not (site/'examples').is_symlink() and (site/'examples').is_dir(),'Pages examples directory must be regular')
     landing=_index(site/'index.html');gallery=_index(site/'examples/index.html')
+    historical_readme=_historical_route_readme()
+    alias=site.joinpath(*HISTORICAL_ROUTE_ALIAS.parts)
+    if alias.exists():require(alias.is_file() and not alias.is_symlink() and alias.read_bytes()==historical_readme,
+                              'historical REVIEW-05 route alias conflicts with sealed bytes')
+    else:require(not alias.is_symlink(),'historical REVIEW-05 route alias is unsafe')
     identity={'reviewed_manifests':ANCHORS,'stager_sha256':digest(Path(__file__).read_bytes()),
         'current_checkers':{name:digest((BENCH/(name+'.py')).read_bytes()) for name in
             ('check_family_query','scalar_query_oracle','render_family_query','check_build_phases','run_build_phases')}}
@@ -275,6 +316,7 @@ and its current-head freshness gate. This local stager does not deploy anything.
             target=destination.joinpath(*_name(name).parts);target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(content)
         with (site/(route+'.zip')).open('xb') as output:output.write(archive_path.read_bytes())
         (site/'index.html').write_bytes(staged_landing);(site/'examples/index.html').write_bytes(staged_gallery)
+    _write_historical_route_alias(site,historical_readme)
     return route
 
 

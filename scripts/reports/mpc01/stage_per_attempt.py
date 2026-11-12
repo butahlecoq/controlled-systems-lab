@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import html
+import json
 from pathlib import Path
 import re
 import shutil
@@ -13,6 +14,8 @@ from urllib.parse import urldefrag, urlparse
 ROOT = Path(__file__).resolve().parents[3]
 REPORT_ID = "mpc01-per-attempt-20261103-r3"
 SOURCE = ROOT / "docs/research/evidence" / REPORT_ID
+PROFILE_SOURCE = ROOT / "docs/research/evidence/mpc01-source-mapped-profile-20261102"
+PROFILE_README_SHA256 = "1c9ccd331e43080f8a26de200a0904e35e139d67146e19f36ae0823b6129c5ff"
 STRATEGY_AB_ID = "mpc01-strategy-ab-ts03-20261103-r1"
 STRATEGY_AB_SOURCE = ROOT / "docs/research/evidence" / STRATEGY_AB_ID
 STRATEGY_AB_ROUTE = Path("docs/research/evidence") / STRATEGY_AB_ID
@@ -74,6 +77,40 @@ def _insert_landing_link(site: Path, marker: str, href: str, label: str) -> None
     if count != 1:
         raise ValueError("built Pages root index.html has no body element")
     landing.write_text(updated, encoding="utf-8")
+
+
+def _profile_readme_aliases(site: Path) -> None:
+    source = PROFILE_SOURCE / "README.txt"
+    if source.is_symlink() or not source.is_file():
+        raise ValueError("source-mapped profile guide is missing or unsafe")
+    content = source.read_bytes()
+    if hashlib.sha256(content).hexdigest() != PROFILE_README_SHA256:
+        raise ValueError("source-mapped profile guide differs from its captured bytes")
+    profile_manifest = json.loads((PROFILE_SOURCE / "profile-manifest.json").read_text(encoding="utf-8"))
+    if profile_manifest["artifacts"].get("README.txt") != PROFILE_README_SHA256:
+        raise ValueError("source-mapped profile manifest does not bind its guide")
+    destination = site / "mpc01-source-mapped-profile-20261102"
+    if destination.is_symlink():
+        raise ValueError("source-mapped profile route is unsafe")
+    destination.mkdir(parents=True, exist_ok=True)
+    for name in ("README.md", "README.txt"):
+        alias = destination / name
+        if alias.is_symlink():
+            raise ValueError("source-mapped profile guide alias is unsafe")
+        if alias.exists():
+            if not alias.is_file() or alias.read_bytes() != content:
+                raise ValueError("source-mapped profile guide alias conflicts with captured bytes")
+        else:
+            alias.write_bytes(content)
+
+
+def _validate_profile_readme_aliases(site: Path) -> None:
+    source = PROFILE_SOURCE / "README.txt"
+    expected = source.read_bytes()
+    for name in ("README.md", "README.txt"):
+        alias = site / "mpc01-source-mapped-profile-20261102" / name
+        if alias.is_symlink() or not alias.is_file() or alias.read_bytes() != expected:
+            raise ValueError("source-mapped profile guide alias differs: " + name)
 
 
 def page() -> str:
@@ -167,6 +204,7 @@ def stage(site: Path) -> Path:
     stage_strategy_ab(site)
     stage_strategy_ab_ts02(site)
     stage_strategy_ab_ts01(site)
+    _profile_readme_aliases(site)
     return dest
 
 
@@ -296,6 +334,16 @@ def validate(site: Path) -> None:
         path = route / name
         if path.is_symlink() or not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
             raise ValueError("MPC-01 source-bundle checksum mismatch: " + name)
+    _validate_profile_readme_aliases(site)
+    summary = route / "benchmark-summary.md"
+    summary_text = summary.read_text(encoding="utf-8")
+    for reference in re.findall(r"\[[^]]+\]\(([^)]+)\)", summary_text):
+        parsed = urlparse(reference)
+        if parsed.scheme or parsed.netloc:
+            continue
+        target = (route / urldefrag(parsed.path)[0]).resolve()
+        if not target.is_relative_to(site.resolve()) or not target.is_file():
+            raise ValueError("MPC-01 summary links to a missing or escaping file: " + reference)
     report_html = (route / "index.html").read_text(encoding="utf-8")
     if "not a closed-loop MPC run" not in report_html or "TwoPoints environment report" not in report_html:
         raise ValueError("MPC-01 report scope statement differs")

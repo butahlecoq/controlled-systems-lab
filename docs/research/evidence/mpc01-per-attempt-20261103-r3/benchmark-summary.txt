@@ -10,7 +10,7 @@ The run retained 140 of 140 native attempts and 7 canonical comparison records. 
 
 The independent exact-rational checker verified feasibility and objective bounds for 90 native attempts classified as optimal. Native solver classifications for singular, infeasible and unbounded cases remain separate; non-optimal attempts are retained in `attempts.jsonl` and their canonical records.
 
-A separate [source-mapped gprof limiter profile](../mpc01-source-mapped-profile-20261102/README.txt) attributes sampled OSQP time to QDLDL triangular solves on its 20-repetition workload. It was instrumented with `-pg` and is excluded from these Release timings; the current measurements do not establish a general limiter outside that workload.
+A separate [source-mapped gprof limiter profile](../mpc01-source-mapped-profile-20261102/README.md) attributes sampled OSQP time to QDLDL triangular solves on its 20-repetition workload. It was instrumented with `-pg` and is excluded from these Release timings; the current measurements do not establish a general limiter outside that workload.
 
 Solve timings below are native solver phase timings, reported as descriptive medians and ranges of five repetitions per fixture/arm. Warm attempts include a same-process cold seed solve inside their attempt resource budget; the seed solve time is retained separately in each event. These rows do not establish a general solver winner or end-to-end MPC latency.
 

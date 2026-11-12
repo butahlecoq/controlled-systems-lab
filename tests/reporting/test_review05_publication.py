@@ -54,6 +54,30 @@ class PublicationTests(unittest.TestCase):
             self.assertEqual((site/'index.html').read_bytes(),saved)
         self.assertEqual(before,{str(p):hashlib.sha256(p.read_bytes()).hexdigest() for root in (QUERY,PHASE) for p in root.rglob('*') if p.is_file()})
 
+    def test_historical_benchmark_links_resolve_to_sealed_route_alias(self):
+        self.assertFalse((ROOT/'benchmarks/reporting/review05/README.md').exists())
+        sealed_readme=STAGER._historical_route_readme()
+        self.assertEqual(hashlib.sha256(sealed_readme).hexdigest(),STAGER.HISTORICAL_ROUTE_README_SHA)
+        with tempfile.TemporaryDirectory() as directory:
+            site=Path(directory)/'site';(site/'examples').mkdir(parents=True)
+            (site/'index.html').write_text('<html><body><h1>Archive</h1></body></html>')
+            (site/'examples/index.html').write_text('<html><body><h1>Examples</h1></body></html>')
+            report_ids=('review05-horizon-match-20261031','review05-dimension-20261031')
+            for report_id in report_ids:
+                source=ROOT/'reports/algorithm-results'/report_id/'README.md'
+                destination=site/'reports/algorithm-results'/report_id/'README.md'
+                destination.parent.mkdir(parents=True)
+                destination.write_bytes(source.read_bytes())
+            STAGER.stage(site)
+            alias=site.joinpath(*STAGER.HISTORICAL_ROUTE_ALIAS.parts)
+            self.assertEqual(alias.read_bytes(),sealed_readme)
+            for report_id in report_ids:
+                page=site/'reports/algorithm-results'/report_id/'README.md'
+                href='../../../benchmarks/reporting/review05/README.md'
+                self.assertIn(href,page.read_text())
+                self.assertEqual((page.parent/href).resolve(),alias.resolve())
+                self.assertEqual((page.parent/href).read_bytes(),sealed_readme)
+
     def test_tampered_summary_checks_or_figure_fail_before_any_stage_write(self):
         self.assertTrue(callable(getattr(STAGER,'stage',None)))
         for filename in ('summary.json','checks.json','control-projection.svg','offline.zip'):

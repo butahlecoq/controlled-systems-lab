@@ -44,7 +44,9 @@ jobs:
           python-version: '3.12'
       - name: Validate the saved attempt and Strategy A/B evidence
         run: |
-          python scripts/reports/mpc01/summarize_per_attempt.py --bundle docs/research/evidence/mpc01-per-attempt-20261103-r3
+          python scripts/reports/mpc01/summarize_per_attempt.py \
+            --bundle docs/research/evidence/mpc01-per-attempt-20261103-r3 \
+            --output build/mpc01-per-attempt/benchmark-summary.txt
           (cd docs/research/evidence/mpc01-per-attempt-20261103-r3 && sha256sum -c SHA256SUMS)
           python scripts/reports/mpc01/validate_strategy_ab_ts03_bundle.py
           python scripts/reports/mpc01/summarize_strategy_ab_ts02.py \
@@ -108,7 +110,9 @@ jobs:
       - name: Validate the saved attempt and Strategy A/B evidence
         if: steps.source_head.outputs.current == 'true'
         run: |
-          python scripts/reports/mpc01/summarize_per_attempt.py --bundle docs/research/evidence/mpc01-per-attempt-20261103-r3
+          python scripts/reports/mpc01/summarize_per_attempt.py \
+            --bundle docs/research/evidence/mpc01-per-attempt-20261103-r3 \
+            --output build/mpc01-per-attempt/benchmark-summary.txt
           (cd docs/research/evidence/mpc01-per-attempt-20261103-r3 && sha256sum -c SHA256SUMS)
           python scripts/reports/mpc01/validate_strategy_ab_ts03_bundle.py
           python scripts/reports/mpc01/summarize_strategy_ab_ts02.py \

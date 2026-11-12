@@ -20,6 +20,38 @@ SPEC.loader.exec_module(stage_module)
 
 
 class PerAttemptPublicationTests(unittest.TestCase):
+    def test_summary_generator_writes_current_text_without_replacing_captured_summary(self):
+        source = stage_module.SOURCE / "benchmark-summary.txt"
+        captured_sha = "e8a3f56c88e300e6f787ad2033eb14bfbfbcceaa4c406376708ec125bfec70fa"
+        self.assertEqual(hashlib.sha256(source.read_bytes()).hexdigest(), captured_sha)
+        with tempfile.TemporaryDirectory(prefix="mpc01-current-summary-") as temporary:
+            output = Path(temporary) / "benchmark-summary.txt"
+            subprocess.run([sys.executable,
+                            str(ROOT / "scripts/reports/mpc01/summarize_per_attempt.py"),
+                            "--bundle", str(stage_module.SOURCE), "--output", str(output)],
+                           cwd=ROOT, check=True, capture_output=True, text=True)
+            current = output.read_text(encoding="utf-8")
+            self.assertIn("../mpc01-source-mapped-profile-20261102/README.txt", current)
+            self.assertNotIn("../mpc01-source-mapped-profile-20261102/README.md", current)
+        self.assertEqual(hashlib.sha256(source.read_bytes()).hexdigest(), captured_sha)
+
+    def test_migrated_mpc01_sidecars_keep_their_source_commit_bytes(self):
+        expected = {
+            "docs/research/evidence/mpc01-external-qps-20261026-r3/benchmark-summary.txt":
+                "de5ce61105e3ee8452d4618d894e3a42924d0922a73e6c8a222914d477089901",
+            "docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-summary.txt":
+                "8bf5c220425bc167cdebfb8937414e8dbf05608a8cc02e8dd6cc9b1c4de8c96b",
+            "docs/research/evidence/mpc01-external-qps-20261026-r3/strategy-ab-ts01-limited-capture/strategy-ab-ts01-summary.txt":
+                "30f695260aa6fefb410eb495999f6f932d91e61e4d313d59c2ac90c8dbcfc556",
+            "docs/research/evidence/mpc01-external-qps-20261026-r3/b04-repeated-benchmark-projections.html":
+                "db0cc4dc2203626d27a3c4c68a49a8ad085f48bc58ae7f8e6484af842df22675",
+            "docs/research/evidence/mpc01-external-qps-20261026/b04-repeated-benchmark-projections.html":
+                "af0f6abb79319e623e61f790caa97447174e8c24ea0e8113ddf622b48957e922",
+        }
+        for relative, digest in expected.items():
+            with self.subTest(path=relative):
+                self.assertEqual(hashlib.sha256((ROOT / relative).read_bytes()).hexdigest(), digest)
+
     def test_repeated_comparison_generator_links_its_text_summary(self):
         source = ROOT / "docs/research/evidence/mpc01-external-qps-20261102-resource-r1"
         with tempfile.TemporaryDirectory(prefix="mpc01-repeated-report-") as temporary:
@@ -34,9 +66,9 @@ class PerAttemptPublicationTests(unittest.TestCase):
             self.assertTrue((output / "benchmark-summary.txt").is_file())
             self.assertFalse((output / "benchmark-summary.md").exists())
 
-    def test_source_mapped_profile_text_asset_retains_its_sealed_link(self):
+    def test_saved_summary_retains_its_historical_profile_link(self):
         summary = stage_module.SOURCE / "benchmark-summary.txt"
-        relative = "../mpc01-source-mapped-profile-20261102/README.txt"
+        relative = "../mpc01-source-mapped-profile-20261102/README.md"
         self.assertIn(relative, summary.read_text(encoding="utf-8"))
         profile = (stage_module.SOURCE.parent / "mpc01-source-mapped-profile-20261102")
         note = profile / "README.txt"
@@ -92,6 +124,19 @@ class PerAttemptPublicationTests(unittest.TestCase):
                                   (staged_bundle / "SHA256SUMS").read_text(encoding="ascii"))
                     self.assertNotIn(f"  {source_name}\n",
                                      (staged_bundle / "SHA256SUMS").read_text(encoding="ascii"))
+            historical_summary = route / "benchmark-summary.md"
+            self.assertEqual(hashlib.sha256(historical_summary.read_bytes()).hexdigest(),
+                             "e8a3f56c88e300e6f787ad2033eb14bfbfbcceaa4c406376708ec125bfec70fa")
+            self.assertIn(
+                "e8a3f56c88e300e6f787ad2033eb14bfbfbcceaa4c406376708ec125bfec70fa  benchmark-summary.md\n",
+                (route / "SHA256SUMS").read_text(encoding="ascii"))
+            alias_root = site / "mpc01-source-mapped-profile-20261102"
+            profile_source = (ROOT / "docs/research/evidence/mpc01-source-mapped-profile-20261102/README.txt").read_bytes()
+            self.assertEqual((alias_root / "README.md").read_bytes(), profile_source)
+            self.assertEqual((alias_root / "README.txt").read_bytes(), profile_source)
+            historical_reference = "../mpc01-source-mapped-profile-20261102/README.md"
+            resolved_historical = (historical_summary.parent / historical_reference).resolve()
+            self.assertEqual(resolved_historical, (alias_root / "README.md").resolve())
             for line in (route / "SHA256SUMS").read_text(encoding="utf-8").splitlines():
                 digest, name = line.split("  ", 1)
                 self.assertEqual(hashlib.sha256((route / name).read_bytes()).hexdigest(), digest, name)
