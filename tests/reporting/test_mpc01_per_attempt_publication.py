@@ -20,6 +20,20 @@ SPEC.loader.exec_module(stage_module)
 
 
 class PerAttemptPublicationTests(unittest.TestCase):
+    def test_repeated_comparison_generator_links_its_text_summary(self):
+        source = ROOT / "docs/research/evidence/mpc01-external-qps-20261102-resource-r1"
+        with tempfile.TemporaryDirectory(prefix="mpc01-repeated-report-") as temporary:
+            output = Path(temporary)
+            script = ROOT / "scripts/reports/mpc01/summarize_repeated_comparison.py"
+            subprocess.run([sys.executable, str(script), "--records",
+                            str(source / "comparison-records.jsonl"), "--attempts",
+                            str(source / "runner.stdout.jsonl"), "--output-dir", str(output)],
+                           cwd=ROOT, check=True, capture_output=True, text=True)
+            page = (output / "b04-repeated-benchmark-projections.html").read_text(encoding="utf-8")
+            self.assertIn('href="benchmark-summary.txt"', page)
+            self.assertTrue((output / "benchmark-summary.txt").is_file())
+            self.assertFalse((output / "benchmark-summary.md").exists())
+
     def test_source_mapped_profile_text_asset_retains_its_sealed_link(self):
         summary = stage_module.SOURCE / "benchmark-summary.txt"
         relative = "../mpc01-source-mapped-profile-20261102/README.txt"
