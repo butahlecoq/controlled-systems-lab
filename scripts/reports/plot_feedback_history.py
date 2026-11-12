@@ -75,6 +75,28 @@ def render(task_name, response, attempt_path, destination, capture_source, rende
     if (geometry["status"] != "complete" or geometry["family"] != "box"
             or len(geometry["stages"]) != horizon + 1):
         raise ValueError("complete all-stage box geometry required")
+    protocol = "cold at each query; known warm-start protocol gap"
+    initialization_sources = []
+    first_request = json.loads((attempt_path.parent / metadata["request"]["path"]).read_bytes())
+    if "warm_start" in first_request:
+        stage1 = json.loads((attempt_path.parent / "stage-001.json").read_bytes())
+        next_ref = stage1["native_query_capture"]
+        next_metadata_bytes = (attempt_path.parent / next_ref["path"]).read_bytes()
+        if hashlib.sha256(next_metadata_bytes).hexdigest() != next_ref["sha256"]:
+            raise ValueError("next query metadata differs")
+        next_metadata = json.loads(next_metadata_bytes)
+        next_request_bytes = (attempt_path.parent / next_metadata["request"]["path"]).read_bytes()
+        if hashlib.sha256(next_request_bytes).hexdigest() != next_metadata["request"]["sha256"]:
+            raise ValueError("next query request differs")
+        next_request = json.loads(next_request_bytes)
+        if (first_request["warm_start"]["policy"] != "initial-zero-control-rollout"
+                or next_request["warm_start"]["policy"] != "shift-prior-primal-drop-applied-stage-no-terminal-repeat"
+                or next_request["warm_start"]["dual_policy"] != "zero-every-solve"):
+            raise ValueError("unexpected recorded initialization protocol")
+        protocol = "initial observed-state rollout; subsequent shifted history primal and zero supplied duals"
+        initialization_sources = [metadata["request"], next_metadata["request"]]
+    protocol_label = ("Shifted primal; supplied zero duals; composite SDK build."
+                      if initialization_sources else "Cold starts; composite SDK build.")
     all_sets = []
     for k, stage in enumerate(geometry["stages"]):
         if stage["stage"] != k or stage["coordinates"] != list(range(n)) or "intersection_h" not in stage:
@@ -146,7 +168,7 @@ def render(task_name, response, attempt_path, destination, capture_source, rende
             colorbar.ax.yaxis.label.set_color(foreground)
             colorbar.ax.tick_params(colors=foreground)
             fig.suptitle(f"{task_name} · first observed query, stages 0–{horizon}", color=foreground, y=0.97)
-            fig.text(0.5, 0.035, "Outer affine-predictor sets; observed nonlinear plant.\nCold starts; composite SDK build.",
+            fig.text(0.5, 0.035, "Outer affine-predictor sets; observed nonlinear plant.\n" + protocol_label,
                      ha="center", color=foreground, fontsize=8)
             path = destination / f"all-stages-{first}-{second}-{variant}.png"
             fig.savefig(path, dpi=150, facecolor=background)
@@ -168,7 +190,7 @@ def render(task_name, response, attempt_path, destination, capture_source, rende
         "terminal_reference": "soft objective reference, not a terminal constraint",
         "full_state_before_projection": True, "family": "box", "stages": horizon+1,
         "quantitative_style": STYLE_ID, "palette": "shared Omarchy stage palette",
-        "execution_protocol": "cold at each query; known warm-start protocol gap",
+        "execution_protocol": protocol, "initialization_sources": initialization_sources,
         "build_scope": "composite current compiled sources and f4 installed SDK",
         "figures": output}
     (destination / "render-receipt.json").write_text(json.dumps(receipt, indent=2) + chr(10))
