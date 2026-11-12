@@ -2,6 +2,7 @@
 
 #include <csl/geometry/contracts.hpp>
 #include <csl/reachability/fixed_plan_disturbance.hpp>
+#include <csl/reachability/finite_plan_box.hpp>
 
 namespace csl::reachability {
 
@@ -28,5 +29,12 @@ using FinitePlanEllipsoidOutcome =
 // This is numerical evidence, not a validated-arithmetic certificate.
 FinitePlanEllipsoidOutcome finite_plan_ellipsoid(
     const FixedPlanRequest& request, const ExecutionContext& context = {});
+
+// One-step image of an axis ellipsoid and the whole control box through B.
+// The fresh axis ellipsoid is an outer cover, not an invertibility assumption.
+std::variant<FinitePlanEllipsoidTrace::Stage, Unsupported, OperationStopped>
+propagate_existential_control_ellipsoid(const model::DynamicsStage&,
+    const FinitePlanEllipsoidTrace::Stage&, const BoxStage& controls,
+    const ExecutionContext&);
 
 } // namespace csl::reachability

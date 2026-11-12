@@ -176,6 +176,32 @@ auto ellipsoid_support(const Stage& stage) {
 }
 } // namespace
 
+std::variant<FinitePlanEllipsoidTrace::Stage, Unsupported, OperationStopped>
+propagate_existential_control_ellipsoid(const model::DynamicsStage& dynamics,
+        const FinitePlanEllipsoidTrace::Stage& current, const BoxStage& controls,
+        const ExecutionContext& context) {
+    const auto n=dynamics.A.rows(), m=dynamics.B.cols();
+    if (n==0 || dynamics.A.cols()!=n || dynamics.B.rows()!=n || dynamics.E.cols()!=0 ||
+        dynamics.offset.size()!=n || current.center.size()!=n || current.radii.size()!=n ||
+        controls.lower.size()!=m || controls.upper.size()!=m)
+        return unsupported("feedback.ellipsoid.inputs", "Compatible state, control and dynamics dimensions are required.");
+    for (std::size_t i=0;i<n;++i)
+        if (!std::isfinite(current.center[i]) || !std::isfinite(current.radii[i]) || current.radii[i]<0)
+            return unsupported("feedback.ellipsoid.inputs", "State center and nonnegative radii must be finite.");
+    Vector center(m), radii(m);
+    for (std::size_t i=0;i<m;++i) {
+        if (!std::isfinite(controls.lower[i]) || !std::isfinite(controls.upper[i]) || controls.lower[i]>controls.upper[i])
+            return unsupported("feedback.ellipsoid.controls", "Control bounds must be finite and ordered.");
+        auto value=midpoint_radius(controls.lower[i],controls.upper[i],1.0);
+        if (!value) return unsupported("feedback.ellipsoid.controls", "Control bounds overflowed.");
+        center[i]=value->first; radii[i]=value->second;
+    }
+    auto zero=numeric::snapshot(Matrix{n,0,{}});
+    if (auto* error=std::get_if<Diagnostic>(&zero)) return Unsupported{{*error}};
+    const model::DynamicsStage mapped{dynamics.A,std::get<numeric::MatrixView>(zero),dynamics.B,dynamics.offset};
+    return step(mapped,current,{},center,radii,context);
+}
+
 FinitePlanEllipsoidOutcome finite_plan_ellipsoid(
     const FixedPlanRequest& request, const ExecutionContext& context) {
   const auto dimensions = request.system.dimensions();

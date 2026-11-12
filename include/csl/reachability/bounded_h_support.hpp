@@ -18,8 +18,10 @@ struct BoundedHSupportInput {
     Vector lower, upper, direction;
 };
 
+enum class SupportBoundMethod { dual_candidate, carrier_only };
 struct SupportUpperBound {
     double value;
+    SupportBoundMethod method{SupportBoundMethod::dual_candidate};
     // Bound applies to the computed H intersection and binary64 inputs only.
 };
 
@@ -50,6 +52,7 @@ BoundedHSupportOutcome bounded_h_support(const BoundedHSupportInput&,
 struct BoundedHAxisCover {
     Vector lower, upper;
     std::vector<registry::LPQueryRecord> lp_calls;
+    std::vector<SupportBoundMethod> methods;
 };
 struct BoundedHAxisFailure {
     BoundedHAxisCover prefix;

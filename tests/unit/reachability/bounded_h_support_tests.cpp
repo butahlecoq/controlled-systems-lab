@@ -2,6 +2,8 @@
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/reachability/feedback_geometry.hpp>
 #include <csl/reachability/finite_plan_zonotope.hpp>
+#include <csl/reachability/finite_plan_box.hpp>
+#include <csl/reachability/finite_plan_ellipsoid.hpp>
 #include <cstdlib>
 
 void check(bool condition) { if (!condition) std::abort(); }
@@ -48,6 +50,17 @@ int main() {
         matrix({2,0,{}}),vector({0,0})};
     FinitePlanZonotopeTrace::Stage state{{0,0},{2,1,{1,1}},{{"state"}}};
     FinitePlanZonotopeTrace::Stage control{{0},{1,1,{0.5}},{{"u"}}};
+    auto propagated_box=propagate_existential_control_box(dynamics,
+        {{-1,-1},{1,1}},{{-0.5},{0.5}},{});
+    check(std::holds_alternative<BoxStage>(propagated_box));
+    const auto& next_box=std::get<BoxStage>(propagated_box);
+    check(next_box.lower[0]<=-2.5 && next_box.upper[0]>=2.5);
+    check(next_box.lower[1]<=-1.5 && next_box.upper[1]>=1.5);
+    auto propagated_ellipsoid=propagate_existential_control_ellipsoid(dynamics,
+        {{0,0},{1,1}},{{-0.5},{0.5}},{});
+    check(std::holds_alternative<FinitePlanEllipsoidTrace::Stage>(propagated_ellipsoid));
+    const auto& next_e=std::get<FinitePlanEllipsoidTrace::Stage>(propagated_ellipsoid);
+    check(next_e.radii[0]>=std::sqrt(2.0)*(std::sqrt(2.0)+0.5));
     auto propagated=propagate_existential_control_zonotope(dynamics,state,control,20,{},0);
     check(std::holds_alternative<FinitePlanZonotopeTrace::Stage>(propagated));
     const auto& next=std::get<FinitePlanZonotopeTrace::Stage>(propagated);
@@ -93,6 +106,14 @@ int main() {
     const auto& solved=std::get<BoundedHSupportResult>(answer);
     check(solved.bound.value>=1 && solved.bound.value<1.00000001);
     check(solved.lp_calls.size()==1);
+    auto tiny_answer=bounded_h_support(tiny,{{"test"},{"dual-tiny"}},
+        std::get<csl::registry::PreparedProvider<csl::registry::LPPort>>(prepared),{});
+    // HiGHS rejects the candidate LP threshold. The carrier-only result uses
+    // zero multipliers and retains that rejection without altering the H rows.
+    check(std::holds_alternative<BoundedHSupportResult>(tiny_answer));
+    const auto& tiny_result=std::get<BoundedHSupportResult>(tiny_answer);
+    check(tiny_result.bound.method==SupportBoundMethod::carrier_only);
+    check(tiny_result.bound.value>=1 && tiny_result.lp_calls.size()==1);
     auto four_answer=bounded_h_support(four,{{"test"},{"dual-four"}},
         std::get<csl::registry::PreparedProvider<csl::registry::LPPort>>(prepared),{});
     check(std::holds_alternative<BoundedHSupportResult>(four_answer));
@@ -121,4 +142,12 @@ int main() {
 void lp_api_must_exist(const csl::reachability::BoundedHSupportInput& input,
     const csl::registry::PreparedProvider<csl::registry::LPPort>& lp) {
     (void)csl::reachability::bounded_h_support(input, {{"support"},{"dual"}}, lp, {});
+}
+
+// API compilation gate for the staged full-state recurrence.
+void coordinator_api_must_exist(const csl::problem::ResolvedProblem& problem,
+    const csl::SetHandle& terminal,
+    const csl::reachability::FeedbackGeometryDependencies& providers) {
+    (void)csl::reachability::feedback_geometry(problem,{"analytic"},terminal,
+        csl::reachability::FeedbackFamily::zonotope,{},providers,{});
 }
