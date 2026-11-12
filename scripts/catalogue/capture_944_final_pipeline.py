@@ -53,6 +53,11 @@ def main() -> int:
         parser.error("build directory has no CMakeCache.txt")
     if output.exists():
         parser.error("output directory must be fresh")
+    if executable.name != "csl_strategy_a_each_choice_pipeline" or not executable.is_relative_to(build):
+        parser.error("executable must be the named pipeline target inside the selected build directory")
+    dirty = subprocess.check_output(["git", "-C", str(ROOT), "status", "--porcelain"], text=True)
+    if dirty:
+        parser.error("source worktree must be clean before capture")
     config = cache_values(cache)
     expected = {
         "CMAKE_HOME_DIRECTORY": str(ROOT),
