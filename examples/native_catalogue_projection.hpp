@@ -20,6 +20,7 @@ struct CapturedCase {
     model::catalogue::CaseInfo info;
     std::vector<Cloud> stages;
     std::array<std::pair<std::size_t, std::size_t>, 2> projection_axes{{{0, 1}, {0, 2}}};
+    bool physical_coordinates{false};
 };
 inline geometry::QuickHull2D projected_hull(const Cloud& cloud) {
     auto result = geometry::quickhull_2d(cloud);
@@ -94,9 +95,9 @@ inline void write_svg(const std::filesystem::path& file, const std::vector<Captu
             }
             out << "<rect x=\"" << left << "\" y=\"" << top << "\" width=\"" << width << "\" height=\"" << height
                 << "\" fill=\"none\" stroke=\"" << foreground << "\"/>"
-                << "<text x=\"" << left + width / 2 << "\" y=\"" << top + height + 45 << "\" text-anchor=\"middle\" font-size=\"" << (panel ? 23 : 15) << "\">x" << horizontal + 1 << " (source unit unspecified)</text>"
-                << "<text transform=\"translate(" << left - 55 << ',' << top + height / 2 << ") rotate(-90)\" text-anchor=\"middle\" font-size=\"" << (panel ? 23 : 15) << "\">x"
-                << vertical + 1 << " (unit unspecified)</text>";
+                << "<text x=\"" << left + width / 2 << "\" y=\"" << top + height + 45 << "\" text-anchor=\"middle\" font-size=\"" << (panel ? (data.physical_coordinates ? 17 : 23) : 15) << "\">" << (data.physical_coordinates ? std::string(data.info.states[horizontal].name) + " (" + std::string(data.info.states[horizontal].unit) + ")" : "x" + std::to_string(horizontal + 1) + " (source unit unspecified)") << "</text>"
+                << "<text transform=\"translate(" << left - 55 << ',' << top + height / 2 << ") rotate(-90)\" text-anchor=\"middle\" font-size=\"" << (panel ? (data.physical_coordinates ? 17 : 23) : 15) << "\">" << (data.physical_coordinates ? "" : "x")
+                << (data.physical_coordinates ? std::string(data.info.states[vertical].name) + " (" + std::string(data.info.states[vertical].unit) + ")" : std::to_string(vertical + 1) + " (unit unspecified)") << "</text>";
         }
     }
     const auto legend_size = panel ? cases[panel->first].stages.size() : maximum_stage + 1;

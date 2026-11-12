@@ -4,6 +4,7 @@
 #include <array>
 #include <cmath>
 #include <limits>
+#include <numbers>
 
 namespace csl::model::catalogue {
 namespace {
@@ -192,6 +193,58 @@ assemble_flexible_pitch(const FlexiblePitchParameters& p) {
         explicit_rates.B.values[i] = solved[i * width + n];
     }
     return FlexiblePitchDescriptor{std::move(E), std::move(A), std::move(B), std::move(explicit_rates), minimum_pivot, residual};
+}
+
+FlexiblePitchResult<FlexiblePitchCase> make_flexible_pitch_case(std::string_view id) {
+    auto parameter_result = flexible_pitch_parameters(id);
+    if (const auto* error = std::get_if<Diagnostics>(&parameter_result)) return *error;
+    auto parameters = std::get<FlexiblePitchParameters>(std::move(parameter_result));
+    auto descriptor_result = assemble_flexible_pitch(parameters);
+    if (const auto* error = std::get_if<Diagnostics>(&descriptor_result)) return *error;
+    auto descriptor = std::get<FlexiblePitchDescriptor>(std::move(descriptor_result));
+    const auto entry = std::find_if(cases.begin(), cases.end(),
+        [id](const CaseInfo& info) { return info.id == id; });
+    const auto n = entry->states.size();
+    Vector times(entry->transitions + 1);
+    for (std::size_t k = 0; k < times.size(); ++k) times[k] = 0.1 * static_cast<double>(k);
+    auto discrete_result = discretize({{n, 1, 0}, times, HoldConvention::zero_order_hold,
+        descriptor.rates});
+    if (const auto* error = std::get_if<Diagnostic>(&discrete_result)) return Diagnostics{*error};
+    if (const auto* stopped = std::get_if<OperationStopped>(&discrete_result))
+        return reject("model.flexible_pitch.discretization", stopped->diagnostics);
+    auto discrete = std::get<DiscretizedModel>(std::move(discrete_result));
+    constexpr double radians = std::numbers::pi / 180;
+    Vector radii{0.2 * radians, 0.05 * radians, 0.2, 0.02};
+    for (std::size_t i = 0; i < parameters.bending.size(); ++i) {
+        radii.push_back(0.0005); radii.push_back(0.001);
+    }
+    for (std::size_t i = 0; i < parameters.slosh.size(); ++i) {
+        radii.push_back(0.001); radii.push_back(0.002);
+    }
+    const std::string prefix(id);
+    Matrix generators{n, n, Vector(n * n, 0)};
+    std::vector<sets::FactorId> factors;
+    std::vector<std::string> labels;
+    for (std::size_t j = 0; j < n; ++j) {
+        generators.values[j * n + j] = radii[j];
+        labels.emplace_back(entry->states[j].name);
+        factors.push_back({prefix + "/initial/" + labels.back()});
+    }
+    auto initial_result = sets::make_generator_set({{prefix + "/initial"}, Vector(n, 0),
+        std::move(generators), std::move(factors), {0, n, {}}, {}, std::move(labels)});
+    if (const auto* error = std::get_if<Diagnostics>(&initial_result)) return *error;
+    std::vector<sets::GeneratorSet> inputs;
+    for (std::size_t k = 0; k < entry->transitions; ++k) {
+        const auto stage = prefix + "/control/" + std::to_string(k);
+        auto input = sets::make_generator_set({{stage}, {0}, {1, 1, {4 * radians}},
+            {{stage + "/delta"}}, {0, 1, {}}, {}, {"pitch_control_deflection"}});
+        if (const auto* error = std::get_if<Diagnostics>(&input)) return *error;
+        inputs.push_back(std::get<sets::GeneratorSet>(std::move(input)));
+    }
+    DiscreteReachabilityCase reach{*entry, std::move(discrete.model), std::move(times),
+        std::get<sets::GeneratorSet>(std::move(initial_result)), std::move(inputs)};
+    return FlexiblePitchCase{std::move(reach), std::move(parameters),
+        std::move(descriptor), std::move(discrete.receipt)};
 }
 
 } // namespace csl::model::catalogue

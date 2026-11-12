@@ -1,12 +1,17 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/model/flexible_pitch.hpp>
+#include <csl/model/linear_system.hpp>
 
 #include <cmath>
 #include <limits>
 
 namespace {
 template<class T, class... Errors> T take(std::variant<T, Errors...> value) {
+    if constexpr (std::is_constructible_v<std::variant<T, Errors...>, csl::Diagnostics>) {
+        if (const auto* errors = std::get_if<csl::Diagnostics>(&value))
+            for (const auto& error : *errors) FAIL(error.field << ": " << error.explanation);
+    }
     REQUIRE(std::holds_alternative<T>(value));
     return std::get<T>(std::move(value));
 }
@@ -94,4 +99,60 @@ TEST_CASE("flexible pitch rejects a singular descriptor before explicit dynamics
     parameters.pitch_input = std::numeric_limits<double>::quiet_NaN();
     CHECK(std::holds_alternative<Diagnostics>(assemble_flexible_pitch(parameters)));
     CHECK(std::holds_alternative<Diagnostics>(flexible_pitch_parameters("missing-flexible-case")));
+}
+
+TEST_CASE("flexible pitch catalogue executes physical-time zero-order hold cases") {
+    using namespace csl;
+    using namespace csl::model::catalogue;
+    CHECK(discrete_reachability_cases().size() == 6);
+    for (const auto& info : flexible_pitch_cases()) {
+        const auto data = take(make_flexible_pitch_case(info.id));
+        const auto& reach = data.reachability;
+        CHECK(reach.info.id == info.id);
+        REQUIRE(reach.time_grid.size() == 41);
+        CHECK(reach.time_grid.front() == 0);
+        CHECK(reach.time_grid.back() == 4);
+        REQUIRE(reach.controls.size() == 40);
+        CHECK(reach.initial.center().size() == info.states.size());
+        CHECK(data.discretization.stages.size() == 40);
+        CHECK(data.discretization.hold == model::HoldConvention::zero_order_hold);
+        CHECK(data.discretization.variation == model::CoefficientVariation::constant_lti);
+        CHECK(take(make_discrete_reachability_case(info.id)).info.id == info.id);
+    }
+}
+
+TEST_CASE("flexible pitch ZOH agrees with an independent augmented matrix exponential") {
+    using namespace csl;
+    using namespace csl::model::catalogue;
+    for (const auto& info : flexible_pitch_cases()) {
+        const auto data = take(make_flexible_pitch_case(info.id));
+        const auto n = info.states.size(), m = n + 1;
+        // Long-double Taylor series of exp(h*[A B; 0 0]), independent of RK4.
+        std::vector<long double> generator(m * m, 0), term(m * m, 0), sum(m * m, 0);
+        for (std::size_t i = 0; i < n; ++i) {
+            for (std::size_t j = 0; j < n; ++j)
+                generator[i * m + j] = 0.1L * data.descriptor.rates.A.values[i * n + j];
+            generator[i * m + n] = 0.1L * data.descriptor.rates.B.values[i];
+        }
+        for (std::size_t i = 0; i < m; ++i) term[i * m + i] = sum[i * m + i] = 1;
+        for (std::size_t order = 1; order <= 40; ++order) {
+            std::vector<long double> next(m * m, 0);
+            for (std::size_t i = 0; i < m; ++i)
+                for (std::size_t j = 0; j < m; ++j)
+                    for (std::size_t k = 0; k < m; ++k)
+                        next[i * m + j] += term[i * m + k] * generator[k * m + j] /
+                            static_cast<long double>(order);
+            term = std::move(next);
+            for (std::size_t i = 0; i < sum.size(); ++i) sum[i] += term[i];
+        }
+        const auto system = take(model::snapshot(data.reachability.model, data.reachability.time_grid));
+        for (std::size_t k = 0; k < system.horizon(); ++k) {
+            const auto stage = take(system.stage({k}));
+            for (std::size_t i = 0; i < n; ++i) {
+                for (std::size_t j = 0; j < n; ++j)
+                    CHECK(std::abs(stage.A(i, j) - sum[i * m + j]) < 2e-9L);
+                CHECK(std::abs(stage.B(i, 0) - sum[i * m + n]) < 2e-9L);
+            }
+        }
+    }
 }

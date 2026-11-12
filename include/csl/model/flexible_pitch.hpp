@@ -32,9 +32,17 @@ struct FlexiblePitchDescriptor {
     double minimum_scaled_pivot, maximum_relative_residual;
 };
 
+struct FlexiblePitchCase {
+    DiscreteReachabilityCase reachability;
+    FlexiblePitchParameters parameters;
+    FlexiblePitchDescriptor descriptor;
+    DiscretizationReceipt discretization;
+};
+
 template<class T> using FlexiblePitchResult = std::variant<T, Diagnostics>;
 
 std::span<const CaseInfo> flexible_pitch_cases() noexcept;
+FlexiblePitchResult<FlexiblePitchCase> make_flexible_pitch_case(std::string_view id);
 FlexiblePitchResult<FlexiblePitchParameters> flexible_pitch_parameters(std::string_view id);
 
 // Assemble E*x_dot=A_tilde*x+B_tilde*delta, then solve the checked descriptor.
