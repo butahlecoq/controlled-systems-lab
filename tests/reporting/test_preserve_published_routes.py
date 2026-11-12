@@ -2,6 +2,7 @@
 import io
 import json
 import stat
+import tarfile
 import zipfile
 from unittest.mock import patch
 from pathlib import Path
@@ -10,9 +11,51 @@ import tempfile
 import unittest
 
 from scripts.reports import preserve_published_routes as preservation
+from scripts.reports import audit_published_route_preservation as baseline_audit
 
 
 class PublishedRoutePreservationTests(unittest.TestCase):
+    def test_baseline_audit_distinguishes_indexes_from_frozen_evidence(self):
+        indexes = ('examples/visual-route-inventory.json', 'examples/visual-coverage.json',
+                   'examples/closed-loop/figure-index.json', 'examples/algorithm-coverage.json')
+        payloads = {name: b'{"entries": []}' for name in indexes}
+        payloads.update({'report/raw.json': b'{"cost": 1}', 'report/raw.zip': b'saved archive',
+                         'pages-mpc11-environment.json': b'{"python": "qualified"}'})
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            site, source = root / 'site', root / 'source'
+            site.mkdir()
+            source.mkdir()
+            baseline = root / 'baseline.tar'
+            with tarfile.open(baseline, 'w') as bundle:
+                for name, data in payloads.items():
+                    member = tarfile.TarInfo(name)
+                    member.size = len(data)
+                    bundle.addfile(member, io.BytesIO(data))
+                    target = site / name
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_bytes(data)
+            manifest = json.loads((preservation.SOURCE / 'manifest.json').read_text())
+            manifest['baseline']['artifact_tar_sha256'] = preservation.digest(baseline.read_bytes())
+            (source / 'manifest.json').write_text(json.dumps(manifest))
+            for name in indexes:
+                (site / name).write_bytes(b'{"entries": ["new illustration"]}')
+            with patch.object(baseline_audit, 'SOURCE', source):
+                self.assertTrue(baseline_audit.audit(baseline, site)['passed'])
+                for name, field in (('report/raw.json', 'unexpected_changed'),
+                                    ('report/raw.zip', 'changed_or_missing_zips')):
+                    with self.subTest(name=name):
+                        (site / name).write_bytes(b'altered scientific evidence')
+                        result = baseline_audit.audit(baseline, site)
+                        self.assertFalse(result['passed'])
+                        self.assertIn(name, result[field])
+                        (site / name).write_bytes(payloads[name])
+                receipt = 'pages-mpc11-environment.json'
+                (site / receipt).unlink()
+                result = baseline_audit.audit(baseline, site)
+                self.assertFalse(result['passed'])
+                self.assertEqual(result['missing'], [receipt])
+
     def test_historical_helper_predecessors_survive_on_a_fresh_site(self):
         predecessors = {
             'b04-source-moments-11fb3cd7d83f868d3c3d':
