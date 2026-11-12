@@ -46,6 +46,7 @@ struct FeedbackSet {
     std::vector<SupportBoundCertificate> support_certificates;
     std::vector<std::string> construction;
     std::vector<GeometryEvidence> lineage;
+    SetId id; // selected-family result identity, including generator and ellipsoid sets
 };
 
 struct FeedbackGeometryStage {

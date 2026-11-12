@@ -61,8 +61,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "c8ad73316a30bc85e2ef4c12143bda1f2d3e41588262ab2d85343fb1ce82388b",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-mpc/1/cfg-c8ad73316a30bc85",
+      "graph_fingerprint": "aa59f19a498e588ba979af07a205ec02d0c1521383b3759c586e0757c26c2531",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-mpc/1/cfg-aa59f19a498e588b",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -164,7 +164,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "ebf2f8843a58f762377005735965b85919513f9d38879f81d627ae4243d7c019"
+          "sha256": "2502287a5dc0817309d5612c3935afa00a544ac9a8e8b6e90d40471680eaf6d5"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -229,8 +229,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "f19a2fc3c4f6628a47ee2d7640301ec8f11599df5a03e82fac60ef723b1ea868",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ipopt/1/cfg-f19a2fc3c4f6628a",
+      "graph_fingerprint": "927084c6bf4439bce7a21bc4b91e82020da516a5c698f6d4233c68e4ab5f19fd",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ipopt/1/cfg-927084c6bf4439bc",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -332,7 +332,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "ebf2f8843a58f762377005735965b85919513f9d38879f81d627ae4243d7c019"
+          "sha256": "2502287a5dc0817309d5612c3935afa00a544ac9a8e8b6e90d40471680eaf6d5"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -408,8 +408,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "e53e21edadf2c0f974ba25c111b399d21f25382d899f359b0261ee1f991212c8",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-box-ipopt/1/cfg-e53e21edadf2c0f9",
+      "graph_fingerprint": "04afb4b83d5f5ad32f7dd30159e7b720c7e5d4bcc64571882e53b6bd981d6e79",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-box-ipopt/1/cfg-04afb4b83d5f5ad3",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -486,7 +486,7 @@
         },
         {
           "path": "include/csl/reachability/feedback_geometry.hpp",
-          "sha256": "168e76536d698aff6306818f28be93a04c9e534c38e2922496fe07f0a87768c1"
+          "sha256": "c06b641b23bf368475838356b038fe583e54d4ad94fcd34545e190eea26d8391"
         },
         {
           "path": "src/adapters/convex/highs.cpp",
@@ -526,7 +526,7 @@
         },
         {
           "path": "src/reachability/feedback_coordinator.cpp",
-          "sha256": "972b22104524517d0acce0eb3d3a06a31152e9a95d53f5f119738eb66e91b3d8"
+          "sha256": "4c4c0a3f2990183b669f387606417499c5fae87bb8ba281a4dc9986bfca9371d"
         },
         {
           "path": "src/reachability/feedback_geometry.cpp",
@@ -562,7 +562,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "ebf2f8843a58f762377005735965b85919513f9d38879f81d627ae4243d7c019"
+          "sha256": "2502287a5dc0817309d5612c3935afa00a544ac9a8e8b6e90d40471680eaf6d5"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -627,8 +627,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "225a872df1ced1efc3d9fed7bdf7e62ed0cc5908e6d76f9dd0a55053bdb276df",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-225a872df1ced1ef",
+      "graph_fingerprint": "3b0f0df20d9edba698558ac9d023289888ffb540a49de1b2615d3a8d9dd566b0",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-3b0f0df20d9edba6",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -726,7 +726,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "ebf2f8843a58f762377005735965b85919513f9d38879f81d627ae4243d7c019"
+          "sha256": "2502287a5dc0817309d5612c3935afa00a544ac9a8e8b6e90d40471680eaf6d5"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -791,8 +791,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "edcd8a728c7bac585084ce78eca53a9fde484671d27cfd7a391a56546f0b6c1a",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-mpc/1/cfg-edcd8a728c7bac58",
+      "graph_fingerprint": "f3a0c4f71ae261c97c47173cb39d1bd131b64aec0ed13055f348550f37a7e0f8",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-mpc/1/cfg-f3a0c4f71ae261c9",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -894,7 +894,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "ebf2f8843a58f762377005735965b85919513f9d38879f81d627ae4243d7c019"
+          "sha256": "2502287a5dc0817309d5612c3935afa00a544ac9a8e8b6e90d40471680eaf6d5"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -959,8 +959,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "ed7cf04671bf32e8f4bb45bcaf766bdd2d041c8948b5c3d424544ba875881a9f",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ipopt/1/cfg-ed7cf04671bf32e8",
+      "graph_fingerprint": "a1002f8d3127846a00e9e28342b55751599cd9a44b7a35272f38113a3c5b1f81",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ipopt/1/cfg-a1002f8d3127846a",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1062,7 +1062,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "ebf2f8843a58f762377005735965b85919513f9d38879f81d627ae4243d7c019"
+          "sha256": "2502287a5dc0817309d5612c3935afa00a544ac9a8e8b6e90d40471680eaf6d5"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",

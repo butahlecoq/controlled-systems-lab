@@ -830,6 +830,7 @@ Json feedback_membership_json(const reachability::FeedbackSet& shape,
             return result;
         }
     }, shape.membership);
+    membership["set_id"] = shape.id.value;
     membership["indices"] = indices;
     membership["role"] = role;
     membership["scope"] = "forward_relevant_from_observation";
