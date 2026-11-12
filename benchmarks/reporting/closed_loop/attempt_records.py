@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import codecs
 import hashlib
 import json
+import math
 import mmap
 import os
 from pathlib import Path
@@ -17,6 +18,9 @@ ATTEMPT_SCHEMA_V2 = "csl.closed-loop.attempt/2"
 STAGE_REFERENCE_SCHEMA = "csl.closed-loop.stage-reference/1"
 STAGE_INDEX = "stage-records.jsonl"
 IO_LOG = "record-io.jsonl"
+IO_STATUS = "record-io-integrity.json"
+IO_SCHEMA = "csl.closed-loop.record-io/1"
+IO_STATUS_SCHEMA = "csl.closed-loop.record-io-integrity/1"
 _JSON_NUMBER = re.compile(rb"-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\Z")
 _JSON_CONTROL = re.compile(rb"[\x00-\x1f]")
 
@@ -100,17 +104,128 @@ def append_jsonl(path: Path, value: Mapping[str, Any]) -> WriteReceipt:
 
 
 def append_io_event(attempt_dir: Path, event: Mapping[str, Any]) -> None:
+    try:
+        _append_io_event(attempt_dir, event)
+    except (OSError, TypeError, ValueError, OverflowError) as error:
+        # The journal is diagnostic. A failure here must not undo an already
+        # durable attempt or stage checkpoint.
+        try:
+            _mark_io_invalid(attempt_dir,
+                f"{type(error).__name__}: {error}; telemetry append disabled")
+        except OSError:
+            pass
+
+
+def _append_io_event(attempt_dir: Path, event: Mapping[str, Any]) -> None:
+    if _read_io_status(attempt_dir) is not None:
+        return
     recovery = _recover_io_log_tail(attempt_dir)
+    if recovery is not None and recovery.get("integrity_status") == "invalid":
+        return
     if recovery is not None:
-        append_jsonl(attempt_dir / IO_LOG, {"schema": "csl.closed-loop.record-io/1",
-            "operation": "record-io-tail-recovery", **recovery})
+        recovery_row = {"schema": IO_SCHEMA,
+            "operation": "record-io-tail-recovery", **recovery}
+        try:
+            _validate_io_event(recovery_row, 0)
+        except ValueError as error:
+            _mark_io_invalid(attempt_dir, f"recovery event is invalid: {error}")
+            return
+        append_jsonl(attempt_dir / IO_LOG, recovery_row)
     row = dict(event)
-    row["schema"] = "csl.closed-loop.record-io/1"
-    append_jsonl(attempt_dir / IO_LOG, row)
+    row["schema"] = IO_SCHEMA
+    try:
+        _validate_io_event(row, 0)
+        append_jsonl(attempt_dir / IO_LOG, row)
+    except (TypeError, ValueError, OverflowError) as error:
+        _mark_io_invalid(attempt_dir, f"generated event is invalid: {type(error).__name__}: {error}",
+            operation=row.get("operation"))
+
+
+def _read_io_status(attempt_dir: Path) -> dict[str, Any] | None:
+    path = attempt_dir / IO_STATUS
+    if not path.is_file():
+        return None
+    try:
+        status = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return {"schema": IO_STATUS_SCHEMA, "integrity_status": "invalid",
+            "integrity_diagnostic": "record I/O integrity sidecar is unreadable"}
+    if not isinstance(status, dict) or status.get("schema") != IO_STATUS_SCHEMA or \
+            status.get("integrity_status") != "invalid":
+        return {"schema": IO_STATUS_SCHEMA, "integrity_status": "invalid",
+            "integrity_diagnostic": "record I/O integrity sidecar has an invalid schema"}
+    return status
+
+
+def _mark_io_invalid(attempt_dir: Path, diagnostic: str, *, operation: Any = None,
+                     recovery_evidence: list[dict[str, Any]] | None = None) -> dict[str, Any]:
+    status = {"schema": IO_STATUS_SCHEMA, "integrity_status": "invalid",
+        "metric_totals_complete": False, "metric_totals_available": False,
+        "integrity_diagnostic": diagnostic,
+        "recovery_evidence": recovery_evidence or []}
+    if isinstance(operation, str):
+        status["operation"] = operation
+    atomic_json(attempt_dir / IO_STATUS, status)
+    return status
+
+
+class _RecordIoIntegrityError(ValueError):
+    pass
+
+
+def _validate_io_event(event: Any, row_number: int) -> None:
+    if not isinstance(event, dict) or event.get("schema") != IO_SCHEMA:
+        raise _RecordIoIntegrityError(f"invalid record I/O schema at row {row_number}")
+    operation = event.get("operation")
+    required: dict[str, tuple[str, ...]] = {
+        "attempt-checkpoint": ("path", "bytes_written", "sha256", "serialization_seconds", "fsync_seconds"),
+        "stage-checkpoint": ("update_index", "path", "bytes_written", "sha256", "serialization_seconds", "fsync_seconds"),
+        "stage-reference": ("update_index", "path", "index_bytes_written", "sha256", "serialization_seconds", "fsync_seconds"),
+        "native-payload": ("payload", "update_index", "path", "bytes_written", "sha256", "serialization_seconds", "fsync_seconds"),
+        "native-capture-checkpoint": ("update_index", "path", "bytes_written", "sha256", "serialization_seconds", "fsync_seconds"),
+        "record-artifact": ("scope", "path", "bytes_written", "sha256", "serialization_seconds", "fsync_seconds"),
+        "stage-reference-hash": ("path", "bytes_read", "verification_seconds", "sha256"),
+        "stage-reference-verification": ("path", "bytes_read", "verification_seconds", "sha256"),
+        "native-capture-verification": ("path", "bytes_read", "verification_seconds", "sha256"),
+        "native-payload-verification": ("path", "bytes_read", "verification_seconds", "sha256"),
+        "stage-index-recovery-read": ("path", "bytes_read", "parse_seconds"),
+        "stage-index-read": ("path", "bytes_read", "parse_seconds"),
+        "stage-index-tail-verified": ("path", "bytes_read", "verification_seconds", "sha256"),
+        "stage-index-tail-preserved": ("path", "bytes_written", "sha256", "serialization_seconds", "fsync_seconds"),
+        "stage-index-prefix-restored": ("path", "bytes_written", "sha256", "serialization_seconds", "fsync_seconds"),
+        "attempt-read": ("path", "bytes_read", "parse_seconds"),
+        "stage-summary-read": ("path", "bytes_read", "parse_seconds"),
+        "record-io-tail-recovery": ("path", "bytes", "sha256", "bytes_read", "verification_seconds",
+            "tail_bytes_written", "prefix_repair_bytes_written", "serialization_seconds", "fsync_seconds",
+            "metric_effect"),
+    }
+    if not isinstance(operation, str) or operation not in required:
+        raise _RecordIoIntegrityError(f"unknown record I/O operation at row {row_number}")
+    for key in required[operation]:
+        if key not in event:
+            raise _RecordIoIntegrityError(f"{operation} is missing {key} at row {row_number}")
+    string_fields = {"path", "sha256", "scope", "payload", "metric_effect"}
+    integer_fields = {"update_index", "bytes", "bytes_written", "bytes_read", "index_bytes_written",
+        "stage_bytes", "tail_bytes_written", "prefix_repair_bytes_written"}
+    number_fields = {"serialization_seconds", "fsync_seconds", "verification_seconds", "parse_seconds"}
+    for key in string_fields.intersection(event):
+        if not isinstance(event[key], str) or not event[key]:
+            raise _RecordIoIntegrityError(f"{operation}.{key} must be a nonempty string at row {row_number}")
+    for key in integer_fields.intersection(event):
+        value = event[key]
+        if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+            raise _RecordIoIntegrityError(f"{operation}.{key} must be a nonnegative integer at row {row_number}")
+    for key in number_fields.intersection(event):
+        value = event[key]
+        finite = isinstance(value, int) or (isinstance(value, float) and math.isfinite(value))
+        if isinstance(value, bool) or not finite or value < 0:
+            raise _RecordIoIntegrityError(f"{operation}.{key} must be a finite nonnegative number at row {row_number}")
 
 
 def _recover_io_log_tail(attempt_dir: Path) -> dict[str, Any] | None:
     """Preserve an unterminated telemetry row before allowing another append."""
+    if _read_io_status(attempt_dir) is not None:
+        return {"integrity_status": "invalid"}
     path = attempt_dir / IO_LOG
     if not path.is_file() or path.stat().st_size == 0:
         return None
@@ -122,7 +237,7 @@ def _recover_io_log_tail(attempt_dir: Path) -> dict[str, Any] | None:
     data = path.read_bytes()
     prefix_end = data.rfind(b"\n") + 1
     prefix, tail = data[:prefix_end], data[prefix_end:]
-    expected_schema = "csl.closed-loop.record-io/1"
+    recovery_evidence = []
     try:
         for row_number, raw_line in enumerate(prefix.splitlines(), start=1):
             if not raw_line.strip():
@@ -130,18 +245,25 @@ def _recover_io_log_tail(attempt_dir: Path) -> dict[str, Any] | None:
             try:
                 event = json.loads(raw_line)
             except (json.JSONDecodeError, UnicodeDecodeError) as error:
-                raise ValueError(f"record I/O log has malformed completed row {row_number}") from error
-            if not isinstance(event, dict) or event.get("schema") != expected_schema:
-                raise ValueError(f"record I/O log has invalid completed row {row_number}")
-    except ValueError:
-        raise
+                raise _RecordIoIntegrityError(f"malformed completed row {row_number}") from error
+            _validate_io_event(event, row_number)
+    except _RecordIoIntegrityError as error:
+        if tail:
+            evidence = _preserve_io_tail(attempt_dir, tail)
+            recovery_evidence.append(evidence)
+        _mark_io_invalid(attempt_dir, f"{error}; original journal bytes preserved",
+            recovery_evidence=recovery_evidence)
+        return {"integrity_status": "invalid"}
     digest = hashlib.sha256(tail).hexdigest()
     tail_name = f"record-io-tail-{digest}.bin"
     tail_path = attempt_dir / tail_name
     if tail_path.exists():
         existing = tail_path.read_bytes()
         if existing != tail:
-            raise ValueError("preserved record I/O tail exists with different contents")
+            evidence = _preserve_io_tail(attempt_dir, tail, collision=True)
+            _mark_io_invalid(attempt_dir, "preserved record I/O tail path has changed contents",
+                recovery_evidence=[evidence])
+            return {"integrity_status": "invalid"}
         tail_bytes_written = 0
         tail_receipt = None
     else:
@@ -157,6 +279,22 @@ def _recover_io_log_tail(attempt_dir: Path) -> dict[str, Any] | None:
         "fsync_seconds": ((tail_receipt.fsync_seconds if tail_receipt else 0.0)
             + prefix_receipt.fsync_seconds),
         "metric_effect": "torn source event is unknown; only the preserved evidence write is counted"}
+
+
+def _preserve_io_tail(attempt_dir: Path, tail: bytes, *, collision: bool = False) -> dict[str, Any]:
+    digest = hashlib.sha256(tail).hexdigest()
+    suffix = "-collision" if collision else ""
+    tail_name = f"record-io-tail-{digest}{suffix}.bin"
+    tail_path = attempt_dir / tail_name
+    if tail_path.exists() and tail_path.read_bytes() != tail:
+        raise OSError("cannot preserve record I/O tail without overwriting existing evidence")
+    if tail_path.exists():
+        bytes_written = 0
+    else:
+        receipt = atomic_bytes(tail_path, tail)
+        bytes_written = receipt.bytes_written
+    return {"path": tail_name, "bytes": len(tail), "sha256": digest,
+        "bytes_written": bytes_written}
 
 
 def atomic_bytes(path: Path, value: bytes) -> WriteReceipt:
@@ -765,8 +903,40 @@ def verify_v2_attempt(attempt_dir: Path, record: Mapping[str, Any]) -> tuple[lis
     return controls, states, reads
 
 
+def _io_unavailable(status: Mapping[str, Any]) -> dict[str, Any]:
+    result = {"integrity_status": status.get("integrity_status", "invalid"),
+        "metric_totals_complete": False, "metric_totals_available": False,
+        "integrity_diagnostic": status.get("integrity_diagnostic", "record I/O metrics are unavailable"),
+        "recovery_evidence": status.get("recovery_evidence", []),
+        "integrity_record": IO_STATUS,
+        "scope": "record I/O aggregates withheld because the diagnostic journal is unavailable; canonical attempt/stage data is independent"}
+    if isinstance(status.get("operation"), str):
+        result["invalid_operation"] = status["operation"]
+    return result
+
+
 def summarize_io(attempt_dir: Path) -> dict[str, Any]:
     path = attempt_dir / IO_LOG
+    prior_status = _read_io_status(attempt_dir)
+    if prior_status is not None:
+        return _io_unavailable(prior_status)
+    if not path.is_file():
+        return _io_unavailable({"integrity_status": "incomplete",
+            "integrity_diagnostic": "record I/O log is missing", "recovery_evidence": []})
+    recovery = _recover_io_log_tail(attempt_dir)
+    if recovery is not None and recovery.get("integrity_status") == "invalid":
+        return _io_unavailable(_read_io_status(attempt_dir) or {})
+    if recovery is not None:
+        recovery_row = {"schema": IO_SCHEMA, "operation": "record-io-tail-recovery", **recovery}
+        try:
+            _validate_io_event(recovery_row, 0)
+            append_jsonl(path, recovery_row)
+        except (TypeError, ValueError, OverflowError) as error:
+            status = _mark_io_invalid(attempt_dir,
+                f"recovery event is invalid: {type(error).__name__}: {error}",
+                operation="record-io-tail-recovery")
+            return _io_unavailable(status)
+
     totals: dict[str, Any] = {"checkpoint_writes": 0, "stage_writes": 0,
         "reference_writes": 0, "attempt_json_bytes_written": 0,
         "stage_json_bytes_written": 0, "native_payload_bytes_written": 0,
@@ -777,62 +947,61 @@ def summarize_io(attempt_dir: Path) -> dict[str, Any]:
         "index_repair_bytes_written": 0, "total_record_bytes_written": 0,
         "bytes_read": 0, "parse_seconds": 0.0, "verification_seconds": 0.0,
         "serialization_seconds": 0.0, "fsync_seconds": 0.0}
-    if not path.is_file():
-        totals.update({"integrity_status": "incomplete", "metric_totals_complete": False,
-            "recovery_evidence": [], "integrity_diagnostic": "record I/O log is missing"})
-        return totals
-    recovery = _recover_io_log_tail(attempt_dir)
-    if recovery is not None:
-        append_jsonl(path, {"schema": "csl.closed-loop.record-io/1",
-            "operation": "record-io-tail-recovery", **recovery})
-    with path.open("r", encoding="utf-8") as stream:
-        for row_number, line in enumerate(stream, start=1):
-            if not line.strip():
-                continue
-            try:
-                event = json.loads(line)
-            except json.JSONDecodeError as error:
-                raise ValueError(f"record I/O log has malformed completed row {row_number}") from error
-            if not isinstance(event, dict) or event.get("schema") != "csl.closed-loop.record-io/1":
-                raise ValueError(f"record I/O log has invalid completed row {row_number}")
-            operation = event.get("operation")
-            if operation == "attempt-checkpoint":
-                totals["checkpoint_writes"] += 1
-                totals["attempt_json_bytes_written"] += event["bytes_written"]
-                totals["total_record_bytes_written"] += event["bytes_written"]
-            elif operation == "stage-checkpoint":
-                totals["stage_writes"] += 1
-                totals["stage_json_bytes_written"] += event["bytes_written"]
-                totals["total_record_bytes_written"] += event["bytes_written"]
-            elif operation == "stage-reference":
-                totals["reference_writes"] += 1
-                totals["reference_index_bytes_written"] += event.get("index_bytes_written", 0)
-                totals["total_record_bytes_written"] += event.get("index_bytes_written", 0)
-            elif operation == "native-payload":
-                totals["native_payload_bytes_written"] += event["bytes_written"]
-                totals["total_record_bytes_written"] += event["bytes_written"]
-            elif operation == "native-capture-checkpoint":
-                totals["native_capture_checkpoint_bytes_written"] += event["bytes_written"]
-                totals["total_record_bytes_written"] += event["bytes_written"]
-            elif operation == "record-artifact":
-                totals["record_artifact_bytes_written"] += event["bytes_written"]
-                totals["total_record_bytes_written"] += event["bytes_written"]
-            elif operation == "stage-index-tail-preserved":
-                totals["recovery_evidence_bytes_written"] += event["bytes_written"]
-                totals["total_record_bytes_written"] += event["bytes_written"]
-            elif operation == "stage-index-prefix-restored":
-                totals["index_repair_bytes_written"] += event["bytes_written"]
-                totals["total_record_bytes_written"] += event["bytes_written"]
-            elif operation == "record-io-tail-recovery":
-                totals["record_io_recovery_evidence_bytes_written"] += event.get("tail_bytes_written", 0)
-                totals["record_io_prefix_repair_bytes_written"] += event.get("prefix_repair_bytes_written", 0)
-                totals["total_record_bytes_written"] += event.get("tail_bytes_written", 0)
-            if "bytes_read" in event:
-                totals["bytes_read"] += event["bytes_read"]
-                totals["parse_seconds"] += event.get("parse_seconds", 0.0)
-                totals["verification_seconds"] += event.get("verification_seconds", 0.0)
-            totals["serialization_seconds"] += event.get("serialization_seconds", 0.0)
-            totals["fsync_seconds"] += event.get("fsync_seconds", 0.0)
+    try:
+        with path.open("r", encoding="utf-8") as stream:
+            for row_number, line in enumerate(stream, start=1):
+                if not line.strip():
+                    continue
+                try:
+                    event = json.loads(line)
+                except json.JSONDecodeError as error:
+                    raise _RecordIoIntegrityError(
+                        f"malformed completed row {row_number}") from error
+                _validate_io_event(event, row_number)
+                operation = event["operation"]
+                if operation == "attempt-checkpoint":
+                    totals["checkpoint_writes"] += 1
+                    totals["attempt_json_bytes_written"] += event["bytes_written"]
+                    totals["total_record_bytes_written"] += event["bytes_written"]
+                elif operation == "stage-checkpoint":
+                    totals["stage_writes"] += 1
+                    totals["stage_json_bytes_written"] += event["bytes_written"]
+                    totals["total_record_bytes_written"] += event["bytes_written"]
+                elif operation == "stage-reference":
+                    totals["reference_writes"] += 1
+                    index_bytes = event["index_bytes_written"]
+                    totals["reference_index_bytes_written"] += index_bytes
+                    totals["total_record_bytes_written"] += index_bytes
+                elif operation == "native-payload":
+                    totals["native_payload_bytes_written"] += event["bytes_written"]
+                    totals["total_record_bytes_written"] += event["bytes_written"]
+                elif operation == "native-capture-checkpoint":
+                    totals["native_capture_checkpoint_bytes_written"] += event["bytes_written"]
+                    totals["total_record_bytes_written"] += event["bytes_written"]
+                elif operation == "record-artifact":
+                    totals["record_artifact_bytes_written"] += event["bytes_written"]
+                    totals["total_record_bytes_written"] += event["bytes_written"]
+                elif operation == "stage-index-tail-preserved":
+                    totals["recovery_evidence_bytes_written"] += event["bytes_written"]
+                    totals["total_record_bytes_written"] += event["bytes_written"]
+                elif operation == "stage-index-prefix-restored":
+                    totals["index_repair_bytes_written"] += event["bytes_written"]
+                    totals["total_record_bytes_written"] += event["bytes_written"]
+                elif operation == "record-io-tail-recovery":
+                    totals["record_io_recovery_evidence_bytes_written"] += event["tail_bytes_written"]
+                    totals["record_io_prefix_repair_bytes_written"] += event["prefix_repair_bytes_written"]
+                    totals["total_record_bytes_written"] += event["tail_bytes_written"]
+                if "bytes_read" in event:
+                    totals["bytes_read"] += event["bytes_read"]
+                    totals["parse_seconds"] += event.get("parse_seconds", 0.0)
+                    totals["verification_seconds"] += event.get("verification_seconds", 0.0)
+                totals["serialization_seconds"] += event.get("serialization_seconds", 0.0)
+                totals["fsync_seconds"] += event.get("fsync_seconds", 0.0)
+    except (OSError, UnicodeError, json.JSONDecodeError, TypeError, ValueError, KeyError, OverflowError) as error:
+        status = _mark_io_invalid(attempt_dir,
+            f"{type(error).__name__}: {error}; metric aggregates withheld")
+        return _io_unavailable(status)
+
     totals["scope"] = ("attempt/stage checkpoints, native payload and capture records, stage-reference index, "
         "checked reference hash reads, held-step request artifacts, torn stage/telemetry tail preservation and journal repair, "
         "and selective record reads; "
@@ -844,6 +1013,7 @@ def summarize_io(attempt_dir: Path) -> dict[str, Any]:
             "sha256": hashlib.sha256(tail_bytes).hexdigest()})
     totals["integrity_status"] = "incomplete" if evidence else "complete"
     totals["metric_totals_complete"] = not evidence
+    totals["metric_totals_available"] = True
     totals["recovery_evidence"] = evidence
     if evidence:
         totals["metric_totals_scope"] = (

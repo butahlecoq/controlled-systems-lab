@@ -333,6 +333,73 @@ class ClosedLoopRunnerFailureTests(unittest.TestCase):
             self.assertIn("malformed completed row", record["record_io"]["integrity_diagnostic"])
             self.assertIn(malformed, (attempt / IO_LOG).read_bytes())
 
+    def test_telemetry_fault_matrix_never_blocks_canonical_terminal_attempt(self):
+        faults = {
+            "invalid-json": b'{"schema":"csl.closed-loop.record-io/1","operation":}\n',
+            "invalid-prefix-plus-tail": (
+                b'{"schema":"csl.closed-loop.record-io/1","operation":}\n'
+                b'{"schema":"csl.closed-loop.record-io/1","operation":"torn"'),
+            "missing-required-field": json.dumps({"schema": "csl.closed-loop.record-io/1",
+                "operation": "stage-checkpoint"}).encode() + b"\n",
+            "wrong-required-field-type": json.dumps({"schema": "csl.closed-loop.record-io/1",
+                "operation": "stage-checkpoint", "bytes_written": "not-an-integer"}).encode() + b"\n",
+        }
+        for label, damaged_bytes in faults.items():
+            with self.subTest(fault=label), tempfile.TemporaryDirectory() as raw:
+                root = Path(raw); bridge = root / "bridge"; bridge.write_text("bridge")
+                captured = {}
+
+                class InterruptedWithTelemetryFault:
+                    pid = 999999999
+                    returncode = -15
+
+                    def communicate(self, timeout):
+                        attempt = next(root.glob("syn-nl-lv-01/attempts/*"))
+                        with (attempt / IO_LOG).open("ab") as stream:
+                            stream.write(damaged_bytes)
+                        captured["log_bytes"] = (attempt / IO_LOG).read_bytes()
+                        return "", "worker interrupted with damaged telemetry"
+
+                with mock.patch.object(run_closed_loop.subprocess, "Popen", return_value=InterruptedWithTelemetryFault()), \
+                     mock.patch.object(run_closed_loop.subprocess, "check_output", return_value="test-commit\n"):
+                    result = run_closed_loop.run_task("syn-nl-lv-01", root, bridge)
+
+                attempt = Path(result["attempt"])
+                record = json.loads((attempt / "attempt.json").read_text())
+                self.assertEqual(record["status"], "incomplete")
+                self.assertEqual(record["record_io"]["integrity_status"], "invalid")
+                self.assertFalse(record["record_io"]["metric_totals_complete"])
+                self.assertNotIn("stage_json_bytes_written", record["record_io"])
+                verify_v2_attempt(attempt, record)
+                coverage = json.loads(run_closed_loop.write_coverage(root).read_text())
+                self.assertEqual(len(coverage["attempts"]), 1)
+                self.assertEqual(coverage["attempts"][0]["ledger_status"], "incomplete")
+                self.assertIn(damaged_bytes.rstrip(b"\n").splitlines()[0],
+                    (attempt / IO_LOG).read_bytes())
+                if label == "invalid-prefix-plus-tail":
+                    self.assertEqual((attempt / IO_LOG).read_bytes(), captured["log_bytes"])
+                    status = json.loads((attempt / "record-io-integrity.json").read_text())
+                    preserved = status["recovery_evidence"][0]
+                    self.assertEqual((attempt / preserved["path"]).read_bytes(),
+                        damaged_bytes.splitlines()[-1])
+
+    def test_invalid_generated_telemetry_event_is_diagnostic_not_a_write_prerequisite(self):
+        with tempfile.TemporaryDirectory() as raw:
+            attempt = Path(raw)
+            record = {"schema": "csl.closed-loop.attempt/2", "format_version": 2,
+                "attempt_id": "append-schema-fixture", "task_id": "task/1", "task_sha256": "a" * 64,
+                "status": "in-progress", "completed_holds": 0,
+                "stage_records": {"path": STAGE_INDEX, "count": 0}}
+            write_attempt(attempt, record)
+            from attempt_records import append_io_event
+            append_io_event(attempt, {"operation": "stage-checkpoint", "bytes_written": "bad"})
+            record.update(status="incomplete", terminal_reason="fixture")
+            write_attempt(attempt, record)
+            saved = json.loads((attempt / "attempt.json").read_text())
+            self.assertEqual(saved["status"], "incomplete")
+            status = json.loads((attempt / "record-io-integrity.json").read_text())
+            self.assertEqual(status["integrity_status"], "invalid")
+
     def test_worker_retained_memory_stays_bounded_as_stage_telemetry_grows(self):
         def measure(stage_count: int) -> dict:
             with tempfile.TemporaryDirectory() as raw:
