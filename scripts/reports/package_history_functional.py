@@ -21,6 +21,37 @@ def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def archive_attempt(attempt: Path, archive_path: Path) -> dict:
+    files = sorted(path for path in attempt.rglob('*') if path.is_file())
+    inventory = {}
+    with zipfile.ZipFile(archive_path, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
+        for path in files:
+            relative = path.relative_to(attempt).as_posix()
+            before = path.stat()
+            data = path.read_bytes()
+            if re.search(rb'(ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{40,}|sk-proj-[A-Za-z0-9_-]{20,}|BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY)', data):
+                raise ValueError(f'possible credential in source member: {relative}')
+            after = path.stat()
+            if (before.st_ino, before.st_size, before.st_mtime_ns) != (after.st_ino, after.st_size, after.st_mtime_ns):
+                raise ValueError(f'source changed during archive: {relative}')
+            info = zipfile.ZipInfo(relative, (1980, 1, 1, 0, 0, 0))
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.external_attr = 0o100644 << 16
+            archive.writestr(info, data, compress_type=zipfile.ZIP_DEFLATED, compresslevel=9)
+            inventory[relative] = {'bytes': len(data), 'sha256': digest(data), 'crc32': f'{zlib.crc32(data):08x}'}
+    with zipfile.ZipFile(archive_path) as archive:
+        if archive.testzip() is not None or set(archive.namelist()) != set(inventory):
+            raise ValueError('archive CRC or member inventory mismatch')
+        for member, expected in inventory.items():
+            data = archive.read(member)
+            source = attempt / member
+            if (source.is_symlink() or len(data) != expected['bytes'] or digest(data) != expected['sha256']
+                    or f'{archive.getinfo(member).CRC:08x}' != expected['crc32']
+                    or digest(source.read_bytes()) != expected['sha256']):
+                raise ValueError(f'archive or source verification failed: {member}')
+    return inventory
+
+
 def package(attempt: Path, output_root: Path, name: str, audit: Path, build: Path,
             sdk: Path, auditor: Path, producer_commit: str, rendered: Path) -> Path:
     if attempt.is_symlink() or output_root.is_symlink() or rendered.is_symlink():
@@ -85,35 +116,9 @@ def package(attempt: Path, output_root: Path, name: str, audit: Path, build: Pat
     for filename in ('trajectory.png', 'controls.png', 'phase.png'):
         if (rendered / filename).is_symlink() or digest((rendered / filename).read_bytes()) != render['plots'][filename]:
             raise ValueError('corrected plot differs from its render receipt')
-    files = sorted(path for path in attempt.rglob('*') if path.is_file())
     stage = Path(tempfile.mkdtemp(prefix=f'.{name}.stage-', dir=output_root))
     archive_path = stage / 'raw.zip'
-    inventory = {}
-    with zipfile.ZipFile(archive_path, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
-        for path in files:
-            relative = path.relative_to(attempt).as_posix()
-            before = path.stat()
-            data = path.read_bytes()
-            if re.search(rb'(ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{40,}|sk-proj-[A-Za-z0-9_-]{20,}|BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY)', data):
-                raise ValueError(f'possible credential in source member: {relative}')
-            after = path.stat()
-            if (before.st_ino, before.st_size, before.st_mtime_ns) != (after.st_ino, after.st_size, after.st_mtime_ns):
-                raise ValueError(f'source changed during archive: {relative}')
-            info = zipfile.ZipInfo(relative, (1980, 1, 1, 0, 0, 0))
-            info.compress_type = zipfile.ZIP_DEFLATED
-            info.external_attr = 0o100644 << 16
-            archive.writestr(info, data, compress_type=zipfile.ZIP_DEFLATED, compresslevel=9)
-            inventory[relative] = {'bytes': len(data), 'sha256': digest(data), 'crc32': f'{zlib.crc32(data):08x}'}
-    with zipfile.ZipFile(archive_path) as archive:
-        if archive.testzip() is not None or set(archive.namelist()) != set(inventory):
-            raise ValueError('archive CRC or member inventory mismatch')
-        for member, expected in inventory.items():
-            data = archive.read(member)
-            source = attempt / member
-            if (source.is_symlink() or len(data) != expected['bytes'] or digest(data) != expected['sha256']
-                    or f'{archive.getinfo(member).CRC:08x}' != expected['crc32']
-                    or digest(source.read_bytes()) != expected['sha256']):
-                raise ValueError(f'archive or source verification failed: {member}')
+    inventory = archive_attempt(attempt, archive_path)
     for filename, data in [('build-receipt.json', build_bytes), ('sdk-manifest.json', sdk_bytes), ('audit.py', auditor_bytes), ('render-receipt.json', render_bytes)]:
         (stage / filename).write_bytes(data)
     for filename in ('trajectory.png', 'controls.png', 'phase.png'):
