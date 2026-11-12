@@ -1,0 +1,1259 @@
+{
+  "schema": "csl.closed-loop.native-query-capture/2",
+  "capture_kind": "bridge-exchange",
+  "bridge_request_sent": true,
+  "request": {
+    "schema": "csl.closed-loop.native-policy-query/1",
+    "task_id": "syn-nl-fuel-01/continuous-receding/1",
+    "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b",
+    "source_model_id": "syn-nl-fuel-01/ode/1",
+    "controller_id": "native-exact-polytope-fixed-plan-mpc/1",
+    "action_profile_id": "syn-nl-fuel-01/continuous-receding/1/finite-catalog-adaptation/1",
+    "problem_id": "syn-nl-fuel-01/continuous-receding/1",
+    "request_id": "native-exact-polytope-fixed-plan-mpc/1/update-39",
+    "absolute_update_index": 39,
+    "observed_physical_state": [
+      75,
+      23,
+      1.5,
+      0.45
+    ],
+    "original_horizon": 40,
+    "dt": 0.5,
+    "predictor_model_id": "syn-nl-fuel-01/midpoint-endpoint-matched-affine/1",
+    "predictor_assurance": "binary64 scipy.linalg.expm numerical exponential; no validated arithmetic",
+    "predictor_stages": [
+      {
+        "A": [
+          [
+            0.9990480691286423,
+            0.0,
+            -0.4422462669650839,
+            0.0
+          ],
+          [
+            0.0,
+            0.9990480691286423,
+            0.0,
+            -0.4422462669650839
+          ],
+          [
+            0.0036549278261577187,
+            0.0,
+            0.7779249356461003,
+            0.0
+          ],
+          [
+            0.0,
+            0.003654927826157718,
+            0.0,
+            0.7779249356461003
+          ]
+        ],
+        "B": [
+          [
+            -0.13438776400055064,
+            0.0
+          ],
+          [
+            0.0,
+            -0.044795921333516876
+          ],
+          [
+            0.5159803016369876,
+            0.0
+          ],
+          [
+            0.0,
+            0.17199343387899588
+          ]
+        ],
+        "c": [
+          0.05774395251728001,
+          0.017323185755182574,
+          -0.22104673565290522,
+          -0.06631402069587153
+        ],
+        "jacobian_A": [
+          [
+            0.0,
+            0.0,
+            -1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            -1.0
+          ],
+          [
+            0.008264462809917356,
+            0.0,
+            -0.5,
+            0.0
+          ],
+          [
+            0.0,
+            0.008264462809917354,
+            0.0,
+            -0.5
+          ]
+        ],
+        "jacobian_B": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            1.1667261889578033,
+            0.0
+          ],
+          [
+            0.0,
+            0.38890872965260115
+          ]
+        ]
+      }
+    ],
+    "actions": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0
+      ],
+      [
+        1.0,
+        0.0
+      ],
+      [
+        1.0,
+        1.0
+      ]
+    ],
+    "state_bounds": [
+      [
+        40,
+        120
+      ],
+      [
+        12,
+        36
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "terminal_objective": {
+      "kind": "quadratic",
+      "Q": [
+        [
+          0.0001,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0011111111111111111,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.011111111111111112,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.1
+        ]
+      ],
+      "linear": [
+        -0.015000000000000001,
+        -0.051111111111111114,
+        -0.03333333333333333,
+        -0.09000000000000001
+      ],
+      "offset": 1.1955277777777777
+    },
+    "running_cost": {
+      "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
+      "stages": [
+        {
+          "stage": 0,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.6683396094894474,
+                0.6015056485405026
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 1,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.6717236291465044,
+                0.604551266231854
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 2,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.6751595780557778,
+                0.6076436202501999
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 3,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.6786487980790501,
+                0.6107839182711451
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 4,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.6821926801288678,
+                0.613973412115981
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 5,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.6857926664981864,
+                0.6172133998483676
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 6,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.6894502533266922,
+                0.620505227994023
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 7,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.6931669932133817,
+                0.6238502938920436
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 8,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.6969444979857555,
+                0.62725004818718
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 9,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.7007844416368488,
+                0.630705997473164
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 10,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.7046885634422533,
+                0.6342197070980279
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 11,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.7086586712703119,
+                0.6377928041432807
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 12,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.7126966450997984,
+                0.6414269805898185
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 13,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.7168044407606271,
+                0.6451239966845644
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 14,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.7209840939145001,
+                0.6488856845230502
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 15,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.7252377242938949,
+                0.6527139518645053
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 16,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.7295675402194438,
+                0.6566107861974994
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 17,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.7339758434175737,
+                0.6605782590758164
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 18,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.7384650341622818,
+                0.6646185307460535
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 19,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.7430376167671371,
+                0.6687338550904234
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 20,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.7476962054560591,
+                0.6729265849104531
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 21,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.7524435306441337,
+                0.6771991775797204
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 22,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.757282445662753,
+                0.6815542010964778
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 23,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.762215933966706,
+                0.6859943405700353
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 24,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.7672471168645812,
+                0.6905224051781231
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 25,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.7723792618179897,
+                0.6951413356361907
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 26,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.777615791359739,
+                0.6998542122237652
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 27,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.7829602926862713,
+                0.7046642634176442
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 28,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.7884165279854434,
+                0.7095748751868991
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 29,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.7939884455672181,
+                0.7145896010104964
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 30,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.7996801918720896,
+                0.7197121726848805
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 31,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.8054961244402359,
+                0.7249465119962123
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 32,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.8114408259335794,
+                0.7302967433402214
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 33,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.8175191193132877,
+                0.7357672073819589
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 34,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.823736084286954,
+                0.7413624758582585
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 35,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.8300970751529204,
+                0.7470873676376284
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 36,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.8366077401842115,
+                0.7529469661657903
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 37,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.8432740427115678,
+                0.758946638440411
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 38,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.850102284084451,
+                0.7650920556760059
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        },
+        {
+          "stage": 39,
+          "terms": [
+            {
+              "kind": "quadratic",
+              "reference": [
+                0.8570991287109667,
+                0.77138921583987
+              ],
+              "scales": [
+                1,
+                1
+              ],
+              "weights": [
+                1.0,
+                1.0
+              ],
+              "coefficient": 0.02
+            }
+          ]
+        }
+      ]
+    },
+    "representation_index": 0,
+    "representation_name": "exact-polytope",
+    "limits": {
+      "max_beam_width": 8,
+      "max_graph_nodes": 512,
+      "max_plans": 512,
+      "max_points_per_stage": 100000,
+      "max_score_evaluations": 100000,
+      "max_generators_per_stage": 1000
+    },
+    "candidate_action_indices": [
+      [
+        0
+      ],
+      [
+        1
+      ],
+      [
+        2
+      ],
+      [
+        3
+      ]
+    ],
+    "candidate_search_policy": "exhaustive-full-action-product/1",
+    "candidate_search_full_action_history_count": "4",
+    "candidate_search_coverage": "complete",
+    "candidate_search_budget": 512
+  },
+  "request_json": "{\"schema\":\"csl.closed-loop.native-policy-query/1\",\"task_id\":\"syn-nl-fuel-01/continuous-receding/1\",\"task_sha256\":\"358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b\",\"source_model_id\":\"syn-nl-fuel-01/ode/1\",\"controller_id\":\"native-exact-polytope-fixed-plan-mpc/1\",\"action_profile_id\":\"syn-nl-fuel-01/continuous-receding/1/finite-catalog-adaptation/1\",\"problem_id\":\"syn-nl-fuel-01/continuous-receding/1\",\"request_id\":\"native-exact-polytope-fixed-plan-mpc/1/update-39\",\"absolute_update_index\":39,\"observed_physical_state\":[75,23,1.5,0.45],\"original_horizon\":40,\"dt\":0.5,\"predictor_model_id\":\"syn-nl-fuel-01/midpoint-endpoint-matched-affine/1\",\"predictor_assurance\":\"binary64 scipy.linalg.expm numerical exponential; no validated arithmetic\",\"predictor_stages\":[{\"A\":[[0.9990480691286423,0.0,-0.4422462669650839,0.0],[0.0,0.9990480691286423,0.0,-0.4422462669650839],[0.0036549278261577187,0.0,0.7779249356461003,0.0],[0.0,0.003654927826157718,0.0,0.7779249356461003]],\"B\":[[-0.13438776400055064,0.0],[0.0,-0.044795921333516876],[0.5159803016369876,0.0],[0.0,0.17199343387899588]],\"c\":[0.05774395251728001,0.017323185755182574,-0.22104673565290522,-0.06631402069587153],\"jacobian_A\":[[0.0,0.0,-1.0,0.0],[0.0,0.0,0.0,-1.0],[0.008264462809917356,0.0,-0.5,0.0],[0.0,0.008264462809917354,0.0,-0.5]],\"jacobian_B\":[[0.0,0.0],[0.0,0.0],[1.1667261889578033,0.0],[0.0,0.38890872965260115]]}],\"actions\":[[0.0,0.0],[0.0,1.0],[1.0,0.0],[1.0,1.0]],\"state_bounds\":[[40,120],[12,36],[0,3],[0,1]],\"terminal_objective\":{\"kind\":\"quadratic\",\"Q\":[[0.0001,0.0,0.0,0.0],[0.0,0.0011111111111111111,0.0,0.0],[0.0,0.0,0.011111111111111112,0.0],[0.0,0.0,0.0,0.1]],\"linear\":[-0.015000000000000001,-0.051111111111111114,-0.03333333333333333,-0.09000000000000001],\"offset\":1.1955277777777777},\"running_cost\":{\"objective_id\":\"syn-nl-fuel-01/dimensionless-quadratic/1\",\"stages\":[{\"stage\":0,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.6683396094894474,0.6015056485405026],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":1,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.6717236291465044,0.604551266231854],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":2,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.6751595780557778,0.6076436202501999],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":3,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.6786487980790501,0.6107839182711451],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":4,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.6821926801288678,0.613973412115981],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":5,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.6857926664981864,0.6172133998483676],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":6,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.6894502533266922,0.620505227994023],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":7,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.6931669932133817,0.6238502938920436],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":8,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.6969444979857555,0.62725004818718],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":9,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7007844416368488,0.630705997473164],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":10,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7046885634422533,0.6342197070980279],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":11,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7086586712703119,0.6377928041432807],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":12,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7126966450997984,0.6414269805898185],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":13,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7168044407606271,0.6451239966845644],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":14,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7209840939145001,0.6488856845230502],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":15,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7252377242938949,0.6527139518645053],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":16,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7295675402194438,0.6566107861974994],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":17,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7339758434175737,0.6605782590758164],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":18,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7384650341622818,0.6646185307460535],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":19,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7430376167671371,0.6687338550904234],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":20,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7476962054560591,0.6729265849104531],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":21,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7524435306441337,0.6771991775797204],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":22,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.757282445662753,0.6815542010964778],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":23,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.762215933966706,0.6859943405700353],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":24,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7672471168645812,0.6905224051781231],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":25,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7723792618179897,0.6951413356361907],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":26,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.777615791359739,0.6998542122237652],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":27,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7829602926862713,0.7046642634176442],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":28,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7884165279854434,0.7095748751868991],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":29,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7939884455672181,0.7145896010104964],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":30,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7996801918720896,0.7197121726848805],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":31,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.8054961244402359,0.7249465119962123],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":32,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.8114408259335794,0.7302967433402214],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":33,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.8175191193132877,0.7357672073819589],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":34,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.823736084286954,0.7413624758582585],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":35,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.8300970751529204,0.7470873676376284],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":36,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.8366077401842115,0.7529469661657903],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":37,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.8432740427115678,0.758946638440411],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":38,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.850102284084451,0.7650920556760059],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":39,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.8570991287109667,0.77138921583987],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]}]},\"representation_index\":0,\"representation_name\":\"exact-polytope\",\"limits\":{\"max_beam_width\":8,\"max_graph_nodes\":512,\"max_plans\":512,\"max_points_per_stage\":100000,\"max_score_evaluations\":100000,\"max_generators_per_stage\":1000},\"candidate_action_indices\":[[0],[1],[2],[3]],\"candidate_search_policy\":\"exhaustive-full-action-product/1\",\"candidate_search_full_action_history_count\":\"4\",\"candidate_search_coverage\":\"complete\",\"candidate_search_budget\":512}",
+  "bridge_request_raw": "{\"schema\":\"csl.closed-loop.native-policy-query/1\",\"task_id\":\"syn-nl-fuel-01/continuous-receding/1\",\"task_sha256\":\"358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b\",\"source_model_id\":\"syn-nl-fuel-01/ode/1\",\"controller_id\":\"native-exact-polytope-fixed-plan-mpc/1\",\"action_profile_id\":\"syn-nl-fuel-01/continuous-receding/1/finite-catalog-adaptation/1\",\"problem_id\":\"syn-nl-fuel-01/continuous-receding/1\",\"request_id\":\"native-exact-polytope-fixed-plan-mpc/1/update-39\",\"absolute_update_index\":39,\"observed_physical_state\":[75,23,1.5,0.45],\"original_horizon\":40,\"dt\":0.5,\"predictor_model_id\":\"syn-nl-fuel-01/midpoint-endpoint-matched-affine/1\",\"predictor_assurance\":\"binary64 scipy.linalg.expm numerical exponential; no validated arithmetic\",\"predictor_stages\":[{\"A\":[[0.9990480691286423,0.0,-0.4422462669650839,0.0],[0.0,0.9990480691286423,0.0,-0.4422462669650839],[0.0036549278261577187,0.0,0.7779249356461003,0.0],[0.0,0.003654927826157718,0.0,0.7779249356461003]],\"B\":[[-0.13438776400055064,0.0],[0.0,-0.044795921333516876],[0.5159803016369876,0.0],[0.0,0.17199343387899588]],\"c\":[0.05774395251728001,0.017323185755182574,-0.22104673565290522,-0.06631402069587153],\"jacobian_A\":[[0.0,0.0,-1.0,0.0],[0.0,0.0,0.0,-1.0],[0.008264462809917356,0.0,-0.5,0.0],[0.0,0.008264462809917354,0.0,-0.5]],\"jacobian_B\":[[0.0,0.0],[0.0,0.0],[1.1667261889578033,0.0],[0.0,0.38890872965260115]]}],\"actions\":[[0.0,0.0],[0.0,1.0],[1.0,0.0],[1.0,1.0]],\"state_bounds\":[[40,120],[12,36],[0,3],[0,1]],\"terminal_objective\":{\"kind\":\"quadratic\",\"Q\":[[0.0001,0.0,0.0,0.0],[0.0,0.0011111111111111111,0.0,0.0],[0.0,0.0,0.011111111111111112,0.0],[0.0,0.0,0.0,0.1]],\"linear\":[-0.015000000000000001,-0.051111111111111114,-0.03333333333333333,-0.09000000000000001],\"offset\":1.1955277777777777},\"running_cost\":{\"objective_id\":\"syn-nl-fuel-01/dimensionless-quadratic/1\",\"stages\":[{\"stage\":0,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.6683396094894474,0.6015056485405026],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":1,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.6717236291465044,0.604551266231854],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":2,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.6751595780557778,0.6076436202501999],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":3,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.6786487980790501,0.6107839182711451],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":4,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.6821926801288678,0.613973412115981],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":5,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.6857926664981864,0.6172133998483676],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":6,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.6894502533266922,0.620505227994023],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":7,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.6931669932133817,0.6238502938920436],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":8,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.6969444979857555,0.62725004818718],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":9,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7007844416368488,0.630705997473164],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":10,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7046885634422533,0.6342197070980279],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":11,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7086586712703119,0.6377928041432807],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":12,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7126966450997984,0.6414269805898185],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":13,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7168044407606271,0.6451239966845644],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":14,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7209840939145001,0.6488856845230502],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":15,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7252377242938949,0.6527139518645053],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":16,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7295675402194438,0.6566107861974994],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":17,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7339758434175737,0.6605782590758164],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":18,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7384650341622818,0.6646185307460535],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":19,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7430376167671371,0.6687338550904234],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":20,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7476962054560591,0.6729265849104531],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":21,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7524435306441337,0.6771991775797204],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":22,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.757282445662753,0.6815542010964778],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":23,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.762215933966706,0.6859943405700353],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":24,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7672471168645812,0.6905224051781231],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":25,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7723792618179897,0.6951413356361907],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":26,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.777615791359739,0.6998542122237652],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":27,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7829602926862713,0.7046642634176442],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":28,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7884165279854434,0.7095748751868991],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":29,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7939884455672181,0.7145896010104964],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":30,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.7996801918720896,0.7197121726848805],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":31,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.8054961244402359,0.7249465119962123],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":32,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.8114408259335794,0.7302967433402214],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":33,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.8175191193132877,0.7357672073819589],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":34,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.823736084286954,0.7413624758582585],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":35,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.8300970751529204,0.7470873676376284],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":36,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.8366077401842115,0.7529469661657903],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":37,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.8432740427115678,0.758946638440411],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":38,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.850102284084451,0.7650920556760059],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]},{\"stage\":39,\"terms\":[{\"kind\":\"quadratic\",\"reference\":[0.8570991287109667,0.77138921583987],\"scales\":[1,1],\"weights\":[1.0,1.0],\"coefficient\":0.02}]}]},\"representation_index\":0,\"representation_name\":\"exact-polytope\",\"limits\":{\"max_beam_width\":8,\"max_graph_nodes\":512,\"max_plans\":512,\"max_points_per_stage\":100000,\"max_score_evaluations\":100000,\"max_generators_per_stage\":1000},\"candidate_action_indices\":[[0],[1],[2],[3]],\"candidate_search_policy\":\"exhaustive-full-action-product/1\",\"candidate_search_full_action_history_count\":\"4\",\"candidate_search_coverage\":\"complete\",\"candidate_search_budget\":512}\n",
+  "bridge_request_transmission_status": "sent",
+  "request_sha256": "6c0ef472dd42e6fbf08ac36414513968d5003fd5e89f239c4a3a3856397b4ea2",
+  "bridge_response_raw": "{\"action_profile_id\":\"syn-nl-fuel-01/continuous-receding/1/finite-catalog-adaptation/1\",\"build_backend_profile\":{\"CSL_ENABLE_HIGHS\":true,\"CSL_ENABLE_QHULL\":true,\"build_type\":\"Release\"},\"candidate_plan_search\":{\"action_catalogue_size\":4,\"all_rows_span_full_prediction_horizon\":true,\"candidate_action_indices\":[[0],[1],[2],[3]],\"candidate_budget\":512,\"candidate_count\":4,\"candidate_evaluation_coverage\":\"complete\",\"full_action_history_count\":4,\"full_authored_horizon\":1,\"indices_refer_to_untouched_source_action_catalogue\":true,\"original_horizon\":40,\"policy_id\":\"exhaustive-full-action-product/1\",\"search_coverage\":\"complete\"},\"control\":[1.0,1.0],\"invocations\":[{\"module_id\":\"csl::optimization::finite_action_nominal_profile\",\"operation\":\"exact-polytope-plan-select\",\"outcome\":\"selected\",\"profile_id\":\"native-exact-polytope-fixed-plan-mpc/1\",\"provider\":\"public-function\"}],\"policy_id\":\"native-exact-polytope-fixed-plan-mpc/1/receding-fixed-plan-mpc/1\",\"predicted_sets\":[{\"assurance\":\"numerical\",\"relation\":\"equivalent\",\"representation\":\"exact-polytope\",\"role\":\"fixed-plan-trajectory-enclosure\",\"stages\":[{\"point\":[75.0,23.0,1.5,0.45],\"representation\":\"singleton\"},{\"representation\":\"polytope-v\",\"vertices\":[[74.18859197271729,22.75162203424615,1.7359405564150618,0.539808974225497]]}]}],\"query_receipt\":{\"absolute_update_index\":39,\"action_profile_id\":\"syn-nl-fuel-01/continuous-receding/1/finite-catalog-adaptation/1\",\"candidate_plan_search\":{\"action_catalogue_size\":4,\"all_rows_span_full_prediction_horizon\":true,\"candidate_action_indices\":[[0],[1],[2],[3]],\"candidate_budget\":512,\"candidate_count\":4,\"candidate_evaluation_coverage\":\"complete\",\"full_action_history_count\":4,\"full_authored_horizon\":1,\"indices_refer_to_untouched_source_action_catalogue\":true,\"original_horizon\":40,\"policy_id\":\"exhaustive-full-action-product/1\",\"search_coverage\":\"complete\"},\"candidate_score\":-0.5924885552256205,\"controller_id\":\"native-exact-polytope-fixed-plan-mpc/1\",\"invocations\":[{\"module_id\":\"csl::optimization::finite_action_nominal_profile\",\"operation\":\"exact-polytope-plan-select\",\"outcome\":\"selected\",\"profile_id\":\"native-exact-polytope-fixed-plan-mpc/1\",\"provider\":\"public-function\"}],\"objective_id\":\"syn-nl-fuel-01/dimensionless-quadratic/1\",\"original_horizon\":40,\"predicted_set_role\":\"fixed-plan-trajectory-enclosure\",\"predictor_assurance\":\"binary64 scipy.linalg.expm numerical exponential; no validated arithmetic\",\"predictor_model_id\":\"syn-nl-fuel-01/midpoint-endpoint-matched-affine/1\",\"representation\":\"exact-polytope\",\"schema\":\"csl.closed-loop.native-policy-query-receipt/1\",\"score_kind\":\"exact-deterministic-objective\",\"search_coverage\":\"complete\",\"selected_control\":[1.0,1.0],\"source_model_id\":\"syn-nl-fuel-01/ode/1\",\"task_id\":\"syn-nl-fuel-01/continuous-receding/1\",\"task_sha256\":\"358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b\"},\"representation\":0,\"selected_plan\":{\"controls\":[[1.0,1.0]],\"running_objective\":3.634177482473721e-05,\"states\":[[75.0,23.0,1.5,0.45],[74.18859197271729,22.75162203424615,1.7359405564150618,0.539808974225497]],\"terminal_objective\":-0.5925248970004452,\"total_objective\":-0.5924885552256205},\"selector\":{\"absolute_stage_offset\":39,\"candidate_score\":-0.5924885552256205,\"objective_id\":\"syn-nl-fuel-01/dimensionless-quadratic/1\",\"optimality_scope\":\"declared full-horizon candidate histories only; coverage against the complete action product is reported separately; no nonlinear global-feedback claim\",\"original_horizon\":40,\"policy_semantics\":\"receding-horizon finite-action fixed-plan MPC over a declared bounded set of full-remaining-horizon action-index histories; selected first action is reapplied after observation\",\"running_objective\":3.634177482473721e-05,\"score_kind\":\"exact-deterministic-objective\",\"search_coverage\":\"complete\",\"selected_control\":[1.0,1.0],\"terminal_objective\":-0.5925248970004452,\"total_replay_objective\":-0.5924885552256205},\"status\":\"accepted\",\"task_id\":\"syn-nl-fuel-01/continuous-receding/1\",\"task_sha256\":\"358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b\"}\n",
+  "bridge_response_sha256": "560f6177bf996ed33a60d36c6126b17edb45592af5b974532f8b4c5b61991fca",
+  "response_parse_status": "parsed",
+  "parsed_response": {
+    "action_profile_id": "syn-nl-fuel-01/continuous-receding/1/finite-catalog-adaptation/1",
+    "build_backend_profile": {
+      "CSL_ENABLE_HIGHS": true,
+      "CSL_ENABLE_QHULL": true,
+      "build_type": "Release"
+    },
+    "candidate_plan_search": {
+      "action_catalogue_size": 4,
+      "all_rows_span_full_prediction_horizon": true,
+      "candidate_action_indices": [
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ]
+      ],
+      "candidate_budget": 512,
+      "candidate_count": 4,
+      "candidate_evaluation_coverage": "complete",
+      "full_action_history_count": 4,
+      "full_authored_horizon": 1,
+      "indices_refer_to_untouched_source_action_catalogue": true,
+      "original_horizon": 40,
+      "policy_id": "exhaustive-full-action-product/1",
+      "search_coverage": "complete"
+    },
+    "control": [
+      1.0,
+      1.0
+    ],
+    "invocations": [
+      {
+        "module_id": "csl::optimization::finite_action_nominal_profile",
+        "operation": "exact-polytope-plan-select",
+        "outcome": "selected",
+        "profile_id": "native-exact-polytope-fixed-plan-mpc/1",
+        "provider": "public-function"
+      }
+    ],
+    "policy_id": "native-exact-polytope-fixed-plan-mpc/1/receding-fixed-plan-mpc/1",
+    "predicted_sets": [
+      {
+        "assurance": "numerical",
+        "relation": "equivalent",
+        "representation": "exact-polytope",
+        "role": "fixed-plan-trajectory-enclosure",
+        "stages": [
+          {
+            "point": [
+              75.0,
+              23.0,
+              1.5,
+              0.45
+            ],
+            "representation": "singleton"
+          },
+          {
+            "representation": "polytope-v",
+            "vertices": [
+              [
+                74.18859197271729,
+                22.75162203424615,
+                1.7359405564150618,
+                0.539808974225497
+              ]
+            ]
+          }
+        ]
+      }
+    ],
+    "query_receipt": {
+      "absolute_update_index": 39,
+      "action_profile_id": "syn-nl-fuel-01/continuous-receding/1/finite-catalog-adaptation/1",
+      "candidate_plan_search": {
+        "action_catalogue_size": 4,
+        "all_rows_span_full_prediction_horizon": true,
+        "candidate_action_indices": [
+          [
+            0
+          ],
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            3
+          ]
+        ],
+        "candidate_budget": 512,
+        "candidate_count": 4,
+        "candidate_evaluation_coverage": "complete",
+        "full_action_history_count": 4,
+        "full_authored_horizon": 1,
+        "indices_refer_to_untouched_source_action_catalogue": true,
+        "original_horizon": 40,
+        "policy_id": "exhaustive-full-action-product/1",
+        "search_coverage": "complete"
+      },
+      "candidate_score": -0.5924885552256205,
+      "controller_id": "native-exact-polytope-fixed-plan-mpc/1",
+      "invocations": [
+        {
+          "module_id": "csl::optimization::finite_action_nominal_profile",
+          "operation": "exact-polytope-plan-select",
+          "outcome": "selected",
+          "profile_id": "native-exact-polytope-fixed-plan-mpc/1",
+          "provider": "public-function"
+        }
+      ],
+      "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
+      "original_horizon": 40,
+      "predicted_set_role": "fixed-plan-trajectory-enclosure",
+      "predictor_assurance": "binary64 scipy.linalg.expm numerical exponential; no validated arithmetic",
+      "predictor_model_id": "syn-nl-fuel-01/midpoint-endpoint-matched-affine/1",
+      "representation": "exact-polytope",
+      "schema": "csl.closed-loop.native-policy-query-receipt/1",
+      "score_kind": "exact-deterministic-objective",
+      "search_coverage": "complete",
+      "selected_control": [
+        1.0,
+        1.0
+      ],
+      "source_model_id": "syn-nl-fuel-01/ode/1",
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b"
+    },
+    "representation": 0,
+    "selected_plan": {
+      "controls": [
+        [
+          1.0,
+          1.0
+        ]
+      ],
+      "running_objective": 3.634177482473721e-05,
+      "states": [
+        [
+          75.0,
+          23.0,
+          1.5,
+          0.45
+        ],
+        [
+          74.18859197271729,
+          22.75162203424615,
+          1.7359405564150618,
+          0.539808974225497
+        ]
+      ],
+      "terminal_objective": -0.5925248970004452,
+      "total_objective": -0.5924885552256205
+    },
+    "selector": {
+      "absolute_stage_offset": 39,
+      "candidate_score": -0.5924885552256205,
+      "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
+      "optimality_scope": "declared full-horizon candidate histories only; coverage against the complete action product is reported separately; no nonlinear global-feedback claim",
+      "original_horizon": 40,
+      "policy_semantics": "receding-horizon finite-action fixed-plan MPC over a declared bounded set of full-remaining-horizon action-index histories; selected first action is reapplied after observation",
+      "running_objective": 3.634177482473721e-05,
+      "score_kind": "exact-deterministic-objective",
+      "search_coverage": "complete",
+      "selected_control": [
+        1.0,
+        1.0
+      ],
+      "terminal_objective": -0.5925248970004452,
+      "total_replay_objective": -0.5924885552256205
+    },
+    "status": "accepted",
+    "task_id": "syn-nl-fuel-01/continuous-receding/1",
+    "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b"
+  }
+}

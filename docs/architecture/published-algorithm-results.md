@@ -2,6 +2,25 @@
 
 The owner requires an English HTML report whenever an implemented algorithm can produce numerical results. Reports are deliverables of the algorithm work, not a feature deferred until the complete optimal-control application exists. Existing scientific and implementation acceptance criteria remain binding.
 
+## Native terminal-cost correction
+
+[Issue #980](https://github.com/butahlecoq/controlled-systems-lab/issues/980)
+records a coefficient-translation error in the Lotka and fuel native feedback
+adapter, including frozen source `64560a03`. It supplied the matrix for
+$x^T D x$ to an interface that evaluates $\frac12 x^T Qx$, while retaining the
+full linear and constant terms. Native selection scores from that source
+therefore use a different terminal polynomial from the stated source cost.
+The saved physical trajectories and independently recomputed physical costs
+remain observations; they do not establish faithful source-cost ranking by
+that native selector. Preserve those records and their hashes.
+
+The [corrected adapter source](https://github.com/butahlecoq/controlled-systems-lab/blob/33f907a0af18e49e52b9c7bbc6f6a49c6dc29d50/benchmarks/reporting/closed_loop/native_graph_policy.py)
+uses $Q=2D$, $q=-2Dr$ and $c=r^TDr$ for $(x-r)^T D(x-r)$.
+Its source-qualified diagnostic queries check terminal, running and total
+components separately. These small queries are not full closed-loop reruns.
+The independent continuous NMPC adapters and the orbit norm adapter use
+separate objective constructions.
+
 ## Artifact and publication
 
 Use saved, versioned records to render a standalone HTML page with numerical tables, suitable figures and measured performance. Publish an index and immutable report URLs through this repository's GitHub Pages site. The published index is a reading layer over the reviewed catalogue: it groups the reports by topic, states in plain language what each report measures, and repeats the scope and the evidence limits recorded with that report, its raw records and its source commit. It adds no claim that the report itself does not make, and every published report family needs a description there before it can appear. Keep the report, raw JSON/CSV and assets in version control, with a download path that remains useful offline. Link the actual published URL and source commit in each relevant PR and issue. Until a report is measured, reviewed and deployed, its URL and performance are pending rather than implied by passing tests.

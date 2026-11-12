@@ -172,7 +172,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
                  "regeneration-entrypoint-preserved-gallery-never-invokes-it",
                  "saved-control-witness-gallery-companion-builder",
                  "reviewed-analytic-diagram-preserved",
-                 "analytic-reference-checked-saved-run-renderer", "saved-data-illustration-renderer"}
+                 "analytic-reference-checked-saved-run-renderer",
+                 "saved-data-illustration-renderer"}
         self.assertTrue(all(entry["disposition"] in allowed for entry in producers.values()))
         deferred=[entry for entry in producers.values()
                   if entry["disposition"]=="deferred-family-specific-migration"]
