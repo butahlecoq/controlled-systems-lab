@@ -11,6 +11,9 @@ csl_add_library(csl_optimization STATIC src/optimization/linear_program.cpp src/
 
 target_link_libraries(csl_optimization PUBLIC CSL::numeric)
 
+csl_add_library(csl_running_control_cost STATIC src/optimization/running_control_cost.cpp)
+target_link_libraries(csl_running_control_cost PUBLIC CSL::numeric)
+
 csl_add_library(csl_phase_one STATIC src/optimization/phase_one/program.cpp src/optimization/phase_one/simplex.cpp)
 
 target_link_libraries(csl_phase_one PUBLIC CSL::optimization CSL::registry)
@@ -62,7 +65,7 @@ csl_add_library(csl_finite_action_nominal STATIC
   src/optimization/finite_action_graph.cpp)
 target_link_libraries(csl_finite_action_nominal PUBLIC CSL::finite_action_minimax
   CSL::finite_action_box_minimax CSL::finite_action_zonotope_minimax
-  CSL::finite_action_parallelotope_minimax CSL::finite_action_ellipsoid_minimax
+  CSL::finite_action_parallelotope_minimax CSL::finite_action_ellipsoid_minimax CSL::running_control_cost
   CSL::polyhedral)
 
 csl_add_library(csl_finite_causal_minimax STATIC src/optimization/finite_causal_minimax.cpp)

@@ -1,0 +1,59 @@
+{
+  "source_commit": "536a5a9f81b49a164847d36ebef96501b0925312",
+  "compiler_parent": "260cc9a7483f94724ab6bd4d513421be8e5ec824",
+  "retention_ref": "evidence/full-history-source-536a5a9f-20261112",
+  "source_capsule": {
+    "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/history-source-536a5a9f.tar",
+    "sha256": "70810451e2a15d974852fabedbf475c89e5c09c8685edb31b0c3f00232cbf5db"
+  },
+  "build": "Incremental Release GCC 16.2.1, HiGHS and Qhull enabled, existing correctly configured bridge cache, serial native lock; dependency tracking, not independently reproduced",
+  "build_command": "/home/butahlecoq/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake --build /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-history-bridge-build --target csl_closed_loop_native_policy history_cost_tests finite_action_nominal_tests finite_action_graph_tests -j1",
+  "binary_sha256": "5ec2cf4411e1f183de4dcbf74398ae4acae2a5179d59ba5fa83b3ff651c08d62",
+  "cmake_cache_sha256": "41cb4eaf1dc1a41e689043173d99c69190a01690314cfce951c99846620bedb7",
+  "build_log_sha256": "64058775525f0d2d16f70292be5104dab0dfe7b7871dbba7c7ddd25518a2a529",
+  "cases": {
+    "total-cost": {
+      "request_sha256": "5d0eb537c8bf48ab3fdf4cfbb5b6a1b70e8c8133559013dd05fa60038f52ce8d",
+      "stdout_sha256": "66db4fe4782380bcd432023c7219cbbd344999fccca541b8849f7a449f5747b5",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "primal": [
+        0.0,
+        0.0,
+        0.33333333333333304,
+        0.0,
+        0.33333333333333304,
+        0.0
+      ],
+      "source_cost": {
+        "running": 0.22222222222222182,
+        "terminal": 0.44444444444444486,
+        "total": 0.6666666666666667
+      },
+      "max_equality_residual": 0.0,
+      "max_inequality_violation": 0,
+      "provider": "csl.convex.highs"
+    },
+    "terminal-only": {
+      "request_sha256": "40b1678c3983cc2e4a6457822bf0bd931b4a9a504ee701f97d3ef70f784f94a9",
+      "stdout_sha256": "f80441b474dbda634d4ba79c3d47ed32b9369d2a01c115465d66e1765b7e196c",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "primal": [
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      "source_cost": {
+        "running": 0.0,
+        "terminal": 0.0,
+        "total": 0.0
+      },
+      "max_equality_residual": 0.0,
+      "max_inequality_violation": 0,
+      "provider": "csl.convex.highs"
+    }
+  },
+  "producer": "Inline Python invoked through owned_run.py at the clean source worktree; copied exact f4 analytic requests, invoked the freshly copied native binary with each request on stdin, saved stdout/stderr, independently checked primal/source cost and all returned H rows. The inline producer source was not separately retained."
+}

@@ -1,0 +1,46 @@
+{
+  "schema": "csl.history-cost-2d-current-source/1",
+  "source_commit": "536a5a9f81b49a164847d36ebef96501b0925312",
+  "compiler_parent": "260cc9a7483f94724ab6bd4d513421be8e5ec824",
+  "retention_ref": "evidence/full-history-source-536a5a9f-20261112",
+  "native_binary_sha256": "5ec2cf4411e1f183de4dcbf74398ae4acae2a5179d59ba5fa83b3ff651c08d62",
+  "provider": "csl.convex.highs",
+  "build_profile": "Incremental Release GCC 16.2.1, HiGHS 1.11.0 and Qhull enabled; serial lock; reuses correctly configured bridge cache; dependency tracking, not independently reproduced.",
+  "cases": {
+    "total-cost": {
+      "point": [
+        0.3333333333333333,
+        0
+      ],
+      "running": 0.22222222222222182,
+      "terminal": 0.44444444444444486,
+      "total": 0.6666666666666667,
+      "max_equality_residual": 0.0,
+      "max_inequality_violation": 0.0
+    },
+    "terminal-only": {
+      "point": [
+        1.0,
+        0
+      ],
+      "running": 0.0,
+      "terminal": 0.0,
+      "total": 0.0,
+      "max_equality_residual": 0.0,
+      "max_inequality_violation": 0.0
+    }
+  },
+  "producer_limit": "The capture receipt records an inline Python producer, but that producer script was not retained separately. Exact raw requests, outputs, errors, receipt, build log and CMake cache are included.",
+  "files": {
+    "records/CMakeCache.txt": "41cb4eaf1dc1a41e689043173d99c69190a01690314cfce951c99846620bedb7",
+    "records/build.log": "64058775525f0d2d16f70292be5104dab0dfe7b7871dbba7c7ddd25518a2a529",
+    "records/receipt-first-write-invalid.txt": "9aa74c71e1e7f4a7c4366685fad994b569bdfa7f6184af038705e1b3f27bf38f",
+    "records/receipt.json": "1eec5c8c44803a2a5d64d39c1e03818e056aeec86c084f28383717dcec65cedf",
+    "records/terminal-only-request.jsonl": "40b1678c3983cc2e4a6457822bf0bd931b4a9a504ee701f97d3ef70f784f94a9",
+    "records/terminal-only-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "records/terminal-only-stdout.jsonl": "f80441b474dbda634d4ba79c3d47ed32b9369d2a01c115465d66e1765b7e196c",
+    "records/total-cost-request.jsonl": "5d0eb537c8bf48ab3fdf4cfbb5b6a1b70e8c8133559013dd05fa60038f52ce8d",
+    "records/total-cost-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "records/total-cost-stdout.jsonl": "66db4fe4782380bcd432023c7219cbbd344999fccca541b8849f7a449f5747b5"
+  }
+}

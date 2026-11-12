@@ -2098,7 +2098,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 91,
+      "signal_count": 97,
       "asset_name_literals": [
         "adaptive-ode-replay.svg",
         "app01-plan-timing-v1.svg",
@@ -2138,6 +2138,7 @@
         "fuel-b06-viz06-trajectory.svg",
         "geometry-reference-ellipsoid.svg",
         "geometry.svg",
+        "history-cost-2d.svg",
         "issue3-control-walkthrough.svg",
         "joint-relation-2d.svg",
         "lazy-2d.svg",

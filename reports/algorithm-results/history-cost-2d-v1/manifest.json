@@ -1,0 +1,23 @@
+{
+  "schema": "csl.history-cost-2d/1",
+  "case": "one-step-identity-dynamics-2d",
+  "source_commit": "f4e73e08908c472801aef6637d94b1a03cb0b2a7",
+  "source_capsule_sha256": "8bc9e1cfd435300b0e079cab72572c442dd2bcd4b61fcda74fbbb008f26e8bac",
+  "native_binary_sha256": "2d336a436220fdc59cf2c2c5a00defceadc5fb330450b16693fd0637a5cded17",
+  "provider": "csl.convex.highs",
+  "provider_version": "HiGHS 1.11.0",
+  "assurance": "numerical optimum for this convex one-step QP",
+  "claim_scope": "one-step supported 2D full-history cost; no full-horizon feedback or nonlinear safety claim",
+  "files": {
+    "history-cost-2d.svg": "48146276a71503b898caf3977e275dd5dcc8909f8c34179cd4ae51d5e6f481f3",
+    "index.html": "aba080d3ebe75fe7e59b4f224f0f81066ee8f03a0aeebe34698b2e54a17fe40b",
+    "records/build-receipt-summary.json": "75dd89a6fdd9dbd2a5f6908be4d918b996f4c0d7d3a479739c27c10b552329b0",
+    "records/capture-receipt.json": "e707a1ce37622ebe7d52c6b6d3e9aef13a496ab34159390e32fd6352d49c1d74",
+    "records/terminal-only-request.jsonl": "40b1678c3983cc2e4a6457822bf0bd931b4a9a504ee701f97d3ef70f784f94a9",
+    "records/terminal-only-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "records/terminal-only-stdout.jsonl": "f80441b474dbda634d4ba79c3d47ed32b9369d2a01c115465d66e1765b7e196c",
+    "records/total-cost-request.jsonl": "5d0eb537c8bf48ab3fdf4cfbb5b6a1b70e8c8133559013dd05fa60038f52ce8d",
+    "records/total-cost-stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "records/total-cost-stdout.jsonl": "66db4fe4782380bcd432023c7219cbbd344999fccca541b8849f7a449f5747b5"
+  }
+}

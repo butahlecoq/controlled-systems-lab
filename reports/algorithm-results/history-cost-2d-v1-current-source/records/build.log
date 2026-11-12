@@ -1,0 +1,138 @@
+[ 63%] Built target highs
+[ 66%] Built target csl_contracts
+[ 66%] Built target csl_numeric
+[ 66%] Built target csl_optimization
+[ 66%] Building CXX object CMakeFiles/csl_running_control_cost.dir/src/optimization/running_control_cost.cpp.o
+[ 66%] Linking CXX static library libcsl_running_control_cost.a
+[ 66%] Built target csl_running_control_cost
+[ 69%] Built target csl_sets
+[ 69%] Built target csl_objectives
+[ 69%] Built target csl_model
+[ 72%] Built target csl_problem
+[ 75%] Built target csl_resolved_core
+[ 75%] Built target csl_verifiers
+[ 75%] Built target csl_registry
+[ 77%] Built target csl_phase_one
+[ 77%] Built target csl_convex
+[ 77%] Built target csl_worst_case_vertex
+[ 77%] Built target csl_polyhedral
+[ 77%] Built target csl_quickhull_2d
+[ 77%] Built target csl_resolved_problem
+[ 80%] Built target csl_bounded_hull_checker
+[ 83%] Built target csl_hull
+[ 83%] Built target csl_legacy_btulshor
+[ 83%] Built target csl_affine_sum
+[ 83%] Built target csl_verification
+[ 86%] Built target csl_execution
+[ 91%] Built target csl_artifacts
+[ 91%] Built target csl_fixed_plan_disturbance
+[ 91%] Built target csl_finite_plan_box
+[ 91%] Built target csl_finite_plan_zonotope
+[ 94%] Built target csl_finite_plan_parallelotope
+[ 94%] Built target csl_finite_plan_ellipsoid
+[ 94%] Built target csl_control_recovery
+[ 94%] Building CXX object CMakeFiles/csl_history_cost.dir/src/optimization/history_cost.cpp.o
+[ 94%] Linking CXX static library libcsl_history_cost.a
+[ 94%] Built target csl_history_cost
+[ 94%] Built target csl_highs_lp
+[ 94%] Built target csl_highs_convex
+[ 94%] Built target csl_finite_action_minimax
+[ 97%] Built target csl_finite_action_replay
+[100%] Built target csl_finite_action_box_minimax
+[100%] Built target csl_finite_action_zonotope_minimax
+[100%] Built target csl_finite_action_parallelotope_minimax
+[100%] Built target csl_finite_action_ellipsoid_minimax
+[100%] Building CXX object CMakeFiles/csl_finite_action_nominal.dir/src/optimization/finite_action_nominal.cpp.o
+[100%] Building CXX object CMakeFiles/csl_finite_action_nominal.dir/src/optimization/finite_action_graph.cpp.o
+[100%] Linking CXX static library libcsl_finite_action_nominal.a
+[100%] Built target csl_finite_action_nominal
+[100%] Linking CXX executable csl_closed_loop_native_policy
+[100%] Built target csl_closed_loop_native_policy
+[ 20%] Built target csl_contracts
+[ 20%] Built target csl_numeric
+[ 40%] Built target csl_sets
+[ 40%] Built target csl_objectives
+[ 40%] Built target csl_model
+[ 40%] Built target csl_running_control_cost
+[ 60%] Built target csl_problem
+[ 80%] Built target csl_resolved_core
+[ 80%] Built target csl_verifiers
+[ 80%] Built target csl_registry
+[ 80%] Built target csl_resolved_problem
+[ 80%] Built target csl_control_recovery
+[ 80%] Built target csl_history_cost
+[ 80%] Building CXX object CMakeFiles/history_cost_tests.dir/tests/unit/optimization/history_cost_tests.cpp.o
+[100%] Linking CXX executable history_cost_tests
+[100%] Built target history_cost_tests
+[  0%] Built target csl_quickhull_2d
+[  8%] Built target csl_contracts
+[  8%] Built target csl_numeric
+[  8%] Built target csl_objectives
+[ 16%] Built target csl_sets
+[ 16%] Built target csl_model
+[ 25%] Built target csl_problem
+[ 33%] Built target csl_resolved_core
+[ 33%] Built target csl_verifiers
+[ 33%] Built target csl_registry
+[ 33%] Built target csl_resolved_problem
+[ 41%] Built target csl_bounded_hull_checker
+[ 41%] Built target csl_optimization
+[ 41%] Built target csl_worst_case_vertex
+[ 41%] Built target csl_verification
+[ 50%] Built target csl_execution
+[ 66%] Built target csl_artifacts
+[ 66%] Built target csl_fixed_plan_disturbance
+[ 75%] Built target csl_finite_action_replay
+[ 75%] Built target csl_finite_plan_ellipsoid
+[ 75%] Built target csl_finite_action_minimax
+[ 75%] Built target csl_finite_action_ellipsoid_minimax
+[ 75%] Built target csl_running_control_cost
+[ 75%] Built target csl_polyhedral
+[ 75%] Built target csl_finite_plan_box
+[ 75%] Built target csl_finite_plan_zonotope
+[ 83%] Built target csl_finite_plan_parallelotope
+[ 91%] Built target csl_finite_action_box_minimax
+[ 91%] Built target csl_finite_action_zonotope_minimax
+[ 91%] Built target csl_finite_action_parallelotope_minimax
+[ 91%] Built target csl_finite_action_nominal
+[100%] Building CXX object CMakeFiles/finite_action_nominal_tests.dir/tests/unit/optimization/finite_action_nominal_tests.cpp.o
+[100%] Linking CXX executable finite_action_nominal_tests
+[100%] Built target finite_action_nominal_tests
+[  0%] Built target csl_quickhull_2d
+[  7%] Built target csl_contracts
+[  7%] Built target csl_numeric
+[  7%] Built target csl_objectives
+[ 14%] Built target csl_sets
+[ 14%] Built target csl_model
+[ 21%] Built target csl_problem
+[ 28%] Built target csl_resolved_core
+[ 28%] Built target csl_verifiers
+[ 28%] Built target csl_registry
+[ 28%] Built target csl_resolved_problem
+[ 35%] Built target csl_bounded_hull_checker
+[ 35%] Built target csl_optimization
+[ 35%] Built target csl_worst_case_vertex
+[ 35%] Built target csl_verification
+[ 42%] Built target csl_execution
+[ 57%] Built target csl_artifacts
+[ 57%] Built target csl_fixed_plan_disturbance
+[ 64%] Built target csl_finite_action_replay
+[ 64%] Built target csl_finite_plan_ellipsoid
+[ 64%] Built target csl_finite_action_minimax
+[ 64%] Built target csl_finite_action_ellipsoid_minimax
+[ 64%] Built target csl_running_control_cost
+[ 64%] Built target csl_polyhedral
+[ 64%] Built target csl_finite_plan_box
+[ 64%] Built target csl_finite_plan_zonotope
+[ 71%] Built target csl_finite_plan_parallelotope
+[ 78%] Built target csl_finite_action_box_minimax
+[ 78%] Built target csl_finite_action_zonotope_minimax
+[ 78%] Built target csl_finite_action_parallelotope_minimax
+[ 78%] Built target csl_finite_action_nominal
+[ 85%] Built target csl_phase_one
+[ 92%] Built target csl_hull
+[ 92%] Built target csl_legacy_btulshor
+[ 92%] Built target csl_affine_sum
+[ 92%] Building CXX object CMakeFiles/finite_action_graph_tests.dir/tests/unit/optimization/finite_action_graph_tests.cpp.o
+[100%] Linking CXX executable finite_action_graph_tests
+[100%] Built target finite_action_graph_tests

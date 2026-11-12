@@ -5,8 +5,6 @@
 #include <csl/optimization/finite_action_zonotope_minimax.hpp>
 
 #include "finite_action_plans.hpp"
-#include "running_cost_evaluation.hpp"
-
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -18,84 +16,15 @@ Unsupported unsupported(std::string field, std::string message) {
     return {{{DiagnosticCode::unsupported, std::move(field), std::move(message)}}};
 }
 
-bool finite_values(std::span<const double> values) {
-    return std::ranges::all_of(values, [](double value) { return std::isfinite(value); });
-}
-
-Unsupported validate_running_cost(const RunningControlCost& cost,
-    std::size_t absolute_stage_offset, std::size_t horizon, std::size_t control_dimension) {
-    if(cost.stages.empty()) {
-        if(!cost.objective_id.empty() || cost.original_horizon != 0)
-            return unsupported("finite_nominal.running_cost", "An inactive running-cost schedule must have empty identity and zero original horizon.");
-        return {};
-    }
-    if(cost.objective_id.empty() || cost.original_horizon == 0 ||
-       absolute_stage_offset > cost.original_horizon || horizon > cost.original_horizon - absolute_stage_offset)
-        return unsupported("finite_nominal.running_cost", "The running-cost identity and original horizon must cover the requested absolute-stage slice.");
-    std::size_t previous_stage = 0;
-    bool first_stage = true;
-    for(const auto& stage : cost.stages) {
-        if(stage.stage >= cost.original_horizon || (!first_stage && stage.stage <= previous_stage))
-            return unsupported("finite_nominal.running_cost.stages", "Running-cost stages must be unique, increasing, and inside the original horizon.");
-        previous_stage = stage.stage;
-        first_stage = false;
-        for(const auto& term : stage.terms) {
-            if(const auto* quadratic = std::get_if<QuadraticControlPenalty>(&term)) {
-                if(quadratic->reference.size() != control_dimension || quadratic->scales.size() != control_dimension ||
-                   quadratic->weights.size() != control_dimension || quadratic->normalization_horizon != cost.original_horizon ||
-                   !std::isfinite(quadratic->coefficient) || quadratic->coefficient < 0 ||
-                   !finite_values(quadratic->reference) || !finite_values(quadratic->scales) ||
-                   !finite_values(quadratic->weights) ||
-                   !std::ranges::all_of(quadratic->scales, [](double value) { return value != 0.0; }) ||
-                   !std::ranges::all_of(quadratic->weights, [](double value) { return value >= 0.0; }))
-                    return unsupported("finite_nominal.running_cost.quadratic", "Quadratic running-cost dimensions, normalization, scales, weights, and coefficient are invalid.");
-            } else {
-                const auto& norm = std::get<EuclideanControlPenalty>(term);
-                if(norm.map.cols != control_dimension || norm.map.rows == 0 || norm.offset.size() != norm.map.rows ||
-                   norm.map.values.size() != norm.map.rows * norm.map.cols || !finite_values(norm.map.values) ||
-                   !finite_values(norm.offset) || !std::isfinite(norm.coefficient) || norm.coefficient < 0)
-                    return unsupported("finite_nominal.running_cost.euclidean", "Euclidean running-cost map, offset, and coefficient are invalid.");
-            }
-        }
-    }
-    return {};
-}
-
-double stage_running_cost(const RunningControlCost& cost, std::size_t absolute_stage,
-    std::span<const double> control) {
-    const auto found = std::lower_bound(cost.stages.begin(), cost.stages.end(), absolute_stage,
-        [](const AbsoluteStageControlCost& row, std::size_t stage) { return row.stage < stage; });
-    if(found == cost.stages.end() || found->stage != absolute_stage) return 0.0;
-    double total = 0.0;
-    for(const auto& term : found->terms) {
-        if(const auto* quadratic = std::get_if<QuadraticControlPenalty>(&term)) {
-            if(quadratic->coefficient == 0.0) continue;
-            const auto quadratic_cost = detail::quadratic_stage_cost(*quadratic, control);
-            if(!quadratic_cost) return std::numeric_limits<double>::quiet_NaN();
-            total += *quadratic_cost;
-        } else {
-            const auto& norm = std::get<EuclideanControlPenalty>(term);
-            if(norm.coefficient == 0.0) continue;
-            double squared = 0.0;
-            for(std::size_t row = 0; row < norm.map.rows; ++row) {
-                double value = norm.offset[row];
-                for(std::size_t col = 0; col < norm.map.cols; ++col)
-                    value += norm.map.values[row * norm.map.cols + col] * control[col];
-                squared += value * value;
-            }
-            total += norm.coefficient * std::sqrt(squared);
-        }
-    }
-    return total;
-}
-
 double running_cost_for(const FiniteActionNominalRequest& request,
     const std::vector<std::size_t>& action_indices) {
-    double result = 0.0;
-    for(std::size_t local = 0; local < action_indices.size(); ++local)
-        result += stage_running_cost(request.running_cost, request.absolute_stage_offset + local,
-            request.actions.catalogue.at(action_indices[local]));
-    return result;
+    std::vector<Vector> controls;
+    controls.reserve(action_indices.size());
+    for(const auto index : action_indices) controls.push_back(request.actions.catalogue.at(index));
+    const auto result = evaluate_running_control_cost(request.running_cost,
+        request.absolute_stage_offset, controls.size(), controls, request.actions.dimension);
+    if(const auto* value = std::get_if<double>(&result)) return *value;
+    return std::numeric_limits<double>::quiet_NaN();
 }
 
 using SetOutcome = std::variant<sets::SetData, Unsupported>;
@@ -139,8 +68,14 @@ RequestOutcome make_degenerate_request(const FiniteActionNominalRequest& request
             checked_plans.push_back(plan);
         }
     }
-    if(auto cost_error = validate_running_cost(request.running_cost, request.absolute_stage_offset,
-            horizon, dimensions.control); !cost_error.diagnostics.empty()) return cost_error;
+    if(auto cost_errors = validate_running_control_cost(request.running_cost, request.absolute_stage_offset,
+            horizon, dimensions.control); !cost_errors.empty()) {
+        for(auto& error : cost_errors) {
+            error.code = DiagnosticCode::unsupported;
+            error.field = "finite_nominal." + error.field;
+        }
+        return Unsupported{std::move(cost_errors)};
+    }
     if(!std::ranges::all_of(request.initial_state, [](double value) { return std::isfinite(value); }))
         return unsupported("finite_nominal.initial", "The authored nominal initial state must be finite.");
     auto initial = singleton("nominal-initial", request.initial_state);
