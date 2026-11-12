@@ -34,27 +34,119 @@
     "horizon": 1,
     "state_dimension": 2,
     "control_dimension": 2,
-    "time_grid": [0, 1],
+    "time_grid": [
+      0,
+      1
+    ],
     "dynamics": {
       "equation": "x1 = x0 + u0",
-      "A": [[1, 0], [0, 1]],
-      "B": [[1, 0], [0, 1]],
+      "A": [
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      "B": [
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          1
+        ]
+      ],
       "external_input_dimension": 0,
-      "offset": [0, 0]
+      "offset": [
+        0,
+        0
+      ]
     },
-    "initial_state": [0, 0],
+    "initial_state": [
+      0,
+      0
+    ],
     "state_factors": [
-      {"stage": 0, "coordinates": ["position", "velocity"], "box": [[-1, 1], [-1, 1]]},
-      {"stage": 1, "coordinates": ["position", "velocity"], "box": [[0, 1], [0, 1]]}
+      {
+        "stage": 0,
+        "coordinates": [
+          "position",
+          "velocity"
+        ],
+        "box": [
+          [
+            -1,
+            1
+          ],
+          [
+            -1,
+            1
+          ]
+        ]
+      },
+      {
+        "stage": 1,
+        "coordinates": [
+          "position",
+          "velocity"
+        ],
+        "box": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      }
     ],
     "control_factors": [
-      {"stage": 0, "coordinates": ["position", "velocity"], "box": [[0, 1], [0, 1]]}
+      {
+        "stage": 0,
+        "coordinates": [
+          "position",
+          "velocity"
+        ],
+        "box": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      }
     ],
     "strategy": "csl.synthesis.reach-back@1",
     "hull_path": "faithful BTULSHOR KPABEP/MODIF with bounded exact checker"
   },
   "original_ordered_conversion_input": {
-    "vertices": [[0, 1], [1, 1], [0, 0], [1, 0]],
+    "vertices": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        0
+      ]
+    ],
     "rays": [],
     "source_record": {
       "issue": 944,
@@ -66,20 +158,59 @@
   },
   "pre_fix_failure": {
     "conversion_matrix_A": [
-      [1, -1.1102230246251565e-16],
-      [0, 1],
-      [1.1102230246251565e-16, -1],
-      [-1, 0]
+      [
+        1,
+        -1.1102230246251565e-16
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        1.1102230246251565e-16,
+        -1
+      ],
+      [
+        -1,
+        0
+      ]
     ],
-    "conversion_vector_b": [0.99999999999999989, 1, 0, 0],
+    "conversion_vector_b": [
+      0.9999999999999999,
+      1,
+      0,
+      0
+    ],
     "hiGHS_removal_threshold": 1e-12,
     "linear_refusal": "highs.matrix: Nonzero coefficient at or below native removal threshold 1e-12",
     "quadratic_refusal": "highs.convex.matrix: nonzero coefficient at or below native removal threshold 1e-12"
   },
   "post_fix_conversion": {
     "relation": "A x <= b",
-    "matrix_A": [[0, 1], [-1, 0], [1, 0], [0, -1]],
-    "vector_b": [1, 0, 1, 0]
+    "matrix_A": [
+      [
+        0,
+        1
+      ],
+      [
+        -1,
+        0
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        0,
+        -1
+      ]
+    ],
+    "vector_b": [
+      1,
+      0,
+      1,
+      0
+    ]
   },
   "terminal_cases": [
     {
@@ -87,25 +218,68 @@
       "objective": "-x1.position",
       "expected_objective": -1,
       "optimizer": "csl.lp.highs",
-      "terminal_state": [1, 0],
-      "control": [1, 0]
+      "terminal_state": [
+        1,
+        0
+      ],
+      "checked_control_witness": [
+        1,
+        0
+      ],
+      "control_role": "checked feasible witness in returned joint relation; not extracted from optimizer"
     },
     {
       "id": "quadratic",
       "objective": "x1.position^2 + x1.velocity^2",
-      "quadratic_matrix": [[2, 0], [0, 2]],
-      "quadratic_center": [0, 0],
+      "quadratic_matrix": [
+        [
+          2,
+          0
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "quadratic_center": [
+        0,
+        0
+      ],
       "expected_objective": 0,
       "optimizer": "csl.convex.highs",
-      "terminal_state": [0, 0],
-      "control": [0, 0]
+      "terminal_state": [
+        0,
+        0
+      ],
+      "checked_control_witness": [
+        0,
+        0
+      ],
+      "control_role": "checked feasible witness in returned joint relation; not extracted from optimizer"
     }
   ],
   "independent_check": {
     "coordinates": "[x0.position, x0.velocity, x1.position, x1.velocity, u0.position, u0.velocity]",
-    "linear_history": [0, 0, 1, 0, 1, 0],
-    "quadratic_history": [0, 0, 0, 0, 0, 0],
-    "dynamics_residual": [0, 0],
+    "linear_history": [
+      0,
+      0,
+      1,
+      0,
+      1,
+      0
+    ],
+    "quadratic_history": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "dynamics_residual": [
+      0,
+      0
+    ],
     "both_histories_satisfy_returned_candidate_relation": true,
     "objective_arithmetic": "linear: -(1) = -1; quadratic: 0^2 + 0^2 = 0"
   },
@@ -121,5 +295,10 @@
     "run": "ctest --test-dir build/qhull-highs-example -R '^(strategy_a_tests|qhull_highs_interop_tests)$' --output-on-failure",
     "source_test": "tests/synthesis/strategy_a/strategy_tests.cpp",
     "conversion_test": "tests/contract/geometry/qhull_highs_interop_tests.cpp"
+  },
+  "illustration_source": {
+    "commit": "15124702bc4e476a4ec4f67ba350bcc65005c0e7",
+    "source_path": "scripts/reports/qhull_highs_strategy_a_example.py",
+    "source_sha256": "3fa007d8011dba1d86c9f0119dc7cf52ecc6746210c8cb2a0fad660e247a71e3"
   }
 }
