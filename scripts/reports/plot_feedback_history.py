@@ -152,6 +152,7 @@ def render(task_name, response, attempt_path, destination, capture_source, rende
             fig.savefig(path, dpi=150, facecolor=background)
             vector = path.with_suffix(".svg")
             fig.savefig(vector, facecolor=background)
+            vector.write_text("".join(line.rstrip() + chr(10) for line in vector.read_text().splitlines()))
             plt.close(fig)
             for rendered in (path, vector):
                 output.append({"path": rendered.name, "sha256": hashlib.sha256(rendered.read_bytes()).hexdigest(),
