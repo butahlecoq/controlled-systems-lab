@@ -33,6 +33,10 @@ struct NominalTubeFailure {
     NominalTubePhase phase;
     std::optional<GeometryRequestIdentity> active_request;
     std::variant<Unsupported, OperationStopped> cause;
+    std::optional<ForwardPartialRelation> forward_partial;
+    std::vector<RequestProvenance> forward_providers;
+    std::vector<GeometryEvidence> forward_lineage;
+    std::vector<CoordinateRelabeling> coordinate_lineage;
 };
 
 // Forward propagation may establish an empty stage before the horizon. Keep

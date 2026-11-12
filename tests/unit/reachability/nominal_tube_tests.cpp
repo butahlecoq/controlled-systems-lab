@@ -301,4 +301,6 @@ TEST_CASE("tube preserves cancellation and projection row-capacity failures with
     CHECK(capacity_failure.phase == NominalTubePhase::forward);
     CHECK(capacity_failure.stage.value == 0);
     REQUIRE(std::holds_alternative<Unsupported>(capacity_failure.cause));
+    CHECK_FALSE(capacity_failure.forward_providers.empty());
+    REQUIRE(capacity_failure.active_request);
 }

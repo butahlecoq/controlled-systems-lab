@@ -172,7 +172,7 @@ NominalTubeOutcome nominal_tube(const problem::ResolvedProblem& resolved, Reques
     const auto fail = [&](auto cause) -> NominalTubeOutcome {
         using T = std::decay_t<decltype(cause)>;
         return NominalTubeFailure{std::move(tube), active_stage, active_phase, active_request,
-            std::variant<Unsupported, OperationStopped>{std::in_place_type<T>, std::move(cause)}};
+            std::variant<Unsupported, OperationStopped>{std::in_place_type<T>, std::move(cause)}, {}, {}, {}, {}};
     };
     try {
         if (request.value.empty()) return fail(Unsupported{error("tube.request", "Nonempty immutable request ID required.", DiagnosticCode::invalid_input)});
@@ -184,7 +184,16 @@ NominalTubeOutcome nominal_tube(const problem::ResolvedProblem& resolved, Reques
             active_stage = failure->stage;
             active_phase = NominalTubePhase::forward;
             if (failure->active_request) active_request = failure->active_request->identity;
-            return std::visit([&](auto cause) { return fail(std::move(cause)); }, failure->cause);
+            auto outcome = std::visit([&](auto cause) -> NominalTubeFailure {
+                using T = std::decay_t<decltype(cause)>;
+                return {std::move(tube), active_stage, active_phase, active_request,
+                    std::variant<Unsupported, OperationStopped>{std::in_place_type<T>, std::move(cause)}, {}, {}, {}, {}};
+            }, failure->cause);
+            outcome.forward_partial = failure->partial_relation;
+            outcome.forward_providers = failure->providers;
+            outcome.forward_lineage = failure->completed_lineage;
+            outcome.coordinate_lineage = failure->coordinate_lineage;
+            return outcome;
         }
         if (auto* empty = std::get_if<EmptyForwardStage>(&forward_outcome)) {
             append_forward(tube, empty->prefix);
