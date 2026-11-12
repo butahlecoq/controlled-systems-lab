@@ -128,6 +128,17 @@ def project_h(member, dimension, first, second):
     normalized = [tuple(p) for p in (points-origin)/scales]
     for _ in range(128):
         hull = convex_boundary(normalized)
+        if len(hull) == 2:
+            edge = np.asarray(hull[1])-hull[0]
+            normal = np.array([edge[1], -edge[0]]) / np.linalg.norm(edge)
+            extra = []
+            for direction in (normal, -normal):
+                point = (support(direction/scales)-origin)/scales
+                if abs(normal @ (point-hull[0])) > 1e-8:
+                    extra.append(tuple(point))
+            if extra:
+                normalized.extend(extra)
+                continue
         if len(hull) < 3:
             return {"points": (np.asarray(hull)*scales+origin).tolist(),
                     "method": "numerical full-state LP projection", "normalized_support_tolerance": 1e-8}

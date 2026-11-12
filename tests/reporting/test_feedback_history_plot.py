@@ -56,6 +56,15 @@ class FeedbackHistoryPlotTest(unittest.TestCase):
         self.assertEqual({tuple(np.round(p, 8)) for p in points},
                          {(-1, -1), (1, -1), (1, 0), (0, 1), (-1, 1)})
 
+    @unittest.skipUnless(importlib.util.find_spec("scipy"), "SciPy required for non-axis full-state H projection")
+    def test_cardinal_extremes_do_not_hide_a_third_projected_vertex(self):
+        from plot_feedback_history import project_member
+        member = {"kind": "h", "inequalities": [[1, -1, 0, 0], [-5, 6, 0, 0], [-5, 4, 0, 0]],
+                  "upper_bounds": [0, 1, 0], "equalities": [[0, 0, 1, 0], [0, 0, 0, 1]],
+                  "equality_values": [0, 0]}
+        points = np.asarray(project_member(member, 4, 0, 1)["points"])
+        self.assertLess(np.min(np.linalg.norm(points-[0.4, 0.5], axis=1)), 1e-7)
+
     def test_full_state_box_then_fuel_physical_planes(self):
         member = {"inequalities": [[1, 0, 0, 0], [-1, 0, 0, 0], [0, 1, 0, 0],
                     [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, -1, 0],
