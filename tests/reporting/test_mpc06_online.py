@@ -108,6 +108,7 @@ for i,line in enumerate(sys.stdin):
                 return PureWindowsPath(relative_to(path,*arguments))
             with mock.patch.object(path_type,'relative_to',windows_relative):
                 result=study.run(driver,folder/'capture',1)
+            self.assertFalse((folder/'capture/source/README.md').exists())
             evidence.load_sources(folder/'capture')
             frozen=json.loads(json.dumps(result,default=study.encode))
             self.assertEqual(check.verify(frozen)['status'],'verified')
@@ -219,6 +220,9 @@ class EvidenceBindingTests(unittest.TestCase):
             output=Path(folder)/'rendered';result=self.renderer(bundle,receipt,output)
             self.assertEqual(result.returncode,0,result.stderr)
             self.assertTrue((output/'verification-v2.json').exists())
+            captured=(output/'checked-inputs'/bundle.name/'source/README.md').read_bytes()
+            self.assertEqual(captured,before[Path('source/README.md')])
+            self.assertIn('checked-inputs/'+bundle.name+'/source/README.md',(output/'index.html').read_text())
             subprocess.run([sys.executable,str(output/'review-tools/check.py'),str(output/'checked-inputs'/bundle.name),'--receipt-output',str(output/'verification-v2.json')],check=True,capture_output=True)
             self.assertEqual({p.relative_to(bundle):p.read_bytes() for p in bundle.rglob('*') if p.is_file()},before)
             subprocess.run([sys.executable,str(P.with_name('check.py')),str(bundle),'--receipt-output',str(receipt)],check=True,capture_output=True)
