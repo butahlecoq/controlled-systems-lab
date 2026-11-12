@@ -167,13 +167,14 @@ class ClosedLoopAttemptRecordTests(unittest.TestCase):
         control = [0.0]
         state = [field["initial"] for field in task["model"]["states"]]
         states = [state]
-        telemetry = {"kind": "deterministic-2d-point-cloud",
-            "points": [[float(i), float((i * 7) % 101)] for i in range(1024)]}
         for index in range(intervals):
             next_state = state
             for _ in range(20):
                 next_state = rk4_step(task["model"]["case_id"], task["model"]["parameters"],
                     next_state, control, dt / 20)
+            telemetry = {"kind": "deterministic-stage-specific-2d-point-cloud",
+                "stage": index, "points": [[float(index), float((point * 7 + index) % 101)]
+                    for point in range(4096)]}
             row = {"update_index": index, "status": "applied-and-observed",
                 "observed_physical": state, "observed_scaled": [
                     value / field["scale"] for value, field in zip(state, task["model"]["states"])],
@@ -214,6 +215,12 @@ class ClosedLoopAttemptRecordTests(unittest.TestCase):
         self.assertEqual(io["stage_json_bytes_written"], stage_bytes)
         self.assertEqual(io["recovery_evidence_bytes_written"], len(torn_reference))
         self.assertGreater(io["index_repair_bytes_written"], 0)
+        telemetry_hashes = []
+        for reference in iter_stage_references(self.attempt):
+            row = json.loads((self.attempt / reference["path"]).read_text(encoding="utf-8"))
+            telemetry_hashes.append(hashlib.sha256(json.dumps(
+                row["geometry_telemetry"], separators=(",", ":")).encode()).hexdigest())
+        self.assertEqual(len(set(telemetry_hashes)), intervals)
 
         bridge = self.attempt / "deterministic-replay-bridge"
         bridge.write_text("#!" + sys.executable + "\n"

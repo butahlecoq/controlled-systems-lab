@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import hashlib
 import json
+import multiprocessing
 import os
 from pathlib import Path
 import shutil
@@ -13,7 +15,72 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "benchmarks/reporting/closed_loop"))
 import run_closed_loop
-from attempt_records import STAGE_INDEX, finalize_stage, write_attempt, write_stage
+from attempt_records import (IO_LOG, STAGE_INDEX, finalize_stage, summarize_io,
+    verify_v2_attempt, write_attempt, write_stage)
+
+
+def _measure_worker_memory(send, attempt: Path, stage_count: int) -> None:
+    try:
+        import copy
+
+        task = copy.deepcopy(run_closed_loop.load_task("syn-nl-lv-01"))
+        task["episode"]["intervals"] = stage_count
+        task["episode"]["final_time"] = stage_count * task["episode"]["dt"]
+        task_hash = "a" * 64
+        graph = {"task_sha256": task_hash,
+            "action_profile_id": task["control_domains"]["continuous"]["problem_id"],
+            "controller": {"id": "memory-fixture-controller", "version": "1"},
+            "execution": {"id": "memory-fixture-execution", "version": "1", "provider": "fixture"},
+            "role_bindings": {}}
+        graph_path = attempt.parent / "graph.json"
+        graph_path.write_text(json.dumps(graph), encoding="utf-8")
+        bridge = attempt.parent / "bridge"
+        bridge.write_text("fixture", encoding="utf-8")
+        attempt.mkdir()
+
+        def query(_task, _graph, _state, stage, _previous, _prepared):
+            telemetry = [[float(stage), float(point), float((stage * 13 + point) % 997)]
+                         for point in range(4096)]
+            return {"status": "accepted", "control": [0.0],
+                "policy_id": graph["controller"]["id"], "invocations": [],
+                "predicted_sets": [{"role": "large-stage-telemetry", "points": telemetry}]}
+
+        def execution(request, _response):
+            state = request["observed_state"]["physical"]
+            start = request["absolute_time"]
+            return {"status": "complete", "physical_states": [state, state],
+                "times": [start, start + task["episode"]["dt"]],
+                "integration_receipts": [{"accepted_steps": 1, "rejected_steps": 0}]}
+
+        with mock.patch.object(run_closed_loop, "load_task", new=lambda _name: task), \
+             mock.patch.object(run_closed_loop, "validate_source_binding", new=lambda _task: None), \
+             mock.patch.object(run_closed_loop, "manifest_sha256", new=lambda _task: task_hash), \
+             mock.patch.object(run_closed_loop, "prepare_graph", new=lambda *_args: (None, {})), \
+             mock.patch.object(run_closed_loop, "controller_query", new=query), \
+             mock.patch.object(run_closed_loop, "execute_held_step_bridge", new=lambda *_args: {}), \
+             mock.patch.object(run_closed_loop, "validate_held_step_response", new=execution), \
+             mock.patch.object(run_closed_loop, "objective", new=lambda *_args: {
+                 "terminal": 0.0, "running": 0.0, "total": 0.0}):
+            status = run_closed_loop.worker("syn-nl-lv-01", attempt, bridge, graph_path=graph_path)
+        record = json.loads((attempt / "attempt.json").read_text(encoding="utf-8"))
+        telemetry_hashes = []
+        for reference in run_closed_loop.iter_stage_references(attempt):
+            row = json.loads((attempt / reference["path"]).read_text(encoding="utf-8"))
+            payload = row["predicted_sets"][0]["points"]
+            telemetry_hashes.append(hashlib.sha256(json.dumps(payload, separators=(",", ":")).encode()).hexdigest())
+        send.send({"status": status, "record_status": record["status"],
+            "traced_peak_bytes": record["resource_limits"]["observed"]["worker_python_traced_peak_bytes"],
+            "rss_peak_kib": record["resource_limits"]["observed"]["worker_max_rss_kib"],
+            "rss_scope": record["resource_limits"]["observed"]["rss_accounting_scope"],
+            "traced_scope": record["resource_limits"]["observed"]["python_traced_memory_scope"],
+            "stage_count": stage_count, "distinct_telemetry_stages": len(set(telemetry_hashes)),
+            "stage_json_bytes_written": summarize_io(attempt)["stage_json_bytes_written"],
+            "attempt_json_bytes": (attempt / "attempt.json").stat().st_size})
+    except BaseException as error:
+        send.send({"error": f"{type(error).__name__}: {error}"})
+        raise
+    finally:
+        send.close()
 
 
 class ClosedLoopRunnerFailureTests(unittest.TestCase):
@@ -161,6 +228,143 @@ class ClosedLoopRunnerFailureTests(unittest.TestCase):
             self.assertEqual(record["controls"], [[0.0]])
             self.assertEqual(record["physical_states"], [
                 record["selected_initial_state_physical"], record["selected_initial_state_physical"]])
+
+    def test_supervisor_reconciles_applied_stage_before_terminal_persistence(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw); bridge = root / "bridge"; bridge.write_text("bridge")
+
+            class InterruptedAfterStageFinalization:
+                pid = 999999999
+                returncode = -15
+
+                def communicate(self, timeout):
+                    attempt = next(root.glob("syn-nl-lv-01/attempts/*"))
+                    record = json.loads((attempt / "attempt.json").read_text())
+                    task = run_closed_loop.load_task("syn-nl-lv-01")
+                    initial = [row["initial"] for row in task["model"]["states"]]
+                    finalize_stage(attempt, 0, {"update_index": 0, "status": "applied-and-observed",
+                        "observed_physical": initial, "applied_control": [0.0],
+                        "observed_next_physical": initial})
+                    # Match the crash window after the durable stage index append but
+                    # before the worker checkpoints the updated attempt ledger.
+                    self.stale_completed_holds = record["completed_holds"]
+                    return "", "worker interrupted after final stage record"
+
+            with mock.patch.object(run_closed_loop.subprocess, "Popen", return_value=InterruptedAfterStageFinalization()), \
+                 mock.patch.object(run_closed_loop.subprocess, "check_output", return_value="test-commit\n"):
+                result = run_closed_loop.run_task("syn-nl-lv-01", root, bridge)
+
+            attempt = Path(result["attempt"])
+            record = json.loads((attempt / "attempt.json").read_text())
+            self.assertEqual(record["status"], "incomplete")
+            self.assertEqual(record["completed_holds"], 1)
+            self.assertEqual(record["controls"], [[0.0]])
+            self.assertEqual(len(record["physical_states"]), 2)
+            self.assertEqual(record["controls_sha256"], hashlib.sha256(
+                json.dumps(record["controls"], separators=(",", ":"), allow_nan=False).encode()).hexdigest())
+            verify_v2_attempt(attempt, record)
+            coverage = json.loads(run_closed_loop.write_coverage(root).read_text())
+            self.assertEqual(coverage["attempts"][0]["completed_holds"], 1)
+            self.assertEqual(coverage["attempts"][0]["ledger_status"], "incomplete")
+
+    def test_supervisor_preserves_torn_record_io_tail_and_marks_metrics_incomplete(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw); bridge = root / "bridge"; bridge.write_text("bridge")
+            torn = b'{"schema":"csl.closed-loop.record-io/1","operation":"stage-checkpoint","bytes_written":'
+
+            class InterruptedDuringTelemetryAppend:
+                pid = 999999999
+                returncode = -15
+
+                def communicate(self, timeout):
+                    attempt = next(root.glob("syn-nl-lv-01/attempts/*"))
+                    task = run_closed_loop.load_task("syn-nl-lv-01")
+                    initial = [row["initial"] for row in task["model"]["states"]]
+                    finalize_stage(attempt, 0, {"update_index": 0, "status": "applied-and-observed",
+                        "observed_physical": initial, "applied_control": [0.0],
+                        "observed_next_physical": initial})
+                    with (attempt / IO_LOG).open("ab") as stream:
+                        stream.write(torn)
+                    return "", "worker interrupted during record I/O append"
+
+            with mock.patch.object(run_closed_loop.subprocess, "Popen", return_value=InterruptedDuringTelemetryAppend()), \
+                 mock.patch.object(run_closed_loop.subprocess, "check_output", return_value="test-commit\n"):
+                result = run_closed_loop.run_task("syn-nl-lv-01", root, bridge)
+
+            attempt = Path(result["attempt"])
+            record = json.loads((attempt / "attempt.json").read_text())
+            self.assertEqual(record["status"], "incomplete")
+            self.assertEqual(record["completed_holds"], 1)
+            integrity = record["record_io"]
+            self.assertEqual(integrity["integrity_status"], "incomplete")
+            self.assertFalse(integrity["metric_totals_complete"])
+            preserved = integrity["recovery_evidence"][0]
+            self.assertEqual((attempt / preserved["path"]).read_bytes(), torn)
+            self.assertEqual(integrity["record_io_recovery_evidence_bytes_written"], len(torn))
+            lines = (attempt / IO_LOG).read_bytes().splitlines()
+            self.assertTrue(lines)
+            self.assertTrue(all(json.loads(line)["schema"] == "csl.closed-loop.record-io/1" for line in lines))
+            verify_v2_attempt(attempt, record)
+
+    def test_completed_malformed_record_io_row_is_reported_without_losing_attempt_status(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw); bridge = root / "bridge"; bridge.write_text("bridge")
+            malformed = b'{"schema":"csl.closed-loop.record-io/1","operation":}\n'
+
+            class InterruptedWithCorruptTelemetry:
+                pid = 999999999
+                returncode = -15
+
+                def communicate(self, timeout):
+                    attempt = next(root.glob("syn-nl-lv-01/attempts/*"))
+                    with (attempt / IO_LOG).open("ab") as stream:
+                        stream.write(malformed)
+                    return "", "worker interrupted after malformed telemetry row"
+
+            with mock.patch.object(run_closed_loop.subprocess, "Popen", return_value=InterruptedWithCorruptTelemetry()), \
+                 mock.patch.object(run_closed_loop.subprocess, "check_output", return_value="test-commit\n"):
+                result = run_closed_loop.run_task("syn-nl-lv-01", root, bridge)
+
+            attempt = Path(result["attempt"])
+            record = json.loads((attempt / "attempt.json").read_text())
+            self.assertEqual(record["status"], "incomplete")
+            self.assertEqual(record["record_io"]["integrity_status"], "invalid")
+            self.assertFalse(record["record_io"]["metric_totals_complete"])
+            self.assertIn("malformed completed row", record["record_io"]["integrity_diagnostic"])
+            self.assertIn(malformed, (attempt / IO_LOG).read_bytes())
+
+    def test_worker_retained_memory_stays_bounded_as_stage_telemetry_grows(self):
+        def measure(stage_count: int) -> dict:
+            with tempfile.TemporaryDirectory() as raw:
+                context = multiprocessing.get_context("fork")
+                receive, send = context.Pipe(duplex=False)
+                attempt = Path(raw) / "attempt"
+                process = context.Process(target=_measure_worker_memory,
+                    args=(send, attempt, stage_count))
+                process.start()
+                send.close()
+                observed = receive.recv()
+                process.join(timeout=30)
+                self.assertEqual(process.exitcode, 0)
+                self.assertNotIn("error", observed)
+                return observed
+
+        short = measure(4)
+        long = measure(24)
+        self.assertEqual((short["record_status"], long["record_status"]), ("complete", "complete"))
+        self.assertEqual(short["distinct_telemetry_stages"], short["stage_count"])
+        self.assertEqual(long["distinct_telemetry_stages"], long["stage_count"])
+        self.assertGreater(long["stage_json_bytes_written"], 5 * short["stage_json_bytes_written"])
+        self.assertLess(long["attempt_json_bytes"], long["stage_json_bytes_written"] // 5)
+        # A 6x longer episode writes 6x as many large stage payloads, but the worker
+        # holds only its current telemetry plus O(n) controls/states. Allow 2 MiB for
+        # one live Python telemetry object, JSON serialization temporaries, and noise.
+        self.assertLessEqual(long["traced_peak_bytes"], short["traced_peak_bytes"] + 2 * 1024**2)
+        # ru_maxrss is coarse and includes imported/native runtime pages; keep its
+        # process-only scope separate from Python tracemalloc and allow 16 MiB noise.
+        self.assertLessEqual(long["rss_peak_kib"], short["rss_peak_kib"] + 16 * 1024)
+        self.assertIn("worker process only", long["rss_scope"])
+        self.assertIn("worker Python allocations", long["traced_scope"])
 
     def test_retry_modes_reject_changed_v2_stage_before_receipt_creation(self):
         with tempfile.TemporaryDirectory() as raw:

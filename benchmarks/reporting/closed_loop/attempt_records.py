@@ -100,7 +100,63 @@ def append_jsonl(path: Path, value: Mapping[str, Any]) -> WriteReceipt:
 
 
 def append_io_event(attempt_dir: Path, event: Mapping[str, Any]) -> None:
-    append_jsonl(attempt_dir / IO_LOG, {"schema": "csl.closed-loop.record-io/1", **event})
+    recovery = _recover_io_log_tail(attempt_dir)
+    if recovery is not None:
+        append_jsonl(attempt_dir / IO_LOG, {"schema": "csl.closed-loop.record-io/1",
+            "operation": "record-io-tail-recovery", **recovery})
+    row = dict(event)
+    row["schema"] = "csl.closed-loop.record-io/1"
+    append_jsonl(attempt_dir / IO_LOG, row)
+
+
+def _recover_io_log_tail(attempt_dir: Path) -> dict[str, Any] | None:
+    """Preserve an unterminated telemetry row before allowing another append."""
+    path = attempt_dir / IO_LOG
+    if not path.is_file() or path.stat().st_size == 0:
+        return None
+    with path.open("rb") as stream:
+        stream.seek(-1, os.SEEK_END)
+        if stream.read(1) == b"\n":
+            return None
+    started = time.perf_counter()
+    data = path.read_bytes()
+    prefix_end = data.rfind(b"\n") + 1
+    prefix, tail = data[:prefix_end], data[prefix_end:]
+    expected_schema = "csl.closed-loop.record-io/1"
+    try:
+        for row_number, raw_line in enumerate(prefix.splitlines(), start=1):
+            if not raw_line.strip():
+                continue
+            try:
+                event = json.loads(raw_line)
+            except (json.JSONDecodeError, UnicodeDecodeError) as error:
+                raise ValueError(f"record I/O log has malformed completed row {row_number}") from error
+            if not isinstance(event, dict) or event.get("schema") != expected_schema:
+                raise ValueError(f"record I/O log has invalid completed row {row_number}")
+    except ValueError:
+        raise
+    digest = hashlib.sha256(tail).hexdigest()
+    tail_name = f"record-io-tail-{digest}.bin"
+    tail_path = attempt_dir / tail_name
+    if tail_path.exists():
+        existing = tail_path.read_bytes()
+        if existing != tail:
+            raise ValueError("preserved record I/O tail exists with different contents")
+        tail_bytes_written = 0
+        tail_receipt = None
+    else:
+        tail_receipt = atomic_bytes(tail_path, tail)
+        tail_bytes_written = len(tail)
+    prefix_receipt = atomic_bytes(path, prefix)
+    return {"path": tail_name, "bytes": len(tail), "sha256": digest,
+        "bytes_read": len(data), "verification_seconds": time.perf_counter() - started,
+        "tail_bytes_written": tail_bytes_written,
+        "prefix_repair_bytes_written": prefix_receipt.bytes_written,
+        "serialization_seconds": ((tail_receipt.serialization_seconds if tail_receipt else 0.0)
+            + prefix_receipt.serialization_seconds),
+        "fsync_seconds": ((tail_receipt.fsync_seconds if tail_receipt else 0.0)
+            + prefix_receipt.fsync_seconds),
+        "metric_effect": "torn source event is unknown; only the preserved evidence write is counted"}
 
 
 def atomic_bytes(path: Path, value: bytes) -> WriteReceipt:
@@ -716,16 +772,29 @@ def summarize_io(attempt_dir: Path) -> dict[str, Any]:
         "stage_json_bytes_written": 0, "native_payload_bytes_written": 0,
         "native_capture_checkpoint_bytes_written": 0, "reference_index_bytes_written": 0,
         "record_artifact_bytes_written": 0, "recovery_evidence_bytes_written": 0,
+        "record_io_recovery_evidence_bytes_written": 0,
+        "record_io_prefix_repair_bytes_written": 0,
         "index_repair_bytes_written": 0, "total_record_bytes_written": 0,
         "bytes_read": 0, "parse_seconds": 0.0, "verification_seconds": 0.0,
         "serialization_seconds": 0.0, "fsync_seconds": 0.0}
     if not path.is_file():
+        totals.update({"integrity_status": "incomplete", "metric_totals_complete": False,
+            "recovery_evidence": [], "integrity_diagnostic": "record I/O log is missing"})
         return totals
+    recovery = _recover_io_log_tail(attempt_dir)
+    if recovery is not None:
+        append_jsonl(path, {"schema": "csl.closed-loop.record-io/1",
+            "operation": "record-io-tail-recovery", **recovery})
     with path.open("r", encoding="utf-8") as stream:
-        for line in stream:
+        for row_number, line in enumerate(stream, start=1):
             if not line.strip():
                 continue
-            event = json.loads(line)
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError as error:
+                raise ValueError(f"record I/O log has malformed completed row {row_number}") from error
+            if not isinstance(event, dict) or event.get("schema") != "csl.closed-loop.record-io/1":
+                raise ValueError(f"record I/O log has invalid completed row {row_number}")
             operation = event.get("operation")
             if operation == "attempt-checkpoint":
                 totals["checkpoint_writes"] += 1
@@ -754,6 +823,10 @@ def summarize_io(attempt_dir: Path) -> dict[str, Any]:
             elif operation == "stage-index-prefix-restored":
                 totals["index_repair_bytes_written"] += event["bytes_written"]
                 totals["total_record_bytes_written"] += event["bytes_written"]
+            elif operation == "record-io-tail-recovery":
+                totals["record_io_recovery_evidence_bytes_written"] += event.get("tail_bytes_written", 0)
+                totals["record_io_prefix_repair_bytes_written"] += event.get("prefix_repair_bytes_written", 0)
+                totals["total_record_bytes_written"] += event.get("tail_bytes_written", 0)
             if "bytes_read" in event:
                 totals["bytes_read"] += event["bytes_read"]
                 totals["parse_seconds"] += event.get("parse_seconds", 0.0)
@@ -761,7 +834,19 @@ def summarize_io(attempt_dir: Path) -> dict[str, Any]:
             totals["serialization_seconds"] += event.get("serialization_seconds", 0.0)
             totals["fsync_seconds"] += event.get("fsync_seconds", 0.0)
     totals["scope"] = ("attempt/stage checkpoints, native payload and capture records, stage-reference index, "
-        "checked reference hash reads, held-step request artifacts, torn-tail preservation/index repair, "
+        "checked reference hash reads, held-step request artifacts, torn stage/telemetry tail preservation and journal repair, "
         "and selective record reads; "
         "excludes controller query, execution process, replay/checker/render, and telemetry-log append scopes")
+    evidence = []
+    for tail_path in sorted(attempt_dir.glob("record-io-tail-*.bin")):
+        tail_bytes = tail_path.read_bytes()
+        evidence.append({"path": tail_path.name, "bytes": len(tail_bytes),
+            "sha256": hashlib.sha256(tail_bytes).hexdigest()})
+    totals["integrity_status"] = "incomplete" if evidence else "complete"
+    totals["metric_totals_complete"] = not evidence
+    totals["recovery_evidence"] = evidence
+    if evidence:
+        totals["metric_totals_scope"] = (
+            "totals cover only verified complete telemetry rows; preserved torn bytes are excluded and "
+            "missing metric values are unknown")
     return totals

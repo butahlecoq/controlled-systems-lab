@@ -649,6 +649,15 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
         controls, physical_states, stage_reads = materialize_episode_summary(attempt, result)
         result["controls"] = controls
         result["physical_states"] = physical_states
+        result["completed_holds"] = len(controls)
+        result["original_intervals"] = task["episode"]["intervals"]
+        result["original_final_time"] = task["episode"]["final_time"]
+        if physical_states:
+            result["selected_initial_state_physical"] = physical_states[0]
+        result["controls_sha256"] = hashlib.sha256(json.dumps(
+            controls, separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+        result["physical_objective"] = (objective(task, physical_states, controls)
+            if len(controls) == task["episode"]["intervals"] else None)
         for read_receipt in stage_reads:
             record_read_io(attempt, read_receipt, "stage-summary-read")
         result["record_io"] = {"path": IO_LOG,
@@ -698,11 +707,17 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
         "performance_claim": "descriptive single attempt; no speed comparison"}
     result.update(derive_outcome_status(result))
     if result.get("format_version") == 2:
-        io_summary = summarize_io(attempt)
-        result["record_io"].update(io_summary)
-        result["record_io"]["summary_scope"] = (
-            "all instrumented attempt, stage, native-payload, held-step-request and selective-read events "
-            "before this terminal attempt checkpoint; the terminal checkpoint receipt is appended to record-io.jsonl")
+        try:
+            io_summary = summarize_io(attempt)
+            result["record_io"].update(io_summary)
+            result["record_io"]["summary_scope"] = (
+                "all instrumented attempt, stage, native-payload, held-step-request and selective-read events "
+                "before this terminal attempt checkpoint; the terminal checkpoint receipt is appended to record-io.jsonl")
+        except (OSError, ValueError, json.JSONDecodeError) as error:
+            result["record_io"].update({"integrity_status": "invalid",
+                "metric_totals_complete": False,
+                "integrity_diagnostic": f"{type(error).__name__}: {error}",
+                "metric_totals_scope": "metric totals withheld because a completed telemetry row is malformed"})
     write_attempt(attempt, result)
     return {"task_id": task["task_id"], "attempt": str(attempt), "status": status,
             "resource_profile_id": resource_profile["profile_id"],
