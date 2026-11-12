@@ -23,8 +23,11 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "benchmarks/reporting/closed_loop"))
 from contracts import load_task, manifest_sha256
-from figure_style import (STYLE_ID, configure_numeric_axis, STAGE_PALETTE as PALETTE,
-                          STAGE_BACKGROUND as BACKGROUND, STAGE_FOREGROUND as FOREGROUND)
+from figure_style import STYLE_ID, configure_numeric_axis
+
+PALETTE = ("#9ccfd8", "#c4a7e7", "#f6c177", "#eb6f92", "#a6da95", "#e0def4")
+BACKGROUND = "#16161e"
+FOREGROUND = "#e0def4"
 
 PLANES = {"syn-nl-lv-01": [(0, 1)], "earth-orbit": [(0, 3)],
           "syn-nl-fuel-01": [(2, 0), (3, 1)]}
