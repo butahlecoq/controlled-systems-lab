@@ -5,7 +5,7 @@
 #include <span>
 #include <utility>
 
-#include <csl/optimization/finite_action_nominal.hpp>
+#include <csl/optimization/running_control_cost.hpp>
 
 namespace csl::optimization::detail {
 

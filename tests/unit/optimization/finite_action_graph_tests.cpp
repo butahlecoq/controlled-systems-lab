@@ -467,6 +467,7 @@ TEST_CASE("graph rejects malformed source cost before numerical evaluation") {
     REQUIRE(std::holds_alternative<Unsupported>(outcome));
     const auto& diagnostics = std::get<Unsupported>(outcome).diagnostics;
     REQUIRE_FALSE(diagnostics.empty());
+    CHECK(diagnostics.front().code == DiagnosticCode::unsupported);
     CHECK(diagnostics.front().field == "finite_graph.running_cost.quadratic");
 }
 

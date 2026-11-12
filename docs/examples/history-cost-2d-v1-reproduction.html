@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Reproduce the full-history cost example</title><link rel="stylesheet" href="examples.css"></head>
+<body><main class="page-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li><a href="../index.html">Examples</a></li><li><a href="history-cost-2d-v1/index.html">Full-history cost</a></li><li aria-current="page">Reproduction commands</li></ol></nav>
+<p class="eyebrow">Copyable reproduction · saved native QP and current API</p><h1>Reproduce the 2D full-history cost result</h1>
+<p>This reproduces the saved provider outputs from the retained source tag, and separately runs the compiler tests from the exact API-fix commit. The captured native build used GCC 16.2.1, HiGHS 1.11.0, Qhull enabled, and one worker in an incremental Release build. The commands below configure a fresh Release build; the resulting executable is not claimed bit-identical to the captured binary. CMake 3.31 or newer, a C++20 compiler, Git, Python 3, and network access for pinned dependencies are needed on a fresh build.</p>
+<section><h2>1. Build the source-bound native provider</h2><p>The retained tag identifies the source that produced the original capture. Fetch the PR branch only to read the archived request files; they are unchanged from commit <code>d9d9b97d27cb65fa704418425bf7d42f1bc6fc99</code>.</p><pre tabindex="0" role="region" aria-label="Build and run saved native QP requests"><code>git clone https://github.com/butahlecoq/controlled-systems-lab.git
+cd controlled-systems-lab
+git checkout evidence/full-history-source-f4e73e08-20261112
+git fetch origin codex/943-full-history-cost-20261112:refs/remotes/origin/codex/943-full-history-cost-20261112
+mkdir -p /tmp/history-cost-2d
+
+git show d9d9b97d27cb65fa704418425bf7d42f1bc6fc99:docs/examples/history-cost-2d-v1/records/total-cost-request.jsonl > /tmp/history-cost-2d/total-cost-request.jsonl
+git show d9d9b97d27cb65fa704418425bf7d42f1bc6fc99:docs/examples/history-cost-2d-v1/records/terminal-only-request.jsonl > /tmp/history-cost-2d/terminal-only-request.jsonl
+
+cmake -S . -B build-history-f4 -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=ON
+cmake --build build-history-f4 --target csl_closed_loop_native_policy -j1
+
+./build-history-f4/csl_closed_loop_native_policy < /tmp/history-cost-2d/total-cost-request.jsonl > /tmp/history-cost-2d/total-cost-response.jsonl 2> /tmp/history-cost-2d/total-cost-stderr.txt
+./build-history-f4/csl_closed_loop_native_policy < /tmp/history-cost-2d/terminal-only-request.jsonl > /tmp/history-cost-2d/terminal-only-response.jsonl 2> /tmp/history-cost-2d/terminal-only-stderr.txt
+
+python3 - &lt;&lt;'PY'
+import json
+from pathlib import Path
+for name in ("total-cost", "terminal-only"):
+    result = json.loads(Path(f"/tmp/history-cost-2d/{name}-response.jsonl").read_text())
+    print(name, result["solver_receipt"]["provider"], result["primal"], result["source_cost"])
+PY</code></pre>
+<p>Expected controls are approximately <code>(1/3,0)</code> for total cost and <code>(1,0)</code> for terminal only. The total-cost response is approximately <code>2/3</code>. A fresh build need not have the captured binary SHA because the recorded build was incremental; compare the source values and provider result rather than expecting a bit-identical executable.</p>
+</section>
+<section><h2>2. Run the native analytic fixture</h2><p>The fixture sends both saved requests through the registered HiGHS provider and checks the full-cost and terminal-only controls.</p><pre tabindex="0" role="region" aria-label="Run the native source-cost analytic fixture"><code>CSL_NATIVE_POLICY_BRIDGE="$PWD/build-history-f4/csl_closed_loop_native_policy" python3 -m unittest discover -s tests/reporting -p test_history_bridge.py</code></pre></section>
+<section><h2>3. Rebuild and test the current history-cost API</h2><p>This exact commit contains the scale-safe coefficient construction, validation compatibility fixes, and edge-case regression tests. HiGHS is disabled here because these unit tests exercise the compiler and source evaluator directly.</p><pre tabindex="0" role="region" aria-label="Build and test the history-cost API"><code>git checkout bf122fc334993c0b54edc22059506e8dded9de54
+cmake -S . -B build-history-cost-api -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF
+cmake --build build-history-cost-api --target history_cost_tests finite_action_nominal_tests finite_action_graph_tests -j1
+ctest --test-dir build-history-cost-api --output-on-failure -R '^(history_cost_tests|finite_action_nominal_tests|finite_action_graph_tests)$'</code></pre>
+<p>Current API regression coverage includes large and small representable scales, refusal when a nonzero coefficient underflows binary64, zero coefficients and weights, parity with source evaluation, legacy <code>unsupported</code> diagnostics, and malformed controls on an empty schedule.</p>
+</section>
+<section><h2>4. Re-run the current merged source capture</h2><p>This source tag contains the compiler fixes integrated with the live main branch. The recorded executable came from an incremental Release build; a fresh build below is for an independent behavioral replay, not a bit-identical binary reproduction.</p><pre tabindex="0" role="region" aria-label="Build and run the current-source analytic request"><code>git clone https://github.com/butahlecoq/controlled-systems-lab.git
+cd controlled-systems-lab
+git checkout evidence/full-history-source-536a5a9f-20261112
+mkdir -p /tmp/history-cost-current
+git show HEAD:reports/algorithm-results/history-cost-2d-v1/records/total-cost-request.jsonl > /tmp/history-cost-current/total-cost-request.jsonl
+git show HEAD:reports/algorithm-results/history-cost-2d-v1/records/terminal-only-request.jsonl > /tmp/history-cost-current/terminal-only-request.jsonl
+
+cmake -S . -B build-history-current -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=ON
+cmake --build build-history-current --target csl_closed_loop_native_policy -j1
+
+./build-history-current/csl_closed_loop_native_policy &lt; /tmp/history-cost-current/total-cost-request.jsonl
+./build-history-current/csl_closed_loop_native_policy &lt; /tmp/history-cost-current/terminal-only-request.jsonl</code></pre><p>Expected controls are approximately (1/3,0) with total source cost 2/3 and (1,0) with total source cost 0. The provider is <code>csl.convex.highs</code>.</p></section>
+<section><h2>Evidence boundary</h2><p>The saved result is a one-step convex two-state/two-control QP with <code>x₀=(0,0)</code>, <code>x₁=x₀+u</code>, and controls in <code>[−2,2]²</code>. It demonstrates this compiler/provider path; it does not establish the original nonlinear full-horizon feedback result or a nonlinear safety claim.</p><p><a href="history-cost-2d-v1/index.html">Return to the 2D example</a> · <a href="history-cost-2d-v1/history-cost-2d-v1.zip">Download the unchanged raw-evidence bundle</a> · <a href="history-cost-2d-v1-current-source.html">Open the post-fix current-source replay</a></p></section>
+</main></body></html>

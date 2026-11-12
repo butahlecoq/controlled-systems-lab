@@ -536,12 +536,97 @@ class GalleryTests(unittest.TestCase):
                 control_witness_companions._b04_repeated_companion(
                     ROOT / "scripts/reports/styles/control-v1.json")
 
+    def test_full_history_example_binds_raw_capture_and_rejects_tampering_or_unsafe_roots(self):
+        bundle = ROOT / "reports/algorithm-results/history-cost-2d-v1"
+        manifest = gallery.validate_history_cost_bundle(bundle, ROOT)
+        self.assertEqual(hashlib.sha256((bundle / "history-cost-2d-v1.zip").read_bytes()).hexdigest(),
+                         "f97824a62643694d0bf333acb1896ac03b82a41382693938eeb620dca0b4b503")
+        self.assertEqual(manifest["source_commit"], "f4e73e08908c472801aef6637d94b1a03cb0b2a7")
+        self.assertEqual(manifest["native_binary_sha256"],
+                         "2d336a436220fdc59cf2c2c5a00defceadc5fb330450b16693fd0637a5cded17")
+        total = json.loads((bundle / "records/total-cost-stdout.jsonl").read_text())
+        terminal = json.loads((bundle / "records/terminal-only-stdout.jsonl").read_text())
+        self.assertEqual(total["solver_receipt"]["provider"], "csl.convex.highs")
+        self.assertEqual(total["primal"], [0.0, 0.0, 0.33333333333333304,
+                                           0.0, 0.33333333333333304, 0.0])
+        self.assertEqual(terminal["primal"], [0.0, 0.0, 1.0, 0.0, 1.0, 0.0])
+        self.assertAlmostEqual(total["source_cost"]["total"], 2 / 3)
+        current_bundle = ROOT / "reports/algorithm-results/history-cost-2d-v1-current-source"
+        current_manifest = gallery.validate_current_history_cost_bundle(current_bundle, ROOT)
+        self.assertEqual(current_manifest["source_commit"],
+                         "536a5a9f81b49a164847d36ebef96501b0925312")
+        self.assertEqual(current_manifest["cases"]["total-cost"]["point"], [1 / 3, 0])
+        self.assertEqual(current_manifest["cases"]["terminal-only"]["point"], [1, 0])
+        self.assertIn("producer script was not retained", current_manifest["producer_limit"])
+        with tempfile.TemporaryDirectory() as temporary:
+            temp_root = Path(temporary) / "repo"
+            copied = temp_root / "reports/algorithm-results/history-cost-2d-v1"
+            copied.parent.mkdir(parents=True)
+            shutil.copytree(bundle, copied)
+            copied_page = temp_root / "docs/examples/history-cost-2d-v1"
+            copied_page.mkdir(parents=True)
+            shutil.copy2(ROOT / "docs/examples/history-cost-2d-v1/index.html", copied_page / "index.html")
+            shutil.copy2(ROOT / "docs/examples/history-cost-2d-v1/history-cost-2d.svg", copied_page / "history-cost-2d.svg")
+            self.assertEqual(gallery.validate_history_cost_bundle(copied, temp_root)["case"],
+                             "one-step-identity-dynamics-2d")
+            response = copied / "records/total-cost-stdout.jsonl"
+            response.write_bytes(response.read_bytes() + b" ")
+            with self.assertRaisesRegex(ValueError, "digest differs"):
+                gallery.validate_history_cost_bundle(copied, temp_root)
+            link = temp_root / "reports/algorithm-results/linked-history-cost"
+            link.symlink_to(bundle, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "symlinked"):
+                gallery.validate_history_cost_bundle(link, temp_root)
+            alias_root = Path(temporary) / "alias"
+            alias_root.mkdir()
+            (alias_root / "reports").symlink_to(temp_root / "reports", target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "symlinked path component"):
+                gallery.validate_history_cost_bundle(
+                    alias_root / "reports/algorithm-results/history-cost-2d-v1", Path(temporary))
+            current_copy = temp_root / "reports/algorithm-results/history-cost-2d-v1-current-source"
+            shutil.copytree(current_bundle, current_copy)
+            receipt_copy = current_copy / "records/receipt.json"
+            receipt_copy.write_bytes(receipt_copy.read_bytes() + b" ")
+            with self.assertRaisesRegex(ValueError, "digest differs"):
+                gallery.validate_current_history_cost_bundle(current_copy, temp_root)
+
     def test_build_preserves_reports_and_has_resolvable_links(self):
         before = {p.relative_to(self.site): hashlib.sha256(p.read_bytes()).hexdigest()
                   for p in self.site.rglob("*") if p.is_file() and p.name != "index.html"}
         original_reports = {e["report_id"]: (self.site / e["report_id"] / "index.html").read_bytes()
                             for e in self.examples}
         gallery.build(self.catalog, self.site)
+        cost_page = self.site / "examples/history-cost-2d-v1/index.html"
+        self.assertTrue(cost_page.is_file())
+        staged_archive = self.site / "examples/history-cost-2d-v1/history-cost-2d-v1.zip"
+        self.assertTrue(staged_archive.is_file())
+        self.assertEqual(staged_archive.read_bytes(),
+                         (ROOT / "reports/algorithm-results/history-cost-2d-v1/history-cost-2d-v1.zip").read_bytes())
+        reproduction = self.site / "examples/history-cost-2d-v1-reproduction.html"
+        self.assertTrue(reproduction.is_file())
+        reproduction_html = reproduction.read_text(encoding="utf-8")
+        self.assertIn("evidence/full-history-source-f4e73e08-20261112", reproduction_html)
+        self.assertIn("CSL_NATIVE_POLICY_BRIDGE", reproduction_html)
+        self.assertIn("history_cost_tests", reproduction_html)
+        self.assertIn("GCC 16.2.1", reproduction_html)
+        self.assertNotIn("/home/butahlecoq/", reproduction_html)
+        gallery_html = (self.site / "examples/index.html").read_text(encoding="utf-8")
+        current_page = self.site / "examples/history-cost-2d-v1-current-source.html"
+        self.assertTrue(current_page.is_file())
+        current_page_html = current_page.read_text(encoding="utf-8")
+        self.assertIn("536a5a9f81b49a164847d36ebef96501b0925312", current_page_html)
+        self.assertIn("coverage-grid current-result-cards", current_page_html)
+        self.assertIn("u₀ = [1/3; 0]", current_page_html)
+        self.assertNotIn("<table>", current_page_html)
+        self.assertIn("Full-precision response JSONL", current_page_html)
+        current_archive = self.site / "examples/history-cost-2d-v1-current-source/history-cost-2d-v1-current-source.zip"
+        self.assertEqual(current_archive.read_bytes(),
+                         (ROOT / "reports/algorithm-results/history-cost-2d-v1-current-source/history-cost-2d-v1-current-source.zip").read_bytes())
+        self.assertIn('id="history-cost-2d-v1-current-source"', gallery_html)
+        cost_inventory = json.loads((self.site / "examples/visual-coverage.json").read_text())
+        cost_route = next(entry for entry in cost_inventory["entries"]
+                          if entry.get("anchor") == "history-cost-2d-v1")
+        self.assertEqual(cost_route["status"], "saved-data-illustration")
         app01_page = self.site / "examples/app01-plan-timing-v1.html"
         app01_html = app01_page.read_text(encoding="utf-8")
         self.assertIn(f"../{self.app01_report_id}/index.html", app01_html)
