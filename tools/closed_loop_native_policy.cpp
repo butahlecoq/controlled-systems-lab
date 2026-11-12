@@ -911,7 +911,7 @@ Json feedback_export(const problem::ResolvedProblem& resolved, const Json& in,
         feedback_provider(converter, "csl.polyhedron.h")};
     auto intersection = feedback_provider(geometry::polyhedral::make_intersection_registration(), "csl.polyhedron.h");
     std::vector<StrictCoordinateLowerBound> strict;
-    if(in.at("task_id") == "earth-orbit") strict.push_back({0, 0});
+    if(in.at("task_id") == "env717-earth-orbit/continuous-receding/1") strict.push_back({0, 0});
     auto outcome = feedback_geometry(resolved, {in.at("request_id").get<std::string>()},
         terminal.as_handle(), found->second, strict,
         {{forward, intersection}, feedback_provider(lp, "csl.program-result.v1"), max_generators}, {});

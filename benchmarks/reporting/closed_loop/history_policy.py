@@ -8,7 +8,7 @@ FAMILIES = ("polytope", "box", "zonotope", "parallelotope", "ellipsoid")
 GEOMETRY_IDS = {f"native-continuous-history-{family}-ipopt/1": family for family in FAMILIES}
 
 
-def geometry_memberships(export, family, state_dimension, horizon):
+def geometry_memberships(export, family, state_dimension, horizon, strict_source_domain=None):
     if (not isinstance(export, dict) or export.get("status") != "complete"
             or export.get("family") != family or export.get("scope") != "forward_relevant_from_observation"):
         raise ValueError("feedback geometry does not match the selected family and scope")
@@ -28,6 +28,8 @@ def geometry_memberships(export, family, state_dimension, horizon):
             expected = "h" if family in {"polytope", "box", "parallelotope"} else family
             if row.get("kind") != expected:
                 raise ValueError("feedback geometry membership differs from requested family")
+            if strict_source_domain is not None and row.get("strict_source_domain") != strict_source_domain:
+                raise ValueError("feedback geometry strict source domain differs from the task")
             if row.get("relation") not in {"outer", "equivalent"}:
                 raise ValueError("feedback geometry is not an outer set")
             memberships.append(row)
@@ -209,7 +211,9 @@ class HistoryPolicy:
             raise ValueError("native history response does not match the explicitly selected solver route")
         relation, compiled = response["history_relation"], response["history_objective"]
         memberships = (geometry_memberships(response.get("geometry"), self.geometry_family,
-            len(observed_physical_state), len(request["predictor_stages"]))
+            len(observed_physical_state), len(request["predictor_stages"]),
+            [{"coordinate": 0, "lower_bound": 0, "strict": True}]
+                if self.task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01" else [])
             if self.geometry_family is not None else None)
         if response["status"] == "solved":
             primal = np.asarray(response["primal"], dtype=float)

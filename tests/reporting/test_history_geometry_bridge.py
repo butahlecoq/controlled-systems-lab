@@ -67,6 +67,15 @@ class GeometryBridgeTest(unittest.TestCase):
                 self.assertAlmostEqual((z[2]-1)**2 + z[3]**2 + 2*(z[4]**2+z[5]**2),
                                        answer["objective"], places=6)
                 self.assertTrue(answer["geometry_validation"]["accepted"])
+        request["task_id"] = "env717-earth-orbit/continuous-receding/1"
+        request["geometry_family"] = "box"
+        run = subprocess.run([os.environ["CSL_NATIVE_GEOMETRY_BRIDGE"]],
+            input=json.dumps(request) + "\n", capture_output=True, text=True, check=True)
+        response = json.loads(run.stdout)
+        self.assertEqual(response["status"], "exported", response)
+        rows = geometry_memberships(response["geometry"], "box", 2, 1,
+                                    [{"coordinate": 0, "lower_bound": 0, "strict": True}])
+        self.assertTrue(all(row["strict_source_domain"][0]["strict"] for row in rows))
 
 
 if __name__ == "__main__":

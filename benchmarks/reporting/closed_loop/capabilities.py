@@ -319,7 +319,7 @@ def _history_definitions() -> list[dict]:
             alternative["graph_fingerprint"] = alternative_fingerprint
             alternative["graph_id"] = f"closed-loop/{task_name}/continuous-history-ipopt/1/cfg-{alternative_fingerprint[:16]}"
             rows.append(alternative)
-        if task_name == "syn-nl-lv-01":
+        if task_name in {"syn-nl-lv-01", "syn-nl-fuel-01", "earth-orbit"}:
             geometry = copy.deepcopy(graph)
             geometry.pop("graph_id")
             geometry.pop("graph_fingerprint")
@@ -332,6 +332,7 @@ def _history_definitions() -> list[dict]:
                 "src/geometry/polyhedral/intersection.cpp", "src/geometry/polyhedral/projection.cpp",
                 "src/geometry/polyhedral/support.cpp", "src/adapters/lp/highs.cpp",
                 "src/adapters/polyhedral/qhull.cpp", "src/adapters/highs_session.hpp",
+                "src/synthesis/exact_h_polytope.hpp",
                 "include/csl/reachability/nominal_tube.hpp", "include/csl/sets/generator_sets.hpp"]
             geometry["controller"]["id"] = "native-continuous-history-box-ipopt/1"
             geometry["controller"]["control_semantics"] = "full-history MPC with full-state F/B/I box memberships"
