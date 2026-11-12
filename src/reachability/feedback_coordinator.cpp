@@ -375,7 +375,7 @@ FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem& resolv
                 auto [ulo,uhi]=explicit_bounds(controls[k-1],context,&exact_control_carrier);
                 run.input_carriers.push_back(axis_h(ulo,uhi,{run.id("control-carrier")},{}));
                 if(exact_control_carrier) run.lineage.push_back({{{resolved.identity(),{run.id("exact-control-carrier")},{run.input_carriers.back().id.value}},
-                    {controls[k-1].id}},GeometryClaimScope::support_value,
+                    {controls[k-1].id}},GeometryClaimScope::set_relation,
                     SymbolicArgument{"Exact stored-binary64 H elimination", "Built-in bounded exact H linear minimization; outward binary64 bracketing"},
                     {"Exact carrier applies to the stored closed-H control set, not a nonlinear plant."},{}});
                 auto box=propagate_existential_control_box(dynamics,{carrier_lo,carrier_hi},{ulo,uhi},context);
