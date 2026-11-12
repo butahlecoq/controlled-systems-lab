@@ -37,7 +37,7 @@ def theme_tokens():
     return screen, printed
 
 
-def regression_svg(record: dict, print_mode: bool = False) -> str:
+def regression_svg(record: dict, print_mode: bool = False, mobile_mode: bool = False) -> str:
     task, row = record["task"], record["attempt"]
     history = row["selected_history"]
     assert row["independent_check"]["selected_history_in_returned_family"]
@@ -45,8 +45,8 @@ def regression_svg(record: dict, print_mode: bool = False) -> str:
     assert not row["independent_check"]["selected_control_in_terminal_family"]
     x0, x1, u = history[:2], history[2:4], history[4:6]
 
-    def panel(x, title, bounds, point, label, shift):
-        left, top, width, height = shift, 95, 330, 250
+    def panel(x, title, bounds, point, label, shift, top=95):
+        left, width, height = shift, 330, 250
         xlo, xhi = bounds[0]
         ylo, yhi = bounds[1]
         pad_x, pad_y = 36, 22
@@ -54,7 +54,7 @@ def regression_svg(record: dict, print_mode: bool = False) -> str:
         sy = lambda value: top + height - pad_y - (value - ylo) / (yhi - ylo) * (height - 2 * pad_y)
         corners = [(xlo,ylo),(xhi,ylo),(xhi,yhi),(xlo,yhi)]
         poly = " ".join(f"{sx(a):.1f},{sy(b):.1f}" for a,b in corners)
-        return (f'<text x="{left}" y="68" class="panel">{html.escape(title)}</text>'
+        return (f'<text x="{left}" y="{top-27}" class="panel">{html.escape(title)}</text>'
                 f'<rect x="{left+pad_x}" y="{top+pad_y}" width="{width-2*pad_x}" height="{height-2*pad_y}" class="frame"/>'
                 f'<polygon points="{poly}" class="domain"/>'
                 f'<circle cx="{sx(point[0]):.1f}" cy="{sy(point[1]):.1f}" r="7" class="point"/>'
@@ -69,9 +69,18 @@ def regression_svg(record: dict, print_mode: bool = False) -> str:
     terminal_bounds = [axis for axis in task["next_state_box"]]
     control_bounds = task["control_box"]
     # Separate state and input coordinate spaces so the terminal test cannot use u0 by mistake.
-    content = panel("", "Initial state x₀", initial_bounds, x0, "x₀=(2,3)", 42)
-    content += panel("", "Terminal state x₁", terminal_bounds, x1, "x₁=(3,4)", 430)
-    content += panel("", "Control u₀", control_bounds, u, "u₀=(1,1)", 818)
+    if mobile_mode:
+        content = panel("", "Initial state x₀", initial_bounds, x0, "x₀=(2,3)", 42, 112)
+        content += panel("", "Terminal state x₁", terminal_bounds, x1, "x₁=(3,4)", 42, 422)
+        content += panel("", "Control u₀", control_bounds, u, "u₀=(1,1)", 42, 732)
+        view_box, figure_height, footer_y = "0 0 420 1080", 1080, 1040
+        title = "Recovered witness"
+    else:
+        content = panel("", "Initial state x₀", initial_bounds, x0, "x₀=(2,3)", 42)
+        content += panel("", "Terminal state x₁", terminal_bounds, x1, "x₁=(3,4)", 430)
+        content += panel("", "Control u₀", control_bounds, u, "u₀=(1,1)", 818)
+        view_box, figure_height, footer_y = "0 0 1200 440", 440, 420
+        title = "A recovered witness distinguishes terminal state from control"
     screen, printed = theme_tokens()
     theme = printed if print_mode else screen
     screen_css = ("text{font-family:Inter,system-ui,sans-serif;fill:" + theme["--text"] + "}" +
@@ -80,11 +89,14 @@ def regression_svg(record: dict, print_mode: bool = False) -> str:
         ".domain{fill:" + theme["--accent"] + ";fill-opacity:.2;stroke:" + theme["--accent"] + ";stroke-width:2}" +
         ".point{fill:" + theme["--warm"] + ";stroke:" + theme["--page"] + ";stroke-width:2}" +
         ".label{font-size:14px}.axis,.tick{fill:" + theme["--text-muted"] + ";font-size:12px}")
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 440" role="img" aria-labelledby="title desc">
+    footer = ("<text x=\"42\" y=\"1040\" class=\"axis\">x₁=x₀+u₀ · all points satisfy their domains.</text>"
+              "<text x=\"42\" y=\"1060\" class=\"axis\">Endpoint belongs to the returned terminal family.</text>"
+              if mobile_mode else "x₁=x₀+u₀ · points lie in their domains · endpoint belongs to the returned terminal family.")
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="{view_box}" role="img" aria-labelledby="title desc">
 <title id="title">Nonzero-origin terminal membership regression</title><desc id="desc">Separate initial state, terminal state, and control domains. The recovered history is x0=(2,3), x1=(3,4), u0=(1,1), so terminal state coordinates differ from control coordinates.</desc>
 <style>{screen_css}</style>
-<rect width="1200" height="440" fill="{theme["--page"]}"/><text x="42" y="34" class="title">A recovered witness distinguishes terminal state from control</text>
-{content}<text x="42" y="420" class="axis">Dynamics: x₁=x₀+u₀ · all three points lie in their declared domains · endpoint belongs to the returned terminal family.</text>
+<rect width="{view_box.split()[2]}" height="{figure_height}" fill="{theme["--page"]}"/><text x="42" y="42" class="title">{title}</text>
+{content}{footer if mobile_mode else f'<text x="42" y="{footer_y}" class="axis">{footer}</text>'}
 </svg>'''
 
 
@@ -171,7 +183,7 @@ def page(record: dict, regression: dict, file_hashes: dict) -> str:
 <section><h2>Declared task</h2><p>One transition with <span class="matrix">x₁ = A x₀ + B u₀</span>:</p><p class="matrix">A = [[1, 0], [0, 1]] &nbsp; B = [[1, 0], [0, 1]] &nbsp; c = [0, 0]</p><p class="matrix">x₀ = [0, 0] &nbsp; X₀ = [−1,1] × [−1,1] &nbsp; U = [0,1] × [0,1] &nbsp; X₁ = [0,1] × [0,1]</p><p class="matrix">linear terminal: c = [−1,0], constant = 0; quadratic terminal: H = [[2,0],[0,2]], center = [0,0], constant = 0</p><p>The optimizer's recovered history is stored in the result record and independently replayed by the checker.</p><div class="issue944-wide"><figure><img src="pipeline-2d.svg" alt="Returned unit-square terminal family with public recovered linear and quadratic histories"><figcaption>The plot shows the returned terminal family and histories selected through public recovery. It illustrates these saved outcomes; it does not claim complete-family verification.</figcaption></figure></div><div class="issue944-narrow"><figure><img src="pipeline-2d-mobile.svg" alt="Returned unit-square terminal family and labeled linear and quadratic recovered histories"><figcaption>Mobile layout of the same saved terminal family and histories.</figcaption></figure></div><div class="issue944-print"><figure><img src="pipeline-2d-print.svg" alt="Printed-color unit-square terminal family with recovered linear and quadratic histories"><figcaption>Figure colors use the shared report print palette.</figcaption></figure></div></section>
 <section><h2>Full admitted-choice accounting</h2><div class="issue944-stats"><div class="issue944-stat"><strong>128</strong>role tuples</div><div class="issue944-stat"><strong>{structural}</strong>structural contract exclusions</div><div class="issue944-stat"><strong>{completed}</strong>completed attempts</div><div class="issue944-stat"><strong>{refused}</strong>numeric refusals</div></div><ul>{sum_html}</ul><p>The {structural} exclusions are Phase-I profiles paired with nonzero terminal objectives, which the declared contracts disallow. Of 64 admitted attempts, {completed} completed and {refused} reached value-level numeric refusal. The refusals are retained attempts, not structural incompatibilities.</p><p><a href="role-matrix.csv" download>Download all 128 tuples with provider roles and statuses (CSV)</a> · <a href="records.json" download>Download complete raw execution record (JSON)</a></p><div class="scroll issue944-table-scroll"><table><thead><tr><th>Reducer</th><th>Vertex LP</th><th>Terminal optimizer</th><th>Attempts</th><th>Complete</th><th>Numeric refusal</th></tr></thead><tbody>{group_rows}</tbody></table></div></section>
 <section><h2>Observed converter boundary</h2><p>The faithful KPABEP provider produced ordered V input [(0,1),(1,1),(0,0),(1,0)]. Qhull returned these H rows and bounds:</p><pre><code>H = [[1,-1.1102230246251565e-16], [0,1], [1.1102230246251565e-16,-1], [-1,0]]; b = [0.99999999999999989,1,0,0]</code></pre><p>Separate HiGHS LP and convex checks refused those matrices under the 10⁻¹² removal threshold. The exact requests and diagnostics are in the raw record and linked follow-up <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/974">issue #974</a>. Coefficients were not rounded or dropped.</p></section>
-<section><h2>Recovered-history indexing regression</h2><p>This separate fixture has nonzero origin and distinct state/control domains. The returned witness is x₀=(2,3), x₁=(3,4), u₀=(1,1). Since x₁ and u₀ differ, checking the terminal family against control coordinates would fail the public membership check. The saved independent record confirms initial membership, dynamics, control bounds, endpoint membership, and returned-family recovery; it does not assert an arbitrary LP tie-break.</p><div class="issue944-wide"><figure><img src="terminal-membership-regression.svg" alt="Distinct initial state, terminal state, and control boxes with recovered witness points"><figcaption>Separate coordinate panels make the terminal state and control vectors visibly distinct.</figcaption></figure></div><div class="issue944-print"><figure><img src="terminal-membership-regression-print.svg" alt="Printed-color distinct initial state, terminal state, and control boxes with recovered witness points"><figcaption>The print variant uses the shared report print palette.</figcaption></figure></div><p><a href="terminal-membership-regression.json" download>Download the independent regression record</a></p></section>
+<section><h2>Recovered-history indexing regression</h2><p>This separate fixture has nonzero origin and distinct state/control domains. The returned witness is x₀=(2,3), x₁=(3,4), u₀=(1,1). Since x₁ and u₀ differ, checking the terminal family against control coordinates would fail the public membership check. The saved independent record confirms initial membership, dynamics, control bounds, endpoint membership, and returned-family recovery; it does not assert an arbitrary LP tie-break.</p><div class="issue944-wide"><figure><img src="terminal-membership-regression.svg" alt="Distinct initial state, terminal state, and control boxes with recovered witness points"><figcaption>Separate coordinate panels make the terminal state and control vectors visibly distinct.</figcaption></figure></div><div class="issue944-narrow"><figure><img src="terminal-membership-regression-mobile.svg" alt="Stacked initial state, terminal state, and control coordinate panels with recovered witness points"><figcaption>Stacked coordinate panels keep the state and control domains distinct on narrow screens.</figcaption></figure></div><div class="issue944-print"><figure><img src="terminal-membership-regression-print.svg" alt="Printed-color distinct initial state, terminal state, and control boxes with recovered witness points"><figcaption>The print variant uses the shared report print palette.</figcaption></figure></div><p><a href="terminal-membership-regression.json" download>Download the independent regression record</a></p></section>
 <section><h2>Reproduction and source identity</h2><p>Rebuild target: <code>csl_strategy_a_each_choice_pipeline</code> with CMake Release, HiGHS and Qhull enabled. Run <code>ctest --test-dir &lt;build&gt; -C Release --output-on-failure -R '^strategy_a_each_choice_pipeline_contract$'</code>, then run the native executable and <code>scripts/catalogue/check_944_each_choice_pipeline.py</code> against the emitted JSON. These are functional checks; elapsed times in the record are not performance results.</p><p>Solver source commit: <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{SOURCE_COMMIT}">{SOURCE_COMMIT}</a>. The matrix and regression records below are checksummed in <code>SHA256SUMS</code>. Implementation source and executable hashes are retained in provenance:</p><pre>{html.escape(provenance)}</pre><p><a href="SHA256SUMS">Checksums</a> · <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{SOURCE_COMMIT}">Runner and checker source commit</a> · <a href="https://github.com/butahlecoq/controlled-systems-lab/pull/976">Related #976 Qhull follow-up and public Strategy A example</a></p></section>
 <footer>Controlled Systems Lab · Saved execution record · #944 remains open while two admitted KPABEP→HiGHS outcomes await the #974 conversion fix.</footer></div></main></body></html>'''
 
@@ -202,6 +214,7 @@ def main() -> int:
     finally:
         sys.argv = old_argv
     (bundle / "terminal-membership-regression.svg").write_text(regression_svg(regression), encoding="utf-8")
+    (bundle / "terminal-membership-regression-mobile.svg").write_text(regression_svg(regression, mobile_mode=True), encoding="utf-8")
     (bundle / "terminal-membership-regression-print.svg").write_text(regression_svg(regression, print_mode=True), encoding="utf-8")
     (bundle / "pipeline-2d-mobile.svg").write_text(mobile_pipeline_svg(run), encoding="utf-8")
     with (bundle / "role-matrix.csv").open("w", encoding="utf-8", newline="") as stream:
@@ -225,7 +238,8 @@ def main() -> int:
     (bundle / "provenance.json").write_text(json.dumps({"schema":"csl.issue944-publication-provenance/1",**file_hashes},indent=2,sort_keys=True)+"\n",encoding="utf-8")
     (bundle / "index.html").write_text(page(run, regression, file_hashes), encoding="utf-8")
     names = ["index.html", "pipeline-2d.svg", "pipeline-2d-mobile.svg", "pipeline-2d-print.svg",
-             "terminal-membership-regression.svg", "terminal-membership-regression-print.svg", "records.json",
+             "terminal-membership-regression.svg", "terminal-membership-regression-mobile.svg",
+             "terminal-membership-regression-print.svg", "records.json",
              "terminal-membership-regression.json", "role-matrix.csv", "provenance.json"]
     (bundle / "SHA256SUMS").write_text("".join(f"{digest(bundle/name)}  {name}\n" for name in names),encoding="ascii")
     return 0

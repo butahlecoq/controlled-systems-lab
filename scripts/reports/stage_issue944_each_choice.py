@@ -14,7 +14,8 @@ _site_spec.loader.exec_module(site)
 REPORT_ID = "issue944-strategy-a-each-choice-v1"
 FILES = {
     "index.html", "pipeline-2d.svg", "pipeline-2d-mobile.svg", "pipeline-2d-print.svg",
-    "terminal-membership-regression.svg", "terminal-membership-regression-print.svg", "records.json",
+    "terminal-membership-regression.svg", "terminal-membership-regression-mobile.svg",
+    "terminal-membership-regression-print.svg", "records.json",
     "terminal-membership-regression.json", "role-matrix.csv", "provenance.json", "SHA256SUMS",
 }
 
