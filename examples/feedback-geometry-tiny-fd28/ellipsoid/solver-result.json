@@ -1,0 +1,79 @@
+{
+  "success": true,
+  "geometry_factors": [
+    [
+      0.0,
+      0.0
+    ],
+    [
+      2.2735776172e-314,
+      0.0
+    ],
+    [
+      2.2735776172e-314,
+      0.0
+    ],
+    [
+      0.11785113019593711,
+      0.0
+    ],
+    [
+      0.08333333333204535,
+      0.0
+    ],
+    [
+      0.08333333333204528,
+      0.0
+    ]
+  ],
+  "geometry_validation": {
+    "accepted": true,
+    "checks": [
+      {
+        "kind": "ellipsoid",
+        "max_residual": 1.0281634234611995e-21,
+        "passed": true
+      },
+      {
+        "kind": "ellipsoid",
+        "max_residual": 1.0281634234611995e-21,
+        "passed": true
+      },
+      {
+        "kind": "ellipsoid",
+        "max_residual": 1.0281634234611995e-21,
+        "passed": true
+      },
+      {
+        "kind": "ellipsoid",
+        "max_residual": 0.0,
+        "passed": true
+      },
+      {
+        "kind": "ellipsoid",
+        "max_residual": 0.0,
+        "passed": true
+      },
+      {
+        "kind": "ellipsoid",
+        "max_residual": 0.0,
+        "passed": true
+      }
+    ]
+  },
+  "status": "Solve_Succeeded",
+  "primal": [
+    1.0281634234611995e-21,
+    0.0,
+    0.33333333332818404,
+    0.0,
+    0.33333333332818404,
+    0.0
+  ],
+  "objective": 0.6666666666666667,
+  "iterations": 7,
+  "solver": "casadi-ipopt/full-history-separate-norm-epigraphs/1",
+  "provider": "casadi-ipopt",
+  "version": "casadi 3.8.0; IPOPT version unavailable",
+  "assurance": "local numerical NLP solution; no global optimality certificate"
+}

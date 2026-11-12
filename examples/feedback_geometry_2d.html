@@ -2,28 +2,31 @@
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Forward-relevant feedback geometry in two dimensions</title>
+<title>Five-family feedback geometry: a two-dimensional example</title>
 <style>
-body{font:16px/1.5 system-ui,sans-serif;max-width:880px;margin:2rem auto;padding:0 1rem;color:#18212b}
-svg{display:block;width:min(100%,620px);height:auto;background:#fbfcfe;border:1px solid #ccd5df}
-.axis{stroke:#405366;stroke-width:2}.label{font-size:16px;fill:#18212b}code{background:#eef2f5;padding:.1rem .3rem;border-radius:3px}
+body{font:16px/1.65 system-ui,sans-serif;max-width:880px;margin:2rem auto;padding:0 1rem;background:#272822;color:#f8f8f2}
+h1{color:#a6e22e}a{color:#66d9ef}a:focus-visible{outline:2px solid #f0c674;outline-offset:4px}
+svg{display:block;width:min(100%,620px);height:auto;background:#303129;border:1px solid #504945}
+.axis{stroke:#d5c4a1;stroke-width:2}.label{font-size:16px;fill:#f8f8f2}code{color:#fd971f;overflow-wrap:anywhere}
 </style>
-<h1>One-step forward-relevant sets</h1>
-<p>Start at <code>x₀=(0.2,0.4)</code>. Use <code>x₁=x₀+u₀</code> with the whole continuous control box
-<code>u₀∈[-0.2,0.3]×[-0.1,0.2]</code>. The physical stage-one set and terminal feasibility set are
-<code>X₁=[0,0.8]×[0.1,0.9]</code>; the terminal set is a feasibility constraint, not a target cost.</p>
-<svg viewBox="0 0 560 430" role="img" aria-labelledby="title description">
-<title id="title">One-step forward-relevant intersection</title>
-<desc id="description">A green rectangle from zero to 0.5 in x and 0.3 to 0.6 in y lies inside the larger physical state rectangle. The initial point at 0.2, 0.4 lies in both.</desc>
-<path fill="#f0f3f6" stroke="#93a1af" stroke-width="2" d="M90 80H410V400H90Z"/>
-<path fill="#bfe4d2" stroke="#397b5d" stroke-width="3" d="M90 200H290V320H90Z"/>
-<path class="axis" d="M90 410V60 M75 400H435"/>
-<circle cx="170" cy="280" r="6" fill="#b64435"/>
-<text class="label" x="175" y="270">x₀</text><text class="label" x="99" y="225">F₁ = B₁ relevant = I₁</text>
-<text class="label" x="86" y="423">0</text><text class="label" x="277" y="423">0.5</text><text class="label" x="397" y="423">0.8</text>
-<text class="label" x="47" y="326">0.3</text><text class="label" x="47" y="205">0.6</text><text class="label" x="47" y="85">0.9</text>
-<text class="label" x="438" y="405">x₁</text><text class="label" x="72" y="48">y₁</text>
+<h1>A one-step feedback query in two dimensions</h1>
+<p>Start at <code>x₀=(0,0)</code>, with <code>x₁=x₀+u₀</code> and the whole continuous control set
+<code>u₀∈[-2,2]²</code>. There are no physical state bounds or hard terminal target. The source objective is
+<code>(x₁-1)²+y₁²+2(uₓ²+uᵧ²)</code>.</p>
+<svg viewBox="0 0 560 420" role="img" aria-labelledby="title description">
+<title id="title">Analytic reachable set and recorded policy</title>
+<desc id="description">The exact stage-one reachable square extends from minus two to two on both axes. A red arrow starts at the origin and ends at one third on the horizontal axis.</desc>
+<path fill="#536326" stroke="#a6e22e" stroke-width="3" d="M100 50H420V370H100Z"/>
+<path class="axis" d="M260 390V30 M80 210H440"/>
+<path d="M260 210H286" stroke="#fd971f" stroke-width="5"/><path d="M286 204L296 210L286 216Z" fill="#fd971f"/>
+<circle cx="260" cy="210" r="5" fill="#f8f8f2"/><circle cx="287" cy="210" r="6" fill="#fd971f"/>
+<text class="label" x="105" y="75">Exact F₁ = [-2,2]²</text><text class="label" x="291" y="194">recorded x₁ ≈ (1/3,0)</text>
+<text class="label" x="88" y="410">-2</text><text class="label" x="253" y="410">0</text><text class="label" x="413" y="410">2</text>
+<text class="label" x="56" y="57">2</text><text class="label" x="47" y="376">-2</text>
+<text class="label" x="446" y="215">x₁</text><text class="label" x="269" y="30">y₁</text>
 </svg>
-<p>Direct addition gives <code>F₁=[0,0.5]×[0.3,0.6]</code>. This is inside the physical terminal set, so the backward set restricted to this forward carrier and the full-state intersection are the same rectangle. The initial intersection is the single point <code>(0.2,0.4)</code>. For example, <code>u₀=(0,0)</code> reaches that point at stage one.</p>
-<p>This figure is an independent analytic illustration, not a replay of the numerical enclosures. The numerical implementations may return larger outer sets and report their provider and support evidence. The source constraints and a recovered full history remain responsible for action feasibility. See the <a href="https://github.com/butahlecoq/controlled-systems-lab/blob/d19e69e7/tests/unit/reachability/feedback_geometry_tests.cpp">2D and 4D executable fixture</a>. With HiGHS and Qhull enabled, build the project and run <code>ctest --test-dir BUILD -R '^feedback_geometry_tests$' --output-on-failure</code>.</p>
+<p>The square is the independently derived exact reachable set; the recorded family sets are numerical outer enclosures and may be larger. The finite forward-relevant backward set and intersection are used in full state space. The global backward set is not asserted here.</p>
+<p>Substituting <code>x₁=u₀</code> gives an independently checkable minimum at <code>u₀=(1/3,0)</code> with cost <code>2/3</code>. The saved run returned this point to numerical tolerance for polytope, box, zonotope, parallelotope and ellipsoid memberships. Each family retained stage 0 and 1 forward, backward and intersection data; the independent audit replayed 24 support certificates per family and checked the original history and cost. The actual geometry providers were <code>csl.geometry.polyhedral-intersection</code> and <code>csl.geometry.polyhedral-projection</code>, with <code>csl.lp.highs</code> for support. These checks are numerical evidence; they do not certify nonlinear-plant behavior or global optimality for the source tasks.</p>
+<p>Read the <a href="feedback-geometry-tiny-fd28/independent-audit.json">independent audit</a>, the <a href="feedback-geometry-tiny-fd28/box/request.jsonl">box request</a> and <a href="feedback-geometry-tiny-fd28/box/response.jsonl">full native response</a>, or the corresponding files in each family directory. A <a href="feedback-geometry-tiny-fd28/files.sha256">SHA-256 file manifest</a> covers the saved bytes. The immutable record uses source <a href="https://github.com/butahlecoq/controlled-systems-lab/tree/fd28cb652bd8a20839b73abaf184881fd7bcf1b4">fd28cb652bd8a20839b73abaf184881fd7bcf1b4</a>, whose geometry parent was <code>77009646</code>. It predates the fixed/coupled-control repair and is not relabeled as a later build. The <a href="feedback-geometry-tiny-fd28/build-receipt.json">build receipt</a> identifies the current compiled sources and the installed f4 SDK used for other libraries; it is a mixed-source build, not a current-source full SDK.</p>
+<p>To rerun the capture, provide the clean source and corresponding built <code>geometry_policy</code> executable and run <code>CSL_CAPTURE_SOURCE_ROOT=&lt;source&gt; CSL_CAPTURE_BINARY=&lt;binary&gt; CSL_CAPTURE_OUTPUT=&lt;new-directory&gt; python producer.py</code> using the controller environment. The <a href="feedback-geometry-tiny-fd28/producer.py">saved producer</a>, <a href="feedback-geometry-tiny-fd28/sdk-manifest.json">SDK manifest</a>, and link/build records are included. Reproducing the mixed build requires the documented SDK and toolchain; this page does not claim an independently reproducible full SDK build.</p>
 </html>

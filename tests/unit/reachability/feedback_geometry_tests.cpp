@@ -277,6 +277,7 @@ int main() {
                 if(evidence.reference.identity.request.value.find("exact-control-carrier")!=std::string::npos) {
                     found_carrier_evidence=true;
                     if(evidence.reference.identity.ideal_output.value!=g.stages[1].forward->auxiliary_input_carriers[0].id.value) return 24;
+                    if(evidence.scope!=GeometryClaimScope::set_relation) return 28;
                 }
             if(!found_carrier_evidence) return 25;
             for(const Vector& point : std::vector<Vector>{{0.2,0.4},{1.2,0.4},{-0.8,0.4},{0.2,1.4},{0.2,-0.6}})
