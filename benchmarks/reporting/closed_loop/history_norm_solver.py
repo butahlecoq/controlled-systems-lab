@@ -65,9 +65,14 @@ def solve(relation: dict, objective: dict, *, initial, positive_indices=()) -> d
         solution = opti.solve()
         primal = np.asarray(solution.value(z), dtype=float).reshape(-1)
         stats = opti.stats()
-        return {"success": bool(stats.get("success") and np.isfinite(primal).all()),
+        objective_value = float(solution.value(cost))
+        if not np.isfinite(primal).all() or not np.isfinite(objective_value):
+            return {"success": False, "status": "nonfinite-solution",
+                    "solver": "casadi-ipopt/full-history-separate-norm-epigraphs/1",
+                    "provider": "casadi-ipopt", "version": f"casadi {ca.__version__}; IPOPT version unavailable"}
+        return {"success": bool(stats.get("success")),
                 "status": str(stats.get("return_status", "unknown")), "primal": primal.tolist(),
-                "objective": float(solution.value(cost)), "iterations": stats.get("iter_count"),
+                "objective": objective_value, "iterations": stats.get("iter_count"),
                 "solver": "casadi-ipopt/full-history-separate-norm-epigraphs/1",
                 "provider": "casadi-ipopt", "version": f"casadi {ca.__version__}; IPOPT version unavailable",
                 "assurance": "local numerical NLP solution; no global optimality certificate"}
