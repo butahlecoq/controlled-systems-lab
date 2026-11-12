@@ -142,6 +142,8 @@ int main() {
             if(geometry.stages.size()!=2) return 3;
             for(const auto& stage:geometry.stages) {
                 if(!stage.forward || !stage.backward || !stage.intersection || !stage.forward_h || !stage.backward_h || !stage.intersection_h || !stage.forward_embedding_h || !stage.backward_embedding_h) return 4;
+                if(stage.forward->id.value.empty() || stage.backward->id.value.empty() || stage.intersection->id.value.empty() ||
+                    stage.forward->id==stage.backward->id || stage.forward->id==stage.intersection->id || stage.backward->id==stage.intersection->id) return 17;
                 auto full=take(sets::from_handle(stage.intersection_h->output));
                 auto full_repr=full.representation();
                 const auto* full_h=std::get_if<sets::HRepresentation>(&full_repr);
@@ -164,6 +166,9 @@ int main() {
                     if(ball && norm>1+1e-10) return 9;
                 }
             }
+            const auto& from=geometry.stages[0].forward->id;
+            const auto& inputs=geometry.stages[1].forward->source_sets;
+            if(std::find(inputs.begin(),inputs.end(),from)==inputs.end()) return 18;
         }
         const auto model4=std::make_shared<const SystemModel>(SystemModel{{{4,2,0}, TimeDomain::discrete,
             std::vector<LinearStage>{{{4,4,{1,1,0,0, 0,1,0,0, 0,0,1,1, 0,0,0,0}},
