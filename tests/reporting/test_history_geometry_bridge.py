@@ -82,5 +82,39 @@ class GeometryBridgeTest(unittest.TestCase):
         self.assertTrue(all(row["strict_source_domain"][0]["strict"] for row in rows))
 
 
+    def test_four_state_singular_carriers_preserve_full_cost_for_every_family(self):
+        request = {"mode": "continuous-history/1", "history_solver": "casadi-ipopt",
+            "task_id": "analytic-four-state", "task_sha256": "analytic-four-state",
+            "problem_id": "analytic-four-state", "request_id": "analytic-four-state",
+            "controller_id": "analytic", "action_profile_id": "continuous",
+            "absolute_update_index": 0, "original_horizon": 1, "dt": 1,
+            "observed_physical_state": [0, 0, 0, 0],
+            "predictor_stages": [{"A": np.eye(4).tolist(),
+                "B": [[1, 0], [0, 1], [0, 0], [0, 0]], "c": [0, 0, 0, 0]}],
+            "state_bounds": [None] * 4, "control_bounds": [[-2, 2], [-2, 2]],
+            "terminal_objective": {"kind": "quadratic", "Q": (2 * np.eye(4)).tolist(),
+                "linear": [-2, 0, 0, 0], "offset": 1},
+            "running_cost": {"objective_id": "analytic-cost", "stages": [
+                {"stage": 0, "terms": [{"kind": "quadratic", "reference": [0, 0],
+                    "scales": [1, 1], "weights": [1, 1], "coefficient": 2}]}]},
+            "geometry_max_generators": 1000}
+        for family in ("polytope", "box", "zonotope", "parallelotope", "ellipsoid"):
+            with self.subTest(family=family):
+                request["geometry_family"] = family
+                run = subprocess.run([os.environ["CSL_NATIVE_GEOMETRY_BRIDGE"]],
+                    input=json.dumps(request) + "\n", capture_output=True, text=True, check=True)
+                response = json.loads(run.stdout)
+                self.assertEqual(response["status"], "exported", response)
+                memberships = geometry_memberships(response["geometry"], family, 4, 1)
+                self.assertEqual(len(memberships), 6)
+                answer = solve(response["history_relation"], response["history_objective"],
+                               initial=[0] * 10, geometry_memberships=memberships)
+                self.assertTrue(answer["success"], answer)
+                np.testing.assert_allclose(answer["primal"][4:8], [1 / 3, 0, 0, 0], atol=1e-5)
+                np.testing.assert_allclose(answer["primal"][8:10], [1 / 3, 0], atol=1e-5)
+                self.assertAlmostEqual(answer["objective"], 2 / 3, places=6)
+                self.assertTrue(answer["geometry_validation"]["accepted"])
+
+
 if __name__ == "__main__":
     unittest.main()

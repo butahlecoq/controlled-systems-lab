@@ -170,7 +170,7 @@ SAVED_COMPANION_ROUTES = {
 }
 SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
 SAVED_DATA_ILLUSTRATION_RENDERERS = {
-    "scripts/reports/plot_feedback_history.py": "Projects complete saved full-state box F/B/I stages from one observed query, preserving every stage and physical coordinate order with shared quantitative axis styling.",
+    "scripts/reports/plot_feedback_history.py": "Projects complete saved full-state H, generator and ellipsoid F/B/I sets from one observed query, preserving every stage and physical coordinate order with shared quantitative axis styling.",
     "scripts/reports/render_history_functional.py": "Renders corrected labels on saved affine-history state and control records using the existing closed-loop plotter; it does not execute a controller or solver.",
     "scripts/reports/render_issue944_each_choice.py": (
         "Renders the immutable source-bound Strategy A choice records and independent recovered-history values "
@@ -369,7 +369,8 @@ def source_inventory(root: Path) -> list[dict]:
             elif relative.endswith("/visual_illustrations.py"):
                 disposition = "reviewed-static-diagram-exception"
             elif relative in {"scripts/reports/visual_example_geometry.py",
-                              "scripts/reports/visual_example_hybrid.py"}:
+                              "scripts/reports/visual_example_hybrid.py",
+                              "scripts/reports/feedback_geometry_example.py"}:
                 disposition = "gallery-case-content-owner"
             elif relative.endswith("/visual_examples.py"):
                 disposition = "gallery-composition-and-route"

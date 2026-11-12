@@ -1,0 +1,32 @@
+{
+  "schema": "history-episode-independent-audit/1",
+  "source_commit": "a4889d4727cf5ba0bc2dbf64c8c39b7792a18ae5",
+  "tasks": {
+    "syn-nl-lv-01": {
+      "status": "complete",
+      "completed_holds": 30,
+      "expected_holds": 30,
+      "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+      "original_horizon": 30,
+      "recorded_overall_status": "complete",
+      "errors": [],
+      "max_h_inequality_violation": 0.0,
+      "max_h_equality_residual": 1.7053025658242404e-13,
+      "max_initial_residual": 1.7053025658242404e-13,
+      "max_dynamics_residual": 1.4210854715202004e-13,
+      "max_source_cost_difference": 0.0,
+      "warm_start_queries_checked": 30,
+      "provider_ids": [
+        "casadi-ipopt"
+      ],
+      "geometry_memberships_checked": 1485,
+      "support_certificates_replayed": 5940,
+      "applied_original_objective": {
+        "terminal": 0.07267524088163776,
+        "running": 0.019388324183800928,
+        "total": 0.0920635650654387
+      },
+      "audit_status": "pass"
+    }
+  }
+}
