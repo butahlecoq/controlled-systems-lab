@@ -72,10 +72,12 @@ class HistoryNormSolverTest(unittest.TestCase):
                 self.assertAlmostEqual(compiled, source, places=9)
 
     def test_history_manifest_has_one_continuous_geometry_free_route_per_task(self):
-        from capabilities import build_history_manifest
+        from capabilities import HISTORY_MANIFEST, build_history_manifest, validate_manifest
         from contracts import load_task
 
-        graphs = build_history_manifest()["graphs"]
+        manifest = build_history_manifest()
+        self.assertEqual(validate_manifest(manifest_path=HISTORY_MANIFEST), manifest)
+        graphs = manifest["graphs"]
         self.assertEqual(len(graphs), 3)
         for name in ("syn-nl-lv-01", "syn-nl-fuel-01", "earth-orbit"):
             task = load_task(name)
