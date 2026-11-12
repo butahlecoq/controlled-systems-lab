@@ -1,15 +1,66 @@
 #!/usr/bin/env python3
 """Independently check the retained 2D Strategy A choice matrix."""
 
+import argparse
 import json
 import math
+from itertools import combinations
+from pathlib import Path
 import subprocess
 import sys
 
 
+def parse_matrix(text: str) -> list[list[float]]:
+    assert text.startswith("[") and text.endswith("]"), text
+    body = text[1:-1]
+    return [] if not body else [[float(value) for value in row.split(",")] for row in body.split(";")]
+
+
+def verify_square_conversion(trace: str) -> None:
+    h_text = trace.split("; H=", 1)[1].split("; b=", 1)[0]
+    suffix = trace.split("; b=", 1)[1]
+    b_text, v_part = suffix.split("; ordered_V_vertices=", 1)
+    v_text, rays_suffix = v_part.split("; rays=", 1)
+    rays_text = rays_suffix.split("; algorithm=", 1)[0]
+    h_rows = parse_matrix(h_text)
+    bounds = [float(value) for value in b_text.split(",")]
+    vertices = parse_matrix(v_text)
+    assert len(h_rows) == len(bounds) and all(len(row) == 2 for row in h_rows), trace
+    expected = {(0.0, 0.0), (0.0, 1.0), (1.0, 0.0), (1.0, 1.0)}
+    assert len(vertices) == 4 and all(len(row) == 2 for row in vertices), trace
+    assert all(any(math.dist((x, y), corner) <= 1e-12 for corner in expected) for x, y in vertices), trace
+    assert all(any(math.dist(corner, (x, y)) <= 1e-12 for x, y in vertices) for corner in expected), trace
+    assert rays_text == "[]", trace
+    for x, y in vertices:
+        assert all(a * x + b * y <= upper + 1e-12 for (a, b), upper in zip(h_rows, bounds)), trace
+    intersections = set()
+    for (i, (a1, b1)), (j, (a2, b2)) in combinations(enumerate(h_rows), 2):
+        determinant = a1 * b2 - b1 * a2
+        if abs(determinant) <= 1e-14:
+            continue
+        x = (bounds[i] * b2 - b1 * bounds[j]) / determinant
+        y = (a1 * bounds[j] - bounds[i] * a2) / determinant
+        if all(a * x + b * y <= upper + 1e-10 for (a, b), upper in zip(h_rows, bounds)):
+            intersections.add((x, y))
+    assert len(intersections) >= 4, trace
+    assert all(any(math.dist(corner, point) <= 1e-9 for point in intersections) for corner in expected), trace
+    assert all(any(math.dist(point, corner) <= 1e-9 for corner in expected) for point in intersections), trace
+
+
 def main() -> int:
-    result = subprocess.run([sys.argv[1]], check=True, capture_output=True, text=True)
-    document = json.loads(result.stdout)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("executable", nargs="?")
+    parser.add_argument("--record-json")
+    parser.add_argument("--regression-json")
+    parser.add_argument("--expected-numeric-boundaries", type=int, default=2)
+    args = parser.parse_args()
+    if args.record_json:
+        document = json.loads(Path(args.record_json).read_text(encoding="utf-8"))
+    else:
+        if not args.executable:
+            parser.error("an executable or --record-json is required")
+        result = subprocess.run([args.executable], check=True, capture_output=True, text=True)
+        document = json.loads(result.stdout)
     assert document["schema"] == "csl.strategy-a-each-choice-pipeline/2"
     assert document["scope"].startswith("one-step nominal Strategy A candidate construction")
     assert document["task"]["state_dimension"] == 2
@@ -63,7 +114,12 @@ def main() -> int:
     numeric_boundaries = [row for row in rows if row["vertex_reducer"] == "csl.hull.source.btulshor-kpabep" and
         row["terminal_optimizer_choice"] in {"csl.lp.highs", "csl.convex.highs"} and
         row.get("first_unmet", "").startswith("highs.")]
-    assert len(numeric_boundaries) == 2
+    assert len(numeric_boundaries) == args.expected_numeric_boundaries
+    completed_rows = [row for row in rows if row["status"] == "completed"]
+    assert len(completed_rows) + len(numeric_boundaries) == 64, {
+        "completed_admitted": len(completed_rows),
+        "numeric_boundaries": len(numeric_boundaries),
+    }
     assert all(row["status"] == "operation_rejected" for row in numeric_boundaries)
     for row in numeric_boundaries:
         assert any("MODIF source statuses retained verbatim" in call for call in row["operation_call_evidence"]), row
@@ -95,6 +151,18 @@ def main() -> int:
             assert any("source-index invocation:" in call for call in row["operation_call_evidence"]), row
             assert any("checker invocation:" in call and "status=verified" in call
                        for call in row["operation_call_evidence"]), row
+            if args.expected_numeric_boundaries == 0:
+                traces = [item for item in row["program_boundary_observations"]
+                          if item.startswith("Qhull 8.0.2 Qx V-to-H conversion output:")]
+                assert traces, row
+                assert all("ordered_V_vertices=" in item and "; H=[" in item and "; b=" in item
+                           for item in traces), row
+                if row["vertex_reducer"] == "csl.hull.source.btulshor-kpabep":
+                    assert any("ordered_V_vertices=[0,1;1,1;0,0;1,0]" in item
+                               for item in traces), row
+                for item in traces:
+                    if "ordered_V_vertices=[0,1;1,1;0,0;1,0]" in item:
+                        verify_square_conversion(item)
         else:
             assert row["vertex_lp_provider"] in lp_profiles
             assert counts["vertex"] > 0, row
@@ -156,9 +224,14 @@ def main() -> int:
         elif row["task"] == "linear" and row["terminal_lp_provider"] != "csl.lp.highs":
             assert row["first_unmet"] and "phase_one.objective" in row["first_unmet"], row
 
-    regression_result = subprocess.run([sys.argv[1], "--terminal-membership-indexing-regression"],
-        check=True, capture_output=True, text=True)
-    regression = json.loads(regression_result.stdout)
+    if args.regression_json:
+        regression = json.loads(Path(args.regression_json).read_text(encoding="utf-8"))
+    else:
+        if not args.executable:
+            parser.error("an executable or --regression-json is required")
+        regression_result = subprocess.run([args.executable, "--terminal-membership-indexing-regression"],
+            check=True, capture_output=True, text=True)
+        regression = json.loads(regression_result.stdout)
     assert regression["schema"] == "csl.strategy-a-terminal-membership-indexing-regression/1"
     assert regression["task"] == {
         "dynamics": "x_next=x+u",

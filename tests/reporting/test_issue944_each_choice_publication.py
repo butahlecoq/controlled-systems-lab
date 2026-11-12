@@ -4,6 +4,7 @@ import csv
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -67,9 +68,17 @@ class Issue944ChoicePipelinePublicationTests(unittest.TestCase):
         self.assertIn("csl.polyhedron.v", (self.bundle / "records.json").read_text(encoding="utf-8"))
         provenance = json.loads((self.bundle / "provenance.json").read_text(encoding="utf-8"))
         self.assertEqual(provenance["solver_source_commit"], "5a4730c517a875400ec7b69e4c8e2c265e49016c")
-        for key, source in (("runner_source_sha256", ROOT / "tools/strategy_a_each_choice_pipeline.cpp"),
-                            ("checker_source_sha256", ROOT / "scripts/catalogue/check_944_each_choice_pipeline.py"),
-                            ("publication_renderer_sha256", ROOT / "scripts/reports/render_issue944_each_choice.py"),
+        historical_sources = {
+            "runner_source_sha256": "tools/strategy_a_each_choice_pipeline.cpp",
+            "checker_source_sha256": "scripts/catalogue/check_944_each_choice_pipeline.py",
+        }
+        for key, relative in historical_sources.items():
+            historical = subprocess.check_output([
+                "git", "-C", str(ROOT), "show",
+                f'{provenance["solver_source_commit"]}:{relative}',
+            ])
+            self.assertEqual(provenance[key], hashlib.sha256(historical).hexdigest())
+        for key, source in (("publication_renderer_sha256", ROOT / "scripts/reports/render_issue944_each_choice.py"),
                             ("plot_renderer_sha256", ROOT / "scripts/catalogue/render_944_each_choice_example.py"),
                             ("shared_stylesheet_sha256", ROOT / "docs/examples/examples.css")):
             self.assertEqual(provenance[key], hashlib.sha256(source.read_bytes()).hexdigest())
@@ -95,6 +104,15 @@ class Issue944ChoicePipelinePublicationTests(unittest.TestCase):
         self.assertIn("#111", regression_print)
         self.assertNotIn("#2878b5", pipeline)
         self.assertNotIn("#101615", regression_svg)
+
+    def test_independent_checker_accepts_immutable_source_5a_capture(self):
+        checker = ROOT / "scripts/catalogue/check_944_each_choice_pipeline.py"
+        subprocess.run([
+            sys.executable, str(checker),
+            "--record-json", str(self.bundle / "records.json"),
+            "--regression-json", str(self.bundle / "terminal-membership-regression.json"),
+            "--expected-numeric-boundaries", "2",
+        ], check=True, capture_output=True, text=True)
 
     def test_stage_checks_hashes_local_links_and_fresh_route(self):
         with tempfile.TemporaryDirectory() as temporary:

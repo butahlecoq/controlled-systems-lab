@@ -114,25 +114,24 @@ public:
                 const auto representation=set->representation();
                 if (const auto* h=std::get_if<sets::HRepresentation>(&representation)) {
                     const auto minimum=smallest_nonzero(h->inequalities);
-                    if (minimum && *minimum<=1e-12) {
-                        std::ostringstream trace;
-                        trace << std::setprecision(17) << "Qhull 8.0.2 Qx V-to-H conversion output: upstream="
-                            << upstream_provider_ << "; request="
-                            << request.identity.request.value << "; input=" << request.input.id.value
-                            << "; output=" << converted->output.id.value << "; H="
-                            << matrix_text(h->inequalities) << "; b=";
-                        for (std::size_t i=0;i<h->upper_bounds.size();++i) { if(i)trace << ','; trace << h->upper_bounds[i]; }
-                        const auto input=sets::from_handle(request.input);
-                        if (const auto* input_set=std::get_if<sets::SetData>(&input)) {
-                            const auto input_representation=input_set->representation();
-                            if (const auto* v=std::get_if<sets::VRepresentation>(&input_representation))
-                                trace << "; ordered_V_vertices=" << matrix_text(v->vertices)
-                                    << "; rays=" << matrix_text(v->rays);
-                        }
-                        for (const auto& assumption:converted->evidence.assumptions)
-                            if (assumption.find("Qhull")!=std::string::npos) trace << "; algorithm=" << assumption;
-                        observations_->push_back(trace.str());
+                    std::ostringstream trace;
+                    trace << std::setprecision(17) << "Qhull 8.0.2 Qx V-to-H conversion output: upstream="
+                        << upstream_provider_ << "; request="
+                        << request.identity.request.value << "; input=" << request.input.id.value
+                        << "; output=" << converted->output.id.value << "; min_nonzero_A=";
+                    if (minimum) trace << *minimum; else trace << "none";
+                    trace << "; H=" << matrix_text(h->inequalities) << "; b=";
+                    for (std::size_t i=0;i<h->upper_bounds.size();++i) { if(i)trace << ','; trace << h->upper_bounds[i]; }
+                    const auto input=sets::from_handle(request.input);
+                    if (const auto* input_set=std::get_if<sets::SetData>(&input)) {
+                        const auto input_representation=input_set->representation();
+                        if (const auto* v=std::get_if<sets::VRepresentation>(&input_representation))
+                            trace << "; ordered_V_vertices=" << matrix_text(v->vertices)
+                                << "; rays=" << matrix_text(v->rays);
                     }
+                    for (const auto& assumption:converted->evidence.assumptions)
+                        if (assumption.find("Qhull")!=std::string::npos) trace << "; algorithm=" << assumption;
+                    observations_->push_back(trace.str());
                 }
             }
         }
