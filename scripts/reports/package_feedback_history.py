@@ -35,6 +35,9 @@ def package(attempt: Path, output: Path, audit: Path, auditor: Path,
     dimension = len(episode["physical_states"][0])
     expected_memberships = 3 * horizon * (horizon + 3) // 2
     native = episode["preparation_receipt"]["adapter_receipt"]
+    family = native["geometry"]
+    if family not in {"polytope", "box", "zonotope", "parallelotope", "ellipsoid"}:
+        raise ValueError("unknown feedback family")
     if (episode["status"] != "complete" or episode["overall_status"] != "complete"
             or episode["postcheck_status"] != "complete" or episode["render_status"] != "complete"
             or episode["completed_holds"] != horizon or task["audit_status"] != "pass"
@@ -42,8 +45,8 @@ def package(attempt: Path, output: Path, audit: Path, auditor: Path,
             or task["errors"] or task["geometry_memberships_checked"] != expected_memberships
             or task["support_certificates_replayed"] != 2 * dimension * expected_memberships):
         raise ValueError("completed full-horizon independently checked feedback evidence required")
-    if (episode["controller_id"] != "native-continuous-history-box-ipopt/1"
-            or graph["controller"]["id"] != episode["controller_id"] or native["geometry"] != "box"
+    if (episode["controller_id"] != f"native-continuous-history-{family}-ipopt/1"
+            or graph["controller"]["id"] != episode["controller_id"]
             or native["history_solver"] != "casadi-ipopt"
             or run["source_commit"] != verified["source_commit"]
             or run["source_commit"] != build_record["source_commit"]
@@ -71,9 +74,9 @@ def package(attempt: Path, output: Path, audit: Path, auditor: Path,
             "controller_id": episode["controller_id"], "action_profile_id": episode["action_profile_id"],
             "graph_id": graph["graph_id"], "graph_fingerprint": graph["graph_fingerprint"],
             "native_sha256": native["executable_sha256"], "native_binary_source_in_raw": native["binary_source"],
-            "original_intervals": horizon, "completed_holds": horizon, "family": "box",
+            "original_intervals": horizon, "completed_holds": horizon, "family": family,
             "optimizer": "casadi-ipopt", "scope": "one numerical F/B/I affine-history MPC episode",
-            "raw_metadata_correction": ("The adapter preparation controller_semantics says direct affine-history MPC; the run used box F/B/I memberships as established by the resolved graph and native records."
+            "raw_metadata_correction": ("The adapter preparation controller_semantics says direct affine-history MPC; the run used selected-family F/B/I memberships as established by the resolved graph and native records."
                 if "direct" in native["controller_semantics"] else None),
             "execution_protocol": "Cold start at each observed query; source shift-prior-primal warm-start contract was not implemented.",
             "postcheck_source_timing": ("After all 40 fuel controls were applied, history_policy.py and history_norm_solver.py were edited while the parent performed postcheck/render; the worker had already imported them and the independent source-cost/replay modules were unchanged."
