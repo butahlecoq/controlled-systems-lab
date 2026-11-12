@@ -7,7 +7,8 @@ from task_models import objective
 
 
 def validate(task, stage, observed, predictor_stages, relation, primal, solver_cost,
-             *, absolute_tolerance=1e-7, relative_tolerance=1e-8):
+             *, geometry_memberships=None, geometry_factors=None,
+             absolute_tolerance=1e-7, relative_tolerance=1e-8):
     n = len(task["model"]["states"])
     m = len(task["model"]["controls"])
     horizon = task["episode"]["intervals"] - stage
@@ -64,6 +65,13 @@ def validate(task, stage, observed, predictor_stages, relation, primal, solver_c
     if task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01":
         checks["positive_radius"] = {"passed": bool(np.all(states[:, 0] > 0)),
                                       "minimum": float(np.min(states[:, 0]))}
+    if geometry_memberships is not None or geometry_factors is not None:
+        if geometry_memberships is None or geometry_factors is None or not geometry_memberships:
+            raise ValueError("geometry memberships and factor witnesses are required together")
+        from history_geometry import parse, verify
+        parsed = parse(geometry_memberships, (horizon + 1) * n)
+        geometry = verify(parsed, z, geometry_factors, tolerance=absolute_tolerance)
+        checks["geometry"] = {"passed": geometry["accepted"], "memberships": geometry["checks"]}
     source_cost = objective(task, states, controls, absolute_stage_offset=stage)
     compare("source_cost", [solver_cost], [source_cost["total"]])
     return {"accepted": all(row["passed"] for row in checks.values()), "checks": checks,

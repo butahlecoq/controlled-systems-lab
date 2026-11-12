@@ -1,6 +1,7 @@
 """Actual solver membership and independent factor-witness checks."""
 import sys
 import unittest
+from unittest import mock
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "benchmarks/reporting/closed_loop"))
@@ -52,6 +53,28 @@ class GeometryMembershipTests(unittest.TestCase):
         self.assertAlmostEqual(answer["primal"][0], 1)
         self.assertAlmostEqual(answer["primal"][1], 2)
         self.assertEqual(answer["geometry_factors"], [[]])
+
+    def test_source_acceptance_independently_checks_geometry_witness(self):
+        from history_validation import validate
+        task = {"episode": {"intervals": 1},
+                "model": {"states": [{"bounds": None}, {"bounds": None}],
+                          "controls": [{}], "case_id": "fixture"},
+                "control_domains": {"continuous": {"bounds": [[-1, 1]]}}}
+        predictor = [{"A": [[1, 0], [0, 1]], "B": [[0], [0]], "c": [0, 0]}]
+        relation = {"inequalities": [], "upper_bounds": [], "equalities": [], "equality_values": []}
+        membership = {"kind": "zonotope", "indices": [2, 3], "center": [0, 0],
+                      "factor_count": 1, "factor": [[1], [0]]}
+        with mock.patch("history_validation.objective", return_value={"total": 0}):
+            result = validate(task, 0, [0.5, 0], predictor, relation, [0.5, 0, 0.5, 0, 0], 0,
+                              geometry_memberships=[membership], geometry_factors=[[0.5]])
+            self.assertTrue(result["accepted"], result)
+            bad = validate(task, 0, [0.5, 0], predictor, relation, [0.5, 0, 0.5, 0, 0], 0,
+                           geometry_memberships=[membership], geometry_factors=[[0.1]])
+            self.assertFalse(bad["accepted"])
+            self.assertFalse(bad["checks"]["geometry"]["passed"])
+            with self.assertRaises(ValueError):
+                validate(task, 0, [0.5, 0], predictor, relation, [0.5, 0, 0.5, 0, 0], 0,
+                         geometry_memberships=[membership])
 
     def test_rejects_invalid_membership_input(self):
         with self.assertRaises(ValueError):
