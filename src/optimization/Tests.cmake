@@ -111,6 +111,11 @@ target_link_libraries(finite_action_nominal_tests PRIVATE CSL::finite_action_nom
 add_test(NAME finite_action_nominal_tests COMMAND finite_action_nominal_tests)
 csl_test_target(finite_action_nominal_tests optimization)
 
+add_executable(history_cost_tests tests/unit/optimization/history_cost_tests.cpp)
+target_link_libraries(history_cost_tests PRIVATE CSL::history_cost doctest::doctest)
+add_test(NAME history_cost_tests COMMAND history_cost_tests)
+csl_test_target(history_cost_tests optimization)
+
 add_executable(finite_action_graph_tests tests/unit/optimization/finite_action_graph_tests.cpp)
 target_link_libraries(finite_action_graph_tests PRIVATE CSL::finite_action_nominal CSL::affine_sum
   CSL::phase_one doctest::doctest)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <csl/optimization/finite_action_minimax.hpp>
+#include <csl/optimization/running_control_cost.hpp>
 #include <csl/reachability/finite_plan_box.hpp>
 #include <csl/reachability/finite_plan_ellipsoid.hpp>
 #include <csl/reachability/finite_plan_parallelotope.hpp>
@@ -10,33 +11,6 @@
 #include <optional>
 
 namespace csl::optimization {
-
-// Running control penalties are evaluated on the original, absolute stage
-// grid. The quadratic form is coefficient / normalization_horizon times
-// sum_i weights[i] * ((u[i] - reference[i]) / scales[i])^2. Euclidean terms
-// retain the source norm: coefficient * ||map * u + offset||_2.
-struct QuadraticControlPenalty {
-    Vector reference;
-    Vector scales;
-    Vector weights;
-    double coefficient;
-    std::size_t normalization_horizon;
-};
-struct EuclideanControlPenalty {
-    Matrix map;
-    Vector offset;
-    double coefficient;
-};
-using ControlPenalty = std::variant<QuadraticControlPenalty, EuclideanControlPenalty>;
-struct AbsoluteStageControlCost {
-    std::size_t stage;
-    std::vector<ControlPenalty> terms;
-};
-struct RunningControlCost {
-    std::string objective_id;
-    std::size_t original_horizon;
-    std::vector<AbsoluteStageControlCost> stages;
-};
 
 struct FiniteActionNominalRequest {
     ProblemId problem;

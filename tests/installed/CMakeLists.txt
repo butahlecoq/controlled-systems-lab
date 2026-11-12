@@ -397,6 +397,13 @@ add_test(NAME installed_terminal_minimizers_client COMMAND installed_terminal_mi
 set_tests_properties(installed_terminal_minimizers_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed terminal-minimizers client: public outcome contract is available")
 
+add_executable(installed_history_cost_client history_cost_client.cpp)
+target_link_libraries(installed_history_cost_client PRIVATE CSL::history_cost)
+set_target_properties(installed_history_cost_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_history_cost_client COMMAND installed_history_cost_client)
+set_tests_properties(installed_history_cost_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed history-cost client: compiled canonical history objective passed")
+
 add_executable(installed_projection_predecessor_client projection_predecessor_client.cpp)
 target_link_libraries(installed_projection_predecessor_client PRIVATE CSL::polyhedral)
 set_target_properties(installed_projection_predecessor_client PROPERTIES CXX_EXTENSIONS OFF)

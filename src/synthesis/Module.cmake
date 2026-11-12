@@ -8,6 +8,9 @@ csl_add_library(csl_control_recovery STATIC src/synthesis/control_recovery.cpp)
 
 target_link_libraries(csl_control_recovery PUBLIC CSL::resolved_problem CSL::sets)
 
+csl_add_library(csl_history_cost STATIC src/optimization/history_cost.cpp)
+target_link_libraries(csl_history_cost PUBLIC CSL::control_recovery CSL::running_control_cost CSL::objectives)
+
 csl_add_library(csl_strategy_a STATIC
   src/synthesis/strategy_a/strategy.cpp)
 
