@@ -81,6 +81,89 @@ class LearningBookTests(unittest.TestCase):
                     self.assertEqual(result.stdout, (ROOT / source).read_bytes(),
                                      "Source permalink differs from the executed example")
 
+    @staticmethod
+    def _is_retained_source_commit(repo: Path, commit: str) -> bool:
+        main_ref = "refs/remotes/origin/main"
+        main_result = subprocess.run(["git", "merge-base", "--is-ancestor", commit, main_ref],
+                                     cwd=repo, capture_output=True, text=True)
+        if main_result.returncode == 0:
+            return True
+        if main_result.returncode != 1:
+            raise AssertionError(f"Cannot check {main_ref}: {main_result.stderr.strip()}")
+
+        tags_result = subprocess.run(["git", "tag", "--list", "evidence/*-source-*"],
+                                     cwd=repo, capture_output=True, text=True)
+        if tags_result.returncode != 0:
+            raise AssertionError(f"Cannot list evidence source tags: {tags_result.stderr.strip()}")
+        for tag in tags_result.stdout.splitlines():
+            tag_ref = f"refs/tags/{tag}"
+            tagged_commit = subprocess.run(["git", "rev-parse", "--verify", f"{tag_ref}^{{commit}}"],
+                                           cwd=repo, capture_output=True, text=True)
+            if tagged_commit.returncode != 0:
+                raise AssertionError(f"Cannot resolve evidence source tag {tag}: " +
+                                     tagged_commit.stderr.strip())
+            tag_result = subprocess.run(
+                ["git", "merge-base", "--is-ancestor", commit, tagged_commit.stdout.strip()],
+                cwd=repo, capture_output=True, text=True)
+            if tag_result.returncode == 0:
+                return True
+            if tag_result.returncode != 1:
+                raise AssertionError(f"Cannot check evidence source tag {tag}: {tag_result.stderr.strip()}")
+        return False
+
+    def test_source_permalinks_are_retained_by_main_or_evidence_source_tags(self):
+        prefix = "https://github.com/butahlecoq/controlled-systems-lab/blob/"
+        sources = {
+            record["href"][len(prefix):].partition("/")[0]
+            for chapter in self.manifest["chapters"]
+            for record in chapter.get("records", [])
+            if record["href"].startswith(prefix)
+        }
+        self.assertTrue(sources)
+        for commit in sorted(sources):
+            with self.subTest(commit=commit):
+                self.assertTrue(
+                    self._is_retained_source_commit(ROOT, commit),
+                    f"Source permalink commit {commit} is not retained by origin/main or an evidence source tag")
+
+    def test_source_retention_rejects_feature_only_history_and_accepts_durable_refs(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            repo = Path(temporary)
+
+            def git(*args: str) -> str:
+                result = subprocess.run(["git", *args], cwd=repo, check=True,
+                                        capture_output=True, text=True)
+                return result.stdout.strip()
+
+            git("init", "--initial-branch=main")
+            git("config", "user.name", "Learning book test")
+            git("config", "user.email", "learning-book-test@example.invalid")
+            (repo / "main-source.cpp").write_text("int main_source = 1;\n")
+            git("add", "main-source.cpp")
+            git("commit", "-m", "main source")
+            main_source = git("rev-parse", "HEAD")
+            git("update-ref", "refs/remotes/origin/main", main_source)
+
+            git("checkout", "-b", "feature")
+            (repo / "feature-source.cpp").write_text("int feature_source = 1;\n")
+            git("add", "feature-source.cpp")
+            git("commit", "-m", "feature-only source")
+            feature_source = git("rev-parse", "HEAD")
+            self.assertEqual(subprocess.run(["git", "merge-base", "--is-ancestor", feature_source, "HEAD"],
+                                            cwd=repo).returncode, 0)
+            self.assertFalse(self._is_retained_source_commit(repo, feature_source))
+
+            git("checkout", "--orphan", "tagged-source")
+            (repo / "snapshot-source.cpp").write_text("int snapshot_source = 1;\n")
+            git("add", "snapshot-source.cpp")
+            git("commit", "-m", "frozen source snapshot")
+            tagged_source = git("rev-parse", "HEAD")
+            git("tag", "-a", "evidence/fixture-source-v1", "-m", "Retain the frozen source commit")
+            self.assertEqual(subprocess.run(["git", "merge-base", "--is-ancestor", tagged_source,
+                                             "refs/remotes/origin/main"], cwd=repo).returncode, 1)
+            self.assertTrue(self._is_retained_source_commit(repo, main_source))
+            self.assertTrue(self._is_retained_source_commit(repo, tagged_source))
+
     def test_known_module_without_an_executable_source_witness_is_rejected(self):
         broken = json.loads(json.dumps(self.manifest))
         broken["chapters"][2]["module_ids"].append("csl.hull.grouped-membership")
