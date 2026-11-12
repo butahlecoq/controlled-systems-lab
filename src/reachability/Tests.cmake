@@ -15,6 +15,11 @@ if(TARGET CSL::highs_lp AND TARGET CSL::qhull_conversion)
   target_link_libraries(nominal_forward_public_client PRIVATE CSL::nominal_forward CSL::affine_sum CSL::qhull_conversion CSL::highs_lp)
   add_test(NAME nominal_forward_public_client COMMAND nominal_forward_public_client)
   csl_test_target(nominal_forward_public_client reachability)
+
+  add_executable(nominal_tube_public_client tests/installed/nominal_tube_client.cpp)
+  target_link_libraries(nominal_tube_public_client PRIVATE CSL::nominal_tube CSL::affine_sum CSL::qhull_conversion CSL::highs_lp)
+  add_test(NAME nominal_tube_public_client COMMAND nominal_tube_public_client)
+  csl_test_target(nominal_tube_public_client reachability)
 endif()
 
 add_executable(fixed_plan_disturbance_tests tests/unit/reachability/fixed_plan_disturbance_tests.cpp)
