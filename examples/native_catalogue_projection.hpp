@@ -39,7 +39,7 @@ inline void write_svg(const std::filesystem::path& file, const std::vector<Captu
     auto color = [&](std::size_t stage) {
         const std::array first = print ? std::array{104, 70, 140} : std::array{196, 167, 231};
         const std::array last = print ? std::array{167, 77, 38} : std::array{246, 193, 119};
-        const double weight = maximum_stage ? static_cast<double>(stage) / maximum_stage : 0;
+        const double weight = maximum_stage ? static_cast<double>(stage) / static_cast<double>(maximum_stage) : 0;
         std::ostringstream text;
         text << '#' << std::hex << std::setfill('0');
         for (std::size_t i = 0; i < 3; ++i)
@@ -70,8 +70,8 @@ inline void write_svg(const std::filesystem::path& file, const std::vector<Captu
             }
             const double dx = (xmax - xmin) * 0.06, dy = (ymax - ymin) * 0.06;
             xmin -= dx; xmax += dx; ymin -= dy; ymax += dy;
-            const double left = panel ? 75 : 75 + 535 * column;
-            const double top = panel ? 72 : 88 + 390 * row, width = 430, height = 285;
+            const double left = static_cast<double>(panel ? 75 : 75 + 535 * column);
+            const double top = static_cast<double>(panel ? 72 : 88 + 390 * row), width = 430, height = 285;
             auto x = [&](double value) { return left + width * (value - xmin) / (xmax - xmin); };
             auto y = [&](double value) { return top + height * (ymax - value) / (ymax - ymin); };
             auto label = [](double value) { std::ostringstream text; text << std::setprecision(3) << value; return text.str(); };
