@@ -25,12 +25,17 @@ struct FeedbackEllipsoidMembership { Vector center; Matrix factor; };
 using FeedbackMembership = std::variant<FeedbackHMembership,
     FeedbackZonotopeMembership, FeedbackEllipsoidMembership>;
 
+// A strict source predicate is retained separately from the closed outer set.
+// For example, orbit radius > 0 uses coordinate 0 and lower_bound 0.
+struct StrictCoordinateLowerBound { std::size_t coordinate; double lower_bound; };
+
 struct FeedbackSet {
     FeedbackFamily family;
     FeedbackScope scope;
     SetRelation relation;
     Assurance assurance;
     FeedbackMembership membership;
+    std::vector<StrictCoordinateLowerBound> strict_source_domain;
     std::vector<SetId> source_sets;
     std::vector<RequestProvenance> providers;
     std::vector<GeometryEvidence> lineage;
