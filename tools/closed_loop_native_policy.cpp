@@ -837,6 +837,12 @@ Json feedback_membership_json(const reachability::FeedbackSet& shape,
     membership["relation"] = shape.relation == SetRelation::outer ? "outer" :
         shape.relation == SetRelation::equivalent ? "equivalent" : "other";
     membership["assurance"] = shape.assurance == Assurance::numerical ? "numerical" : "validated";
+    membership["auxiliary_input_carriers"] = Json::array();
+    for(const auto& carrier : shape.auxiliary_input_carriers) {
+        auto encoded = set_json(take_history(sets::from_handle(carrier), "feedback-input-carrier"));
+        encoded["set_id"] = carrier.id.value;
+        membership["auxiliary_input_carriers"].push_back(std::move(encoded));
+    }
     membership["source_sets"] = Json::array();
     for(const auto& id : shape.source_sets) membership["source_sets"].push_back(id.value);
     membership["construction"] = shape.construction;
@@ -936,6 +942,12 @@ Json feedback_export(const problem::ResolvedProblem& resolved, const Json& in,
         result["pending_support_calls"] = Json::array();
         for(const auto& record : failure->pending_support_calls)
             result["pending_support_calls"].push_back(support_call_json(record));
+        result["pending_input_carriers"] = Json::array();
+        for(const auto& carrier : failure->pending_input_carriers) {
+            auto encoded = set_json(take_history(sets::from_handle(carrier), "feedback-pending-carrier"));
+            encoded["set_id"] = carrier.id.value;
+            result["pending_input_carriers"].push_back(std::move(encoded));
+        }
         result["pending_support_certificates"] = Json::array();
         for(const auto& certificate : failure->pending_support_certificates)
             result["pending_support_certificates"].push_back(support_certificate_json(certificate));

@@ -38,6 +38,10 @@ class GeometryBridgeTest(unittest.TestCase):
                 memberships = geometry_memberships(geometry, family, 2, 1)
                 self.assertTrue(any(m["providers"] for m in memberships))
                 self.assertTrue(any(m["support_calls"] for m in memberships))
+                carriers = [carrier for m in memberships for carrier in m["auxiliary_input_carriers"]]
+                self.assertTrue(carriers)
+                self.assertTrue(all(carrier["representation"] == "polytope-h" and carrier["set_id"]
+                                    for carrier in carriers))
                 for stage in geometry["stages"]:
                     ids = [membership["set_id"] for membership in stage["memberships"]]
                     self.assertEqual(len(set(ids)), 3)
