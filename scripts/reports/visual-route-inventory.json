@@ -1151,6 +1151,16 @@
       "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
+      "source": "scripts/reports/package_feedback_history.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "controls.png",
+        "phase.png",
+        "trajectory.png"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/package_history_functional.py",
       "signal_count": 6,
       "asset_name_literals": [
