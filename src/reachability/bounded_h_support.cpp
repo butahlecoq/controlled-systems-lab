@@ -134,3 +134,40 @@ BoundedHSupportOutcome bounded_h_support(const BoundedHSupportInput& in,
     return BoundedHSupportResult{std::get<SupportUpperBound>(corrected),std::move(records)};
 }
 } // namespace csl::reachability
+
+namespace csl::reachability {
+BoundedHAxisOutcome bounded_h_axis_cover(const BoundedHSupportInput& input,
+        ProgramIdentity identity, const registry::PreparedProvider<registry::LPPort>& provider,
+        const ExecutionContext& context) {
+    BoundedHAxisCover cover;
+    const auto n=input.direction.size();
+    cover.lower.reserve(n);
+    cover.upper.reserve(n);
+    auto validation=residual_corrected_support(input, Vector(input.upper_bounds.size(),0),
+        Vector(input.equality_values.size(),0));
+    if (auto* diagnostics=std::get_if<Diagnostics>(&validation))
+        return BoundedHAxisFailure{std::move(cover),0,false,*diagnostics};
+    auto query=input;
+    for (std::size_t j=0;j<n;++j) {
+        for (bool upper : {false,true}) {
+            query.direction.assign(n,0);
+            query.direction[j]=upper ? 1 : -1;
+            ProgramIdentity id=identity;
+            id.program.value += "/axis/"+std::to_string(j)+(upper ? "/upper" : "/lower");
+            auto answer=bounded_h_support(query,std::move(id),provider,context);
+            if (auto* failure=std::get_if<BoundedHSupportFailure>(&answer)) {
+                cover.lp_calls.insert(cover.lp_calls.end(),failure->lp_calls.begin(),failure->lp_calls.end());
+                return BoundedHAxisFailure{std::move(cover),j,upper,std::move(failure->cause)};
+            }
+            auto result=std::get<BoundedHSupportResult>(std::move(answer));
+            cover.lp_calls.insert(cover.lp_calls.end(),result.lp_calls.begin(),result.lp_calls.end());
+            if (upper) cover.upper.push_back(result.bound.value);
+            else cover.lower.push_back(-result.bound.value);
+        }
+        if (cover.lower.back()>cover.upper.back())
+            return BoundedHAxisFailure{std::move(cover),j,true,
+                OperationStopped{StopReason::numerical_failure,"Axis bounds are inconsistent; no emptiness conclusion is drawn."}};
+    }
+    return cover;
+}
+} // namespace csl::reachability

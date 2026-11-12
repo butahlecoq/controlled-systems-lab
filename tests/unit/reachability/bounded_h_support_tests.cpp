@@ -54,6 +54,15 @@ int main() {
     const auto four_bound=std::get<BoundedHSupportResult>(four_answer).bound.value;
     check(four_bound>=3 && four_bound<3.00000001);
 
+    BoundedHSupportInput clip{{1,2,{1,1}}, {1}, {0,2,{}}, {},
+        {-2,0}, {2,2}, {0,0}};
+    auto cover=bounded_h_axis_cover(clip,{{"test"},{"axis"}},
+        std::get<csl::registry::PreparedProvider<csl::registry::LPPort>>(prepared),{});
+    check(std::holds_alternative<BoundedHAxisCover>(cover));
+    const auto& box=std::get<BoundedHAxisCover>(cover);
+    check(box.lower[0]<=-2 && box.upper[0]>=1 && box.upper[0]<1.00000001);
+    check(box.lp_calls.size()==4);
+
     BoundedHSupportInput fixed{{0,2,{}}, {}, {0,2,{}}, {},
         {1,0}, {1,0}, {1,1}};
     auto fixed_bound=residual_corrected_support(fixed,{},{});

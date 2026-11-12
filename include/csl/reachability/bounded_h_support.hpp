@@ -47,4 +47,21 @@ BoundedHSupportOutcome bounded_h_support(const BoundedHSupportInput&,
     ProgramIdentity, const registry::PreparedProvider<registry::LPPort>&,
     const ExecutionContext&);
 
+struct BoundedHAxisCover {
+    Vector lower, upper;
+    std::vector<registry::LPQueryRecord> lp_calls;
+};
+struct BoundedHAxisFailure {
+    BoundedHAxisCover prefix;
+    std::size_t coordinate;
+    bool upper_direction;
+    std::variant<Diagnostics, Unsupported, OperationStopped> cause;
+};
+using BoundedHAxisOutcome = std::variant<BoundedHAxisCover, BoundedHAxisFailure>;
+// General-dimensional axis cover. The carrier remains part of the actual
+// intersection; a stopped or inconsistent numerical result is not emptiness.
+BoundedHAxisOutcome bounded_h_axis_cover(const BoundedHSupportInput&,
+    ProgramIdentity, const registry::PreparedProvider<registry::LPPort>&,
+    const ExecutionContext&);
+
 } // namespace csl::reachability
