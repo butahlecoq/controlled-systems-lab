@@ -37,6 +37,13 @@ add_test(NAME installed_continuous_discretization_client COMMAND installed_conti
 set_tests_properties(installed_continuous_discretization_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed continuous adapter: two physical intervals and source receipt passed")
 
+add_executable(installed_box_approximation_client box_approximation_client.cpp)
+target_link_libraries(installed_box_approximation_client PRIVATE CSL::approximation)
+set_target_properties(installed_box_approximation_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_box_approximation_client COMMAND installed_box_approximation_client)
+set_tests_properties(installed_box_approximation_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed box approximation client: diamond is enclosed with bounds 2 on both axes")
+
 add_executable(installed_box_parallelotope_client box_parallelotope_client.cpp)
 target_link_libraries(installed_box_parallelotope_client PRIVATE CSL::approximation)
 set_target_properties(installed_box_parallelotope_client PROPERTIES CXX_EXTENSIONS OFF)
@@ -78,7 +85,7 @@ target_link_libraries(installed_conversion_client PRIVATE CSL::qhull_conversion 
 set_target_properties(installed_conversion_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_conversion_client COMMAND installed_conversion_client)
 set_tests_properties(installed_conversion_client PROPERTIES
-  PASS_REGULAR_EXPRESSION "Installed Qhull conversion client: registered square conversion and literal vertices passed")
+  PASS_REGULAR_EXPRESSION "Installed Qhull conversion client: H-to-V square vertices passed")
 
 endif()
 add_executable(installed_plot_data_client plot_data_client.cpp)

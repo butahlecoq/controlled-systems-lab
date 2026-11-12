@@ -30,6 +30,8 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertIn("no full-reachability claim",pinned_lotka["role_and_disposition_reason"])
         self.assertEqual(producers["scripts/reports/recorded_closed_loop_figures.py"]["disposition"],
                          "analytic-reference-checked-saved-run-renderer")
+        self.assertEqual(producers["scripts/reports/source_index_figure.py"]["disposition"],
+                         "analytic-reference-checked-saved-run-renderer")
         self.assertIn("scripts/reports/env717/check_two_points.py", producers)
         self.assertEqual(producers["scripts/reports/env717/check_two_points.py"]["follow_up_issue"],717)
         self.assertEqual(producers["scripts/reports/env717/check_two_points.py"]["asset_name_literals"],

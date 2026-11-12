@@ -510,6 +510,9 @@ jobs:
       - name: Stage the saved closed-loop pilot report and 2D example
         if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/closed-loop-pilot/closed-loop-pilot-v1/manifest.json') != ''
         run: python scripts/reports/stage_closed_loop_pilot.py --source reports/closed-loop-pilot/closed-loop-pilot-v1 --site build/report-site
+      - name: Build the progressive learning book
+        if: steps.catalog.outputs.has_reports == 'true' && hashFiles('docs/examples/closed-loop/figure-index.json') != ''
+        run: python scripts/reports/learning_book.py --site build/report-site --figure-index docs/examples/closed-loop/figure-index.json
       - name: Stage the saved MPC-03 pilot report and gallery link
         if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/algorithm-results/mpc03-open-loop-pilot-v1/record.json') != ''
         run: python scripts/reports/stage_mpc03.py --source reports/algorithm-results/mpc03-open-loop-pilot-v1 --site build/report-site
