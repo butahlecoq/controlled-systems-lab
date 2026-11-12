@@ -21,11 +21,18 @@ class PageMarkup(HTMLParser):
         self.labels: list[str] = []
         self.links: list[str] = []
         self.control_witness_label = False
+        self.result_cards = 0
+        self.has_results_table = False
+        self.text: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attributes = dict(attrs)
         if tag == "main":
             self.main_classes.extend((attributes.get("class") or "").split())
+        elif tag == "article" and "saved-figure" in (attributes.get("class") or "").split():
+            self.result_cards += 1
+        elif tag == "table":
+            self.has_results_table = True
         elif tag == "link" and attributes.get("rel") == "stylesheet":
             self.stylesheets.append(attributes.get("href", ""))
         elif tag == "mtr":
@@ -39,6 +46,7 @@ class PageMarkup(HTMLParser):
                 self.links.append(attributes[attribute])
 
     def handle_data(self, data: str) -> None:
+        self.text.append(data)
         if "Checked feasible control witness" in data:
             self.control_witness_label = True
 
@@ -67,6 +75,12 @@ class QhullHighsStrategyAExampleTests(unittest.TestCase):
         self.assertEqual(markup.stylesheets, ["examples.css"])
         self.assertIn("page-content", markup.main_classes)
         self.assertIn("walkthrough", markup.main_classes)
+        self.assertEqual(markup.result_cards, 2)
+        self.assertFalse(markup.has_results_table)
+        result_text = " ".join(markup.text)
+        for detail in ("csl.lp.highs", "csl.convex.highs", "Objective:", "Provider:",
+                       "Terminal state:", "Checked feasible control witness:", "Objective value:"):
+            self.assertIn(detail, result_text)
         self.assertGreaterEqual(markup.math_rows, 10)
         self.assertGreaterEqual(markup.math_cells, 20)
         self.assertTrue(any(label.startswith("Ordered V point matrix:") for label in markup.labels))
