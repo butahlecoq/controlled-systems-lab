@@ -2,7 +2,7 @@
   "schema": "csl.module-composition-inventory/1",
   "inventory_id": "four-group-module-composition/1",
   "audited_source": "three-environment-closed-loop-matrix-audit.md@ed2dda1ef049ac4fbe259a800d3314e446ceee28",
-  "scope": "Four-group module records were initially inventoried from ff451f74d90d70cd9dd228889fa77c181fc1fd26 and rechecked against current main 6f932fb5dc36e81ae59c080d1c12602d4b63367a after the closed-loop task contracts merged. The cited matrix audit remains ed2dda1ef049ac4fbe259a800d3314e446ceee28; compiled receipts are reported separately.",
+  "scope": "Four-group module records were initially inventoried from ff451f74d90d70cd9dd228889fa77c181fc1fd26 and rechecked against current main 6f932fb5dc36e81ae59c080d1c12602d4b63367a after the closed-loop task contracts merged. The cited matrix audit remains ed2dda1ef049ac4fbe259a800d3314e446ceee28; compiled receipts are reported separately. The source-bound finite-action receding-MPC adapter and selected-profile native bridge are tracked separately from the continuous NMPC baseline; its five fixed-plan representation traces do not constitute predecessor recovery.",
   "groups": [
     {
       "id": "vertex_lp_simplex",
@@ -1522,6 +1522,44 @@
       "action_domain": "all continuous controls in the native affine model",
       "tolerance_policy": "Selected provider requirements and ExecutionContext numerical policy.",
       "budget_policy": "Provider request budgets and operation limits."
+    },
+    {
+      "group": "controller",
+      "kind": "external_program_route",
+      "identity": {
+        "symbol": "benchmarks/reporting/closed_loop/native_finite_action_policy.py"
+      },
+      "role": "source_bound_finite_action_receding_mpc",
+      "input": "source-bound observed physical state, original task identity, absolute update index, and finite-action profile",
+      "output": "selected first action, fixed-plan reachable-set record, and full-cost query receipt",
+      "dimension": "task-specific state and control dimensions; shrinking horizon preserves original absolute stage indices",
+      "assurance": "exact finite-action objective on the declared affine predictor for exact-polytope scoring; numerical outer-estimate ranking for box, zonotope, parallelotope, and ellipsoid; independent physical plant replay is separate",
+      "relation": "selected control from receding finite-action fixed-plan MPC; exact-H predecessor/recovery is a numerical witness conditional on the selected first-step singleton target, not an independent feedback synthesis; approximation traces are numerical outer enclosures",
+      "operations": [
+        "source task and action-profile binding",
+        "absolute-stage full-cost lowering",
+        "selected-profile finite-plan enumeration",
+        "selected control from first action of chosen plan",
+        "persistent JSONL native bridge",
+        "exact-H one-step predecessor feasibility and authored finite-action first-step witness for the selected 2D LV plan"
+      ],
+      "dependencies": [
+        "CSL finite_action_nominal target",
+        "CSL native prediction receipt",
+        "nlohmann JSON headers",
+        "Python closed-loop runner"
+      ],
+      "build": "source-tree executable and Python adapter; not installed",
+      "source": {
+        "path": "benchmarks/reporting/closed_loop/native_finite_action_policy.py"
+      },
+      "route": "five selectable finite-action receding-MPC representations; not a reachable-set predecessor controller",
+      "model_classes": [
+        "source-bound Lotka-Volterra, Earth-orbit, and fuel task adapters when their finite action profiles are selected"
+      ],
+      "action_domain": "task-authored finite action catalogue; distinct from the continuous bounded-control profile",
+      "tolerance_policy": "The selected affine prediction receipt pins its numerical profile; native limits are explicit per query. Physical replay uses the separate task-pinned independent integrator profile.",
+      "budget_policy": "Finite enumeration limits are explicit; incomplete search coverage remains recorded and does not imply global optimality."
     }
   ],
   "finite_probe_profiles": [
@@ -1625,7 +1663,8 @@
         "field": "environment.adapter",
         "reason": "No source-supported MPC11 orbit model/episode adapter exists."
       },
-      "source": "docs/research/three-environment-closed-loop-matrix-audit.md"
+      "source": "https://github.com/butahlecoq/controlled-systems-lab/blob/797b606faee21d9cc22004c882fc7e120113be20/docs/research/three-environment-closed-loop-matrix-audit.md",
+      "source_sha256": "6ceb1153879f4cc6c94060ba8afdaec32cc9a366b283cab90f41e57e174513ff"
     },
     {
       "candidate_id": "controller/approximate-representation/predecessor-recovery-v1",
@@ -1638,7 +1677,8 @@
         "field": "controller.adapter",
         "reason": "The finite-plan traces do not provide the common feedback predecessor and first-action recovery route."
       },
-      "source": "docs/research/three-environment-closed-loop-matrix-audit.md"
+      "source": "https://github.com/butahlecoq/controlled-systems-lab/blob/797b606faee21d9cc22004c882fc7e120113be20/docs/research/three-environment-closed-loop-matrix-audit.md",
+      "source_sha256": "6ceb1153879f4cc6c94060ba8afdaec32cc9a366b283cab90f41e57e174513ff"
     },
     {
       "candidate_id": "controller/mpc11/acados-backend-v1",

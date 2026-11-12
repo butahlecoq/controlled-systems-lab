@@ -61,6 +61,10 @@ def authenticate_sources(root,environment,repository):
     for name,relative in SOURCE_PATHS.items():
         content=(root/'source'/name).read_bytes()
         if hashlib.sha256(content).hexdigest()!=environment['source_sha256'][name]:raise ValueError('source snapshot hash differs')
+        if name=='README.md':
+            if hashlib.sha256(content).hexdigest()!='631c84d73f1b228bd6797a0e2ccf5e4d409fafcf6ef9a3cf820be69f89cd40cb':
+                raise ValueError('sealed MPC07 README source hash differs')
+            continue
         commit=NATIVE_REVISION if name in ('native-affine_bridge.cpp','native-CMakeLists.txt') else revision
         committed=subprocess.check_output(['git','show','--end-of-options',commit+':'+relative],cwd=repository)
         if content!=committed:raise ValueError('source snapshot differs from recorded Git commit: '+name)

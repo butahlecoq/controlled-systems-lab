@@ -1,0 +1,8 @@
+Internal ctest changing into directory: /home/butahlecoq/.local/share/codex/worktrees/native-feedback-composition-943-20261111/build/core/installed-candidate-api-isolated/installed-consumer/build
+Test project /home/butahlecoq/.local/share/codex/worktrees/native-feedback-composition-943-20261111/build/core/installed-candidate-api-isolated/installed-consumer/build
+    Start 27: installed_finite_action_nominal_client
+1/1 Test #27: installed_finite_action_nominal_client ...   Passed    0.00 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   0.01 sec

@@ -97,13 +97,10 @@ FiniteActionEllipsoidMinimaxOutcome finite_action_ellipsoid_minimax(
     return unsupported("finite_ellipsoid_minimax.identity", "Problem and request identities must be nonempty.");
   if (request.actions.catalogue.empty() && horizon != 0)
     return unsupported("finite_ellipsoid_minimax.actions", "A nonempty finite action catalogue is required.");
-  std::size_t plan_count = 1;
-  for (std::size_t stage = 0; stage < horizon; ++stage) {
-    if (!request.actions.catalogue.empty() &&
-        plan_count > limits.max_plans / request.actions.catalogue.size())
-      return unsupported("finite_ellipsoid_minimax.plans", "Action plan count exceeds caller limit.");
-    plan_count *= request.actions.catalogue.size();
-  }
+  if (!detail::valid_candidate_action_indices(request))
+    return unsupported("finite_ellipsoid_minimax.candidate_plans",
+        "Candidate action histories must be unique, full-horizon, and index the unchanged action catalogue.");
+  const auto plan_count=detail::selected_plan_count(request);
   if (plan_count > limits.max_plans)
     return unsupported("finite_ellipsoid_minimax.plans", "Action plan count exceeds caller limit.");
   if (request.objective.dimension() != request.system.dimensions().state ||
@@ -129,8 +126,7 @@ FiniteActionEllipsoidMinimaxOutcome finite_action_ellipsoid_minimax(
         EllipsoidCandidateSearchStopped{index, std::move(stopped)}, Assurance::numerical};
   };
   for (std::size_t plan = 0; plan < plan_count; ++plan) {
-    const auto choices = detail::action_plan_indices(
-        plan, request.actions.catalogue.size(), horizon);
+    const auto choices = detail::selected_plan_indices(request,plan);
     if (plan >= limits.max_candidate_attempts)
       return stop_search(choices, plan,
           {StopReason::resource_limit, "Ellipsoid candidate-attempt limit was reached."});

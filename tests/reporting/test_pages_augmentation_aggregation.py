@@ -133,6 +133,10 @@ class PagesAugmentationAggregation(unittest.TestCase):
                                  expected_zip_hash)
                 self.assertIn(f'href="{route}/index.html"', archive_page)
                 self.assertIn("archive.html", inventory["html_routes"][route + "/index.html"]["inbound_html_references"])
+            with zipfile.ZipFile(site / "mpc11-mesh-timing-e1d5ebe497051adfdfad.zip") as bundle:
+                affine_note = "mpc11-mesh-timing-e1d5ebe497051adfdfad/source/benchmarks/reporting/mpc11/AFFINE.md"
+                self.assertEqual(hashlib.sha256(bundle.read(affine_note)).hexdigest(),
+                                 "b164db27d765b009e8e2a050733cdf0c432ed9a8b65146a1ca4c172ccd6ab50c")
             first_variant_hashes = {
                 route: hashlib.sha256((site / route / "index.html").read_bytes()).hexdigest()
                 for route in retained_mpc11

@@ -56,7 +56,7 @@ This revision narrows the earlier statement that a concrete geometry backend rem
 |---|---|---|
 | Qhull reentrant C library, v8.0.2 | [Official v8.0.2 source tag](https://github.com/qhull/qhull/tree/v8.0.2); [upstream `COPYING.txt` notice](https://github.com/qhull/qhull/blob/v8.0.2/COPYING.txt), installed intact at `share/CSL/notices/Qhull-8.0.2`; source archive SHA-256 `8774e9a12c70b0180b95d6b0b563c5aa4bea8d5960c15e18ae3b6d2521d64f8b`, pinned in [`QhullDependencies.cmake`](../../../cmake/QhullDependencies.cmake). | Static private `libqhull_r`, using the reentrant C API and fixed `Qx` option, behind `ConversionPort`. Supports cross-representation conversion of bounded H/V polyhedra with finite binary64 coordinates. It is not an exact-arithmetic or validated geometry backend. |
 
-The adapter uses the caller-selected `LPPort` for feasibility, boundedness, and relative-interior queries. It reduces explicit affine equalities before H-to-V enumeration and restores affine equalities for V-to-H output. Rank-zero and rank-one cases use direct paths. The precise supported cases, evidence, observations, and source lineage are in the [polyhedral-conversion contract](../../contracts/polyhedral-conversion.md) and [current framework composition map](../framework-composition.md).
+The adapter uses the caller-selected `LPPort` for feasibility, boundedness, and relative-interior queries. It reduces explicit affine equalities before H-to-V enumeration and restores affine equalities for V-to-H output. Rank-zero and rank-one cases use direct paths. The precise supported cases, evidence, observations, and source lineage are in the [polyhedral-conversion contract](../../contracts/polyhedral-conversion.md) and current framework composition map.
 
 Capability admission returns `Unsupported` for nonempty V ray sets, unbounded H sets requested in finite V form, ambiguous rank, validated assurance, and unsupported output representations. Same-representation requests retain the input. The adapter has no fixed ambient-dimension or input-row cap; `QhullOptions` permits caller-selected limits for both. Qhull's signed-integer interface, host container and memory limits remain. It has no in-call cancellation guarantee, and this integration does not provide an output-size cap. These implementation limits do not settle the global hard-cap versus per-request-budget policy, which remains open for review.
 
@@ -64,7 +64,7 @@ This selection does not implement the general polyhedral operation algebra. Affi
 
 ## 2026-10-18 update: bounded Qhull integration review
 
-The source-backed [Qhull 8.0.2 integration review](../../research/qhull-8.0.2-integration-review.md)
+The local archive retains the source-backed Qhull 8.0.2 integration review. It
 records the supported bounded H/V profile, numeric-only evidence, signed-integer
 and caller-capacity limits, boundary-only cancellation, and the evidence gap for
 independent-instance concurrency. It also checks the upstream notice against
@@ -76,11 +76,11 @@ or downstream package completeness; issue #7 remains open.
 
 ## 2026-10-17 update: bounded HiGHS LP/QP integration review
 
-The [pinned HiGHS 1.11.0 integration review](../../research/highs-1.11-integration-review.md) ties the selected static build and narrow downstream initialization patch to upstream source, the current adapters, concurrent-workspace and preexecution-stop tests, and the three-file notice inventory. It supports only the adapters' one-thread, separate-workspace Windows profile. Simplex cancellation is cooperative; the QP path has no prompt stop-token callback. No process-wide thread or memory cap, hard deadline, general thread-safety claim, or final distribution-license approval follows from this check.
+The local archive retains the pinned HiGHS 1.11.0 integration review. It ties the selected static build and narrow downstream initialization patch to upstream source, the current adapters, concurrent-workspace and preexecution-stop tests, and the three-file notice inventory. It supports only the adapters' one-thread, separate-workspace Windows profile. Simplex cancellation is cooperative; the QP path has no prompt stop-token callback. No process-wide thread or memory cap, hard deadline, general thread-safety claim, or final distribution-license approval follows from this check.
 
 ## 2026-10-18 update: bounded Eigen integration review
 
-The [pinned Eigen 3.4.0 integration review](../../research/eigen-3.4-integration-review.md)
+The local archive retains the pinned Eigen 3.4.0 integration review. It
 maps the production headers and operations used by objectives, Phase I, and
 Qhull conversion; the neutral matrix boundary and local index guards; target
 compile definitions; configured notice installation; and the checked-in
@@ -89,7 +89,7 @@ were run as part of that review, and it does not establish numerical
 conditioning guarantees, a process-wide thread policy, universal index safety,
 independent-instance thread safety, or downstream packaging compliance.
 
-The [bounded JSON/doctest and installed-package review](../../research/issue7-package-install-integration-review.md)
+The local archive retains the bounded JSON/doctest and installed-package review. It
 records the pinned private JSON integration, test-only doctest integration,
 installed-client checks, removal of a duplicate JSON notice install, and use of
 the configured install library directory when locating the exported targets.

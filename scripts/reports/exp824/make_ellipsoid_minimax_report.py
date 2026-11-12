@@ -72,8 +72,6 @@ SOURCE_FILES = (
     "tests/reporting/test_issue824_ellipsoid_minimax_publication.py",
     "tests/reporting/test_issue824_ellipsoid_minimax_publication.py",
     ".github/workflows/algorithm-reports.yml",
-    "docs/architecture/issue824-zonotope-minimax-selection.md",
-    "docs/architecture/issue824-ellipsoid-minimax-selection.md",
 )
 COLORS = ("#458588", "#689d6a", "#d79921")
 

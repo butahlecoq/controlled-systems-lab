@@ -54,13 +54,10 @@ FiniteActionBoxMinimaxOutcome finite_action_box_minimax(
         return unsupported("finite_box_minimax.identity", "Problem and request identities must be nonempty.");
     if(request.actions.catalogue.empty() && horizon != 0)
         return unsupported("finite_box_minimax.actions", "A nonempty finite action catalogue is required.");
-    std::size_t plan_count = 1;
-    for(std::size_t stage = 0; stage < horizon; ++stage) {
-        if(request.actions.catalogue.size() != 0 &&
-           plan_count > limits.max_plans / request.actions.catalogue.size())
-            return unsupported("finite_box_minimax.plans", "Action plan count exceeds caller limit.");
-        plan_count *= request.actions.catalogue.size();
-    }
+    if(!detail::valid_candidate_action_indices(request))
+        return unsupported("finite_box_minimax.candidate_plans",
+            "Candidate action histories must be unique, full-horizon, and index the unchanged action catalogue.");
+    const auto plan_count=detail::selected_plan_count(request);
     if(plan_count > limits.max_plans)
         return unsupported("finite_box_minimax.plans", "Action plan count exceeds caller limit.");
     if(request.objective.dimension() != request.system.dimensions().state ||
@@ -74,8 +71,7 @@ FiniteActionBoxMinimaxOutcome finite_action_box_minimax(
     double minimum = std::numeric_limits<double>::infinity();
     bool search_stopped = false;
     for(std::size_t plan_index = 0; plan_index < plan_count; ++plan_index) {
-        const auto choices = detail::action_plan_indices(plan_index,
-            request.actions.catalogue.size(), horizon);
+        const auto choices = detail::selected_plan_indices(request,plan_index);
         if(context.cancellation.stop_requested()) {
             attempts.emplace_back(BoxPlanStopped{choices,
                 {StopReason::cancelled, "Approximate finite minimax cancelled."}});

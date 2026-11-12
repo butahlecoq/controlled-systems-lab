@@ -12,6 +12,7 @@ import platform
 import subprocess
 from pathlib import Path
 
+SOURCE_NOTE_COMMIT = "d71402ba339043226cedb452efb74a0e2c50dabd"
 SOURCE_COMMIT = "f4d76c60f4003f50954174e96eafd8e514bd5441"
 SOURCE_BLOB = "4380ec05c9d100d8b4c1cf0b931a111bc5d419db"
 SOURCE_PATH = "Environments/VanDerPol/VanDerPol.py"
@@ -333,7 +334,7 @@ def write_bundle(result, output):
 
 Scenario: `{result['scenario_id']}` (`{result['reference_variant']}`).
 
-Pinned source: [{SOURCE_PATH}]({SOURCE_URL}) at `{SOURCE_COMMIT}` (blob `{SOURCE_BLOB}`) and [{NOTEBOOK_PATH}]({NOTEBOOK_URL}) (blob `{NOTEBOOK_BLOB}`). The upstream repository declares no license. This report re-expresses the equations and does not copy upstream source code. The source note is [env717-vanderpol-source-notes.md](https://github.com/butahlecoq/controlled-systems-lab/blob/{result['source_commit']}/docs/research/env717-vanderpol-source-notes.md).
+Pinned source: [{SOURCE_PATH}]({SOURCE_URL}) at `{SOURCE_COMMIT}` (blob `{SOURCE_BLOB}`) and [{NOTEBOOK_PATH}]({NOTEBOOK_URL}) (blob `{NOTEBOOK_BLOB}`). The upstream repository declares no license. This report re-expresses the equations and does not copy upstream source code. The source note is [env717-vanderpol-source-notes.md](https://github.com/butahlecoq/controlled-systems-lab/blob/{SOURCE_NOTE_COMMIT}/docs/research/env717-vanderpol-source-notes.md).
 
 ## Model and objective
 

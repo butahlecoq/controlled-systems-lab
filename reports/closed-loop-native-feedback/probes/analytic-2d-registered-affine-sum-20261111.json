@@ -1,0 +1,2902 @@
+{
+  "schema": "csl.closed-loop.analytic-backward-graph-probe/1",
+  "bridge": "/home/butahlecoq/.local/share/codex/worktrees/native-feedback-composition-943-20261111/build/core/csl_closed_loop_native_policy",
+  "viability_case": {
+    "request": {
+      "schema": "csl.closed-loop.native-policy-query/1",
+      "task_id": "analytic-2d-graph",
+      "task_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "source_model_id": "analytic-2d/1",
+      "controller_id": "analytic-viability",
+      "action_profile_id": "analytic-actions/1",
+      "problem_id": "analytic-problem",
+      "request_id": "analytic-viability",
+      "absolute_update_index": 0,
+      "observed_physical_state": [
+        0.0,
+        0.0
+      ],
+      "original_horizon": 2,
+      "dt": 1.0,
+      "predictor_model_id": "analytic-affine/1",
+      "predictor_assurance": "exact analytic affine map",
+      "predictor_stages": [
+        {
+          "A": [
+            [
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ]
+          ],
+          "B": [
+            [
+              1.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "c": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "A": [
+            [
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ]
+          ],
+          "B": [
+            [
+              1.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "c": [
+            0.0,
+            0.0
+          ]
+        }
+      ],
+      "actions": [
+        [
+          0.0
+        ],
+        [
+          1.0
+        ]
+      ],
+      "state_bounds": [
+        [
+          0.0,
+          2.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "stage_state_bounds": [
+        [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            0.0,
+            2.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ]
+      ],
+      "terminal_objective": {
+        "kind": "quadratic",
+        "Q": [
+          [
+            2.0,
+            0.0
+          ],
+          [
+            0.0,
+            2.0
+          ]
+        ],
+        "linear": [
+          0.0,
+          0.0
+        ],
+        "offset": 0.0
+      },
+      "running_cost": {
+        "objective_id": "analytic-running/1",
+        "stages": [
+          {
+            "stage": 0,
+            "terms": [
+              {
+                "kind": "quadratic",
+                "reference": [
+                  0.0
+                ],
+                "scales": [
+                  1.0
+                ],
+                "weights": [
+                  1.0
+                ],
+                "coefficient": 1.0
+              }
+            ]
+          },
+          {
+            "stage": 1,
+            "terms": [
+              {
+                "kind": "quadratic",
+                "reference": [
+                  0.0
+                ],
+                "scales": [
+                  1.0
+                ],
+                "weights": [
+                  1.0
+                ],
+                "coefficient": 1.0
+              }
+            ]
+          }
+        ]
+      },
+      "representation_index": 0,
+      "representation_name": "exact_polytope",
+      "reachable_set_method": "csl.geometry.affine-sum",
+      "search_policy": "stage-layered-backward-viability",
+      "limits": {
+        "max_beam_width": 4,
+        "max_graph_nodes": 32
+      }
+    },
+    "response": {
+      "action_profile_id": "analytic-actions/1",
+      "control": [
+        1.0
+      ],
+      "graph_receipt": {
+        "absolute_stage_offset": 0,
+        "action_profile_id": "analytic-actions/1",
+        "backward_viability_applied_before_selection": true,
+        "beam_width": 4,
+        "edges": [
+          {
+            "absolute_stage": 0,
+            "action": [
+              1.0
+            ],
+            "action_index": 1,
+            "action_lineage": [
+              1
+            ],
+            "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+            "backward_viable": true,
+            "child_node_id": 1,
+            "child_state": [
+              1.0,
+              0.0
+            ],
+            "discrete_transition_witness": true,
+            "parent_node_id": 0,
+            "predecessor_contains_parent": true
+          },
+          {
+            "absolute_stage": 0,
+            "action": [
+              0.0
+            ],
+            "action_index": 0,
+            "action_lineage": [
+              0
+            ],
+            "backward_edge_status": "skipped-suffix-nonviable",
+            "backward_viable": false,
+            "child_node_id": 2,
+            "child_state": [
+              0.0,
+              0.0
+            ],
+            "discrete_transition_witness": null,
+            "parent_node_id": 0,
+            "predecessor_contains_parent": null
+          },
+          {
+            "absolute_stage": 1,
+            "action": [
+              0.0
+            ],
+            "action_index": 0,
+            "action_lineage": [
+              0,
+              0
+            ],
+            "backward_edge_status": "numerical-predecessor-membership-false",
+            "backward_viable": false,
+            "child_node_id": 3,
+            "child_state": [
+              0.0,
+              0.0
+            ],
+            "discrete_transition_witness": true,
+            "parent_node_id": 2,
+            "predecessor_contains_parent": false
+          },
+          {
+            "absolute_stage": 1,
+            "action": [
+              1.0
+            ],
+            "action_index": 1,
+            "action_lineage": [
+              0,
+              1
+            ],
+            "backward_edge_status": "numerical-predecessor-membership-false",
+            "backward_viable": false,
+            "child_node_id": 4,
+            "child_state": [
+              1.0,
+              0.0
+            ],
+            "discrete_transition_witness": true,
+            "parent_node_id": 2,
+            "predecessor_contains_parent": false
+          },
+          {
+            "absolute_stage": 1,
+            "action": [
+              0.0
+            ],
+            "action_index": 0,
+            "action_lineage": [
+              1,
+              0
+            ],
+            "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+            "backward_viable": true,
+            "child_node_id": 5,
+            "child_state": [
+              1.0,
+              0.0
+            ],
+            "discrete_transition_witness": true,
+            "parent_node_id": 1,
+            "predecessor_contains_parent": true
+          },
+          {
+            "absolute_stage": 1,
+            "action": [
+              1.0
+            ],
+            "action_index": 1,
+            "action_lineage": [
+              1,
+              1
+            ],
+            "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+            "backward_viable": true,
+            "child_node_id": 6,
+            "child_state": [
+              2.0,
+              0.0
+            ],
+            "discrete_transition_witness": true,
+            "parent_node_id": 1,
+            "predecessor_contains_parent": true
+          }
+        ],
+        "layer_statistics": [
+          {
+            "generated": 2,
+            "infeasible": 0,
+            "pruned": 0,
+            "retained": 1,
+            "stage": 0
+          },
+          {
+            "generated": 4,
+            "infeasible": 1,
+            "pruned": 0,
+            "retained": 2,
+            "stage": 1
+          },
+          {
+            "generated": 0,
+            "infeasible": 0,
+            "pruned": 0,
+            "retained": 4,
+            "stage": 2
+          }
+        ],
+        "max_graph_nodes": 32,
+        "no_path_semantics": "no viable retained path after numerical filtering is not a global infeasibility proof",
+        "node_budget_exhausted": false,
+        "nodes": [
+          {
+            "absolute_stage": 0,
+            "action_index": null,
+            "action_lineage": [],
+            "backward_edge_status": "root-node",
+            "backward_value": 1.5,
+            "backward_viable": true,
+            "discrete_transition_witness": null,
+            "edge_running_cost": 0.0,
+            "heuristic_score": 0.0,
+            "node_id": 0,
+            "parent_node_id": null,
+            "predecessor_contains_parent": null,
+            "reachable_envelope_contains": null,
+            "stage_set_intersection_nonempty": true,
+            "state": [
+              0.0,
+              0.0
+            ],
+            "state_admissible": true
+          },
+          {
+            "absolute_stage": 1,
+            "action_index": 1,
+            "action_lineage": [
+              1
+            ],
+            "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+            "backward_value": 1.0,
+            "backward_viable": true,
+            "discrete_transition_witness": true,
+            "edge_running_cost": 0.5,
+            "heuristic_score": 1.5,
+            "node_id": 1,
+            "parent_node_id": 0,
+            "predecessor_contains_parent": true,
+            "reachable_envelope_contains": true,
+            "stage_set_intersection_nonempty": true,
+            "state": [
+              1.0,
+              0.0
+            ],
+            "state_admissible": true
+          },
+          {
+            "absolute_stage": 1,
+            "action_index": 0,
+            "action_lineage": [
+              0
+            ],
+            "backward_edge_status": "skipped-suffix-nonviable",
+            "backward_value": null,
+            "backward_viable": false,
+            "discrete_transition_witness": null,
+            "edge_running_cost": 0.0,
+            "heuristic_score": 0.0,
+            "node_id": 2,
+            "parent_node_id": 0,
+            "predecessor_contains_parent": null,
+            "reachable_envelope_contains": true,
+            "stage_set_intersection_nonempty": false,
+            "state": [
+              0.0,
+              0.0
+            ],
+            "state_admissible": false
+          },
+          {
+            "absolute_stage": 2,
+            "action_index": 0,
+            "action_lineage": [
+              0,
+              0
+            ],
+            "backward_edge_status": "numerical-predecessor-membership-false",
+            "backward_value": 0.0,
+            "backward_viable": false,
+            "discrete_transition_witness": true,
+            "edge_running_cost": 0.0,
+            "heuristic_score": 0.0,
+            "node_id": 3,
+            "parent_node_id": 2,
+            "predecessor_contains_parent": false,
+            "reachable_envelope_contains": true,
+            "stage_set_intersection_nonempty": true,
+            "state": [
+              0.0,
+              0.0
+            ],
+            "state_admissible": true
+          },
+          {
+            "absolute_stage": 2,
+            "action_index": 1,
+            "action_lineage": [
+              0,
+              1
+            ],
+            "backward_edge_status": "numerical-predecessor-membership-false",
+            "backward_value": 1.0,
+            "backward_viable": false,
+            "discrete_transition_witness": true,
+            "edge_running_cost": 0.5,
+            "heuristic_score": 1.5,
+            "node_id": 4,
+            "parent_node_id": 2,
+            "predecessor_contains_parent": false,
+            "reachable_envelope_contains": true,
+            "stage_set_intersection_nonempty": true,
+            "state": [
+              1.0,
+              0.0
+            ],
+            "state_admissible": true
+          },
+          {
+            "absolute_stage": 2,
+            "action_index": 0,
+            "action_lineage": [
+              1,
+              0
+            ],
+            "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+            "backward_value": 1.0,
+            "backward_viable": true,
+            "discrete_transition_witness": true,
+            "edge_running_cost": 0.0,
+            "heuristic_score": 2.5,
+            "node_id": 5,
+            "parent_node_id": 1,
+            "predecessor_contains_parent": true,
+            "reachable_envelope_contains": true,
+            "stage_set_intersection_nonempty": true,
+            "state": [
+              1.0,
+              0.0
+            ],
+            "state_admissible": true
+          },
+          {
+            "absolute_stage": 2,
+            "action_index": 1,
+            "action_lineage": [
+              1,
+              1
+            ],
+            "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+            "backward_value": 4.0,
+            "backward_viable": true,
+            "discrete_transition_witness": true,
+            "edge_running_cost": 0.5,
+            "heuristic_score": 6.0,
+            "node_id": 6,
+            "parent_node_id": 1,
+            "predecessor_contains_parent": true,
+            "reachable_envelope_contains": true,
+            "stage_set_intersection_nonempty": true,
+            "state": [
+              2.0,
+              0.0
+            ],
+            "state_admissible": true
+          }
+        ],
+        "objective_id": "analytic-running/1",
+        "optimality_scope": "Bellman minimum over retained graph only; no claim over pruned paths or nonlinear plant",
+        "original_horizon": 2,
+        "predictor_model_id": "analytic-affine/1",
+        "representation": "exact-polytope",
+        "schema": "csl.closed-loop.finite-action-backward-graph/1",
+        "search_coverage": "complete",
+        "source_model_id": "analytic-2d/1",
+        "task_id": "analytic-2d-graph",
+        "task_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "invocations": [
+        {
+          "generated_edges": 6,
+          "module_id": "csl::optimization::finite_action_stage_layered_graph",
+          "operation": "full-authored-horizon stage-layered finite-action graph and backward Bellman selection",
+          "outcome": "selected",
+          "profile_id": "analytic-viability",
+          "provider": "public-function",
+          "retained_nodes": 7
+        },
+        {
+          "assurance": "numerical, support unestablished",
+          "calls": 5,
+          "module_id": "csl::reachability::prepare_nominal_predecessor",
+          "operation": "numerical H predecessor membership followed by authored discrete transition witness",
+          "profile_id": "analytic-viability",
+          "provider": "csl.geometry.polyhedral-projection@1.0.0"
+        },
+        {
+          "calls": 7,
+          "module_id": "csl::geometry::polyhedral::intersect_h",
+          "operation": "intersect each generated point with its authored stage H constraints",
+          "profile_id": "analytic-viability",
+          "provider": "public-function"
+        },
+        {
+          "assurance": "numerical",
+          "calls": 3,
+          "module_id": "csl::geometry::affine-image",
+          "operation": "registered affine image of each retained observed-state parent",
+          "profile_id": "analytic-viability",
+          "provider": "csl.geometry.affine-sum@1.0.0",
+          "relation": "equivalent",
+          "selected_method_id": "csl.geometry.affine-sum"
+        },
+        {
+          "assurance": "numerical",
+          "calls": 3,
+          "module_id": "csl::geometry::minkowski-sum",
+          "operation": "registered Minkowski sum with stage-transformed authored discrete action hull",
+          "profile_id": "analytic-viability",
+          "provider": "csl.geometry.affine-sum@1.0.0",
+          "relation": "equivalent",
+          "selected_method_id": "csl.geometry.affine-sum"
+        }
+      ],
+      "policy_id": "analytic-viability/budgeted-backward-graph-mpc/1",
+      "predicted_sets": [
+        {
+          "assurance": "numerical",
+          "nodes": [
+            {
+              "absolute_stage": 0,
+              "action_index": null,
+              "action_lineage": [],
+              "backward_edge_status": "root-node",
+              "backward_value": 1.5,
+              "backward_viable": true,
+              "discrete_transition_witness": null,
+              "edge_running_cost": 0.0,
+              "heuristic_score": 0.0,
+              "node_id": 0,
+              "parent_node_id": null,
+              "predecessor_contains_parent": null,
+              "reachable_envelope_contains": null,
+              "stage_set_intersection_nonempty": true,
+              "state": [
+                0.0,
+                0.0
+              ],
+              "state_admissible": true
+            },
+            {
+              "absolute_stage": 1,
+              "action_index": 1,
+              "action_lineage": [
+                1
+              ],
+              "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+              "backward_value": 1.0,
+              "backward_viable": true,
+              "discrete_transition_witness": true,
+              "edge_running_cost": 0.5,
+              "heuristic_score": 1.5,
+              "node_id": 1,
+              "parent_node_id": 0,
+              "predecessor_contains_parent": true,
+              "reachable_envelope_contains": true,
+              "stage_set_intersection_nonempty": true,
+              "state": [
+                1.0,
+                0.0
+              ],
+              "state_admissible": true
+            },
+            {
+              "absolute_stage": 1,
+              "action_index": 0,
+              "action_lineage": [
+                0
+              ],
+              "backward_edge_status": "skipped-suffix-nonviable",
+              "backward_value": null,
+              "backward_viable": false,
+              "discrete_transition_witness": null,
+              "edge_running_cost": 0.0,
+              "heuristic_score": 0.0,
+              "node_id": 2,
+              "parent_node_id": 0,
+              "predecessor_contains_parent": null,
+              "reachable_envelope_contains": true,
+              "stage_set_intersection_nonempty": false,
+              "state": [
+                0.0,
+                0.0
+              ],
+              "state_admissible": false
+            },
+            {
+              "absolute_stage": 2,
+              "action_index": 0,
+              "action_lineage": [
+                0,
+                0
+              ],
+              "backward_edge_status": "numerical-predecessor-membership-false",
+              "backward_value": 0.0,
+              "backward_viable": false,
+              "discrete_transition_witness": true,
+              "edge_running_cost": 0.0,
+              "heuristic_score": 0.0,
+              "node_id": 3,
+              "parent_node_id": 2,
+              "predecessor_contains_parent": false,
+              "reachable_envelope_contains": true,
+              "stage_set_intersection_nonempty": true,
+              "state": [
+                0.0,
+                0.0
+              ],
+              "state_admissible": true
+            },
+            {
+              "absolute_stage": 2,
+              "action_index": 1,
+              "action_lineage": [
+                0,
+                1
+              ],
+              "backward_edge_status": "numerical-predecessor-membership-false",
+              "backward_value": 1.0,
+              "backward_viable": false,
+              "discrete_transition_witness": true,
+              "edge_running_cost": 0.5,
+              "heuristic_score": 1.5,
+              "node_id": 4,
+              "parent_node_id": 2,
+              "predecessor_contains_parent": false,
+              "reachable_envelope_contains": true,
+              "stage_set_intersection_nonempty": true,
+              "state": [
+                1.0,
+                0.0
+              ],
+              "state_admissible": true
+            },
+            {
+              "absolute_stage": 2,
+              "action_index": 0,
+              "action_lineage": [
+                1,
+                0
+              ],
+              "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+              "backward_value": 1.0,
+              "backward_viable": true,
+              "discrete_transition_witness": true,
+              "edge_running_cost": 0.0,
+              "heuristic_score": 2.5,
+              "node_id": 5,
+              "parent_node_id": 1,
+              "predecessor_contains_parent": true,
+              "reachable_envelope_contains": true,
+              "stage_set_intersection_nonempty": true,
+              "state": [
+                1.0,
+                0.0
+              ],
+              "state_admissible": true
+            },
+            {
+              "absolute_stage": 2,
+              "action_index": 1,
+              "action_lineage": [
+                1,
+                1
+              ],
+              "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+              "backward_value": 4.0,
+              "backward_viable": true,
+              "discrete_transition_witness": true,
+              "edge_running_cost": 0.5,
+              "heuristic_score": 6.0,
+              "node_id": 6,
+              "parent_node_id": 1,
+              "predecessor_contains_parent": true,
+              "reachable_envelope_contains": true,
+              "stage_set_intersection_nonempty": true,
+              "state": [
+                2.0,
+                0.0
+              ],
+              "state_admissible": true
+            }
+          ],
+          "relation": "equivalent",
+          "representation": "polytope-h",
+          "role": "retained-stage-layered-singleton-nodes"
+        }
+      ],
+      "recovered_control": [
+        1.0
+      ],
+      "representation": 0,
+      "selected_edges": [
+        {
+          "absolute_stage": 0,
+          "action": [
+            1.0
+          ],
+          "action_index": 1,
+          "action_lineage": [
+            1
+          ],
+          "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+          "backward_viable": true,
+          "child_node_id": 1,
+          "child_state": [
+            1.0,
+            0.0
+          ],
+          "parent_node_id": 0
+        },
+        {
+          "absolute_stage": 1,
+          "action": [
+            0.0
+          ],
+          "action_index": 0,
+          "action_lineage": [
+            1,
+            0
+          ],
+          "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+          "backward_viable": true,
+          "child_node_id": 5,
+          "child_state": [
+            1.0,
+            0.0
+          ],
+          "parent_node_id": 1
+        }
+      ],
+      "selected_plan": {
+        "controls": [
+          [
+            1.0
+          ],
+          [
+            0.0
+          ]
+        ],
+        "running_objective": 0.5,
+        "states": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0
+          ]
+        ],
+        "terminal_objective": 1.0,
+        "total_objective": 1.5
+      },
+      "selector": {
+        "beam_width": 4,
+        "max_graph_nodes": 32,
+        "optimality_scope": "retained graph only; not complete finite-action optimum, nonlinear global optimum, or causal feedback optimum",
+        "policy_semantics": "receding finite-action graph MPC; backward predecessor viability filters authored edges before Bellman selection; replans after each observed hold",
+        "retained_graph_value": 1.5,
+        "running_objective": 0.5,
+        "score_kind": "exact-source-cost-on-numerical-affine-predictor",
+        "search_coverage": "complete",
+        "terminal_objective": 1.0,
+        "total_replay_objective": 1.5
+      },
+      "status": "accepted",
+      "task_id": "analytic-2d-graph",
+      "task_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "independent_histories": [
+      {
+        "action_indices": [
+          0,
+          0
+        ],
+        "states": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "feasible": false,
+        "running_cost": 0.0,
+        "terminal_cost": 0.0,
+        "total_cost": 0.0
+      },
+      {
+        "action_indices": [
+          0,
+          1
+        ],
+        "states": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0
+          ]
+        ],
+        "feasible": false,
+        "running_cost": 0.5,
+        "terminal_cost": 1.0,
+        "total_cost": 1.5
+      },
+      {
+        "action_indices": [
+          1,
+          0
+        ],
+        "states": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0
+          ]
+        ],
+        "feasible": true,
+        "running_cost": 0.5,
+        "terminal_cost": 1.0,
+        "total_cost": 1.5
+      },
+      {
+        "action_indices": [
+          1,
+          1
+        ],
+        "states": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            2.0,
+            0.0
+          ]
+        ],
+        "feasible": true,
+        "running_cost": 1.0,
+        "terminal_cost": 4.0,
+        "total_cost": 5.0
+      }
+    ],
+    "unconstrained_best": {
+      "action_indices": [
+        0,
+        0
+      ],
+      "states": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "feasible": false,
+      "running_cost": 0.0,
+      "terminal_cost": 0.0,
+      "total_cost": 0.0
+    },
+    "best_feasible_history": {
+      "action_indices": [
+        1,
+        0
+      ],
+      "states": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ]
+      ],
+      "feasible": true,
+      "running_cost": 0.5,
+      "terminal_cost": 1.0,
+      "total_cost": 1.5
+    },
+    "backward_viability_changed_first_action": true
+  },
+  "continuous_only_witness_case": {
+    "request": {
+      "schema": "csl.closed-loop.native-policy-query/1",
+      "task_id": "analytic-2d-graph",
+      "task_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "source_model_id": "analytic-2d/1",
+      "controller_id": "analytic-continuous-only-refusal",
+      "action_profile_id": "analytic-actions/1",
+      "problem_id": "analytic-problem",
+      "request_id": "analytic-continuous-only-refusal",
+      "absolute_update_index": 0,
+      "observed_physical_state": [
+        0.0,
+        0.0
+      ],
+      "original_horizon": 2,
+      "dt": 1.0,
+      "predictor_model_id": "analytic-affine/1",
+      "predictor_assurance": "exact analytic affine map",
+      "predictor_stages": [
+        {
+          "A": [
+            [
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ]
+          ],
+          "B": [
+            [
+              1.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "c": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "A": [
+            [
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ]
+          ],
+          "B": [
+            [
+              1.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "c": [
+            0.0,
+            0.0
+          ]
+        }
+      ],
+      "actions": [
+        [
+          0.0
+        ],
+        [
+          1.0
+        ]
+      ],
+      "state_bounds": [
+        [
+          0.0,
+          2.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "stage_state_bounds": [
+        [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            0.5,
+            0.5
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            0.0,
+            2.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ]
+      ],
+      "terminal_objective": {
+        "kind": "quadratic",
+        "Q": [
+          [
+            2.0,
+            0.0
+          ],
+          [
+            0.0,
+            2.0
+          ]
+        ],
+        "linear": [
+          0.0,
+          0.0
+        ],
+        "offset": 0.0
+      },
+      "running_cost": {
+        "objective_id": "analytic-running/1",
+        "stages": [
+          {
+            "stage": 0,
+            "terms": [
+              {
+                "kind": "quadratic",
+                "reference": [
+                  0.0
+                ],
+                "scales": [
+                  1.0
+                ],
+                "weights": [
+                  1.0
+                ],
+                "coefficient": 1.0
+              }
+            ]
+          },
+          {
+            "stage": 1,
+            "terms": [
+              {
+                "kind": "quadratic",
+                "reference": [
+                  0.0
+                ],
+                "scales": [
+                  1.0
+                ],
+                "weights": [
+                  1.0
+                ],
+                "coefficient": 1.0
+              }
+            ]
+          }
+        ]
+      },
+      "representation_index": 0,
+      "representation_name": "exact_polytope",
+      "reachable_set_method": "csl.geometry.affine-sum",
+      "search_policy": "stage-layered-backward-viability",
+      "limits": {
+        "max_beam_width": 4,
+        "max_graph_nodes": 32
+      }
+    },
+    "response": {
+      "action_profile_id": "analytic-actions/1",
+      "graph_receipt": {
+        "absolute_stage_offset": 0,
+        "action_profile_id": "analytic-actions/1",
+        "backward_viability_applied_before_selection": true,
+        "beam_width": 4,
+        "edges": [
+          {
+            "absolute_stage": 0,
+            "action": [
+              0.0
+            ],
+            "action_index": 0,
+            "action_lineage": [
+              0
+            ],
+            "backward_edge_status": "skipped-suffix-nonviable",
+            "backward_viable": false,
+            "child_node_id": 1,
+            "child_state": [
+              0.0,
+              0.0
+            ],
+            "discrete_transition_witness": null,
+            "parent_node_id": 0,
+            "predecessor_contains_parent": null
+          },
+          {
+            "absolute_stage": 0,
+            "action": [
+              1.0
+            ],
+            "action_index": 1,
+            "action_lineage": [
+              1
+            ],
+            "backward_edge_status": "skipped-suffix-nonviable",
+            "backward_viable": false,
+            "child_node_id": 2,
+            "child_state": [
+              1.0,
+              0.0
+            ],
+            "discrete_transition_witness": null,
+            "parent_node_id": 0,
+            "predecessor_contains_parent": null
+          },
+          {
+            "absolute_stage": 1,
+            "action": [
+              0.0
+            ],
+            "action_index": 0,
+            "action_lineage": [
+              0,
+              0
+            ],
+            "backward_edge_status": "numerical-predecessor-membership-false",
+            "backward_viable": false,
+            "child_node_id": 3,
+            "child_state": [
+              0.0,
+              0.0
+            ],
+            "discrete_transition_witness": true,
+            "parent_node_id": 1,
+            "predecessor_contains_parent": false
+          },
+          {
+            "absolute_stage": 1,
+            "action": [
+              1.0
+            ],
+            "action_index": 1,
+            "action_lineage": [
+              0,
+              1
+            ],
+            "backward_edge_status": "numerical-predecessor-membership-false",
+            "backward_viable": false,
+            "child_node_id": 4,
+            "child_state": [
+              1.0,
+              0.0
+            ],
+            "discrete_transition_witness": true,
+            "parent_node_id": 1,
+            "predecessor_contains_parent": false
+          },
+          {
+            "absolute_stage": 1,
+            "action": [
+              0.0
+            ],
+            "action_index": 0,
+            "action_lineage": [
+              1,
+              0
+            ],
+            "backward_edge_status": "numerical-predecessor-membership-false",
+            "backward_viable": false,
+            "child_node_id": 5,
+            "child_state": [
+              1.0,
+              0.0
+            ],
+            "discrete_transition_witness": true,
+            "parent_node_id": 2,
+            "predecessor_contains_parent": false
+          },
+          {
+            "absolute_stage": 1,
+            "action": [
+              1.0
+            ],
+            "action_index": 1,
+            "action_lineage": [
+              1,
+              1
+            ],
+            "backward_edge_status": "numerical-predecessor-membership-false",
+            "backward_viable": false,
+            "child_node_id": 6,
+            "child_state": [
+              2.0,
+              0.0
+            ],
+            "discrete_transition_witness": true,
+            "parent_node_id": 2,
+            "predecessor_contains_parent": false
+          }
+        ],
+        "layer_statistics": [
+          {
+            "generated": 2,
+            "infeasible": 0,
+            "pruned": 0,
+            "retained": 1,
+            "stage": 0
+          },
+          {
+            "generated": 4,
+            "infeasible": 2,
+            "pruned": 0,
+            "retained": 2,
+            "stage": 1
+          },
+          {
+            "generated": 0,
+            "infeasible": 0,
+            "pruned": 0,
+            "retained": 4,
+            "stage": 2
+          }
+        ],
+        "max_graph_nodes": 32,
+        "no_path_semantics": "no viable retained path after numerical filtering is not a global infeasibility proof",
+        "node_budget_exhausted": false,
+        "nodes": [
+          {
+            "absolute_stage": 0,
+            "action_index": null,
+            "action_lineage": [],
+            "backward_edge_status": "root-node",
+            "backward_value": null,
+            "backward_viable": false,
+            "discrete_transition_witness": null,
+            "edge_running_cost": 0.0,
+            "heuristic_score": 0.0,
+            "node_id": 0,
+            "parent_node_id": null,
+            "predecessor_contains_parent": null,
+            "reachable_envelope_contains": null,
+            "stage_set_intersection_nonempty": true,
+            "state": [
+              0.0,
+              0.0
+            ],
+            "state_admissible": true
+          },
+          {
+            "absolute_stage": 1,
+            "action_index": 0,
+            "action_lineage": [
+              0
+            ],
+            "backward_edge_status": "skipped-suffix-nonviable",
+            "backward_value": null,
+            "backward_viable": false,
+            "discrete_transition_witness": null,
+            "edge_running_cost": 0.0,
+            "heuristic_score": 0.0,
+            "node_id": 1,
+            "parent_node_id": 0,
+            "predecessor_contains_parent": null,
+            "reachable_envelope_contains": true,
+            "stage_set_intersection_nonempty": false,
+            "state": [
+              0.0,
+              0.0
+            ],
+            "state_admissible": false
+          },
+          {
+            "absolute_stage": 1,
+            "action_index": 1,
+            "action_lineage": [
+              1
+            ],
+            "backward_edge_status": "skipped-suffix-nonviable",
+            "backward_value": null,
+            "backward_viable": false,
+            "discrete_transition_witness": null,
+            "edge_running_cost": 0.5,
+            "heuristic_score": 1.5,
+            "node_id": 2,
+            "parent_node_id": 0,
+            "predecessor_contains_parent": null,
+            "reachable_envelope_contains": true,
+            "stage_set_intersection_nonempty": false,
+            "state": [
+              1.0,
+              0.0
+            ],
+            "state_admissible": false
+          },
+          {
+            "absolute_stage": 2,
+            "action_index": 0,
+            "action_lineage": [
+              0,
+              0
+            ],
+            "backward_edge_status": "numerical-predecessor-membership-false",
+            "backward_value": 0.0,
+            "backward_viable": false,
+            "discrete_transition_witness": true,
+            "edge_running_cost": 0.0,
+            "heuristic_score": 0.0,
+            "node_id": 3,
+            "parent_node_id": 1,
+            "predecessor_contains_parent": false,
+            "reachable_envelope_contains": true,
+            "stage_set_intersection_nonempty": true,
+            "state": [
+              0.0,
+              0.0
+            ],
+            "state_admissible": true
+          },
+          {
+            "absolute_stage": 2,
+            "action_index": 1,
+            "action_lineage": [
+              0,
+              1
+            ],
+            "backward_edge_status": "numerical-predecessor-membership-false",
+            "backward_value": 1.0,
+            "backward_viable": false,
+            "discrete_transition_witness": true,
+            "edge_running_cost": 0.5,
+            "heuristic_score": 1.5,
+            "node_id": 4,
+            "parent_node_id": 1,
+            "predecessor_contains_parent": false,
+            "reachable_envelope_contains": true,
+            "stage_set_intersection_nonempty": true,
+            "state": [
+              1.0,
+              0.0
+            ],
+            "state_admissible": true
+          },
+          {
+            "absolute_stage": 2,
+            "action_index": 0,
+            "action_lineage": [
+              1,
+              0
+            ],
+            "backward_edge_status": "numerical-predecessor-membership-false",
+            "backward_value": 1.0,
+            "backward_viable": false,
+            "discrete_transition_witness": true,
+            "edge_running_cost": 0.0,
+            "heuristic_score": 2.5,
+            "node_id": 5,
+            "parent_node_id": 2,
+            "predecessor_contains_parent": false,
+            "reachable_envelope_contains": true,
+            "stage_set_intersection_nonempty": true,
+            "state": [
+              1.0,
+              0.0
+            ],
+            "state_admissible": true
+          },
+          {
+            "absolute_stage": 2,
+            "action_index": 1,
+            "action_lineage": [
+              1,
+              1
+            ],
+            "backward_edge_status": "numerical-predecessor-membership-false",
+            "backward_value": 4.0,
+            "backward_viable": false,
+            "discrete_transition_witness": true,
+            "edge_running_cost": 0.5,
+            "heuristic_score": 6.0,
+            "node_id": 6,
+            "parent_node_id": 2,
+            "predecessor_contains_parent": false,
+            "reachable_envelope_contains": true,
+            "stage_set_intersection_nonempty": true,
+            "state": [
+              2.0,
+              0.0
+            ],
+            "state_admissible": true
+          }
+        ],
+        "objective_id": "analytic-running/1",
+        "optimality_scope": "Bellman minimum over retained graph only; no claim over pruned paths or nonlinear plant",
+        "original_horizon": 2,
+        "predictor_model_id": "analytic-affine/1",
+        "representation": "exact-polytope",
+        "schema": "csl.closed-loop.finite-action-backward-graph/1",
+        "search_coverage": "complete",
+        "source_model_id": "analytic-2d/1",
+        "task_id": "analytic-2d-graph",
+        "task_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "invocations": [
+        {
+          "generated_edges": 6,
+          "module_id": "csl::optimization::finite_action_stage_layered_graph",
+          "operation": "full-authored-horizon stage-layered finite-action graph and backward Bellman selection",
+          "outcome": "no-viable-retained-path",
+          "profile_id": "analytic-continuous-only-refusal",
+          "provider": "public-function",
+          "retained_nodes": 7
+        },
+        {
+          "assurance": "numerical, support unestablished",
+          "calls": 4,
+          "module_id": "csl::reachability::prepare_nominal_predecessor",
+          "operation": "numerical H predecessor membership followed by authored discrete transition witness",
+          "profile_id": "analytic-continuous-only-refusal",
+          "provider": "csl.geometry.polyhedral-projection@1.0.0"
+        },
+        {
+          "calls": 7,
+          "module_id": "csl::geometry::polyhedral::intersect_h",
+          "operation": "intersect each generated point with its authored stage H constraints",
+          "profile_id": "analytic-continuous-only-refusal",
+          "provider": "public-function"
+        },
+        {
+          "assurance": "numerical",
+          "calls": 3,
+          "module_id": "csl::geometry::affine-image",
+          "operation": "registered affine image of each retained observed-state parent",
+          "profile_id": "analytic-continuous-only-refusal",
+          "provider": "csl.geometry.affine-sum@1.0.0",
+          "relation": "equivalent",
+          "selected_method_id": "csl.geometry.affine-sum"
+        },
+        {
+          "assurance": "numerical",
+          "calls": 3,
+          "module_id": "csl::geometry::minkowski-sum",
+          "operation": "registered Minkowski sum with stage-transformed authored discrete action hull",
+          "profile_id": "analytic-continuous-only-refusal",
+          "provider": "csl.geometry.affine-sum@1.0.0",
+          "relation": "equivalent",
+          "selected_method_id": "csl.geometry.affine-sum"
+        }
+      ],
+      "policy_id": "analytic-continuous-only-refusal/budgeted-backward-graph-mpc/1",
+      "predicted_sets": [
+        {
+          "assurance": "numerical",
+          "nodes": [
+            {
+              "absolute_stage": 0,
+              "action_index": null,
+              "action_lineage": [],
+              "backward_edge_status": "root-node",
+              "backward_value": null,
+              "backward_viable": false,
+              "discrete_transition_witness": null,
+              "edge_running_cost": 0.0,
+              "heuristic_score": 0.0,
+              "node_id": 0,
+              "parent_node_id": null,
+              "predecessor_contains_parent": null,
+              "reachable_envelope_contains": null,
+              "stage_set_intersection_nonempty": true,
+              "state": [
+                0.0,
+                0.0
+              ],
+              "state_admissible": true
+            },
+            {
+              "absolute_stage": 1,
+              "action_index": 0,
+              "action_lineage": [
+                0
+              ],
+              "backward_edge_status": "skipped-suffix-nonviable",
+              "backward_value": null,
+              "backward_viable": false,
+              "discrete_transition_witness": null,
+              "edge_running_cost": 0.0,
+              "heuristic_score": 0.0,
+              "node_id": 1,
+              "parent_node_id": 0,
+              "predecessor_contains_parent": null,
+              "reachable_envelope_contains": true,
+              "stage_set_intersection_nonempty": false,
+              "state": [
+                0.0,
+                0.0
+              ],
+              "state_admissible": false
+            },
+            {
+              "absolute_stage": 1,
+              "action_index": 1,
+              "action_lineage": [
+                1
+              ],
+              "backward_edge_status": "skipped-suffix-nonviable",
+              "backward_value": null,
+              "backward_viable": false,
+              "discrete_transition_witness": null,
+              "edge_running_cost": 0.5,
+              "heuristic_score": 1.5,
+              "node_id": 2,
+              "parent_node_id": 0,
+              "predecessor_contains_parent": null,
+              "reachable_envelope_contains": true,
+              "stage_set_intersection_nonempty": false,
+              "state": [
+                1.0,
+                0.0
+              ],
+              "state_admissible": false
+            },
+            {
+              "absolute_stage": 2,
+              "action_index": 0,
+              "action_lineage": [
+                0,
+                0
+              ],
+              "backward_edge_status": "numerical-predecessor-membership-false",
+              "backward_value": 0.0,
+              "backward_viable": false,
+              "discrete_transition_witness": true,
+              "edge_running_cost": 0.0,
+              "heuristic_score": 0.0,
+              "node_id": 3,
+              "parent_node_id": 1,
+              "predecessor_contains_parent": false,
+              "reachable_envelope_contains": true,
+              "stage_set_intersection_nonempty": true,
+              "state": [
+                0.0,
+                0.0
+              ],
+              "state_admissible": true
+            },
+            {
+              "absolute_stage": 2,
+              "action_index": 1,
+              "action_lineage": [
+                0,
+                1
+              ],
+              "backward_edge_status": "numerical-predecessor-membership-false",
+              "backward_value": 1.0,
+              "backward_viable": false,
+              "discrete_transition_witness": true,
+              "edge_running_cost": 0.5,
+              "heuristic_score": 1.5,
+              "node_id": 4,
+              "parent_node_id": 1,
+              "predecessor_contains_parent": false,
+              "reachable_envelope_contains": true,
+              "stage_set_intersection_nonempty": true,
+              "state": [
+                1.0,
+                0.0
+              ],
+              "state_admissible": true
+            },
+            {
+              "absolute_stage": 2,
+              "action_index": 0,
+              "action_lineage": [
+                1,
+                0
+              ],
+              "backward_edge_status": "numerical-predecessor-membership-false",
+              "backward_value": 1.0,
+              "backward_viable": false,
+              "discrete_transition_witness": true,
+              "edge_running_cost": 0.0,
+              "heuristic_score": 2.5,
+              "node_id": 5,
+              "parent_node_id": 2,
+              "predecessor_contains_parent": false,
+              "reachable_envelope_contains": true,
+              "stage_set_intersection_nonempty": true,
+              "state": [
+                1.0,
+                0.0
+              ],
+              "state_admissible": true
+            },
+            {
+              "absolute_stage": 2,
+              "action_index": 1,
+              "action_lineage": [
+                1,
+                1
+              ],
+              "backward_edge_status": "numerical-predecessor-membership-false",
+              "backward_value": 4.0,
+              "backward_viable": false,
+              "discrete_transition_witness": true,
+              "edge_running_cost": 0.5,
+              "heuristic_score": 6.0,
+              "node_id": 6,
+              "parent_node_id": 2,
+              "predecessor_contains_parent": false,
+              "reachable_envelope_contains": true,
+              "stage_set_intersection_nonempty": true,
+              "state": [
+                2.0,
+                0.0
+              ],
+              "state_admissible": true
+            }
+          ],
+          "relation": "equivalent",
+          "representation": "polytope-h",
+          "role": "retained-stage-layered-singleton-nodes"
+        }
+      ],
+      "reason": "No viable retained path passed the numerical backward filter; no control is returned and this is not a global infeasibility proof.",
+      "representation": 0,
+      "status": "unsupported",
+      "task_id": "analytic-2d-graph",
+      "task_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "continuous_parent_to_target_witness": true,
+    "authored_discrete_edge_witness": false,
+    "result": "rejected without fabricating a finite action"
+  },
+  "center_lineage_case": {
+    "request": {
+      "schema": "csl.closed-loop.native-policy-query/1",
+      "task_id": "analytic-2d-graph",
+      "task_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "source_model_id": "analytic-2d/1",
+      "controller_id": "analytic-center-lineage",
+      "action_profile_id": "analytic-actions/1",
+      "problem_id": "analytic-problem",
+      "request_id": "analytic-center-lineage",
+      "absolute_update_index": 0,
+      "observed_physical_state": [
+        0.0,
+        0.0
+      ],
+      "original_horizon": 2,
+      "dt": 1.0,
+      "predictor_model_id": "analytic-affine/1",
+      "predictor_assurance": "exact analytic affine map",
+      "predictor_stages": [
+        {
+          "A": [
+            [
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ]
+          ],
+          "B": [
+            [
+              1.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "c": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "A": [
+            [
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ]
+          ],
+          "B": [
+            [
+              1.0
+            ],
+            [
+              0.0
+            ]
+          ],
+          "c": [
+            0.0,
+            0.0
+          ]
+        }
+      ],
+      "actions": [
+        [
+          -1.0
+        ],
+        [
+          0.0
+        ],
+        [
+          1.0
+        ]
+      ],
+      "state_bounds": [
+        [
+          0.0,
+          2.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "stage_state_bounds": [
+        [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            -1.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            -1.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ]
+      ],
+      "terminal_objective": {
+        "kind": "quadratic",
+        "Q": [
+          [
+            2.0,
+            0.0
+          ],
+          [
+            0.0,
+            2.0
+          ]
+        ],
+        "linear": [
+          0.0,
+          0.0
+        ],
+        "offset": 0.0
+      },
+      "running_cost": {
+        "objective_id": "analytic-running/1",
+        "stages": [
+          {
+            "stage": 0,
+            "terms": [
+              {
+                "kind": "quadratic",
+                "reference": [
+                  0.0
+                ],
+                "scales": [
+                  1.0
+                ],
+                "weights": [
+                  1.0
+                ],
+                "coefficient": 1.0
+              }
+            ]
+          },
+          {
+            "stage": 1,
+            "terms": [
+              {
+                "kind": "quadratic",
+                "reference": [
+                  0.0
+                ],
+                "scales": [
+                  1.0
+                ],
+                "weights": [
+                  1.0
+                ],
+                "coefficient": 1.0
+              }
+            ]
+          }
+        ]
+      },
+      "representation_index": 0,
+      "representation_name": "exact_polytope",
+      "reachable_set_method": "csl.geometry.affine-sum",
+      "search_policy": "stage-layered-backward-viability",
+      "limits": {
+        "max_beam_width": 4,
+        "max_graph_nodes": 32
+      }
+    },
+    "response": {
+      "action_profile_id": "analytic-actions/1",
+      "control": [
+        0.0
+      ],
+      "graph_receipt": {
+        "absolute_stage_offset": 0,
+        "action_profile_id": "analytic-actions/1",
+        "backward_viability_applied_before_selection": true,
+        "beam_width": 4,
+        "edges": [
+          {
+            "absolute_stage": 0,
+            "action": [
+              0.0
+            ],
+            "action_index": 1,
+            "action_lineage": [
+              1
+            ],
+            "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+            "backward_viable": true,
+            "child_node_id": 1,
+            "child_state": [
+              0.0,
+              0.0
+            ],
+            "discrete_transition_witness": true,
+            "parent_node_id": 0,
+            "predecessor_contains_parent": true
+          },
+          {
+            "absolute_stage": 0,
+            "action": [
+              -1.0
+            ],
+            "action_index": 0,
+            "action_lineage": [
+              0
+            ],
+            "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+            "backward_viable": true,
+            "child_node_id": 2,
+            "child_state": [
+              -1.0,
+              0.0
+            ],
+            "discrete_transition_witness": true,
+            "parent_node_id": 0,
+            "predecessor_contains_parent": true
+          },
+          {
+            "absolute_stage": 0,
+            "action": [
+              1.0
+            ],
+            "action_index": 2,
+            "action_lineage": [
+              2
+            ],
+            "backward_edge_status": "skipped-suffix-nonviable",
+            "backward_viable": false,
+            "child_node_id": 3,
+            "child_state": [
+              1.0,
+              0.0
+            ],
+            "discrete_transition_witness": null,
+            "parent_node_id": 0,
+            "predecessor_contains_parent": null
+          },
+          {
+            "absolute_stage": 1,
+            "action": [
+              0.0
+            ],
+            "action_index": 1,
+            "action_lineage": [
+              1,
+              1
+            ],
+            "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+            "backward_viable": true,
+            "child_node_id": 4,
+            "child_state": [
+              0.0,
+              0.0
+            ],
+            "discrete_transition_witness": true,
+            "parent_node_id": 1,
+            "predecessor_contains_parent": true
+          },
+          {
+            "absolute_stage": 1,
+            "action": [
+              -1.0
+            ],
+            "action_index": 0,
+            "action_lineage": [
+              1,
+              0
+            ],
+            "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+            "backward_viable": true,
+            "child_node_id": 5,
+            "child_state": [
+              -1.0,
+              0.0
+            ],
+            "discrete_transition_witness": true,
+            "parent_node_id": 1,
+            "predecessor_contains_parent": true
+          },
+          {
+            "absolute_stage": 1,
+            "action": [
+              1.0
+            ],
+            "action_index": 2,
+            "action_lineage": [
+              1,
+              2
+            ],
+            "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+            "backward_viable": true,
+            "child_node_id": 6,
+            "child_state": [
+              1.0,
+              0.0
+            ],
+            "discrete_transition_witness": true,
+            "parent_node_id": 1,
+            "predecessor_contains_parent": true
+          },
+          {
+            "absolute_stage": 1,
+            "action": [
+              1.0
+            ],
+            "action_index": 2,
+            "action_lineage": [
+              0,
+              2
+            ],
+            "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+            "backward_viable": true,
+            "child_node_id": 7,
+            "child_state": [
+              0.0,
+              0.0
+            ],
+            "discrete_transition_witness": true,
+            "parent_node_id": 2,
+            "predecessor_contains_parent": true
+          }
+        ],
+        "layer_statistics": [
+          {
+            "generated": 3,
+            "infeasible": 0,
+            "pruned": 0,
+            "retained": 1,
+            "stage": 0
+          },
+          {
+            "generated": 9,
+            "infeasible": 0,
+            "pruned": 5,
+            "retained": 3,
+            "stage": 1
+          },
+          {
+            "generated": 0,
+            "infeasible": 0,
+            "pruned": 0,
+            "retained": 4,
+            "stage": 2
+          }
+        ],
+        "max_graph_nodes": 32,
+        "no_path_semantics": "no viable retained path after numerical filtering is not a global infeasibility proof",
+        "node_budget_exhausted": false,
+        "nodes": [
+          {
+            "absolute_stage": 0,
+            "action_index": null,
+            "action_lineage": [],
+            "backward_edge_status": "root-node",
+            "backward_value": 0.0,
+            "backward_viable": true,
+            "discrete_transition_witness": null,
+            "edge_running_cost": 0.0,
+            "heuristic_score": 0.0,
+            "node_id": 0,
+            "parent_node_id": null,
+            "predecessor_contains_parent": null,
+            "reachable_envelope_contains": null,
+            "stage_set_intersection_nonempty": true,
+            "state": [
+              0.0,
+              0.0
+            ],
+            "state_admissible": true
+          },
+          {
+            "absolute_stage": 1,
+            "action_index": 1,
+            "action_lineage": [
+              1
+            ],
+            "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+            "backward_value": 0.0,
+            "backward_viable": true,
+            "discrete_transition_witness": true,
+            "edge_running_cost": 0.0,
+            "heuristic_score": 0.0,
+            "node_id": 1,
+            "parent_node_id": 0,
+            "predecessor_contains_parent": true,
+            "reachable_envelope_contains": true,
+            "stage_set_intersection_nonempty": true,
+            "state": [
+              0.0,
+              0.0
+            ],
+            "state_admissible": true
+          },
+          {
+            "absolute_stage": 1,
+            "action_index": 0,
+            "action_lineage": [
+              0
+            ],
+            "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+            "backward_value": 0.5,
+            "backward_viable": true,
+            "discrete_transition_witness": true,
+            "edge_running_cost": 0.5,
+            "heuristic_score": 1.5,
+            "node_id": 2,
+            "parent_node_id": 0,
+            "predecessor_contains_parent": true,
+            "reachable_envelope_contains": true,
+            "stage_set_intersection_nonempty": true,
+            "state": [
+              -1.0,
+              0.0
+            ],
+            "state_admissible": true
+          },
+          {
+            "absolute_stage": 1,
+            "action_index": 2,
+            "action_lineage": [
+              2
+            ],
+            "backward_edge_status": "skipped-suffix-nonviable",
+            "backward_value": null,
+            "backward_viable": false,
+            "discrete_transition_witness": null,
+            "edge_running_cost": 0.5,
+            "heuristic_score": 1.5,
+            "node_id": 3,
+            "parent_node_id": 0,
+            "predecessor_contains_parent": null,
+            "reachable_envelope_contains": true,
+            "stage_set_intersection_nonempty": true,
+            "state": [
+              1.0,
+              0.0
+            ],
+            "state_admissible": true
+          },
+          {
+            "absolute_stage": 2,
+            "action_index": 1,
+            "action_lineage": [
+              1,
+              1
+            ],
+            "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+            "backward_value": 0.0,
+            "backward_viable": true,
+            "discrete_transition_witness": true,
+            "edge_running_cost": 0.0,
+            "heuristic_score": 0.0,
+            "node_id": 4,
+            "parent_node_id": 1,
+            "predecessor_contains_parent": true,
+            "reachable_envelope_contains": true,
+            "stage_set_intersection_nonempty": true,
+            "state": [
+              0.0,
+              0.0
+            ],
+            "state_admissible": true
+          },
+          {
+            "absolute_stage": 2,
+            "action_index": 0,
+            "action_lineage": [
+              1,
+              0
+            ],
+            "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+            "backward_value": 1.0,
+            "backward_viable": true,
+            "discrete_transition_witness": true,
+            "edge_running_cost": 0.5,
+            "heuristic_score": 1.5,
+            "node_id": 5,
+            "parent_node_id": 1,
+            "predecessor_contains_parent": true,
+            "reachable_envelope_contains": true,
+            "stage_set_intersection_nonempty": true,
+            "state": [
+              -1.0,
+              0.0
+            ],
+            "state_admissible": true
+          },
+          {
+            "absolute_stage": 2,
+            "action_index": 2,
+            "action_lineage": [
+              1,
+              2
+            ],
+            "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+            "backward_value": 1.0,
+            "backward_viable": true,
+            "discrete_transition_witness": true,
+            "edge_running_cost": 0.5,
+            "heuristic_score": 1.5,
+            "node_id": 6,
+            "parent_node_id": 1,
+            "predecessor_contains_parent": true,
+            "reachable_envelope_contains": true,
+            "stage_set_intersection_nonempty": true,
+            "state": [
+              1.0,
+              0.0
+            ],
+            "state_admissible": true
+          },
+          {
+            "absolute_stage": 2,
+            "action_index": 2,
+            "action_lineage": [
+              0,
+              2
+            ],
+            "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+            "backward_value": 0.0,
+            "backward_viable": true,
+            "discrete_transition_witness": true,
+            "edge_running_cost": 0.5,
+            "heuristic_score": 2.0,
+            "node_id": 7,
+            "parent_node_id": 2,
+            "predecessor_contains_parent": true,
+            "reachable_envelope_contains": true,
+            "stage_set_intersection_nonempty": true,
+            "state": [
+              0.0,
+              0.0
+            ],
+            "state_admissible": true
+          }
+        ],
+        "objective_id": "analytic-running/1",
+        "optimality_scope": "Bellman minimum over retained graph only; no claim over pruned paths or nonlinear plant",
+        "original_horizon": 2,
+        "predictor_model_id": "analytic-affine/1",
+        "representation": "exact-polytope",
+        "schema": "csl.closed-loop.finite-action-backward-graph/1",
+        "search_coverage": "incomplete",
+        "source_model_id": "analytic-2d/1",
+        "task_id": "analytic-2d-graph",
+        "task_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "invocations": [
+        {
+          "generated_edges": 12,
+          "module_id": "csl::optimization::finite_action_stage_layered_graph",
+          "operation": "full-authored-horizon stage-layered finite-action graph and backward Bellman selection",
+          "outcome": "selected",
+          "profile_id": "analytic-center-lineage",
+          "provider": "public-function",
+          "retained_nodes": 8
+        },
+        {
+          "assurance": "numerical, support unestablished",
+          "calls": 6,
+          "module_id": "csl::reachability::prepare_nominal_predecessor",
+          "operation": "numerical H predecessor membership followed by authored discrete transition witness",
+          "profile_id": "analytic-center-lineage",
+          "provider": "csl.geometry.polyhedral-projection@1.0.0"
+        },
+        {
+          "calls": 13,
+          "module_id": "csl::geometry::polyhedral::intersect_h",
+          "operation": "intersect each generated point with its authored stage H constraints",
+          "profile_id": "analytic-center-lineage",
+          "provider": "public-function"
+        },
+        {
+          "assurance": "numerical",
+          "calls": 4,
+          "module_id": "csl::geometry::affine-image",
+          "operation": "registered affine image of each retained observed-state parent",
+          "profile_id": "analytic-center-lineage",
+          "provider": "csl.geometry.affine-sum@1.0.0",
+          "relation": "equivalent",
+          "selected_method_id": "csl.geometry.affine-sum"
+        },
+        {
+          "assurance": "numerical",
+          "calls": 4,
+          "module_id": "csl::geometry::minkowski-sum",
+          "operation": "registered Minkowski sum with stage-transformed authored discrete action hull",
+          "profile_id": "analytic-center-lineage",
+          "provider": "csl.geometry.affine-sum@1.0.0",
+          "relation": "equivalent",
+          "selected_method_id": "csl.geometry.affine-sum"
+        }
+      ],
+      "policy_id": "analytic-center-lineage/budgeted-backward-graph-mpc/1",
+      "predicted_sets": [
+        {
+          "assurance": "numerical",
+          "nodes": [
+            {
+              "absolute_stage": 0,
+              "action_index": null,
+              "action_lineage": [],
+              "backward_edge_status": "root-node",
+              "backward_value": 0.0,
+              "backward_viable": true,
+              "discrete_transition_witness": null,
+              "edge_running_cost": 0.0,
+              "heuristic_score": 0.0,
+              "node_id": 0,
+              "parent_node_id": null,
+              "predecessor_contains_parent": null,
+              "reachable_envelope_contains": null,
+              "stage_set_intersection_nonempty": true,
+              "state": [
+                0.0,
+                0.0
+              ],
+              "state_admissible": true
+            },
+            {
+              "absolute_stage": 1,
+              "action_index": 1,
+              "action_lineage": [
+                1
+              ],
+              "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+              "backward_value": 0.0,
+              "backward_viable": true,
+              "discrete_transition_witness": true,
+              "edge_running_cost": 0.0,
+              "heuristic_score": 0.0,
+              "node_id": 1,
+              "parent_node_id": 0,
+              "predecessor_contains_parent": true,
+              "reachable_envelope_contains": true,
+              "stage_set_intersection_nonempty": true,
+              "state": [
+                0.0,
+                0.0
+              ],
+              "state_admissible": true
+            },
+            {
+              "absolute_stage": 1,
+              "action_index": 0,
+              "action_lineage": [
+                0
+              ],
+              "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+              "backward_value": 0.5,
+              "backward_viable": true,
+              "discrete_transition_witness": true,
+              "edge_running_cost": 0.5,
+              "heuristic_score": 1.5,
+              "node_id": 2,
+              "parent_node_id": 0,
+              "predecessor_contains_parent": true,
+              "reachable_envelope_contains": true,
+              "stage_set_intersection_nonempty": true,
+              "state": [
+                -1.0,
+                0.0
+              ],
+              "state_admissible": true
+            },
+            {
+              "absolute_stage": 1,
+              "action_index": 2,
+              "action_lineage": [
+                2
+              ],
+              "backward_edge_status": "skipped-suffix-nonviable",
+              "backward_value": null,
+              "backward_viable": false,
+              "discrete_transition_witness": null,
+              "edge_running_cost": 0.5,
+              "heuristic_score": 1.5,
+              "node_id": 3,
+              "parent_node_id": 0,
+              "predecessor_contains_parent": null,
+              "reachable_envelope_contains": true,
+              "stage_set_intersection_nonempty": true,
+              "state": [
+                1.0,
+                0.0
+              ],
+              "state_admissible": true
+            },
+            {
+              "absolute_stage": 2,
+              "action_index": 1,
+              "action_lineage": [
+                1,
+                1
+              ],
+              "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+              "backward_value": 0.0,
+              "backward_viable": true,
+              "discrete_transition_witness": true,
+              "edge_running_cost": 0.0,
+              "heuristic_score": 0.0,
+              "node_id": 4,
+              "parent_node_id": 1,
+              "predecessor_contains_parent": true,
+              "reachable_envelope_contains": true,
+              "stage_set_intersection_nonempty": true,
+              "state": [
+                0.0,
+                0.0
+              ],
+              "state_admissible": true
+            },
+            {
+              "absolute_stage": 2,
+              "action_index": 0,
+              "action_lineage": [
+                1,
+                0
+              ],
+              "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+              "backward_value": 1.0,
+              "backward_viable": true,
+              "discrete_transition_witness": true,
+              "edge_running_cost": 0.5,
+              "heuristic_score": 1.5,
+              "node_id": 5,
+              "parent_node_id": 1,
+              "predecessor_contains_parent": true,
+              "reachable_envelope_contains": true,
+              "stage_set_intersection_nonempty": true,
+              "state": [
+                -1.0,
+                0.0
+              ],
+              "state_admissible": true
+            },
+            {
+              "absolute_stage": 2,
+              "action_index": 2,
+              "action_lineage": [
+                1,
+                2
+              ],
+              "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+              "backward_value": 1.0,
+              "backward_viable": true,
+              "discrete_transition_witness": true,
+              "edge_running_cost": 0.5,
+              "heuristic_score": 1.5,
+              "node_id": 6,
+              "parent_node_id": 1,
+              "predecessor_contains_parent": true,
+              "reachable_envelope_contains": true,
+              "stage_set_intersection_nonempty": true,
+              "state": [
+                1.0,
+                0.0
+              ],
+              "state_admissible": true
+            },
+            {
+              "absolute_stage": 2,
+              "action_index": 2,
+              "action_lineage": [
+                0,
+                2
+              ],
+              "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+              "backward_value": 0.0,
+              "backward_viable": true,
+              "discrete_transition_witness": true,
+              "edge_running_cost": 0.5,
+              "heuristic_score": 2.0,
+              "node_id": 7,
+              "parent_node_id": 2,
+              "predecessor_contains_parent": true,
+              "reachable_envelope_contains": true,
+              "stage_set_intersection_nonempty": true,
+              "state": [
+                0.0,
+                0.0
+              ],
+              "state_admissible": true
+            }
+          ],
+          "relation": "equivalent",
+          "representation": "polytope-h",
+          "role": "retained-stage-layered-singleton-nodes"
+        }
+      ],
+      "recovered_control": [
+        0.0
+      ],
+      "representation": 0,
+      "selected_edges": [
+        {
+          "absolute_stage": 0,
+          "action": [
+            0.0
+          ],
+          "action_index": 1,
+          "action_lineage": [
+            1
+          ],
+          "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+          "backward_viable": true,
+          "child_node_id": 1,
+          "child_state": [
+            0.0,
+            0.0
+          ],
+          "parent_node_id": 0
+        },
+        {
+          "absolute_stage": 1,
+          "action": [
+            0.0
+          ],
+          "action_index": 1,
+          "action_lineage": [
+            1,
+            1
+          ],
+          "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+          "backward_viable": true,
+          "child_node_id": 4,
+          "child_state": [
+            0.0,
+            0.0
+          ],
+          "parent_node_id": 1
+        }
+      ],
+      "selected_plan": {
+        "controls": [
+          [
+            0.0
+          ],
+          [
+            0.0
+          ]
+        ],
+        "running_objective": 0.0,
+        "states": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "terminal_objective": 0.0,
+        "total_objective": 0.0
+      },
+      "selector": {
+        "beam_width": 4,
+        "max_graph_nodes": 32,
+        "optimality_scope": "retained graph only; not complete finite-action optimum, nonlinear global optimum, or causal feedback optimum",
+        "policy_semantics": "receding finite-action graph MPC; backward predecessor viability filters authored edges before Bellman selection; replans after each observed hold",
+        "retained_graph_value": 0.0,
+        "running_objective": 0.0,
+        "score_kind": "exact-source-cost-on-numerical-affine-predictor",
+        "search_coverage": "incomplete",
+        "terminal_objective": 0.0,
+        "total_replay_objective": 0.0
+      },
+      "status": "accepted",
+      "task_id": "analytic-2d-graph",
+      "task_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "independent_histories": [
+      {
+        "action_indices": [
+          0,
+          0
+        ],
+        "states": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            -1.0,
+            0.0
+          ],
+          [
+            -2.0,
+            0.0
+          ]
+        ],
+        "feasible": false,
+        "running_cost": 1.0,
+        "terminal_cost": 4.0,
+        "total_cost": 5.0
+      },
+      {
+        "action_indices": [
+          0,
+          1
+        ],
+        "states": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            -1.0,
+            0.0
+          ],
+          [
+            -1.0,
+            0.0
+          ]
+        ],
+        "feasible": true,
+        "running_cost": 0.5,
+        "terminal_cost": 1.0,
+        "total_cost": 1.5
+      },
+      {
+        "action_indices": [
+          0,
+          2
+        ],
+        "states": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            -1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "feasible": true,
+        "running_cost": 1.0,
+        "terminal_cost": 0.0,
+        "total_cost": 1.0
+      },
+      {
+        "action_indices": [
+          1,
+          0
+        ],
+        "states": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            -1.0,
+            0.0
+          ]
+        ],
+        "feasible": true,
+        "running_cost": 0.5,
+        "terminal_cost": 1.0,
+        "total_cost": 1.5
+      },
+      {
+        "action_indices": [
+          1,
+          1
+        ],
+        "states": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "feasible": true,
+        "running_cost": 0.0,
+        "terminal_cost": 0.0,
+        "total_cost": 0.0
+      },
+      {
+        "action_indices": [
+          1,
+          2
+        ],
+        "states": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0
+          ]
+        ],
+        "feasible": true,
+        "running_cost": 0.5,
+        "terminal_cost": 1.0,
+        "total_cost": 1.5
+      },
+      {
+        "action_indices": [
+          2,
+          0
+        ],
+        "states": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "feasible": true,
+        "running_cost": 1.0,
+        "terminal_cost": 0.0,
+        "total_cost": 1.0
+      },
+      {
+        "action_indices": [
+          2,
+          1
+        ],
+        "states": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0
+          ]
+        ],
+        "feasible": true,
+        "running_cost": 0.5,
+        "terminal_cost": 1.0,
+        "total_cost": 1.5
+      },
+      {
+        "action_indices": [
+          2,
+          2
+        ],
+        "states": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            2.0,
+            0.0
+          ]
+        ],
+        "feasible": false,
+        "running_cost": 1.0,
+        "terminal_cost": 4.0,
+        "total_cost": 5.0
+      }
+    ],
+    "best_feasible_history": {
+      "action_indices": [
+        1,
+        1
+      ],
+      "states": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "feasible": true,
+      "running_cost": 0.0,
+      "terminal_cost": 0.0,
+      "total_cost": 0.0
+    },
+    "interior_stage_node_retained": {
+      "absolute_stage": 1,
+      "action_index": 1,
+      "action_lineage": [
+        1
+      ],
+      "backward_edge_status": "eligible-numerical-predecessor-and-discrete-edge",
+      "backward_value": 0.0,
+      "backward_viable": true,
+      "discrete_transition_witness": true,
+      "edge_running_cost": 0.0,
+      "heuristic_score": 0.0,
+      "node_id": 1,
+      "parent_node_id": 0,
+      "predecessor_contains_parent": true,
+      "reachable_envelope_contains": true,
+      "stage_set_intersection_nonempty": true,
+      "state": [
+        0.0,
+        0.0
+      ],
+      "state_admissible": true
+    },
+    "interpretation": "the state produced by the authored center action is interior to the two endpoint states but remains a distinct witnessed node; the graph does not hull-deduplicate or splice its lineage"
+  }
+}

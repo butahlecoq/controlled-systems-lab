@@ -1,0 +1,626 @@
+{
+  "absolute_update_index": 29,
+  "action_profile_id": "syn-nl-lv-01/continuous-receding/1/finite-catalog-adaptation/1",
+  "assurance": "numerical affine predecessor relation with unestablished support; independent nonlinear plant replay on the actual LV ODE",
+  "checks": {
+    "matches_query_cost": true,
+    "physical_bound_max_violation": 0.0,
+    "source_stage_running_cost": 0.0004166666666666667,
+    "status": "passed"
+  },
+  "controller_id": "native-probe/exact_polytope/receding-fixed-plan-mpc/1",
+  "execution": {
+    "diagnostics": [],
+    "elapsed_seconds": 4.6305e-05,
+    "integration_receipts": [
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.4802973661668753e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          5.921189464667501e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.1842378929335003e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          2.960594732333751e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.4802973661668753e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          5.921189464667501e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.4802973661668753e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.4802973661668753e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.4802973661668753e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.3322676295501878e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.4802973661668753e-16,
+          5.921189464667501e-17
+        ],
+        "rejected_steps": 0
+      },
+      {
+        "accepted_steps": 1,
+        "max_accepted_local_error_estimates": [
+          1.4802973661668753e-16,
+          4.4408920985006264e-17
+        ],
+        "rejected_steps": 0
+      }
+    ],
+    "physical_states": [
+      [
+        111.86343263248402,
+        98.69653529031181
+      ],
+      [
+        111.74484176026618,
+        98.73149231999436
+      ],
+      [
+        111.62618245084646,
+        98.76611024562536
+      ],
+      [
+        111.50745708167393,
+        98.80038850254529
+      ],
+      [
+        111.38866802508946,
+        98.83432653635991
+      ],
+      [
+        111.26981764823765,
+        98.86792380295007
+      ],
+      [
+        111.15090831297985,
+        98.90117976848109
+      ],
+      [
+        111.03194237580784,
+        98.93409390941105
+      ],
+      [
+        110.91292218775838,
+        98.96666571249892
+      ],
+      [
+        110.79385009432838,
+        98.99889467481145
+      ],
+      [
+        110.67472843539103,
+        99.03078030372974
+      ],
+      [
+        110.55555954511271,
+        99.06232211695496
+      ],
+      [
+        110.43634575187056,
+        99.09351964251346
+      ],
+      [
+        110.31708937817095,
+        99.12437241876111
+      ],
+      [
+        110.19779274056889,
+        99.15487999438699
+      ],
+      [
+        110.07845814958802,
+        99.18504192841645
+      ],
+      [
+        109.95908790964144,
+        99.21485779021337
+      ],
+      [
+        109.83968431895367,
+        99.24432715948184
+      ],
+      [
+        109.72024966948297,
+        99.27344962626717
+      ],
+      [
+        109.60078624684479,
+        99.30222479095607
+      ],
+      [
+        109.48129633023606,
+        99.33065226427645
+      ]
+    ],
+    "scaled_states": [
+      [
+        1.1186343263248402,
+        1.2337066911288976
+      ],
+      [
+        1.1174484176026618,
+        1.2341436539999295
+      ],
+      [
+        1.1162618245084646,
+        1.234576378070317
+      ],
+      [
+        1.1150745708167393,
+        1.235004856281816
+      ],
+      [
+        1.1138866802508947,
+        1.2354290817044988
+      ],
+      [
+        1.1126981764823765,
+        1.235849047536876
+      ],
+      [
+        1.1115090831297985,
+        1.2362647471060135
+      ],
+      [
+        1.1103194237580785,
+        1.2366761738676382
+      ],
+      [
+        1.109129221877584,
+        1.2370833214062364
+      ],
+      [
+        1.1079385009432838,
+        1.2374861834351432
+      ],
+      [
+        1.1067472843539103,
+        1.2378847537966218
+      ],
+      [
+        1.1055555954511271,
+        1.238279026461937
+      ],
+      [
+        1.1043634575187056,
+        1.2386689955314183
+      ],
+      [
+        1.1031708937817095,
+        1.2390546552345139
+      ],
+      [
+        1.101977927405689,
+        1.2394359999298374
+      ],
+      [
+        1.10078458149588,
+        1.2398130241052057
+      ],
+      [
+        1.0995908790964144,
+        1.240185722377667
+      ],
+      [
+        1.0983968431895368,
+        1.240554089493523
+      ],
+      [
+        1.0972024966948297,
+        1.2409181203283395
+      ],
+      [
+        1.096007862468448,
+        1.241277809886951
+      ],
+      [
+        1.0948129633023607,
+        1.2416331533034557
+      ]
+    ],
+    "scenario_sha256": "08d8ce1d9935cbc69c1e685b812cd13813c1c1a806de6eef69a7d8962f9c84f2",
+    "slice_sha256": "3ce8d45183c54e3f1672d18814153e410155766b034d7cd7d25df32fed971acc",
+    "status": "complete",
+    "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+    "times": [
+      2.9000000000000004,
+      2.9050000000000002,
+      2.91,
+      2.9150000000000005,
+      2.9200000000000004,
+      2.9250000000000003,
+      2.9300000000000006,
+      2.9350000000000005,
+      2.9400000000000004,
+      2.9450000000000003,
+      2.95,
+      2.9550000000000005,
+      2.9600000000000004,
+      2.9650000000000003,
+      2.9700000000000006,
+      2.9750000000000005,
+      2.9800000000000004,
+      2.9850000000000003,
+      2.99,
+      2.9950000000000006,
+      3.0000000000000004
+    ]
+  },
+  "input_observation_source": {
+    "attempt_id": "syn-nl-lv-01-20261111T114908Z-8dc20bed",
+    "attempt_json_sha256": "1170640f63491a70ce30a06e8b07f0da6e1426e8a610effebc9dfc38a32fb7ce"
+  },
+  "model_id": "syn-nl-lv-01/ode/1",
+  "native_runtime": {
+    "bridge_build": "build/core",
+    "bridge_source_sha256": "df4d9dfd86e9591b8896fe0736b23a3a9fd223136aec8f67288096901bdaaa67",
+    "build_target": "csl_closed_loop_native_policy",
+    "controller_adapter_sha256": "56fa8a99063dc32ec83c3c4ca9c44b40495b0f9fbe92a31ff6418b83e3201b25",
+    "enumeration_limits": {
+      "max_plans": 16,
+      "max_score_evaluations": 32
+    },
+    "source_commit_before_probe_changes": "160021766741f2e65dc41b13eb9a046102c186c5"
+  },
+  "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
+  "observed_state_physical": [
+    111.86343263248402,
+    98.69653529031181
+  ],
+  "query": {
+    "action_profile_id": "syn-nl-lv-01/continuous-receding/1/finite-catalog-adaptation/1",
+    "control": [
+      0.025
+    ],
+    "invocations": [
+      {
+        "module_id": "csl::optimization::finite_action_nominal_profile",
+        "operation": "exact-polytope-plan-select",
+        "outcome": "selected",
+        "profile_id": "native-probe/exact_polytope",
+        "provider": "public-function"
+      },
+      {
+        "module_id": "csl::reachability::prepare_nominal_predecessor",
+        "operation": "one-step existential-control state predecessor",
+        "profile_id": "native-probe/exact_polytope",
+        "projection_provider": "csl.geometry.polyhedral-projection@1.0.0",
+        "provider": "csl.geometry.polyhedral-projection@1.0.0"
+      }
+    ],
+    "policy_id": "native-probe/exact_polytope/receding-fixed-plan-mpc/1",
+    "policy_semantics": "receding-horizon finite-action MPC plus a numerical first-step predecessor/recovery witness for its selected singleton target",
+    "predicted_sets": [
+      {
+        "assurance": "numerical",
+        "relation": "equivalent",
+        "representation": "exact-polytope",
+        "role": "fixed-plan-trajectory-enclosure",
+        "stages": [
+          {
+            "point": [
+              111.86343263248402,
+              98.69653529031181
+            ],
+            "representation": "singleton"
+          },
+          {
+            "representation": "polytope-v",
+            "vertices": [
+              [
+                109.71701356810439,
+                99.21467327090049
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "assurance": "numerical",
+        "relation": "equivalent",
+        "representation": "polytope-h",
+        "role": "one-step-feasible-state-predecessor",
+        "set": {
+          "equalities": [
+            [
+              0.024009604610239203,
+              1.0
+            ]
+          ],
+          "equality_values": [
+            101.3823320781619
+          ],
+          "inequalities": [
+            [
+              1.0,
+              0.0
+            ],
+            [
+              -1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              -1.0
+            ],
+            [
+              0.09983994877658305,
+              -0.01
+            ],
+            [
+              -0.09983994877658305,
+              0.01
+            ]
+          ],
+          "representation": "polytope-h",
+          "upper_bounds": [
+            200.0,
+            -0.0,
+            150.0,
+            -0.0,
+            10.206474031096835,
+            -10.156474031096835
+          ]
+        },
+        "support": "unestablished"
+      }
+    ],
+    "prediction_profile": {
+      "assurance": "binary64 scipy.linalg.expm numerical exponential; no validated arithmetic",
+      "model_id": "syn-nl-lv-01/frozen-coexistence-affine/1",
+      "policy_semantics": "receding-horizon finite-action MPC plus a numerical first-step predecessor/recovery witness for its selected singleton target",
+      "representation": "exact_polytope",
+      "validity": "numerical local/frozen predictor only; no nonlinear enclosure or off-reference error bound"
+    },
+    "query_receipt": {
+      "absolute_update_index": 29,
+      "action_profile_id": "syn-nl-lv-01/continuous-receding/1/finite-catalog-adaptation/1",
+      "candidate_score": 0.06754677520172951,
+      "controller_id": "native-probe/exact_polytope",
+      "first_step_recovery": {
+        "absolute_stage": 29,
+        "finite_catalogue_witness_count": 1,
+        "observed_state_in_predecessor": true,
+        "original_horizon": 30,
+        "predecessor_assurance": "numerical with unestablished support",
+        "predecessor_request": "native-probe/exact_polytope/update-29/first-step-predecessor",
+        "replay_check": "affine one-step state lies in selected singleton target and next-state bounds",
+        "running_cost_objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
+        "schema": "csl.closed-loop.native-first-step-recovery/1",
+        "selected_control": [
+          0.025
+        ],
+        "selected_stage_running_cost": 0.0004166666666666667,
+        "selected_target_state": [
+          109.71701356810439,
+          99.21467327090049
+        ]
+      },
+      "invocations": [
+        {
+          "module_id": "csl::optimization::finite_action_nominal_profile",
+          "operation": "exact-polytope-plan-select",
+          "outcome": "selected",
+          "profile_id": "native-probe/exact_polytope",
+          "provider": "public-function"
+        },
+        {
+          "module_id": "csl::reachability::prepare_nominal_predecessor",
+          "operation": "one-step existential-control state predecessor",
+          "profile_id": "native-probe/exact_polytope",
+          "projection_provider": "csl.geometry.polyhedral-projection@1.0.0",
+          "provider": "csl.geometry.polyhedral-projection@1.0.0"
+        }
+      ],
+      "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
+      "original_horizon": 30,
+      "predicted_set_role": "fixed-plan-trajectory-enclosure",
+      "predictor_assurance": "binary64 scipy.linalg.expm numerical exponential; no validated arithmetic",
+      "predictor_model_id": "syn-nl-lv-01/frozen-coexistence-affine/1",
+      "representation": "exact_polytope",
+      "schema": "csl.closed-loop.native-policy-query-receipt/1",
+      "score_kind": "exact-deterministic-objective",
+      "search_coverage": "complete",
+      "selected_control": [
+        0.025
+      ],
+      "source_model_id": "syn-nl-lv-01/ode/1",
+      "task_id": "syn-nl-lv-01/continuous-receding/1",
+      "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec"
+    },
+    "recovered_control": [
+      0.025
+    ],
+    "representation": 0,
+    "selected_plan": {
+      "controls": [
+        [
+          0.025
+        ]
+      ],
+      "running_objective": 0.0004166666666666667,
+      "states": [
+        [
+          111.86343263248402,
+          98.69653529031181
+        ],
+        [
+          109.71701356810439,
+          99.21467327090049
+        ]
+      ],
+      "terminal_objective": 0.06713010853506285,
+      "total_objective": 0.06754677520172951
+    },
+    "selector": {
+      "absolute_stage_offset": 29,
+      "candidate_score": 0.06754677520172951,
+      "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
+      "optimality_scope": "finite action catalogue and declared numerical affine predictor; no nonlinear global-feedback claim",
+      "original_horizon": 30,
+      "policy_semantics": "receding-horizon finite-action MPC plus a numerical first-step predecessor/recovery witness for its selected singleton target",
+      "running_objective": 0.0004166666666666667,
+      "score_kind": "exact-deterministic-objective",
+      "search_coverage": "complete",
+      "selected_control": [
+        0.025
+      ],
+      "terminal_objective": 0.06713010853506285,
+      "total_replay_objective": 0.06754677520172951
+    },
+    "status": "accepted",
+    "task_id": "syn-nl-lv-01/continuous-receding/1",
+    "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec"
+  },
+  "schema": "csl.closed-loop.native-predecessor-probe/1",
+  "task_id": "syn-nl-lv-01/continuous-receding/1",
+  "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+  "stage0_search_probe": {
+    "absolute_update_index": 0,
+    "original_horizon": 30,
+    "authored_actions": 3,
+    "full_plan_product": 205891132094649,
+    "caller_plan_limit": 16,
+    "observed_state_physical": [
+      120,
+      60
+    ],
+    "status": "unsupported",
+    "reason": "Action product exceeds the caller plan limit.",
+    "control_returned": null,
+    "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+    "interpretation": "The selected-profile full-horizon finite-action search returns unsupported at the original initial stage; no control was fabricated. This demonstrates the current route cannot execute the full episode."
+  }
+}

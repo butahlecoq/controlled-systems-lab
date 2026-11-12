@@ -235,7 +235,7 @@ MpcCase make_ts03_singular() {
     result.id = "ts03-singular-v1";
     result.version = "1";
     result.source_kind = "analytic-contract";
-    result.source_ref = "docs/architecture/framework-composition.md#ts03";
+    result.source_ref = "benchmarks/reporting/mpc01/fixtures.cpp#make_ts03_singular";
     result.canonical_input_bytes = R"({"schema":"csl.mpc01-fixture/1","id":"ts03-singular-v1","x0":[0],"A":[[0],[0]],"B":[[1],[1]],"u":[[0,1],[0,1]],"cost":{"kind":"quadratic","Q":[[2]],"linear":[-2],"offset":1}})";
     result.canonical_input_sha256 = digest_text(result.canonical_input_bytes);
     result.initial_state = {0.0};

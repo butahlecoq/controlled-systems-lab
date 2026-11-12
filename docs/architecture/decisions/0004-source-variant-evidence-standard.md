@@ -81,8 +81,7 @@ run remains unauthorized.
 
 ### B04 / L11
 
-The [exact B04 variant diagnosis](../../research/b04-model-variant-diagnosis.md)
-and its cited [consistency audit](../../research/b04-restoration.md) give
+The archived exact B04 variant diagnosis and its cited consistency audit give
 terminal stock-plane functional
 `-2122.7`; the published endpoint gives `-406.201`. The exclusion margin is
 `1716.499`, far above the `0.0145` rounding radius. This is an invariant
@@ -100,7 +99,7 @@ run remain separate, named work and do not change the historical result.
 The printed scalar recurrence and four-component control-zonotope
 representation do not have compatible dimensions at the control multiplication
 boundary. This is a direct structural inconsistency in the printed
-representation. The [scalar-input construction](../../research/r29-corrected-scalar-reference.md) in
+representation. The archived scalar-input construction in
 `r29-corrected-scalar-reference.md` is explicitly an inferred reference
 motivated by the printed recurrence, scalar bound, and input-matrix shape; its
 exact derivation does not establish author intent, recover the historical
@@ -108,7 +107,7 @@ implementation, or authorize replacing the printed representation.
 
 ### B08 / L04 and B09 / L13
 
-For B08, the [exact displayed-data audit](../../research/b08-displayed-exact-audit.md)
+For B08, the archived exact displayed-data audit
 establishes by exact enumeration of the printed rational data a
 three-way minimax tie with minimum norm approximately `67.15060110140489`,
 while the reported value is `67.12`. At two printed decimal places, the
@@ -126,7 +125,7 @@ evidence labels unchanged.
 For L13, the owner rechecked the hash-identified source and recorded the
 transcription, corrected interpretation, Table 1 check, and affected-case
 inventory in [issue #532](https://github.com/butahlecoq/controlled-systems-lab/issues/532#issuecomment-6334291909).
-The [bound recovery note](../../research/l13-mixture-bound-recovery.md) records
+The archived bound recovery note records
 the general Eq. (11) state-polyhedron form, the 7%-of-nominal-`K` statement,
 and its numerical state-box realization. A nominal `v=0` endpoint check against
 the printed box is recorded separately; the source's bounded model-error input

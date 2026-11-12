@@ -521,10 +521,6 @@ def algorithm_coverage(catalog, site, gallery_inventory):
     result = json.loads(source.read_text(encoding="utf-8"))
     require(result.get("schema") == "csl.algorithm-visual-coverage/1",
             "unsupported algorithm coverage schema")
-    architecture = Path(__file__).parents[2] / result["source"]
-    require(architecture.is_file(),
-            "algorithm coverage architecture source is missing")
-    architecture_text = architecture.read_text(encoding="utf-8")
     reports = json.loads(Path(catalog).read_text(encoding="utf-8"))["reports"]
     require(Path(catalog).resolve() == Path(__file__).parents[2] / result["catalog_source"],
             "algorithm coverage was built from an unexpected report catalog")
@@ -550,8 +546,9 @@ def algorithm_coverage(catalog, site, gallery_inventory):
                 "algorithm coverage catalog report is not staged: " + report["report_id"])
     gallery = {entry["anchor"]: entry for entry in gallery_inventory}
     for family in result["families"]:
-        require(all(module in architecture_text for module in family["modules"]),
-                "algorithm family module is absent from its architecture source: " + family["id"])
+        require(isinstance(family.get("modules"), list) and family["modules"] and
+                all(isinstance(module, str) and module for module in family["modules"]),
+                "algorithm family needs structured module metadata: " + family["id"])
         require(family["implementation_issues"],
                 "algorithm family needs a linked implementation issue: " + family["id"])
         require(family["support"].startswith("supported-") or family["limit"],

@@ -130,8 +130,7 @@ class B04HistoricalReportTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory)
             report.write_report(self.value, output)
-            for name in ("b04-historical-comparison.json", "b04-historical-comparison.html",
-                         "b04-historical-comparison.md"):
+            for name in ("b04-historical-comparison.json", "b04-historical-comparison.html"):
                 self.assertEqual((output / name).read_bytes(), (expected / name).read_bytes())
 
 

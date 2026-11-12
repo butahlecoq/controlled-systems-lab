@@ -1,5 +1,6 @@
 """Check the deterministic Lotka–Volterra sample record and publication."""
 
+import importlib.util
 import json
 from pathlib import Path
 import sys
@@ -10,6 +11,12 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 import lotka_volterra_sampled as report
 import stage_lotka_volterra_sampled as publisher
+
+FROZEN_GENERATOR = ROOT / "scripts/reports/lotka_volterra_sampled_frozen_321ac099.py"
+FROZEN_GENERATOR_SHA256 = "321ac099e8185c8b1b9a76af9859c9b818682b429ba705f1410a19d648238f1c"
+frozen_spec = importlib.util.spec_from_file_location("frozen_lotka_volterra_sampled", FROZEN_GENERATOR)
+frozen_report = importlib.util.module_from_spec(frozen_spec)
+frozen_spec.loader.exec_module(frozen_report)
 
 
 class SampledLotkaVolterraTests(unittest.TestCase):
@@ -49,11 +56,16 @@ class SampledLotkaVolterraTests(unittest.TestCase):
         self.assertIn("not the full reachable sets", page)
         self.assertIn("sample hull; local zoom", svg)
         self.assertIn("L05 Example 1 source dossier", page)
+        self.assertIn(
+            "https://github.com/butahlecoq/controlled-systems-lab/blob/"
+            "797b606faee21d9cc22004c882fc7e120113be20/"
+            "docs/research/l05-example1-source-dossier.md", page)
         cloud = [trace[15] for trace in record["sampled_states"]]
         self.assertGreaterEqual(len(report.convex_hull(cloud)), 3)
 
     def test_saved_bundle_is_reproducible_and_stages_as_a_local_page(self):
-        report.build(report.REPORT_DIR, None, True)
+        self.assertEqual(report.sha(FROZEN_GENERATOR.read_bytes()), FROZEN_GENERATOR_SHA256)
+        frozen_report.build(report.REPORT_DIR, None, True)
         with tempfile.TemporaryDirectory() as directory:
             site = Path(directory)
             (site / "index.html").write_text("<!doctype html><html><body></body></html>")
