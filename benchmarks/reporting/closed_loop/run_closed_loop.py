@@ -229,227 +229,233 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
     tracing_started_here = not tracemalloc.is_tracing()
     if tracing_started_here:
         tracemalloc.start()
-    task = load_task(task_name); validate_source_binding(task)
-    task_hash = manifest_sha256(task)
-    if graph_path is None: raise ValueError("worker requires an admitted resolved graph")
-    graph = json.loads(graph_path.read_text())
-    if graph["task_sha256"] != task_hash: raise ValueError("resolved graph task hash differs from worker task")
-    if policy_adapter and policy_adapter != graph["controller"].get("policy_factory"):
-        raise ValueError("requested adapter factory differs from the manifest-selected policy adapter")
-    if requested_controller_id and requested_controller_id != graph["controller"]["id"]:
-        raise ValueError("requested controller differs from the resolved capability graph")
-    expected_action_profile = graph["action_profile_id"]
-    if requested_action_profile_id and requested_action_profile_id != expected_action_profile:
-        raise ValueError("requested action profile differs from the resolved capability graph")
     try:
-        prepared_controller, preparation = prepare_graph(task, graph, bridge)
-    except Exception as error:
-        write_attempt(attempt, attempt_format(attempt.name, **{
-            "task_id": task["task_id"], "task_sha256": task_hash,
-            "controller_id": graph["controller"]["id"], "resolved_graph": graph,
+        task = load_task(task_name); validate_source_binding(task)
+        task_hash = manifest_sha256(task)
+        if graph_path is None: raise ValueError("worker requires an admitted resolved graph")
+        graph = json.loads(graph_path.read_text())
+        if graph["task_sha256"] != task_hash: raise ValueError("resolved graph task hash differs from worker task")
+        if policy_adapter and policy_adapter != graph["controller"].get("policy_factory"):
+            raise ValueError("requested adapter factory differs from the manifest-selected policy adapter")
+        if requested_controller_id and requested_controller_id != graph["controller"]["id"]:
+            raise ValueError("requested controller differs from the resolved capability graph")
+        expected_action_profile = graph["action_profile_id"]
+        if requested_action_profile_id and requested_action_profile_id != expected_action_profile:
+            raise ValueError("requested action profile differs from the resolved capability graph")
+        try:
+            prepared_controller, preparation = prepare_graph(task, graph, bridge)
+        except Exception as error:
+            write_attempt(attempt, attempt_format(attempt.name, **{
+                "task_id": task["task_id"], "task_sha256": task_hash,
+                "controller_id": graph["controller"]["id"], "resolved_graph": graph,
+                "resource_profile_id": resource_profile["profile_id"],
+                "resource_limits": {"requested": resource_profile["requested"],
+                    "enforced": resource_profile["enforced"]},
+                "status": "preparation_failed", "algorithm_status": "preparation_failed",
+                "overall_status": "preparation_failed", "completed_holds": 0,
+                "preparation_failure": {"type": type(error).__name__, "reason": str(error)},
+                "mathematical_support_status": "not_evaluated"}))
+            return 2
+        scales = np.asarray([s["scale"] for s in task["model"]["states"]])
+        state = np.asarray([s["initial"] for s in task["model"]["states"]], dtype=float)
+        controls = []; states = [state.tolist()]; previous = None
+        mathematical_support_not_evaluated = False
+        default_controller_id = graph["controller"]["id"]
+        controller_id = requested_controller_id or default_controller_id
+        action_profile_id = expected_action_profile
+        policy = prepared_controller if graph["controller"].get("policy_factory") else None
+        geometry_method = graph.get("role_bindings", {}).get("reachable_set_method", "not_used")
+        geometry_active = geometry_method != "not_used"
+        ledger = attempt_format(attempt.name, **{
+            "task_id": task["task_id"], "task_sha256": task_hash, "source_sha256": task["source"]["sha256"],
+            "model_id": task["model"]["model_id"], "action_profile_id": action_profile_id,
+            "objective_id": task["objective"]["objective_id"], "controller_id": controller_id,
+            "resolved_graph": graph, "preparation_receipt": preparation,
+            "selected_initial_state_physical": state.tolist(), "original_intervals": task["episode"]["intervals"],
+            "original_final_time": task["episode"]["final_time"], "status": "in-progress",
+            "timing_scopes": {"stage_interval_seconds": "one stage from before its initial checkpoint through controller query and held-step execution; sampled immediately before the final stage record/index write, so excludes stage finalization and the subsequent attempt checkpoint; overlaps controller and execution subscopes",
+                "controller_query_wall_seconds": "controller query including any native capture checkpoint callbacks",
+                "execution_process_wall_seconds": "held-step child launch through child completion and stdout/stderr persistence; excludes response parsing, replay and rendering",
+                "record_io": "actual JSON bytes, serialization and fsync, plus selective parsing; telemetry log append is excluded"},
+            "module_roles": {**graph.get("role_bindings", graph.get("inactive_roles", {})),
+                             "controller": controller_id, "execution": graph["execution"]["id"]},
+            "geometry_work": {"vertices": None if geometry_active else 0, "set_operations": 0,
+                "claim": graph.get("claim_scope", "pure NMPC; no representation comparison")},
             "resource_profile_id": resource_profile["profile_id"],
-            "resource_limits": {"requested": resource_profile["requested"],
-                "enforced": resource_profile["enforced"]},
-            "status": "preparation_failed", "algorithm_status": "preparation_failed",
-            "overall_status": "preparation_failed", "completed_holds": 0,
-            "preparation_failure": {"type": type(error).__name__, "reason": str(error)},
-            "mathematical_support_status": "not_evaluated"}))
-        return 2
-    scales = np.asarray([s["scale"] for s in task["model"]["states"]])
-    state = np.asarray([s["initial"] for s in task["model"]["states"]], dtype=float)
-    controls = []; states = [state.tolist()]; previous = None
-    mathematical_support_not_evaluated = False
-    default_controller_id = graph["controller"]["id"]
-    controller_id = requested_controller_id or default_controller_id
-    action_profile_id = expected_action_profile
-    policy = prepared_controller if graph["controller"].get("policy_factory") else None
-    geometry_method = graph.get("role_bindings", {}).get("reachable_set_method", "not_used")
-    geometry_active = geometry_method != "not_used"
-    ledger = attempt_format(attempt.name, **{
-        "task_id": task["task_id"], "task_sha256": task_hash, "source_sha256": task["source"]["sha256"],
-        "model_id": task["model"]["model_id"], "action_profile_id": action_profile_id,
-        "objective_id": task["objective"]["objective_id"], "controller_id": controller_id,
-        "resolved_graph": graph, "preparation_receipt": preparation,
-        "selected_initial_state_physical": state.tolist(), "original_intervals": task["episode"]["intervals"],
-        "original_final_time": task["episode"]["final_time"], "status": "in-progress",
-        "timing_scopes": {"stage_interval_seconds": "one stage from before its initial checkpoint through controller query and held-step execution; sampled immediately before the final stage record/index write, so excludes stage finalization and the subsequent attempt checkpoint; overlaps controller and execution subscopes",
-            "controller_query_wall_seconds": "controller query including any native capture checkpoint callbacks",
-            "execution_process_wall_seconds": "held-step child launch through child completion and stdout/stderr persistence; excludes response parsing, replay and rendering",
-            "record_io": "actual JSON bytes, serialization and fsync, plus selective parsing; telemetry log append is excluded"},
-        "module_roles": {**graph.get("role_bindings", graph.get("inactive_roles", {})),
-                         "controller": controller_id, "execution": graph["execution"]["id"]},
-        "geometry_work": {"vertices": None if geometry_active else 0, "set_operations": 0,
-            "claim": graph.get("claim_scope", "pure NMPC; no representation comparison")},
-        "resource_profile_id": resource_profile["profile_id"],
-        "resource_limits": {"requested": {**resource_profile["requested"], "address_space_bytes": 8 * 1024**3,
-              "worker_count": 1, "solver_threads": 1},
-            "enforced": {**resource_profile["enforced"],
-              "address_space_bytes": "POSIX RLIMIT_AS on worker process",
-              "worker_count": "one worker", "solver_threads": "environment requests one BLAS/OMP/MKL thread"},
-            "observed": {"worker_pid": os.getpid(), "platform": platform.platform(), "python": platform.python_version(),
-                "effective_cpu_seconds": resource.getrlimit(resource.RLIMIT_CPU),
-                "effective_address_space_bytes": resource.getrlimit(resource.RLIMIT_AS),
-                "thread_environment": {key: os.environ.get(key) for key in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS")},
-                "python_process_threads": threading.active_count()}},
-        "assurance": "observed-state single-player policy trajectory; no global optimality, reachability, safety, or robustness guarantee"})
-    write_attempt(attempt, ledger)
-    n = task["episode"]["intervals"]
-    stage_elapsed_seconds_sum = 0.0
-    for j in range(n):
-        started = time.monotonic()
-        row = {"update_index": j, "absolute_time": j * task["episode"]["dt"],
-               "observed_physical": state.tolist(), "observed_scaled": (state / scales).tolist(),
-               "original_task_sha256": task_hash, "status": "started", "module_calls": [],
-               "requested_modules": {"controller": {"id": graph["controller"]["id"], "version": graph["controller"]["version"]},
-                   **graph.get("role_bindings", graph.get("inactive_roles", {})),
-                   "execution": {"id": graph["execution"]["id"], "version": graph["execution"]["version"]}}}
-        persist_stage_checkpoint(attempt, j, row)
-        controller_query_started = None
-        try:
-            if policy is not None:
-                install_capture = getattr(policy, "set_query_capture_callback", None)
-                capture_payload_refs = {}
-                if callable(install_capture):
-                    def persist_native_capture(capture):
-                        row["native_query_capture"] = persist_native_capture_payload(
-                            attempt, j, capture, capture_payload_refs)
-                        persist_stage_checkpoint(attempt, j, row)
-                    install_capture(persist_native_capture)
-            controller_query_started = time.monotonic()
-            query = (policy.query(task["task_id"], state.tolist(), j) if policy is not None
-                     else controller_query(task, graph, state, j, previous, prepared_controller))
-            row["controller_query_wall_seconds"] = time.monotonic() - controller_query_started
-            if policy is not None:
-                capture = getattr(policy, "last_query_capture", None)
-                if capture is not None:
-                    if row.get("native_query_capture", {}).get("schema") != \
-                            "csl.closed-loop.native-query-capture-reference/1":
-                        row["native_query_capture"] = persist_native_capture_payload(
-                            attempt, j, capture, capture_payload_refs)
-                        persist_stage_checkpoint(attempt, j, row)
-                query = validate_policy_response(task, task_hash, action_profile_id, query)
-                ledger["preparation_receipt"]["adapter_receipt"] = getattr(policy, "preparation_receipt", {})
-            row.update({"status": query["status"], "policy_id": query["policy_id"],
-                        "controller_invocations": query["invocations"]})
-            row["controller_status"] = query["status"]
-            if query.get("reason"):
-                row["controller_reason"] = query["reason"]
-            if query["status"] in {"unavailable", "incompatible"}:
-                row["failure_category"] = "backend_unavailable_or_incompatible"
-            elif query["status"] == "failed":
-                row["failure_category"] = "controller_execution_failed"
-            if query.get("mathematical_support"):
-                row["mathematical_support_status"] = query["mathematical_support"]
-            elif query["status"] in {"unavailable", "incompatible"}:
-                row["mathematical_support_status"] = "not_evaluated"
-            elif query["status"] == "failed":
-                row["mathematical_support_status"] = "not_evaluated"
-            elif query["status"] in {"unsupported", "rejected"}:
-                row["mathematical_support_status"] = "not_established"
-            if row.get("mathematical_support_status") == "not_evaluated":
-                mathematical_support_not_evaluated = True
-            receipt = query.get("solve_receipt")
-            if receipt is None and row.get("native_query_capture", {}).get("schema") != \
-                    "csl.closed-loop.native-query-capture-reference/1":
-                receipt = query.get("query_receipt")
-            if receipt is not None: row["solve_receipt"] = receipt
-            if query.get("query_receipt") is not None and row.get("native_query_capture", {}).get("schema") == \
-                    "csl.closed-loop.native-query-capture-reference/1":
-                row["query_receipt"] = query["query_receipt"]
-            row["invoked_modules"] = ([call["module_id"] for call in query["invocations"] if call.get("module_id")]
-                + [call[key] for call in query.get("geometry_invocations", [])
-                   for key in ("actual_method_id",) if call.get(key)])
-            raw_capture_is_referenced = row.get("native_query_capture", {}).get("schema") == \
-                "csl.closed-loop.native-query-capture-reference/1"
-            retained_query_fields = {"policy_semantics", "prediction_profile", "coverage",
-                "selected_representation", "finite_action_nominal_profile", "build_backend_profile"}
-            if not raw_capture_is_referenced:
-                retained_query_fields.update({"predicted_sets", "recovered_control", "composition_id",
-                    "profile_id", "geometry_selection", "geometry_invocations", "action_cloud_rows",
-                    "candidate_plan_search", "selector", "selected_plan", "representation"})
-            for field in retained_query_fields:
-                if field in query: row[field] = query[field]
-            if "selected_representation" not in row and "representation" in query:
-                row["selected_representation"] = query["representation"]
-            row["module_call_roles"] = trace_call_roles(query, graph)
-            ledger["geometry_work"]["set_operations"] += len(query.get("geometry_invocations", []))
-            if query["status"] != "accepted" or query["control"] is None:
-                row["failure"] = ("controller unavailable or incompatible; mathematical support was not evaluated"
-                    if query["status"] in {"unavailable", "incompatible"} else
-                    ("controller execution failed; mathematical support was not evaluated"
-                        if query["status"] == "failed" else
-                        "controller-rejected; no fallback action applied"))
-                row["stage_elapsed_seconds"] = time.monotonic() - started
-                stage_elapsed_seconds_sum += row["stage_elapsed_seconds"]
-                persist_stage_final(attempt, j, row, ledger)
-                ledger.update({"completed_holds": len(controls), "status": "in-progress"})
-                write_attempt(attempt, ledger)
-                break
-            action = [float(v) for v in query["control"]]
-            held = make_held_step_request(task, state, action, j,
-                hashlib.sha256((task_hash + json.dumps(controls, separators=(",", ":"))).encode()).hexdigest(),
-                action_profile_id=action_profile_id)
-            row["held_step_request"] = held
-            req_path = attempt / f"execution-request-{j:03d}.json"
-            write_record_artifact(attempt, req_path, held["bridge_request"], "held-step-execution-request")
-            response = execute_held_step_bridge(bridge, req_path, attempt, j, row)
-            execution = validate_held_step_response(held, response)
-            row["execution"] = execution
-            row["module_calls"].append({"operation": "execution.advance", "provider": graph["execution"]["provider"],
-                "module_id": graph["execution"]["id"], "version": "CSL 0.1.0",
-                "profile_id": held["execution_profile_id"], "status": execution["status"],
-                "accepted_steps": sum(r["accepted_steps"] for r in execution["integration_receipts"]),
-                "rejected_steps": sum(r["rejected_steps"] for r in execution["integration_receipts"])})
-            state = np.asarray(execution["physical_states"][-1])
-            controls.append(action); states.append(state.tolist()); previous = query.get("next_guess")
-            row["observed_next_physical"] = state.tolist()
-            row["status"] = "applied-and-observed"; row["applied_control"] = action
-        except Exception as error:
-            if controller_query_started is not None and "controller_query_wall_seconds" not in row:
-                row["controller_query_wall_seconds"] = time.monotonic() - controller_query_started
-            failure = {"type": type(error).__name__, "reason": str(error)}
-            row.update({"status": "failed", "failure": f"{type(error).__name__}: {error}"})
-            if policy is not None:
-                capture = getattr(policy, "last_query_capture", None)
-                if capture is not None:
-                    failure["native_query_capture_ref"] = row.get("native_query_capture")
-                row["failure_category"] = "controller_protocol_or_execution_failure"
-                row["mathematical_support_status"] = "not_evaluated"
-                mathematical_support_not_evaluated = True
-                row["controller_failure"] = failure
-        row["stage_elapsed_seconds"] = time.monotonic() - started
-        stage_elapsed_seconds_sum += row["stage_elapsed_seconds"]
-        persist_stage_final(attempt, j, row, ledger)
-        ledger.update({"completed_holds": len(controls), "status": "in-progress"})
+            "resource_limits": {"requested": {**resource_profile["requested"], "address_space_bytes": 8 * 1024**3,
+                  "worker_count": 1, "solver_threads": 1},
+                "enforced": {**resource_profile["enforced"],
+                  "address_space_bytes": "POSIX RLIMIT_AS on worker process",
+                  "worker_count": "one worker", "solver_threads": "environment requests one BLAS/OMP/MKL thread"},
+                "observed": {"worker_pid": os.getpid(), "platform": platform.platform(), "python": platform.python_version(),
+                    "effective_cpu_seconds": resource.getrlimit(resource.RLIMIT_CPU),
+                    "effective_address_space_bytes": resource.getrlimit(resource.RLIMIT_AS),
+                    "thread_environment": {key: os.environ.get(key) for key in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS")},
+                    "python_process_threads": threading.active_count()}},
+            "assurance": "observed-state single-player policy trajectory; no global optimality, reachability, safety, or robustness guarantee"})
         write_attempt(attempt, ledger)
-        if row["status"] != "applied-and-observed":
-            break
-    complete = len(controls) == n
-    ledger.update({"status": "complete" if complete else "incomplete", "completed_holds": len(controls),
-        "stage_interval_seconds_sum": stage_elapsed_seconds_sum,
-        "physical_objective": objective(task, states, controls) if complete else None,
-        "controls_sha256": hashlib.sha256(json.dumps(controls, separators=(",", ":")).encode()).hexdigest()})
-    if mathematical_support_not_evaluated:
-        ledger["mathematical_support_status"] = "not_evaluated"
-    usage = resource.getrusage(resource.RUSAGE_SELF)
-    if policy is not None:
-        try:
-            policy.close()
-            ledger["policy_adapter_lifecycle"] = {"close": "complete", "adapter": policy_adapter}
-        except Exception as error:
-            ledger["policy_adapter_lifecycle"] = {"close": "failed", "adapter": policy_adapter,
-                                                   "error": f"{type(error).__name__}: {error}"}
-    ledger["resource_limits"]["observed"].update({
-        "worker_stage_interval_seconds_sum": ledger["stage_interval_seconds_sum"],
-        "worker_cpu_seconds": usage.ru_utime + usage.ru_stime, "worker_max_rss_kib": usage.ru_maxrss,
-        "rss_accounting_scope": "worker process only; bridge subprocess peaks are not included"})
-    traced_current, traced_peak = tracemalloc.get_traced_memory()
-    ledger["resource_limits"]["observed"].update({
-        "worker_python_traced_current_bytes": traced_current,
-        "worker_python_traced_peak_bytes": traced_peak,
-        "python_traced_memory_scope": "worker Python allocations; excludes native allocations and bridge subprocesses"})
-    if tracing_started_here:
-        tracemalloc.stop()
+        n = task["episode"]["intervals"]
+        stage_elapsed_seconds_sum = 0.0
+        for j in range(n):
+            started = time.monotonic()
+            row = {"update_index": j, "absolute_time": j * task["episode"]["dt"],
+                   "observed_physical": state.tolist(), "observed_scaled": (state / scales).tolist(),
+                   "original_task_sha256": task_hash, "status": "started", "module_calls": [],
+                   "requested_modules": {"controller": {"id": graph["controller"]["id"], "version": graph["controller"]["version"]},
+                       **graph.get("role_bindings", graph.get("inactive_roles", {})),
+                       "execution": {"id": graph["execution"]["id"], "version": graph["execution"]["version"]}}}
+            persist_stage_checkpoint(attempt, j, row)
+            controller_query_started = None
+            try:
+                if policy is not None:
+                    install_capture = getattr(policy, "set_query_capture_callback", None)
+                    capture_payload_refs = {}
+                    if callable(install_capture):
+                        def persist_native_capture(capture):
+                            row["native_query_capture"] = persist_native_capture_payload(
+                                attempt, j, capture, capture_payload_refs)
+                            persist_stage_checkpoint(attempt, j, row)
+                        install_capture(persist_native_capture)
+                controller_query_started = time.monotonic()
+                query = (policy.query(task["task_id"], state.tolist(), j) if policy is not None
+                         else controller_query(task, graph, state, j, previous, prepared_controller))
+                row["controller_query_wall_seconds"] = time.monotonic() - controller_query_started
+                if policy is not None:
+                    capture = getattr(policy, "last_query_capture", None)
+                    if capture is not None:
+                        if row.get("native_query_capture", {}).get("schema") != \
+                                "csl.closed-loop.native-query-capture-reference/1":
+                            row["native_query_capture"] = persist_native_capture_payload(
+                                attempt, j, capture, capture_payload_refs)
+                            persist_stage_checkpoint(attempt, j, row)
+                    query = validate_policy_response(task, task_hash, action_profile_id, query)
+                    ledger["preparation_receipt"]["adapter_receipt"] = getattr(policy, "preparation_receipt", {})
+                row.update({"status": query["status"], "policy_id": query["policy_id"],
+                            "controller_invocations": query["invocations"]})
+                row["controller_status"] = query["status"]
+                if query.get("reason"):
+                    row["controller_reason"] = query["reason"]
+                if query["status"] in {"unavailable", "incompatible"}:
+                    row["failure_category"] = "backend_unavailable_or_incompatible"
+                elif query["status"] == "failed":
+                    row["failure_category"] = "controller_execution_failed"
+                if query.get("mathematical_support"):
+                    row["mathematical_support_status"] = query["mathematical_support"]
+                elif query["status"] in {"unavailable", "incompatible"}:
+                    row["mathematical_support_status"] = "not_evaluated"
+                elif query["status"] == "failed":
+                    row["mathematical_support_status"] = "not_evaluated"
+                elif query["status"] in {"unsupported", "rejected"}:
+                    row["mathematical_support_status"] = "not_established"
+                if row.get("mathematical_support_status") == "not_evaluated":
+                    mathematical_support_not_evaluated = True
+                receipt = query.get("solve_receipt")
+                if receipt is None and row.get("native_query_capture", {}).get("schema") != \
+                        "csl.closed-loop.native-query-capture-reference/1":
+                    receipt = query.get("query_receipt")
+                if receipt is not None: row["solve_receipt"] = receipt
+                if query.get("query_receipt") is not None and row.get("native_query_capture", {}).get("schema") == \
+                        "csl.closed-loop.native-query-capture-reference/1":
+                    row["query_receipt"] = query["query_receipt"]
+                row["invoked_modules"] = ([call["module_id"] for call in query["invocations"] if call.get("module_id")]
+                    + [call[key] for call in query.get("geometry_invocations", [])
+                       for key in ("actual_method_id",) if call.get(key)])
+                raw_capture_is_referenced = row.get("native_query_capture", {}).get("schema") == \
+                    "csl.closed-loop.native-query-capture-reference/1"
+                retained_query_fields = {"policy_semantics", "prediction_profile", "coverage",
+                    "selected_representation", "finite_action_nominal_profile", "build_backend_profile"}
+                if not raw_capture_is_referenced:
+                    retained_query_fields.update({"predicted_sets", "recovered_control", "composition_id",
+                        "profile_id", "geometry_selection", "geometry_invocations", "action_cloud_rows",
+                        "candidate_plan_search", "selector", "selected_plan", "representation"})
+                for field in retained_query_fields:
+                    if field in query: row[field] = query[field]
+                if "selected_representation" not in row and "representation" in query:
+                    row["selected_representation"] = query["representation"]
+                row["module_call_roles"] = trace_call_roles(query, graph)
+                ledger["geometry_work"]["set_operations"] += len(query.get("geometry_invocations", []))
+                if query["status"] != "accepted" or query["control"] is None:
+                    row["failure"] = ("controller unavailable or incompatible; mathematical support was not evaluated"
+                        if query["status"] in {"unavailable", "incompatible"} else
+                        ("controller execution failed; mathematical support was not evaluated"
+                            if query["status"] == "failed" else
+                            "controller-rejected; no fallback action applied"))
+                    row["stage_elapsed_seconds"] = time.monotonic() - started
+                    stage_elapsed_seconds_sum += row["stage_elapsed_seconds"]
+                    persist_stage_final(attempt, j, row, ledger)
+                    ledger.update({"completed_holds": len(controls), "status": "in-progress"})
+                    write_attempt(attempt, ledger)
+                    break
+                action = [float(v) for v in query["control"]]
+                held = make_held_step_request(task, state, action, j,
+                    hashlib.sha256((task_hash + json.dumps(controls, separators=(",", ":"))).encode()).hexdigest(),
+                    action_profile_id=action_profile_id)
+                row["held_step_request"] = held
+                req_path = attempt / f"execution-request-{j:03d}.json"
+                write_record_artifact(attempt, req_path, held["bridge_request"], "held-step-execution-request")
+                response = execute_held_step_bridge(bridge, req_path, attempt, j, row)
+                execution = validate_held_step_response(held, response)
+                row["execution"] = execution
+                row["module_calls"].append({"operation": "execution.advance", "provider": graph["execution"]["provider"],
+                    "module_id": graph["execution"]["id"], "version": "CSL 0.1.0",
+                    "profile_id": held["execution_profile_id"], "status": execution["status"],
+                    "accepted_steps": sum(r["accepted_steps"] for r in execution["integration_receipts"]),
+                    "rejected_steps": sum(r["rejected_steps"] for r in execution["integration_receipts"])})
+                state = np.asarray(execution["physical_states"][-1])
+                controls.append(action); states.append(state.tolist()); previous = query.get("next_guess")
+                row["observed_next_physical"] = state.tolist()
+                row["status"] = "applied-and-observed"; row["applied_control"] = action
+            except Exception as error:
+                if controller_query_started is not None and "controller_query_wall_seconds" not in row:
+                    row["controller_query_wall_seconds"] = time.monotonic() - controller_query_started
+                failure = {"type": type(error).__name__, "reason": str(error)}
+                row.update({"status": "failed", "failure": f"{type(error).__name__}: {error}"})
+                if policy is not None:
+                    capture = getattr(policy, "last_query_capture", None)
+                    if capture is not None:
+                        failure["native_query_capture_ref"] = row.get("native_query_capture")
+                    row["failure_category"] = "controller_protocol_or_execution_failure"
+                    row["mathematical_support_status"] = "not_evaluated"
+                    mathematical_support_not_evaluated = True
+                    row["controller_failure"] = failure
+            row["stage_elapsed_seconds"] = time.monotonic() - started
+            stage_elapsed_seconds_sum += row["stage_elapsed_seconds"]
+            persist_stage_final(attempt, j, row, ledger)
+            ledger.update({"completed_holds": len(controls), "status": "in-progress"})
+            write_attempt(attempt, ledger)
+            if row["status"] != "applied-and-observed":
+                break
+        complete = len(controls) == n
+        ledger.update({"status": "complete" if complete else "incomplete", "completed_holds": len(controls),
+            "stage_interval_seconds_sum": stage_elapsed_seconds_sum,
+            "physical_objective": objective(task, states, controls) if complete else None,
+            "controls_sha256": hashlib.sha256(json.dumps(controls, separators=(",", ":")).encode()).hexdigest()})
+        if mathematical_support_not_evaluated:
+            ledger["mathematical_support_status"] = "not_evaluated"
+        usage = resource.getrusage(resource.RUSAGE_SELF)
+        if policy is not None:
+            try:
+                policy.close()
+                ledger["policy_adapter_lifecycle"] = {"close": "complete", "adapter": policy_adapter}
+            except Exception as error:
+                ledger["policy_adapter_lifecycle"] = {"close": "failed", "adapter": policy_adapter,
+                                                       "error": f"{type(error).__name__}: {error}"}
+        ledger["resource_limits"]["observed"].update({
+            "worker_stage_interval_seconds_sum": ledger["stage_interval_seconds_sum"],
+            "worker_cpu_seconds": usage.ru_utime + usage.ru_stime, "worker_max_rss_kib": usage.ru_maxrss,
+            "rss_accounting_scope": "worker process only; bridge subprocess peaks are not included"})
+        traced_current, traced_peak = tracemalloc.get_traced_memory()
+        ledger["resource_limits"]["observed"].update({
+            "worker_python_traced_current_bytes": traced_current,
+            "worker_python_traced_peak_bytes": traced_peak,
+            "python_traced_memory_scope": (
+                "worker Python allocations; excludes native allocations and bridge subprocesses"
+                if tracing_started_here else
+                "caller-owned Python tracing session; includes allocations before worker entry; "
+                "excludes native allocations and bridge subprocesses")})
+    finally:
+        if tracing_started_here:
+            tracemalloc.stop()
     write_attempt(attempt, ledger)
     return 0 if complete else 2
 
