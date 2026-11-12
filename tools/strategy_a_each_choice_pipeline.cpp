@@ -732,7 +732,7 @@ void emit_matrix(std::ostream& out) {
         }
     }
     out << "{\"schema\":\"csl.strategy-a-each-choice-pipeline/1\","
-        << "\"scope\":\"one-step, two-state, two-control nominal Strategy A candidate construction; numerical evidence only\"," 
+        << "\"scope\":\"one-step, two-state, two-control nominal Strategy A candidate construction; numerical evidence only\","
         << "\"task\":{\"dynamics\":\"x_next=x+u\",\"state_dimension\":2,\"control_dimension\":2,\"horizon\":1,"
         << "\"initial_state_box\":[[-1,1],[-1,1]],\"control_box\":[0,1],\"next_state_box\":[[0,1],[0,1]],"
             << "\"linear_terminal_objective\":[-1,0],\"quadratic_terminal_center\":[0,0]},"
