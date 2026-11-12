@@ -15,8 +15,6 @@ install(FILES schemas/model/continuous-v1.schema.json schemas/model/README.md DE
 
 install(FILES tests/fixtures/input/continuous-double-integrator.json DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/tests/fixtures/input)
 
-install(FILES docs/contracts/scenario-input.md DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/docs/contracts)
-
 install(FILES tests/fixtures/input/minimal-integrator.json tests/fixtures/input/affine-ltv.json DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/tests/fixtures/input)
 
 csl_install_headers(input)

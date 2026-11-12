@@ -12,6 +12,12 @@ choose a delivery outcome: no release needed, release candidate preparation, or
 an update to an existing release/package workflow. Include the reason and any
 remaining gates. A CMake project version is not evidence of a published release.
 
+The issue 966 documentation migration removes Markdown working contracts from
+installed package trees. Installed consumers use public headers and executable
+behavior; package checks must not require files under
+`share/CSL/docs/contracts` or `share/doc/CSL/contracts`. Record this removal in
+package impact notes because existing consumers may have linked to those paths.
+
 ## Choose the artifact
 
 | Consumer need | Delivery |
