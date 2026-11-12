@@ -16,6 +16,7 @@ struct NominalTubeStage {
     std::optional<OperationResult> backward;
     std::optional<OperationResult> intersection;
     std::vector<SetId> source_sets;
+    std::vector<GeometryReference> requests;
     std::vector<RequestProvenance> providers;
     std::vector<GeometryEvidence> lineage;
 };

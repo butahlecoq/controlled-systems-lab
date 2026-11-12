@@ -116,6 +116,7 @@ std::variant<OperationResult, Unsupported, OperationStopped> intersect(
     OperationRequest operation{identity, selected.provenance().actual->id,
         Intersection{left, right}, SetRelation::equivalent, Assurance::numerical};
     active = identity;
+    record.requests.push_back(geometry_reference(operation));
     record.providers.push_back(provenance(selected.provenance(), identity));
     record.source_sets.push_back(left.id);
     record.source_sets.push_back(right.id);
@@ -136,8 +137,12 @@ std::variant<OperationResult, Unsupported, OperationStopped> intersect(
 }
 
 std::variant<OperationResult, Unsupported, OperationStopped> as_intersection_result(
-        NominalPredecessorOutcome outcome, NominalTubeStage& record) {
+        NominalPredecessorOutcome outcome, NominalTubeStage& record,
+        std::optional<GeometryRequestIdentity>& active) {
     if (auto* failure = std::get_if<NominalPredecessorFailure>(&outcome)) {
+        active = failure->projection.identity;
+        record.requests.push_back(failure->predecessor);
+        record.requests.push_back(failure->projection);
         record.providers.push_back(failure->projection_provider);
         record.lineage.insert(record.lineage.end(), failure->completed_lineage.begin(), failure->completed_lineage.end());
         return std::visit([](auto cause) -> std::variant<OperationResult, Unsupported, OperationStopped> {
@@ -147,6 +152,9 @@ std::variant<OperationResult, Unsupported, OperationStopped> as_intersection_res
         }, failure->cause);
     }
     auto result = std::get<NominalPredecessorResult>(std::move(outcome));
+    active = result.projection_request;
+    record.requests.push_back(result.result.evidence.reference);
+    record.requests.push_back({result.projection_request, result.result.evidence.reference.inputs});
     record.providers.push_back(result.projection_provider);
     record.lineage.push_back(result.result.evidence);
     return std::move(result.result);
@@ -163,7 +171,7 @@ NominalTubeOutcome nominal_tube(const problem::ResolvedProblem& resolved, Reques
     std::optional<GeometryRequestIdentity> active_request;
     const auto fail = [&](auto cause) -> NominalTubeOutcome {
         using T = std::decay_t<decltype(cause)>;
-        return NominalTubeFailure{tube, active_stage, active_phase, active_request,
+        return NominalTubeFailure{std::move(tube), active_stage, active_phase, active_request,
             std::variant<Unsupported, OperationStopped>{std::in_place_type<T>, std::move(cause)}};
     };
     try {
@@ -281,7 +289,8 @@ NominalTubeOutcome nominal_tube(const problem::ResolvedProblem& resolved, Reques
             if (auto* rejected = std::get_if<Diagnostics>(&prepared)) return fail(Unsupported{std::move(*rejected)});
             if (auto* rejected = std::get_if<registry::Rejection>(&prepared)) return fail(Unsupported{rejected->diagnostics});
             auto predecessor = std::get<PreparedNominalPredecessor>(std::move(prepared)).run(context);
-            auto predecessor_result = as_intersection_result(std::move(predecessor), tube.stages[stage_index]);
+            auto predecessor_result = as_intersection_result(std::move(predecessor),
+                tube.stages[stage_index], active_request);
             if (auto* rejected = std::get_if<Unsupported>(&predecessor_result)) return fail(*rejected);
             if (auto* stopped = std::get_if<OperationStopped>(&predecessor_result)) return fail(*stopped);
             auto preimage = std::get<OperationResult>(std::move(predecessor_result));

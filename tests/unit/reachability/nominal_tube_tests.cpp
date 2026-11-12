@@ -208,9 +208,12 @@ TEST_CASE("two-stage full-state H tube matches independent box arithmetic at eve
         REQUIRE(tube.stages[stage].backward);
         REQUIRE(tube.stages[stage].intersection);
         CHECK(tube.stages[stage].coordinates == std::vector<std::size_t>{0, 1});
+        CHECK_FALSE(tube.stages[stage].requests.empty());
         CHECK_FALSE(tube.stages[stage].providers.empty());
         CHECK_FALSE(tube.stages[stage].lineage.empty());
     }
+    CHECK(std::any_of(tube.stages[0].requests.begin(), tube.stages[0].requests.end(),
+        [](const auto& request) { return request.identity.request.value.find("predecessor") != std::string::npos; }));
     const auto& stages = tube.stages;
     check_range(stages[0].forward->output, 0, 0.5, 0.5);
     check_range(stages[0].forward->output, 1, 1.5, 1.5);
