@@ -115,8 +115,33 @@
       "holds_total": 30,
       "source_objective": 0.09206356266610233,
       "directory": "lv-ellipsoid-b78"
+    },
+    {
+      "task": "Lotka–Volterra with F/B/I box geometry, shifted history warm start",
+      "solver": "CasADi/IPOPT",
+      "holds_completed": 30,
+      "holds_total": 30,
+      "source_objective": 0.09206723732293642,
+      "directory": "lv-box-warm-a488",
+      "execution_protocol": "initial zero-control affine rollout; shifted accepted history at subsequent queries; zero supplied duals and provider initialization checked"
     }
   ],
   "bundle_files": "Each directory contains receipt.json, raw.zip, SHA256SUMS, independent audit source and build receipt. Completed episodes also contain corrected plots and renderer receipt.",
-  "verification": "Run sha256sum -c SHA256SUMS and python -m zipfile -t raw.zip in each directory."
+  "verification": "Run sha256sum -c SHA256SUMS and python -m zipfile -t raw.zip in each directory.",
+  "warm_start_evidence": {
+    "source_commit": "a4889d4727cf5ba0bc2dbf64c8c39b7792a18ae5",
+    "tiny_queries": "warm-tiny-a488",
+    "lotka_complete": "lv-box-warm-a488",
+    "orbit_incomplete": {
+      "directory": "orbit-box-warm-a488-incomplete",
+      "completed_holds": 12,
+      "holds_total": 20,
+      "failed_update_index": 12,
+      "reason": "IPOPT Infeasible_Problem_Detected; no source infeasibility claim"
+    },
+    "preserved_setup_failures": [
+      "lv-box-warm-a488-execution-failure",
+      "orbit-box-warm-a488-execution-failure"
+    ]
+  }
 }
