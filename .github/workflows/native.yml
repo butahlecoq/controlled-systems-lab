@@ -221,10 +221,98 @@ jobs:
           archive_hit: ${{ steps.cache.outputs.archive_hit }}
           compiler_hit: ${{ steps.cache.outputs.compiler_hit }}
 
+  casadi-package:
+    needs: route
+    if: needs.route.outputs.native == 'true'
+    name: Linux GCC 13 / native CasADi enabled SDK
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      CC: gcc-13
+      CXX: g++-13
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+      - name: Prepare pinned native CasADi dependency and CMake
+        run: |
+          python -m pip install cmake==3.31.6 -r benchmarks/reporting/closed_loop/requirements.txt
+          python - <<'PYTHON'
+          import casadi, os
+          from pathlib import Path
+          prefix = Path(casadi.__file__).resolve().parent
+          with open(os.environ['GITHUB_ENV'], 'a') as stream:
+              stream.write(f'CASADI_NATIVE_PREFIX={prefix}\nCASADI_CMAKE_DIR={prefix / "cmake"}\n')
+          PYTHON
+      - name: Restore compatible optional-native caches
+        id: cache
+        uses: ./.github/actions/native-cache-setup
+        with:
+          lane: casadi-package
+          configuration: Release
+          generator: Ninja
+          options: -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DCSL_ENABLE_CASADI=ON -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF
+          clean: ${{ inputs.clean || false }}
+      - name: Configure actual CasADi C++ adapter and ABI/link probes
+        run: >-
+          cmake -S . -B tmp/casadi-sdk -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+          -DCSL_ENABLE_CASADI=ON -DCSL_ENABLE_HIGHS=OFF -DCSL_ENABLE_QHULL=OFF
+          -Dcasadi_DIR="$CASADI_CMAKE_DIR"
+      - name: Build native adapter and SDK serially
+        run: cmake --build tmp/casadi-sdk --parallel 1
+      - name: Install the enabled native SDK
+        run: cmake --install tmp/casadi-sdk --prefix "$GITHUB_WORKSPACE/install/casadi"
+      - name: Build and execute isolated installed consumers with an empty runtime PATH
+        run: >-
+          cmake -DCSL_SOURCE_DIR="$GITHUB_WORKSPACE"
+          -DCSL_INSTALL_PREFIX="$GITHUB_WORKSPACE/install/casadi"
+          -DCSL_WORK_DIR="$GITHUB_WORKSPACE/tmp/casadi-consumers"
+          -DCSL_CASADI_DIR="$CASADI_CMAKE_DIR"
+          -P cmake/RunCasadiInstalledClient.cmake
+      - name: Audit native executable and IPOPT plugin dependencies
+        run: |
+          ldd tmp/casadi-consumers/build/policy > tmp/casadi-consumer-dependencies.log
+          ldd "$CASADI_NATIVE_PREFIX/libcasadi_nlpsol_ipopt.so" > tmp/casadi-ipopt-dependencies.log
+          if grep -i libpython tmp/casadi-consumer-dependencies.log tmp/casadi-ipopt-dependencies.log; then
+            exit 1
+          fi
+          if grep -F "$GITHUB_WORKSPACE" install/casadi/lib/cmake/CSL/CSLConfig.cmake install/casadi/lib/cmake/CSL/CSLTargets.cmake; then
+            exit 1
+          fi
+      - name: Preserve optional-native cache evidence
+        if: always() && steps.cache.outputs.archive_key != ''
+        uses: ./.github/actions/native-cache-finish
+        with:
+          lane: casadi-package
+          clean: ${{ inputs.clean || false }}
+          build_success: ${{ job.status == 'success' }}
+          archive_key: ${{ steps.cache.outputs.archive_key }}
+          compiler_key: ${{ steps.cache.outputs.compiler_key }}
+          compiler_enabled: ${{ steps.cache.outputs.compiler_enabled }}
+          save_allowed: ${{ steps.cache.outputs.save_allowed }}
+          archive_hit: ${{ steps.cache.outputs.archive_hit }}
+          compiler_hit: ${{ steps.cache.outputs.compiler_hit }}
+      - name: Retain native dependency and consumer validation logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: casadi-enabled-native-validation
+          path: |
+            tmp/casadi-sdk/CMakeCache.txt
+            tmp/casadi-sdk/CMakeFiles/CMakeConfigureLog.yaml
+            tmp/casadi-consumers/build/CMakeCache.txt
+            tmp/casadi-*-dependencies.log
+          retention-days: 14
+
   native-status:
     name: Native validation
     if: always()
-    needs: [route, release, sanitizers, partial-package]
+    needs: [route, release, sanitizers, partial-package, casadi-package]
     runs-on: ubuntu-24.04
     steps:
       - name: Require routing and every requested native configuration
@@ -234,13 +322,15 @@ jobs:
           RELEASE_RESULT: ${{ needs.release.result }}
           SANITIZERS_RESULT: ${{ needs.sanitizers.result }}
           PACKAGE_RESULT: ${{ needs.partial-package.result }}
+          CASADI_RESULT: ${{ needs.casadi-package.result }}
         run: |
           test "$ROUTE_RESULT" = success
           if [ "$NATIVE" = true ]; then
             test "$RELEASE_RESULT" = success
             test "$SANITIZERS_RESULT" = success
             test "$PACKAGE_RESULT" = success
+            test "$CASADI_RESULT" = success
           else
             test "$NATIVE" = false
-            echo 'Native inputs unchanged: six configurations intentionally not scheduled.'
+            echo 'Native inputs unchanged: native configurations intentionally not scheduled.'
           fi
