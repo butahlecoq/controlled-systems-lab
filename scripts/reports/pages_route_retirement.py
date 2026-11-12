@@ -178,6 +178,8 @@ def _route_role(route: str, catalog: dict[str, dict]) -> tuple[str, str]:
     parts = PurePosixPath(route).parts
     if len(parts) == 1 and parts[0] in {"index.html", "archive.html", "legacy-index.html"}:
         return "learning navigation", "learning"
+    if len(parts) > 1 and parts[0] == "learn":
+        return "learning book chapter", "learning"
     if len(parts) > 1 and parts[0] == "examples":
         return "illustrated learning example", "learning"
     if len(parts) > 1 and parts[0] == "docs":
@@ -220,7 +222,31 @@ def _producer_record(site: Path, route: str, catalog: dict[str, dict], source_id
         return {"files": ["scripts/reports/pages_route_retirement.py"], "owner_status": "exact"}
     if route in {"archive.html", "legacy-index.html"}:
         return {"files": ["scripts/reports/pages_route_retirement.py", "scripts/reports/landing.py"], "owner_status": "exact"}
+    if top == "learn":
+        sources = ["scripts/reports/learning_book.py", "docs/catalogue/learning-book-v1.json",
+                   "docs/catalogue/module-composition-inventory-v1.json"]
+        parts = PurePosixPath(route).parts
+        if route.endswith("/index.html"):
+            manifest = repo / "docs/catalogue/learning-book-v1.json"
+            if manifest.is_file():
+                data = json.loads(manifest.read_text(encoding="utf-8"))
+                sources.extend("docs/examples/learning/chapters/" + chapter["source"]
+                               for chapter in data.get("chapters", []))
+        elif route == "learn/module-catalogue.html":
+            sources.append("docs/catalogue/module-composition-inventory-v1.json")
+        elif len(parts) == 2 and parts[1].endswith(".html"):
+            sources.append("docs/examples/learning/chapters/" + parts[1][:-5] + ".html")
+        return {"files": sources, "owner_status": "chapter-manifest-producer"}
     if top == "examples":
+        if route.startswith("examples/closed-loop/"):
+            sources = ["scripts/reports/learning_book.py",
+                       "scripts/reports/recorded_closed_loop_figures.py",
+                       "docs/examples/closed-loop/figure-index.json"]
+            asset_root = repo / "docs/examples/closed-loop"
+            if asset_root.is_dir():
+                sources.extend(path.relative_to(repo).as_posix()
+                               for path in asset_root.rglob("*") if path.is_file())
+            return {"files": sources, "owner_status": "recorded-figure-and-book-stage"}
         files = ["scripts/reports/visual_examples.py"]
         if route == "examples/index.html":
             files.extend(GALLERY_INDEX_PRODUCERS)
@@ -395,6 +421,16 @@ def inventory(site: Path, *, source_commit: str = "unknown") -> dict:
             lesson = "primary learning entrypoint" if rel == "index.html" else "evidence archive"
             completeness = {"status": "navigation-only", "basis": "no numerical lesson is claimed"}
             replacement_page = None
+        elif role == "learning book chapter":
+            if rel == "learn/module-catalogue.html":
+                lesson = "generated module inventory reference"
+                completeness = {"status": "inventory-reference",
+                                "basis": "module facts come from the source-owned inventory and link to executable lessons when present"}
+            else:
+                lesson = "chapter generated from the ordered learning-book manifest"
+                completeness = {"status": "chapter-manifest-classified",
+                                "basis": "generated lesson chapters carry source-owned status and executable evidence links"}
+            replacement_page = None
         else:
             lesson = "No lesson replacement asserted"
             statuses = sorted({str(item.get("status")) for item in route_entries if item.get("status")})
@@ -434,7 +470,8 @@ def inventory(site: Path, *, source_commit: str = "unknown") -> dict:
         owner = row["producer"]
         if owner["owner_status"] not in {
                 "exact", "source-bundle-and-workflow", "gallery-aggregator",
-                "gallery-aggregation-pipeline"}:
+                "gallery-aggregation-pipeline", "chapter-manifest-producer",
+                "recorded-figure-and-book-stage"}:
             raise ValueError(f"HTML route has no reviewed producer owner: {route} ({owner['owner_status']})")
         missing_owners = [path for path in owner["files"] if not (repo / path).exists()]
         if missing_owners:
@@ -454,7 +491,7 @@ def inventory(site: Path, *, source_commit: str = "unknown") -> dict:
             "html_routes": pages, "zip_routes": zip_rows}
 
 
-def learning_page() -> bytes:
+def learning_page(*, has_learning_book: bool = False) -> bytes:
     cards = (
         ("Vertex algorithms", "LP and simplex methods select vertices. Their membership and redundancy checks are separate from terminal optimization.", "vertex-algorithms"),
         ("Reachable-set representations", "Polytopes, zonotopes, parallelotopes, ellipsoids, and boxes carry different relations and guarantees.", "reachable-sets"),
@@ -462,9 +499,10 @@ def learning_page() -> bytes:
         ("Supporting algorithms", "Follow conversions, projections, sums, intersections, predecessor recovery, and optimization providers.", "supporting-algorithms"),
     )
     body = "".join(f'<li id="{anchor}"><h3>{escape(title)}</h3><p class="summary">{escape(summary)}</p><a href="examples/index.html#algorithm-coverage">Browse related examples</a></li>' for title, summary, anchor in cards)
+    book_link = '<a href="learn/index.html">Learning book</a>' if has_learning_book else ""
     return ("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Learn · Controlled Systems Lab</title><link rel=\"stylesheet\" href=\"examples/examples.css\"></head><body data-csl-pages-learning-root=\"1\"><div class=\"shell\"><aside>"
             "<a class=\"brand\" href=\"index.html\">[ csl ]<br>Controlled Systems Lab</a><p class=\"eyebrow\">Learning routes</p>"
-            "<nav aria-label=\"Learning routes\"><a href=\"index.html\" aria-current=\"page\">Learn</a><a href=\"examples/index.html\">Examples</a><a href=\"archive.html\">Evidence archive</a>"
+            "<nav aria-label=\"Learning routes\"><a href=\"index.html\" aria-current=\"page\">Learn</a>" + book_link + "<a href=\"examples/index.html\">Examples</a><a href=\"archive.html\">Evidence archive</a>"
             "<a href=\"index.html#vertex-algorithms\">Vertex algorithms</a><a href=\"index.html#reachable-sets\">Reachable sets</a>"
             "<a href=\"index.html#control-algorithms\">Control algorithms</a><a href=\"index.html#supporting-algorithms\">Supporting algorithms</a></nav></aside>"
             "<main class=\"report-home\"><header><p class=\"eyebrow\">Start here</p><h1>Learn controlled systems</h1><p>Start with an illustrated example, then open its saved report to inspect the inputs, result, and evidence limits. The archive keeps historical and supplemental reports with their original files.</p></header>"
@@ -662,7 +700,7 @@ def finalize(site: Path, *, source_commit: str = "unknown",
                 "</body>", '<nav aria-label="Site">' + navigation + "</nav></body>", 1)
         else:
             raise ValueError("gallery has no insertion point for evidence archive navigation")
-    root.write_bytes(learning_page())
+    root.write_bytes(learning_page(has_learning_book=(site / "learn/index.html").is_file()))
     legacy.write_bytes(legacy_bytes)
     archive.write_bytes(archive_page(site, baseline))
     gallery.write_text(gallery_text, encoding="utf-8")

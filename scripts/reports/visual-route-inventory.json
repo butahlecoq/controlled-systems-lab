@@ -1141,6 +1141,14 @@
       "disposition": "adopted-shared-quantitative-policy"
     },
     {
+      "source": "scripts/reports/qhull_highs_strategy_a_example.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "qhull-highs-strategy-a-2d.svg"
+      ],
+      "disposition": "analytic-reference-checked-saved-run-renderer"
+    },
+    {
       "source": "scripts/reports/recorded_closed_loop_figures.py",
       "signal_count": 11,
       "asset_name_literals": [],
@@ -1205,6 +1213,14 @@
         "latency.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/source_index_figure.py",
+      "signal_count": 6,
+      "asset_name_literals": [
+        "source-index-geometry-2d.svg"
+      ],
+      "disposition": "analytic-reference-checked-saved-run-renderer"
     },
     {
       "source": "scripts/reports/stage_app01.py",
@@ -2008,7 +2024,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 86,
+      "signal_count": 88,
       "asset_name_literals": [
         "adaptive-ode-replay.svg",
         "app01-plan-timing-v1.svg",
@@ -2059,6 +2075,7 @@
         "projections-lambda0.svg",
         "projections-lambda1.svg",
         "projections.svg",
+        "qhull-highs-strategy-a-2d.svg",
         "reachability-and-approximations.svg",
         "source-index-geometry-2d.svg",
         "syn01-timing.svg",

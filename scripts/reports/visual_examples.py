@@ -23,6 +23,8 @@ import visual_illustrations
 import visual_example_geometry as geometry_examples
 import visual_example_fuel_layers
 import visual_example_hybrid as hybrid_examples
+import qhull_highs_strategy_a_example
+from mathematical_notation import matrix_html
 
 CASE_OWNERS = {
     "hull": geometry_examples,
@@ -319,7 +321,7 @@ def data_details(example):
         }[example["kind"]]
         math_rows = ", ".join(math_label for math_label, _ in coordinate_labels)
         spoken_rows = ", ".join(spoken_label for _, spoken_label in coordinate_labels)
-        output_matrix = _math_matrix(
+        output_matrix = matrix_html(
             matrix,
             f"Output coordinate matrix W, {dimensions} coordinate rows by {len(points)} stored-output columns, displayed to six significant digits; coordinates {spoken_rows}",
             display_significant_digits=6)
@@ -344,37 +346,13 @@ def data_details(example):
     return '<details><summary>' + summary + '</summary>' + content + '</details>'
 
 
-def _math_matrix(matrix, label, *, display_significant_digits=None):
-    """Render a numeric-only MathML body with accessible CSS-stretched brackets."""
-    def display_value(value):
-        exact = json.dumps(value, allow_nan=False)
-        if display_significant_digits is not None and isinstance(value, (int, float)):
-            return format(value, f".{display_significant_digits}g")
-        return exact
-
-    rows = []
-    for values in matrix:
-        cells = "".join(f'<mtd><mn>{escape(display_value(value))}</mn></mtd>'
-                        for value in values)
-        rows.append(f'<mtr>{cells}</mtr>')
-    spoken_rows = "; ".join(", ".join(display_value(value) for value in row)
-                             for row in matrix)
-    accessible_label = f"{label}: {spoken_rows}"
-    return ('<span class="math-matrix" role="math" aria-label="'
-            + escape(accessible_label, quote=True) + '">'
-            '<span class="math-bracket math-bracket-left" aria-hidden="true"></span>'
-            '<math display="inline" aria-hidden="true"><mtable columnspacing="0.7em" rowspacing="0.25em">'
-            + "".join(rows) + '</mtable></math>'
-            '<span class="math-bracket math-bracket-right" aria-hidden="true"></span></span>')
-
-
 def lesson_input_math(example):
     """Show a mathematical view only for the lesson inputs with known schemas."""
     if example["kind"] == "hull":
         points = example["inputs"]["points"]
         dimensions = len(points[0])
         matrix = [[point[coordinate] for point in points] for coordinate in range(dimensions)]
-        values = _math_matrix(matrix,
+        values = matrix_html(matrix,
                               f"Point matrix V, {dimensions} coordinate rows by {len(points)} source-point columns")
         return ('<div class="math-input"><p><var>V</var> = [<var>v</var><sub>0</sub> … '
                 f'<var>v</var><sub>{len(points) - 1}</sub>] ∈ ℝ<sup>{dimensions}×{len(points)}</sup></p>'
@@ -390,8 +368,8 @@ def lesson_input_math(example):
         def halfspace(name, symbol, set_symbol, title):
             matrix = source[name + "_A"]
             bounds = source[name + "_b"]
-            matrix_table = _math_matrix(matrix, f"Matrix A_{symbol}, {len(matrix)} rows by 2 columns")
-            vector_table = _math_matrix([[value] for value in bounds],
+            matrix_table = matrix_html(matrix, f"Matrix A_{symbol}, {len(matrix)} rows by 2 columns")
+            vector_table = matrix_html([[value] for value in bounds],
                                         f"Column vector b_{symbol}, {len(bounds)} entries")
             return ('<section class="math-system"><h3>' + title + '</h3>'
                     f'<p><var>{set_symbol}</var> = {{<var>x</var> ∈ ℝ<sup>2</sup> : '
@@ -732,6 +710,12 @@ def build(catalog, site):
         '<p>QuickHull2D and the recovered BTULSHOR KPABEP/MODIF profile propose original point IDs; an independent exact checker validates each generated cloud before the affine or control sum applies those IDs.</p>'
         '<p><a href="source-index-geometry-2d.html">Inputs, answer and reproduction details ↗</a> · '
         '<a href="source-index-geometry-2d-records.json">Raw records ↗</a></p></article>')
+    saved_figures += ('<article class="saved-figure" id="qhull-highs-strategy-a-2d"><p class="eyebrow">Geometry and control · Public-interface example</p>'
+        '<h3><a href="qhull-highs-strategy-a-2d.html">Qhull and Strategy A on a 2D control problem</a></h3>'
+        '<a href="qhull-highs-strategy-a-2d.html"><img src="qhull-highs-strategy-a-2d.svg" alt="Unit square H constraints with LP and QP terminal state points"></a>'
+        '<p>The saved example runs the faithful source hull path, Qhull conversion, and both HiGHS terminal optimizer paths on one two-state, two-control fixture.</p>'
+        '<p><a href="qhull-highs-strategy-a-2d.html">Inputs, answers, and reproduction details ↗</a> · '
+        '<a href="qhull-highs-strategy-a-2d-record.json">Raw inputs and outputs ↗</a></p></article>')
     fuel_layer_files, fuel_layer_inventory, fuel_layer_card = visual_example_fuel_layers.build(
         Path(__file__).resolve().parents[2])
     saved_figures += fuel_layer_card
@@ -754,6 +738,7 @@ def build(catalog, site):
     require(not out.is_symlink(), "gallery output must not be a symlink")
     outputs = {e["slug"] + ".svg": plot(e) for e in examples}
     outputs.update(analytic_files)
+    outputs.update(qhull_highs_strategy_a_example.build())
     adaptive_assets = Path(__file__).parents[2] / "docs/examples"
     for name in ("adaptive-ode-replay.html", "adaptive-ode-replay.csv",
                  "adaptive-ode-replay.svg", "adaptive-ode-replay.json"):
@@ -784,6 +769,13 @@ def build(catalog, site):
         "page": "source-index-geometry-2d.html", "figure": "source-index-geometry-2d.svg",
         "source_page": "https://github.com/butahlecoq/controlled-systems-lab/blob/main/examples/source_index_geometry_2d.cpp",
         "raw_record": "source-index-geometry-2d-records.json"})
+    qhull_example_source = qhull_highs_strategy_a_example.load_record()["source_commit"]
+    gallery_inventory.append({"family": "Geometry and control reachability",
+        "title": "Qhull and Strategy A on a 2D control problem",
+        "status": "educational-example", "anchor": "qhull-highs-strategy-a-2d",
+        "page": "qhull-highs-strategy-a-2d.html", "figure": "qhull-highs-strategy-a-2d.svg",
+        "source_page": f"https://github.com/butahlecoq/controlled-systems-lab/blob/{qhull_example_source}/tests/synthesis/strategy_a/strategy_tests.cpp",
+        "raw_record": "qhull-highs-strategy-a-2d-record.json"})
     control_witness = control_witness_companions.build(site, catalog)
     outputs.update(control_witness.files)
     gallery_inventory.extend(control_witness.gallery_entries)

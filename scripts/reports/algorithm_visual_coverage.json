@@ -373,13 +373,15 @@
         "CSL::control_recovery"
       ],
       "support": "limited-profile-evidence",
-      "limit": "T-S01/T-S02 reports use scalar state; 2D control plots are not 2D state examples.",
+      "limit": "T-S01/T-S02 complete-family reports use scalar state. The Qhull and HiGHS example is a two-state one-step candidate pipeline, not a complete-family proof.",
       "catalog_kinds": [
         "syn03-strategy-a-ts01",
         "syn03-strategy-a-ts02"
       ],
       "report_routes": [],
-      "examples": [],
+      "examples": [
+        "qhull-highs-strategy-a-2d"
+      ],
       "implementation_issues": [
         66,
         71
