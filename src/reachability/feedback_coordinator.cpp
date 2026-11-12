@@ -76,6 +76,8 @@ struct Runner {
     ProblemId problem; RequestId request; std::vector<SetId> source_ids; std::size_t stage{}; std::size_t serial{};
     std::vector<GeometryReference> requests; std::vector<RequestProvenance> providers;
     std::vector<GeometryEvidence> lineage; std::vector<registry::LPQueryRecord> support_calls; std::vector<SupportBoundMethod> support_methods;
+    Runner(const FeedbackGeometryDependencies& d,const ExecutionContext& c,ProblemId p,RequestId r)
+        : deps(d),context(c),problem(std::move(p)),request(std::move(r)) {}
     std::string id(const char* role) { return "feedback/"+request.value+"/"+std::to_string(stage)+"/"+role+"/"+std::to_string(serial++); }
     OperationResult operation(GeometryOperation op,const registry::PreparedProvider<registry::GeometryPort>& provider,const char* role) {
         if(!provider.provenance().actual) bad("feedback.provider","Selected geometry provider is unresolved.");
@@ -156,10 +158,6 @@ FeedbackSet record(Runner& r,FeedbackFamily family,FeedbackMembership membership
         std::move(membership),strict,std::move(sources),r.requests,r.providers,r.support_calls,r.support_methods,
         {"H embeddings of nonpolyhedral families are coordinate outer covers; family clipping uses an axis cover when needed."},r.lineage};
     r.requests.clear(); r.providers.clear(); r.support_calls.clear(); r.support_methods.clear(); r.lineage.clear(); return result;
-}
-OperationResult wrap(const SetHandle& set,ProblemId p,RequestId request,const char* description) {
-    GeometryReference ref{{p,request,{set.id.value}},{set.id}};
-    return {set,SetRelation::outer,{ref,GeometryClaimScope::set_relation,Unestablished{},{description},{}}};
 }
 } // namespace
 namespace {
