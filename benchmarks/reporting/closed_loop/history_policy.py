@@ -42,12 +42,13 @@ class HistoryPolicy:
             raise ValueError("continuous history policy requires the original continuous action domain")
         if factory_options:
             raise ValueError("continuous history provider options are not registered")
+        receipt = prediction_receipt(task)
         executable = Path(os.environ["CSL_NATIVE_POLICY_BRIDGE"]).resolve(strict=True)
         self.process = subprocess.Popen([str(executable)], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE, text=True, bufsize=1)
         self.task, self.task_sha256, self.controller_id = task, task_sha256, controller_id
         self.action_profile_id = action_profile_id
-        self.receipt = prediction_receipt(task)
+        self.receipt = receipt
         self.last_query_capture = None
         self.query_capture_callback = None
         self.preparation_receipt = {"executable": str(executable),
