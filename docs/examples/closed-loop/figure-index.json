@@ -1,0 +1,2006 @@
+{
+  "figures": [
+    {
+      "availability": "ready",
+      "comparison_coverage_gaps": [],
+      "coordinate_transform": {
+        "description": "Physical state coordinates; no scaling applied.",
+        "names": [
+          "Prey population P",
+          "Predator population R"
+        ],
+        "permutation_matrix": [
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0
+          ]
+        ],
+        "raw_indices": [
+          0,
+          1
+        ],
+        "raw_scales": null,
+        "scale_applied_to_source_values": false,
+        "source_values_are_physical": true,
+        "units": [
+          "thousand individuals",
+          "thousand individuals"
+        ]
+      },
+      "href": "examples/closed-loop/figures/lotka-populations.html",
+      "id": "lotka-populations",
+      "layer_scopes": [
+        "initial physical state",
+        "retained stage-layered graph singleton nodes",
+        "serialized complete authored-action parent clouds when present",
+        "initial model-predicted plan",
+        "executed physical plant replay",
+        "soft objective target when defined"
+      ],
+      "missing_layers": [
+        "complete all-stage forward-set geometry over the full reachable parent set",
+        "all-admissible-control forward reachable sets",
+        "materialized backward/predecessor sets",
+        "materialized full-state intersections"
+      ],
+      "plotted_data_href": "examples/closed-loop/figures/lotka-populations.plotted-data.json",
+      "png_href": "examples/closed-loop/figures/lotka-populations.png",
+      "profile_id": "worker-wall-1800-cpu-1800/1",
+      "raw_record_refs": [
+        {
+          "attempt_id": "syn-nl-lv-01-20261111T202218Z-4011d21f",
+          "capture_relative_path": "syn-nl-lv-01/attempts/syn-nl-lv-01-20261111T202218Z-4011d21f",
+          "manifest_sha256": "c6657d497a4be3fac7281d2741f46c4b4e183abe6b624dc0ef3d00a74e6c1a68",
+          "raw_stage_hashes": [
+            {
+              "path": "stage-000.json",
+              "sha256": "3b096ded3aa6ca24e6def43aa25eb3460fac647f756243c0f5328c689d49f088"
+            },
+            {
+              "path": "stage-001.json",
+              "sha256": "8c7dd37244d48cd541e8c881e2b32705dd0cece110a60cdc7b044c558e9943fe"
+            },
+            {
+              "path": "stage-002.json",
+              "sha256": "3b44ff336e9ed63b33648d66d45828092dc38d2196d01892303051da4d6c46fe"
+            },
+            {
+              "path": "stage-003.json",
+              "sha256": "69e6545440c9ef40d61d306ab02d111be07efad33be9d9e556c2e458f723c0eb"
+            },
+            {
+              "path": "stage-004.json",
+              "sha256": "65ce8e511df2f82e2cadf489e7dbcafd2e00f1d837216ae72710376a43cd7288"
+            },
+            {
+              "path": "stage-005.json",
+              "sha256": "2903a652e934214228de3f31f07a8cc6bc7e26f7c6730a9aceb5c0284a79a2c8"
+            },
+            {
+              "path": "stage-006.json",
+              "sha256": "c033ec890191e26003c2f1de17573cbfec0d4791c0860681925e24f7ba095459"
+            },
+            {
+              "path": "stage-007.json",
+              "sha256": "c00a6b99708498c00e059031f862cb3c1626b66cc8f0076bd4d5a5891140e4db"
+            },
+            {
+              "path": "stage-008.json",
+              "sha256": "b2521864fac6be2af3f97251ffe7ab08d29f53ee927009a9eb52884f75305666"
+            },
+            {
+              "path": "stage-009.json",
+              "sha256": "a5cc7c1b69f54fb71ce69ebb361a793e47e2511f1262d01a4776f3f34d536ec4"
+            },
+            {
+              "path": "stage-010.json",
+              "sha256": "dca04327a974246d9bc5f95da770b885688408610055574c8e06e388fb190700"
+            },
+            {
+              "path": "stage-011.json",
+              "sha256": "bbfadea434aeccfe3c004a11a1c236b533545f28436e80d2d7c1071d61b10c4f"
+            },
+            {
+              "path": "stage-012.json",
+              "sha256": "fde343769ffe138a2f6dea44b65c09d73aca3118858a1a9a31889fdc9c15ab8e"
+            },
+            {
+              "path": "stage-013.json",
+              "sha256": "04e9627e9e1f418f8e5e9d52432bec9b14e895c28eecd7e823b4cf70742c83d7"
+            },
+            {
+              "path": "stage-014.json",
+              "sha256": "2ac9dea0b59c8901c78b496bdc011c1981208e5bf202cddb5908ab64a6a40dff"
+            },
+            {
+              "path": "stage-015.json",
+              "sha256": "05d2acecae4aca68bc2ab4eca381e1caf3fc7d7d464249316cf52b32185f0e99"
+            },
+            {
+              "path": "stage-016.json",
+              "sha256": "a19f18c86573214d7827fe898e5cf6927efe6c19e08213fc2d29f3a68732ba35"
+            },
+            {
+              "path": "stage-017.json",
+              "sha256": "81692e8e0fb525d44d8f25301051b9e592986fcba6e6664a3ddc2d7dfb9001f3"
+            },
+            {
+              "path": "stage-018.json",
+              "sha256": "26951887adf9aa6abaa1796f1db8c811fdb67482448b28767a3b4f398971b869"
+            },
+            {
+              "path": "stage-019.json",
+              "sha256": "a75e592f28ff09101b44aaa746a5a55bbfec322918b62a70def12c45d4ae8730"
+            },
+            {
+              "path": "stage-020.json",
+              "sha256": "287b2023d7734b6492bc1b4a11c6536f601de5487181343baddf9ca18a5de3eb"
+            },
+            {
+              "path": "stage-021.json",
+              "sha256": "efac3f6229ba4a59e2e037f5ef7405e5afaa72d49b351d73f229db9986874b29"
+            },
+            {
+              "path": "stage-022.json",
+              "sha256": "091d79ddafba7f2ca206931b425ce24ea5518187b72e0d1fc6aab5e0705ef6ee"
+            },
+            {
+              "path": "stage-023.json",
+              "sha256": "fbd836a1b52b44ed97c3efa0dc2ef91b17baff3e40dfa2b02b43f25cf819afe9"
+            },
+            {
+              "path": "stage-024.json",
+              "sha256": "070194208349b7a9ae2b8d5b51e2105561452b5145fe2403973c3f131f2063e3"
+            },
+            {
+              "path": "stage-025.json",
+              "sha256": "e892f9638d8ac024cf1e5a068ef0ba937e518708a70b40368dbdca405b78a543"
+            },
+            {
+              "path": "stage-026.json",
+              "sha256": "ab3d2c7df6ef85b3a9b42c73c11310721a8b64703322f98aeeddd458b8add690"
+            },
+            {
+              "path": "stage-027.json",
+              "sha256": "a4c9875fb5b4fce624989f451dbb12455ad28135f15e77534928554622f16896"
+            },
+            {
+              "path": "stage-028.json",
+              "sha256": "c3a6cf2d7ee6bfef0da7b9231f393bd9decd1306fa915c15a8273028939c5744"
+            },
+            {
+              "path": "stage-029.json",
+              "sha256": "c017cd5e23d2a218279ac98e25da385399f896ea86b069b81f7e29c4ca981d21"
+            }
+          ],
+          "stage_count": 30
+        },
+        {
+          "attempt_id": "syn-nl-lv-01-20261111T202541Z-4f0b01f8",
+          "capture_relative_path": "syn-nl-lv-01/attempts/syn-nl-lv-01-20261111T202541Z-4f0b01f8",
+          "manifest_sha256": "f09bce8df65720d4d983bb49e1366a8eb6049dbb3460192ab6b465f0208ca3cc",
+          "raw_stage_hashes": [
+            {
+              "path": "stage-000.json",
+              "sha256": "a8f4d5e0681f8146ac1ce9875ce4ced41b9f94d50e2f802d448599f08f697694"
+            },
+            {
+              "path": "stage-001.json",
+              "sha256": "c3b53be2ade7b6ecfd01984913766ca7e668e7e4997a1267e21385d07e7ade35"
+            },
+            {
+              "path": "stage-002.json",
+              "sha256": "0901fc650a02b86cd9946cd9149d5948bc477efd518a5379dd0acf8b3a69346e"
+            },
+            {
+              "path": "stage-003.json",
+              "sha256": "f40d204824d8bb123d8db82fd5c979adea2e12dbd989ba2b850c3663b58b2a3c"
+            },
+            {
+              "path": "stage-004.json",
+              "sha256": "da0523518ddd765991f22d356d47272d55ad0fb9c511723265e7d57e91cd5cf6"
+            },
+            {
+              "path": "stage-005.json",
+              "sha256": "6483883422ee58b8b37d7dcdd04c1e622ebb9b85c8a593ba6908ed2ff8a1d687"
+            },
+            {
+              "path": "stage-006.json",
+              "sha256": "4be42c2a672271830eb2f0d9cafcc2c599983ae00cfeb4273286740995a73f7c"
+            },
+            {
+              "path": "stage-007.json",
+              "sha256": "4393c22363d9d74482c71eb18aaa77a27c2192442a6eee0ae3cca082427ebe7d"
+            },
+            {
+              "path": "stage-008.json",
+              "sha256": "0ecb57ee4c1b2b3e3546ead8483f0b3d91853fb9cba1f743481065dd9623ab8f"
+            },
+            {
+              "path": "stage-009.json",
+              "sha256": "8cb5a1f4607c85d28a454027676af4b857209e7d549a119d3906810e0bed35d9"
+            },
+            {
+              "path": "stage-010.json",
+              "sha256": "7b1a3077a6972921792708292ae86a28ad24b1b960bdc6d8a9b13f8a184a2e8b"
+            },
+            {
+              "path": "stage-011.json",
+              "sha256": "865e50a9488602022732bd07b4d167d9ac1af0fd3123c200cf59f374fe4a2287"
+            },
+            {
+              "path": "stage-012.json",
+              "sha256": "aca842d28c478ba163db1e0db9a3eb84d14bb6c6b46440fc7ef5065bc1d8c993"
+            },
+            {
+              "path": "stage-013.json",
+              "sha256": "d94ceaf6260b5131b441550006f8e1c3db34245ceb3868ffd0724590d518ba32"
+            },
+            {
+              "path": "stage-014.json",
+              "sha256": "1b01b13800b51844a03dff0c18d10365ab57099f27d722664e7bf818cdad96fa"
+            },
+            {
+              "path": "stage-015.json",
+              "sha256": "823815eb997859109692cd37bb5fece5752a3465a9990ad16c24fac4c9c5e420"
+            },
+            {
+              "path": "stage-016.json",
+              "sha256": "8714f20d3bc1dacf87e387657f44c76b8f570409770c96b0a8f7846b35e63ce9"
+            },
+            {
+              "path": "stage-017.json",
+              "sha256": "6360bd0f1273f2f021706ca25ad0d0b0cef8d0392a20dbbf443ac3c409426424"
+            },
+            {
+              "path": "stage-018.json",
+              "sha256": "25045cc6b60785bf644c0b904d12f2237e442762df10bf317efbc2c36f0af678"
+            },
+            {
+              "path": "stage-019.json",
+              "sha256": "32ccf04fbf0bf6aae69f3d42891e4efd8d5b00e678c9c4c350fe6e2f9db22064"
+            },
+            {
+              "path": "stage-020.json",
+              "sha256": "9cfbc295cadd39accee21ef542a5439ed3266d660c1586d4fe30be09dbbe142e"
+            },
+            {
+              "path": "stage-021.json",
+              "sha256": "729543780f2fb91c0174413365aaab326582f6ec8040136dcc2724268fb109ca"
+            },
+            {
+              "path": "stage-022.json",
+              "sha256": "98586c909314bcc5bcd9cbb66b5dcad737f4322d06c34dc0c40bab67d7ce6d8b"
+            },
+            {
+              "path": "stage-023.json",
+              "sha256": "67d7a8811a8c5803bd337622fd4cc8942dd5fd9104affcfe1053c7826e6f914c"
+            },
+            {
+              "path": "stage-024.json",
+              "sha256": "b78de41438ab0838a23459a94cdb591eb7a62ded6d156b69b8fd6c7fc92c0b5e"
+            },
+            {
+              "path": "stage-025.json",
+              "sha256": "07f4d7c41cbc2c2413a37cbe992eef1190f46b3f30584707734762b22e7bfd84"
+            },
+            {
+              "path": "stage-026.json",
+              "sha256": "1bdee4fe1c16783e0b3f51cf3858ba506259ce7edc7587bb6d49fcbe3c376f54"
+            },
+            {
+              "path": "stage-027.json",
+              "sha256": "b5029a060630897a888daf244b289ba2eb642566214b7b579429ae3d1f9e2d70"
+            },
+            {
+              "path": "stage-028.json",
+              "sha256": "e1a718e4b25717c73277f0229b2a133211904e969f631dd9225731de36a172f6"
+            },
+            {
+              "path": "stage-029.json",
+              "sha256": "c1f9f2d1d2a4c0a8770ea34aa95e200fd53ad1b94622e93c1fc12ec5d824ef3f"
+            }
+          ],
+          "stage_count": 30
+        },
+        {
+          "attempt_id": "syn-nl-lv-01-20261111T203317Z-ddc8d8e0",
+          "capture_relative_path": "syn-nl-lv-01/attempts/syn-nl-lv-01-20261111T203317Z-ddc8d8e0",
+          "manifest_sha256": "6fae4663c98ce145289272ce61e2cb3ddc0c4ee67877ac090ed44605eedce40c",
+          "raw_stage_hashes": [
+            {
+              "path": "stage-000.json",
+              "sha256": "ce6ab940f34c04a1f429ec6a9088e05bf738c7837ef5ea6bb22d5f1a82cfd31c"
+            },
+            {
+              "path": "stage-001.json",
+              "sha256": "7a2b63033ab7c57e8bec752f27e8fe9ffd032f15ba4429be9fc57a9a512a839a"
+            },
+            {
+              "path": "stage-002.json",
+              "sha256": "4ba5a9d8a3878a7f406223cf67894e56feabf1ff842a7e51b7aa00492e10145c"
+            },
+            {
+              "path": "stage-003.json",
+              "sha256": "556332d4d48cbd4301c785a7b1e576bc633ee2cb04caf899f988e62cb5887525"
+            },
+            {
+              "path": "stage-004.json",
+              "sha256": "2542f0048606a4e10214b526081c823d220bfa6589da757d9d282459a1e3466c"
+            },
+            {
+              "path": "stage-005.json",
+              "sha256": "ca4f84da1fd78c21e3af9b3d2c691011a32e42562e15244f8d96b338d784600b"
+            },
+            {
+              "path": "stage-006.json",
+              "sha256": "f4c5dc804327216a5999ca548364a96e94e8704aed729927ca1ba15db645fd50"
+            },
+            {
+              "path": "stage-007.json",
+              "sha256": "88b203530bb13d7179d5cc65cfc891a6e0fd798fd7dded200be0eee2744616cd"
+            },
+            {
+              "path": "stage-008.json",
+              "sha256": "6d58134c6dc8d43bf8b538fcfa1806c62ce09808cf27ec586fa4e046b51d7bf0"
+            },
+            {
+              "path": "stage-009.json",
+              "sha256": "bcf8244199f637cc8e03e2b08f4255a452a3dfadfa4c1444ad0cd328f3ca13ff"
+            },
+            {
+              "path": "stage-010.json",
+              "sha256": "4acc5efc0bc941824e000463b29868ef056b2a2df36af107022c5c7c85ca76c9"
+            },
+            {
+              "path": "stage-011.json",
+              "sha256": "ca0e9e8c107a08faedd280b3399163398ea3febfdc87e1c800f2654b67588d1d"
+            },
+            {
+              "path": "stage-012.json",
+              "sha256": "b580671fa7c8887f8e95805e614470958be56a1c7a0bf83bb30ceb1723e86be1"
+            },
+            {
+              "path": "stage-013.json",
+              "sha256": "5111b4e4a6108cc684223a533731d4e8d6a8ae55ace0aff98b613dddb442ab0e"
+            },
+            {
+              "path": "stage-014.json",
+              "sha256": "bcfce249935ea559f038f768bfac47f95b4443477646eddad69ed99d951a5025"
+            },
+            {
+              "path": "stage-015.json",
+              "sha256": "50fe4b26b976612a058673749f4358a91f3743759a122639ae27f6a8b794b808"
+            },
+            {
+              "path": "stage-016.json",
+              "sha256": "a70de2136f714fc33724fb4d581111346b969ebe6a065f909c7239b685f2d82b"
+            },
+            {
+              "path": "stage-017.json",
+              "sha256": "9722a77d1983a87d8f23bb0d559d13a5ea5e129cdc88fe1f464db9eb84a4a252"
+            },
+            {
+              "path": "stage-018.json",
+              "sha256": "f3c446b4cc6f72a363caaa9d24bd995ed593d07a8a4ace43564a2a59c54db775"
+            },
+            {
+              "path": "stage-019.json",
+              "sha256": "6938b399d0461cb33657ab3e13cd9c6f8a5f739946fe23d1cea234a5cf2c4729"
+            },
+            {
+              "path": "stage-020.json",
+              "sha256": "69b95ee09d38d8696dd6bc8846626ca5db62d4a2411affe9807198815f3677c7"
+            },
+            {
+              "path": "stage-021.json",
+              "sha256": "257eda6fb1b6d05f431c215a363052f837d36b92cecffd8b4fbffd1c8beab493"
+            },
+            {
+              "path": "stage-022.json",
+              "sha256": "33aed0a12697de26e8c559aa60012951616c3e6f230e9ee541933f97d058f07b"
+            },
+            {
+              "path": "stage-023.json",
+              "sha256": "ec60ac118bd01e6fbeb16cfc4d19b4822e32d343ef03b5600251e88597a800b4"
+            },
+            {
+              "path": "stage-024.json",
+              "sha256": "f08378d029fd2d8f58b0ea6348cc561b2df5eac089d6a530b70fd536675af573"
+            },
+            {
+              "path": "stage-025.json",
+              "sha256": "00e0b03f507b76e19d30f26a3428dc85967ad07f985bc0be110157d2df28581a"
+            },
+            {
+              "path": "stage-026.json",
+              "sha256": "7f92667c483c51f8c675dcbd9497648c72ef81105d13813d5a5f2b881c508c26"
+            },
+            {
+              "path": "stage-027.json",
+              "sha256": "0e11311586c7c016ae6a03ffca006b2e1400c3caad0f5d983c6cc46a178ff697"
+            },
+            {
+              "path": "stage-028.json",
+              "sha256": "c57bf7be789255159a69b68f9f5b73b10c1de0ff316af8b8a6e7db5a1e2c081d"
+            },
+            {
+              "path": "stage-029.json",
+              "sha256": "d841f8eb08d54f427f978830d9249a5689a8cdd9397dbfd85d6fb38748abb982"
+            }
+          ],
+          "stage_count": 30
+        },
+        {
+          "attempt_id": "syn-nl-lv-01-20261111T204110Z-af9710e5",
+          "capture_relative_path": "syn-nl-lv-01/attempts/syn-nl-lv-01-20261111T204110Z-af9710e5",
+          "manifest_sha256": "64a014a04b68e052474f0a9359921dd9fc63687cce198a8bd49035d90c38abff",
+          "raw_stage_hashes": [
+            {
+              "path": "stage-000.json",
+              "sha256": "d947a983d65a46ed3adcc642f48f9a8138860cd825c5d45abf977cb40c653009"
+            },
+            {
+              "path": "stage-001.json",
+              "sha256": "9ed3fb08ff68ba2e92fe27e4c0de3249dec107242e49e0f3808a5bd43ba98343"
+            },
+            {
+              "path": "stage-002.json",
+              "sha256": "5cfc81e8a54e9d0649249abfe139e2c80c2673b1c5f99ac242fa10494ceedc75"
+            },
+            {
+              "path": "stage-003.json",
+              "sha256": "156473efdbcaeb4caf371fe0753b9ede3151b22a5847a4530140d357c137caac"
+            },
+            {
+              "path": "stage-004.json",
+              "sha256": "1b8dffbc26a9e86ce6d9290a7527fbbc399f7471d9e12163aafe87bd16efe9b9"
+            },
+            {
+              "path": "stage-005.json",
+              "sha256": "d7f659e7fca4c632da99704b47c4ca4f273fec56a012c7309e94b2fd7d0566f6"
+            },
+            {
+              "path": "stage-006.json",
+              "sha256": "b39b3d64e6c705bded8d522f2125480d54d8c68bc29c7c054bd8a0c738a5afd7"
+            },
+            {
+              "path": "stage-007.json",
+              "sha256": "2234f2fa340db848db21db233f0d0ea6d849473b643f2df94c5efd77f284ec67"
+            },
+            {
+              "path": "stage-008.json",
+              "sha256": "59444a3fb12d1de09e7878bf7928fa598552738c773f025813da8ab57f574afc"
+            },
+            {
+              "path": "stage-009.json",
+              "sha256": "65619722f0e9e307e5defefdc12221c1ff6247ab192fc1f274c82e2d30f1de58"
+            },
+            {
+              "path": "stage-010.json",
+              "sha256": "be567d8f29200758f1231620c99ad741e647f2a8cff61570a238bed8229bece7"
+            },
+            {
+              "path": "stage-011.json",
+              "sha256": "bf8bfe53ca0e21b7418a189abec470036f9f833e2bc34d71f5dd540fc13c2f83"
+            },
+            {
+              "path": "stage-012.json",
+              "sha256": "d435f989bf8e645be6574cd30dc5f10766fd0dc4fda55fa54738b6e3985b2222"
+            },
+            {
+              "path": "stage-013.json",
+              "sha256": "6f5da5b7d9a461a8b107e628bbe6e0bd7bc3151f4381e88fcc4ea0aca7867e0c"
+            },
+            {
+              "path": "stage-014.json",
+              "sha256": "3da9f60a0ae1e47cbc0920d8642f08cf7206dd906f1861b999532e5532e58dfc"
+            },
+            {
+              "path": "stage-015.json",
+              "sha256": "109c2b03010c457c0833443a77159f956b1187cfe4c18f90c53038d9a3fc839d"
+            },
+            {
+              "path": "stage-016.json",
+              "sha256": "74d3528305e67e4cc8a02837f43bf5742efc5462cf0423d0e4c3e2658a8d44ba"
+            },
+            {
+              "path": "stage-017.json",
+              "sha256": "72960a72fb9281cce2ebb0bf2938bdd034c8ae0363493c805fc0312c9467c8ee"
+            },
+            {
+              "path": "stage-018.json",
+              "sha256": "8b4ccd3a437ecb4e2cace607b31276d4e3c65a0d78aa6bff18aa7286acecd164"
+            },
+            {
+              "path": "stage-019.json",
+              "sha256": "01796be7d11977c0d2855bf40b644f879d76bda41a8dff013e341eee760c9e8f"
+            },
+            {
+              "path": "stage-020.json",
+              "sha256": "64929fd9d007f59b6dcaccb1bd150e85bef4b5ce34cee201302e07b9ab04d00c"
+            },
+            {
+              "path": "stage-021.json",
+              "sha256": "e93cf272178ecd8f6fedf81e2ccef5daedc0e8007f3dbf86bf3876c6b7967be5"
+            },
+            {
+              "path": "stage-022.json",
+              "sha256": "f4076d1753e2bf2e8bc173434d85c18f05719efcc780f765e59fd8aa7f9be382"
+            },
+            {
+              "path": "stage-023.json",
+              "sha256": "4dcb8f620b6726ffe688c3b69fc2b9f0c79dd451811b26e5747af278710fe032"
+            },
+            {
+              "path": "stage-024.json",
+              "sha256": "efc6d1b91bb7a994310f5237ec0586d8e407810a0f67690a8a8914b99ddd573f"
+            },
+            {
+              "path": "stage-025.json",
+              "sha256": "9fef10fe24118ef613e2fb6fbb135f95b204e95a648e9c3ef15ba9f2e75fe72b"
+            },
+            {
+              "path": "stage-026.json",
+              "sha256": "41ad04360d06cfbc75d9cb3d72b98b6b3adb0246829f16a3e08c7abdcd6c23e7"
+            },
+            {
+              "path": "stage-027.json",
+              "sha256": "39eb6011066f8cf89b3d0c2d49cee9e32bff2e72566185fc181eaceb9774b825"
+            },
+            {
+              "path": "stage-028.json",
+              "sha256": "05871fcdc12000dad3a03585551ad088d0280cfbefeeb9bdf933df9eae46181b"
+            },
+            {
+              "path": "stage-029.json",
+              "sha256": "ae3a884749df89e50a9ed4d6103ea60258fbc1d8e44a615ab88ebd17122b1078"
+            }
+          ],
+          "stage_count": 30
+        },
+        {
+          "attempt_id": "syn-nl-lv-01-20261111T204901Z-06fc9393",
+          "capture_relative_path": "syn-nl-lv-01/attempts/syn-nl-lv-01-20261111T204901Z-06fc9393",
+          "manifest_sha256": "8074f68538c5857ca3be29db73ec99104ba8aabd2b3cfe83543ae95707c6b9b7",
+          "raw_stage_hashes": [
+            {
+              "path": "stage-000.json",
+              "sha256": "147e32c6a09403fd8468bd893db08fc0159b166a11fb79e9e77a33228ba1288d"
+            },
+            {
+              "path": "stage-001.json",
+              "sha256": "91106ba1ff6874345986917b7fa75220fc6f1a4098bbf2afb17f4687c3461a98"
+            },
+            {
+              "path": "stage-002.json",
+              "sha256": "7af3f7f7d8cbdc213a9ca7c6d6b770f9eb1f47b1e303353aee7beb17bfcaee06"
+            },
+            {
+              "path": "stage-003.json",
+              "sha256": "ee6cfc4eb229113d5c0480f93b73ad8bd9d54134e9c0646c220a7cbc5adbb269"
+            },
+            {
+              "path": "stage-004.json",
+              "sha256": "69c093cfffccbabf88e187b647a5933c0d684039cde43b52ad68b95d1556b4ba"
+            },
+            {
+              "path": "stage-005.json",
+              "sha256": "c5a4c8cc6feaaad5cbf6c02ab0073dd23a1e275e92e7d11a5311f567ac8221b1"
+            },
+            {
+              "path": "stage-006.json",
+              "sha256": "d554571849a5a1bd8fa22314277d9a22b7e627ba1208a2b4ee70932698afae42"
+            },
+            {
+              "path": "stage-007.json",
+              "sha256": "73f26d8ab928bc919baf49e95acef3f70be3ff9037349b5a8e8586d38870b950"
+            },
+            {
+              "path": "stage-008.json",
+              "sha256": "999ba12ee85448c8d97ffc3db66a68b6e320028ce24289e00fc713a8ee1fdcf6"
+            },
+            {
+              "path": "stage-009.json",
+              "sha256": "8948c0cb9ebf73ade1677bc8b3c6b8c7e5945bbcd46ba0372a4907a08dc621a5"
+            },
+            {
+              "path": "stage-010.json",
+              "sha256": "265861300815c6e447b60e8087b01e7a5d815574b6e4a63e61e9c88856f999f5"
+            },
+            {
+              "path": "stage-011.json",
+              "sha256": "60c6586f21c473c161b46367d46975b8d4221dd411b0f62992332814d7360739"
+            },
+            {
+              "path": "stage-012.json",
+              "sha256": "cfc55eea65724ed25a0ff3d4b19e699b8298683a1292a036e9c0f4a1a4fb7653"
+            },
+            {
+              "path": "stage-013.json",
+              "sha256": "f7aeb6297c30bea7398a28e4f15bab517b91c756a572b934d81889e6721364bc"
+            },
+            {
+              "path": "stage-014.json",
+              "sha256": "e6cadd7fd999bd527211290e2ee6f111f47b2ac4af4c243b86cb871663ff6414"
+            },
+            {
+              "path": "stage-015.json",
+              "sha256": "c37860f76b57a11adad1e2fef67bd7f80847f02783e060c11dab231224671538"
+            },
+            {
+              "path": "stage-016.json",
+              "sha256": "eb9f26a08c901a6d52d9ac8d9b00f5576d554111c7e87531cd5c65e114789efd"
+            },
+            {
+              "path": "stage-017.json",
+              "sha256": "b730f23a277e814a6127afbf2929defa402de4d0e748a4beba2fc029ec644cfd"
+            },
+            {
+              "path": "stage-018.json",
+              "sha256": "6c545fda71682daa43b094f6a74bfb9d0df38d02cbb1a41725ce08aa671e1385"
+            },
+            {
+              "path": "stage-019.json",
+              "sha256": "e3782854c6bd54c1530d26732038762392b4ae477731fb457bbe45f124c54602"
+            },
+            {
+              "path": "stage-020.json",
+              "sha256": "210ce63c865d6c9113714a928b2817f6427f14c3b79028f7e631bf8dca431456"
+            },
+            {
+              "path": "stage-021.json",
+              "sha256": "bb8d6d3f12d6a4f09ffc1198aedf5460598550aeb3f4fb96b87f44496f1ef08b"
+            },
+            {
+              "path": "stage-022.json",
+              "sha256": "8a9504039a0da3aa44e0ea54e71327e3878ffe906f55247c14e94d64912ad276"
+            },
+            {
+              "path": "stage-023.json",
+              "sha256": "52c435633432dacbe3e0cba27fa0a4657a9b4381f0aad895ab65dfe988aac026"
+            },
+            {
+              "path": "stage-024.json",
+              "sha256": "f3360f291c13082f07f6df1f5c69beef57f11ab3f8e51a71a2cfc1b021a25ea6"
+            },
+            {
+              "path": "stage-025.json",
+              "sha256": "6ef8637b39a5937dc631e051994e162900a0a59a26af2f7f0a379ef232afa6eb"
+            },
+            {
+              "path": "stage-026.json",
+              "sha256": "c3345bf487f534adccd91f3ee9690c3bb3a4045850db9d35ce18ef7df5ce5e1c"
+            },
+            {
+              "path": "stage-027.json",
+              "sha256": "bf743d3971cfec3303fadd8040464f464292ff5e711e53165fe7b0c78da4408a"
+            },
+            {
+              "path": "stage-028.json",
+              "sha256": "0a7d70a1e3addae0fc25de3d73a374787d5545f53b6956dd8b7db521facca17a"
+            },
+            {
+              "path": "stage-029.json",
+              "sha256": "38075c540de43cea087d9e3ee282fc585bd44a6a4f6e31820e5d660f41dc5ede"
+            }
+          ],
+          "stage_count": 30
+        }
+      ],
+      "reproduction_command": "python scripts/reports/recorded_closed_loop_figures.py --capture-root \"$CSL_CLOSED_LOOP_CAPTURE_ROOT\" --output docs/examples/closed-loop",
+      "shape_coverage_gaps": [
+        {
+          "attempt_id": "syn-nl-lv-01-20261111T202218Z-4011d21f",
+          "controller_id": "native-exact-polytope-backward-graph/1",
+          "reason": "The saved response has retained graph points but no materialized parent-cloud shape geometry."
+        }
+      ],
+      "source_commit": "64560a03b2d4a04a56a94c86b3abf193bb63f54f",
+      "stage_count": 30,
+      "svg_href": "examples/closed-loop/figures/lotka-populations.svg",
+      "task_id": "syn-nl-lv-01/continuous-receding/1",
+      "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+      "time_step": 0.1,
+      "timeline_end": 3.0000000000000004,
+      "title": "Lotka population plane"
+    },
+    {
+      "availability": "ready",
+      "comparison_coverage_gaps": [
+        {
+          "controller_id": "native-parallelotope-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        }
+      ],
+      "coordinate_transform": {
+        "description": "Raw physical state order [r, v, theta, omega]; no scaling applied.",
+        "names": [
+          "Radius r",
+          "Angular rate \u03c9"
+        ],
+        "permutation_matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "raw_indices": [
+          0,
+          3
+        ],
+        "raw_scales": null,
+        "scale_applied_to_source_values": false,
+        "source_values_are_physical": true,
+        "units": [
+          "km",
+          "rad/s"
+        ]
+      },
+      "href": "examples/closed-loop/figures/earth-orbit.html",
+      "id": "earth-orbit",
+      "layer_scopes": [
+        "initial physical state",
+        "retained stage-layered graph singleton nodes",
+        "serialized complete authored-action parent clouds when present",
+        "initial model-predicted plan",
+        "executed physical plant replay",
+        "soft objective target when defined"
+      ],
+      "missing_layers": [
+        "complete all-stage forward-set geometry over the full reachable parent set",
+        "all-admissible-control forward reachable sets",
+        "materialized backward/predecessor sets",
+        "materialized full-state intersections"
+      ],
+      "plotted_data_href": "examples/closed-loop/figures/earth-orbit.plotted-data.json",
+      "png_href": "examples/closed-loop/figures/earth-orbit.png",
+      "profile_id": "worker-wall-1800-cpu-1800/1",
+      "raw_record_refs": [
+        {
+          "attempt_id": "earth-orbit-20261111T201301Z-8f6b272d",
+          "capture_relative_path": "earth-orbit/attempts/earth-orbit-20261111T201301Z-8f6b272d",
+          "manifest_sha256": "3b3e2767c8cfa3acc60d86817ad983b090abffaaf1628731c6757ac326f9c03e",
+          "raw_stage_hashes": [
+            {
+              "path": "stage-000.json",
+              "sha256": "6bad07a174d600020e49eae6474aaae09fbdff5f56e5a47cd1f834e7fc490355"
+            },
+            {
+              "path": "stage-001.json",
+              "sha256": "fbef7852153b4f1b220779a947409936341b3fc7205679e24993650b45002cb5"
+            },
+            {
+              "path": "stage-002.json",
+              "sha256": "60acd3b5b83e2f82231854411c73fd39c94182132ebcc3c1abad12cb9284d43e"
+            },
+            {
+              "path": "stage-003.json",
+              "sha256": "659d529d36485b8710c2e8da0df1103d3f12413d2d53a94251cdd25103254474"
+            },
+            {
+              "path": "stage-004.json",
+              "sha256": "a4044e10605b78c2517cdb3d60aa3cb0b75fdc3559d2eb2b49c7787f53444c5e"
+            },
+            {
+              "path": "stage-005.json",
+              "sha256": "6b217ea467f5c38f94e4e107ab0e04c648c65b76c027b58d0c152fbd7817ee47"
+            },
+            {
+              "path": "stage-006.json",
+              "sha256": "45af667e8d5bdf37cc991fc34f6d651bba792d473688f51cb6ec87f0ec4f1504"
+            },
+            {
+              "path": "stage-007.json",
+              "sha256": "39a870b1c321d89ff80330cb4344ea15d0c2b7c9729ac799ab8ed5cfae12125d"
+            },
+            {
+              "path": "stage-008.json",
+              "sha256": "6a60ce5835940488abba988d0d332f4c7aaf846eda94c183a7e5b2419011d1b3"
+            },
+            {
+              "path": "stage-009.json",
+              "sha256": "4207bb8e84ae134910a72a02155811633957742b6e02e08e76f1f840f3e539e8"
+            },
+            {
+              "path": "stage-010.json",
+              "sha256": "373a8c63757184c8c1b95d37959845b1a2f79f73702e4cdd31300b22dfdf1570"
+            },
+            {
+              "path": "stage-011.json",
+              "sha256": "e6483fada01a1767a11d1f05a1942427d55962a44a7b43342b40cab321a2f80e"
+            },
+            {
+              "path": "stage-012.json",
+              "sha256": "3de28658b1971a524367f70d258b2bceeebb0511a6a1a93442e64b37579a3c6b"
+            },
+            {
+              "path": "stage-013.json",
+              "sha256": "d74f6d322a8a1c0de60cbf19a88b5df695b3a0ceb46c2e8e4fe7d0261cd95feb"
+            },
+            {
+              "path": "stage-014.json",
+              "sha256": "350a78ecf1b9c26dea5e545587eb29cc14159590f7e40fa0fd7cd6e1a6798dd2"
+            },
+            {
+              "path": "stage-015.json",
+              "sha256": "7c6cac60570c97a68dc1e167ad4663623e92ec0fdee4bd3950315a9040fbb675"
+            },
+            {
+              "path": "stage-016.json",
+              "sha256": "686225ec158f70c56793f0b0ea489071a1b6151b14c8a2a1b16609cd4851706c"
+            },
+            {
+              "path": "stage-017.json",
+              "sha256": "fa099543609fd5397a64d3fbcdd6312e70d7d9d50614a497bcc29fb1b1d3edfe"
+            },
+            {
+              "path": "stage-018.json",
+              "sha256": "12d0da48a51ff55445fef3e34af5737cdf75f070cdf293a2c3d5e5cbc9f49994"
+            },
+            {
+              "path": "stage-019.json",
+              "sha256": "6d9e59431c43b220638e479f1c93b7a9d7b4e9e3d4322c74fadfe146989dd858"
+            }
+          ],
+          "stage_count": 20
+        },
+        {
+          "attempt_id": "earth-orbit-20261111T194241Z-3c53f195",
+          "capture_relative_path": "earth-orbit/attempts/earth-orbit-20261111T194241Z-3c53f195",
+          "manifest_sha256": "6de37b9ff47c5cd5cae822121b6319dd7eb4b87d9072cbda8596529cdb034d76",
+          "raw_stage_hashes": [
+            {
+              "path": "stage-000.json",
+              "sha256": "2aa2d89389d0f9e878590aa7433940ee1d3f87f45681355a46dc370140860776"
+            },
+            {
+              "path": "stage-001.json",
+              "sha256": "c29e7f5cbcde5abba1dd73f62c5788911c9cd7bafae2d5a34fbfe7d0d0309c9b"
+            },
+            {
+              "path": "stage-002.json",
+              "sha256": "6f6a879b97988fe2d13e99dad5e5cb467786c7213a234123ffd4d215fbbd0d54"
+            },
+            {
+              "path": "stage-003.json",
+              "sha256": "3f97120e089c5313d505cdf7b68ba2291af52435dd6ec3c5f4505230b6e4b49b"
+            },
+            {
+              "path": "stage-004.json",
+              "sha256": "639ceba16b162b6a891936af5124c8240f9fadb8cf5c1848650e9426bda772ad"
+            },
+            {
+              "path": "stage-005.json",
+              "sha256": "03aa22cbf1bb7bcae8bd6793c70de3774c1006afbebad3e3a3547560f65be871"
+            },
+            {
+              "path": "stage-006.json",
+              "sha256": "764a227514acff2d15401e96b5b8b057cd97d0cbc158755384b74bbfd6dd0e89"
+            },
+            {
+              "path": "stage-007.json",
+              "sha256": "36b309152786c88bfffba255e18251d0f35ab7099462bd94c9b1772ec06acc05"
+            },
+            {
+              "path": "stage-008.json",
+              "sha256": "3df41c057259a814dd47ac5cce7275b315ee1cfc2be8b8f74a4844665dbf6e72"
+            },
+            {
+              "path": "stage-009.json",
+              "sha256": "2817eafa7c83db67b059158315a38c601ad7aa36555d9f3bf1c8b73728b57d98"
+            },
+            {
+              "path": "stage-010.json",
+              "sha256": "568a3cd99ac9633987e6294bfcb99d0564a23b82bca79ad7e9ec940d40d0198e"
+            },
+            {
+              "path": "stage-011.json",
+              "sha256": "83bd5a38a940c63e515c6226c4a37e8d5ac20fc77fa8a48d0143dcb07a3c6472"
+            },
+            {
+              "path": "stage-012.json",
+              "sha256": "2ce42d0bb140a110571412585c6b4b5a8a9ef09a5d7aa4a8099193cf108de92f"
+            },
+            {
+              "path": "stage-013.json",
+              "sha256": "3cd350aba6cc65c4ef18ef010a8fe69873caf926b1ed7d3ca2ff9b7c7fe9168e"
+            },
+            {
+              "path": "stage-014.json",
+              "sha256": "8f00dd7e2b2994346800d330744124dcdca54b882c9423f93eb284b66b1125d4"
+            },
+            {
+              "path": "stage-015.json",
+              "sha256": "d2e1b94ddea3e9d0dd27d739fc25765bd927589bde878a2113bdd27f925142a2"
+            },
+            {
+              "path": "stage-016.json",
+              "sha256": "f9a8e05875290f844c1bd6438ec72d6e56ce3ef07369e9e1023607e5c3c3a26f"
+            },
+            {
+              "path": "stage-017.json",
+              "sha256": "fe7c5e139a2ebc89accaa88f9cee312f84ff8cd71cd5424ca7011e49d728e593"
+            },
+            {
+              "path": "stage-018.json",
+              "sha256": "49fe0e9ee762affbec6966c2ac5d53c69a04dbb29bfca7be89233816a253b71e"
+            },
+            {
+              "path": "stage-019.json",
+              "sha256": "c47821a486df8a2146ecb1419c1bb07c124e84a53aa9c62c38c7e683feab9b33"
+            }
+          ],
+          "stage_count": 20
+        },
+        {
+          "attempt_id": "earth-orbit-20261111T210302Z-56088e74",
+          "capture_relative_path": "earth-orbit/attempts/earth-orbit-20261111T210302Z-56088e74",
+          "manifest_sha256": "ce5da9133c34ae69f7a887511e432e916b444faea160950187f66651ea059e92",
+          "raw_stage_hashes": [
+            {
+              "path": "stage-000.json",
+              "sha256": "804c594eae95a5bdbd7bc39c2c31bb190b22905975669167d1482b5b2073a044"
+            },
+            {
+              "path": "stage-001.json",
+              "sha256": "deb75a907721c9e368cfa393794fee4af30619a77804a04d1f4b01b3381ce861"
+            },
+            {
+              "path": "stage-002.json",
+              "sha256": "2dcf87356ea596e6d156b903c68f56a3be85dee51adcc8d8bb1ee55654b95fab"
+            },
+            {
+              "path": "stage-003.json",
+              "sha256": "0667dfbe527ad20c215bc2b49f8709b7adf9a4b60779e137b4ebfe17e0bf6270"
+            },
+            {
+              "path": "stage-004.json",
+              "sha256": "4cc44045c78f98eaad31d9d47d90a1452af128711ed80a2d1a2a45db8c6a0081"
+            },
+            {
+              "path": "stage-005.json",
+              "sha256": "7c30f52161fedb3d0967e8ff0b5bb186632cca22a12ebacf12e197a392651c5d"
+            },
+            {
+              "path": "stage-006.json",
+              "sha256": "2ba585f84e6b1f46dbee4f9879cd8479b1180f6605828c3ef4ae3a8b1f38433e"
+            },
+            {
+              "path": "stage-007.json",
+              "sha256": "abb7e6fc14c53486bf4ffebc2989d5a0e1c745bf89673da2e4b0e37b7a78dbe9"
+            },
+            {
+              "path": "stage-008.json",
+              "sha256": "25b8a8d63733102c1a32aff29c441db31038f909957772cf6f0c3fd3a5ee6f5a"
+            },
+            {
+              "path": "stage-009.json",
+              "sha256": "3e84fbf1778e1a7b94fed7c25fcc8fb2b5dcc10916267df8ec42e9db38116a34"
+            },
+            {
+              "path": "stage-010.json",
+              "sha256": "620962210c4b6dd4718da3965665938bf3a8b34502c1e752ef0697c82e709d94"
+            },
+            {
+              "path": "stage-011.json",
+              "sha256": "590cd886e6d6af19d5c63ef3a5c3fa2e63966a460b2c64340c36ca0ec79a32cd"
+            },
+            {
+              "path": "stage-012.json",
+              "sha256": "476232f362ab700cfd8d25866a7fa352ecd62f1b0034bb724a7527c36557bd2a"
+            },
+            {
+              "path": "stage-013.json",
+              "sha256": "c8c9480608f546a1585bf1ab59e3634a16ae5292486cd5119bb9c71327ab28aa"
+            },
+            {
+              "path": "stage-014.json",
+              "sha256": "781aeda7e87d96c2a48306b3d7bf8807af5ca863c692b54dde3ae82655791579"
+            },
+            {
+              "path": "stage-015.json",
+              "sha256": "99051d23be406ed5e33000f79447036ea9e4c828986905fb9a327f8ab37e7aa9"
+            },
+            {
+              "path": "stage-016.json",
+              "sha256": "f5ba84b145af7dbe781288ed5f77ed61cef6ca91fb109c499318534280c06d98"
+            },
+            {
+              "path": "stage-017.json",
+              "sha256": "dadf44866a38670bb293c65de3f6c55c54a46c2d731e6de3037a8eaf7cd4fe73"
+            },
+            {
+              "path": "stage-018.json",
+              "sha256": "e03497572df3890892947c314b81d62942d98d7cf18bfee1575f598a3aeb9f15"
+            },
+            {
+              "path": "stage-019.json",
+              "sha256": "c6625d65af35b77028c5cbbddbceb024e07ea7b8ec0bd2c9573731c59c4d461c"
+            }
+          ],
+          "stage_count": 20
+        },
+        {
+          "attempt_id": "earth-orbit-20261111T210944Z-89f7c607",
+          "capture_relative_path": "earth-orbit/attempts/earth-orbit-20261111T210944Z-89f7c607",
+          "manifest_sha256": "1a12f91f24adce167093f7f527722f04f91367286eca8c8282aa754f64affae4",
+          "raw_stage_hashes": [
+            {
+              "path": "stage-000.json",
+              "sha256": "919b72cc4dd0a3e20b6d52b5414c0cdffc976499edb98e649dc4efbbcbfba0a5"
+            },
+            {
+              "path": "stage-001.json",
+              "sha256": "fb17a0ecda437715419d1a760697e7ac7eab0196fc2a33de4c02244dae5a9c64"
+            },
+            {
+              "path": "stage-002.json",
+              "sha256": "68708a7f81e0bd3fede13c86a6d3fa414f91e81f0b6ab5dd3f27bbc094dd0b79"
+            },
+            {
+              "path": "stage-003.json",
+              "sha256": "16c9c4f22c88c62a469c97955a36bb7c2d7722079fa0ee8c5ee533364bece762"
+            },
+            {
+              "path": "stage-004.json",
+              "sha256": "f77c63267eee5eb7d64875a1560cbd181807531f34b4199820a3afc95f382ec5"
+            },
+            {
+              "path": "stage-005.json",
+              "sha256": "a503b5aca0bbc117841ba60b2557e733c529e757821cfe82f3ee87166bcc50f9"
+            },
+            {
+              "path": "stage-006.json",
+              "sha256": "0b7219b115f32d343e358fb2f8df895e9b7f4a6fc79512ef64a9c627b55c803e"
+            },
+            {
+              "path": "stage-007.json",
+              "sha256": "5354e8dd8d466f55b3efb171ba9946ec469799253cdd591c50e4f024d3d6d2ab"
+            },
+            {
+              "path": "stage-008.json",
+              "sha256": "539d2f5144c3074f9030657594648553d5f672ca75407930f9a3287f1579662a"
+            },
+            {
+              "path": "stage-009.json",
+              "sha256": "cad8fb756ca42237ed21aa0974be6bb1630a0c0e3daf0139c70814eeede477af"
+            },
+            {
+              "path": "stage-010.json",
+              "sha256": "eff45d871064ad4d17f0433ed3b741d4db2d1c28bf3795890f9ba12eb8de3cd9"
+            },
+            {
+              "path": "stage-011.json",
+              "sha256": "e683edb834ab9ab91a495ba2ab9ba6be6dc5dd9465a534059e98e549c06bc725"
+            },
+            {
+              "path": "stage-012.json",
+              "sha256": "ce38d850f0614e86225fcd8680391c47661d9b2d6ad33c42bb003266fca2d388"
+            },
+            {
+              "path": "stage-013.json",
+              "sha256": "fe16b72c5a974f5a8f4779e6f428525d0a973510006eec9eb0a96485d864703d"
+            },
+            {
+              "path": "stage-014.json",
+              "sha256": "b06897c0d1f5e3ffa02586780f3d889ecd6fe9dfa83d07e0b32dd2468a7df92d"
+            },
+            {
+              "path": "stage-015.json",
+              "sha256": "564605962ea5c19e29796f0ba5a588c5f38affa1292bf7ac729d48808f4fa03e"
+            },
+            {
+              "path": "stage-016.json",
+              "sha256": "93222cf4ce68714511b5b348df6462e3755d07d6a303c0a26c8b5d62bb191ef1"
+            },
+            {
+              "path": "stage-017.json",
+              "sha256": "baddbeaca004ce2fdf19b09010b822170b1ead34ea875c01ded2220733f7cb22"
+            },
+            {
+              "path": "stage-018.json",
+              "sha256": "7823056e054697206ee006cda0dc4cae0233e80f75eb5e19811b899a39eb7fce"
+            },
+            {
+              "path": "stage-019.json",
+              "sha256": "6ffb8bedad71f816b182bfe4a7cd062171a9b0ed93e00d8045071947c4afd8b9"
+            }
+          ],
+          "stage_count": 20
+        }
+      ],
+      "reproduction_command": "python scripts/reports/recorded_closed_loop_figures.py --capture-root \"$CSL_CLOSED_LOOP_CAPTURE_ROOT\" --output docs/examples/closed-loop",
+      "shape_coverage_gaps": [
+        {
+          "attempt_id": "earth-orbit-20261111T201301Z-8f6b272d",
+          "controller_id": "native-exact-polytope-backward-graph/1",
+          "reason": "The saved response has retained graph points but no materialized parent-cloud shape geometry."
+        }
+      ],
+      "source_commit": "64560a03b2d4a04a56a94c86b3abf193bb63f54f",
+      "stage_count": 20,
+      "svg_href": "examples/closed-loop/figures/earth-orbit.svg",
+      "task_id": "env717-earth-orbit/continuous-receding/1",
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+      "time_step": 100.0,
+      "timeline_end": 2000.0,
+      "title": "Earth orbit phase plane"
+    },
+    {
+      "availability": "ready",
+      "comparison_coverage_gaps": [
+        {
+          "controller_id": "native-zonotope-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        },
+        {
+          "controller_id": "native-parallelotope-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        },
+        {
+          "controller_id": "native-ellipsoid-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        }
+      ],
+      "coordinate_transform": {
+        "description": "Raw order [m_ox, m_f, q_ox, q_f]; requested oxidizer indices [2, 0] and fuel indices [3, 1]; raw scale [100, 30, 3, 1] is not reapplied to physical data.",
+        "names": [
+          "Oxidizer flow q\u2092\u2093",
+          "Oxidizer mass m\u2092\u2093"
+        ],
+        "permutation_matrix": [
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "raw_indices": [
+          2,
+          0
+        ],
+        "raw_scales": [
+          100.0,
+          30.0,
+          3.0,
+          1.0
+        ],
+        "scale_applied_to_source_values": false,
+        "source_values_are_physical": true,
+        "units": [
+          "kg/s",
+          "kg"
+        ]
+      },
+      "href": "examples/closed-loop/figures/fuel-state.html",
+      "id": "fuel-state",
+      "layer_scopes": [
+        "initial physical state",
+        "retained stage-layered graph singleton nodes",
+        "serialized complete authored-action parent clouds when present",
+        "initial model-predicted plan",
+        "executed physical plant replay",
+        "soft objective target when defined"
+      ],
+      "missing_layers": [
+        "complete all-stage forward-set geometry over the full reachable parent set",
+        "all-admissible-control forward reachable sets",
+        "materialized backward/predecessor sets",
+        "materialized full-state intersections"
+      ],
+      "plotted_data_href": "examples/closed-loop/figures/fuel-state.plotted-data.json",
+      "png_href": "examples/closed-loop/figures/fuel-state.png",
+      "profile_id": "worker-wall-1800-cpu-1800/1",
+      "raw_record_refs": [
+        {
+          "attempt_id": "syn-nl-fuel-01-20261111T201447Z-6c594012",
+          "capture_relative_path": "syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261111T201447Z-6c594012",
+          "manifest_sha256": "0af51a73834cae33c3768c626f6362da6c3e804d1bb34c559a1239c7c6b915e7",
+          "raw_stage_hashes": [
+            {
+              "path": "stage-000.json",
+              "sha256": "8692a5628549c66b0f78cbdfe6656223addf35aaec21fb26b86dd5cda54654f6"
+            },
+            {
+              "path": "stage-001.json",
+              "sha256": "a8277d443fbe7ebc8be69909cf0655531f94c9d8e13ac54e08bf15a7d840c0a1"
+            },
+            {
+              "path": "stage-002.json",
+              "sha256": "0576f0e1eb8812b3526f74ac55b6b20137f439c82f1499523f6b4221b742c9a4"
+            },
+            {
+              "path": "stage-003.json",
+              "sha256": "0e0413790c5bf9f9cecb9b98f00e625757bd0319aaaf7857a57a158cc02b628a"
+            },
+            {
+              "path": "stage-004.json",
+              "sha256": "73600612baaa7c3dca4b377ea2426e9a27726450aeba1217024cbbe858d7c42c"
+            },
+            {
+              "path": "stage-005.json",
+              "sha256": "f6e570adce1019fb473d42a2d5ab7e1bb0f0f9eb4bf646f305326ec86207471c"
+            },
+            {
+              "path": "stage-006.json",
+              "sha256": "d10746658e88017647928e3279ea6c0342ccb31af5633b423fa7a28fd62df6e0"
+            },
+            {
+              "path": "stage-007.json",
+              "sha256": "16131ed8202e5c2729036d0cd33d2af551061676d1480ac065ae091345ce3076"
+            },
+            {
+              "path": "stage-008.json",
+              "sha256": "20955ff85fd758919bdd6f3aff90c03ed1f2f15c9f5456ebfe8aca9ee6eb77c1"
+            },
+            {
+              "path": "stage-009.json",
+              "sha256": "9b6fb71e98dc69720f1900d5828ec3c3ca6f47923e743bae5ac593f39d38094c"
+            },
+            {
+              "path": "stage-010.json",
+              "sha256": "c42c95233d8984daed5b6e6edfc59054a5a4f731a1682072f68936e297efc633"
+            },
+            {
+              "path": "stage-011.json",
+              "sha256": "89dd236bc199a2f0370d36e79acb549c78a33becfefbb85558c51fa95017b140"
+            },
+            {
+              "path": "stage-012.json",
+              "sha256": "44d89a6120bf3fa8fe8ec74bed7edad2ff3a2cf7aadffb10d781b41f3585f84d"
+            },
+            {
+              "path": "stage-013.json",
+              "sha256": "45a5777dfc2eb94627f97cb634fb64e23d01c092e0f3f3c318a64f02cc1699f4"
+            },
+            {
+              "path": "stage-014.json",
+              "sha256": "86c4eec82e5d6d648719ffc1d87800ef4a4aba356c64a98dfb1bc51ef4b0b822"
+            },
+            {
+              "path": "stage-015.json",
+              "sha256": "a5c2bf919d5ff350a844709af6c8a224dae3a268514aacc012dd3e27f4109c30"
+            },
+            {
+              "path": "stage-016.json",
+              "sha256": "cb97ec73bbed9c2790b91f23c5a4e5b3f5226181aa5b440a27cca86d057c237e"
+            },
+            {
+              "path": "stage-017.json",
+              "sha256": "2f6c10f8e20a16b9595ac7859d2642d976423f5c0c0bccdaeeccdffa39b9dfd7"
+            },
+            {
+              "path": "stage-018.json",
+              "sha256": "7b2c3fdffeba341716b36ee4dc72d96e3f1c9944e5b6c9140cb28b9a42f82056"
+            },
+            {
+              "path": "stage-019.json",
+              "sha256": "d2e8c9da7dad31a60a45dfb2610cd7b9b822993efefab5816e35f857c84ff15b"
+            },
+            {
+              "path": "stage-020.json",
+              "sha256": "486426019d1b887c3accf6c81eb2a0594ffe06e8823dc882e2274fae6d8e9b1a"
+            },
+            {
+              "path": "stage-021.json",
+              "sha256": "cd19f5687d8d2e9e6e65922327003db8fb0827e10e4be7141ff15658f23dfb25"
+            },
+            {
+              "path": "stage-022.json",
+              "sha256": "654a4d78a3c3105ec5dc910922acc1e7eb62bcfe077434da9e89f2f2b484013f"
+            },
+            {
+              "path": "stage-023.json",
+              "sha256": "862e23f06f5e25758cd642eab1a6b2e0b2c01f9ba72e75889ba5ea003ca3a5f3"
+            },
+            {
+              "path": "stage-024.json",
+              "sha256": "f22ec5cedc463e885e67601e3a5184e49628f4c6721b86e3c415f9735363168f"
+            },
+            {
+              "path": "stage-025.json",
+              "sha256": "a016c3eacb7045127a3eeceb4e07649f6828fd57d5697f6e1f55ca259768e8e4"
+            },
+            {
+              "path": "stage-026.json",
+              "sha256": "ff875f01e434e7fa41b41b71c61afddef91fd5de11a64f054e3a15574d67787a"
+            },
+            {
+              "path": "stage-027.json",
+              "sha256": "fb11fa24a2cde36f71a40fc6b42f473a76b24da307937abcf3702e400821070e"
+            },
+            {
+              "path": "stage-028.json",
+              "sha256": "f1bad53c67a8e26e06e13fd3bdd3b9e6874c9327aea5daedc261048392edd902"
+            },
+            {
+              "path": "stage-029.json",
+              "sha256": "1d8467903e34063efd80c79d3c0d290fa5b521c50d6873fd8cf5d7ccda467df2"
+            },
+            {
+              "path": "stage-030.json",
+              "sha256": "e13365ad643866f7406b4cac06e884ade116ed5519dbfe98eb176cab2514c50f"
+            },
+            {
+              "path": "stage-031.json",
+              "sha256": "cc4d253cb3fa9fd4068951cde2fd4397792367b4632634a2951deb54c5adb04f"
+            },
+            {
+              "path": "stage-032.json",
+              "sha256": "0c143b2e84155af76c0bfff9374139e75293996b5815c1188fff3ea848cdb259"
+            },
+            {
+              "path": "stage-033.json",
+              "sha256": "f2f8bc58ff4173cdb7cd6632f04a28801a82e4548f4c21f57f8d143ecbb4a81a"
+            },
+            {
+              "path": "stage-034.json",
+              "sha256": "d57069ef6ee35b3dcdc9555cf4d180ecabcb5d3ff18c17b7dc01d27e3effd2d0"
+            },
+            {
+              "path": "stage-035.json",
+              "sha256": "5ec2b53ec19f238cc4a20d4f303be49ea8fb06b3f65fd0490781b63efb6e9ac3"
+            },
+            {
+              "path": "stage-036.json",
+              "sha256": "c39c6bae8ee1e340bca94e16698bd57c9201eed7304ca9da8d4a8505f39431ed"
+            },
+            {
+              "path": "stage-037.json",
+              "sha256": "9a20c52bfd62e81937b0238380276c57ff42cb682795fc2d2c0df8e8a1b33332"
+            },
+            {
+              "path": "stage-038.json",
+              "sha256": "9789fede7de1608a892cac918987a64cf482b94ca2001afc9f0faa5ed69b8b2b"
+            },
+            {
+              "path": "stage-039.json",
+              "sha256": "ac836740781ff7dc18a0bc7e0f91d69039da35d88b918f17129c2060a76a2600"
+            }
+          ],
+          "stage_count": 40
+        },
+        {
+          "attempt_id": "syn-nl-fuel-01-20261111T194953Z-681474d9",
+          "capture_relative_path": "syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261111T194953Z-681474d9",
+          "manifest_sha256": "90424275f0e93637c1619da9cb812ec622f050eeb9957f851632406ee6cdd2ef",
+          "raw_stage_hashes": [
+            {
+              "path": "stage-000.json",
+              "sha256": "86fdcd040da417a49de176ef06b5b6449e0eb3ce4a735d25d5ceee1db344555f"
+            },
+            {
+              "path": "stage-001.json",
+              "sha256": "c53d13866dc2ccb0bec81cd425db460bc470580dc4b3f92b215d722f0cffa30c"
+            },
+            {
+              "path": "stage-002.json",
+              "sha256": "55f3dfd6864db280fb8b038ede4bf6198ba3f50938eba6ee8f37e88fb5f8bad2"
+            },
+            {
+              "path": "stage-003.json",
+              "sha256": "d60bb13f872f527c9a145321199edbb003ac0df35a505daec173afe453c46428"
+            },
+            {
+              "path": "stage-004.json",
+              "sha256": "460ea9fce7093af2930e55df16d92bf29508069896d08adfc71bad1b1f0be3d7"
+            },
+            {
+              "path": "stage-005.json",
+              "sha256": "d03d34c37b4b2714bf6fba837d4034ef5e1f266cfb1cda63387a95d87c69eb6e"
+            },
+            {
+              "path": "stage-006.json",
+              "sha256": "94f99b537f395b3bd7c5c00fe017183ba90d69c658dedaafc10dcaf44c5a7d9a"
+            },
+            {
+              "path": "stage-007.json",
+              "sha256": "584d4a201442fcda055c5259e2edd984905a773554b55738506ae2f464e60480"
+            },
+            {
+              "path": "stage-008.json",
+              "sha256": "3b290e5abc8254a74608a4ffcb1491016a8fe7c757fefbc50e958b601616586d"
+            },
+            {
+              "path": "stage-009.json",
+              "sha256": "e819cb25abc54f31f204f0ecb2eda5f52eeef719f0373c50e06c938f0f251845"
+            },
+            {
+              "path": "stage-010.json",
+              "sha256": "73961022813c4324ee21c8ae1b6fff3e8b38a134d59d398056629e5a7de05bb1"
+            },
+            {
+              "path": "stage-011.json",
+              "sha256": "c33b22145ef4abc80ad4f74842f68d410ea3e8f2dba23f694bf133926e94b2d8"
+            },
+            {
+              "path": "stage-012.json",
+              "sha256": "e25dbcc42c77eca62934c0471df9037458436ae75baaced804458a9a9ce9fd73"
+            },
+            {
+              "path": "stage-013.json",
+              "sha256": "c2db6e5703e57bae850f9156b2323ccc9fad3736f8c6d4922c10808d71cdacb5"
+            },
+            {
+              "path": "stage-014.json",
+              "sha256": "ed1df007bc9e69bc82a32fd263584b5a51b4307d3d2f5d5c6475c4462f1175b8"
+            },
+            {
+              "path": "stage-015.json",
+              "sha256": "d6e810a0a36009497b1f3165409dbdcc2f56d5fafa064212fc1a65ac05fec177"
+            },
+            {
+              "path": "stage-016.json",
+              "sha256": "03346ab8ece418b9d4737e6cf011b334348872f7a15949aa67409532d5143268"
+            },
+            {
+              "path": "stage-017.json",
+              "sha256": "0bc8519ec9731a76326237b378064612c7d8ed5880fa88752bcebd6ab1b9fdb1"
+            },
+            {
+              "path": "stage-018.json",
+              "sha256": "ac5d84589c91ef013aa80ee0da6b43d5b32c21bd1ee15a978ff3b4e6d4c2f5c1"
+            },
+            {
+              "path": "stage-019.json",
+              "sha256": "cc8345e93cfb4ef943556f67857c82786bc01183e732d5c4d0d6896ccb00b190"
+            },
+            {
+              "path": "stage-020.json",
+              "sha256": "171642ce55e55efaa233084492364f8ddcc94fbb87fe64ee047ad866fcb9a1a0"
+            },
+            {
+              "path": "stage-021.json",
+              "sha256": "39d090ffbba51557b0ff81048bed2963f038f2a16922de1f8c11bc872fada22f"
+            },
+            {
+              "path": "stage-022.json",
+              "sha256": "96ce2a15ccd7a3a3dbb5358e5d52d99b2cf02d5f261c9c8943eb16e4e0a4275e"
+            },
+            {
+              "path": "stage-023.json",
+              "sha256": "3f5f7a535b8145b3904e403e644a40296130b8dd6a1146ebe9f6f45b20158136"
+            },
+            {
+              "path": "stage-024.json",
+              "sha256": "b66af8f2ee732b510628de2a016ffc7253e7fc48e2200cfeb7471a372778fa42"
+            },
+            {
+              "path": "stage-025.json",
+              "sha256": "a60500a9189187b108b0ae75b62f57d43e25eb54d1dfa624dec2406012b398aa"
+            },
+            {
+              "path": "stage-026.json",
+              "sha256": "04dc84532ae539bc47a9e3fafd918a3c3a25d1aefb5b0364c73171d4bd84b05f"
+            },
+            {
+              "path": "stage-027.json",
+              "sha256": "604ac99f1b287749eb7b83a082decdb075c3f49efa14f2b15ab44968a1902afe"
+            },
+            {
+              "path": "stage-028.json",
+              "sha256": "d5b7694de8876a855de8fff304d69793ef41aef8940626edbd8a23782f339a98"
+            },
+            {
+              "path": "stage-029.json",
+              "sha256": "61d0aae98b7a5f697186a7b242010a66faffd241992a1136db4e4366807cd472"
+            },
+            {
+              "path": "stage-030.json",
+              "sha256": "03dc681bf4ae4592cd3713ed79f314d4e11a8f8a2cb80d3b739b22c13db69775"
+            },
+            {
+              "path": "stage-031.json",
+              "sha256": "80a5879215d3de5c9594b8d55fc640b2e8dd5c370d587721722dd812778cfb36"
+            },
+            {
+              "path": "stage-032.json",
+              "sha256": "29b4952207ede9cfbdd845929f5b6a3d2bd9c22321e0dbaaa6070ad347fae567"
+            },
+            {
+              "path": "stage-033.json",
+              "sha256": "860cadc4036f9f92c2a132c063d33b4ba13703df1c566d59a517ec58e0090989"
+            },
+            {
+              "path": "stage-034.json",
+              "sha256": "db252b8b4a30c1e980512f98ad31ad201f9b251152e3cec5c59c3d906648dbee"
+            },
+            {
+              "path": "stage-035.json",
+              "sha256": "491da5c1463588118796387a07e2536cec37fff312c25e332d65a6eb9032628d"
+            },
+            {
+              "path": "stage-036.json",
+              "sha256": "050dad0e129a11b5bf2f07ebdaa492033daba979c7af74cc8dca75547ec281ce"
+            },
+            {
+              "path": "stage-037.json",
+              "sha256": "79d68f3eb7e32b398d6b6aec22080972ce15fc21efd3467a7a8a41ad7be278e2"
+            },
+            {
+              "path": "stage-038.json",
+              "sha256": "ffd3780a9a86f721fa300ec1e07fab064f7c8b86a8f38c501353f8619f62e27f"
+            },
+            {
+              "path": "stage-039.json",
+              "sha256": "710707064ee9ec2fd85300e3c4f7989e2ad64d959ffce9de40809a98d46d4d0c"
+            }
+          ],
+          "stage_count": 40
+        }
+      ],
+      "reproduction_command": "python scripts/reports/recorded_closed_loop_figures.py --capture-root \"$CSL_CLOSED_LOOP_CAPTURE_ROOT\" --output docs/examples/closed-loop",
+      "shape_coverage_gaps": [
+        {
+          "attempt_id": "syn-nl-fuel-01-20261111T201447Z-6c594012",
+          "controller_id": "native-exact-polytope-backward-graph/1",
+          "reason": "The saved response has retained graph points but no materialized parent-cloud shape geometry."
+        }
+      ],
+      "source_commit": "64560a03b2d4a04a56a94c86b3abf193bb63f54f",
+      "stage_count": 40,
+      "svg_href": "examples/closed-loop/figures/fuel-state.svg",
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b",
+      "time_step": 0.5,
+      "timeline_end": 20.0,
+      "title": "Fuel control state planes"
+    },
+    {
+      "availability": "ready",
+      "comparison_coverage_gaps": [
+        {
+          "controller_id": "native-zonotope-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        },
+        {
+          "controller_id": "native-parallelotope-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        },
+        {
+          "controller_id": "native-ellipsoid-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        }
+      ],
+      "coordinate_transform": {
+        "description": "Raw order [m_ox, m_f, q_ox, q_f]; requested fuel indices [3, 1]; raw scale [100, 30, 3, 1] is not reapplied to physical data.",
+        "names": [
+          "Fuel flow q_f",
+          "Fuel mass m_f"
+        ],
+        "permutation_matrix": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "raw_indices": [
+          3,
+          1
+        ],
+        "raw_scales": [
+          100.0,
+          30.0,
+          3.0,
+          1.0
+        ],
+        "scale_applied_to_source_values": false,
+        "source_values_are_physical": true,
+        "units": [
+          "kg/s",
+          "kg"
+        ]
+      },
+      "href": "examples/closed-loop/figures/fuel-fuel-flow.html",
+      "id": "fuel-fuel-flow",
+      "layer_scopes": [
+        "initial physical state",
+        "retained stage-layered graph singleton nodes",
+        "serialized complete authored-action parent clouds when present",
+        "initial model-predicted plan",
+        "executed physical plant replay",
+        "soft objective target when defined"
+      ],
+      "missing_layers": [
+        "complete all-stage forward-set geometry over the full reachable parent set",
+        "all-admissible-control forward reachable sets",
+        "materialized backward/predecessor sets",
+        "materialized full-state intersections"
+      ],
+      "plotted_data_href": "examples/closed-loop/figures/fuel-fuel-flow.plotted-data.json",
+      "png_href": "examples/closed-loop/figures/fuel-fuel-flow.png",
+      "profile_id": "worker-wall-1800-cpu-1800/1",
+      "raw_record_refs": [
+        {
+          "attempt_id": "syn-nl-fuel-01-20261111T201447Z-6c594012",
+          "capture_relative_path": "syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261111T201447Z-6c594012",
+          "manifest_sha256": "0af51a73834cae33c3768c626f6362da6c3e804d1bb34c559a1239c7c6b915e7",
+          "raw_stage_hashes": [
+            {
+              "path": "stage-000.json",
+              "sha256": "8692a5628549c66b0f78cbdfe6656223addf35aaec21fb26b86dd5cda54654f6"
+            },
+            {
+              "path": "stage-001.json",
+              "sha256": "a8277d443fbe7ebc8be69909cf0655531f94c9d8e13ac54e08bf15a7d840c0a1"
+            },
+            {
+              "path": "stage-002.json",
+              "sha256": "0576f0e1eb8812b3526f74ac55b6b20137f439c82f1499523f6b4221b742c9a4"
+            },
+            {
+              "path": "stage-003.json",
+              "sha256": "0e0413790c5bf9f9cecb9b98f00e625757bd0319aaaf7857a57a158cc02b628a"
+            },
+            {
+              "path": "stage-004.json",
+              "sha256": "73600612baaa7c3dca4b377ea2426e9a27726450aeba1217024cbbe858d7c42c"
+            },
+            {
+              "path": "stage-005.json",
+              "sha256": "f6e570adce1019fb473d42a2d5ab7e1bb0f0f9eb4bf646f305326ec86207471c"
+            },
+            {
+              "path": "stage-006.json",
+              "sha256": "d10746658e88017647928e3279ea6c0342ccb31af5633b423fa7a28fd62df6e0"
+            },
+            {
+              "path": "stage-007.json",
+              "sha256": "16131ed8202e5c2729036d0cd33d2af551061676d1480ac065ae091345ce3076"
+            },
+            {
+              "path": "stage-008.json",
+              "sha256": "20955ff85fd758919bdd6f3aff90c03ed1f2f15c9f5456ebfe8aca9ee6eb77c1"
+            },
+            {
+              "path": "stage-009.json",
+              "sha256": "9b6fb71e98dc69720f1900d5828ec3c3ca6f47923e743bae5ac593f39d38094c"
+            },
+            {
+              "path": "stage-010.json",
+              "sha256": "c42c95233d8984daed5b6e6edfc59054a5a4f731a1682072f68936e297efc633"
+            },
+            {
+              "path": "stage-011.json",
+              "sha256": "89dd236bc199a2f0370d36e79acb549c78a33becfefbb85558c51fa95017b140"
+            },
+            {
+              "path": "stage-012.json",
+              "sha256": "44d89a6120bf3fa8fe8ec74bed7edad2ff3a2cf7aadffb10d781b41f3585f84d"
+            },
+            {
+              "path": "stage-013.json",
+              "sha256": "45a5777dfc2eb94627f97cb634fb64e23d01c092e0f3f3c318a64f02cc1699f4"
+            },
+            {
+              "path": "stage-014.json",
+              "sha256": "86c4eec82e5d6d648719ffc1d87800ef4a4aba356c64a98dfb1bc51ef4b0b822"
+            },
+            {
+              "path": "stage-015.json",
+              "sha256": "a5c2bf919d5ff350a844709af6c8a224dae3a268514aacc012dd3e27f4109c30"
+            },
+            {
+              "path": "stage-016.json",
+              "sha256": "cb97ec73bbed9c2790b91f23c5a4e5b3f5226181aa5b440a27cca86d057c237e"
+            },
+            {
+              "path": "stage-017.json",
+              "sha256": "2f6c10f8e20a16b9595ac7859d2642d976423f5c0c0bccdaeeccdffa39b9dfd7"
+            },
+            {
+              "path": "stage-018.json",
+              "sha256": "7b2c3fdffeba341716b36ee4dc72d96e3f1c9944e5b6c9140cb28b9a42f82056"
+            },
+            {
+              "path": "stage-019.json",
+              "sha256": "d2e8c9da7dad31a60a45dfb2610cd7b9b822993efefab5816e35f857c84ff15b"
+            },
+            {
+              "path": "stage-020.json",
+              "sha256": "486426019d1b887c3accf6c81eb2a0594ffe06e8823dc882e2274fae6d8e9b1a"
+            },
+            {
+              "path": "stage-021.json",
+              "sha256": "cd19f5687d8d2e9e6e65922327003db8fb0827e10e4be7141ff15658f23dfb25"
+            },
+            {
+              "path": "stage-022.json",
+              "sha256": "654a4d78a3c3105ec5dc910922acc1e7eb62bcfe077434da9e89f2f2b484013f"
+            },
+            {
+              "path": "stage-023.json",
+              "sha256": "862e23f06f5e25758cd642eab1a6b2e0b2c01f9ba72e75889ba5ea003ca3a5f3"
+            },
+            {
+              "path": "stage-024.json",
+              "sha256": "f22ec5cedc463e885e67601e3a5184e49628f4c6721b86e3c415f9735363168f"
+            },
+            {
+              "path": "stage-025.json",
+              "sha256": "a016c3eacb7045127a3eeceb4e07649f6828fd57d5697f6e1f55ca259768e8e4"
+            },
+            {
+              "path": "stage-026.json",
+              "sha256": "ff875f01e434e7fa41b41b71c61afddef91fd5de11a64f054e3a15574d67787a"
+            },
+            {
+              "path": "stage-027.json",
+              "sha256": "fb11fa24a2cde36f71a40fc6b42f473a76b24da307937abcf3702e400821070e"
+            },
+            {
+              "path": "stage-028.json",
+              "sha256": "f1bad53c67a8e26e06e13fd3bdd3b9e6874c9327aea5daedc261048392edd902"
+            },
+            {
+              "path": "stage-029.json",
+              "sha256": "1d8467903e34063efd80c79d3c0d290fa5b521c50d6873fd8cf5d7ccda467df2"
+            },
+            {
+              "path": "stage-030.json",
+              "sha256": "e13365ad643866f7406b4cac06e884ade116ed5519dbfe98eb176cab2514c50f"
+            },
+            {
+              "path": "stage-031.json",
+              "sha256": "cc4d253cb3fa9fd4068951cde2fd4397792367b4632634a2951deb54c5adb04f"
+            },
+            {
+              "path": "stage-032.json",
+              "sha256": "0c143b2e84155af76c0bfff9374139e75293996b5815c1188fff3ea848cdb259"
+            },
+            {
+              "path": "stage-033.json",
+              "sha256": "f2f8bc58ff4173cdb7cd6632f04a28801a82e4548f4c21f57f8d143ecbb4a81a"
+            },
+            {
+              "path": "stage-034.json",
+              "sha256": "d57069ef6ee35b3dcdc9555cf4d180ecabcb5d3ff18c17b7dc01d27e3effd2d0"
+            },
+            {
+              "path": "stage-035.json",
+              "sha256": "5ec2b53ec19f238cc4a20d4f303be49ea8fb06b3f65fd0490781b63efb6e9ac3"
+            },
+            {
+              "path": "stage-036.json",
+              "sha256": "c39c6bae8ee1e340bca94e16698bd57c9201eed7304ca9da8d4a8505f39431ed"
+            },
+            {
+              "path": "stage-037.json",
+              "sha256": "9a20c52bfd62e81937b0238380276c57ff42cb682795fc2d2c0df8e8a1b33332"
+            },
+            {
+              "path": "stage-038.json",
+              "sha256": "9789fede7de1608a892cac918987a64cf482b94ca2001afc9f0faa5ed69b8b2b"
+            },
+            {
+              "path": "stage-039.json",
+              "sha256": "ac836740781ff7dc18a0bc7e0f91d69039da35d88b918f17129c2060a76a2600"
+            }
+          ],
+          "stage_count": 40
+        },
+        {
+          "attempt_id": "syn-nl-fuel-01-20261111T194953Z-681474d9",
+          "capture_relative_path": "syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261111T194953Z-681474d9",
+          "manifest_sha256": "90424275f0e93637c1619da9cb812ec622f050eeb9957f851632406ee6cdd2ef",
+          "raw_stage_hashes": [
+            {
+              "path": "stage-000.json",
+              "sha256": "86fdcd040da417a49de176ef06b5b6449e0eb3ce4a735d25d5ceee1db344555f"
+            },
+            {
+              "path": "stage-001.json",
+              "sha256": "c53d13866dc2ccb0bec81cd425db460bc470580dc4b3f92b215d722f0cffa30c"
+            },
+            {
+              "path": "stage-002.json",
+              "sha256": "55f3dfd6864db280fb8b038ede4bf6198ba3f50938eba6ee8f37e88fb5f8bad2"
+            },
+            {
+              "path": "stage-003.json",
+              "sha256": "d60bb13f872f527c9a145321199edbb003ac0df35a505daec173afe453c46428"
+            },
+            {
+              "path": "stage-004.json",
+              "sha256": "460ea9fce7093af2930e55df16d92bf29508069896d08adfc71bad1b1f0be3d7"
+            },
+            {
+              "path": "stage-005.json",
+              "sha256": "d03d34c37b4b2714bf6fba837d4034ef5e1f266cfb1cda63387a95d87c69eb6e"
+            },
+            {
+              "path": "stage-006.json",
+              "sha256": "94f99b537f395b3bd7c5c00fe017183ba90d69c658dedaafc10dcaf44c5a7d9a"
+            },
+            {
+              "path": "stage-007.json",
+              "sha256": "584d4a201442fcda055c5259e2edd984905a773554b55738506ae2f464e60480"
+            },
+            {
+              "path": "stage-008.json",
+              "sha256": "3b290e5abc8254a74608a4ffcb1491016a8fe7c757fefbc50e958b601616586d"
+            },
+            {
+              "path": "stage-009.json",
+              "sha256": "e819cb25abc54f31f204f0ecb2eda5f52eeef719f0373c50e06c938f0f251845"
+            },
+            {
+              "path": "stage-010.json",
+              "sha256": "73961022813c4324ee21c8ae1b6fff3e8b38a134d59d398056629e5a7de05bb1"
+            },
+            {
+              "path": "stage-011.json",
+              "sha256": "c33b22145ef4abc80ad4f74842f68d410ea3e8f2dba23f694bf133926e94b2d8"
+            },
+            {
+              "path": "stage-012.json",
+              "sha256": "e25dbcc42c77eca62934c0471df9037458436ae75baaced804458a9a9ce9fd73"
+            },
+            {
+              "path": "stage-013.json",
+              "sha256": "c2db6e5703e57bae850f9156b2323ccc9fad3736f8c6d4922c10808d71cdacb5"
+            },
+            {
+              "path": "stage-014.json",
+              "sha256": "ed1df007bc9e69bc82a32fd263584b5a51b4307d3d2f5d5c6475c4462f1175b8"
+            },
+            {
+              "path": "stage-015.json",
+              "sha256": "d6e810a0a36009497b1f3165409dbdcc2f56d5fafa064212fc1a65ac05fec177"
+            },
+            {
+              "path": "stage-016.json",
+              "sha256": "03346ab8ece418b9d4737e6cf011b334348872f7a15949aa67409532d5143268"
+            },
+            {
+              "path": "stage-017.json",
+              "sha256": "0bc8519ec9731a76326237b378064612c7d8ed5880fa88752bcebd6ab1b9fdb1"
+            },
+            {
+              "path": "stage-018.json",
+              "sha256": "ac5d84589c91ef013aa80ee0da6b43d5b32c21bd1ee15a978ff3b4e6d4c2f5c1"
+            },
+            {
+              "path": "stage-019.json",
+              "sha256": "cc8345e93cfb4ef943556f67857c82786bc01183e732d5c4d0d6896ccb00b190"
+            },
+            {
+              "path": "stage-020.json",
+              "sha256": "171642ce55e55efaa233084492364f8ddcc94fbb87fe64ee047ad866fcb9a1a0"
+            },
+            {
+              "path": "stage-021.json",
+              "sha256": "39d090ffbba51557b0ff81048bed2963f038f2a16922de1f8c11bc872fada22f"
+            },
+            {
+              "path": "stage-022.json",
+              "sha256": "96ce2a15ccd7a3a3dbb5358e5d52d99b2cf02d5f261c9c8943eb16e4e0a4275e"
+            },
+            {
+              "path": "stage-023.json",
+              "sha256": "3f5f7a535b8145b3904e403e644a40296130b8dd6a1146ebe9f6f45b20158136"
+            },
+            {
+              "path": "stage-024.json",
+              "sha256": "b66af8f2ee732b510628de2a016ffc7253e7fc48e2200cfeb7471a372778fa42"
+            },
+            {
+              "path": "stage-025.json",
+              "sha256": "a60500a9189187b108b0ae75b62f57d43e25eb54d1dfa624dec2406012b398aa"
+            },
+            {
+              "path": "stage-026.json",
+              "sha256": "04dc84532ae539bc47a9e3fafd918a3c3a25d1aefb5b0364c73171d4bd84b05f"
+            },
+            {
+              "path": "stage-027.json",
+              "sha256": "604ac99f1b287749eb7b83a082decdb075c3f49efa14f2b15ab44968a1902afe"
+            },
+            {
+              "path": "stage-028.json",
+              "sha256": "d5b7694de8876a855de8fff304d69793ef41aef8940626edbd8a23782f339a98"
+            },
+            {
+              "path": "stage-029.json",
+              "sha256": "61d0aae98b7a5f697186a7b242010a66faffd241992a1136db4e4366807cd472"
+            },
+            {
+              "path": "stage-030.json",
+              "sha256": "03dc681bf4ae4592cd3713ed79f314d4e11a8f8a2cb80d3b739b22c13db69775"
+            },
+            {
+              "path": "stage-031.json",
+              "sha256": "80a5879215d3de5c9594b8d55fc640b2e8dd5c370d587721722dd812778cfb36"
+            },
+            {
+              "path": "stage-032.json",
+              "sha256": "29b4952207ede9cfbdd845929f5b6a3d2bd9c22321e0dbaaa6070ad347fae567"
+            },
+            {
+              "path": "stage-033.json",
+              "sha256": "860cadc4036f9f92c2a132c063d33b4ba13703df1c566d59a517ec58e0090989"
+            },
+            {
+              "path": "stage-034.json",
+              "sha256": "db252b8b4a30c1e980512f98ad31ad201f9b251152e3cec5c59c3d906648dbee"
+            },
+            {
+              "path": "stage-035.json",
+              "sha256": "491da5c1463588118796387a07e2536cec37fff312c25e332d65a6eb9032628d"
+            },
+            {
+              "path": "stage-036.json",
+              "sha256": "050dad0e129a11b5bf2f07ebdaa492033daba979c7af74cc8dca75547ec281ce"
+            },
+            {
+              "path": "stage-037.json",
+              "sha256": "79d68f3eb7e32b398d6b6aec22080972ce15fc21efd3467a7a8a41ad7be278e2"
+            },
+            {
+              "path": "stage-038.json",
+              "sha256": "ffd3780a9a86f721fa300ec1e07fab064f7c8b86a8f38c501353f8619f62e27f"
+            },
+            {
+              "path": "stage-039.json",
+              "sha256": "710707064ee9ec2fd85300e3c4f7989e2ad64d959ffce9de40809a98d46d4d0c"
+            }
+          ],
+          "stage_count": 40
+        }
+      ],
+      "reproduction_command": "python scripts/reports/recorded_closed_loop_figures.py --capture-root \"$CSL_CLOSED_LOOP_CAPTURE_ROOT\" --output docs/examples/closed-loop",
+      "shape_coverage_gaps": [
+        {
+          "attempt_id": "syn-nl-fuel-01-20261111T201447Z-6c594012",
+          "controller_id": "native-exact-polytope-backward-graph/1",
+          "reason": "The saved response has retained graph points but no materialized parent-cloud shape geometry."
+        }
+      ],
+      "source_commit": "64560a03b2d4a04a56a94c86b3abf193bb63f54f",
+      "stage_count": 40,
+      "svg_href": "examples/closed-loop/figures/fuel-fuel-flow.svg",
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b",
+      "time_step": 0.5,
+      "timeline_end": 20.0,
+      "title": "Fuel flow and mass plane"
+    }
+  ],
+  "schema": "csl.closed-loop.figure-index/1",
+  "style_id": "csl-report-quantitative-v1"
+}
