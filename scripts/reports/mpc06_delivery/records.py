@@ -110,13 +110,15 @@ def make_record(online,upstream_files):
     return result
 
 
-def check(record,online,upstream_files):
+def check(record,online,upstream_files,source_files=None):
     if not re.fullmatch('[0-9a-f]{40}',record['source_commit']):raise ValueError('invalid reference source commit')
     if record['schema']!='csl.mpc06-delivery/1' or record['source_status'] or record['upstream_report_id']!=UPSTREAM.name:
         raise ValueError('delivery scope/source mismatch')
     if record['upstream_files']!=upstream_files or record['native_source_commit']!=online['source_commit']:
         raise ValueError('delivery upstream source binding mismatch')
-    if record['source_files']!={name:evidence.digest((ROOT/name).read_bytes()) for name in SOURCE_FILES}:
+    expected_source_files=({name:evidence.digest((ROOT/name).read_bytes()) for name in SOURCE_FILES}
+                           if source_files is None else source_files)
+    if record['source_files']!=expected_source_files:
         raise ValueError('delivery reviewing source binding mismatch')
     if record['geometry']!=plain(geometry(online)):raise ValueError('geometry source binding mismatch')
     if record['scopes']['comparison']!='no bound ordering between M0 and fixed_K policy classes; no general causal optimum':raise ValueError('reference policy comparison scope changed')
@@ -155,11 +157,13 @@ def validate(source):
         raise ValueError('invalid exact-reference cost receipt')
     for key in ('construction_and_extraction_ns','independent_check_ns'):
         if type(costs.get(key)) is not int or costs[key]<0:raise ValueError('invalid exact-reference cost interval')
+    captured_sources={}
     for name in SOURCE_FILES:
         copied='source/'+Path(name).name
         if copied not in contents or evidence.digest(contents[copied])!=record['source_files'].get(name):
             raise ValueError('delivery copied source binding mismatch: '+name)
-    verification=check(record,online,upstream_files)
+        captured_sources[name]=evidence.digest(contents[copied])
+    verification=check(record,online,upstream_files,captured_sources)
     if evidence.json_value(contents['verification.json'])!=verification:raise ValueError('delivery saved verification disposition mismatch')
     return record,online,verification,contents
 

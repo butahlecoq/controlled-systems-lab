@@ -59,6 +59,13 @@ class ExactPolicyReferenceTests(unittest.TestCase):
         with self.assertRaises(ValueError):REF.solve((Q(0),Q(0)),(1,2))
 
 class DeliveryExtractionTests(unittest.TestCase):
+    def test_saved_completion_validates_against_its_captured_source_bytes(self):
+        source=ROOT/'reports/algorithm-results/mpc06-completion-v2/input'
+        record,online,verification,_=records.validate(source)
+        current=records.evidence.digest((ROOT/'scripts/reports/mpc06_delivery/records.py').read_bytes())
+        self.assertEqual(verification['status'],'verified')
+        self.assertNotEqual(record['source_files']['scripts/reports/mpc06_delivery/records.py'],current)
+
     def test_held_native_plan_and_receding_prefix_are_checked_separately(self):
         online,files=records.upstream(records.UPSTREAM)
         original=records.subprocess.check_output

@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import shutil
 from urllib.parse import urldefrag, urlparse
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -84,6 +85,25 @@ class PerAttemptPublicationTests(unittest.TestCase):
         result = subprocess.run([sys.executable, str(validator)], cwd=ROOT, check=True,
                                 capture_output=True, text=True)
         self.assertIn("Validated immutable MPC-01 T-S03", result.stdout)
+
+    def test_ts02_html_replay_does_not_add_an_unmanifested_markdown_file(self):
+        script = ROOT / "scripts/reports/mpc01/summarize_strategy_ab_ts02.py"
+        with tempfile.TemporaryDirectory(prefix="mpc01-ts02-replay-") as temporary:
+            bundle = Path(temporary) / stage_module.STRATEGY_AB_TS02_ID
+            shutil.copytree(stage_module.STRATEGY_AB_TS02_SOURCE, bundle)
+            output = bundle / "strategy-ab-ts02-summary.html"
+            subprocess.run([
+                sys.executable, str(script),
+                "--events", str(bundle / "strategy-ab-ts02-events.jsonl"),
+                "--stdout", str(bundle / "strategy-ab-ts02-stdout.jsonl"),
+                "--scenario", str(bundle / "scenario.json"),
+                "--environment", str(bundle / "strategy-ab-ts02-environment.json"),
+                "--resource-profile", str(bundle / "resource-profile.json"),
+                "--record", str(bundle / "strategy-ab-ts02-comparison-record.json"),
+                "--output", str(output),
+            ], cwd=ROOT, check=True, capture_output=True, text=True)
+            self.assertFalse(output.with_suffix(".md").exists())
+            stage_module._check_manifest(bundle, stage_module.STRATEGY_AB_TS02_FILES)
 
     def test_route_preserves_source_bundle_and_links_from_root_landing(self):
         with tempfile.TemporaryDirectory(prefix="mpc01-pages-augmentation-") as temporary:

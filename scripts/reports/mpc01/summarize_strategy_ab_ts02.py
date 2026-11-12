@@ -107,7 +107,6 @@ def main() -> None:
 
     output = args.output.resolve()
     svg_path = output.with_name("strategy-ab-ts02-control-plane.svg")
-    summary_path = output.with_suffix(".md")
     colors = {EXPECTED[0]: "#1874a5", EXPECTED[1]: "#d7652b"}
     points = []
     for strategy in EXPECTED:
@@ -169,25 +168,6 @@ def main() -> None:
 <ul><li>Source commit: <code>{html.escape(environment['source_commit'])}</code></li><li>Scenario SHA-256: <code>{scenario_hash}</code></li><li>Events SHA-256: <code>{event_hash}</code></li><li><a href="strategy-ab-ts02-environment.json">Capture environment</a> · <a href="strategy-ab-ts02-csl-environment.json">Codec environment</a> · <a href="resource-profile.json">Per-attempt resource receipts</a> · <a href="binary-dynamic-dependencies.txt">Dynamic dependencies</a></li>{provenance_links}<li><a href="strategy-ab-ts02-events.jsonl">Raw events</a> · <a href="strategy-ab-ts02-stdout.jsonl">Raw stdout</a> · <a href="scenario.json">Scenario</a></li><li><a href="strategy-ab-ts02-comparison-record.json">Canonical comparison record</a> with the exact profile bytes embedded in each attempt</li><li><a href="capture-supervisor.py">Capture supervisor</a></li></ul>
 <p class="note">This is a limited T-S02 functional comparison slice for #597. It does not complete the broader MPC-01 matrix, external solver comparison, default per-attempt limiter profile, or general ranking.</p></body></html>'''
     output.write_text(report, encoding="utf-8")
-
-    lines = [
-        "# Resource-limited saved Strategy A/B T-S02 capture", "",
-        "T-S02 is the two-stage scalar integrator with `x0=0`, `x[t+1]=x[t]+u[t]`, `u[t] in [0,1]`, and constant objective `J=3`. Every feasible control pair is therefore an exact minimizer; this fixture checks family plumbing and witness replay, not optimization difficulty.", "",
-        f"- Source commit: `{environment['source_commit']}`.", f"- Scenario SHA-256: `{scenario_hash}`.", f"- Event/stdout SHA-256: `{event_hash}`.",
-        f"- {provenance_text} Executable SHA-256: `{environment['executable_sha256']}`.",
-        "- One excluded warmup pair; five measured alternating pairs; all 12 trials passed.",
-        "- Each result marked its profile-specific family complete and returned two distinct histories. Original-model bindings, feasibility, and objective checks passed; separate proof fields for optimality and completeness remain unsupported.",
-        "- The exact minimizer set is the full unit square. Both strategies returned the same two corner witnesses.", "",
-        "| Strategy | Median end-to-end (ms) | Range (ms) |", "|---|---:|---:|",
-    ]
-    if build_provenance:
-        lines.insert(5, f"- Build note: [`{build_provenance['build_note']['path']}`]({build_provenance['build_note']['path']}) (SHA-256 `{build_provenance['build_note']['sha256']}`).")
-    for strategy in EXPECTED:
-        median, low, high = timing[strategy]
-        lines.append(f"| `{strategy}` | {median/1e6:.6f} | {low/1e6:.6f}–{high/1e6:.6f} |")
-    lines.extend(["", resource_text, "", "The timings cover strategy preparation through original-problem witness verification; they exclude process startup, shared setup, JSON I/O, build and rendering. This tiny constant-objective fixture supports no general winner claim.", "", f"Report: [`{output.name}`]({output.name}); figure: [`{svg_path.name}`]({svg_path.name}).", ""])
-    summary_path.write_text("\n".join(lines), encoding="utf-8")
-
 
 if __name__ == "__main__":
     main()
