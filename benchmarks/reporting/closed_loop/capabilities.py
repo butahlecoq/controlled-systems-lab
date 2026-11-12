@@ -370,6 +370,7 @@ def _history_definitions() -> list[dict]:
 
 
 def _fixed_tail_definitions() -> list[dict]:
+    from fixed_tail_validation import declared_geometry_roles
     paths = {"benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
         "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
         "benchmarks/reporting/closed_loop/history_validation.py",
@@ -391,19 +392,20 @@ def _fixed_tail_definitions() -> list[dict]:
         if task["source"]["kind"] == "mpc11-scenario":
             sources.add("benchmarks/reporting/mpc11/affine.py")
         for family in ("polytope", "box", "zonotope", "parallelotope", "ellipsoid"):
+            geometry_roles = declared_geometry_roles(family)
             graph = {key: copy.deepcopy(base[key]) for key in ("task_id", "task_sha256", "model_id",
                 "objective_id", "action_profile_id", "execution")}
             graph.update({"controller": {"id": f"native-fixed-tail-{family}-ipopt/1", "version": "1",
                 "adapter": "native_fixed_tail", "policy_factory": "native_fixed_tail_policy:create_policy",
-                "factory_options": {"wall_seconds": 60, "build_backend_profile": {"build_type": "Release",
+                "factory_options": {"wall_seconds": 60, "geometry_roles": geometry_roles, "build_backend_profile": {"build_type": "Release",
                     "CSL_ENABLE_HIGHS": False, "CSL_ENABLE_QHULL": False, "CSL_ENABLE_CASADI": True}},
                 "source_files": sorted(paths), "prediction": "full remaining source-bound affine physical predictor",
                 "control_semantics": "C++ feasible frozen tail; continuous current-action argmin of complete original J under every selected physical stage region",
                 "solver": {"provider": "csl.nlp.casadi-ipopt.fixed-tail", "assurance": "local numerical"}},
-                "role_bindings": {"reachable_set_method": {"id": "csl.reachability.inner-template/1"},
+                "role_bindings": {**{value["role"]: {"id": value["owner"]} for value in geometry_roles.values()},
                     "representation": {"id": family}, "vertex_lp": "not_used", "converter": "not_used",
                     "control_optimizer": {"id": "csl.nlp.casadi-ipopt.fixed-tail"}},
-                "operation_roles": {"controller.solve": "control_optimizer", "fixed-tail.regions": "reachable_set_method"},
+                "operation_roles": {"controller.solve": "control_optimizer", **{operation: value["role"] for operation, value in geometry_roles.items()}},
                 "admission": {"status": "admitted", "basis": "native C++ five-family original-task queries, all-stage H/J/membership and warm initialization checks; episode outcomes retained separately"},
                 "geometry_work": {"claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"},
                 "source_files": [{"path": path, "sha256": hashlib.sha256((ROOT / path).read_bytes()).hexdigest()}

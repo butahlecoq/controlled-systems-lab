@@ -15,7 +15,7 @@ import subprocess
 from contracts import manifest_sha256
 from history_policy import make_request
 from history_validation import validate
-from fixed_tail_validation import validate_regions
+from fixed_tail_validation import validate_regions, declared_geometry_roles, validate_construction_trace
 from task_models import prediction_receipt, validate_source_binding
 
 FAMILIES = ('polytope', 'box', 'zonotope', 'parallelotope', 'ellipsoid')
@@ -30,8 +30,10 @@ class NativeFixedTailPolicy:
         if action_profile_id != task['control_domains']['continuous']['problem_id']:
             raise ValueError('native fixed-tail policy requires the original continuous action domain')
         options = dict(factory_options or {})
-        if set(options) != {'wall_seconds', 'build_backend_profile'} or options['wall_seconds'] != 60:
+        if set(options) != {'wall_seconds', 'build_backend_profile', 'geometry_roles'} or options['wall_seconds'] != 60:
             raise ValueError('native fixed-tail profile requires its registered budget and native build profile')
+        if options['geometry_roles'] != declared_geometry_roles(CONTROLLERS[controller_id]):
+            raise ValueError('declared fixed-tail construction roles differ from selected physical family')
         self.task, self.task_sha256 = task, task_sha256
         self.controller_id, self.action_profile_id = controller_id, action_profile_id
         self.family = CONTROLLERS[controller_id]
@@ -105,15 +107,17 @@ class NativeFixedTailPolicy:
                           response['source_cost']['total'])
         physical = validate_regions(response, len(observed_physical_state), self.task['episode']['intervals'] - absolute_update_index)
         checks['physical_regions'] = physical
+        checks['construction_trace'] = validate_construction_trace(response, self.options['geometry_roles'])
         checks['accepted'] &= physical['accepted']
         result['solve_receipt']['independent_validation'] = checks
         if not checks['accepted']:
             result['reason'] = 'independent original source H/J verification failed'; return result
-        result['geometry_invocations'] = [{'operation': 'fixed-tail.regions',
-            'actual_method_id': 'csl.reachability.inner-template/1' if self.family != 'polytope' else 'csl.reachability.fixed-tail-reference/1',
-            'version': '1', 'role': 'reachable_set_method',
-            'absolute_stage': absolute_update_index + region['stage'], 'geometry_role': 'fixed-tail-inner'}
-            for region in response['regions']]
+        result['geometry_invocations'] = [{'operation': event['operation'],
+            'actual_method_id': event['owner'], 'provider': 'public-function',
+            'version': 'source', 'role': event['role'], 'retained': event['retained'],
+            'absolute_stage': absolute_update_index + region['stage'],
+            'geometry_role': 'native-stage-construction-event'}
+            for region in response['regions'] for event in region['construction']]
         self.previous_history = response['next_warm_history']
         result.update(status='accepted', control=response['control'],
             predicted_states=checks['states'], predicted_controls=checks['controls'],

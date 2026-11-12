@@ -1056,6 +1056,13 @@ Json fixed_tail_query(const Json& in,const problem::ResolvedProblem& source,
             {"strict_coordinates",r.strict_coordinates},{"algorithmic_strict_margins",r.strict_margins_by_future_stage},
             {"relation","inner"},{"scope","fixed-feasible-tail intersect finite all-control carrier"},
             {"intersection_identity","F carrier intersect B equals B: carrier rows participate in B admission"}};
+        item["construction"]=Json::array({
+            {{"operation","fixed-tail.reference"},{"role","reachable_set_method"},
+             {"owner","csl::reachability::fixed_tail_policy"},{"retained",true}},
+            {{"operation",r.inner?"fixed-tail.inner-template":"fixed-tail.anchor-admission"},
+             {"role",r.inner?"inner_constructor":"anchor_admission"},
+             {"owner","csl::reachability::inscribe_template"},{"retained",r.inner.has_value()}}
+        });
         if(r.inner)item["membership"]={{"center",r.inner->center},{"factor",matrix_rows(r.inner->factor)},
             {"support_norm",r.inner->norm==InnerTemplateNorm::euclidean_ball?"l2":"l1"},
             {"factor_domain_norm",r.inner->norm==InnerTemplateNorm::euclidean_ball?"l2":"linf"},

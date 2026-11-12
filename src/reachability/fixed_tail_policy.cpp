@@ -413,10 +413,13 @@ HistoryLiftResult fixed_control_tail_lift(const FixedTailModel& model,std::span<
             std::copy(C.values.begin(),C.values.end(),out.map.values.begin()+static_cast<std::ptrdiff_t>((k+1)*n*m));
             std::copy(d.begin(),d.end(),out.offset.begin()+static_cast<std::ptrdiff_t>((k+1)*n));
         }
-        for(std::size_t k=0;k<horizon;++k)for(std::size_t j=0;j<m;++j) {
-            const auto index=(horizon+1)*n+k*m+j;
-            if(k==0)out.map.values[index*m+j]=1;else out.offset[index]=anchor[index];
-        }return out;
+        for(std::size_t k=0;k<horizon;++k) {
+            for(std::size_t j=0;j<m;++j) {
+                const auto index=(horizon+1)*n+k*m+j;
+                if(k==0)out.map.values[index*m+j]=1;else out.offset[index]=anchor[index];
+            }
+        }
+        return out;
     }catch(const Rejected& e){return e.error;}
 }
 std::variant<TailStateLift,Diagnostic> fixed_tail_state_lift(const FixedTailModel& model,std::span<const double> anchor,StageIndex at) {

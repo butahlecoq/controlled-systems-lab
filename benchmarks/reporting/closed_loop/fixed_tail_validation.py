@@ -44,3 +44,27 @@ def validate_regions(response, state_dimension, horizon, *, atol=1e-7, rtol=1e-8
             passed &= bool(bound <= 1 + atol and np.all(abs(x - reconstructed) <= atol + rtol * np.maximum(abs(x), abs(reconstructed))))
         checks.append({'stage': stage, 'passed': passed})
     return {'accepted': all(row['passed'] for row in checks), 'stages': checks}
+
+
+def declared_geometry_roles(family):
+    if family not in {'polytope', 'box', 'zonotope', 'parallelotope', 'ellipsoid'}:
+        raise ValueError('unknown fixed-tail physical family')
+    return {'fixed-tail.reference': {'role': 'reachable_set_method',
+                'owner': 'csl::reachability::fixed_tail_policy', 'retained': True},
+            ('fixed-tail.anchor-admission' if family == 'polytope' else 'fixed-tail.inner-template'):
+                {'role': 'anchor_admission' if family == 'polytope' else 'inner_constructor',
+                 'owner': 'csl::reachability::inscribe_template', 'retained': family != 'polytope'}}
+
+
+def validate_construction_trace(response, declared):
+    for stage in response['regions']:
+        observed = stage.get('construction')
+        if not isinstance(observed, list) or len(observed) != len(declared):
+            raise ValueError('missing native stage construction/admission trace')
+        operations = [row.get('operation') for row in observed]
+        if len(set(operations)) != len(operations) or set(operations) != set(declared):
+            raise ValueError('native stage operation trace differs from declared roles')
+        for row in observed:
+            if {key: row.get(key) for key in ('role', 'owner', 'retained')} != declared[row['operation']]:
+                raise ValueError('native stage construction role or owner differs from its declared graph')
+    return {'accepted': True, 'stages': len(response['regions']), 'declared_roles': declared}

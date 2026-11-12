@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'benchmarks/reporting/closed_loop'))
 from capabilities import build_history_manifest
 from contracts import load_task
-from fixed_tail_validation import validate_regions
+from fixed_tail_validation import validate_regions, declared_geometry_roles, validate_construction_trace
 
 
 class NativeFixedTailTests(unittest.TestCase):
@@ -44,10 +44,11 @@ class NativeFixedTailTests(unittest.TestCase):
             script = ('import sys;sys.path.insert(0,' + repr(str(ROOT / 'benchmarks/reporting/closed_loop')) + ');'
                 'from contracts import load_task,manifest_sha256;'
                 'from native_fixed_tail_policy import create_policy;'
+                'from fixed_tail_validation import declared_geometry_roles;'
                 't=load_task("syn-nl-lv-01");'
                 'p=create_policy(t,task_sha256=manifest_sha256(t),controller_id="native-fixed-tail-box-ipopt/1",'
                 'action_profile_id=t["control_domains"]["continuous"]["problem_id"],'
-                'factory_options={"wall_seconds":60,"build_backend_profile":{}});'
+                'factory_options={"wall_seconds":60,"build_backend_profile":{},"geometry_roles":declared_geometry_roles("box")});'
                 'p.query(t["task_id"],[120,60],0)')
             with mock.patch.dict(os.environ, {'CSL_NATIVE_POLICY_BRIDGE': str(bridge),
                     'OPENBLAS_NUM_THREADS': '1', 'OMP_NUM_THREADS': '1'}):
@@ -55,6 +56,21 @@ class NativeFixedTailTests(unittest.TestCase):
                     wall_seconds=4, cpu_seconds=10, address_space_bytes=8*1024**3)
             self.assertEqual(outcome['status'], 'timed_out')
             self.assertIn(marker, (folder / 'stderr').read_bytes())
+
+    def test_native_construction_trace_matches_declared_roles(self):
+        for family in ('polytope', 'box', 'zonotope', 'parallelotope', 'ellipsoid'):
+            roles = declared_geometry_roles(family)
+            response = {'regions': [{'construction': [{'operation': op, **value} for op, value in roles.items()]}]}
+            self.assertTrue(validate_construction_trace(response, roles)['accepted'])
+            if family == 'polytope':
+                self.assertEqual(roles['fixed-tail.anchor-admission']['role'], 'anchor_admission')
+                self.assertFalse(roles['fixed-tail.anchor-admission']['retained'])
+                bad = copy.deepcopy(response)
+                bad['regions'][0]['construction'][1]['retained'] = True
+                with self.assertRaisesRegex(ValueError, 'declared graph'):
+                    validate_construction_trace(bad, roles)
+            with self.assertRaisesRegex(ValueError, 'missing native'):
+                validate_construction_trace({'regions': [{}]}, roles)
 
     def test_factor_domain_is_infinity_ball_with_l1_support(self):
         h = {'inequalities': [[1, 0], [-1, 0], [0, 1], [0, -1]],

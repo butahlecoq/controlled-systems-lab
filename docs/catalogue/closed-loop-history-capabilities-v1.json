@@ -63,8 +63,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "79bf97f83dcee9498c84ecd07642b21f9405fbce0a87f4461b0e666f888d353b",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-mpc/1/cfg-79bf97f83dcee949",
+      "graph_fingerprint": "2555130484851b7e5dc9970ddaba5fd95bbb58af127555e68e9b2d0e39de10e2",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-mpc/1/cfg-2555130484851b7e",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -174,7 +174,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -241,8 +241,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "1063f66c47bf6710eb73d14e6fe7e23d5fc06a26272474a57c9278a6b2e5adb4",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ipopt/1/cfg-1063f66c47bf6710",
+      "graph_fingerprint": "695cfbd23cc0ad9666fe29facc71d94f10389e88b7c221434b26efefc6baf22b",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ipopt/1/cfg-695cfbd23cc0ad96",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -352,7 +352,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -438,8 +438,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "8b42df55b07d34352013ccb22ce618132dfe168e3e00eab3d6554dea00d68c4f",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-box-ipopt/1/cfg-8b42df55b07d3435",
+      "graph_fingerprint": "7cb5e874dc6a59e611491cb332bdc10181ea5f60a1793ac5f78e5aa1458712bb",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-box-ipopt/1/cfg-7cb5e874dc6a59e6",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -632,7 +632,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -718,8 +718,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "0b645977750936fbccdebc437aa8cc9ab6dc607bcb7e9053885209b592d07dde",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-polytope-ipopt/1/cfg-0b645977750936fb",
+      "graph_fingerprint": "646ea2f11a5bf79b64fbf90fd1baa978595aac17510f658f4604e5c4fc40a52c",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-polytope-ipopt/1/cfg-646ea2f11a5bf79b",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -912,7 +912,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -998,8 +998,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "9180b124e993ca32e4168f18a611fbbcef87b850185f01deb496844d4138ac67",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-zonotope-ipopt/1/cfg-9180b124e993ca32",
+      "graph_fingerprint": "d42e5f5a93d21b32a1e028d4f7b02b9344afab7283ebbbcaac4f0923009a4938",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-zonotope-ipopt/1/cfg-d42e5f5a93d21b32",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1192,7 +1192,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -1278,8 +1278,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "9fb0e7d4c7035a749af96f16a570f733e1627bc8b1dbe72157862bc4e1f6e73c",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-parallelotope-ipopt/1/cfg-9fb0e7d4c7035a74",
+      "graph_fingerprint": "43d1dc26d2c11f2a275e7cb0ca8b19d86f20eaece78fc307dbe9f7e8c1e5c973",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-parallelotope-ipopt/1/cfg-43d1dc26d2c11f2a",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1472,7 +1472,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -1558,8 +1558,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "f91235b0918aa61f463417a16f82cafbe26239134af9dd88668bd698838e818e",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ellipsoid-ipopt/1/cfg-f91235b0918aa61f",
+      "graph_fingerprint": "a57e0086cfb6cbc938face231c161e726ebdbc7cead52cd4d08b1f14ef865a31",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ellipsoid-ipopt/1/cfg-a57e0086cfb6cbc9",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1752,7 +1752,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -1819,8 +1819,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "6a61005b8560ff469b6dcfad5cea12dcd05017b91f837ed610ee46edc0976a37",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-6a61005b8560ff46",
+      "graph_fingerprint": "903a0dbc92610606eda60c1a777c7c83b0442c14cf21b6dd88ec5ff6242acc02",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-903a0dbc92610606",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -1926,7 +1926,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -2012,8 +2012,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "25cf21c0e15d26a17d8b440129c51dd3ba9050b197836065d9dbf1eadce9231b",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-box-ipopt/1/cfg-25cf21c0e15d26a1",
+      "graph_fingerprint": "c4bbd55b8dbef5390b43e01bd56d169d053c608f3ff0705b20491e3dfb271ab6",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-box-ipopt/1/cfg-c4bbd55b8dbef539",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2202,7 +2202,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -2288,8 +2288,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "2defc18449b0a65a0288297dd89cec1066a25350d59635d23d714c29f7dc630b",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-polytope-ipopt/1/cfg-2defc18449b0a65a",
+      "graph_fingerprint": "6222b60688e6997f4c10c244489143ac6d8136468e5096c149390ef9f817e27b",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-polytope-ipopt/1/cfg-6222b60688e6997f",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2478,7 +2478,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -2564,8 +2564,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "ca3d77fda3890295beb328d4deea9f818cca3ee1dd52bdeb8cc90a37f1eba5fb",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-zonotope-ipopt/1/cfg-ca3d77fda3890295",
+      "graph_fingerprint": "58bdb818a7be03bca1f72bf73446ac228304e07b13d2abe03ddc6371adebd55d",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-zonotope-ipopt/1/cfg-58bdb818a7be03bc",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2754,7 +2754,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -2840,8 +2840,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "da66a4cb99a7f56ef79a152ca61bce359767eac75d9d4e5690adc07f0c6ec75e",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-parallelotope-ipopt/1/cfg-da66a4cb99a7f56e",
+      "graph_fingerprint": "3f129e9b8a4cfe70eede8572f2cb8540613c16dcc48570685008e3750a3684df",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-parallelotope-ipopt/1/cfg-3f129e9b8a4cfe70",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3030,7 +3030,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -3116,8 +3116,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "3f92705a5ea053f92ad12162b8953e9b946da41a3e9a31ceb06187a8865605e5",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-ellipsoid-ipopt/1/cfg-3f92705a5ea053f9",
+      "graph_fingerprint": "c19d7e28b0a9da1383e9c8578e4c804942b88e1101dad34025c911af4d13fbfb",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-ellipsoid-ipopt/1/cfg-c19d7e28b0a9da13",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3306,7 +3306,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -3373,8 +3373,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "317f88f7369e49f94e7c3d33a348b06c7bfeb807d4d52a0ab9c2a0d34a521c14",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-mpc/1/cfg-317f88f7369e49f9",
+      "graph_fingerprint": "53d9dc187b85db965ee84c7c3e119c41704fe6f4d95bce0cd5519bb4e51a6083",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-mpc/1/cfg-53d9dc187b85db96",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -3484,7 +3484,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -3551,8 +3551,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "30b714e1d6be55871cb1db69e20cf7b244144f6d22f756dd9f495af4cd898c89",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ipopt/1/cfg-30b714e1d6be5587",
+      "graph_fingerprint": "4656c6de08782c3e30ce80371b514799cfc5768592c8a2a917342c293416157f",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ipopt/1/cfg-4656c6de08782c3e",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -3662,7 +3662,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -3748,8 +3748,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "7275f432652afe1799399c7cfd389dd002c59383a38a4c367fd2680d8377a583",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-box-ipopt/1/cfg-7275f432652afe17",
+      "graph_fingerprint": "ea5ef81d4487e49832f6c93a7701ec51c1270f3340bfd5e7205b4869847d36e6",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-box-ipopt/1/cfg-ea5ef81d4487e498",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -3942,7 +3942,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -4028,8 +4028,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "5b7725e7715ef7a97abe64296290cb1ac6eef441bd2fff91d7408e8630f10a4a",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-polytope-ipopt/1/cfg-5b7725e7715ef7a9",
+      "graph_fingerprint": "897e4c92f570b5b7f0ecf0a55bd312585566d568baac9e952045cdf3014b201f",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-polytope-ipopt/1/cfg-897e4c92f570b5b7",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4222,7 +4222,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -4308,8 +4308,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "3e44c36578810178c62a4e7cfe5a81a556bc123171e5185e7ad851ae18cd4d59",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-zonotope-ipopt/1/cfg-3e44c36578810178",
+      "graph_fingerprint": "c952d2b66d3529c6e40a02ee43fe0c3c11d5c02e3b1ca7d6c7a71dd1dd7d1963",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-zonotope-ipopt/1/cfg-c952d2b66d3529c6",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4502,7 +4502,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -4588,8 +4588,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "4a42463bebee3758af74aede18e2e9c317cc3d64325c7fbb6f4b04c525ef14b7",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-parallelotope-ipopt/1/cfg-4a42463bebee3758",
+      "graph_fingerprint": "e073445bf0338c1b267b4b489dc3b0fb8de1373103817632c0c39ffe3de822a4",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-parallelotope-ipopt/1/cfg-e073445bf0338c1b",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4782,7 +4782,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -4868,8 +4868,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "aaf965f11cac4afa3d951f93348e84a90ef5f05426cd74f493f810b9fc287dfa",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ellipsoid-ipopt/1/cfg-aaf965f11cac4afa",
+      "graph_fingerprint": "88eee6d1b4b6219b14f02639261a5e05f2076e902bf88cfd1c15e3935f46e353",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ellipsoid-ipopt/1/cfg-88eee6d1b4b6219b",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5062,7 +5062,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -5083,6 +5083,18 @@
             "CSL_ENABLE_HIGHS": false,
             "CSL_ENABLE_QHULL": false,
             "build_type": "Release"
+          },
+          "geometry_roles": {
+            "fixed-tail.anchor-admission": {
+              "owner": "csl::reachability::inscribe_template",
+              "retained": false,
+              "role": "anchor_admission"
+            },
+            "fixed-tail.reference": {
+              "owner": "csl::reachability::fixed_tail_policy",
+              "retained": true,
+              "role": "reachable_set_method"
+            }
           },
           "wall_seconds": 60
         },
@@ -5136,21 +5148,25 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "21f927836ee990b3bc8cc5c28313e330223b1627e9020e4443d786ebb033cd8a",
-      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-polytope-ipopt/1/cfg-21f927836ee990b3",
+      "graph_fingerprint": "29241cd9dd52f9dde7e0acf7ad272972c272d4aa28423f6a4fa6cff6d1c52beb",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-polytope-ipopt/1/cfg-29241cd9dd52f9dd",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
         "controller.solve": "control_optimizer",
-        "fixed-tail.regions": "reachable_set_method"
+        "fixed-tail.anchor-admission": "anchor_admission",
+        "fixed-tail.reference": "reachable_set_method"
       },
       "role_bindings": {
+        "anchor_admission": {
+          "id": "csl::reachability::inscribe_template"
+        },
         "control_optimizer": {
           "id": "csl.nlp.casadi-ipopt.fixed-tail"
         },
         "converter": "not_used",
         "reachable_set_method": {
-          "id": "csl.reachability.inner-template/1"
+          "id": "csl::reachability::fixed_tail_policy"
         },
         "representation": {
           "id": "polytope"
@@ -5164,7 +5180,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
-          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+          "sha256": "bc4925bc17c887a3d4e57db51d538cc1776ff21f546cb60a79ff16be303ad539"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
@@ -5176,7 +5192,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "a95e51c34e7a9e06e1f2ae5fe2977bde291f62c96ab3e8b09a0af228c17f2fae"
+          "sha256": "38be4e94485812e104db91aac0988bffb49d01e9cbf68205b10097f5883eca94"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -5240,7 +5256,7 @@
         },
         {
           "path": "src/reachability/fixed_tail_policy.cpp",
-          "sha256": "64e9c38f4d8999a4a7a37140945b55af504a1bb27dba6d38cc4714b9c551ad02"
+          "sha256": "fc1e10913604ac33ffff581134301f3d8a2c08f83b6c389acef80207055ce3e9"
         },
         {
           "path": "src/reachability/inner_template.cpp",
@@ -5256,7 +5272,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -5277,6 +5293,18 @@
             "CSL_ENABLE_HIGHS": false,
             "CSL_ENABLE_QHULL": false,
             "build_type": "Release"
+          },
+          "geometry_roles": {
+            "fixed-tail.inner-template": {
+              "owner": "csl::reachability::inscribe_template",
+              "retained": true,
+              "role": "inner_constructor"
+            },
+            "fixed-tail.reference": {
+              "owner": "csl::reachability::fixed_tail_policy",
+              "retained": true,
+              "role": "reachable_set_method"
+            }
           },
           "wall_seconds": 60
         },
@@ -5330,21 +5358,25 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "88400a5fe22acb443779bf1759da371494a9f9be1685cf8d6a672fbb800c8614",
-      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-box-ipopt/1/cfg-88400a5fe22acb44",
+      "graph_fingerprint": "a3a3fe4be9773627616a01c741de1b5a96001e3eaad3bfe9990936b2f26b5194",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-box-ipopt/1/cfg-a3a3fe4be9773627",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
         "controller.solve": "control_optimizer",
-        "fixed-tail.regions": "reachable_set_method"
+        "fixed-tail.inner-template": "inner_constructor",
+        "fixed-tail.reference": "reachable_set_method"
       },
       "role_bindings": {
         "control_optimizer": {
           "id": "csl.nlp.casadi-ipopt.fixed-tail"
         },
         "converter": "not_used",
+        "inner_constructor": {
+          "id": "csl::reachability::inscribe_template"
+        },
         "reachable_set_method": {
-          "id": "csl.reachability.inner-template/1"
+          "id": "csl::reachability::fixed_tail_policy"
         },
         "representation": {
           "id": "box"
@@ -5358,7 +5390,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
-          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+          "sha256": "bc4925bc17c887a3d4e57db51d538cc1776ff21f546cb60a79ff16be303ad539"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
@@ -5370,7 +5402,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "a95e51c34e7a9e06e1f2ae5fe2977bde291f62c96ab3e8b09a0af228c17f2fae"
+          "sha256": "38be4e94485812e104db91aac0988bffb49d01e9cbf68205b10097f5883eca94"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -5434,7 +5466,7 @@
         },
         {
           "path": "src/reachability/fixed_tail_policy.cpp",
-          "sha256": "64e9c38f4d8999a4a7a37140945b55af504a1bb27dba6d38cc4714b9c551ad02"
+          "sha256": "fc1e10913604ac33ffff581134301f3d8a2c08f83b6c389acef80207055ce3e9"
         },
         {
           "path": "src/reachability/inner_template.cpp",
@@ -5450,7 +5482,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -5471,6 +5503,18 @@
             "CSL_ENABLE_HIGHS": false,
             "CSL_ENABLE_QHULL": false,
             "build_type": "Release"
+          },
+          "geometry_roles": {
+            "fixed-tail.inner-template": {
+              "owner": "csl::reachability::inscribe_template",
+              "retained": true,
+              "role": "inner_constructor"
+            },
+            "fixed-tail.reference": {
+              "owner": "csl::reachability::fixed_tail_policy",
+              "retained": true,
+              "role": "reachable_set_method"
+            }
           },
           "wall_seconds": 60
         },
@@ -5524,21 +5568,25 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "ae483ac301eed494df45583543a11e2026da76a2a57908088ecd3853a185c253",
-      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-zonotope-ipopt/1/cfg-ae483ac301eed494",
+      "graph_fingerprint": "002d03ef6f7f5ffdbf0b04f78d589507bb3fa7694073e71468743619acaf6601",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-zonotope-ipopt/1/cfg-002d03ef6f7f5ffd",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
         "controller.solve": "control_optimizer",
-        "fixed-tail.regions": "reachable_set_method"
+        "fixed-tail.inner-template": "inner_constructor",
+        "fixed-tail.reference": "reachable_set_method"
       },
       "role_bindings": {
         "control_optimizer": {
           "id": "csl.nlp.casadi-ipopt.fixed-tail"
         },
         "converter": "not_used",
+        "inner_constructor": {
+          "id": "csl::reachability::inscribe_template"
+        },
         "reachable_set_method": {
-          "id": "csl.reachability.inner-template/1"
+          "id": "csl::reachability::fixed_tail_policy"
         },
         "representation": {
           "id": "zonotope"
@@ -5552,7 +5600,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
-          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+          "sha256": "bc4925bc17c887a3d4e57db51d538cc1776ff21f546cb60a79ff16be303ad539"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
@@ -5564,7 +5612,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "a95e51c34e7a9e06e1f2ae5fe2977bde291f62c96ab3e8b09a0af228c17f2fae"
+          "sha256": "38be4e94485812e104db91aac0988bffb49d01e9cbf68205b10097f5883eca94"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -5628,7 +5676,7 @@
         },
         {
           "path": "src/reachability/fixed_tail_policy.cpp",
-          "sha256": "64e9c38f4d8999a4a7a37140945b55af504a1bb27dba6d38cc4714b9c551ad02"
+          "sha256": "fc1e10913604ac33ffff581134301f3d8a2c08f83b6c389acef80207055ce3e9"
         },
         {
           "path": "src/reachability/inner_template.cpp",
@@ -5644,7 +5692,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -5665,6 +5713,18 @@
             "CSL_ENABLE_HIGHS": false,
             "CSL_ENABLE_QHULL": false,
             "build_type": "Release"
+          },
+          "geometry_roles": {
+            "fixed-tail.inner-template": {
+              "owner": "csl::reachability::inscribe_template",
+              "retained": true,
+              "role": "inner_constructor"
+            },
+            "fixed-tail.reference": {
+              "owner": "csl::reachability::fixed_tail_policy",
+              "retained": true,
+              "role": "reachable_set_method"
+            }
           },
           "wall_seconds": 60
         },
@@ -5718,21 +5778,25 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "18c7f191889bb588167036a04d62a8173a352a92bc6159295f88a0a6348dfc63",
-      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-parallelotope-ipopt/1/cfg-18c7f191889bb588",
+      "graph_fingerprint": "60e67a225858ae3a757e9ac1b0de4c807c7c7d1cca5d2f2d7402900701b2d53e",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-parallelotope-ipopt/1/cfg-60e67a225858ae3a",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
         "controller.solve": "control_optimizer",
-        "fixed-tail.regions": "reachable_set_method"
+        "fixed-tail.inner-template": "inner_constructor",
+        "fixed-tail.reference": "reachable_set_method"
       },
       "role_bindings": {
         "control_optimizer": {
           "id": "csl.nlp.casadi-ipopt.fixed-tail"
         },
         "converter": "not_used",
+        "inner_constructor": {
+          "id": "csl::reachability::inscribe_template"
+        },
         "reachable_set_method": {
-          "id": "csl.reachability.inner-template/1"
+          "id": "csl::reachability::fixed_tail_policy"
         },
         "representation": {
           "id": "parallelotope"
@@ -5746,7 +5810,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
-          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+          "sha256": "bc4925bc17c887a3d4e57db51d538cc1776ff21f546cb60a79ff16be303ad539"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
@@ -5758,7 +5822,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "a95e51c34e7a9e06e1f2ae5fe2977bde291f62c96ab3e8b09a0af228c17f2fae"
+          "sha256": "38be4e94485812e104db91aac0988bffb49d01e9cbf68205b10097f5883eca94"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -5822,7 +5886,7 @@
         },
         {
           "path": "src/reachability/fixed_tail_policy.cpp",
-          "sha256": "64e9c38f4d8999a4a7a37140945b55af504a1bb27dba6d38cc4714b9c551ad02"
+          "sha256": "fc1e10913604ac33ffff581134301f3d8a2c08f83b6c389acef80207055ce3e9"
         },
         {
           "path": "src/reachability/inner_template.cpp",
@@ -5838,7 +5902,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -5859,6 +5923,18 @@
             "CSL_ENABLE_HIGHS": false,
             "CSL_ENABLE_QHULL": false,
             "build_type": "Release"
+          },
+          "geometry_roles": {
+            "fixed-tail.inner-template": {
+              "owner": "csl::reachability::inscribe_template",
+              "retained": true,
+              "role": "inner_constructor"
+            },
+            "fixed-tail.reference": {
+              "owner": "csl::reachability::fixed_tail_policy",
+              "retained": true,
+              "role": "reachable_set_method"
+            }
           },
           "wall_seconds": 60
         },
@@ -5912,21 +5988,25 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "86473ed84c85e913e7a0e19ddb9ff874d438d0d5ccd7845943625fafcc6e820a",
-      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-ellipsoid-ipopt/1/cfg-86473ed84c85e913",
+      "graph_fingerprint": "5855d65f310b5dbe0959ecb60863ca6f30c42dcf9734712c5bca2e810cc233d0",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-ellipsoid-ipopt/1/cfg-5855d65f310b5dbe",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
         "controller.solve": "control_optimizer",
-        "fixed-tail.regions": "reachable_set_method"
+        "fixed-tail.inner-template": "inner_constructor",
+        "fixed-tail.reference": "reachable_set_method"
       },
       "role_bindings": {
         "control_optimizer": {
           "id": "csl.nlp.casadi-ipopt.fixed-tail"
         },
         "converter": "not_used",
+        "inner_constructor": {
+          "id": "csl::reachability::inscribe_template"
+        },
         "reachable_set_method": {
-          "id": "csl.reachability.inner-template/1"
+          "id": "csl::reachability::fixed_tail_policy"
         },
         "representation": {
           "id": "ellipsoid"
@@ -5940,7 +6020,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
-          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+          "sha256": "bc4925bc17c887a3d4e57db51d538cc1776ff21f546cb60a79ff16be303ad539"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
@@ -5952,7 +6032,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "a95e51c34e7a9e06e1f2ae5fe2977bde291f62c96ab3e8b09a0af228c17f2fae"
+          "sha256": "38be4e94485812e104db91aac0988bffb49d01e9cbf68205b10097f5883eca94"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -6016,7 +6096,7 @@
         },
         {
           "path": "src/reachability/fixed_tail_policy.cpp",
-          "sha256": "64e9c38f4d8999a4a7a37140945b55af504a1bb27dba6d38cc4714b9c551ad02"
+          "sha256": "fc1e10913604ac33ffff581134301f3d8a2c08f83b6c389acef80207055ce3e9"
         },
         {
           "path": "src/reachability/inner_template.cpp",
@@ -6032,7 +6112,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-lv-01/continuous-receding/1",
@@ -6053,6 +6133,18 @@
             "CSL_ENABLE_HIGHS": false,
             "CSL_ENABLE_QHULL": false,
             "build_type": "Release"
+          },
+          "geometry_roles": {
+            "fixed-tail.anchor-admission": {
+              "owner": "csl::reachability::inscribe_template",
+              "retained": false,
+              "role": "anchor_admission"
+            },
+            "fixed-tail.reference": {
+              "owner": "csl::reachability::fixed_tail_policy",
+              "retained": true,
+              "role": "reachable_set_method"
+            }
           },
           "wall_seconds": 60
         },
@@ -6106,21 +6198,25 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "0b39459faf22e6e65b31ce2fe73fbf430347ab9dd5b45d93b61f1a9f13e4ba1e",
-      "graph_id": "closed-loop/earth-orbit/fixed-tail-polytope-ipopt/1/cfg-0b39459faf22e6e6",
+      "graph_fingerprint": "e9547efd1c59dbf86f02bd410e070a3d9cb2a31511651392e733aff10ff13e02",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-polytope-ipopt/1/cfg-e9547efd1c59dbf8",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
         "controller.solve": "control_optimizer",
-        "fixed-tail.regions": "reachable_set_method"
+        "fixed-tail.anchor-admission": "anchor_admission",
+        "fixed-tail.reference": "reachable_set_method"
       },
       "role_bindings": {
+        "anchor_admission": {
+          "id": "csl::reachability::inscribe_template"
+        },
         "control_optimizer": {
           "id": "csl.nlp.casadi-ipopt.fixed-tail"
         },
         "converter": "not_used",
         "reachable_set_method": {
-          "id": "csl.reachability.inner-template/1"
+          "id": "csl::reachability::fixed_tail_policy"
         },
         "representation": {
           "id": "polytope"
@@ -6134,7 +6230,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
-          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+          "sha256": "bc4925bc17c887a3d4e57db51d538cc1776ff21f546cb60a79ff16be303ad539"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
@@ -6146,7 +6242,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "a95e51c34e7a9e06e1f2ae5fe2977bde291f62c96ab3e8b09a0af228c17f2fae"
+          "sha256": "38be4e94485812e104db91aac0988bffb49d01e9cbf68205b10097f5883eca94"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -6206,7 +6302,7 @@
         },
         {
           "path": "src/reachability/fixed_tail_policy.cpp",
-          "sha256": "64e9c38f4d8999a4a7a37140945b55af504a1bb27dba6d38cc4714b9c551ad02"
+          "sha256": "fc1e10913604ac33ffff581134301f3d8a2c08f83b6c389acef80207055ce3e9"
         },
         {
           "path": "src/reachability/inner_template.cpp",
@@ -6222,7 +6318,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -6243,6 +6339,18 @@
             "CSL_ENABLE_HIGHS": false,
             "CSL_ENABLE_QHULL": false,
             "build_type": "Release"
+          },
+          "geometry_roles": {
+            "fixed-tail.inner-template": {
+              "owner": "csl::reachability::inscribe_template",
+              "retained": true,
+              "role": "inner_constructor"
+            },
+            "fixed-tail.reference": {
+              "owner": "csl::reachability::fixed_tail_policy",
+              "retained": true,
+              "role": "reachable_set_method"
+            }
           },
           "wall_seconds": 60
         },
@@ -6296,21 +6404,25 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "a15a29f78fb1b4185ee19f76e7370d9fb96de8e2d1c44e783b7f05ecf1058d11",
-      "graph_id": "closed-loop/earth-orbit/fixed-tail-box-ipopt/1/cfg-a15a29f78fb1b418",
+      "graph_fingerprint": "1c162af01c6feb10317c7b5b3f57849e80afd179be70d0800bf8d1a4845cc1a9",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-box-ipopt/1/cfg-1c162af01c6feb10",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
         "controller.solve": "control_optimizer",
-        "fixed-tail.regions": "reachable_set_method"
+        "fixed-tail.inner-template": "inner_constructor",
+        "fixed-tail.reference": "reachable_set_method"
       },
       "role_bindings": {
         "control_optimizer": {
           "id": "csl.nlp.casadi-ipopt.fixed-tail"
         },
         "converter": "not_used",
+        "inner_constructor": {
+          "id": "csl::reachability::inscribe_template"
+        },
         "reachable_set_method": {
-          "id": "csl.reachability.inner-template/1"
+          "id": "csl::reachability::fixed_tail_policy"
         },
         "representation": {
           "id": "box"
@@ -6324,7 +6436,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
-          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+          "sha256": "bc4925bc17c887a3d4e57db51d538cc1776ff21f546cb60a79ff16be303ad539"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
@@ -6336,7 +6448,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "a95e51c34e7a9e06e1f2ae5fe2977bde291f62c96ab3e8b09a0af228c17f2fae"
+          "sha256": "38be4e94485812e104db91aac0988bffb49d01e9cbf68205b10097f5883eca94"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -6396,7 +6508,7 @@
         },
         {
           "path": "src/reachability/fixed_tail_policy.cpp",
-          "sha256": "64e9c38f4d8999a4a7a37140945b55af504a1bb27dba6d38cc4714b9c551ad02"
+          "sha256": "fc1e10913604ac33ffff581134301f3d8a2c08f83b6c389acef80207055ce3e9"
         },
         {
           "path": "src/reachability/inner_template.cpp",
@@ -6412,7 +6524,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -6433,6 +6545,18 @@
             "CSL_ENABLE_HIGHS": false,
             "CSL_ENABLE_QHULL": false,
             "build_type": "Release"
+          },
+          "geometry_roles": {
+            "fixed-tail.inner-template": {
+              "owner": "csl::reachability::inscribe_template",
+              "retained": true,
+              "role": "inner_constructor"
+            },
+            "fixed-tail.reference": {
+              "owner": "csl::reachability::fixed_tail_policy",
+              "retained": true,
+              "role": "reachable_set_method"
+            }
           },
           "wall_seconds": 60
         },
@@ -6486,21 +6610,25 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "807cef9d8c3b77dd21b2d69b0c8ad9af8e5a0817fec54b70cae85f501eb3e72a",
-      "graph_id": "closed-loop/earth-orbit/fixed-tail-zonotope-ipopt/1/cfg-807cef9d8c3b77dd",
+      "graph_fingerprint": "70b2e0084d201d00e4338086cf794acc0495f501f4bc9ed11a57ab861de94439",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-zonotope-ipopt/1/cfg-70b2e0084d201d00",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
         "controller.solve": "control_optimizer",
-        "fixed-tail.regions": "reachable_set_method"
+        "fixed-tail.inner-template": "inner_constructor",
+        "fixed-tail.reference": "reachable_set_method"
       },
       "role_bindings": {
         "control_optimizer": {
           "id": "csl.nlp.casadi-ipopt.fixed-tail"
         },
         "converter": "not_used",
+        "inner_constructor": {
+          "id": "csl::reachability::inscribe_template"
+        },
         "reachable_set_method": {
-          "id": "csl.reachability.inner-template/1"
+          "id": "csl::reachability::fixed_tail_policy"
         },
         "representation": {
           "id": "zonotope"
@@ -6514,7 +6642,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
-          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+          "sha256": "bc4925bc17c887a3d4e57db51d538cc1776ff21f546cb60a79ff16be303ad539"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
@@ -6526,7 +6654,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "a95e51c34e7a9e06e1f2ae5fe2977bde291f62c96ab3e8b09a0af228c17f2fae"
+          "sha256": "38be4e94485812e104db91aac0988bffb49d01e9cbf68205b10097f5883eca94"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -6586,7 +6714,7 @@
         },
         {
           "path": "src/reachability/fixed_tail_policy.cpp",
-          "sha256": "64e9c38f4d8999a4a7a37140945b55af504a1bb27dba6d38cc4714b9c551ad02"
+          "sha256": "fc1e10913604ac33ffff581134301f3d8a2c08f83b6c389acef80207055ce3e9"
         },
         {
           "path": "src/reachability/inner_template.cpp",
@@ -6602,7 +6730,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -6623,6 +6751,18 @@
             "CSL_ENABLE_HIGHS": false,
             "CSL_ENABLE_QHULL": false,
             "build_type": "Release"
+          },
+          "geometry_roles": {
+            "fixed-tail.inner-template": {
+              "owner": "csl::reachability::inscribe_template",
+              "retained": true,
+              "role": "inner_constructor"
+            },
+            "fixed-tail.reference": {
+              "owner": "csl::reachability::fixed_tail_policy",
+              "retained": true,
+              "role": "reachable_set_method"
+            }
           },
           "wall_seconds": 60
         },
@@ -6676,21 +6816,25 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "2fea9ba29cd732a2cdf00990db34e4c8410f724949e68051311bef5053d4c314",
-      "graph_id": "closed-loop/earth-orbit/fixed-tail-parallelotope-ipopt/1/cfg-2fea9ba29cd732a2",
+      "graph_fingerprint": "4bac495725425b68129c94fab8051ff2d241a12393f9979532feb5512467af2f",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-parallelotope-ipopt/1/cfg-4bac495725425b68",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
         "controller.solve": "control_optimizer",
-        "fixed-tail.regions": "reachable_set_method"
+        "fixed-tail.inner-template": "inner_constructor",
+        "fixed-tail.reference": "reachable_set_method"
       },
       "role_bindings": {
         "control_optimizer": {
           "id": "csl.nlp.casadi-ipopt.fixed-tail"
         },
         "converter": "not_used",
+        "inner_constructor": {
+          "id": "csl::reachability::inscribe_template"
+        },
         "reachable_set_method": {
-          "id": "csl.reachability.inner-template/1"
+          "id": "csl::reachability::fixed_tail_policy"
         },
         "representation": {
           "id": "parallelotope"
@@ -6704,7 +6848,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
-          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+          "sha256": "bc4925bc17c887a3d4e57db51d538cc1776ff21f546cb60a79ff16be303ad539"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
@@ -6716,7 +6860,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "a95e51c34e7a9e06e1f2ae5fe2977bde291f62c96ab3e8b09a0af228c17f2fae"
+          "sha256": "38be4e94485812e104db91aac0988bffb49d01e9cbf68205b10097f5883eca94"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -6776,7 +6920,7 @@
         },
         {
           "path": "src/reachability/fixed_tail_policy.cpp",
-          "sha256": "64e9c38f4d8999a4a7a37140945b55af504a1bb27dba6d38cc4714b9c551ad02"
+          "sha256": "fc1e10913604ac33ffff581134301f3d8a2c08f83b6c389acef80207055ce3e9"
         },
         {
           "path": "src/reachability/inner_template.cpp",
@@ -6792,7 +6936,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -6813,6 +6957,18 @@
             "CSL_ENABLE_HIGHS": false,
             "CSL_ENABLE_QHULL": false,
             "build_type": "Release"
+          },
+          "geometry_roles": {
+            "fixed-tail.inner-template": {
+              "owner": "csl::reachability::inscribe_template",
+              "retained": true,
+              "role": "inner_constructor"
+            },
+            "fixed-tail.reference": {
+              "owner": "csl::reachability::fixed_tail_policy",
+              "retained": true,
+              "role": "reachable_set_method"
+            }
           },
           "wall_seconds": 60
         },
@@ -6866,21 +7022,25 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "0f2a9c57b2b1f8ebd9877c65fceff3b43c307c05265ae6881ee5f231ab144b2e",
-      "graph_id": "closed-loop/earth-orbit/fixed-tail-ellipsoid-ipopt/1/cfg-0f2a9c57b2b1f8eb",
+      "graph_fingerprint": "0a517c510cb01d5ab5cdcadbac794d1aebb9478d962b7142d17e3bfb2ac20aa3",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-ellipsoid-ipopt/1/cfg-0a517c510cb01d5a",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
         "controller.solve": "control_optimizer",
-        "fixed-tail.regions": "reachable_set_method"
+        "fixed-tail.inner-template": "inner_constructor",
+        "fixed-tail.reference": "reachable_set_method"
       },
       "role_bindings": {
         "control_optimizer": {
           "id": "csl.nlp.casadi-ipopt.fixed-tail"
         },
         "converter": "not_used",
+        "inner_constructor": {
+          "id": "csl::reachability::inscribe_template"
+        },
         "reachable_set_method": {
-          "id": "csl.reachability.inner-template/1"
+          "id": "csl::reachability::fixed_tail_policy"
         },
         "representation": {
           "id": "ellipsoid"
@@ -6894,7 +7054,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
-          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+          "sha256": "bc4925bc17c887a3d4e57db51d538cc1776ff21f546cb60a79ff16be303ad539"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
@@ -6906,7 +7066,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "a95e51c34e7a9e06e1f2ae5fe2977bde291f62c96ab3e8b09a0af228c17f2fae"
+          "sha256": "38be4e94485812e104db91aac0988bffb49d01e9cbf68205b10097f5883eca94"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -6966,7 +7126,7 @@
         },
         {
           "path": "src/reachability/fixed_tail_policy.cpp",
-          "sha256": "64e9c38f4d8999a4a7a37140945b55af504a1bb27dba6d38cc4714b9c551ad02"
+          "sha256": "fc1e10913604ac33ffff581134301f3d8a2c08f83b6c389acef80207055ce3e9"
         },
         {
           "path": "src/reachability/inner_template.cpp",
@@ -6982,7 +7142,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "env717-earth-orbit/continuous-receding/1",
@@ -7003,6 +7163,18 @@
             "CSL_ENABLE_HIGHS": false,
             "CSL_ENABLE_QHULL": false,
             "build_type": "Release"
+          },
+          "geometry_roles": {
+            "fixed-tail.anchor-admission": {
+              "owner": "csl::reachability::inscribe_template",
+              "retained": false,
+              "role": "anchor_admission"
+            },
+            "fixed-tail.reference": {
+              "owner": "csl::reachability::fixed_tail_policy",
+              "retained": true,
+              "role": "reachable_set_method"
+            }
           },
           "wall_seconds": 60
         },
@@ -7056,21 +7228,25 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "f8a3fb5aad3b2f4f0dc80bdb84ad23a8c59e161d323c5e3573a481b30d59d1ba",
-      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-polytope-ipopt/1/cfg-f8a3fb5aad3b2f4f",
+      "graph_fingerprint": "2ced292649c14156740366c00d75ccf295574827c85c1728d270b04811d140b1",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-polytope-ipopt/1/cfg-2ced292649c14156",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
         "controller.solve": "control_optimizer",
-        "fixed-tail.regions": "reachable_set_method"
+        "fixed-tail.anchor-admission": "anchor_admission",
+        "fixed-tail.reference": "reachable_set_method"
       },
       "role_bindings": {
+        "anchor_admission": {
+          "id": "csl::reachability::inscribe_template"
+        },
         "control_optimizer": {
           "id": "csl.nlp.casadi-ipopt.fixed-tail"
         },
         "converter": "not_used",
         "reachable_set_method": {
-          "id": "csl.reachability.inner-template/1"
+          "id": "csl::reachability::fixed_tail_policy"
         },
         "representation": {
           "id": "polytope"
@@ -7084,7 +7260,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
-          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+          "sha256": "bc4925bc17c887a3d4e57db51d538cc1776ff21f546cb60a79ff16be303ad539"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
@@ -7096,7 +7272,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "a95e51c34e7a9e06e1f2ae5fe2977bde291f62c96ab3e8b09a0af228c17f2fae"
+          "sha256": "38be4e94485812e104db91aac0988bffb49d01e9cbf68205b10097f5883eca94"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -7160,7 +7336,7 @@
         },
         {
           "path": "src/reachability/fixed_tail_policy.cpp",
-          "sha256": "64e9c38f4d8999a4a7a37140945b55af504a1bb27dba6d38cc4714b9c551ad02"
+          "sha256": "fc1e10913604ac33ffff581134301f3d8a2c08f83b6c389acef80207055ce3e9"
         },
         {
           "path": "src/reachability/inner_template.cpp",
@@ -7176,7 +7352,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -7197,6 +7373,18 @@
             "CSL_ENABLE_HIGHS": false,
             "CSL_ENABLE_QHULL": false,
             "build_type": "Release"
+          },
+          "geometry_roles": {
+            "fixed-tail.inner-template": {
+              "owner": "csl::reachability::inscribe_template",
+              "retained": true,
+              "role": "inner_constructor"
+            },
+            "fixed-tail.reference": {
+              "owner": "csl::reachability::fixed_tail_policy",
+              "retained": true,
+              "role": "reachable_set_method"
+            }
           },
           "wall_seconds": 60
         },
@@ -7250,21 +7438,25 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "22c723d62d7549fb249cc4d485371b24194ae7a8372bd024bccac4ec6f549024",
-      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-box-ipopt/1/cfg-22c723d62d7549fb",
+      "graph_fingerprint": "dfeeb59a9689a3e4696ef6e00157c69d40df7905e43342f90715f73bdba57f00",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-box-ipopt/1/cfg-dfeeb59a9689a3e4",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
         "controller.solve": "control_optimizer",
-        "fixed-tail.regions": "reachable_set_method"
+        "fixed-tail.inner-template": "inner_constructor",
+        "fixed-tail.reference": "reachable_set_method"
       },
       "role_bindings": {
         "control_optimizer": {
           "id": "csl.nlp.casadi-ipopt.fixed-tail"
         },
         "converter": "not_used",
+        "inner_constructor": {
+          "id": "csl::reachability::inscribe_template"
+        },
         "reachable_set_method": {
-          "id": "csl.reachability.inner-template/1"
+          "id": "csl::reachability::fixed_tail_policy"
         },
         "representation": {
           "id": "box"
@@ -7278,7 +7470,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
-          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+          "sha256": "bc4925bc17c887a3d4e57db51d538cc1776ff21f546cb60a79ff16be303ad539"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
@@ -7290,7 +7482,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "a95e51c34e7a9e06e1f2ae5fe2977bde291f62c96ab3e8b09a0af228c17f2fae"
+          "sha256": "38be4e94485812e104db91aac0988bffb49d01e9cbf68205b10097f5883eca94"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -7354,7 +7546,7 @@
         },
         {
           "path": "src/reachability/fixed_tail_policy.cpp",
-          "sha256": "64e9c38f4d8999a4a7a37140945b55af504a1bb27dba6d38cc4714b9c551ad02"
+          "sha256": "fc1e10913604ac33ffff581134301f3d8a2c08f83b6c389acef80207055ce3e9"
         },
         {
           "path": "src/reachability/inner_template.cpp",
@@ -7370,7 +7562,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -7391,6 +7583,18 @@
             "CSL_ENABLE_HIGHS": false,
             "CSL_ENABLE_QHULL": false,
             "build_type": "Release"
+          },
+          "geometry_roles": {
+            "fixed-tail.inner-template": {
+              "owner": "csl::reachability::inscribe_template",
+              "retained": true,
+              "role": "inner_constructor"
+            },
+            "fixed-tail.reference": {
+              "owner": "csl::reachability::fixed_tail_policy",
+              "retained": true,
+              "role": "reachable_set_method"
+            }
           },
           "wall_seconds": 60
         },
@@ -7444,21 +7648,25 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "7aa4fc6bd44c42617f384303868914e38102859a3b73ea4cc203c186b6ddee5d",
-      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-zonotope-ipopt/1/cfg-7aa4fc6bd44c4261",
+      "graph_fingerprint": "8531e4f00ce7b65418ded592f615a955c0f5dd943847f4b16d9adea7de4b04b7",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-zonotope-ipopt/1/cfg-8531e4f00ce7b654",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
         "controller.solve": "control_optimizer",
-        "fixed-tail.regions": "reachable_set_method"
+        "fixed-tail.inner-template": "inner_constructor",
+        "fixed-tail.reference": "reachable_set_method"
       },
       "role_bindings": {
         "control_optimizer": {
           "id": "csl.nlp.casadi-ipopt.fixed-tail"
         },
         "converter": "not_used",
+        "inner_constructor": {
+          "id": "csl::reachability::inscribe_template"
+        },
         "reachable_set_method": {
-          "id": "csl.reachability.inner-template/1"
+          "id": "csl::reachability::fixed_tail_policy"
         },
         "representation": {
           "id": "zonotope"
@@ -7472,7 +7680,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
-          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+          "sha256": "bc4925bc17c887a3d4e57db51d538cc1776ff21f546cb60a79ff16be303ad539"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
@@ -7484,7 +7692,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "a95e51c34e7a9e06e1f2ae5fe2977bde291f62c96ab3e8b09a0af228c17f2fae"
+          "sha256": "38be4e94485812e104db91aac0988bffb49d01e9cbf68205b10097f5883eca94"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -7548,7 +7756,7 @@
         },
         {
           "path": "src/reachability/fixed_tail_policy.cpp",
-          "sha256": "64e9c38f4d8999a4a7a37140945b55af504a1bb27dba6d38cc4714b9c551ad02"
+          "sha256": "fc1e10913604ac33ffff581134301f3d8a2c08f83b6c389acef80207055ce3e9"
         },
         {
           "path": "src/reachability/inner_template.cpp",
@@ -7564,7 +7772,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -7585,6 +7793,18 @@
             "CSL_ENABLE_HIGHS": false,
             "CSL_ENABLE_QHULL": false,
             "build_type": "Release"
+          },
+          "geometry_roles": {
+            "fixed-tail.inner-template": {
+              "owner": "csl::reachability::inscribe_template",
+              "retained": true,
+              "role": "inner_constructor"
+            },
+            "fixed-tail.reference": {
+              "owner": "csl::reachability::fixed_tail_policy",
+              "retained": true,
+              "role": "reachable_set_method"
+            }
           },
           "wall_seconds": 60
         },
@@ -7638,21 +7858,25 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "ca2e43a02d775fefd1994e12e62fce8e95957f196e6e5ab1b36722c497a4eac1",
-      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-parallelotope-ipopt/1/cfg-ca2e43a02d775fef",
+      "graph_fingerprint": "58dad05954d0fab5bd5b2f7f2c5610aeed33a5db7ebaa631a487834eb78a57a7",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-parallelotope-ipopt/1/cfg-58dad05954d0fab5",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
         "controller.solve": "control_optimizer",
-        "fixed-tail.regions": "reachable_set_method"
+        "fixed-tail.inner-template": "inner_constructor",
+        "fixed-tail.reference": "reachable_set_method"
       },
       "role_bindings": {
         "control_optimizer": {
           "id": "csl.nlp.casadi-ipopt.fixed-tail"
         },
         "converter": "not_used",
+        "inner_constructor": {
+          "id": "csl::reachability::inscribe_template"
+        },
         "reachable_set_method": {
-          "id": "csl.reachability.inner-template/1"
+          "id": "csl::reachability::fixed_tail_policy"
         },
         "representation": {
           "id": "parallelotope"
@@ -7666,7 +7890,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
-          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+          "sha256": "bc4925bc17c887a3d4e57db51d538cc1776ff21f546cb60a79ff16be303ad539"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
@@ -7678,7 +7902,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "a95e51c34e7a9e06e1f2ae5fe2977bde291f62c96ab3e8b09a0af228c17f2fae"
+          "sha256": "38be4e94485812e104db91aac0988bffb49d01e9cbf68205b10097f5883eca94"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -7742,7 +7966,7 @@
         },
         {
           "path": "src/reachability/fixed_tail_policy.cpp",
-          "sha256": "64e9c38f4d8999a4a7a37140945b55af504a1bb27dba6d38cc4714b9c551ad02"
+          "sha256": "fc1e10913604ac33ffff581134301f3d8a2c08f83b6c389acef80207055ce3e9"
         },
         {
           "path": "src/reachability/inner_template.cpp",
@@ -7758,7 +7982,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
@@ -7779,6 +8003,18 @@
             "CSL_ENABLE_HIGHS": false,
             "CSL_ENABLE_QHULL": false,
             "build_type": "Release"
+          },
+          "geometry_roles": {
+            "fixed-tail.inner-template": {
+              "owner": "csl::reachability::inscribe_template",
+              "retained": true,
+              "role": "inner_constructor"
+            },
+            "fixed-tail.reference": {
+              "owner": "csl::reachability::fixed_tail_policy",
+              "retained": true,
+              "role": "reachable_set_method"
+            }
           },
           "wall_seconds": 60
         },
@@ -7832,21 +8068,25 @@
       "geometry_work": {
         "claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"
       },
-      "graph_fingerprint": "ee2dbdd314e1888b5a7836c2ec8cd08b5323094318d6a9a470c154b976cbb2d8",
-      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-ellipsoid-ipopt/1/cfg-ee2dbdd314e1888b",
+      "graph_fingerprint": "b9523439c86bdd5ab967189645d9495078e0a7dee1b8d504ec50680bf0732fbe",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-ellipsoid-ipopt/1/cfg-b9523439c86bdd5a",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
         "controller.solve": "control_optimizer",
-        "fixed-tail.regions": "reachable_set_method"
+        "fixed-tail.inner-template": "inner_constructor",
+        "fixed-tail.reference": "reachable_set_method"
       },
       "role_bindings": {
         "control_optimizer": {
           "id": "csl.nlp.casadi-ipopt.fixed-tail"
         },
         "converter": "not_used",
+        "inner_constructor": {
+          "id": "csl::reachability::inscribe_template"
+        },
         "reachable_set_method": {
-          "id": "csl.reachability.inner-template/1"
+          "id": "csl::reachability::fixed_tail_policy"
         },
         "representation": {
           "id": "ellipsoid"
@@ -7860,7 +8100,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
-          "sha256": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b"
+          "sha256": "bc4925bc17c887a3d4e57db51d538cc1776ff21f546cb60a79ff16be303ad539"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
@@ -7872,7 +8112,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
-          "sha256": "a95e51c34e7a9e06e1f2ae5fe2977bde291f62c96ab3e8b09a0af228c17f2fae"
+          "sha256": "38be4e94485812e104db91aac0988bffb49d01e9cbf68205b10097f5883eca94"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -7936,7 +8176,7 @@
         },
         {
           "path": "src/reachability/fixed_tail_policy.cpp",
-          "sha256": "64e9c38f4d8999a4a7a37140945b55af504a1bb27dba6d38cc4714b9c551ad02"
+          "sha256": "fc1e10913604ac33ffff581134301f3d8a2c08f83b6c389acef80207055ce3e9"
         },
         {
           "path": "src/reachability/inner_template.cpp",
@@ -7952,7 +8192,7 @@
         },
         {
           "path": "tools/closed_loop_native_policy.cpp",
-          "sha256": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+          "sha256": "0270adbb4d5df92bf7d11a5a0e461dee8f964d0f951d36dde5a3c568f76accbf"
         }
       ],
       "task_id": "syn-nl-fuel-01/continuous-receding/1",
