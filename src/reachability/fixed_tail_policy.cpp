@@ -114,18 +114,43 @@ std::vector<Interval> axis_bounds(const FixedTailHRows& h,bool require_finite=tr
         throw Rejected{{DiagnosticCode::unsupported,"fixed_tail.input_carrier","Finite explicit source input bounds required; arbitrary bounded H support can use the support-provider extension."}};
     return bounds;
 }
-void recover_authored_fixed_inputs(const FixedTailModel& model,Vector& history) {
-    const auto n=model.observed.size(),T=model.stages.size(),m=model.source_cost.coordinates.dimensions.control;
-    for(std::size_t k=0;k<T;++k) {
-        const auto bounds=axis_bounds(model.control_domains[k],false);
-        for(std::size_t j=0;j<m;++j)if(bounds[j].lower && bounds[j].upper && *bounds[j].lower==*bounds[j].upper)
-            history[(T+1)*n+k*m+j]=*bounds[j].lower;
-    }
+std::vector<FixedTailCommandAdjustment> recover_authored_command_bounds(
+        const FixedTailHRows& domain,Vector& control,StageIndex stage) {
+    std::vector<FixedTailCommandAdjustment> adjustments;
+    const auto scan=[&](const Matrix& A,const Vector& b,bool equality) {
+        for(std::size_t row=0;row<A.rows;++row) {
+            std::size_t axis=0,count=0;
+            for(std::size_t j=0;j<A.cols;++j)if(A.values[row*A.cols+j]!=0) {axis=j;++count;}
+            if(count!=1)continue;
+            const auto coefficient=A.values[row*A.cols+axis];
+            if(coefficient!=1 && coefficient!=-1)continue;
+            const auto bound=coefficient==1?b[row]:-b[row];
+            const bool upper=coefficient==1;
+            const auto raw=control[axis];
+            if((upper && raw<=bound && !equality) || (!upper && raw>=bound && !equality) || raw==bound)continue;
+            const auto allowed=fixed_tail_command_recovery_tolerance.absolute_tolerance+
+                fixed_tail_command_recovery_tolerance.relative_tolerance*std::max(std::abs(raw),std::abs(bound));
+            if(std::abs(raw-bound)>allowed)
+                throw Rejected{invalid("optimizer command materially violates an authored literal unit-axis bound")};
+            control[axis]=bound;
+            adjustments.push_back({stage,axis,raw<bound?FixedTailCommandBoundSide::lower:FixedTailCommandBoundSide::upper,
+                raw,bound,bound,allowed});
+        }
+    };
+    scan(domain.inequalities,domain.upper_bounds,false);scan(domain.equalities,domain.equality_values,true);
+    return adjustments;
 }
-void recover_authored_fixed_first_input(const FixedTailModel& model,Vector& control) {
-    const auto bounds=axis_bounds(model.control_domains[0],false);
-    for(std::size_t j=0;j<control.size();++j)if(bounds[j].lower && bounds[j].upper && *bounds[j].lower==*bounds[j].upper)
-        control[j]=*bounds[j].lower;
+std::vector<FixedTailCommandAdjustment> recover_anchor_commands(const FixedTailModel& model,Vector& history) {
+    const auto n=model.observed.size(),T=model.stages.size(),m=model.source_cost.coordinates.dimensions.control;
+    std::vector<FixedTailCommandAdjustment> adjustments;
+    for(std::size_t k=0;k<T;++k) {
+        const auto begin=history.begin()+static_cast<std::ptrdiff_t>((T+1)*n+k*m);
+        Vector control(begin,begin+static_cast<std::ptrdiff_t>(m));
+        auto recovered=recover_authored_command_bounds(model.control_domains[k],control,{k});
+        std::copy(control.begin(),control.end(),begin);
+        adjustments.insert(adjustments.end(),recovered.begin(),recovered.end());
+    }
+    return adjustments;
 }
 bool admitted(const FixedTailHRows& h,std::span<const double> value) {
     const auto check=[&](const Matrix& A,const Vector& b,bool equality) {
@@ -492,7 +517,7 @@ FixedTailPolicyOutcome fixed_tail_policy(const FixedTailPolicyRequest& request,
            std::any_of(anchor.supplied_initial_duals.begin(),anchor.supplied_initial_duals.end(),[](double v){return v!=0;}))
             throw Rejected{invalid("feasibility optimizer did not retain shifted primal and zero supplied duals")};
         auto recovered_anchor=anchor.history;
-        recover_authored_fixed_inputs(model,recovered_anchor);
+        auto anchor_adjustments=recover_anchor_commands(model,recovered_anchor);
         auto lift=take(fixed_control_tail_lift(model,recovered_anchor));
         Vector first(recovered_anchor.begin()+static_cast<std::ptrdiff_t>((horizon+1)*n),recovered_anchor.begin()+static_cast<std::ptrdiff_t>((horizon+1)*n+m));
         auto center=take(recover_fixed_tail_history(lift,first));
@@ -520,7 +545,7 @@ FixedTailPolicyOutcome fixed_tail_policy(const FixedTailPolicyRequest& request,
            std::any_of(solved.supplied_initial_duals.begin(),solved.supplied_initial_duals.end(),[](double value){return value!=0;}))
             throw Rejected{invalid("reduced optimizer did not retain the recovered initial primal and zero supplied duals")};
         auto recovered_control=solved.primary;
-        recover_authored_fixed_first_input(model,recovered_control);
+        auto command_adjustments=recover_authored_command_bounds(model.control_domains[0],recovered_control,{0});
         auto history=take(recover_fixed_tail_history(lift,recovered_control));
         if(solved.history.size()!=history.size() || !admitted(model.full_history,history))throw Rejected{invalid("reduced action failed independent full source H check")};
         for(std::size_t i=0;i<history.size();++i)if(std::abs(history[i]-solved.history[i])>1e-7+1e-8*std::abs(history[i]))throw Rejected{invalid("provider history differs from the native affine recovery")};
@@ -553,7 +578,7 @@ FixedTailPolicyOutcome fixed_tail_policy(const FixedTailPolicyRequest& request,
         if(!std::isfinite(solved.objective) || std::abs(cost.total-solved.objective)>1e-7+1e-8*std::max(std::abs(cost.total),std::abs(solved.objective)))
             throw Rejected{invalid("reduced optimizer objective differs from full original source cost")};
         return FixedTailPolicyResult{model.problem,request.request,request.family,std::move(recovered_control),std::move(history),center,cost,
-            std::move(anchor),std::move(solved),std::move(lift),std::move(failure.region_prefix),std::move(failure.providers)};
+            std::move(anchor),std::move(solved),std::move(anchor_adjustments),std::move(command_adjustments),std::move(lift),std::move(failure.region_prefix),std::move(failure.providers)};
     }catch(const Rejected& e){failure.cause=e.error;return failure;}
 }
 } // namespace csl::reachability

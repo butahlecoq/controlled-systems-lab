@@ -111,6 +111,14 @@ struct FixedTailPolicyRequest {
     Vector shifted_initial_history;
     std::vector<std::size_t> strictly_positive_state_coordinates;
 };
+enum class FixedTailCommandBoundSide { lower, upper };
+inline constexpr NumericalPolicy fixed_tail_command_recovery_tolerance{1e-10,1e-12};
+struct FixedTailCommandAdjustment {
+    StageIndex stage;
+    std::size_t coordinate;
+    FixedTailCommandBoundSide side;
+    double raw,recovered,source_bound,allowed_absolute_adjustment;
+};
 struct FixedTailPolicyResult {
     ProblemId problem;
     RequestId request;
@@ -118,6 +126,7 @@ struct FixedTailPolicyResult {
     Vector control,history,recovered_anchor_history;
     optimization::HistoryCostEvaluation cost;
     FixedTailSolveResult feasibility, reduced_argmin;
+    std::vector<FixedTailCommandAdjustment> anchor_control_adjustments,command_adjustments;
     FullHistoryLift lift;
     std::vector<FixedTailRegion> regions;
     std::vector<registry::Provenance> providers;

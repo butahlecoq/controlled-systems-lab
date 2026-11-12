@@ -1065,9 +1065,21 @@ Json fixed_tail_query(const Json& in,const problem::ResolvedProblem& source,
         item["tail_state_lift"]={{"maps",maps},{"offsets",r.tail.offsets}};
         regions.push_back(std::move(item));
     }
+    const auto adjustment_rows=[](const std::vector<FixedTailCommandAdjustment>& adjustments) {
+        Json rows=Json::array();
+        for(const auto& value:adjustments)rows.push_back({{"stage",value.stage.value},{"coordinate",value.coordinate},
+            {"side",value.side==FixedTailCommandBoundSide::lower?"lower":"upper"},{"raw",value.raw},
+            {"recovered",value.recovered},{"source_bound",value.source_bound},
+            {"adjustment",value.recovered-value.raw},{"allowed_absolute_adjustment",value.allowed_absolute_adjustment}});
+        return rows;
+    };
     response.update({{"status","accepted"},{"control",result.control},{"history",result.history},
         {"source_recovery",{{"anchor_history",result.recovered_anchor_history},{"applied_control",result.control},
-            {"rule","only coordinates fixed by authored axis constraints are recovered exactly; raw solver primals remain in the phase receipts"}}},
+            {"rule","only tolerance-sized violations of authored literal unit-axis bounds are recovered; raw solver primals remain in phase receipts; history and full original J are recomputed and all constraints/memberships rechecked"},
+            {"absolute_tolerance",fixed_tail_command_recovery_tolerance.absolute_tolerance},
+            {"relative_tolerance",fixed_tail_command_recovery_tolerance.relative_tolerance},
+            {"anchor_control_adjustments",adjustment_rows(result.anchor_control_adjustments)},
+            {"command_adjustments",adjustment_rows(result.command_adjustments)}}},
         {"source_history",h_rows(model.full_history)},
         {"source_cost",{{"terminal",result.cost.terminal},{"running",result.cost.running},{"total",result.cost.total}}},
         {"regions",regions},{"full_history_lift",{{"map",matrix_rows(result.lift.map)},{"offset",result.lift.offset}}},
