@@ -65,6 +65,26 @@
       "plot_scope": "all predicted stages of first observed query, with actual full nonlinear trajectory",
       "warm_start_protocol": "cold at each observed query; source shift-prior-primal contract not implemented",
       "postcheck_source_timing": "policy and solver source edited after worker completed holds while parent performed postcheck/render"
+    },
+    {
+      "task": "Earth orbit",
+      "solver": "CasADi/IPOPT",
+      "family": "box",
+      "status": "incomplete",
+      "holds_completed": 3,
+      "holds_total": 20,
+      "directory": "orbit-box-a800-incomplete",
+      "stop": "independent source-cost validation rejected epigraph discrepancy"
+    },
+    {
+      "task": "Earth orbit",
+      "solver": "CasADi/IPOPT",
+      "family": "box",
+      "status": "incomplete",
+      "holds_completed": 4,
+      "holds_total": 20,
+      "directory": "orbit-box-aeac-incomplete",
+      "stop": "local optimizer reported infeasibility; source infeasibility not established"
     }
   ],
   "bundle_files": "Each directory contains receipt.json, raw.zip, SHA256SUMS, independent audit source and build receipt. Completed episodes also contain corrected plots and renderer receipt.",

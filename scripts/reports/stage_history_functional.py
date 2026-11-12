@@ -8,7 +8,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[2]
 REPORT = "closed-loop-history-functional"
 RECORDS = ("lv-highs-f4", "orbit-ipopt-f4", "fuel-ipopt-3c", "fuel-highs-f4-timeout",
-           "lv-box-fd28", "fuel-box-a800")
+           "lv-box-fd28", "fuel-box-a800", "orbit-box-a800-incomplete", "orbit-box-aeac-incomplete")
 CARD = ('<article class="saved-figure" id="closed-loop-history-functional">'
         '<h3>Continuous affine-history control: functional evidence</h3>'
         '<p>Original-horizon direct and F/B/I box physical episodes, plus a separately retained HiGHS fuel timeout, with source-bound records.</p>'

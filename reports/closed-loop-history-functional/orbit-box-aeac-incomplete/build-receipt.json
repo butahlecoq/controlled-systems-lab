@@ -1,0 +1,49 @@
+{
+  "source_commit": "a800b95b9be6a874c0bab188d1cf3394fbb836b1",
+  "geometry_parent": "3f5f3a7283b2e773ad7310240e6e06f15c65e93f",
+  "retention_ref": "evidence/five-family-history-source-a800b95b-20261112",
+  "source_capsule": {
+    "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/history-five-source-a800b95b.tar",
+    "sha256": "840926c6f7b29014ce43bcdfa411af11698eed6057d7ac03b90bfa0af96387d8"
+  },
+  "native_binary": {
+    "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/history-five-a800-build/geometry_policy",
+    "sha256": "4be7fb205630b615fcbead74dc4c3ad3766104336920c4bf61a9b4d094ff1223"
+  },
+  "physical_binary": {
+    "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/history-five-a800-build/physical_bridge",
+    "sha256": "fcbb9170d1fbfc7cd1a1324087a0d049f8a078a16a8c450de4a9623be5942e36",
+    "source_commit": "f4e73e08908c472801aef6637d94b1a03cb0b2a7"
+  },
+  "sdk_source_commit": "f4e73e08908c472801aef6637d94b1a03cb0b2a7",
+  "sdk_manifest_sha256": "7b31b58248937c147ced8cee3de00b54a96968da029859141ffa0c93903170b5",
+  "build_scope": "Composite external consumer: current listed sources compiled directly against installed f4 SDK; source header exact_h_polytope.hpp included. Not a current-source full SDK or independently reproducible build.",
+  "current_source_hashes": {
+    "tools/closed_loop_native_policy.cpp": "5f4fe7af2be6004f4b50ce158368393d1317b89e6a82d45ce43493d59d0a4ee5",
+    "src/reachability/bounded_h_support.cpp": "504017feeee296138ccad9387ee5965938ab8e0f284bc39059116d6628319d60",
+    "src/reachability/feedback_geometry.cpp": "1d51f9bf2e9a2ade843d2d3c5dc472f94149d3fe7ff8cbd6f3e416a5d7025c3c",
+    "src/reachability/feedback_coordinator.cpp": "0b6e15be5f55e1ed671b75df28537d6b94f17b5a57ef5263d7a05e0a4c850f53",
+    "src/reachability/nominal_tube.cpp": "2b50bf5f06eece6476fd856260e6e371d2f6d12e1fad352df6679a5592ae4c0a",
+    "src/geometry/polyhedral/intersection.cpp": "5a583fb352729d2d019dfead7733247fec4b0ca8651519a130b5095c5478821a",
+    "src/reachability/nominal_forward.cpp": "6e6a313b18378026098ff140f4847c20eebe49c31fe11e355a3cee3b4fdd3295",
+    "src/reachability/finite_plan_zonotope.cpp": "99042907401ed408a9674ff0399832a5c511f4efb6202d04da8445de6eeebe44",
+    "src/reachability/finite_plan_box.cpp": "c47ab2fbc17fe789298b6453a51de22dca279146cd464c84ee52070b5c4f2164",
+    "src/reachability/finite_plan_ellipsoid.cpp": "9f4f40bf55a7e647b8b7724d677662153b8a6fb96ad7970928f326ec5fe78449",
+    "src/optimization/history_cost.cpp": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86",
+    "src/optimization/running_control_cost.cpp": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0",
+    "src/optimization/finite_action_nominal.cpp": "26192d7e06d857ae2d2d7efdcef1d667ea8f42bfaec0cd04d60c84ff0e514767",
+    "src/optimization/finite_action_graph.cpp": "beb790b30558d5d6e669cf32a3a16c82a1b3a102c7737f2c5229d1633e02486c",
+    "src/synthesis/exact_h_polytope.hpp": "e8731b71d75e1820d814f2df88b37d5ed3cc5c3c9b7db21f00cda4ab624fdff3"
+  },
+  "files": {
+    "geometry_policy": "4be7fb205630b615fcbead74dc4c3ad3766104336920c4bf61a9b4d094ff1223",
+    "physical_bridge": "fcbb9170d1fbfc7cd1a1324087a0d049f8a078a16a8c450de4a9623be5942e36",
+    "CMakeLists.txt": "e2705ebbf44beedcae0bcb2b3a7ae816f69f14479b3214a5cb3dfb191243030d",
+    "CMakeCache.txt": "dff9c3a92f1d1c179fea32f8d95b859480c8853e7765f6a39d4d838d94fd44ff",
+    "link.txt": "a4d5d4334bcec4a2d9a5b186f5659caf86d832677420d5ccd4f8cbf20c453cd5",
+    "flags.make": "7ed225af94eec4434623ceeacd926fcb844b232dbce6bfd10417fba17707b1ce",
+    "link.map": "c13341412d9c60b85528d26e4c8e6ae6401d49108bb4bff91d72f7a704145dde",
+    "incremental-build.log": "632a739f6cf73138f7cf8e9cf5c5d1fe649d240a0de32fd2f1bc7e0380ffe468",
+    "sdk-manifest.json": "7b31b58248937c147ced8cee3de00b54a96968da029859141ffa0c93903170b5"
+  }
+}
