@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
-import tracemalloc
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -264,15 +264,29 @@ class ClosedLoopAttemptRecordTests(unittest.TestCase):
             "attempt_id": "legacy", "status": "incomplete", "controls": [[0.5]],
             "physical_states": [[0.0], [0.5]], "stages": [payload]}, separators=(",", ":")),
             encoding="utf-8")
-        tracemalloc.start()
-        try:
-            record, receipt = read_attempt(legacy)
-            _, peak = tracemalloc.get_traced_memory()
-        finally:
-            tracemalloc.stop()
+        probe = """
+import json
+from pathlib import Path
+import sys
+import tracemalloc
+sys.path.insert(0, sys.argv[1])
+from attempt_records import read_attempt
+tracemalloc.start()
+try:
+    record, receipt = read_attempt(Path(sys.argv[2]))
+    _, peak = tracemalloc.get_traced_memory()
+finally:
+    tracemalloc.stop()
+print(json.dumps({"record": record, "bytes_read": receipt.bytes_read, "peak": peak}))
+"""
+        result = subprocess.run([sys.executable, "-E", "-c", probe,
+            str(ROOT / "benchmarks/reporting/closed_loop"), str(legacy)],
+            capture_output=True, text=True, timeout=30, check=True)
+        measured = json.loads(result.stdout)
+        record, peak = measured["record"], measured["peak"]
         self.assertNotIn("stages", record)
         self.assertEqual(record["controls"], [[0.5]])
-        self.assertEqual(receipt.bytes_read, legacy.stat().st_size)
+        self.assertEqual(measured["bytes_read"], legacy.stat().st_size)
         self.assertLess(peak, len(payload) // 4)
 
     def test_v1_skipped_stage_json_accepts_escaped_quotes_and_rejects_malformed_values(self):
