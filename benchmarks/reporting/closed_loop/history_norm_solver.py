@@ -5,7 +5,7 @@ import casadi as ca
 import numpy as np
 
 
-def solve(relation: dict, objective: dict, *, initial, positive_indices=()) -> dict:
+def solve(relation: dict, objective: dict, *, initial, positive_indices=(), geometry_memberships=()) -> dict:
     """Solve the complete H relation with separate exact norm epigraphs.
 
     Positive coordinates are parameterized as exp(s), with no artificial
@@ -38,6 +38,9 @@ def solve(relation: dict, objective: dict, *, initial, positive_indices=()) -> d
                 raise ValueError("invalid history relation")
             expression = ca.DM(matrix) @ z
             opti.subject_to(expression == ca.DM(bound) if equality else expression <= ca.DM(bound))
+    from history_geometry import constrain, parse, verify
+    geometry = parse(geometry_memberships, dimension)
+    factor_variables = constrain(opti, z, geometry, initial)
     quadratic = objective["quadratic"]
     q = np.asarray(quadratic["Q"], dtype=float)
     linear = np.asarray(quadratic["linear"], dtype=float)
@@ -70,7 +73,11 @@ def solve(relation: dict, objective: dict, *, initial, positive_indices=()) -> d
             return {"success": False, "status": "nonfinite-solution",
                     "solver": "casadi-ipopt/full-history-separate-norm-epigraphs/1",
                     "provider": "casadi-ipopt", "version": f"casadi {ca.__version__}; IPOPT version unavailable"}
-        return {"success": bool(stats.get("success")),
+        factor_values = [([] if variable is None else np.asarray(solution.value(variable), dtype=float).reshape(-1).tolist())
+                         for variable in factor_variables]
+        geometry_check = verify(geometry, primal, factor_values)
+        return {"success": bool(stats.get("success")) and geometry_check["accepted"],
+                "geometry_factors": factor_values, "geometry_validation": geometry_check,
                 "status": str(stats.get("return_status", "unknown")), "primal": primal.tolist(),
                 "objective": objective_value, "iterations": stats.get("iter_count"),
                 "solver": "casadi-ipopt/full-history-separate-norm-epigraphs/1",

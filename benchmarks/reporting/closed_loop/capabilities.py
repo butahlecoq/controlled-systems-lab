@@ -268,6 +268,7 @@ def _history_definitions() -> list[dict]:
     rows = []
     common_sources = ["benchmarks/reporting/closed_loop/history_policy.py",
         "benchmarks/reporting/closed_loop/history_norm_solver.py",
+        "benchmarks/reporting/closed_loop/history_geometry.py",
         "benchmarks/reporting/closed_loop/history_validation.py",
         "benchmarks/reporting/closed_loop/native_graph_policy.py",
         "benchmarks/reporting/closed_loop/task_models.py",

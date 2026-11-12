@@ -22,6 +22,7 @@
         "source_files": [
           "benchmarks/reporting/closed_loop/history_policy.py",
           "benchmarks/reporting/closed_loop/history_norm_solver.py",
+          "benchmarks/reporting/closed_loop/history_geometry.py",
           "benchmarks/reporting/closed_loop/history_validation.py",
           "benchmarks/reporting/closed_loop/native_graph_policy.py",
           "benchmarks/reporting/closed_loop/task_models.py",
@@ -60,8 +61,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "063ff263a596995072f83f4bef0ba9fba922450c7c392fb95fc32421f4f918e1",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-mpc/1/cfg-063ff263a5969950",
+      "graph_fingerprint": "0b2915e0c820fe66fba255cd423d6be19ed7c43549d6d428a24682a8d4d5cdb3",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-mpc/1/cfg-0b2915e0c820fe66",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -82,8 +83,12 @@
           "sha256": "93a5dffdd61c6d94b12683cc30c3c17a7d011b1a1746e3d2b3ba3bb135594e09"
         },
         {
+          "path": "benchmarks/reporting/closed_loop/history_geometry.py",
+          "sha256": "1c54f4e0b64a68329f481f3b43d61d070151f5bab82baa7a26ed78e235c7970b"
+        },
+        {
           "path": "benchmarks/reporting/closed_loop/history_norm_solver.py",
-          "sha256": "d4c2ff799a2fe46ebf32fc4c3829f7cf9b7c0c586d503626fcefaf17766f204d"
+          "sha256": "7365e8789cbae84e6cc04a461a28c1d932ca65d7d1436068d4fac8de5663884c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
@@ -185,6 +190,7 @@
         "source_files": [
           "benchmarks/reporting/closed_loop/history_policy.py",
           "benchmarks/reporting/closed_loop/history_norm_solver.py",
+          "benchmarks/reporting/closed_loop/history_geometry.py",
           "benchmarks/reporting/closed_loop/history_validation.py",
           "benchmarks/reporting/closed_loop/native_graph_policy.py",
           "benchmarks/reporting/closed_loop/task_models.py",
@@ -223,8 +229,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "6ddeac8bbf901eae76b99604343c600533013b25270beda038e4f7c5a4fe9fb0",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ipopt/1/cfg-6ddeac8bbf901eae",
+      "graph_fingerprint": "e0bcdc8ea74920b4422b685c81ce4858402e4a6c699dd95dd79a71ce206148cc",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ipopt/1/cfg-e0bcdc8ea74920b4",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -245,8 +251,12 @@
           "sha256": "93a5dffdd61c6d94b12683cc30c3c17a7d011b1a1746e3d2b3ba3bb135594e09"
         },
         {
+          "path": "benchmarks/reporting/closed_loop/history_geometry.py",
+          "sha256": "1c54f4e0b64a68329f481f3b43d61d070151f5bab82baa7a26ed78e235c7970b"
+        },
+        {
           "path": "benchmarks/reporting/closed_loop/history_norm_solver.py",
-          "sha256": "d4c2ff799a2fe46ebf32fc4c3829f7cf9b7c0c586d503626fcefaf17766f204d"
+          "sha256": "7365e8789cbae84e6cc04a461a28c1d932ca65d7d1436068d4fac8de5663884c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
@@ -348,6 +358,7 @@
         "source_files": [
           "benchmarks/reporting/closed_loop/history_policy.py",
           "benchmarks/reporting/closed_loop/history_norm_solver.py",
+          "benchmarks/reporting/closed_loop/history_geometry.py",
           "benchmarks/reporting/closed_loop/history_validation.py",
           "benchmarks/reporting/closed_loop/native_graph_policy.py",
           "benchmarks/reporting/closed_loop/task_models.py",
@@ -386,8 +397,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "100584ed5e9a16285475b5fa28f67382fdd853f0492a89ec1181cc0a38302c87",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-100584ed5e9a1628",
+      "graph_fingerprint": "06736b97f26db71166f54806ffeaf57157eb94ed9243f3baa5e96cff0a54f0a6",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-06736b97f26db711",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -408,8 +419,12 @@
           "sha256": "93a5dffdd61c6d94b12683cc30c3c17a7d011b1a1746e3d2b3ba3bb135594e09"
         },
         {
+          "path": "benchmarks/reporting/closed_loop/history_geometry.py",
+          "sha256": "1c54f4e0b64a68329f481f3b43d61d070151f5bab82baa7a26ed78e235c7970b"
+        },
+        {
           "path": "benchmarks/reporting/closed_loop/history_norm_solver.py",
-          "sha256": "d4c2ff799a2fe46ebf32fc4c3829f7cf9b7c0c586d503626fcefaf17766f204d"
+          "sha256": "7365e8789cbae84e6cc04a461a28c1d932ca65d7d1436068d4fac8de5663884c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
@@ -507,6 +522,7 @@
         "source_files": [
           "benchmarks/reporting/closed_loop/history_policy.py",
           "benchmarks/reporting/closed_loop/history_norm_solver.py",
+          "benchmarks/reporting/closed_loop/history_geometry.py",
           "benchmarks/reporting/closed_loop/history_validation.py",
           "benchmarks/reporting/closed_loop/native_graph_policy.py",
           "benchmarks/reporting/closed_loop/task_models.py",
@@ -545,8 +561,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "1bcfac1863d6308c18d332b25b021f70f1b03ab3522750c6be2e74d1e3865063",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-mpc/1/cfg-1bcfac1863d6308c",
+      "graph_fingerprint": "2d5c00f8658cd1a988e50fba411a7055c71665761cc8ee30fda429e51ce14607",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-mpc/1/cfg-2d5c00f8658cd1a9",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -567,8 +583,12 @@
           "sha256": "93a5dffdd61c6d94b12683cc30c3c17a7d011b1a1746e3d2b3ba3bb135594e09"
         },
         {
+          "path": "benchmarks/reporting/closed_loop/history_geometry.py",
+          "sha256": "1c54f4e0b64a68329f481f3b43d61d070151f5bab82baa7a26ed78e235c7970b"
+        },
+        {
           "path": "benchmarks/reporting/closed_loop/history_norm_solver.py",
-          "sha256": "d4c2ff799a2fe46ebf32fc4c3829f7cf9b7c0c586d503626fcefaf17766f204d"
+          "sha256": "7365e8789cbae84e6cc04a461a28c1d932ca65d7d1436068d4fac8de5663884c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
@@ -670,6 +690,7 @@
         "source_files": [
           "benchmarks/reporting/closed_loop/history_policy.py",
           "benchmarks/reporting/closed_loop/history_norm_solver.py",
+          "benchmarks/reporting/closed_loop/history_geometry.py",
           "benchmarks/reporting/closed_loop/history_validation.py",
           "benchmarks/reporting/closed_loop/native_graph_policy.py",
           "benchmarks/reporting/closed_loop/task_models.py",
@@ -708,8 +729,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "f728089343069c5fb546296e445970f25da8862f5426463f4a00f4c04bcec2d8",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ipopt/1/cfg-f728089343069c5f",
+      "graph_fingerprint": "d27287352648a5e8c3f02e69002d8195974b261e0aedd4460997cf15154baebf",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ipopt/1/cfg-d27287352648a5e8",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -730,8 +751,12 @@
           "sha256": "93a5dffdd61c6d94b12683cc30c3c17a7d011b1a1746e3d2b3ba3bb135594e09"
         },
         {
+          "path": "benchmarks/reporting/closed_loop/history_geometry.py",
+          "sha256": "1c54f4e0b64a68329f481f3b43d61d070151f5bab82baa7a26ed78e235c7970b"
+        },
+        {
           "path": "benchmarks/reporting/closed_loop/history_norm_solver.py",
-          "sha256": "d4c2ff799a2fe46ebf32fc4c3829f7cf9b7c0c586d503626fcefaf17766f204d"
+          "sha256": "7365e8789cbae84e6cc04a461a28c1d932ca65d7d1436068d4fac8de5663884c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",

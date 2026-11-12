@@ -1,0 +1,63 @@
+"""Actual solver membership and independent factor-witness checks."""
+import sys
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "benchmarks/reporting/closed_loop"))
+from history_geometry import parse, verify
+from history_norm_solver import solve
+
+
+class GeometryMembershipTests(unittest.TestCase):
+    def test_all_membership_forms_constrain_the_original_objective(self):
+        relation = {"inequalities": [], "upper_bounds": [], "equalities": [], "equality_values": []}
+        objective = {"quadratic": {"Q": [[2, 0], [0, 2]], "linear": [-2, 0], "offset": 1},
+                     "residual_norms": []}
+        memberships = [
+            {"kind": "h", "indices": [0, 1], "inequalities": [[1, 0]], "upper_bounds": [0.5],
+             "equalities": [], "equality_values": []},
+            {"kind": "zonotope", "indices": [0, 1], "center": [0, 0],
+             "factor_count": 1, "factor": [[0.5], [0]]},
+            {"kind": "ellipsoid", "indices": [0, 1], "center": [0, 0],
+             "factor_count": 2, "factor": [[0.5, 0], [0, 0.5]]},
+        ]
+        for membership in memberships:
+            with self.subTest(kind=membership["kind"]):
+                answer = solve(relation, objective, initial=[0, 0], geometry_memberships=[membership])
+                self.assertTrue(answer["success"], answer)
+                self.assertAlmostEqual(answer["primal"][0], 0.5, places=5)
+                self.assertAlmostEqual(answer["primal"][1], 0, places=5)
+                self.assertAlmostEqual(answer["objective"], 0.25, places=5)
+                self.assertTrue(answer["geometry_validation"]["accepted"])
+
+    def test_rejects_forged_and_degenerate_factor_witnesses(self):
+        membership = {"kind": "zonotope", "indices": [0, 1], "center": [0, 0],
+                      "factor_count": 1, "factor": [[1], [0]]}
+        entries = parse([membership], 2)
+        self.assertFalse(verify(entries, [2, 0], [[2]])["accepted"])
+        self.assertFalse(verify(entries, [0.5, 0], [[0.1]])["accepted"])
+        point = {"kind": "ellipsoid", "indices": [0, 1], "center": [1, 2],
+                 "factor_count": 0, "factor": [[], []]}
+        self.assertTrue(verify(parse([point], 2), [1, 2], [[]])["accepted"])
+        self.assertFalse(verify(parse([point], 2), [1, 2.1], [[]])["accepted"])
+
+    def test_zero_column_ellipsoid_constrains_to_single_point(self):
+        relation = {"inequalities": [], "upper_bounds": [], "equalities": [], "equality_values": []}
+        objective = {"quadratic": {"Q": [[2, 0], [0, 2]], "linear": [0, 0], "offset": 0},
+                     "residual_norms": []}
+        point = {"kind": "ellipsoid", "indices": [0, 1], "center": [1, 2],
+                 "factor_count": 0, "factor": [[], []]}
+        answer = solve(relation, objective, initial=[1, 2], geometry_memberships=[point])
+        self.assertTrue(answer["success"], answer)
+        self.assertAlmostEqual(answer["primal"][0], 1)
+        self.assertAlmostEqual(answer["primal"][1], 2)
+        self.assertEqual(answer["geometry_factors"], [[]])
+
+    def test_rejects_invalid_membership_input(self):
+        with self.assertRaises(ValueError):
+            parse([{"kind": "h", "indices": [0, 0], "inequalities": [], "upper_bounds": [],
+                    "equalities": [], "equality_values": []}], 2)
+
+
+if __name__ == "__main__":
+    unittest.main()
