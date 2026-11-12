@@ -45,6 +45,15 @@ bool affine_coordinates(const Eigen::MatrixXd& points, AffineCoordinates& output
             return false;
         }
     }
+    if (rank == static_cast<std::size_t>(ambient)) {
+        output.dimension = rank;
+        output.rank_threshold = threshold;
+        output.basis = Eigen::MatrixXd::Identity(ambient, ambient);
+        output.left_inverse = output.basis.transpose();
+        output.orthogonal_equalities.resize(0, ambient);
+        output.maximum_residual = 0;
+        return true;
+    }
     output.dimension = rank;
     output.rank_threshold = threshold;
     output.basis = svd.matrixU().leftCols(static_cast<Eigen::Index>(rank));

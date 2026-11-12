@@ -175,6 +175,7 @@ SAVED_DATA_COMPANION_RENDERERS = {
     "scripts/reports/mpc06_online/render.py",
     "scripts/reports/mpc06_delivery/figures.py",
     "scripts/reports/render_adaptive_ode_example.py",
+    "scripts/reports/qhull_highs_strategy_a_example.py",
     "scripts/reports/ext02/render_saved.py",
     "scripts/reports/mpc06/render_tube_objective.py",
     "scripts/reports/env717/check_unlimited_bolza.py",
