@@ -32,8 +32,12 @@ class HistoryPolicy:
         import os
         import subprocess
         from pathlib import Path
-        from task_models import prediction_receipt
+        from contracts import manifest_sha256
+        from task_models import prediction_receipt, validate_source_binding
 
+        validate_source_binding(task)
+        if manifest_sha256(task) != task_sha256:
+            raise ValueError("history policy task hash differs from the source-bound task")
         if action_profile_id != task["control_domains"]["continuous"]["problem_id"]:
             raise ValueError("continuous history policy requires the original continuous action domain")
         if factory_options:

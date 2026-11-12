@@ -86,6 +86,14 @@ class HistoryNormSolverTest(unittest.TestCase):
             self.assertEqual(graph["role_bindings"]["representation"], "not_used")
             self.assertEqual(graph["controller"]["policy_factory"], "history_policy:create_policy")
 
+    def test_policy_refuses_a_task_hash_that_does_not_match_the_source_task(self):
+        from contracts import load_task
+        from history_policy import create_policy
+        task = load_task("earth-orbit")
+        with self.assertRaisesRegex(ValueError, "task hash"):
+            create_policy(task, task_sha256="wrong", controller_id="history",
+                          action_profile_id=task["control_domains"]["continuous"]["problem_id"])
+
     def test_history_verification_rejects_wrong_rows_and_cost(self):
         import numpy as np
         from contracts import load_task
