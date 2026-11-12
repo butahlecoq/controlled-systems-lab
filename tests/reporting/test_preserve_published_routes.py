@@ -13,15 +13,35 @@ from scripts.reports import preserve_published_routes as preservation
 
 
 class PublishedRoutePreservationTests(unittest.TestCase):
+    def test_historical_helper_predecessors_survive_on_a_fresh_site(self):
+        predecessors = {
+            'b04-source-moments-11fb3cd7d83f868d3c3d':
+                '509c9293a4b23e3e16024f702a377b685bfb654b40dd3d74a5334e29f3790db1',
+            'mpc11-controller-comparison-cc50fc8473b24ee929ac':
+                '14a7f042fb3fb4ffb3268f55a7ff3f0b3436fcf9a1a59e51aa65106955a9ae3c',
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            site = Path(directory)
+            preservation.stage(site)
+            for route, expected in predecessors.items():
+                with self.subTest(route=route):
+                    archive = site / (route + '.zip')
+                    self.assertTrue(archive.is_file())
+                    self.assertEqual(preservation.digest(archive.read_bytes()), expected)
+                    with zipfile.ZipFile(archive) as bundle:
+                        for name in bundle.namelist():
+                            self.assertEqual((site / name).read_bytes(), bundle.read(name))
+
     def test_original_routes_archives_and_repeat(self):
         with tempfile.TemporaryDirectory() as directory:
             site = Path(directory)
             assets = preservation.payloads()
-            self.assertEqual(preservation.stage(site)['preserved_routes'], 461)
+            self.assertEqual(preservation.stage(site)['preserved_routes'], 570)
             self.assertEqual({p.relative_to(site).as_posix(): p.read_bytes()
                               for p in site.rglob('*') if p.is_file()}, assets)
-            self.assertEqual(preservation.stage(site)['preserved_routes'], 461)
-            self.assertEqual(sum(n.endswith('.zip') for n in assets), 18)
+            self.assertEqual(preservation.stage(site)['preserved_routes'], 570)
+            self.assertEqual(preservation.stage(site)['preserved_top_level_zips'], 5)
+            self.assertEqual(sum(n.endswith('.zip') for n in assets), 28)
             self.assertFalse(any('.git' in Path(n).parts for n in assets))
 
     def test_tampered_archive_rejected_before_writes(self):

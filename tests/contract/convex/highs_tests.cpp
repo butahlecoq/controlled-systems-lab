@@ -70,6 +70,51 @@ TEST_CASE("HiGHS convex provider declares bounded hybrid quadratic envelopes") {
     CHECK(unrelated.status==AdmissionStatus::unknown);
 }
 
+TEST_CASE("primal hints are owned snapshots with unchanged problem identity and typed validation") {
+    const auto p=accepted(make_convex_program(parabola()));
+    CHECK_FALSE(p.primal_start());
+    Vector input{1.25};
+    const auto hinted=accepted(with_primal_start(p,input));
+    input[0]=4;
+    REQUIRE(hinted.primal_start());
+    CHECK((*hinted.primal_start())[0]==1.25);
+    CHECK(hinted.identity()==p.identity());
+    CHECK(std::holds_alternative<Diagnostics>(with_primal_start(p,Vector{})));
+    CHECK(std::holds_alternative<Diagnostics>(with_primal_start(p,Vector{std::numeric_limits<double>::infinity()})));
+    auto [worker]=prepare(hinted).create();
+    const auto result=accepted(worker->run(context()));
+    optimum(result,hinted,0);
+    CHECK(result.raw_diagnostics.find("phase.qp.primal_start.input=1.25,")!=std::string::npos);
+    CHECK(result.raw_diagnostics.find("phase.qp.primal_start.retained=true")!=std::string::npos);
+    CHECK(result.raw_diagnostics.find("phase.qp.primal_start.feasible=true")!=std::string::npos);
+    CHECK(result.raw_diagnostics.find("phase.qp.actual_start.source=submitted-primal")!=std::string::npos);
+    CHECK(result.raw_diagnostics.find("phase.qp.actual_start.primal=1.25,")!=std::string::npos);
+    CHECK(result.raw_diagnostics.find("phase.qp.basis.inactive_free_rows=1")!=std::string::npos);
+}
+
+TEST_CASE("QP starts retain free-row primal hints and disclose infeasible-hint repair") {
+    for(const double hint:{1.25,6.0,-1.0}) {
+        auto input=parabola();
+        input.constraints={1,1,{0,1},{0},{1}};
+        input.rows={{}};
+        const auto source=accepted(make_convex_program(input));
+        const auto hinted=accepted(with_primal_start(source,Vector{hint}));
+        auto [worker]=prepare(hinted).create();
+        const auto result=accepted(worker->run(context()));
+        optimum(result,hinted,0);
+        CHECK(result.raw_diagnostics.find("model.private_free_row=false")!=std::string::npos);
+        CHECK(result.raw_diagnostics.find("phase.qp.primal_start.retained=true")!=std::string::npos);
+        if(hint==1.25) {
+            CHECK(result.raw_diagnostics.find("phase.qp.basis.inactive_free_rows=1")!=std::string::npos);
+            CHECK(result.raw_diagnostics.find("phase.qp.actual_start.source=submitted-primal")!=std::string::npos);
+        } else {
+            CHECK(result.raw_diagnostics.find("phase.qp.primal_start.repair=feasibility-phase-solution")!=std::string::npos);
+            CHECK(result.raw_diagnostics.find("phase.qp.actual_start.source=feasibility-phase-repair")!=std::string::npos);
+        }
+        CHECK(result.raw_diagnostics.find("phase.qp.actual_start.row_duals=0,")!=std::string::npos);
+    }
+}
+
 TEST_CASE("registered quadratic interior and boundary optima retain original numerical KKT evidence") {
     for(double upper:{5.0,2.0}) {
         const auto p=accepted(make_convex_program(parabola(upper)));
@@ -80,6 +125,7 @@ TEST_CASE("registered quadratic interior and boundary optima retain original num
         CHECK(r.raw_diagnostics.find(std::string("native.downstream.scheduler_observation_sha256=")+CSL_HIGHS_THREAD_OBSERVATION_PATCH_SHA256)!=std::string::npos);
         CHECK(r.raw_diagnostics.find("phase.feasibility.scheduler_threads=1")!=std::string::npos);
         CHECK(r.raw_diagnostics.find("phase.qp.scheduler_threads=1")!=std::string::npos);
+        CHECK(r.raw_diagnostics.find("phase.qp.basis.inactive_free_rows=")==std::string::npos);
         CHECK(r.raw_diagnostics.find("Model status")!=std::string::npos);
         CHECK((*r.primal)[0]==doctest::Approx(upper==5?3:2));
         CHECK(worker->last_attempt()->stamp.program().identity()==p.identity());

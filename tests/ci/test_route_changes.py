@@ -1,12 +1,12 @@
 """Exercise the routing CLI with real event payloads and Git history."""
+
 import json
 import os
-from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
-
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts/ci/route_changes.py"
@@ -41,17 +41,28 @@ class RoutingTests(unittest.TestCase):
 
     def route(self, event_name="pull_request", payload=None):
         if payload is None:
-            payload = {"pull_request": {"base": {"sha": self.base},
-                                         "head": {"sha": self.git("rev-parse", "HEAD")}}}
+            payload = {
+                "pull_request": {
+                    "base": {"sha": self.base},
+                    "head": {"sha": self.git("rev-parse", "HEAD")},
+                }
+            }
         event = self.area / "event.json"
         event.write_text(json.dumps(payload), encoding="utf-8")
         output = self.area / "output.txt"
         output.unlink(missing_ok=True)
-        result = subprocess.run([sys.executable, str(SCRIPT)], cwd=self.repo,
-                                env={**os.environ, "GITHUB_EVENT_NAME": event_name,
-                                     "GITHUB_EVENT_PATH": str(event),
-                                     "GITHUB_OUTPUT": str(output)},
-                                text=True, capture_output=True)
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT)],
+            cwd=self.repo,
+            env={
+                **os.environ,
+                "GITHUB_EVENT_NAME": event_name,
+                "GITHUB_EVENT_PATH": str(event),
+                "GITHUB_OUTPUT": str(output),
+            },
+            text=True,
+            capture_output=True,
+        )
         self.assertEqual(result.returncode, 0, result.stderr)
         outputs = dict(line.split("=", 1) for line in output.read_text().splitlines())
         return outputs["native"], outputs["reports"]
@@ -68,11 +79,18 @@ class RoutingTests(unittest.TestCase):
         self.assertEqual(self.route(), ("false", "true"))
 
     def test_coupled_and_unknown_executables_keep_both_gates(self):
-        for name in ("scripts/reports/collector_common.py", "scripts/reports/geo07/check_smoke.py",
-                     "scripts/reports/visual_examples_new.py", "tests/reporting/test_render.py",
-                     "benchmarks/reporting/app01/plan_driver.cpp", "src/new.cpp",
-                     "cmake/HighsDependencies.cmake", "schemas/scenario/v1.schema.json",
-                     ".github/workflows/native.yml", "CMakePresets.json"):
+        for name in (
+            "scripts/reports/collector_common.py",
+            "scripts/reports/geo07/check_smoke.py",
+            "scripts/reports/visual_examples_new.py",
+            "tests/reporting/test_render.py",
+            "benchmarks/reporting/app01/plan_driver.cpp",
+            "src/new.cpp",
+            "cmake/HighsDependencies.cmake",
+            "schemas/scenario/v1.schema.json",
+            ".github/workflows/native.yml",
+            "CMakePresets.json",
+        ):
             with self.subTest(name=name):
                 self.git("reset", "--hard", self.base)
                 self.write(name, "changed")
@@ -88,14 +106,16 @@ class RoutingTests(unittest.TestCase):
     def test_push_and_manual_events(self):
         self.write("scripts/reports/visual_examples.py", "legend")
         head = self.commit()
-        self.assertEqual(self.route("push", {"before": self.base, "after": head}),
-                         ("false", "true"))
+        self.assertEqual(
+            self.route("push", {"before": self.base, "after": head}), ("false", "true")
+        )
         self.assertEqual(self.route("workflow_dispatch", {}), ("true", "true"))
 
     def test_unavailable_history_and_empty_diff_are_conservative(self):
         self.assertEqual(self.route(), ("true", "true"))
-        self.assertEqual(self.route("push", {"before": "0" * 40, "after": self.base}),
-                         ("true", "true"))
+        self.assertEqual(
+            self.route("push", {"before": "0" * 40, "after": self.base}), ("true", "true")
+        )
         self.assertEqual(self.route("pull_request", {}), ("true", "true"))
 
     def test_deleted_native_file_cannot_hide_as_renamed_presentation(self):
@@ -110,8 +130,10 @@ class RoutingTests(unittest.TestCase):
         self.git("checkout", "-qb", "advanced-base", self.base)
         self.write("src/existing.cpp", "unrelated base change")
         base = self.commit()
-        self.assertEqual(self.route(payload={"pull_request": {
-            "base": {"sha": base}, "head": {"sha": head}}}), ("false", "true"))
+        self.assertEqual(
+            self.route(payload={"pull_request": {"base": {"sha": base}, "head": {"sha": head}}}),
+            ("false", "true"),
+        )
 
     def test_docs_and_saved_bundles_keep_existing_non_native_scope(self):
         self.write("docs/build/readme.md", "docs")

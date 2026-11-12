@@ -1,0 +1,6 @@
+{
+  "initial_attempt": "../988-warm-tiny-a488-01",
+  "initial_checker_failure": "Two-stage analytic checker initially omitted the bridge running-cost normalization by original_horizon; raw request, response and solver result preserved. Runtime task and solver were unchanged.",
+  "summary_label_correction": "Executed producer shadowed stage with a geometry-row dict while forming summary keys. Original independent-audit.json retained; corrected-labels companion maps insertion order back to actual family/stage directory and request labels.",
+  "supplied_warm_start": "Second query uses dropped prior state/control history with new first observation and no repeated terminal stage; provider initialization readback and zero dual checks passed."
+}

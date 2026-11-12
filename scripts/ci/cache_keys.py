@@ -1,26 +1,42 @@
 """Emit cache compatibility keys and an explicit read/write trust decision."""
+
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
 import os
-from pathlib import Path
 import re
-
+from pathlib import Path
 
 INPUTS = (
-    "cmake/Dependencies.cmake", "cmake/DependencyArchive.cmake",
-    "cmake/HighsDependencies.cmake", "cmake/QhullDependencies.cmake",
-    "cmake/JsonDependencies.cmake", "cmake/ObjectivesDependencies.cmake",
-    "cmake/ApplyPinnedHighsPatch.cmake", "probes/core-01/CMakeLists.txt",
-    "tests/cmake/pinned_highs_patch_contract.cmake", "CMakePresets.json",
-    "CMakeLists.txt", ".github/workflows/native.yml", "scripts/ci/cache_keys.py",
+    "cmake/Dependencies.cmake",
+    "cmake/DependencyArchive.cmake",
+    "cmake/HighsDependencies.cmake",
+    "cmake/QhullDependencies.cmake",
+    "cmake/JsonDependencies.cmake",
+    "cmake/ObjectivesDependencies.cmake",
+    "cmake/ApplyPinnedHighsPatch.cmake",
+    "probes/core-01/CMakeLists.txt",
+    "tests/cmake/pinned_highs_patch_contract.cmake",
+    "CMakePresets.json",
+    "CMakeLists.txt",
+    ".github/workflows/native.yml",
+    "scripts/ci/cache_keys.py",
     ".github/actions/native-cache-setup/action.yml",
     ".github/actions/native-cache-finish/action.yml",
 )
-CONTEXT_FIELDS = {"os", "arch", "compiler", "cmake", "ccache", "generator",
-                  "configuration", "options", "lane"}
+CONTEXT_FIELDS = {
+    "os",
+    "arch",
+    "compiler",
+    "cmake",
+    "ccache",
+    "generator",
+    "configuration",
+    "options",
+    "lane",
+}
 
 
 def digest(value):
@@ -28,7 +44,9 @@ def digest(value):
 
 
 def cache_keys(root, context, event, ref, revision):
-    if set(context) != CONTEXT_FIELDS or any(not isinstance(v, str) or not v for v in context.values()):
+    if set(context) != CONTEXT_FIELDS or any(
+        not isinstance(v, str) or not v for v in context.values()
+    ):
         raise ValueError("cache context must supply every nonempty compatibility field")
     if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", revision):
         raise ValueError("GITHUB_SHA must identify the exact source revision")
@@ -47,10 +65,14 @@ def cache_keys(root, context, event, ref, revision):
     # a partial archive set under the full/probe lane's key.
     compatibility_id = digest({"context": context, "inputs": inputs_sha256})
     compiler_prefix = f"csl-objects-v1-{scope}-{compatibility_id}-"
-    return {"archive_key": f"csl-archives-v1-{scope}-{compatibility_id}",
-            "compiler_prefix": compiler_prefix, "compiler_key": compiler_prefix + revision,
-            "save_allowed": str(save).lower(), "scope": scope,
-            "inputs_sha256": inputs_sha256}
+    return {
+        "archive_key": f"csl-archives-v1-{scope}-{compatibility_id}",
+        "compiler_prefix": compiler_prefix,
+        "compiler_key": compiler_prefix + revision,
+        "save_allowed": str(save).lower(),
+        "scope": scope,
+        "inputs_sha256": inputs_sha256,
+    }
 
 
 def main():
@@ -58,9 +80,13 @@ def main():
     parser.add_argument("--root", type=Path, default=Path.cwd())
     parser.add_argument("--context", type=Path, required=True)
     args = parser.parse_args()
-    keys = cache_keys(args.root, json.loads(args.context.read_text(encoding="utf-8")),
-                      os.environ["GITHUB_EVENT_NAME"], os.environ["GITHUB_REF"],
-                      os.environ["GITHUB_SHA"])
+    keys = cache_keys(
+        args.root,
+        json.loads(args.context.read_text(encoding="utf-8")),
+        os.environ["GITHUB_EVENT_NAME"],
+        os.environ["GITHUB_REF"],
+        os.environ["GITHUB_SHA"],
+    )
     print(json.dumps(keys, indent=2))
     if os.environ.get("GITHUB_OUTPUT"):
         with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:

@@ -1,0 +1,98 @@
+{
+  "actual_provider": "casadi-ipopt",
+  "attempt_sha256": "d95dfece9446d1d675b4cdbf5eda14912ab37278e8ded1dba416965e56d5c0cb",
+  "controller_id": "native-continuous-affine-history-mpc/1",
+  "correction": "The original trajectory PNG title and generic geometry/coverage text said NMPC; the saved controller is affine-history MPC. Original files remain unchanged in the raw archive.",
+  "generator_source_sha256": "680421415f706ed5bba8ebc170eaedbf45928031a2730c792e731ddddd72ba88",
+  "plots": {
+    "controls.png": "0d9fc0b398190854a33114c0ac57c3c0a05e826fa281a9636b149cc5868bcb68",
+    "phase.png": "8ea4ab38f1fe7c80614e30a727eb2a99e1977ca1e6f27200109669665e3e33b8",
+    "trajectory.png": "3366a0159c0eb1930b7623a0a863fb0dbce6ed01333708c2d9de75297c068dd8"
+  },
+  "producer_commit": "a940fa4d4717e69f44afb2d08914c4a525e9126a",
+  "renderer_source_sha256": "601943dabd4459e9a1a40d77fd8c43a53a533a0731987316a738ec04a80ceb4f",
+  "schema": "csl.closed-loop.history-corrected-render/1",
+  "stage_sources": [
+    {
+      "path": "stage-000.json",
+      "sha256": "9d254ad9e853cda83700501bf92f9204b8e4a8eba58f4a13b467cf23e8ad576e"
+    },
+    {
+      "path": "stage-001.json",
+      "sha256": "185d4c3dea8380f304214794140cbdb61e66f103aeb90e18a67499ff96c92193"
+    },
+    {
+      "path": "stage-002.json",
+      "sha256": "6847f6b24103f117f891cb97d17e25aeb8ceac110ca80fa43c4bcc0b8f6ad03a"
+    },
+    {
+      "path": "stage-003.json",
+      "sha256": "5900955c3cc8bd82ef07af19a5bf9e6bb9871226b82086bc3d9eff530bec9ff7"
+    },
+    {
+      "path": "stage-004.json",
+      "sha256": "ecd58fa9a4d268240e0ed84df97226725d737799144d33d8ddf49542053d357d"
+    },
+    {
+      "path": "stage-005.json",
+      "sha256": "793e1dd98da5e89c55cf66755f4436df8887f2d4d1279f2c0d4c75efd440f0fc"
+    },
+    {
+      "path": "stage-006.json",
+      "sha256": "00cb510e9b9353cdf263b137aec1a5f9e4b842103ccafda97f7812dc0118fff6"
+    },
+    {
+      "path": "stage-007.json",
+      "sha256": "1070d6531baadbe7f5cc08e85d68fcc7c85cfcff537640bfc2b83014dec9ea35"
+    },
+    {
+      "path": "stage-008.json",
+      "sha256": "c0770e9d990b20e1bab39da4d359fc1d96faf16aa40aaae961bcdacd9abd1933"
+    },
+    {
+      "path": "stage-009.json",
+      "sha256": "26154dcfb2d27eab2a109c54df558a838dc1393264cb1c4dfedd1fbefb466fca"
+    },
+    {
+      "path": "stage-010.json",
+      "sha256": "018f4f3f678aed0769fc8850c7bd4aeb62c128334e8486a8c6cc73958d512c3f"
+    },
+    {
+      "path": "stage-011.json",
+      "sha256": "83ae6e41391628fd4536a6113296eed1aecb28485889c5442c35d9012c054aa3"
+    },
+    {
+      "path": "stage-012.json",
+      "sha256": "fd7ffbd7e113099b171de59c28208927a0c04ff3ebb6333a60cd8dc98c0406fa"
+    },
+    {
+      "path": "stage-013.json",
+      "sha256": "704a166bdab31a3c4c86dc6e7b0917e9fa1b4734111c4bba7d9704ff3a0ffce9"
+    },
+    {
+      "path": "stage-014.json",
+      "sha256": "936b9523e4efe5f12ea1f8a5be6259b6998c8ea6d5e494a53a73be78b8bcb88e"
+    },
+    {
+      "path": "stage-015.json",
+      "sha256": "246a2803d25c7fc67f52115f0f29e14513ccc3ed610603f8a90ac6e246312b2a"
+    },
+    {
+      "path": "stage-016.json",
+      "sha256": "fcf902e8b019eacacc656a86876cf63063194e57f270f9ce1a71c372f41bc510"
+    },
+    {
+      "path": "stage-017.json",
+      "sha256": "26e310bcdd1f4758b0c63bb00d2dd14a7972665234a76fe0ab307d43b1d1c1a8"
+    },
+    {
+      "path": "stage-018.json",
+      "sha256": "9173460924e8d56103656104fac054a6cc769c827390eed3009e1d9e6acfec09"
+    },
+    {
+      "path": "stage-019.json",
+      "sha256": "e1df7affb098a95b7f93b6eb15039232a545a976bb61cfe0bcb7c82a42689b8f"
+    }
+  ],
+  "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744"
+}

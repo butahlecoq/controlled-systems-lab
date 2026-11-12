@@ -1,0 +1,24 @@
+{
+  "schema": "csl.feedback-history-stage-figure/1",
+  "task_id": "syn-nl-lv-01/continuous-receding/1",
+  "input_response_sha256": "17adbec9b05e7841f1270bb1d27d8fc535330340f17aec2003eb5f26f52be953",
+  "capture_source_commit": "fd28cb652bd8a20839b73abaf184881fd7bcf1b4",
+  "renderer_source_commit": "b613170764af48ac5e595d075e0c444520d594da",
+  "renderer_sha256": "da7a912245eba8bfd199f621c0a346ba514e015772a85b602d060b5cc4df51f3",
+  "query_scope": "first observed-state query; all predicted stages, not all replans",
+  "full_state_before_projection": true,
+  "family": "box",
+  "stages": 31,
+  "quantitative_style": "csl-report-quantitative-v1",
+  "colormap": "viridis",
+  "figures": [
+    {
+      "path": "all-stages-0-1.png",
+      "sha256": "5c41379142c6012ee4116b242afb1a6cbfd433298f8489ceaa1bb86e442457a3",
+      "raw_state_indices": [
+        0,
+        1
+      ]
+    }
+  ]
+}

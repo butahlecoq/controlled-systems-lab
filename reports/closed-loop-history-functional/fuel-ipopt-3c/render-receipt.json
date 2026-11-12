@@ -1,0 +1,178 @@
+{
+  "actual_provider": "casadi-ipopt",
+  "attempt_sha256": "e7a5b92a7c5974f2e8863fe6780b2c7da5f52af109a1d6f587a80f7af5927200",
+  "controller_id": "native-continuous-affine-history-ipopt/1",
+  "correction": "The original trajectory PNG title and generic geometry/coverage text said NMPC; the saved controller is affine-history MPC. Original files remain unchanged in the raw archive.",
+  "generator_source_sha256": "680421415f706ed5bba8ebc170eaedbf45928031a2730c792e731ddddd72ba88",
+  "plots": {
+    "controls.png": "fb0d63242b923d7ab5f96da5a15914df52e8b7f6bd97842d5b28bfe1fd521431",
+    "phase.png": "b5cb8214b8dd51388f1513a033b76f9ec6e26c1c8c913223a1e6e65533f87a0b",
+    "trajectory.png": "c1921135a886d17297396308a191fd6caf20127997b162319c1d296be8666abb"
+  },
+  "producer_commit": "a940fa4d4717e69f44afb2d08914c4a525e9126a",
+  "renderer_source_sha256": "601943dabd4459e9a1a40d77fd8c43a53a533a0731987316a738ec04a80ceb4f",
+  "schema": "csl.closed-loop.history-corrected-render/1",
+  "stage_sources": [
+    {
+      "path": "stage-000.json",
+      "sha256": "a671db9910f7a308437490da8ce845efbc9b670fffab6b5dbd911f1ecad9d880"
+    },
+    {
+      "path": "stage-001.json",
+      "sha256": "bee2c68f968463f8b759613f5541131934157bed40651686b7433dd19c5cb3e2"
+    },
+    {
+      "path": "stage-002.json",
+      "sha256": "b697356dd8efc456fa6c83651ab0244b6ab41df24e59f6efd91dd1d84975a0c7"
+    },
+    {
+      "path": "stage-003.json",
+      "sha256": "04ef2f4c3103e3e1203200352c69e76485129c76adf4ed4cd01a6255b76cc1e3"
+    },
+    {
+      "path": "stage-004.json",
+      "sha256": "ec3001081dae7e1ed4fab0c8bcbc1b2de096399b7dc896eae516174632b37060"
+    },
+    {
+      "path": "stage-005.json",
+      "sha256": "9643705ca06bc11a4fb16bd8b290834fc1f64c9bc2eb2b147a1e3b5b18d53b7b"
+    },
+    {
+      "path": "stage-006.json",
+      "sha256": "403ac2575162b2ce641f3fdf59465ca6541a6591693acb109c872b89db6d308c"
+    },
+    {
+      "path": "stage-007.json",
+      "sha256": "02877b57e4a0e08309b5b63524c52e3796da40e4a26a47c5d31a77389756eef6"
+    },
+    {
+      "path": "stage-008.json",
+      "sha256": "14eb81ed278757b6d067b97c351fc081640d71c42fa0df5567e368fab2e2d256"
+    },
+    {
+      "path": "stage-009.json",
+      "sha256": "2a9f23deffe9e7627f57172c589e11298af69852151236f165389da207c5795a"
+    },
+    {
+      "path": "stage-010.json",
+      "sha256": "1b0e1971d20420f863ecc42c35243a9b3ea2c4d9039b1417e98e66f28ae7ed89"
+    },
+    {
+      "path": "stage-011.json",
+      "sha256": "6f3fd3fb7f5707b6e205c29dc7b49bb7f0daa1ea40130e4dc7b775dbdb60dfb4"
+    },
+    {
+      "path": "stage-012.json",
+      "sha256": "500b733deb8c9b7b7b40d967121b477586b6134a3612b3e98183b7805d04f21a"
+    },
+    {
+      "path": "stage-013.json",
+      "sha256": "10f42d368024e11be304aae195b63463486f6644aeb56a1758180c895ef079a1"
+    },
+    {
+      "path": "stage-014.json",
+      "sha256": "005a927bd08fea6fa832a705c142e925b7cb34299f235f1592a782b4f47813c1"
+    },
+    {
+      "path": "stage-015.json",
+      "sha256": "2b9206395b52e98f5eea4be121d456b4c207dcbf3a8114cd7c982beb890a7f19"
+    },
+    {
+      "path": "stage-016.json",
+      "sha256": "6ef6873e818dfd883e9d331711bb0834cf98781abc951fb0595e897ebe344375"
+    },
+    {
+      "path": "stage-017.json",
+      "sha256": "964fbf25776d4dd69d77065f14e2a098224a4d9fa56356132dcd932f57c14f91"
+    },
+    {
+      "path": "stage-018.json",
+      "sha256": "7e995bcf813dde054ae0d3d1b2b815885d1d75258bc484cd4e9431caf6b046ce"
+    },
+    {
+      "path": "stage-019.json",
+      "sha256": "732dd28b80f37597282d5ec3bd66a50d2b447dfb6ef864d3db984b7dd25a1314"
+    },
+    {
+      "path": "stage-020.json",
+      "sha256": "81fa3d60d31a0b34a52146c54157fe7654493aa001ebf39eee686c6c63289567"
+    },
+    {
+      "path": "stage-021.json",
+      "sha256": "e9889b50cf2ff7975be4742af53289ce7a048131ffdb8384dff641a79e90e673"
+    },
+    {
+      "path": "stage-022.json",
+      "sha256": "8f20df8a5e57547c6e9adbc34a3b2789f8fde1fd8f186e35b774142c6becae5d"
+    },
+    {
+      "path": "stage-023.json",
+      "sha256": "5e82315d4fac404c31b975a9cffb59e0c99826890d991f4e7124436922ab8011"
+    },
+    {
+      "path": "stage-024.json",
+      "sha256": "c2e3e612e03d7f6a3c23c3b1ed0335913b27256f5619561da8bdf408c617e893"
+    },
+    {
+      "path": "stage-025.json",
+      "sha256": "7db9d63fa8ae2a2f0ddd9e860ae54c7c9153f37c40f287781221f8b4dca0f1ad"
+    },
+    {
+      "path": "stage-026.json",
+      "sha256": "b756f08fefbc099f48da7c1976848200d5b5a6bacfe67f0d9f4e2009be4af3f1"
+    },
+    {
+      "path": "stage-027.json",
+      "sha256": "de4bfda6cc6470e60342366d2b23f5021e7f2610afbc102f05ed79c091a6861e"
+    },
+    {
+      "path": "stage-028.json",
+      "sha256": "50a1434815ba901060e16ebf75979b56433d1a95c3949c2e1ba0a226484da380"
+    },
+    {
+      "path": "stage-029.json",
+      "sha256": "1b700e29ed8a6a07eed83f6a9f51c0328ce87adf07d0ffc26101cf0dbaaaea86"
+    },
+    {
+      "path": "stage-030.json",
+      "sha256": "0fb89e2290550a9767b3d0c8d024a8861dc4b6711b478e30c33f9583749303d8"
+    },
+    {
+      "path": "stage-031.json",
+      "sha256": "5d1fae1e3615d2b31027d2fd712dceed23fe728d045f3d0a244e7a4f5c2cf022"
+    },
+    {
+      "path": "stage-032.json",
+      "sha256": "f603a68daf1e2975962e8800f88030328b990056ba1c867c217f195bd0744e37"
+    },
+    {
+      "path": "stage-033.json",
+      "sha256": "e3cd73b9795e4ac575718a42d1cdd44bb7da54df98cfc77fa75750a316310da7"
+    },
+    {
+      "path": "stage-034.json",
+      "sha256": "e221ad8f54371e6b73513a580c424e5ef76255b20ff572efdf5c0f14a007625f"
+    },
+    {
+      "path": "stage-035.json",
+      "sha256": "d57062fe141ff92fd137aec340376ece54e5440383abe090c4244e66810964af"
+    },
+    {
+      "path": "stage-036.json",
+      "sha256": "5182b8fe169883b4da7f76916c128e13ad9ae0632070991ce1f75a4dc44701cb"
+    },
+    {
+      "path": "stage-037.json",
+      "sha256": "9e879a9a11ba574745cb04478d08656734aa85a9bd5844deb9bf4bf72617e9ea"
+    },
+    {
+      "path": "stage-038.json",
+      "sha256": "bd41bf918685c23e46b45f72dce45b5d3f3a91d56a6d543700ae5fc7612f7ab2"
+    },
+    {
+      "path": "stage-039.json",
+      "sha256": "080b9514693ad7e1e35a97342410dfc5829b1e395885d6a58b0e7a60ec44ccc6"
+    }
+  ],
+  "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b"
+}

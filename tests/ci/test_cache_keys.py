@@ -1,22 +1,29 @@
 """Check cache compatibility and trust boundaries through the CLI."""
+
 import json
 import os
-from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
-
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts/ci/cache_keys.py"
 INPUTS = (
-    "cmake/Dependencies.cmake", "cmake/DependencyArchive.cmake",
-    "cmake/HighsDependencies.cmake", "cmake/QhullDependencies.cmake",
-    "cmake/JsonDependencies.cmake", "cmake/ObjectivesDependencies.cmake",
-    "cmake/ApplyPinnedHighsPatch.cmake", "probes/core-01/CMakeLists.txt",
-    "tests/cmake/pinned_highs_patch_contract.cmake", "CMakePresets.json",
-    "CMakeLists.txt", ".github/workflows/native.yml", "scripts/ci/cache_keys.py",
+    "cmake/Dependencies.cmake",
+    "cmake/DependencyArchive.cmake",
+    "cmake/HighsDependencies.cmake",
+    "cmake/QhullDependencies.cmake",
+    "cmake/JsonDependencies.cmake",
+    "cmake/ObjectivesDependencies.cmake",
+    "cmake/ApplyPinnedHighsPatch.cmake",
+    "probes/core-01/CMakeLists.txt",
+    "tests/cmake/pinned_highs_patch_contract.cmake",
+    "CMakePresets.json",
+    "CMakeLists.txt",
+    ".github/workflows/native.yml",
+    "scripts/ci/cache_keys.py",
     ".github/actions/native-cache-setup/action.yml",
     ".github/actions/native-cache-finish/action.yml",
 )
@@ -31,19 +38,34 @@ class CacheKeyTests(unittest.TestCase):
             path = self.root / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text("literal initial dependency input", encoding="utf-8")
-        self.context = {"os": "Linux", "arch": "X64", "compiler": "GCC 13.3",
-                        "cmake": "3.31.6", "ccache": "4.10.2", "generator": "Ninja",
-                        "configuration": "Release", "options": "highs=on qhull=on probes=on",
-                        "lane": "gcc-release"}
+        self.context = {
+            "os": "Linux",
+            "arch": "X64",
+            "compiler": "GCC 13.3",
+            "cmake": "3.31.6",
+            "ccache": "4.10.2",
+            "generator": "Ninja",
+            "configuration": "Release",
+            "options": "highs=on qhull=on probes=on",
+            "lane": "gcc-release",
+        }
 
     def keys(self, event="push", ref="refs/heads/main", revision="1" * 40):
         context = self.root / "context.json"
         context.write_text(json.dumps(self.context), encoding="utf-8")
-        result = subprocess.run([sys.executable, str(SCRIPT), "--root", str(self.root),
-                                 "--context", str(context)], text=True, capture_output=True,
-                                env={**os.environ, "GITHUB_EVENT_NAME": event,
-                                     "GITHUB_REF": ref, "GITHUB_SHA": revision,
-                                     "GITHUB_OUTPUT": "", "GITHUB_STEP_SUMMARY": ""})
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT), "--root", str(self.root), "--context", str(context)],
+            text=True,
+            capture_output=True,
+            env={
+                **os.environ,
+                "GITHUB_EVENT_NAME": event,
+                "GITHUB_REF": ref,
+                "GITHUB_SHA": revision,
+                "GITHUB_OUTPUT": "",
+                "GITHUB_STEP_SUMMARY": "",
+            },
+        )
         self.assertEqual(result.returncode, 0, result.stderr)
         return json.loads(result.stdout)
 
@@ -57,8 +79,11 @@ class CacheKeyTests(unittest.TestCase):
 
     def test_pin_and_patch_edits_invalidate_both_caches(self):
         original = self.keys()
-        for name in ("cmake/HighsDependencies.cmake", "cmake/ApplyPinnedHighsPatch.cmake",
-                     "tests/cmake/pinned_highs_patch_contract.cmake"):
+        for name in (
+            "cmake/HighsDependencies.cmake",
+            "cmake/ApplyPinnedHighsPatch.cmake",
+            "tests/cmake/pinned_highs_patch_contract.cmake",
+        ):
             with self.subTest(name=name):
                 path = self.root / name
                 path.write_text("changed pin or patch", encoding="utf-8")
@@ -76,11 +101,16 @@ class CacheKeyTests(unittest.TestCase):
 
     def test_incompatible_build_context_cannot_restore_release_objects(self):
         original = self.keys()
-        for field, changed in (("compiler", "Clang 18.1"), ("configuration", "Debug"),
-                               ("options", "-fsanitize=address,undefined probes=off"),
-                               ("os", "Windows"), ("arch", "ARM64"),
-                               ("lane", "gcc-sanitizers"), ("ccache", "4.12"),
-                               ("generator", "Visual Studio 17 2022")):
+        for field, changed in (
+            ("compiler", "Clang 18.1"),
+            ("configuration", "Debug"),
+            ("options", "-fsanitize=address,undefined probes=off"),
+            ("os", "Windows"),
+            ("arch", "ARM64"),
+            ("lane", "gcc-sanitizers"),
+            ("ccache", "4.12"),
+            ("generator", "Visual Studio 17 2022"),
+        ):
             with self.subTest(field=field):
                 previous = self.context[field]
                 self.context[field] = changed

@@ -94,14 +94,17 @@ def continuous_jacobian(task: dict, state, control) -> tuple[np.ndarray, np.ndar
     return a, b
 
 
-def objective(task: dict, states, controls) -> dict:
+def objective(task: dict, states, controls, *, absolute_stage_offset: int = 0) -> dict:
     import numpy as np
     x = np.asarray(states, dtype=float)
     u = np.asarray(controls, dtype=float)
     n = task["episode"]["intervals"]
     nx, nu = len(task["model"]["states"]), len(task["model"]["controls"])
-    if x.shape != (n + 1, nx) or u.shape != (n, nu):
-        raise ValueError("objective requires a complete state and control history")
+    if not isinstance(absolute_stage_offset, int) or not 0 <= absolute_stage_offset < n:
+        raise ValueError("objective stage offset must identify an original control stage")
+    horizon = n - absolute_stage_offset
+    if x.shape != (horizon + 1, nx) or u.shape != (horizon, nu):
+        raise ValueError("objective requires the complete remaining state and control history")
     if not np.isfinite(x).all() or not np.isfinite(u).all():
         raise ValueError("objective inputs must be finite")
     case, _ = _ids(task)
@@ -113,13 +116,13 @@ def objective(task: dict, states, controls) -> dict:
         scale = np.asarray(spec["terminal_scale"])
         weights = np.asarray(spec["terminal_weights"])
         terminal = float(np.sum(weights * ((x[-1] - target) / scale) ** 2))
-        references = np.asarray(mpc11_affine.model(source)["reference_commands"])
+        references = np.asarray(mpc11_affine.model(source)["reference_commands"])[absolute_stage_offset:]
         running = float(spec["running_weight"] / n * np.sum(((u - references) / spec["running_scale"]) ** 2))
     elif case == "ENV717-EARTH-ORBIT-CONTINUOUS-01":
         target = task["objective"]["target"]
         terminal = math.hypot(target["radius_km"] - x[-1, 0],
                               100000 * (target["angular_rate_rad_s"] - x[-1, 3]))
-        running = 0.001 * task["episode"]["dt"] * float(np.linalg.norm(u[:n - 1], axis=1).sum())
+        running = 0.001 * task["episode"]["dt"] * float(np.linalg.norm(u[:max(0, n - 1 - absolute_stage_offset)], axis=1).sum())
     else:
         raise ValueError(f"unsupported objective for {case}")
     return {"terminal": terminal, "running": running, "total": terminal + running}

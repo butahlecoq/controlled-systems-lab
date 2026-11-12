@@ -1,0 +1,19 @@
+{
+  "source_commit": "a800b95b9be6a874c0bab188d1cf3394fbb836b1",
+  "geometry_parent": "3f5f3a7283b2e773ad7310240e6e06f15c65e93f",
+  "native_binary": {
+    "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/history-five-a800-build/geometry_policy",
+    "sha256": "4be7fb205630b615fcbead74dc4c3ad3766104336920c4bf61a9b4d094ff1223"
+  },
+  "physical_binary": {
+    "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/history-five-a800-build/physical_bridge",
+    "sha256": "fcbb9170d1fbfc7cd1a1324087a0d049f8a078a16a8c450de4a9623be5942e36",
+    "source_commit": "f4e73e08908c472801aef6637d94b1a03cb0b2a7"
+  },
+  "task": "earth-orbit",
+  "original_horizon": 20,
+  "controller": "native-continuous-history-box-ipopt/1",
+  "wall_seconds": 1800,
+  "cpu_seconds": 1800,
+  "scope": "one numerical observed-state affine-history MPC profile with full-state F/B/I box geometry"
+}

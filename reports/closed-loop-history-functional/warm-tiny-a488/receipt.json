@@ -1,0 +1,244 @@
+{
+  "producer_commit": "d73b455c8bd3f0951e9690ef5073ddb965a0b005",
+  "source_commit": "a4889d4727cf5ba0bc2dbf64c8c39b7792a18ae5",
+  "native_sha256": "96e0ecb805d2949ca06817e11bf4721df165a4cb1c996a35926c429027fd38a4",
+  "raw_zip_sha256": "dcac609818fe380267c5bae31e1c171c1995ee3bd41d72c796697b6185f54406",
+  "archive_members": {
+    "box/0/request.jsonl": {
+      "bytes": 1124,
+      "sha256": "a65cb1eb0b25c6e013f43e8530feaf3d212b29b7aa02c36e6bb92accb928da86",
+      "crc32": "50d29ba5"
+    },
+    "box/0/response.jsonl": {
+      "bytes": 45525,
+      "sha256": "824ec0e585949bbb96962304506597f78827863277cd4e8b9899ff11732cfef6",
+      "crc32": "b5675e38"
+    },
+    "box/0/solver-result.json": {
+      "bytes": 3491,
+      "sha256": "f4a60868b5e53496189d0261b9c7e330155f0a5153dd058bc306ae6b6fd9ebef",
+      "crc32": "a4e8d50f"
+    },
+    "box/0/stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    },
+    "box/1/request.jsonl": {
+      "bytes": 1319,
+      "sha256": "09b52b94bd07dfbf1a9b4a42a0fa09c9eb8e8b3f4eb25fc29cb48c9d857159a2",
+      "crc32": "b7fd4ed4"
+    },
+    "box/1/response.jsonl": {
+      "bytes": 31286,
+      "sha256": "65832642c2c5079afe297619a029caaf59206d2362d15a87d89d49719845149e",
+      "crc32": "04c3d864"
+    },
+    "box/1/solver-result.json": {
+      "bytes": 2822,
+      "sha256": "fda6b402f752589bb401f198b6ac86e7dd1f23fb2a423e7769ec4006de67d5af",
+      "crc32": "271c4d95"
+    },
+    "box/1/stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    },
+    "ellipsoid/0/request.jsonl": {
+      "bytes": 1130,
+      "sha256": "cc624f139f240e986d5c0e93219c9292632e42528c100cf869900b2ca04155bc",
+      "crc32": "a792cc01"
+    },
+    "ellipsoid/0/response.jsonl": {
+      "bytes": 44583,
+      "sha256": "95856ae03c5eee536488bafdcfabd4b32dfd2cc55a69e537724775a7913c711d",
+      "crc32": "2abf9e4d"
+    },
+    "ellipsoid/0/solver-result.json": {
+      "bytes": 3947,
+      "sha256": "76eb69b013164e9047c40312e285d314e723172612c2700e72f376ad8368714d",
+      "crc32": "a9c5b28b"
+    },
+    "ellipsoid/0/stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    },
+    "ellipsoid/1/request.jsonl": {
+      "bytes": 1321,
+      "sha256": "e33368a597ba491aa150ef4f0d8f53a746f7679f58335eb858d3e834f2d38f1a",
+      "crc32": "fccb1470"
+    },
+    "ellipsoid/1/response.jsonl": {
+      "bytes": 30639,
+      "sha256": "61453771f14bd1dc139c57da568d153e910426dbc5057c20a15701f63ff38a28",
+      "crc32": "64379d1a"
+    },
+    "ellipsoid/1/solver-result.json": {
+      "bytes": 3176,
+      "sha256": "10486d9bc77010c17d9b3d13e6462acfaf64069dcc17ed3c6c87a8eb737060e6",
+      "crc32": "d01e670d"
+    },
+    "ellipsoid/1/stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    },
+    "harness-corrections.json": {
+      "bytes": 749,
+      "sha256": "68a3a3a12894d6a90944f8893ffe9e5ff1d05ecef64eb51a0dc833460d996d0d",
+      "crc32": "07f4b80c"
+    },
+    "independent-audit-corrected-labels.json": {
+      "bytes": 19067,
+      "sha256": "dc6c8dd78d308e6f93157ee32d43a5441a116e1db90b1860aa21da9672d32633",
+      "crc32": "c339fda0"
+    },
+    "independent-audit.json": {
+      "bytes": 173556,
+      "sha256": "7919c7b94277a09c3689ca870635bae6e002b4d042954562d98a25c73da618f3",
+      "crc32": "8e3bcd0f"
+    },
+    "parallelotope/0/request.jsonl": {
+      "bytes": 1134,
+      "sha256": "2849b747a48dafdb93cc08087840c7cc74600fa4000b1f63588b68cec8aa9042",
+      "crc32": "d9bd4c3e"
+    },
+    "parallelotope/0/response.jsonl": {
+      "bytes": 45931,
+      "sha256": "c51fd86e0637482901806805b8c1b91957a92f63b9afbf31c40bd0bb8e12593a",
+      "crc32": "55e7bb9a"
+    },
+    "parallelotope/0/solver-result.json": {
+      "bytes": 3491,
+      "sha256": "f4a60868b5e53496189d0261b9c7e330155f0a5153dd058bc306ae6b6fd9ebef",
+      "crc32": "a4e8d50f"
+    },
+    "parallelotope/0/stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    },
+    "parallelotope/1/request.jsonl": {
+      "bytes": 1329,
+      "sha256": "5e53158d5ad4d1010d0fa17b76983769a57a2b35519812538d65063b5fd62d39",
+      "crc32": "688cfde6"
+    },
+    "parallelotope/1/response.jsonl": {
+      "bytes": 31560,
+      "sha256": "39a2f94a5c5cf0eb6d12f15a5ed398b0e993efd80e801ac4ba7c569192c88243",
+      "crc32": "e0ff1b83"
+    },
+    "parallelotope/1/solver-result.json": {
+      "bytes": 2822,
+      "sha256": "fda6b402f752589bb401f198b6ac86e7dd1f23fb2a423e7769ec4006de67d5af",
+      "crc32": "271c4d95"
+    },
+    "parallelotope/1/stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    },
+    "polytope/0/request.jsonl": {
+      "bytes": 1129,
+      "sha256": "22a728c844f59f17517f819f9952e8535cc149c368492bffd18c1bb3fa1aee3f",
+      "crc32": "1246b552"
+    },
+    "polytope/0/response.jsonl": {
+      "bytes": 59698,
+      "sha256": "1558e57a4b9de726e10264f76cb8764d349ddc53b0e63681f71228402a5a18d6",
+      "crc32": "0ba814c8"
+    },
+    "polytope/0/solver-result.json": {
+      "bytes": 9120,
+      "sha256": "013525dc377512a12bd1f7e3eda51e50356c85e27bbd4cc01ac5fe2aa8e56fda",
+      "crc32": "eee5836c"
+    },
+    "polytope/0/stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    },
+    "polytope/1/request.jsonl": {
+      "bytes": 1315,
+      "sha256": "c5db01041703edafb6206d65c7c61a35cde7c7dc36efd7b7d52bd6c7d8392dc9",
+      "crc32": "c0d22966"
+    },
+    "polytope/1/response.jsonl": {
+      "bytes": 38156,
+      "sha256": "5ccfd0a66d5a02072edcaffaa06261699c6291995f8115be12a2ff357c0e377a",
+      "crc32": "25849b01"
+    },
+    "polytope/1/solver-result.json": {
+      "bytes": 5271,
+      "sha256": "07968940224c1ee9fdeae96543a269be53d19acd64f17708cd990ab6cd3ce22e",
+      "crc32": "6ca54297"
+    },
+    "polytope/1/stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    },
+    "producer-executed.py": {
+      "bytes": 6984,
+      "sha256": "bde9e2dccc229876fb522e92e5ccea0afdd70c3bdda29381470bbd5c80c047c7",
+      "crc32": "ae354283"
+    },
+    "zonotope/0/request.jsonl": {
+      "bytes": 1129,
+      "sha256": "3bb30090d1ee71363a89c9804a7f23eb241a65823d13202aa0f4e5de370c274c",
+      "crc32": "ffcbdff4"
+    },
+    "zonotope/0/response.jsonl": {
+      "bytes": 46176,
+      "sha256": "eb58b345ed110d18417b71a65c59b457ac09a7773aa7bdc5ea68d1628df6f80e",
+      "crc32": "764b38e3"
+    },
+    "zonotope/0/solver-result.json": {
+      "bytes": 4665,
+      "sha256": "5cfdca27d078d758cc8d415a12ea3dce34ae9a137cc06c725b3e9351f35cd045",
+      "crc32": "fe85b021"
+    },
+    "zonotope/0/stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    },
+    "zonotope/1/request.jsonl": {
+      "bytes": 1318,
+      "sha256": "7215e6146ede80596f9cd639ba10a5b7e3ed95c609fb8f0096ac02a1f6361de1",
+      "crc32": "d0b0190c"
+    },
+    "zonotope/1/response.jsonl": {
+      "bytes": 31584,
+      "sha256": "d020d2fcee4fbadf25493b54776b80f8314b5222dc10987878fe0e8516e79adf",
+      "crc32": "4c79cd86"
+    },
+    "zonotope/1/solver-result.json": {
+      "bytes": 3471,
+      "sha256": "065aba30fd5f833422b221938feb205bf7c91f8aa3b90c8e9e82fae529328a47",
+      "crc32": "d1aa66d9"
+    },
+    "zonotope/1/stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    }
+  },
+  "scope": "functional verification; no timing comparison or global guarantees",
+  "schema": "csl.feedback-history-warm-tiny/1",
+  "queries": 10,
+  "families": [
+    "polytope",
+    "box",
+    "zonotope",
+    "parallelotope",
+    "ellipsoid"
+  ],
+  "stages": [
+    0,
+    1
+  ],
+  "original_horizon": 2,
+  "checks": "Independent source cost/H feasibility, family memberships and support certificates; exact shifted prior primal with changed first observation; zero supplied duals and provider initialization readback."
+}
