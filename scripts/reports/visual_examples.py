@@ -21,6 +21,7 @@ import report_data
 import site_additions
 import site_design
 import stage_ext07 as ext07_reports
+import stage_native_model_catalogue
 import visual_illustrations
 import visual_example_geometry as geometry_examples
 import visual_example_fuel_layers
@@ -881,6 +882,9 @@ def build(catalog, site):
     fuel_layer_files, fuel_layer_inventory, fuel_layer_card = visual_example_fuel_layers.build(
         Path(__file__).resolve().parents[2])
     saved_figures += fuel_layer_card
+    native_files, native_inventory, native_cards = stage_native_model_catalogue.build(
+        Path(__file__).resolve().parents[2])
+    saved_figures += native_cards
     saved_figures += ('<article class="saved-figure" id="history-cost-2d-v1"><p class="eyebrow">Nominal optimization · Saved-data illustration</p>'
         '<h3><a href="history-cost-2d-v1/index.html">Full-history cost moves the 2D optimum</a></h3>'
         '<a href="history-cost-2d-v1/index.html"><img src="history-cost-2d-v1/history-cost-2d.svg" alt="Feasible control square, terminal-only optimum at (1,0), and full-cost HiGHS optimum at (1/3,0) with both objective contours"></a>'
@@ -913,6 +917,7 @@ def build(catalog, site):
     require(not out.is_symlink(), "gallery output must not be a symlink")
     outputs = {e["slug"] + ".svg": plot(e) for e in examples}
     outputs.update(analytic_files)
+    outputs.update(native_files)
     repository_root = Path(__file__).resolve().parents[2]
     cost_page_root = repository_root / "docs/examples/history-cost-2d-v1"
     cost_evidence_root = repository_root / "reports/algorithm-results/history-cost-2d-v1"
@@ -1018,6 +1023,7 @@ def build(catalog, site):
         gallery_inventory.append(owner.inventory_entry(example))
     gallery_inventory.extend(analytic_inventory)
     gallery_inventory.extend(fuel_layer_inventory)
+    gallery_inventory.extend(native_inventory)
     geometry_first = geometry_inventory[0]
     gallery_inventory.append({"family": "Geometry and optimization",
                               "title": "Readable geometry and timing figures",

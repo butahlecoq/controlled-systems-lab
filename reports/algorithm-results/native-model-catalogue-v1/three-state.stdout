@@ -1,0 +1,3 @@
+case=bulaev-2016-slide33/illustrated-seven/1 dimension=3 controls=1 transitions=7 verified_full_state_stages=8 terminal_cube_corners=1024
+case=bulaev-2016-slide33/literal-eight/1 dimension=3 controls=1 transitions=8 verified_full_state_stages=9 terminal_cube_corners=2048
+Native model catalogue: 2 source cases and all full-state corner checks passed
