@@ -1142,6 +1142,17 @@
       "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
+      "source": "scripts/reports/package_history_functional.py",
+      "signal_count": 6,
+      "asset_name_literals": [
+        "controls.png",
+        "phase.png",
+        "trajectory.png"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 687
+    },
+    {
       "source": "scripts/reports/plot.py",
       "signal_count": 7,
       "asset_name_literals": [
@@ -1208,6 +1219,17 @@
       ],
       "disposition": "analytic-reference-checked-saved-run-renderer",
       "role_and_disposition_reason": "Validates and renders the fixed source-bound attempt, replay, and coverage records into a versioned standalone report and 2D example; it does not execute a solver or plant."
+    },
+    {
+      "source": "scripts/reports/render_history_functional.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "controls.png",
+        "phase.png",
+        "trajectory.png"
+      ],
+      "disposition": "deferred-family-specific-migration",
+      "follow_up_issue": 687
     },
     {
       "source": "scripts/reports/report_data.py",
@@ -2034,7 +2056,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 89,
+      "signal_count": 91,
       "asset_name_literals": [
         "adaptive-ode-replay.svg",
         "app01-plan-timing-v1.svg",
@@ -2074,6 +2096,7 @@
         "fuel-b06-viz06-trajectory.svg",
         "geometry-reference-ellipsoid.svg",
         "geometry.svg",
+        "history-cost-2d.svg",
         "issue3-control-walkthrough.svg",
         "joint-relation-2d.svg",
         "lazy-2d.svg",

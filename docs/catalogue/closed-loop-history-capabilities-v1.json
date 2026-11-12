@@ -60,8 +60,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "58422f26e2e56ee5900a166dcc78697f770296156c033b4170ef5becef14df0f",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-mpc/1/cfg-58422f26e2e56ee5",
+      "graph_fingerprint": "e8edec6af926892782ef03920da0d21c294c886064ba63caf57714f7fb4e36a9",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-mpc/1/cfg-e8edec6af9268927",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -135,7 +135,7 @@
         },
         {
           "path": "src/optimization/history_cost.cpp",
-          "sha256": "4b65ab1df6b52e14267eaca3d0e74fb33c34fb166c9526fe45886f4cf37c4c86"
+          "sha256": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86"
         },
         {
           "path": "src/optimization/objective_reformulation.cpp",
@@ -143,7 +143,7 @@
         },
         {
           "path": "src/optimization/running_control_cost.cpp",
-          "sha256": "dc9274200f602e1b5fc100258aa014ee92b1357a8bd8b8abeab404547d771ddc"
+          "sha256": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0"
         },
         {
           "path": "src/problem/resolved.cpp",
@@ -223,8 +223,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "f5e59e99ec548f112f7493a0723e138bd52053ede89694584feb397a61782e6a",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ipopt/1/cfg-f5e59e99ec548f11",
+      "graph_fingerprint": "030cac62644fd1df0cdf2aa738cec7e19882eb48948824c9cba6c7c83b46227d",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ipopt/1/cfg-030cac62644fd1df",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -298,7 +298,7 @@
         },
         {
           "path": "src/optimization/history_cost.cpp",
-          "sha256": "4b65ab1df6b52e14267eaca3d0e74fb33c34fb166c9526fe45886f4cf37c4c86"
+          "sha256": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86"
         },
         {
           "path": "src/optimization/objective_reformulation.cpp",
@@ -306,7 +306,7 @@
         },
         {
           "path": "src/optimization/running_control_cost.cpp",
-          "sha256": "dc9274200f602e1b5fc100258aa014ee92b1357a8bd8b8abeab404547d771ddc"
+          "sha256": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0"
         },
         {
           "path": "src/problem/resolved.cpp",
@@ -386,8 +386,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "7e83d241aa8cd8a533f17e3cc20a9cc8f886ceec0c02a5993eaa1f00a91b071f",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-7e83d241aa8cd8a5",
+      "graph_fingerprint": "8804dc38cf41e32d68fe616cd4544528d3cbc7e636c60cce8e6f99775df9cc9c",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-8804dc38cf41e32d",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -457,7 +457,7 @@
         },
         {
           "path": "src/optimization/history_cost.cpp",
-          "sha256": "4b65ab1df6b52e14267eaca3d0e74fb33c34fb166c9526fe45886f4cf37c4c86"
+          "sha256": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86"
         },
         {
           "path": "src/optimization/objective_reformulation.cpp",
@@ -465,7 +465,7 @@
         },
         {
           "path": "src/optimization/running_control_cost.cpp",
-          "sha256": "dc9274200f602e1b5fc100258aa014ee92b1357a8bd8b8abeab404547d771ddc"
+          "sha256": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0"
         },
         {
           "path": "src/problem/resolved.cpp",
@@ -545,8 +545,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "75c623cf0a71a49d5829d7e710b6284b526813d62765520e655141a9decbd0ee",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-mpc/1/cfg-75c623cf0a71a49d",
+      "graph_fingerprint": "991d6ec9ca8f67202ceab6a450ec9b399d601b52a9b71d4b3b4f959cac61cc8e",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-mpc/1/cfg-991d6ec9ca8f6720",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -620,7 +620,7 @@
         },
         {
           "path": "src/optimization/history_cost.cpp",
-          "sha256": "4b65ab1df6b52e14267eaca3d0e74fb33c34fb166c9526fe45886f4cf37c4c86"
+          "sha256": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86"
         },
         {
           "path": "src/optimization/objective_reformulation.cpp",
@@ -628,7 +628,7 @@
         },
         {
           "path": "src/optimization/running_control_cost.cpp",
-          "sha256": "dc9274200f602e1b5fc100258aa014ee92b1357a8bd8b8abeab404547d771ddc"
+          "sha256": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0"
         },
         {
           "path": "src/problem/resolved.cpp",
@@ -708,8 +708,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "3d3e7e612148425acfb8091400779afdf5b07d59e76d40174d7eef2865e512e9",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ipopt/1/cfg-3d3e7e612148425a",
+      "graph_fingerprint": "a9848ca2ce134367172de95869e362bb2a039c5ab28f2d9234ad900bab3fe3c1",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ipopt/1/cfg-a9848ca2ce134367",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -783,7 +783,7 @@
         },
         {
           "path": "src/optimization/history_cost.cpp",
-          "sha256": "4b65ab1df6b52e14267eaca3d0e74fb33c34fb166c9526fe45886f4cf37c4c86"
+          "sha256": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86"
         },
         {
           "path": "src/optimization/objective_reformulation.cpp",
@@ -791,7 +791,7 @@
         },
         {
           "path": "src/optimization/running_control_cost.cpp",
-          "sha256": "dc9274200f602e1b5fc100258aa014ee92b1357a8bd8b8abeab404547d771ddc"
+          "sha256": "9fb1000d9a7dc97c4068b3846552616f410902ae76fbc1099c718d1cc78f4bf0"
         },
         {
           "path": "src/problem/resolved.cpp",

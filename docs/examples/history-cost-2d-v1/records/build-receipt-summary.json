@@ -1,0 +1,11 @@
+{
+  "schema": "csl.native-build-receipt-summary/1",
+  "build_receipt_sha256": "80ccc29f5757ec82ab459ad2e2a010aa3927a464d843897150fa826ef226a276",
+  "source_commit": "f4e73e08908c472801aef6637d94b1a03cb0b2a7",
+  "source_capsule_sha256": "8bc9e1cfd435300b0e079cab72572c442dd2bcd4b61fcda74fbbb008f26e8bac",
+  "native_binary_sha256": "2d336a436220fdc59cf2c2c5a00defceadc5fb330450b16693fd0637a5cded17",
+  "terminal_cost_fix_parent": "608905254218e2bd7940ab60b065d8fadb0c8ece",
+  "compiler_parent": "243da5711a31bbf8384a686b2c364a3bd661e449",
+  "build": "incremental CMake Release; GCC 16.2.1; HiGHS 1.11.0; Qhull enabled; one worker",
+  "assurance": "Recorded clean source capsule and build tree; cached object source is supported by dependency tracking, not independently reproduced."
+}

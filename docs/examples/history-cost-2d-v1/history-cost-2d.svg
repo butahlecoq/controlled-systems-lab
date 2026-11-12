@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 680" role="img" aria-labelledby="title desc">
+<title id="title">Full-history cost changes the selected control</title>
+<desc id="desc">Equal-scale control square from minus two to two in each coordinate. Terminal-only optimum is one, zero; actual HiGHS full-cost optimum is one third, zero. Contours are clipped to the feasible square.</desc>
+<style>@media(max-width:600px){text{font-size:24px!important}.axis-title{font-size:28px!important}}</style>
+<rect width="900" height="680" fill="#303129"/>
+<line x1="195.0" y1="80" x2="195.0" y2="560" stroke="#504945"/>
+<line x1="195" y1="560.0" x2="675" y2="560.0" stroke="#504945"/>
+<text x="195.0" y="585" fill="#d5c4a1" text-anchor="middle" font-size="16">-2</text>
+<text x="177" y="565.0" fill="#d5c4a1" text-anchor="end" font-size="16">-2</text>
+<line x1="315.0" y1="80" x2="315.0" y2="560" stroke="#504945"/>
+<line x1="195" y1="440.0" x2="675" y2="440.0" stroke="#504945"/>
+<text x="315.0" y="585" fill="#d5c4a1" text-anchor="middle" font-size="16">-1</text>
+<text x="177" y="445.0" fill="#d5c4a1" text-anchor="end" font-size="16">-1</text>
+<line x1="435.0" y1="80" x2="435.0" y2="560" stroke="#504945"/>
+<line x1="195" y1="320.0" x2="675" y2="320.0" stroke="#504945"/>
+<text x="435.0" y="585" fill="#d5c4a1" text-anchor="middle" font-size="16">0</text>
+<text x="177" y="325.0" fill="#d5c4a1" text-anchor="end" font-size="16">0</text>
+<line x1="555.0" y1="80" x2="555.0" y2="560" stroke="#504945"/>
+<line x1="195" y1="200.0" x2="675" y2="200.0" stroke="#504945"/>
+<text x="555.0" y="585" fill="#d5c4a1" text-anchor="middle" font-size="16">1</text>
+<text x="177" y="205.0" fill="#d5c4a1" text-anchor="end" font-size="16">1</text>
+<line x1="675.0" y1="80" x2="675.0" y2="560" stroke="#504945"/>
+<line x1="195" y1="80.0" x2="675" y2="80.0" stroke="#504945"/>
+<text x="675.0" y="585" fill="#d5c4a1" text-anchor="middle" font-size="16">2</text>
+<text x="177" y="85.0" fill="#d5c4a1" text-anchor="end" font-size="16">2</text>
+<rect x="195" y="80" width="480" height="480" fill="#66d9ef" fill-opacity=".035" stroke="#66d9ef" stroke-width="3"/>
+<defs><clipPath id="feasible"><rect x="195" y="80" width="480" height="480"/></clipPath></defs><g clip-path="url(#feasible)">
+<circle cx="555.0" cy="320.0" r="84.85" fill="none" stroke="#fd971f" stroke-width="2.5" opacity=".9"/>
+<circle cx="555.0" cy="320.0" r="120.00" fill="none" stroke="#fd971f" stroke-width="2.5" opacity=".9"/>
+<circle cx="555.0" cy="320.0" r="169.71" fill="none" stroke="#fd971f" stroke-width="2.5" opacity=".9"/>
+<circle cx="475.0" cy="320.0" r="48.99" fill="none" stroke="#a6e22e" stroke-width="2.5" opacity=".95"/>
+<circle cx="475.0" cy="320.0" r="69.28" fill="none" stroke="#a6e22e" stroke-width="2.5" opacity=".95"/>
+<circle cx="475.0" cy="320.0" r="97.98" fill="none" stroke="#a6e22e" stroke-width="2.5" opacity=".95"/>
+</g>
+<circle cx="435.0" cy="320.0" r="7" fill="#66d9ef" stroke="#1d1e19" stroke-width="2"/>
+<circle cx="555.0" cy="320.0" r="9" fill="#fd971f" stroke="#1d1e19" stroke-width="2"/>
+<circle cx="475.0" cy="320.0" r="9" fill="#a6e22e" stroke="#1d1e19" stroke-width="2"/>
+<line x1="110" y1="36" x2="150" y2="36" stroke="#fd971f" stroke-width="3"/><text x="160" y="42" fill="#f8f8f2" font-size="16">terminal cost contours</text>
+<line x1="430" y1="36" x2="470" y2="36" stroke="#a6e22e" stroke-width="3"/><text x="480" y="42" fill="#f8f8f2" font-size="16">full cost contours</text>
+<text x="435.0" y="627" fill="#f8f8f2" text-anchor="middle" font-size="20" class="axis-title">u₁ (also x₁ at terminal time)</text>
+<text transform="translate(45 320.0) rotate(-90)" fill="#f8f8f2" text-anchor="middle" font-size="20" class="axis-title">u₂ (also x₂ at terminal time)</text>
+<text x="195" y="665" fill="#b7b7af" font-size="16">Feasible controls: [-2,2]² · x₀=(0,0), x₁=x₀+u</text>
+</svg>
