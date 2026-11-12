@@ -275,6 +275,11 @@ propagate_existential_control_zonotope(const model::DynamicsStage& dynamics,
     const model::DynamicsStage mapped{dynamics.A,std::get<numeric::MatrixView>(zero),
         dynamics.B,dynamics.offset};
     auto result=propagate(mapped,current,controls,{},generator_limit,context,stage);
+    if (auto* failure=std::get_if<Unsupported>(&result)) {
+        for (const auto& diagnostic:failure->diagnostics)
+            if (diagnostic.field=="finite_plan_zonotope.generators.limit" || diagnostic.field=="finite_plan_zonotope.stage.capacity")
+                return OperationStopped{StopReason::resource_limit,diagnostic.explanation};
+    }
     if (auto* output=std::get_if<FinitePlanZonotopeTrace::Stage>(&result)) {
         std::vector<std::string> ids;
         for (const auto& factor:output->factors) {

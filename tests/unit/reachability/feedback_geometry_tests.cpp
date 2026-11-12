@@ -49,7 +49,10 @@ csl::SetHandle box(std::string id, csl::Vector lower, csl::Vector upper) {
         rows.values[(2 * coordinate + 1) * dimension + coordinate] = -1.0;
         rhs[2 * coordinate + 1] = -lower[coordinate];
     }
-    return take(sets::make_h({{std::move(id)}, dimension, {"x", "y"}},
+    std::vector<std::string> labels;
+    if(dimension==2) labels={"x","y"};
+    else for(std::size_t i=0;i<dimension;++i) labels.push_back("x"+std::to_string(i));
+    return take(sets::make_h({{std::move(id)}, dimension, labels},
         {take(numeric::snapshot(rows)), take(numeric::snapshot_vector(rhs)),
          take(numeric::snapshot(Matrix{0, dimension, {}})),
          take(numeric::snapshot_vector({}))})).as_handle();
@@ -142,6 +145,44 @@ int main() {
                 }
             }
         }
+        const auto model4=std::make_shared<const SystemModel>(SystemModel{{{4,2,0}, TimeDomain::discrete,
+            std::vector<LinearStage>{{{4,4,{1,1,0,0, 0,1,0,0, 0,0,1,1, 0,0,0,0}},
+                {4,2,{1,0, 0,1, 1,0, 0,1}}, {4,0,{}}, {0,0,0,0}}}}, {}});
+        Problem source4{{"four-singular"},model4,{0,1},KnownInitial{{0.2,0.4,0.6,0.8}},
+            ContinuousDomain{{box("u4",{-0.1,-0.1},{0.1,0.1})}},
+            {box("X40",{-3,-3,-3,-3},{3,3,3,3}),box("X41",{-3,-3,-3,-3},{3,3,3,3})},
+            {},{},InformationPattern::nominal_open_loop,
+            QuadraticTerminal{{4,4,{2,0,0,0,0,2,0,0,0,0,2,0,0,0,0,2}},{0,0,0,0},0}};
+        const auto resolved4=take(problem::resolve(source4,
+            {problem::UncertaintyStructure::stage_product_uncoupled,{}, {}}));
+        for(auto family : {reachability::FeedbackFamily::polytope, reachability::FeedbackFamily::box,
+                reachability::FeedbackFamily::zonotope, reachability::FeedbackFamily::parallelotope,
+                reachability::FeedbackFamily::ellipsoid}) {
+            auto result=reachability::feedback_geometry(resolved4,{"four-singular"},
+                box("terminal4",{-3,-3,-3,-3},{3,3,3,3}),family,{{0,0}},
+                {{forward,intersection},selected(lp,"csl.program-result.v1"),1000},{});
+            if(auto* failure=std::get_if<reachability::FeedbackGeometryFailure>(&result)) {
+                std::cerr << "4D family " << static_cast<int>(family) << " stage " << failure->stage.value << " phase " << static_cast<int>(failure->phase) << "\n";
+                std::visit([](const auto& cause) { using T=std::decay_t<decltype(cause)>;
+                    if constexpr(std::is_same_v<T,Unsupported>) for(const auto& d:cause.diagnostics) std::cerr << d.field << ": " << d.explanation << "\n";
+                    else std::cerr << cause.diagnostics << "\n"; },failure->cause);
+                return 10;
+            }
+            const auto& g=std::get<reachability::FeedbackGeometry>(result);
+            if(g.stages.size()!=2 || !g.stages[1].intersection_h || !g.stages[1].intersection ||
+                g.stages[1].intersection->strict_source_domain.size()!=1 ||
+                g.stages[1].intersection->strict_source_domain[0].lower_bound!=0) return 11;
+            auto hdata=take(sets::from_handle(g.stages[1].intersection_h->output));
+            auto hrepr=hdata.representation(); auto* h=std::get_if<sets::HRepresentation>(&hrepr);
+            if(!h || !contains(*h,{0.6,0.4,1.4,0})) return 12;
+        }
+        auto limited=reachability::feedback_geometry(resolved,{"limited"},
+            box("limited-terminal",{0.0,0.1},{0.8,0.9}),reachability::FeedbackFamily::zonotope,{},
+            {{forward,intersection},selected(lp,"csl.program-result.v1"),0},{});
+        const auto* stopped=std::get_if<reachability::FeedbackGeometryFailure>(&limited);
+        if(!stopped || stopped->stage.value!=1 || stopped->prefix.stages.empty() || !stopped->prefix.stages[0].forward) return 13;
+        const auto* limit=std::get_if<OperationStopped>(&stopped->cause);
+        if(!limit || limit->reason!=StopReason::resource_limit) return 14;
         std::cout << "Five-family feedback geometry: full-state and family membership passed\n";
         return 0;
     } catch (const std::exception& error) {

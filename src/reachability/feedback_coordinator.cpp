@@ -76,6 +76,8 @@ struct Runner {
     ProblemId problem; RequestId request; std::vector<SetId> source_ids; std::size_t stage{}; std::size_t serial{};
     std::vector<GeometryReference> requests; std::vector<RequestProvenance> providers;
     std::vector<GeometryEvidence> lineage; std::vector<registry::LPQueryRecord> support_calls; std::vector<SupportBoundMethod> support_methods;
+    Runner(const FeedbackGeometryDependencies& d,const ExecutionContext& c,ProblemId p,RequestId r)
+        : deps(d),context(c),problem(std::move(p)),request(std::move(r)) {}
     std::string id(const char* role) { return "feedback/"+request.value+"/"+std::to_string(stage)+"/"+role+"/"+std::to_string(serial++); }
     OperationResult operation(GeometryOperation op,const registry::PreparedProvider<registry::GeometryPort>& provider,const char* role) {
         if(!provider.provenance().actual) bad("feedback.provider","Selected geometry provider is unresolved.");
@@ -156,10 +158,6 @@ FeedbackSet record(Runner& r,FeedbackFamily family,FeedbackMembership membership
         std::move(membership),strict,std::move(sources),r.requests,r.providers,r.support_calls,r.support_methods,
         {"H embeddings of nonpolyhedral families are coordinate outer covers; family clipping uses an axis cover when needed."},r.lineage};
     r.requests.clear(); r.providers.clear(); r.support_calls.clear(); r.support_methods.clear(); r.lineage.clear(); return result;
-}
-OperationResult wrap(const SetHandle& set,ProblemId p,RequestId request,const char* description) {
-    GeometryReference ref{{p,request,{set.id.value}},{set.id}};
-    return {set,SetRelation::outer,{ref,GeometryClaimScope::set_relation,Unestablished{},{description},{}}};
 }
 } // namespace
 namespace {
@@ -250,6 +248,7 @@ FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem& resolv
         auto source=resolved.description(); auto system=resolved.model(); auto dims=system.dimensions();
         const auto n=dims.state,m=dims.control,horizon=system.horizon();
         if(request.value.empty() || n==0 || dims.external!=0 || source->states.size()!=horizon+1 ||
+           source->model->dynamics.time_domain!=TimeDomain::discrete || source->information!=InformationPattern::nominal_open_loop ||
            !std::holds_alternative<KnownInitial>(source->initial))
             bad("feedback.profile","Known initial state, positive state dimension, matching horizon and no external port are required.");
         auto controls_desc=resolved.controls().description(); auto* continuous=std::get_if<ContinuousDomain>(controls_desc.get());
@@ -317,6 +316,11 @@ FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem& resolv
             stage.forward_embedding_h=selected_h;
             forward_embeddings.push_back(selected_h);
             stage.forward=record(run,family,selected,strict,{clipped.output.id});
+            if(k==0) stage.forward->construction.push_back("Observed singleton and physical state intersection.");
+            else if(family==FeedbackFamily::polytope) stage.forward->construction.push_back("Full joint H state/control relation projected through the selected provider.");
+            else if(family==FeedbackFamily::zonotope) stage.forward->construction.push_back("Native finite-plan zonotope one-step kernel, with the complete continuous control cover mapped through B as independent existential factors.");
+            else if(family==FeedbackFamily::ellipsoid) stage.forward->construction.push_back("Native finite-plan ellipsoid one-step kernel with the complete control box mapped through B; output is an axis ellipsoid.");
+            else stage.forward->construction.push_back("Native finite-plan box one-step kernel with the complete control box mapped through B; parallelotope uses the identity frame.");
             carrier_lo=lower[k]; carrier_hi=upper[k];
         }
         SetHandle next_backward=terminal_h;
@@ -354,6 +358,7 @@ FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem& resolv
             else { auto range=membership_bounds(member); next_backward=axis_h(range.first,range.second,{run.id("backward-embedding")},labels); }
             stage.backward_embedding_h=next_backward;
             stage.backward=record(run,family,member,strict,{backward.output.id});
+            stage.backward->construction.push_back(family==FeedbackFamily::polytope ? "Projected full-state H predecessor with forward-relevant carrier." : "Projected full-state H predecessor enclosed by a coarse axis family cover within the forward-relevant carrier.");
             phase=FeedbackGeometryPhase::intersection;
             auto full_intersection=run.intersect(forward_embeddings[k],next_backward,"full-state-intersection");
             auto intersection=run.intersect(full_intersection.output,carrier,"intersection-carrier");
@@ -361,6 +366,7 @@ FeedbackGeometryOutcome feedback_geometry(const problem::ResolvedProblem& resolv
             auto overlap=run.cover(intersection.output,lower[k],upper[k]);
             auto intersection_shape=shape(family,intersection.output,overlap.lower,overlap.upper,{run.id("intersection-family")},labels);
             stage.intersection=record(run,family,std::move(intersection_shape),strict,{forward_embeddings[k].id,next_backward.id,carrier.id});
+            stage.intersection->construction.push_back("Full-state forward and backward H embeddings intersected with the explicit forward-relevant carrier before family enclosure.");
         }
         return output;
     } catch(const Failure& failure) { return FeedbackGeometryFailure{std::move(output),active,phase,failure.cause,std::move(run.requests),std::move(run.providers),std::move(run.lineage),std::move(run.support_calls)}; }
