@@ -194,7 +194,7 @@ void set_hint(Highs& h,const HighsSolution& start,std::ostringstream& raw,const 
     require(status);
     if(!retained) throw SetupError("native primal hint readback differs");
 }
-HighsBasis qp_start_basis(const HighsLp& lp,HighsBasis basis,std::ostringstream& raw) {
+std::pair<HighsBasis,std::size_t> qp_start_basis(const HighsLp& lp,HighsBasis basis) {
     std::size_t inactive_free_rows=0;
     for(std::size_t i=0;i<basis.row_status.size();++i) {
         // The QP initializer represents inactive rows with kNonbasic. A warm
@@ -206,8 +206,7 @@ HighsBasis qp_start_basis(const HighsLp& lp,HighsBasis basis,std::ostringstream&
             ++inactive_free_rows;
         }
     }
-    raw<<"\nphase.qp.basis.inactive_free_rows="<<inactive_free_rows;
-    return basis;
+    return {std::move(basis),inactive_free_rows};
 }
 bool feasible_start(const Highs& h,const HighsLp& lp,const ConvexProgram& p,double tolerance) {
     const auto& s=h.getSolution(); const auto& b=h.getBasis();
@@ -400,12 +399,13 @@ class Workspace final : public ConvexWorkspace {
                 auto& h=*solver_; configure(h,c,options_,true); highs_detail::CallbackGuard qp_callbacks(h,capture,require);
                 require(h.passModel(model));
                 HighsSolution start=phase.getSolution(); start.dual_valid=false; start.col_dual.clear(); start.row_dual.clear();
-                const auto basis=qp_start_basis(model.lp_,phase.getBasis(),raw);
+                const auto [basis,inactive_free_rows]=qp_start_basis(model.lp_,phase.getBasis());
                 require(h.setSolution(start)); require(h.setBasis(basis));
                 bool warm=false; double tolerance=0;
                 require(h.getOptionValue("use_warm_start",warm)); require(h.getOptionValue("dual_feasibility_tolerance",tolerance));
                 if(!warm || !feasible_start(h,model.lp_,p,tolerance)) {raw<<"\nqp_run=false\nstart.valid=false";return finish();}
                 if(auto hint=p.primal_start()) {
+                    raw<<"\nphase.qp.basis.inactive_free_rows="<<inactive_free_rows;
                     set_hint(h,primal_hint(model.lp_,*hint),raw,"phase.qp");
                     require(h.setBasis(basis));
                     const bool hint_feasible=feasible_start(h,model.lp_,p,tolerance);
