@@ -19,7 +19,10 @@ from benchmarks.reporting.mpc07 import joint_filter as J
 
 ROOT=Path(__file__).resolve().parents[3]
 NATIVE='b3978a98a8bfb30e21841466244ed7f78e987886'
-SOURCE_PATHS={name:'benchmarks/reporting/mpc07/'+('evidence/bounded-policy-0e821c2a/PLAN.md' if name=='PLAN.md' else name) for name in
+SOURCE_PATHS={name:'benchmarks/reporting/mpc07/'+(
+    'evidence/bounded-policy-0e821c2a/PLAN.md' if name=='PLAN.md' else
+    'evidence/bounded-policy-0e821c2a/README.md' if name=='README.md' else
+    'evidence/joint-filter-04369201-recheck-v2/JOINT-FILTER.md' if name=='JOINT-FILTER.md' else name) for name in
               ('PLAN.md','README.md','JOINT-FILTER.md','policy.py','capture.py','report.py','joint_filter.py','joint_capture.py','native-build-receipt.json')}
 SOURCE_PATHS.update({'test_mpc07_policy.py':'tests/reporting/test_mpc07_policy.py',
     'test_mpc07_joint_filter.py':'tests/reporting/test_mpc07_joint_filter.py',
@@ -54,6 +57,7 @@ def checked_records(root,repository,hashes):
             continue
         candidates=[relative]
         if name=='PLAN.md':candidates.append('benchmarks/reporting/mpc07/PLAN.md')
+        if name=='JOINT-FILTER.md':candidates.append('benchmarks/reporting/mpc07/JOINT-FILTER.md')
         if not any(content==subprocess.run(['git','show','--end-of-options',commit+':'+candidate],
                 cwd=repository,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,check=False).stdout
                 for candidate in candidates):
