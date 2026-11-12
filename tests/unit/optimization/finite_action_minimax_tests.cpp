@@ -35,6 +35,11 @@ FiniteActionMinimaxRequest request(Vector actions = {0,1}, double safe_bound = 1
 }
 }
 
+TEST_CASE("legacy minimax aggregate requests leave candidate filtering unset") {
+    const auto legacy = request();
+    CHECK_FALSE(legacy.candidate_action_indices.has_value());
+}
+
 TEST_CASE("finite action minimax compares complete adversarial maxima and retains plan evidence") {
     const auto outcome=finite_action_minimax(request(),{2,2,0});
     REQUIRE(std::holds_alternative<FiniteMinimaxOptimal>(outcome));

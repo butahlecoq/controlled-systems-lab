@@ -22,6 +22,8 @@ using FinitePlanParallelotopeOutcome =
     std::variant<FinitePlanParallelotopeTrace, Unsupported, OperationStopped>;
 
 // Stagewise outer propagation in a fixed, non-axis-aligned four-state frame.
+// Universal, singleton and H state constraints are supported when every full
+// outer parallelotope is contained; failed containment is inconclusive.
 // The frame and its integer inverse are fixed by this first TwoPoints profile;
 // singular dynamics are supported because the frame is not derived from A.
 FinitePlanParallelotopeOutcome

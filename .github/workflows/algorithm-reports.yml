@@ -36,6 +36,8 @@ jobs:
           git fetch --no-tags origin refs/pull/849/head
       - name: Install report-only validation and plotting tools
         run: python -m pip install --cache-dir build/report-pip-cache -r scripts/reports/requirements.txt
+      - name: Install closed-loop numerical replay dependencies
+        run: python -m pip install --cache-dir build/report-pip-cache -r benchmarks/reporting/closed_loop/requirements.txt
       - name: Validate literal records, safe export and real pinned plotting pipeline
         env:
           MPLCONFIGDIR: ${{ github.workspace }}/build/report-mpl-config

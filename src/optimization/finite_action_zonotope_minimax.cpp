@@ -65,13 +65,10 @@ FiniteActionZonotopeMinimaxOutcome finite_action_zonotope_minimax(
         return unsupported("finite_zonotope_minimax.identity", "Problem and request identities must be nonempty.");
     if(request.actions.catalogue.empty() && horizon != 0)
         return unsupported("finite_zonotope_minimax.actions", "A nonempty finite action catalogue is required.");
-    std::size_t plan_count = 1;
-    for(std::size_t stage = 0; stage < horizon; ++stage) {
-        if(request.actions.catalogue.size() != 0 &&
-           plan_count > limits.max_plans / request.actions.catalogue.size())
-            return unsupported("finite_zonotope_minimax.plans", "Action plan count exceeds caller limit.");
-        plan_count *= request.actions.catalogue.size();
-    }
+    if(!detail::valid_candidate_action_indices(request))
+        return unsupported("finite_zonotope_minimax.candidate_plans",
+            "Candidate action histories must be unique, full-horizon, and index the unchanged action catalogue.");
+    const auto plan_count=detail::selected_plan_count(request);
     if(plan_count > limits.max_plans)
         return unsupported("finite_zonotope_minimax.plans", "Action plan count exceeds caller limit.");
     if(request.objective.dimension() != request.system.dimensions().state ||
@@ -97,8 +94,7 @@ FiniteActionZonotopeMinimaxOutcome finite_action_zonotope_minimax(
             ZonotopeCandidateSearchStopped{plan_index, std::move(stopped)}, Assurance::numerical};
     };
     for(std::size_t plan_index = 0; plan_index < plan_count; ++plan_index) {
-        const auto choices = detail::action_plan_indices(plan_index,
-            request.actions.catalogue.size(), horizon);
+        const auto choices = detail::selected_plan_indices(request,plan_index);
         if(plan_index >= limits.max_candidate_attempts)
             return stop_search(choices, plan_index,
                 {StopReason::resource_limit, "Zonotope candidate-attempt limit reached before this plan."});

@@ -1,0 +1,23 @@
+{
+  "schema": "csl.installed-client-verification/1",
+  "source_commit": "f84bf6fafe79be391dd7ae0c525ae95003146e60",
+  "fresh_prefix": "build/core/installed-f84-prefix",
+  "isolated_source": "build/core/install-stage-f84/installed-consumer/source",
+  "source_tree_public_headers_copied": false,
+  "cmake_install_returncode": 0,
+  "consumer_configured_with": "CSL_DIR=<fresh-prefix>/lib/cmake/CSL",
+  "consumer_build_target": "installed_finite_action_graph_client",
+  "consumer_build_returncode": 0,
+  "ctest": "installed_finite_action_graph_client",
+  "ctest_returncode": 0,
+  "tests_passed": 1,
+  "tests_failed": 0,
+  "client_coverage": [
+    "box membership and rejection",
+    "parallelotope inside-bbox rejection",
+    "ellipsoid inside-bbox rejection",
+    "zonotope inside-bbox rejection",
+    "repeated axis-generator bounded witness",
+    "NaN shape payload refusal"
+  ]
+}

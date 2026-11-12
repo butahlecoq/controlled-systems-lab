@@ -5,11 +5,14 @@
 #include <csl/optimization/worst_case_vertex.hpp>
 #include <csl/artifacts/run_statistics.hpp>
 
+#include <optional>
 #include <vector>
 
 namespace csl::optimization {
 
-// Complete means every declared action plan received a usable candidate score.
+// Complete means every action plan selected by the request received a usable
+// candidate score. Callers with a restricted candidate catalogue must report
+// coverage against the full action product separately.
 enum class CandidateSearchCoverage { complete, incomplete };
 
 // Stage-invariant ordered action catalogue; indices distinguish duplicate rows.
@@ -22,6 +25,11 @@ struct FiniteActionMinimaxRequest {
     std::vector<sets::SetData> disturbances;
     std::vector<sets::SetData> admissible_states;
     Objective objective;
+    // nullopt preserves exhaustive enumeration. A present, nonempty value is a
+    // restricted set of full-horizon catalogue-index histories; solvers only
+    // evaluate those histories and nominal callers report product coverage
+    // separately. An explicitly empty value is invalid.
+    std::optional<std::vector<std::vector<std::size_t>>> candidate_action_indices{};
 };
 struct FiniteActionMinimaxLimits {
     std::size_t max_plans;
@@ -80,9 +88,11 @@ using FiniteActionMinimaxOutcome = std::variant<FiniteMinimaxOptimal,
     FiniteMinimaxInfeasible, FiniteMinimaxEmptyCatalogue, FiniteMinimaxNoScenarios,
     Unsupported, OperationStopped>;
 
-// Exhausts every fixed action sequence and every generated terminal V row.
-// Only numerical assurance is available; records are replay witnesses, not
-// validated rounding certificates or an independently proved H/V conversion.
+// Evaluates every selected fixed action history and every generated terminal
+// V row. With no candidate catalogue this is the complete action product; a
+// supplied subset is not a full-product optimality claim. Only numerical
+// assurance is available; records are replay witnesses, not validated rounding
+// certificates or an independently proved H/V conversion.
 FiniteActionMinimaxOutcome finite_action_minimax(
     const FiniteActionMinimaxRequest& request,
     FiniteActionMinimaxLimits limits,
