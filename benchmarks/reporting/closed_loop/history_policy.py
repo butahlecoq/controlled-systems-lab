@@ -105,7 +105,8 @@ class HistoryPolicy:
             "binary_source": "unknown",
             "action_profile_id": action_profile_id, "original_horizon": task["episode"]["intervals"],
             "geometry": self.geometry_family or "not_used", "history_solver": self.history_solver,
-            "controller_semantics": "observed-state direct affine-history MPC"}
+            "controller_semantics": ("observed-state affine-history MPC with F/B/I family memberships"
+                if self.geometry_family else "observed-state direct affine-history MPC")}
 
     def set_query_capture_callback(self, callback):
         self.query_capture_callback = callback

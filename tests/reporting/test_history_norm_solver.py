@@ -3,6 +3,7 @@ import importlib.util
 from pathlib import Path
 import sys
 import unittest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "benchmarks/reporting/closed_loop"))
@@ -99,6 +100,18 @@ class HistoryNormSolverTest(unittest.TestCase):
                 self.assertEqual(alternatives[0]["action_profile_id"], graph["action_profile_id"])
                 self.assertEqual(alternatives[0]["objective_id"], graph["objective_id"])
                 self.assertEqual(alternatives[0]["role_bindings"]["control_optimizer"]["id"], "casadi-ipopt")
+
+    def test_feedback_profile_preparation_identifies_geometry_semantics(self):
+        from contracts import load_task, manifest_sha256
+        from history_policy import create_policy
+        task = load_task("syn-nl-lv-01")
+        with mock.patch.dict("os.environ", {"CSL_NATIVE_POLICY_BRIDGE": "/bin/true"}), \
+                mock.patch("subprocess.Popen"):
+            policy = create_policy(task, task_sha256=manifest_sha256(task),
+                controller_id="native-continuous-history-box-ipopt/1",
+                action_profile_id=task["control_domains"]["continuous"]["problem_id"])
+            self.assertEqual(policy.preparation_receipt["geometry"], "box")
+            self.assertIn("F/B/I", policy.preparation_receipt["controller_semantics"])
 
     def test_policy_refuses_a_task_hash_that_does_not_match_the_source_task(self):
         from contracts import load_task

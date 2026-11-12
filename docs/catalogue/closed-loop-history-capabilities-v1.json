@@ -61,8 +61,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "aa59f19a498e588ba979af07a205ec02d0c1521383b3759c586e0757c26c2531",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-mpc/1/cfg-aa59f19a498e588b",
+      "graph_fingerprint": "2734dc848aa333990d2fdb35a615a9f4816d3402f9b0d86d8f514972a816e6fc",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-mpc/1/cfg-2734dc848aa33399",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -92,7 +92,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "81ac199adea9dbe302cbd8196f840a7408a1293ab670622f5589d1b2854c6640"
+          "sha256": "062dcace5903ee83758cc48522609c218d86a2cead2589b8680924df3c665e15"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -229,8 +229,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "927084c6bf4439bce7a21bc4b91e82020da516a5c698f6d4233c68e4ab5f19fd",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ipopt/1/cfg-927084c6bf4439bc",
+      "graph_fingerprint": "55631791e68927a158b58b611e15b1847b77f18f0e8212051994799364f6af24",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ipopt/1/cfg-55631791e68927a1",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -260,7 +260,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "81ac199adea9dbe302cbd8196f840a7408a1293ab670622f5589d1b2854c6640"
+          "sha256": "062dcace5903ee83758cc48522609c218d86a2cead2589b8680924df3c665e15"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -415,8 +415,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "2605d378d1d9b976d02263e76d9d096c607724c89b4cd1c7fd9e825ead357351",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-box-ipopt/1/cfg-2605d378d1d9b976",
+      "graph_fingerprint": "041b0dfbadb21ef82b94803827bec34e366447fb565ed8630d488e51b1d65186",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-box-ipopt/1/cfg-041b0dfbadb21ef8",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -453,7 +453,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "81ac199adea9dbe302cbd8196f840a7408a1293ab670622f5589d1b2854c6640"
+          "sha256": "062dcace5903ee83758cc48522609c218d86a2cead2589b8680924df3c665e15"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -662,8 +662,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "3b0f0df20d9edba698558ac9d023289888ffb540a49de1b2615d3a8d9dd566b0",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-3b0f0df20d9edba6",
+      "graph_fingerprint": "f37bf7de2c5214cafd58b306dea74547123ec6964572377821505a5ccaba00cf",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-f37bf7de2c5214ca",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -693,7 +693,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "81ac199adea9dbe302cbd8196f840a7408a1293ab670622f5589d1b2854c6640"
+          "sha256": "062dcace5903ee83758cc48522609c218d86a2cead2589b8680924df3c665e15"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -826,8 +826,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "f3a0c4f71ae261c97c47173cb39d1bd131b64aec0ed13055f348550f37a7e0f8",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-mpc/1/cfg-f3a0c4f71ae261c9",
+      "graph_fingerprint": "c1ce16b2dd60428f033992bb3ea45d280c308e9cefedf186fa9aa7f48fce604e",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-mpc/1/cfg-c1ce16b2dd60428f",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -857,7 +857,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "81ac199adea9dbe302cbd8196f840a7408a1293ab670622f5589d1b2854c6640"
+          "sha256": "062dcace5903ee83758cc48522609c218d86a2cead2589b8680924df3c665e15"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -994,8 +994,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "a1002f8d3127846a00e9e28342b55751599cd9a44b7a35272f38113a3c5b1f81",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ipopt/1/cfg-a1002f8d3127846a",
+      "graph_fingerprint": "c0b9fe2d07170d137c19c16a9d60b50ff639594e5674363e7cbf58c07d4b2645",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ipopt/1/cfg-c0b9fe2d07170d13",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1025,7 +1025,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "81ac199adea9dbe302cbd8196f840a7408a1293ab670622f5589d1b2854c6640"
+          "sha256": "062dcace5903ee83758cc48522609c218d86a2cead2589b8680924df3c665e15"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
