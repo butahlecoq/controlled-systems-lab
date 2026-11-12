@@ -786,7 +786,9 @@ def build(catalog, site):
         '<h3><a href="history-cost-2d-v1/index.html">Full-history cost moves the 2D optimum</a></h3>'
         '<a href="history-cost-2d-v1/index.html"><img src="history-cost-2d-v1/history-cost-2d.svg" alt="Feasible control square, terminal-only optimum at (1,0), and full-cost HiGHS optimum at (1/3,0) with both objective contours"></a>'
         '<p>A one-step supported 2D QP from the full-history cost compiler. The saved HiGHS point is compared with a separate terminal-only solve; the page preserves raw requests and responses.</p>'
-        '<p><a href="history-cost-2d-v1/index.html">Open the full-history cost example →</a> · <a href="history-cost-2d-v1/history-cost-2d-v1.zip">Offline evidence bundle</a></p></article>')
+        '<p><a href="history-cost-2d-v1/index.html">Open the full-history cost example →</a> · '
+        '<a href="history-cost-2d-v1-reproduction.html">Build and reproduction commands</a> · '
+        '<a href="history-cost-2d-v1/history-cost-2d-v1.zip">Offline evidence bundle</a></p></article>')
     last_topic_anchor = "visual-fuel-b06-viz03"
     last_topic_title = "B06 fuel terminal set: readable 4D-to-2D projections"
     analytic_files, analytic_inventory = visual_illustrations.build(Path(catalog))
@@ -814,6 +816,10 @@ def build(catalog, site):
             require(not path.is_symlink(), "saved full-history example file is a symlink")
             relative = path.relative_to(cost_root).as_posix()
             outputs["history-cost-2d-v1/" + relative] = path.read_bytes() if path.suffix == ".zip" else path.read_text(encoding="utf-8")
+    reproduction_page = repository_root / "docs/examples/history-cost-2d-v1-reproduction.html"
+    require(reproduction_page.is_file() and not reproduction_page.is_symlink(),
+            "full-history reproduction commands page is missing or symlinked")
+    outputs["history-cost-2d-v1-reproduction.html"] = reproduction_page.read_text(encoding="utf-8")
     outputs.update(qhull_highs_strategy_a_example.build())
     adaptive_assets = Path(__file__).parents[2] / "docs/examples"
     for name in ("adaptive-ode-replay.html", "adaptive-ode-replay.csv",
@@ -837,6 +843,7 @@ def build(catalog, site):
         "status": "saved-data-illustration", "anchor": "history-cost-2d-v1",
         "page": "history-cost-2d-v1/index.html", "figure": "history-cost-2d-v1/history-cost-2d.svg",
         "source_page": "history-cost-2d-v1/index.html",
+        "walkthrough_page": "history-cost-2d-v1-reproduction.html",
         "raw_record": "history-cost-2d-v1/records/capture-receipt.json"}]
     gallery_inventory.append({"family": "Numerical integration",
         "title": "Adaptive RK4 replay of a two-state oscillator",

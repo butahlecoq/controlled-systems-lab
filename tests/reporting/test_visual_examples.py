@@ -579,7 +579,18 @@ class GalleryTests(unittest.TestCase):
         gallery.build(self.catalog, self.site)
         cost_page = self.site / "examples/history-cost-2d-v1/index.html"
         self.assertTrue(cost_page.is_file())
-        self.assertTrue((self.site / "examples/history-cost-2d-v1/history-cost-2d-v1.zip").is_file())
+        staged_archive = self.site / "examples/history-cost-2d-v1/history-cost-2d-v1.zip"
+        self.assertTrue(staged_archive.is_file())
+        self.assertEqual(staged_archive.read_bytes(),
+                         (ROOT / "docs/examples/history-cost-2d-v1/history-cost-2d-v1.zip").read_bytes())
+        reproduction = self.site / "examples/history-cost-2d-v1-reproduction.html"
+        self.assertTrue(reproduction.is_file())
+        reproduction_html = reproduction.read_text(encoding="utf-8")
+        self.assertIn("evidence/full-history-source-f4e73e08-20261112", reproduction_html)
+        self.assertIn("CSL_NATIVE_POLICY_BRIDGE", reproduction_html)
+        self.assertIn("history_cost_tests", reproduction_html)
+        self.assertIn("GCC 16.2.1", reproduction_html)
+        self.assertNotIn("/home/butahlecoq/", reproduction_html)
         gallery_html = (self.site / "examples/index.html").read_text(encoding="utf-8")
         self.assertIn('id="history-cost-2d-v1"', gallery_html)
         cost_inventory = json.loads((self.site / "examples/visual-coverage.json").read_text())
