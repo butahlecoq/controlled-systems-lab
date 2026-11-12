@@ -170,6 +170,9 @@ def validate(evidence=EVIDENCE):
             require(checksum==qualification['frozen_checker_sha256'] and
                     digest((ROOT/name).read_bytes())==qualification['current_checker_sha256'],
                     'current checker differs from qualified post-capture source: '+name)
+        elif name == 'scripts/reports/figure_style.py':
+            require(digest(figures['source/figure_style.py']) == checksum,
+                    'historical style differs from reviewed figure: '+name)
         else:
             require(digest((ROOT/name).read_bytes()) == checksum,'current checker/source differs from reviewed figure: '+name)
     frozen={FIGURES:figures};archives={};extracted={}
@@ -236,20 +239,23 @@ def stage(site,evidence=EVIDENCE,*,example_card_writer=None):
     landing=index(site/'index.html');gallery=index(site/'examples/index.html')
     published_guides={name:captured_source_asset('benchmarks/reporting/mpc11/'+name)
                       for name in ('FIGURES.md','AFFINE-RECHECK.md','environment/README.md')}
+    frozen,archives,verification=validate(evidence)
+    historical_style=frozen[FIGURES]['source/figure_style.py']
     source_files={p.relative_to(ROOT).as_posix():digest(p.read_bytes()) for p in MODULE.glob('*.py')}
     for folder in ('scenarios','environment'):
         source_files.update({f'benchmarks/reporting/mpc11/{folder}/'+name:digest(content)
                              for name,content in directory(MODULE/folder).items()
                              if '__pycache__' not in PurePosixPath(name).parts and name!='README.md'})
-    source_files['scripts/reports/figure_style.py']=digest((ROOT/'scripts/reports/figure_style.py').read_bytes())
     identity={'figures_manifest':FIGURE_ANCHOR,'archives':ARCHIVES,'stager_sha256':digest(Path(__file__).read_bytes()),
               'current_sources':source_files,
+              'historical_source_assets':{'scripts/reports/figure_style.py':{
+                  'snapshot_path':f'benchmarks/reporting/mpc11/evidence/{FIGURES}/source/figure_style.py',
+                  'sha256':digest(historical_style)}},
               'captured_source_assets':{name:{'source_commit':commit,'sha256':digest(content)}
                                         for name,(commit,content) in published_guides.items()}}
     route='mpc11-controller-comparison-'+digest(json.dumps(identity,sort_keys=True).encode())[:20]
     require(not (site/route).exists() and not (site/route).is_symlink() and not (site/(route+'.zip')).exists() and
             not (site/(route+'.zip')).is_symlink() and route not in landing and route not in gallery,'immutable publication route exists')
-    frozen,archives,verification=validate(evidence)
     prefix='benchmarks/reporting/mpc11/'
     generated={prefix+'evidence/'+folder+'/'+name:content for folder,files in frozen.items() for name,content in files.items()}
     for kind,(folder,_) in ARCHIVES.items():generated['raw/'+kind+'.zip']=frozen[folder]['capture.zip']
@@ -257,8 +263,8 @@ def stage(site,evidence=EVIDENCE,*,example_card_writer=None):
     for folder in ('scenarios','environment'):
         for name,content in directory(MODULE/folder).items():
             if '__pycache__' not in PurePosixPath(name).parts and name!='README.md':generated[prefix+folder+'/'+name]=content
-    for name in ('figure_style.py','stage_mpc11_controller_comparison.py'):
-        generated['scripts/reports/'+name]=(ROOT/'scripts/reports'/name).read_bytes()
+    generated['scripts/reports/figure_style.py']=historical_style
+    generated['scripts/reports/stage_mpc11_controller_comparison.py']=Path(__file__).read_bytes()
     for name,(_,content) in published_guides.items():generated[prefix+name]=content
     figures_path=prefix+'evidence/'+FIGURES
     sections=[]

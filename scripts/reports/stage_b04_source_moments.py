@@ -17,6 +17,8 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE_COMMIT = "dcb1783aa16ce19799fec63c6c59b173e5e3225a"
+STYLE_PATH = "scripts/reports/figure_style.py"
+FROZEN_STYLE_PATH = "benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/figure_style.py"
 EVIDENCE = ROOT / "docs/research/evidence"
 FIGURES = EVIDENCE / "b04-source-moment-figures"
 INPUT_NAME = "b04-source-moment-inputs.json"
@@ -85,17 +87,41 @@ def read_json(path: Path) -> dict:
     return value
 
 
-def _load_modules(repository: Path):
-    tools = repository / "docs/research/tools"
-    geometry_path = repository / "scripts/reports/b04_source_moments/geometry.py"
-    helper_dir = repository / "benchmarks/reporting/mpc08_explicit"
-    reports = repository / "scripts/reports"
-    for path in (tools, helper_dir, reports, geometry_path.parent):
-        if str(path) not in sys.path:
-            sys.path.insert(0, str(path))
-    import check_b04_source_moments as checker
-    import geometry
-    return checker, geometry
+def source_bytes(repository: Path, name: str) -> bytes:
+    relative = FROZEN_STYLE_PATH if name == STYLE_PATH else name
+    path = repository
+    for part in PurePosixPath(relative).parts:
+        path = path / part
+        require(not path.is_symlink(), "source snapshot must not contain symlinks: " + relative)
+    return path.read_bytes()
+
+
+def verify_saved_science(snapshot: dict[str, bytes]) -> None:
+    """Rebuild saved provenance in its authenticated source tree, not live tools."""
+    with tempfile.TemporaryDirectory(prefix="b04-source-check-") as temporary:
+        root = Path(temporary)
+        for name, content in snapshot.items():
+            target = root / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(content)
+        command = '''import json, sys
+from pathlib import Path
+root = Path(sys.argv[1])
+sys.path[:0] = [str(root / "docs/research/tools"),
+               str(root / "scripts/reports/b04_source_moments")]
+import check_b04_source_moments as checker
+import geometry
+evidence = root / "docs/research/evidence"
+inputs = json.loads((evidence / "b04-source-moment-inputs.json").read_bytes())
+certificate = json.loads((evidence / "b04-source-moment-certificate.json").read_bytes())
+stage_sets = json.loads((evidence / "b04-source-moment-stage-sets.json").read_bytes())
+checker.verify_certificate(certificate, inputs)
+geometry.verify_stage_sets(stage_sets, certificate)
+'''
+        checked = subprocess.run([sys.executable, "-I", "-B", "-c", command, str(root)],
+                                 capture_output=True, text=True, timeout=60)
+        require(checked.returncode == 0,
+                "historical scientific recheck failed: " + checked.stderr[-2000:])
 
 
 def _read_evidence(repository: Path, evidence_dir: Path) -> dict[str, bytes]:
@@ -108,36 +134,34 @@ def _read_evidence(repository: Path, evidence_dir: Path) -> dict[str, bytes]:
     return files
 
 
-def verify_source_anchor(repository: Path = ROOT, evidence_dir: Path | None = None) -> dict:
+def verify_source_anchor(repository: Path = ROOT, evidence_dir: Path | None = None) -> tuple[dict, dict[str, bytes]]:
     """Compare all published scientific/source inputs with Git blobs at the fixed anchor."""
     repository = Path(repository)
     evidence_dir = Path(evidence_dir) if evidence_dir else repository / "docs/research/evidence"
     resolved = subprocess.run(["git", "rev-parse", f"{SOURCE_COMMIT}^{{commit}}"], cwd=repository,
                               check=True, capture_output=True, text=True).stdout.strip()
     require(resolved == SOURCE_COMMIT, "source anchor does not resolve to the immutable full commit")
+    snapshot = {**_read_evidence(repository, evidence_dir),
+                **{name: source_bytes(repository, name) for name in SOURCE_FILES}}
     result = {}
-    for name in SNAPSHOT_FILES:
-        data = (_read_evidence(repository, evidence_dir)[name] if name in EVIDENCE_FILES
-                else (repository / name).read_bytes())
+    for name, data in snapshot.items():
         anchored = subprocess.run(["git", "show", f"{SOURCE_COMMIT}:{name}"], cwd=repository,
                                   check=True, capture_output=True).stdout
         require(data == anchored, f"selected source bytes differ from source-anchor Git blob: {name}")
         result[name] = {"sha256": digest(data), "git_blob_sha1": git_blob_sha1(data), "bytes": len(data)}
-    return result
+    return result, snapshot
 
 
 def validate(repository: Path = ROOT, evidence_dir: Path | None = None) -> dict:
     repository = Path(repository)
     evidence_dir = Path(evidence_dir) if evidence_dir else repository / "docs/research/evidence"
-    evidence = _read_evidence(repository, evidence_dir)
-    anchor_files = verify_source_anchor(repository, evidence_dir)
+    anchor_files, snapshot = verify_source_anchor(repository, evidence_dir)
+    evidence = {name: snapshot[name] for name in EVIDENCE_FILES}
     inputs = json.loads(evidence[f"docs/research/evidence/{INPUT_NAME}"])
     certificate = json.loads(evidence[f"docs/research/evidence/{CERT_NAME}"])
     stage_sets = json.loads(evidence[f"docs/research/evidence/{STAGES_NAME}"])
     export = json.loads(evidence[f"docs/research/evidence/b04-source-moment-figures/{EXPORT_NAME}"])
-    checker, geometry = _load_modules(repository)
-    checker.verify_certificate(certificate, inputs)
-    geometry.verify_stage_sets(stage_sets, certificate)
+    verify_saved_science(snapshot)
 
     cert_hash = digest(evidence[f"docs/research/evidence/{CERT_NAME}"])
     stages_hash = digest(evidence[f"docs/research/evidence/{STAGES_NAME}"])
@@ -177,7 +201,7 @@ def validate(repository: Path = ROOT, evidence_dir: Path | None = None) -> dict:
     return {"inputs": inputs, "certificate": certificate, "stage_sets": stage_sets,
             "figures": {SVG_NAME: evidence[f"docs/research/evidence/b04-source-moment-figures/{SVG_NAME}"],
                         PNG_NAME: evidence[f"docs/research/evidence/b04-source-moment-figures/{PNG_NAME}"]},
-            "figure_export": export, "anchor_files": anchor_files}
+            "figure_export": export, "anchor_files": anchor_files, "source_snapshot": snapshot}
 
 
 def _json_bytes(value) -> bytes:
@@ -357,9 +381,7 @@ def stage(site: Path, *, repository: Path = ROOT, evidence_dir: Path | None = No
     for path in (site / "index.html", site / "examples", site / "examples/index.html"):
         require(not path.is_symlink(), "symlink site destination refused")
     validation = validate(repository, evidence_dir)
-    source_snapshot = {name: ((repository / name).read_bytes() if name in SOURCE_FILES else
-                              (evidence_dir / (Path(name).name if not name.startswith("docs/research/evidence/b04-source-moment-figures/") else f"b04-source-moment-figures/{Path(name).name}")).read_bytes())
-                       for name in SNAPSHOT_FILES}
+    source_snapshot = validation["source_snapshot"]
     generated = {
         "minimal-inputs.json": _json_bytes(validation["inputs"]),
         "certificate.json": _json_bytes(validation["certificate"]),
@@ -397,6 +419,8 @@ def stage(site: Path, *, repository: Path = ROOT, evidence_dir: Path | None = No
             "source_provenance": validation["inputs"]["source"],
             "adapter_provenance": {"path": "scripts/reports/stage_b04_source_moments.py",
                                    "sha256": digest(adapter_bytes), "bytes": len(adapter_bytes)},
+            "historical_source_assets": {STYLE_PATH: {"snapshot_path": FROZEN_STYLE_PATH,
+                                                       "sha256": digest(source_snapshot[STYLE_PATH])}},
             "figure_export": validation["figure_export"],
             "files": {name: digest(data) for name, data in sorted(generated.items())},
         }

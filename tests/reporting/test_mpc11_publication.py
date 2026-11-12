@@ -60,6 +60,28 @@ class PublicationTests(unittest.TestCase):
             with self.subTest(field=field),self.assertRaises(ValueError):
                 STAGER.checked_report_agreement(altered,frozen)
 
+    def test_live_style_changes_do_not_change_historical_source_or_bundle(self):
+        from types import SimpleNamespace
+        from unittest import mock
+        frozen=json.loads((STAGER.EVIDENCE/STAGER.FIGURES/'receipt.json').read_text())['saved_checks']
+        live_style=ROOT/'scripts/reports/figure_style.py'
+        read_bytes=Path.read_bytes
+        def changed_style(path):
+            content=read_bytes(path)
+            return content+b"\nPALETTE = ('new-live-color',)\n" if path==live_style else content
+        outputs=[]
+        for changed in (False,True):
+            with tempfile.TemporaryDirectory() as temporary:
+                site=Path(temporary);(site/'examples').mkdir()
+                for name in ('index.html','examples/index.html'):(site/name).write_text('<body></body>')
+                with mock.patch.object(STAGER,'current_renderer',return_value=SimpleNamespace(checked_inputs=lambda **kwargs:frozen)):
+                    with mock.patch.object(Path,'read_bytes',changed_style if changed else read_bytes):
+                        route=STAGER.stage(site)
+                outputs.append((route,(site/(route+'.zip')).read_bytes(),
+                                (site/route/'scripts/reports/figure_style.py').read_bytes()))
+        self.assertEqual(outputs[0],outputs[1])
+        self.assertEqual(outputs[0][2],read_bytes(live_style))
+
     def test_saved_checker_failure_exposes_underlying_diagnostic(self):
         from unittest import mock
         from types import SimpleNamespace
@@ -90,7 +112,7 @@ class PublicationTests(unittest.TestCase):
 
     def test_mutated_figure_receipt_or_raw_refused_before_writes(self):
         for relative in ['figures-60bda0fb/syn-nl-lv-01-plotted-data.json',
-                         'figures-60bda0fb/receipt.json','nmpc-pilot-55f65110/capture.zip',
+                         'figures-60bda0fb/receipt.json','figures-60bda0fb/source/figure_style.py','nmpc-pilot-55f65110/capture.zip',
                          'affine-pilot-b3978a98/summary.json']:
             with self.subTest(relative=relative), tempfile.TemporaryDirectory() as temporary:
                 root=Path(temporary); evidence=root/'evidence';shutil.copytree(STAGER.EVIDENCE,evidence)
