@@ -1,0 +1,1 @@
+000000000020b490 T csl::optimization::compile_history_cost(csl::synthesis::JointHistoryRelation const&, std::variant<csl::LinearTerminal, csl::QuadraticTerminal, csl::ResidualNormTerminal> const&, csl::optimization::RunningControlCost const&, unsigned long)

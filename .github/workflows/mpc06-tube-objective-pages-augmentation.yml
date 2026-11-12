@@ -150,7 +150,9 @@ jobs:
 
       - name: Apply the shared Pages route policy before upload
         if: steps.scope.outputs.eligible == 'true' && steps.artifact.outputs.found == 'true'
-        run: python scripts/reports/pages_route_retirement.py --site build/report-site
+        run: |
+          python scripts/reports/preserve_published_routes.py --site build/report-site
+          python scripts/reports/pages_route_retirement.py --site build/report-site
 
       - name: Check that the augmented artifact still targets current main
         if: steps.scope.outputs.eligible == 'true' && steps.artifact.outputs.found == 'true'

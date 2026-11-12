@@ -6,6 +6,10 @@ intersection. Each plot includes complete inputs, expected answers, native
 reproduction instructions and links to reviewed saved reports. These educational
 illustrations accompany the [numerical report archive](https://butahlecoq.github.io/controlled-systems-lab/).
 
+The source also contains a [saved five-family feedback example](examples/feedback_geometry_2d.html)
+with its original provider calls, independent checks and source-qualified raw record. Its Pages
+route is not yet published.
+
 C++20 library and research repository for constrained discrete-time control. The library currently provides immutable affine models and problem data, JSON scenario intake, registered LP/convex backends, phase-I feasibility, execution and numerical reporting. Start with the installed-package examples below.
 
 Strategy A (reachability, terminal minimization and backward recovery), Strategy B (direct joint optimization), witness selection and independent trajectory verification are implemented. Complete optimal families are supported by profile-specific verifiers for T-S01/T-S02/T-S03; Strategy A also has a bounded finite-horizon nominal linear profile whose verifier checks represented binary64 inputs as exact dyadics. These checks do not certify the numerical geometry or optimization producers and do not provide generic family coverage. Trusted proof serialization remains pending.
