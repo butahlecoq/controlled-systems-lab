@@ -13,10 +13,11 @@ an update to an existing release/package workflow. Include the reason and any
 remaining gates. A CMake project version is not evidence of a published release.
 
 The issue 966 documentation migration removes Markdown working contracts from
-installed package trees. Installed consumers use public headers and executable
-behavior; package checks must not require files under
-`share/CSL/docs/contracts` or `share/doc/CSL/contracts`. Record this removal in
-package impact notes because existing consumers may have linked to those paths.
+installed package trees and no longer installs the scenario-schema README.
+Installed consumers use public headers, JSON schemas and executable behavior;
+package checks must not require files under `share/CSL/docs/contracts` or
+`share/doc/CSL/contracts`. Record this removal in package impact notes because
+existing consumers may have linked to those paths.
 
 ## Choose the artifact
 

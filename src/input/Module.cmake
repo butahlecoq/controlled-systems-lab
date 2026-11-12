@@ -9,7 +9,7 @@ target_link_libraries(csl_input PUBLIC CSL::resolved_problem)
 
 target_include_directories(csl_input SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 
-install(FILES schemas/scenario/v1.schema.json schemas/scenario/README.md DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/schemas/scenario)
+install(FILES schemas/scenario/v1.schema.json DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/schemas/scenario)
 
 install(FILES schemas/model/continuous-v1.schema.json schemas/model/README.md DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/schemas/model)
 
