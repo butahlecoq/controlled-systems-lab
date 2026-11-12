@@ -1,6 +1,6 @@
 {
   "artifacts": {
-    "README.md": "1c9ccd331e43080f8a26de200a0904e35e139d67146e19f36ae0823b6129c5ff",
+    "README.txt": "1c9ccd331e43080f8a26de200a0904e35e139d67146e19f36ae0823b6129c5ff",
     "diagnostic-attempts.jsonl": "a7ac34e4c88a783373952449636e49d55d02efb8c9c4518ac0a84c7e6d6e0d32",
     "gmon.out": "a52ed58dc341138faa9e4c543dca44d751eb0647a12216946aea26f4ccb9b3de",
     "gprof-flat-profile.txt": "3ad5272970728966872f1a1dcd8f6365ea7892b1da103340096534d055c71cc9",

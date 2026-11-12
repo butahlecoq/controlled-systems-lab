@@ -1691,7 +1691,8 @@
         "field": "policy.acados",
         "reason": "The existing MPC11 contract prohibits acados execution and installation."
       },
-      "source": "docs/contracts/mpc11-synthetic-controller-study.md"
+      "source": "https://github.com/butahlecoq/controlled-systems-lab/blob/15df1a87062fc1f7ea9c286e7e2e4e313bdc9ff4/docs/contracts/mpc11-synthetic-controller-study.md",
+      "source_sha256": "2a28aec486dae47ed31a6a3a4531cfd1ca239986b1c326ceddce257aaffa8615"
     }
   ],
   "build_dependent_classifications": [

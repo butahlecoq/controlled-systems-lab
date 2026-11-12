@@ -30,6 +30,50 @@ ONLINE_CHECK=online_module('check',{'model':M,'study':ONLINE_STUDY,'evidence':ON
 ONLINE_RENDER=online_module('render',{'evidence':ONLINE_EVIDENCE})
 
 class OnlineTubeTests(unittest.TestCase):
+    def test_saved_anchor_receipt_uses_its_captured_review_tools(self):
+        root=P.parents[3]
+        report=root/'reports/algorithm-results/mpc06-online-anchor-portable-v3'
+        bundle=report/'checked-inputs/mpc06-online-anchor-v1'
+        record,receipt=ONLINE_EVIDENCE.checked_sources(bundle,report/'verification-v2.json')
+        self.assertEqual(receipt['source_report_id'],bundle.name)
+        self.assertEqual(receipt['verification']['status'],'verified')
+        self.assertNotEqual(receipt['checked_sources'],ONLINE_EVIDENCE.tool_bindings())
+
+    def test_saved_anchor_rejects_coordinated_checker_receipt_and_manifest_rewrite(self):
+        root=P.parents[3]/'reports/algorithm-results/mpc06-online-anchor-portable-v3'
+        with tempfile.TemporaryDirectory() as folder:
+            report=Path(folder)/root.name
+            shutil.copytree(root,report)
+            tool=report/'review-tools/model.py'
+            tool.write_bytes(tool.read_bytes()+b'\n# coordinated provenance rewrite\n')
+            receipt_path=report/'verification-v2.json'
+            receipt=json.loads(receipt_path.read_text())
+            receipt['checked_sources']['model.py']=ONLINE_EVIDENCE.digest(tool.read_bytes())
+            receipt['receipt_sha256']=ONLINE_EVIDENCE.receipt_id(receipt)
+            receipt_path.write_text(json.dumps(receipt,indent=2)+'\n')
+            files=sorted(path for path in report.rglob('*') if path.is_file() and path!=report/'SHA256SUMS')
+            (report/'SHA256SUMS').write_text(''.join(
+                f"{ONLINE_EVIDENCE.digest(path.read_bytes())}  {path.relative_to(report).as_posix()}\n"
+                for path in files))
+            bundle=report/'checked-inputs/mpc06-online-anchor-v1'
+            with self.assertRaisesRegex(ValueError,'reviewed report manifest binding'):
+                ONLINE_EVIDENCE.checked_sources(bundle,receipt_path)
+
+    def test_original_capture_name_accepts_replayed_current_receipt_and_render(self):
+        bundle=P.parents[3]/'reports/algorithm-results/mpc06-online-anchor-v1'
+        with tempfile.TemporaryDirectory() as folder:
+            receipt=Path(folder)/'verification-v2.json'
+            command=[sys.executable,str(P.with_name('check.py')),str(bundle),
+                     '--receipt-output',str(receipt)]
+            for _ in range(2):
+                result=subprocess.run(command,capture_output=True,text=True)
+                self.assertEqual(result.returncode,0,result.stderr)
+            saved=json.loads(receipt.read_text())
+            self.assertEqual(saved['checked_sources'],ONLINE_EVIDENCE.tool_bindings())
+            output=Path(folder)/'rendered'
+            ONLINE_RENDER.render(bundle,receipt,output)
+            self.assertTrue((output/'index.html').is_file())
+
     def test_terminal_elimination_and_unique_nominal_optimum(self):
         for p,q in [(Q(1,8),Q(0)),(Q(-1,4),Q(1,8)),(Q(0),Q(0))]:
             qp=M.problem((p,q),M.tightenings('polytope'))
@@ -108,6 +152,7 @@ for i,line in enumerate(sys.stdin):
                 return PureWindowsPath(relative_to(path,*arguments))
             with mock.patch.object(path_type,'relative_to',windows_relative):
                 result=study.run(driver,folder/'capture',1)
+            self.assertFalse((folder/'capture/source/README.md').exists())
             evidence.load_sources(folder/'capture')
             frozen=json.loads(json.dumps(result,default=study.encode))
             self.assertEqual(check.verify(frozen)['status'],'verified')
@@ -219,6 +264,9 @@ class EvidenceBindingTests(unittest.TestCase):
             output=Path(folder)/'rendered';result=self.renderer(bundle,receipt,output)
             self.assertEqual(result.returncode,0,result.stderr)
             self.assertTrue((output/'verification-v2.json').exists())
+            captured=(output/'checked-inputs'/bundle.name/'source/README.md').read_bytes()
+            self.assertEqual(captured,before[Path('source/README.md')])
+            self.assertIn('checked-inputs/'+bundle.name+'/source/README.md',(output/'index.html').read_text())
             subprocess.run([sys.executable,str(output/'review-tools/check.py'),str(output/'checked-inputs'/bundle.name),'--receipt-output',str(output/'verification-v2.json')],check=True,capture_output=True)
             self.assertEqual({p.relative_to(bundle):p.read_bytes() for p in bundle.rglob('*') if p.is_file()},before)
             subprocess.run([sys.executable,str(P.with_name('check.py')),str(bundle),'--receipt-output',str(receipt)],check=True,capture_output=True)

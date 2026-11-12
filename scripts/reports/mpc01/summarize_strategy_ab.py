@@ -222,6 +222,7 @@ def main() -> None:
         if json.loads(args.environment.read_text(encoding="utf-8"))["measurement"]["resource_profile_sha256"] != digest(args.resource_profile):
             raise ValueError("environment does not bind the supplied resource profile")
         lines[0] = "# Resource-limited saved Strategy A/B T-S01 capture"
+    documented_output = args.output.with_suffix(".md") if args.output.suffix == ".txt" else args.output
     lines.extend([
         "",
         ("The timing interval covers strategy preparation through two witness checks. It excludes process startup, shared scenario/provider setup, JSON serialization, build and rendering. " +
@@ -240,7 +241,7 @@ def main() -> None:
         f"  --scenario {shlex.quote(str(args.scenario))} \\",
         f"  --environment {shlex.quote(str(args.environment))} \\",
         *([f"  --resource-profile {shlex.quote(str(args.resource_profile))} \\"] if args.resource_profile else []),
-        f"  --output {shlex.quote(str(args.output))}",
+        f"  --output {shlex.quote(str(documented_output))}",
         "```",
         "",
     ])

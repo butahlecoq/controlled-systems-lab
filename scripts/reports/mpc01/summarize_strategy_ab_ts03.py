@@ -174,7 +174,7 @@ def main() -> None:
     ]
     summary.extend(f"| `{s}` | {timing[s][0]:.6f} | {timing[s][1]:.6f}–{timing[s][2]:.6f} |" for s in STRATEGIES)
     summary.extend(["", "Timing is strategy preparation through selected-witness replay, excluding process startup, shared setup, serialization, build and rendering. Five pairs on this one small synthetic fixture are descriptive; they establish no general winner.", "", "The full process tree ran under a 2 GiB cgroup-v2 cap with swap disabled and a 300-second suite watchdog. The watchdog is suite-wide, not per-attempt, and does not meet the comparison contract default per-attempt limiter profile.", "", f"Source commit: `{environment['source_commit']}`. Scenario SHA-256: `{scenario_hash}`. Event SHA-256: `{event_hash}`. Executable SHA-256: `{binary_hash}`.", "", "This is a partial #597 increment. The broader fixture matrix, external comparison and publication catalogue integration remain outstanding.", ""])
-    (bundle / "strategy-ab-ts03-summary.md").write_text("\n".join(summary), encoding="utf-8")
+    (bundle / "strategy-ab-ts03-summary.txt").write_text("\n".join(summary), encoding="utf-8")
 
 
 if __name__ == "__main__":

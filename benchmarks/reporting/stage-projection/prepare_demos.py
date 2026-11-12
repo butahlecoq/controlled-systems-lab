@@ -24,7 +24,6 @@ from scripts.reports.stage_projection_figures import render_batch
 
 EXAMPLES = Path(__file__).resolve().parent / "examples"
 STYLE = ROOT / "scripts/reports/styles/control-v1.json"
-BUNDLE_README = Path(__file__).resolve().parent / "BUNDLE-README.md"
 
 
 def _parse(path: Path) -> tuple[dict, bytes]:
@@ -198,7 +197,6 @@ def main() -> None:
         raise FileExistsError(f"refusing to overwrite existing output: {output}")
     output.mkdir(parents=True)
     os.environ.setdefault("MPLCONFIGDIR", str(output / "mpl-config"))
-    shutil.copyfile(BUNDLE_README, output / "README.md")
     inputs = []
     for stem in ("fuel-four-state", "nonfuel-integrator"):
         source_path = EXAMPLES / f"{stem}.json"
@@ -258,10 +256,8 @@ def main() -> None:
     source_files = ["benchmarks/reporting/stage-projection/prepare_demos.py",
                     "benchmarks/reporting/stage-projection/nominal_forward_route.cpp",
                     "benchmarks/reporting/stage-projection/check_nominal_forward_route.py",
-                    "benchmarks/reporting/stage-projection/BUNDLE-README.md",
                     "CMakeLists.txt", "cmake/OptionalReports.cmake",
                     "scripts/reports/stage_projection_route_capabilities.json",
-                    "benchmarks/reporting/stage-projection/README.md",
                     "tests/reporting/test_stage_projection_demos.py",
                     "scripts/reports/stage_projection_data.py",
                     "scripts/reports/stage_projection_figures.py",

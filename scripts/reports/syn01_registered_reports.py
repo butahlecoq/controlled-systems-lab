@@ -14,11 +14,12 @@ import report_data as data
 KIND = "syn01-nominal-forward"
 SCHEMA = "csl.syn01-nominal-forward-report/2"
 FILES = {
-    "README.md", "build-provenance.json", "configure-log.txt", "build-log.txt",
+    "build-provenance.json", "configure-log.txt", "build-log.txt",
     "driver-stderr.txt", "environment.json", "index.html", "latency.svg",
     "measurement-command.txt", "profile-evidence.txt", "publication-map.json",
     "raw-events.jsonl", "records.json", "scenarios.json", "summary.csv", "trials.csv",
 }
+HISTORICAL_FILES = FILES | {"README.md"}
 
 
 def _map():
@@ -123,7 +124,9 @@ def adapt(bundle):
             raise ValueError("SYN-01 bundle cannot contain symlinks")
         if path.is_file():
             actual.add(path.relative_to(bundle).as_posix())
-    if actual != FILES | {"manifest.json"} or set(manifest.get("files", {})) != FILES:
+    manifest_files = set(manifest.get("files", {}))
+    if (manifest_files not in (FILES, HISTORICAL_FILES) or
+            actual != manifest_files | {"manifest.json"}):
         raise ValueError("SYN-01 bundle inventory mismatch")
     for name, digest in manifest["files"].items():
         if not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None or hashlib.sha256((bundle / name).read_bytes()).hexdigest() != digest:
@@ -136,7 +139,7 @@ def adapt(bundle):
     scope = record["measurement"]["scope"]
     limits = "; ".join(record["evidence_limits"])
     return common.PublicationRecord(KIND, public_id, digest, record["source_commit"], scope,
-        limits, tuple(sorted(FILES)), SCHEMA, digest, record["report_id"])
+        limits, tuple(sorted(manifest_files)), SCHEMA, digest, record["report_id"])
 
 
 def render_page(bundle, publication):

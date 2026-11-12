@@ -11,7 +11,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts" / "reports"))
-sys.path.insert(0, str(ROOT / "reports" / "algorithm-results" / "tooling" / "syn02"))
+sys.path.insert(0, str(ROOT / "scripts" / "reports" / "syn02"))
 import registered_reports
 import report_data
 def _load_module(name, path):
@@ -21,9 +21,9 @@ def _load_module(name, path):
     spec.loader.exec_module(module)
     return module
 
-publication_map = _load_module("csl_syn02_test_publication_map", ROOT / "reports/algorithm-results/tooling/syn02/publication_map.py")
+publication_map = _load_module("csl_syn02_test_publication_map", ROOT / "scripts/reports/syn02/publication_map.py")
 sys.modules["publication_map"] = publication_map
-collect = _load_module("csl_syn02_test_collect", ROOT / "reports/algorithm-results/tooling/syn02/collect.py")
+collect = _load_module("csl_syn02_test_collect", ROOT / "scripts/reports/syn02/collect.py")
 SITE_SPEC = importlib.util.spec_from_file_location("csl_syn02_test_site", ROOT / "scripts" / "reports" / "site.py")
 report_site = importlib.util.module_from_spec(SITE_SPEC)
 SITE_SPEC.loader.exec_module(report_site)
@@ -69,7 +69,14 @@ def _csv_value(value):
 
 
 class Syn02PublicationTests(unittest.TestCase):
-    def make_bundle(self, root):
+    @staticmethod
+    def project_for_bundle(bundle, record):
+        projection = publication_map.project(record)
+        if (bundle / "README.md").exists():
+            projection["manifest_fields"]["files"]["entries"] = publication_map.HISTORICAL_STAGED_FILES
+        return projection
+
+    def make_bundle(self, root, *, include_readme=True):
         root.mkdir(parents=True, exist_ok=True)
         source_id = "syn02-terminal-20261013-c234a1a0-1755dd198e03"
         bundle = root / source_id
@@ -108,17 +115,21 @@ class Syn02PublicationTests(unittest.TestCase):
         (bundle / "environment.json").write_text(json.dumps(record["environment"], sort_keys=True) + "\n", encoding="utf-8")
         (bundle / "build-provenance.json").write_text(json.dumps(record["provenance"], sort_keys=True) + "\n", encoding="utf-8")
         (bundle / "profile-evidence.json").write_text(json.dumps({"status": "process_counter_sampling_incomplete"}, sort_keys=True) + "\n", encoding="utf-8")
-        content = {"README.md": b"fixture", "build-log.txt": b"Release build fixture", "collect.py": b"collector fixture",
+        content = {"build-log.txt": b"Release build fixture", "collect.py": b"collector fixture",
                    "configure-log.txt": b"configure fixture", "etw-profile-attempt.txt": b"unavailable",
                    "measurement-command.txt": b"fixture command", "profile-note.txt": b"limiter unknown",
                    "profile-raw.jsonl": b"profile fixture\n", "publication_map.py": b"publication mapping fixture",
                    "render_saved.py": b"renderer fixture",
                    "terminal_driver.cpp": b"driver fixture", "test_report.py": b"test fixture"}
+        if include_readme:
+            content["README.md"] = b"historical fixture guide"
         for name, data in content.items():
             (bundle / name).write_bytes(data)
-        (bundle / "publication-map.json").write_text(json.dumps(publication_map.project(record), ensure_ascii=False,
+        projection = self.project_for_bundle(bundle, record)
+        (bundle / "publication-map.json").write_text(json.dumps(projection, ensure_ascii=False,
                                                                    sort_keys=True, indent=2) + "\n", encoding="utf-8")
-        source_names = (set(publication_map.STAGED_SOURCE_FILES) - {"manifest.json"}) | {"index.html"}
+        source_names = (set(publication_map.HISTORICAL_STAGED_SOURCE_FILES if include_readme else
+                            publication_map.STAGED_SOURCE_FILES) - {"manifest.json"}) | {"index.html"}
         manifest = {"schema": "csl.syn02-report-manifest/1", "report_id": source_id,
                     "source_commit": SOURCE, "harness_commit": HARNESS,
                     "files": {name: hashlib.sha256((bundle / name).read_bytes()).hexdigest() for name in sorted(source_names)}}
@@ -128,7 +139,7 @@ class Syn02PublicationTests(unittest.TestCase):
     def test_valid_bundle_stages_registered_page_envelope_manifest_and_zip(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / "reports"
-            bundle = self.make_bundle(root)
+            bundle = self.make_bundle(root, include_readme=False)
             shutil.copyfile(ROOT / "reports" / "algorithm-results" / "legacy-publications.json", root / "legacy-publications.json")
             item = syn02.adapt(bundle)
             self.assertEqual("syn02-terminal-minimizers", item.kind)
@@ -166,6 +177,21 @@ class Syn02PublicationTests(unittest.TestCase):
                         "native_payload_sha256", "source_commit", "measured_scope", "evidence_limits", "source_report_id")}
             self.assertTrue(syn02.validate_publication_manifest(output / item.report_id, expected))
 
+    def test_historical_readme_inventory_remains_valid_and_byte_preserved(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = self.make_bundle(Path(directory))
+            original = (bundle / "README.md").read_bytes()
+            item = syn02.adapt(bundle)
+            self.assertIn("README.md", item.files)
+            self.assertEqual(original, syn02.publication_artifacts(bundle, item)["README.md"])
+
+    def test_current_inventory_omits_working_readme(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = self.make_bundle(Path(directory), include_readme=False)
+            item = syn02.adapt(bundle)
+            self.assertNotIn("README.md", item.files)
+            self.assertNotIn("README.md", syn02.publication_artifacts(bundle, item))
+
     def test_generated_latency_svg_passes_pages_safety_policy(self):
         with tempfile.TemporaryDirectory() as directory:
             bundle = self.make_bundle(Path(directory))
@@ -177,7 +203,7 @@ class Syn02PublicationTests(unittest.TestCase):
         manifest["files"] = {name: hashlib.sha256((bundle / name).read_bytes()).hexdigest() for name in sorted(manifest["files"])}
         (bundle / "manifest.json").write_text(json.dumps(manifest, sort_keys=True, indent=2) + "\n", encoding="utf-8")
         record = json.loads((bundle / "records.json").read_text(encoding="utf-8"))
-        (bundle / "publication-map.json").write_text(json.dumps(publication_map.project(record), ensure_ascii=False,
+        (bundle / "publication-map.json").write_text(json.dumps(self.project_for_bundle(bundle, record), ensure_ascii=False,
                                                                    sort_keys=True, indent=2) + "\n", encoding="utf-8")
         manifest["files"]["publication-map.json"] = hashlib.sha256((bundle / "publication-map.json").read_bytes()).hexdigest()
         (bundle / "manifest.json").write_text(json.dumps(manifest, sort_keys=True, indent=2) + "\n", encoding="utf-8")
@@ -252,7 +278,7 @@ class Syn02PublicationTests(unittest.TestCase):
             record = json.loads(record_path.read_text(encoding="utf-8"))
             record["profile_summary"] = "Separate process CPU/RSS counter sampling completed; no call-stack attribution. WPR CPU stack capture unavailable; limiting source function remains unknown."
             record_path.write_text(json.dumps(record, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-            (bundle / "publication-map.json").write_text(json.dumps(publication_map.project(record), ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            (bundle / "publication-map.json").write_text(json.dumps(self.project_for_bundle(bundle, record), ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
             self._rehash_native_manifest(bundle)
             self.assertEqual(bundle.name, syn02.adapt(bundle).source_report_id)
         with tempfile.TemporaryDirectory() as directory:

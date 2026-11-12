@@ -14,6 +14,7 @@ from evidence import checked_sources
 
 def render(bundle,receipt_path,output):
     record,receipt=checked_sources(bundle,receipt_path)
+    has_source_guide=(Path(bundle)/'source/README.md').is_file()
     verified=receipt['verification']
     if output.resolve().is_relative_to(bundle.resolve()) or bundle.resolve().is_relative_to(output.resolve()):raise ValueError('render output must be separate from immutable source bundle')
     if output.exists():raise ValueError('render output must be new')
@@ -84,7 +85,7 @@ def render(bundle,receipt_path,output):
         '<p>This bounded two-state LTI study solves actual CSL/HiGHS nominal QPs, compares matched fixed-K robust feasibility, and independently checks all continuous-box disturbance costs for the recorded deterministic nominal schedules. It does not compute fixed-plan minimax or general causal optimum.</p>',
         f'<p>Source <code>{html.escape(record["source_commit"])}</code>. Independent replay: {html.escape(verified["status"])}; {verified["completed_native_qps"]} completed native QPs. <a href="result.json">Raw mathematical/process records</a>, <a href="verification-v2.json">checker receipt</a>, <a href="summary.json">cost/timing distributions</a>.</p>',
         '<p>At each step u=v+K(x-z), K=(-1,-2); z propagates with the applied nominal v. Full-state measurements affect only the fixed ancillary feedback. The nominal N=3 objective is sum(z²+v²), with terminal z3=0. The finite-error reference uses the same policy and global disturbance clock; invariant tubes are conservative restrictions. All original state/control bounds are checked without clipping. The actual reported objective is sum(x²+u²)+x3² over the three executed steps.</p>',
-        '<p>Minimal inputs: A=[[1,1],[0,1]], B=E=(0,1), W=[-1/8,1/8], X=[-1,1]², U=[-1,1]. Initial actual and nominal states coincide at (1/8,0), (3/8,-1/8), or (-1/4,1/8). Exact full-state feedback, independent stage disturbances and continuous actuators are required. <a href="base-scenario.json">Immutable base input</a>; <a href="source/README.md">derivation and reproduction commands</a>.</p>',
+        '<p>Minimal inputs: A=[[1,1],[0,1]], B=E=(0,1), W=[-1/8,1/8], X=[-1,1]², U=[-1,1]. Initial actual and nominal states coincide at (1/8,0), (3/8,-1/8), or (-1/4,1/8). Exact full-state feedback, independent stage disturbances and continuous actuators are required. <a href="base-scenario.json">Immutable base input</a>'+('; <a href="source/README.md">derivation and reproduction commands</a>' if has_source_guide else '')+'</p>',
         '<h2>Matched feasible intervals and online cost</h2><p>The 17 by 17 initial grid is finite and is not a complete feedback-winning-set characterization. Times are medians [minimum, maximum] in microseconds over completed steps; process/IPC timing is separate from native solve. Actual worst cost ranges cover the same three initial states over all repetitions; exact fractions and matched nominal-objective gaps remain in JSON. No performance ranking is claimed.</p>',
         '<table><tr><th>Method</th><th>Grid feasible / lost</th><th>Actual worst cost range</th><th>Native setup</th><th>Native solve</th><th>Exact QP construction</th><th>Independent QP check</th></tr>']
     def duration(d):return 'unavailable' if d is None else f'{d["median"]/1000:.2f} [{d["min"]/1000:.2f}, {d["max"]/1000:.2f}]'
@@ -95,8 +96,10 @@ def render(bundle,receipt_path,output):
         '<h2>Scope and delivery</h2><p>Actual cost is checked with exact dyadic controls over all eight disturbance vertices; convexity proves the continuous-box maximum for this deterministic-anchor policy. Native optimum agreement is numerical with an independent exact scalar optimum, not a solver certificate. Initial error is zero, actuators are continuous and disturbances are independent stagewise additive intervals. LTV, correlated/model uncertainty, finite actuators, state-reset policies and general stable-tail construction are unsupported.</p>',
         '<p>Offline construction, online preparation/setup/solve and checker costs are retained separately. This Linux capture does not establish other-platform performance, native thread enforcement, heap/RSS caps or hard real-time deadlines. HiGHS is the existing optional MIT integration; no acados or new required dependency is introduced. Compiler/platform/install checks, independent review and versioned Pages publication remain integration gates; no release is needed for the research tool. Issue #602 remains open until all evidence gates pass.</p></html>']
     page='\n'.join(text)+'\n'
-    for name in ('result.json','base-scenario.json','source/README.md'):
+    for name in ('result.json','base-scenario.json'):
         page=page.replace('href="'+name+'"','href="'+source_prefix+'/'+name+'"')
+    if has_source_guide:
+        page=page.replace('href="source/README.md"','href="'+source_prefix+'/source/README.md"')
     (bundle/'index.html').write_text(page)
     paths=sorted(p for p in bundle.rglob('*') if p.is_file() and p!=bundle/'SHA256SUMS')
     (bundle/'SHA256SUMS').write_text(''.join(f'{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(bundle).as_posix()}\n' for p in paths))
