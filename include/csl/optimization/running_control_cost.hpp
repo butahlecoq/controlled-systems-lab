@@ -7,6 +7,9 @@
 
 namespace csl::optimization {
 
+// Quadratic penalties use coefficient / normalization_horizon times the sum
+// of weighted, scaled squared residuals. Euclidean penalties preserve the
+// source norm coefficient * ||map * u + offset||_2.
 struct QuadraticControlPenalty {
     Vector reference;
     Vector scales;

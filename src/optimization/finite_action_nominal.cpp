@@ -69,7 +69,10 @@ RequestOutcome make_degenerate_request(const FiniteActionNominalRequest& request
         }
     }
     if(auto cost_errors = validate_running_control_cost(request.running_cost, request.absolute_stage_offset,
-            horizon, dimensions.control); !cost_errors.empty()) return Unsupported{std::move(cost_errors)};
+            horizon, dimensions.control); !cost_errors.empty()) {
+        for(auto& error : cost_errors) error.field = "finite_nominal." + error.field;
+        return Unsupported{std::move(cost_errors)};
+    }
     if(!std::ranges::all_of(request.initial_state, [](double value) { return std::isfinite(value); }))
         return unsupported("finite_nominal.initial", "The authored nominal initial state must be finite.");
     auto initial = singleton("nominal-initial", request.initial_state);
