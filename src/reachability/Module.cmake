@@ -1,5 +1,8 @@
 # Target and installation ownership for reachability. Included from the project root.
 
+csl_add_library(csl_bounded_h_support STATIC src/reachability/bounded_h_support.cpp)
+target_link_libraries(csl_bounded_h_support PUBLIC CSL::registry CSL::optimization)
+
 csl_add_library(csl_nominal_forward STATIC src/reachability/nominal_forward.cpp)
 
 target_link_libraries(csl_nominal_forward PUBLIC CSL::polyhedral CSL::resolved_problem

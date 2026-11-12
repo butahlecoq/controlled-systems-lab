@@ -1,3 +1,10 @@
+if(TARGET CSL::highs_lp)
+  add_executable(bounded_h_support_tests tests/unit/reachability/bounded_h_support_tests.cpp)
+  target_link_libraries(bounded_h_support_tests PRIVATE CSL::bounded_h_support CSL::highs_lp)
+  add_test(NAME bounded_h_support_tests COMMAND bounded_h_support_tests)
+  csl_test_target(bounded_h_support_tests reachability)
+endif()
+
 if(TARGET CSL::highs_lp AND TARGET CSL::qhull_conversion)
   add_executable(nominal_tube_tests tests/unit/reachability/nominal_tube_tests.cpp)
   target_link_libraries(nominal_tube_tests PRIVATE CSL::nominal_tube CSL::affine_sum CSL::qhull_conversion CSL::highs_lp CSL::artifacts doctest::doctest)
