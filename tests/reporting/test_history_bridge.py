@@ -29,7 +29,7 @@ class HistoryBridgeTest(unittest.TestCase):
         previous = None
         for stage in range(3):
             horizon = 3 - stage
-            request = {"mode": "continuous-history/1", "task_id": "warm", "task_sha256": "warm",
+            request = {"mode": "continuous-history/1", "history_solver": "csl.convex.highs", "task_id": "warm", "task_sha256": "warm",
                 "problem_id": "warm", "request_id": str(stage), "controller_id": "warm",
                 "action_profile_id": "warm", "absolute_update_index": stage, "original_horizon": 3,
                 "dt": 1, "observed_physical_state": [0.1*stage, -0.1*stage],
