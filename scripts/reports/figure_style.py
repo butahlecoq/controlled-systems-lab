@@ -5,6 +5,9 @@ import math
 
 
 STYLE_ID = "csl-report-quantitative-v1"
+STAGE_PALETTE = ("#9ccfd8", "#c4a7e7", "#f6c177", "#eb6f92", "#a6da95", "#e0def4")
+STAGE_BACKGROUND = "#16161e"
+STAGE_FOREGROUND = "#e0def4"
 
 
 def format_tick(value: float, locations: list[float]) -> str:

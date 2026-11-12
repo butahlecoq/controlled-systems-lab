@@ -1184,7 +1184,7 @@
       "signal_count": 4,
       "asset_name_literals": [],
       "disposition": "saved-data-illustration-renderer",
-      "role_and_disposition_reason": "Projects complete saved full-state box F/B/I stages from one observed query, preserving every stage and physical coordinate order with shared quantitative axis styling."
+      "role_and_disposition_reason": "Projects complete saved full-state H, generator and ellipsoid F/B/I sets from one observed query, preserving every stage and physical coordinate order with shared quantitative axis styling."
     },
     {
       "source": "scripts/reports/qhull_highs_strategy_a_example.py",
