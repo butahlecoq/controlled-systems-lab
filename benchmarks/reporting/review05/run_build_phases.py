@@ -81,8 +81,10 @@ def main():
     if 'CMAKE_BUILD_TYPE:STRING=Release' not in args.build_cache.read_text():parser.error('Release build required')
     bundle=args.output;bundle.mkdir(parents=True);(bundle/'attempts').mkdir();(bundle/'scenarios').mkdir();(bundle/'source').mkdir()
     for name in FILES:shutil.copy2(source/'scenarios'/name,bundle/'scenarios'/name)
-    for name in ('family_query_ladder.cpp','check_family_query.py','check_build_phases.py','run_build_phases.py','run_horizon_ladder.py','render_family_query.py','scalar_query_oracle.py','BUILD-PHASES.md','build_phase_probe.cmake'):
+    for name in ('family_query_ladder.cpp','check_family_query.py','check_build_phases.py','run_build_phases.py','run_horizon_ladder.py','render_family_query.py','scalar_query_oracle.py','build_phase_probe.cmake'):
         shutil.copy2(source/name,bundle/'source'/name)
+    # Preserve the original source artifact name and bytes in frozen captures.
+    shutil.copy2(source/'BUILD-PHASES.txt',bundle/'source'/'BUILD-PHASES.md')
     shutil.copy2(root/'src/synthesis/strategy_b/direct_joint.cpp',bundle/'source/direct_joint.cpp')
     shutil.copy2(args.build_cache,bundle/'CMakeCache.txt')
     environment={'schema':'csl.review05.build-phase-environment/1','source_commit':revision,'source_status':status,'binary_sha256':sha(driver),

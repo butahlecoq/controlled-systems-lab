@@ -41,8 +41,11 @@ def main():
     if 'CSL_REVIEW05_PROFILE_DRIVER:BOOL=ON' in cache:parser.error('primary capture must use the unprofiled driver')
     args.output.mkdir(parents=True);(args.output/'attempts').mkdir();(args.output/'scenarios').mkdir();(args.output/'source').mkdir()
     for name in FILES:shutil.copy2(scenarios/name,args.output/'scenarios'/name)
-    for name in ('family_query_ladder.cpp','CMakeLists.txt','run_family_query.py','check_family_query.py','scalar_query_oracle.py','render_family_query.py','run_horizon_ladder.py','profile_family_query.py','FAMILY-QUERY.md'):
+    for name in ('family_query_ladder.cpp','CMakeLists.txt','run_family_query.py','check_family_query.py','scalar_query_oracle.py','render_family_query.py','run_horizon_ladder.py','profile_family_query.py'):
         shutil.copy2(source/name,args.output/'source'/name)
+    # Keep the historical capture/publication route while the working note is
+    # stored as plain text in the source tree.
+    shutil.copy2(source/'FAMILY-QUERY.txt',args.output/'source'/'FAMILY-QUERY.md')
     for name in ('figure_style.py','plot.py','report_data.py'):
         shutil.copy2(root/'scripts/reports'/name,args.output/'source'/name)
     shutil.copy2(args.build_cache,args.output/'CMakeCache.txt')
