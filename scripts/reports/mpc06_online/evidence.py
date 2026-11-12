@@ -126,13 +126,19 @@ def captured_tool_bindings(receipt_path,source_report_id):
     report=Path(receipt_path).resolve().parent
     snapshot=report/'review-tools'
     if not snapshot.exists():
-        if report.name==REVIEWED_REPORT_ID or source_report_id==REVIEWED_SOURCE_ID:
+        if report.name==REVIEWED_REPORT_ID:
             raise ValueError('reviewed report checker snapshot is missing')
         return tool_bindings()
     if snapshot.is_symlink() or not snapshot.is_dir():raise ValueError('invalid captured review-tool snapshot')
     manifest_path=report/'SHA256SUMS'
     if manifest_path.is_symlink() or not manifest_path.is_file():raise ValueError('missing captured report manifest')
-    if report.name==REVIEWED_REPORT_ID or source_report_id==REVIEWED_SOURCE_ID:
+    pinned_reviewed_report=digest(manifest_path.read_bytes())==REVIEWED_REPORT_MANIFEST_SHA256
+    if report.name==REVIEWED_REPORT_ID:
+        if not pinned_reviewed_report:
+            raise ValueError('reviewed report manifest binding mismatch')
+    if pinned_reviewed_report:
+        if source_report_id!=REVIEWED_SOURCE_ID:
+            raise ValueError('reviewed report source identity mismatch')
         manifest=reviewed_report_manifest(report,manifest_path)
     else:
         manifest={}
@@ -143,10 +149,7 @@ def captured_tool_bindings(receipt_path,source_report_id):
     bindings={name:digest((snapshot/name).read_bytes()) for name in TOOLS}
     if any(manifest.get(f'review-tools/{name}')!=value for name,value in bindings.items()):
         raise ValueError('captured review-tool snapshot differs from its report manifest')
-    if report.name==REVIEWED_REPORT_ID or source_report_id==REVIEWED_SOURCE_ID:
-        if source_report_id!=REVIEWED_SOURCE_ID:
-            raise ValueError('reviewed report manifest binding mismatch')
-    elif bindings!=tool_bindings():
+    if not pinned_reviewed_report and bindings!=tool_bindings():
         raise ValueError('new report checker snapshot differs from current sources')
     return bindings
 

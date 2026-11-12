@@ -59,6 +59,21 @@ class OnlineTubeTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'reviewed report manifest binding'):
                 ONLINE_EVIDENCE.checked_sources(bundle,receipt_path)
 
+    def test_original_capture_name_accepts_replayed_current_receipt_and_render(self):
+        bundle=P.parents[3]/'reports/algorithm-results/mpc06-online-anchor-v1'
+        with tempfile.TemporaryDirectory() as folder:
+            receipt=Path(folder)/'verification-v2.json'
+            command=[sys.executable,str(P.with_name('check.py')),str(bundle),
+                     '--receipt-output',str(receipt)]
+            for _ in range(2):
+                result=subprocess.run(command,capture_output=True,text=True)
+                self.assertEqual(result.returncode,0,result.stderr)
+            saved=json.loads(receipt.read_text())
+            self.assertEqual(saved['checked_sources'],ONLINE_EVIDENCE.tool_bindings())
+            output=Path(folder)/'rendered'
+            ONLINE_RENDER.render(bundle,receipt,output)
+            self.assertTrue((output/'index.html').is_file())
+
     def test_terminal_elimination_and_unique_nominal_optimum(self):
         for p,q in [(Q(1,8),Q(0)),(Q(-1,4),Q(1,8)),(Q(0),Q(0))]:
             qp=M.problem((p,q),M.tightenings('polytope'))
