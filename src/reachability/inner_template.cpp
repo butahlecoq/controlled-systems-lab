@@ -30,17 +30,29 @@ Range dot(const Matrix& A,std::size_t row,const Vector& x) {
     return total;
 }
 double support(const Matrix& A,std::size_t row,const Matrix& G,InnerTemplateNorm norm) {
-    double sum=0;
+    Vector widths;
+    double sum=0,maximum=0;
     for(std::size_t column=0;column<G.cols;++column) {
         Range total{0,0};
         for(std::size_t j=0;j<G.rows;++j)
             total=add(total,product(A.values[row*A.cols+j],G.values[j*G.cols+column]));
-        double value=std::max(std::abs(total.lo),std::abs(total.hi));
-        if(value==0) continue;
-        if(norm==InnerTemplateNorm::euclidean_ball) value=std::nextafter(value*value,inf);
-        sum=std::nextafter(sum+value,inf);
+        const double value=std::max(std::abs(total.lo),std::abs(total.hi));
+        if(!std::isfinite(value))return inf;
+        if(value==0)continue;
+        if(norm==InnerTemplateNorm::independent_intervals)sum=add({sum,sum},{value,value}).hi;
+        else {widths.push_back(value);maximum=std::max(maximum,value);}
     }
-    return norm==InnerTemplateNorm::euclidean_ball && sum!=0 ? std::nextafter(std::sqrt(sum),inf) : sum;
+    if(norm==InnerTemplateNorm::independent_intervals || maximum==0)return sum;
+    // Normalize before squaring: finite factors may be far outside sqrt(binary64).
+    double squares=0;
+    for(const auto value:widths) {
+        const auto ratio=value==maximum?1.0:std::nextafter(value/maximum,inf);
+        const auto square=product(ratio,ratio).hi;
+        squares=add({squares,squares},{square,square}).hi;
+    }
+    if(squares==1)return maximum;
+    const double root=std::nextafter(std::sqrt(squares),inf);
+    return product(maximum,root).hi;
 }
 bool finite(const Vector& x) { return std::all_of(x.begin(),x.end(),[](double v){return std::isfinite(v);}); }
 Diagnostic invalid(std::string text) { return {DiagnosticCode::invalid_input,"inner_template",std::move(text)}; }
@@ -93,6 +105,7 @@ InnerTemplateResult inscribe_template(const InnerTemplateInput& in) {
         const auto center=dot(in.inequalities,i,in.center);
         const double slack=std::nextafter(in.upper_bounds[i]-center.hi,-inf);
         const double width=support(in.inequalities,i,in.directions,in.norm);
+        if(!std::isfinite(width))return Diagnostic{DiagnosticCode::unsupported,"inner_template.support","outward support bound exceeds binary64; no finite inner scale was asserted"};
         result.row_support_upper.push_back(width);
         result.row_slack_lower.push_back(slack);
         if(width>0) radius=std::min(radius,std::max(0.0,std::nextafter(slack/width,-inf)));

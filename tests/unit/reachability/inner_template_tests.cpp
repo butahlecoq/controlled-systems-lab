@@ -5,7 +5,7 @@
 using namespace csl;
 using namespace csl::reachability;
 void require(bool value) { if(!value) throw std::runtime_error("inner-template behavior failed"); }
-int main() {
+int run() {
     InnerTemplateInput input{{0,0},{2,2,{1,0,0,1}},InnerTemplateNorm::independent_intervals,
         {4,2,{1,1,-1,-1,1,0,-1,0}},{1,1,1,1},{0,2,{}},{}};
     auto result=inscribe_template(input);
@@ -31,5 +31,19 @@ int main() {
     require(!check_inner_template(input,tampered).empty());
     input.center={2,2};
     require(std::holds_alternative<Diagnostic>(inscribe_template(input)));
+    for(const auto magnitude:{1e200,1e-200}) {
+        InnerTemplateInput scaled{{0},{1,1,{magnitude}},InnerTemplateNorm::euclidean_ball,
+            {2,1,{1,-1}},{1,1},{0,1,{}},{}};
+        const auto answer=inscribe_template(scaled);
+        require(std::holds_alternative<InnerTemplate>(answer));
+        const auto& normalized=std::get<InnerTemplate>(answer);
+        require(!normalized.point && normalized.factor.values[0]>.99 && normalized.factor.values[0]<=1);
+        require(check_inner_template(scaled,normalized).empty());
+    }
     std::cout<<"ND inner templates: box, ellipsoid, point, affine hull and tampering passed\n";
+    return 0;
+}
+int main() {
+    try {return run();}
+    catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}
 }
