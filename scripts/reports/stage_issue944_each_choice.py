@@ -22,7 +22,7 @@ FILES = {
 
 def stage(source: Path, site_root: Path) -> str:
     source, site_root = Path(source), Path(site_root)
-    if source.is_symlink() or not source.is_dir() or not site_root.is_dir():
+    if source.is_symlink() or not source.is_dir() or site_root.is_symlink() or not site_root.is_dir():
         raise ValueError("report source and existing site directory are required")
     if {entry.name for entry in source.iterdir()} != FILES:
         raise ValueError("#944 report bundle inventory differs")
@@ -46,3 +46,17 @@ def stage(source: Path, site_root: Path) -> str:
         raise ValueError("#944 Pages route must be fresh")
     shutil.copytree(source, destination, symlinks=False)
     return REPORT_ID
+
+
+def main() -> int:
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--source", type=Path, required=True)
+    parser.add_argument("--site", type=Path, required=True)
+    args = parser.parse_args()
+    print(stage(args.source, args.site))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

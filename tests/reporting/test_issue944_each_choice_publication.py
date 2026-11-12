@@ -123,6 +123,21 @@ class Issue944ChoicePipelinePublicationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "fresh"):
                 publication.stage(self.bundle, site)
 
+    def test_cli_rejects_symlinked_site_without_writing(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            site = root / "site"
+            site.mkdir()
+            alias = root / "alias"
+            alias.symlink_to(site, target_is_directory=True)
+            result = subprocess.run([
+                sys.executable, str(ROOT / "scripts/reports/stage_issue944_each_choice.py"),
+                "--source", str(self.bundle), "--site", str(alias),
+            ], capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("existing site directory", result.stderr)
+            self.assertEqual(list(site.iterdir()), [])
+
 
 if __name__ == "__main__":
     unittest.main()
