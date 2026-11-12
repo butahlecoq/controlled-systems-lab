@@ -100,6 +100,26 @@ def tool_bindings():
     return {name:digest((directory/name).read_bytes()) for name in TOOLS}
 
 
+def captured_tool_bindings(receipt_path):
+    """Return the producer bindings captured with an immutable report bundle."""
+    report=Path(receipt_path).resolve().parent
+    snapshot=report/'review-tools'
+    if not snapshot.exists():
+        return tool_bindings()
+    if snapshot.is_symlink() or not snapshot.is_dir():raise ValueError('invalid captured review-tool snapshot')
+    manifest_path=report/'SHA256SUMS'
+    if manifest_path.is_symlink() or not manifest_path.is_file():raise ValueError('missing captured report manifest')
+    manifest={}
+    for line in manifest_path.read_text(encoding='ascii').splitlines():
+        match=re.fullmatch(r'([0-9a-f]{64})  (.+)',line)
+        if not match:raise ValueError('invalid captured report checksum entry')
+        manifest[match[2]]=match[1]
+    bindings={name:digest((snapshot/name).read_bytes()) for name in TOOLS}
+    if any(manifest.get(f'review-tools/{name}')!=value for name,value in bindings.items()):
+        raise ValueError('captured review-tool snapshot differs from its report manifest')
+    return bindings
+
+
 def receipt_id(receipt):
     payload={key:value for key,value in receipt.items() if key!='receipt_sha256'}
     return digest(json.dumps(payload,sort_keys=True,separators=(',',':'),allow_nan=False).encode())
@@ -120,7 +140,7 @@ def checked_sources(bundle,receipt_path):
         raise ValueError('missing versioned checked-source receipt')
     if receipt.get('receipt_sha256')!=receipt_id(receipt):raise ValueError('verification receipt content binding mismatch')
     if receipt.get('inputs')!=inputs:raise ValueError('verification receipt input binding mismatch')
-    if receipt.get('checked_sources')!=tool_bindings():raise ValueError('verification receipt script binding mismatch')
+    if receipt.get('checked_sources')!=captured_tool_bindings(receipt_path):raise ValueError('verification receipt script binding mismatch')
     if receipt['verification']['status'] not in ('verified','inconclusive'):raise ValueError('missing independent check disposition')
     expected_count=sum(len(attempt['steps']) for attempt in record['attempts'] if attempt['status']=='completed')
     expected_status='inconclusive' if any(p.get('status')=='inconclusive' for p in record['processes']) or any(a['status']!='completed' for a in record['attempts']) else 'verified'
