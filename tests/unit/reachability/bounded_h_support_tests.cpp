@@ -48,6 +48,18 @@ int main() {
     const auto& solved=std::get<BoundedHSupportResult>(answer);
     check(solved.bound.value>=1 && solved.bound.value<1.00000001);
     check(solved.lp_calls.size()==1);
+    auto four_answer=bounded_h_support(four,{{"test"},{"dual-four"}},
+        std::get<csl::registry::PreparedProvider<csl::registry::LPPort>>(prepared),{});
+    check(std::holds_alternative<BoundedHSupportResult>(four_answer));
+    const auto four_bound=std::get<BoundedHSupportResult>(four_answer).bound.value;
+    check(four_bound>=3 && four_bound<3.00000001);
+
+    BoundedHSupportInput fixed{{0,2,{}}, {}, {0,2,{}}, {},
+        {1,0}, {1,0}, {1,1}};
+    auto fixed_bound=residual_corrected_support(fixed,{},{});
+    check(std::holds_alternative<SupportUpperBound>(fixed_bound));
+    check(std::get<SupportUpperBound>(fixed_bound).value>=1);
+    check(std::get<SupportUpperBound>(fixed_bound).value<1.00000001);
 }
 
 // The production LP entry point accepts a registered provider and returns
