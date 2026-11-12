@@ -39,6 +39,26 @@ class OnlineTubeTests(unittest.TestCase):
         self.assertEqual(receipt['verification']['status'],'verified')
         self.assertNotEqual(receipt['checked_sources'],ONLINE_EVIDENCE.tool_bindings())
 
+    def test_saved_anchor_rejects_coordinated_checker_receipt_and_manifest_rewrite(self):
+        root=P.parents[3]/'reports/algorithm-results/mpc06-online-anchor-portable-v3'
+        with tempfile.TemporaryDirectory() as folder:
+            report=Path(folder)/root.name
+            shutil.copytree(root,report)
+            tool=report/'review-tools/model.py'
+            tool.write_bytes(tool.read_bytes()+b'\n# coordinated provenance rewrite\n')
+            receipt_path=report/'verification-v2.json'
+            receipt=json.loads(receipt_path.read_text())
+            receipt['checked_sources']['model.py']=ONLINE_EVIDENCE.digest(tool.read_bytes())
+            receipt['receipt_sha256']=ONLINE_EVIDENCE.receipt_id(receipt)
+            receipt_path.write_text(json.dumps(receipt,indent=2)+'\n')
+            files=sorted(path for path in report.rglob('*') if path.is_file() and path!=report/'SHA256SUMS')
+            (report/'SHA256SUMS').write_text(''.join(
+                f"{ONLINE_EVIDENCE.digest(path.read_bytes())}  {path.relative_to(report).as_posix()}\n"
+                for path in files))
+            bundle=report/'checked-inputs/mpc06-online-anchor-v1'
+            with self.assertRaisesRegex(ValueError,'reviewed report manifest binding'):
+                ONLINE_EVIDENCE.checked_sources(bundle,receipt_path)
+
     def test_terminal_elimination_and_unique_nominal_optimum(self):
         for p,q in [(Q(1,8),Q(0)),(Q(-1,4),Q(1,8)),(Q(0),Q(0))]:
             qp=M.problem((p,q),M.tightenings('polytope'))

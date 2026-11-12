@@ -3,6 +3,9 @@ from fractions import Fraction as Q
 from pathlib import Path
 import unittest
 import copy
+import shutil
+import tempfile
+import json
 from unittest import mock
 from scripts.reports.mpc06_delivery import records
 
@@ -65,6 +68,34 @@ class DeliveryExtractionTests(unittest.TestCase):
         current=records.evidence.digest((ROOT/'scripts/reports/mpc06_delivery/records.py').read_bytes())
         self.assertEqual(verification['status'],'verified')
         self.assertNotEqual(record['source_files']['scripts/reports/mpc06_delivery/records.py'],current)
+
+    def test_saved_completion_rejects_coordinated_source_and_manifest_rewrite(self):
+        root=ROOT/'reports/algorithm-results/mpc06-completion-v2'
+        with tempfile.TemporaryDirectory() as folder:
+            report=Path(folder)/root.name
+            shutil.copytree(root,report)
+            source=report/'input'
+            captured=source/'source/records.py'
+            captured.write_bytes(captured.read_bytes()+b'\n# coordinated provenance rewrite\n')
+            result_path=source/'result.json'
+            result=json.loads(result_path.read_text())
+            result['source_files']['scripts/reports/mpc06_delivery/records.py']=records.evidence.digest(captured.read_bytes())
+            result_path.write_text(json.dumps(result,indent=2)+'\n')
+            verification_path=source/'verification.json'
+            verification=json.loads(verification_path.read_text())
+            verification['result_sha256']=records.evidence.digest(
+                json.dumps(result,sort_keys=True,separators=(',',':')).encode())
+            verification_path.write_text(json.dumps(verification,indent=2)+'\n')
+            files=sorted(path for path in source.rglob('*') if path.is_file() and path!=source/'SHA256SUMS')
+            (source/'SHA256SUMS').write_text(''.join(
+                f"{records.evidence.digest(path.read_bytes())}  {path.relative_to(source).as_posix()}\n"
+                for path in files))
+            files=sorted(path for path in report.rglob('*') if path.is_file() and path!=report/'SHA256SUMS')
+            (report/'SHA256SUMS').write_text(''.join(
+                f"{records.evidence.digest(path.read_bytes())}  {path.relative_to(report).as_posix()}\n"
+                for path in files))
+            with self.assertRaisesRegex(ValueError,'reviewed delivery report manifest binding'):
+                records.validate(source)
 
     def test_held_native_plan_and_receding_prefix_are_checked_separately(self):
         online,files=records.upstream(records.UPSTREAM)

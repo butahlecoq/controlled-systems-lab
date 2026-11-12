@@ -124,7 +124,19 @@ class PagesAugmentationAggregation(unittest.TestCase):
                 "mpc11-controller-comparison-967db980c95590a5150b": "a14f045212e4bbd3858e1efa2ea62e2387c648bbb7742ef8cd4ec1317873866e",
                 "mpc11-mesh-timing-e1d5ebe497051adfdfad": "c8a84931f056a25c0cfb88b7ec8a24b16be4c119794d6e3964247d3af4374854",
             }
-            self.assertEqual(routes["mpc11"], "mpc11-controller-comparison-967db980c95590a5150b")
+            self.assertRegex(routes["mpc11"], r"^mpc11-controller-comparison-[0-9a-f]{20}$")
+            mpc11_route=site/routes["mpc11"]
+            mpc11_index=(mpc11_route/"index.html").read_bytes()
+            mpc11_manifest=json.loads((mpc11_route/"publication-manifest.json").read_text())
+            self.assertEqual(
+                routes["mpc11"],
+                "mpc11-controller-comparison-"+
+                hashlib.sha256(json.dumps(mpc11_manifest["identity"],sort_keys=True).encode()).hexdigest()[:20])
+            self.assertIn(f'href="../{routes["mpc11"]}.zip"',mpc11_index.decode())
+            with zipfile.ZipFile(site/(routes["mpc11"]+".zip")) as current_bundle:
+                self.assertEqual(current_bundle.read(routes["mpc11"]+"/index.html"),mpc11_index)
+                self.assertEqual(current_bundle.read(routes["mpc11"]+"/publication-manifest.json"),
+                                 (mpc11_route/"publication-manifest.json").read_bytes())
             self.assertEqual(routes["mpc11_studies"], "mpc11-mesh-timing-e1d5ebe497051adfdfad")
             self.assertEqual(routes["retained_mpc11_variants"], retained_mpc11)
             for route, expected_zip_hash in retained_mpc11.items():

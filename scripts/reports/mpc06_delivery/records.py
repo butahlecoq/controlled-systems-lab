@@ -18,6 +18,8 @@ from scripts.reports.mpc06_online import evidence,model
 
 UPSTREAM=ROOT/'reports/algorithm-results/mpc06-online-anchor-portable-v3'
 REVIEWED_UPSTREAM_MANIFEST_SHA256='8edb28e2744b1b061a47971e5f0613c30be64e7c25727c70bd1ec52d4244034a'
+REVIEWED_REPORT_ID='mpc06-completion-v2'
+REVIEWED_REPORT_MANIFEST_SHA256='1af58d5e6e24b5c8c00064a6d533e9fea4e26f64ee483e8d4f709fff72dabfa4'
 SOURCE_FILES=('scripts/reports/mpc06_delivery/reference.py','scripts/reports/mpc06_delivery/records.py',
               'scripts/reports/mpc06_delivery/figures.py','scripts/reports/figure_style.py','scripts/reports/plot.py','scripts/reports/report_data.py','scripts/reports/requirements.txt',
               'scripts/reports/mpc06_online/evidence.py','scripts/reports/mpc06_online/model.py')
@@ -163,7 +165,26 @@ def validate(source):
         if copied not in contents or evidence.digest(contents[copied])!=record['source_files'].get(name):
             raise ValueError('delivery copied source binding mismatch: '+name)
         captured_sources[name]=evidence.digest(contents[copied])
-    verification=check(record,online,upstream_files,captured_sources)
+    report_root=Path(source).resolve().parent
+    if report_root.name==REVIEWED_REPORT_ID:
+        report_manifest=report_root/'SHA256SUMS'
+        if (report_manifest.is_symlink() or not report_manifest.is_file() or
+                evidence.digest(report_manifest.read_bytes())!=REVIEWED_REPORT_MANIFEST_SHA256):
+            raise ValueError('reviewed delivery report manifest binding mismatch')
+        expected={}
+        for line in report_manifest.read_text(encoding='ascii').splitlines():
+            match=re.fullmatch(r'([0-9a-f]{64})  (.+)',line)
+            if not match or match[2] in expected:raise ValueError('invalid reviewed delivery report manifest')
+            expected[match[2]]=match[1]
+        actual={}
+        for path in report_root.rglob('*'):
+            if path.is_symlink():raise ValueError('reviewed delivery report contains a symlink')
+            if path.is_file() and path!=report_manifest:
+                actual[path.relative_to(report_root).as_posix()]=evidence.digest(path.read_bytes())
+        if actual!=expected:raise ValueError('reviewed delivery report files differ from its pinned manifest')
+        verification=check(record,online,upstream_files,captured_sources)
+    else:
+        verification=check(record,online,upstream_files)
     if evidence.json_value(contents['verification.json'])!=verification:raise ValueError('delivery saved verification disposition mismatch')
     return record,online,verification,contents
 
