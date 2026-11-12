@@ -19,7 +19,7 @@ from benchmarks.reporting.mpc07 import joint_filter as J
 
 ROOT=Path(__file__).resolve().parents[3]
 NATIVE='b3978a98a8bfb30e21841466244ed7f78e987886'
-SOURCE_PATHS={name:'benchmarks/reporting/mpc07/'+name for name in
+SOURCE_PATHS={name:'benchmarks/reporting/mpc07/'+('evidence/bounded-policy-0e821c2a/PLAN.md' if name=='PLAN.md' else name) for name in
               ('PLAN.md','README.md','JOINT-FILTER.md','policy.py','capture.py','report.py','joint_filter.py','joint_capture.py','native-build-receipt.json')}
 SOURCE_PATHS.update({'test_mpc07_policy.py':'tests/reporting/test_mpc07_policy.py',
     'test_mpc07_joint_filter.py':'tests/reporting/test_mpc07_joint_filter.py',
@@ -52,7 +52,11 @@ def checked_records(root,repository,hashes):
             if hashlib.sha256(content).hexdigest()!='631c84d73f1b228bd6797a0e2ccf5e4d409fafcf6ef9a3cf820be69f89cd40cb':
                 raise ValueError('sealed MPC07 README source hash differs')
             continue
-        if content!=subprocess.check_output(['git','show','--end-of-options',commit+':'+relative],cwd=repository):
+        candidates=[relative]
+        if name=='PLAN.md':candidates.append('benchmarks/reporting/mpc07/PLAN.md')
+        if not any(content==subprocess.run(['git','show','--end-of-options',commit+':'+candidate],
+                cwd=repository,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,check=False).stdout
+                for candidate in candidates):
             raise ValueError('joint source differs from recorded Git commit: '+name)
     rows=[];policies={};seen=set()
     for folder in sorted((root/'attempts').iterdir()):

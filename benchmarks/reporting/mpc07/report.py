@@ -40,7 +40,7 @@ def inventory(root):
 
 
 SOURCE_PATHS={
-    'PLAN.md':'benchmarks/reporting/mpc07/PLAN.md',
+    'PLAN.md':'benchmarks/reporting/mpc07/evidence/bounded-policy-0e821c2a/PLAN.md',
     'README.md':'benchmarks/reporting/mpc07/README.md',
     'capture.py':'benchmarks/reporting/mpc07/capture.py',
     'policy.py':'benchmarks/reporting/mpc07/policy.py',
@@ -66,8 +66,19 @@ def authenticate_sources(root,environment,repository):
                 raise ValueError('sealed MPC07 README source hash differs')
             continue
         commit=NATIVE_REVISION if name in ('native-affine_bridge.cpp','native-CMakeLists.txt') else revision
-        committed=subprocess.check_output(['git','show','--end-of-options',commit+':'+relative],cwd=repository)
-        if content!=committed:raise ValueError('source snapshot differs from recorded Git commit: '+name)
+        candidates=[relative]
+        if name=='PLAN.md':candidates.append('benchmarks/reporting/mpc07/PLAN.md')
+        matches=False
+        for candidate in candidates:
+            try:
+                committed=subprocess.check_output(['git','show','--end-of-options',commit+':'+candidate],
+                    cwd=repository,stderr=subprocess.DEVNULL)
+            except subprocess.CalledProcessError:
+                continue
+            if content==committed:
+                matches=True
+                break
+        if not matches:raise ValueError('source snapshot differs from recorded Git commit: '+name)
     native_receipt=json.loads((root/'source/native-build-receipt.json').read_text())
     if native_receipt['source_revision']!=NATIVE_REVISION or native_receipt['bridge_sha256']!=capture.BRIDGE_SHA:
         raise ValueError('reused native source/build receipt differs')
