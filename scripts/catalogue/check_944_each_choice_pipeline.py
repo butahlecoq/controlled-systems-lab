@@ -156,10 +156,40 @@ def main() -> int:
         elif row["task"] == "linear" and row["terminal_lp_provider"] != "csl.lp.highs":
             assert row["first_unmet"] and "phase_one.objective" in row["first_unmet"], row
 
+    regression_result = subprocess.run([sys.argv[1], "--terminal-membership-indexing-regression"],
+        check=True, capture_output=True, text=True)
+    regression = json.loads(regression_result.stdout)
+    assert regression["schema"] == "csl.strategy-a-terminal-membership-indexing-regression/1"
+    assert regression["task"] == {
+        "dynamics": "x_next=x+u",
+        "initial_state": [2, 3],
+        "initial_state_box": [[1, 2], [2, 3]],
+        "control_box": [[0, 1], [1, 2]],
+        "next_state_box": [[2, 3], [4, 5]],
+    }
+    attempt = regression["attempt"]
+    assert attempt["status"] == "completed", attempt
+    assert attempt["history_recovery_status"] == "completed", attempt
+    assert attempt["history_recovery_api"] == "csl.synthesis.recover_joint_history@1", attempt
+    assert attempt["history_selection_provider"] == "csl.lp.highs", attempt
+    assert attempt["independent_check"]["selected_history_in_returned_family"], attempt
+    assert attempt["independent_check"]["selected_history_in_terminal_family"], attempt
+    assert not attempt["independent_check"]["selected_control_in_terminal_family"], attempt
+    history = attempt["selected_history"]
+    x0, endpoint, control = history[:2], history[2:4], history[4:6]
+    assert x0 == [2.0, 3.0], attempt
+    assert endpoint != control, attempt
+    assert endpoint == [x0[i] + control[i] for i in range(2)], attempt
+    assert all(low <= value <= high for (low, high), value in zip([[1, 2], [2, 3]], x0)), attempt
+    assert all(low <= value <= high for (low, high), value in zip([[0, 1], [1, 2]], control)), attempt
+    assert all(low <= value <= high for (low, high), value in zip([[2, 3], [4, 5]], endpoint)), attempt
+    assert any(value < low or value > high for (low, high), value in zip([[2, 3], [4, 5]], control)), attempt
+
     print(f"#944 2D Strategy A pipeline: {len(rows)} task/choice tuples checked; "
           f"{sum(row['status'] == 'completed' for row in rows)} completed with recovered selected histories, "
           f"{len(phase_one_terminal_rejections)} Phase-I/nonzero-objective rejections, "
-          f"{len(numeric_boundaries)} Qhull/HiGHS numeric-boundary rejections")
+          f"{len(numeric_boundaries)} Qhull/HiGHS numeric-boundary rejections; "
+          "terminal-state membership indexing regression passed")
     return 0
 
 

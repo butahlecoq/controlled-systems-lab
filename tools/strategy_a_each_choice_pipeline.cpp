@@ -198,23 +198,47 @@ std::vector<ReducerChoice> reducer_choices() {
     };
 }
 
-SetHandle box(std::string id, std::string x, std::string y, double lx, double ux, double ly, double uy) {
+struct BoxBounds2D {
+    double x_lower;
+    double x_upper;
+    double y_lower;
+    double y_upper;
+};
+
+struct ControlProblemShape {
+    Vector initial_state;
+    BoxBounds2D initial_state_box;
+    BoxBounds2D control_box;
+    BoxBounds2D next_state_box;
+};
+
+ControlProblemShape standard_control_problem_shape() {
+    return {{0,0}, {-1,1,-1,1}, {0,1,0,1}, {0,1,0,1}};
+}
+
+ControlProblemShape terminal_membership_indexing_shape() {
+    return {{2,3}, {1,2,2,3}, {0,1,1,2}, {2,3,4,5}};
+}
+
+SetHandle box(std::string id, std::string x, std::string y, const BoxBounds2D& bounds) {
     return take(sets::make_h({SetId{std::move(id)}, 2, {std::move(x), std::move(y)}},
         {take(numeric::snapshot(Matrix{4, 2, {1,0,-1,0,0,1,0,-1}})),
-         take(numeric::snapshot_vector(Vector{ux,-lx,uy,-ly})),
+         take(numeric::snapshot_vector(Vector{bounds.x_upper,-bounds.x_lower,
+             bounds.y_upper,-bounds.y_lower})),
          take(numeric::snapshot(Matrix{0,2,{}})), take(numeric::snapshot_vector(Vector{}))})).as_handle();
 }
 
-problem::ResolvedProblem control_problem(bool quadratic) {
+problem::ResolvedProblem control_problem(bool quadratic, const ControlProblemShape& shape) {
     TerminalObjective objective = quadratic
         ? TerminalObjective{QuadraticTerminal{Matrix{2,2,{2,0,0,2}}, Vector{0,0}, 0}}
         : TerminalObjective{LinearTerminal{Vector{-1,0}, 0}};
     Problem source{{quadratic ? "issue944-planar-quadratic" : "issue944-planar-linear"},
         std::make_shared<const SystemModel>(SystemModel{{{2,2,0}, TimeDomain::discrete,
             LinearStage{Matrix{2,2,{1,0,0,1}}, Matrix{2,2,{1,0,0,1}}, Matrix{2,0,{}}, Vector{0,0}}}, {}}),
-        {0,1}, KnownInitial{{0,0}}, ContinuousDomain{{box("issue944-u", "u0", "u1", 0,1,0,1)}},
-        {box("issue944-x0", "position", "velocity", -1,1,-1,1),
-         box("issue944-x1", "position", "velocity", 0,1,0,1)}, {}, {},
+        {0,1}, KnownInitial{shape.initial_state}, ContinuousDomain{{
+            box("issue944-u", "u0", "u1", shape.control_box)}},
+        {box("issue944-x0", "position", "velocity", shape.initial_state_box),
+         box("issue944-x1", "position", "velocity", shape.next_state_box)}, {}, {},
         InformationPattern::nominal_open_loop, std::move(objective)};
     return take(problem::resolve(source, {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}));
 }
@@ -329,6 +353,7 @@ struct Trial {
     bool returned_relation{};
     bool selected_history_in_returned_family{};
     bool selected_history_in_terminal_family{};
+    bool selected_control_in_terminal_family{};
     std::size_t vertex_lp_calls{};
     std::size_t converter_lp_calls{};
     std::size_t terminal_lp_calls{};
@@ -484,7 +509,7 @@ std::optional<double> smallest_nonzero(const numeric::MatrixView& matrix) {
     return minimum;
 }
 
-void emit_trial(std::ostream& out, const Trial& trial) {
+void emit_trial(std::ostream& out, const Trial& trial, bool include_control_terminal_probe = false) {
     out << "{\"task\":" << quote(trial.task)
         << ",\"controller\":\"csl.synthesis.reach-back@1\",\"representation\":\"csl.polyhedron.h\""
         << ",\"vertex_reducer\":" << quote(trial.reducer)
@@ -506,8 +531,11 @@ void emit_trial(std::ostream& out, const Trial& trial) {
         << ",\"history_selection\":" << trial.history_selection_lp_calls << '}'
         << ",\"independent_check\":{\"forward_hull_is_unit_square\":" << (trial.geometry_check ? "true" : "false")
         << ",\"selected_history_in_returned_family\":" << (trial.selected_history_in_returned_family ? "true" : "false")
-        << ",\"selected_history_in_terminal_family\":" << (trial.selected_history_in_terminal_family ? "true" : "false")
-        << ",\"candidate_relation_returned\":" << (trial.returned_relation ? "true" : "false") << '}'
+        << ",\"selected_history_in_terminal_family\":" << (trial.selected_history_in_terminal_family ? "true" : "false");
+    if (include_control_terminal_probe)
+        out << ",\"selected_control_in_terminal_family\":"
+            << (trial.selected_control_in_terminal_family ? "true" : "false");
+    out << ",\"candidate_relation_returned\":" << (trial.returned_relation ? "true" : "false") << '}'
         << ",\"forward_vertices\":[";
     for (std::size_t i=0; i<trial.forward_vertices.size(); ++i) { if (i) out << ','; out << json_vector(trial.forward_vertices[i]); }
     out << "],\"terminal_point\":[";
@@ -527,7 +555,8 @@ void emit_trial(std::ostream& out, const Trial& trial) {
 }
 
 Trial execute(const std::string& task, const std::string& reducer_id, const std::string& vertex_lp_id,
-        const std::string& terminal_lp_id, const std::string& terminal_choice, bool source_index) {
+        const std::string& terminal_lp_id, const std::string& terminal_choice, bool source_index,
+        const ControlProblemShape& shape = standard_control_problem_shape()) {
     Trial trial{task, reducer_id, vertex_lp_id, terminal_lp_id, terminal_choice};
     auto choices = lp_choices();
     const auto find_lp = [&](const std::string& id) -> registry::Registration<registry::LPPort> {
@@ -728,7 +757,7 @@ Trial execute(const std::string& task, const std::string& reducer_id, const std:
             registry::ConversionPort, registry::LPPort, registry::ConvexPort>>(std::move(checked)));
     registry::StrategyRegistry strategies;
     if (strategies.add(std::move(strategy))) throw std::runtime_error("Strategy A registration rejected");
-    auto problem = control_problem(task == "quadratic");
+    auto problem = control_problem(task == "quadratic", shape);
     FamilyRequest family;
     family.objective = problem.identity();
     family.profile = "nominal_open_loop";
@@ -810,8 +839,10 @@ Trial execute(const std::string& task, const std::string& reducer_id, const std:
                         const auto terminal_representation=history->terminal->relation->representation();
                         if (const auto* terminal_h=std::get_if<sets::HRepresentation>(&terminal_representation)) {
                             if (trial.selected_history.size()==6) {
-                                const Vector selected_terminal{trial.selected_history[4],trial.selected_history[5]};
+                                const Vector selected_terminal{trial.selected_history[2],trial.selected_history[3]};
                                 trial.selected_history_in_terminal_family=contains(*terminal_h,selected_terminal);
+                                const Vector control{trial.selected_history[4],trial.selected_history[5]};
+                                trial.selected_control_in_terminal_family=contains(*terminal_h,control);
                             }
                         }
                     }
@@ -862,14 +893,31 @@ void emit_matrix(std::ostream& out) {
     for (std::size_t i=0; i<trials.size(); ++i) { if (i) out << ','; emit_trial(out, trials[i]); }
     out << "]}\n";
 }
+
+void emit_terminal_membership_indexing_regression(std::ostream& out) {
+    const auto shape = terminal_membership_indexing_shape();
+    const auto trial = execute("linear", "csl.hull.lp-membership", "csl.lp.highs",
+        "csl.lp.highs", "csl.lp.highs", false, shape);
+    out << "{\"schema\":\"csl.strategy-a-terminal-membership-indexing-regression/1\","
+        << "\"task\":{\"dynamics\":\"x_next=x+u\",\"initial_state\":[2,3],"
+        << "\"initial_state_box\":[[1,2],[2,3]],\"control_box\":[[0,1],[1,2]],"
+        << "\"next_state_box\":[[2,3],[4,5]]},\"attempt\":";
+    emit_trial(out, trial, true);
+    out << "}\n";
+}
 }
 
-int main() try {
+int main(int argc, char** argv) try {
 #if !CSL_PIPELINE_HAS_HIGHS || !CSL_PIPELINE_HAS_QHULL
     std::cout << "{\"schema\":\"csl.strategy-a-each-choice-pipeline/2\",\"status\":\"backend_unavailable\","
         << "\"first_unmet\":\"This probe requires compiled HiGHS LP, HiGHS convex and Qhull providers.\"}\n";
 #else
-    emit_matrix(std::cout);
+    if (argc == 2 && std::string_view(argv[1]) == "--terminal-membership-indexing-regression")
+        emit_terminal_membership_indexing_regression(std::cout);
+    else if (argc == 1)
+        emit_matrix(std::cout);
+    else
+        throw std::invalid_argument("unsupported pipeline runner argument");
 #endif
     return 0;
 } catch (const std::exception& error) {
