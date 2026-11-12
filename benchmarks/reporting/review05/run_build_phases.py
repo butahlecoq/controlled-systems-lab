@@ -64,7 +64,7 @@ def summarize(bundle):
     for row in summaries:
         if row['collector']!='on':continue
         page.append(f'<tr><td>{row["fixture"]} / {row["horizon"]}</td><td>{row["n"]}</td>'+''.join(f'<td>{fmt(row[key])}</td>' for key in ('build_ns','joint_h_assembly_ns','objective_lift_ns','program_freeze_ns','build_residual_ns'))+'</tr>')
-    page.append('<p>Collector-mode distributions and process-wall times remain separate in the summary; host load/observer costs prevent interpreting every mode difference as pure overhead. Hard native heap enforcement remains unsupported. Build and reproduce using <a href="source/BUILD-PHASES.md">the saved phase contract</a>. The independently reviewed scalar 2D illustration remains in the preceding <a href="../review05-family-query-20261110-3b98f5b0/index.html">family-query report</a>. This follow-up is not a new control algorithm or Pages deployment; #95 remains open.</p></html>')
+    page.append('<p>Collector-mode distributions and process-wall times remain separate in the summary; host load/observer costs prevent interpreting every mode difference as pure overhead. Hard native heap enforcement remains unsupported. Rebuild the bounded capture from a clean Release tree with <code>run_build_phases.py --driver &lt;Release-driver&gt; --build-cache &lt;Release-CMakeCache.txt&gt; --output &lt;new-empty-directory&gt;</code>; the runner records the actual source revision, fixture inputs and source hashes. The independently reviewed scalar 2D illustration remains in the preceding <a href="../review05-family-query-20261110-3b98f5b0/index.html">family-query report</a>. This follow-up is not a new control algorithm or Pages deployment; #95 remains open.</p></html>')
     (bundle/'index.html').write_text('\n'.join(page)+'\n')
     files=sorted(p for p in bundle.rglob('*') if p.is_file() and p.name!='SHA256SUMS')
     (bundle/'SHA256SUMS').write_text(''.join(f'{sha(p)}  {p.relative_to(bundle).as_posix()}\n' for p in files))
@@ -83,8 +83,6 @@ def main():
     for name in FILES:shutil.copy2(source/'scenarios'/name,bundle/'scenarios'/name)
     for name in ('family_query_ladder.cpp','check_family_query.py','check_build_phases.py','run_build_phases.py','run_horizon_ladder.py','render_family_query.py','scalar_query_oracle.py','build_phase_probe.cmake'):
         shutil.copy2(source/name,bundle/'source'/name)
-    # Preserve the original source artifact name and bytes in frozen captures.
-    shutil.copy2(source/'BUILD-PHASES.txt',bundle/'source'/'BUILD-PHASES.md')
     shutil.copy2(root/'src/synthesis/strategy_b/direct_joint.cpp',bundle/'source/direct_joint.cpp')
     shutil.copy2(args.build_cache,bundle/'CMakeCache.txt')
     environment={'schema':'csl.review05.build-phase-environment/1','source_commit':revision,'source_status':status,'binary_sha256':sha(driver),
