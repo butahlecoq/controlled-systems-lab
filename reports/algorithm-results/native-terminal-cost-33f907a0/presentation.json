@@ -1,0 +1,6 @@
+{
+  "renderer_sha256": "98fb73307e3ee4a2eb9096de2f3f778f232881844923a8c12f2c96e7a64bbe0e",
+  "shared_stylesheet_sha256": "11ded2b69cec694ff61ecad0493f175becbfc47bce3d641f2ee512543bb82cf4",
+  "capture_source": "33f907a0af18e49e52b9c7bbc6f6a49c6dc29d50",
+  "scope": "Rendered from saved diagnostic exchanges; no solver or benchmark is run."
+}

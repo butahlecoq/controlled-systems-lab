@@ -167,6 +167,11 @@ SAVED_COMPANION_ROUTES = {
     "benchmarks/reporting/issue6/b09_render_projection.py",
 }
 SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
+SAVED_DATA_ILLUSTRATION_RENDERERS = {
+    "scripts/reports/native_terminal_cost_example.py": (
+        "Renders the source-bound before/after native diagnostic exchanges and analytic terminal-cost contours "
+        "with shared screen/print tokens; it runs no solver and makes no full-episode or performance claim."),
+}
 SAVED_DATA_COMPANION_RENDERERS = {
     "benchmarks/reporting/closed_loop/run_closed_loop.py",
     "scripts/reports/recorded_closed_loop_figures.py",
@@ -312,6 +317,8 @@ def source_inventory(root: Path) -> list[dict]:
                 disposition = "measurement-collector-preserved-with-saved-data-companion"
             elif relative in SAVED_DATA_COMPANION_RENDERERS:
                 disposition = "analytic-reference-checked-saved-run-renderer"
+            elif relative in SAVED_DATA_ILLUSTRATION_RENDERERS:
+                disposition = "saved-data-illustration-renderer"
             elif relative in FROZEN_DIAGRAM_EXCEPTIONS:
                 disposition = "reviewed-static-diagram-exception"
             elif relative in PUBLICATION_EXPORT_ROUTES:
@@ -360,7 +367,9 @@ def source_inventory(root: Path) -> list[dict]:
             entries.append({"source": relative, "signal_count": len(matches),
                             "asset_name_literals": assets, "disposition": disposition,
                             **({"role_and_disposition_reason": VIZ10_ROLE_REASONS[relative]}
-                               if relative in VIZ10_ROLE_REASONS else {}),
+                               if relative in VIZ10_ROLE_REASONS else
+                               {"role_and_disposition_reason": SAVED_DATA_ILLUSTRATION_RENDERERS[relative]}
+                               if relative in SAVED_DATA_ILLUSTRATION_RENDERERS else {}),
                             **({"follow_up_issue": FOLLOW_UP_ISSUE_OVERRIDES.get(
                                     relative, migration_issue(relative))}
                                if disposition == "deferred-family-specific-migration" else {})})

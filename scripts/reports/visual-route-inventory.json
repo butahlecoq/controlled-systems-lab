@@ -1060,6 +1060,16 @@
       "disposition": "composes-or-copies-existing-saved-figure"
     },
     {
+      "source": "scripts/reports/native_terminal_cost_example.py",
+      "signal_count": 8,
+      "asset_name_literals": [
+        "cost-contours-print.svg",
+        "cost-contours.svg"
+      ],
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Renders the source-bound before/after native diagnostic exchanges and analytic terminal-cost contours with shared screen/print tokens; it runs no solver and makes no full-episode or performance claim."
+    },
+    {
       "source": "scripts/reports/opt04/render.py",
       "signal_count": 5,
       "asset_name_literals": [
@@ -2016,7 +2026,7 @@
     },
     {
       "source": "scripts/reports/visual_examples.py",
-      "signal_count": 86,
+      "signal_count": 87,
       "asset_name_literals": [
         "adaptive-ode-replay.svg",
         "app01-plan-timing-v1.svg",
@@ -2028,6 +2038,7 @@
         "b04-repeated-oxidizer.svg",
         "b07-b07-reconstruction-s0-l0-d0.png",
         "control-projection.svg",
+        "cost-contours.svg",
         "ellipsoid-2d.svg",
         "ellipsoid-planar-example.svg",
         "example-2d.svg",
@@ -3614,6 +3625,17 @@
       "index_sha256": "5aedfc545cf114531f293321592fde3412cc56956e1495085a50e26f3d997e7b",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 605
+    },
+    {
+      "route": "native-terminal-cost-33f907a0",
+      "source_bundle": "native-terminal-cost-33f907a0",
+      "assets": [
+        "cost-contours-print.svg",
+        "cost-contours.svg"
+      ],
+      "index_sha256": "87ca880c5b75a633e81005cfdaddf1db5c653b10139144b39600d133e353d99d",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
     },
     {
       "route": "opt04-20261013T172839Z-6451c4b89d3b",
