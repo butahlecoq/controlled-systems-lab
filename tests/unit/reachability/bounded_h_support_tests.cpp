@@ -2,6 +2,7 @@
 #include <csl/adapters/lp/highs.hpp>
 #include <csl/reachability/feedback_geometry.hpp>
 #include <csl/reachability/finite_plan_zonotope.hpp>
+#include <csl/reachability/finite_plan_box.hpp>
 #include <cstdlib>
 
 void check(bool condition) { if (!condition) std::abort(); }
@@ -48,6 +49,12 @@ int main() {
         matrix({2,0,{}}),vector({0,0})};
     FinitePlanZonotopeTrace::Stage state{{0,0},{2,1,{1,1}},{{"state"}}};
     FinitePlanZonotopeTrace::Stage control{{0},{1,1,{0.5}},{{"u"}}};
+    auto propagated_box=propagate_existential_control_box(dynamics,
+        {{-1,-1},{1,1}},{{-0.5},{0.5}},{});
+    check(std::holds_alternative<BoxStage>(propagated_box));
+    const auto& next_box=std::get<BoxStage>(propagated_box);
+    check(next_box.lower[0]<=-2.5 && next_box.upper[0]>=2.5);
+    check(next_box.lower[1]<=-1.5 && next_box.upper[1]>=1.5);
     auto propagated=propagate_existential_control_zonotope(dynamics,state,control,20,{},0);
     check(std::holds_alternative<FinitePlanZonotopeTrace::Stage>(propagated));
     const auto& next=std::get<FinitePlanZonotopeTrace::Stage>(propagated);

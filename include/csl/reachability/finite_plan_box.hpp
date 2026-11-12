@@ -33,4 +33,10 @@ using FinitePlanBoxOutcome = std::variant<FinitePlanBoxTrace, Unsupported,
 FinitePlanBoxOutcome finite_plan_box(const FixedPlanRequest& request,
     const ExecutionContext& context = {});
 
+// One-step image of a state box under the whole continuous control box.
+// B is mapped to the geometric input role with existential semantics.
+std::variant<BoxStage, Unsupported, OperationStopped>
+propagate_existential_control_box(const model::DynamicsStage&, const BoxStage&,
+    const BoxStage& controls, const ExecutionContext&);
+
 } // namespace csl::reachability
