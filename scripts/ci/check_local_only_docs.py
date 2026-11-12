@@ -6,13 +6,14 @@ against the PR base rather than reclassifying the entire existing corpus. The
 ADR shape check is only a syntax gate; reviewers must verify that each ADR is a
 real decision record and not a renamed plan or worklog.
 """
+
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 STANDING_DOCS = {
     "docs/agents/issue-tracker.md",
@@ -26,8 +27,12 @@ ISSUE_TEMPLATES = {
     ".github/ISSUE_TEMPLATE/reproduction.md",
     ".github/ISSUE_TEMPLATE/scientific-correction.md",
 }
-ADR_PATH = re.compile(r"docs/architecture/decisions/(?P<number>[0-9]{4})-[a-z0-9]+(?:-[a-z0-9]+)*\.md\Z")
-WORKING_PATH_WORD = re.compile(r"(?:^|[-_.])(plan|plans|spec|specs|draft|drafts|review|reviews|notes)(?:[-_.]|$)", re.I)
+ADR_PATH = re.compile(
+    r"docs/architecture/decisions/(?P<number>[0-9]{4})-[a-z0-9]+(?:-[a-z0-9]+)*\.md\Z"
+)
+WORKING_PATH_WORD = re.compile(
+    r"(?:^|[-_.])(plan|plans|spec|specs|draft|drafts|review|reviews|notes)(?:[-_.]|$)", re.I
+)
 MARKDOWN_SUFFIXES = {".md", ".markdown"}
 DOCUMENT_SUFFIXES = MARKDOWN_SUFFIXES | {".rst", ".adoc", ".org", ".text", ".txt"}
 WORKING_DOCUMENT_SUFFIXES = DOCUMENT_SUFFIXES | {".json", ".yml", ".yaml"}
@@ -37,9 +42,24 @@ FUNCTIONAL_DOC_ASSETS = {
     "docs/contracts/closed-loop/": {".json", ".sha256"},
     "docs/examples/": {".css", ".csv", ".html", ".json", ".png", ".svg"},
     "docs/research/evidence/": {
-        ".c", ".cmake", ".cpp", ".html", ".json", ".jsonl", ".log", ".make",
-        ".out", ".png", ".py", ".sha256", ".stderr", ".stdout", ".svg", ".txt",
-        ".yml", ".yaml",
+        ".c",
+        ".cmake",
+        ".cpp",
+        ".html",
+        ".json",
+        ".jsonl",
+        ".log",
+        ".make",
+        ".out",
+        ".png",
+        ".py",
+        ".sha256",
+        ".stderr",
+        ".stdout",
+        ".svg",
+        ".txt",
+        ".yml",
+        ".yaml",
     },
     "docs/research/figures/": {".png", ".svg"},
     "docs/research/tools/": {".py"},
@@ -88,10 +108,16 @@ def is_retained_markdown(path: str, root: Path) -> bool:
         return False
     first_line = lines[0] if lines else ""
     has_metadata = any(line.startswith("Date:") for line in lines[:8]) and any(
-        "Status:" in line for line in lines[:8])
-    has_decision = any(re.fullmatch(r"## Decision(?: and alternatives)?", line) or
-                       re.fullmatch(r"## Context and decision", line) for line in lines)
-    return first_line.startswith(f"# ADR {match.group('number')}:") and has_metadata and has_decision
+        "Status:" in line for line in lines[:8]
+    )
+    has_decision = any(
+        re.fullmatch(r"## Decision(?: and alternatives)?", line)
+        or re.fullmatch(r"## Context and decision", line)
+        for line in lines
+    )
+    return (
+        first_line.startswith(f"# ADR {match.group('number')}:") and has_metadata and has_decision
+    )
 
 
 def changed_paths(base: str, root: Path) -> list[str]:
@@ -106,19 +132,26 @@ def is_working_document_path(path: str) -> bool:
     parts = path.split("/")
     stem = Path(path).stem
     suffix = Path(path).suffix.lower()
-    return ((stem.lower() == "readme" and suffix in DOCUMENT_SUFFIXES) or
-            any(part.lower() in {"notes", "plans", "specs", "drafts", "reviews"} for part in parts) or
-            bool(WORKING_PATH_WORD.search(stem)))
+    return (
+        (stem.lower() == "readme" and suffix in DOCUMENT_SUFFIXES)
+        or any(part.lower() in {"notes", "plans", "specs", "drafts", "reviews"} for part in parts)
+        or bool(WORKING_PATH_WORD.search(stem))
+    )
 
 
 def is_functional_doc_asset(path: str) -> bool:
     if path in FUNCTIONAL_DOC_EXACT_ASSETS:
         return True
-    if path.startswith("docs/research/evidence/") and Path(path).name in {"SHA256SUMS", "exit-code"}:
+    if path.startswith("docs/research/evidence/") and Path(path).name in {
+        "SHA256SUMS",
+        "exit-code",
+    }:
         return True
     suffix = Path(path).suffix.lower()
-    return any(path.startswith(prefix) and suffix in suffixes
-               for prefix, suffixes in FUNCTIONAL_DOC_ASSETS.items())
+    return any(
+        path.startswith(prefix) and suffix in suffixes
+        for prefix, suffixes in FUNCTIONAL_DOC_ASSETS.items()
+    )
 
 
 def is_explicit_working_directory(path: str) -> bool:
@@ -127,8 +160,9 @@ def is_explicit_working_directory(path: str) -> bool:
 
 def is_functional_repo_asset(path: str) -> bool:
     suffix = Path(path).suffix.lower()
-    return (not suffix in DOCUMENT_SUFFIXES and
-            any(path.startswith(prefix) for prefix in FUNCTIONAL_REPO_ASSET_LOCATIONS))
+    return not suffix in DOCUMENT_SUFFIXES and any(
+        path.startswith(prefix) for prefix in FUNCTIONAL_REPO_ASSET_LOCATIONS
+    )
 
 
 def is_retained_change(path: str, root: Path) -> bool:
@@ -161,7 +195,10 @@ def main() -> int:
     base = args.base or git(root, "rev-parse", "HEAD^").strip()
     bad = [path for path in changed_paths(base, root) if not is_retained_change(path, root)]
     if bad:
-        print("Working documents are local-only; changed paths outside the retained guide, ADR, and functional-asset set:", file=sys.stderr)
+        print(
+            "Working documents are local-only; changed paths outside the retained guide, ADR, and functional-asset set:",
+            file=sys.stderr,
+        )
         for path in bad:
             print(f"  {path}", file=sys.stderr)
         return 1

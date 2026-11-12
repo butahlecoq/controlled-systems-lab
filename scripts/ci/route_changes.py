@@ -1,11 +1,11 @@
 """Route complete Git diffs through conservative native/report validation gates."""
+
 from __future__ import annotations
 
 import json
 import os
-from pathlib import Path
 import subprocess
-
+from pathlib import Path
 
 # Ownership map: mutable Pages shells, report companions and their presentation
 # tests. These Python renderers read saved inputs but never define native targets.
@@ -71,11 +71,16 @@ def changed_paths(event_name, event):
         raise ValueError("manual or unknown event requires both gates")
     # Only object IDs from the event enter the revision expression, never refs
     # or shell text. Both sides of a rename count as changed paths.
-    if any(len(sha) != 40 or any(c not in "0123456789abcdef" for c in sha)
-           or sha == "0" * 40 for sha in (base, head)):
+    if any(
+        len(sha) != 40 or any(c not in "0123456789abcdef" for c in sha) or sha == "0" * 40
+        for sha in (base, head)
+    ):
         raise ValueError("event has no usable source object IDs")
-    result = subprocess.run(["git", "diff", "--name-only", "-z", "--no-renames",
-                             comparison, "--"], check=True, capture_output=True)
+    result = subprocess.run(
+        ["git", "diff", "--name-only", "-z", "--no-renames", comparison, "--"],
+        check=True,
+        capture_output=True,
+    )
     if not result.stdout:
         return []
     return result.stdout.decode("utf-8", errors="surrogateescape").rstrip("\0").split("\0")
