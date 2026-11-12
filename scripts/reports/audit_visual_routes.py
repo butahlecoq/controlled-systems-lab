@@ -168,6 +168,12 @@ SAVED_COMPANION_ROUTES = {
 }
 SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
 SAVED_DATA_ILLUSTRATION_RENDERERS = {
+    "scripts/reports/render_issue944_each_choice.py": (
+        "Renders the immutable source-bound Strategy A choice records and independent recovered-history values "
+        "with shared screen/print tokens; it runs no solver and makes no full-family or performance claim."),
+    "scripts/reports/render_issue944_postfix.py": (
+        "Renders the source-bound post-fix Strategy A choice records and independent recovered-history values "
+        "with shared screen/print tokens; it runs no solver and makes no full-family or performance claim."),
     "scripts/reports/native_terminal_cost_example.py": (
         "Renders the source-bound before/after native diagnostic exchanges and analytic terminal-cost contours "
         "with shared screen/print tokens; it runs no solver and makes no full-episode or performance claim."),
