@@ -112,7 +112,10 @@ def _render_candidate(output: Path) -> dict:
     (raw / "coverage.json").write_text(json.dumps(portable_coverage, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     source_identities = {"schema": "csl.closed-loop.report-source-identities/1", "tasks": {},
         "capability_manifest": {"source": "docs/catalogue/closed-loop-pilot-capabilities-v1.json",
-            "path": "capabilities/closed-loop-pilot-capabilities-v1.json"}}
+            "path": "capabilities/closed-loop-pilot-capabilities-v1.json"},
+        "tooling": {name: {"path": name, "sha256": digest((ROOT / name).read_bytes())}
+            for name in ("scripts/reports/render_closed_loop_pilot.py",
+                "benchmarks/reporting/closed_loop/attempt_records.py")}}
     capability_dir = raw / "capabilities"; capability_dir.mkdir(parents=True, exist_ok=True)
     for capability_file in ("closed-loop-pilot-capabilities-v1.json", "closed-loop-pilot-capabilities-v1.sha256"):
         shutil.copyfile(ROOT / "docs/catalogue" / capability_file, capability_dir / capability_file)

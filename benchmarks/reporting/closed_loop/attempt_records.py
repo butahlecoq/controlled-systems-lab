@@ -86,13 +86,17 @@ def atomic_json(path: Path, value: Any) -> WriteReceipt:
                         serialization_seconds, fsync_seconds)
 
 
-def append_jsonl(path: Path, value: Mapping[str, Any]) -> int:
+def append_jsonl(path: Path, value: Mapping[str, Any]) -> WriteReceipt:
+    started = time.perf_counter()
     encoded = (json.dumps(value, separators=(",", ":"), allow_nan=False) + "\n").encode("utf-8")
+    serialization_seconds = time.perf_counter() - started
+    fsync_started = time.perf_counter()
     with path.open("ab") as stream:
         stream.write(encoded)
         stream.flush()
         os.fsync(stream.fileno())
-    return len(encoded)
+    return WriteReceipt(path.name, len(encoded), hashlib.sha256(encoded).hexdigest(),
+                        serialization_seconds, time.perf_counter() - fsync_started)
 
 
 def append_io_event(attempt_dir: Path, event: Mapping[str, Any]) -> None:
@@ -219,6 +223,16 @@ def write_attempt(attempt_dir: Path, value: Mapping[str, Any]) -> WriteReceipt:
     return receipt
 
 
+def write_record_artifact(attempt_dir: Path, path: Path, value: Any,
+                          scope: str) -> WriteReceipt:
+    receipt = atomic_json(path, value)
+    append_io_event(attempt_dir, {"operation": "record-artifact", "scope": scope,
+        "path": str(path.relative_to(attempt_dir)), "bytes_written": receipt.bytes_written,
+        "sha256": receipt.sha256, "serialization_seconds": receipt.serialization_seconds,
+        "fsync_seconds": receipt.fsync_seconds})
+    return receipt
+
+
 def write_stage(attempt_dir: Path, update_index: int, value: Mapping[str, Any]) -> WriteReceipt:
     path = f"stage-{update_index:03d}.json"
     receipt = atomic_json(attempt_dir / path, value)
@@ -237,10 +251,11 @@ def _append_reference(attempt_dir: Path, update_index: int, path: Path) -> dict[
     digest = file_sha256(path)
     row = {"schema": STAGE_REFERENCE_SCHEMA, "update_index": update_index,
         "path": relative, "bytes": byte_count, "sha256": digest}
-    index_bytes = append_jsonl(attempt_dir / STAGE_INDEX, row)
+    index_receipt = append_jsonl(attempt_dir / STAGE_INDEX, row)
     append_io_event(attempt_dir, {"operation": "stage-reference", "update_index": update_index,
-        "path": relative, "stage_bytes": byte_count, "index_bytes_written": index_bytes,
-        "sha256": digest})
+        "path": relative, "stage_bytes": byte_count, "index_bytes_written": index_receipt.bytes_written,
+        "sha256": digest, "serialization_seconds": index_receipt.serialization_seconds,
+        "fsync_seconds": index_receipt.fsync_seconds})
     return row
 
 
@@ -248,9 +263,11 @@ def finalize_stage(attempt_dir: Path, update_index: int, value: Mapping[str, Any
     receipt = write_stage(attempt_dir, update_index, value)
     reference = {"schema": STAGE_REFERENCE_SCHEMA, "update_index": update_index,
         "path": receipt.path, "bytes": receipt.bytes_written, "sha256": receipt.sha256}
-    index_bytes = append_jsonl(attempt_dir / STAGE_INDEX, reference)
+    index_receipt = append_jsonl(attempt_dir / STAGE_INDEX, reference)
     append_io_event(attempt_dir, {"operation": "stage-reference", **reference,
-        "index_bytes_written": index_bytes})
+        "index_bytes_written": index_receipt.bytes_written,
+        "serialization_seconds": index_receipt.serialization_seconds,
+        "fsync_seconds": index_receipt.fsync_seconds})
     return reference
 
 
@@ -556,6 +573,7 @@ def summarize_io(attempt_dir: Path) -> dict[str, Any]:
         "reference_writes": 0, "attempt_json_bytes_written": 0,
         "stage_json_bytes_written": 0, "native_payload_bytes_written": 0,
         "native_capture_checkpoint_bytes_written": 0, "reference_index_bytes_written": 0,
+        "record_artifact_bytes_written": 0, "total_record_bytes_written": 0,
         "bytes_read": 0, "parse_seconds": 0.0,
         "serialization_seconds": 0.0, "fsync_seconds": 0.0}
     if not path.is_file():
@@ -569,20 +587,30 @@ def summarize_io(attempt_dir: Path) -> dict[str, Any]:
             if operation == "attempt-checkpoint":
                 totals["checkpoint_writes"] += 1
                 totals["attempt_json_bytes_written"] += event["bytes_written"]
+                totals["total_record_bytes_written"] += event["bytes_written"]
             elif operation == "stage-checkpoint":
                 totals["stage_writes"] += 1
                 totals["stage_json_bytes_written"] += event["bytes_written"]
+                totals["total_record_bytes_written"] += event["bytes_written"]
             elif operation == "stage-reference":
                 totals["reference_writes"] += 1
                 totals["reference_index_bytes_written"] += event.get("index_bytes_written", 0)
+                totals["total_record_bytes_written"] += event.get("index_bytes_written", 0)
             elif operation == "native-payload":
                 totals["native_payload_bytes_written"] += event["bytes_written"]
+                totals["total_record_bytes_written"] += event["bytes_written"]
             elif operation == "native-capture-checkpoint":
                 totals["native_capture_checkpoint_bytes_written"] += event["bytes_written"]
+                totals["total_record_bytes_written"] += event["bytes_written"]
+            elif operation == "record-artifact":
+                totals["record_artifact_bytes_written"] += event["bytes_written"]
+                totals["total_record_bytes_written"] += event["bytes_written"]
             if "bytes_read" in event:
                 totals["bytes_read"] += event["bytes_read"]
                 totals["parse_seconds"] += event.get("parse_seconds", 0.0)
             totals["serialization_seconds"] += event.get("serialization_seconds", 0.0)
             totals["fsync_seconds"] += event.get("fsync_seconds", 0.0)
-    totals["scope"] = "attempt and stage JSON serialization plus fsync; excludes controller, execution, reference-index append, replay, rendering, and telemetry-log writes"
+    totals["scope"] = ("attempt/stage checkpoints, native payload and capture records, stage-reference index, "
+        "held-step request artifacts, and selective record reads; excludes controller query, execution process, "
+        "replay/checker/render, and telemetry-log append scopes")
     return totals

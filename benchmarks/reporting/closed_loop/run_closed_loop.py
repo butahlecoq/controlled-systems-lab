@@ -33,7 +33,8 @@ from task_models import (make_held_step_request, make_replay_request, objective,
 from capabilities import MANIFEST, NATIVE_MANIFEST, resolve_graph, validate_resolved_graph, manifest_digest
 from attempt_records import (ATTEMPT_SCHEMA_V2, IO_LOG, STAGE_INDEX, append_io_event,
     atomic_json, finalize_stage, iter_stage_references, materialize_episode_summary,
-    persist_native_capture, read_attempt, register_orphan_stages, write_attempt, write_stage)
+    persist_native_capture, read_attempt, register_orphan_stages, summarize_io,
+    write_attempt, write_record_artifact, write_stage)
 
 HERE = Path(__file__).resolve().parent
 MPC11 = ROOT / "benchmarks/reporting/mpc11"
@@ -389,7 +390,8 @@ def worker(task_name: str, attempt: Path, bridge: Path, policy_adapter: str | No
                 hashlib.sha256((task_hash + json.dumps(controls, separators=(",", ":"))).encode()).hexdigest(),
                 action_profile_id=action_profile_id)
             row["held_step_request"] = held
-            req_path = attempt / f"execution-request-{j:03d}.json"; atomic_json(req_path, held["bridge_request"])
+            req_path = attempt / f"execution-request-{j:03d}.json"
+            write_record_artifact(attempt, req_path, held["bridge_request"], "held-step-execution-request")
             response = execute_held_step_bridge(bridge, req_path, attempt, j, row)
             execution = validate_held_step_response(held, response)
             row["execution"] = execution
@@ -562,7 +564,7 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
             "render_status": "not_run", "overall_status": status, "completed_holds": 0}
     controller_id = selected_controller_id
     source_hashes = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in [
-        HERE / "run_closed_loop.py", HERE / "orbit_nmpc.py", HERE / "task_models.py", HERE / "check_episode.py",
+        HERE / "run_closed_loop.py", HERE / "attempt_records.py", HERE / "orbit_nmpc.py", HERE / "task_models.py", HERE / "check_episode.py",
         HERE / "check_replay.py", HERE / "capabilities.py", MPC11 / "nmpc.py", MPC11 / "affine.py"]}
     selected_manifest_path = NATIVE_MANIFEST if graph["controller"]["id"].startswith("native-") else MANIFEST
     source_hashes[str(selected_manifest_path.relative_to(ROOT))] = hashlib.sha256(selected_manifest_path.read_bytes()).hexdigest()
@@ -691,6 +693,12 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
         "worker_wall_seconds": result["supervisor"]["wall_seconds"],
         "performance_claim": "descriptive single attempt; no speed comparison"}
     result.update(derive_outcome_status(result))
+    if result.get("format_version") == 2:
+        io_summary = summarize_io(attempt)
+        result["record_io"].update(io_summary)
+        result["record_io"]["summary_scope"] = (
+            "all instrumented attempt, stage, native-payload, held-step-request and selective-read events "
+            "before this terminal attempt checkpoint; the terminal checkpoint receipt is appended to record-io.jsonl")
     write_attempt(attempt, result)
     return {"task_id": task["task_id"], "attempt": str(attempt), "status": status,
             "resource_profile_id": resource_profile["profile_id"],
@@ -823,7 +831,8 @@ def replay_attempt(task: dict, result: dict, attempt: Path, bridge: Path, tag: s
     outcome = derive_outcome_status(result)
     result.update(outcome)
     source_hashes = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in [
-        "benchmarks/reporting/closed_loop/run_closed_loop.py", "benchmarks/reporting/closed_loop/check_episode.py",
+        "benchmarks/reporting/closed_loop/run_closed_loop.py", "benchmarks/reporting/closed_loop/attempt_records.py",
+        "benchmarks/reporting/closed_loop/check_episode.py",
         "benchmarks/reporting/closed_loop/check_replay.py", "benchmarks/reporting/closed_loop/task_models.py"]}
     checker_id = tag or "initial"
     postcheck = {"schema": "csl.closed-loop.postcheck/1", "postcheck_id": checker_id,
@@ -1121,7 +1130,8 @@ def main() -> int:
             render_status = "failed"
             error = result["render"]["error"]
         source_hashes = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in [
-            "benchmarks/reporting/closed_loop/run_closed_loop.py", "benchmarks/reporting/closed_loop/task_models.py"]}
+            "benchmarks/reporting/closed_loop/run_closed_loop.py", "benchmarks/reporting/closed_loop/attempt_records.py",
+            "benchmarks/reporting/closed_loop/task_models.py"]}
         render_record = {"schema": "csl.closed-loop.render/1", "render_id": tag,
             "attempt_id": result["attempt_id"], "task_sha256": result["task_sha256"],
             "controls_sha256": result["controls_sha256"], "source_commit": subprocess.check_output(
