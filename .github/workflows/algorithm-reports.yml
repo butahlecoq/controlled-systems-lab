@@ -513,6 +513,8 @@ jobs:
       - name: Stage the saved closed-loop pilot report and 2D example
         if: steps.catalog.outputs.has_reports == 'true' && hashFiles('reports/closed-loop-pilot/closed-loop-pilot-v1/manifest.json') != ''
         run: python scripts/reports/stage_closed_loop_pilot.py --source reports/closed-loop-pilot/closed-loop-pilot-v1 --site build/report-site
+      - name: Stage affine-history functional evidence
+        run: python scripts/reports/stage_history_functional.py --site build/report-site
       - name: Build the progressive learning book
         if: steps.catalog.outputs.has_reports == 'true' && hashFiles('docs/examples/closed-loop/figure-index.json') != ''
         run: python scripts/reports/learning_book.py --site build/report-site --figure-index docs/examples/closed-loop/figure-index.json
