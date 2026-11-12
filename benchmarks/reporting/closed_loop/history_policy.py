@@ -261,7 +261,10 @@ class HistoryPolicy:
                               "source_cost": checks["source_cost"]},
             "policy_semantics": ("observed-state affine-history MPC with full-state F/B/I family memberships"
                 if self.geometry_family else "fresh observed-state affine history MPC; numerical local evidence"),
-            "coverage": "not_applicable"})
+            "coverage": ("single selected family, numerical full-state geometry only"
+                if self.geometry_family else "not_applicable")})
+        if self.geometry_family:
+            result["selected_representation"] = self.geometry_family
         return result
 
     def close(self):
