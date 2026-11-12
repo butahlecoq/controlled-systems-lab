@@ -76,6 +76,8 @@ class NativeFixedTailPolicy:
         self.process.stdin.write(raw); self.process.stdin.flush()
         self.last_query_capture.update(bridge_request_sent=True, bridge_request_transmission_status='sent'); self._capture()
         response_raw = self.process.stdout.readline()
+        self.last_query_capture['bridge_stderr_raw'] = os.pread(
+            self.stderr.fileno(), os.fstat(self.stderr.fileno()).st_size, 0).decode(errors='replace')
         self.last_query_capture.update(bridge_response_raw=response_raw,
             bridge_response_sha256=hashlib.sha256(response_raw.encode()).hexdigest(), response_parse_status='raw_received' if response_raw else 'missing_response')
         self._capture()
