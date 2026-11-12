@@ -11,7 +11,6 @@ import json
 import os
 from pathlib import Path
 import subprocess
-import tempfile
 
 from contracts import manifest_sha256
 from history_policy import make_request
@@ -39,15 +38,16 @@ class NativeFixedTailPolicy:
         self.options, self.receipt = options, prediction_receipt(task)
         self.previous_history, self.last_query_capture, self.query_capture_callback = None, None, None
         executable = Path(os.environ['CSL_NATIVE_POLICY_BRIDGE']).resolve(strict=True)
-        self.stderr = tempfile.TemporaryFile(mode='w+t')
         self.process = subprocess.Popen([str(executable)], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                        stderr=self.stderr, text=True, bufsize=1)
+                                        stderr=None, text=True, bufsize=1)
         self.preparation_receipt = {'executable': str(executable),
             'executable_sha256': hashlib.sha256(executable.read_bytes()).hexdigest(),
             'binary_source': 'unknown', 'action_profile_id': action_profile_id,
             'original_horizon': task['episode']['intervals'], 'history_solver': 'native-casadi-ipopt',
             'controller_semantics': 'native C++ feasible fixed tail; continuous current action; all-stage physical inner regions; complete original source cost',
-            'decision_implementation': 'C++', 'external_adapter_roles': ['transport', 'independent validation']}
+            'decision_implementation': 'C++',
+            'stderr_policy': 'native process inherits the supervised worker stderr stream; shared process log, not isolated per-call stderr',
+            'external_adapter_roles': ['source-bound predictor fixture preparation', 'transport', 'independent validation']}
 
     def set_query_capture_callback(self, callback):
         self.query_capture_callback = callback
@@ -76,8 +76,6 @@ class NativeFixedTailPolicy:
         self.process.stdin.write(raw); self.process.stdin.flush()
         self.last_query_capture.update(bridge_request_sent=True, bridge_request_transmission_status='sent'); self._capture()
         response_raw = self.process.stdout.readline()
-        self.last_query_capture['bridge_stderr_raw'] = os.pread(
-            self.stderr.fileno(), os.fstat(self.stderr.fileno()).st_size, 0).decode(errors='replace')
         self.last_query_capture.update(bridge_response_raw=response_raw,
             bridge_response_sha256=hashlib.sha256(response_raw.encode()).hexdigest(), response_parse_status='raw_received' if response_raw else 'missing_response')
         self._capture()
@@ -132,7 +130,6 @@ class NativeFixedTailPolicy:
             self.process.terminate(); self.process.wait()
         if self.process.stdout:
             self.process.stdout.close()
-        self.stderr.close()
         if self.process.returncode:
             raise RuntimeError(f'native fixed-tail bridge exited with status {self.process.returncode}')
 
