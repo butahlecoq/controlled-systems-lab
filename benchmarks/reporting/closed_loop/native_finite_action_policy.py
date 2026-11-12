@@ -18,6 +18,10 @@ from contracts import manifest_sha256
 from task_models import prediction_receipt, validate_source_binding
 
 
+def _reject_nonstandard_number(token: str):
+    raise ValueError(f"native bridge response contains nonstandard JSON number {token}")
+
+
 def _positive_limit(name: str, default: int,
                     factory_options: Mapping[str, object] | None = None) -> int:
     option = {
@@ -225,6 +229,15 @@ class NativeFiniteActionPolicy:
             "action_profile_id": action_profile_id, "representation": self.representation}
         self.process = subprocess.Popen([str(path)], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, text=True, encoding="utf-8", bufsize=1)
+        self.last_query_capture = None
+        self.query_capture_callback = None
+
+    def set_query_capture_callback(self, callback) -> None:
+        self.query_capture_callback = callback
+
+    def _publish_query_capture(self) -> None:
+        if self.query_capture_callback is not None and self.last_query_capture is not None:
+            self.query_capture_callback(self.last_query_capture)
 
     def query(self, task_id: str, observed_physical_state: list[float], absolute_update_index: int) -> dict[str, Any]:
         if task_id != self.task["task_id"]:
@@ -242,17 +255,40 @@ class NativeFiniteActionPolicy:
             return {"status": "failed", "task_sha256": self.task_sha256,
                     "action_profile_id": self.action_profile_id, "policy_id": self.controller_id,
                     "invocations": [], "reason": "native policy bridge exited before query"}
+        request_line = json.dumps(request, allow_nan=False, separators=(",", ":")) + "\n"
+        self.last_query_capture = {"schema": "csl.closed-loop.native-query-capture/3",
+            "capture_kind": "bridge-exchange", "bridge_request_sent": False,
+            "bridge_request_transmission_status": "prepared",
+            "request_sha256": hashlib.sha256(request_line.encode("utf-8")).hexdigest(),
+            "bridge_request_raw": request_line, "bridge_response_raw": None,
+            "bridge_response_sha256": None, "response_parse_status": "not_received"}
+        self._publish_query_capture()
         try:
-            self.process.stdin.write(json.dumps(request, allow_nan=False, separators=(",", ":")) + "\n")
+            self.last_query_capture["bridge_request_transmission_status"] = "attempted"
+            self._publish_query_capture()
+            self.process.stdin.write(request_line)
             self.process.stdin.flush()
+            self.last_query_capture["bridge_request_sent"] = True
+            self.last_query_capture["bridge_request_transmission_status"] = "sent"
+            self._publish_query_capture()
             line = self.process.stdout.readline()
+            self.last_query_capture["bridge_response_raw"] = line
+            self.last_query_capture["bridge_response_sha256"] = hashlib.sha256(line.encode("utf-8")).hexdigest()
+            self.last_query_capture["response_parse_status"] = "raw_received" if line else "missing_response"
+            self._publish_query_capture()
             if not line:
                 raise RuntimeError("native policy bridge closed its output")
-            response = json.loads(line)
+            response = json.loads(line, parse_constant=_reject_nonstandard_number)
         except (BrokenPipeError, OSError, ValueError, RuntimeError) as error:
+            if self.last_query_capture is not None:
+                self.last_query_capture["response_parse_status"] = "malformed_json" if isinstance(error, ValueError) else \
+                    self.last_query_capture.get("response_parse_status", "not_received")
+                self._publish_query_capture()
             return {"status": "failed", "task_sha256": self.task_sha256,
                     "action_profile_id": self.action_profile_id, "policy_id": self.controller_id,
                     "invocations": [], "reason": str(error)}
+        self.last_query_capture["response_parse_status"] = "parsed"
+        self._publish_query_capture()
         actual_build_profile = response.get("build_backend_profile")
         if not isinstance(actual_build_profile, Mapping):
             return {"status": "failed", "task_sha256": self.task_sha256,
@@ -273,6 +309,12 @@ class NativeFiniteActionPolicy:
         response["action_profile_id"] = self.action_profile_id
         response.setdefault("policy_id", self.controller_id)
         response.setdefault("invocations", [])
+        response["native_query_capture"] = {"schema": "csl.closed-loop.native-query-capture/3",
+            "capture_kind": self.last_query_capture["capture_kind"],
+            "bridge_request_sent": self.last_query_capture["bridge_request_sent"],
+            "request_sha256": self.last_query_capture["request_sha256"],
+            "bridge_response_sha256": self.last_query_capture["bridge_response_sha256"],
+            "response_parse_status": self.last_query_capture["response_parse_status"]}
         if response.get("status") == "accepted":
             semantics = response.get("selector", {}).get("policy_semantics",
                 "nominal receding-horizon fixed-plan MPC")

@@ -22,12 +22,12 @@ class ClosedLoopRunnerFailureTests(unittest.TestCase):
 
             clock = [0.0]
             exited = [False]
-            read_text = Path.read_text
+            read_attempt = run_closed_loop.read_attempt
 
-            def read_after_exit(path, *args, **kwargs):
+            def parse_after_exit(path):
                 if exited[0]:
                     clock[0] += 10.0
-                return read_text(path, *args, **kwargs)
+                return read_attempt(path)
 
             class WorkerProcess:
                 pid = 999999999
@@ -45,7 +45,7 @@ class ClosedLoopRunnerFailureTests(unittest.TestCase):
             with mock.patch.object(run_closed_loop.subprocess, "Popen", return_value=WorkerProcess()), \
                  mock.patch.object(run_closed_loop.subprocess, "check_output", return_value="test-commit\n"), \
                  mock.patch.object(run_closed_loop.time, "monotonic", side_effect=lambda: clock[0]), \
-                 mock.patch.object(Path, "read_text", read_after_exit):
+                 mock.patch.object(run_closed_loop, "read_attempt", parse_after_exit):
                 result = run_closed_loop.run_task("syn-nl-lv-01", root, bridge)
 
             record = json.loads((Path(result["attempt"]) / "attempt.json").read_text())

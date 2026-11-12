@@ -11,12 +11,15 @@ import math
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tempfile
 import zipfile
 
-from contracts import canonical_sha256
-
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "benchmarks/reporting/closed_loop"))
+from contracts import canonical_sha256
+from attempt_records import read_attempt
+
 REPORT_ID = "closed-loop-pilot-v1"
 ATTEMPTS = {
     "syn-nl-lv-01": "syn-nl-lv-01-20261111T114908Z-8dc20bed",
@@ -45,7 +48,7 @@ def task_manifest(name: str) -> dict:
 
 def attempt_paths(name: str) -> tuple[Path, dict, dict, dict]:
     path = ROOT / "reports/closed-loop-pilot" / name / "attempts" / ATTEMPTS[name]
-    record = read_json(path / "attempt.json")
+    record, _ = read_attempt(path / "attempt.json")
     run = read_json(path / "run-manifest.json")
     common = read_json(path / "full-replay-common/independent-check.json")
     tight = read_json(path / "full-replay-tight/independent-check.json")

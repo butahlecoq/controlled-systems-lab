@@ -40,6 +40,10 @@ def _capture_safe(value):
     return {"unserializable_type": type(value).__name__, "repr": repr(value)}
 
 
+def _reject_nonstandard_number(token: str):
+    raise ValueError(f"native bridge response contains nonstandard JSON number {token}")
+
+
 def _profile(controller_id: str) -> tuple[int, bool, str]:
     for suffix, profile in _PROFILES.items():
         if controller_id.endswith(suffix):
@@ -230,7 +234,7 @@ class NativeGraphPolicy:
 
     def _publish_query_capture(self) -> None:
         if self.query_capture_callback is not None and self.last_query_capture is not None:
-            self.query_capture_callback(_capture_safe(self.last_query_capture))
+            self.query_capture_callback(self.last_query_capture)
 
     def _method_option(self, key: str, env_id: str, env_version: str, default_id: str,
                        default_version: str) -> dict[str, str]:
@@ -337,7 +341,7 @@ class NativeGraphPolicy:
         request_json = None
         self.last_query_capture = {"schema": "csl.closed-loop.native-query-capture/2",
             "capture_kind": "bridge-exchange", "bridge_request_sent": False,
-            "request": _capture_safe(request), "request_json": None,
+            "request_json": None,
             "bridge_request_raw": None, "bridge_request_transmission_status": "not_started",
             "request_sha256": None, "bridge_response_raw": None,
             "bridge_response_sha256": None, "response_parse_status": "not_received"}
@@ -367,17 +371,15 @@ class NativeGraphPolicy:
         self.last_query_capture["response_parse_status"] = "raw_received"
         self._publish_query_capture()
         try:
-            response = json.loads(line)
+            response = json.loads(line, parse_constant=_reject_nonstandard_number)
         except (json.JSONDecodeError, ValueError) as error:
             self.last_query_capture["response_parse_status"] = "malformed_json"
             self._publish_query_capture()
             raise ValueError(f"native policy bridge returned malformed JSON: {error}") from error
-        self.last_query_capture["parsed_response"] = _capture_safe(response)
         self.last_query_capture["response_parse_status"] = "parsed"
         self._publish_query_capture()
         if not isinstance(response, dict):
             raise ValueError("native policy bridge response must be a JSON object")
-        native_response = dict(response)
         actual_build_profile = response.get("build_backend_profile")
         if not isinstance(actual_build_profile, Mapping):
             failed = {"status": "failed", "task_sha256": self.task_sha256,
@@ -406,14 +408,17 @@ class NativeGraphPolicy:
             "remaining_prediction_steps": horizon, "original_update_index": absolute_update_index}
         response["coverage"] = response.get("selector", {}).get("search_coverage",
             response.get("graph_receipt", {}).get("search_coverage", "not_applicable"))
-        response["query_receipt"] = {"schema": "csl.closed-loop.native-query-capture/1",
+        response["query_receipt"] = {"schema": "csl.closed-loop.native-query-capture-reference/1",
             "task_id": task_id, "task_sha256": self.task_sha256,
             "action_profile_id": self.action_profile_id, "absolute_update_index": absolute_update_index,
-            "request": request,
-            "bridge_response_sha256": hashlib.sha256(json.dumps(native_response, sort_keys=True,
-                separators=(",", ":"), allow_nan=False).encode()).hexdigest(),
-            "bridge_response": native_response}
-        response["native_query_capture"] = _capture_safe(self.last_query_capture)
+            "request_sha256": self.last_query_capture.get("request_sha256"),
+            "bridge_response_sha256": self.last_query_capture.get("bridge_response_sha256")}
+        response["native_query_capture"] = {"schema": "csl.closed-loop.native-query-capture/3",
+            "capture_kind": self.last_query_capture.get("capture_kind"),
+            "bridge_request_sent": self.last_query_capture.get("bridge_request_sent"),
+            "request_sha256": self.last_query_capture.get("request_sha256"),
+            "bridge_response_sha256": self.last_query_capture.get("bridge_response_sha256"),
+            "response_parse_status": self.last_query_capture.get("response_parse_status")}
         return response
 
     def close(self) -> None:
