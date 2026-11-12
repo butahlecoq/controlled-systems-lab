@@ -194,3 +194,18 @@ TEST_CASE("augmented width overflow and unresolvable physical times refuse") {
     REQUIRE(std::holds_alternative<OperationStopped>(unresolved));
     CHECK(std::get<OperationStopped>(unresolved).reason==StopReason::numerical_failure);
 }
+
+TEST_CASE("decimal physical grids do not create an unresolvable trailing interval") {
+    Vector times(41);
+    for (std::size_t k=0;k<times.size();++k) times[k]=0.1*static_cast<double>(k);
+    ContinuousAffineModel input{{1,1,0},times,HoldConvention::zero_order_hold,
+        LinearStage{{1,1,{2}},{1,1,{1}},{1,0,{}},{0}}};
+    const auto converted=take<DiscretizedModel>(discretize(input));
+    const auto& stages=std::get<std::vector<LinearStage>>(converted.model.dynamics.stages);
+    REQUIRE(stages.size()==40);
+    for(std::size_t k=0;k<stages.size();++k) {
+        const double duration=times[k+1]-times[k];
+        check_near(stages[k].A.values[0],std::exp(2*duration),2e-9);
+        check_near(stages[k].B.values[0],std::expm1(2*duration)/2,2e-9);
+    }
+}

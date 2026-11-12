@@ -102,7 +102,12 @@ IntegrationResult integrate_stage(const LinearStage& start,const LinearStage& en
         if(receipt.accepted_steps+receipt.rejected_steps>=options.max_attempts_per_stage)
             return failure(StopReason::resource_limit,"Continuous-model step budget exhausted");
         h=std::min(h,t1-t);
-        const double next=std::min(t+h,t1),mid=t+(next-t)/2;
+        double next=std::min(t+h,t1);
+        // Do not manufacture a trailing one-ULP interval with no midpoint.
+        // Integrate through that endpoint in this step, including its duration
+        // in both RK4 estimates. Authored adjacent endpoints still refuse below.
+        if(next<t1 && std::nextafter(next,t1)==t1)next=t1;
+        const double mid=t+(next-t)/2;
         if(!(next>t) || !(mid>t && mid<next))
             return failure(StopReason::numerical_failure,"Binary64 time cannot resolve the next integration step");
         const double step=next-t;
