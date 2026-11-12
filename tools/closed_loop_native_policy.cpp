@@ -11,10 +11,17 @@
 #include <csl/optimization/finite_action_nominal.hpp>
 #include <csl/optimization/finite_action_graph.hpp>
 #include <csl/optimization/objectives.hpp>
+#include <csl/optimization/history_cost.hpp>
+#include <csl/optimization/convex_backend.hpp>
+#include <csl/problem/resolved_problem.hpp>
+#if CSL_NATIVE_HAS_HIGHS
+#include <csl/adapters/convex/highs.hpp>
+#endif
 #include <csl/registry/registry.hpp>
 #include <csl/sets/data.hpp>
 #include <nlohmann/json.hpp>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <iostream>
@@ -182,23 +189,25 @@ sets::SetData safe_box(const Json& bounds, std::size_t dimension, const std::str
          take(numeric::snapshot_vector(b), "safe-bounds"), empty_matrix, empty_vector}), "bounded-safe-set");
 }
 
-optimization::Objective terminal_objective(const Json& spec, std::size_t state_dimension) {
+TerminalObjective terminal_source(const Json& spec, std::size_t state_dimension) {
     if(spec.at("kind") == "quadratic") {
         const auto q = matrix(spec.at("Q"));
         const auto linear = vector(spec.at("linear"));
         const auto offset = spec.at("offset").get<double>();
         if(q.rows != state_dimension || q.cols != state_dimension || linear.size() != state_dimension)
             throw std::runtime_error("terminal quadratic dimension mismatch");
-        return take(optimization::snapshot(QuadraticTerminal{q, linear, offset}),
-            "terminal-quadratic");
+        return QuadraticTerminal{q, linear, offset};
     }
     const auto map = matrix(spec.at("map"));
     const auto target = vector(spec.at("target"));
     const auto weights = vector(spec.at("weights"));
     if(map.cols != state_dimension || map.rows != target.size())
         throw std::runtime_error("terminal norm dimension mismatch");
-    return take(optimization::snapshot(ResidualNormTerminal{map, target, weights}),
-        "terminal-euclidean-norm");
+    return ResidualNormTerminal{map, target, weights};
+}
+
+optimization::Objective terminal_objective(const Json& spec, std::size_t state_dimension) {
+    return take(optimization::snapshot(terminal_source(spec, state_dimension)), "terminal-objective");
 }
 
 optimization::RunningControlCost running_cost(const Json& spec, std::size_t full_horizon,
@@ -717,7 +726,148 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
     return response;
 }
 
+template<class T, class... E> T take_history(std::variant<T, E...> result, const char* field) {
+    if (const auto* value = std::get_if<T>(&result)) return *value;
+    std::string detail = "history operation failed";
+    std::visit([&](const auto& item) {
+        using V = std::decay_t<decltype(item)>;
+        if constexpr (std::is_same_v<V, Diagnostic>) detail = item.field + ": " + item.explanation;
+        else if constexpr (std::is_same_v<V, Diagnostics>) {
+            if (!item.empty()) detail = item.front().field + ": " + item.front().explanation;
+        } else if constexpr (std::is_same_v<V, OperationStopped>) detail = item.diagnostics;
+    }, result);
+    throw std::runtime_error(std::string(field) + ": " + detail);
+}
+
+Json continuous_history_query(const Json& in) {
+    const auto initial = vector(in.at("observed_physical_state"));
+    const auto n = initial.size();
+    const auto m = in.at("control_bounds").size();
+    const auto& coefficients = in.at("predictor_stages");
+    const auto horizon = coefficients.size();
+    const auto stage = in.at("absolute_update_index").get<std::size_t>();
+    const auto original = in.at("original_horizon").get<std::size_t>();
+    if (!n || !m || !horizon || stage >= original || horizon != original - stage)
+        throw std::runtime_error("invalid continuous remaining horizon or dimensions");
+    std::vector<LinearStage> stages;
+    for (const auto& row : coefficients)
+        stages.push_back({matrix(row.at("A")), matrix(row.at("B")), Matrix{n, 0, {}}, vector(row.at("c"))});
+    auto model = std::make_shared<const SystemModel>(SystemModel{
+        {{n, m, 0}, TimeDomain::discrete, Coefficients{std::move(stages)}}, {}});
+    const double dt = in.at("dt").get<double>();
+    Vector times(horizon + 1);
+    for (std::size_t i = 0; i <= horizon; ++i) times[i] = (stage + i) * dt;
+    std::vector<AdmissibleSet> states, controls;
+    for (std::size_t i = 0; i <= horizon; ++i)
+        states.emplace_back(safe_box(in.at("state_bounds"), n, "history-state-" + std::to_string(i)).as_handle());
+    for (std::size_t i = 0; i < horizon; ++i)
+        controls.emplace_back(safe_box(in.at("control_bounds"), m, "history-control-" + std::to_string(i)).as_handle());
+    const auto terminal = terminal_source(in.at("terminal_objective"), n);
+    Problem source{{in.at("problem_id").get<std::string>()}, std::move(model), std::move(times),
+        KnownInitial{initial}, ContinuousDomain{std::move(controls)}, std::move(states), {}, {},
+        InformationPattern::nominal_open_loop, terminal};
+    const auto resolved = take_history(problem::resolve(source,
+        {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}}), "resolve");
+    const auto universal = take(sets::make_universal({{"history-universal-terminal"}, n, {}}), "terminal-domain");
+    const auto history = take_history(synthesis::recover_joint_history(resolved, universal), "recover-history");
+    const auto cost = running_cost(in.at("running_cost"), original, m);
+    const auto program = take_history(optimization::compile_history_cost(history, terminal, cost, stage), "compile-history-cost");
+    const auto h = std::get<sets::HRepresentation>(history.relation.representation());
+    const auto& q = program.quadratic;
+    Json norms = Json::array();
+    for (const auto& term : program.residual_norms)
+        norms.push_back({{"map", matrix_json(term.map.rows, term.map.cols,
+            [&](std::size_t i, std::size_t j) { return term.map.values[i * term.map.cols + j]; })},
+            {"target", term.target}, {"weights", term.weights}, {"coefficient", term.coefficient}});
+    Json response{{"status", "exported"}, {"task_id", in.at("task_id")}, {"task_sha256", in.at("task_sha256")},
+        {"action_profile_id", in.at("action_profile_id")}, {"policy_id", in.at("controller_id")},
+        {"history_relation", set_json(history.relation)},
+        {"history_objective", {{"quadratic", {{"Q", matrix_json(q.Q.rows, q.Q.cols,
+            [&](std::size_t i, std::size_t j) { return q.Q.values[i * q.Q.cols + j]; })},
+            {"linear", q.linear}, {"offset", q.offset}}}, {"residual_norms", std::move(norms)}}},
+        {"coordinates", {{"state_dimension", n}, {"control_dimension", m}, {"horizon", horizon},
+            {"layout", "x0..xT,u0..u(T-1)"}}}, {"geometry", "not_used"},
+        {"assurance", "numerical affine history; no validated completeness or nonlinear safety claim"}};
+    if (!program.residual_norms.empty()) return response;
+#if CSL_NATIVE_HAS_HIGHS
+    SparseMatrix rows{h.inequalities.rows() + h.equalities.rows(), q.dimension, {0}, {}, {}};
+    std::vector<Interval> bounds;
+    const auto append_rows = [&](const auto& matrix, const auto& values, bool equality) {
+        for (std::size_t i = 0; i < matrix.rows(); ++i) {
+            for (std::size_t j = 0; j < matrix.cols(); ++j) {
+                if (const double value = matrix(i, j); value != 0) {
+                    rows.column_indices.push_back(j); rows.values.push_back(value);
+                }
+            }
+            rows.row_offsets.push_back(rows.values.size());
+            const auto value = values[i];
+            bounds.push_back(equality ? Interval{value, value} : Interval{{}, value});
+        }
+    };
+    append_rows(h.inequalities, h.upper_bounds, false);
+    append_rows(h.equalities, h.equality_values, true);
+    auto qp = take_history(optimization::make_convex_program({
+        {{in.at("problem_id").get<std::string>()}, {in.at("request_id").get<std::string>()}},
+        QuadraticTerminal{q.Q, q.linear, q.offset}, std::move(rows),
+        std::vector<Interval>(q.dimension), std::move(bounds), {}}), "make-history-qp");
+    if(in.contains("initial_primal"))
+        qp=take_history(optimization::with_primal_start(qp,vector(in.at("initial_primal"))), "history-primal-start");
+    response["warm_start"]={{"initial_primal",in.value("initial_primal",Json(nullptr))},
+        {"dual_policy","zero-every-solve"}};
+    using namespace registry;
+    Registry<ConvexPort> registry;
+    auto entry = take_history(adapters::convex::make_highs_registration(), "highs-registration");
+    if (registry.add(std::move(entry))) throw std::runtime_error("convex registration failed");
+    Requirements requirements;
+    requirements.output.representation = {"csl.program-result.v1"};
+    auto preparation = prepare_pipeline(select(registry, {{"csl.convex.highs"}, {}}, qp, requirements));
+    if (std::holds_alternative<Rejection>(preparation)) throw std::runtime_error("convex provider rejected history QP");
+    const auto& prepared = std::get<PreparedPipeline<ConvexPort>>(preparation);
+    auto [workspace] = prepared.create();
+    const auto resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    const auto actual = prepared.provenance()[0].actual.value();
+    const auto outcome = workspace->run({resources, {}, {}, {1e-8, 1e-8}, "continuous-history"});
+    const auto* result = std::get_if<ProgramResult>(&outcome);
+    if (!result || result->termination != Termination::completed ||
+        result->outcome.value != MathematicalOutcome::optimal || !result->primal ||
+        !optimization::check_program_result(*result, qp, Assurance::numerical).empty()) {
+        response["status"] = "failed";
+        response["reason"] = "convex history provider did not return a completed optimum";
+        response["solver_receipt"] = {{"provider", actual.id.value}, {"version", actual.version},
+            {"raw_diagnostics", result ? result->raw_diagnostics : "provider returned unsupported"}};
+        return response;
+    }
+    const auto& primal = *result->primal;
+    if (primal.size() != q.dimension || !std::all_of(primal.begin(), primal.end(), [](double value) { return std::isfinite(value); })) {
+        response["status"] = "failed";
+        response["reason"] = "convex history provider returned an invalid primal";
+        response["solver_receipt"] = {{"provider", actual.id.value}, {"version", actual.version},
+            {"raw_diagnostics", result->raw_diagnostics}};
+        return response;
+    }
+    std::vector<Vector> xs, us;
+    for (std::size_t k = 0; k <= horizon; ++k)
+        xs.emplace_back(primal.begin() + k*n, primal.begin() + (k+1)*n);
+    const auto control_offset = (horizon+1)*n;
+    for (std::size_t k = 0; k < horizon; ++k)
+        us.emplace_back(primal.begin() + control_offset+k*m, primal.begin() + control_offset+(k+1)*m);
+    const auto evaluated = take_history(optimization::evaluate_history_cost(program, xs, us), "evaluate-history-cost");
+    response["status"] = "solved";
+    response["primal"] = primal;
+    response["source_cost"] = {{"terminal", evaluated.terminal}, {"running", evaluated.running}, {"total", evaluated.total}};
+    response["solver_receipt"] = {{"provider", actual.id.value}, {"version", actual.version},
+        {"termination", "completed"}, {"outcome", "optimal"}, {"assurance", "numerical"},
+        {"raw_diagnostics", result->raw_diagnostics}};
+    return response;
+#else
+    response["status"] = "unavailable";
+    response["reason"] = "compiled native executable has no registered convex QP provider";
+    return response;
+#endif
+}
+
 Json query(const Json& in) {
+    if(in.value("mode", std::string{}) == "continuous-history/1") return continuous_history_query(in);
     if(in.contains("candidate_action_indices") &&
             (!in.at("candidate_action_indices").is_array() || in.at("candidate_action_indices").empty())) {
         auto result=query_failure(in,"rejected",

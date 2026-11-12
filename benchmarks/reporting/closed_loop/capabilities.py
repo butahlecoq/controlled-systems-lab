@@ -12,6 +12,8 @@ MANIFEST = ROOT / "docs/catalogue/closed-loop-pilot-capabilities-v1.json"
 SIDECAR = ROOT / "docs/catalogue/closed-loop-pilot-capabilities-v1.sha256"
 NATIVE_MANIFEST = ROOT / "docs/catalogue/closed-loop-native-capabilities-v1.json"
 NATIVE_SIDECAR = ROOT / "docs/catalogue/closed-loop-native-capabilities-v1.sha256"
+HISTORY_MANIFEST = ROOT / "docs/catalogue/closed-loop-history-capabilities-v1.json"
+HISTORY_SIDECAR = ROOT / "docs/catalogue/closed-loop-history-capabilities-v1.sha256"
 MODULE_INVENTORY = ROOT / "docs/catalogue/module-composition-inventory-v1.json"
 
 NATIVE_PROFILES = {
@@ -261,18 +263,74 @@ def build_native_manifest() -> dict:
         "graphs": _native_definitions()}
 
 
+def _history_definitions() -> list[dict]:
+    rows = []
+    common_sources = ["benchmarks/reporting/closed_loop/history_policy.py",
+        "benchmarks/reporting/closed_loop/history_norm_solver.py",
+        "benchmarks/reporting/closed_loop/history_validation.py",
+        "benchmarks/reporting/closed_loop/native_graph_policy.py",
+        "benchmarks/reporting/closed_loop/task_models.py",
+        "tools/closed_loop_native_policy.cpp", "include/csl/optimization/history_cost.hpp",
+        "include/csl/optimization/contracts.hpp", "include/csl/optimization/convex_backend.hpp",
+        "include/csl/optimization/running_control_cost.hpp", "src/optimization/history_cost.cpp",
+        "src/optimization/running_control_cost.cpp", "src/optimization/objective_reformulation.cpp",
+        "src/optimization/convex_backend.cpp", "src/problem/resolved.cpp", "src/model/linear_system.cpp",
+        "src/synthesis/control_recovery.cpp", "src/adapters/convex/highs.cpp", "CMakeLists.txt"]
+    for base in _definitions():
+        task_name = base["task_id"].split("/")[0] if base["task_id"].startswith("syn-") else "earth-orbit"
+        task = load_task(task_name)
+        orbit = task["model"]["case_id"] == "ENV717-EARTH-ORBIT-CONTINUOUS-01"
+        provider = "casadi-ipopt" if orbit else "csl.convex.highs"
+        controller = {"id": "native-continuous-affine-history-mpc/1", "version": "1",
+            "adapter": "continuous_history", "policy_factory": "history_policy:create_policy",
+            "factory_options": {}, "source_files": common_sources,
+            "prediction": "source-bound affine physical predictor over the full remaining horizon",
+            "control_semantics": "continuous full-history receding-horizon MPC",
+            "solver": {"provider": provider, "assurance": "local numerical" if orbit else "numerical"}}
+        source_paths = set(common_sources + base["execution"]["source_files"])
+        source_paths.add(task["source"]["path"])
+        if task["source"]["kind"] == "mpc11-scenario":
+            source_paths.add("benchmarks/reporting/mpc11/affine.py")
+        graph = {key: base[key] for key in ("task_id", "task_sha256", "model_id", "objective_id",
+                                             "action_profile_id", "execution")}
+        graph.update({"controller": controller,
+            "role_bindings": {"reachable_set_method": "not_used", "representation": "not_used",
+                              "vertex_lp": "not_used", "converter": "not_used",
+                              "control_optimizer": {"id": provider}},
+            "operation_roles": {"controller.solve": "control_optimizer"},
+            "admission": {"status": "admitted", "basis": "source-bound continuous full-history profile"},
+            "geometry_work": {"vertices": 0, "set_operations": 0, "claim": "no representation comparison is made"},
+            "source_files": [{"path": path, "sha256": hashlib.sha256((ROOT / path).read_bytes()).hexdigest()}
+                             for path in sorted(source_paths)]})
+        fingerprint = canonical_sha256(graph)
+        graph["graph_fingerprint"] = fingerprint
+        graph["graph_id"] = f"closed-loop/{task_name}/continuous-history-mpc/1/cfg-{fingerprint[:16]}"
+        rows.append(graph)
+    return rows
+
+
+def build_history_manifest() -> dict:
+    return {"schema": "csl.closed-loop-capability-manifest/2",
+        "manifest_id": "source-bound-continuous-history-profiles/1",
+        "registration_status": "source-frozen", "catalogue_parent": "csl.module-composition-inventory/1",
+        "purpose": "Continuous full-source-cost affine-history MPC on the three common tasks.",
+        "claim_scope": "Numerical observed-state affine MPC; no set-representation, global nonlinear or safety guarantee.",
+        "graphs": _history_definitions()}
+
+
 def validate_manifest(value: dict | None = None, manifest_path: Path | None = None) -> dict:
     selected_path = manifest_path or MANIFEST
     manifest = value or json.loads(selected_path.read_text())
     native = selected_path.resolve() == NATIVE_MANIFEST.resolve()
-    expected_schema = "csl.closed-loop-capability-manifest/2" if native else "csl.closed-loop-capability-manifest/1"
+    history = selected_path.resolve() == HISTORY_MANIFEST.resolve()
+    expected_schema = "csl.closed-loop-capability-manifest/2" if native or history else "csl.closed-loop-capability-manifest/1"
     if manifest.get("schema") != expected_schema:
         raise ValueError("unsupported closed-loop capability manifest")
-    sidecar = NATIVE_SIDECAR if native else SIDECAR
+    sidecar = HISTORY_SIDECAR if history else NATIVE_SIDECAR if native else SIDECAR
     expected = sidecar.read_text().split()[0]
     if canonical_sha256(manifest) != expected:
         raise ValueError("closed-loop capability manifest hash mismatch")
-    expected_rows = _native_definitions() if native else _definitions()
+    expected_rows = _history_definitions() if history else _native_definitions() if native else _definitions()
     expected_ids = {row["graph_id"] for row in expected_rows}
     graph_ids = [row.get("graph_id") for row in manifest["graphs"]]
     if len(graph_ids) != len(set(graph_ids)):
@@ -331,15 +389,23 @@ def write_native_manifest() -> None:
     NATIVE_SIDECAR.write_text(canonical_sha256(manifest) + "  closed-loop-native-capabilities-v1.json\n")
 
 
+def write_history_manifest() -> None:
+    manifest = build_history_manifest()
+    HISTORY_MANIFEST.write_text(json.dumps(manifest, sort_keys=True, indent=2) + "\n")
+    HISTORY_SIDECAR.write_text(canonical_sha256(manifest) + "  closed-loop-history-capabilities-v1.json\n")
+
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--write", action="store_true")
     parser.add_argument("--write-native", action="store_true")
+    parser.add_argument("--write-history", action="store_true")
     args = parser.parse_args()
     if args.write: write_manifest()
     if args.write_native: write_native_manifest()
-    selected = NATIVE_MANIFEST if args.write_native else MANIFEST
+    if args.write_history: write_history_manifest()
+    selected = HISTORY_MANIFEST if args.write_history else NATIVE_MANIFEST if args.write_native else MANIFEST
     checked = validate_manifest(manifest_path=selected)
     print(json.dumps({"status": "pass", "manifest_id": checked["manifest_id"],
         "graphs": [{"graph_id": row["graph_id"], "task_sha256": row["task_sha256"],
