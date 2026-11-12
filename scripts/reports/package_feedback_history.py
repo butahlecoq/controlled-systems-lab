@@ -12,6 +12,14 @@ import tempfile
 from package_history_functional import archive_attempt, digest
 
 
+def postcheck_source_timing(source_commit: str, attempt_id: str) -> str | None:
+    if (source_commit, attempt_id) == (
+            "a800b95b9be6a874c0bab188d1cf3394fbb836b1",
+            "syn-nl-fuel-01-20261112T113606Z-6e1a2885"):
+        return "After all 40 fuel controls were applied, history_policy.py and history_norm_solver.py were edited while the parent performed postcheck/render; the worker had already imported them and the independent source-cost/replay modules were unchanged."
+    return None
+
+
 def package(attempt: Path, output: Path, audit: Path, auditor: Path,
             build: Path, sdk: Path, producer_commit: str) -> None:
     sources = (attempt, output, audit, auditor, build, sdk)
@@ -86,8 +94,7 @@ def package(attempt: Path, output: Path, audit: Path, auditor: Path,
                 if "direct" in native["controller_semantics"] else None),
             "execution_protocol": protocol,
             "warm_start_queries_checked": warm_queries,
-            "postcheck_source_timing": ("After all 40 fuel controls were applied, history_policy.py and history_norm_solver.py were edited while the parent performed postcheck/render; the worker had already imported them and the independent source-cost/replay modules were unchanged."
-                if task_name == "syn-nl-fuel-01" else None),
+            "postcheck_source_timing": postcheck_source_timing(run["source_commit"], episode["attempt_id"]),
             "audit": task, "archive_sha256": digest((stage / "raw.zip").read_bytes()),
             "archive_members": inventory}
         (stage / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
