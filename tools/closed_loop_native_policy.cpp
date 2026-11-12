@@ -842,7 +842,8 @@ Json continuous_history_query(const Json& in) {
     response["primal"] = primal;
     response["source_cost"] = {{"terminal", evaluated.terminal}, {"running", evaluated.running}, {"total", evaluated.total}};
     response["solver_receipt"] = {{"provider", actual.id.value}, {"version", actual.version},
-        {"termination", "completed"}, {"outcome", "optimal"}, {"assurance", "numerical"}};
+        {"termination", "completed"}, {"outcome", "optimal"}, {"assurance", "numerical"},
+        {"raw_diagnostics", result->raw_diagnostics}};
     return response;
 #else
     response["status"] = "unavailable";
