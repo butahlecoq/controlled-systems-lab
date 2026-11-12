@@ -20,7 +20,6 @@ import report
 import publication_map
 
 ROOT = Path(__file__).resolve().parents[3]
-TOOLING = Path(__file__).resolve().parent
 TRIAL_FIELDS = ("scenario", "repetition", "warmup", "status", "outcome", "oracle_passed",
                 "expected_marginals", "observed_marginals", "setup_ns", "setup_state", "solve_ns", "solve_state",
                 "oracle_ns", "oracle_state", "execute_ns", "execute_state", "provider_identities",
@@ -342,8 +341,6 @@ def collect(args):
         (bundle / "build-provenance.json").write_bytes(canonical(record["provenance"]) + b"\n")
         (bundle / "measurement-command.txt").write_text("\n".join(command) + "\n", encoding="utf-8")
         (bundle / "profile-evidence.txt").write_text("No separate source-level profile was collected; no comparative performance claim is made. Limiter and capacity remain unknown.\n", encoding="utf-8")
-        for name in ("README.md",):
-            shutil.copyfile(TOOLING / name, bundle / name)
         _write(bundle / "publication-map.json", canonical(publication_map.project(record)) + b"\n")
         manifest_files = {path.name: sha(path.read_bytes()) for path in bundle.iterdir()}
         manifest = {"schema": "csl.syn01-report-manifest/1", "report_id": record["report_id"],

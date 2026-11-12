@@ -60,6 +60,10 @@ EXPECTED_LINEAGE_AUDIT = {
         },
     },
 }
+CURRENT_LINEAGE_AUDIT = {
+    **EXPECTED_LINEAGE_AUDIT,
+    "contract_reference": "https://github.com/butahlecoq/controlled-systems-lab/blob/68db559016fcfffea3aa052c65f7757386e35075/docs/contracts/polyhedral-conversion.md#lineage-audit-a17-and-a18",
+}
 
 
 def require(condition: bool, message: str) -> None:
@@ -194,7 +198,7 @@ def validate(root: Path) -> None:
     require(len(trials) == repetitions * len(FIXTURES) * len(DIRECTIONS), "saved trial count mismatch")
     require(measure["emitted_trials"] == len(trials) and measure["expected_trials"] == len(trials), "measurement trial count mismatch")
     require(measure["failures"] == 0 and measure["process_return_code"] == 0, "measurement contains failures")
-    require(payload.get("lineage_audit") == EXPECTED_LINEAGE_AUDIT, "A17/A18 source lineage audit differs from reviewed archive evidence")
+    require(payload.get("lineage_audit") in (EXPECTED_LINEAGE_AUDIT, CURRENT_LINEAGE_AUDIT), "A17/A18 source lineage audit differs from reviewed archive evidence")
     require("A17/A18 lineage not audited" not in payload["scope_limitations"], "stale lineage limitation contradicts the audit")
     literal_scenarios = payload_scenario_literal()
     require(payload["scenarios"] == literal_scenarios, "scenario metadata differs from independent fixture definitions")

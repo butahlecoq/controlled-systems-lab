@@ -275,7 +275,7 @@ def write_bundle(bundle, payload, raw, environment, provenance, profile, profile
     (bundle/"measurement-command.txt").write_text(command+"\n",encoding="utf-8")
     (bundle/"profile-note.txt").write_text(profile_note+"\n",encoding="utf-8")
     (bundle/"terminal_driver.cpp").write_bytes((ROOT/"benchmarks/reporting/syn02/terminal_driver.cpp").read_bytes())
-    for tool_name in ("collect.py", "render_saved.py", "publication_map.py", "test_report.py", "README.md"):
+    for tool_name in ("collect.py", "render_saved.py", "publication_map.py", "test_report.py"):
         (bundle/tool_name).write_bytes((TOOLING/tool_name).read_bytes())
     # Renderer consumes the just-written records file, keeping report generation
     # reproducible without invoking the measured executable again.

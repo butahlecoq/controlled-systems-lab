@@ -18,6 +18,8 @@ from scripts.reports.mpc06_online import evidence,model
 
 UPSTREAM=ROOT/'reports/algorithm-results/mpc06-online-anchor-portable-v3'
 REVIEWED_UPSTREAM_MANIFEST_SHA256='8edb28e2744b1b061a47971e5f0613c30be64e7c25727c70bd1ec52d4244034a'
+REVIEWED_REPORT_ID='mpc06-completion-v2'
+REVIEWED_REPORT_MANIFEST_SHA256='1af58d5e6e24b5c8c00064a6d533e9fea4e26f64ee483e8d4f709fff72dabfa4'
 SOURCE_FILES=('scripts/reports/mpc06_delivery/reference.py','scripts/reports/mpc06_delivery/records.py',
               'scripts/reports/mpc06_delivery/figures.py','scripts/reports/figure_style.py','scripts/reports/plot.py','scripts/reports/report_data.py','scripts/reports/requirements.txt',
               'scripts/reports/mpc06_online/evidence.py','scripts/reports/mpc06_online/model.py')
@@ -110,13 +112,15 @@ def make_record(online,upstream_files):
     return result
 
 
-def check(record,online,upstream_files):
+def check(record,online,upstream_files,source_files=None):
     if not re.fullmatch('[0-9a-f]{40}',record['source_commit']):raise ValueError('invalid reference source commit')
     if record['schema']!='csl.mpc06-delivery/1' or record['source_status'] or record['upstream_report_id']!=UPSTREAM.name:
         raise ValueError('delivery scope/source mismatch')
     if record['upstream_files']!=upstream_files or record['native_source_commit']!=online['source_commit']:
         raise ValueError('delivery upstream source binding mismatch')
-    if record['source_files']!={name:evidence.digest((ROOT/name).read_bytes()) for name in SOURCE_FILES}:
+    expected_source_files=({name:evidence.digest((ROOT/name).read_bytes()) for name in SOURCE_FILES}
+                           if source_files is None else source_files)
+    if record['source_files']!=expected_source_files:
         raise ValueError('delivery reviewing source binding mismatch')
     if record['geometry']!=plain(geometry(online)):raise ValueError('geometry source binding mismatch')
     if record['scopes']['comparison']!='no bound ordering between M0 and fixed_K policy classes; no general causal optimum':raise ValueError('reference policy comparison scope changed')
@@ -155,11 +159,32 @@ def validate(source):
         raise ValueError('invalid exact-reference cost receipt')
     for key in ('construction_and_extraction_ns','independent_check_ns'):
         if type(costs.get(key)) is not int or costs[key]<0:raise ValueError('invalid exact-reference cost interval')
+    captured_sources={}
     for name in SOURCE_FILES:
         copied='source/'+Path(name).name
         if copied not in contents or evidence.digest(contents[copied])!=record['source_files'].get(name):
             raise ValueError('delivery copied source binding mismatch: '+name)
-    verification=check(record,online,upstream_files)
+        captured_sources[name]=evidence.digest(contents[copied])
+    report_root=Path(source).resolve().parent
+    if report_root.name==REVIEWED_REPORT_ID:
+        report_manifest=report_root/'SHA256SUMS'
+        if (report_manifest.is_symlink() or not report_manifest.is_file() or
+                evidence.digest(report_manifest.read_bytes())!=REVIEWED_REPORT_MANIFEST_SHA256):
+            raise ValueError('reviewed delivery report manifest binding mismatch')
+        expected={}
+        for line in report_manifest.read_text(encoding='ascii').splitlines():
+            match=re.fullmatch(r'([0-9a-f]{64})  (.+)',line)
+            if not match or match[2] in expected:raise ValueError('invalid reviewed delivery report manifest')
+            expected[match[2]]=match[1]
+        actual={}
+        for path in report_root.rglob('*'):
+            if path.is_symlink():raise ValueError('reviewed delivery report contains a symlink')
+            if path.is_file() and path!=report_manifest:
+                actual[path.relative_to(report_root).as_posix()]=evidence.digest(path.read_bytes())
+        if actual!=expected:raise ValueError('reviewed delivery report files differ from its pinned manifest')
+        verification=check(record,online,upstream_files,captured_sources)
+    else:
+        verification=check(record,online,upstream_files)
     if evidence.json_value(contents['verification.json'])!=verification:raise ValueError('delivery saved verification disposition mismatch')
     return record,online,verification,contents
 

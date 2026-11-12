@@ -11,6 +11,9 @@ import re
 from fractions import Fraction as Q
 
 TOOLS=('check.py','evidence.py','model.py','study.py','render.py')
+REVIEWED_REPORT_ID='mpc06-online-anchor-portable-v3'
+REVIEWED_SOURCE_ID='mpc06-online-anchor-v1'
+REVIEWED_REPORT_MANIFEST_SHA256='8edb28e2744b1b061a47971e5f0613c30be64e7c25727c70bd1ec52d4244034a'
 
 
 def digest(data):return hashlib.sha256(data).hexdigest()
@@ -100,6 +103,57 @@ def tool_bindings():
     return {name:digest((directory/name).read_bytes()) for name in TOOLS}
 
 
+def reviewed_report_manifest(report,manifest_path):
+    manifest_bytes=manifest_path.read_bytes()
+    if digest(manifest_bytes)!=REVIEWED_REPORT_MANIFEST_SHA256:
+        raise ValueError('reviewed report manifest binding mismatch')
+    manifest={}
+    for line in manifest_bytes.decode('ascii').splitlines():
+        match=re.fullmatch(r'([0-9a-f]{64})  (.+)',line)
+        if not match or match[2] in manifest:raise ValueError('invalid reviewed report manifest')
+        manifest[match[2]]=match[1]
+    actual={}
+    for path in report.rglob('*'):
+        if path.is_symlink():raise ValueError('reviewed report contains a symlink')
+        if path.is_file() and path!=manifest_path:
+            actual[path.relative_to(report).as_posix()]=digest(path.read_bytes())
+    if actual!=manifest:raise ValueError('reviewed report files differ from its pinned manifest')
+    return manifest
+
+
+def captured_tool_bindings(receipt_path,source_report_id):
+    """Return the producer bindings captured with an immutable report bundle."""
+    report=Path(receipt_path).resolve().parent
+    snapshot=report/'review-tools'
+    if not snapshot.exists():
+        if report.name==REVIEWED_REPORT_ID:
+            raise ValueError('reviewed report checker snapshot is missing')
+        return tool_bindings()
+    if snapshot.is_symlink() or not snapshot.is_dir():raise ValueError('invalid captured review-tool snapshot')
+    manifest_path=report/'SHA256SUMS'
+    if manifest_path.is_symlink() or not manifest_path.is_file():raise ValueError('missing captured report manifest')
+    pinned_reviewed_report=digest(manifest_path.read_bytes())==REVIEWED_REPORT_MANIFEST_SHA256
+    if report.name==REVIEWED_REPORT_ID:
+        if not pinned_reviewed_report:
+            raise ValueError('reviewed report manifest binding mismatch')
+    if pinned_reviewed_report:
+        if source_report_id!=REVIEWED_SOURCE_ID:
+            raise ValueError('reviewed report source identity mismatch')
+        manifest=reviewed_report_manifest(report,manifest_path)
+    else:
+        manifest={}
+        for line in manifest_path.read_text(encoding='ascii').splitlines():
+            match=re.fullmatch(r'([0-9a-f]{64})  (.+)',line)
+            if not match:raise ValueError('invalid captured report checksum entry')
+            manifest[match[2]]=match[1]
+    bindings={name:digest((snapshot/name).read_bytes()) for name in TOOLS}
+    if any(manifest.get(f'review-tools/{name}')!=value for name,value in bindings.items()):
+        raise ValueError('captured review-tool snapshot differs from its report manifest')
+    if not pinned_reviewed_report and bindings!=tool_bindings():
+        raise ValueError('new report checker snapshot differs from current sources')
+    return bindings
+
+
 def receipt_id(receipt):
     payload={key:value for key,value in receipt.items() if key!='receipt_sha256'}
     return digest(json.dumps(payload,sort_keys=True,separators=(',',':'),allow_nan=False).encode())
@@ -120,7 +174,7 @@ def checked_sources(bundle,receipt_path):
         raise ValueError('missing versioned checked-source receipt')
     if receipt.get('receipt_sha256')!=receipt_id(receipt):raise ValueError('verification receipt content binding mismatch')
     if receipt.get('inputs')!=inputs:raise ValueError('verification receipt input binding mismatch')
-    if receipt.get('checked_sources')!=tool_bindings():raise ValueError('verification receipt script binding mismatch')
+    if receipt.get('checked_sources')!=captured_tool_bindings(receipt_path,receipt.get('source_report_id')):raise ValueError('verification receipt script binding mismatch')
     if receipt['verification']['status'] not in ('verified','inconclusive'):raise ValueError('missing independent check disposition')
     expected_count=sum(len(attempt['steps']) for attempt in record['attempts'] if attempt['status']=='completed')
     expected_status='inconclusive' if any(p.get('status')=='inconclusive' for p in record['processes']) or any(a['status']!='completed' for a in record['attempts']) else 'verified'

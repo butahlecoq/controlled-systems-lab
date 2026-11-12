@@ -53,6 +53,13 @@ class Geo03ReportCsvProjectionTests(unittest.TestCase):
     def test_saved_report_and_csv_projections_validate(self) -> None:
         VALIDATOR.validate(self.source)
 
+    def test_future_report_reference_is_pinned_to_the_archived_source_commit(self) -> None:
+        reference = BUILDER.LINEAGE_AUDIT["contract_reference"]
+        self.assertEqual(
+            reference,
+            "https://github.com/butahlecoq/controlled-systems-lab/blob/68db559016fcfffea3aa052c65f7757386e35075/docs/contracts/polyhedral-conversion.md#lineage-audit-a17-and-a18",
+        )
+
     def test_saved_report_audits_archival_lineage_without_equivalence_claim(self) -> None:
         wrapper = json.loads((self.source / "records.json").read_text(encoding="utf-8"))
         payload = wrapper["payload"]
