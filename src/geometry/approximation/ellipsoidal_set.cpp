@@ -47,6 +47,8 @@ bool radius_covers(double bound,double radius) {
         (is_zero(difference) || !difference.negative);
 }
 bool finite_matrix(const Matrix& matrix) {
+    if(matrix.cols!=0 && matrix.rows>std::numeric_limits<std::size_t>::max()/matrix.cols)
+        return false;
     return matrix.values.size()==matrix.rows*matrix.cols && finite(matrix.values);
 }
 bool zero_factor(const Matrix& matrix) {
@@ -70,6 +72,9 @@ FactorEllipsoidResult affine_image(const FactorEllipsoid& input,
        input.factor.rows!=input.center.size() || !finite_matrix(input.factor))
         return invalid("ellipsoid.factor.affine",
             "Finite map, offset and factor dimensions must agree.");
+    if(map.rows!=0 && input.factor.cols>std::numeric_limits<std::size_t>::max()/map.rows)
+        return invalid("ellipsoid.factor.affine.capacity",
+            "Affine factor dimensions overflow addressable storage.",DiagnosticCode::unsupported);
     Vector center(map.rows,0.0);
     Matrix factor{map.rows,input.factor.cols,
         Vector(map.rows*input.factor.cols,0.0)};
@@ -99,6 +104,13 @@ FactorEllipsoidResult outer_minkowski_sum(const FactorEllipsoid& left,
         return invalid("ellipsoid.factor.sum.beta","Beta scaling overflowed.",
                        DiagnosticCode::unsupported);
     const auto dimension=left.center.size();
+    if(right.factor.cols>std::numeric_limits<std::size_t>::max()-left.factor.cols)
+        return invalid("ellipsoid.factor.sum.capacity",
+            "Concatenated factor column count overflows size_t.",DiagnosticCode::unsupported);
+    const auto columns=left.factor.cols+right.factor.cols;
+    if(columns!=0 && dimension>std::numeric_limits<std::size_t>::max()/columns)
+        return invalid("ellipsoid.factor.sum.capacity",
+            "Concatenated factor storage extent overflows size_t.",DiagnosticCode::unsupported);
     Vector center(dimension);
     for(std::size_t row=0;row<dimension;++row)
         center[row]=left.center[row]+right.center[row];
@@ -108,8 +120,7 @@ FactorEllipsoidResult outer_minkowski_sum(const FactorEllipsoid& left,
         return make_factor_ellipsoid(std::move(center),right.factor);
     if(zero_factor(right.factor))
         return make_factor_ellipsoid(std::move(center),left.factor);
-    Matrix factor{dimension,left.factor.cols+right.factor.cols,
-        Vector(dimension*(left.factor.cols+right.factor.cols),0.0)};
+    Matrix factor{dimension,columns,Vector(dimension*columns,0.0)};
     for(std::size_t row=0;row<dimension;++row) {
         for(std::size_t column=0;column<left.factor.cols;++column)
             factor.values[row*factor.cols+column]=

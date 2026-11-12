@@ -168,6 +168,10 @@ SAVED_COMPANION_ROUTES = {
 }
 SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
 SAVED_DATA_ILLUSTRATION_RENDERERS = {
+    "scripts/reports/buryatia/render_2d.py": (
+        "Renders all saved source-qualified native affine 2D stages and a terminal overlay; the factor matrix is "
+        "retained in each ellipse record and the sampled boundary is checked against that represented set. "
+        "The page makes no nonlinear, feedback, minimax or timing claim."),
     "scripts/reports/render_issue944_each_choice.py": (
         "Renders the immutable source-bound Strategy A choice records and independent recovered-history values "
         "with shared screen/print tokens; it runs no solver and makes no full-family or performance claim."),

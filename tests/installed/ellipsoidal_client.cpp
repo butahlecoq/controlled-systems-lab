@@ -33,5 +33,14 @@ int main() {
         if(member.basis!=StructuralBasis::v_ellipsoid_containment ||
            !std::holds_alternative<EllipsoidSet>(from_ellipsoid_handle(member.result.output)))
             return 7;
-    std::cout<<"Installed ellipsoidal client: two reviewed outer members passed\n";
+    const auto initial=make_factor_ellipsoid({1.0,-1.0},Matrix{2,0,{}});
+    if(!std::holds_alternative<FactorEllipsoid>(initial))return 8;
+    const auto control=make_factor_ellipsoid({0.0,0.0},Matrix{2,1,{0.25,-0.5}});
+    if(!std::holds_alternative<FactorEllipsoid>(control))return 9;
+    const auto recurrence=outer_minkowski_sum(std::get<FactorEllipsoid>(initial),
+        std::get<FactorEllipsoid>(control),1.0);
+    if(!std::holds_alternative<FactorEllipsoid>(recurrence) ||
+       std::get<FactorEllipsoid>(recurrence).center!=Vector{1.0,-1.0} ||
+       std::get<FactorEllipsoid>(recurrence).factor.cols!=1)return 10;
+    std::cout<<"Installed ellipsoidal client: two reviewed outer members passed; factor recurrence passed\n";
 }

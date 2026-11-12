@@ -1656,6 +1656,20 @@ add_test(NAME buryatia_volterra_2d_report
   COMMAND Python3::Interpreter
     ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/buryatia/check_2d.py
     --raw ${CMAKE_CURRENT_SOURCE_DIR}/docs/examples/buryatia-volterra-affine-2d-records.json)
+add_test(NAME buryatia_volterra_2d_native_capture
+  COMMAND Python3::Interpreter
+    ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/buryatia/check_2d.py
+    --exe $<TARGET_FILE:csl_buryatia_approximation_report>
+    --cmake-cache ${CMAKE_BINARY_DIR}/CMakeCache.txt
+    --record-out ${CMAKE_CURRENT_BINARY_DIR}/buryatia-volterra-affine-2d-native-records.json)
 set_tests_properties(buryatia_volterra_2d_report PROPERTIES LABELS "geometry;example" TIMEOUT 30)
+set_tests_properties(buryatia_volterra_2d_native_capture PROPERTIES LABELS "geometry;example;native-report" TIMEOUT 1800)
+add_executable(buryatia_ellipse_boundary_tests
+  tests/contract/geometry/buryatia_ellipse_boundary_tests.cpp)
+target_include_directories(buryatia_ellipse_boundary_tests PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/buryatia)
+target_link_libraries(buryatia_ellipse_boundary_tests PRIVATE CSL::approximation doctest::doctest)
+add_test(NAME buryatia_ellipse_boundary_tests COMMAND buryatia_ellipse_boundary_tests)
+csl_test_target(buryatia_ellipse_boundary_tests geometry)
 endif()
 endif()

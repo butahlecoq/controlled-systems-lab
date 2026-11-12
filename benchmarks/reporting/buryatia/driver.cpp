@@ -8,6 +8,7 @@
 #include <csl/registry/provider.hpp>
 #include <csl/sets/data.hpp>
 #include <csl/sets/generator_sets.hpp>
+#include "ellipse_boundary.hpp"
 
 #include <nlohmann/json.hpp>
 
@@ -280,33 +281,6 @@ Json json_points(const std::vector<std::array<double,2>>& points) {
     return result;
 }
 
-std::vector<std::array<double,2>> factor_ellipsoid_boundary(
-        const FactorEllipsoid& e,std::size_t count=96) {
-    double q00=0,q01=0,q11=0;
-    for(std::size_t column=0;column<e.factor.cols;++column) {
-        const double x=e.factor.values[column];
-        const double y=e.factor.values[e.factor.cols+column];
-        q00+=x*x;q01+=x*y;q11+=y*y;
-    }
-    const double spread=std::hypot(q00-q11,2*q01);
-    const double major=std::sqrt(std::max(0.0,(q00+q11+spread)/2));
-    const double minor=std::sqrt(std::max(0.0,(q00+q11-spread)/2));
-    std::array<double,2> u{1,0};
-    if(std::abs(q01)>std::abs((q00+spread-q11)/2))
-        u={q01,(q00+spread-q11)/2};
-    else if(q01==0 && q11>q00)u={0,1};
-    const double length=std::hypot(u[0],u[1]);
-    if(length==0)u={1,0};else {u[0]/=length;u[1]/=length;}
-    const std::array<double,2> v{-u[1],u[0]};
-    std::vector<std::array<double,2>> points;points.reserve(count);
-    for(std::size_t i=0;i<count;++i) {
-        const double angle=2*std::acos(-1.0)*static_cast<double>(i)/static_cast<double>(count);
-        const double a=major*std::cos(angle),b=minor*std::sin(angle);
-        points.push_back({e.center[0]+a*u[0]+b*v[0],e.center[1]+a*u[1]+b*v[1]});
-    }
-    return points;
-}
-
 std::vector<std::array<double,2>> hull(std::vector<std::array<double,2>> points) {
     std::sort(points.begin(),points.end());
     points.erase(std::unique(points.begin(),points.end()),points.end());
@@ -385,7 +359,8 @@ double maximum_support_error(const sets::GeneratorSet& reference,
 Json stage_record(std::size_t stage,std::string family,const std::string& status,
         double area,std::size_t vertices_count,std::size_t generators_count,
         std::size_t constraints,double support_error,std::string inclusion,
-        Json modules,Json assumptions={},double reference_area=0,Json drawing=Json::array()) {
+        Json modules,Json assumptions={},double reference_area=0,Json drawing=Json::array(),
+        Json represented_set=Json()) {
     return {{"stage",stage},{"family",std::move(family)},{"status",status},
         {"area",area},{"vertex_count",vertices_count},{"generator_count",generators_count},
         {"constraint_count",constraints},{"max_abs_support_error_8_directions",support_error},
@@ -393,7 +368,14 @@ Json stage_record(std::size_t stage,std::string family,const std::string& status
         {"excess_area_vs_affine_reference",area-reference_area},
         {"rendering_vertices",std::move(drawing)},
         {"containment_check",inclusion},{"module_invocations",std::move(modules)},
-        {"assumptions",std::move(assumptions)}};
+        {"assumptions",std::move(assumptions)},
+        {"represented_set",std::move(represented_set)}};
+}
+
+Json factor_ellipsoid_json(const FactorEllipsoid& ellipsoid) {
+    return {{"kind","factor_ellipsoid"},{"center",ellipsoid.center},
+        {"factor_rows",ellipsoid.factor.rows},{"factor_columns",ellipsoid.factor.cols},
+        {"factor_row_major",ellipsoid.factor.values}};
 }
 
 const char* basis_name(csl::geometry::approximation::StructuralBasis basis) {
@@ -450,7 +432,8 @@ Json run_2d() {
     records.push_back(stage_record(0,"box","completed",0,1,0,4,0,
         "identical_initial_point",Json::array(),Json::object(),0,{{1,2}}));
     records.push_back(stage_record(0,"ellipsoid","completed",0,1,0,2,0,
-        "identical_initial_point",Json::array(),Json::object(),0,{{1,2}}));
+        "identical_initial_point",Json::array(),Json::object(),0,{{1,2}},
+        factor_ellipsoid_json(ellipse_state)));
 
     const auto reduced_registration=approximation::make_axis_cover_registration({"buryatia-reduced"});
     const auto reduced_method=registry::Method{reduced_registration.identity.id,
@@ -636,15 +619,19 @@ Json run_2d() {
              {"registered_provider_reference_area",provider_area},
              {"provider_reference_basis",basis_name(ellipse_enclosed->basis)},
              {"rounding","numerical binary64; no validated arithmetic certificate"}},
-            exact_area,json_points(factor_ellipsoid_boundary(ellipse_state))));
+            exact_area,json_points(benchmarks::buryatia::factor_ellipsoid_boundary_2d(ellipse_state)),
+            factor_ellipsoid_json(ellipse_state)));
     }
 
-    return {{"schema","csl.buryatia.recursive-approximation/1"},
+    return {{"schema","csl.buryatia.recursive-approximation/2"},
         {"track","new-comparison/literal-script-affine-variant"},
         {"case_id","buryatia-volterra-matlab-literal-affine/1"},
         {"source_variant_id","buryatia-volterra-literal-script-affine/1"},
         {"canonical_task_comparison","syn-nl-lv-01 is a distinct multiplicative-harvesting model"},
         {"source_sha256","c26fc2424fa8b3325a864d1afbc67920ba1c05665bfdf4562bed79548b60a4f1"},
+        {"supersedes",{{"schema","csl.buryatia.recursive-approximation/1"},
+            {"records_sha256","21c7ce75e047e2898f76221579cf5808470696e6e6b341a391f86d0fffde68be"},
+            {"reason","The prior ellipse boundary sample used an incorrect eigendirection and omitted the carried factor state."}}},
         {"state_coordinates","deviation x1,x2 around nominal physical state"},
         {"nominal_initial",{410,300}},{"deviation_initial",{1,2}},
         {"parameters",{{"a",0.9},{"b",0.003},{"c",0.8},{"d",0.002},{"e",0.85}}},

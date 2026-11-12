@@ -4,6 +4,7 @@
 #include <doctest/doctest.h>
 
 #include <cmath>
+#include <limits>
 #include <variant>
 
 namespace {
@@ -79,4 +80,10 @@ TEST_CASE("zero-factor Minkowski operands preserve the other factor exactly") {
     CHECK(sum.factor.rows==2);
     CHECK(sum.factor.cols==1);
     CHECK(sum.factor.values==segment.factor.values);
+}
+
+TEST_CASE("factor ellipsoid admission rejects overflowing matrix extents") {
+    const auto columns=std::numeric_limits<std::size_t>::max()/2+1;
+    const auto rejected=make_factor_ellipsoid({0.0,0.0},Matrix{2,columns,{}});
+    CHECK(std::holds_alternative<Diagnostics>(rejected));
 }

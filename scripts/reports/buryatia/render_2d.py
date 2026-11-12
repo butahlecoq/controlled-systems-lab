@@ -101,7 +101,7 @@ body{{background:var(--page);color:var(--text)}} .page-content{{max-width:78rem}
 <div class="math-input"><p><strong>Deviation state:</strong> z₀ = (1, 2), around nominal physical state (410, 300).</p>
 <p><strong>Parameters:</strong> a = 0.9, b = 0.003, c = 0.8, d = 0.002, e = 0.85; h = 2π / (60√(ac)) = {raw['step']:.15g}; uₖ ∈ [−0.3, 0.3] independently.</p>
 <p>zₖ₊₁ = Aₖ zₖ + B uₖ, B = (he, 0)ᵀ. The literal script evaluates Aₖ at the next Euler nominal point. Each set is propagated at all 60 stages.</p></div>
-<p class="provenance">Private source is not included. SHA-256: <code>{html.escape(raw['source_sha256'])}</code>. Reference values from the independent affine reconstruction: 120 terminal vertices and area 4.619042908487405 (published table rounds to 120 and 4.62). This implementation reports its own native outputs below.</p>
+<p class="provenance">Private source is not included. SHA-256: <code>{html.escape(raw['source_sha256'])}</code>. Reference values from the independent affine reconstruction: 120 terminal vertices and area 4.619042908487405 (published table rounds to 120 and 4.62). This corrected capture supersedes the earlier ellipse drawing record; the prior bytes remain available under the superseded filename.</p>
 </section>
 <section><h2>Explore every time slice</h2><p>Use the stage control to inspect the complete stored slice for each family. The factor ellipsoid is sampled only to draw its boundary; the raw record retains the factor matrix and reported support diagnostics.</p>
 <div class="controls"><label for="stage">Stage <output id="stage-value">0</output> / 60</label><input id="stage" type="range" min="0" max="60" value="0"><label><input id="all-stages" type="checkbox"> Overlay every stage faintly</label></div>
@@ -111,9 +111,10 @@ body{{background:var(--page);color:var(--text)}} .page-content{{max-width:78rem}
 <div class="scroll"><table><thead><tr><th>Family</th><th>Area</th><th>Excess area</th><th>Vertices</th><th>Generators</th><th>Constraints</th><th>Support diagnostic</th></tr></thead><tbody id="terminal-table"></tbody></table></div></section>
 <section><h2>Reproduce</h2><pre><code>cmake -S . -B build -DCSL_BUILD_BURYATIA_REPORT=ON
 cmake --build build --target csl_buryatia_approximation_report
-build/csl_buryatia_approximation_report --volterra-2d &gt; buryatia-volterra-affine-2d-records.json
-python3 scripts/reports/buryatia/render_2d.py --raw buryatia-volterra-affine-2d-records.json</code></pre>
-<p><a href="{html.escape(raw_path.name)}">Download raw stage records</a> · <a href="{html.escape(manifest_path.name)}">Artifact checksums and scope</a></p>
+python3 scripts/reports/buryatia/check_2d.py --exe build/csl_buryatia_approximation_report --cmake-cache build/CMakeCache.txt --record-out docs/examples/buryatia-volterra-affine-2d-records.json
+python3 scripts/reports/buryatia/render_2d.py --raw docs/examples/buryatia-volterra-affine-2d-records.json</code></pre>
+<p><a href="{html.escape(raw_path.name)}">Download corrected raw stage records</a> · <a href="{html.escape(manifest_path.name)}">Artifact checksums and scope</a> · <a href="buryatia-volterra-affine-2d-records-superseded-v1.json">Download superseded v1 records</a></p>
+<p>Native executable SHA-256: <code>{html.escape(raw['native_build']['executable_sha256'])}</code>; source hashes and build configuration are included in the raw record.</p>
 <p>The native driver uses the registered source-index affine-sum operation, native generator operations, axis-cover reduction, registered box and parallelotope producers, a factor ellipsoid recursion, and the existing directional V-to-ellipsoid provider as a separately labeled per-stage candidate.</p>
 </section><footer><p>Numerical binary64 record; no validated global rounding certificate. No nonlinear outer-reachability claim.</p></footer></main>
 <script id="data" type="application/json">{escaped_payload}</script>
@@ -130,14 +131,25 @@ const terminal=rows.filter(r=>r.stage===60);document.getElementById('terminal-ta
     html_path.write_text(page, encoding="utf-8")
     artifacts = [raw_path, html_path, terminal_svg_path]
     manifest = {
-        "schema": "csl.buryatia.2d-artifact-manifest/1",
+        "schema": "csl.buryatia.2d-artifact-manifest/2",
         "case_id": raw["case_id"],
         "source_variant_id": raw["source_variant_id"],
         "source_sha256": raw["source_sha256"],
         "assurance": "numerical binary64; no validated rounding certificate",
+        "native_build": raw["native_build"],
         "artifacts": [
             {"path": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
             for path in artifacts
+        ],
+        "superseded_artifacts": [
+            {"path": f"docs/examples/{name}",
+             "sha256": hashlib.sha256((manifest_path.parent / name).read_bytes()).hexdigest()}
+            for name in (
+                "buryatia-volterra-affine-2d-records-superseded-v1.json",
+                "buryatia-volterra-affine-2d-superseded-v1.html",
+                "buryatia-volterra-affine-2d-terminal-superseded-v1.svg",
+                "buryatia-volterra-affine-2d-manifest-superseded-v1.json",
+            )
         ],
     }
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
