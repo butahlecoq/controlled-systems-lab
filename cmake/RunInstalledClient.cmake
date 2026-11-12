@@ -118,7 +118,7 @@ execute_process(COMMAND "${CMAKE_COMMAND}" -S "${work}/source" -B "${work}/build
   "-DCSL_EXPECT_HIGHS=${CSL_EXPECT_HIGHS}" "-DCSL_EXPECT_QHULL=${CSL_EXPECT_QHULL}"
   COMMAND_ERROR_IS_FATAL ANY)
 execute_process(COMMAND "${CMAKE_COMMAND}" --build "${work}/build"
-  --config "${CSL_CONFIG}" --parallel 4 COMMAND_ERROR_IS_FATAL ANY)
+  --config "${CSL_CONFIG}" --parallel 1 COMMAND_ERROR_IS_FATAL ANY)
 execute_process(COMMAND "${CMAKE_CTEST_COMMAND}" --test-dir "${work}/build"
   -C "${CSL_CONFIG}" --output-on-failure --no-tests=error COMMAND_ERROR_IS_FATAL ANY)
 
