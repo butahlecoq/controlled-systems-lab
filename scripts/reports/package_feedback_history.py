@@ -29,14 +29,18 @@ def package(attempt: Path, output: Path, audit: Path, auditor: Path,
     graph = json.loads((attempt / "resolved-graph.json").read_text())
     verified = json.loads(audit.read_text())
     build_record = json.loads(build.read_text())
-    task = verified["tasks"]["syn-nl-lv-01"]
+    task_name = episode["task_id"].split("/")[0]
+    task = verified["tasks"][task_name]
+    horizon = episode["original_intervals"]
+    dimension = len(episode["physical_states"][0])
+    expected_memberships = 3 * horizon * (horizon + 3) // 2
     native = episode["preparation_receipt"]["adapter_receipt"]
     if (episode["status"] != "complete" or episode["overall_status"] != "complete"
             or episode["postcheck_status"] != "complete" or episode["render_status"] != "complete"
-            or episode["completed_holds"] != 30 or task["audit_status"] != "pass"
-            or task["completed_holds"] != 30 or task["expected_holds"] != 30
-            or task["errors"] or task["geometry_memberships_checked"] != 1485
-            or task["support_certificates_replayed"] != 5940):
+            or episode["completed_holds"] != horizon or task["audit_status"] != "pass"
+            or task["completed_holds"] != horizon or task["expected_holds"] != horizon
+            or task["errors"] or task["geometry_memberships_checked"] != expected_memberships
+            or task["support_certificates_replayed"] != 2 * dimension * expected_memberships):
         raise ValueError("completed full-horizon independently checked feedback evidence required")
     if (episode["controller_id"] != "native-continuous-history-box-ipopt/1"
             or graph["controller"]["id"] != episode["controller_id"] or native["geometry"] != "box"
@@ -67,9 +71,13 @@ def package(attempt: Path, output: Path, audit: Path, auditor: Path,
             "controller_id": episode["controller_id"], "action_profile_id": episode["action_profile_id"],
             "graph_id": graph["graph_id"], "graph_fingerprint": graph["graph_fingerprint"],
             "native_sha256": native["executable_sha256"], "native_binary_source_in_raw": native["binary_source"],
-            "original_intervals": 30, "completed_holds": 30, "family": "box",
+            "original_intervals": horizon, "completed_holds": horizon, "family": "box",
             "optimizer": "casadi-ipopt", "scope": "one numerical F/B/I affine-history MPC episode",
-            "raw_metadata_correction": "The adapter preparation controller_semantics says direct affine-history MPC; the run used box F/B/I memberships as established by the resolved graph and native records.",
+            "raw_metadata_correction": ("The adapter preparation controller_semantics says direct affine-history MPC; the run used box F/B/I memberships as established by the resolved graph and native records."
+                if "direct" in native["controller_semantics"] else None),
+            "execution_protocol": "Cold start at each observed query; source shift-prior-primal warm-start contract was not implemented.",
+            "postcheck_source_timing": ("After all 40 fuel controls were applied, history_policy.py and history_norm_solver.py were edited while the parent performed postcheck/render; the worker had already imported them and the independent source-cost/replay modules were unchanged."
+                if task_name == "syn-nl-fuel-01" else None),
             "audit": task, "archive_sha256": digest((stage / "raw.zip").read_bytes()),
             "archive_members": inventory}
         (stage / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
