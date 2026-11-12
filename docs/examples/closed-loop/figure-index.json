@@ -722,7 +722,7 @@
         "description": "Raw physical state order [r, v, theta, omega]; no scaling applied.",
         "names": [
           "Radius r",
-          "Angular rate \u03c9"
+          "Angular rate ω"
         ],
         "permutation_matrix": [
           [
@@ -1162,8 +1162,8 @@
       "coordinate_transform": {
         "description": "Raw order [m_ox, m_f, q_ox, q_f]; requested oxidizer indices [2, 0] and fuel indices [3, 1]; raw scale [100, 30, 3, 1] is not reapplied to physical data.",
         "names": [
-          "Oxidizer flow q\u2092\u2093",
-          "Oxidizer mass m\u2092\u2093"
+          "Oxidizer flow qₒₓ",
+          "Oxidizer mass mₒₓ"
         ],
         "permutation_matrix": [
           [
@@ -1999,6 +1999,69 @@
       "time_step": 0.5,
       "timeline_end": 20.0,
       "title": "Fuel flow and mass plane"
+    },
+    {
+      "id": "nominal-h-tube-lotka",
+      "availability": "ready",
+      "href": "examples/closed-loop/figures/nominal-h-tube-lotka.html",
+      "svg_href": "examples/closed-loop/figures/nominal-h-tube-lotka.svg",
+      "plotted_data_href": "examples/closed-loop/figures/nominal-h-tube-lotka.plotted-data.json",
+      "title": "Lotka full-state nominal H tube",
+      "task_id": "syn-nl-lv-01/continuous-receding/1 (frozen-affine geometry producer)",
+      "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+      "geometry_source_commit": "1288c1586f9153ac1c706e457dcf3fa79d63b6e6",
+      "stage_count": 31,
+      "transition_count": 30,
+      "time_step": 0.1,
+      "timeline_end": 3.0,
+      "coordinate_transform": {
+        "raw_indices": [
+          0,
+          1
+        ],
+        "names": [
+          "Prey population P",
+          "Predator population R"
+        ],
+        "units": [
+          "thousand individuals",
+          "thousand individuals"
+        ],
+        "description": "Full physical state; plotted before any projection.",
+        "permutation_matrix": [
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0
+          ]
+        ],
+        "source_values_are_physical": true,
+        "scale_applied_to_source_values": false
+      },
+      "layer_scopes": [
+        "full-state forward H sets F[0..30]",
+        "compacted full-state backward feasible H sets B[0..30]",
+        "full-state intersections I[0..30] before projection",
+        "separate saved nonlinear continuous NMPC plant trajectory"
+      ],
+      "missing_layers": [
+        "nonlinear reachable-set enclosure",
+        "exact or validated-arithmetic set-relation certificate"
+      ],
+      "raw_record_refs": [
+        {
+          "geometry_capture": "reports/closed-loop-pilot/closed-loop-pilot-v1/raw/geometry/nominal-h-tube-lotka-v1-bounded-backward-compaction-maxrows-1000000/raw-record.json",
+          "geometry_record_sha256": "03e771f7f188d2c97a3077cc11e6fa850abfee5ea33697371535c8e6ca7902e2",
+          "geometry_request_sha256": "69ce07b1c460bdbf81f451d84e4d7d5311fb2c42224c7f63c9d0ca617a7f66c2",
+          "geometry_manifest_sha256": "a0c9b34bdf31e6a1da7a32fce92037501d3d5579cc7f10ec1f145ae1bb62ca38",
+          "nonlinear_attempt": "reports/closed-loop-pilot/closed-loop-pilot-v1/raw/attempts/syn-nl-lv-01/syn-nl-lv-01-20261111T114908Z-8dc20bed/attempt.json",
+          "nonlinear_attempt_sha256": "1170640f63491a70ce30a06e8b07f0da6e1426e8a610effebc9dfc38a32fb7ce"
+        }
+      ],
+      "reproduction_command": "python scripts/reports/nominal_tube_figure.py"
     }
   ],
   "schema": "csl.closed-loop.figure-index/1",

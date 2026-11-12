@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 700" role="img" aria-labelledby="title desc">
+<title id="title">Returned unit-square terminal family and recovered histories</title><desc id="desc">A square terminal family with the recovered linear history from zero to (1,0) under control (1,0), and quadratic history at zero under control (0,0).</desc>
+<style>text{font-family:Inter,system-ui,sans-serif;fill:#f8f8f2}.title{font-size:24px;font-weight:650}.axis,.tick{font-size:16px;fill:#b7b7af}.legend{font-size:16px;font-weight:600}</style>
+<rect width="480" height="700" fill="#272822"/><text x="28" y="46" class="title">Returned terminal family</text><text x="28" y="76" class="axis">x₁=x₀+u₀, x₀=(0,0), u₀∈[0,1]²</text>
+<rect x="55" y="120" width="370" height="370" fill="#303129" stroke="#504945" stroke-width="2"/><line x1="55" y1="305.0" x2="425" y2="305.0" stroke="#504945"/><line x1="240.0" y1="120" x2="240.0" y2="490" stroke="#504945"/>
+<polygon points="55.0,490.0 425.0,490.0 425.0,120.0 55.0,120.0" fill="#a6e22e" fill-opacity=".18" stroke="#a6e22e" stroke-width="3"/><line x1="55" y1="490" x2="425" y2="490" stroke="#66d9ef" stroke-width="5" opacity=".9"/><text x="55" y="555" class="legend" fill="#66d9ef">LP: x₀=(0,0), x₁=(1,0), u₀=(1,0)</text><line x1="55" y1="490" x2="55" y2="490" stroke="#fd971f" stroke-width="5" opacity=".9"/><text x="55" y="591" class="legend" fill="#fd971f">QP: x₀=(0,0), x₁=(0,0), u₀=(0,0)</text><circle cx="425" cy="490" r="9" fill="#66d9ef" stroke="#272822" stroke-width="2"/><circle cx="55" cy="490" r="9" fill="#fd971f" stroke="#272822" stroke-width="2"/>
+<text x="55" y="515" class="tick">0</text><text x="417" y="515" class="tick">1</text><text x="30" y="490" class="tick">0</text><text x="30" y="132" class="tick">1</text>
+<text x="55" y="652" class="axis">Both histories were recovered from the returned family.</text>
+</svg>

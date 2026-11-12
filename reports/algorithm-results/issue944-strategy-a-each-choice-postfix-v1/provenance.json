@@ -1,0 +1,40 @@
+{
+  "algorithm_source_sha256": "40d6da9ca5194d74a7b0980d6996202dddc596a85ad208f351e062d5106d76ba",
+  "build": {
+    "cmake_path": "/home/butahlecoq/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake",
+    "cmake_version": "cmake version 3.31.6",
+    "compiler_path": "/usr/bin/c++",
+    "compiler_version": "c++ (GCC) 16.2.1 20260810",
+    "generator": "Unix Makefiles",
+    "highs_enabled": "ON",
+    "qhull_enabled": "ON",
+    "qhull_provider": "Qhull 8.0.2 Qx",
+    "type": "Release"
+  },
+  "capture_harness_sha256": "1941f252c87c6b7061078a280ec5fd4f909ff9d86bf0f8e14c29870e2b1eec11",
+  "captured_at_utc": "2026-11-12T05:32:48.373732+00:00",
+  "checker_result": {
+    "required_reconciliation": "64 structural exclusions + 64 completed admitted attempts",
+    "return_code": 0,
+    "status": "passed"
+  },
+  "checker_source_sha256": "32c161822ea0915fadfc9bf55f6175373dff64ebd55ebdcf1897bfddf5dc9297",
+  "cmake_cache_sha256": "33c261715ea8cb23f197c5774803efa0f90bd68838a03f851fa108441c3b98fa",
+  "executable_sha256": "5dcdaf8ddfd76a5144ac055990ea5a41c2e954431abfad91cae6642e40c92176",
+  "record_sha256": "abf2ea6b80260a14e344ab004e9bed7b6d4a11e4d8bc2083ebd6c10d5404d73c",
+  "regression_sha256": "2bfce10402b25884b5de16f3ca97abb1ed6d4dac8b94b62939444938c22bfdb1",
+  "runner_exit_codes": {
+    "matrix": 0,
+    "terminal_membership_regression": 0
+  },
+  "runner_source_sha256": "b3d99cd4edd0eb76af42ea7da65ba7236f4fca372e30e52d17a21f0c958d9468",
+  "schema": "csl.issue944-final-capture-provenance/1",
+  "source_commit": "ee677acf13fb38330dbde696a7b7bb7247eab792",
+  "source_tree": {
+    "CMakeLists.txt": "51915bd9eeff65de5616dcbd428810dd2a426151347f8c7a589968a9d69586b7",
+    "src/adapters/polyhedral/Tests.cmake": "47724b80da071cd6ed36a6493a6df92e89c65f00335931d52ca40b8ef6ea7c98",
+    "src/adapters/polyhedral/qhull.cpp": "117ce16b9b3c9e91da3ddf2575a87358cedace4d969d552024d552bc65e4e7c6",
+    "src/geometry/conversion/affine_coordinates.cpp": "40d6da9ca5194d74a7b0980d6996202dddc596a85ad208f351e062d5106d76ba",
+    "tests/contract/geometry/qhull_highs_interop_tests.cpp": "602b19ca04f9fbcc041bbfd1e7984ea353110ad5973bba19bdc46fe33bef2a8e"
+  }
+}
