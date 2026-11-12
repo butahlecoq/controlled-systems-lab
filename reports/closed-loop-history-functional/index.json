@@ -1,5 +1,5 @@
 {
-  "description": "Observed-state affine-history functional evidence for direct and F/B/I box profiles. Original source costs, continuous bounds, and full remaining horizons are retained.",
+  "description": "Observed-state affine-history functional evidence for direct and selected F/B/I family profiles. Original source costs, continuous bounds and full remaining horizons are retained.",
   "scope": "Individual numerical results; no global optimality, continuous-time safety, performance ranking, or five-representation coverage claim. IPOPT results are local.",
   "plot_label_correction": "Earlier direct-profile raw images and coverage text labeled the controller as NMPC. Their corrected plots were separately rendered from saved records without controller reruns.",
   "binary_provenance": "Original attempt preparation recorded binary source unknown; separate build receipts record clean source revision, incremental build, executable and source capsule hashes.",
@@ -85,6 +85,36 @@
       "holds_total": 20,
       "directory": "orbit-box-aeac-incomplete",
       "stop": "local optimizer reported infeasibility; source infeasibility not established"
+    },
+    {
+      "task": "Lotka-Volterra",
+      "solver": "CasADi/IPOPT",
+      "family": "zonotope",
+      "controller": "affine-history MPC with F/B/I",
+      "holds_completed": 30,
+      "holds_total": 30,
+      "source_objective": 0.09206357506388757,
+      "directory": "lv-zonotope-b78",
+      "warm_start_protocol": "cold at each observed query; source shift-prior-primal contract not implemented"
+    },
+    {
+      "task": "Lotka-Volterra",
+      "solver": "CasADi/IPOPT",
+      "family": "parallelotope",
+      "controller": "affine-history MPC with F/B/I",
+      "holds_completed": 30,
+      "holds_total": 30,
+      "source_objective": 0.09207050915639435,
+      "directory": "lv-parallelotope-b78",
+      "warm_start_protocol": "cold at each observed query; source shift-prior-primal contract not implemented"
+    },
+    {
+      "task": "Lotka–Volterra with F/B/I ellipsoid geometry",
+      "solver": "CasADi/IPOPT",
+      "holds_completed": 30,
+      "holds_total": 30,
+      "source_objective": 0.09206356266610233,
+      "directory": "lv-ellipsoid-b78"
     }
   ],
   "bundle_files": "Each directory contains receipt.json, raw.zip, SHA256SUMS, independent audit source and build receipt. Completed episodes also contain corrected plots and renderer receipt.",
