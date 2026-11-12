@@ -727,7 +727,15 @@ Json graph_response(const Json& input, const optimization::FiniteActionNominalRe
 
 template<class T, class... E> T take_history(std::variant<T, E...> result, const char* field) {
     if (const auto* value = std::get_if<T>(&result)) return *value;
-    throw std::runtime_error(std::string(field) + ": history operation failed");
+    std::string detail = "history operation failed";
+    std::visit([&](const auto& item) {
+        using V = std::decay_t<decltype(item)>;
+        if constexpr (std::is_same_v<V, Diagnostic>) detail = item.field + ": " + item.explanation;
+        else if constexpr (std::is_same_v<V, Diagnostics>) {
+            if (!item.empty()) detail = item.front().field + ": " + item.front().explanation;
+        } else if constexpr (std::is_same_v<V, OperationStopped>) detail = item.diagnostics;
+    }, result);
+    throw std::runtime_error(std::string(field) + ": " + detail);
 }
 
 Json continuous_history_query(const Json& in) {
