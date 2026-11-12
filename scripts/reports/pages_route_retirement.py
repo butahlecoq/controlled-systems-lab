@@ -77,6 +77,9 @@ EXAMPLE_ROUTE_PRODUCERS = {
 }
 
 STANDALONE_REPORT_ROUTE_PRODUCERS = {
+    "closed-loop-history-functional/index.html": ["scripts/reports/stage_history_functional.py",
+                                                   "reports/closed-loop-history-functional/index.html",
+                                                   ".github/workflows/algorithm-reports.yml"],
     "closed-loop-pilot-v1/index.html": ["scripts/reports/render_closed_loop_pilot.py",
                                         "scripts/reports/stage_closed_loop_pilot.py",
                                         ".github/workflows/algorithm-reports.yml"],

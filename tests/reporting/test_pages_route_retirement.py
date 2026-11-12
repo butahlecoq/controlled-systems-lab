@@ -64,6 +64,26 @@ class PagesRouteRetirementTests(unittest.TestCase):
                     self.assertEqual(producer["owner_status"], "exact" if route.startswith("closed-loop") else "gallery-aggregator")
                     self.assertIn(source, producer["files"])
 
+    def test_real_finalizer_accepts_staged_history_functional_report(self) -> None:
+        repo = Path(__file__).resolve().parents[2]
+        from scripts.reports.stage_history_functional import stage
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary) / "site"
+            (site / "examples").mkdir(parents=True)
+            (site / "examples/index.html").write_text(
+                '<html><body><h1 id="algorithm-coverage">Examples</h1><section id="analytic-illustrations"></section></body></html>')
+            (site / "index.html").write_text('<html><body><a href="examples/index.html">Examples</a></body></html>')
+            (site / "examples/examples.css").write_text("body{color:inherit}")
+            stage(repo / "reports/closed-loop-history-functional", site)
+            completed = subprocess.run(
+                [sys.executable, str(repo / "scripts/reports/pages_route_retirement.py"),
+                 "--site", str(site)], cwd=repo, capture_output=True, text=True)
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            inventory = json.loads((site / "pages-route-inventory.json").read_text())
+            producer = inventory["html_routes"]["closed-loop-history-functional/index.html"]["producer"]
+            self.assertEqual(producer["owner_status"], "exact")
+            self.assertIn("scripts/reports/stage_history_functional.py", producer["files"])
+
     def make_site(self, root: Path, *, gallery: str | None = None,
                   route: str | None = None) -> tuple[Path, str]:
         site = root / "site"
