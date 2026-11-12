@@ -76,6 +76,22 @@ class GeometryMembershipTests(unittest.TestCase):
                 validate(task, 0, [0.5, 0], predictor, relation, [0.5, 0, 0.5, 0, 0], 0,
                          geometry_memberships=[membership])
 
+    def test_geometry_export_requires_all_stage_roles_and_requested_family(self):
+        from history_policy import geometry_memberships
+        def row(k, role):
+            return {"kind": "h", "indices": [2*k, 2*k+1], "role": role,
+                    "relation": "outer", "inequalities": [], "upper_bounds": [],
+                    "equalities": [], "equality_values": []}
+        stages = [{"stage": k, "coordinates": [0, 1],
+                   "memberships": [row(k, role) for role in ("forward", "backward", "intersection")]}
+                  for k in range(2)]
+        export = {"family": "box", "scope": "forward_relevant_from_observation",
+                  "status": "complete", "stages": stages}
+        self.assertEqual(len(geometry_memberships(export, "box", 2, 1)), 6)
+        stages[1]["memberships"].pop()
+        with self.assertRaisesRegex(ValueError, "forward, backward and intersection"):
+            geometry_memberships(export, "box", 2, 1)
+
     def test_rejects_invalid_membership_input(self):
         with self.assertRaises(ValueError):
             parse([{"kind": "h", "indices": [0, 0], "inequalities": [], "upper_bounds": [],

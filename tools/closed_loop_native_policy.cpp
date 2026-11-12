@@ -7,11 +7,16 @@
 #include <csl/optimization/phase_one.hpp>
 #if CSL_NATIVE_HAS_HIGHS
 #include <csl/adapters/lp/highs.hpp>
+#if CSL_NATIVE_HAS_QHULL
+#include <csl/adapters/polyhedral/qhull.hpp>
+#endif
 #endif
 #include <csl/optimization/finite_action_nominal.hpp>
 #include <csl/optimization/finite_action_graph.hpp>
 #include <csl/optimization/objectives.hpp>
 #include <csl/optimization/history_cost.hpp>
+#include <csl/reachability/feedback_geometry.hpp>
+#include <csl/geometry/polyhedral_intersection.hpp>
 #include <csl/optimization/convex_backend.hpp>
 #include <csl/problem/resolved_problem.hpp>
 #if CSL_NATIVE_HAS_HIGHS
@@ -26,6 +31,7 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <map>
 #include <numeric>
 #include <stdexcept>
 #include <string>
@@ -739,6 +745,175 @@ template<class T, class... E> T take_history(std::variant<T, E...> result, const
     throw std::runtime_error(std::string(field) + ": " + detail);
 }
 
+#if CSL_NATIVE_HAS_HIGHS && CSL_NATIVE_HAS_QHULL
+template<class Port>
+registry::PreparedProvider<Port> feedback_provider(registry::Registration<Port> registration,
+        const std::string& representation) {
+    registry::Requirements requirements;
+    requirements.output.representation = {representation};
+    if constexpr(std::is_same_v<Port, registry::GeometryPort> ||
+                 std::is_same_v<Port, registry::ConversionPort>)
+        requirements.output.relation = SetRelation::equivalent;
+    return prepare_provider(std::move(registration), requirements);
+}
+
+Json feedback_membership_json(const reachability::FeedbackSet& shape,
+        const std::vector<std::size_t>& indices, const std::string& role) {
+    Json membership = std::visit([&](const auto& value) -> Json {
+        using T = std::decay_t<decltype(value)>;
+        if constexpr(std::is_same_v<T, reachability::FeedbackHMembership>) {
+            auto result = set_json(take_history(sets::from_handle(value.set), "feedback-membership"));
+            if(result.at("representation") != "polytope-h")
+                throw std::runtime_error("feedback H membership is not H-represented");
+            result["kind"] = "h";
+            if(value.parallelotope_frame)
+                result["parallelotope_frame"] = matrix_json(value.parallelotope_frame->rows,
+                    value.parallelotope_frame->cols, [&](auto i, auto j) {
+                        return value.parallelotope_frame->values[i*value.parallelotope_frame->cols+j]; });
+            return result;
+        } else {
+            const auto& factor = [&]() -> const Matrix& {
+                if constexpr(std::is_same_v<T, reachability::FeedbackZonotopeMembership>) return value.generators;
+                else return value.factor;
+            }();
+            Json result{{"kind", std::is_same_v<T, reachability::FeedbackZonotopeMembership> ? "zonotope" : "ellipsoid"},
+                {"center", value.center}, {"factor_count", factor.cols},
+                {"factor", matrix_json(factor.rows, factor.cols, [&](auto i, auto j) {
+                    return factor.values[i*factor.cols+j]; })}};
+            if constexpr(std::is_same_v<T, reachability::FeedbackZonotopeMembership>) {
+                result["factor_ids"] = Json::array();
+                for(const auto& id : value.factors) result["factor_ids"].push_back(id.value);
+            }
+            return result;
+        }
+    }, shape.membership);
+    membership["indices"] = indices;
+    membership["role"] = role;
+    membership["scope"] = "forward_relevant_from_observation";
+    membership["relation"] = shape.relation == SetRelation::outer ? "outer" :
+        shape.relation == SetRelation::equivalent ? "equivalent" : "other";
+    membership["assurance"] = shape.assurance == Assurance::numerical ? "numerical" : "validated";
+    membership["source_sets"] = Json::array();
+    for(const auto& id : shape.source_sets) membership["source_sets"].push_back(id.value);
+    membership["construction"] = shape.construction;
+    membership["strict_source_domain"] = Json::array();
+    for(const auto& predicate : shape.strict_source_domain)
+        membership["strict_source_domain"].push_back({{"coordinate", predicate.coordinate},
+            {"lower_bound", predicate.lower_bound}, {"strict", true}});
+    membership["requests"] = Json::array();
+    for(const auto& reference : shape.requests)
+        membership["requests"].push_back({{"request", reference.identity.request.value},
+            {"ideal_output", reference.identity.ideal_output.value}});
+    membership["providers"] = Json::array();
+    for(const auto& call : shape.providers) membership["providers"].push_back({
+        {"request", call.request.value}, {"port", call.port},
+        {"requested", call.requested_module.value},
+        {"requested_version", call.requested_version ? Json(*call.requested_version) : Json(nullptr)},
+        {"actual", call.actual_module ? Json(call.actual_module->value) : Json(nullptr)},
+        {"actual_version", call.actual_version ? Json(*call.actual_version) : Json(nullptr)}});
+    membership["support_calls"] = Json::array();
+    for(const auto& record : shape.support_calls) std::visit([&](const auto& call) {
+        using T = std::decay_t<decltype(call)>;
+        const char* status = std::is_same_v<T, registry::LPQueryCompleted> ? "completed" :
+            std::is_same_v<T, registry::LPQueryRejected> ? "rejected" :
+            std::is_same_v<T, registry::LPQueryStopped> ? "stopped" :
+            std::is_same_v<T, registry::LPQuerySolverUnsupported> ? "unsupported" : "not_run";
+        const auto& provenance = [&]() -> const registry::Provenance& {
+            if constexpr(std::is_same_v<T, registry::LPQueryRejected>) return call.rejection.provenance;
+            else return call.provider;
+        }();
+        membership["support_calls"].push_back({{"program", call.request.program.value}, {"status", status},
+            {"requested", provenance.requested.id.value},
+            {"requested_version", provenance.requested.version ? Json(*provenance.requested.version) : Json(nullptr)},
+            {"actual", provenance.actual ? Json(provenance.actual->id.value) : Json(nullptr)},
+            {"actual_version", provenance.actual ? Json(provenance.actual->version) : Json(nullptr)}});
+    }, record);
+    membership["support_methods"] = Json::array();
+    for(const auto method : shape.support_methods)
+        membership["support_methods"].push_back(method == reachability::SupportBoundMethod::dual_candidate ?
+            "dual_candidate" : "carrier_only");
+    return membership;
+}
+
+Json feedback_stage_json(const reachability::FeedbackGeometryStage& stage, std::size_t n) {
+    Json result{{"stage", stage.stage.value}, {"coordinates", stage.coordinates}, {"memberships", Json::array()}};
+    std::vector<std::size_t> indices;
+    for(const auto coordinate : stage.coordinates) indices.push_back(stage.stage.value*n+coordinate);
+    for(const auto& [role, value] : std::array{
+        std::pair{"forward", &stage.forward}, std::pair{"backward", &stage.backward},
+        std::pair{"intersection", &stage.intersection}})
+        if(*value) result["memberships"].push_back(feedback_membership_json(**value, indices, role));
+    for(const auto& [role, value] : std::array{
+        std::pair{"forward_h", &stage.forward_h}, std::pair{"backward_h", &stage.backward_h},
+        std::pair{"intersection_h", &stage.intersection_h}})
+        if(*value) result[role] = set_json(take_history(sets::from_handle((*value)->output), "feedback-source-h"));
+    return result;
+}
+
+Json feedback_export(const problem::ResolvedProblem& resolved, const Json& in,
+        const sets::SetData& terminal, std::size_t n) {
+    using namespace reachability;
+    const auto name = in.at("geometry_family").get<std::string>();
+    const std::map<std::string, FeedbackFamily> families{
+        {"polytope",FeedbackFamily::polytope}, {"box",FeedbackFamily::box},
+        {"zonotope",FeedbackFamily::zonotope}, {"parallelotope",FeedbackFamily::parallelotope},
+        {"ellipsoid",FeedbackFamily::ellipsoid}};
+    const auto found = families.find(name);
+    if(found == families.end()) throw std::runtime_error("unknown feedback family");
+    const auto requested_generators = in.at("geometry_max_generators").get<std::int64_t>();
+    if(requested_generators <= 0) throw std::runtime_error("geometry generator budget must be positive");
+    const auto max_generators = static_cast<std::size_t>(requested_generators);
+    auto lp = take_history(adapters::lp::make_highs_registration(), "feedback-highs");
+    auto converter = take_history(adapters::polyhedral::make_qhull_registration(lp), "feedback-qhull");
+    auto affine = geometry::make_affine_sum_registration({
+        feedback_provider(geometry::make_lp_hull_reducer_registration(), ""),
+        feedback_provider(lp, "csl.program-result.v1"),
+        feedback_provider(converter, "csl.polyhedron.v")}, {{}, {}});
+    ForwardDependencies forward{
+        feedback_provider(geometry::polyhedral::make_projection_registration(), "csl.polyhedron.h"),
+        feedback_provider(std::move(affine), "csl.polyhedron.v"),
+        feedback_provider(converter, "csl.polyhedron.h")};
+    auto intersection = feedback_provider(geometry::polyhedral::make_intersection_registration(), "csl.polyhedron.h");
+    std::vector<StrictCoordinateLowerBound> strict;
+    if(in.at("task_id") == "earth-orbit") strict.push_back({0, 0});
+    auto outcome = feedback_geometry(resolved, {in.at("request_id").get<std::string>()},
+        terminal.as_handle(), found->second, strict,
+        {{forward, intersection}, feedback_provider(lp, "csl.program-result.v1"), max_generators}, {});
+    const auto* failure = std::get_if<FeedbackGeometryFailure>(&outcome);
+    const auto& geometry = failure ? failure->prefix : std::get<FeedbackGeometry>(outcome);
+    Json result{{"family", name}, {"scope", "forward_relevant_from_observation"},
+        {"status", failure ? "stopped" : "complete"}, {"stages", Json::array()}};
+    for(const auto& row : geometry.stages) result["stages"].push_back(feedback_stage_json(row, n));
+    if(failure) {
+        result["stop_stage"] = failure->stage.value;
+        result["stop_phase"] = static_cast<int>(failure->phase);
+        result["pending_requests"] = Json::array();
+        for(const auto& reference : failure->pending_requests)
+            result["pending_requests"].push_back({{"request", reference.identity.request.value},
+                {"ideal_output", reference.identity.ideal_output.value}});
+        result["pending_providers"] = Json::array();
+        for(const auto& call : failure->pending_providers)
+            result["pending_providers"].push_back({{"request", call.request.value},
+                {"port", call.port}, {"requested", call.requested_module.value},
+                {"actual", call.actual_module ? Json(call.actual_module->value) : Json(nullptr)},
+                {"actual_version", call.actual_version ? Json(*call.actual_version) : Json(nullptr)}});
+        result["pending_support_calls"] = failure->pending_support_calls.size();
+        std::visit([&](const auto& cause) {
+            using T = std::decay_t<decltype(cause)>;
+            if constexpr(std::is_same_v<T, Unsupported>) {
+                result["stop_kind"] = "unsupported";
+                result["diagnostics"] = Json::array();
+                for(const auto& d : cause.diagnostics) result["diagnostics"].push_back({{"field",d.field},{"explanation",d.explanation}});
+            } else {
+                result["stop_kind"] = "operation_stopped";
+                result["diagnostics"] = cause.diagnostics;
+            }
+        }, failure->cause);
+    }
+    return result;
+}
+#endif
+
 Json continuous_history_query(const Json& in) {
     const auto solver = in.at("history_solver").get<std::string>();
     if (solver != "csl.convex.highs" && solver != "casadi-ipopt")
@@ -792,6 +967,21 @@ Json continuous_history_query(const Json& in) {
             {"layout", "x0..xT,u0..u(T-1)"}}}, {"geometry", "not_used"},
         {"assurance", "numerical affine history; no validated completeness or nonlinear safety claim"}};
     response["requested_solver"] = solver;
+    if(in.contains("geometry_family")) {
+        if(solver != "casadi-ipopt") throw std::runtime_error("feedback family requires explicitly selected casadi-ipopt");
+#if CSL_NATIVE_HAS_HIGHS && CSL_NATIVE_HAS_QHULL
+        response["geometry"] = feedback_export(resolved, in, universal, n);
+        if(response["geometry"].at("status") != "complete") {
+            response["status"] = "failed";
+            response["reason"] = "feedback geometry stopped; partial stage prefix retained";
+            return response;
+        }
+#else
+        response["status"] = "unavailable";
+        response["reason"] = "feedback geometry requires registered HiGHS and Qhull";
+        return response;
+#endif
+    }
     if (solver == "casadi-ipopt") return response;
     if (!program.residual_norms.empty()) {
         response["status"] = "unsupported";
