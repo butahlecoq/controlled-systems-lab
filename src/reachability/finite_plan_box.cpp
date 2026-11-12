@@ -102,6 +102,27 @@ auto box_support(const BoxStage& box) {
 }
 }
 
+std::variant<BoxStage, Unsupported, OperationStopped>
+propagate_existential_control_box(const model::DynamicsStage& dynamics,
+        const BoxStage& current, const BoxStage& controls, const ExecutionContext& context) {
+    const auto n=dynamics.A.rows();
+    const auto valid=[](const BoxStage& box, std::size_t dimension) {
+        if (box.lower.size()!=dimension || box.upper.size()!=dimension) return false;
+        for (std::size_t i=0;i<dimension;++i)
+            if (!std::isfinite(box.lower[i]) || !std::isfinite(box.upper[i]) || box.lower[i]>box.upper[i]) return false;
+        return true;
+    };
+    if (dynamics.A.cols()!=n || dynamics.B.rows()!=n || dynamics.E.cols()!=0 ||
+        dynamics.offset.size()!=n || !valid(current,n) || !valid(controls,dynamics.B.cols()))
+        return unsupported("feedback.box.inputs", "Compatible finite boxes and no physical external port are required.");
+    auto zero=numeric::snapshot(Matrix{n,0,{}});
+    if (auto* error=std::get_if<Diagnostic>(&zero)) return Unsupported{{*error}};
+    const model::DynamicsStage mapped{dynamics.A,std::get<numeric::MatrixView>(zero),dynamics.B,dynamics.offset};
+    auto result=step(mapped,current,{},controls,context);
+    if (auto* stop=std::get_if<OperationStopped>(&result)) return *stop;
+    return std::get<BoxStage>(std::move(result));
+}
+
 FinitePlanBoxOutcome finite_plan_box(const FixedPlanRequest& request,
     const ExecutionContext& context) {
     const auto dimension = request.system.dimensions().state;

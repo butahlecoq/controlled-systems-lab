@@ -573,6 +573,14 @@
       "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
+      "source": "scripts/reports/feedback_geometry_example.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "feedback_geometry_2d.svg"
+      ],
+      "disposition": "gallery-case-content-owner"
+    },
+    {
       "source": "scripts/reports/finite_feedback/render_saved.py",
       "signal_count": 4,
       "asset_name_literals": [

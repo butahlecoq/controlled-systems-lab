@@ -1,0 +1,61 @@
+{
+  "success": true,
+  "geometry_factors": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    []
+  ],
+  "geometry_validation": {
+    "accepted": true,
+    "checks": [
+      {
+        "kind": "h",
+        "max_residual": 3.84857551101285e-15,
+        "passed": true
+      },
+      {
+        "kind": "h",
+        "max_residual": 3.84857551101285e-15,
+        "passed": true
+      },
+      {
+        "kind": "h",
+        "max_residual": 3.84857551101285e-15,
+        "passed": true
+      },
+      {
+        "kind": "h",
+        "max_residual": 0.0,
+        "passed": true
+      },
+      {
+        "kind": "h",
+        "max_residual": 0.0,
+        "passed": true
+      },
+      {
+        "kind": "h",
+        "max_residual": 0.0,
+        "passed": true
+      }
+    ]
+  },
+  "status": "Solve_Succeeded",
+  "primal": [
+    3.84857551101285e-15,
+    -1.1067907488939013e-16,
+    0.33333331719732817,
+    -7.378373729884052e-17,
+    0.3333333171973067,
+    3.689533758011177e-17
+  ],
+  "objective": 0.6666666666666388,
+  "iterations": 24,
+  "solver": "casadi-ipopt/full-history-separate-norm-epigraphs/1",
+  "provider": "casadi-ipopt",
+  "version": "casadi 3.8.0; IPOPT version unavailable",
+  "assurance": "local numerical NLP solution; no global optimality certificate"
+}

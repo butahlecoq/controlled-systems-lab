@@ -429,6 +429,19 @@ set_tests_properties(installed_nominal_tube_client PROPERTIES
 
 endif()
 
+add_executable(installed_feedback_geometry_client feedback_geometry_client.cpp)
+target_link_libraries(installed_feedback_geometry_client PRIVATE CSL::feedback_geometry CSL::generator_adapter)
+if(TARGET CSL::highs_lp)
+  target_link_libraries(installed_feedback_geometry_client PRIVATE CSL::highs_lp)
+  target_compile_definitions(installed_feedback_geometry_client PRIVATE CSL_INSTALLED_FEEDBACK_WITH_HIGHS=1)
+else()
+  target_compile_definitions(installed_feedback_geometry_client PRIVATE CSL_INSTALLED_FEEDBACK_WITH_HIGHS=0)
+endif()
+set_target_properties(installed_feedback_geometry_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_feedback_geometry_client COMMAND installed_feedback_geometry_client)
+set_tests_properties(installed_feedback_geometry_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed feedback geometry client: corrected support, ellipsoid factor and coordinator stop passed")
+
 add_executable(installed_finite_plan_zonotope_client finite_plan_zonotope_client.cpp)
 target_link_libraries(installed_finite_plan_zonotope_client PRIVATE CSL::finite_plan_zonotope)
 set_target_properties(installed_finite_plan_zonotope_client PROPERTIES CXX_EXTENSIONS OFF)
