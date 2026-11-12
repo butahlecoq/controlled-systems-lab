@@ -40,13 +40,13 @@ endif()
 execute_process(COMMAND "${CMAKE_COMMAND}" --install "${CSL_BUILD_DIR}"
   --config "${CSL_CONFIG}" --prefix "${prefix}" COMMAND_ERROR_IS_FATAL ANY)
 # Installed packages expose behavior through headers and executable consumers;
-# Markdown working contracts stay in the source repository and are not packaged.
-file(GLOB_RECURSE installed_contract_docs LIST_DIRECTORIES false
-  "${prefix}/${CSL_INSTALL_DATADIR}/CSL/docs/contracts/*.md"
-  "${prefix}/${CSL_INSTALL_DATADIR}/doc/CSL/contracts/*.md")
-if(installed_contract_docs)
+# Markdown working documents stay in the source repository and are not packaged.
+file(GLOB_RECURSE installed_markdown_docs LIST_DIRECTORIES false
+  "${prefix}/${CSL_INSTALL_DATADIR}/CSL/*.md"
+  "${prefix}/${CSL_INSTALL_DATADIR}/doc/CSL/*.md")
+if(installed_markdown_docs)
   message(FATAL_ERROR
-    "Working Markdown contracts must not be installed: ${installed_contract_docs}")
+    "Markdown working documents must not be installed: ${installed_markdown_docs}")
 endif()
 # Inspect the installed artifacts, ignoring comments that discuss dependency names.
 set(notices_root "${prefix}/${CSL_INSTALL_DATADIR}/CSL/notices")

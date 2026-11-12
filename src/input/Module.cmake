@@ -11,7 +11,7 @@ target_include_directories(csl_input SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/inclu
 
 install(FILES schemas/scenario/v1.schema.json DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/schemas/scenario)
 
-install(FILES schemas/model/continuous-v1.schema.json schemas/model/README.md DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/schemas/model)
+install(FILES schemas/model/continuous-v1.schema.json DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/schemas/model)
 
 install(FILES tests/fixtures/input/continuous-double-integrator.json DESTINATION ${CMAKE_INSTALL_DATADIR}/CSL/tests/fixtures/input)
 
