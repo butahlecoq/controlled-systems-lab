@@ -1,0 +1,125 @@
+{
+  "schema": "csl.qhull-highs-strategy-a-example/1",
+  "example_id": "qhull-highs-strategy-a-2d",
+  "status": "educational numerical example",
+  "source_commit": "9db04451008c6166408b7611c68b2195ab430ca5",
+  "fix_commit": "28301a286849ab2864b8a60bb3d5d93fd1b6fe0f",
+  "capture": {
+    "source_commit": "9db04451008c6166408b7611c68b2195ab430ca5",
+    "source_path": "tests/synthesis/strategy_a/strategy_tests.cpp",
+    "source_sha256": "b5afa7252a0f7bfa22902bfd3b2cf3543ed755364b65f85e350cef3464687788",
+    "binary_sha256": "7ee3e18e3359dc6a2bdedac73ac068f4150cb7a5b80fc5e0c3a4bd0e03eaa9ba",
+    "output_sha256": "97a924b4f20f0cc4fdb7b990644fb6497d8b531543a555a905f5067a7468d031",
+    "build": {
+      "cmake": "3.31.6",
+      "compiler": "GNU 16.2.1",
+      "configuration": "Release",
+      "highs": "1.11.0",
+      "qhull": "8.0.2"
+    },
+    "command": "strategy_a_tests --test-case=public Strategy A Qhull output reaches both HiGHS terminal optimizer paths --no-version",
+    "observed_summary": "1 case passed; 112 assertions passed",
+    "observed_lines": [
+      "qhull_highs_strategy_a case=linear terminal_provider=csl.lp.highs state=(1,-0) control=(1,0) objective=-1",
+      "qhull_highs_strategy_a case=quadratic terminal_provider=csl.convex.highs state=(0,0) control=(0,0) objective=0"
+    ]
+  },
+  "methods": {
+    "source_hull": "csl.hull.source.btulshor-kpabep@1.0.0",
+    "conversion": "csl.conversion.qhull@1.0.0+qhull.8.0.2",
+    "linear_optimizer": "csl.lp.highs@1.1.0+highs.1.11.0",
+    "quadratic_optimizer": "csl.convex.highs@1.0.0+highs.1.11.0"
+  },
+  "problem": {
+    "horizon": 1,
+    "state_dimension": 2,
+    "control_dimension": 2,
+    "time_grid": [0, 1],
+    "dynamics": {
+      "equation": "x1 = x0 + u0",
+      "A": [[1, 0], [0, 1]],
+      "B": [[1, 0], [0, 1]],
+      "external_input_dimension": 0,
+      "offset": [0, 0]
+    },
+    "initial_state": [0, 0],
+    "state_factors": [
+      {"stage": 0, "coordinates": ["position", "velocity"], "box": [[-1, 1], [-1, 1]]},
+      {"stage": 1, "coordinates": ["position", "velocity"], "box": [[0, 1], [0, 1]]}
+    ],
+    "control_factors": [
+      {"stage": 0, "coordinates": ["position", "velocity"], "box": [[0, 1], [0, 1]]}
+    ],
+    "strategy": "csl.synthesis.reach-back@1",
+    "hull_path": "faithful BTULSHOR KPABEP/MODIF with bounded exact checker"
+  },
+  "original_ordered_conversion_input": {
+    "vertices": [[0, 1], [1, 1], [0, 0], [1, 0]],
+    "rays": [],
+    "source_record": {
+      "issue": 944,
+      "diagnostic_artifact": "944-each-choice-diagnostic-rerun.json",
+      "diagnostic_artifact_sha256": "2c36b19636b06246da77460d528ce6d5f1ea298764597c949803050a6ebd79ef",
+      "runner_sha256": "854da9b99d60fd6d8ec21baacd91be85e338de1261cf1a751f3702875e89e5df",
+      "pre_fix_library_source_commit": "3a3f6b8d494ee07365bd9bf8808da15eabebd37a"
+    }
+  },
+  "pre_fix_failure": {
+    "conversion_matrix_A": [
+      [1, -1.1102230246251565e-16],
+      [0, 1],
+      [1.1102230246251565e-16, -1],
+      [-1, 0]
+    ],
+    "conversion_vector_b": [0.99999999999999989, 1, 0, 0],
+    "hiGHS_removal_threshold": 1e-12,
+    "linear_refusal": "highs.matrix: Nonzero coefficient at or below native removal threshold 1e-12",
+    "quadratic_refusal": "highs.convex.matrix: nonzero coefficient at or below native removal threshold 1e-12"
+  },
+  "post_fix_conversion": {
+    "relation": "A x <= b",
+    "matrix_A": [[0, 1], [-1, 0], [1, 0], [0, -1]],
+    "vector_b": [1, 0, 1, 0]
+  },
+  "terminal_cases": [
+    {
+      "id": "linear",
+      "objective": "-x1.position",
+      "expected_objective": -1,
+      "optimizer": "csl.lp.highs",
+      "terminal_state": [1, 0],
+      "control": [1, 0]
+    },
+    {
+      "id": "quadratic",
+      "objective": "x1.position^2 + x1.velocity^2",
+      "quadratic_matrix": [[2, 0], [0, 2]],
+      "quadratic_center": [0, 0],
+      "expected_objective": 0,
+      "optimizer": "csl.convex.highs",
+      "terminal_state": [0, 0],
+      "control": [0, 0]
+    }
+  ],
+  "independent_check": {
+    "coordinates": "[x0.position, x0.velocity, x1.position, x1.velocity, u0.position, u0.velocity]",
+    "linear_history": [0, 0, 1, 0, 1, 0],
+    "quadratic_history": [0, 0, 0, 0, 0, 0],
+    "dynamics_residual": [0, 0],
+    "both_histories_satisfy_returned_candidate_relation": true,
+    "objective_arithmetic": "linear: -(1) = -1; quadratic: 0^2 + 0^2 = 0"
+  },
+  "evidence_limits": [
+    "Binary64 numerical example, not validated arithmetic or a global error bound.",
+    "The source hull checker proves containment of this finite generated cloud; it does not prove hull minimality.",
+    "The plotted construction explains saved input and returned values; it does not replay MODIF pivots.",
+    "No benchmark or performance claim is made."
+  ],
+  "reproduction": {
+    "configure": "cmake -S . -B build/qhull-highs-example -DCMAKE_BUILD_TYPE=Release -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=ON",
+    "build": "cmake --build build/qhull-highs-example --target strategy_a_tests qhull_highs_interop_tests --parallel 1",
+    "run": "ctest --test-dir build/qhull-highs-example -R '^(strategy_a_tests|qhull_highs_interop_tests)$' --output-on-failure",
+    "source_test": "tests/synthesis/strategy_a/strategy_tests.cpp",
+    "conversion_test": "tests/contract/geometry/qhull_highs_interop_tests.cpp"
+  }
+}
