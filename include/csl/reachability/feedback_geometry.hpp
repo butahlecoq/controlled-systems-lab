@@ -43,6 +43,7 @@ struct FeedbackSet {
     std::vector<RequestProvenance> providers;
     std::vector<registry::LPQueryRecord> support_calls;
     std::vector<SupportBoundMethod> support_methods;
+    std::vector<SupportBoundCertificate> support_certificates;
     std::vector<std::string> construction;
     std::vector<GeometryEvidence> lineage;
 };
@@ -73,6 +74,7 @@ struct FeedbackGeometryFailure {
     std::vector<RequestProvenance> pending_providers;
     std::vector<GeometryEvidence> pending_lineage;
     std::vector<registry::LPQueryRecord> pending_support_calls;
+    std::vector<SupportBoundCertificate> pending_support_certificates;
 };
 using FeedbackGeometryOutcome = std::variant<FeedbackGeometry, FeedbackGeometryFailure>;
 struct FeedbackGeometryDependencies {

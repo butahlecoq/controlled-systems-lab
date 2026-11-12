@@ -63,7 +63,7 @@ std::variant<SupportUpperBound, Diagnostics> residual_corrected_support(
         if (!std::isfinite(sum.lo) || !std::isfinite(sum.hi)) return invalid("Residual bound overflowed.");
     }
     if (!std::isfinite(sum.hi)) return invalid("Residual bound overflowed.");
-    return SupportUpperBound{sum.hi};
+    return SupportUpperBound{sum.hi,SupportBoundMethod::dual_candidate,lambda,mu};
 }
 } // namespace csl::reachability
 
@@ -182,6 +182,7 @@ BoundedHAxisOutcome bounded_h_axis_cover(const BoundedHSupportInput& input,
             auto result=std::get<BoundedHSupportResult>(std::move(answer));
             cover.lp_calls.insert(cover.lp_calls.end(),result.lp_calls.begin(),result.lp_calls.end());
             cover.methods.push_back(result.bound.method);
+            cover.certificates.push_back({{},query.direction,query.lower,query.upper,result.bound});
             if (upper) cover.upper.push_back(result.bound.value);
             else cover.lower.push_back(-result.bound.value);
         }

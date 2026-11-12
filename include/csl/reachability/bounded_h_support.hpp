@@ -22,6 +22,7 @@ enum class SupportBoundMethod { dual_candidate, carrier_only };
 struct SupportUpperBound {
     double value;
     SupportBoundMethod method{SupportBoundMethod::dual_candidate};
+    Vector inequality_multipliers, equality_multipliers;
     // Bound applies to the computed H intersection and binary64 inputs only.
 };
 
@@ -49,10 +50,16 @@ BoundedHSupportOutcome bounded_h_support(const BoundedHSupportInput&,
     ProgramIdentity, const registry::PreparedProvider<registry::LPPort>&,
     const ExecutionContext&);
 
+struct SupportBoundCertificate {
+    std::optional<SetId> input_set;
+    Vector direction, carrier_lower, carrier_upper;
+    SupportUpperBound bound;
+};
 struct BoundedHAxisCover {
     Vector lower, upper;
     std::vector<registry::LPQueryRecord> lp_calls;
     std::vector<SupportBoundMethod> methods;
+    std::vector<SupportBoundCertificate> certificates;
 };
 struct BoundedHAxisFailure {
     BoundedHAxisCover prefix;

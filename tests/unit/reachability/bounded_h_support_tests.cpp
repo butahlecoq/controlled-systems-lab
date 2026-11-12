@@ -105,6 +105,9 @@ int main() {
     check(std::holds_alternative<BoundedHSupportResult>(answer));
     const auto& solved=std::get<BoundedHSupportResult>(answer);
     check(solved.bound.value>=1 && solved.bound.value<1.00000001);
+    auto replayed=residual_corrected_support(input,solved.bound.inequality_multipliers,solved.bound.equality_multipliers);
+    check(std::holds_alternative<SupportUpperBound>(replayed));
+    check(std::get<SupportUpperBound>(replayed).value==solved.bound.value);
     check(solved.lp_calls.size()==1);
     auto tiny_answer=bounded_h_support(tiny,{{"test"},{"dual-tiny"}},
         std::get<csl::registry::PreparedProvider<csl::registry::LPPort>>(prepared),{});
@@ -127,7 +130,8 @@ int main() {
     check(std::holds_alternative<BoundedHAxisCover>(cover));
     const auto& box=std::get<BoundedHAxisCover>(cover);
     check(box.lower[0]<=-2 && box.upper[0]>=1 && box.upper[0]<1.00000001);
-    check(box.lp_calls.size()==4);
+    check(box.lp_calls.size()==4 && box.certificates.size()==4);
+    check(box.certificates[0].carrier_lower==clip.lower && box.certificates[0].carrier_upper==clip.upper);
 
     BoundedHSupportInput fixed{{0,2,{}}, {}, {0,2,{}}, {},
         {1,0}, {1,0}, {1,1}};
