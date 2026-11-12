@@ -177,17 +177,22 @@ Json provider_json(const RequestProvenance& provider) {
 
 Json stage_json(const NominalTubeStage& stage) {
     Json requests = Json::array(), providers = Json::array(), lineage = Json::array(), source_sets = Json::array();
+    Json coordinate_lineage = Json::array();
     for (const auto& request : stage.requests) requests.push_back(reference_json(request));
     for (const auto& provider : stage.providers) providers.push_back(provider_json(provider));
     for (const auto& evidence : stage.lineage) lineage.push_back(evidence_json(evidence));
     for (const auto& source : stage.source_sets) source_sets.push_back(source.value);
+    for (const auto& item : stage.coordinate_lineage)
+        coordinate_lineage.push_back({{"coordinates", item.coordinates},
+            {"source", item.source.id.value}, {"target", item.target.id.value}});
     return {{"stage", stage.stage.value}, {"state_coordinates", stage.coordinates},
         {"state_coordinate_labels", stage.coordinate_labels},
         {"forward", stage.forward ? operation_json(*stage.forward) : Json(nullptr)},
         {"backward", stage.backward ? operation_json(*stage.backward) : Json(nullptr)},
         {"intersection", stage.intersection ? operation_json(*stage.intersection) : Json(nullptr)},
         {"source_set_ids", std::move(source_sets)}, {"requests", std::move(requests)},
-        {"providers", std::move(providers)}, {"lineage", std::move(lineage)}};
+        {"providers", std::move(providers)}, {"lineage", std::move(lineage)},
+        {"coordinate_lineage", std::move(coordinate_lineage)}};
 }
 
 Json stages_json(const NominalTube& tube) {
@@ -367,7 +372,7 @@ int main(int argc, char** argv) {
             std::chrono::duration_cast<std::chrono::steady_clock::duration>(
                 std::chrono::duration<double>(options.deadline_seconds));
         const auto outcome = reachability::nominal_tube(resolved, {"source-bound-nominal-tube"}, terminal,
-            {std::move(forward), std::move(intersection)}, context);
+            {std::move(forward), std::move(intersection), selected(converter, "csl.polyhedron.v")}, context);
 
         Json record{{"schema", "csl.nominal-h-tube-record/1"}, {"input", input},
             {"resource_profile", {{"max_projection_rows", options.max_projection_rows},

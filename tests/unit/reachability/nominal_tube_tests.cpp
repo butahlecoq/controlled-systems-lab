@@ -66,9 +66,10 @@ SetHandle box(std::string id, std::vector<std::string> labels, Vector lower, Vec
 struct Providers {
     ForwardDependencies forward;
     PreparedProvider<GeometryPort> intersection;
+    std::optional<PreparedProvider<ConversionPort>> compact_h_to_v;
 };
 
-Providers providers(std::optional<std::size_t> projection_rows = {}) {
+Providers providers(std::optional<std::size_t> projection_rows = {}, bool compact_h = false) {
     auto lp = take(adapters::lp::make_highs_registration());
     auto qhull = take(adapters::polyhedral::make_qhull_registration(lp));
     auto projection = geometry::polyhedral::make_projection_registration(
@@ -81,7 +82,8 @@ Providers providers(std::optional<std::size_t> projection_rows = {}) {
     return {{selected(std::move(projection), "csl.polyhedron.h", SetRelation::equivalent),
         selected(std::move(affine), "csl.polyhedron.v"),
         selected(qhull, "csl.polyhedron.h")},
-        selected(std::move(intersection), "csl.polyhedron.h", SetRelation::equivalent)};
+        selected(std::move(intersection), "csl.polyhedron.h", SetRelation::equivalent),
+        compact_h ? std::optional{selected(qhull, "csl.polyhedron.v")} : std::nullopt};
 }
 
 Matrix identity2() { return {2, 2, {1, 0, 0, 1}}; }
@@ -171,7 +173,8 @@ std::pair<double, double> axis_bounds(const SetHandle& handle, std::size_t coord
 NominalTubeOutcome run(Problem source, SetHandle terminal, Providers selected_providers,
         ExecutionContext context = {}) {
     return nominal_tube(resolve(std::move(source)), {"analytic-tube"}, terminal,
-        {std::move(selected_providers.forward), std::move(selected_providers.intersection)}, context);
+        {std::move(selected_providers.forward), std::move(selected_providers.intersection),
+         std::move(selected_providers.compact_h_to_v)}, context);
 }
 
 void check_range(const SetHandle& set, std::size_t coordinate, double lower, double upper) {
@@ -277,6 +280,37 @@ TEST_CASE("empty terminal feasibility remains an empty full-state intersection")
     REQUIRE(std::holds_alternative<NominalTube>(result));
     const auto& final = *std::get<NominalTube>(result).stages.back().intersection;
     CHECK(axis_bounds(final.output, 0).first > axis_bounds(final.output, 0).second);
+}
+
+TEST_CASE("optional bounded H compaction records H-to-V-to-H and preserves membership") {
+    const auto terminal = box("z-slab", {"x", "y", "z"}, {-1, -1, 2}, {1, 1, 3});
+    const auto result = run(zero_step_3d_problem(), terminal, providers({}, true));
+    INFO(describe(result));
+    REQUIRE(std::holds_alternative<NominalTube>(result));
+    const auto& stage = std::get<NominalTube>(result).stages[0];
+    REQUIRE(stage.backward);
+    const auto backward = take(sets::from_handle(stage.backward->output));
+    const auto representation = backward.representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+    const auto& h = std::get<sets::HRepresentation>(representation);
+    CHECK(h.inequalities.rows() < 12);
+    CHECK(stage.backward->relation == SetRelation::equivalent);
+    CHECK(std::any_of(stage.requests.begin(), stage.requests.end(), [](const auto& request) {
+        return request.identity.request.value.find("compact-h/to-v") != std::string::npos;
+    }));
+    CHECK(std::any_of(stage.requests.begin(), stage.requests.end(), [](const auto& request) {
+        return request.identity.request.value.find("compact-h/to-h") != std::string::npos;
+    }));
+    CHECK(std::count_if(stage.providers.begin(), stage.providers.end(), [](const auto& provider) {
+        return provider.port == "conversion" && provider.actual_module &&
+            provider.actual_module->value == "csl.conversion.qhull";
+    }) >= 2);
+    CHECK(stage.backward->evidence.reference.inputs.size() == 2);
+    CHECK(stage.backward->evidence.support.index() == 0);
+    CHECK(axis_bounds(stage.backward->output, 0).first == doctest::Approx(-1));
+    CHECK(axis_bounds(stage.backward->output, 0).second == doctest::Approx(1));
+    CHECK(axis_bounds(stage.backward->output, 2).first == doctest::Approx(2));
+    CHECK(axis_bounds(stage.backward->output, 2).second == doctest::Approx(3));
 }
 
 TEST_CASE("tube preserves cancellation and projection row-capacity failures with phase and stage") {

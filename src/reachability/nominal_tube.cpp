@@ -29,6 +29,11 @@ std::string child_id(const ProblemId& problem, const RequestId& request,
         std::to_string(stage) + "/" + suffix;
 }
 
+std::string child_id(const ProblemId& problem, const RequestId& request,
+        std::size_t stage, const std::string& suffix) {
+    return child_id(problem, request, stage, suffix.c_str());
+}
+
 Matrix copy_matrix(const numeric::MatrixView& view) {
     Matrix result{view.rows(), view.cols(), {}};
     result.values.reserve(view.rows() * view.cols());
@@ -134,6 +139,105 @@ std::variant<OperationResult, Unsupported, OperationStopped> intersect(
         return Unsupported{diagnostics};
     record.lineage.push_back(result->evidence);
     return *result;
+}
+
+std::variant<OperationResult, Unsupported, OperationStopped> compact_h(
+        OperationResult input, ProblemId problem, RequestId request, StageIndex stage,
+        NominalTubePhase phase, const NominalTubeDependencies& dependencies,
+        NominalTubeStage& record, std::optional<GeometryRequestIdentity>& active,
+        const ExecutionContext& context) {
+    if (!dependencies.compact_h_to_v) return input;
+    const auto& to_v = *dependencies.compact_h_to_v;
+    const auto& to_h = dependencies.forward.to_h;
+    if (!to_v.provenance().actual || !to_h.provenance().actual)
+        return Unsupported{error("tube.compaction.provider", "Bounded H compaction requires resolved H-to-V and V-to-H providers.")};
+    const auto phase_name = phase == NominalTubePhase::terminal ? "terminal" :
+        phase == NominalTubePhase::backward ? "backward" : "intersection";
+    const auto make_request = [&](const SetHandle& source, const char* direction) {
+        const auto suffix = std::string(phase_name) + "/compact-h/" + direction;
+        GeometryRequestIdentity identity{{problem.value}, {child_id(problem, request, stage.value, suffix)},
+            {child_id(problem, request, stage.value, suffix + "/output")}};
+        const auto representation = std::string("csl.polyhedron.") +
+            (std::string(direction) == "to-v" ? "v" : "h");
+        return ConversionRequest{identity, source, {representation}, Assurance::numerical};
+    };
+    const auto run_conversion = [&](const registry::PreparedProvider<registry::ConversionPort>& provider,
+            const ConversionRequest& conversion) -> std::variant<OperationResult, Unsupported, OperationStopped> {
+        active = conversion.identity;
+        record.requests.push_back({conversion.identity, {conversion.input.id}});
+        record.providers.push_back(provenance(provider.provenance(), conversion.identity));
+        record.source_sets.push_back(conversion.input.id);
+        auto prepared = provider.prepare(conversion);
+        if (auto* rejected = std::get_if<registry::Rejection>(&prepared))
+            return Unsupported{rejected->diagnostics};
+        auto workspace = std::get<registry::PreparedPipeline<registry::ConversionPort>>(
+            std::move(prepared)).create();
+        auto outcome = std::get<0>(workspace)->run(context);
+        if (auto* stopped = std::get_if<OperationStopped>(&outcome)) return *stopped;
+        if (auto* rejected = std::get_if<Unsupported>(&outcome)) return *rejected;
+        const auto* result = std::get_if<OperationResult>(&outcome);
+        if (!result) return Unsupported{error("tube.compaction.result", "Conversion provider returned a query instead of a set.", DiagnosticCode::evidence_mismatch)};
+        if (const auto diagnostics = check_geometry_evidence(result->evidence, conversion); !diagnostics.empty())
+            return Unsupported{diagnostics};
+        if (result->relation != SetRelation::equivalent ||
+            result->output.metadata.dimension != input.output.metadata.dimension)
+            return Unsupported{error("tube.compaction.result", "H compaction conversion changed relation or state dimension.", DiagnosticCode::evidence_mismatch)};
+        record.lineage.push_back(result->evidence);
+        return *result;
+    };
+
+    auto h_to_v = make_request(input.output, "to-v");
+    auto v_result = run_conversion(to_v, h_to_v);
+    if (auto* rejected = std::get_if<Unsupported>(&v_result)) return *rejected;
+    if (auto* stopped = std::get_if<OperationStopped>(&v_result)) return *stopped;
+    auto v = std::get<OperationResult>(std::move(v_result));
+    if (v.output.metadata.representation.value != "csl.polyhedron.v")
+        return Unsupported{error("tube.compaction.representation", "H-to-V provider did not materialize V data.", DiagnosticCode::evidence_mismatch)};
+
+    auto v_to_h = make_request(v.output, "to-h");
+    auto h_result = run_conversion(to_h, v_to_h);
+    if (auto* rejected = std::get_if<Unsupported>(&h_result)) return *rejected;
+    if (auto* stopped = std::get_if<OperationStopped>(&h_result)) return *stopped;
+    auto h = std::get<OperationResult>(std::move(h_result));
+    if (h.output.metadata.representation.value != "csl.polyhedron.h")
+        return Unsupported{error("tube.compaction.representation", "V-to-H provider did not materialize H data.", DiagnosticCode::evidence_mismatch)};
+    auto imported_h = sets::from_handle(h.output);
+    if (auto* rejected = std::get_if<Diagnostic>(&imported_h)) return Unsupported{{*rejected}};
+    auto h_data = std::get<sets::SetData>(std::move(imported_h));
+    const auto h_representation = h_data.representation();
+    const auto* h_native = std::get_if<sets::HRepresentation>(&h_representation);
+    if (!h_native) return Unsupported{error("tube.compaction.representation", "V-to-H output does not contain native H data.", DiagnosticCode::evidence_mismatch)};
+    auto imported_source = sets::from_handle(input.output);
+    if (auto* rejected = std::get_if<Diagnostic>(&imported_source)) return Unsupported{{*rejected}};
+    const auto& source_labels = std::get<sets::SetData>(imported_source).metadata()->coordinate_labels;
+    const auto& output_labels = h_data.metadata()->coordinate_labels;
+    if (source_labels.size() != input.output.metadata.dimension ||
+        (!output_labels.empty() && output_labels != source_labels))
+        return Unsupported{error("tube.compaction.coordinates", "H conversion changed coordinate order or labels.", DiagnosticCode::evidence_mismatch)};
+    if (output_labels.empty()) {
+        auto relabeled = sets::make_h({{child_id(problem, request, stage.value,
+            std::string(phase_name) + "/compact-h/labelled")}, input.output.metadata.dimension, source_labels},
+            *h_native);
+        if (auto* rejected = std::get_if<Diagnostic>(&relabeled)) return Unsupported{{*rejected}};
+        const auto target = std::get<sets::SetData>(std::move(relabeled)).as_handle();
+        record.coordinate_lineage.push_back({h.output, target,
+            identity_coordinates(input.output.metadata.dimension)});
+        h.output = target;
+    }
+
+    auto composed = h.evidence;
+    composed.reference.identity = GeometryRequestIdentity{{problem.value},
+        {child_id(problem, request, stage.value, std::string(phase_name) + "/compact-h/result")},
+        {h.output.id.value}};
+    composed.reference.inputs = {input.output.id, v.output.id};
+    composed.scope = GeometryClaimScope::set_relation;
+    composed.support = Unestablished{};
+    composed.error_bound.reset();
+    composed.assumptions.push_back("bounded H set compacted by an explicitly requested equivalent numerical H-to-V-to-H conversion chain");
+    input.output = std::move(h.output);
+    input.relation = SetRelation::equivalent;
+    input.evidence = std::move(composed);
+    return input;
 }
 
 std::variant<OperationResult, Unsupported, OperationStopped> as_intersection_result(
@@ -264,6 +368,14 @@ NominalTubeOutcome nominal_tube(const problem::ResolvedProblem& resolved, Reques
         if (!is_state_h(backward, dimension, state_labels))
             return fail(Unsupported{error("tube.terminal.result", "Terminal feasibility is not a full-state H result.", DiagnosticCode::evidence_mismatch)});
         tube.stages[horizon].backward = backward;
+        auto compacted_terminal = compact_h(std::move(backward), tube.problem, request, active_stage,
+            active_phase, dependencies, tube.stages[horizon], active_request, context);
+        if (auto* rejected = std::get_if<Unsupported>(&compacted_terminal)) return fail(*rejected);
+        if (auto* stopped = std::get_if<OperationStopped>(&compacted_terminal)) return fail(*stopped);
+        backward = std::get<OperationResult>(std::move(compacted_terminal));
+        if (!is_state_h(backward, dimension, state_labels))
+            return fail(Unsupported{error("tube.terminal.compaction", "Compacted terminal set changed state coordinates.", DiagnosticCode::evidence_mismatch)});
+        tube.stages[horizon].backward = backward;
 
         active_phase = NominalTubePhase::intersection;
         auto terminal_intersection = intersect(tube.stages[horizon].forward->output,
@@ -274,7 +386,15 @@ NominalTubeOutcome nominal_tube(const problem::ResolvedProblem& resolved, Reques
         auto terminal_i = std::get<OperationResult>(std::move(terminal_intersection));
         if (!is_state_h(terminal_i, dimension, state_labels))
             return fail(Unsupported{error("tube.intersection.result", "Full-state terminal intersection changed representation or coordinates.", DiagnosticCode::evidence_mismatch)});
-        tube.stages[horizon].intersection = std::move(terminal_i);
+        tube.stages[horizon].intersection = terminal_i;
+        auto compacted_terminal_i = compact_h(std::move(terminal_i), tube.problem, request, active_stage,
+            active_phase, dependencies, tube.stages[horizon], active_request, context);
+        if (auto* rejected = std::get_if<Unsupported>(&compacted_terminal_i)) return fail(*rejected);
+        if (auto* stopped = std::get_if<OperationStopped>(&compacted_terminal_i)) return fail(*stopped);
+        auto terminal_intersection_set = std::get<OperationResult>(std::move(compacted_terminal_i));
+        if (!is_state_h(terminal_intersection_set, dimension, state_labels))
+            return fail(Unsupported{error("tube.intersection.compaction", "Compacted terminal intersection changed state coordinates.", DiagnosticCode::evidence_mismatch)});
+        tube.stages[horizon].intersection = std::move(terminal_intersection_set);
 
         for (std::size_t reverse = horizon; reverse > 0; --reverse) {
             const auto stage_index = reverse - 1;
@@ -315,6 +435,15 @@ NominalTubeOutcome nominal_tube(const problem::ResolvedProblem& resolved, Reques
             if (!is_state_h(backward_stage, dimension, state_labels))
                 return fail(Unsupported{error("tube.backward.result", "Backward stage is not a full-state H set.", DiagnosticCode::evidence_mismatch)});
             tube.stages[stage_index].backward = backward_stage;
+            auto compacted_backward = compact_h(std::move(backward_stage), tube.problem, request,
+                active_stage, NominalTubePhase::backward, dependencies, tube.stages[stage_index],
+                active_request, context);
+            if (auto* rejected = std::get_if<Unsupported>(&compacted_backward)) return fail(*rejected);
+            if (auto* stopped = std::get_if<OperationStopped>(&compacted_backward)) return fail(*stopped);
+            backward_stage = std::get<OperationResult>(std::move(compacted_backward));
+            if (!is_state_h(backward_stage, dimension, state_labels))
+                return fail(Unsupported{error("tube.backward.compaction", "Compacted backward set changed state coordinates.", DiagnosticCode::evidence_mismatch)});
+            tube.stages[stage_index].backward = backward_stage;
 
             active_phase = NominalTubePhase::intersection;
             auto intersection_result = intersect(tube.stages[stage_index].forward->output,
@@ -325,7 +454,16 @@ NominalTubeOutcome nominal_tube(const problem::ResolvedProblem& resolved, Reques
             auto full_state_intersection = std::get<OperationResult>(std::move(intersection_result));
             if (!is_state_h(full_state_intersection, dimension, state_labels))
                 return fail(Unsupported{error("tube.intersection.result", "Full-state stage intersection changed representation or coordinates.", DiagnosticCode::evidence_mismatch)});
-            tube.stages[stage_index].intersection = std::move(full_state_intersection);
+            tube.stages[stage_index].intersection = full_state_intersection;
+            auto compacted_intersection = compact_h(std::move(full_state_intersection), tube.problem,
+                request, active_stage, active_phase, dependencies, tube.stages[stage_index],
+                active_request, context);
+            if (auto* rejected = std::get_if<Unsupported>(&compacted_intersection)) return fail(*rejected);
+            if (auto* stopped = std::get_if<OperationStopped>(&compacted_intersection)) return fail(*stopped);
+            auto intersection_set = std::get<OperationResult>(std::move(compacted_intersection));
+            if (!is_state_h(intersection_set, dimension, state_labels))
+                return fail(Unsupported{error("tube.intersection.compaction", "Compacted full-state intersection changed state coordinates.", DiagnosticCode::evidence_mismatch)});
+            tube.stages[stage_index].intersection = std::move(intersection_set);
         }
         return tube;
     } catch (const std::bad_alloc&) {

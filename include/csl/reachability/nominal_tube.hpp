@@ -19,6 +19,7 @@ struct NominalTubeStage {
     std::vector<GeometryReference> requests;
     std::vector<RequestProvenance> providers;
     std::vector<GeometryEvidence> lineage;
+    std::vector<CoordinateRelabeling> coordinate_lineage;
 };
 
 struct NominalTube {
@@ -52,6 +53,9 @@ using NominalTubeOutcome = std::variant<NominalTube, NominalTubeEmptyForward, No
 struct NominalTubeDependencies {
     ForwardDependencies forward;
     registry::PreparedProvider<registry::GeometryPort> intersection;
+    // Optional bounded-set compaction used to keep successive H projections
+    // tractable. The coordinator performs H-to-V and reuses forward.to_h.
+    std::optional<registry::PreparedProvider<registry::ConversionPort>> compact_h_to_v{};
 };
 
 // Computes full-state F_k, B_k and F_k ∩ B_k for one closed-H continuous
