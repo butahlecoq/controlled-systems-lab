@@ -1,0 +1,83 @@
+{
+  "success": true,
+  "geometry_factors": [
+    [
+      0.0,
+      0.0
+    ],
+    [
+      1.675265872e-314,
+      0.0
+    ],
+    [
+      1.675265872e-314,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      0.16666666666147176,
+      0.0,
+      5.428601056993744e-17,
+      0.0
+    ],
+    [
+      0.16666666666147065,
+      0.0
+    ],
+    [
+      0.1666666666614705,
+      0.0
+    ]
+  ],
+  "geometry_validation": {
+    "accepted": true,
+    "checks": [
+      {
+        "kind": "zonotope",
+        "max_residual": 5.3292024753192174e-21,
+        "passed": true
+      },
+      {
+        "kind": "zonotope",
+        "max_residual": 5.3292024753192174e-21,
+        "passed": true
+      },
+      {
+        "kind": "zonotope",
+        "max_residual": 5.3292024753192174e-21,
+        "passed": true
+      },
+      {
+        "kind": "zonotope",
+        "max_residual": 0.0,
+        "passed": true
+      },
+      {
+        "kind": "zonotope",
+        "max_residual": 0.0,
+        "passed": true
+      },
+      {
+        "kind": "zonotope",
+        "max_residual": 0.0,
+        "passed": true
+      }
+    ]
+  },
+  "status": "Solve_Succeeded",
+  "primal": [
+    5.3292024753192174e-21,
+    0.0,
+    0.33333333332294374,
+    0.0,
+    0.33333333332294374,
+    0.0
+  ],
+  "objective": 0.6666666666666667,
+  "iterations": 7,
+  "solver": "casadi-ipopt/full-history-separate-norm-epigraphs/1",
+  "provider": "casadi-ipopt",
+  "version": "casadi 3.8.0; IPOPT version unavailable",
+  "assurance": "local numerical NLP solution; no global optimality certificate"
+}
