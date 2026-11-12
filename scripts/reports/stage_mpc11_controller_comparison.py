@@ -38,6 +38,23 @@ def digest(content):
     return hashlib.sha256(content).hexdigest()
 
 
+def captured_source_asset(relative):
+    """Read a prose source only from an already-pinned historical source commit."""
+    source_record=ROOT/'docs/research/evidence/pages-mpc11-source-variants.json'
+    variants=json.loads(source_record.read_text(encoding='utf-8'))['variants']
+    candidates=[]
+    for variant in variants:
+        expected=variant.get('current_sources',{}).get(relative)
+        if expected:
+            commit=variant['source_commit']
+            content=subprocess.check_output(['git','show','--end-of-options',commit+':'+relative],cwd=ROOT)
+            require(digest(content)==expected,'captured MPC-11 source digest differs: '+relative)
+            candidates.append((commit,content))
+    require(bool(candidates),'MPC-11 captured source has no pinned historical identity: '+relative)
+    require(all(content==candidates[0][1] for _,content in candidates),'MPC-11 historical source variants disagree: '+relative)
+    return candidates[0]
+
+
 def safe_name(name):
     path = PurePosixPath(name)
     require(bool(name) and not path.is_absolute() and path.as_posix() == name and
@@ -217,14 +234,18 @@ def stage(site,evidence=EVIDENCE,*,example_card_writer=None):
     site=Path(site);require(site.is_dir() and not site.is_symlink(),'site must be regular')
     require((site/'examples').is_dir() and not (site/'examples').is_symlink(),'examples directory must be regular')
     landing=index(site/'index.html');gallery=index(site/'examples/index.html')
+    published_guides={name:captured_source_asset('benchmarks/reporting/mpc11/'+name)
+                      for name in ('FIGURES.md','AFFINE-RECHECK.md','environment/README.md')}
     source_files={p.relative_to(ROOT).as_posix():digest(p.read_bytes()) for p in MODULE.glob('*.py')}
     for folder in ('scenarios','environment'):
         source_files.update({f'benchmarks/reporting/mpc11/{folder}/'+name:digest(content)
-                             for name,content in directory(MODULE/folder).items() if '__pycache__' not in PurePosixPath(name).parts})
-    for p in (MODULE/'FIGURES.md', MODULE/'AFFINE-RECHECK.md', ROOT/'scripts/reports/figure_style.py'):
-        source_files[p.relative_to(ROOT).as_posix()]=digest(p.read_bytes())
+                             for name,content in directory(MODULE/folder).items()
+                             if '__pycache__' not in PurePosixPath(name).parts and name!='README.md'})
+    source_files['scripts/reports/figure_style.py']=digest((ROOT/'scripts/reports/figure_style.py').read_bytes())
     identity={'figures_manifest':FIGURE_ANCHOR,'archives':ARCHIVES,'stager_sha256':digest(Path(__file__).read_bytes()),
-              'current_sources':source_files}
+              'current_sources':source_files,
+              'captured_source_assets':{name:{'source_commit':commit,'sha256':digest(content)}
+                                        for name,(commit,content) in published_guides.items()}}
     route='mpc11-controller-comparison-'+digest(json.dumps(identity,sort_keys=True).encode())[:20]
     require(not (site/route).exists() and not (site/route).is_symlink() and not (site/(route+'.zip')).exists() and
             not (site/(route+'.zip')).is_symlink() and route not in landing and route not in gallery,'immutable publication route exists')
@@ -235,10 +256,10 @@ def stage(site,evidence=EVIDENCE,*,example_card_writer=None):
     for source in MODULE.glob('*.py'):generated[prefix+source.name]=source.read_bytes()
     for folder in ('scenarios','environment'):
         for name,content in directory(MODULE/folder).items():
-            if '__pycache__' not in PurePosixPath(name).parts:generated[prefix+folder+'/'+name]=content
+            if '__pycache__' not in PurePosixPath(name).parts and name!='README.md':generated[prefix+folder+'/'+name]=content
     for name in ('figure_style.py','stage_mpc11_controller_comparison.py'):
         generated['scripts/reports/'+name]=(ROOT/'scripts/reports'/name).read_bytes()
-    for name in ('FIGURES.md','AFFINE-RECHECK.md'):generated[prefix+name]=(MODULE/name).read_bytes()
+    for name,(_,content) in published_guides.items():generated[prefix+name]=content
     figures_path=prefix+'evidence/'+FIGURES
     sections=[]
     for slug,title in [('syn-nl-lv-01','Lotka–Volterra: P/R'),('syn-nl-fuel-01','Fuel: m_ox/q_ox and m_f/q_f')]:
