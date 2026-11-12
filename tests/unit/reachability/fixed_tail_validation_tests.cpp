@@ -19,7 +19,7 @@ FixedTailSolveRequest request() {
     return {{{"validation-problem"},{"validation-solve"}},empty(3),cost(),
         {{{1,1,0},1},identity(3),Vector(3,0)},{},Vector(3,0),true,{}};
 }
-FixedTailModel model() {
+FixedTailModel validation_model() {
     FixedTailHRows control{{2,1,{1,-1}},{0,0},{0,1,{}},{}};
     FixedTailHRows full{{2,3,{0,0,1,0,0,-1}},{0,0},{2,3,{1,0,0,-1,1,-1}},{0,0}};
     return {{"validation-problem"},{{{1,1,{1}},{1,1,{1}},{1,0,{}},{0}}},{0},
@@ -79,7 +79,7 @@ int run() {
         registry::Requirements requirements;requirements.output.representation={"csl.fixed-tail-solve.v1"};
         auto selected=registry::prepare_provider(registry::select_provider(providers,method,requirements));
         require(std::holds_alternative<registry::PreparedProvider<registry::FixedTailOptimizerPort>>(selected),"fixture selection failed");
-        const auto result=fixed_tail_policy({model(),{"malformed-result"},FixedTailFamily::box,Vector(3,0),{}},
+        const auto result=fixed_tail_policy({validation_model(),{"malformed-result"},FixedTailFamily::box,Vector(3,0),{}},
             std::get<registry::PreparedProvider<registry::FixedTailOptimizerPort>>(selected),{});
         const auto* failure=std::get_if<FixedTailPolicyFailure>(&result);
         require(failure!=nullptr,"malformed provider result was accepted or escaped its typed failure");
