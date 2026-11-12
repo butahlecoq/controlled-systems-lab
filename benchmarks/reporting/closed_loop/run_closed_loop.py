@@ -30,7 +30,7 @@ from contracts import ROOT, load_task, manifest_sha256
 from task_models import (make_held_step_request, make_replay_request, objective,
                          source_scenario, validate_held_step_response,
                          validate_source_binding)
-from capabilities import MANIFEST, NATIVE_MANIFEST, resolve_graph, validate_resolved_graph, manifest_digest
+from capabilities import HISTORY_MANIFEST, MANIFEST, NATIVE_MANIFEST, resolve_graph, validate_resolved_graph, manifest_digest
 from attempt_records import (ATTEMPT_SCHEMA_V2, IO_LOG, STAGE_INDEX, append_io_event,
     atomic_json, finalize_stage, iter_stage_references, materialize_episode_summary,
     persist_native_capture, read_attempt, register_orphan_stages, summarize_io, verify_v2_attempt,
@@ -541,11 +541,12 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
     try:
         task = load_task(task_name); validate_source_binding(task)
         requested_action_profile_id = action_profile_id
-        native_controller = bool(controller_id and controller_id.startswith("native-"))
+        history_controller = controller_id == "native-continuous-affine-history-mpc/1"
+        native_controller = bool(controller_id and controller_id.startswith("native-")) and not history_controller
         if native_controller and action_profile_id is None:
             action_profile_id = task["control_domains"]["finite"]["problem_id"]
         action_profile_id = action_profile_id or task["control_domains"]["continuous"]["problem_id"]
-        selected_manifest_path = NATIVE_MANIFEST if native_controller else MANIFEST
+        selected_manifest_path = HISTORY_MANIFEST if history_controller else NATIVE_MANIFEST if native_controller else MANIFEST
         capability_manifest, graph = resolve_graph(task, action_profile_id, controller_id,
                                                     manifest_path=selected_manifest_path)
         selected_manifest_sha256 = manifest_digest(capability_manifest)
@@ -572,7 +573,6 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
     source_hashes = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in [
         HERE / "run_closed_loop.py", HERE / "attempt_records.py", HERE / "orbit_nmpc.py", HERE / "task_models.py", HERE / "check_episode.py",
         HERE / "check_replay.py", HERE / "capabilities.py", MPC11 / "nmpc.py", MPC11 / "affine.py"]}
-    selected_manifest_path = NATIVE_MANIFEST if graph["controller"]["id"].startswith("native-") else MANIFEST
     source_hashes[str(selected_manifest_path.relative_to(ROOT))] = hashlib.sha256(selected_manifest_path.read_bytes()).hexdigest()
     for source_file in graph.get("source_files", []):
         source_hashes[source_file["path"]] = source_file["sha256"]

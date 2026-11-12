@@ -96,6 +96,20 @@ class HistoryNormSolverTest(unittest.TestCase):
             create_policy(task, task_sha256="wrong", controller_id="history",
                           action_profile_id=task["control_domains"]["continuous"]["problem_id"])
 
+    def test_runner_resolves_continuous_history_profile_before_bridge_preflight(self):
+        import json
+        import tempfile
+        from pathlib import Path
+        from run_closed_loop import run_task
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            result = run_task("syn-nl-lv-01", root, root / "missing-bridge",
+                              controller_id="native-continuous-affine-history-mpc/1")
+            self.assertEqual(result["status"], "refused")
+            reason = json.loads((Path(result["attempt"]) / "resolution-refusal.json").read_text())["reason"]
+            self.assertIn("common execution bridge does not exist", reason)
+
     def test_history_verification_rejects_wrong_rows_and_cost(self):
         import numpy as np
         from contracts import load_task
