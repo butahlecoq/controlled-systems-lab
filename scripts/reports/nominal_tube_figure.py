@@ -205,4 +205,3 @@ def main():
     print(json.dumps({"stages":len(d["stages"]),"all_vertex_checks_within_tolerance":all(x["within_tolerance"] for x in checks),"max_abs_raw_row_violation":max(x["max_raw_row_violation"] for x in checks),"geometry_record_sha256":d["provenance"]["geometry_record_sha256"],"nonlinear_attempt_sha256":d["provenance"]["nonlinear_attempt_sha256"]},indent=2))
 
 if __name__=="__main__": main()
-
