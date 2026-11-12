@@ -88,6 +88,10 @@ def main() -> int:
         (stage / "checker.stdout.txt").write_text(checker.stdout if checker else "", encoding="utf-8")
         (stage / "checker.stderr.txt").write_text(checker.stderr if checker else "", encoding="utf-8")
         source_commit = subprocess.check_output(["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True).strip()
+        compiler = config.get("CMAKE_CXX_COMPILER", "")
+        cmake = config.get("CMAKE_COMMAND", "")
+        compiler_result = subprocess.run([compiler, "--version"], check=True, capture_output=True, text=True)
+        cmake_result = subprocess.run([cmake, "--version"], check=True, capture_output=True, text=True)
         provenance = {
             "schema": "csl.issue944-final-capture-provenance/1",
             "captured_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -101,10 +105,15 @@ def main() -> int:
             "algorithm_source_sha256": digest(ALGORITHM_SOURCE),
             "executable_sha256": digest(executable),
             "build": {
-                key: config.get(key) for key in (
-                    "CMAKE_BUILD_TYPE", "CMAKE_CXX_COMPILER", "CMAKE_CXX_COMPILER_ID",
-                    "CMAKE_CXX_COMPILER_VERSION", "CSL_ENABLE_HIGHS", "CSL_ENABLE_QHULL",
-                )
+                "type": config.get("CMAKE_BUILD_TYPE"),
+                "generator": config.get("CMAKE_GENERATOR"),
+                "compiler_path": compiler,
+                "compiler_version": compiler_result.stdout.splitlines()[0],
+                "cmake_path": cmake,
+                "cmake_version": cmake_result.stdout.splitlines()[0],
+                "highs_enabled": config.get("CSL_ENABLE_HIGHS"),
+                "qhull_enabled": config.get("CSL_ENABLE_QHULL"),
+                "qhull_provider": "Qhull 8.0.2 Qx",
             },
             "record_sha256": digest(stage / "records.json"),
             "regression_sha256": digest(stage / "terminal-membership-regression.json"),
