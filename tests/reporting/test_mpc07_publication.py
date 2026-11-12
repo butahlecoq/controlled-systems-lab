@@ -11,8 +11,12 @@ import unittest
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT))
 from scripts.reports import stage_mpc07_comparison as S
+from benchmarks.reporting.mpc07 import capture as mpc07_capture
 
 class PublicationTests(unittest.TestCase):
+    def test_readme_source_comes_from_the_sealed_capture_bundle(self):
+        self.assertEqual(hashlib.sha256(mpc07_capture.archived_readme()).hexdigest(),
+                         '631c84d73f1b228bd6797a0e2ccf5e4d409fafcf6ef9a3cf820be69f89cd40cb')
     def site(self,root):
         site=root/'site';(site/'examples').mkdir(parents=True)
         for path in (site/'index.html',site/'examples/index.html'):path.write_text('<html><body>existing</body></html>')

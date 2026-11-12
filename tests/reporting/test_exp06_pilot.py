@@ -3,9 +3,12 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 from pathlib import Path
+import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 BUNDLE = ROOT / "reports/algorithm-results/exp06-geometry-pilot-20261029"
@@ -84,6 +87,7 @@ class Exp06PilotTest(unittest.TestCase):
         self.assertFalse(capture["harness_dirty"])
 
     def test_paper_followup_renderer_and_stager_verify_saved_bundle(self) -> None:
+        capture, wire, _spec, manifest, methods, rows = paper_render.read_saved(PAPER_BUNDLE)
         rendered, report_id = paper_render.render(PAPER_BUNDLE)
         self.assertTrue(report_id.startswith("exp06-"))
         for name, data in rendered.items():
@@ -95,6 +99,30 @@ class Exp06PilotTest(unittest.TestCase):
             self.assertEqual(staged_id, report_id)
             self.assertTrue((site_dir / report_id / "hulls.svg").is_file())
             self.assertIn("paper-derived", (site_dir / report_id / "index.html").read_text())
+        future_capture = dict(capture, source_commit="d54621def6c8d62bbfe8c3a8b7c54365211f093e")
+        future_page = paper_render.render_html(
+            future_capture, wire, manifest, methods, rows, report_id)
+        self.assertIn(
+            "blob/d71402ba339043226cedb452efb74a0e2c50dabd/"
+            "docs/research/itis17-paper-reducers-cpp-adaptation.md", future_page)
+
+    def test_historical_paper_stage_is_independent_of_git_object_availability(self) -> None:
+        rendered, report_id = paper_render.render(PAPER_BUNDLE)
+        with tempfile.TemporaryDirectory() as temporary:
+            site_dir = Path(temporary)
+            (site_dir / "index.html").write_text(
+                "<!doctype html><html><body><ul></ul></body></html>")
+            empty_objects = site_dir / "empty-git-objects"
+            empty_objects.mkdir()
+            with patch.dict(os.environ, {"GIT_OBJECT_DIRECTORY": str(empty_objects)}):
+                unavailable = subprocess.run(
+                    ["git", "cat-file", "-e", "1f34503eb3f5d4c3e239076a8d48b2af2e6bf06c"],
+                    cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                self.assertNotEqual(unavailable.returncode, 0)
+                staged_id = stage.stage(PAPER_BUNDLE, site_dir, paper_render)
+            self.assertEqual(staged_id, report_id)
+            self.assertEqual({name: (site_dir / report_id / name).read_bytes()
+                              for name in rendered}, rendered)
 
 
 if __name__ == "__main__":

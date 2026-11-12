@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 from datetime import datetime, timezone
 import hashlib
 from html import escape
@@ -36,9 +37,13 @@ DATA_FILES = {
     "csl-candidate-observations.jsonl": "csl-candidate-observations.jsonl",
     "critical-regions.svg": "explicit-double-integrator.svg",
 }
+README_SOURCE_PATH = "benchmarks/reporting/mpc08_explicit/README.md"
+README_SOURCE_COMMIT = "ea756e66ccef9aef633798016b7acd87d01fccc7"
+README_SOURCE_SHA256 = "fd937e6a517d5790591400b1f309f2337378e2c3e0b19970086be7352bbfdb5b"
+README_CAPSULE = ROOT / "scripts/reports/source_snapshots/mpc08-explicit-readme-ea756e66.json"
 SOURCE_FILES = (
     "CMakeLists.txt", "cmake/OptionalReports.cmake",
-    "benchmarks/reporting/mpc08_explicit/README.md",
+    README_SOURCE_PATH,
     "benchmarks/reporting/mpc08_explicit/explicit_double_integrator.py",
     "benchmarks/reporting/mpc08_explicit/mpc08_strategy_comparison.cpp",
     "scripts/reports/stage_mpc08.py", "scripts/reports/landing.py",
@@ -76,6 +81,24 @@ INDEX_CARD = (
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise ValueError(message)
+
+
+def historical_readme() -> bytes:
+    capsule = json.loads(README_CAPSULE.read_text(encoding="utf-8"))
+    try:
+        content = base64.b64decode(capsule["content_base64"], validate=True)
+    except (KeyError, ValueError) as error:
+        raise ValueError("MPC-08 historical README capsule is invalid") from error
+    blob = hashlib.sha1(f"blob {len(content)}\0".encode() + content).hexdigest()
+    require(capsule.get("schema") == "csl.report-source-capsule/1" and
+            capsule.get("source_commit") == README_SOURCE_COMMIT and
+            capsule.get("source_path") == README_SOURCE_PATH and
+            capsule.get("git_blob") == "65bf429afc9f549f25cabfaca56a26ad26cbfd44" and
+            capsule.get("size_bytes") == len(content) and
+            capsule.get("sha256") == README_SOURCE_SHA256 and
+            hashlib.sha256(content).hexdigest() == README_SOURCE_SHA256 and blob == capsule["git_blob"],
+            "MPC-08 historical README source identity differs")
+    return content
 
 
 def digest(data: bytes) -> str:
@@ -119,7 +142,8 @@ def package(source_commit: str) -> None:
                 row["action_and_value_match_exact_reference"] is True for row in online_rows),
             "online QP observation fields do not report action/value checks distinctly")
 
-    source_hashes = {name: file_digest(ROOT / name) for name in SOURCE_FILES}
+    source_hashes = {name: (README_SOURCE_SHA256 if name == README_SOURCE_PATH else file_digest(ROOT / name))
+                     for name in SOURCE_FILES}
     raw_hashes = {name: file_digest(GENERATED / name) for name in (
         "explicit-double-integrator.json", "explicit-double-integrator-queries.csv",
         "csl-candidate-observations.jsonl", "explicit-double-integrator.svg")}
@@ -142,7 +166,7 @@ def package(source_commit: str) -> None:
     BUNDLE.mkdir(parents=True, exist_ok=True)
     for target, source in DATA_FILES.items():
         shutil.copyfile(GENERATED / source, BUNDLE / target)
-    readme = (SOURCE_DIR / "README.md").read_text(encoding="utf-8")
+    readme = historical_readme().decode("utf-8")
     readme = readme.replace(
         "../../../reports/algorithm-results/mpc08-explicit-pilot-v1/index.html",
         "index.html",
@@ -151,7 +175,7 @@ def package(source_commit: str) -> None:
     readme = readme.replace("generated/csl-candidate-observations.jsonl", "csl-candidate-observations.jsonl")
     (BUNDLE / "README.md").write_text(readme, encoding="utf-8")
     source_url = (f"https://github.com/butahlecoq/controlled-systems-lab/blob/"
-                  f"{source_commit}/benchmarks/reporting/mpc08_explicit/README.md")
+                  f"{README_SOURCE_COMMIT}/{README_SOURCE_PATH}")
     record = {
         "schema": "csl.mpc08-explicit-pilot-record/1", "report_id": REPORT_ID,
         "scope": "One exact rational one-step double-integrator fixture; 45 solver-validation points and 810 fixed-initial method observations.",
@@ -235,7 +259,7 @@ def render_html(record: dict) -> str:
         rows.append(f"<tr><th scope=\"row\">{escape(label)}</th><td>{item['measured_attempts']}</td>"
                     f"<td>{median_ms:.3f} ms</td><td>{low_ms:.3f}–{high_ms:.3f} ms</td><td>{escape(note)}</td></tr>")
     source_link = (f"https://github.com/butahlecoq/controlled-systems-lab/blob/"
-                   f"{record['source_commit']}/benchmarks/reporting/mpc08_explicit/README.md")
+                   f"{README_SOURCE_COMMIT}/{README_SOURCE_PATH}")
     return f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Exact explicit MPC pilot · MPC-08</title>

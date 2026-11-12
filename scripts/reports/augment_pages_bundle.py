@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -50,9 +51,50 @@ def stage_all(site: Path) -> dict[str, str]:
     mpc07 = stage_mpc07_comparison.stage(site)
     stage_per_attempt._insert_landing_link(site,mpc07+"-archive",mpc07+".zip","Download the complete robust-policy comparison evidence")
     mpc10 = stage_mpc10_comparison.stage(site)
-    mpc11_studies = stage_mpc11_mesh_timing.stage(site)
-    b04_source = stage_b04_source_moments.stage(site)
     retained_mpc11 = replay_mpc11_published_variants.preserve(site)
+    current_study_sources = {
+        name: hashlib.sha256(content).hexdigest()
+        for name, content in stage_mpc11_mesh_timing.sources().items()
+    }
+    mpc11_studies = None
+    removed_affine_note = "benchmarks/reporting/mpc11/AFFINE.md"
+    for variant in replay_mpc11_published_variants._policy()["variants"]:
+        route = variant["route"]
+        if route not in retained_mpc11 or not route.startswith("mpc11-mesh-timing-"):
+            continue
+        historical_sources = variant["current_sources"]
+        if (set(historical_sources) - set(current_study_sources) == {removed_affine_note} and
+                set(current_study_sources) == set(historical_sources) - {removed_affine_note} and
+                all(current_study_sources[name] == historical_sources[name]
+                    for name in current_study_sources)):
+            mpc11_studies = route
+            break
+    if mpc11_studies is None:
+        mpc11_studies = stage_mpc11_mesh_timing.stage(site)
+    else:
+        landing_path = site / "index.html"
+        gallery_path = site / "examples/index.html"
+        landing_html = landing_path.read_text(encoding="utf-8")
+        gallery_html = gallery_path.read_text(encoding="utf-8")
+        if (landing_html.count("</body>") != 1 or gallery_html.count("</body>") != 1 or
+                mpc11_studies in landing_html or mpc11_studies in gallery_html):
+            raise ValueError("historical MPC11 study route has an unexpected insertion point")
+        landing_section = (
+            f'<section id="{mpc11_studies}"><h2>MPC11 mesh and repeated-workload studies</h2>'
+            f'<p><a href="{mpc11_studies}/index.html">Read the saved study and minimal visual inputs</a> · '
+            f'<a href="{mpc11_studies}.zip">Download complete offline source/raw data</a>.</p></section>')
+        example_card = (
+            f'<article id="{mpc11_studies}-example"><h3><a href="../{mpc11_studies}/index.html#mesh-example">'
+            'LV/fuel mesh sensitivity and measured phase costs</a></h3>'
+            f'<a href="../{mpc11_studies}/index.html#mesh-example"><img '
+            f'src="../{mpc11_studies}/mesh-phase-overlays.svg" '
+            'alt="NI1/NI2 LV and fuel mass-flow paths overlaid"></a>'
+            '<p>Componentwise physical differences, original inputs, five alternating phase-cost repetitions; '
+            'no solver ranking or safety/convergence certificate.</p>'
+            f'<p><a href="../{mpc11_studies}.zip">Complete offline source/raw ZIP</a></p></article>')
+        landing_path.write_text(landing_html.replace("</body>", landing_section + "</body>"), encoding="utf-8")
+        gallery_path.write_text(gallery_html.replace("</body>", example_card + "</body>"), encoding="utf-8")
+    b04_source = stage_b04_source_moments.stage(site)
 
     stage_per_attempt.validate(site)
     landing = site / "index.html"

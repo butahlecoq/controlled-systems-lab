@@ -4,7 +4,7 @@ For public API, dependency, installation, example and publication changes, recor
 the PR's release/package impact using the [delivery guide](docs/agents/delivery.md).
 It covers GitHub Releases, when Packages is useful, and minimal Pages examples.
 
-This repository contains a C++20 library and its research dossier. The owner selected C++ as the main implementation language, with C++20 as the working standard and Python allowed for independent verification. Start implementation with the [development guide](docs/build/development.md), [current composition](docs/architecture/framework-composition.md) and canonical [glossary](docs/research/glossary.md). Read [the research index](docs/research/README.md), [foundations](docs/research/scientific-foundations.md) and [architecture hypothesis](docs/architecture/initial-architecture.md) first.
+This repository contains a C++20 library, executable examples and published evidence. Use the current source, tests and issue-linked requirements when making changes.
 
 Use issues for scientific corrections, reproduction reports and algorithm proposals. Cite an Lxx source identifier or a primary external reference, the formula/page, exact assumptions and a minimal example where possible. Distinguish a proven discrepancy, an interpretation question, a numerical observation and an implementation defect.
 
@@ -18,12 +18,12 @@ New curated documentation and future software should be in English. Preserve ori
 
 Original papers, listings, raw extractions and personal source metadata remain local. Source IDs and hashes are public; reviewers can cite the published counterparts and request a precise transcription through an issue. Public availability of the repository does not establish a redistribution license for archival materials. Project licensing remains an owner decision.
 
-Changes to mathematical contracts or guarantee labels require a clear rationale and appropriate independent checks. The owner selected nominal planning with an optimal solution-family output. Product implementation follows the agreed architecture. New algorithms should integrate through the [modular ports](docs/architecture/modular-algorithms-and-solution-sets.md), with output completeness and set-conversion/approximation evidence recorded.
+Changes to mathematical contracts or guarantee labels require a clear rationale and appropriate independent checks. State supported assumptions, returned guarantees, complexity and output-completeness limits in the relevant issue and pull request.
 
 Implementation work starts from the live GitHub issue: verify its prerequisites, claim it, and agree on file ownership before parallel edits. Each module implementation ships minimum independent tests; separate test expansions and rigorous review issues provide additional gates. The issue tracker is the current source for work state.
 
-Every algorithm that produces numerical results also delivers a versioned standalone HTML report and raw records under the [published-results policy](docs/architecture/published-algorithm-results.md). Follow the [report commands and record contract](docs/contracts/algorithm-report-records.md): review the fixed code/harness, measure its clean Release executable, review saved results/figures, then publish and verify the accessible versioned URL. Functional CTest/smoke runs are not benchmark measurements. Link the actual report URL and measured source commit in the relevant PR and issue; preserve failures, unavailable metrics and the declared evidence scope.
+Every algorithm that produces numerical results must follow the [published-results evidence gates](docs/architecture/published-algorithm-results.md). Link the report URL and measured source commit in the relevant pull request and issue; preserve failures, unavailable metrics and declared evidence scope.
 
 The initial source-bound observed-state pilot has a [standalone numerical report](reports/closed-loop-pilot/closed-loop-pilot-v1/index.html) and a [minimal Lotka–Volterra 2D example](reports/closed-loop-pilot/closed-loop-pilot-v1/example-2d.html), both rendered only from saved full-episode records. They are staged through the Pages report workflow; independent review, main-only deployment, and live URL/hash verification remain pending.
 
-Before retiring local worktrees or builds, follow the [inventory and preservation procedure](docs/build/development.md#inventory-and-safe-retirement). Preserve research archives, raw records and versioned published evidence.
+Before retiring local worktrees or builds, inspect their status and preserve authored files. Keep raw records and versioned published evidence intact.

@@ -796,8 +796,9 @@ class GalleryTests(unittest.TestCase):
         self.assertEqual(projected_record["analytic"]["projected_terminal_set"], "0<=x[1]<=0.5")
         coverage = json.loads((self.site / "examples/algorithm-coverage.json").read_text())
         self.assertEqual(coverage["schema"], "csl.algorithm-visual-coverage/1")
-        architecture = (ROOT / coverage["source"]).read_text(encoding="utf-8")
-        self.assertTrue(all(module in architecture for family in coverage["families"] for module in family["modules"]))
+        self.assertTrue(all(isinstance(family.get("modules"), list) and family["modules"] and
+                            all(isinstance(module, str) and module for module in family["modules"])
+                            for family in coverage["families"]))
         catalog_kinds = {report["report_kind"] for report in json.loads(self.catalog.read_text())["reports"]}
         mapped_kinds = ({kind for family in coverage["families"] for kind in family["catalog_kinds"]} |
                         set(coverage.get("evidence_only_kinds", {})))

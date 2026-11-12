@@ -5,6 +5,16 @@ import html
 import math
 from fractions import Fraction
 
+NOTE_SOURCE_COMMIT = "d71402ba339043226cedb452efb74a0e2c50dabd"
+NOTE_PATH = "docs/research/b08-displayed-exact-audit.md"
+HISTORICAL_SOURCE_COMMITS = frozenset({
+    "4d812d3e3f0e9b84a7508ddcb83e32b1d32a43fe",
+})
+
+
+def note_source_commit(source_commit: str) -> str:
+    return source_commit if source_commit in HISTORICAL_SOURCE_COMMITS else NOTE_SOURCE_COMMIT
+
 
 def hull(points):
     ordered = sorted(set((float(x), float(y)) for x, y in points))
@@ -120,6 +130,6 @@ def render_html(record: dict) -> str:
 <section class="panel"><h2>Reproduce and inspect</h2><p>Optional report-only dependency: PySCIPOpt 6.3.0 (MIT) with bundled SCIP 10.0 (Apache-2.0). The PyPI wheels support Linux x86-64, Windows x86-64 and macOS x86-64/Apple Silicon. No CSL library dependency or installation surface is added.</p><pre><code>python3 -m venv .venv
 .venv/bin/python -m pip install pyscipopt==6.3.0
 .venv/bin/python scripts/reports/mpc03/b08_miqcp.py --output-dir /tmp/mpc03-b08-l04-miQCP-v1
-python3 docs/research/tools/check_b08_displayed_exact.py --verify-record docs/research/evidence/b08-displayed-exact.json</code></pre><ul><li><a href="record.json">Saved report record</a></li><li><a href="solver-output.json">Raw solver output</a></li><li><a href="independent-oracle.json">Independent exact enumeration</a></li><li><a href="{root}/benchmarks/reporting/mpc03/b08_miqcp.py">Solver driver at commit {commit[:8]}</a></li><li><a href="{root}/docs/research/b08-displayed-exact-audit.md">Displayed-data scope and historical limits</a></li></ul></section>
+python3 docs/research/tools/check_b08_displayed_exact.py --verify-record docs/research/evidence/b08-displayed-exact.json</code></pre><ul><li><a href="record.json">Saved report record</a></li><li><a href="solver-output.json">Raw solver output</a></li><li><a href="independent-oracle.json">Independent exact enumeration</a></li><li><a href="{root}/benchmarks/reporting/mpc03/b08_miqcp.py">Solver driver at commit {commit[:8]}</a></li><li><a href="https://github.com/butahlecoq/controlled-systems-lab/blob/{note_source_commit(commit)}/{NOTE_PATH}">Displayed-data scope and historical limits</a></li></ul></section>
 <section class="panel"><h2>Limits</h2><p>The source paper's unrounded arrays and complete generator are unavailable. The rational oracle treats printed decimals as exact; SCIP receives binary64 coefficients. This case is unconstrained, linear, four-step and open-loop. It does not establish nonlinear-plant reproduction or validated arithmetic. Each solver timing is one exploratory capture and no runtime claim is made.</p></section>
 </main></body></html>\n'''

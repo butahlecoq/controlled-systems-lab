@@ -55,7 +55,7 @@
     },
     {
       "source": "scripts/reports/augment_pages_bundle.py",
-      "signal_count": 18,
+      "signal_count": 19,
       "asset_name_literals": [
         "b04-all-stage-reachability.png",
         "b04-all-stage-reachability.svg",
@@ -829,6 +829,23 @@
         "geometry.svg"
       ],
       "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
+    },
+    {
+      "source": "scripts/reports/lotka_volterra_sampled_frozen_321ac099.py",
+      "signal_count": 5,
+      "asset_name_literals": [
+        "geometry.svg"
+      ],
+      "disposition": "pinned-historical-source-snapshot",
+      "role_and_disposition_reason": "Exact historical producer bytes retained only to authenticate the existing sampled Lotka–Volterra example; this source snapshot makes no full-reachability claim and has no algorithm-family deferral.",
+      "source_snapshot": {
+        "source_commit": "3be2f4257eeb4d00a81b3275ba9f576fb1332e87",
+        "source_path": "scripts/reports/lotka_volterra_sampled.py",
+        "sha256": "321ac099e8185c8b1b9a76af9859c9b818682b429ba705f1410a19d648238f1c"
+      },
+      "companion_ids": [
+        "lotka-volterra-sampled-20261023"
+      ]
     },
     {
       "source": "scripts/reports/mpc01/b04_native_smoke_projection.py",
