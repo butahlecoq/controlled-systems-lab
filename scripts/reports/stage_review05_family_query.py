@@ -32,6 +32,8 @@ HISTORICAL_ROUTE_CAPTURE=ROOT/'reports/algorithm-results/review05-highs-clocks-8
 HISTORICAL_ROUTE_CAPTURE_SHA='f7c8f38f30ce3152f87f95fe0563404069b8d0c3dfc78d6bdaec675180e4d836'
 HISTORICAL_ROUTE_README_SHA='838d25b02d6514fc8270df78fc8bdbee04d8baaaf66cbccd0f90a2b19bb99386'
 HISTORICAL_ROUTE_ALIAS=PurePosixPath('benchmarks/reporting/review05/README.md')
+HISTORICAL_ROUTE_METADATA_SOURCE=ROOT/'reports/algorithm-results/review05-guide-route-retirement-20261112.json'
+HISTORICAL_ROUTE_METADATA_ALIAS=PurePosixPath('benchmarks/reporting/review05/route-retirement.json')
 MAX_ARCHIVE_BYTES=256*1024**2
 
 
@@ -133,15 +135,41 @@ def _historical_route_readme():
     return readme
 
 
-def _write_historical_route_alias(site,readme):
-    alias=site.joinpath(*HISTORICAL_ROUTE_ALIAS.parts)
-    parent=alias.parent
-    require(not parent.is_symlink() and not alias.is_symlink(),'historical REVIEW-05 route alias is unsafe')
-    parent.mkdir(parents=True,exist_ok=True)
-    if alias.exists():
-        require(alias.is_file() and alias.read_bytes()==readme,'historical REVIEW-05 route alias conflicts with sealed bytes')
-    else:
-        alias.write_bytes(readme)
+def _historical_route_metadata():
+    path=HISTORICAL_ROUTE_METADATA_SOURCE
+    require(not path.is_symlink() and path.is_file(),'REVIEW-05 retirement metadata is missing or unsafe')
+    content=path.read_bytes()
+    try:
+        metadata=json.loads(content)
+    except (UnicodeDecodeError,json.JSONDecodeError) as error:
+        raise ValueError('invalid REVIEW-05 retirement metadata: '+str(error)) from error
+    source=metadata['retained_source'];git_source=source['git'];capture=source['sealed_capture']
+    require(metadata['schema']=='csl.retired-working-guide-route/1' and
+            metadata['status']=='working-guide-retired-from-current-tree' and
+            git_source['commit']=='8abaf50b1dc612eeb9deaf1827c8e57042e8364f' and
+            git_source['path']=='benchmarks/reporting/review05/README.md' and
+            git_source['sha256']==HISTORICAL_ROUTE_README_SHA and
+            capture['path']=='reports/algorithm-results/review05-highs-clocks-8abaf50b-20261109/capture.zip' and
+            capture['sha256']==HISTORICAL_ROUTE_CAPTURE_SHA and capture['member']=='README.md' and
+            capture['member_size_bytes']==11761 and capture['member_sha256']==HISTORICAL_ROUTE_README_SHA and
+            metadata['current_project_route']['public_alias'].endswith('/controlled-systems-lab/benchmarks/reporting/review05/README.md') and
+            metadata['current_project_route']['source_metadata'].endswith('/controlled-systems-lab/benchmarks/reporting/review05/route-retirement.json') and
+            metadata['preservation']['sealed_report_readmes_and_capture_zip_modified'] is False and
+            metadata['preservation']['current_working_guide_restored'] is False,
+            'REVIEW-05 retirement metadata does not match the retained source')
+    return content
+
+
+def _write_historical_route_aliases(site,readme,metadata):
+    for route,content in ((HISTORICAL_ROUTE_ALIAS,readme),(HISTORICAL_ROUTE_METADATA_ALIAS,metadata)):
+        alias=site.joinpath(*route.parts)
+        parent=alias.parent
+        require(not parent.is_symlink() and not alias.is_symlink(),'historical REVIEW-05 route asset is unsafe')
+        parent.mkdir(parents=True,exist_ok=True)
+        if alias.exists():
+            require(alias.is_file() and alias.read_bytes()==content,'historical REVIEW-05 route asset conflicts with its source bytes')
+        else:
+            alias.write_bytes(content)
 
 
 def _module(name):
@@ -244,11 +272,12 @@ def stage(site,query_source=QUERY_SOURCE,phase_source=PHASE_SOURCE,*,example_car
     site=Path(site);require(not site.is_symlink() and site.is_dir(),'Pages site must be a regular directory')
     require(not (site/'examples').is_symlink() and (site/'examples').is_dir(),'Pages examples directory must be regular')
     landing=_index(site/'index.html');gallery=_index(site/'examples/index.html')
-    historical_readme=_historical_route_readme()
-    alias=site.joinpath(*HISTORICAL_ROUTE_ALIAS.parts)
-    if alias.exists():require(alias.is_file() and not alias.is_symlink() and alias.read_bytes()==historical_readme,
-                              'historical REVIEW-05 route alias conflicts with sealed bytes')
-    else:require(not alias.is_symlink(),'historical REVIEW-05 route alias is unsafe')
+    historical_readme=_historical_route_readme();historical_metadata=_historical_route_metadata()
+    for route,content in ((HISTORICAL_ROUTE_ALIAS,historical_readme),(HISTORICAL_ROUTE_METADATA_ALIAS,historical_metadata)):
+        alias=site.joinpath(*route.parts)
+        if alias.exists():require(alias.is_file() and not alias.is_symlink() and alias.read_bytes()==content,
+                                  'historical REVIEW-05 route asset conflicts with its source bytes')
+        else:require(not alias.is_symlink(),'historical REVIEW-05 route asset is unsafe')
     identity={'reviewed_manifests':ANCHORS,'stager_sha256':digest(Path(__file__).read_bytes()),
         'current_checkers':{name:digest((BENCH/(name+'.py')).read_bytes()) for name in
             ('check_family_query','scalar_query_oracle','render_family_query','check_build_phases','run_build_phases')}}
@@ -260,7 +289,7 @@ def stage(site,query_source=QUERY_SOURCE,phase_source=PHASE_SOURCE,*,example_car
     generated['index.html']=f'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Complete scalar families and query evidence</title>
 <style>body{{font:16px/1.6 system-ui;background:#1e1e2e;color:#cdd6f4;max-width:1100px;margin:3rem auto;padding:0 1.5rem}}a{{color:#89b4fa}}h1,h2{{color:#a6e3a1}}img{{max-width:100%;height:auto}}code{{color:#f9e2af}}</style><body>
 <h1>Complete scalar optimizer families and actual queries</h1><p><strong>Performance verdict: inconclusive.</strong> The bounded T=2/4/8 observations retain all complete-family/query outcomes, warmups, resource stops and separate profiling. No ranking, asymptotic or hard real-time guarantee is claimed.</p>
-<p><a href="{QUERY_ID}/index.html">Frozen family-query report</a> · <a href="{PHASE_ID}/index.html">Actual assembly/program-construction phases</a> · <a href="publication-manifest.json">Publication provenance</a> · <a href="../{route}.zip">Complete publication ZIP</a> · <a href="{QUERY_ID}/offline.zip">Original immutable raw ZIP</a></p>
+<p><a href="{QUERY_ID}/index.html">Frozen family-query report</a> · <a href="{PHASE_ID}/index.html">Actual assembly/program-construction phases</a> · <a href="publication-manifest.json">Publication provenance</a> · <a href="../{route}.zip">Complete publication ZIP</a> · <a href="{QUERY_ID}/offline.zip">Original immutable raw ZIP</a> · <a href="../benchmarks/reporting/review05/route-retirement.json">Historical guide source and route receipt</a></p>
 <section id="scalar-2d"><h2>A minimal two-control example; scalar state dimension 1</h2>
 <p>Inputs: <code>x[t+1]=x[t]+u[t], x[0]=0, T=2, 0≤u[t]≤1</code>; original terminal objective is constant zero. Thus <code>x1=u0</code> and <code>x2=u0+u1</code>. The full optimizer family projects to the complete control square <code>[0,1]²</code>. Coverage does not follow from selected witnesses: the current independent fixture checker establishes both H-family inclusions, separately from each selected history and direction optimum. Library assurance remains numerical.</p>
 <img src="{QUERY_ID}/control-projection.svg" alt="Scalar state n=1, T=2: complete u0/u1 control square and recorded selected scalar state paths">
@@ -316,7 +345,7 @@ and its current-head freshness gate. This local stager does not deploy anything.
             target=destination.joinpath(*_name(name).parts);target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(content)
         with (site/(route+'.zip')).open('xb') as output:output.write(archive_path.read_bytes())
         (site/'index.html').write_bytes(staged_landing);(site/'examples/index.html').write_bytes(staged_gallery)
-    _write_historical_route_alias(site,historical_readme)
+    _write_historical_route_aliases(site,historical_readme,historical_metadata)
     return route
 
 

@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 import shutil
 import tempfile
+from urllib.parse import urljoin
 import unittest
 from unittest.mock import patch
 import zipfile
@@ -54,10 +55,12 @@ class PublicationTests(unittest.TestCase):
             self.assertEqual((site/'index.html').read_bytes(),saved)
         self.assertEqual(before,{str(p):hashlib.sha256(p.read_bytes()).hexdigest() for root in (QUERY,PHASE) for p in root.rglob('*') if p.is_file()})
 
-    def test_historical_benchmark_links_resolve_to_sealed_route_alias(self):
+    def test_historical_benchmark_links_are_out_of_scope_and_scoped_alias_is_published(self):
         self.assertFalse((ROOT/'benchmarks/reporting/review05/README.md').exists())
         sealed_readme=STAGER._historical_route_readme()
         self.assertEqual(hashlib.sha256(sealed_readme).hexdigest(),STAGER.HISTORICAL_ROUTE_README_SHA)
+        retirement=STAGER._historical_route_metadata()
+        self.assertEqual(json.loads(retirement)['schema'],'csl.retired-working-guide-route/1')
         with tempfile.TemporaryDirectory() as directory:
             site=Path(directory)/'site';(site/'examples').mkdir(parents=True)
             (site/'index.html').write_text('<html><body><h1>Archive</h1></body></html>')
@@ -65,18 +68,28 @@ class PublicationTests(unittest.TestCase):
             report_ids=('review05-horizon-match-20261031','review05-dimension-20261031')
             for report_id in report_ids:
                 source=ROOT/'reports/algorithm-results'/report_id/'README.md'
-                destination=site/'reports/algorithm-results'/report_id/'README.md'
+                destination=site/report_id/'README.md'
                 destination.parent.mkdir(parents=True)
                 destination.write_bytes(source.read_bytes())
-            STAGER.stage(site)
+            route=STAGER.stage(site)
             alias=site.joinpath(*STAGER.HISTORICAL_ROUTE_ALIAS.parts)
+            metadata_alias=site.joinpath(*STAGER.HISTORICAL_ROUTE_METADATA_ALIAS.parts)
             self.assertEqual(alias.read_bytes(),sealed_readme)
+            self.assertEqual(metadata_alias.read_bytes(),retirement)
+            self.assertEqual(hashlib.sha256(metadata_alias.read_bytes()).hexdigest(),hashlib.sha256(retirement).hexdigest())
+            current_index=(site/route/'index.html').read_text()
+            self.assertIn('../benchmarks/reporting/review05/route-retirement.json',current_index)
             for report_id in report_ids:
-                page=site/'reports/algorithm-results'/report_id/'README.md'
+                page=site/report_id/'README.md'
                 href='../../../benchmarks/reporting/review05/README.md'
                 self.assertIn(href,page.read_text())
-                self.assertEqual((page.parent/href).resolve(),alias.resolve())
-                self.assertEqual((page.parent/href).read_bytes(),sealed_readme)
+                old_target=(page.parent/href).resolve()
+                self.assertFalse(old_target.is_relative_to(site.resolve()))
+                published_url=urljoin('https://butahlecoq.github.io/controlled-systems-lab/'+report_id+'/README.md',href)
+                self.assertEqual(published_url,'https://butahlecoq.github.io/benchmarks/reporting/review05/README.md')
+            scoped_url='https://butahlecoq.github.io/controlled-systems-lab/benchmarks/reporting/review05/README.md'
+            self.assertEqual(scoped_url, json.loads(retirement)['current_project_route']['public_alias'])
+            self.assertEqual((site/'benchmarks/reporting/review05/README.md').read_bytes(),sealed_readme)
 
     def test_tampered_summary_checks_or_figure_fail_before_any_stage_write(self):
         self.assertTrue(callable(getattr(STAGER,'stage',None)))
