@@ -1,0 +1,7 @@
+{
+  "fixture_source": "a6b7d1cb",
+  "native_cpp_source": "99fe6e3c",
+  "native_binary_sha256": "fe46f54211831e089b481b94016f5e7ab1e63ca4a41348f77f9c07112264bace",
+  "task_sha256": "ce2d613295a650db22a08bbe6db33a3f4337eab1800be3201e7301d724ff5681",
+  "scope": "Functional query captures; raw stderr captured directly by external subprocess for each fixture; no performance claim."
+}
