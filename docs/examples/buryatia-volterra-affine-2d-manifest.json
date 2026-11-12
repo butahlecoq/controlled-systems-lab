@@ -1,0 +1,21 @@
+{
+  "schema": "csl.buryatia.2d-artifact-manifest/1",
+  "case_id": "buryatia-volterra-matlab-literal-affine/1",
+  "source_variant_id": "buryatia-volterra-literal-script-affine/1",
+  "source_sha256": "c26fc2424fa8b3325a864d1afbc67920ba1c05665bfdf4562bed79548b60a4f1",
+  "assurance": "numerical binary64; no validated rounding certificate",
+  "artifacts": [
+    {
+      "path": "docs/examples/buryatia-volterra-affine-2d-records.json",
+      "sha256": "21c7ce75e047e2898f76221579cf5808470696e6e6b341a391f86d0fffde68be"
+    },
+    {
+      "path": "docs/examples/buryatia-volterra-affine-2d.html",
+      "sha256": "187f1b0e227b98d4b38efbbb7a2858afcb4b2c2db23b8b17cdfbce340faadf8e"
+    },
+    {
+      "path": "docs/examples/buryatia-volterra-affine-2d-terminal.svg",
+      "sha256": "0cebdbf91054cdc5d781da4368972eec3f60d5426cc5918dfe2fe63d13cb0205"
+    }
+  ]
+}

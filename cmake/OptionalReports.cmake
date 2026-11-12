@@ -1637,3 +1637,25 @@ add_executable(observability_overhead benchmarks/observability_overhead.cpp)
 target_link_libraries(observability_overhead PRIVATE CSL::artifacts)
 target_compile_definitions(observability_overhead PRIVATE $<$<CONFIG:Release>:NDEBUG>)
 endif()
+
+if(CSL_BUILD_BURYATIA_REPORT)
+include(cmake/JsonDependencies.cmake)
+add_executable(csl_buryatia_approximation_report benchmarks/reporting/buryatia/driver.cpp)
+target_compile_features(csl_buryatia_approximation_report PRIVATE cxx_std_20)
+target_include_directories(csl_buryatia_approximation_report SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
+target_link_libraries(csl_buryatia_approximation_report PRIVATE
+  CSL::affine_sum CSL::approximation CSL::generator_adapter CSL::quickhull_2d)
+if(MSVC)
+target_compile_options(csl_buryatia_approximation_report PRIVATE /W4 /WX /permissive-)
+else()
+target_compile_options(csl_buryatia_approximation_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+if(BUILD_TESTING)
+find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
+add_test(NAME buryatia_volterra_2d_report
+  COMMAND Python3::Interpreter
+    ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/buryatia/check_2d.py
+    --raw ${CMAKE_CURRENT_SOURCE_DIR}/docs/examples/buryatia-volterra-affine-2d-records.json)
+set_tests_properties(buryatia_volterra_2d_report PROPERTIES LABELS "geometry;example" TIMEOUT 30)
+endif()
+endif()

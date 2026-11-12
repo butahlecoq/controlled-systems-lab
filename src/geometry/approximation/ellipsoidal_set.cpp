@@ -1,6 +1,7 @@
 #include <csl/geometry/ellipsoidal.hpp>
 #include "../exact_dyadic.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <limits>
 
@@ -45,6 +46,93 @@ bool radius_covers(double bound,double radius) {
         add_product(difference,negative,decode(bound)) &&
         (is_zero(difference) || !difference.negative);
 }
+bool finite_matrix(const Matrix& matrix) {
+    return matrix.values.size()==matrix.rows*matrix.cols && finite(matrix.values);
+}
+bool zero_factor(const Matrix& matrix) {
+    return std::all_of(matrix.values.begin(),matrix.values.end(),
+        [](double value){return value==0.0;});
+}
+}
+
+FactorEllipsoidResult make_factor_ellipsoid(Vector center,Matrix factor) {
+    if(center.empty() || !finite(center) || factor.rows!=center.size() ||
+       !finite_matrix(factor))
+        return invalid("ellipsoid.factor.shape",
+            "A finite nonempty center and a finite factor with matching rows are required.");
+    return FactorEllipsoid{std::move(center),std::move(factor)};
+}
+
+FactorEllipsoidResult affine_image(const FactorEllipsoid& input,
+                                    const Matrix& map,const Vector& offset) {
+    if(map.cols!=input.center.size() || map.rows==0 || offset.size()!=map.rows ||
+       !finite_matrix(map) || !finite(offset) ||
+       input.factor.rows!=input.center.size() || !finite_matrix(input.factor))
+        return invalid("ellipsoid.factor.affine",
+            "Finite map, offset and factor dimensions must agree.");
+    Vector center(map.rows,0.0);
+    Matrix factor{map.rows,input.factor.cols,
+        Vector(map.rows*input.factor.cols,0.0)};
+    for(std::size_t row=0;row<map.rows;++row) {
+        center[row]=offset[row];
+        for(std::size_t column=0;column<map.cols;++column)
+            center[row]+=map.values[row*map.cols+column]*input.center[column];
+        for(std::size_t column=0;column<input.factor.cols;++column)
+            for(std::size_t k=0;k<map.cols;++k)
+                factor.values[row*factor.cols+column]+=
+                    map.values[row*map.cols+k]*input.factor.values[k*input.factor.cols+column];
+    }
+    return make_factor_ellipsoid(std::move(center),std::move(factor));
+}
+
+FactorEllipsoidResult outer_minkowski_sum(const FactorEllipsoid& left,
+        const FactorEllipsoid& right,double beta) {
+    if(left.center.empty() || left.center.size()!=right.center.size() ||
+       left.factor.rows!=left.center.size() || right.factor.rows!=right.center.size() ||
+       !finite(left.center) || !finite(right.center) || !finite_matrix(left.factor) ||
+       !finite_matrix(right.factor) || !std::isfinite(beta) || beta<=0)
+        return invalid("ellipsoid.factor.sum",
+            "Finite factors of matching dimension and positive finite beta are required.");
+    const double left_scale=std::sqrt(1.0+beta);
+    const double right_scale=std::sqrt(1.0+1.0/beta);
+    if(!std::isfinite(left_scale) || !std::isfinite(right_scale))
+        return invalid("ellipsoid.factor.sum.beta","Beta scaling overflowed.",
+                       DiagnosticCode::unsupported);
+    const auto dimension=left.center.size();
+    Vector center(dimension);
+    for(std::size_t row=0;row<dimension;++row)
+        center[row]=left.center[row]+right.center[row];
+    // A zero factor is the exact singleton {center}; avoid inflating the other
+    // summand by an arbitrary limiting beta.
+    if(zero_factor(left.factor))
+        return make_factor_ellipsoid(std::move(center),right.factor);
+    if(zero_factor(right.factor))
+        return make_factor_ellipsoid(std::move(center),left.factor);
+    Matrix factor{dimension,left.factor.cols+right.factor.cols,
+        Vector(dimension*(left.factor.cols+right.factor.cols),0.0)};
+    for(std::size_t row=0;row<dimension;++row) {
+        for(std::size_t column=0;column<left.factor.cols;++column)
+            factor.values[row*factor.cols+column]=
+                left_scale*left.factor.values[row*left.factor.cols+column];
+        for(std::size_t column=0;column<right.factor.cols;++column)
+            factor.values[row*factor.cols+left.factor.cols+column]=
+                right_scale*right.factor.values[row*right.factor.cols+column];
+    }
+    return make_factor_ellipsoid(std::move(center),std::move(factor));
+}
+
+FactorEllipsoidResult outer_box(Vector center,const Matrix& generators) {
+    if(center.empty() || generators.rows!=center.size() ||
+       !finite(center) || !finite_matrix(generators))
+        return invalid("ellipsoid.factor.box",
+            "Finite box center and generator rows must have matching dimensions.");
+    const double scale=std::sqrt(static_cast<double>(generators.cols));
+    if(!std::isfinite(scale))
+        return invalid("ellipsoid.factor.box.scale","Box dimension scale overflowed.",
+                       DiagnosticCode::unsupported);
+    auto factor=generators;
+    for(auto& value:factor.values)value*=scale;
+    return make_factor_ellipsoid(std::move(center),std::move(factor));
 }
 
 EllipsoidSet::EllipsoidSet(std::shared_ptr<const detail::EllipsoidStorage> storage)
