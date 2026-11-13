@@ -1,0 +1,805 @@
+{
+  "syn-nl-lv-01": {
+    "control_domains": {
+      "continuous": {
+        "bounds": [
+          [
+            0,
+            0.05
+          ]
+        ],
+        "problem_id": "syn-nl-lv-01/continuous-receding/1/continuous-control/1",
+        "semantics": "independent admissible control at every physical interval"
+      },
+      "finite": {
+        "actions": [
+          [
+            0.0
+          ],
+          [
+            0.025
+          ],
+          [
+            0.05
+          ]
+        ],
+        "problem_id": "syn-nl-lv-01/continuous-receding/1/finite-catalog-adaptation/1",
+        "semantics": "independent catalog choice at every interval; distinct task from continuous control"
+      }
+    },
+    "episode": {
+      "closed_loop": {
+        "apply": "first-zero-order-held-input",
+        "failure": "stop-before-next-input-no-fallback",
+        "observation": "exact-full-execution-state",
+        "optimization_horizon": "shrinking-to-fixed-terminal",
+        "players": 1,
+        "second_player": false,
+        "warm_start": "shift-prior-primal-drop-applied-stage-no-terminal-repeat;zero-duals"
+      },
+      "dt": 0.1,
+      "execution": {
+        "abstol": 1e-10,
+        "method": "CVODES",
+        "reltol": 1e-09
+      },
+      "final_time": 3,
+      "hold": "zero-order",
+      "intervals": 30,
+      "time_unit": "day"
+    },
+    "legacy_source_case": null,
+    "model": {
+      "case_id": "SYN-NL-LV-01",
+      "controls": [
+        {
+          "bounds": [
+            0,
+            0.05
+          ],
+          "name": "u",
+          "unit": "1/day"
+        }
+      ],
+      "domain": "P,R finite; bounds checked independently",
+      "equations": [
+        "dP/dt=(a-b*R-u)*P",
+        "dR/dt=(d*P-c)*R"
+      ],
+      "model_id": "syn-nl-lv-01/ode/1",
+      "parameters": {
+        "a": {
+          "unit": "1/day",
+          "value": 0.8
+        },
+        "b": {
+          "unit": "1/(thousand individuals*day)",
+          "value": 0.01
+        },
+        "c": {
+          "unit": "1/day",
+          "value": 0.6
+        },
+        "d": {
+          "unit": "1/(thousand individuals*day)",
+          "value": 0.006
+        }
+      },
+      "states": [
+        {
+          "bounds": [
+            0,
+            200
+          ],
+          "initial": 120,
+          "name": "P",
+          "scale": 100,
+          "unit": "thousand individuals"
+        },
+        {
+          "bounds": [
+            0,
+            150
+          ],
+          "initial": 60,
+          "name": "R",
+          "scale": 80,
+          "unit": "thousand individuals"
+        }
+      ]
+    },
+    "objective": {
+      "evaluation": "terminal expression plus every physical running term divided by original interval count; never renormalize a shrinking tail",
+      "kind": "dimensionless-quadratic",
+      "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
+      "running_stage_range": [
+        0,
+        29
+      ],
+      "source_definition": {
+        "running_formula": "running_weight/N*sum_k(sum_i(((u[k,i]-running_reference[i])/running_scale[i])^2))",
+        "running_reference": [
+          0
+        ],
+        "running_scale": [
+          0.05
+        ],
+        "running_weight": 0.05,
+        "terminal_formula": "sum_i(terminal_weights[i]*((x[N,i]-terminal_target[i])/terminal_scale[i])^2)",
+        "terminal_scale": [
+          100,
+          80
+        ],
+        "terminal_target": [
+          100,
+          80
+        ],
+        "terminal_weights": [
+          1,
+          1
+        ]
+      }
+    },
+    "prediction": {
+      "affine_model_id": "syn-nl-lv-01/frozen-coexistence-affine/1",
+      "discretization": "per-stage matrix exponential; source-specific LV Taylor offset or fuel endpoint-matched offset",
+      "plant": "original nonlinear ODE",
+      "producer": "benchmarks/reporting/mpc11/affine.py:model",
+      "receipt_fields": [
+        "physical A,B,c",
+        "scaled A,B,c",
+        "continuous Jacobians",
+        "state and input references",
+        "discretization method and version",
+        "validity scope"
+      ],
+      "validity": "numerical local/frozen predictor only; no nonlinear enclosure or off-reference error bound"
+    },
+    "roles": {
+      "backward_feasibility": "predecessors-of-terminal-physical-state-bounds",
+      "forward_reachability": "all-admissible-control-family",
+      "off_trajectory_policy_queries": "any state in the declared model domain and physical state bounds; do not restrict to recorded nominal trajectory",
+      "off_trajectory_query_fixtures": [
+        {
+          "control": [
+            0.017
+          ],
+          "purpose": "off-nominal policy query away from initial state",
+          "state": [
+            143.0,
+            47.0
+          ]
+        }
+      ],
+      "policy_trajectory": "one-deterministic-policy-trajectory"
+    },
+    "schema": "csl.closed-loop.task/1",
+    "source": {
+      "case_id": "SYN-NL-LV-01",
+      "kind": "mpc11-scenario",
+      "model_id": "syn-nl-lv-01/ode/1",
+      "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
+      "path": "benchmarks/reporting/mpc11/scenarios/syn-nl-lv-01.json",
+      "sha256": "debf46903cbcd78694ea91bd1734f8ba9e503be36387288bbf1395661450c45b"
+    },
+    "task_id": "syn-nl-lv-01/continuous-receding/1",
+    "terminal_condition": {
+      "kind": "physical-state-bounds",
+      "objective_target_is_feasibility_constraint": false
+    }
+  },
+  "syn-nl-fuel-01": {
+    "control_domains": {
+      "continuous": {
+        "bounds": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "problem_id": "syn-nl-fuel-01/continuous-receding/1/continuous-control/1",
+        "semantics": "independent admissible control at every physical interval"
+      },
+      "finite": {
+        "actions": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0
+          ]
+        ],
+        "problem_id": "syn-nl-fuel-01/continuous-receding/1/finite-catalog-adaptation/1",
+        "semantics": "independent catalog choice at every interval; distinct task from continuous control"
+      }
+    },
+    "coordinate_maps": {
+      "requested_physical_planes": [
+        {
+          "id": "oxidizer-flow-mass",
+          "indices": [
+            2,
+            0
+          ],
+          "names": [
+            "q_ox",
+            "m_ox"
+          ],
+          "units": [
+            "kg/s",
+            "kg"
+          ],
+          "native_mpc11_plane": "oxidizer-mass-flow"
+        },
+        {
+          "id": "fuel-flow-mass",
+          "indices": [
+            3,
+            1
+          ],
+          "names": [
+            "q_f",
+            "m_f"
+          ],
+          "units": [
+            "kg/s",
+            "kg"
+          ],
+          "native_mpc11_plane": "fuel-mass-flow"
+        }
+      ],
+      "projection_comparison_note": "Archived linear stock-balance coordinates are not numerically equivalent to MPC11 absolute propellant mass; use each source case's own coordinates and units.",
+      "projections": [
+        {
+          "id": "oxidizer-mass-flow",
+          "indices": [
+            0,
+            2
+          ],
+          "names": [
+            "m_ox",
+            "q_ox"
+          ],
+          "units": [
+            "kg",
+            "kg/s"
+          ]
+        },
+        {
+          "id": "fuel-mass-flow",
+          "indices": [
+            1,
+            3
+          ],
+          "names": [
+            "m_f",
+            "q_f"
+          ],
+          "units": [
+            "kg",
+            "kg/s"
+          ]
+        }
+      ],
+      "raw_mpc11_state_order": [
+        "m_ox",
+        "m_f",
+        "q_ox",
+        "q_f"
+      ]
+    },
+    "episode": {
+      "closed_loop": {
+        "apply": "first-zero-order-held-input",
+        "failure": "stop-before-next-input-no-fallback",
+        "observation": "exact-full-execution-state",
+        "optimization_horizon": "shrinking-to-fixed-terminal",
+        "players": 1,
+        "second_player": false,
+        "warm_start": "shift-prior-primal-drop-applied-stage-no-terminal-repeat;zero-duals"
+      },
+      "dt": 0.5,
+      "execution": {
+        "abstol": 1e-10,
+        "method": "CVODES",
+        "reltol": 1e-09
+      },
+      "final_time": 20,
+      "hold": "zero-order",
+      "intervals": 40,
+      "time_unit": "s"
+    },
+    "legacy_source_case": null,
+    "legacy_source_cases": [
+      {
+        "control_dimension": 1,
+        "identity_note": "source-bound deterministic linear fuel model; distinct from SYN-NL-FUEL-01",
+        "source_path": "docs/examples/fuel-reachability-layers-model.json",
+        "source_sha256": "7986e78028d9da46d31c0a4f70fa1fe191f8372fc40037b53e35aa15c25e64e0",
+        "state_names": [
+          "oxidizer flow",
+          "oxidizer stock balance",
+          "fuel flow",
+          "fuel stock balance"
+        ],
+        "state_order": [
+          "x1",
+          "x2",
+          "x3",
+          "x4"
+        ],
+        "state_units": [
+          "kg/s",
+          "kg",
+          "kg/s",
+          "kg"
+        ],
+        "task_id": "csl.fuel-reachability-model/1"
+      },
+      {
+        "control_dimension": 1,
+        "identity_note": "separate five-stage affine projection illustration; distinct from SYN-NL-FUEL-01",
+        "source_path": "benchmarks/reporting/stage-projection/examples/fuel-four-state.json",
+        "source_sha256": "f66613c4da547075a263a87bc4f1670abb5c920b81fdcea8541303c95fd79b9e",
+        "state_names": [
+          "oxidizer flow x1",
+          "oxidizer stock x2",
+          "fuel flow x3",
+          "fuel stock x4"
+        ],
+        "state_order": [
+          "x1",
+          "x2",
+          "x3",
+          "x4"
+        ],
+        "state_units": [
+          "kg/s",
+          "kg",
+          "kg/s",
+          "kg"
+        ],
+        "task_id": "fuel-four-state-box-control-demo-v1"
+      }
+    ],
+    "model": {
+      "case_id": "SYN-NL-FUEL-01",
+      "controls": [
+        {
+          "bounds": [
+            0,
+            1
+          ],
+          "name": "u_ox",
+          "unit": "1"
+        },
+        {
+          "bounds": [
+            0,
+            1
+          ],
+          "name": "u_f",
+          "unit": "1"
+        }
+      ],
+      "domain": "m_ox,m_f >= 0 and every state/input finite; negative mass raises model-domain error",
+      "equations": [
+        "dm_ox/dt=-q_ox",
+        "dm_f/dt=-q_f",
+        "dq_ox/dt=(Q_ox*u_ox*sqrt(m_ox/m_ox0)-q_ox)/tau_ox",
+        "dq_f/dt=(Q_f*u_f*sqrt(m_f/m_f0)-q_f)/tau_f"
+      ],
+      "model_id": "syn-nl-fuel-01/ode/1",
+      "parameters": {
+        "Q_f": {
+          "unit": "kg/s",
+          "value": 1
+        },
+        "Q_ox": {
+          "unit": "kg/s",
+          "value": 3
+        },
+        "m_f0": {
+          "unit": "kg",
+          "value": 30
+        },
+        "m_ox0": {
+          "unit": "kg",
+          "value": 100
+        },
+        "tau_f": {
+          "unit": "s",
+          "value": 2
+        },
+        "tau_ox": {
+          "unit": "s",
+          "value": 2
+        }
+      },
+      "states": [
+        {
+          "bounds": [
+            40,
+            120
+          ],
+          "initial": 100,
+          "name": "m_ox",
+          "scale": 100,
+          "unit": "kg"
+        },
+        {
+          "bounds": [
+            12,
+            36
+          ],
+          "initial": 30,
+          "name": "m_f",
+          "scale": 30,
+          "unit": "kg"
+        },
+        {
+          "bounds": [
+            0,
+            3
+          ],
+          "initial": 2,
+          "name": "q_ox",
+          "scale": 3,
+          "unit": "kg/s"
+        },
+        {
+          "bounds": [
+            0,
+            1
+          ],
+          "initial": 0.6,
+          "name": "q_f",
+          "scale": 1,
+          "unit": "kg/s"
+        }
+      ]
+    },
+    "objective": {
+      "evaluation": "terminal expression plus every physical running term divided by original interval count; never renormalize a shrinking tail",
+      "kind": "dimensionless-quadratic",
+      "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
+      "running_stage_range": [
+        0,
+        39
+      ],
+      "source_definition": {
+        "running_formula": "running_weight/N*sum_k(sum_i(((u[k,i]-ubar[k,i])/running_scale[i])^2))",
+        "running_reference": "midpoint-sampled-nominal-command",
+        "running_scale": [
+          1,
+          1
+        ],
+        "running_weight": 0.02,
+        "terminal_formula": "sum_i(terminal_weights[i]*((x[N,i]-terminal_target[i])/terminal_scale[i])^2)",
+        "terminal_scale": [
+          100,
+          30,
+          3,
+          1
+        ],
+        "terminal_target": [
+          75,
+          23,
+          1.5,
+          0.45
+        ],
+        "terminal_weights": [
+          1,
+          1,
+          0.1,
+          0.1
+        ]
+      }
+    },
+    "prediction": {
+      "affine_model_id": "syn-nl-fuel-01/midpoint-endpoint-matched-affine/1",
+      "discretization": "per-stage matrix exponential; source-specific LV Taylor offset or fuel endpoint-matched offset",
+      "plant": "original nonlinear ODE",
+      "producer": "benchmarks/reporting/mpc11/affine.py:model",
+      "receipt_fields": [
+        "physical A,B,c",
+        "scaled A,B,c",
+        "continuous Jacobians",
+        "state and input references",
+        "discretization method and version",
+        "validity scope"
+      ],
+      "validity": "numerical local/frozen predictor only; no nonlinear enclosure or off-reference error bound"
+    },
+    "roles": {
+      "backward_feasibility": "predecessors-of-terminal-physical-state-bounds",
+      "forward_reachability": "all-admissible-control-family",
+      "off_trajectory_policy_queries": "any state in the declared model domain and physical state bounds; do not restrict to recorded nominal trajectory",
+      "off_trajectory_query_fixtures": [
+        {
+          "control": [
+            0.31,
+            0.67
+          ],
+          "purpose": "off-nominal policy query away from initial state",
+          "state": [
+            91.0,
+            26.0,
+            1.8,
+            0.49
+          ]
+        }
+      ],
+      "policy_trajectory": "one-deterministic-policy-trajectory"
+    },
+    "schema": "csl.closed-loop.task/1",
+    "source": {
+      "case_id": "SYN-NL-FUEL-01",
+      "kind": "mpc11-scenario",
+      "model_id": "syn-nl-fuel-01/ode/1",
+      "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
+      "path": "benchmarks/reporting/mpc11/scenarios/syn-nl-fuel-01.json",
+      "sha256": "c0fb79df63b9b87116ddb96552d139de177eb9ac71440b662d3d4719f6f65572"
+    },
+    "task_id": "syn-nl-fuel-01/continuous-receding/1",
+    "terminal_condition": {
+      "kind": "physical-state-bounds",
+      "objective_target_is_feasibility_constraint": false
+    }
+  },
+  "earth-orbit": {
+    "control_domains": {
+      "continuous": {
+        "bounds": [
+          [
+            -0.5,
+            0.5
+          ],
+          [
+            -0.5,
+            0.5
+          ]
+        ],
+        "problem_id": "env717-earth-orbit/continuous-control-per-100s-interval/1",
+        "semantics": "independent continuous force pair in [-0.5,0.5]^2 N at every one of 20 intervals"
+      },
+      "finite": {
+        "actions": [
+          [
+            -0.5,
+            -0.5
+          ],
+          [
+            -0.5,
+            0.0
+          ],
+          [
+            -0.5,
+            0.5
+          ],
+          [
+            0.0,
+            -0.5
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.5
+          ],
+          [
+            0.5,
+            -0.5
+          ],
+          [
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5
+          ]
+        ],
+        "problem_id": "env717-earth-orbit/finite-nine-action-per-step-adaptation/1",
+        "semantics": "independent choice among source force pairs at each interval; not the legacy block-plan schedule"
+      }
+    },
+    "episode": {
+      "closed_loop": {
+        "apply": "first-zero-order-held-input",
+        "failure": "stop-before-next-input-no-fallback",
+        "observation": "exact-full-execution-state",
+        "optimization_horizon": "shrinking-to-fixed-terminal",
+        "players": 1,
+        "second_player": false,
+        "warm_start": "shift-prior-primal-drop-applied-stage-no-terminal-repeat;zero-duals"
+      },
+      "dt": 100.0,
+      "execution": {
+        "abstol": 1e-10,
+        "method": "CSL adaptive RK4 step doubling",
+        "profile_id": "common-adaptive-replay/CSL-simulation-rk4-step-doubling/1",
+        "reltol": 1e-09,
+        "source_execution_difference": "The source pilot uses 100 classical RK4 substeps per 100-second hold. This task uses the common CSL adaptive RK4 step-doubling replay adapter; no equivalence claim is made."
+      },
+      "final_time": 2000.0,
+      "hold": "zero-order",
+      "intervals": 20,
+      "time_unit": "s"
+    },
+    "legacy_source_case": {
+      "action_catalogue": "nine force pairs in {-0.5,0,0.5}^2 N",
+      "do_not_conflate_with": "continuous or independent finite per-step control task",
+      "objective": "same source terminal hypot and 0.001*norm(u)*100 running cost on first 19 stages",
+      "problem_id": "env717-earth-orbit/finite-nine-action-three-block-plan/1",
+      "schedule": {
+        "block_lengths": [
+          7,
+          7,
+          6
+        ],
+        "decision_count": 3,
+        "plan_count": 729
+      }
+    },
+    "model": {
+      "case_id": "ENV717-EARTH-ORBIT-CONTINUOUS-01",
+      "controls": [
+        {
+          "bounds": [
+            -0.5,
+            0.5
+          ],
+          "name": "u_r",
+          "unit": "N"
+        },
+        {
+          "bounds": [
+            -0.5,
+            0.5
+          ],
+          "name": "u_t",
+          "unit": "N"
+        }
+      ],
+      "domain": "all coordinates and controls finite; r>0; no authored physical state-bound constraints in source pilot",
+      "equations": [
+        "dr/dt=v",
+        "dv/dt=r*omega^2-G*M/r^2+u_r/(1000*m_vehicle)",
+        "dtheta/dt=omega",
+        "domega/dt=-2*omega*v/r+u_t/(1000*m_vehicle*r)"
+      ],
+      "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
+      "parameters": {
+        "G": {
+          "unit": "km^3 kg^-1 s^-2",
+          "value": 6.67448478e-20
+        },
+        "M_earth": {
+          "unit": "kg",
+          "value": 5.9726e+24
+        },
+        "m_vehicle": {
+          "unit": "kg",
+          "value": 50.0
+        }
+      },
+      "states": [
+        {
+          "bounds": null,
+          "initial": 7000.0,
+          "name": "r",
+          "scale": 1000.0,
+          "unit": "km"
+        },
+        {
+          "bounds": null,
+          "initial": 0.0,
+          "name": "v",
+          "scale": 1.0,
+          "unit": "km/s"
+        },
+        {
+          "bounds": null,
+          "initial": 0.0,
+          "name": "theta",
+          "scale": 1.0,
+          "unit": "rad"
+        },
+        {
+          "bounds": null,
+          "initial": 0.0010780614796240577,
+          "name": "omega",
+          "scale": 0.001,
+          "unit": "rad/s"
+        }
+      ]
+    },
+    "objective": {
+      "kind": "source-euclidean-terminal-plus-running-force-norm",
+      "objective_id": "env717-earth-orbit/source-cost-continuous/1",
+      "running_formula": "0.001*100 seconds*hypot(u_r,u_t) for stages 0 through 18; zero running term at stage 19",
+      "running_stage_range": [
+        0,
+        18
+      ],
+      "smoothness": "running norm is nonsmooth at zero force; do not replace or smooth it",
+      "target": {
+        "angular_rate_rad_s": 0.0011015823082230797,
+        "radius_km": 6900.0
+      },
+      "terminal_formula": "hypot(6900-r_N,100000*(omega_target-omega_N))",
+      "units": "source scalar score; radius contribution km and rate contribution scaled by 100000 s"
+    },
+    "prediction": {
+      "affine_model_id": "env717-earth-orbit/local-tangent-zoh/1",
+      "discretization": "zero-order hold matrix exponential of local affine tangent",
+      "plant": "original nonlinear two-body ODE",
+      "producer": "analytic orbit Jacobian and offset, then augmented matrix exponential",
+      "receipt_fields": [
+        "physical A,B,c",
+        "scaled A,B,c",
+        "linearization state and input",
+        "analytic continuous Jacobians",
+        "discretization method and version",
+        "local validity point and scope"
+      ],
+      "validity": "point linearization in binary64; no nonlinear enclosure or off-reference error bound"
+    },
+    "roles": {
+      "backward_feasibility": "predecessors-of-terminal-model-domain-r-positive",
+      "forward_reachability": "all-admissible-control-family",
+      "off_trajectory_policy_queries": "any state in the declared model domain and physical state bounds; do not restrict to recorded nominal trajectory",
+      "off_trajectory_query_fixtures": [
+        {
+          "control": [
+            0.21,
+            -0.17
+          ],
+          "purpose": "off-nominal policy query away from initial state",
+          "state": [
+            7130.0,
+            0.012,
+            0.2,
+            0.0011
+          ]
+        }
+      ],
+      "policy_trajectory": "one-deterministic-policy-trajectory"
+    },
+    "schema": "csl.closed-loop.task/1",
+    "source": {
+      "execution_profile": {
+        "method": "classical fixed-step RK4",
+        "source_hold_seconds": 100.0,
+        "substeps_per_source_hold": 100
+      },
+      "kind": "earth-orbit-source-file",
+      "path": "benchmarks/reporting/env717/earth_orbit.cpp",
+      "pilot_driver": "csl.env717-earth-orbit/1",
+      "sha256": "142cdfd5d07c5a3b65ee5fc28e20402ade14096f4574efd3ce385474f7703b8c",
+      "source_profile_id": "env717-earth-orbit/finite-nine-action-three-block-plan/1"
+    },
+    "task_id": "env717-earth-orbit/continuous-receding/1",
+    "terminal_condition": {
+      "kind": "positive-radius-model-domain",
+      "objective_target_is_feasibility_constraint": false
+    }
+  }
+}

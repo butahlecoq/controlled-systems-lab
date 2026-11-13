@@ -5,6 +5,8 @@ from pathlib import Path
 import shutil
 import zipfile
 
+import history_warm_gap_report
+
 ROOT = Path(__file__).resolve().parents[2]
 REPORT = "closed-loop-history-functional"
 RECORDS = ("lv-highs-f4", "orbit-ipopt-f4", "fuel-ipopt-3c", "fuel-highs-f4-timeout",
@@ -20,6 +22,9 @@ CARD = ('<article class="saved-figure" id="closed-loop-history-functional">'
 def stage(source: Path, site: Path) -> None:
     source = source.resolve(strict=True)
     site = site.resolve(strict=True)
+    warm_gap = source / "warm-gap-9540-v1"
+    if warm_gap.exists():
+        history_warm_gap_report.validate(warm_gap)
     for record in RECORDS:
         directory = source / record
         checksums = directory / "SHA256SUMS"

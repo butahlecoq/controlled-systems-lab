@@ -1,0 +1,185 @@
+{
+  "id": "09-syn-nl-fuel-01-polytope",
+  "task": "syn-nl-fuel-01",
+  "family": "polytope",
+  "attempt_id": "syn-nl-fuel-01-20261113T061618Z-3411a229",
+  "task_id": "syn-nl-fuel-01/continuous-receding/1",
+  "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b",
+  "controller_id": "native-continuous-history-polytope-ipopt/1",
+  "source_commit": "9540b8d0b441f3f3e544d2016abb4ee53c94da0b",
+  "sdk_source_commit": "ab3fdba672d9227e7631e7fec9b10bc91196c285",
+  "native_sha256": "c46c3a2d9755c347d8d665af1332c12c2596491bd83d73173308c5b4831e3aa0",
+  "physical_bridge_sha256": "b5d47c14c65f1d2f833eaec4d9713bcc4717b130bd688e943ade7442c363973f",
+  "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-polytope-ipopt/1/cfg-9087b2a423b72a48",
+  "graph_fingerprint": "9087b2a423b72a488b3b226dde2b0799e79c86dfd1ea829466b89e5cc7197d14",
+  "original_intervals": 40,
+  "completed_holds": 0,
+  "outcome": "resource-limited",
+  "reason": "Numerical worker service Result=oom-kill at its 2 GiB memory/2 GiB swap envelope; no native response. Not infeasibility.",
+  "geometry_terminal": null,
+  "full_episode": false,
+  "physical_objective": null,
+  "audit": {
+    "task": "syn-nl-fuel-01",
+    "family": "polytope",
+    "cell": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-warm-gap-functional-9540-resume-04/03-syn-nl-fuel-01-polytope",
+    "accepted_queries_checked": 0,
+    "warm_queries_checked": 0,
+    "memberships_checked": 0,
+    "support_certificates_checked": 0,
+    "errors": [],
+    "attempt_status": {
+      "status": "incomplete",
+      "algorithm_status": "incomplete",
+      "overall_status": "incomplete",
+      "completed_holds": 0
+    },
+    "completed_holds_proven": 0,
+    "audit_status": "pass",
+    "full_episode": false
+  },
+  "unit_terminal": {
+    "observed_unix_seconds": 1794550593.335414,
+    "systemctl_exit_code": 0,
+    "properties": {
+      "Id": "csl943-worker-7c4746456b31403d.service",
+      "ActiveState": "failed",
+      "SubState": "failed",
+      "MainPID": "0",
+      "Result": "oom-kill",
+      "OOMPolicy": "stop",
+      "ExecMainCode": "2",
+      "ExecMainStatus": "15",
+      "ControlGroup": "",
+      "MemoryCurrent": "[not set]",
+      "MemoryPeak": "2147483648",
+      "MemorySwapCurrent": "[not set]",
+      "MemorySwapPeak": "2147278848",
+      "MemoryMax": "2147483648",
+      "MemorySwapMax": "2147483648",
+      "ManagedOOMSwap": "auto",
+      "ManagedOOMMemoryPressure": "auto"
+    },
+    "stderr": "",
+    "systemd_run_returncode": 1
+  },
+  "resource_envelope": {
+    "worker_units": "per-attempt csl943-worker-*.service",
+    "memory_max_bytes": 2147483648,
+    "memory_swap_max_bytes": 2147483648,
+    "oom_policy": "stop",
+    "scope": "numerical worker subtree only; outer supervisor outside worker memory domain; original worker1800s wall/CPU and8GiB per-process RLIMIT_AS retained; not uniform with initial direct runs"
+  },
+  "worker_stderr_available": true,
+  "attempt_prefix": "attempt/",
+  "archive_sha256": "f7189e0fb35d6a322fd9ef1f069ba7395ef8f094cfa84d433b483b18c1f27a7e",
+  "archive_members": {
+    "attempt/attempt.json": {
+      "bytes": 19487,
+      "sha256": "8ee5791f6973a5dfe1d9c9fbcbbcecb68c8ab64b66aa73c00bac8315a8f33b52",
+      "crc32": "b5e139b8"
+    },
+    "attempt/native-query-000-3f53b629be569e663010d51fd7b3f42e3e18ef9db4cfd72ebc3bf846a2086170.json": {
+      "bytes": 551,
+      "sha256": "3f53b629be569e663010d51fd7b3f42e3e18ef9db4cfd72ebc3bf846a2086170",
+      "crc32": "be7f3bab"
+    },
+    "attempt/native-query-000-784456bbc1150356d5aa51020165379eb25464310014abeed5049f87b3eacc34.json": {
+      "bytes": 546,
+      "sha256": "784456bbc1150356d5aa51020165379eb25464310014abeed5049f87b3eacc34",
+      "crc32": "672f4785"
+    },
+    "attempt/native-query-000-b59cdf37797e68720e92b020617540d0d5902c4bfca88ac173b550e5966b9bef.json": {
+      "bytes": 552,
+      "sha256": "b59cdf37797e68720e92b020617540d0d5902c4bfca88ac173b550e5966b9bef",
+      "crc32": "4a070c54"
+    },
+    "attempt/native-query-000-request.jsonl": {
+      "bytes": 38819,
+      "sha256": "d085b4417e9f6cbce16967223acf9f86d0b62caa0be2befaf4b41abe855133e1",
+      "crc32": "7d27860d"
+    },
+    "attempt/record-io.jsonl": {
+      "bytes": 7214,
+      "sha256": "d71f540abac41c419917f70824112d1595bab3d55720591a77d1be06a8757a75",
+      "crc32": "b0b15edf"
+    },
+    "attempt/request.json": {
+      "bytes": 970,
+      "sha256": "72be2cf9d200d0ef2eb845deb5205786e464e744534191c7ee5298cf6b2a6170",
+      "crc32": "c30d0e1a"
+    },
+    "attempt/resolution-receipt.json": {
+      "bytes": 1000,
+      "sha256": "48ca6ecaa57f99b464ad425222efb55680db722a4cb5e9342e0fca90cfd73367",
+      "crc32": "c81f2e30"
+    },
+    "attempt/resolved-graph.json": {
+      "bytes": 10716,
+      "sha256": "ed6d91901998b6a0e465f1249442b4019728fbd2fffd65441d60e0a8aa7d3939",
+      "crc32": "d657c2aa"
+    },
+    "attempt/run-manifest.json": {
+      "bytes": 10533,
+      "sha256": "9dc4342c89d765ac0933b21ac7d19c51833179331a02e33e6e8e47be5719284f",
+      "crc32": "08b0f441"
+    },
+    "attempt/stage-000.json": {
+      "bytes": 1211,
+      "sha256": "24144af10d5506829c0a6981e7b6dd6c7ffe485fdce832f8f989ba5a41e8bb37",
+      "crc32": "0d1f47b4"
+    },
+    "attempt/stage-records.jsonl": {
+      "bytes": 177,
+      "sha256": "5f39361ceeabaf5c3c720920a6aee64f1c547a7b6915b9cbc0f2cb25dc6ea8ac",
+      "crc32": "70226768"
+    },
+    "attempt/worker-stderr.txt": {
+      "bytes": 285,
+      "sha256": "f7db89a40fb33b4c89d12a9d5a739e28c757c47d3c828a05fceb77bfa8ac6057",
+      "crc32": "bde47d65"
+    },
+    "attempt/worker-stdout.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    },
+    "attempt/worker-systemd-launch.json": {
+      "bytes": 4087,
+      "sha256": "820579ce853f4d67919311de6f85e620472623a9ff40b65d4dce8fbaa4e84485",
+      "crc32": "c41d0dfc"
+    },
+    "attempt/worker-systemd-telemetry.jsonl": {
+      "bytes": 18955,
+      "sha256": "f66f5600498ae74d4c927be5ecec19087010c0f9e65cdf88ce4ac3ff702260d1",
+      "crc32": "475b3dc6"
+    },
+    "attempt/worker-systemd-terminal.json": {
+      "bytes": 677,
+      "sha256": "6e52e62f4a79afff53132603a7123bfaab39065c073b9651e52fba143f773fc0",
+      "crc32": "172c8eee"
+    },
+    "supervisor/launch.json": {
+      "bytes": 2345,
+      "sha256": "e07a9349b995e57858b511db4fb1e5d2b09cb9ed83b358ad54606404abbdbdff",
+      "crc32": "17090aed"
+    },
+    "supervisor/parent-stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    },
+    "supervisor/parent-stdout.log": {
+      "bytes": 1303,
+      "sha256": "0763b3555fa87da8fe49e4dbfbd9c00cead8e472d049ce042993b980f73b0944",
+      "crc32": "fe084674"
+    },
+    "supervisor/parent-terminal.json": {
+      "bytes": 640,
+      "sha256": "22de1c378eac7ce28fb23291899ae27c576f5a4797689706f528c61377421c3e",
+      "crc32": "185653ee"
+    }
+  },
+  "scope": "Archive receipt/index only; authoritative algorithm result remains original csl.closed-loop.attempt/2 and source-bound stage records.",
+  "trace_qualification": "Original native stderr shares worker stream where retained. Initial nonterminal and outer-OOM attempts lack recovered final worker streams; no bytes reconstructed."
+}

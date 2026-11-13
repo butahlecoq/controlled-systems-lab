@@ -212,5 +212,16 @@
       "lv-box-warm-a488-execution-failure",
       "orbit-box-warm-a488-execution-failure"
     ]
+  },
+  "warm_gap_9540_wave": {
+    "index": "warm-gap-9540-v1/index.html",
+    "records": "warm-gap-9540-v1/records.json",
+    "source_commit": "9540b8d0b441f3f3e544d2016abb4ee53c94da0b",
+    "sdk_source_commit": "ab3fdba672d9227e7631e7fec9b10bc91196c285",
+    "selected_profiles": 15,
+    "attempt_archives": 16,
+    "complete_profiles": 8,
+    "accepted_queries_checked": 304,
+    "scope": "Initial functional validation; source-qualified varied resource envelopes; no timing/exhaustive campaign completion."
   }
 }

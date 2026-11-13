@@ -1,0 +1,216 @@
+{
+  "source_commit": "9540b8d0b441f3f3e544d2016abb4ee53c94da0b",
+  "scope": "saved accepted query witnesses and actual original source objective; failed/nonterminal outcomes remain separate",
+  "cells": [
+    {
+      "task": "syn-nl-fuel-01",
+      "family": "parallelotope",
+      "cell": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-warm-gap-functional-9540-resume-04/01-syn-nl-fuel-01-parallelotope",
+      "accepted_queries_checked": 40,
+      "warm_queries_checked": 40,
+      "memberships_checked": 2580,
+      "support_certificates_checked": 20640,
+      "errors": [],
+      "attempt_status": {
+        "status": "complete",
+        "algorithm_status": "complete",
+        "overall_status": "complete",
+        "completed_holds": 40
+      },
+      "completed_holds_proven": 40,
+      "audit_status": "pass",
+      "full_episode": true,
+      "applied_original_objective": {
+        "terminal": 0.00024328906422933072,
+        "running": 0.003605577625800036,
+        "total": 0.003848866690029367
+      }
+    },
+    {
+      "task": "syn-nl-fuel-01",
+      "family": "ellipsoid",
+      "cell": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-warm-gap-functional-9540-resume-04/02-syn-nl-fuel-01-ellipsoid",
+      "accepted_queries_checked": 40,
+      "warm_queries_checked": 40,
+      "memberships_checked": 2580,
+      "support_certificates_checked": 20640,
+      "errors": [],
+      "attempt_status": {
+        "status": "complete",
+        "algorithm_status": "complete",
+        "overall_status": "complete",
+        "completed_holds": 40
+      },
+      "completed_holds_proven": 40,
+      "audit_status": "pass",
+      "full_episode": true,
+      "applied_original_objective": {
+        "terminal": 0.00020403925114985443,
+        "running": 0.0036301740702535117,
+        "total": 0.003834213321403366
+      }
+    },
+    {
+      "task": "syn-nl-fuel-01",
+      "family": "polytope",
+      "cell": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-warm-gap-functional-9540-resume-04/03-syn-nl-fuel-01-polytope",
+      "accepted_queries_checked": 0,
+      "warm_queries_checked": 0,
+      "memberships_checked": 0,
+      "support_certificates_checked": 0,
+      "errors": [],
+      "attempt_status": {
+        "status": "incomplete",
+        "algorithm_status": "incomplete",
+        "overall_status": "incomplete",
+        "completed_holds": 0
+      },
+      "completed_holds_proven": 0,
+      "audit_status": "pass",
+      "full_episode": false
+    },
+    {
+      "task": "earth-orbit",
+      "family": "box",
+      "cell": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-warm-gap-functional-9540-resume-04/04-earth-orbit-box",
+      "accepted_queries_checked": 12,
+      "warm_queries_checked": 12,
+      "memberships_checked": 558,
+      "support_certificates_checked": 4464,
+      "errors": [],
+      "attempt_status": {
+        "status": "incomplete",
+        "algorithm_status": "incomplete",
+        "overall_status": "incomplete",
+        "completed_holds": 12
+      },
+      "completed_holds_proven": 12,
+      "audit_status": "pass",
+      "full_episode": false
+    },
+    {
+      "task": "earth-orbit",
+      "family": "zonotope",
+      "cell": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-warm-gap-functional-9540-resume-04/05-earth-orbit-zonotope",
+      "accepted_queries_checked": 0,
+      "warm_queries_checked": 0,
+      "memberships_checked": 0,
+      "support_certificates_checked": 0,
+      "errors": [],
+      "attempt_status": {
+        "status": "incomplete",
+        "algorithm_status": "incomplete",
+        "overall_status": "incomplete",
+        "completed_holds": 0
+      },
+      "completed_holds_proven": 0,
+      "audit_status": "pass",
+      "full_episode": false
+    },
+    {
+      "task": "earth-orbit",
+      "family": "parallelotope",
+      "cell": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-warm-gap-functional-9540-resume-04/06-earth-orbit-parallelotope",
+      "accepted_queries_checked": 12,
+      "warm_queries_checked": 12,
+      "memberships_checked": 558,
+      "support_certificates_checked": 4464,
+      "errors": [],
+      "attempt_status": {
+        "status": "incomplete",
+        "algorithm_status": "incomplete",
+        "overall_status": "incomplete",
+        "completed_holds": 12
+      },
+      "completed_holds_proven": 12,
+      "audit_status": "pass",
+      "full_episode": false
+    },
+    {
+      "task": "earth-orbit",
+      "family": "ellipsoid",
+      "cell": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-warm-gap-functional-9540-resume-04/07-earth-orbit-ellipsoid",
+      "accepted_queries_checked": 0,
+      "warm_queries_checked": 0,
+      "memberships_checked": 0,
+      "support_certificates_checked": 0,
+      "errors": [],
+      "attempt_status": {
+        "status": "incomplete",
+        "algorithm_status": "incomplete",
+        "overall_status": "incomplete",
+        "completed_holds": 0
+      },
+      "completed_holds_proven": 0,
+      "audit_status": "pass",
+      "full_episode": false
+    },
+    {
+      "task": "earth-orbit",
+      "family": "polytope",
+      "cell": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-warm-gap-functional-9540-resume-04/08-earth-orbit-polytope",
+      "accepted_queries_checked": 0,
+      "warm_queries_checked": 0,
+      "memberships_checked": 0,
+      "support_certificates_checked": 0,
+      "errors": [],
+      "attempt_status": {
+        "status": "incomplete",
+        "algorithm_status": "incomplete",
+        "overall_status": "incomplete",
+        "completed_holds": 0
+      },
+      "completed_holds_proven": 0,
+      "audit_status": "pass",
+      "full_episode": false
+    },
+    {
+      "task": "syn-nl-lv-01",
+      "family": "direct-highs",
+      "cell": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-warm-gap-functional-9540-resume-04/09-syn-nl-lv-01-direct-highs",
+      "accepted_queries_checked": 30,
+      "warm_queries_checked": 30,
+      "memberships_checked": 0,
+      "support_certificates_checked": 0,
+      "errors": [],
+      "attempt_status": {
+        "status": "complete",
+        "algorithm_status": "complete",
+        "overall_status": "complete",
+        "completed_holds": 30
+      },
+      "completed_holds_proven": 30,
+      "audit_status": "pass",
+      "full_episode": true,
+      "applied_original_objective": {
+        "terminal": 0.07267521356259597,
+        "running": 0.01938834742447278,
+        "total": 0.09206356098706875
+      }
+    },
+    {
+      "task": "syn-nl-fuel-01",
+      "family": "direct-highs",
+      "cell": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-warm-gap-functional-9540-resume-04/10-syn-nl-fuel-01-direct-highs",
+      "accepted_queries_checked": 40,
+      "warm_queries_checked": 40,
+      "memberships_checked": 0,
+      "support_certificates_checked": 0,
+      "errors": [],
+      "attempt_status": {
+        "status": "complete",
+        "algorithm_status": "complete",
+        "overall_status": "complete",
+        "completed_holds": 40
+      },
+      "completed_holds_proven": 40,
+      "audit_status": "pass",
+      "full_episode": true,
+      "applied_original_objective": {
+        "terminal": 0.00020403867794717735,
+        "running": 0.0036301748030936336,
+        "total": 0.003834213481040811
+      }
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "id": "05-syn-nl-lv-01-polytope",
+  "task": "syn-nl-lv-01",
+  "family": "polytope",
+  "attempt_id": "syn-nl-lv-01-20261113T054424Z-f9bdff52",
+  "task_id": "syn-nl-lv-01/continuous-receding/1",
+  "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+  "controller_id": "native-continuous-history-polytope-ipopt/1",
+  "source_commit": "9540b8d0b441f3f3e544d2016abb4ee53c94da0b",
+  "sdk_source_commit": "ab3fdba672d9227e7631e7fec9b10bc91196c285",
+  "native_sha256": "c46c3a2d9755c347d8d665af1332c12c2596491bd83d73173308c5b4831e3aa0",
+  "physical_bridge_sha256": "b5d47c14c65f1d2f833eaec4d9713bcc4717b130bd688e943ade7442c363973f",
+  "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-polytope-ipopt/1/cfg-570e887324460279",
+  "graph_fingerprint": "570e8873244602794342603a1ab1e6543ebc3d1b57041bae6588fe31a81ca404",
+  "original_intervals": 30,
+  "completed_holds": 0,
+  "outcome": "resource-limited",
+  "reason": "Outer service Result=oom-kill during initial LV polytope query. No native response or inner supervisor terminal receipt; mathematical feasibility not established.",
+  "geometry_terminal": null,
+  "full_episode": false,
+  "physical_objective": null,
+  "audit": null,
+  "unit_terminal": null,
+  "resource_envelope": null,
+  "worker_stderr_available": false,
+  "attempt_prefix": "attempt/",
+  "archive_sha256": "405b2fc697387e3899d6bedf0bf0090fa44729803c74ee43da37fda883f72e94",
+  "archive_members": {
+    "attempt/attempt.json": {
+      "bytes": 15821,
+      "sha256": "fe6b0c458ed92c40b69e37279f9f692411cc6bcad60b6b1c0d280f07c292b46e",
+      "crc32": "10e1f5c5"
+    },
+    "attempt/native-query-000-4ad52319967dac2c703a6d2ba1173f79bc818cb2797022e5b4fd0b610c23d58c.json": {
+      "bytes": 551,
+      "sha256": "4ad52319967dac2c703a6d2ba1173f79bc818cb2797022e5b4fd0b610c23d58c",
+      "crc32": "700459d8"
+    },
+    "attempt/native-query-000-5d6c5e501e75f5c5b0273e77e16a6343a69dd7f6b6aac0ac58b25736a885e4d8.json": {
+      "bytes": 552,
+      "sha256": "5d6c5e501e75f5c5b0273e77e16a6343a69dd7f6b6aac0ac58b25736a885e4d8",
+      "crc32": "847c6e27"
+    },
+    "attempt/native-query-000-80135fda1dc129fb501b9db4f8969c8f9bf0955e449a44cc52a8601db9595466.json": {
+      "bytes": 546,
+      "sha256": "80135fda1dc129fb501b9db4f8969c8f9bf0955e449a44cc52a8601db9595466",
+      "crc32": "a95425f6"
+    },
+    "attempt/native-query-000-request.jsonl": {
+      "bytes": 14636,
+      "sha256": "9a3d0d41e73bcceb6d1cb490ca5a39644554768c5efe78f005eff3ad68d7be0e",
+      "crc32": "34d399be"
+    },
+    "attempt/record-io.jsonl": {
+      "bytes": 3456,
+      "sha256": "6c072cabb2e59266e7464c8175597afe26b98391806b0a1b5f1a8c183f7eddab",
+      "crc32": "b33e6be5"
+    },
+    "attempt/request.json": {
+      "bytes": 966,
+      "sha256": "39357930102138df244010610363171bde45d0b2183cb4cc14a97ed07477f612",
+      "crc32": "c9b36fac"
+    },
+    "attempt/resolution-receipt.json": {
+      "bytes": 994,
+      "sha256": "e0aeaa0f392b40a9ef06a54d9562e12e8f922603ddf508e65e0303eccdb9a3e1",
+      "crc32": "21fef1ea"
+    },
+    "attempt/resolved-graph.json": {
+      "bytes": 10703,
+      "sha256": "6644b7f5fbc2f76dd297c89db3d4b9e257f971a101be482a8f7e4db10c05f552",
+      "crc32": "5fec7dfd"
+    },
+    "attempt/run-manifest.json": {
+      "bytes": 10526,
+      "sha256": "739f014983df80e2f6e4af8838ac5139030a98c38434260db0546c769b32da59",
+      "crc32": "27e619d3"
+    },
+    "attempt/stage-000.json": {
+      "bytes": 1161,
+      "sha256": "480d238aa4d17ea2990d4548610813ba6c60f2ae71e8310caa1265c44c2eed2a",
+      "crc32": "29d5ebcc"
+    },
+    "supervisor/launch.json": {
+      "bytes": 1942,
+      "sha256": "a98afb78056ec298dc9be8cb59a62e9962128e9030352c3c7b6fc34d49ae76c6",
+      "crc32": "5144f622"
+    },
+    "supervisor/parent-stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    },
+    "supervisor/parent-stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    }
+  },
+  "scope": "Archive receipt/index only; authoritative algorithm result remains original csl.closed-loop.attempt/2 and source-bound stage records.",
+  "trace_qualification": "Original native stderr shares worker stream where retained. Initial nonterminal and outer-OOM attempts lack recovered final worker streams; no bytes reconstructed."
+}
