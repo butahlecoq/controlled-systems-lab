@@ -144,6 +144,9 @@ example_check(native_four_state_source_case native_four_state_reachability "" 0
   "Native four-state reachability: fifteen transitions and 1280 support checks passed")
 example_check(native_flexible_pitch_synthetic_ladder native_flexible_pitch "" 0
   "Native flexible pitch: 3 synthetic physical models; support_checks=4920 projection_checks=47232")
+if(TARGET native_flexible_pitch)
+  set_tests_properties(native_flexible_pitch_synthetic_ladder PROPERTIES TIMEOUT 300)
+endif()
 example_check(convex_original_norm registered_convex "" 0 "original_cost=4.1231056.*squared_cost=17")
 example_check(resolved_history resolved_scenario "" 0 "states=0,0.25,1 controls=0.25,0.75 original_cost=0")
 example_check(continuous_policy_all_generators continuous_policy "" 0

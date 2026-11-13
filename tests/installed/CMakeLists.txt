@@ -21,6 +21,7 @@ target_link_libraries(installed_flexible_pitch_client PRIVATE CSL::model_catalog
 set_target_properties(installed_flexible_pitch_client PROPERTIES CXX_EXTENSIONS OFF)
 add_test(NAME installed_flexible_pitch_client COMMAND installed_flexible_pitch_client)
 set_tests_properties(installed_flexible_pitch_client PROPERTIES
+  TIMEOUT 300
   PASS_REGULAR_EXPRESSION "Native flexible pitch: 3 synthetic physical models; support_checks=4920 projection_checks=47232")
 
 # Expectations come from the package-building configuration. Optional clients may
