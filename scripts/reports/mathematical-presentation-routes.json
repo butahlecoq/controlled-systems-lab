@@ -595,6 +595,20 @@
       "owner": "docs/examples/native-quadcopter-mpc.html"
     },
     {
+      "route": "examples/native-row-scaling-diagnostic-v1/guide.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/native-row-scaling-diagnostic-v1/guide.html",
+      "sha256": "a04f7f9d45dc9f427511bd0bff6ac19e2a5267cd32a98ba5f4603a1893f38907",
+      "witness": "Source-only saved diagnostic capsule 428bbdcaca4adca6a8d5af2ba3f1d64a80c97f6e; exact executed C++ source hashes and all three outcomes retained; source-only ZIP locked by stage_native_row_scaling_diagnostic.py"
+    },
+    {
+      "route": "examples/native-row-scaling-diagnostic-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/native-row-scaling-diagnostic-v1/index.html",
+      "sha256": "e465a838a208a61f158502b7ac316139689424c799a064034e23f856c80f5f4b",
+      "witness": "Source-only saved diagnostic capsule 428bbdcaca4adca6a8d5af2ba3f1d64a80c97f6e; exact executed C++ source hashes and all three outcomes retained; source-only ZIP locked by stage_native_row_scaling_diagnostic.py"
+    },
+    {
       "route": "examples/native-slide50-reachability.html",
       "disposition": "maintained",
       "owner": "docs/examples/native-slide50-reachability.html"

@@ -14,6 +14,9 @@ on:
       - 'scripts/reports/stage_app02.py'
       - 'tests/reporting/test_site_additions.py'
       - 'tests/reporting/test_app02_saved.py'
+      - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
+      - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
+      - 'reports/algorithm-results/native-row-scaling-diagnostic-v1/**'
       - 'pyproject.toml'
       - 'requirements-quality.txt'
       - '.github/workflows/python-quality.yml'
@@ -31,6 +34,9 @@ on:
       - 'scripts/reports/stage_app02.py'
       - 'tests/reporting/test_site_additions.py'
       - 'tests/reporting/test_app02_saved.py'
+      - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
+      - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
+      - 'reports/algorithm-results/native-row-scaling-diagnostic-v1/**'
       - 'pyproject.toml'
       - 'requirements-quality.txt'
       - '.github/workflows/python-quality.yml'
@@ -63,3 +69,5 @@ jobs:
         run: |
           python -m unittest discover -s tests/reporting -p 'test_site_additions.py'
           python -m unittest discover -s tests/reporting -p 'test_app02_saved.py'
+      - name: Check the locked source-only native row-scaling publication
+        run: python -m unittest discover -s tests/reporting -p 'test_stage_native_row_scaling_diagnostic.py'

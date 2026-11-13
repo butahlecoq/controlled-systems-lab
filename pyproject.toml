@@ -5,6 +5,7 @@ line-length = 100
 include = [
     "scripts/ci/**/*.py", "tests/ci/**/*.py", "scripts/catalogue/**/*.py",
     "scripts/reports/frozen_native_bundle.py", "scripts/reports/stage_native_model_catalogue.py", "scripts/reports/stage_native_extended_models.py",
+    "scripts/reports/stage_native_row_scaling_diagnostic.py", "tests/reporting/test_stage_native_row_scaling_diagnostic.py",
     "scripts/reports/site_additions.py", "scripts/reports/stage_app02.py",
     "tests/reporting/test_site_additions.py", "tests/reporting/test_app02_saved.py",
 ]
@@ -17,7 +18,7 @@ python-version = "3.11"
 extra-paths = ["scripts/ci", "scripts/reports", "benchmarks/reporting/closed_loop", "benchmarks/reporting/mpc11"]
 
 [tool.ty.src]
-include = ["scripts/ci", "tests/ci", "scripts/catalogue", "scripts/reports/frozen_native_bundle.py", "scripts/reports/stage_native_model_catalogue.py", "scripts/reports/stage_native_extended_models.py", "scripts/reports/site_additions.py", "scripts/reports/stage_app02.py", "tests/reporting/test_site_additions.py", "tests/reporting/test_app02_saved.py"]
+include = ["scripts/reports/stage_native_row_scaling_diagnostic.py", "tests/reporting/test_stage_native_row_scaling_diagnostic.py", "scripts/ci", "tests/ci", "scripts/catalogue", "scripts/reports/frozen_native_bundle.py", "scripts/reports/stage_native_model_catalogue.py", "scripts/reports/stage_native_extended_models.py", "scripts/reports/site_additions.py", "scripts/reports/stage_app02.py", "tests/reporting/test_site_additions.py", "tests/reporting/test_app02_saved.py"]
 
 [tool.ty.terminal]
 error-on-warning = true
