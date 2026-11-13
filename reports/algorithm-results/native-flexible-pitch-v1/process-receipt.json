@@ -1,0 +1,15 @@
+{
+  "schema": "csl.native-functional-process/1",
+  "producer_source_commit": "b8c884a0cbca8c5195f82383d4e2bea39a805edc",
+  "executable_sha256": "55ec837dc38d92b9623c81df483a6bf978d569859ae6aac00926fff12b6483fe",
+  "argv": [
+    "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-installed-examples/build/native_flexible_pitch",
+    "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-native-capture-b8"
+  ],
+  "returncode": 0,
+  "started_utc": "2026-11-13T00:29:02.391483+00:00",
+  "ended_utc": "2026-11-13T00:29:23.616291+00:00",
+  "stdout_sha256": "24e7358efa0dcbb31f834728c2d9f58439dd5262c0f27a04019ee791f0ed0041",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "scope": "functional native invocation; no timing or performance claim"
+}

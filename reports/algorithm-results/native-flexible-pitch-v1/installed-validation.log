@@ -1,0 +1,16 @@
+[1/4] Scanning /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-build/installed-consumer/source/native_flexible_pitch.cpp for CXX dependencies
+[2/4] Generating CXX dyndep file CMakeFiles/installed_flexible_pitch_client.dir/CXX.dd
+[3/4] Building CXX object CMakeFiles/installed_flexible_pitch_client.dir/native_flexible_pitch.cpp.o
+[4/4] Linking CXX executable installed_flexible_pitch_client
+[1/4] Scanning /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-installed-examples/source/native_flexible_pitch.cpp for CXX dependencies
+[2/4] Generating CXX dyndep file CMakeFiles/native_flexible_pitch.dir/CXX.dd
+[3/4] Building CXX object CMakeFiles/native_flexible_pitch.dir/native_flexible_pitch.cpp.o
+[4/4] Linking CXX executable native_flexible_pitch
+Internal ctest changing into directory: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-build/installed-consumer/build
+Test project /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-build/installed-consumer/build
+    Start 3: installed_flexible_pitch_client
+1/1 Test #3: installed_flexible_pitch_client ...   Passed   19.68 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =  19.68 sec

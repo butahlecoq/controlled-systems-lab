@@ -1,0 +1,94 @@
+[0/1] Re-running CMake...
+CMake Deprecation Warning at /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-history-bridge-deps/doctest-src/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+-- Configuring done (0.6s)
+-- Generating done (0.3s)
+-- Build files have been written to: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-build
+[1/86] Generating CXX dyndep file CMakeFiles/csl_contracts.dir/CXX.dd
+[2/79] Generating CXX dyndep file CMakeFiles/csl_numeric.dir/CXX.dd
+[3/77] Generating CXX dyndep file CMakeFiles/csl_objectives.dir/CXX.dd
+[4/75] Generating CXX dyndep file CMakeFiles/csl_sets.dir/CXX.dd
+[5/73] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/model/discretization/rk4.cpp for CXX dependencies
+[6/73] Generating CXX dyndep file CMakeFiles/csl_model.dir/CXX.dd
+[7/70] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/problem/domains.cpp for CXX dependencies
+[8/70] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/problem/constraints.cpp for CXX dependencies
+[9/70] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/problem/initial_information.cpp for CXX dependencies
+[10/70] Building CXX object CMakeFiles/csl_model.dir/src/model/discretization/rk4.cpp.o
+[11/70] Generating CXX dyndep file CMakeFiles/csl_problem.dir/CXX.dd
+[12/70] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/problem/identity.cpp for CXX dependencies
+[13/70] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/problem/resolved.cpp for CXX dependencies
+[14/70] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/registry/compiled_verifiers.cpp for CXX dependencies
+[15/70] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/registry/nominal_linear_exact_verifier.cpp for CXX dependencies
+[16/70] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/registry/b04_c_exact_verifier.cpp for CXX dependencies
+[17/70] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/synthesis/b04_c_exact_family.cpp for CXX dependencies
+[18/70] Linking CXX static library libcsl_model.a
+[19/70] Building CXX object CMakeFiles/csl_problem.dir/src/problem/domains.cpp.o
+[20/70] Building CXX object CMakeFiles/csl_problem.dir/src/problem/constraints.cpp.o
+[21/70] Building CXX object CMakeFiles/csl_problem.dir/src/problem/initial_information.cpp.o
+[22/70] Generating CXX dyndep file CMakeFiles/csl_resolved_core.dir/CXX.dd
+[23/70] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/registry/registry.cpp for CXX dependencies
+[24/70] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/registry/strategy_catalogue.cpp for CXX dependencies
+[25/70] Generating CXX dyndep file CMakeFiles/csl_verifiers.dir/CXX.dd
+[26/70] Linking CXX static library libcsl_problem.a
+[27/70] Building CXX object CMakeFiles/csl_resolved_core.dir/src/problem/identity.cpp.o
+[28/70] Building CXX object CMakeFiles/csl_resolved_core.dir/src/problem/resolved.cpp.o
+[29/70] Generating CXX dyndep file CMakeFiles/csl_registry.dir/CXX.dd
+[30/70] Building CXX object CMakeFiles/csl_verifiers.dir/src/registry/compiled_verifiers.cpp.o
+[31/70] Building CXX object CMakeFiles/csl_verifiers.dir/src/registry/nominal_linear_exact_verifier.cpp.o
+[32/70] Building CXX object CMakeFiles/csl_verifiers.dir/src/registry/b04_c_exact_verifier.cpp.o
+[33/70] Building CXX object CMakeFiles/csl_verifiers.dir/src/synthesis/b04_c_exact_family.cpp.o
+[34/70] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/hull/quickhull_2d.cpp for CXX dependencies
+[35/70] Generating CXX dyndep file CMakeFiles/csl_geometry_generators.dir/CXX.dd
+[36/68] Linking CXX static library libcsl_resolved_core.a
+[37/68] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/problem/validator.cpp for CXX dependencies
+[38/68] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/problem/temporal_lifts.cpp for CXX dependencies
+[39/68] Building CXX object CMakeFiles/csl_registry.dir/src/registry/registry.cpp.o
+[40/68] Building CXX object CMakeFiles/csl_registry.dir/src/registry/strategy_catalogue.cpp.o
+[41/68] Linking CXX static library libcsl_verifiers.a
+[42/68] Generating CXX dyndep file CMakeFiles/csl_model_catalogue.dir/CXX.dd
+[43/65] Generating CXX dyndep file CMakeFiles/csl_quickhull_2d.dir/CXX.dd
+[44/65] Generating CXX dyndep file CMakeFiles/csl_resolved_problem.dir/CXX.dd
+[45/65] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/tests/unit/model/flexible_pitch_slew_tests.cpp for CXX dependencies
+[46/65] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/examples/native_flexible_pitch.cpp for CXX dependencies
+[47/65] Linking CXX static library libcsl_registry.a
+[48/65] Building CXX object CMakeFiles/csl_quickhull_2d.dir/src/geometry/hull/quickhull_2d.cpp.o
+[49/65] Building CXX object CMakeFiles/csl_resolved_problem.dir/src/problem/validator.cpp.o
+[50/65] Building CXX object CMakeFiles/csl_resolved_problem.dir/src/problem/temporal_lifts.cpp.o
+[51/65] Generating CXX dyndep file CMakeFiles/flexible_pitch_tests.dir/CXX.dd
+[52/64] Generating CXX dyndep file CMakeFiles/continuous_discretization_tests.dir/CXX.dd
+[53/63] Generating CXX dyndep file CMakeFiles/flexible_pitch_slew_tests.dir/CXX.dd
+[54/63] Generating CXX dyndep file CMakeFiles/flexible_pitch_reference.dir/CXX.dd
+[55/63] Linking CXX static library libcsl_quickhull_2d.a
+[56/63] Linking CXX static library libcsl_resolved_problem.a
+[57/63] Building CXX object CMakeFiles/flexible_pitch_slew_tests.dir/tests/unit/model/flexible_pitch_slew_tests.cpp.o
+[58/63] Building CXX object CMakeFiles/flexible_pitch_reference.dir/examples/native_flexible_pitch.cpp.o
+[59/63] Linking CXX executable flexible_pitch_tests
+[60/63] Linking CXX executable continuous_discretization_tests
+[61/63] Linking CXX executable flexible_pitch_slew_tests
+[62/63] Linking CXX executable flexible_pitch_reference
+[doctest] doctest version is "2.4.11"
+[doctest] run with "--help" for options
+===============================================================================
+[doctest] test cases:  11 |  11 passed | 0 failed | 0 skipped
+[doctest] assertions: 164 | 164 passed | 0 failed |
+[doctest] Status: SUCCESS!
+[doctest] doctest version is "2.4.11"
+[doctest] run with "--help" for options
+===============================================================================
+[doctest] test cases:     4 |     4 passed | 0 failed | 0 skipped
+[doctest] assertions: 20271 | 20271 passed | 0 failed |
+[doctest] Status: SUCCESS!
+[doctest] doctest version is "2.4.11"
+[doctest] run with "--help" for options
+===============================================================================
+[doctest] test cases:    1 |    1 passed | 0 failed | 0 skipped
+[doctest] assertions: 2469 | 2469 passed | 0 failed |
+[doctest] Status: SUCCESS!
+Native flexible pitch: 3 synthetic physical models; support_checks=4920 projection_checks=47232 maximum_absolute_support_difference=1.07666e-11; independent amplitude inputs, no stabilization objective
