@@ -660,6 +660,17 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("GCC 16.2.1", reproduction_html)
         self.assertNotIn("/home/butahlecoq/", reproduction_html)
         gallery_html = (self.site / "examples/index.html").read_text(encoding="utf-8")
+        volterra_page = self.site / "examples/buryatia-volterra-affine-2d.html"
+        self.assertEqual(volterra_page.read_bytes(),
+                         (ROOT / "docs/examples/buryatia-volterra-affine-2d.html").read_bytes())
+        for name in gallery.stage_buryatia_volterra.asset_paths():
+            self.assertEqual((self.site / "examples" / name).read_bytes(),
+                             (ROOT / "docs/examples" / name).read_bytes())
+        volterra_inventory = json.loads((self.site / "examples/visual-coverage.json").read_text())
+        volterra_entry = next(entry for entry in volterra_inventory["entries"]
+                              if entry.get("anchor") == "buryatia-volterra-affine-2d")
+        self.assertEqual(volterra_entry["page"], "buryatia-volterra-affine-2d.html")
+        self.assertIn('href="buryatia-volterra-affine-2d.html"', gallery_html)
         dim4_route = self.site / "examples/buryatia-dim4-literal-affine-v1"
         dim4_page = dim4_route / "index.html"
         dim4_raw = dim4_route / "buryatia-dim4-literal-affine-v1-records.json"
@@ -813,7 +824,7 @@ class GalleryTests(unittest.TestCase):
             if not urlsplit(link).scheme and not link.startswith("#"):
                 self.assertTrue((self.site / "examples" / link.split("#")[0]).is_file(), link)
         figures = list((self.site / "examples").glob("*.svg"))
-        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 28)
+        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 30)
         self.assertIn('id="saved-feedback-geometry-2d"', page)
         self.assertIn('id="native-fixed-tail-2d"', page)
         self.assertTrue((self.site / "examples/native-fixed-tail-2d.html").is_file())
@@ -825,6 +836,10 @@ class GalleryTests(unittest.TestCase):
         self.assertIn('id="source-index-geometry-2d"', page)
         self.assertTrue((self.site / "examples/source-index-geometry-2d-records.json").is_file())
         for figure in figures:
+            if figure.name in {"buryatia-volterra-affine-2d-terminal.svg",
+                               "buryatia-volterra-affine-2d-terminal-superseded-v1.svg"}:
+                self.assertEqual(figure.read_bytes(), (ROOT / "docs/examples" / figure.name).read_bytes())
+                continue
             if figure.name == "fuel-b06-viz06-before.svg":
                 self.assertEqual(hashlib.sha256(figure.read_bytes()).hexdigest(),
                                  "ac5997b750ef20fb80c90b46549a1110cf10f7ff37bbb5f9d72ab1cc44461f20")

@@ -6,7 +6,9 @@ from __future__ import annotations
 import argparse
 import copy
 import hashlib
+import importlib
 import json
+import sys
 import tempfile
 from pathlib import Path
 
@@ -61,6 +63,122 @@ def collected_strings(value: object) -> set[str]:
         for nested in value:
             found.update(collected_strings(nested))
     return found
+
+
+def check_current_factory_rows(rows: list[dict], root: Path) -> None:
+    """Bind emitted factory rows to validated manifests and immutable task inputs."""
+    closed_loop = root / "benchmarks/reporting/closed_loop"
+    if str(closed_loop) not in sys.path:
+        sys.path.insert(0, str(closed_loop))
+    from capabilities import validate_manifest
+    from task_models import validate_source_binding
+
+    from contracts import load_task, manifest_sha256
+
+    sources = (
+        (
+            root / "docs/catalogue/closed-loop-native-capabilities-v1.json",
+            "source-bound-native-finite-action-profiles/1",
+        ),
+        (
+            root / "docs/catalogue/closed-loop-history-capabilities-v1.json",
+            "source-bound-continuous-history-profiles/1",
+        ),
+    )
+    factories = {
+        "native_graph_policy": "native_graph_policy:create_policy",
+        "continuous_history": "history_policy:create_policy",
+        "native_fixed_tail": "native_fixed_tail_policy:create_policy",
+    }
+    expected: dict[str, tuple[dict, dict, Path]] = {}
+    for path, manifest_id in sources:
+        manifest = validate_manifest(manifest_path=path)
+        assert manifest["manifest_id"] == manifest_id
+        for graph in manifest["graphs"]:
+            assert graph["graph_id"] not in expected
+            expected[graph["graph_id"]] = (manifest, graph, path)
+
+    assert len(expected) == 65
+    assert {row["graph_id"] for row in rows} == set(expected)
+    assert len({row["graph_id"] for row in rows}) == len(rows)
+    assert len({row["graph_fingerprint"] for row in rows}) == len(rows)
+
+    for row in rows:
+        graph_id = row["graph_id"]
+        manifest, graph, manifest_path = expected[graph_id]
+        controller = graph["controller"]
+        adapter = controller["adapter"]
+        assert adapter in factories
+        expected_factory = factories[adapter]
+        assert controller["policy_factory"] == expected_factory
+        module_name, factory_name = expected_factory.split(":")
+        assert callable(getattr(importlib.import_module(module_name), factory_name, None))
+
+        task_name = graph["task_id"].split("/")[0]
+        if not task_name.startswith("syn-"):
+            task_name = "earth-orbit"
+        task = load_task(task_name)
+        validate_source_binding(task)
+        task_digest = manifest_sha256(task)
+        domain_kind = "finite" if adapter == "native_graph_policy" else "continuous"
+        action_profile_id = task["control_domains"][domain_kind]["problem_id"]
+        assert graph["task_id"] == task["task_id"]
+        assert graph["task_sha256"] == task_digest
+        assert graph["model_id"] == task["model"]["model_id"]
+        assert graph["objective_id"] == task["objective"]["objective_id"]
+        assert graph["action_profile_id"] == action_profile_id
+
+        graph_without_identity = {
+            key: value
+            for key, value in graph.items()
+            if key not in {"graph_id", "graph_fingerprint"}
+        }
+        graph_fingerprint = hashlib.sha256(
+            json.dumps(graph_without_identity, sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest()
+        assert graph["graph_fingerprint"] == graph_fingerprint
+        assert graph_id.endswith(f"cfg-{graph_fingerprint[:16]}")
+
+        expected_semantics = {
+            "observation": task["episode"]["closed_loop"]["observation"],
+            "apply": task["episode"]["closed_loop"]["apply"],
+            "horizon": task["episode"]["closed_loop"]["optimization_horizon"],
+            "failure": task["episode"]["closed_loop"]["failure"],
+        }
+        expected_catalogue_source = {
+            "manifest_id": manifest["manifest_id"],
+            "manifest_path": str(manifest_path.relative_to(root)),
+            "manifest_sha256": hashlib.sha256(manifest_path.read_bytes()).hexdigest(),
+            "declared_admission": graph["admission"],
+            "factory_registration": "registered",
+            "runtime_preparation": "not_attempted",
+            "runtime_binary": "not_inspected",
+        }
+        assert row["status"] == "preparation_not_attempted"
+        assert row["task_id"] == graph["task_id"]
+        assert row["task_contract_sha256"] == task_digest
+        assert row["model_id"] == graph["model_id"]
+        assert row["model_dimension"] == len(task["model"]["states"])
+        assert row["control_dimension"] == len(task["model"]["controls"])
+        assert row["objective_id"] == graph["objective_id"]
+        assert row["action_profile_id"] == action_profile_id
+        assert row["action_domain_id"] == action_profile_id
+        assert row["action_domain_kind"] == domain_kind
+        assert row["controller_route"] == adapter
+        assert row["controller_id"] == controller["id"]
+        assert row["controller_factory"] == expected_factory
+        assert row["factory_options"] == controller.get("factory_options", {})
+        assert row["module_tuple"] == {
+            "controller": controller,
+            "role_bindings": graph.get("role_bindings", {}),
+            "operation_roles": graph.get("operation_roles", {}),
+        }
+        assert row["source_owned_graph"] == graph
+        assert row["source_files"] == graph["source_files"]
+        assert row["policy_semantics"] == expected_semantics
+        assert row["catalogue_source"] == expected_catalogue_source
+        assert row["graph_fingerprint"] == graph_fingerprint
+        assert row["first_unmet"] is None
 
 
 def task_binding_negative_checks(root: Path) -> None:
@@ -129,12 +247,61 @@ def main() -> int:
         data = json.loads((root / f"docs/contracts/closed-loop/{name}.json").read_text())
         contracts[data["task_id"]] = data
     assert set(contracts) == EXPECTED_TASKS
+    native_tool = output["native_component_tool"]
+    assert len(native_tool["binary_sha256"]) == 64
+    assert len(native_tool["source_commit"]) == 40
+    assert len(native_tool["current_source_commit"]) == 40
+    assert native_tool["source_matches_catalogue_commit"] == (
+        native_tool["source_commit"] == native_tool["current_source_commit"]
+    )
+    assert (
+        native_tool["compiled_backends"] == output["native_component_evidence"]["compiled_backends"]
+    )
 
-    controllers = output["closed_loop_controller_candidates"]
+    all_controllers = output["closed_loop_controller_candidates"]
+    current_factory_rows = [row for row in all_controllers if "catalogue_source" in row]
+    controllers = [row for row in all_controllers if "catalogue_source" not in row]
+    assert len(all_controllers) == 3383
     assert len(controllers) == 3318
+    assert len(current_factory_rows) == 65
     assert {row["controller_route"] for row in controllers} == EXPECTED_ROUTES
-    assert len({row["graph_id"] for row in controllers}) == len(controllers)
-    assert len({row["graph_fingerprint"] for row in controllers}) == len(controllers)
+    assert len({row["graph_id"] for row in all_controllers}) == len(all_controllers)
+    assert len({row["graph_fingerprint"] for row in all_controllers}) == len(all_controllers)
+    assert {row["controller_route"] for row in current_factory_rows} == {
+        "native_graph_policy",
+        "continuous_history",
+        "native_fixed_tail",
+    }
+    assert (
+        sum(row["controller_route"] == "native_graph_policy" for row in current_factory_rows) == 30
+    )
+    assert (
+        sum(row["controller_route"] == "continuous_history" for row in current_factory_rows) == 20
+    )
+    assert sum(row["controller_route"] == "native_fixed_tail" for row in current_factory_rows) == 15
+    check_current_factory_rows(current_factory_rows, root)
+    assert all(
+        row["status"] == "preparation_not_attempted"
+        and row["catalogue_source"]["declared_admission"]["status"] == "admitted"
+        and row["catalogue_source"]["runtime_preparation"] == "not_attempted"
+        and row["catalogue_source"]["factory_registration"] == "registered"
+        and row["catalogue_source"]["runtime_binary"] == "not_inspected"
+        and row["objective_id"]
+        and row["action_profile_id"]
+        and row["controller_factory"]
+        for row in current_factory_rows
+    )
+    current_identities = {
+        (
+            row["task_id"],
+            row["action_profile_id"],
+            row["objective_id"],
+            row["controller_id"],
+            json.dumps(row["module_tuple"], sort_keys=True),
+        )
+        for row in current_factory_rows
+    }
+    assert len(current_identities) == 65
     for row in controllers:
         contract = contracts[row["task_id"]]
         assert row["task_contract_sha256"]
@@ -511,7 +678,7 @@ def main() -> int:
         else "2 source-bound external prepares"
     )
     print(
-        f"full finite catalogue passed: 3,318 controller tuples, 45 predecessor/representation/terminal-LP tuples, 24 full-task legacy/QuickHull choices, {mpc11_count}"
+        f"full finite catalogue passed: 3,318 historical controller tuples plus 65 source-bound factory identities (runtime preparation not attempted), 45 predecessor/representation/terminal-LP tuples, 24 full-task legacy/QuickHull choices, {mpc11_count}"
     )
     return 0
 

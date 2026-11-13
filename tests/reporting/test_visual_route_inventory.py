@@ -320,6 +320,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "buryatia-dim4-literal-affine-v1/buryatia-dim4-literal-affine-v1-SHA256SUMS",
             "buryatia-dim4-literal-affine-v1/buryatia-dim4-matlab-literal-affine-v1.json",
             "buryatia-dim4-literal-affine-v1/terminal-x1-x2.svg",
+            *audit_visual_routes.stage_buryatia_volterra.asset_paths(),
             *audit_visual_routes.geometry_companion_assets(),
             *audit_visual_routes.viz10_companion_assets(),
             *audit_visual_routes.control_witness_companions.asset_paths()})
