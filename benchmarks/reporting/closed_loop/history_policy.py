@@ -137,7 +137,7 @@ class HistoryPolicy:
         receipt = prediction_receipt(task)
         executable = Path(os.environ["CSL_NATIVE_POLICY_BRIDGE"]).resolve(strict=True)
         self.process = subprocess.Popen([str(executable)], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                        stderr=subprocess.PIPE, text=True, bufsize=1)
+                                        stderr=None, text=True, bufsize=1)
         self.task, self.task_sha256, self.controller_id = task, task_sha256, controller_id
         self.action_profile_id = action_profile_id
         self.receipt = receipt
@@ -147,6 +147,7 @@ class HistoryPolicy:
         self.preparation_receipt = {"executable": str(executable),
             "executable_sha256": hashlib.sha256(executable.read_bytes()).hexdigest(),
             "binary_source": "unknown",
+            "native_stderr": "inherited supervised worker stderr; shared across native queries, not isolated per call",
             "action_profile_id": action_profile_id, "original_horizon": task["episode"]["intervals"],
             "geometry": self.geometry_family or "not_used", "history_solver": self.history_solver,
             "controller_semantics": ("observed-state affine-history MPC with F/B/I family memberships"
