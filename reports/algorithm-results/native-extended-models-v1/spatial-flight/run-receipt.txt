@@ -1,0 +1,21 @@
+case=spatial-flight/b-consistent-body9-synthetic/1
+source_sha256=68fc05d895d5c5c347ced535ea455c767ce0c789f3a2b90c1416cbcd37d1f1af
+source_qualification=Corrected B-consistent nine-state rigid-body equations with fully authored synthetic parameters, Y-up gravity, controls, reference and perturbation sets. Catalogue dynamics propagate zero-centered linear deviations x-x_ref with perturbation controls u-u_ref; the nonlinear reference is available from SpatialFlightCase. Zero-based controls u0,u1,u2: u0 enters moments only; u1 and u2 also enter Cy/Cz. Not a historical numerical reproduction or calibrated aircraft.
+physical_state_order=vx,vy,vz,phi,psi,theta,omega_x,omega_y,omega_z
+reachability_state_order=delta_vx,delta_vy,delta_vz,delta_phi,delta_psi,delta_theta,delta_omega_x,delta_omega_y,delta_omega_z
+control_order=u0,u1,u2
+reachability_control_order=delta_u0,delta_u1,delta_u2
+control_allocation=zero_based_u0_moments_only;u1_u2_also_Cy_Cz
+
+nominal_control=0.003,-0.002,0.002
+initial_state=100,0,0,0,0,0,0,0,0
+
+reference_method=classical RK4; fixed 0.005 s steps; domain checked at every RHS evaluation
+reference_intervals=20
+reference_substeps_per_interval=10
+reference_rhs_evaluations=800
+linear_discretizer=rk4_step_doubling
+linear_discretizer_abs_tolerance=1e-10
+linear_discretizer_rel_tolerance=1e-10
+linear_discretizer_error_scope=Observed RK4 step-doubling local difference divided by 15; not a certified global error bound
+reachability_scope=linearized deviation model; not a nonlinear enclosure or Euler-domain certificate
