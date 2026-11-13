@@ -14,8 +14,12 @@ from typing import Any
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "benchmarks/reporting/closed_loop"))
 from attempt_records import iter_stage_references, read_attempt, verify_v2_attempt
-from figure_style import STYLE_ID, configure_numeric_axis
-from mathematical_notation import matrix_html
+if __package__:
+    from .figure_style import STYLE_ID, configure_numeric_axis
+    from .mathematical_notation import matrix_html
+else:
+    from figure_style import STYLE_ID, configure_numeric_axis
+    from mathematical_notation import matrix_html
 
 
 SCHEMA = "csl.closed-loop.figure-index/1"
