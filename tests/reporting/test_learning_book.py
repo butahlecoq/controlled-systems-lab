@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 from html.parser import HTMLParser
 import json
 from pathlib import Path
@@ -199,6 +200,10 @@ class LearningBookTests(unittest.TestCase):
                 self.assertIn('<table>', html)
             self.assertIn('<details class="lesson-input-details">', html)
             self.assertNotIn('<h3>Input</h3><pre', html)
+            if chapter_id == "representation-consumers":
+                preservation = json.loads((ROOT / "reports/published-route-preservation/manifest.json").read_text())
+                self.assertEqual(hashlib.sha256(html.encode()).hexdigest(),
+                                 preservation["mutable_copy_reviewed_sha256"]["learn/representation-consumers.html"])
 
         terminal = by_id["terminal-optimization"]
         self.assertIn("{(x,y)=(s,1−s) : 0≤s≤1}", terminal["mathematical_conclusion"])

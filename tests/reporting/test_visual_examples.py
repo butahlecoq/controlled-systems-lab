@@ -335,6 +335,9 @@ class GalleryTests(unittest.TestCase):
                      for report_id, *_ in control_witness_companions.PROJECTIONS}
         result = control_witness_companions.build(self.site, self.catalog)
         mathematical_page = result.files["control-witness-v1.html"].decode()
+        preservation = json.loads((ROOT / "reports/published-route-preservation/manifest.json").read_text())
+        self.assertEqual(hashlib.sha256(result.files["control-witness-v1.html"]).hexdigest(),
+                         preservation["mutable_copy_reviewed_sha256"]["examples/control-witness-v1.html"])
         self.assertNotIn("saved projection vertex</td>", mathematical_page)
         self.assertNotIn("[[-1, -2]]", mathematical_page)
         self.assertIn("Feedback matrix K, 1 by 2", mathematical_page)
