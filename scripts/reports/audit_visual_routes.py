@@ -9,6 +9,7 @@ from pathlib import Path
 import re
 
 import control_witness_companions
+import stage_buryatia_volterra
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -79,9 +80,12 @@ PUBLICATION_EXPORT_ROUTES = {
     "scripts/reports/augment_pages_bundle.py",
     "scripts/reports/stage_mpc11_mesh_timing.py",
     "scripts/reports/stage_buryatia_dim4.py",
+    "scripts/reports/stage_buryatia_volterra.py",
     "benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/figures.py",
 }
 VIZ10_ROLE_REASONS = {
+    "scripts/reports/stage_buryatia_volterra.py":
+        "Authenticates the frozen v2 manifest and native 35a708df producer identity, then copies all current and superseded two-state affine lesson assets byte exactly into the Pages gallery; no numerical execution or historical relabelling.",
     "scripts/reports/stage_buryatia_dim4.py":
         "Authenticates the source-bound four-state affine capture and copies its raw record, model manifest, lesson and derived terminal projection into the Pages gallery; no native propagation or numerical analysis runs during staging.",
     "scripts/reports/stage_b04_source_moments.py":
@@ -501,7 +505,7 @@ def build(root: Path = ROOT) -> dict:
                     "buryatia-dim4-literal-affine-v1/buryatia-dim4-box-trace-correction-v1.json",
                     "buryatia-dim4-literal-affine-v1/buryatia-dim4-literal-affine-v1-SHA256SUMS",
                     "buryatia-dim4-literal-affine-v1/buryatia-dim4-matlab-literal-affine-v1.json",
-                    "buryatia-dim4-literal-affine-v1/terminal-x1-x2.svg"] + geometry_companion_assets() +
+                    "buryatia-dim4-literal-affine-v1/terminal-x1-x2.svg"] + stage_buryatia_volterra.asset_paths() + geometry_companion_assets() +
                     viz10_companion_assets() + control_witness_companions.asset_paths(),
                  "disposition": "adopted-shared-quantitative-policy"}],
             "migration_owner": "#669 owns the shared policy; deferred family renderers link to scoped follow-up issues #684–#687, while frozen report bundles remain immutable evidence"}
