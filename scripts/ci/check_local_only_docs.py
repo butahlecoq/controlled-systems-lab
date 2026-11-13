@@ -79,6 +79,7 @@ FUNCTIONAL_DOC_EXACT_ASSETS = {
     "docs/research/syn04-strategy-b-ts03-control-projection.svg",
     "docs/research/verification.json",
     "docs/research/works-selected-sources.json",
+    "docs/examples/buryatia-dim4-literal-affine-v1-SHA256SUMS",
     "scripts/reports/geo07_dependent/review-seal.json",
     "scripts/reports/geo07_port/review-seal.json",
 }

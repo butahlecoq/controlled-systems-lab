@@ -1408,6 +1408,15 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_buryatia_dim4.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "terminal-x1-x2.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route",
+      "role_and_disposition_reason": "Authenticates the source-bound four-state affine capture and copies its raw record, model manifest, lesson and derived terminal projection into the Pages gallery; no native propagation or numerical analysis runs during staging."
+    },
+    {
       "source": "scripts/reports/stage_env717.py",
       "signal_count": 3,
       "asset_name_literals": [
@@ -4168,6 +4177,13 @@
         "adaptive-ode-replay.csv",
         "adaptive-ode-replay.svg",
         "adaptive-ode-replay.json",
+        "buryatia-dim4-literal-affine-v1/index.html",
+        "buryatia-dim4-literal-affine-v1/buryatia-dim4-literal-affine-v1-records.json",
+        "buryatia-dim4-literal-affine-v1/buryatia-dim4-literal-affine-v1-capture.json",
+        "buryatia-dim4-literal-affine-v1/buryatia-dim4-box-trace-correction-v1.json",
+        "buryatia-dim4-literal-affine-v1/buryatia-dim4-literal-affine-v1-SHA256SUMS",
+        "buryatia-dim4-literal-affine-v1/buryatia-dim4-matlab-literal-affine-v1.json",
+        "buryatia-dim4-literal-affine-v1/terminal-x1-x2.svg",
         "geometry-optimization-v1.html",
         "geometry-opt/geo02/figure.svg",
         "geometry-opt/geo02/figure.png",

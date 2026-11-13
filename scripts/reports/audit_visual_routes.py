@@ -77,9 +77,12 @@ PUBLICATION_EXPORT_ROUTES = {
     "scripts/reports/exp824/finalize_limited_report.py",
     "scripts/reports/augment_pages_bundle.py",
     "scripts/reports/stage_mpc11_mesh_timing.py",
+    "scripts/reports/stage_buryatia_dim4.py",
     "benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/figures.py",
 }
 VIZ10_ROLE_REASONS = {
+    "scripts/reports/stage_buryatia_dim4.py":
+        "Authenticates the source-bound four-state affine capture and copies its raw record, model manifest, lesson and derived terminal projection into the Pages gallery; no native propagation or numerical analysis runs during staging.",
     "scripts/reports/stage_b04_source_moments.py":
         "Verifies exact source-candidate moment and all-stage set certificates, then copies source-bound saved physical-plane figures; no original program, optimization or rendering runs during staging.",
     "scripts/reports/b04_source_moments/figures.py":
@@ -486,7 +489,14 @@ def build(root: Path = ROOT) -> dict:
                     "mpc03-b08-l04-miQCP-v1/solver-output.json",
                     "mpc03-b08-l04-miQCP-v1/independent-oracle.json",
                     "mpc03-b08-l04-miQCP-v1/disturbance-tube.svg", "adaptive-ode-replay.html",
-                    "adaptive-ode-replay.csv", "adaptive-ode-replay.svg", "adaptive-ode-replay.json"] + geometry_companion_assets() +
+                    "adaptive-ode-replay.csv", "adaptive-ode-replay.svg", "adaptive-ode-replay.json",
+                    "buryatia-dim4-literal-affine-v1/index.html",
+                    "buryatia-dim4-literal-affine-v1/buryatia-dim4-literal-affine-v1-records.json",
+                    "buryatia-dim4-literal-affine-v1/buryatia-dim4-literal-affine-v1-capture.json",
+                    "buryatia-dim4-literal-affine-v1/buryatia-dim4-box-trace-correction-v1.json",
+                    "buryatia-dim4-literal-affine-v1/buryatia-dim4-literal-affine-v1-SHA256SUMS",
+                    "buryatia-dim4-literal-affine-v1/buryatia-dim4-matlab-literal-affine-v1.json",
+                    "buryatia-dim4-literal-affine-v1/terminal-x1-x2.svg"] + geometry_companion_assets() +
                     viz10_companion_assets() + control_witness_companions.asset_paths(),
                  "disposition": "adopted-shared-quantitative-policy"}],
             "migration_owner": "#669 owns the shared policy; deferred family renderers link to scoped follow-up issues #684–#687, while frozen report bundles remain immutable evidence"}
