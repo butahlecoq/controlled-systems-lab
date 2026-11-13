@@ -12,7 +12,7 @@ from stage_native_model_catalogue import _file
 
 ROUTE = 'native-discrete-models-v1'
 SOURCE = '856d7a77c49fca0c6f6cdb8c1a1db9a651da85cb'
-MANIFEST_SHA256 = 'e8cf34800946d1a5dade51a49a123ba822cf91c6b5880b56d186e8e71e978f2d'
+MANIFEST_SHA256 = '9d0cdfc6853cab2ada99c311fdfa455ebd2d040300cb0d7d5b37288f6990ca6f'
 PAGES = ('native-discrete-models.html', 'native-quadcopter-mpc.html')
 
 
