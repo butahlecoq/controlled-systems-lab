@@ -1,4 +1,4 @@
-name: C++ core, nominal reachability and numeric data tooling quality
+name: C++ core, nominal reachability, numeric and set data tooling quality
 
 on:
   pull_request:
@@ -10,6 +10,11 @@ on:
       - 'src/numeric/data.cpp'
       - 'src/numeric/Module.cmake'
       - 'src/numeric/Tests.cmake'
+      - 'include/csl/sets/contracts.hpp'
+      - 'include/csl/sets/data.hpp'
+      - 'src/sets/data.cpp'
+      - 'src/sets/Module.cmake'
+      - 'src/sets/Tests.cmake'
       - 'include/csl/reachability/nominal_forward.hpp'
       - 'include/csl/reachability/nominal_predecessor.hpp'
       - 'include/csl/reachability/nominal_tube.hpp'
@@ -37,6 +42,11 @@ on:
       - 'src/numeric/data.cpp'
       - 'src/numeric/Module.cmake'
       - 'src/numeric/Tests.cmake'
+      - 'include/csl/sets/contracts.hpp'
+      - 'include/csl/sets/data.hpp'
+      - 'src/sets/data.cpp'
+      - 'src/sets/Module.cmake'
+      - 'src/sets/Tests.cmake'
       - 'include/csl/reachability/nominal_forward.hpp'
       - 'include/csl/reachability/nominal_predecessor.hpp'
       - 'include/csl/reachability/nominal_tube.hpp'
@@ -71,7 +81,7 @@ jobs:
           python-version: '3.12'
       - name: Install pinned development tools
         run: python -m pip install --disable-pip-version-check -r requirements-cpp-quality.txt
-      - name: Check core, nominal reachability and numeric data formatting
+      - name: Check core, nominal reachability, numeric and set data formatting
         run: cmake -DCSL_CPP_QUALITY_MODE=format -P scripts/ci/check_cpp_core.cmake
       - name: Configure real C++20 compilation contexts
         run: >-
@@ -84,11 +94,12 @@ jobs:
           --target csl_contracts csl_core_header_checks csl_nominal_header_checks
           csl_nominal_forward csl_nominal_tube csl_polyhedral
           csl_numeric header_numeric_data_hpp numeric_tests numeric_buffer_views_tests
+          csl_sets header_sets_contracts_hpp header_sets_data_hpp sets_tests sets_public_client
           public_headers_client public_headers_lp_first_client
           contract_tests public_client projection_predecessor_tests projection_predecessor_public_client
       - name: Analyze selected public headers and implementations
         run: cmake -DCSL_CPP_QUALITY_MODE=tidy -P scripts/ci/check_cpp_core.cmake
-      - name: Exercise existing core, predecessor and numeric behavior
+      - name: Exercise existing core, predecessor, numeric and set behavior
         run: >-
           ctest --test-dir build/cpp-quality --output-on-failure
-          -R '^(contract_tests|public_client|projection_predecessor_tests|projection_predecessor_public_client|numeric_tests|numeric_buffer_views_tests|public_headers_client|public_headers_lp_first_client|numeric_dependency_direction)$'
+          -R '^(contract_tests|public_client|projection_predecessor_tests|projection_predecessor_public_client|numeric_tests|numeric_buffer_views_tests|public_headers_client|public_headers_lp_first_client|numeric_dependency_direction|sets_tests|sets_public_client)$'
