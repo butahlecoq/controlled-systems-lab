@@ -165,7 +165,10 @@
       const print=$('print-figures');print.replaceChildren();
       task.planes.forEach((p,i)=>{const f=document.createElement('figure'),image=document.createElement('img'),caption=document.createElement('figcaption');image.src=`${task.id}-plane-${i}.svg`;image.alt=task.title+' all-stage matched-family conditional regions and execution';caption.textContent=p.labels.join(' / ');f.append(image,caption);print.append(f);});
       downloads();domain=null;draw();
-    } catch(error) {$('status').textContent=error.message+' — open this page through the reproduction HTTP server.';}
+    } catch(error) {
+      if(token!==request)return;
+      $('status').textContent=error.message+' — open this page through the reproduction HTTP server.';
+    }
   }
   families.forEach((f,i)=>{const label=document.createElement('label'),input=document.createElement('input'),swatch=document.createElement('span');input.type='checkbox';input.value=f;input.checked=true;swatch.className='swatch';swatch.style.background=colors[i];label.append(input,swatch,document.createTextNode(f));$('family-controls').append(label);});
   $('task-choice').addEventListener('change',selectTask);
