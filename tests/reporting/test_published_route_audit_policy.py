@@ -116,6 +116,17 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
             "learn/controller-composition.html",
             "learn/set-operations.html",
         )
+        manifest = json.loads((preservation.SOURCE / "manifest.json").read_text())
+        provenance = json.loads((fixture / "source.json").read_text())
+        self.assertEqual(provenance["schema"], "csl.published-route-baseline-fixture/1")
+        self.assertEqual(provenance["baseline"], manifest["baseline"])
+        self.assertEqual(set(provenance["routes_sha256"]), set(routes))
+        for route in routes:
+            self.assertEqual(
+                preservation.digest((fixture / route).read_bytes()),
+                provenance["routes_sha256"][route],
+                route,
+            )
         with tempfile.TemporaryDirectory() as directory:
             temporary = Path(directory)
             site = temporary / "site"
@@ -134,7 +145,6 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
                 site,
                 figure_index_path=root / "docs/examples/closed-loop/figure-index.json",
             )
-            manifest = json.loads((preservation.SOURCE / "manifest.json").read_text())
             manifest["baseline"]["artifact_tar_sha256"] = preservation.digest(baseline.read_bytes())
             self.assertEqual(
                 {
