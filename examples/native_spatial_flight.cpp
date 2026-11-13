@@ -215,7 +215,7 @@ int main(int argc,char** argv) try {
                 generators<<k<<",generator,"<<set.factor_ids()[j].value<<','<<i<<','
                     <<set.generators().values[i*set.generators().cols+j]<<'\n';
     }
-    for (const auto [first,second]:planes()) {
+    for (const auto& [first,second]:planes()) {
         CapturedCase capture{reach.info,{},{{{first,second},{first,second}}},true};
         capture.stages.reserve(reachable.size());
         for (std::size_t k=0;k<reachable.size();++k) {
