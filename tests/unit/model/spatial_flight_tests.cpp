@@ -108,6 +108,11 @@ TEST_CASE("B-consistent passive attitude matrix satisfies the nonzero-angle rate
     for (const std::array<double,3> angles : {std::array{0.23,-0.17,0.31},std::array{-0.35,0.28,-0.4}}) {
         const std::array<double,3> rate{0.03,-0.04,0.05};
         const auto b=body_from_inertial(angles[0],angles[1],angles[2]);
+        const double determinant=b.values[0]*(b.values[4]*b.values[8]-b.values[5]*b.values[7])
+            -b.values[1]*(b.values[3]*b.values[8]-b.values[5]*b.values[6])
+            +b.values[2]*(b.values[3]*b.values[7]-b.values[4]*b.values[6]);
+        CHECK(determinant == doctest::Approx(1).epsilon(1e-14));
+        CHECK(determinant > 0);
         double orthogonality=0;
         for (std::size_t i=0;i<3;++i) for (std::size_t j=0;j<3;++j) {
             double product=0;
@@ -137,6 +142,23 @@ TEST_CASE("B-consistent passive attitude matrix satisfies the nonzero-angle rate
         };
         CHECK(residual(omega_x,omega_y,omega_z) < 1e-10);
         CHECK(residual(omega_printed_x,omega_printed_y,omega_printed_z) > 1e-3);
+
+        const auto model=std::get<Model>(Model::make(synthetic_parameters()));
+        double inverse_map[3][3]{};
+        for (std::size_t column=0;column<3;++column) {
+            std::array<double,3> omega{};
+            omega[column]=1;
+            const State state{100,0,0,angles[0],angles[1],angles[2],omega[0],omega[1],omega[2]};
+            const auto rates=std::get<State>(model.rhs(state,{0,0,0}));
+            const double euler_rate[]{rates.phi,rates.psi,rates.theta};
+            for (std::size_t row=0;row<3;++row) inverse_map[row][column]=euler_rate[row];
+        }
+        const double inverse_rate_determinant=
+            inverse_map[0][0]*(inverse_map[1][1]*inverse_map[2][2]-inverse_map[1][2]*inverse_map[2][1])
+            -inverse_map[0][1]*(inverse_map[1][0]*inverse_map[2][2]-inverse_map[1][2]*inverse_map[2][0])
+            +inverse_map[0][2]*(inverse_map[1][0]*inverse_map[2][1]-inverse_map[1][1]*inverse_map[2][0]);
+        CHECK(inverse_rate_determinant == doctest::Approx(1/std::cos(angles[1])).epsilon(1e-14));
+        CHECK(inverse_rate_determinant*std::cos(angles[1]) == doctest::Approx(1).epsilon(1e-14));
     }
 }
 
