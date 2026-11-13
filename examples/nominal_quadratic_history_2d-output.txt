@@ -1,0 +1,1 @@
+Interior-state penalty changes first control from 0.000000 to 0.454545; baseline_x1=(0.000000,0.000000); tracking_x1=(0.454545,0.454545)

@@ -129,11 +129,13 @@ csl_example(native_discrete_models CSL::model_catalogue)
 
 if(TARGET CSL::highs_convex AND TARGET CSL::model_catalogue)
   add_executable(quadcopter_mpc quadcopter_mpc.cpp quadcopter_mpc_task.cpp)
-  target_link_libraries(quadcopter_mpc PRIVATE CSL::highs_convex CSL::model_catalogue)
+  target_link_libraries(quadcopter_mpc PRIVATE CSL::highs_convex CSL::model_catalogue
+    CSL::nominal_quadratic_history)
   target_compile_features(quadcopter_mpc PRIVATE cxx_std_20)
   set_target_properties(quadcopter_mpc PROPERTIES CXX_EXTENSIONS OFF)
   add_executable(quadcopter_mpc_scalar_contract quadcopter_mpc_scalar_contract.cpp quadcopter_mpc_task.cpp)
-  target_link_libraries(quadcopter_mpc_scalar_contract PRIVATE CSL::highs_convex)
+  target_link_libraries(quadcopter_mpc_scalar_contract PRIVATE CSL::highs_convex
+    CSL::nominal_quadratic_history)
   target_compile_features(quadcopter_mpc_scalar_contract PRIVATE cxx_std_20)
   set_target_properties(quadcopter_mpc_scalar_contract PROPERTIES CXX_EXTENSIONS OFF)
   foreach(target quadcopter_mpc quadcopter_mpc_scalar_contract)
@@ -145,6 +147,14 @@ if(TARGET CSL::highs_convex AND TARGET CSL::model_catalogue)
   endforeach()
   add_test(NAME quadcopter_mpc_scalar_running_state_cost COMMAND quadcopter_mpc_scalar_contract)
   set_tests_properties(quadcopter_mpc_scalar_running_state_cost PROPERTIES TIMEOUT 30)
+  add_executable(nominal_quadratic_history_2d nominal_quadratic_history_2d.cpp)
+  target_link_libraries(nominal_quadratic_history_2d PRIVATE CSL::highs_convex
+    CSL::nominal_quadratic_history)
+  target_compile_features(nominal_quadratic_history_2d PRIVATE cxx_std_20)
+  set_target_properties(nominal_quadratic_history_2d PROPERTIES CXX_EXTENSIONS OFF)
+  add_test(NAME nominal_quadratic_history_2d COMMAND nominal_quadratic_history_2d)
+  set_tests_properties(nominal_quadratic_history_2d PROPERTIES
+    PASS_REGULAR_EXPRESSION "Interior-state penalty changes first control from 0.000000 to 0.454545")
   add_test(NAME quadcopter_mpc_source21_feedback
     COMMAND "${CMAKE_COMMAND}"
       "-DEXAMPLE_EXE=$<TARGET_FILE:quadcopter_mpc>"
