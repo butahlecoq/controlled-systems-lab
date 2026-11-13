@@ -53,10 +53,11 @@ and generated scientific data are excluded. The `C++ core tooling quality`
 workflow enforces this initial gate. Other maintained C++ modules still require
 coverage under [issue 993](https://github.com/butahlecoq/controlled-systems-lab/issues/993).
 
-The Python CI scripts and tests under `scripts/ci` and `tests/ci` use pinned Ruff
-linting/formatting and ty type checking. Install `requirements-quality.txt` in a
-virtual environment, then run `ruff check`, `ruff format --check`, `ty check` and
+The Python tools under `scripts/ci` and `scripts/catalogue`, and tests under
+`tests/ci`, use pinned Ruff linting/formatting and ty type checking. Install
+`requirements-quality.txt` in a virtual environment, then run `ruff check`, `ruff format --check`, `ty check` and
 `python -m unittest discover -s tests/ci -p 'test_*.py'` from the repository root.
-The `Python CI tooling quality` workflow enforces these checks. Other Python tools remain outside this initial gate; broader adoption and
-immutable-source exclusions are tracked in
+The `Python tooling quality` workflow enforces these checks. Other Python
+tools remain outside this initial gate; broader adoption and immutable-source
+exclusions are tracked in
 [issue 993](https://github.com/butahlecoq/controlled-systems-lab/issues/993).

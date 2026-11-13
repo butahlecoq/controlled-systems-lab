@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """Capture and independently check a source-bound final #944 pipeline run."""
+
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timezone
 import hashlib
 import json
-from pathlib import Path
 import re
 import subprocess
 import sys
 import tempfile
-
+from datetime import datetime, timezone
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 RUNNER = ROOT / "tools/strategy_a_each_choice_pipeline.cpp"
@@ -53,8 +53,12 @@ def main() -> int:
         parser.error("build directory has no CMakeCache.txt")
     if output.exists():
         parser.error("output directory must be fresh")
-    if executable.name != "csl_strategy_a_each_choice_pipeline" or not executable.is_relative_to(build):
-        parser.error("executable must be the named pipeline target inside the selected build directory")
+    if executable.name != "csl_strategy_a_each_choice_pipeline" or not executable.is_relative_to(
+        build
+    ):
+        parser.error(
+            "executable must be the named pipeline target inside the selected build directory"
+        )
     dirty = subprocess.check_output(["git", "-C", str(ROOT), "status", "--porcelain"], text=True)
     if dirty:
         parser.error("source worktree must be clean before capture")
@@ -72,33 +76,51 @@ def main() -> int:
     with tempfile.TemporaryDirectory(prefix=".issue944-capture-", dir=output.parent) as temporary:
         stage = Path(temporary)
         matrix = subprocess.run([str(executable)], capture_output=True)
-        regression = subprocess.run([str(executable), "--terminal-membership-indexing-regression"],
-                                    capture_output=True)
+        regression = subprocess.run(
+            [str(executable), "--terminal-membership-indexing-regression"], capture_output=True
+        )
         (stage / "records.json").write_bytes(matrix.stdout)
         (stage / "records.stderr.txt").write_bytes(matrix.stderr)
         (stage / "terminal-membership-regression.json").write_bytes(regression.stdout)
         (stage / "terminal-membership-regression.stderr.txt").write_bytes(regression.stderr)
         checker = None
         if matrix.returncode == 0 and regression.returncode == 0:
-            checker = subprocess.run([
-                sys.executable, str(CHECKER), "--record-json", str(stage / "records.json"),
-                "--regression-json", str(stage / "terminal-membership-regression.json"),
-                "--expected-numeric-boundaries", "0",
-            ], capture_output=True, text=True)
-        (stage / "checker.stdout.txt").write_text(checker.stdout if checker else "", encoding="utf-8")
-        (stage / "checker.stderr.txt").write_text(checker.stderr if checker else "", encoding="utf-8")
-        source_commit = subprocess.check_output(["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True).strip()
+            checker = subprocess.run(
+                [
+                    sys.executable,
+                    str(CHECKER),
+                    "--record-json",
+                    str(stage / "records.json"),
+                    "--regression-json",
+                    str(stage / "terminal-membership-regression.json"),
+                    "--expected-numeric-boundaries",
+                    "0",
+                ],
+                capture_output=True,
+                text=True,
+            )
+        (stage / "checker.stdout.txt").write_text(
+            checker.stdout if checker else "", encoding="utf-8"
+        )
+        (stage / "checker.stderr.txt").write_text(
+            checker.stderr if checker else "", encoding="utf-8"
+        )
+        source_commit = subprocess.check_output(
+            ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
+        ).strip()
         compiler = config.get("CMAKE_CXX_COMPILER", "")
         cmake = config.get("CMAKE_COMMAND", "")
-        compiler_result = subprocess.run([compiler, "--version"], check=True, capture_output=True, text=True)
-        cmake_result = subprocess.run([cmake, "--version"], check=True, capture_output=True, text=True)
+        compiler_result = subprocess.run(
+            [compiler, "--version"], check=True, capture_output=True, text=True
+        )
+        cmake_result = subprocess.run(
+            [cmake, "--version"], check=True, capture_output=True, text=True
+        )
         provenance = {
             "schema": "csl.issue944-final-capture-provenance/1",
             "captured_at_utc": datetime.now(timezone.utc).isoformat(),
             "source_commit": source_commit,
-            "source_tree": {
-                str(path.relative_to(ROOT)): digest(path) for path in MANIFEST_SOURCES
-            },
+            "source_tree": {str(path.relative_to(ROOT)): digest(path) for path in MANIFEST_SOURCES},
             "runner_source_sha256": digest(RUNNER),
             "checker_source_sha256": digest(CHECKER),
             "capture_harness_sha256": digest(Path(__file__).resolve()),
@@ -128,8 +150,9 @@ def main() -> int:
             },
             "cmake_cache_sha256": digest(cache),
         }
-        (stage / "provenance.json").write_text(json.dumps(provenance, indent=2, sort_keys=True) + "\n",
-                                                encoding="utf-8")
+        (stage / "provenance.json").write_text(
+            json.dumps(provenance, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
         names = sorted(path.name for path in stage.iterdir())
         checksum_lines = [f"{digest(stage / name)}  {name}\n" for name in names]
         (stage / "SHA256SUMS").write_text("".join(checksum_lines), encoding="ascii")
