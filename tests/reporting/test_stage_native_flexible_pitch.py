@@ -12,6 +12,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 import stage_native_flexible_pitch as native
+import stage_nominal_quadratic_history as history
 
 
 class Links(HTMLParser):
@@ -46,9 +47,11 @@ class FlexiblePitchPublicationTests(unittest.TestCase):
                 self.assertTrue(files[native.ROUTE + "/" + path.relative_to(self.bundle).as_posix()] == path.read_bytes(),
                                 "staged payload bytes differ: " + path.relative_to(self.bundle).as_posix())
         links = Links(); links.feed(files["native-flexible-pitch.html"].decode())
+        history_files, _, _ = history.build(ROOT)
         for link in links.links:
             if ":" not in link and not link.startswith("#") and link not in {"index.html", "examples.css", "native-model-catalogue.html"}:
-                self.assertTrue(link in files, "missing staged lesson link: " + link)
+                self.assertTrue(link in files or link in history_files,
+                                "missing staged lesson link: " + link)
         self.assertEqual(native.build(self.root), (files, entries, card))
 
     def test_changed_physical_generator_is_rejected(self):

@@ -31,6 +31,7 @@ import stage_native_extended_models
 import stage_native_model_catalogue
 import stage_native_discrete_models
 import stage_native_model_tracking_first_pass
+import stage_nominal_quadratic_history
 import stage_native_flexible_pitch
 import visual_illustrations
 import visual_example_geometry as geometry_examples
@@ -910,6 +911,9 @@ def build(catalog, site):
     tracking_files, tracking_inventory, tracking_card = stage_native_model_tracking_first_pass.build(
         Path(__file__).resolve().parents[2])
     saved_figures += tracking_card
+    history_files, history_inventory, history_card = stage_nominal_quadratic_history.build(
+        Path(__file__).resolve().parents[2])
+    saved_figures += history_card
     extended_files, extended_inventory, extended_cards = stage_native_extended_models.build(
         Path(__file__).resolve().parents[2])
     saved_figures += extended_cards
@@ -959,6 +963,7 @@ def build(catalog, site):
     outputs.update(pitch_files)
     outputs.update(discrete_files)
     outputs.update(tracking_files)
+    outputs.update(history_files)
     outputs.update(extended_files)
     repository_root = Path(__file__).resolve().parents[2]
     cost_page_root = repository_root / "docs/examples/history-cost-2d-v1"
@@ -1071,6 +1076,7 @@ def build(catalog, site):
     gallery_inventory.extend(pitch_inventory)
     gallery_inventory.extend(discrete_inventory)
     gallery_inventory.extend(tracking_inventory)
+    gallery_inventory.extend(history_inventory)
     gallery_inventory.extend(extended_inventory)
     geometry_first = geometry_inventory[0]
     gallery_inventory.append({"family": "Geometry and optimization",
