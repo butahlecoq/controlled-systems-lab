@@ -1,5 +1,6 @@
 """Offline figures/reading page from immutable attempt archives; no controller runs."""
-import argparse,hashlib,html,importlib.util,json,math,shutil,zipfile
+import argparse,hashlib,html,importlib.util,json,math,shutil,zipfile,sys
+sys.dont_write_bytecode=True
 from pathlib import Path
 import numpy as np
 import matplotlib
@@ -86,7 +87,7 @@ def render(bundle):
  receipt=json.loads((bundle/'figure-receipt.json').read_text())
  for f in receipt['figures']:f['svg_sha256']=sha(bundle/f['svg'])
  (bundle/'figure-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
- files={str(p.relative_to(bundle)):sha(p) for p in sorted(bundle.rglob('*')) if p.is_file() and p.name!='files.sha256'};(bundle/'files.sha256').write_text(''.join(v+'  '+k+'\n' for k,v in files.items()))
+ files={str(p.relative_to(bundle)):sha(p) for p in sorted(bundle.rglob('*')) if p.is_file() and p.name!='files.sha256' and '__pycache__' not in p.parts and p.suffix!='.pyc'};(bundle/'files.sha256').write_text(''.join(v+'  '+k+'\n' for k,v in files.items()))
 
 if __name__=='__main__':
  parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--bundle',type=Path,required=True);parser.add_argument('--output',type=Path);args=parser.parse_args()

@@ -3,6 +3,7 @@
 import hashlib
 import json
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -13,6 +14,21 @@ sys.path.insert(0, str(ROOT / "scripts/reports"))
 
 
 class WarmGapPublicationTest(unittest.TestCase):
+    def test_saved_wave_is_complete_using_tracked_files_only(self):
+        import history_warm_gap_report
+
+        relative = "reports/closed-loop-history-functional/warm-gap-9540-v1"
+        tracked = subprocess.check_output(
+            ["git", "-C", str(ROOT), "ls-files", "-z", relative], text=True
+        ).split("\0")
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = Path(directory) / "bundle"
+            for name in filter(None, tracked):
+                target = bundle / Path(name).relative_to(relative)
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(ROOT / name, target)
+            self.assertEqual(history_warm_gap_report.validate(bundle)["complete"], 8)
+
     def test_saved_wave_retains_all_outcomes_and_source_bound_queries(self):
         import history_warm_gap_report
 
