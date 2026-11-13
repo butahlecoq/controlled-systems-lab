@@ -11,6 +11,20 @@ import os
 import resource
 import subprocess
 from pathlib import Path
+from typing import TypedDict
+
+
+class ControllerRoute(TypedDict):
+    key: str
+    name: str
+    record: dict
+
+
+class BoundTask(TypedDict):
+    contract: dict
+    path: Path
+    sha256: str
+    file_sha256: str
 
 
 def sha256(path: Path) -> str:
@@ -34,7 +48,7 @@ def identity_tuple(record: dict) -> dict:
     return {"id": identity["id"], "version": identity["version"]}
 
 
-def controller_variants(route: dict, inventory: dict) -> list[dict]:
+def controller_variants(route: ControllerRoute, inventory: dict) -> list[dict]:
     key = route["key"]
     if key == "csl.synthesis.reach-back":
         reducers = [
@@ -192,7 +206,7 @@ def controller_graphs(
         "csl::optimization::finite_causal_minimax::solve": "public finite-table cost controller",
         "benchmarks/reporting/mpc11/run_nmpc.py": "external MPC11 nominal local NMPC",
     }
-    routes = []
+    routes: list[ControllerRoute] = []
     for record in inventory["modules"]:
         identity = record["identity"]
         key = identity.get("id", identity.get("symbol"))
@@ -203,7 +217,7 @@ def controller_graphs(
     )
     receipt_by_task = {row["task_id"]: row for row in receipts["routes"]}
 
-    tasks = []
+    tasks: list[BoundTask] = []
     import sys
 
     sys.path.insert(0, str(root / "benchmarks/reporting/closed_loop"))

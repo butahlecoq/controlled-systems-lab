@@ -78,10 +78,17 @@ class Issue944ChoicePipelinePublicationTests(unittest.TestCase):
                 f'{provenance["solver_source_commit"]}:{relative}',
             ])
             self.assertEqual(provenance[key], hashlib.sha256(historical).hexdigest())
-        for key, source in (("publication_renderer_sha256", ROOT / "scripts/reports/render_issue944_each_choice.py"),
-                            ("plot_renderer_sha256", ROOT / "scripts/catalogue/render_944_each_choice_example.py"),
-                            ("shared_stylesheet_sha256", ROOT / "docs/examples/examples.css")):
-            self.assertEqual(provenance[key], hashlib.sha256(source.read_bytes()).hexdigest())
+        publication_source = "7c05c56f39b7270e329d029ecbddb9049d478b8d"
+        publication_sources = {
+            "publication_renderer_sha256": "scripts/reports/render_issue944_each_choice.py",
+            "plot_renderer_sha256": "scripts/catalogue/render_944_each_choice_example.py",
+            "shared_stylesheet_sha256": "docs/examples/examples.css",
+        }
+        for key, relative in publication_sources.items():
+            historical = subprocess.check_output([
+                "git", "-C", str(ROOT), "show", f"{publication_source}:{relative}",
+            ])
+            self.assertEqual(provenance[key], hashlib.sha256(historical).hexdigest())
         pipeline = (self.bundle / "pipeline-2d.svg").read_text(encoding="utf-8")
         mobile_pipeline = (self.bundle / "pipeline-2d-mobile.svg").read_text(encoding="utf-8")
         pipeline_print = (self.bundle / "pipeline-2d-print.svg").read_text(encoding="utf-8")

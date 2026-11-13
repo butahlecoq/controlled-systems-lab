@@ -15,7 +15,10 @@ def theme_tokens():
     print_root = re.search(r"@media\s+print\s*\{\s*:root\s*\{([^}]+)\}", text)
     if root is None or print_root is None:
         raise ValueError("shared examples screen/print themes are required")
-    parse = lambda block: dict(re.findall(r"(--[a-z-]+)\s*:\s*([^;]+)\s*;", block))
+
+    def parse(block: str) -> dict[str, str]:
+        return dict(re.findall(r"(--[a-z-]+)\s*:\s*([^;]+)\s*;", block))
+
     values, printed = parse(root.group(1)), parse(print_root.group(1))
     required = {
         "--page",

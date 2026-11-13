@@ -37,7 +37,9 @@ def verify_square_conversion(trace: str) -> None:
     ), trace
     assert rays_text == "[]", trace
     for x, y in vertices:
-        assert all(a * x + b * y <= upper + 1e-12 for (a, b), upper in zip(h_rows, bounds)), trace
+        assert all(
+            a * x + b * y <= upper + 1e-12 for (a, b), upper in zip(h_rows, bounds, strict=True)
+        ), trace
     intersections = set()
     for (i, (a1, b1)), (j, (a2, b2)) in combinations(enumerate(h_rows), 2):
         determinant = a1 * b2 - b1 * a2
@@ -45,7 +47,9 @@ def verify_square_conversion(trace: str) -> None:
             continue
         x = (bounds[i] * b2 - b1 * bounds[j]) / determinant
         y = (a1 * bounds[j] - bounds[i] * a2) / determinant
-        if all(a * x + b * y <= upper + 1e-10 for (a, b), upper in zip(h_rows, bounds)):
+        if all(
+            a * x + b * y <= upper + 1e-10 for (a, b), upper in zip(h_rows, bounds, strict=True)
+        ):
             intersections.add((x, y))
     assert len(intersections) >= 4, trace
     assert all(
@@ -338,15 +342,18 @@ def main() -> int:
     assert x0 == [2.0, 3.0], attempt
     assert endpoint != control, attempt
     assert endpoint == [x0[i] + control[i] for i in range(2)], attempt
-    assert all(low <= value <= high for (low, high), value in zip([[1, 2], [2, 3]], x0)), attempt
-    assert all(low <= value <= high for (low, high), value in zip([[0, 1], [1, 2]], control)), (
-        attempt
-    )
-    assert all(low <= value <= high for (low, high), value in zip([[2, 3], [4, 5]], endpoint)), (
-        attempt
-    )
+    assert all(
+        low <= value <= high for (low, high), value in zip([[1, 2], [2, 3]], x0, strict=True)
+    ), attempt
+    assert all(
+        low <= value <= high for (low, high), value in zip([[0, 1], [1, 2]], control, strict=True)
+    ), attempt
+    assert all(
+        low <= value <= high for (low, high), value in zip([[2, 3], [4, 5]], endpoint, strict=True)
+    ), attempt
     assert any(
-        value < low or value > high for (low, high), value in zip([[2, 3], [4, 5]], control)
+        value < low or value > high
+        for (low, high), value in zip([[2, 3], [4, 5]], control, strict=True)
     ), attempt
 
     print(

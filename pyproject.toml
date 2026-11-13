@@ -2,17 +2,17 @@
 required-version = "==0.17.5"
 target-version = "py311"
 line-length = 100
-include = ["scripts/ci/**/*.py", "tests/ci/**/*.py"]
+include = ["scripts/ci/**/*.py", "tests/ci/**/*.py", "scripts/catalogue/**/*.py"]
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F", "I", "B"]
 
 [tool.ty.environment]
 python-version = "3.11"
-extra-paths = ["scripts/ci"]
+extra-paths = ["scripts/ci", "benchmarks/reporting/closed_loop", "benchmarks/reporting/mpc11"]
 
 [tool.ty.src]
-include = ["scripts/ci", "tests/ci"]
+include = ["scripts/ci", "tests/ci", "scripts/catalogue"]
 
 [tool.ty.terminal]
 error-on-warning = true
