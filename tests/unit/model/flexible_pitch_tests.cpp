@@ -156,3 +156,34 @@ TEST_CASE("flexible pitch ZOH agrees with an independent augmented matrix expone
         }
     }
 }
+
+TEST_CASE("descriptor residuals outside the checking precision never become a finite admission") {
+    using namespace csl;
+    using namespace csl::model::catalogue;
+    auto parameters = take(flexible_pitch_parameters("flexible-pitch/synthetic-12-state/1"));
+    parameters.pitch_input = 0.8 * std::numeric_limits<double>::max();
+    for (auto& tank : parameters.slosh) {
+        tank.pitch_feedback = 0.5;
+        tank.lateral_feedback = 0;
+        tank.lateral_acceleration = 0;
+    }
+    parameters.slosh[0].pitch_acceleration = -1;
+    parameters.slosh[1].pitch_acceleration = 1;
+    // The finite solution has theta_B=-M and both tank_B=M/2. Reconstructing
+    // its pitch row visits -M-M/2+M/2, beyond double's intermediate range.
+    const auto result = assemble_flexible_pitch(parameters);
+    if constexpr (std::numeric_limits<long double>::max_exponent ==
+                  std::numeric_limits<double>::max_exponent) {
+        REQUIRE(std::holds_alternative<Diagnostics>(result));
+        const auto& error = std::get<Diagnostics>(result).front();
+        CHECK(error.code == DiagnosticCode::unsupported);
+        CHECK(error.field == "model.flexible_pitch.mass_matrix");
+        CHECK(error.explanation.find("residual") != std::string::npos);
+    } else {
+        REQUIRE(std::holds_alternative<FlexiblePitchDescriptor>(result));
+        const auto& descriptor = std::get<FlexiblePitchDescriptor>(result);
+        CHECK(std::isfinite(descriptor.maximum_relative_residual));
+        CHECK(descriptor.maximum_relative_residual < 1e-12);
+        for (const auto value : descriptor.rates.B.values) CHECK(std::isfinite(value));
+    }
+}

@@ -182,7 +182,14 @@ assemble_flexible_pitch(const FlexiblePitchParameters& p) {
             magnitude += std::abs(term);
         }
         const double expected = column == n ? B.values[i] : A.values[i * n + column];
-        residual = std::max(residual, static_cast<double>(std::abs(actual - expected) / (1 + magnitude + std::abs(expected))));
+        const long double numerator = std::abs(actual - expected);
+        const long double normalization = 1 + magnitude + std::abs(expected);
+        if (!std::isfinite(numerator) || !std::isfinite(normalization))
+            return reject("model.flexible_pitch.mass_matrix", "Descriptor residual exceeded the checking precision's finite range.", DiagnosticCode::unsupported);
+        const long double relative = numerator / normalization;
+        if (!std::isfinite(relative))
+            return reject("model.flexible_pitch.mass_matrix", "Descriptor residual is nonfinite.", DiagnosticCode::unsupported);
+        residual = std::max(residual, static_cast<double>(relative));
     }
     if (residual > 1e-12)
         return reject("model.flexible_pitch.mass_matrix", "Descriptor residual exceeded the numerical admission threshold.", DiagnosticCode::unsupported);
