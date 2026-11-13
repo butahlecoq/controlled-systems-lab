@@ -5,6 +5,34 @@
 
 namespace csl::geometry::ellipsoidal {
 
+// Factor form E(c,F) = {c + F u : ||u||_2 <= 1}. Unlike EllipsoidSet below,
+// this form has no ambient-dimension restriction and permits rank-deficient
+// factors. Arithmetic is binary64; callers must retain numerical assurance.
+struct FactorEllipsoid {
+    Vector center;
+    Matrix factor;
+};
+
+using FactorEllipsoidResult = std::variant<FactorEllipsoid,Diagnostics>;
+
+FactorEllipsoidResult make_factor_ellipsoid(Vector center,Matrix factor);
+
+// Exact affine image of the represented factor set, evaluated in binary64.
+FactorEllipsoidResult affine_image(const FactorEllipsoid& input,
+                                   const Matrix& map,const Vector& offset);
+
+// Outer ellipsoid for E1 (+) E2. In real arithmetic the block factor
+// [sqrt(1+beta) F1, sqrt(1+1/beta) F2] encloses the Minkowski sum: for
+// ||u||,||v|| <= 1, the concatenated witness has squared norm at most
+// 1/(1+beta) + 1/(1+1/beta) = 1. This operation does not claim validated
+// floating-point rounding.
+FactorEllipsoidResult outer_minkowski_sum(const FactorEllipsoid& left,
+    const FactorEllipsoid& right,double beta);
+
+// The box center + G[-1,1]^m is contained by the factor ellipsoid
+// E(center,sqrt(m) G), since ||u||_2 <= sqrt(m) for every box vertex.
+FactorEllipsoidResult outer_box(Vector center,const Matrix& generators);
+
 // E = {x: sum_i (B_i(x-c)/r_i)^2 <= 1}; r_i=0 requires B_i(x-c)=0.
 // Its real-arithmetic shape B^-1 diag(r_i^2) B^-T is PSD by construction.
 struct EllipsoidInput {

@@ -1,0 +1,71 @@
+{
+  "schema": "csl.buryatia.2d-artifact-manifest/2",
+  "case_id": "buryatia-volterra-matlab-literal-affine/1",
+  "source_variant_id": "buryatia-volterra-literal-script-affine/1",
+  "source_sha256": "c26fc2424fa8b3325a864d1afbc67920ba1c05665bfdf4562bed79548b60a4f1",
+  "assurance": "numerical binary64; no validated rounding certificate",
+  "native_build": {
+    "git_revision": "35a708df541409bd8d7c0bddaeafcda60c26dbae",
+    "executable_sha256": "fef4ed0d5659fdc68bea6d01521243c4d9447e679f899a1782902cfb148e8e5b",
+    "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "compiler_and_configuration": {
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "/usr/bin/c++",
+      "CMAKE_CXX_FLAGS": "",
+      "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG",
+      "CMAKE_GENERATOR": "Unix Makefiles",
+      "CMAKE_CXX_COMPILER_ID": "GNU",
+      "CMAKE_CXX_COMPILER_VERSION": "16.2.1"
+    },
+    "source_sha256": {
+      "benchmarks/reporting/buryatia/driver.cpp": "5cc56dbe08b7547987f7b4f43a441c5165540f27d7b21d1daed07a77535411af",
+      "benchmarks/reporting/buryatia/ellipse_boundary.hpp": "8537670db6000b790caa1c21a0a7b2a14e616da27a1997f87d5e0c35308ba5c9",
+      "scripts/reports/buryatia/check_2d.py": "37defe104c5c9b0dbc2e34e0711fa51970f553cfeb4226f68d816443de779ee1",
+      "scripts/reports/buryatia/render_2d.py": "37a5314608e0c47d45d29717bb8c8490f9f407412c8c5a3c8b2a5f6f7c44c87f",
+      "include/csl/geometry/ellipsoidal.hpp": "b2b548357dba44f3b1f19516993efee5537cec95be4a6420355b4d29d4bfddbc",
+      "src/geometry/approximation/ellipsoidal_set.cpp": "a4498b907824e5aa1b9d21c110372cc8671a9bc3004b804360e63153d9377e35",
+      "src/geometry/approximation/ellipsoidal.cpp": "192b7702c0d1de4aed9a749d86953f5d6849efffef405c7da971eefb9a61c681",
+      "src/geometry/approximation/policy.cpp": "a95faf76eae5881a24db6173634a683dc5e69fe194a383e1b35ed5fa6744e04e",
+      "src/geometry/affine_sum.cpp": "d6062bd0d3175fc7935ee89bd542b067521984157bc080aebc8df28d94e5b29f",
+      "src/geometry/source_index_hull.cpp": "f2d19e56937f4028e517078621c6545a64d9874705cd42567ee931705cb6d713",
+      "src/geometry/bounded_hull_checker.cpp": "88945b680061869ce234154b893c7d44f4f4f77272db74f877c7285b2f9f86c7",
+      "src/geometry/hull/quickhull_2d.cpp": "b1f22687696d9a0bb9237fcccd86f533f272c9ac5bd94b724c290f3b293de669",
+      "src/geometry/generators/generator_sets.cpp": "638a2f21e9487ac3c06f5db6c73000996f2ddb4185b1931e4c553c78bff87ee9",
+      "src/geometry/generators/adapter.cpp": "d27904e4ebc914164363b50dc73e9e37823407290baaa8a772ed4d2def4f6bd3",
+      "src/geometry/approximation/box_parallelotope.cpp": "464ac084242562875529dc23fac40ec339c5ba33d1befb9f61277f758dc767fb",
+      "src/geometry/approximation/zonotope.cpp": "fc389b36b51feff642b9b65c1979ef82d4f2322577dcdcc0f185d166429ede65"
+    }
+  },
+  "artifacts": [
+    {
+      "path": "docs/examples/buryatia-volterra-affine-2d-records.json",
+      "sha256": "aa7a7652afb8bd06c09c5a5b8c4bb676c6c24d3f7ee9ada5264ccaf24f8a549a"
+    },
+    {
+      "path": "docs/examples/buryatia-volterra-affine-2d.html",
+      "sha256": "137ab8065a21a83d87e741d5d90b4c97bb61d7fb34136ce3c9bb134218963ffa"
+    },
+    {
+      "path": "docs/examples/buryatia-volterra-affine-2d-terminal.svg",
+      "sha256": "5d11854fc913a26f4495ae95cae805188b493ed8ae29b6d286eff9fc3f93bc5d"
+    }
+  ],
+  "superseded_artifacts": [
+    {
+      "path": "docs/examples/buryatia-volterra-affine-2d-records-superseded-v1.json",
+      "sha256": "21c7ce75e047e2898f76221579cf5808470696e6e6b341a391f86d0fffde68be"
+    },
+    {
+      "path": "docs/examples/buryatia-volterra-affine-2d-superseded-v1.html",
+      "sha256": "187f1b0e227b98d4b38efbbb7a2858afcb4b2c2db23b8b17cdfbce340faadf8e"
+    },
+    {
+      "path": "docs/examples/buryatia-volterra-affine-2d-terminal-superseded-v1.svg",
+      "sha256": "0cebdbf91054cdc5d781da4368972eec3f60d5426cc5918dfe2fe63d13cb0205"
+    },
+    {
+      "path": "docs/examples/buryatia-volterra-affine-2d-manifest-superseded-v1.json",
+      "sha256": "da0c52bb35a98bd19181ef32234806058a7bbe80420b6e94827ed65e4706a6d4"
+    }
+  ]
+}
