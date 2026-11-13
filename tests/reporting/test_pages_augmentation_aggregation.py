@@ -312,11 +312,11 @@ class PagesAugmentationAggregation(unittest.TestCase):
         self.assertIn("actions/upload-pages-artifact@", aggregation_text)
         self.assertIn("repository: actions/deploy-pages", aggregation_text)
         self.assertIn("ref: 368f82528645a54fb793d4d04e342629a3f51346", aggregation_text)
-        self.assertIn(
-            "actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
-            aggregation_text,
+        self.assertIn("uses: ./.github/actions/pages-deploy", aggregation_text)
+        local_action = (ROOT / ".github/actions/pages-deploy/index.js").read_text(
+            encoding="utf-8"
         )
-        self.assertIn("scripts/ci/deploy_pages_metadata_retry.py", aggregation_text)
+        self.assertIn("scripts/ci/deploy_pages_metadata_retry.py", local_action)
         publishers = [
             path.name
             for path in workflows.glob("*.yml")
@@ -353,7 +353,6 @@ class PagesAugmentationAggregation(unittest.TestCase):
             encoding="utf-8"
         )
         checkout = workflow.index("name: Check out the pinned official Pages deployer")
-        node = workflow.index("name: Set up Node 24 for the pinned Pages deployer")
         freshness = workflow.index(
             "name: Check that the complete artifact still targets current main"
         )
@@ -361,8 +360,7 @@ class PagesAugmentationAggregation(unittest.TestCase):
         configure = workflow.index("actions/configure-pages@")
         deploy = workflow.index("name: Deploy the complete augmented report site")
 
-        self.assertLess(checkout, node)
-        self.assertLess(node, freshness)
+        self.assertLess(checkout, freshness)
         self.assertLess(freshness, upload)
         self.assertLess(upload, configure)
         self.assertLess(configure, deploy)
@@ -370,12 +368,13 @@ class PagesAugmentationAggregation(unittest.TestCase):
         self.assertIn(
             "if: steps.head.outputs.current == 'true'\n        id: deployment", workflow
         )
-        self.assertIn("INPUT_TOKEN: ${{ github.token }}", workflow)
-        self.assertIn("INPUT_TIMEOUT: '600000'", workflow)
-        self.assertIn("INPUT_ERROR_COUNT: '10'", workflow)
-        self.assertIn("INPUT_REPORTING_INTERVAL: '5000'", workflow)
-        self.assertIn("INPUT_ARTIFACT_NAME: github-pages", workflow)
-        self.assertIn("INPUT_PREVIEW: 'false'", workflow)
+        self.assertIn("uses: ./.github/actions/pages-deploy", workflow)
+        self.assertIn("token: ${{ github.token }}", workflow)
+        self.assertIn("timeout: '600000'", workflow)
+        self.assertIn("error_count: '10'", workflow)
+        self.assertIn("reporting_interval: '5000'", workflow)
+        self.assertIn("artifact_name: github-pages", workflow)
+        self.assertIn("preview: 'false'", workflow)
         self.assertIn("pages: write\n      id-token: write", workflow)
 
 

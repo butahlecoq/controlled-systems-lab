@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+import signal
 import subprocess
 import sys
 import time
@@ -69,7 +71,14 @@ def main() -> int:
     if len(sys.argv) < 2:
         print("usage: deploy_pages_metadata_retry.py COMMAND [ARG ...]", file=sys.stderr)
         return 2
-    return run_deployer(sys.argv[1:])
+    result = run_deployer(sys.argv[1:])
+    if result < 0:
+        signal_number = -result
+        try:
+            os.kill(os.getpid(), signal.Signals(signal_number))
+        except (OSError, ValueError):
+            return 128 + signal_number
+    return result
 
 
 if __name__ == "__main__":
