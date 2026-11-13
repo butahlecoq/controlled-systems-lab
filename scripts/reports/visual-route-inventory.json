@@ -1086,6 +1086,13 @@
       "disposition": "composes-or-copies-existing-saved-figure"
     },
     {
+      "source": "scripts/reports/native_discrete_models.py",
+      "signal_count": 4,
+      "asset_name_literals": [],
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Draws all 15 authenticated saved native source21 MPC predictions against the executed path; checks complete coordinates, literal costs, dynamics, controls and bounds before rendering; uses shared numeric-axis policy and explicit screen/print themes without solving or timing."
+    },
+    {
       "source": "scripts/reports/native_fixed_tail_episode_report.py",
       "signal_count": 4,
       "asset_name_literals": [
@@ -1863,6 +1870,14 @@
       ],
       "disposition": "publication-validation-or-frozen-route",
       "role_and_disposition_reason": "Rechecks immutable mesh and repeated-controller archives, builds labelled saved-data study companions and copies complete source/raw inputs; no optimization or integration runs."
+    },
+    {
+      "source": "scripts/reports/stage_native_discrete_models.py",
+      "signal_count": 1,
+      "asset_name_literals": [
+        "phase-x3-x6-screen.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
     },
     {
       "source": "scripts/reports/stage_native_flexible_pitch.py",
