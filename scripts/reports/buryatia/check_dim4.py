@@ -117,14 +117,19 @@ def validate(record: dict) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--exe", type=Path, required=True)
+    input_group = parser.add_mutually_exclusive_group(required=True)
+    input_group.add_argument("--exe", type=Path, help="run and check the native report executable")
+    input_group.add_argument("--raw", type=Path, help="check a saved JSON record")
     args = parser.parse_args()
-    result = subprocess.run([str(args.exe.resolve(strict=True)), "--dim4-literal-affine"],
-                            check=False, capture_output=True, text=True)
-    if result.returncode:
-        print(result.stderr, file=sys.stderr, end="")
-        return result.returncode
-    validate(json.loads(result.stdout))
+    if args.raw:
+        validate(json.loads(args.raw.read_text(encoding="utf-8")))
+    else:
+        result = subprocess.run([str(args.exe.resolve(strict=True)), "--dim4-literal-affine"],
+                                check=False, capture_output=True, text=True)
+        if result.returncode:
+            print(result.stderr, file=sys.stderr, end="")
+            return result.returncode
+        validate(json.loads(result.stdout))
     print("Buryatia Dim4: eight full-state stages, six families, source reference, support diagnostics, and 3D ellipsoid projections pass")
     return 0
 
