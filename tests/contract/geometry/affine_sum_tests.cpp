@@ -988,6 +988,37 @@ TEST_CASE("Minkowski sums compose independent exact higher-dimensional box cover
     CHECK(check_geometry_evidence(result.evidence,req).empty());
 }
 
+TEST_CASE("generic affine-sum provider preserves exact four-dimensional cube sums") {
+    Vector cube_points;
+    cube_points.reserve(16*4);
+    for(std::size_t mask=0;mask<16;++mask)
+        for(std::size_t coordinate=0;coordinate<4;++coordinate)
+            cube_points.push_back((mask&(std::size_t{1}<<coordinate))?1.0:-1.0);
+    const auto cube=vertices("4d-cube",4,std::move(cube_points),16,
+        {"x1","x2","x3","x4"});
+    const auto req=request(MinkowskiSum{cube,cube},"four-dimensional-cube-minkowski");
+    const auto result=take(run(req,dependencies()));
+    const auto imported=sets::from_handle(result.output);
+    REQUIRE(std::holds_alternative<sets::SetData>(imported));
+    const auto representation=std::get<sets::SetData>(imported).representation();
+    REQUIRE(std::holds_alternative<sets::VRepresentation>(representation));
+    const auto& hull=std::get<sets::VRepresentation>(representation);
+    // V-to-V affine sums may retain redundant candidates.  The public set
+    // contract is exact support, not minimal vertex materialization.
+    CHECK(hull.vertices.rows()>=16);
+    CHECK(hull.vertices.cols()==4);
+    for(std::size_t row=0;row<hull.vertices.rows();++row)
+        for(std::size_t column=0;column<hull.vertices.cols();++column)
+            CHECK(std::abs(hull.vertices(row,column))<=2.0);
+    for(std::size_t mask=0;mask<16;++mask) {
+        Vector direction(4);
+        for(std::size_t coordinate=0;coordinate<4;++coordinate)
+            direction[coordinate]=(mask&(std::size_t{1}<<coordinate))?1.0:-1.0;
+        CHECK(support(result.output,direction)==8.0);
+    }
+    CHECK(check_geometry_evidence(result.evidence,req).empty());
+}
+
 TEST_CASE("public geometry operation rejects an H-to-V vertex outside H rows despite zero reported residual") {
     auto h=take(sets::make_h({{"h-interval-inaccurate"},1,{}},
         {take(numeric::snapshot(Matrix{2,1,{-1,1}})),take(numeric::snapshot_vector(Vector{0,1})),
