@@ -65,7 +65,7 @@ optimization::ConvexDataResult<ConvexProgram> compile(const NominalProblem& p) {
     constraints.row_offsets.push_back(0);
     for(auto& row: rows) {
         std::sort(row.begin(),row.end(),[](const auto& a,const auto& b){return a.first<b.first;});
-        for(const auto [col,value]:row) {constraints.column_indices.push_back(col);constraints.values.push_back(value);}
+        for(const auto& [col,value]:row) {constraints.column_indices.push_back(col);constraints.values.push_back(value);}
         constraints.row_offsets.push_back(constraints.values.size());
     }
     auto made=optimization::make_convex_program({{{"quadcopter-mpc"},{"source21-horizon10"}},
