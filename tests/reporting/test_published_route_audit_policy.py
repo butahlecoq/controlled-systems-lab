@@ -9,6 +9,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from scripts.reports import audit_published_route_preservation as baseline_audit
+from scripts.reports import learning_book
 from scripts.reports import preserve_published_routes as preservation
 
 
@@ -22,16 +23,26 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
         previous_entry = '<li class="book-chapter"><span class="chapter-state">Ready · installed package example</span> <a href="controller-composition.html">Compose reachability, recovery, and MPC</a><p>The complete optimal joint family is (x0,x1,x2,u0,u1)=(0,s,1,s,1-s), 0&lt;=s&lt;=1. The exact-family verifier applies only to its registered profiles. Generic Strategy A/B paths are numerical candidates. Local NLP MPC makes no global optimum claim.</p></li>'
         prefix = '<html><main><p>Saved scientific cost = 1</p><a href="raw.zip">Evidence</a>'
         nav = '<nav class="lesson-neighbors" aria-label="Lesson navigation">'
-        suffix = '</main></html>'
+        suffix = "</main></html>"
         payloads = {
-            "learn/controller-composition.html": (prefix + nav + previous + following + '</nav>' + suffix).encode(),
-            "learn/set-operations.html": (prefix + nav + previous + following + '</nav>' + suffix).encode(),
-            "learn/index.html": (prefix + '<ol>' + previous_entry + '</ol>' + suffix).encode(),
+            "learn/controller-composition.html": (
+                prefix + nav + previous + following + "</nav>" + suffix
+            ).encode(),
+            "learn/set-operations.html": (
+                prefix + nav + previous + following + "</nav>" + suffix
+            ).encode(),
+            "learn/index.html": (prefix + "<ol>" + previous_entry + "</ol>" + suffix).encode(),
         }
         updated = {
-            "learn/controller-composition.html": payloads["learn/controller-composition.html"].replace(following.encode(), added_following.encode()),
-            "learn/set-operations.html": payloads["learn/set-operations.html"].replace(previous.encode(), added_previous.encode()),
-            "learn/index.html": payloads["learn/index.html"].replace(b'</ol>', added_entry.encode() + b'</ol>'),
+            "learn/controller-composition.html": payloads[
+                "learn/controller-composition.html"
+            ].replace(following.encode(), added_following.encode()),
+            "learn/set-operations.html": payloads["learn/set-operations.html"].replace(
+                previous.encode(), added_previous.encode()
+            ),
+            "learn/index.html": payloads["learn/index.html"].replace(
+                b"</ol>", added_entry.encode() + b"</ol>"
+            ),
         }
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -48,6 +59,11 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
                     target.parent.mkdir(parents=True, exist_ok=True)
                     target.write_bytes(updated[route])
             manifest = json.loads((preservation.SOURCE / "manifest.json").read_text())
+            manifest["learning_navigation_insertions_reviewed_separately"] = [
+                insertion
+                for insertion in manifest["learning_navigation_insertions_reviewed_separately"]
+                if insertion["chapter_id"] == "native-quadcopter-mpc"
+            ]
             manifest["baseline"]["artifact_tar_sha256"] = preservation.digest(baseline.read_bytes())
             (source / "manifest.json").write_text(json.dumps(manifest))
             with patch.object(baseline_audit, "SOURCE", source):
@@ -56,10 +72,14 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
                 self.assertEqual(set(result["reviewed_learning_navigation_changes"]), set(payloads))
                 for route, data in updated.items():
                     for label, bad in {
-                        "scientific body": data.replace(b'cost = 1', b'cost = 2'),
-                        "unrelated link": data.replace(b'raw.zip', b'other.zip'),
-                        "wrong navigation target": data.replace(b'native-quadcopter-mpc.html', b'other-lesson.html'),
-                        "wrong lesson title": data.replace(b'15 observed-state', b'99 observed-state'),
+                        "scientific body": data.replace(b"cost = 1", b"cost = 2"),
+                        "unrelated link": data.replace(b"raw.zip", b"other.zip"),
+                        "wrong navigation target": data.replace(
+                            b"native-quadcopter-mpc.html", b"other-lesson.html"
+                        ),
+                        "wrong lesson title": data.replace(
+                            b"15 observed-state", b"99 observed-state"
+                        ),
                     }.items():
                         with self.subTest(route=route, mutation=label):
                             (site / route).write_bytes(bad)
@@ -70,18 +90,161 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
                 for field in ("chapter_sha256", "previous_chapter_id", "next_chapter_id"):
                     with self.subTest(reviewed_identity=field):
                         changed_manifest = json.loads(json.dumps(manifest))
-                        changed_manifest["learning_navigation_insertions_reviewed_separately"][0][field] = "wrong"
+                        changed_manifest["learning_navigation_insertions_reviewed_separately"][0][
+                            field
+                        ] = "wrong"
                         (source / "manifest.json").write_text(json.dumps(changed_manifest))
                         result = baseline_audit.audit(baseline, site)
                         self.assertFalse(result["passed"])
                         self.assertEqual(set(result["unexpected_changed"]), set(payloads))
                 (source / "manifest.json").write_text(json.dumps(manifest))
                 misplaced = payloads["learn/index.html"].replace(
-                    b'<ol>', b'<ol>' + added_entry.encode())
+                    b"<ol>", b"<ol>" + added_entry.encode()
+                )
                 (site / "learn/index.html").write_bytes(misplaced)
                 result = baseline_audit.audit(baseline, site)
                 self.assertFalse(result["passed"])
                 self.assertIn("learn/index.html", result["unexpected_changed"])
+
+    def test_two_independent_chapter_insertions_preserve_actual_book_pages(self):
+        root = Path(__file__).resolve().parents[2]
+        fixture = Path(__file__).resolve().parents[1] / "fixtures/published-route-baseline"
+        routes = (
+            "learn/index.html",
+            "learn/representation-consumers.html",
+            "learn/closed-loop-semantics.html",
+            "learn/controller-composition.html",
+            "learn/set-operations.html",
+        )
+        manifest = json.loads((preservation.SOURCE / "manifest.json").read_text())
+        provenance = json.loads((fixture / "source.json").read_text())
+        self.assertEqual(provenance["schema"], "csl.published-route-baseline-fixture/1")
+        self.assertEqual(provenance["baseline"], manifest["baseline"])
+        self.assertEqual(set(provenance["routes_sha256"]), set(routes))
+        for route in routes:
+            self.assertEqual(
+                preservation.digest((fixture / route).read_bytes()),
+                provenance["routes_sha256"][route],
+                route,
+            )
+        with tempfile.TemporaryDirectory() as directory:
+            temporary = Path(directory)
+            site = temporary / "site"
+            site.mkdir()
+            baseline = temporary / "baseline.tar"
+            source = temporary / "source"
+            source.mkdir()
+            with tarfile.open(baseline, "w") as bundle:
+                for route in routes:
+                    payload = (fixture / route).read_bytes()
+                    member = tarfile.TarInfo("./" + route)
+                    member.size = len(payload)
+                    bundle.addfile(member, io.BytesIO(payload))
+
+            learning_book.build(
+                site,
+                figure_index_path=root / "docs/examples/closed-loop/figure-index.json",
+            )
+            manifest["baseline"]["artifact_tar_sha256"] = preservation.digest(baseline.read_bytes())
+            self.assertEqual(
+                {
+                    entry["chapter_id"]
+                    for entry in manifest["learning_navigation_insertions_reviewed_separately"]
+                },
+                {"native-forward-models", "native-quadcopter-mpc"},
+            )
+            (source / "manifest.json").write_text(json.dumps(manifest))
+
+            with patch.object(baseline_audit, "SOURCE", source):
+                result = baseline_audit.audit(baseline, site)
+                self.assertTrue(result["passed"], result)
+                self.assertEqual(set(result["reviewed_learning_navigation_changes"]), set(routes))
+
+                mutated_routes = {
+                    "body mutation": (
+                        "learn/representation-consumers.html",
+                        lambda data: data.replace(b"</main>", b"<p>changed body</p></main>", 1),
+                    ),
+                    "wrong insertion target": (
+                        "learn/index.html",
+                        lambda data: data.replace(
+                            b'href="native-forward-models.html"',
+                            b'href="unreviewed-lesson.html"',
+                            1,
+                        ),
+                    ),
+                    "misplaced chapter entry": (
+                        "learn/index.html",
+                        lambda data: self._move_native_forward_entry_after_closed_loop(data),
+                    ),
+                }
+                for label, (route, mutate) in mutated_routes.items():
+                    with self.subTest(mutation=label):
+                        path = site / route
+                        original = path.read_bytes()
+                        path.write_bytes(mutate(original))
+                        result = baseline_audit.audit(baseline, site)
+                        self.assertFalse(result["passed"])
+                        self.assertIn(route, result["unexpected_changed"])
+                        path.write_bytes(original)
+
+                wrong_identity = json.loads(json.dumps(manifest))
+                wrong_identity["learning_navigation_insertions_reviewed_separately"][-1][
+                    "chapter_sha256"
+                ] = "0" * 64
+                (source / "manifest.json").write_text(json.dumps(wrong_identity))
+                result = baseline_audit.audit(baseline, site)
+                self.assertFalse(result["passed"])
+                self.assertEqual(
+                    set(result["unexpected_changed"]),
+                    {
+                        "learn/index.html",
+                        "learn/representation-consumers.html",
+                        "learn/closed-loop-semantics.html",
+                    },
+                )
+
+    @staticmethod
+    def _move_native_forward_entry_after_closed_loop(data):
+        import re
+
+        entries = list(re.finditer(rb'<li class="book-chapter">.*?</li>', data, re.DOTALL))
+        added = next(
+            match for match in entries if b'href="native-forward-models.html"' in match.group()
+        )
+        destination = next(
+            match for match in entries if b'href="closed-loop-semantics.html"' in match.group()
+        )
+        without_added = data[: added.start()] + data[added.end() :]
+        shift = len(added.group()) if added.end() < destination.end() else 0
+        destination_end = destination.end() - shift
+        return without_added[:destination_end] + added.group() + without_added[destination_end:]
+
+    def test_adjacent_or_repeated_chapter_insertions_fail_closed(self):
+        manifest = json.loads((preservation.SOURCE / "manifest.json").read_text())
+        forward = {
+            "chapter_id": "native-forward-models",
+            "chapter_sha256": "b7236c15858c7cd7d0b6fd7cfe4b3122be7f5d034f397e5a4b5b344bae599358",
+            "previous_chapter_id": "representation-consumers",
+            "next_chapter_id": "closed-loop-semantics",
+            "qualification": "Reviewed native forward-models lesson insertion.",
+        }
+        manifest["learning_navigation_insertions_reviewed_separately"] = [
+            forward,
+            {
+                "chapter_id": "closed-loop-semantics",
+                "chapter_sha256": "fb951101429be7caf73b13b72a21ccebe84ee44a03718db45abd7927b88bde8d",
+                "previous_chapter_id": "native-forward-models",
+                "next_chapter_id": "finite-controller-consumers",
+                "qualification": "ambiguous adjacent insertion",
+            },
+        ]
+        with self.assertRaisesRegex(ValueError, "adjacent or overlapping"):
+            baseline_audit._learning_navigation_replacements(manifest)
+
+        manifest["learning_navigation_insertions_reviewed_separately"] = [forward, forward]
+        with self.assertRaisesRegex(ValueError, "duplicate chapter insertion"):
+            baseline_audit._learning_navigation_replacements(manifest)
 
     def test_only_reviewed_learning_links_and_installed_list_order_are_mutable(self):
         learning_routes = ("learn/install-consumer.html", "learn/chapter-manifest.json")
