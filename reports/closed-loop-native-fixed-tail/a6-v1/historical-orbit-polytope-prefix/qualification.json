@@ -1,0 +1,152 @@
+{
+  "source_commit": "7e04e283",
+  "completed_holds": 1,
+  "original_intervals": 20,
+  "status": "incomplete",
+  "reason": "Native command slightly outside authored literal bound; physical execution refused before the second input",
+  "recording_gap": "Native stderr buffered privately and discarded by this historical recorder; bytes cannot be reconstructed",
+  "raw_zip_sha256": "47ad6626f7b10583f8a53aae2bc349378d6fb3c4d88c2708862f8d78a8e8c187",
+  "archive_members": {
+    "attempt.json": {
+      "bytes": 16954,
+      "sha256": "095021cf3cfe7a19f6183e6141416b5a9178b5c37e92be01129836049ea25fc1",
+      "crc32": "0e5c4a24"
+    },
+    "execution-request-000.json": {
+      "bytes": 4087,
+      "sha256": "5b0e77ae17545798a1d3c85a31746543718f6c7334e3742b3d7c68800c467c98",
+      "crc32": "1cb65bc8"
+    },
+    "execution-stderr-000.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    },
+    "execution-stdout-000.txt": {
+      "bytes": 10878,
+      "sha256": "6d2990ceafc1d5d77b79ead30d1491d74bf9560dcb93c672091c1ee0f31fca80",
+      "crc32": "27375bf9"
+    },
+    "native-query-000-11f9b6a0430ee869b0e74463353051f8338933f18fb5b187b9113e1ba4a418a7.json": {
+      "bytes": 552,
+      "sha256": "11f9b6a0430ee869b0e74463353051f8338933f18fb5b187b9113e1ba4a418a7",
+      "crc32": "ca0d940b"
+    },
+    "native-query-000-4cb526801cb9035789fcad13f6d0135b5d97c82ffbc878b761bbe5545915ef82.json": {
+      "bytes": 551,
+      "sha256": "4cb526801cb9035789fcad13f6d0135b5d97c82ffbc878b761bbe5545915ef82",
+      "crc32": "3e75a3f4"
+    },
+    "native-query-000-800b8e95b1c1be554f9ec37699578543a1494a255b3f2aab91ed5abe6ec6a752.json": {
+      "bytes": 546,
+      "sha256": "800b8e95b1c1be554f9ec37699578543a1494a255b3f2aab91ed5abe6ec6a752",
+      "crc32": "e725dfda"
+    },
+    "native-query-000-be91f8f5e38556f2c52c139bcd060608da303d37653dc6af2b167e682fc804e2.json": {
+      "bytes": 752,
+      "sha256": "be91f8f5e38556f2c52c139bcd060608da303d37653dc6af2b167e682fc804e2",
+      "crc32": "4efd0990"
+    },
+    "native-query-000-e3da73593f3ab48ed2511588229484c22d80f2810aaf01c1a772ad762454a654.json": {
+      "bytes": 758,
+      "sha256": "e3da73593f3ab48ed2511588229484c22d80f2810aaf01c1a772ad762454a654",
+      "crc32": "c9c96efa"
+    },
+    "native-query-000-request.jsonl": {
+      "bytes": 14402,
+      "sha256": "f74350296f96a0f1e175d87a4e2addb93b928ebb5e36ecefa1eae338224e31f6",
+      "crc32": "3ad63e6d"
+    },
+    "native-query-000-response.jsonl": {
+      "bytes": 268191,
+      "sha256": "d820dc854901d899d68db723c879c2fd10de25e723c8084797c36779a9c4a99a",
+      "crc32": "91c29946"
+    },
+    "native-query-001-5df4f53bbefc7725a39e6d935d4838671d1e87145ab9a100254379554f69a9a2.json": {
+      "bytes": 758,
+      "sha256": "5df4f53bbefc7725a39e6d935d4838671d1e87145ab9a100254379554f69a9a2",
+      "crc32": "d8107d07"
+    },
+    "native-query-001-a72e70cba0724546fcfd9608351b150f3edfaf29660b488b9e74ea7974251e34.json": {
+      "bytes": 546,
+      "sha256": "a72e70cba0724546fcfd9608351b150f3edfaf29660b488b9e74ea7974251e34",
+      "crc32": "a188cb6c"
+    },
+    "native-query-001-ae17378ffba174bb5147ebf8a153d6a4a06f3947378840e05166b7656992818a.json": {
+      "bytes": 752,
+      "sha256": "ae17378ffba174bb5147ebf8a153d6a4a06f3947378840e05166b7656992818a",
+      "crc32": "35c88911"
+    },
+    "native-query-001-cdb68c5d01f95609049ce15925519b1d4ee3344c5a63cf858ed129a75ed2e1ec.json": {
+      "bytes": 552,
+      "sha256": "cdb68c5d01f95609049ce15925519b1d4ee3344c5a63cf858ed129a75ed2e1ec",
+      "crc32": "f259343b"
+    },
+    "native-query-001-fa5ed2bce220b262c6070c4eac55d7d1af611b0a459c89ef0e4b660894a4d0d0.json": {
+      "bytes": 551,
+      "sha256": "fa5ed2bce220b262c6070c4eac55d7d1af611b0a459c89ef0e4b660894a4d0d0",
+      "crc32": "2c4a4f01"
+    },
+    "native-query-001-request.jsonl": {
+      "bytes": 16757,
+      "sha256": "b1eda428645c11ddfa9cb474fd1d941e1d0870d9f0d1af0a0ca27c1257a256df",
+      "crc32": "8ae4f556"
+    },
+    "native-query-001-response.jsonl": {
+      "bytes": 249016,
+      "sha256": "7240d2bfbf4f080b1651180cd2045abe04e7c8730c9f4e062e18be4bf98bc13a",
+      "crc32": "e428220e"
+    },
+    "record-io.jsonl": {
+      "bytes": 19028,
+      "sha256": "9bd3bd9e0bf2a914dc4a1440873378e4e2e52313632002f613b66215e21f3b7d",
+      "crc32": "086a2102"
+    },
+    "request.json": {
+      "bytes": 945,
+      "sha256": "fa7629abb29495fe1b95a5841aff79975cb1b52fbd51372723d45d3dd675d353",
+      "crc32": "46b404c0"
+    },
+    "resolution-receipt.json": {
+      "bytes": 977,
+      "sha256": "884a9906b3007eace5f0f9418bfca1794a16bc83c333965ac3054797b6374c6b",
+      "crc32": "7fdcf2f9"
+    },
+    "resolved-graph.json": {
+      "bytes": 7433,
+      "sha256": "203aa28feee760b8eb25550b359b35c7209a6d5921f15bed8a4d4d1ff230f066",
+      "crc32": "a8397709"
+    },
+    "run-manifest.json": {
+      "bytes": 7938,
+      "sha256": "457ad820d7c22c04f4ed6ecb060d6e1d2473a30266804f3a3cb2e82e932653c7",
+      "crc32": "7a8ffd15"
+    },
+    "stage-000.json": {
+      "bytes": 845499,
+      "sha256": "0c84a8b6f7f18e2ecaaee020f0ea036c8ad082727c5c1d968ca799b8776285c7",
+      "crc32": "cb1485b1"
+    },
+    "stage-001.json": {
+      "bytes": 761097,
+      "sha256": "4f86efbe1998af45a0f9c777582d93399b6649129754a036f103c49fb81ab111",
+      "crc32": "c8a9327c"
+    },
+    "stage-records.jsonl": {
+      "bytes": 358,
+      "sha256": "1c8094cc770981630ce4b95eb58fe8369c08e4ff69d0d6953d8e3f9d7a211291",
+      "crc32": "6b7d684a"
+    },
+    "worker-stderr.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    },
+    "worker-stdout.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    }
+  },
+  "scope": "Preserved historical failed prefix; not a completed episode or warm/stream-complete capture"
+}

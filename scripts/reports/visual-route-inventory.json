@@ -1076,6 +1076,14 @@
       "disposition": "composes-or-copies-existing-saved-figure"
     },
     {
+      "source": "scripts/reports/native_fixed_tail_episode_report.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "plane-1.svg"
+      ],
+      "disposition": "analytic-reference-checked-saved-run-renderer"
+    },
+    {
       "source": "scripts/reports/native_terminal_cost_example.py",
       "signal_count": 8,
       "asset_name_literals": [
