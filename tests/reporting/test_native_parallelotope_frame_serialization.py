@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import itertools
 import json
 import os
@@ -83,6 +84,14 @@ def _run_native_query(bridge: Path, representation_index: int) -> tuple[dict, st
 
 class NativeParallelotopeFrameSerializationTests(unittest.TestCase):
     def test_four_state_frame_projects_real_native_trace_corners_to_physical_state(self):
+        self._check_native_trace(render_cli=False)
+
+    @unittest.skipUnless(importlib.util.find_spec("matplotlib"),
+                         "Public figure rendering requires the optional reporting matplotlib dependency")
+    def test_public_cli_renders_current_referenced_native_capture(self):
+        self._check_native_trace(render_cli=True)
+
+    def _check_native_trace(self, *, render_cli: bool):
         bridge_value = os.environ.get("CSL_NATIVE_POLICY_BRIDGE")
         assert bridge_value, "CSL_NATIVE_POLICY_BRIDGE must name the built native bridge"
         bridge = Path(bridge_value).resolve(strict=True)
@@ -282,26 +291,27 @@ class NativeParallelotopeFrameSerializationTests(unittest.TestCase):
                 self.assertAlmostEqual(min(actual), min(expected), places=9)
                 self.assertAlmostEqual(max(actual), max(expected), places=9)
 
-            # The actual public CLI can select this fresh, referenced capture.
-            output = capture_root / "rendered"
-            script = Path(figures.__file__).resolve()
-            subprocess.run(
-                [sys.executable, str(script), "--capture-root", str(capture_root),
-                 "--output", str(output), "--attempt", f"{plane.case_id}={attempt_id}"],
-                text=True, capture_output=True, check=True, timeout=60,
-            )
-            figure_index = json.loads((output / "figure-index.json").read_text())
-            self.assertEqual(len(figure_index["figures"]), 2)
-            for entry in figure_index["figures"]:
-                self.assertEqual(entry["source_commits"], [current_source])
-                self.assertEqual(entry["profile_ids"], ["frame-serialization-functional/1"])
-                self.assertIn(f"--attempt {plane.case_id}={attempt_id}", entry["reproduction_command"])
-                page = (output / "figures" / (entry["id"] + ".html")).read_text()
-                self.assertIn(current_source, page)
-                self.assertNotIn(figures.SOURCE_COMMIT, page)
-                data = json.loads((output / "figures" / (entry["id"] + ".plotted-data.json")).read_text())
-                self.assertEqual(data["source_commit"], current_source)
-                self.assertEqual(data["reproduction_command"], entry["reproduction_command"])
+            if render_cli:
+                # The actual public CLI can select this fresh, referenced capture.
+                output = capture_root / "rendered"
+                script = Path(figures.__file__).resolve()
+                subprocess.run(
+                    [sys.executable, str(script), "--capture-root", str(capture_root),
+                     "--output", str(output), "--attempt", f"{plane.case_id}={attempt_id}"],
+                    text=True, capture_output=True, check=True, timeout=60,
+                )
+                figure_index = json.loads((output / "figure-index.json").read_text())
+                self.assertEqual(len(figure_index["figures"]), 2)
+                for entry in figure_index["figures"]:
+                    self.assertEqual(entry["source_commits"], [current_source])
+                    self.assertEqual(entry["profile_ids"], ["frame-serialization-functional/1"])
+                    self.assertIn(f"--attempt {plane.case_id}={attempt_id}", entry["reproduction_command"])
+                    page = (output / "figures" / (entry["id"] + ".html")).read_text()
+                    self.assertIn(current_source, page)
+                    self.assertNotIn(figures.SOURCE_COMMIT, page)
+                    data = json.loads((output / "figures" / (entry["id"] + ".plotted-data.json")).read_text())
+                    self.assertEqual(data["source_commit"], current_source)
+                    self.assertEqual(data["reproduction_command"], entry["reproduction_command"])
 
             # A legacy referenced response without the serialized frame stays source-agnostic.
             legacy_response = json.loads(native_runs[3][1])
