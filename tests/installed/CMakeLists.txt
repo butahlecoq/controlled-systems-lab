@@ -31,6 +31,13 @@ set_tests_properties(installed_flexible_pitch_client PROPERTIES
   TIMEOUT 600
   PASS_REGULAR_EXPRESSION "Native flexible pitch: 3 synthetic physical models; support_checks=4920 projection_checks=47232")
 
+add_executable(installed_slide50_catalogue_client native_slide50_reachability.cpp)
+target_link_libraries(installed_slide50_catalogue_client PRIVATE CSL::model_catalogue CSL::generator_adapter CSL::quickhull_2d)
+set_target_properties(installed_slide50_catalogue_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_slide50_catalogue_client COMMAND installed_slide50_catalogue_client)
+set_tests_properties(installed_slide50_catalogue_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Slide50 authored box: both horizon variants and all full-state corner checks passed")
+
 # Expectations come from the package-building configuration. Optional clients may
 # be skipped only when the corresponding adapter was deliberately disabled.
 foreach(adapter HIGHS QHULL)

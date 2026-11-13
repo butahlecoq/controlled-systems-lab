@@ -1,0 +1,64 @@
+{
+  "checks": {
+    "source50_full_state_corner_checks": 54608,
+    "spatial_full_state_support_checks": 3213,
+    "spatial_projection_planes": 6,
+    "spatial_terminal_generator_factors": 69
+  },
+  "cmake_cache_sha256": "ba99460c88186e8dc10b3a603d1fcf137832df12f36112222f5aba0940639d92",
+  "compiler": "c++ (GCC) 16.2.1 20260810",
+  "configuration": {
+    "CMAKE_BUILD_TYPE": "Release",
+    "CMAKE_CXX_COMPILER": "/usr/bin/c++",
+    "CMAKE_CXX_FLAGS": "",
+    "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG",
+    "CSL_ENABLE_CASADI": "OFF",
+    "CSL_ENABLE_HIGHS": "OFF",
+    "CSL_ENABLE_QHULL": "OFF"
+  },
+  "executable_sha256": {
+    "slide50_catalogue_reference": "589bdb7dcb93d0f06d3835a33e32472a068b791373b5d25cd4c4769a0d5ff21d",
+    "spatial_flight_reference": "de0b78a47fc06ad66bf897ef87f2f4c7479b3b22b25aafde4c6a5ffe98e5a2fe"
+  },
+  "execution_source_state": "clean committed source snapshot; incremental core Release build",
+  "linked_archives_sha256": {
+    "libcsl_artifacts.a": "272e851c9ec76fefd56183eb6eea34ba84f5e68db3913781e57f6cbc6462e399",
+    "libcsl_bounded_hull_checker.a": "a9c4883d947c43ca75fed69f40915a869e52d5d162fe5ff336965dcaf5fcbadd",
+    "libcsl_contracts.a": "afbecd584d1732402bb15f9ab6d2773b356ec3ae69c8389afb2350f99c1d73f4",
+    "libcsl_execution.a": "eda285da62afd8ad51a29e18fb9d0543a2da57dc8f07db2172cbb152d7c07ab6",
+    "libcsl_generator_adapter.a": "5732be3cd5587145da5083f20189d701b3b866e99424a3bd9abf56324b24a496",
+    "libcsl_geometry_generators.a": "e97953fa1dc10b31fba56d15e45f61a678829889a489af800d48fd1b83ee0651",
+    "libcsl_model.a": "1ca87f24cde7e9dea53fa8327acf1bac05665f6f476efd8055660fb28b8d8275",
+    "libcsl_model_catalogue.a": "692e65753f7b45743890fccc12f8c9bab34ac1d13d0d43d89d59dbfc1c49d246",
+    "libcsl_numeric.a": "9160133e117685818d4dc87fb0179633da777fc10fc043401fdc7e4a944ee1f8",
+    "libcsl_objectives.a": "8b97e48614bcfbad6e04fc1b2d5e2c8f9bc5123d5c18b831b9cf040987560eff",
+    "libcsl_optimization.a": "8edba0f5b921e3173ee2b800d5eb2736a769afc82bca07abb5ea18652c96e43a",
+    "libcsl_problem.a": "035734b1c901c8dc2a85629aa16be12b15c8b9e3399c2aed53e4fa5a034d2e8e",
+    "libcsl_quickhull_2d.a": "0c093d9e5cbbbb733560804435c335ea21fa83a986601fa9dcb90887d6671684",
+    "libcsl_registry.a": "9957db3a9e0ffe3161449484a03d8665219283d0f71bbe07110a7fcd1e6828f3",
+    "libcsl_resolved_core.a": "00781522b8177c8676dd0dea85ab5e8e6d75e0321ded3af54a56c8a92b013357",
+    "libcsl_resolved_problem.a": "422fa8fa56479f04c05d8b85cd7b0e50dd24becab90d1b52950cf04bee92c825",
+    "libcsl_sets.a": "c9c8889bbc52dfad785246a8a9a67339576bae4b29f324760f07ecad256b8d15",
+    "libcsl_verification.a": "2d43c96a29d7974cc2813bda728bf33127e442020d7a9ca45f2bdc9ad71435dc",
+    "libcsl_verifiers.a": "408913f944a2f75b51bed292d08eb02cdf3b56f6447c4d0a5208ec7071d0ce9a"
+  },
+  "machine": "x86_64",
+  "schema": "csl.native-model-example-build/1",
+  "scope": "Functional in-tree examples; no fresh whole-SDK installation or benchmark claim. Earlier installed source-3d7fff0c evidence is separate; final reviewed-tree install CI remains required.",
+  "source_commit": "e487affa2ad0edb3d6e615fe0a8f4dd6aeabd785",
+  "source_files_sha256": {
+    "examples/CMakeLists.txt": "6973a79778f2c7ad3aaf0db10dacbc06f330667885e5fe1529faeff61b456305",
+    "examples/native_catalogue_projection.hpp": "dd6bb0ad52d1d6a63edca7f37674dd016e5aa973591ee02f3902ad21afd96321",
+    "examples/native_slide50_reachability.cpp": "74ac991c9c482ce3efd114a3deca7087bed753a8ac35acee24b9dceb6925cf21",
+    "examples/native_spatial_flight.cpp": "ea0f74f6cc11eb77e88a7ef72ddf94db389ed135e7fcd2428213917fb4b60e9a",
+    "include/csl/model/catalogue.hpp": "ba64266f4d311f3ed32f30bda076c94ee961956155d5f0566dcc7ea4924720d5",
+    "include/csl/model/catalogue_metadata.hpp": "0d4fc6a01fdaf41431b2539d24661a80c8c3419f354e5db17f1001d3d34140ae",
+    "include/csl/model/spatial_flight.hpp": "c2bfe454a8938e90a12c4d6d7f24fd3281fed71e5a5401d9debf788f000dcb1c",
+    "include/csl/model/spatial_flight_catalogue.hpp": "2188fc542a48a0e0fa209229faf12fe9aeb6c8beeee9ddf7836346441a01520f",
+    "src/model/Module.cmake": "c9267f6106007e0b6aea271adda46ea2508272067d6c0ea6a3d67140a97c5bf6",
+    "src/model/Tests.cmake": "d1fa6bcc523de064f5a1566418cf4e37ca9b6e193244b4d2dd71ccbd21b3c95b",
+    "src/model/catalogue.cpp": "f24b2f110fc1984793b3766c0d23eeae4d7e053f817433bea2cc09dc7ded3be0",
+    "src/model/spatial_flight.cpp": "ad5890e2d04d57c14be26c8f40f055b5f64b0311be3edf8d036707447fdaee7e",
+    "src/model/spatial_flight_catalogue.cpp": "f64b9dbbcb079bb473956a8eb25d656fe0cc96d51f71a5a19c5d617dee69ad93"
+  }
+}
