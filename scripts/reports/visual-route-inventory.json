@@ -1101,6 +1101,15 @@
       "disposition": "analytic-reference-checked-saved-run-renderer"
     },
     {
+      "source": "scripts/reports/native_fixed_tail_geometry.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "syn-nl-lv-01-plane-0.svg"
+      ],
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Reads authenticated A6 native fixed-tail archives and saved full-state projection receipts. Displays matched-family carriers F, conditional inner B and the recorded full-state identity I=F∩B=B, with affine candidates and separate nonlinear execution; no controller run, global backward set or nonlinear certificate."
+    },
+    {
       "source": "scripts/reports/native_parallelotope_functional.py",
       "signal_count": 7,
       "asset_name_literals": [
