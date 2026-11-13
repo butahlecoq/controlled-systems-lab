@@ -166,7 +166,7 @@ int main(int argc, char** argv) try {
         std::vector<std::pair<std::size_t, std::size_t>> planes;
         for (std::size_t j = 0; j < n; j += 2) planes.push_back({j, j + 1});
         std::vector<native_catalogue_example::CapturedCase> pictures;
-        for (const auto [a, b] : planes) pictures.push_back({info, {}, {{{a, b}, {a, b}}}, true});
+        for (const auto& [a, b] : planes) pictures.push_back({info, {}, {{{a, b}, {a, b}}}, true});
         for (std::size_t k = 0; k < reachable.size(); ++k) {
             const auto& set = reachable[k];
             if (set.factor_ids().size() != n + k) throw std::runtime_error("Independent control factor lost");
