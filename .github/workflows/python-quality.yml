@@ -7,6 +7,7 @@ on:
       - 'scripts/ci/**'
       - 'tests/ci/**'
       - 'scripts/catalogue/**'
+      - 'reports/algorithm-results/tooling/**'
       - 'scripts/reports/frozen_native_bundle.py'
       - 'scripts/reports/stage_native_model_catalogue.py'
       - 'scripts/reports/stage_native_extended_models.py'
@@ -17,6 +18,8 @@ on:
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
       - 'reports/algorithm-results/native-row-scaling-diagnostic-v1/**'
+      - 'tests/reporting/test_syn03_strategy_a_report.py'
+      - 'tests/reporting/test_syn03_ts02_report.py'
       - 'pyproject.toml'
       - 'requirements-quality.txt'
       - '.github/workflows/python-quality.yml'
@@ -27,6 +30,7 @@ on:
       - 'scripts/ci/**'
       - 'tests/ci/**'
       - 'scripts/catalogue/**'
+      - 'reports/algorithm-results/tooling/**'
       - 'scripts/reports/frozen_native_bundle.py'
       - 'scripts/reports/stage_native_model_catalogue.py'
       - 'scripts/reports/stage_native_extended_models.py'
@@ -37,6 +41,8 @@ on:
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
       - 'reports/algorithm-results/native-row-scaling-diagnostic-v1/**'
+      - 'tests/reporting/test_syn03_strategy_a_report.py'
+      - 'tests/reporting/test_syn03_ts02_report.py'
       - 'pyproject.toml'
       - 'requirements-quality.txt'
       - '.github/workflows/python-quality.yml'
@@ -69,5 +75,9 @@ jobs:
         run: |
           python -m unittest discover -s tests/reporting -p 'test_site_additions.py'
           python -m unittest discover -s tests/reporting -p 'test_app02_saved.py'
+      - name: Exercise maintained compatibility entry points
+        run: |
+          python -m unittest discover -s tests/reporting -p 'test_syn03_strategy_a_report.py'
+          python -m unittest discover -s tests/reporting -p 'test_syn03_ts02_report.py'
       - name: Check the locked source-only native row-scaling publication
         run: python -m unittest discover -s tests/reporting -p 'test_stage_native_row_scaling_diagnostic.py'

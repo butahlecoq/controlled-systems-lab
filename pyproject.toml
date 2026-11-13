@@ -8,7 +8,10 @@ include = [
     "scripts/reports/stage_native_row_scaling_diagnostic.py", "tests/reporting/test_stage_native_row_scaling_diagnostic.py",
     "scripts/reports/site_additions.py", "scripts/reports/stage_app02.py",
     "tests/reporting/test_site_additions.py", "tests/reporting/test_app02_saved.py",
+    "reports/algorithm-results/tooling/**/*.py",
 ]
+
+extend-exclude = ["reports/algorithm-results/tooling/opt07", "reports/algorithm-results/tooling/opt11"]
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F", "I", "B"]
@@ -18,7 +21,8 @@ python-version = "3.11"
 extra-paths = ["scripts/ci", "scripts/reports", "benchmarks/reporting/closed_loop", "benchmarks/reporting/mpc11"]
 
 [tool.ty.src]
-include = ["scripts/reports/stage_native_row_scaling_diagnostic.py", "tests/reporting/test_stage_native_row_scaling_diagnostic.py", "scripts/ci", "tests/ci", "scripts/catalogue", "scripts/reports/frozen_native_bundle.py", "scripts/reports/stage_native_model_catalogue.py", "scripts/reports/stage_native_extended_models.py", "scripts/reports/site_additions.py", "scripts/reports/stage_app02.py", "tests/reporting/test_site_additions.py", "tests/reporting/test_app02_saved.py"]
+include = ["scripts/reports/stage_native_row_scaling_diagnostic.py", "tests/reporting/test_stage_native_row_scaling_diagnostic.py", "scripts/ci", "tests/ci", "scripts/catalogue", "scripts/reports/frozen_native_bundle.py", "scripts/reports/stage_native_model_catalogue.py", "scripts/reports/stage_native_extended_models.py", "scripts/reports/site_additions.py", "scripts/reports/stage_app02.py", "tests/reporting/test_site_additions.py", "tests/reporting/test_app02_saved.py", "reports/algorithm-results/tooling"]
+exclude = ["reports/algorithm-results/tooling/opt07", "reports/algorithm-results/tooling/opt11"]
 
 [tool.ty.terminal]
 error-on-warning = true
