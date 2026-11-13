@@ -180,7 +180,8 @@ example_check(native_flexible_pitch_synthetic_ladder native_flexible_pitch "" 0
 example_check(native_spatial_flight_synthetic_deviation_reachability native_spatial_flight "" 0
   "Native spatial flight: 20 transitions.*projection_planes=6 full_state_coordinates_covered=9")
 if(TARGET native_flexible_pitch)
-  set_tests_properties(native_flexible_pitch_synthetic_ladder PROPERTIES TIMEOUT 600)
+  set_tests_properties(native_flexible_pitch_synthetic_ladder
+    native_spatial_flight_synthetic_deviation_reachability PROPERTIES TIMEOUT 600)
 endif()
 example_check(convex_original_norm registered_convex "" 0 "original_cost=4.1231056.*squared_cost=17")
 example_check(resolved_history resolved_scenario "" 0 "states=0,0.25,1 controls=0.25,0.75 original_cost=0")
