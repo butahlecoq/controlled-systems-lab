@@ -39,12 +39,13 @@
 <code>(u₀-1)²+u₀²+0.2u₀²</code>; setting its derivative to zero gives
 <code>u₀=5/11</code>. Without the state penalty the objective is <code>0.2u₀²</code>,
 so <code>u₀=0</code>. The plotted points match the native HiGHS run in
-<a href="nominal_quadratic_history_2d.csv">the captured output</a>.</p>
+<a href="https://github.com/butahlecoq/controlled-systems-lab/blob/c16a19dd900bc5e186273008f610a712dc177981/examples/nominal_quadratic_history_2d.csv">the captured output</a>.</p>
 <h2>Reproduce</h2>
 <pre><code>cmake -S examples -B build/examples -DCMAKE_PREFIX_PATH=build/dev/install
 cmake --build build/examples --target nominal_quadratic_history_2d
 ./build/examples/nominal_quadratic_history_2d</code></pre>
-<p>Source: <a href="nominal_quadratic_history_2d.cpp">example program</a> and
-<a href="../include/csl/optimization/nominal_quadratic_history.hpp">public API declaration</a>.
+<p>Source at <a href="https://github.com/butahlecoq/controlled-systems-lab/tree/c16a19dd900bc5e186273008f610a712dc177981">commit c16a19dd</a>:
+<a href="https://github.com/butahlecoq/controlled-systems-lab/blob/c16a19dd900bc5e186273008f610a712dc177981/examples/nominal_quadratic_history_2d.cpp">example program</a> and
+<a href="https://github.com/butahlecoq/controlled-systems-lab/blob/c16a19dd900bc5e186273008f610a712dc177981/include/csl/optimization/nominal_quadratic_history.hpp">public API declaration</a>.
 This is a two-dimensional mathematical example, not a calibrated physical model or a benchmark.</p>
 </html>
