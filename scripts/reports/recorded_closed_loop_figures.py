@@ -13,7 +13,8 @@ from typing import Any
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "benchmarks/reporting/closed_loop"))
-from attempt_records import iter_stage_references, read_attempt, verify_v2_attempt
+from attempt_records import (iter_stage_references, read_attempt, read_native_capture_metadata,
+                             verify_v2_attempt)
 from figure_style import STYLE_ID, configure_numeric_axis
 from mathematical_notation import matrix_html
 
@@ -277,6 +278,7 @@ def _collect_run(plane: Plane, attempt_id: str, capture_root: Path) -> dict[str,
                 raise ValueError(f"v2 stage evidence is invalid for {attempt_id}: {error}") from error
 
     raw_files: list[dict[str, str]] = []
+    native_capture_files: list[dict[str, str]] = []
     stages: list[dict[str, Any]] = []
     if attempt_record is not None and attempt_record.get("format_version") == 2:
         stage_paths = [attempt_dir / reference["path"]
@@ -303,7 +305,49 @@ def _collect_run(plane: Plane, attempt_id: str, capture_root: Path) -> dict[str,
     if first.get("status") != "applied-and-observed":
         raise ValueError(f"initial stage was not applied and observed for {attempt_id}")
     controller_id = resolution.get("selected_controller_id")
-    predicted = first.get("predicted_sets", [])
+    native_response: dict[str, Any] | None = None
+    native_response_source: dict[str, str] | None = None
+    capture_reference = first.get("native_query_capture")
+    if isinstance(capture_reference, dict) and capture_reference.get("schema") == \
+            "csl.closed-loop.native-query-capture-reference/1":
+        capture_metadata, payload_paths = read_native_capture_metadata(attempt_dir, capture_reference)
+        response_reference = capture_metadata.get("response")
+        response_path = payload_paths.get("response")
+        if (response_reference is not None and response_path is not None
+                and capture_metadata.get("response_parse_status") == "parsed"):
+            response_bytes = response_path.read_bytes()
+            response_sha256 = hashlib.sha256(response_bytes).hexdigest()
+            if (len(response_bytes) != response_reference.get("bytes")
+                    or response_sha256 != response_reference.get("sha256")
+                    or response_sha256 != capture_metadata.get("bridge_response_sha256")):
+                raise ValueError(f"native response payload hash chain is invalid for {attempt_id}")
+            try:
+                parsed_response = json.loads(response_bytes)
+            except (UnicodeDecodeError, json.JSONDecodeError) as error:
+                raise ValueError(f"saved native response is not parsed JSON for {attempt_id}") from error
+            if not isinstance(parsed_response, dict):
+                raise ValueError(f"saved native response is not an object for {attempt_id}")
+            if parsed_response.get("task_id") not in (None, plane.task_id) or \
+                    parsed_response.get("task_sha256") not in (None, task_sha):
+                raise ValueError(f"saved native response task identity mismatch for {attempt_id}")
+            native_response = parsed_response
+            native_response_source = {"path": response_path.name, "sha256": response_sha256}
+            native_capture_files.append(
+                {"path": capture_reference["path"], "sha256": capture_reference["sha256"]}
+            )
+            for payload_name, payload_path in payload_paths.items():
+                native_capture_files.append({
+                    "path": payload_path.name,
+                    "sha256": capture_metadata[payload_name]["sha256"],
+                })
+    predicted = first.get("predicted_sets")
+    if predicted is None and native_response is not None:
+        predicted = native_response.get("predicted_sets", [])
+    if not isinstance(predicted, list):
+        predicted = []
+    trace_source = native_response_source if first.get("predicted_sets") is None else None
+    trace_source_path = (trace_source or {}).get("path", first["_source_filename"])
+    trace_source_sha256 = (trace_source or {}).get("sha256", first["_source_file_sha256"])
     node_layers = [layer for layer in predicted if layer.get("role") == "retained-stage-layered-singleton-nodes"]
     cloud_layers = [layer for layer in predicted if layer.get("role") == "complete-authored-action-parent-clouds"]
     nodes = node_layers[0].get("nodes", []) if node_layers else []
@@ -335,9 +379,9 @@ def _collect_run(plane: Plane, attempt_id: str, capture_root: Path) -> dict[str,
                      "accepted_by_selected_shape_numerical_membership": child.get("accepted_by_selected_shape_numerical_membership")}
                     for child in cloud.get("action_child_witnesses", [])
                 ],
-                "source_pointer": f"stage-000.json#/predicted_sets/{predicted.index(cloud_layers[0])}/clouds/{index}",
-                "source_file": first["_source_filename"],
-                "source_file_sha256": first["_source_file_sha256"],
+                "source_pointer": f"{trace_source_path}#/predicted_sets/{predicted.index(cloud_layers[0])}/clouds/{index}",
+                "source_file": trace_source_path,
+                "source_file_sha256": trace_source_sha256,
             })
     for predicted_index, trace in enumerate(predicted):
         if trace.get("role") != "fixed-plan-trajectory-enclosure":
@@ -385,9 +429,9 @@ def _collect_run(plane: Plane, attempt_id: str, capture_root: Path) -> dict[str,
                 "projection_status": (
                     "projected" if projected_geometry else "representation geometry unsupported or invalid"
                 ),
-                "source_pointer": f"{first['_source_filename']}#/predicted_sets/{predicted_index}/stages/{stage_index}",
-                "source_file": first["_source_filename"],
-                "source_file_sha256": first["_source_file_sha256"],
+                "source_pointer": f"{trace_source_path}#/predicted_sets/{predicted_index}/stages/{stage_index}",
+                "source_file": trace_source_path,
+                "source_file_sha256": trace_source_sha256,
             })
     node_rows = []
     for node in nodes:
@@ -404,18 +448,20 @@ def _collect_run(plane: Plane, attempt_id: str, capture_root: Path) -> dict[str,
             "backward_membership_witness": node.get("predecessor_contains_parent"),
             "stage_intersection_membership_witness": node.get("stage_set_intersection_nonempty"),
             "backward_viable": node.get("backward_viable"),
-            "source_pointer": "stage-000.json#/predicted_sets/0/nodes",
-            "source_file": first["_source_filename"],
-            "source_file_sha256": first["_source_file_sha256"],
+            "source_pointer": f"{trace_source_path}#/predicted_sets/0/nodes",
+            "source_file": trace_source_path,
+            "source_file_sha256": trace_source_sha256,
         })
 
     predicted_plan = first.get("selected_plan", {})
+    if not predicted_plan and native_response is not None:
+        predicted_plan = native_response.get("selected_plan", {})
     plan_states = predicted_plan.get("states", [])
     planned = [{"absolute_stage": i, "time": i * plane.dt, "state": state,
                 "point": list(plane.project(state)),
-                "source_pointer": f"stage-000.json#/selected_plan/states/{i}",
-                "source_file": first["_source_filename"],
-                "source_file_sha256": first["_source_file_sha256"]}
+                "source_pointer": f"{trace_source_path}#/selected_plan/states/{i}",
+                "source_file": trace_source_path,
+                "source_file_sha256": trace_source_sha256}
                for i, state in enumerate(plan_states) if isinstance(state, list)]
     replay: list[dict[str, Any]] = []
     for stage in stages:
@@ -440,7 +486,7 @@ def _collect_run(plane: Plane, attempt_id: str, capture_root: Path) -> dict[str,
     observed = first.get("observed_physical")
     if not isinstance(observed, list) or not replay:
         raise ValueError(f"initial state or completed plant replay missing for {attempt_id}")
-    all_target = first.get("selected_plan", {}).get("states", [])
+    all_target = predicted_plan.get("states", [])
     result = {
         "attempt_id": attempt_id,
         "case_id": case,
@@ -481,6 +527,7 @@ def _collect_run(plane: Plane, attempt_id: str, capture_root: Path) -> dict[str,
             "resolution_sha256": _sha256(attempt_dir / "resolution-receipt.json"),
             "postcheck_sha256": _sha256(attempt_dir / "postcheck-initial.json"),
             "stage_files": raw_files,
+            "native_capture_files": native_capture_files,
         },
     }
     if case == "syn-nl-fuel-01":
