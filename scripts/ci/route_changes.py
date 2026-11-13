@@ -39,6 +39,38 @@ PRESENTATION_FILES = {
     "tests/reporting/test_viz10_plot_companions.py",
     "tests/reporting/test_landing.py",
 }
+# Pages preservation owns archived routes, navigation inventories and byte/hash
+# audits. These files have no native CMake target or executable smoke consumer.
+PAGES_PUBLICATION_FILES = {
+    "scripts/reports/audit_published_route_preservation.py",
+    "scripts/reports/preserve_published_routes.py",
+    "scripts/reports/pages_route_retirement.py",
+    "scripts/reports/audit_visual_routes.py",
+    "tests/reporting/test_published_route_audit_policy.py",
+    "tests/reporting/test_preserve_published_routes.py",
+    "tests/reporting/test_pages_route_retirement.py",
+}
+# Saved-episode publication reads contracts/captures and renders/checks records.
+# Shared controller/record-protocol implementations in benchmarks/ remain native.
+SAVED_EPISODE_PUBLICATION_FILES = {
+    "scripts/reports/history_warm_gap_report.py",
+    "scripts/reports/stage_history_functional.py",
+    "scripts/reports/package_history_functional.py",
+    "scripts/reports/render_history_functional.py",
+    "scripts/reports/recorded_closed_loop_figures.py",
+    "scripts/reports/native_parallelotope_functional.py",
+    "tests/reporting/test_history_functional_bundle.py",
+    "tests/reporting/test_history_warm_gap_publication.py",
+    "tests/reporting/test_recorded_closed_loop_figures.py",
+    "tests/reporting/test_native_parallelotope_functional.py",
+}
+# These owners carry saved evidence, including inert source/build snapshots.
+# They are not compiler inputs; adding a live driver/build owner elsewhere still
+# requires native validation. Do not generalize to reports/ or scripts/reports/.
+SAVED_PUBLICATION_ROOTS = (
+    "reports/published-route-preservation/",
+    "reports/closed-loop-history-functional/",
+)
 SAVED_REPORTS = "reports/algorithm-results/"
 EXECUTABLE_REPORT_TOOLS = SAVED_REPORTS + "tooling/"
 
@@ -48,7 +80,9 @@ def classify(paths):
     native = not paths
     reports = not paths
     for path in paths:
-        if path in PRESENTATION_FILES:
+        if path in PRESENTATION_FILES | PAGES_PUBLICATION_FILES | SAVED_EPISODE_PUBLICATION_FILES:
+            reports = True
+        elif path.startswith(SAVED_PUBLICATION_ROOTS):
             reports = True
         elif path.startswith(SAVED_REPORTS) and not path.startswith(EXECUTABLE_REPORT_TOOLS):
             reports = True
