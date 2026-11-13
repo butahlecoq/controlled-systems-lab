@@ -1668,6 +1668,9 @@ add_test(NAME buryatia_volterra_2d_report
   COMMAND Python3::Interpreter
     ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/buryatia/check_2d.py
     --raw ${CMAKE_CURRENT_SOURCE_DIR}/docs/examples/buryatia-volterra-affine-2d-records.json)
+add_test(NAME buryatia_2d_provenance_protocol
+  COMMAND Python3::Interpreter
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/reporting/test_buryatia_2d_provenance.py)
 add_test(NAME buryatia_dim4_native_report
   COMMAND Python3::Interpreter
     ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/buryatia/check_dim4.py
@@ -1681,7 +1684,7 @@ add_test(NAME buryatia_volterra_2d_native_capture
     --exe $<TARGET_FILE:csl_buryatia_approximation_report>
     --cmake-cache ${CMAKE_BINARY_DIR}/CMakeCache.txt
     --record-out ${CMAKE_CURRENT_BINARY_DIR}/buryatia-volterra-affine-2d-native-records.json)
-set_tests_properties(buryatia_volterra_2d_report PROPERTIES LABELS "geometry;example" TIMEOUT 30)
+set_tests_properties(buryatia_volterra_2d_report buryatia_2d_provenance_protocol PROPERTIES LABELS "geometry;example" TIMEOUT 30)
 set_tests_properties(buryatia_dim4_native_report PROPERTIES LABELS "geometry;example;native-report" TIMEOUT 300)
 set_tests_properties(buryatia_dim4_capture_protocol PROPERTIES LABELS "geometry;example" TIMEOUT 30)
 set_tests_properties(buryatia_volterra_2d_native_capture PROPERTIES LABELS "geometry;example;native-report" TIMEOUT 1800)
