@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
+import re
 from pathlib import Path
 import zipfile
 
@@ -53,6 +55,8 @@ def check_zip(path, receipt):
         if (episode['resolved_graph']['graph_id'] != receipt['graph_id'] or
                 episode['resolved_graph']['graph_fingerprint'] != receipt['graph_fingerprint']):
             raise ValueError('native archive graph differs from its receipt')
+        if any(type(value) not in (int, float) or not math.isfinite(value) for value in episode['physical_objective'].values()):
+            raise ValueError('native episode cost must be finite numeric data')
         if episode['physical_objective'] != receipt['physical_objective']:
             raise ValueError('native episode cost differs between archive and receipt')
         if 'worker-stderr.txt' not in archive.namelist():
@@ -118,6 +122,9 @@ def build(root=ROOT):
         raise ValueError('native episode or separate role-probe audit is incomplete')
     assets = {ROUTE+'/'+name: value for name, value in files.items()}
     provenance = json.loads(files['provenance.json'])
+    for key in ('episode_source_commit', 'native_cpp_source_commit', 'current_role_probe_source_commit', 'current_role_probe_native_cpp_source_commit'):
+        if not re.fullmatch(r'[0-9a-f]{40}', provenance[key]):
+            raise ValueError('native evidence requires exact source commit identities')
     assets[ROUTE+'/index.html'] = page(records, provenance)
     entry = {'family': 'Native set-based control', 'title': 'Three nonlinear tasks × five physical families',
         'status': 'saved-data-companion', 'anchor': ROUTE, 'page': ROUTE+'/index.html',
@@ -148,7 +155,7 @@ def main():
         path.write_bytes(raw)
     gallery = ('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Native fixed-tail examples</title><link rel="stylesheet" href="examples.css"></head><body><main class="page-content"><h1>Native fixed-tail examples</h1>'+minimal_card+card+'</main></body></html>')
     (output/'examples/index.html').write_text(gallery)
-    (output/'index.html').write_text('<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Native fixed-tail evidence</title></head><body><a href="examples/index.html">Open the native fixed-tail examples</a></body></html>')
+    (output/'index.html').write_text('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Native fixed-tail evidence</title><link rel="stylesheet" href="examples/examples.css"></head><body><main class="page-content"><h1>Native fixed-tail evidence</h1><p><a href="examples/index.html">Open the mathematical examples and saved episodes</a></p></main></body></html>')
     return 0
 
 
