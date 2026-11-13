@@ -50,8 +50,8 @@ def render(root: Path) -> str:
               '<a href="records/attempts/analytic-normalized/stdout.log">Native stdout</a> · '
               '<a href="records/attempts/analytic-normalized-output/native.txt">Full native log</a></figcaption></figure></section>',
               '<section><h2>All three outcomes remain in the record</h2>',
-              '<table><caption>One bounded diagnostic profile, without a cross-model ranking</caption><thead><tr>'
-              '<th scope="col">Model</th><th scope="col">Original compiled matrix</th><th scope="col">Observed outcome</th><th scope="col">Raw evidence</th>'
+              '<div class="scroll" role="region" aria-label="Diagnostic outcomes; scroll horizontally on narrow screens" tabindex="0"><table style="min-width:60rem"><caption>One bounded diagnostic profile, without a cross-model ranking</caption><thead><tr>'
+              '<th scope="col" style="white-space:nowrap">Model</th><th scope="col">Original compiled matrix</th><th scope="col">Observed outcome</th><th scope="col">Raw evidence</th>'
               '</tr></thead><tbody>']
     descriptions = {
         23: ('38 rows; 6 offending entries; minimum 6.855804411066206×10⁻¹⁷',
@@ -63,8 +63,8 @@ def render(root: Path) -> str:
     for number,(matrix,outcome) in descriptions.items():
         path=f'records/attempts/model-{number}-row-scale-output'
         links=f'<a href="{path}/replan-0/rows.csv">Rows, stages and exponents</a> · <a href="{path}/replan-0/csr.csv">Original/scaled CSR</a> · <a href="{path}/native-replan-0.txt">Full native log</a> · <a href="records/attempts/model-{number}-row-scale/attempt.json">Attempt receipt</a>'
-        parts.append(f'<tr><th scope="row">{number}</th><td>{matrix}</td><td>{outcome}</td><td>{links}</td></tr>')
-    parts += ['</tbody></table><p>The resulting whole-matrix magnitude ranges were approximately '
+        parts.append(f'<tr><th scope="row" style="white-space:nowrap">{number}</th><td>{matrix}</td><td>{outcome}</td><td>{links}</td></tr>')
+    parts += ['</tbody></table></div><p>The resulting whole-matrix magnitude ranges were approximately '
               '[7.93×10<sup>−5</sup>, 1.80×10<sup>16</sup>], [1, 6.19×10<sup>26</sup>] and '
               '[1, 1.33×10<sup>36</sup>], respectively. Large ranges remain; algebraic admission '
               'alone cannot establish a numerically usable solve. No further retry is included.</p></section>',

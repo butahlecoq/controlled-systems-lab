@@ -10,8 +10,8 @@ from frozen_native_bundle import FrozenNativeBundle, read_bundle
 
 ROUTE = "native-row-scaling-diagnostic-v1"
 SOURCE = "428bbdcaca4adca6a8d5af2ba3f1d64a80c97f6e"
-MANIFEST_SHA256 = "2338fdc18f7402030f7fe0982db9c39c9261867571cbba411b2d6db7e34eab51"
-ARCHIVE_SHA256 = "c21f22c40027abfefe51ff2025e1e047c65ee3c3bfd40d03eb9182260b0fdf25"
+MANIFEST_SHA256 = "8eea8f3a484147cb4eb636e7e6e6d3276ca3d63d9e5bc986da82d49780f42aa9"
+ARCHIVE_SHA256 = "7233a9b93b8f071b9454552596134ca8fd6ffce2fff5ce64300555a5d1f28bd7"
 
 
 def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]], str]:

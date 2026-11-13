@@ -10,7 +10,7 @@ record = json.loads((root/'records/analytic-result.json').read_text())
 point = record['observed_x']
 plt.rcParams.update({'svg.hashsalt':'csl-row-diagnostic-v1', 'font.size':11})
 fig, ax = plt.subplots(figsize=(6.6,4.8), layout='constrained')
-ax.plot([0,3],[3,0],color='#40526b',label='Original feasible line: x + y = 3')
+ax.plot([-.3,3.3],[3.3,-.3],color='#40526b',label='Original feasible line: x + y = 3')
 ax.scatter(*point,s=150,facecolors='none',edgecolors='#006e84',linewidths=2.4,label='Recorded native point (1.5, 1.5)',zorder=3)
 ax.scatter(*record['analytic_x'],s=50,marker='x',color='#a24119',label='Analytic optimum (same point)',zorder=4)
 ax.annotate('Original objective: x² + y² = 4.5',xy=point,xytext=(.1,2.55),arrowprops={'arrowstyle':'->','color':'#536270'},fontsize=10)

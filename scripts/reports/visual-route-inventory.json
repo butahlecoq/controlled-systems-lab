@@ -3922,7 +3922,7 @@
         "toy.png",
         "toy.svg"
       ],
-      "index_sha256": "e465a838a208a61f158502b7ac316139689424c799a064034e23f856c80f5f4b",
+      "index_sha256": "2a4018585cdcc8fd65c65461eaf0834ca254b2587a2874b953018936d21fa719",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },

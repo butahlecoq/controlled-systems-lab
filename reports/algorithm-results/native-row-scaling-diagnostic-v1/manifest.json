@@ -4,7 +4,7 @@
   "files_sha256": {
     "examples.css": "11ded2b69cec694ff61ecad0493f175becbfc47bce3d641f2ee512543bb82cf4",
     "guide.html": "a04f7f9d45dc9f427511bd0bff6ac19e2a5267cd32a98ba5f4603a1893f38907",
-    "index.html": "e465a838a208a61f158502b7ac316139689424c799a064034e23f856c80f5f4b",
+    "index.html": "2a4018585cdcc8fd65c65461eaf0834ca254b2587a2874b953018936d21fa719",
     "inputs/models.csv": "e8e16b69d2e94c1016014f05349693662af455f060d755cd2daf9f835254591e",
     "inputs/provenance.json": "a790316844c7ec892d7ab48d8b2ec8a65b124637f425e60b5db07d9816c23aa2",
     "records/analytic-result.json": "3775e6107cda45877c9316a8b111e6a037acc36593ffdd223a9678fa41031c28",
@@ -102,17 +102,17 @@
     "source/check_evidence.py": "59e6c949933f874b88f358ddf57b1bb644c7561a50b6e030e4a184b914400c8c",
     "source/executed-local-check_results.py.txt": "94112533531a087cc23672eaabd7c2f41dd18d2213780ac3393f9589b6b17269",
     "source/executed-local-run_attempts.py.txt": "082b108418b9d3fdc033d3f59e91a4a5794e2c48c1fbbf467b8ef9393aa677b8",
-    "source/plot_toy.py": "ce8a99a3748ae28dcc9c51dd3c1391fe2edb0c776310cb93032f5ae4b0e66537",
-    "source/render_snapshot.py": "31dd44559be0c016f00f0cbba1614526af490e30f273c659eb6c4caf440323e8",
+    "source/plot_toy.py": "1408d48650246d237a108508489e64830b8d7be8c94321598cb73e8d3197a140",
+    "source/render_snapshot.py": "d959992ce6ae4b56548030c52aeb832df258e1def41323308be89dea292480fa",
     "source/reproduce.py": "44e22e23d8ca97fcfba1fc3380dc656b47ae51c0ef4c7575ee8033922dbd4fbb",
     "source/row_scaling.hpp": "6b5b64b65177d0b5365d98b36b972c14b529ff44bb6ec1059fed65a381027469",
     "source/row_scaling_driver.cpp": "eb27038ab0fa156d9f587a8088047305cd1dc9aef1067e8f9cb113d7cb512751",
     "source/site_design_snapshot.py": "6adbe54892b86ee9a6a8261e97d0a1451cab38cd1cbfa39820a5041ad1ff6633",
-    "toy.png": "20d64ee57e7d460e5959db1d94c11a5631a6b768b95d15c42569b7d834eba5bd",
-    "toy.svg": "2ff167986e95e9f03d6f36049db9d1245f47374934fd1a329f5866eaa678fbd9"
+    "toy.png": "18d38738235ee92a47be1baa1870bfd4744b5274daa99bbd2ffa763ac5fd03e2",
+    "toy.svg": "058dd44ef5ce016d9c99600b80d76acd298d77785a2d1ba3cfe428b87b26bd3a"
   },
   "schema": "csl.native-row-scaling-diagnostic/1",
   "source_commit": "428bbdcaca4adca6a8d5af2ba3f1d64a80c97f6e",
   "source_only": true,
-  "source_scope": "Retrospective source capsule; executed C++ files match actual captured SHA256. The numerical spike ran with these helper bytes uncommitted; 5df7f97f is the baseline parent, not the modified helper commit at execution time."
+  "source_scope": "Exact executed native C++ helper/data capsule at source_commit; helper bytes were uncommitted during the spike and are retrospectively bound by captured SHA256. The baseline parent was5df7f97f. Presentation and portable supporting adaptations are frozen publication artifacts, separately hashed here; they do not claim execution-time code status."
 }
