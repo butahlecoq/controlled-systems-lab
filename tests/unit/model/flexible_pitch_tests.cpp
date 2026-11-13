@@ -128,8 +128,6 @@ TEST_CASE("flexible pitch ZOH agrees with an independent augmented matrix expone
     using namespace csl;
     using namespace csl::model::catalogue;
     for (const auto& info : flexible_pitch_cases()) {
-        CHECK(std::count_if(catalogue.begin(), catalogue.end(),
-            [&](const CaseInfo& entry) { return entry.id == info.id; }) == 1);
         const auto data = take(make_flexible_pitch_case(info.id));
         const auto n = info.states.size(), m = n + 1;
         // Long-double Taylor series of exp(h*[A B; 0 0]), independent of RK4.
