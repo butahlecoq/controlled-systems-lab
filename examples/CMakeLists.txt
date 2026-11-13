@@ -125,6 +125,7 @@ csl_example(adaptive_ode_replay CSL::simulation)
 csl_example(native_model_catalogue CSL::model_catalogue CSL::generator_adapter CSL::quickhull_2d)
 csl_example(native_four_state_reachability CSL::model_catalogue CSL::geometry_generators CSL::quickhull_2d)
 csl_example(native_flexible_pitch CSL::model_catalogue CSL::geometry_generators CSL::quickhull_2d)
+csl_example(native_spatial_flight CSL::model_catalogue CSL::geometry_generators CSL::quickhull_2d)
 
 function(example_check name executable argument status output)
   if(NOT TARGET ${executable})
@@ -144,6 +145,8 @@ example_check(native_four_state_source_case native_four_state_reachability "" 0
   "Native four-state reachability: fifteen transitions and 1280 support checks passed")
 example_check(native_flexible_pitch_synthetic_ladder native_flexible_pitch "" 0
   "Native flexible pitch: 3 synthetic physical models; support_checks=4920 projection_checks=47232")
+example_check(native_spatial_flight_synthetic_deviation_reachability native_spatial_flight "" 0
+  "Native spatial flight: 20 transitions.*projection_planes=6 full_state_coordinates_covered=9")
 if(TARGET native_flexible_pitch)
   set_tests_properties(native_flexible_pitch_synthetic_ladder PROPERTIES TIMEOUT 600)
 endif()

@@ -1,6 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/model/spatial_flight.hpp>
+#include <csl/model/spatial_flight_catalogue.hpp>
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -137,4 +138,87 @@ TEST_CASE("B-consistent passive attitude matrix satisfies the nonzero-angle rate
         CHECK(residual(omega_x,omega_y,omega_z) < 1e-10);
         CHECK(residual(omega_printed_x,omega_printed_y,omega_printed_z) > 1e-3);
     }
+}
+
+TEST_CASE("rigid-body coupling does zero work and forces and moments use mass and inertia") {
+    using namespace csl;
+    using namespace csl::model::spatial_flight;
+    auto p=synthetic_parameters();
+    p.thrust=0;
+    p.cx0=p.cx_alpha_squared=p.cx_beta_squared=0;
+    p.cy0=p.cy_alpha=p.cy_beta=p.cy_u1=p.cy_u2=0;
+    p.cz_beta=p.cz_alpha=p.cz_u1=p.cz_u2=0;
+    p.moment_alpha={0,0,0}; p.moment_beta={0,0,0};
+    p.moment_rate.fill(0); p.moment_control.fill(0);
+    const auto model=std::get<Model>(Model::make(p));
+    const State moving{40,3,4,0.1,-0.12,0.3,0.7,-0.4,0.2};
+    const auto derivative=std::get<State>(model.rhs(moving,{0,0,0}));
+    const auto rotation=body_from_inertial(moving.phi,moving.psi,moving.theta);
+    const double gx=-p.gravity*rotation.values[1], gy=-p.gravity*rotation.values[4], gz=-p.gravity*rotation.values[7];
+    CHECK(moving.vx*(derivative.vx-gx)+moving.vy*(derivative.vy-gy)+moving.vz*(derivative.vz-gz) == doctest::Approx(0).epsilon(1e-12));
+    CHECK(p.principal_inertia[0]*moving.omega_x*derivative.omega_x+
+          p.principal_inertia[1]*moving.omega_y*derivative.omega_y+
+          p.principal_inertia[2]*moving.omega_z*derivative.omega_z == doctest::Approx(0).epsilon(1e-12));
+
+    p.cx0=0.2;
+    const auto light=std::get<Model>(Model::make(p));
+    auto heavier_parameters=p; heavier_parameters.mass*=2;
+    const auto heavier=std::get<Model>(Model::make(heavier_parameters));
+    const State straight{40,0,0,0,0,0,0,0,0};
+    const auto light_force=std::get<State>(light.rhs(straight,{0,0,0}));
+    const auto heavy_force=std::get<State>(heavier.rhs(straight,{0,0,0}));
+    CHECK(heavy_force.vx == doctest::Approx(light_force.vx/2));
+
+    p.cx0=0; p.moment_control[0]=1;
+    const auto nominal_inertia=std::get<Model>(Model::make(p));
+    auto greater_inertia_parameters=p; greater_inertia_parameters.principal_inertia[0]*=2;
+    const auto greater_inertia=std::get<Model>(Model::make(greater_inertia_parameters));
+    const auto nominal_moment=std::get<State>(nominal_inertia.rhs(straight,{0.1,0,0}));
+    const auto halved_acceleration=std::get<State>(greater_inertia.rhs(straight,{0.1,0,0}));
+    CHECK(halved_acceleration.omega_x == doctest::Approx(nominal_moment.omega_x/2));
+}
+
+TEST_CASE("native spatial-flight reference yields a 9-state deviation LTV case") {
+    using namespace csl;
+    using namespace csl::model;
+    using namespace csl::model::catalogue;
+    REQUIRE(spatial_flight_cases().size() == 1);
+    const auto& info=spatial_flight_cases().front();
+    CHECK(info.id == "spatial-flight/b-consistent-body9-synthetic/1");
+    CHECK(info.states.size() == 9);
+    CHECK(info.controls.size() == 3);
+    CHECK(info.transitions == 20);
+    auto result=make_spatial_flight_case(info.id);
+    REQUIRE(std::holds_alternative<SpatialFlightCase>(result));
+    const auto& data=std::get<SpatialFlightCase>(result);
+    const auto& reach=data.reachability;
+    CHECK((reach.model.dynamics.dimensions == Dimensions{9,3,0}));
+    REQUIRE(reach.time_grid.size() == 21);
+    CHECK(reach.time_grid.front() == 0);
+    CHECK(reach.time_grid.back() == doctest::Approx(1.0));
+    CHECK(data.reference.size() == 21);
+    CHECK(data.reference.front().vx == 100);
+    CHECK(data.reference_integration.intervals == 20);
+    CHECK(data.reference_integration.substeps_per_interval == 10);
+    CHECK(data.reference_integration.rhs_evaluations == 800);
+    CHECK(data.discretization.stages.size() == 20);
+    CHECK(data.discretization.hold == HoldConvention::zero_order_hold);
+    CHECK(data.discretization.variation == CoefficientVariation::piecewise_linear_ltv);
+    REQUIRE(reach.controls.size() == 20);
+    CHECK(reach.initial.center() == Vector(9,0));
+    CHECK(reach.initial.generators().rows == 9);
+    CHECK(reach.initial.generators().cols == 9);
+    CHECK(reach.initial.generators().values[0] == doctest::Approx(0.1));
+    for (const auto& control : reach.controls) {
+        CHECK(control.center() == Vector(3,0));
+        CHECK(control.generators().rows == 3);
+        CHECK(control.generators().cols == 3);
+        CHECK(control.generators().values[0] == doctest::Approx(0.001));
+    }
+    CHECK(reach.controls.front().factor_ids().front() != reach.controls.back().factor_ids().front());
+    CHECK(reach.initial.factor_ids().front() != reach.controls.front().factor_ids().front());
+    CHECK(data.reference.back().vy != data.reference.front().vy);
+    CHECK(data.parameters.mass == 100);
+    auto unknown=make_spatial_flight_case("spatial-flight/no-such-case/1");
+    CHECK(std::holds_alternative<Diagnostics>(unknown));
 }

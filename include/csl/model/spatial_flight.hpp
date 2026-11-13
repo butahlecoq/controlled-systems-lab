@@ -13,6 +13,8 @@ struct State {
     double phi, psi, theta;
     double omega_x, omega_y, omega_z;
 };
+// Synthetic allocation is zero-based: u0 acts through moments; u1 and u2 act
+// through both Cy/Cz and moments. These are not recovered hardware controls.
 struct Control { double u0, u1, u2; };
 
 // Authored synthetic coefficients. Angular quantities are numerically radians.
