@@ -12,6 +12,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 REGISTRY = Path(__file__).with_name("mathematical-presentation-routes.json")
+ROOT = Path(__file__).resolve().parents[2]
 NESTED_NUMBERS = re.compile(r"\[\s*\[\s*[+−\-\d.]")
 VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta",
         "param", "source", "track", "wbr"}
@@ -156,7 +157,24 @@ def discovered_routes(site: Path) -> set[str]:
     return routes
 
 
-def audit_site(site: Path, ledger: dict, required_routes: set[str] | None = None) -> dict:
+def declared_source_routes(repository_root: Path) -> dict[str, list[str]]:
+    """Read current producer declarations even when a preview predates their staging."""
+    if __package__:
+        from . import pages_route_retirement
+    else:
+        import pages_route_retirement
+
+    declarations = {
+        **pages_route_retirement.EXAMPLE_ROUTE_PRODUCERS,
+        **pages_route_retirement.STANDALONE_REPORT_ROUTE_PRODUCERS,
+    }
+    return {route: owners for route, owners in declarations.items()
+            if route.endswith(".html")
+            and all((repository_root / owner).is_file() for owner in owners)}
+
+
+def audit_site(site: Path, ledger: dict, required_routes: set[str] | None = None,
+               repository_root: Path | None = None) -> dict:
     site = site.resolve()
     entries = {entry["route"]: entry for entry in ledger["routes"]}
     findings = []
@@ -166,7 +184,9 @@ def audit_site(site: Path, ledger: dict, required_routes: set[str] | None = None
                              "message": "Composed-site producer inventory is required for route coverage."})
     if len(entries) != len(ledger["routes"]):
         findings.append({"route": "", "kind": "duplicate-route", "message": "Duplicate registry route."})
-    required = discovered_routes(site) | (required_routes or set())
+    source_routes = declared_source_routes(repository_root or ROOT) if (
+        repository_root is not None or ledger.get("require_source_declared_routes")) else {}
+    required = discovered_routes(site) | (required_routes or set()) | set(source_routes)
     actual = {str(path.relative_to(site)) for path in site.rglob("*.html") if path.is_file()}
     for route in sorted(required - actual):
         findings.append({"route": route, "kind": "missing-route",
@@ -198,7 +218,8 @@ def audit_site(site: Path, ledger: dict, required_routes: set[str] | None = None
             findings.append({"route": route, "kind": "invalid-disposition",
                              "message": "Use maintained or frozen with an exact byte witness."})
     return {"schema": "csl.mathematical-presentation-audit/1", "passed": not findings,
-            "html_pages": len(actual), "required_pages": len(required), "findings": findings}
+            "html_pages": len(actual), "required_pages": len(required),
+            "source_declared_pages": len(source_routes), "findings": findings}
 
 
 def main() -> None:

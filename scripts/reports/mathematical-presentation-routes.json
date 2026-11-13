@@ -111,6 +111,13 @@
       "owner": "reports/closed-loop-history-functional/index.html"
     },
     {
+      "route": "closed-loop-history-functional/native-parallelotope-d6fc-v1/index.html",
+      "disposition": "frozen",
+      "owner": "scripts/reports/native_parallelotope_functional.py",
+      "sha256": "9e1f2569c95f13a21afb65627c69260e12710ac0bec6d53985002f977f3d875d",
+      "witness": "Authenticated saved native functional evidence; source ad42e7a993486769e6f00b82f6c9ee10ec70d6a4:reports/closed-loop-history-functional/native-parallelotope-d6fc-v1/index.html; native episode source d6fc399abcca49d4ac96fabeed9d8878d11cf326; checked against bundle files.sha256 by stage_history_functional/native_parallelotope_functional.check"
+    },
+    {
       "route": "closed-loop-history-functional/warm-gap-9540-v1/index.html",
       "disposition": "frozen",
       "owner": "reports/closed-loop-history-functional/warm-gap-9540-v1/index.html",
@@ -1805,5 +1812,6 @@
     "examples/visual-coverage.json",
     "learn/chapter-manifest.json",
     "examples/closed-loop/figure-index.json"
-  ]
+  ],
+  "require_source_declared_routes": true
 }

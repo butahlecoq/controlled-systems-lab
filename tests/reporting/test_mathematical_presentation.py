@@ -113,6 +113,37 @@ class PresentationTests(unittest.TestCase):
             self.assertFalse(result["passed"])
             self.assertIn("missing-route", {f["kind"] for f in result["findings"]})
 
+    def test_source_declared_standalone_routes_need_classification_before_staging(self):
+        from scripts.reports import pages_route_retirement
+
+        root = Path(__file__).resolve().parents[2]
+        declared = audit.declared_source_routes(root)
+        expected = {route for route, owners in
+                    pages_route_retirement.STANDALONE_REPORT_ROUTE_PRODUCERS.items()
+                    if all((root / owner).is_file() for owner in owners)}
+        self.assertTrue(expected <= set(declared))
+        ledger = json.loads(audit.REGISTRY.read_text())
+        classified = {entry["route"] for entry in ledger["routes"]}
+        self.assertTrue(set(declared) <= classified, set(declared) - classified)
+        child = "closed-loop-history-functional/native-parallelotope-d6fc-v1/index.html"
+        with tempfile.TemporaryDirectory() as directory:
+            result = audit.audit_site(Path(directory), ledger, repository_root=root)
+            self.assertTrue(any(finding["route"] == child and finding["kind"] == "missing-route"
+                                for finding in result["findings"]))
+            with tempfile.TemporaryDirectory() as absent:
+                optional_root = Path(absent)
+                self.assertEqual(audit.declared_source_routes(optional_root), {})
+                owners = pages_route_retirement.STANDALONE_REPORT_ROUTE_PRODUCERS[child]
+                for owner in owners[:-1]:
+                    path = optional_root / owner
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.touch()
+                self.assertNotIn(child, audit.declared_source_routes(optional_root))
+                path = optional_root / owners[-1]
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.touch()
+                self.assertIn(child, audit.declared_source_routes(optional_root))
+
     def test_checked_in_ledger_has_precise_owners_and_frozen_witnesses(self):
         ledger = json.loads(audit.REGISTRY.read_text())
         routes = [entry["route"] for entry in ledger["routes"]]
