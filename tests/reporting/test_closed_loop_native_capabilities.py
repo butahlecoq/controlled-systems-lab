@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import math
-from pathlib import Path
+import shutil
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -16,6 +18,68 @@ import run_closed_loop
 
 
 class NativeCapabilityTests(unittest.TestCase):
+    def test_selected_propagator_sources_causally_bind_profile_fingerprints(self):
+        baseline = capabilities.build_native_manifest()
+        propagators = {
+            "exact-polytope": "fixed_plan_disturbance",
+            "box": "finite_plan_box",
+            "zonotope": "finite_plan_zonotope",
+            "parallelotope": "finite_plan_parallelotope",
+            "ellipsoid": "finite_plan_ellipsoid",
+        }
+        mutations = [
+            (f"src/reachability/{name}.cpp", {family})
+            for family, name in propagators.items()
+        ] + [
+            (f"include/csl/reachability/{name}.hpp", {family})
+            for family, name in propagators.items() if family != "exact-polytope"
+        ]
+        approximate = set(propagators) - {"exact-polytope"}
+        mutations += [
+            ("include/csl/reachability/fixed_plan_disturbance.hpp", set(propagators)),
+            ("include/csl/reachability/detail/outer_safety.hpp", approximate),
+            ("src/reachability/fixed_plan_admission.hpp", approximate),
+        ]
+        sources = {item["path"] for graph in baseline["graphs"] for item in graph["source_files"]}
+        sources.update(path for path, _ in mutations)
+        with tempfile.TemporaryDirectory() as raw:
+            fixture = Path(raw)
+            for name in sources:
+                destination = fixture / name
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(ROOT / name, destination)
+            with mock.patch.object(capabilities, "ROOT", fixture), mock.patch.object(
+                capabilities, "MODULE_INVENTORY", fixture / capabilities.MODULE_INVENTORY.relative_to(ROOT)
+            ):
+                self.assertEqual(capabilities.build_native_manifest(), baseline)
+                for name, families in mutations:
+                    with self.subTest(source=name):
+                        path = fixture / name
+                        original = path.read_bytes()
+                        mutated = original + b"\n"
+                        path.write_bytes(mutated)
+                        try:
+                            changed = capabilities.build_native_manifest()
+                        finally:
+                            path.write_bytes(original)
+                        for previous, actual in zip(baseline["graphs"], changed["graphs"], strict=True):
+                            family = capabilities.NATIVE_PROFILES[previous["controller"]["id"]][0]
+                            affected = family in families and (
+                                previous["controller"]["control_semantics"] == "fixed-plan-mpc"
+                                or family != "exact-polytope"
+                            )
+                            expected = copy.deepcopy(previous)
+                            if affected:
+                                self.assertNotEqual(actual["graph_fingerprint"], previous["graph_fingerprint"])
+                                self.assertNotEqual(actual["graph_id"], previous["graph_id"])
+                                self.assertIn(name, {item["path"] for item in previous["source_files"]})
+                                for item in expected["source_files"]:
+                                    if item["path"] == name:
+                                        item["sha256"] = hashlib.sha256(mutated).hexdigest()
+                                expected["graph_fingerprint"] = actual["graph_fingerprint"]
+                                expected["graph_id"] = actual["graph_id"]
+                            self.assertEqual(actual, expected)
+
     def test_native_profiles_bind_all_tasks_to_finite_action_domains(self):
         manifest = capabilities.build_native_manifest()
         self.assertEqual(len(manifest["graphs"]), 30)
@@ -33,7 +97,7 @@ class NativeCapabilityTests(unittest.TestCase):
         self.assertEqual(len(by_task), 3)
         self.assertTrue(all(profiles == expected_profiles for profiles in by_task.values()))
 
-    def test_fixed_plan_profiles_do_not_claim_geometry_or_lp_calls(self):
+    def test_fixed_plan_profiles_do_not_claim_registered_geometry_or_lp_calls(self):
         graph = next(row for row in capabilities.build_native_manifest()["graphs"]
             if row["controller"]["id"] == "native-box-fixed-plan-mpc/1")
         roles = graph["role_bindings"]
@@ -52,7 +116,7 @@ class NativeCapabilityTests(unittest.TestCase):
         source_paths = {source["path"] for source in graph["source_files"]}
         self.assertIn("src/optimization/finite_action_plans.hpp", source_paths)
         self.assertIn("src/optimization/finite_action_box_minimax.cpp", source_paths)
-        self.assertNotIn("src/reachability/finite_plan_box.cpp", source_paths)
+        self.assertIn("src/reachability/finite_plan_box.cpp", source_paths)
         self.assertEqual(graph["candidate_search_policy"], "constant-and-single-switch-full-horizon/1")
         self.assertEqual(graph["controller"]["limit_usage"]["max_plans"], "used_as_candidate_history_budget")
         self.assertEqual(graph["controller"]["limit_usage"]["max_graph_nodes"], "not_used_by_fixed_plan_search")
