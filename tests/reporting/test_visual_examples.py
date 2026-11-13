@@ -611,6 +611,27 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("GCC 16.2.1", reproduction_html)
         self.assertNotIn("/home/butahlecoq/", reproduction_html)
         gallery_html = (self.site / "examples/index.html").read_text(encoding="utf-8")
+        dim4_route = self.site / "examples/buryatia-dim4-literal-affine-v1"
+        dim4_page = dim4_route / "index.html"
+        dim4_raw = dim4_route / "buryatia-dim4-literal-affine-v1-records.json"
+        dim4_scenario = dim4_route / "buryatia-dim4-matlab-literal-affine-v1.json"
+        self.assertTrue(dim4_page.is_file())
+        self.assertEqual(hashlib.sha256(dim4_raw.read_bytes()).hexdigest(),
+                         "d0a8ca600eaa52f9630c87f1e7395c4ca2454c0080d315469e44c06a4403d8ad")
+        self.assertEqual(dim4_scenario.read_bytes(),
+                         (ROOT / "benchmarks/scenarios/buryatia-dim4-matlab-literal-affine-v1.json").read_bytes())
+        dim4_html = dim4_page.read_text(encoding="utf-8")
+        self.assertIn('href="../examples.css"', dim4_html)
+        self.assertIn('href="buryatia-dim4-matlab-literal-affine-v1.json"', dim4_html)
+        self.assertTrue((dim4_route / "terminal-x1-x2.svg").is_file())
+        self.assertTrue((dim4_route / "buryatia-dim4-literal-affine-v1-SHA256SUMS").is_file())
+        self.assertIn('id="buryatia-dim4-literal-affine-v1"', gallery_html)
+        dim4_inventory = json.loads((self.site / "examples/visual-coverage.json").read_text())
+        dim4_entry = next(entry for entry in dim4_inventory["entries"]
+                          if entry.get("anchor") == "buryatia-dim4-literal-affine-v1")
+        self.assertEqual(dim4_entry["raw_record"],
+                         "buryatia-dim4-literal-affine-v1/buryatia-dim4-literal-affine-v1-records.json")
+        self.assertIn("buryatia-dim4-literal-affine-v1/index.html", gallery_html)
         current_page = self.site / "examples/history-cost-2d-v1-current-source.html"
         self.assertTrue(current_page.is_file())
         current_page_html = current_page.read_text(encoding="utf-8")

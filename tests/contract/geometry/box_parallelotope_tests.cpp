@@ -154,6 +154,42 @@ TEST_CASE("registered four-dimensional parallelotope emits one support pair per 
         }
 }
 
+TEST_CASE("registered four-dimensional box reports its full identity orientation") {
+    Matrix points{16,4,Vector(64)};
+    for(std::size_t mask=0;mask<16;++mask)
+        for(std::size_t coordinate=0;coordinate<4;++coordinate)
+            points.values[mask*4+coordinate]=(mask&(std::size_t{1}<<coordinate))?1.0:-1.0;
+    const auto input=polygon("box-evidence-hypercube",std::move(points));
+    registry::Registry<registry::ApproximationPort> methods;
+    REQUIRE_FALSE(methods.add(make_box_registration({"box-evidence-output"})).has_value());
+    ApproximationRequest query{{{"box-evidence"},{"box-evidence-request"},{"box-evidence-reference"}},
+        input,{"csl.polyhedron.h"},SetRelation::outer,8,Assurance::numerical};
+    const auto result=run_registered(methods,{{"csl.approximation.box"},std::nullopt},
+        query,ExecutionContext{});
+    REQUIRE(std::holds_alternative<EnclosedApproximation>(result));
+    const auto& enclosed=std::get<EnclosedApproximation>(result);
+    REQUIRE(enclosed.result.evidence.assumptions.size()==3);
+    CHECK(enclosed.result.evidence.assumptions[0]==
+        "orientation_rows=1,0,0,0;0,1,0,0;0,0,1,0;0,0,0,1");
+    CHECK(enclosed.result.evidence.assumptions[1]==
+        "requested_budget=8; input_vertices=16; input_rays=0; output_h_rows=8");
+    const auto native=sets::from_handle(enclosed.result.output);
+    REQUIRE(std::holds_alternative<sets::SetData>(native));
+    const auto representation=std::get<sets::SetData>(native).representation();
+    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+    const auto& h=std::get<sets::HRepresentation>(representation);
+    REQUIRE(h.inequalities.rows()==8);
+    REQUIRE(h.inequalities.cols()==4);
+    for(std::size_t row=0;row<h.inequalities.rows();++row)
+        for(std::size_t vertex=0;vertex<16;++vertex) {
+            double dot=0.0;
+            for(std::size_t coordinate=0;coordinate<4;++coordinate)
+                dot+=h.inequalities(row,coordinate)*
+                    ((vertex&(std::size_t{1}<<coordinate))?1.0:-1.0);
+            CHECK(dot<=h.upper_bounds[row]);
+        }
+}
+
 TEST_CASE("four-dimensional parallelotope rejects a rank-deficient orientation") {
     Matrix points{1,4,{0,0,0,0}};
     const auto input=polygon("four-dimensional-point",std::move(points));

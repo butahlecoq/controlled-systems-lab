@@ -26,7 +26,14 @@ SOURCE_SHA256 = "f1b9868dac256a45f144ee5192ec8b789548b34c2be6be094005bcef8dc7293
 REFERENCE_VOLUME = 40808.165574887396
 
 
-def validate(record: dict) -> None:
+def box_orientation_rows(dimension: int) -> str:
+    return "orientation_rows=" + ";".join(
+        ",".join("1" if row == column else "0" for column in range(dimension))
+        for row in range(dimension)
+    )
+
+
+def validate(record: dict, *, require_full_box_orientation: bool = False) -> None:
     assert record["schema"] == "csl.buryatia.recursive-approximation-4d/1"
     assert record["case_id"] == "buryatia-dim4-matlab-literal-affine/1"
     assert record["source_variant_id"] == "buryatia-dim4-literal-script-affine/1"
@@ -81,6 +88,8 @@ def validate(record: dict) -> None:
                     assert operation["affine_sum"] == "csl.geometry.affine-sum"
                     assert operation["approximation"].startswith(expected_provider + "/")
                     assert operation["inclusion_basis"] == "v_h_containment"
+                    if require_full_box_orientation and family["family"] == "box":
+                        assert box_orientation_rows(record["state_dimension"]) in operation["inclusion_evidence"]
                 elif family["family"] == "ellipsoid":
                     operations = invocations["operations"]
                     assert operations["affine_image"] == "csl.geometry.ellipsoidal.factor-affine/1"
@@ -120,16 +129,19 @@ def main() -> int:
     input_group = parser.add_mutually_exclusive_group(required=True)
     input_group.add_argument("--exe", type=Path, help="run and check the native report executable")
     input_group.add_argument("--raw", type=Path, help="check a saved JSON record")
+    parser.add_argument("--require-full-box-orientation", action="store_true",
+                        help="require corrected full-state box orientation evidence for saved records")
     args = parser.parse_args()
     if args.raw:
-        validate(json.loads(args.raw.read_text(encoding="utf-8")))
+        validate(json.loads(args.raw.read_text(encoding="utf-8")),
+                 require_full_box_orientation=args.require_full_box_orientation)
     else:
         result = subprocess.run([str(args.exe.resolve(strict=True)), "--dim4-literal-affine"],
                                 check=False, capture_output=True, text=True)
         if result.returncode:
             print(result.stderr, file=sys.stderr, end="")
             return result.returncode
-        validate(json.loads(result.stdout))
+        validate(json.loads(result.stdout), require_full_box_orientation=True)
     print("Buryatia Dim4: eight full-state stages, six families, source reference, support diagnostics, and 3D ellipsoid projections pass")
     return 0
 

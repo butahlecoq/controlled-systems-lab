@@ -123,9 +123,12 @@ public:
         if(!std::holds_alternative<sets::SetData>(output))
             return Unsupported{unsupported("box.output","Native H output could not be constructed.")};
         if(stopped(context))return stop(context);
+        Matrix orientation{dimension,dimension,Vector(dimension*dimension,0.0)};
+        for(std::size_t coordinate=0;coordinate<dimension;++coordinate)
+            orientation.values[coordinate*dimension+coordinate]=1.0;
         GeometryEvidence evidence{{request.identity,{request.input.id}},GeometryClaimScope::set_relation,
             SymbolicArgument{"native V-coordinate bounds","Stored V coordinates define exact binary64 H slabs."},
-            {"orientation_rows="+(dimension==1?std::string{"1"}:std::string{"1,0;0,1"}),
+            {"orientation_rows="+matrix_rows(orientation),
              "requested_budget="+std::to_string(request.size_budget)+
                  "; input_vertices="+std::to_string(vertices->vertices.rows())+
                  "; input_rays=0; output_h_rows="+std::to_string(2*dimension),

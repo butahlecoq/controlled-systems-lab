@@ -106,6 +106,7 @@ function ellipsoidBoundary(shape,count){
  return out;
 }
 function thin(points,limit=650){if(points.length<=limit)return points;const stride=Math.ceil(points.length/limit),out=[];for(let i=0;i<points.length;i+=stride)out.push(points[i]);return out;}
+function formatTick(value){if(Math.abs(value)<1e-12)return '0';return Number(value.toPrecision(3)).toString();}
 function makeCanvas(projection){const fig=document.createElement('figure');fig.className='view';const canvas=document.createElement('canvas');canvas.className='plot';canvas.width=760;canvas.height=520;canvas.setAttribute('role','img');canvas.setAttribute('aria-label',`3D coordinate projection ${projection}`);const cap=document.createElement('figcaption');cap.textContent=projection.replaceAll('_',' · ').replaceAll('x','x');fig.append(canvas,cap);document.getElementById('views').append(fig);return canvas;}
 const canvases=projectionNames.map(makeCanvas);
 function draw3d(canvas,stageIndex,projection){
@@ -115,8 +116,17 @@ function draw3d(canvas,stageIndex,projection){
  const mins=[0,1,2].map(k=>Math.min(...all.map(p=>p[k]))),maxs=[0,1,2].map(k=>Math.max(...all.map(p=>p[k]))),center=mins.map((v,k)=>(v+maxs[k])/2),span=Math.max(...maxs.map((v,k)=>Math.max(1e-9,v-mins[k])));
  ctx.clearRect(0,0,W,H);ctx.fillStyle='#303129';ctx.fillRect(0,0,W,H);
  const project=p=>{const x=(p[0]-center[0])/span,y=(p[1]-center[1])/span,z=(p[2]-center[2])/span;return [W/2+((x-z*.58)*.78)*(W-2*pad),H/2-((y-(x+z)*.27)*.78)*(H-2*pad),y+x+z]};
- const axisNames=projection.split('_');const axes=[[[-.48,0,0],[.48,0,0],axisNames[0]],[[0,-.48,0],[0,.48,0],axisNames[1]],[[0,0,-.48],[0,0,.48],axisNames[2]]];
- ctx.strokeStyle='#77776f';ctx.lineWidth=1;for(const [a,b,label] of axes){const A=project(a),B=project(b);ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke();ctx.fillStyle='#cdd0c0';ctx.fillText(label,B[0]+4,B[1]-4);}
+ const axisNames=projection.split('_');ctx.strokeStyle='#92938b';ctx.lineWidth=1;ctx.font='11px system-ui';
+ for(let axis=0;axis<3;axis++){
+  const start=center.slice(),end=center.slice();start[axis]-=.48*span;end[axis]+=.48*span;
+  const A=project(start),B=project(end);ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke();
+  for(const fraction of [-.4,0,.4]){
+   const tick=center.slice();tick[axis]+=fraction*span;const P=project(tick),mark=tick.slice();mark[(axis+1)%3]+=.014*span;const M=project(mark);
+   ctx.beginPath();ctx.moveTo(P[0],P[1]);ctx.lineTo(M[0],M[1]);ctx.stroke();
+   if(fraction!==0){ctx.fillStyle='#d9dacd';ctx.fillText(formatTick(tick[axis]),P[0]+5,P[1]-3);}
+  }
+  ctx.fillStyle='#f2f2e8';ctx.font='bold 12px system-ui';ctx.fillText(axisNames[axis],B[0]+5,B[1]-5);ctx.font='11px system-ui';
+ }
  for(const s of stages)for(const name of Object.keys(colors)){
   const pts=thin(points3(s,name,projection));ctx.fillStyle=colors[name];ctx.globalAlpha=s.stage===stageIndex?.72:.10;
   for(const p of pts){const v=project(p);ctx.beginPath();ctx.arc(v[0],v[1],s.stage===stageIndex?2:1.2,0,2*Math.PI);ctx.fill();}
@@ -125,10 +135,13 @@ function draw3d(canvas,stageIndex,projection){
 }
 function draw2d(){
  const stage=data.records[7],key=document.getElementById('pair').value,canvas=document.getElementById('terminal'),ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height,pad=60;
- const all=Object.keys(colors).flatMap(name=>thin(points2(stage,name,key),1000));const minx=Math.min(...all.map(p=>p[0])),maxx=Math.max(...all.map(p=>p[0])),miny=Math.min(...all.map(p=>p[1])),maxy=Math.max(...all.map(p=>p[1]));const span=Math.max(maxx-minx,maxy-miny,1e-9),cx=(minx+maxx)/2,cy=(miny+maxy)/2;
- ctx.fillStyle='#303129';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#77776f';ctx.beginPath();ctx.moveTo(pad,H-pad);ctx.lineTo(W-pad,H-pad);ctx.moveTo(pad,pad);ctx.lineTo(pad,H-pad);ctx.stroke();
- for(const name of Object.keys(colors)){ctx.fillStyle=colors[name];ctx.globalAlpha=name==='exact_affine_polytope'?.75:.44;for(const p of thin(points2(stage,name,key),1000)){const x=W/2+(p[0]-cx)/span*(W-2*pad),y=H/2-(p[1]-cy)/span*(H-2*pad);ctx.fillRect(x-1.5,y-1.5,3,3);}}
- ctx.globalAlpha=1;ctx.fillStyle='#f8f8f2';ctx.fillText(`${key.replaceAll('_',' / ')} · stage 7`,pad,24);ctx.fillText(key.split('_')[0],W-pad-22,H-pad+22);ctx.fillText(key.split('_')[1],pad-36,pad-12);document.getElementById('terminal-caption').textContent=`Terminal stage 7 · ${key.replaceAll('_',' / ')} · point clouds are visual projections`;
+ const all=Object.keys(colors).flatMap(name=>thin(points2(stage,name,key),1000));const minx=Math.min(...all.map(p=>p[0])),maxx=Math.max(...all.map(p=>p[0])),miny=Math.min(...all.map(p=>p[1])),maxy=Math.max(...all.map(p=>p[1]));const xspan=Math.max(maxx-minx,1e-12),yspan=Math.max(maxy-miny,1e-12),cx=(minx+maxx)/2,cy=(miny+maxy)/2,scale=Math.min((W-2*pad)/xspan,(H-2*pad)/yspan);
+ const sx=x=>W/2+(x-cx)*scale,sy=y=>H/2-(y-cy)*scale;
+ ctx.fillStyle='#303129';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#77776f';ctx.fillStyle='#d9dacd';ctx.font='12px system-ui';
+ for(let i=0;i<5;i++){const x=minx+(maxx-minx)*i/4,y=miny+(maxy-miny)*i/4,px=sx(x),py=sy(y);ctx.beginPath();ctx.moveTo(px,pad);ctx.lineTo(px,H-pad);ctx.moveTo(pad,py);ctx.lineTo(W-pad,py);ctx.stroke();ctx.fillText(formatTick(x),px-18,H-pad+20);ctx.fillText(formatTick(y),pad-52,py+4);}
+ ctx.strokeStyle='#b9baae';ctx.beginPath();ctx.moveTo(pad,H-pad);ctx.lineTo(W-pad,H-pad);ctx.moveTo(pad,pad);ctx.lineTo(pad,H-pad);ctx.stroke();
+ for(const name of Object.keys(colors)){ctx.fillStyle=colors[name];ctx.globalAlpha=name==='exact_affine_polytope'?.75:.44;for(const p of thin(points2(stage,name,key),1000)){ctx.fillRect(sx(p[0])-1.5,sy(p[1])-1.5,3,3);}}
+ ctx.globalAlpha=1;ctx.fillStyle='#f8f8f2';ctx.font='14px system-ui';ctx.fillText(`${key.replaceAll('_',' / ')} · stage 7`,pad,24);ctx.fillText(key.split('_')[0],W-pad-22,H-pad+40);ctx.fillText(key.split('_')[1],pad-48,pad-14);document.getElementById('terminal-caption').textContent=`Terminal stage 7 · ${key.replaceAll('_',' / ')} · physical ticks and equal coordinate scale; point clouds are projections`;
 }
 function drawSummary(){const rows=data.records[7].families;document.getElementById('summary').innerHTML=rows.map(f=>`<tr><td>${names[f.family]}</td><td>${f.volume.toPrecision(8)}</td><td>${f.excess_volume.toPrecision(6)}</td><td>${f.vertex_count}</td><td>${f.generator_count}</td><td>${f.max_abs_support_error_sampled_directions.toPrecision(5)}</td><td>${f.minimum_sampled_support_excess.toPrecision(5)}</td></tr>`).join('');}
 function draw(){const stage=+stageSlider.value;document.getElementById('stage-value').value=stage;for(let i=0;i<canvases.length;i++)draw3d(canvases[i],stage,projectionNames[i]);}

@@ -12,6 +12,11 @@ SPEC = importlib.util.spec_from_file_location("buryatia_capture_dim4", SCRIPT)
 CAPTURE = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
 SPEC.loader.exec_module(CAPTURE)
+CHECK_SCRIPT = (Path(__file__).resolve().parents[2] / "scripts/reports/buryatia/check_dim4.py")
+CHECK_SPEC = importlib.util.spec_from_file_location("buryatia_check_dim4", CHECK_SCRIPT)
+CHECK = importlib.util.module_from_spec(CHECK_SPEC)
+assert CHECK_SPEC and CHECK_SPEC.loader
+CHECK_SPEC.loader.exec_module(CHECK)
 
 
 class BuryatiaCaptureTests(unittest.TestCase):
@@ -74,6 +79,21 @@ class BuryatiaCaptureTests(unittest.TestCase):
         self.assertEqual(receipt["exit_code"], 7)
         self.assertTrue(receipt["stdout_sha256"])
         self.assertTrue(receipt["stderr_sha256"])
+
+    def test_full_state_orientation_gate_marks_old_trace_and_accepts_corrected_record(self):
+        root = Path(__file__).resolve().parents[2]
+        record = json.loads((root / "docs/examples/buryatia-dim4-literal-affine-v1-records.json")
+                            .read_text(encoding="utf-8"))
+        CHECK.validate(record)
+        with self.assertRaises(AssertionError):
+            CHECK.validate(record, require_full_box_orientation=True)
+
+        corrected = json.loads(json.dumps(record))
+        for stage in corrected["records"][1:]:
+            box = next(family for family in stage["families"] if family["family"] == "box")
+            box["module_invocations"]["operation"]["inclusion_evidence"][0] = \
+                CHECK.box_orientation_rows(corrected["state_dimension"])
+        CHECK.validate(corrected, require_full_box_orientation=True)
 
 
 if __name__ == "__main__":
