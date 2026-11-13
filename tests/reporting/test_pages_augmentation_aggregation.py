@@ -308,10 +308,21 @@ class PagesAugmentationAggregation(unittest.TestCase):
             workflows / "b04-c-pages-augmentation.yml",
             workflows / "mpc06-tube-objective-pages-augmentation.yml",
         ]
-        self.assertIn("actions/deploy-pages@", aggregation.read_text(encoding="utf-8"))
-        self.assertIn("actions/upload-pages-artifact@", aggregation.read_text(encoding="utf-8"))
-        publishers = [path.name for path in workflows.glob("*.yml")
-                      if "actions/deploy-pages@" in path.read_text(encoding="utf-8")]
+        aggregation_text = aggregation.read_text(encoding="utf-8")
+        self.assertIn("actions/upload-pages-artifact@", aggregation_text)
+        self.assertIn("repository: actions/deploy-pages", aggregation_text)
+        self.assertIn("ref: 368f82528645a54fb793d4d04e342629a3f51346", aggregation_text)
+        self.assertIn("uses: ./.github/actions/pages-deploy", aggregation_text)
+        local_action = (ROOT / ".github/actions/pages-deploy/index.js").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("scripts/ci/deploy_pages_metadata_retry.py", local_action)
+        publishers = [
+            path.name
+            for path in workflows.glob("*.yml")
+            if "actions/deploy-pages@" in path.read_text(encoding="utf-8")
+            or "repository: actions/deploy-pages" in path.read_text(encoding="utf-8")
+        ]
         self.assertEqual(publishers, [aggregation.name])
         for path in sources:
             with self.subTest(workflow=path.name):
@@ -329,7 +340,6 @@ class PagesAugmentationAggregation(unittest.TestCase):
                 self.assertIn("workflow_run:", source)
                 self.assertIn("workflows: [Algorithm report records and site]", source)
                 self.assertIn("branches: [main]", source)
-        aggregation_text = aggregation.read_text(encoding="utf-8")
         self.assertIn("Wait for every single-route artifact for this source revision", aggregation_text)
         self.assertIn("await_pages_augmentation_runs.py", aggregation_text)
         waiter = (ROOT / "scripts/reports/await_pages_augmentation_runs.py").read_text(encoding="utf-8")
@@ -337,6 +347,35 @@ class PagesAugmentationAggregation(unittest.TestCase):
                      "b04-c-pages-augmentation.yml",
                      "mpc06-tube-objective-pages-augmentation.yml"):
             self.assertIn(name, waiter)
+
+    def test_metadata_retry_stays_inside_current_main_gated_deployment(self):
+        workflow = (ROOT / ".github/workflows/pages-augmentation-aggregation.yml").read_text(
+            encoding="utf-8"
+        )
+        checkout = workflow.index("name: Check out the pinned official Pages deployer")
+        freshness = workflow.index(
+            "name: Check that the complete artifact still targets current main"
+        )
+        upload = workflow.index("name: Upload the complete augmented Pages site")
+        configure = workflow.index("actions/configure-pages@")
+        deploy = workflow.index("name: Deploy the complete augmented report site")
+
+        self.assertLess(checkout, freshness)
+        self.assertLess(freshness, upload)
+        self.assertLess(upload, configure)
+        self.assertLess(configure, deploy)
+        self.assertEqual(workflow.count("name: Upload the complete augmented Pages site"), 1)
+        self.assertIn(
+            "if: steps.head.outputs.current == 'true'\n        id: deployment", workflow
+        )
+        self.assertIn("uses: ./.github/actions/pages-deploy", workflow)
+        self.assertIn("token: ${{ github.token }}", workflow)
+        self.assertIn("timeout: '600000'", workflow)
+        self.assertIn("error_count: '10'", workflow)
+        self.assertIn("reporting_interval: '5000'", workflow)
+        self.assertIn("artifact_name: github-pages", workflow)
+        self.assertIn("preview: 'false'", workflow)
+        self.assertIn("pages: write\n      id-token: write", workflow)
 
 
 if __name__ == "__main__":

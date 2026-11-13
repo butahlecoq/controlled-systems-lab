@@ -83,6 +83,13 @@ class PagesRouteRetirementTests(unittest.TestCase):
             producer = inventory["html_routes"]["closed-loop-history-functional/index.html"]["producer"]
             self.assertEqual(producer["owner_status"], "exact")
             self.assertIn("scripts/reports/stage_history_functional.py", producer["files"])
+            warm_route = "closed-loop-history-functional/warm-gap-9540-v1/index.html"
+            warm_producer = inventory["html_routes"][warm_route]["producer"]
+            self.assertEqual(warm_producer["owner_status"], "exact")
+            self.assertIn("scripts/reports/history_warm_gap_report.py", warm_producer["files"])
+            self.assertIn(
+                "reports/closed-loop-history-functional/warm-gap-9540-v1/render-source.py",
+                warm_producer["files"])
 
     def make_site(self, root: Path, *, gallery: str | None = None,
                   route: str | None = None) -> tuple[Path, str]:

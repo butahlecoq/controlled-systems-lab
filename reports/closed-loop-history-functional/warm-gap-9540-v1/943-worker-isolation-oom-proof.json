@@ -1,0 +1,66 @@
+{
+  "launch": {
+    "unit": "csl943-worker-5c0c298c46f84b24.service",
+    "command": [
+      "/usr/bin/systemd-run",
+      "--user",
+      "--wait",
+      "--pipe",
+      "--service-type=exec",
+      "--unit=csl943-worker-5c0c298c46f84b24.service",
+      "-p",
+      "MemoryMax=67108864",
+      "-p",
+      "MemorySwapMax=0",
+      "-p",
+      "OOMPolicy=stop",
+      "-p",
+      "RuntimeMaxSec=20",
+      "-p",
+      "TimeoutStopSec=1",
+      "-p",
+      "KillMode=control-group",
+      "-p",
+      "WorkingDirectory=/home/butahlecoq/.codex/worktrees/3e28/controlled-systems-lab",
+      "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/controller-env/bin/python",
+      "-c",
+      "import os;os.write(2,b'worker-before-allocation\\n');x=bytearray(256*1024**2);print(len(x))"
+    ],
+    "original_command": [
+      "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/controller-env/bin/python",
+      "-c",
+      "import os;os.write(2,b'worker-before-allocation\\n');x=bytearray(256*1024**2);print(len(x))"
+    ],
+    "forwarded_environment": {},
+    "supervisor_pid": 4145937,
+    "supervisor_cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/app-graphical.slice/app-Hyprland-gtk\\x2dlaunch-074e5ff2.scope\n",
+    "scope": "numerical worker and descendants only; supervisor outside; additional2GiB memory+2GiB swap envelope, original AS8GiB and CPU/wall1800 worker limits retained"
+  },
+  "terminal": {
+    "observed_unix_seconds": 1794549080.531398,
+    "systemctl_exit_code": 0,
+    "properties": {
+      "Id": "csl943-worker-5c0c298c46f84b24.service",
+      "ActiveState": "failed",
+      "SubState": "failed",
+      "MainPID": "0",
+      "Result": "oom-kill",
+      "OOMPolicy": "stop",
+      "ExecMainCode": "2",
+      "ExecMainStatus": "9",
+      "ControlGroup": "",
+      "MemoryCurrent": "[not set]",
+      "MemoryPeak": "67108864",
+      "MemorySwapCurrent": "[not set]",
+      "MemorySwapPeak": "0",
+      "MemoryMax": "67108864",
+      "MemorySwapMax": "0",
+      "ManagedOOMSwap": "auto",
+      "ManagedOOMMemoryPressure": "auto"
+    },
+    "stderr": "",
+    "systemd_run_returncode": 1
+  },
+  "stderr": "Running as unit: csl943-worker-5c0c298c46f84b24.service\nworker-before-allocation\n          Finished with result: oom-kill\nMain processes terminated with: code=killed, status=9/KILL\n               Service runtime: 143ms\n             CPU time consumed: 92ms\n                   Memory peak: 64M (swap: 0B)\n",
+  "telemetry": "{\"observed_unix_seconds\": 1794549080.363387, \"systemctl_exit_code\": 0, \"properties\": {\"Id\": \"csl943-worker-5c0c298c46f84b24.service\", \"ActiveState\": \"inactive\", \"SubState\": \"dead\", \"MainPID\": \"0\", \"Result\": \"success\", \"OOMPolicy\": \"stop\", \"ExecMainCode\": \"0\", \"ExecMainStatus\": \"0\", \"ControlGroup\": \"\", \"MemoryCurrent\": \"[not set]\", \"MemoryPeak\": \"[not set]\", \"MemorySwapCurrent\": \"[not set]\", \"MemorySwapPeak\": \"[not set]\", \"MemoryMax\": \"67108864\", \"MemorySwapMax\": \"0\", \"ManagedOOMSwap\": \"auto\", \"ManagedOOMMemoryPressure\": \"auto\"}, \"stderr\": \"\"}\n"
+}

@@ -1,0 +1,6 @@
+OOMPolicy=continue
+MemoryPeak=1082896384
+MemoryMax=2147483648
+MemorySwapMax=0
+ManagedOOMSwap=auto
+ManagedOOMMemoryPressure=auto

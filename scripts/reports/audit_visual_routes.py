@@ -170,6 +170,10 @@ SAVED_COMPANION_ROUTES = {
 }
 SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
 SAVED_DATA_ILLUSTRATION_RENDERERS = {
+    "scripts/reports/native_discrete_models.py": (
+        "Draws all 15 authenticated saved native source21 MPC predictions against the executed path; "
+        "checks complete coordinates, literal costs, dynamics, controls and bounds before rendering; "
+        "uses shared numeric-axis policy and explicit screen/print themes without solving or timing."),
     "scripts/reports/buryatia/render_2d.py": (
         "Renders all saved source-qualified native affine 2D stages and a terminal overlay; the factor matrix is "
         "retained in each ellipse record and the sampled boundary is checked against that represented set. "

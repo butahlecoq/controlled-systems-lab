@@ -54,7 +54,7 @@
         },
         {
           "label": "examples/CMakeLists.txt installed package consumer",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/91eae71b4734fafe3a8d2290beb3779022c4a1c3/examples/CMakeLists.txt"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/1582059a8cb3356422234859ae4aa2f81bc339a5/examples/CMakeLists.txt"
         }
       ],
       "example_sources": [
@@ -1518,6 +1518,83 @@
             [
               "complete optimal family",
               "Complete optimal histories (x₀,x₁,x₂,u₀,u₁)=(0,s,1,s,1−s), 0≤s≤1"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "native-quadcopter-mpc",
+      "title": "From native model data to 15 observed-state MPC replans",
+      "group": "controller",
+      "group_label": "Reachable-set controllers and MPC",
+      "role": "educational",
+      "status": "ready",
+      "status_label": "Ready · saved native functional evidence",
+      "prerequisites": [
+        "install-consumer"
+      ],
+      "module_ids": [],
+      "source": "native-quadcopter-mpc.html",
+      "summary": "Browse 35 native model records, then inspect all predictions, the executed 12-state path and four inputs for source21.",
+      "mathematical_input": "x(k+1)=Ax(k)+Bu(k), x0=0 in R12, u in R4; N=10; 15 observed-state replans; w=0.",
+      "command": "python -B scripts/reports/native_discrete_models.py --check",
+      "expected_output": "15 replans; checked source objective, predicted dynamics, applied actions and state/input bounds.",
+      "intermediate_geometry": "All 15 predicted 11-state paths overlay the 16-state executed path in indexed (x1,x2) and (x3,x6) planes; no reachable sets are inferred.",
+      "support_limits": "Source-bound numerical functional evidence from a qualified pre-commit installed build. Units remain unspecified; 0.1-second grid is an owner assumption. No certified optimum, global policy, nonlinear safety, or timing claim.",
+      "figure_ids": [],
+      "records": [
+        {
+          "label": "Complete saved data and source/build qualification",
+          "href": "../examples/native-discrete-models-v1/manifest.json"
+        },
+        {
+          "label": "All-stage MPC lesson",
+          "href": "../examples/native-quadcopter-mpc.html"
+        }
+      ],
+      "example_sources": [
+        "examples/quadcopter_mpc.cpp",
+        "examples/quadcopter_mpc_task.cpp",
+        "examples/native_discrete_models.cpp"
+      ],
+      "kind": "saved evidence",
+      "mathematical_displays": [
+        {
+          "label": "Q diagonal; terminal QN=Q",
+          "rows": [
+            [
+              0,
+              0,
+              10,
+              10,
+              10,
+              10,
+              0,
+              0,
+              0,
+              5,
+              5,
+              5
+            ]
+          ]
+        },
+        {
+          "label": "Reference r",
+          "rows": [
+            [
+              0,
+              0,
+              1,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
             ]
           ]
         }

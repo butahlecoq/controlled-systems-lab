@@ -1,0 +1,796 @@
+{
+  "source_commit": "9540b8d0b441f3f3e544d2016abb4ee53c94da0b",
+  "sdk_source_commit": "ab3fdba672d9227e7631e7fec9b10bc91196c285",
+  "renderer_sha256": "8cc0c817565d4efd7effa61e2cc96681ffad22ca4fc45b817995ec17675a0f29",
+  "projection_source_sha256": "f28fc155706422532ac00e7e51f56ffb84428de5d791d7f523af098a965e8e86",
+  "figures": [
+    {
+      "record_id": "01-syn-nl-lv-01-direct-ipopt",
+      "variant": "screen",
+      "svg": "figures/01-syn-nl-lv-01-direct-ipopt-screen.svg",
+      "png": "figures/01-syn-nl-lv-01-direct-ipopt-screen.png",
+      "svg_sha256": "b8d8057b051f146d259371137db6942d89571a7c0a193df4309d1da7f72259fb",
+      "png_sha256": "7ac76a560117c2be69991007eed9db14f22452e3dec05be18a47271b497d0fd9",
+      "raw_state_projections": [
+        [
+          0,
+          1
+        ]
+      ],
+      "available_memberships_drawn": [
+        0
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "01-syn-nl-lv-01-direct-ipopt",
+      "variant": "print",
+      "svg": "figures/01-syn-nl-lv-01-direct-ipopt-print.svg",
+      "png": "figures/01-syn-nl-lv-01-direct-ipopt-print.png",
+      "svg_sha256": "c90adec238b3f2fd5c3b45142deda87658d5acf5164e91d601a17163be07de18",
+      "png_sha256": "def32bffecbeaa28dd8bb64d752401d7b990b1e9d4d8a0220589237fb63893df",
+      "raw_state_projections": [
+        [
+          0,
+          1
+        ]
+      ],
+      "available_memberships_drawn": [
+        0
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "02-syn-nl-fuel-01-direct-ipopt",
+      "variant": "screen",
+      "svg": "figures/02-syn-nl-fuel-01-direct-ipopt-screen.svg",
+      "png": "figures/02-syn-nl-fuel-01-direct-ipopt-screen.png",
+      "svg_sha256": "456f838f3e7ef370d6bcd23afde1fbd85445aff6057a26572642ae0708884f88",
+      "png_sha256": "45d0e06f7434d446bef4d45d420cd73778c4c819b63f7aa1cffd4a4bc84db78f",
+      "raw_state_projections": [
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          1
+        ]
+      ],
+      "available_memberships_drawn": [
+        0,
+        0
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "02-syn-nl-fuel-01-direct-ipopt",
+      "variant": "print",
+      "svg": "figures/02-syn-nl-fuel-01-direct-ipopt-print.svg",
+      "png": "figures/02-syn-nl-fuel-01-direct-ipopt-print.png",
+      "svg_sha256": "eacb1c3428271c8c98ad9c8a468876e770bdc772d167410bdde5173cd3148308",
+      "png_sha256": "9d224c5b02c29945492e0ed60545433fb56295bb0196a436b5319cba256b2785",
+      "raw_state_projections": [
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          1
+        ]
+      ],
+      "available_memberships_drawn": [
+        0,
+        0
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "03-earth-orbit-direct-ipopt",
+      "variant": "screen",
+      "svg": "figures/03-earth-orbit-direct-ipopt-screen.svg",
+      "png": "figures/03-earth-orbit-direct-ipopt-screen.png",
+      "svg_sha256": "712d0ebfd2380cb0237373bd5b2feaa6332b47fc85a0790013ad8d4488c4a3c1",
+      "png_sha256": "3cb4e8439468e7717c8853b7f8e6a7c5543a18f6c3579c03053820ab0ea62c33",
+      "raw_state_projections": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          0,
+          3
+        ]
+      ],
+      "available_memberships_drawn": [
+        0,
+        0,
+        0
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "03-earth-orbit-direct-ipopt",
+      "variant": "print",
+      "svg": "figures/03-earth-orbit-direct-ipopt-print.svg",
+      "png": "figures/03-earth-orbit-direct-ipopt-print.png",
+      "svg_sha256": "750a53cc6084222d1693a6414fb32ebb66b82cbecbef85ca615116777ba4540c",
+      "png_sha256": "f32d1a9b4cdc60ef7ec54ce5de7c0d4335079a0db9e8c4f09cc1dc630ee6ed44",
+      "raw_state_projections": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          0,
+          3
+        ]
+      ],
+      "available_memberships_drawn": [
+        0,
+        0,
+        0
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "04-syn-nl-lv-01-polytope",
+      "variant": "screen",
+      "svg": "figures/04-syn-nl-lv-01-polytope-screen.svg",
+      "png": "figures/04-syn-nl-lv-01-polytope-screen.png",
+      "svg_sha256": "10cecfab8a8e19ba1c9b3d0b0681f68da2746db83f7f6d66cd3e051d73016a5d",
+      "png_sha256": "5787eaa9ea7b774183afd37d28c24c7488817d62fa91c1c2d9844c7ac46985e8",
+      "raw_state_projections": [
+        [
+          0,
+          1
+        ]
+      ],
+      "available_memberships_drawn": [
+        0
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "04-syn-nl-lv-01-polytope",
+      "variant": "print",
+      "svg": "figures/04-syn-nl-lv-01-polytope-print.svg",
+      "png": "figures/04-syn-nl-lv-01-polytope-print.png",
+      "svg_sha256": "c8e458b1137c89a5adc515af35d0e20f1cb3d455e248dad9b5154268bc2d6e72",
+      "png_sha256": "8510f6eac4275996bdb3c466068583fdbd4149e1bb72aff5642e19492724936d",
+      "raw_state_projections": [
+        [
+          0,
+          1
+        ]
+      ],
+      "available_memberships_drawn": [
+        0
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "05-syn-nl-lv-01-polytope",
+      "variant": "screen",
+      "svg": "figures/05-syn-nl-lv-01-polytope-screen.svg",
+      "png": "figures/05-syn-nl-lv-01-polytope-screen.png",
+      "svg_sha256": "791fc655f46f161e119b786ff44d967c4f82836954ecd3d6e611bbfbc958bd7c",
+      "png_sha256": "11fb569059b04db9bc18313b26fe25ba2e8cd118269f0dac8b4dfd7041a1bf1d",
+      "raw_state_projections": [
+        [
+          0,
+          1
+        ]
+      ],
+      "available_memberships_drawn": [
+        0
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "05-syn-nl-lv-01-polytope",
+      "variant": "print",
+      "svg": "figures/05-syn-nl-lv-01-polytope-print.svg",
+      "png": "figures/05-syn-nl-lv-01-polytope-print.png",
+      "svg_sha256": "36fb3adfab4a9dc8784a6389bf8014c2603b60a467f1f384b83396cb75df711d",
+      "png_sha256": "916700f50b42495b062f27555d197cf00b2551d344938d924600f5085288454f",
+      "raw_state_projections": [
+        [
+          0,
+          1
+        ]
+      ],
+      "available_memberships_drawn": [
+        0
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "06-syn-nl-fuel-01-zonotope",
+      "variant": "screen",
+      "svg": "figures/06-syn-nl-fuel-01-zonotope-screen.svg",
+      "png": "figures/06-syn-nl-fuel-01-zonotope-screen.png",
+      "svg_sha256": "0a207f75b923e533222652718d5b8f9efcbe38acac1a57158b2ee4910d0c439a",
+      "png_sha256": "189b203e23fd71140a5828d7920cf353154298baea15b51a8bb3251589d7e6bf",
+      "raw_state_projections": [
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          1
+        ]
+      ],
+      "available_memberships_drawn": [
+        123,
+        123
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "06-syn-nl-fuel-01-zonotope",
+      "variant": "print",
+      "svg": "figures/06-syn-nl-fuel-01-zonotope-print.svg",
+      "png": "figures/06-syn-nl-fuel-01-zonotope-print.png",
+      "svg_sha256": "2599809ec2cfe61ab1d6ed311c1aef4e0dd80c848f78eabdb1e2abec67682bdb",
+      "png_sha256": "9c49d6cc350958dc1b2b61fe1054d1b4e1e107ab6780ef32fcf070df4b15b806",
+      "raw_state_projections": [
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          1
+        ]
+      ],
+      "available_memberships_drawn": [
+        123,
+        123
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "07-syn-nl-fuel-01-parallelotope",
+      "variant": "screen",
+      "svg": "figures/07-syn-nl-fuel-01-parallelotope-screen.svg",
+      "png": "figures/07-syn-nl-fuel-01-parallelotope-screen.png",
+      "svg_sha256": "8855e27c83ab5eb10a7e11b0783a6daaf10a646bbca20c80e29020b07072e22f",
+      "png_sha256": "876f1d8a62770f09b6d124a4161a110b914423b1bbeec883ee7d14027f56d9cc",
+      "raw_state_projections": [
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          1
+        ]
+      ],
+      "available_memberships_drawn": [
+        123,
+        123
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "07-syn-nl-fuel-01-parallelotope",
+      "variant": "print",
+      "svg": "figures/07-syn-nl-fuel-01-parallelotope-print.svg",
+      "png": "figures/07-syn-nl-fuel-01-parallelotope-print.png",
+      "svg_sha256": "bc2e0634db9285f2af797f4c4e42b04b179b6efe95d7e20808b5586c876c18d6",
+      "png_sha256": "6f8d88c8c94b5905e736942c4fdb4ddff6334cac51c668c2c4cf174fe4e0d4e5",
+      "raw_state_projections": [
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          1
+        ]
+      ],
+      "available_memberships_drawn": [
+        123,
+        123
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "08-syn-nl-fuel-01-ellipsoid",
+      "variant": "screen",
+      "svg": "figures/08-syn-nl-fuel-01-ellipsoid-screen.svg",
+      "png": "figures/08-syn-nl-fuel-01-ellipsoid-screen.png",
+      "svg_sha256": "0ed0469241d9bae857526bad423ce7cbe517ab12859920e35d470d4dc4a05d6c",
+      "png_sha256": "f96b97b88aace667d47bb0bb3be37a62880b2dae742bf5d0da85aece5e45e89c",
+      "raw_state_projections": [
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          1
+        ]
+      ],
+      "available_memberships_drawn": [
+        123,
+        123
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "08-syn-nl-fuel-01-ellipsoid",
+      "variant": "print",
+      "svg": "figures/08-syn-nl-fuel-01-ellipsoid-print.svg",
+      "png": "figures/08-syn-nl-fuel-01-ellipsoid-print.png",
+      "svg_sha256": "509fa368ab04e9426c7f5cd2c616278c96cd4c90173eb62522f435d2d7ef245d",
+      "png_sha256": "8ed973202c0afc6d41328f02db225c8db13120a577a3cff69ad45fc4131b676a",
+      "raw_state_projections": [
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          1
+        ]
+      ],
+      "available_memberships_drawn": [
+        123,
+        123
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "09-syn-nl-fuel-01-polytope",
+      "variant": "screen",
+      "svg": "figures/09-syn-nl-fuel-01-polytope-screen.svg",
+      "png": "figures/09-syn-nl-fuel-01-polytope-screen.png",
+      "svg_sha256": "3188dbfced276f24dc3f9eabc7849f5d4a249ba6dcbf5d813be9796b4a4cb06d",
+      "png_sha256": "6f01b6440039e193b40291b97b52d12f8e7a3289c481a070df518bf07e5057da",
+      "raw_state_projections": [
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          1
+        ]
+      ],
+      "available_memberships_drawn": [
+        0,
+        0
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "09-syn-nl-fuel-01-polytope",
+      "variant": "print",
+      "svg": "figures/09-syn-nl-fuel-01-polytope-print.svg",
+      "png": "figures/09-syn-nl-fuel-01-polytope-print.png",
+      "svg_sha256": "9948be3164e74a3f2adaacca5e01ed73e50cfb0785350e2275c81bb5c92d08a8",
+      "png_sha256": "a14973365e30a7054adf06bb979ac47451c48b816519411c43345967c11af7f4",
+      "raw_state_projections": [
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          1
+        ]
+      ],
+      "available_memberships_drawn": [
+        0,
+        0
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "10-earth-orbit-box",
+      "variant": "screen",
+      "svg": "figures/10-earth-orbit-box-screen.svg",
+      "png": "figures/10-earth-orbit-box-screen.png",
+      "svg_sha256": "070bb7e27d8238a27bb380e02d675b6d9a88ea257774cbd0994a3f16a2f735e6",
+      "png_sha256": "c32b21b1c48043496e2dac4b69165f7b91801fe03ef91e33d759dba6f63b70a0",
+      "raw_state_projections": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          0,
+          3
+        ]
+      ],
+      "available_memberships_drawn": [
+        63,
+        63,
+        63
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "10-earth-orbit-box",
+      "variant": "print",
+      "svg": "figures/10-earth-orbit-box-print.svg",
+      "png": "figures/10-earth-orbit-box-print.png",
+      "svg_sha256": "1661de18c4d6ff288960c9a84521371c1bbb18c1829f76400ec616fbbd1f70a5",
+      "png_sha256": "417c1fb9e9257b802cb8fbdd2341fd4fe985097ee30ea39618e3703d9f41dbe3",
+      "raw_state_projections": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          0,
+          3
+        ]
+      ],
+      "available_memberships_drawn": [
+        63,
+        63,
+        63
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "11-earth-orbit-zonotope",
+      "variant": "screen",
+      "svg": "figures/11-earth-orbit-zonotope-screen.svg",
+      "png": "figures/11-earth-orbit-zonotope-screen.png",
+      "svg_sha256": "f13773266abe4de4e99ed22a34bffa325104177958bdae621482cece49eb9a89",
+      "png_sha256": "77dd55751fac5666dc2482ea2d8f02d69bd4dfbc02e494cbb3d8e075c663667a",
+      "raw_state_projections": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          0,
+          3
+        ]
+      ],
+      "available_memberships_drawn": [
+        63,
+        63,
+        63
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "11-earth-orbit-zonotope",
+      "variant": "print",
+      "svg": "figures/11-earth-orbit-zonotope-print.svg",
+      "png": "figures/11-earth-orbit-zonotope-print.png",
+      "svg_sha256": "8da9f89e4bffe676d478142caf600bd7615387653e5a85b837b53d6cf694ab2d",
+      "png_sha256": "576624199c44e17c95487c1d11cb287e06e9c95614bf2d98ff6cf4d68eda9f31",
+      "raw_state_projections": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          0,
+          3
+        ]
+      ],
+      "available_memberships_drawn": [
+        63,
+        63,
+        63
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "12-earth-orbit-parallelotope",
+      "variant": "screen",
+      "svg": "figures/12-earth-orbit-parallelotope-screen.svg",
+      "png": "figures/12-earth-orbit-parallelotope-screen.png",
+      "svg_sha256": "b1e4d9b79700fbbe333932ae19d1c4d6196cca965f2fee7441327ab67ca28ba6",
+      "png_sha256": "09783c1e220bd2f78c9a74affc10a6063bafde167a67ca8e2e388f8ad8f4ec53",
+      "raw_state_projections": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          0,
+          3
+        ]
+      ],
+      "available_memberships_drawn": [
+        63,
+        63,
+        63
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "12-earth-orbit-parallelotope",
+      "variant": "print",
+      "svg": "figures/12-earth-orbit-parallelotope-print.svg",
+      "png": "figures/12-earth-orbit-parallelotope-print.png",
+      "svg_sha256": "0e77f7467b17e975bb4dfab2e59d2d66fe8e2d24c6d6fb7e01e43d2f04897ea4",
+      "png_sha256": "e3d52945002de3b11df5b752ac70bb65bfc5731039e6872040aa31c73159104c",
+      "raw_state_projections": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          0,
+          3
+        ]
+      ],
+      "available_memberships_drawn": [
+        63,
+        63,
+        63
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "13-earth-orbit-ellipsoid",
+      "variant": "screen",
+      "svg": "figures/13-earth-orbit-ellipsoid-screen.svg",
+      "png": "figures/13-earth-orbit-ellipsoid-screen.png",
+      "svg_sha256": "dd7edccb3638179525fd1fd5f7751e70beff7abd70d6f79df9f52548ca1ebee8",
+      "png_sha256": "9dc106a39572c29fa23b02dafef3f6de836688845def9d7b8b1c5885a6cefe4c",
+      "raw_state_projections": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          0,
+          3
+        ]
+      ],
+      "available_memberships_drawn": [
+        63,
+        63,
+        63
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "13-earth-orbit-ellipsoid",
+      "variant": "print",
+      "svg": "figures/13-earth-orbit-ellipsoid-print.svg",
+      "png": "figures/13-earth-orbit-ellipsoid-print.png",
+      "svg_sha256": "1d55365fb1fd35b20ee12ab5a57e2abdeb00f97ed62163515b1a2c2bf3b5d46c",
+      "png_sha256": "e9d98b2357b2fd1c15fa2e0f276a506ce88b9cc1bf23c3a802b3645816800467",
+      "raw_state_projections": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          0,
+          3
+        ]
+      ],
+      "available_memberships_drawn": [
+        63,
+        63,
+        63
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "14-earth-orbit-polytope",
+      "variant": "screen",
+      "svg": "figures/14-earth-orbit-polytope-screen.svg",
+      "png": "figures/14-earth-orbit-polytope-screen.png",
+      "svg_sha256": "ff49e1762a46f26b7a043ee469e526b94cd15533afca7361bc3dc88c33bfb88a",
+      "png_sha256": "b79c2ad6d6379f839715c5dbeaddb27f8c2a3ff8e8aa7b65251a958b332c51e5",
+      "raw_state_projections": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          0,
+          3
+        ]
+      ],
+      "available_memberships_drawn": [
+        2,
+        2,
+        2
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "14-earth-orbit-polytope",
+      "variant": "print",
+      "svg": "figures/14-earth-orbit-polytope-print.svg",
+      "png": "figures/14-earth-orbit-polytope-print.png",
+      "svg_sha256": "452f8155faebc09989309fe74a2686944bb060ebb2a9fa2ea7612e58cd6f9891",
+      "png_sha256": "16cf82e951b0ed06cc9815bf327c42cf7d0dd1b76eb8e0acab65e33f1946e39e",
+      "raw_state_projections": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          0,
+          3
+        ]
+      ],
+      "available_memberships_drawn": [
+        2,
+        2,
+        2
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "15-syn-nl-lv-01-direct-highs",
+      "variant": "screen",
+      "svg": "figures/15-syn-nl-lv-01-direct-highs-screen.svg",
+      "png": "figures/15-syn-nl-lv-01-direct-highs-screen.png",
+      "svg_sha256": "4a27af0bd1ecfe1e73e644c2c69a4b6fe820081c01011bd78094b9b841d4094b",
+      "png_sha256": "ccda8b7322a7e4908ff003054e5a3a695ec45ab0e1865a0c4700ba5d13e37e75",
+      "raw_state_projections": [
+        [
+          0,
+          1
+        ]
+      ],
+      "available_memberships_drawn": [
+        0
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "15-syn-nl-lv-01-direct-highs",
+      "variant": "print",
+      "svg": "figures/15-syn-nl-lv-01-direct-highs-print.svg",
+      "png": "figures/15-syn-nl-lv-01-direct-highs-print.png",
+      "svg_sha256": "a2326419a24c75ccf3d8d94e0d033c0450d4475f8b6fa55409a56f0e0b3ea354",
+      "png_sha256": "a30a5e2cf750bac86bd763a858d0eddeb657641dd584728bed596b0e46efe2cc",
+      "raw_state_projections": [
+        [
+          0,
+          1
+        ]
+      ],
+      "available_memberships_drawn": [
+        0
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "16-syn-nl-fuel-01-direct-highs",
+      "variant": "screen",
+      "svg": "figures/16-syn-nl-fuel-01-direct-highs-screen.svg",
+      "png": "figures/16-syn-nl-fuel-01-direct-highs-screen.png",
+      "svg_sha256": "a5f82b7ddda21d1f0087cb673d35dbf38b2fe466b048a09074364ea6a3a80ef5",
+      "png_sha256": "0a0bb468d742f633399fe1858d162a00b98a05626cd87fb29379d87d33c70716",
+      "raw_state_projections": [
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          1
+        ]
+      ],
+      "available_memberships_drawn": [
+        0,
+        0
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    },
+    {
+      "record_id": "16-syn-nl-fuel-01-direct-highs",
+      "variant": "print",
+      "svg": "figures/16-syn-nl-fuel-01-direct-highs-print.svg",
+      "png": "figures/16-syn-nl-fuel-01-direct-highs-print.png",
+      "svg_sha256": "7831b1024ba9eb4cb574795af762411ab09f05367a9e9cab7f90c78e3083f49d",
+      "png_sha256": "90e5f9b796bf9b01c67452f972d56056e9fa8e5f44cc5e5edb08eaa007c456bc",
+      "raw_state_projections": [
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          1
+        ]
+      ],
+      "available_memberships_drawn": [
+        0,
+        0
+      ],
+      "projection_failures": [],
+      "scope": "First query saved geometry only; actual executed path full or explicitly partial. Soft references are not terminal constraints."
+    }
+  ]
+}

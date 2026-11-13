@@ -48,6 +48,8 @@ BARE_ROUTE_REPLACEMENTS = {
 # Gallery pages are assembled by visual_examples.py. These additional sources
 # own page content or figures for the routes they contribute.
 EXAMPLE_ROUTE_PRODUCERS = {
+    "examples/native-discrete-models.html": ["scripts/reports/stage_native_discrete_models.py", "docs/examples/native-discrete-models.html"],
+    "examples/native-quadcopter-mpc.html": ["scripts/reports/stage_native_discrete_models.py", "scripts/reports/native_discrete_models.py", "docs/examples/native-quadcopter-mpc.html"],
     "examples/adaptive-ode-replay.html": ["scripts/reports/render_adaptive_ode_example.py"],
     "examples/source-index-geometry-2d.html": ["docs/examples/source-index-geometry-2d.html"],
     "examples/app01-plan-timing-v1.html": ["scripts/reports/approx_extension_companions.py"],
@@ -79,6 +81,11 @@ EXAMPLE_ROUTE_PRODUCERS = {
 }
 
 STANDALONE_REPORT_ROUTE_PRODUCERS = {
+    "closed-loop-history-functional/warm-gap-9540-v1/index.html": [
+        "scripts/reports/stage_history_functional.py",
+        "scripts/reports/history_warm_gap_report.py",
+        "reports/closed-loop-history-functional/warm-gap-9540-v1/render-source.py",
+        ".github/workflows/algorithm-reports.yml"],
     "closed-loop-history-functional/index.html": ["scripts/reports/stage_history_functional.py",
                                                    "reports/closed-loop-history-functional/index.html",
                                                    ".github/workflows/algorithm-reports.yml"],
@@ -91,6 +98,7 @@ STANDALONE_REPORT_ROUTE_PRODUCERS = {
 }
 
 GALLERY_INDEX_PRODUCERS = [
+    "scripts/reports/stage_native_discrete_models.py",
     "scripts/reports/approx_extension_companions.py",
     "scripts/reports/control_witness_companions.py",
     "scripts/reports/geometry_opt_companions.py",

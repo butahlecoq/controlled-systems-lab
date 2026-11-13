@@ -1,0 +1,1 @@
+15 replans; max source/program objective error=3.58e-14; max predicted dynamics residual=7.47e-13; max public-step residual=4.44e-16
