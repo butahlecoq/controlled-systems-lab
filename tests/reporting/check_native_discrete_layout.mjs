@@ -83,8 +83,10 @@ try {
       region.scrollIntoView({block:'center', behavior:'instant'});
       region.scrollLeft = region.scrollWidth;
       return {left:region.scrollLeft, max:region.scrollWidth-region.clientWidth,
+              verticalOverflow:region.scrollHeight>region.clientHeight,
               accessible:region.tabIndex===0 && region.getAttribute('role')==='region'};
     })()`);
+    assert.equal(scroll.verticalOverflow, false, 'the objective must not clip tall MathML symbols');
     assert(scroll?.accessible, 'objective scroll region must be keyboard accessible and labelled');
     assert.equal(scroll.left, scroll.max, 'the terminal term must be reachable by scrolling');
     await writeFile(join(output, `${name}-objective.png`), Buffer.from(
