@@ -100,16 +100,17 @@ void write_capture(const std::filesystem::path& output,const std::vector<Capture
 int main(int argc,char** argv) try {
     if (argc>2 || (argc==2 && std::string_view(argv[1]).starts_with("--")))
         throw std::runtime_error("Usage: native_spatial_flight [new-output-directory]");
-    const auto data=take(model::catalogue::make_spatial_flight_case(
-        "spatial-flight/b-consistent-body9-synthetic/1"));
-    const auto system=take(model::snapshot(data.reachability.model,data.reachability.time_grid));
-    std::vector<sets::GeneratorSet> reachable{data.reachability.initial};
+    constexpr std::string_view id="spatial-flight/b-consistent-body9-synthetic/1";
+    const auto data=take(model::catalogue::make_spatial_flight_case(id));
+    const auto reach=take(model::catalogue::make_discrete_reachability_case(id));
+    const auto system=take(model::snapshot(reach.model,reach.time_grid));
+    std::vector<sets::GeneratorSet> reachable{reach.initial};
     for (std::size_t k=0;k<system.horizon();++k) {
         const auto stage=take(system.stage({k}));
-        const auto prefix=std::string(data.reachability.info.id)+"/stage/"+std::to_string(k+1);
+        const auto prefix=std::string(reach.info.id)+"/stage/"+std::to_string(k+1);
         auto state=take(geometry::generators::affine_image(reachable.back(),own(stage.A),
             Vector(stage.offset.values().begin(),stage.offset.values().end()),{prefix+"/state-image"}));
-        auto control=take(geometry::generators::affine_image(data.reachability.controls[k],own(stage.B),
+        auto control=take(geometry::generators::affine_image(reach.controls[k],own(stage.B),
             Vector(9,0),{prefix+"/control-image"}));
         reachable.push_back(take(geometry::generators::minkowski_sum(state,control,{prefix+"/reachable"})));
     }
@@ -159,7 +160,7 @@ int main(int argc,char** argv) try {
         }
         for (std::size_t k=0;k<data.reference.size();++k) {
             const auto& x=data.reference[k];
-            reference<<k<<','<<data.reachability.time_grid[k]<<','<<x.vx<<','<<x.vy<<','<<x.vz<<','
+            reference<<k<<','<<reach.time_grid[k]<<','<<x.vx<<','<<x.vy<<','<<x.vz<<','
                 <<x.phi<<','<<x.psi<<','<<x.theta<<','<<x.omega_x<<','<<x.omega_y<<','<<x.omega_z<<'\n';
             const auto m=std::get<model::spatial_flight::Model>(model::spatial_flight::Model::make(data.parameters));
             const auto lin=take(m.linearize(x,data.nominal_control));
@@ -172,8 +173,8 @@ int main(int argc,char** argv) try {
         }
         std::ofstream metadata(*output/"run-receipt.txt");
         metadata.exceptions(std::ios::badbit|std::ios::failbit);
-        metadata<<"case="<<data.reachability.info.id<<"\nsource_sha256="<<data.reachability.info.source.sha256
-            <<"\nsource_qualification="<<data.reachability.info.source.qualification
+        metadata<<"case="<<reach.info.id<<"\nsource_sha256="<<reach.info.source.sha256
+            <<"\nsource_qualification="<<reach.info.source.qualification
             <<"\nphysical_state_order=vx,vy,vz,phi,psi,theta,omega_x,omega_y,omega_z\nreachability_state_order=delta_vx,delta_vy,delta_vz,delta_phi,delta_psi,delta_theta,delta_omega_x,delta_omega_y,delta_omega_z\ncontrol_order=u0,u1,u2\nreachability_control_order=delta_u0,delta_u1,delta_u2\n"
             <<"control_allocation=zero_based_u0_moments_only;u1_u2_also_Cy_Cz\n"
             <<"\nnominal_control=0.003,-0.002,0.002\ninitial_state=100,0,0,0,0,0,0,0,0\n"
@@ -198,7 +199,7 @@ int main(int argc,char** argv) try {
                     <<set.generators().values[i*set.generators().cols+j]<<'\n';
     }
     for (const auto [first,second]:planes()) {
-        CapturedCase capture{data.reachability.info,{},{{{first,second},{first,second}}},true};
+        CapturedCase capture{reach.info,{},{{{first,second},{first,second}}},true};
         capture.stages.reserve(reachable.size());
         for (std::size_t k=0;k<reachable.size();++k) {
             const auto& set=reachable[k];
@@ -232,7 +233,7 @@ int main(int argc,char** argv) try {
         }
     }
     if (output) write_capture(*output,captures);
-    std::cout<<std::setprecision(17)<<"case="<<data.reachability.info.id<<" dimension=9 controls=3 transitions=20 stages="
+    std::cout<<std::setprecision(17)<<"case="<<reach.info.id<<" dimension=9 controls=3 transitions=20 stages="
         <<reachable.size()<<" terminal_generators="<<reachable.back().generators().cols
         <<" support_checks="<<support_checks<<" maximum_support_difference="<<maximum_error<<'\n'
         <<"Native spatial flight: 20 transitions and "<<support_checks<<" full-state support checks passed\n"
