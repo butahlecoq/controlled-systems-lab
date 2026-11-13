@@ -1,0 +1,6 @@
+original_problem=row-diagnostic-analytic
+original_program=equality-2d-v1
+configuration=positive-power2-row-min-normalization-v1
+dual_relation=y_original=D*y_scaled; mathematical relation only, ProgramResult has no public dual vectors
+derived_problem=row-diagnostic-analytic
+derived_program=equality-2d-v1/diagnostic-row-min-power2-v1
