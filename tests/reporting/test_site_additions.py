@@ -1,15 +1,14 @@
 from __future__ import annotations
 
 import os
-from pathlib import Path
 import stat
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
 import site_additions
 
 
@@ -27,8 +26,11 @@ class SiteAdditionsTests(unittest.TestCase):
             site = Path(temporary)
             index = site / "index.html"
             index.write_bytes(b"original")
-            plan = site_additions.prepare(site, {"route.html": b"route", "index.html": b"new"},
-                                          replace_existing={"index.html"})
+            plan = site_additions.prepare(
+                site,
+                {"route.html": b"route", "index.html": b"new"},
+                replace_existing={"index.html"},
+            )
             index.write_bytes(b"concurrent change")
             with self.assertRaisesRegex(ValueError, "changed after preparation"):
                 site_additions.commit(plan)
@@ -39,11 +41,14 @@ class SiteAdditionsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             site = Path(temporary)
             writes = []
-            plan = site_additions.prepare(site, {
-                "index.html": b"site",
-                "reports/index.html": b"nested",
-                "reports/data.json": b"data",
-            })
+            plan = site_additions.prepare(
+                site,
+                {
+                    "index.html": b"site",
+                    "reports/index.html": b"nested",
+                    "reports/data.json": b"data",
+                },
+            )
 
             def writer(path: Path, content: bytes) -> None:
                 writes.append(path.relative_to(site).as_posix())
@@ -58,8 +63,11 @@ class SiteAdditionsTests(unittest.TestCase):
             site = Path(temporary)
             index = site / "index.html"
             index.write_bytes(b"original")
-            plan = site_additions.prepare(site, {"route.html": b"route", "index.html": b"updated"},
-                                          replace_existing={"index.html"})
+            plan = site_additions.prepare(
+                site,
+                {"route.html": b"route", "index.html": b"updated"},
+                replace_existing={"index.html"},
+            )
             replace = site_additions.os.replace
 
             def fail_index_replace(source: Path, destination: Path) -> None:
@@ -81,8 +89,11 @@ class SiteAdditionsTests(unittest.TestCase):
             index = site / "index.html"
             index.write_bytes(b"original")
             index.chmod(0o640)
-            plan = site_additions.prepare(site, {"route.html": b"route", "index.html": b"updated"},
-                                          replace_existing={"index.html"})
+            plan = site_additions.prepare(
+                site,
+                {"route.html": b"route", "index.html": b"updated"},
+                replace_existing={"index.html"},
+            )
             site_additions.commit(plan)
             self.assertEqual(stat.S_IMODE(index.stat().st_mode), 0o640)
             self.assertEqual(stat.S_IMODE((site / "route.html").stat().st_mode), 0o644)
