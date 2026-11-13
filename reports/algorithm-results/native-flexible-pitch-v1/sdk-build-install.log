@@ -1,0 +1,579 @@
+[1/332] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/model/discretization/rk4.cpp for CXX dependencies
+[2/332] Generating CXX dyndep file CMakeFiles/csl_model.dir/CXX.dd
+[3/329] Building CXX object CMakeFiles/csl_model.dir/src/model/discretization/rk4.cpp.o
+[4/329] Linking CXX static library libcsl_model.a
+[5/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/linear_program.cpp for CXX dependencies
+[6/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/lp_backend.cpp for CXX dependencies
+[7/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/linear_infeasibility_certificate.cpp for CXX dependencies
+[8/329] Generating CXX dyndep file CMakeFiles/csl_optimization.dir/CXX.dd
+[9/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/bounded_hull_checker.cpp for CXX dependencies
+[10/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/verification/trajectory.cpp for CXX dependencies
+[11/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/execution/executor.cpp for CXX dependencies
+[12/329] Building CXX object CMakeFiles/csl_optimization.dir/src/optimization/linear_program.cpp.o
+[13/329] Building CXX object CMakeFiles/csl_optimization.dir/src/optimization/lp_backend.cpp.o
+[14/329] Building CXX object CMakeFiles/csl_optimization.dir/src/optimization/linear_infeasibility_certificate.cpp.o
+[15/329] Generating CXX dyndep file CMakeFiles/csl_bounded_hull_checker.dir/CXX.dd
+[16/329] Generating CXX dyndep file CMakeFiles/csl_verification.dir/CXX.dd
+[17/329] Generating CXX dyndep file CMakeFiles/csl_execution.dir/CXX.dd
+[18/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/artifacts/run_statistics.cpp for CXX dependencies
+[19/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/artifacts/run_statistics_json.cpp for CXX dependencies
+[20/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/artifacts/comparison_manifest.cpp for CXX dependencies
+[21/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/artifacts/scenario_sweep.cpp for CXX dependencies
+[22/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/artifacts/h_relation_attachment.cpp for CXX dependencies
+[23/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/artifacts/bounded_hull_check.cpp for CXX dependencies
+[24/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/artifacts/final_plot_data.cpp for CXX dependencies
+[25/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/artifacts/plot_request.cpp for CXX dependencies
+[26/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/artifacts/stage_projection_request.cpp for CXX dependencies
+[27/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/artifacts/stage_projection_capture.cpp for CXX dependencies
+[28/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/artifacts/stage_projection_batch_json.cpp for CXX dependencies
+[29/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/artifacts/plot_document_json.cpp for CXX dependencies
+[30/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/execution/observability.cpp for CXX dependencies
+[31/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/execution/timing_collector.cpp for CXX dependencies
+[32/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/execution/operation_observability.cpp for CXX dependencies
+[33/329] Linking CXX static library libcsl_optimization.a
+[34/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/worst_case_vertex.cpp for CXX dependencies
+[35/329] Building CXX object CMakeFiles/csl_bounded_hull_checker.dir/src/geometry/bounded_hull_checker.cpp.o
+[36/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/reachability/fixed_plan_disturbance.cpp for CXX dependencies
+[37/329] Building CXX object CMakeFiles/csl_verification.dir/src/verification/trajectory.cpp.o
+[38/329] Building CXX object CMakeFiles/csl_execution.dir/src/execution/executor.cpp.o
+[39/329] Generating CXX dyndep file CMakeFiles/csl_artifacts.dir/CXX.dd
+[40/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/phase_one/program.cpp for CXX dependencies
+[41/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/phase_one/simplex.cpp for CXX dependencies
+[42/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/convex_backend.cpp for CXX dependencies
+[43/329] Generating CXX dyndep file CMakeFiles/csl_worst_case_vertex.dir/CXX.dd
+[44/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/finite_action_minimax.cpp for CXX dependencies
+[45/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/finite_action_replay.cpp for CXX dependencies
+[46/329] Linking CXX static library libcsl_bounded_hull_checker.a
+[47/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/polyhedral/intersection.cpp for CXX dependencies
+[48/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/polyhedral/halfspace_reducer.cpp for CXX dependencies
+[49/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/polyhedral/projection.cpp for CXX dependencies
+[50/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/polyhedral/support.cpp for CXX dependencies
+[51/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/reachability/nominal_predecessor.cpp for CXX dependencies
+[52/329] Generating CXX dyndep file CMakeFiles/csl_fixed_plan_disturbance.dir/CXX.dd
+[53/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/reachability/finite_plan_box.cpp for CXX dependencies
+[54/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/reachability/finite_plan_zonotope.cpp for CXX dependencies
+[55/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/reachability/finite_plan_parallelotope.cpp for CXX dependencies
+[56/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/reachability/finite_plan_ellipsoid.cpp for CXX dependencies
+[57/329] Linking CXX static library libcsl_verification.a
+[58/329] Linking CXX static library libcsl_execution.a
+[59/329] Building CXX object CMakeFiles/csl_artifacts.dir/src/artifacts/run_statistics.cpp.o
+[60/329] Building CXX object CMakeFiles/csl_artifacts.dir/src/artifacts/run_statistics_json.cpp.o
+[61/329] Building CXX object CMakeFiles/csl_artifacts.dir/src/artifacts/comparison_manifest.cpp.o
+[62/329] Building CXX object CMakeFiles/csl_artifacts.dir/src/artifacts/scenario_sweep.cpp.o
+[63/329] Building CXX object CMakeFiles/csl_artifacts.dir/src/artifacts/h_relation_attachment.cpp.o
+[64/329] Building CXX object CMakeFiles/csl_artifacts.dir/src/artifacts/bounded_hull_check.cpp.o
+[65/329] Building CXX object CMakeFiles/csl_artifacts.dir/src/artifacts/final_plot_data.cpp.o
+[66/329] Building CXX object CMakeFiles/csl_artifacts.dir/src/artifacts/plot_request.cpp.o
+[67/329] Building CXX object CMakeFiles/csl_artifacts.dir/src/artifacts/stage_projection_request.cpp.o
+[68/329] Building CXX object CMakeFiles/csl_artifacts.dir/src/artifacts/stage_projection_capture.cpp.o
+[69/329] Building CXX object CMakeFiles/csl_artifacts.dir/src/artifacts/stage_projection_batch_json.cpp.o
+[70/329] Building CXX object CMakeFiles/csl_artifacts.dir/src/artifacts/plot_document_json.cpp.o
+[71/329] Building CXX object CMakeFiles/csl_artifacts.dir/src/execution/observability.cpp.o
+[72/329] Building CXX object CMakeFiles/csl_artifacts.dir/src/execution/timing_collector.cpp.o
+[73/329] Building CXX object CMakeFiles/csl_artifacts.dir/src/execution/operation_observability.cpp.o
+[74/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/running_control_cost.cpp for CXX dependencies
+[75/329] Generating CXX dyndep file CMakeFiles/csl_phase_one.dir/CXX.dd
+[76/329] Generating CXX dyndep file CMakeFiles/csl_convex.dir/CXX.dd
+[77/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/zoutendijk/projection.cpp for CXX dependencies
+[78/329] Building CXX object CMakeFiles/csl_worst_case_vertex.dir/src/optimization/worst_case_vertex.cpp.o
+[79/329] Generating CXX dyndep file CMakeFiles/csl_finite_action_minimax.dir/CXX.dd
+[80/329] Generating CXX dyndep file CMakeFiles/csl_finite_action_replay.dir/CXX.dd
+[81/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/finite_action_box_minimax.cpp for CXX dependencies
+[82/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/finite_action_zonotope_minimax.cpp for CXX dependencies
+[83/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/finite_action_parallelotope_minimax.cpp for CXX dependencies
+[84/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/finite_action_ellipsoid_minimax.cpp for CXX dependencies
+[85/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/validated_finite_action_minimax.cpp for CXX dependencies
+[86/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/composition_catalogue.cpp for CXX dependencies
+[87/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/hull_reducer.cpp for CXX dependencies
+[88/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/basis_reuse_reducer.cpp for CXX dependencies
+[89/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/a43_paper_reducer.cpp for CXX dependencies
+[90/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/hull/ordered_reducer.cpp for CXX dependencies
+[91/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/hull/itis17_reducers.cpp for CXX dependencies
+[92/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/hull/grouped_reducer.cpp for CXX dependencies
+[93/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/hull/recursive_reducer.cpp for CXX dependencies
+[94/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/legacy_btulshor.cpp for CXX dependencies
+[95/329] Generating CXX dyndep file CMakeFiles/csl_polyhedral.dir/CXX.dd
+[96/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/generators/adapter.cpp for CXX dependencies
+[97/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/reachability/nominal_forward.cpp for CXX dependencies
+[98/329] Building CXX object CMakeFiles/csl_fixed_plan_disturbance.dir/src/reachability/fixed_plan_disturbance.cpp.o
+[99/329] Generating CXX dyndep file CMakeFiles/csl_finite_plan_box.dir/CXX.dd
+[100/329] Generating CXX dyndep file CMakeFiles/csl_finite_plan_zonotope.dir/CXX.dd
+[101/329] Generating CXX dyndep file CMakeFiles/csl_finite_plan_parallelotope.dir/CXX.dd
+[102/329] Generating CXX dyndep file CMakeFiles/csl_finite_plan_ellipsoid.dir/CXX.dd
+[103/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/reachability/finite_feedback.cpp for CXX dependencies
+[104/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/synthesis/terminal_minimizers.cpp for CXX dependencies
+[105/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/synthesis/control_recovery.cpp for CXX dependencies
+[106/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/synthesis/strategy_ts01/analytic_profile.cpp for CXX dependencies
+[107/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/synthesis/finite_search/action_histories.cpp for CXX dependencies
+[108/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/simulation/nonlinear_replay.cpp for CXX dependencies
+[109/329] Linking CXX static library libcsl_artifacts.a
+[110/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/application/comparison.cpp for CXX dependencies
+[111/329] Generating CXX dyndep file CMakeFiles/csl_running_control_cost.dir/CXX.dd
+[112/329] Building CXX object CMakeFiles/csl_phase_one.dir/src/optimization/phase_one/program.cpp.o
+[113/329] Building CXX object CMakeFiles/csl_phase_one.dir/src/optimization/phase_one/simplex.cpp.o
+[114/329] Building CXX object CMakeFiles/csl_convex.dir/src/optimization/convex_backend.cpp.o
+[115/329] Generating CXX dyndep file CMakeFiles/csl_zoutendijk_projection.dir/CXX.dd
+[116/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/feasible_directions/smooth_convex.cpp for CXX dependencies
+[117/329] Linking CXX static library libcsl_worst_case_vertex.a
+[118/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/worst_case_interval.cpp for CXX dependencies
+[119/329] Building CXX object CMakeFiles/csl_finite_action_minimax.dir/src/optimization/finite_action_minimax.cpp.o
+[120/329] Building CXX object CMakeFiles/csl_finite_action_replay.dir/src/optimization/finite_action_replay.cpp.o
+[121/329] Generating CXX dyndep file CMakeFiles/csl_finite_action_box_minimax.dir/CXX.dd
+[122/329] Generating CXX dyndep file CMakeFiles/csl_finite_action_zonotope_minimax.dir/CXX.dd
+[123/329] Generating CXX dyndep file CMakeFiles/csl_finite_action_parallelotope_minimax.dir/CXX.dd
+[124/329] Generating CXX dyndep file CMakeFiles/csl_finite_action_ellipsoid_minimax.dir/CXX.dd
+[125/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/finite_action_nominal.cpp for CXX dependencies
+[126/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/finite_action_graph.cpp for CXX dependencies
+[127/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/finite_causal_minimax.cpp for CXX dependencies
+[128/329] Generating CXX dyndep file CMakeFiles/csl_validated_finite_action_minimax.dir/CXX.dd
+[129/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/validated_finite_action_minimax_port.cpp for CXX dependencies
+[130/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/finite_action_minimax_port.cpp for CXX dependencies
+[131/329] Generating CXX dyndep file CMakeFiles/csl_hull.dir/CXX.dd
+[132/329] Generating CXX dyndep file CMakeFiles/csl_legacy_btulshor.dir/CXX.dd
+[133/329] Building CXX object CMakeFiles/csl_polyhedral.dir/src/geometry/polyhedral/intersection.cpp.o
+[134/329] Building CXX object CMakeFiles/csl_polyhedral.dir/src/geometry/polyhedral/halfspace_reducer.cpp.o
+[135/329] Building CXX object CMakeFiles/csl_polyhedral.dir/src/geometry/polyhedral/projection.cpp.o
+[136/329] Building CXX object CMakeFiles/csl_polyhedral.dir/src/geometry/polyhedral/support.cpp.o
+[137/329] Building CXX object CMakeFiles/csl_polyhedral.dir/src/reachability/nominal_predecessor.cpp.o
+[138/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/lazy/expression.cpp for CXX dependencies
+[139/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/lazy/support.cpp for CXX dependencies
+[140/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/lazy/materialize.cpp for CXX dependencies
+[141/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/affine_sum.cpp for CXX dependencies
+[142/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/source_index_hull.cpp for CXX dependencies
+[143/329] Generating CXX dyndep file CMakeFiles/csl_generator_adapter.dir/CXX.dd
+[144/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/approximation/policy.cpp for CXX dependencies
+[145/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/approximation/reachable_plan.cpp for CXX dependencies
+[146/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/approximation/box_parallelotope.cpp for CXX dependencies
+[147/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/approximation/zonotope.cpp for CXX dependencies
+[148/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/approximation/ellipsoidal_set.cpp for CXX dependencies
+[149/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/approximation/ellipsoidal.cpp for CXX dependencies
+[150/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/geometry/approximation/ellipsoidal_family.cpp for CXX dependencies
+[151/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/controllers/observed_replay.cpp for CXX dependencies
+[152/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/controllers/finite_policy.cpp for CXX dependencies
+[153/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/controllers/continuous_policy.cpp for CXX dependencies
+[154/329] Generating CXX dyndep file CMakeFiles/csl_nominal_forward.dir/CXX.dd
+[155/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/reachability/nominal_tube.cpp for CXX dependencies
+[156/329] Linking CXX static library libcsl_fixed_plan_disturbance.a
+[157/329] Building CXX object CMakeFiles/csl_finite_plan_box.dir/src/reachability/finite_plan_box.cpp.o
+[158/329] Building CXX object CMakeFiles/csl_finite_plan_zonotope.dir/src/reachability/finite_plan_zonotope.cpp.o
+[159/329] Building CXX object CMakeFiles/csl_finite_plan_parallelotope.dir/src/reachability/finite_plan_parallelotope.cpp.o
+[160/329] Building CXX object CMakeFiles/csl_finite_plan_ellipsoid.dir/src/reachability/finite_plan_ellipsoid.cpp.o
+[161/329] Generating CXX dyndep file CMakeFiles/csl_finite_feedback.dir/CXX.dd
+[162/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/reachability/finite_feedback_port.cpp for CXX dependencies
+[163/329] Generating CXX dyndep file CMakeFiles/csl_terminal_minimizers.dir/CXX.dd
+[164/329] Generating CXX dyndep file CMakeFiles/csl_control_recovery.dir/CXX.dd
+[165/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/optimization/history_cost.cpp for CXX dependencies
+[166/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/synthesis/strategy_a/strategy.cpp for CXX dependencies
+[167/329] Generating CXX dyndep file CMakeFiles/csl_strategy_ts01.dir/CXX.dd
+[168/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/synthesis/strategy_b/direct_joint.cpp for CXX dependencies
+[169/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/synthesis/witness_selector.cpp for CXX dependencies
+[170/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/synthesis/hybrid_path_program.cpp for CXX dependencies
+[171/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/synthesis/hybrid_projected_reachability.cpp for CXX dependencies
+[172/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/synthesis/hybrid_family_verifier.cpp for CXX dependencies
+[173/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/synthesis/hybrid_linear_h_family_verifier.cpp for CXX dependencies
+[174/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/synthesis/hybrid_interval_family_verifier.cpp for CXX dependencies
+[175/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/synthesis/hybrid_two_parameter_family_verifier.cpp for CXX dependencies
+[176/329] Generating CXX dyndep file CMakeFiles/csl_finite_action_histories.dir/CXX.dd
+[177/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/synthesis/finite_search/mixed_branch.cpp for CXX dependencies
+[178/329] Generating CXX dyndep file CMakeFiles/csl_simulation.dir/CXX.dd
+[179/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/input/scenario_loader.cpp for CXX dependencies
+[180/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/input/scenario_json.cpp for CXX dependencies
+[181/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/input/scenario_file.cpp for CXX dependencies
+[182/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/input/continuous_model.cpp for CXX dependencies
+[183/329] Generating CXX dyndep file CMakeFiles/csl_application.dir/CXX.dd
+[184/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/experiments/batch_runner.cpp for CXX dependencies
+[185/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/experiments/replay_comparison.cpp for CXX dependencies
+[186/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/src/experiments/process_memory_observer.cpp for CXX dependencies
+[187/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/examples/native_model_catalogue.cpp for CXX dependencies
+[188/329] Scanning /home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/examples/native_four_state_reachability.cpp for CXX dependencies
+[189/329] Building CXX object CMakeFiles/csl_running_control_cost.dir/src/optimization/running_control_cost.cpp.o
+[190/329] Linking CXX static library libcsl_phase_one.a
+[191/329] Linking CXX static library libcsl_convex.a
+[192/329] Building CXX object CMakeFiles/csl_zoutendijk_projection.dir/src/optimization/zoutendijk/projection.cpp.o
+[193/329] Generating CXX dyndep file CMakeFiles/csl_feasible_directions.dir/CXX.dd
+[194/329] Generating CXX dyndep file CMakeFiles/csl_worst_case_interval.dir/CXX.dd
+[195/329] Linking CXX static library libcsl_finite_action_minimax.a
+[196/329] Linking CXX static library libcsl_finite_action_replay.a
+[197/329] Building CXX object CMakeFiles/csl_finite_action_box_minimax.dir/src/optimization/finite_action_box_minimax.cpp.o
+[198/329] Building CXX object CMakeFiles/csl_finite_action_zonotope_minimax.dir/src/optimization/finite_action_zonotope_minimax.cpp.o
+[199/329] Building CXX object CMakeFiles/csl_finite_action_parallelotope_minimax.dir/src/optimization/finite_action_parallelotope_minimax.cpp.o
+[200/329] Building CXX object CMakeFiles/csl_finite_action_ellipsoid_minimax.dir/src/optimization/finite_action_ellipsoid_minimax.cpp.o
+[201/329] Generating CXX dyndep file CMakeFiles/csl_finite_action_nominal.dir/CXX.dd
+[202/329] Generating CXX dyndep file CMakeFiles/csl_finite_causal_minimax.dir/CXX.dd
+[203/329] Building CXX object CMakeFiles/csl_validated_finite_action_minimax.dir/src/optimization/validated_finite_action_minimax.cpp.o
+[204/329] Generating CXX dyndep file CMakeFiles/csl_validated_finite_action_minimax_port.dir/CXX.dd
+[205/329] Generating CXX dyndep file CMakeFiles/csl_finite_action_minimax_port.dir/CXX.dd
+[206/329] Building CXX object CMakeFiles/csl_hull.dir/src/geometry/composition_catalogue.cpp.o
+[207/329] Building CXX object CMakeFiles/csl_hull.dir/src/geometry/hull_reducer.cpp.o
+[208/329] Building CXX object CMakeFiles/csl_hull.dir/src/geometry/basis_reuse_reducer.cpp.o
+[209/329] Building CXX object CMakeFiles/csl_hull.dir/src/geometry/a43_paper_reducer.cpp.o
+[210/329] Building CXX object CMakeFiles/csl_hull.dir/src/geometry/hull/ordered_reducer.cpp.o
+[211/329] Building CXX object CMakeFiles/csl_hull.dir/src/geometry/hull/itis17_reducers.cpp.o
+[212/329] Building CXX object CMakeFiles/csl_hull.dir/src/geometry/hull/grouped_reducer.cpp.o
+[213/329] Building CXX object CMakeFiles/csl_hull.dir/src/geometry/hull/recursive_reducer.cpp.o
+[214/329] Building CXX object CMakeFiles/csl_legacy_btulshor.dir/src/geometry/legacy_btulshor.cpp.o
+[215/329] Linking CXX static library libcsl_polyhedral.a
+[216/329] Generating CXX dyndep file CMakeFiles/csl_lazy_geometry.dir/CXX.dd
+[217/329] Generating CXX dyndep file CMakeFiles/csl_affine_sum.dir/CXX.dd
+[218/329] Building CXX object CMakeFiles/csl_generator_adapter.dir/src/geometry/generators/adapter.cpp.o
+[219/329] Generating CXX dyndep file CMakeFiles/csl_approximation.dir/CXX.dd
+[220/329] Generating CXX dyndep file CMakeFiles/csl_controllers.dir/CXX.dd
+[221/329] Building CXX object CMakeFiles/csl_nominal_forward.dir/src/reachability/nominal_forward.cpp.o
+[222/329] Generating CXX dyndep file CMakeFiles/csl_nominal_tube.dir/CXX.dd
+[223/329] Linking CXX static library libcsl_finite_plan_box.a
+[224/329] Linking CXX static library libcsl_finite_plan_zonotope.a
+[225/329] Linking CXX static library libcsl_finite_plan_parallelotope.a
+[226/329] Linking CXX static library libcsl_finite_plan_ellipsoid.a
+[227/329] Building CXX object CMakeFiles/csl_finite_feedback.dir/src/reachability/finite_feedback.cpp.o
+[228/329] Generating CXX dyndep file CMakeFiles/csl_finite_feedback_port.dir/CXX.dd
+[229/329] Building CXX object CMakeFiles/csl_terminal_minimizers.dir/src/synthesis/terminal_minimizers.cpp.o
+[230/329] Building CXX object CMakeFiles/csl_control_recovery.dir/src/synthesis/control_recovery.cpp.o
+[231/329] Generating CXX dyndep file CMakeFiles/csl_history_cost.dir/CXX.dd
+[232/329] Generating CXX dyndep file CMakeFiles/csl_strategy_a.dir/CXX.dd
+[233/329] Building CXX object CMakeFiles/csl_strategy_ts01.dir/src/synthesis/strategy_ts01/analytic_profile.cpp.o
+[234/329] Generating CXX dyndep file CMakeFiles/csl_strategy_b.dir/CXX.dd
+[235/329] Generating CXX dyndep file CMakeFiles/csl_witness_selector.dir/CXX.dd
+[236/329] Generating CXX dyndep file CMakeFiles/csl_hybrid_path_program.dir/CXX.dd
+[237/329] Building CXX object CMakeFiles/csl_finite_action_histories.dir/src/synthesis/finite_search/action_histories.cpp.o
+[238/329] Generating CXX dyndep file CMakeFiles/csl_finite_mixed_branch.dir/CXX.dd
+[239/329] Building CXX object CMakeFiles/csl_simulation.dir/src/simulation/nonlinear_replay.cpp.o
+[240/329] Generating CXX dyndep file CMakeFiles/csl_input.dir/CXX.dd
+[241/329] Building CXX object CMakeFiles/csl_application.dir/src/application/comparison.cpp.o
+[242/329] Generating CXX dyndep file CMakeFiles/csl_experiments.dir/CXX.dd
+[243/329] Generating CXX dyndep file CMakeFiles/model_catalogue_reference.dir/CXX.dd
+[244/329] Generating CXX dyndep file CMakeFiles/four_state_catalogue_reference.dir/CXX.dd
+[245/329] Linking CXX static library libcsl_running_control_cost.a
+[246/329] Linking CXX static library libcsl_zoutendijk_projection.a
+[247/329] Building CXX object CMakeFiles/csl_feasible_directions.dir/src/optimization/feasible_directions/smooth_convex.cpp.o
+[248/329] Building CXX object CMakeFiles/csl_worst_case_interval.dir/src/optimization/worst_case_interval.cpp.o
+[249/329] Linking CXX static library libcsl_finite_action_box_minimax.a
+[250/329] Linking CXX static library libcsl_finite_action_zonotope_minimax.a
+[251/329] Linking CXX static library libcsl_finite_action_parallelotope_minimax.a
+[252/329] Linking CXX static library libcsl_finite_action_ellipsoid_minimax.a
+[253/329] Building CXX object CMakeFiles/csl_finite_action_nominal.dir/src/optimization/finite_action_nominal.cpp.o
+[254/329] Building CXX object CMakeFiles/csl_finite_action_nominal.dir/src/optimization/finite_action_graph.cpp.o
+[255/329] Building CXX object CMakeFiles/csl_finite_causal_minimax.dir/src/optimization/finite_causal_minimax.cpp.o
+[256/329] Linking CXX static library libcsl_validated_finite_action_minimax.a
+[257/329] Building CXX object CMakeFiles/csl_validated_finite_action_minimax_port.dir/src/optimization/validated_finite_action_minimax_port.cpp.o
+[258/329] Building CXX object CMakeFiles/csl_finite_action_minimax_port.dir/src/optimization/finite_action_minimax_port.cpp.o
+[259/329] Linking CXX static library libcsl_hull.a
+[260/329] Linking CXX static library libcsl_legacy_btulshor.a
+[261/329] Building CXX object CMakeFiles/csl_lazy_geometry.dir/src/geometry/lazy/expression.cpp.o
+[262/329] Building CXX object CMakeFiles/csl_lazy_geometry.dir/src/geometry/lazy/support.cpp.o
+[263/329] Building CXX object CMakeFiles/csl_lazy_geometry.dir/src/geometry/lazy/materialize.cpp.o
+[264/329] Building CXX object CMakeFiles/csl_affine_sum.dir/src/geometry/affine_sum.cpp.o
+[265/329] Building CXX object CMakeFiles/csl_affine_sum.dir/src/geometry/source_index_hull.cpp.o
+[266/329] Linking CXX static library libcsl_generator_adapter.a
+[267/329] Building CXX object CMakeFiles/csl_approximation.dir/src/geometry/approximation/policy.cpp.o
+[268/329] Building CXX object CMakeFiles/csl_approximation.dir/src/geometry/approximation/reachable_plan.cpp.o
+[269/329] Building CXX object CMakeFiles/csl_approximation.dir/src/geometry/approximation/box_parallelotope.cpp.o
+[270/329] Building CXX object CMakeFiles/csl_approximation.dir/src/geometry/approximation/zonotope.cpp.o
+[271/329] Building CXX object CMakeFiles/csl_approximation.dir/src/geometry/approximation/ellipsoidal_set.cpp.o
+[272/329] Building CXX object CMakeFiles/csl_approximation.dir/src/geometry/approximation/ellipsoidal.cpp.o
+[273/329] Building CXX object CMakeFiles/csl_approximation.dir/src/geometry/approximation/ellipsoidal_family.cpp.o
+[274/329] Building CXX object CMakeFiles/csl_controllers.dir/src/controllers/observed_replay.cpp.o
+[275/329] Building CXX object CMakeFiles/csl_controllers.dir/src/controllers/finite_policy.cpp.o
+[276/329] Building CXX object CMakeFiles/csl_controllers.dir/src/controllers/continuous_policy.cpp.o
+[277/329] Linking CXX static library libcsl_nominal_forward.a
+[278/329] Building CXX object CMakeFiles/csl_nominal_tube.dir/src/reachability/nominal_tube.cpp.o
+[279/329] Linking CXX static library libcsl_finite_feedback.a
+[280/329] Building CXX object CMakeFiles/csl_finite_feedback_port.dir/src/reachability/finite_feedback_port.cpp.o
+[281/329] Linking CXX static library libcsl_terminal_minimizers.a
+[282/329] Linking CXX static library libcsl_control_recovery.a
+[283/329] Building CXX object CMakeFiles/csl_history_cost.dir/src/optimization/history_cost.cpp.o
+[284/329] Building CXX object CMakeFiles/csl_strategy_a.dir/src/synthesis/strategy_a/strategy.cpp.o
+[285/329] Linking CXX static library libcsl_strategy_ts01.a
+[286/329] Building CXX object CMakeFiles/csl_strategy_b.dir/src/synthesis/strategy_b/direct_joint.cpp.o
+[287/329] Building CXX object CMakeFiles/csl_witness_selector.dir/src/synthesis/witness_selector.cpp.o
+[288/329] Building CXX object CMakeFiles/csl_hybrid_path_program.dir/src/synthesis/hybrid_path_program.cpp.o
+[289/329] Building CXX object CMakeFiles/csl_hybrid_path_program.dir/src/synthesis/hybrid_projected_reachability.cpp.o
+[290/329] Building CXX object CMakeFiles/csl_hybrid_path_program.dir/src/synthesis/hybrid_family_verifier.cpp.o
+[291/329] Building CXX object CMakeFiles/csl_hybrid_path_program.dir/src/synthesis/hybrid_linear_h_family_verifier.cpp.o
+[292/329] Building CXX object CMakeFiles/csl_hybrid_path_program.dir/src/synthesis/hybrid_interval_family_verifier.cpp.o
+[293/329] Building CXX object CMakeFiles/csl_hybrid_path_program.dir/src/synthesis/hybrid_two_parameter_family_verifier.cpp.o
+[294/329] Linking CXX static library libcsl_finite_action_histories.a
+[295/329] Building CXX object CMakeFiles/csl_finite_mixed_branch.dir/src/synthesis/finite_search/mixed_branch.cpp.o
+[296/329] Linking CXX static library libcsl_simulation.a
+[297/329] Building CXX object CMakeFiles/csl_input.dir/src/input/scenario_loader.cpp.o
+[298/329] Building CXX object CMakeFiles/csl_input.dir/src/input/scenario_json.cpp.o
+[299/329] Building CXX object CMakeFiles/csl_input.dir/src/input/scenario_file.cpp.o
+[300/329] Building CXX object CMakeFiles/csl_input.dir/src/input/continuous_model.cpp.o
+[301/329] Linking CXX static library libcsl_application.a
+[302/329] Building CXX object CMakeFiles/csl_experiments.dir/src/experiments/batch_runner.cpp.o
+[303/329] Building CXX object CMakeFiles/csl_experiments.dir/src/experiments/replay_comparison.cpp.o
+[304/329] Building CXX object CMakeFiles/csl_experiments.dir/src/experiments/process_memory_observer.cpp.o
+[305/329] Building CXX object CMakeFiles/model_catalogue_reference.dir/examples/native_model_catalogue.cpp.o
+[306/329] Building CXX object CMakeFiles/four_state_catalogue_reference.dir/examples/native_four_state_reachability.cpp.o
+[307/329] Linking CXX static library libcsl_feasible_directions.a
+[308/329] Linking CXX static library libcsl_worst_case_interval.a
+[309/329] Linking CXX static library libcsl_finite_action_nominal.a
+[310/329] Linking CXX static library libcsl_finite_causal_minimax.a
+[311/329] Linking CXX static library libcsl_validated_finite_action_minimax_port.a
+[312/329] Linking CXX static library libcsl_finite_action_minimax_port.a
+[313/329] Linking CXX static library libcsl_lazy_geometry.a
+[314/329] Linking CXX static library libcsl_affine_sum.a
+[315/329] Linking CXX static library libcsl_approximation.a
+[316/329] Linking CXX static library libcsl_controllers.a
+[317/329] Linking CXX static library libcsl_nominal_tube.a
+[318/329] Linking CXX static library libcsl_finite_feedback_port.a
+[319/329] Linking CXX static library libcsl_history_cost.a
+[320/329] Linking CXX static library libcsl_strategy_a.a
+[321/329] Linking CXX static library libcsl_strategy_b.a
+[322/329] Linking CXX static library libcsl_witness_selector.a
+[323/329] Linking CXX static library libcsl_hybrid_path_program.a
+[324/329] Linking CXX static library libcsl_finite_mixed_branch.a
+[325/329] Linking CXX static library libcsl_input.a
+[326/329] Linking CXX static library libcsl_experiments.a
+[327/329] Linking CXX executable model_catalogue_reference
+[328/329] Linking CXX executable four_state_catalogue_reference
+[329/329] Linking CXX executable flexible_pitch_reference
+-- Install configuration: "Release"
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/CSL/notices/nlohmann-json-3.11.3/LICENSE.MIT
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_contracts.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/contracts.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/core
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/core/diagnostics.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/core/outcomes.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/core/values.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/evidence
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/evidence/contracts.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_numeric.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/numeric
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/numeric/data.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_objectives.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/CSL/notices/Eigen-3.4.0/COPYING.README
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/CSL/notices/Eigen-3.4.0/COPYING.MPL2
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/CSL/notices/Eigen-3.4.0/COPYING.BSD
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/CSL/notices/Eigen-3.4.0/COPYING.APACHE
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/CSL/notices/Eigen-3.4.0/COPYING.MINPACK
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_optimization.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_running_control_cost.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_phase_one.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_convex.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_zoutendijk_projection.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_feasible_directions.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_worst_case_vertex.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_worst_case_interval.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_finite_action_minimax.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_finite_action_replay.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_finite_action_box_minimax.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_finite_action_zonotope_minimax.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_finite_action_parallelotope_minimax.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_finite_action_ellipsoid_minimax.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_finite_action_nominal.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_finite_causal_minimax.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_validated_finite_action_minimax.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_validated_finite_action_minimax_port.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_finite_action_minimax_port.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/contracts.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/convex_backend.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/feasible_directions
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/feasible_directions/smooth_convex.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/finite_action_box_minimax.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/finite_action_ellipsoid_minimax.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/finite_action_graph.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/finite_action_minimax.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/finite_action_minimax_port.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/finite_action_nominal.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/finite_action_parallelotope_minimax.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/finite_action_zonotope_minimax.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/finite_causal_minimax.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/history_cost.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/linear_infeasibility_certificate.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/linear_program.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/lp_backend.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/objective_contracts.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/objectives.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/phase_one.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/running_control_cost.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/validated_finite_action_minimax.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/validated_finite_action_minimax_port.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/worst_case_interval.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/worst_case_vertex.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/zoutendijk
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/optimization/zoutendijk/projection.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_registry.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_verifiers.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/registry
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/registry/provider.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/registry/registry.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/registry/strategy_catalogue.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_sets.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/sets
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/sets/contracts.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/sets/data.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/sets/generator_sets.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_model.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_model_catalogue.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/model
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/model/catalogue.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/model/contracts.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/model/discretization.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/model/hybrid_system.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/model/linear_system.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/model/flexible_pitch.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_hull.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_quickhull_2d.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_legacy_btulshor.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_bounded_hull_checker.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_polyhedral.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_lazy_geometry.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_affine_sum.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_geometry_generators.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_generator_adapter.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_approximation.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry/affine_sum.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry/approximation.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry/basis_reuse_reducer.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry/bounded_hull_checker.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry/box_parallelotope.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry/composition_catalogue.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry/contracts.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry/ellipsoidal.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry/generator_adapter.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry/generators.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry/hull_reducer.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry/lazy.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry/legacy_btulshor.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry/operation_admission.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry/polyhedral_intersection.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry/polyhedral_projection.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry/polyhedral_support.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry/quickhull_2d.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry/reachable_plan.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry/source_index_hull.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/geometry/zonotope_reduction.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_problem.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_resolved_core.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_resolved_problem.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/problem
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/problem/constraints.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/problem/contracts.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/problem/domains.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/problem/initial_information.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/problem/resolved_problem.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/problem/temporal_lifts.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/problem/validator.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_controllers.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/controllers
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/controllers/continuous_policy.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/controllers/finite_policy.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/controllers/observed_replay.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_nominal_forward.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_nominal_tube.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_fixed_plan_disturbance.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_finite_plan_box.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_finite_plan_zonotope.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_finite_plan_parallelotope.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_finite_plan_ellipsoid.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_finite_feedback.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_finite_feedback_port.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/reachability
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/reachability/detail
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/reachability/detail/outer_safety.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/reachability/finite_feedback.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/reachability/finite_feedback_port.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/reachability/finite_plan_box.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/reachability/finite_plan_ellipsoid.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/reachability/finite_plan_parallelotope.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/reachability/finite_plan_zonotope.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/reachability/fixed_plan_disturbance.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/reachability/nominal_forward.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/reachability/nominal_predecessor.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/reachability/nominal_tube.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_terminal_minimizers.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_control_recovery.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_history_cost.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_strategy_a.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_strategy_ts01.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_strategy_b.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_witness_selector.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_hybrid_path_program.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_finite_action_histories.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_finite_mixed_branch.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/synthesis
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/synthesis/b04_c_exact_family.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/synthesis/contracts.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/synthesis/control_recovery.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/synthesis/finite_action_histories.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/synthesis/finite_mixed_branch.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/synthesis/hybrid_admission.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/synthesis/hybrid_path_program.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/synthesis/strategy_a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/synthesis/strategy_a/strategy.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/synthesis/strategy_b
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/synthesis/strategy_b/direct_joint.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/synthesis/strategy_ts01
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/synthesis/strategy_ts01/analytic_profile.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/synthesis/terminal_minimizers.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/synthesis/ts02_constant_integrator.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/synthesis/ts03_singular_integrator.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/synthesis/witness_selector.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_verification.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/verification
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/verification/trajectory.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_simulation.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/simulation
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/simulation/nonlinear_replay.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_input.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/CSL/schemas/scenario/v1.schema.json
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/CSL/schemas/model/continuous-v1.schema.json
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/CSL/tests/fixtures/input/continuous-double-integrator.json
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/CSL/tests/fixtures/input/minimal-integrator.json
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/CSL/tests/fixtures/input/affine-ltv.json
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/input
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/input/continuous_model.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/input/scenario_loader.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_execution.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/execution
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/execution/contracts.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/execution/executor.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/execution/instrumented_operation.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/execution/observability.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/execution/timing_collector.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_artifacts.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/csl/schemas/run-statistics-v1.schema.json
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/csl/schemas/run-statistics-v2.schema.json
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/csl/schemas/run-statistics-v3.schema.json
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/csl/schemas/run-statistics-v4.schema.json
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/csl/schemas/run-statistics-v5.schema.json
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/csl/schemas/run-statistics-v6.schema.json
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/csl/schemas/comparison-spec-v1.schema.json
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/csl/schemas/comparison-v1.schema.json
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/csl/schemas/scenario-sweep-v1.schema.json
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/csl/schemas/scenario-sweep-v2.schema.json
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/csl/schemas/bounded-hull-check-v1.schema.json
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/csl/schemas/trajectory-verification-reports-v1.schema.json
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/share/csl/schemas/stage-projection-batch-v1.schema.json
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/artifacts
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/artifacts/bounded_hull_check.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/artifacts/comparison_manifest.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/artifacts/h_relation_attachment.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/artifacts/plot_data.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/artifacts/plot_document_json.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/artifacts/plot_request.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/artifacts/run_statistics.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/artifacts/scenario_sweep.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/artifacts/stage_projection_batch.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/artifacts/stage_projection_capture.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/artifacts/stage_projection_request.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/adapters/lp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/adapters/lp/highs.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/adapters/convex
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/adapters/convex/highs.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/adapters/polyhedral
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/adapters/polyhedral/qhull.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_application.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/application
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/application/comparison.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/libcsl_experiments.a
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/experiments
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/experiments/batch_runner.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/include/csl/experiments/replay_artifact.hpp
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/cmake/CSL/CSLTargets.cmake
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/cmake/CSL/CSLTargets-release.cmake
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/cmake/CSL/CSLConfig.cmake
+-- Installing: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-install/lib/cmake/CSL/CSLConfigVersion.cmake
