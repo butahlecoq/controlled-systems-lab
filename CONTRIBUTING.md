@@ -65,10 +65,17 @@ The Python tools under `scripts/ci` and `scripts/catalogue`, tests under
 `tests/ci`, `scripts/reports/frozen_native_bundle.py`,
 `scripts/reports/stage_native_model_catalogue.py`, and
 `scripts/reports/stage_native_extended_models.py` use pinned Ruff linting/formatting
-and ty type checking. Install
+and ty type checking. The gate also covers `scripts/reports/site_additions.py`,
+`scripts/reports/stage_app02.py`, and their tests
+`tests/reporting/test_site_additions.py` and `tests/reporting/test_app02_saved.py`.
+Install
 `requirements-quality.txt` in a virtual environment, then run `ruff check`, `ruff format --check`, `ty check` and
 `python -m unittest discover -s tests/ci -p 'test_*.py'` from the repository root.
 The `Python tooling quality` workflow enforces these checks. Other Python
 tools remain outside this initial gate; broader adoption and immutable-source
 exclusions are tracked in
 [issue 993](https://github.com/butahlecoq/controlled-systems-lab/issues/993).
+The workflow also runs the site-addition and APP-02 tests with the standard
+library. Run them locally with
+`python -m unittest discover -s tests/reporting -p 'test_site_additions.py'` and
+`python -m unittest discover -s tests/reporting -p 'test_app02_saved.py'`.

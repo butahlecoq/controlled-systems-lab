@@ -8,8 +8,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "scripts/reports"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
 import site_additions
 
 

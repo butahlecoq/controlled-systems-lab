@@ -16,8 +16,8 @@ sys.path.insert(0, str(ROOT / "scripts/reports"))
 spec = importlib.util.spec_from_file_location(
     "app02_render_test", ROOT / "scripts/reports/app02/render_saved.py"
 )
+assert spec is not None and spec.loader is not None
 render = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(render)
 BUNDLE = ROOT / "reports/algorithm-results/app02-box-8ff979de60ea9d22"
 CATALOG = ROOT / "reports/algorithm-results/app02-publications.json"

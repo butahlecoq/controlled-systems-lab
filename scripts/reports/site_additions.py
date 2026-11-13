@@ -6,9 +6,9 @@ import hashlib
 import os
 import stat
 import tempfile
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
-from typing import Callable, Mapping
 
 
 @dataclass(frozen=True)
@@ -62,7 +62,7 @@ def prepare(
     site_root: Path,
     files: Mapping[str, bytes],
     *,
-    replace_existing: frozenset[str] = frozenset(),
+    replace_existing: Iterable[str] = frozenset(),
     require_absent: tuple[str, ...] = (),
 ) -> Plan:
     site_root = Path(site_root)

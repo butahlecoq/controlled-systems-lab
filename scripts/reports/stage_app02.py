@@ -9,6 +9,8 @@ import json
 from html import escape
 from pathlib import Path
 
+import site_additions
+
 ROOT = Path(__file__).resolve().parents[2]
 HISTORICAL_STAGER_HASHES = {
     "app02-box-8ff979de60ea9d22": "d63f67e8496b8cd225f3a4ca78ca274b80ea8553e619fda6473412184a3dd0be",
@@ -16,16 +18,15 @@ HISTORICAL_STAGER_HASHES = {
 spec = importlib.util.spec_from_file_location(
     "app02_saved_renderer", ROOT / "scripts/reports/app02/render_saved.py"
 )
+assert spec is not None and spec.loader is not None
 report = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
 spec.loader.exec_module(report)
 site_spec = importlib.util.spec_from_file_location(
     "app02_site_validator", Path(__file__).with_name("site.py")
 )
+assert site_spec is not None and site_spec.loader is not None
 site = importlib.util.module_from_spec(site_spec)
-assert site_spec.loader is not None
 site_spec.loader.exec_module(site)
-import site_additions
 
 
 def sha(value: bytes) -> str:
