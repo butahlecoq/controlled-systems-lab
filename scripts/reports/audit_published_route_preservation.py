@@ -5,12 +5,16 @@ import hashlib
 import json
 import tarfile
 from collections import Counter
+from html import escape
 from pathlib import Path
 
 try:
     from scripts.reports.preserve_published_routes import SOURCE, digest, safe
 except ModuleNotFoundError:
     from preserve_published_routes import SOURCE, digest, safe
+
+
+BOOK_MANIFEST = Path(__file__).resolve().parents[2] / "docs/catalogue/learning-book-v1.json"
 
 
 ORDER_INSENSITIVE_RECEIPT_ROUTE = "pages-mpc11-environment.json"
@@ -65,6 +69,64 @@ def _receipt_inventory_reordered_only(expected: bytes, actual: bytes) -> bool:
         return False
 
 
+def _learning_navigation_replacements(manifest: dict) -> dict:
+    insertions = manifest.get("learning_navigation_insertions_reviewed_separately", [])
+    if not insertions:
+        return {}
+    chapters = json.loads(BOOK_MANIFEST.read_text())["chapters"]
+    replacements = {}
+
+    def entry(chapter):
+        return ('<li class="book-chapter"><span class="chapter-state">' +
+                escape(chapter["status_label"]) + '</span> <a href="' +
+                escape(chapter["id"] + '.html', quote=True) + '">' +
+                escape(chapter["title"]) + '</a><p>' +
+                escape(chapter["summary"]) + '</p></li>')
+
+    def link(chapter, direction):
+        label = "Previous" if direction == "prev" else "Next"
+        return ('<a rel="' + direction + '" href="' +
+                escape(chapter["id"] + '.html', quote=True) + '"><span>' + label +
+                '</span><strong>' + escape(chapter["title"]) + '</strong></a>')
+
+    for insertion in insertions:
+        matches = [i for i, chapter in enumerate(chapters)
+                   if chapter["id"] == insertion["chapter_id"]]
+        if len(matches) != 1 or not 0 < matches[0] < len(chapters) - 1:
+            continue
+        index = matches[0]
+        previous, chapter, following = chapters[index - 1:index + 2]
+        if (digest(_canonical_json(chapter).encode()) != insertion["chapter_sha256"]
+                or previous["id"] != insertion["previous_chapter_id"]
+                or following["id"] != insertion["next_chapter_id"]):
+            continue
+        changes = {
+            "learn/index.html": (entry(previous), entry(previous) + entry(chapter)),
+            "learn/" + previous["id"] + ".html": (link(following, "next"), link(chapter, "next")),
+            "learn/" + following["id"] + ".html": (link(previous, "prev"), link(chapter, "prev")),
+        }
+        for route, (old, new) in changes.items():
+            if route in replacements:
+                raise ValueError("overlapping reviewed learning navigation insertions")
+            replacements[route] = (old.encode(), new.encode(), insertion["qualification"])
+    return replacements
+
+
+def _learning_navigation_only(route: str, expected: bytes, actual: bytes, replacement: tuple) -> bool:
+    old, new, _ = replacement
+    if expected.count(old) != 1:
+        return False
+    if route != "learn/index.html":
+        opening = b'<nav class="lesson-neighbors" aria-label="Lesson navigation">'
+        if expected.count(opening) != 1:
+            return False
+        start = expected.index(opening) + len(opening)
+        end = expected.find(b'</nav>', start)
+        if end < 0 or old not in expected[start:end]:
+            return False
+    return actual == expected.replace(old, new, 1)
+
+
 def audit(baseline: Path, site: Path) -> dict:
     manifest = json.loads((SOURCE / "manifest.json").read_text())
     with baseline.open("rb") as stream:
@@ -75,6 +137,8 @@ def audit(baseline: Path, site: Path) -> dict:
             raise ValueError("baseline artifact differs from pinned public artifact")
     missing, changed, changed_zips = [], [], []
     reviewed_receipt_order_changes = {}
+    reviewed_learning_navigation_changes = {}
+    learning_replacements = _learning_navigation_replacements(manifest)
     order_only_receipts = manifest.get("order_insensitive_receipts_reviewed_separately", {})
     total = zip_count = 0
     with tarfile.open(baseline) as bundle:
@@ -96,6 +160,9 @@ def audit(baseline: Path, site: Path) -> dict:
                 actual_bytes = path.read_bytes()
                 if digest(actual_bytes) != expected:
                     changed.append(route)
+                    if (route in learning_replacements and _learning_navigation_only(
+                            route, expected_bytes, actual_bytes, learning_replacements[route])):
+                        reviewed_learning_navigation_changes[route] = learning_replacements[route][2]
                     if (
                         route == ORDER_INSENSITIVE_RECEIPT_ROUTE
                         and route in order_only_receipts
@@ -110,6 +177,7 @@ def audit(baseline: Path, site: Path) -> dict:
         n
         for n in changed
         if n not in reviewed_receipt_order_changes
+        and n not in reviewed_learning_navigation_changes
         and (
             n not in mutable
             or (n in reviewed_copies and digest((site / n).read_bytes()) != reviewed_copies[n])
@@ -123,6 +191,7 @@ def audit(baseline: Path, site: Path) -> dict:
         "unexpected_changed": unexpected,
         "reviewed_mutable_changes": {n: mutable[n] for n in changed if n in mutable},
         "reviewed_receipt_order_changes": reviewed_receipt_order_changes,
+        "reviewed_learning_navigation_changes": reviewed_learning_navigation_changes,
         "passed": not (missing or changed_zips or unexpected),
     }
 
