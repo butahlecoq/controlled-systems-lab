@@ -258,8 +258,21 @@ Json trace_json(const optimization::NominalTrackSelected& selected) {
     std::string representation;
     std::string relation;
     std::visit(TraceJsonVisitor{stages, representation, relation}, selected.selected_trace);
-    return {{"role", "fixed-plan-trajectory-enclosure"}, {"representation", representation},
+    Json trace{{"role", "fixed-plan-trajectory-enclosure"}, {"representation", representation},
         {"relation", relation}, {"assurance", "numerical"}, {"stages", std::move(stages)}};
+    if (const auto* parallelotope =
+            std::get_if<reachability::FinitePlanParallelotopeTrace>(&selected.selected_trace)) {
+        trace["frame"] = matrix_json(parallelotope->frame.rows, parallelotope->frame.cols,
+            [&](std::size_t i, std::size_t j) {
+                return parallelotope->frame.values[i * parallelotope->frame.cols + j];
+            });
+        trace["coordinate_semantics"] = {
+            {"physical_state", "x"},
+            {"frame_state", "y"},
+            {"mapping", "x = frame * y"},
+            {"stage_bounds", "lower and upper are frame coordinates y"}};
+    }
+    return trace;
 }
 
 Json query_failure(const Json& input, const std::string& status, const std::string& reason) {

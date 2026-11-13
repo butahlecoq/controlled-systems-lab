@@ -71,7 +71,7 @@ def timeline_end(runs: list[dict[str, Any]]) -> float:
     times = [
         float(row["time"])
         for run in runs
-        for series_name in ("clouds", "nodes", "planned_prediction", "plant_replay")
+        for series_name in ("clouds", "fixed_plan_enclosures", "nodes", "planned_prediction", "plant_replay")
         for row in run.get(series_name, [])
         if "time" in row
     ]
@@ -310,6 +310,7 @@ def _collect_run(plane: Plane, attempt_id: str, capture_root: Path) -> dict[str,
     clouds = cloud_layers[0].get("clouds", []) if cloud_layers else []
 
     shape_rows: list[dict[str, Any]] = []
+    fixed_plan_enclosures: list[dict[str, Any]] = []
     if clouds:
         for index, cloud in enumerate(clouds):
             shape = cloud.get("selected_outer_shape")
@@ -335,6 +336,56 @@ def _collect_run(plane: Plane, attempt_id: str, capture_root: Path) -> dict[str,
                     for child in cloud.get("action_child_witnesses", [])
                 ],
                 "source_pointer": f"stage-000.json#/predicted_sets/{predicted.index(cloud_layers[0])}/clouds/{index}",
+                "source_file": first["_source_filename"],
+                "source_file_sha256": first["_source_file_sha256"],
+            })
+    for predicted_index, trace in enumerate(predicted):
+        if trace.get("role") != "fixed-plan-trajectory-enclosure":
+            continue
+        representation = trace.get("representation")
+        if representation not in {"exact-polytope", "box", "zonotope", "parallelotope", "ellipsoid"}:
+            continue
+        frame = trace.get("frame")
+        coordinate_semantics = trace.get("coordinate_semantics")
+        for stage_index, bounds in enumerate(trace.get("stages", [])):
+            shape = {"representation": representation, **bounds}
+            frame_is_qualified = (
+                isinstance(frame, list)
+                and coordinate_semantics == {
+                    "physical_state": "x",
+                    "frame_state": "y",
+                    "mapping": "x = frame * y",
+                    "stage_bounds": "lower and upper are frame coordinates y",
+                }
+            )
+            if representation == "parallelotope":
+                # Never infer a missing frame from the source or another record.
+                if not frame_is_qualified:
+                    shape = {}
+                else:
+                    shape["frame"] = frame
+            projected_geometry = project_shape(shape, plane.raw_indices)
+            fixed_plan_enclosures.append({
+                "update_index": 0,
+                "absolute_stage": stage_index,
+                "time": stage_index * plane.dt,
+                "role": trace["role"],
+                "relation": trace.get("relation"),
+                "assurance": trace.get("assurance"),
+                "representation": representation,
+                "coordinate_semantics": coordinate_semantics,
+                "frame_status": (
+                    "not-required" if representation != "parallelotope"
+                    else "provided" if frame_is_qualified and projected_geometry
+                    else "invalid frame geometry; not projected" if frame_is_qualified
+                    else "missing or unrecognized coordinate semantics; not projected"
+                ),
+                "shape": shape,
+                "projected_geometry": projected_geometry,
+                "projection_status": (
+                    "projected" if projected_geometry else "representation geometry unsupported or invalid"
+                ),
+                "source_pointer": f"{first['_source_filename']}#/predicted_sets/{predicted_index}/stages/{stage_index}",
                 "source_file": first["_source_filename"],
                 "source_file_sha256": first["_source_file_sha256"],
             })
@@ -412,6 +463,7 @@ def _collect_run(plane: Plane, attempt_id: str, capture_root: Path) -> dict[str,
         "initial_point": list(plane.project(observed)),
         "nodes": node_rows,
         "clouds": shape_rows,
+        "fixed_plan_enclosures": fixed_plan_enclosures,
         "planned_prediction": planned,
         "plant_replay": replay,
         "stage_count": len(stages),
@@ -461,7 +513,11 @@ def _plot_run(axis, run: dict[str, Any], plane: Plane, cmap, end_time: float,
     all_stages = focused_stage is None
     linestyle = "--" if run["controller_id"] == "native-exact-polytope-backward-graph/1" else "-"
     clouds = run["clouds"] if all_stages else rows_for_output_stage(run["clouds"], focused_stage)
-    for item in clouds:
+    fixed_plan_enclosures = (
+        run.get("fixed_plan_enclosures", []) if all_stages
+        else rows_for_output_stage(run.get("fixed_plan_enclosures", []), focused_stage)
+    )
+    for item in [*clouds, *fixed_plan_enclosures]:
         geometry = item.get("projected_geometry")
         if not geometry:
             continue
@@ -618,7 +674,7 @@ code{{overflow-wrap:anywhere}} .data-links a{{margin-right:1rem}}
 </style></head><body>
 <main><p><a href="../figure-index.json">All recorded closed-loop figures</a></p>
 <h1>{title}</h1>
-<p>Stage-coloured projections from saved records. Solid traces show executed plant replay. Dotted traces show the initial model prediction. Shaded shapes show serialized finite authored-action parent clouds, projected from their stored shape parameters.</p>
+<p>Stage-coloured projections from saved records. Solid traces show executed plant replay. Dotted traces show the initial model prediction. Shaded shapes show serialized finite authored-action parent clouds; dashed outlines show fixed-plan trajectory enclosures. Parallelotope projections use the frame and coordinate semantics stored in that trace.</p>
 <div class="figure-actions"><label for="stage-focus">Output state focus</label><select id="stage-focus" aria-label="Output state focus"><option value="all">All stages</option><option value="0">Output state stage 0 (initial)</option>{stage_options}</select>
 <a href="{ident}.svg">Standalone SVG</a><a href="{ident}.png">PNG</a><a href="{data_url}">Exact plotted-data JSON</a></div>
 <p class="note"><strong>Evidence scope.</strong> Retained graph and finite authored-action model predictions are numerical and policy-conditioned. These plots do not show all-admissible-control reachability. A point or a membership flag is a witness, not a materialized region. The marked terminal objective target is soft, not a hard target set.</p>
@@ -654,9 +710,10 @@ function draw(d,selected){{
   svg.append(make('text',{{x:left-9,y:y(yv)+4,'text-anchor':'end','font-size':12,fill:'currentColor'}},Number(yv.toPrecision(5)).toString()));
  }}
  for(let ri=0;ri<runs.length;ri++){{const run=runs[ri], lineColor=['#1769aa','#c04424','#18864b','#8156a8','#bc7b12'][ri%5];
-  for(const c of run.clouds||[]){{if(selected!=='all'&&c.absolute_stage!==Number(selected))continue;const g=c.projected_geometry;if(!g)continue;const col=color(c.time,d.timeline_end);
-   if(c.representation==='ellipsoid'&&g.length===2)svg.append(make('ellipse',{{cx:x(g[0][0]),cy:y(g[0][1]),rx:Math.abs(x(g[0][0]+g[1][0])-x(g[0][0])),ry:Math.abs(y(g[0][1]+g[1][1])-y(g[0][1])),fill:col,'fill-opacity':selected==='all'?.08:.2,stroke:col,'stroke-width':1}}));
-   else if(g.length>2)svg.append(make('polygon',{{points:g.map(p=>`${{x(p[0])}},${{y(p[1])}}`).join(' '),fill:col,'fill-opacity':selected==='all'?.035:.16,stroke:col,'stroke-width':.6}}));
+  for(const c of [...(run.clouds||[]),...(run.fixed_plan_enclosures||[])]){{if(selected!=='all'&&c.absolute_stage!==Number(selected))continue;const g=c.projected_geometry;if(!g)continue;const col=color(c.time,d.timeline_end);
+   const planTrace=c.role==='fixed-plan-trajectory-enclosure', dash=planTrace?'4 3':'';
+   if(c.representation==='ellipsoid'&&g.length===2)svg.append(make('ellipse',{{cx:x(g[0][0]),cy:y(g[0][1]),rx:Math.abs(x(g[0][0]+g[1][0])-x(g[0][0])),ry:Math.abs(y(g[0][1]+g[1][1])-y(g[0][1])),fill:col,'fill-opacity':selected==='all'?.08:.2,stroke:col,'stroke-width':1,'stroke-dasharray':dash}}));
+   else if(g.length>2)svg.append(make('polygon',{{points:g.map(p=>`${{x(p[0])}},${{y(p[1])}}`).join(' '),fill:col,'fill-opacity':selected==='all'?.035:.16,stroke:col,'stroke-width':.6,'stroke-dasharray':dash}}));
   }}
   const graph=(run.nodes||[]).filter(n=>selected==='all'||n.absolute_stage===Number(selected));
   for(const n of graph){{const p=n.state,ix=d.coordinate_transform.raw_indices;svg.append(make('circle',{{cx:x(p[ix[0]]),cy:y(p[ix[1]]),r:2.3,fill:color(n.time,d.timeline_end),'fill-opacity':.65}}));}}
@@ -700,8 +757,10 @@ def _figure_entry(plane: Plane, capture_root: Path) -> dict[str, Any]:
     shape_gaps = [{
         "attempt_id": run["attempt_id"],
         "controller_id": run["controller_id"],
-        "reason": "The saved response has retained graph points but no materialized parent-cloud shape geometry.",
-    } for run in runs if not run["clouds"]]
+        "reason": "The saved response has no projectable materialized shape geometry.",
+    } for run in runs
+        if not any(row.get("projected_geometry") for row in
+                   [*run["clouds"], *run.get("fixed_plan_enclosures", [])])]
     return {
         "id": plane.figure_id,
         "availability": "ready",
@@ -735,6 +794,7 @@ def _figure_entry(plane: Plane, capture_root: Path) -> dict[str, Any]:
             "initial physical state",
             "retained stage-layered graph singleton nodes",
             "serialized complete authored-action parent clouds when present",
+            "serialized fixed-plan trajectory enclosures when present and coordinate-qualified",
             "initial model-predicted plan",
             "executed physical plant replay",
             "soft objective target when defined",
@@ -762,7 +822,7 @@ def _plot_bounds(entry: dict[str, Any], plane: Plane) -> dict[str, list[float]]:
     xs: list[float] = []
     ys: list[float] = []
     for run in entry["runs"]:
-        for row in run["clouds"]:
+        for row in [*run["clouds"], *run.get("fixed_plan_enclosures", [])]:
             geometry = row.get("projected_geometry") or []
             if row.get("representation") == "ellipsoid" and len(geometry) == 2:
                 center, radii = geometry
