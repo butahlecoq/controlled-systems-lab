@@ -82,6 +82,10 @@ def _run_native_query(bridge: Path, representation_index: int) -> tuple[dict, st
     return json.loads(completed.stdout), completed.stdout
 
 
+@unittest.skipUnless(
+    os.environ.get("CSL_NATIVE_POLICY_BRIDGE"),
+    "Native bridge integration is exercised by the configured native CTest",
+)
 class NativeParallelotopeFrameSerializationTests(unittest.TestCase):
     def test_four_state_frame_projects_real_native_trace_corners_to_physical_state(self):
         self._check_native_trace(render_cli=False)
@@ -377,4 +381,6 @@ class NativeParallelotopeFrameSerializationTests(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    if not os.environ.get("CSL_NATIVE_POLICY_BRIDGE"):
+        raise SystemExit("Set CSL_NATIVE_POLICY_BRIDGE when running the native integration script")
     unittest.main()
