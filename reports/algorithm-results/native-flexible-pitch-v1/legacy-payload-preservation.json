@@ -1,0 +1,28 @@
+{
+  "schema": "csl.native-legacy-payload-preservation/1",
+  "producer_source_commit": "b8c884a0cbca8c5195f82383d4e2bea39a805edc",
+  "preserved_frozen_source_commit": "19d32a3c37b6860dbf881996da1bf5e2b3f92353",
+  "regenerated_payloads_byte_identical": {
+    "three-state/full-state-v-points.csv": "ef8446e27effa6409a75207c1f51cf1cd70d8e976aee099cb30b36b7704c46fe",
+    "three-state/native-model-catalogue-screen.svg": "16c62228c0435d98884808111f8134984c4948e67c04a669332ca5083c392ce2",
+    "three-state/native-model-catalogue-print.svg": "6f49cb234be4e4dd6253f6e1939245ed50abe262cd84a88bd1b5ab9c571930e3",
+    "three-state/stages-7-x1-x2-screen.svg": "a9a7f465e32e370a419bd24204fc10b03d3f9148a1d26215ed1b1b3d0d58782e",
+    "three-state/stages-7-x1-x2-print.svg": "7d03424c91283a009162f72890254c029e5c0f858d02a35d46960e5b977542d8",
+    "three-state/stages-7-x1-x3-screen.svg": "e1a243837e05ba04d66faf1bf0ba7080085171020a062a5951bd865f655f68f3",
+    "three-state/stages-7-x1-x3-print.svg": "3eadc2234c5c45f56f308f99dd6997d6b24239b624f4451211cc7b4df544962f",
+    "three-state/stages-8-x1-x2-screen.svg": "dfe0ce871d72f5d970b75685d96ea0fdda3f6375424d25167913e4469958e9cb",
+    "three-state/stages-8-x1-x2-print.svg": "2e92cbbfa62705c96fee1026bc6a5383c3190ec3cf232c3b8261e873ea2e65e4",
+    "three-state/stages-8-x1-x3-screen.svg": "fe3f7c8a23e7fe10f1c36b5aa625f320b16e67c346328d2d730d36f5c922a7a1",
+    "three-state/stages-8-x1-x3-print.svg": "fb6d88610c3f4a653fc2a4ecb453f71f46c0debc1b0418241e2f48c69826c723",
+    "four-state/full-state-support-checks.csv": "5b163b827487e49d62a1f2677d121dfcfa3eb17a958973393ceb24df06c62ab0",
+    "four-state/full-state-generators.csv": "970468f348b1124765c240231224c99997ab40397462dab9ceba870573a91ba4",
+    "four-state/projection-boundary-witnesses.csv": "b64451329573e29154150d4e2db8ade41d5d449a2b6d6da2990664ba2972f45d",
+    "four-state/four-state-stages-screen.svg": "5df3a6b6a05d94fad66c7a5c21672222db62b194a7c1e4037288185096119891",
+    "four-state/stages-x1-x2-screen.svg": "c6410b6e09061147310dda391c21c580e509ca983c40576b30f1e0c65ec7391e",
+    "four-state/stages-x3-x4-screen.svg": "23cb52ca0c14e2b0ec254bef10c133cf631ad414d3defd3e00e3c6479354656a",
+    "four-state/four-state-stages-print.svg": "987867130b6576fe9b48af9d554ef7f2a0b2ffbd9c879a03bfcff18594c971cc",
+    "four-state/stages-x1-x2-print.svg": "002a8fdd447a21f086383530df6e6a039853e30a43b1afd9c091bc39b64746a1",
+    "four-state/stages-x3-x4-print.svg": "f1717fd8c124cded051435bb702945cbcf6aac139668856438ac6abb9fe762d2"
+  },
+  "qualification": "Fresh real native regeneration after conditional physical SVG margin fix; frozen original records read only and unchanged."
+}
