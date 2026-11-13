@@ -334,6 +334,20 @@ class GalleryTests(unittest.TestCase):
         originals = {report_id: hashlib.sha256((self.site / routes[report_id] / "records.json").read_bytes()).hexdigest()
                      for report_id, *_ in control_witness_companions.PROJECTIONS}
         result = control_witness_companions.build(self.site, self.catalog)
+        mathematical_page = result.files["control-witness-v1.html"].decode()
+        preservation = json.loads((ROOT / "reports/published-route-preservation/manifest.json").read_text())
+        self.assertEqual(hashlib.sha256(result.files["control-witness-v1.html"]).hexdigest(),
+                         preservation["mutable_copy_reviewed_sha256"]["examples/control-witness-v1.html"])
+        self.assertNotIn("saved projection vertex</td>", mathematical_page)
+        self.assertNotIn("[[-1, -2]]", mathematical_page)
+        self.assertIn("Feedback matrix K, 1 by 2", mathematical_page)
+        self.assertIn("State constraint X =", mathematical_page)
+        self.assertIn("V_Z, 2 by 4, vertices in columns", mathematical_page)
+        for _, _, _, points in control_witness_companions.PROJECTIONS:
+            columns = [[point[axis] for point in points] for axis in range(2)]
+            label = f"Projected vertices, 2 by {len(points)}, columns in saved order"
+            self.assertIn(control_witness_companions.mathematical_notation.matrix_html(columns, label),
+                          mathematical_page)
         self.assertEqual(len(result.gallery_entries), 6)
         gallery_anchors = {entry["anchor"] for entry in result.gallery_entries}
         self.assertEqual(gallery_anchors, {"control-witness-companions", "control-witness-timings",
@@ -360,7 +374,7 @@ class GalleryTests(unittest.TestCase):
         self.assertIn("three-step horizon", page)
         self.assertIn("u=v+K(x-z)", page)
         self.assertIn("does not optimize an objective", page)
-        self.assertIn('role="region" aria-label="MPC-06 saved geometry coordinates"', page)
+        self.assertIn('role="region" aria-label="V_Z, 2 by 4, vertices in columns"', page)
         self.assertIn('id="exp02-ts02-control-family"', page)
         self.assertIn('id="b04-repeated-benchmark"', page)
         self.assertIn("selected by proximity to that backend’s median solve time", page)
@@ -431,6 +445,15 @@ class GalleryTests(unittest.TestCase):
                          [[-1, 1], [-1, 1]])
         self.assertEqual(mpc06_evidence["plot_data"]["sets"]["error_tube_Z"]["vertices"],
                          [[.125, 0], [-.125, .25], [-.125, 0], [.125, -.25]])
+        self.assertIn(control_witness_companions.mathematical_notation.matrix_html(
+            mpc06_evidence["profile"]["feedback_gain"], "Feedback matrix K, 1 by 2"),
+            mathematical_page)
+        self.assertIn(control_witness_companions.mathematical_notation.matrix_html(
+            [[.125, -.125, -.125, .125], [0.0, .25, 0.0, -.25]],
+            "V_Z, 2 by 4, vertices in columns"), mathematical_page)
+        self.assertIn('State constraint X: [-1.0, 1.0] times [-1.0, 1.0]', mathematical_page)
+        self.assertIn('Tightened state set X ⊖ Z: [-0.875, 0.875] times [-0.75, 0.75]',
+                      mathematical_page)
         self.assertTrue(result.files["control-witness/mpc06-tube.png"].startswith(b"\x89PNG\r\n\x1a\n"))
         mpc06_svg = ET.fromstring(result.files["control-witness/mpc06-tube.svg"])
         self.assertEqual(mpc06_svg.attrib["role"], "img")

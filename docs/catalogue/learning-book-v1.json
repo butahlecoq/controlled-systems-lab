@@ -1101,26 +1101,35 @@
               1.5
             ]
           ]
-        }
-      ],
-      "mathematical_tables": [
+        },
         {
-          "label": "Ellipsoid direction matrices",
-          "columns": [
-            "member",
-            "matrix rows"
-          ],
+          "label": "Axis ellipsoid directions, 2 by 2; one direction per row in x,y order",
           "rows": [
             [
-              "axis",
-              "[[1,0],[0,1]]"
+              1,
+              0
             ],
             [
-              "rotated",
-              "[[1,1],[1,−1]]"
+              0,
+              1
             ]
           ]
         },
+        {
+          "label": "Rotated ellipsoid directions, 2 by 2; one direction per row in x,y order",
+          "rows": [
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              -1
+            ]
+          ]
+        }
+      ],
+      "mathematical_tables": [
         {
           "label": "Approximation inputs",
           "columns": [

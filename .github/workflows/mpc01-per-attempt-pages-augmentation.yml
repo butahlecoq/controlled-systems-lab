@@ -194,6 +194,7 @@ jobs:
         run: |
           python scripts/reports/preserve_published_routes.py --site build/report-site
           python scripts/reports/pages_route_retirement.py --site build/report-site
+          python scripts/reports/audit_mathematical_presentation.py --site-root build/report-site --json-output build/mathematical-presentation-audit.json
 
       - name: Check that the augmented artifact still targets current main
         if: steps.artifact.outputs.found == 'true'

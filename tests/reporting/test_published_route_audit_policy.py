@@ -158,7 +158,12 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
             with patch.object(baseline_audit, "SOURCE", source):
                 result = baseline_audit.audit(baseline, site)
                 self.assertTrue(result["passed"], result)
-                self.assertEqual(set(result["reviewed_learning_navigation_changes"]), set(routes))
+                math_route = "learn/representation-consumers.html"
+                self.assertEqual(set(result["reviewed_learning_navigation_changes"]),
+                                 set(routes) - {math_route})
+                self.assertIn(math_route, result["reviewed_mutable_changes"])
+                self.assertEqual(preservation.digest((site / math_route).read_bytes()),
+                                 manifest["mutable_copy_reviewed_sha256"][math_route])
 
                 mutated_routes = {
                     "body mutation": (
@@ -199,10 +204,10 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
                     set(result["unexpected_changed"]),
                     {
                         "learn/index.html",
-                        "learn/representation-consumers.html",
                         "learn/closed-loop-semantics.html",
                     },
                 )
+                self.assertNotIn(math_route, result["unexpected_changed"])
 
     @staticmethod
     def _move_native_forward_entry_after_closed_loop(data):
