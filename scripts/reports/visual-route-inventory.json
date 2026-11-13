@@ -1849,6 +1849,15 @@
       "role_and_disposition_reason": "Rechecks immutable mesh and repeated-controller archives, builds labelled saved-data study companions and copies complete source/raw inputs; no optimization or integration runs."
     },
     {
+      "source": "scripts/reports/stage_native_model_catalogue.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "stages-8-x1-x2-screen.svg",
+        "stages-x1-x2-screen.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_projection_figures.py",
       "signal_count": 4,
       "asset_name_literals": [],

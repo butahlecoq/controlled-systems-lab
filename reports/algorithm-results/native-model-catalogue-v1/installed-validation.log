@@ -1,0 +1,60 @@
+-- The CXX compiler identification is GNU 16.2.1
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Installed complete-family publisher replacement was rejected by the compiler
+-- Installed caller-supplied verifier callback was rejected by the compiler
+-- Installed downstream relation factory definition was rejected by the compiler
+-- Installed downstream ExactFarkasEvidence construction was rejected by the compiler
+-- Configuring done (9.2s)
+-- Generating done (0.2s)
+-- Build files have been written to: ${LOCAL_VALIDATION_ROOT}/991-native-staged-consumer/installed-consumer/build
+[ 50%] Building CXX object CMakeFiles/installed_model_catalogue_client.dir/native_model_catalogue.cpp.o
+[100%] Linking CXX executable installed_model_catalogue_client
+[100%] Built target installed_model_catalogue_client
+[ 50%] Building CXX object CMakeFiles/installed_four_state_catalogue_client.dir/native_four_state_reachability.cpp.o
+[100%] Linking CXX executable installed_four_state_catalogue_client
+[100%] Built target installed_four_state_catalogue_client
+Internal ctest changing into directory: ${LOCAL_VALIDATION_ROOT}/991-native-staged-consumer/installed-consumer/build
+Test project ${LOCAL_VALIDATION_ROOT}/991-native-staged-consumer/installed-consumer/build
+    Start 1: installed_model_catalogue_client
+1/2 Test #1: installed_model_catalogue_client ........   Passed    0.01 sec
+    Start 2: installed_four_state_catalogue_client
+2/2 Test #2: installed_four_state_catalogue_client ...   Passed    0.12 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   0.13 sec
+-- The CXX compiler identification is GNU 16.2.1
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Configuring done (0.6s)
+-- Generating done (0.0s)
+-- Build files have been written to: ${LOCAL_VALIDATION_ROOT}/991-native-installed-examples
+[ 50%] Building CXX object CMakeFiles/native_model_catalogue.dir/native_model_catalogue.cpp.o
+[100%] Linking CXX executable native_model_catalogue
+[100%] Built target native_model_catalogue
+[ 50%] Building CXX object CMakeFiles/native_four_state_reachability.dir/native_four_state_reachability.cpp.o
+[100%] Linking CXX executable native_four_state_reachability
+[100%] Built target native_four_state_reachability
+Internal ctest changing into directory: ${LOCAL_VALIDATION_ROOT}/991-native-installed-examples
+Test project ${LOCAL_VALIDATION_ROOT}/991-native-installed-examples
+    Start 1: native_catalogue_source_cases
+1/2 Test #1: native_catalogue_source_cases ....   Passed    0.02 sec
+    Start 2: native_four_state_source_case
+2/2 Test #2: native_four_state_source_case ....   Passed    0.14 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   0.16 sec
