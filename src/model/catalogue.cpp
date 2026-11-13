@@ -1,5 +1,6 @@
 #include <csl/model/catalogue.hpp>
 #include <csl/model/flexible_pitch.hpp>
+#include <csl/model/spatial_flight_catalogue.hpp>
 
 #include <algorithm>
 #include <array>
@@ -63,18 +64,27 @@ std::span<const CaseInfo> discrete_reachability_cases() {
         const auto flexible = flexible_pitch_cases();
         result.insert(result.end(), flexible.begin(), flexible.end());
         result.insert(result.end(), slide50_entries.begin(), slide50_entries.end());
+        const auto spatial = spatial_flight_cases();
+        result.insert(result.end(), spatial.begin(), spatial.end());
         return result;
     }();
     return all;
 }
 
-std::variant<DiscreteReachabilityCase, Diagnostics>
+std::variant<DiscreteReachabilityCase, Diagnostics, OperationStopped>
 make_discrete_reachability_case(std::string_view id) {
     for (const auto& flexible : flexible_pitch_cases()) {
         if (flexible.id != id) continue;
         auto result = make_flexible_pitch_case(id);
         if (const auto* error = std::get_if<Diagnostics>(&result)) return *error;
         return std::move(std::get<FlexiblePitchCase>(result).reachability);
+    }
+    for (const auto& spatial : spatial_flight_cases()) {
+        if (spatial.id != id) continue;
+        auto result = make_spatial_flight_case(id);
+        if (const auto* error = std::get_if<Diagnostics>(&result)) return *error;
+        if (const auto* stopped = std::get_if<OperationStopped>(&result)) return *stopped;
+        return std::move(std::get<SpatialFlightCase>(result).reachability);
     }
     const auto cases = discrete_reachability_cases();
     const auto entry = std::find_if(cases.begin(), cases.end(),

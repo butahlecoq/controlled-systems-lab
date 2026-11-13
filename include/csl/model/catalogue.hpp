@@ -1,6 +1,7 @@
 #pragma once
 
 #include <csl/model/contracts.hpp>
+#include <csl/core/outcomes.hpp>
 #include <csl/model/catalogue_metadata.hpp>
 #include <csl/sets/generator_sets.hpp>
 
@@ -30,7 +31,7 @@ struct DiscreteReachabilityCase {
 };
 
 std::span<const CaseInfo> discrete_reachability_cases();
-std::variant<DiscreteReachabilityCase, Diagnostics>
+std::variant<DiscreteReachabilityCase, Diagnostics, OperationStopped>
 make_discrete_reachability_case(std::string_view id);
 
 } // namespace csl::model::catalogue

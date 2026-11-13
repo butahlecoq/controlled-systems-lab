@@ -3,6 +3,7 @@
 #include <csl/model/catalogue.hpp>
 #include <csl/model/linear_system.hpp>
 
+#include <algorithm>
 #include <set>
 #include <utility>
 
@@ -110,4 +111,29 @@ TEST_CASE("slide50 uses printed two-input dynamics and a separately authored ini
         }
         CHECK(factors.size() == 3 + 2 * variant.second);
     }
+}
+
+TEST_CASE("spatial deviation dynamics are discoverable through the common native catalogue") {
+    using namespace csl;
+    constexpr std::string_view id = "spatial-flight/b-consistent-body9-synthetic/1";
+    const auto entries = model::catalogue::discrete_reachability_cases();
+    const auto found = std::find_if(entries.begin(), entries.end(),
+        [&](const model::catalogue::CaseInfo& entry) { return entry.id == id; });
+    REQUIRE(found != entries.end());
+    const auto data = take(model::catalogue::make_discrete_reachability_case(id));
+    const auto system = take(model::snapshot(data.model, data.time_grid));
+    CHECK(system.dimensions() == Dimensions{9, 3, 0});
+    CHECK(system.horizon() == 20);
+    CHECK(data.info.source.qualification.find("synthetic") != std::string_view::npos);
+    CHECK(data.info.states[0].name == "delta_vx");
+    CHECK(data.info.states[8].name == "delta_omega_z");
+    CHECK(data.initial.center() == Vector(9, 0));
+    CHECK(data.initial.factor_ids().size() == 9);
+    REQUIRE(data.controls.size() == 20);
+    CHECK(data.controls.front().center() == Vector(3, 0));
+    CHECK(data.controls.front().factor_ids().size() == 3);
+    CHECK(data.info.controls[0].name == "delta_u0");
+    CHECK(data.controls.front().coordinate_labels()[0] == data.info.controls[0].name);
+    REQUIRE(data.time_grid.size() == 21);
+    CHECK(data.time_grid.back() == doctest::Approx(1));
 }

@@ -131,7 +131,7 @@ int main(int argc,char** argv) try {
         }
         supports<<"stage,direction,d0,d1,d2,d3,d4,d5,d6,d7,d8,native_support,independent_support,absolute_difference\n";
         generators<<"stage,kind,factor_id,coordinate,value\n";
-        projection_output<<"stage,plane,point_id,x0,x1,x2,x3,x4,x5,x6,x7,x8\n";
+        projection_output<<"stage,plane,point_id,delta_vx,delta_vy,delta_vz,delta_phi,delta_psi,delta_theta,delta_omega_x,delta_omega_y,delta_omega_z\n";
         reference<<"stage,time,vx,vy,vz,phi,psi,theta,omega_x,omega_y,omega_z\n";
         jacobians<<"stage,kind,row,column,value\n";
         parameter_output<<"name,value\n";
@@ -174,7 +174,7 @@ int main(int argc,char** argv) try {
         metadata.exceptions(std::ios::badbit|std::ios::failbit);
         metadata<<"case="<<data.reachability.info.id<<"\nsource_sha256="<<data.reachability.info.source.sha256
             <<"\nsource_qualification="<<data.reachability.info.source.qualification
-            <<"\nstate_order=vx,vy,vz,phi,psi,theta,omega_x,omega_y,omega_z\ncontrol_order=u0,u1,u2\n"
+            <<"\nphysical_state_order=vx,vy,vz,phi,psi,theta,omega_x,omega_y,omega_z\nreachability_state_order=delta_vx,delta_vy,delta_vz,delta_phi,delta_psi,delta_theta,delta_omega_x,delta_omega_y,delta_omega_z\ncontrol_order=u0,u1,u2\nreachability_control_order=delta_u0,delta_u1,delta_u2\n"
             <<"control_allocation=zero_based_u0_moments_only;u1_u2_also_Cy_Cz\n"
             <<"\nnominal_control=0.003,-0.002,0.002\ninitial_state=100,0,0,0,0,0,0,0,0\n"
             <<"\nreference_method="<<data.reference_integration.method

@@ -12,21 +12,21 @@ using spatial_flight::Model;
 using spatial_flight::State;
 
 constexpr Coordinate states[]{
-    {"vx", "m/s"}, {"vy", "m/s"}, {"vz", "m/s"},
-    {"phi", "rad"}, {"psi", "rad"}, {"theta", "rad"},
-    {"omega_x", "rad/s"}, {"omega_y", "rad/s"}, {"omega_z", "rad/s"}};
-constexpr Coordinate controls[]{{"u0", "rad"}, {"u1", "rad"}, {"u2", "rad"}};
+    {"delta_vx", "m/s"}, {"delta_vy", "m/s"}, {"delta_vz", "m/s"},
+    {"delta_phi", "rad"}, {"delta_psi", "rad"}, {"delta_theta", "rad"},
+    {"delta_omega_x", "rad/s"}, {"delta_omega_y", "rad/s"}, {"delta_omega_z", "rad/s"}};
+constexpr Coordinate controls[]{{"delta_u0", "rad"}, {"delta_u1", "rad"}, {"delta_u2", "rad"}};
 constexpr std::string_view operations[]{
     "csl::model::discretize", "csl::model::snapshot",
     "csl::geometry::generators::affine_image", "csl::geometry::generators::minkowski_sum"};
 constexpr Source source{
     "Goranov and Shorikov: linearization of an aircraft dynamic model along a reference trajectory",
     "68fc05d895d5c5c347ced535ea455c767ce0c789f3a2b90c1416cbcd37d1f1af",
-    "2016 Russian-language draft, symbolic equations and kinematics; private source not redistributed",
-    "Corrected B-consistent nine-state rigid-body equations with fully authored synthetic parameters, Y-up gravity, controls, reference and perturbation sets. Zero-based controls u0,u1,u2: u0 enters moments only; u1 and u2 also enter Cy/Cz. Not a historical numerical reproduction or calibrated aircraft."};
+    "Russian-language draft, symbolic equations and kinematics; private source not redistributed",
+    "Corrected B-consistent nine-state rigid-body equations with fully authored synthetic parameters, Y-up gravity, controls, reference and perturbation sets. Catalogue dynamics propagate zero-centered linear deviations x-x_ref with perturbation controls u-u_ref; the nonlinear reference is available from SpatialFlightCase. Zero-based controls u0,u1,u2: u0 enters moments only; u1 and u2 also enter Cy/Cz. Not a historical numerical reproduction or calibrated aircraft."};
 constexpr CaseInfo entry{
     "spatial-flight/b-consistent-body9-synthetic/1",
-    "Synthetic B-consistent nine-state spatial flight along a varying reference",
+    "Synthetic nine-state spatial-flight deviations about a nonlinear reference",
     states, controls, 20, "s", source, operations};
 constexpr std::array<CaseInfo,1> entries{entry};
 constexpr std::size_t intervals=20, reference_substeps=10;
@@ -146,7 +146,7 @@ SpatialFlightResult<SpatialFlightCase> make_spatial_flight_case(
         const auto stage_id=prefix+"/control/"+std::to_string(k);
         auto input=sets::make_generator_set({{stage_id},Vector(3,0),std::move(map),
             {{stage_id+"/u0"},{stage_id+"/u1"},{stage_id+"/u2"}},
-            {0,3,{}},{},{"u0","u1","u2"}});
+            {0,3,{}},{},{"delta_u0","delta_u1","delta_u2"}});
         if (const auto* error=std::get_if<Diagnostics>(&input)) return *error;
         control_sets.push_back(std::get<sets::GeneratorSet>(std::move(input)));
     }
