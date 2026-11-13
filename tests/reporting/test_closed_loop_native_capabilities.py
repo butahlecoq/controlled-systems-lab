@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import importlib
 import json
 import math
 import shutil
@@ -330,6 +331,15 @@ class NativeCapabilityTests(unittest.TestCase):
                             child.stdout.close()
 
     def test_native_bridge_failures_persist_request_and_raw_response(self):
+        try:
+            importlib.import_module("scipy.linalg")
+        except ImportError as error:
+            self.fail(
+                f"Native bridge integration test requires SciPy in {sys.executable!r}: {error}. "
+                "Use a Python environment provisioned from "
+                "benchmarks/reporting/closed_loop/requirements.txt, then rerun this test "
+                "with that environment's interpreter."
+            )
         task = capabilities.load_task("earth-orbit")
         graph = next(row for row in capabilities.build_native_manifest()["graphs"]
             if row["task_id"] == task["task_id"] and row["controller"]["id"] == "native-box-mpc/1")
