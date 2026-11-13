@@ -170,7 +170,7 @@ class NativeGraphPolicy:
         if not os.access(self.executable, os.X_OK):
             raise ValueError("native policy bridge is not executable")
         self.process = subprocess.Popen([str(self.executable)], stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
+            stdout=subprocess.PIPE, stderr=None, text=True, bufsize=1)
         self.last_query_capture = None
         self.query_capture_callback = None
         self.receipt = prediction_receipt(task)
@@ -191,6 +191,7 @@ class NativeGraphPolicy:
         })
         self.preparation_receipt = {"executable": str(self.executable),
             "executable_sha256": hashlib.sha256(self.executable.read_bytes()).hexdigest(),
+            "native_stderr": "inherited supervised worker stderr; shared across native queries, not isolated per call",
             "build_backend_profile": backend_profile,
             "predictor_model_id": self.receipt["model_id"],
             "predictor_assurance": self.receipt["coefficient_assurance"],
