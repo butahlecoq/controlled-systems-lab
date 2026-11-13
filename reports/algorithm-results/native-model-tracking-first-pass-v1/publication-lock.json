@@ -1,5 +1,5 @@
 {
-  "archive_sha256": "3204cd4842d2117608d4e7bc3a59bbb6e79238aa0383d304c30446d8d00e30b6",
-  "portable_renderer_commit": "7f4901b694b1abd5e186ab7a726840c8127ecdb8",
+  "archive_sha256": "6b562a8c1dc2e06673952b012e5335fd38d5acecf5331015223cb139f5611354",
+  "portable_renderer_commit": "2a1717cbb63658f637602083fc0302d3653d14bb",
   "schema": "csl.native-model-tracking-publication-lock/1"
 }
