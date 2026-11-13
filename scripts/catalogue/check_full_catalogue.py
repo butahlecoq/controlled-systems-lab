@@ -129,12 +129,60 @@ def main() -> int:
         data = json.loads((root / f"docs/contracts/closed-loop/{name}.json").read_text())
         contracts[data["task_id"]] = data
     assert set(contracts) == EXPECTED_TASKS
+    native_tool = output["native_component_tool"]
+    assert len(native_tool["binary_sha256"]) == 64
+    assert len(native_tool["source_commit"]) == 40
+    assert len(native_tool["current_source_commit"]) == 40
+    assert native_tool["source_matches_catalogue_commit"] == (
+        native_tool["source_commit"] == native_tool["current_source_commit"]
+    )
+    assert (
+        native_tool["compiled_backends"] == output["native_component_evidence"]["compiled_backends"]
+    )
 
-    controllers = output["closed_loop_controller_candidates"]
+    all_controllers = output["closed_loop_controller_candidates"]
+    current_factory_rows = [row for row in all_controllers if "catalogue_source" in row]
+    controllers = [row for row in all_controllers if "catalogue_source" not in row]
+    assert len(all_controllers) == 3383
     assert len(controllers) == 3318
+    assert len(current_factory_rows) == 65
     assert {row["controller_route"] for row in controllers} == EXPECTED_ROUTES
-    assert len({row["graph_id"] for row in controllers}) == len(controllers)
-    assert len({row["graph_fingerprint"] for row in controllers}) == len(controllers)
+    assert len({row["graph_id"] for row in all_controllers}) == len(all_controllers)
+    assert len({row["graph_fingerprint"] for row in all_controllers}) == len(all_controllers)
+    assert {row["controller_route"] for row in current_factory_rows} == {
+        "native_graph_policy",
+        "continuous_history",
+        "native_fixed_tail",
+    }
+    assert (
+        sum(row["controller_route"] == "native_graph_policy" for row in current_factory_rows) == 30
+    )
+    assert (
+        sum(row["controller_route"] == "continuous_history" for row in current_factory_rows) == 20
+    )
+    assert sum(row["controller_route"] == "native_fixed_tail" for row in current_factory_rows) == 15
+    assert all(
+        row["status"] == "preparation_not_attempted"
+        and row["catalogue_source"]["declared_admission"]["status"] == "admitted"
+        and row["catalogue_source"]["runtime_preparation"] == "not_attempted"
+        and row["catalogue_source"]["factory_registration"] == "registered"
+        and row["catalogue_source"]["runtime_binary"] == "not_inspected"
+        and row["objective_id"]
+        and row["action_profile_id"]
+        and row["controller_factory"]
+        for row in current_factory_rows
+    )
+    current_identities = {
+        (
+            row["task_id"],
+            row["action_profile_id"],
+            row["objective_id"],
+            row["controller_id"],
+            json.dumps(row["module_tuple"], sort_keys=True),
+        )
+        for row in current_factory_rows
+    }
+    assert len(current_identities) == 65
     for row in controllers:
         contract = contracts[row["task_id"]]
         assert row["task_contract_sha256"]
@@ -511,7 +559,7 @@ def main() -> int:
         else "2 source-bound external prepares"
     )
     print(
-        f"full finite catalogue passed: 3,318 controller tuples, 45 predecessor/representation/terminal-LP tuples, 24 full-task legacy/QuickHull choices, {mpc11_count}"
+        f"full finite catalogue passed: 3,318 historical controller tuples plus 65 source-bound factory identities (runtime preparation not attempted), 45 predecessor/representation/terminal-LP tuples, 24 full-task legacy/QuickHull choices, {mpc11_count}"
     )
     return 0
 
