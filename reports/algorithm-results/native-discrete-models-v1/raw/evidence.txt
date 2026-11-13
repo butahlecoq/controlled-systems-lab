@@ -1,0 +1,33 @@
+Issue: 1012 source21 native MPC example
+Implementation commit: 856d7a77c49fca0c6f6cdb8c1a1db9a651da85cb
+Implementation parent/base: 71d369b0204e6a843c3e4c9f90241faeb09ed86e
+
+Build facts:
+- Compiler: GNU C/C++ 16.2.1
+- CMake: 3.31.6
+- Configuration: Release; BUILD_TESTING=OFF; CSL_ENABLE_HIGHS=ON; CSL_ENABLE_QHULL=OFF
+- HiGHS archive: 1.11.0, SHA-256 2b44b074cf41439325ce4d0bbdac2d51379f56faf17ba15320a410d3c1f07275
+- Full package build finished; actual isolated install prefix: ../1012-native-install-attempt-02
+- Installed client configured from examples/CMakeLists.txt with CMAKE_PREFIX_PATH set to that install prefix.
+- The build occurred before commit in the implementation worktree based on the exact parent above. I did not capture a whole working-tree hash before compilation. The compiled example's source-file Git blob IDs below match the final committed files; do not describe the whole pre-commit build tree as a clean commit checkout.
+
+Compiled source blobs, each equal to `git rev-parse 856d7a77:path` and `git hash-object path`:
+- examples/quadcopter_mpc.cpp dbdfb078144eb7454aa50e0f5bff32ef8fb6fc4a
+- examples/quadcopter_mpc_task.cpp 52885942e6d6073e73d6064830f88758bb68f5ca
+- examples/quadcopter_mpc_task.hpp 9e33a17c49d9b5090afac7f221696bf18077b075
+- examples/quadcopter_mpc_scalar_contract.cpp 92ba875deb5ee7709601387dc8298973cdd193a1
+
+Executable/output hashes:
+- quadcopter_mpc SHA-256 264827bbd7490ac39da33c35f7b0b12b5f1f3705bdbfdba89cc1fb8403dbd8b6
+- plans.csv SHA-256 c1a9379f999d2a484d029e52ace29d08b7337b387ecb749e00aab453569f087d
+- run.txt SHA-256 c32b58155bcf29911e5af1f4a80aa7f491b827ac0fa06078ddd1cb33fcada9ce
+- independently exported source model records SHA-256 498d3ff2ab5fcf817b7d0d1a22e6fa0a9344bdf40880f41aa8bab2329e5cf514
+
+Verification:
+- CTest `quadcopter_mpc_scalar_running_state_cost`: passed; x0=0 case yields x=(0,0.6,0.8), u=(0.6,0.2). Nonzero initial equality regression x0=0.25 yields u=(0.45,0.15).
+- CTest `quadcopter_mpc_source21_feedback`: passed; executes the full 15-replan example and checks output record presence/count and source qualification fields.
+- Native functional output: `../1012-functional-attempt-05` (plans.csv and run.txt); successful stdout is in `../1012-functional-logs/attempt-05.stdout`.
+- Independent Python checker source: `../1012-functional-logs/check_source21.py`; receipt: `independent-check.txt`. It loads native-exported model21 A/B, recomputes predicted dynamics, applies all stated state/input bounds, checks observed feedback stepping and recomputes the literal source cost for all 15 plans. Maximum source/program objective error 3.58e-14; maximum predicted dynamics residual 7.47e-13; maximum public-step residual 4.44e-16.
+- Earlier attempts are preserved: attempt01 exposed the zero-initial-state replan defect; attempts02-04 recorded HiGHS QP failure on a nonzero replan before shifted feasible warm starts were added. They were not overwritten.
+
+Scope: source21 OSQP example, horizon 10, 15 replans, zero external input. Backend result is numerical optimal only; no certified bounds, timing claim, or global feedback-policy certificate. Coordinates remain indexed with physical units unspecified. The 2D visual example and broader 1012 model/formulation scope remain separate follow-up work.

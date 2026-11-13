@@ -1,0 +1,13 @@
+{
+  "replans": 15,
+  "horizon": 10,
+  "state_dimension": 12,
+  "control_dimension": 4,
+  "max_absolute_residual": {
+    "objective": 3.57595897337859e-14,
+    "dynamics": 7.473970448732765e-13,
+    "feedback": 4.440892098500626e-16
+  },
+  "realized_running_cost_no_terminal": 28.0588822368079,
+  "scope": "Numerical saved-data check; no stationarity, optimality, or safety certificate."
+}

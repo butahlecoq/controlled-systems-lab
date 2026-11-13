@@ -2,6 +2,13 @@ cmake_minimum_required(VERSION 3.31)
 project(CSLInstalledConsumer LANGUAGES CXX)
 find_package(CSL 0.1 CONFIG REQUIRED)
 
+add_executable(installed_discrete_model_client native_discrete_models.cpp)
+target_link_libraries(installed_discrete_model_client PRIVATE CSL::model_catalogue)
+set_target_properties(installed_discrete_model_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_discrete_model_client COMMAND installed_discrete_model_client)
+set_tests_properties(installed_discrete_model_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Native discrete model data: 35 models")
+
 add_executable(installed_model_catalogue_client native_model_catalogue.cpp)
 target_link_libraries(installed_model_catalogue_client PRIVATE CSL::model_catalogue CSL::generator_adapter CSL::quickhull_2d)
 set_target_properties(installed_model_catalogue_client PROPERTIES CXX_EXTENSIONS OFF)
