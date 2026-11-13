@@ -52,6 +52,8 @@ class PagesRouteRetirementTests(unittest.TestCase):
                 "--site", str(site)], check=False, cwd=repo, capture_output=True, text=True)
             self.assertEqual(completed.returncode, 0, completed.stderr)
             self.assertIn('"html_route_count"', completed.stdout)
+            self.assertEqual((site / "legacy-index.html").read_bytes(),
+                             retirement.legacy_root_snapshot())
             inventory = json.loads((site / "pages-route-inventory.json").read_text(encoding="utf-8"))
             expected_sources = {
                 "closed-loop-pilot-v1/index.html": "scripts/reports/render_closed_loop_pilot.py",
