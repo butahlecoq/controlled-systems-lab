@@ -1,0 +1,279 @@
+{
+  "schema": "csl.native-fixed-tail.saved-record-audit/1",
+  "scope": "Functional numerical/source/protocol audit, not performance or nonlinear safety proof",
+  "attempts": [
+    {
+      "task_id": "env717-earth-orbit/continuous-receding/1",
+      "family": "box",
+      "attempt": "runs/earth-orbit-box/records/earth-orbit/attempts/earth-orbit-20261112T224555Z-b74ba3c5/attempt.json",
+      "source_commit": "a6b7d1cb",
+      "queries": 20,
+      "physical_regions_checked": 230,
+      "anchor_control_adjustments": 0,
+      "command_adjustments": 0,
+      "physical_objective": {
+        "terminal": 80.43833220391276,
+        "running": 0.7067350885448704,
+        "total": 81.14506729245764
+      },
+      "warm_protocol": "native shifted primal/drop applied stage/replace observed x0; supplied zero duals",
+      "stderr": "retained shared worker/native stream",
+      "accepted": true
+    },
+    {
+      "task_id": "env717-earth-orbit/continuous-receding/1",
+      "family": "ellipsoid",
+      "attempt": "runs/earth-orbit-ellipsoid/records/earth-orbit/attempts/earth-orbit-20261112T224634Z-0dd513a2/attempt.json",
+      "source_commit": "a6b7d1cb",
+      "queries": 20,
+      "physical_regions_checked": 230,
+      "anchor_control_adjustments": 0,
+      "command_adjustments": 0,
+      "physical_objective": {
+        "terminal": 89.58667618230487,
+        "running": 0.36453036543031386,
+        "total": 89.95120654773518
+      },
+      "warm_protocol": "native shifted primal/drop applied stage/replace observed x0; supplied zero duals",
+      "stderr": "retained shared worker/native stream",
+      "accepted": true
+    },
+    {
+      "task_id": "env717-earth-orbit/continuous-receding/1",
+      "family": "parallelotope",
+      "attempt": "runs/earth-orbit-parallelotope/records/earth-orbit/attempts/earth-orbit-20261112T224621Z-bface084/attempt.json",
+      "source_commit": "a6b7d1cb",
+      "queries": 20,
+      "physical_regions_checked": 230,
+      "anchor_control_adjustments": 0,
+      "command_adjustments": 0,
+      "physical_objective": {
+        "terminal": 90.03339810133271,
+        "running": 0.3593858719040112,
+        "total": 90.39278397323672
+      },
+      "warm_protocol": "native shifted primal/drop applied stage/replace observed x0; supplied zero duals",
+      "stderr": "retained shared worker/native stream",
+      "accepted": true
+    },
+    {
+      "task_id": "env717-earth-orbit/continuous-receding/1",
+      "family": "polytope",
+      "attempt": "runs/earth-orbit-polytope/records/earth-orbit/attempts/earth-orbit-20261112T224538Z-944ff464/attempt.json",
+      "source_commit": "a6b7d1cb",
+      "queries": 20,
+      "physical_regions_checked": 230,
+      "anchor_control_adjustments": 0,
+      "command_adjustments": 5,
+      "physical_objective": {
+        "terminal": 63.899316308995694,
+        "running": 1.330348506984259,
+        "total": 65.22966481597996
+      },
+      "warm_protocol": "native shifted primal/drop applied stage/replace observed x0; supplied zero duals",
+      "stderr": "retained shared worker/native stream",
+      "accepted": true
+    },
+    {
+      "task_id": "env717-earth-orbit/continuous-receding/1",
+      "family": "zonotope",
+      "attempt": "runs/earth-orbit-zonotope/records/earth-orbit/attempts/earth-orbit-20261112T224608Z-57aa7c5d/attempt.json",
+      "source_commit": "a6b7d1cb",
+      "queries": 20,
+      "physical_regions_checked": 230,
+      "anchor_control_adjustments": 0,
+      "command_adjustments": 0,
+      "physical_objective": {
+        "terminal": 85.89289944585637,
+        "running": 0.5082483490225763,
+        "total": 86.40114779487895
+      },
+      "warm_protocol": "native shifted primal/drop applied stage/replace observed x0; supplied zero duals",
+      "stderr": "retained shared worker/native stream",
+      "accepted": true
+    },
+    {
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "family": "box",
+      "attempt": "runs/syn-nl-fuel-01-box/records/syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261112T225106Z-89bc27c2/attempt.json",
+      "source_commit": "a6b7d1cb",
+      "queries": 40,
+      "physical_regions_checked": 860,
+      "anchor_control_adjustments": 0,
+      "command_adjustments": 0,
+      "physical_objective": {
+        "terminal": 0.0007324196379516063,
+        "running": 0.004392142720901462,
+        "total": 0.005124562358853068
+      },
+      "warm_protocol": "native shifted primal/drop applied stage/replace observed x0; supplied zero duals",
+      "stderr": "retained shared worker/native stream",
+      "accepted": true
+    },
+    {
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "family": "ellipsoid",
+      "attempt": "runs/syn-nl-fuel-01-ellipsoid/records/syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261112T225501Z-3a6b651e/attempt.json",
+      "source_commit": "a6b7d1cb",
+      "queries": 40,
+      "physical_regions_checked": 860,
+      "anchor_control_adjustments": 0,
+      "command_adjustments": 0,
+      "physical_objective": {
+        "terminal": 0.0023156902863840714,
+        "running": 0.003626487246575365,
+        "total": 0.005942177532959437
+      },
+      "warm_protocol": "native shifted primal/drop applied stage/replace observed x0; supplied zero duals",
+      "stderr": "retained shared worker/native stream",
+      "accepted": true
+    },
+    {
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "family": "parallelotope",
+      "attempt": "runs/syn-nl-fuel-01-parallelotope/records/syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261112T225336Z-eca5d525/attempt.json",
+      "source_commit": "a6b7d1cb",
+      "queries": 40,
+      "physical_regions_checked": 860,
+      "anchor_control_adjustments": 0,
+      "command_adjustments": 0,
+      "physical_objective": {
+        "terminal": 0.0019609997763361826,
+        "running": 0.0039777474901098115,
+        "total": 0.005938747266445994
+      },
+      "warm_protocol": "native shifted primal/drop applied stage/replace observed x0; supplied zero duals",
+      "stderr": "retained shared worker/native stream",
+      "accepted": true
+    },
+    {
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "family": "polytope",
+      "attempt": "runs/syn-nl-fuel-01-polytope/records/syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261112T224912Z-0d219016/attempt.json",
+      "source_commit": "a6b7d1cb",
+      "queries": 40,
+      "physical_regions_checked": 860,
+      "anchor_control_adjustments": 0,
+      "command_adjustments": 0,
+      "physical_objective": {
+        "terminal": 0.0003007725385517327,
+        "running": 0.006813587162348389,
+        "total": 0.0071143597009001225
+      },
+      "warm_protocol": "native shifted primal/drop applied stage/replace observed x0; supplied zero duals",
+      "stderr": "retained shared worker/native stream",
+      "accepted": true
+    },
+    {
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "family": "zonotope",
+      "attempt": "runs/syn-nl-fuel-01-zonotope/records/syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261112T225221Z-60d01593/attempt.json",
+      "source_commit": "a6b7d1cb",
+      "queries": 40,
+      "physical_regions_checked": 860,
+      "anchor_control_adjustments": 0,
+      "command_adjustments": 0,
+      "physical_objective": {
+        "terminal": 0.0010245181795264667,
+        "running": 0.004223019374532365,
+        "total": 0.005247537554058832
+      },
+      "warm_protocol": "native shifted primal/drop applied stage/replace observed x0; supplied zero duals",
+      "stderr": "retained shared worker/native stream",
+      "accepted": true
+    },
+    {
+      "task_id": "syn-nl-lv-01/continuous-receding/1",
+      "family": "box",
+      "attempt": "runs/syn-nl-lv-01-box/records/syn-nl-lv-01/attempts/syn-nl-lv-01-20261112T224729Z-5940f53d/attempt.json",
+      "source_commit": "a6b7d1cb",
+      "queries": 30,
+      "physical_regions_checked": 495,
+      "anchor_control_adjustments": 0,
+      "command_adjustments": 0,
+      "physical_objective": {
+        "terminal": 0.07666525367632622,
+        "running": 0.017249495266364122,
+        "total": 0.09391474894269033
+      },
+      "warm_protocol": "native shifted primal/drop applied stage/replace observed x0; supplied zero duals",
+      "stderr": "retained shared worker/native stream",
+      "accepted": true
+    },
+    {
+      "task_id": "syn-nl-lv-01/continuous-receding/1",
+      "family": "ellipsoid",
+      "attempt": "runs/syn-nl-lv-01-ellipsoid/records/syn-nl-lv-01/attempts/syn-nl-lv-01-20261112T224851Z-40020ea3/attempt.json",
+      "source_commit": "a6b7d1cb",
+      "queries": 30,
+      "physical_regions_checked": 495,
+      "anchor_control_adjustments": 0,
+      "command_adjustments": 0,
+      "physical_objective": {
+        "terminal": 0.08039024369596022,
+        "running": 0.015313656854819724,
+        "total": 0.09570390055077994
+      },
+      "warm_protocol": "native shifted primal/drop applied stage/replace observed x0; supplied zero duals",
+      "stderr": "retained shared worker/native stream",
+      "accepted": true
+    },
+    {
+      "task_id": "syn-nl-lv-01/continuous-receding/1",
+      "family": "parallelotope",
+      "attempt": "runs/syn-nl-lv-01-parallelotope/records/syn-nl-lv-01/attempts/syn-nl-lv-01-20261112T224832Z-f5261eb7/attempt.json",
+      "source_commit": "a6b7d1cb",
+      "queries": 30,
+      "physical_regions_checked": 495,
+      "anchor_control_adjustments": 0,
+      "command_adjustments": 0,
+      "physical_objective": {
+        "terminal": 0.0783712528222705,
+        "running": 0.015171020084889486,
+        "total": 0.09354227290716
+      },
+      "warm_protocol": "native shifted primal/drop applied stage/replace observed x0; supplied zero duals",
+      "stderr": "retained shared worker/native stream",
+      "accepted": true
+    },
+    {
+      "task_id": "syn-nl-lv-01/continuous-receding/1",
+      "family": "polytope",
+      "attempt": "runs/syn-nl-lv-01-polytope/records/syn-nl-lv-01/attempts/syn-nl-lv-01-20261112T224646Z-1159dfbf/attempt.json",
+      "source_commit": "a6b7d1cb",
+      "queries": 30,
+      "physical_regions_checked": 495,
+      "anchor_control_adjustments": 0,
+      "command_adjustments": 0,
+      "physical_objective": {
+        "terminal": 0.07169412200240828,
+        "running": 0.02023692807515437,
+        "total": 0.09193105007756265
+      },
+      "warm_protocol": "native shifted primal/drop applied stage/replace observed x0; supplied zero duals",
+      "stderr": "retained shared worker/native stream",
+      "accepted": true
+    },
+    {
+      "task_id": "syn-nl-lv-01/continuous-receding/1",
+      "family": "zonotope",
+      "attempt": "runs/syn-nl-lv-01-zonotope/records/syn-nl-lv-01/attempts/syn-nl-lv-01-20261112T224751Z-fb9d8052/attempt.json",
+      "source_commit": "a6b7d1cb",
+      "queries": 30,
+      "physical_regions_checked": 495,
+      "anchor_control_adjustments": 0,
+      "command_adjustments": 0,
+      "physical_objective": {
+        "terminal": 0.07626251325897151,
+        "running": 0.01667898741117247,
+        "total": 0.09294150067014398
+      },
+      "warm_protocol": "native shifted primal/drop applied stage/replace observed x0; supplied zero duals",
+      "stderr": "retained shared worker/native stream",
+      "accepted": true
+    }
+  ],
+  "queries": 450,
+  "physical_regions_checked": 7925,
+  "all_accepted": true
+}

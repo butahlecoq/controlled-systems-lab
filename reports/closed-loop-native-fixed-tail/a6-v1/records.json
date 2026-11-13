@@ -1,0 +1,152 @@
+[
+  {
+    "name": "earth-orbit-box",
+    "receipt": "records/earth-orbit-box/receipt.json",
+    "raw": "records/earth-orbit-box/raw.zip",
+    "physical_objective": {
+      "terminal": 80.43833220391276,
+      "running": 0.7067350885448704,
+      "total": 81.14506729245764
+    }
+  },
+  {
+    "name": "earth-orbit-ellipsoid",
+    "receipt": "records/earth-orbit-ellipsoid/receipt.json",
+    "raw": "records/earth-orbit-ellipsoid/raw.zip",
+    "physical_objective": {
+      "terminal": 89.58667618230487,
+      "running": 0.36453036543031386,
+      "total": 89.95120654773518
+    }
+  },
+  {
+    "name": "earth-orbit-parallelotope",
+    "receipt": "records/earth-orbit-parallelotope/receipt.json",
+    "raw": "records/earth-orbit-parallelotope/raw.zip",
+    "physical_objective": {
+      "terminal": 90.03339810133271,
+      "running": 0.3593858719040112,
+      "total": 90.39278397323672
+    }
+  },
+  {
+    "name": "earth-orbit-polytope",
+    "receipt": "records/earth-orbit-polytope/receipt.json",
+    "raw": "records/earth-orbit-polytope/raw.zip",
+    "physical_objective": {
+      "terminal": 63.899316308995694,
+      "running": 1.330348506984259,
+      "total": 65.22966481597996
+    }
+  },
+  {
+    "name": "earth-orbit-zonotope",
+    "receipt": "records/earth-orbit-zonotope/receipt.json",
+    "raw": "records/earth-orbit-zonotope/raw.zip",
+    "physical_objective": {
+      "terminal": 85.89289944585637,
+      "running": 0.5082483490225763,
+      "total": 86.40114779487895
+    }
+  },
+  {
+    "name": "syn-nl-fuel-01-box",
+    "receipt": "records/syn-nl-fuel-01-box/receipt.json",
+    "raw": "records/syn-nl-fuel-01-box/raw.zip",
+    "physical_objective": {
+      "terminal": 0.0007324196379516063,
+      "running": 0.004392142720901462,
+      "total": 0.005124562358853068
+    }
+  },
+  {
+    "name": "syn-nl-fuel-01-ellipsoid",
+    "receipt": "records/syn-nl-fuel-01-ellipsoid/receipt.json",
+    "raw": "records/syn-nl-fuel-01-ellipsoid/raw.zip",
+    "physical_objective": {
+      "terminal": 0.0023156902863840714,
+      "running": 0.003626487246575365,
+      "total": 0.005942177532959437
+    }
+  },
+  {
+    "name": "syn-nl-fuel-01-parallelotope",
+    "receipt": "records/syn-nl-fuel-01-parallelotope/receipt.json",
+    "raw": "records/syn-nl-fuel-01-parallelotope/raw.zip",
+    "physical_objective": {
+      "terminal": 0.0019609997763361826,
+      "running": 0.0039777474901098115,
+      "total": 0.005938747266445994
+    }
+  },
+  {
+    "name": "syn-nl-fuel-01-polytope",
+    "receipt": "records/syn-nl-fuel-01-polytope/receipt.json",
+    "raw": "records/syn-nl-fuel-01-polytope/raw.zip",
+    "physical_objective": {
+      "terminal": 0.0003007725385517327,
+      "running": 0.006813587162348389,
+      "total": 0.0071143597009001225
+    }
+  },
+  {
+    "name": "syn-nl-fuel-01-zonotope",
+    "receipt": "records/syn-nl-fuel-01-zonotope/receipt.json",
+    "raw": "records/syn-nl-fuel-01-zonotope/raw.zip",
+    "physical_objective": {
+      "terminal": 0.0010245181795264667,
+      "running": 0.004223019374532365,
+      "total": 0.005247537554058832
+    }
+  },
+  {
+    "name": "syn-nl-lv-01-box",
+    "receipt": "records/syn-nl-lv-01-box/receipt.json",
+    "raw": "records/syn-nl-lv-01-box/raw.zip",
+    "physical_objective": {
+      "terminal": 0.07666525367632622,
+      "running": 0.017249495266364122,
+      "total": 0.09391474894269033
+    }
+  },
+  {
+    "name": "syn-nl-lv-01-ellipsoid",
+    "receipt": "records/syn-nl-lv-01-ellipsoid/receipt.json",
+    "raw": "records/syn-nl-lv-01-ellipsoid/raw.zip",
+    "physical_objective": {
+      "terminal": 0.08039024369596022,
+      "running": 0.015313656854819724,
+      "total": 0.09570390055077994
+    }
+  },
+  {
+    "name": "syn-nl-lv-01-parallelotope",
+    "receipt": "records/syn-nl-lv-01-parallelotope/receipt.json",
+    "raw": "records/syn-nl-lv-01-parallelotope/raw.zip",
+    "physical_objective": {
+      "terminal": 0.0783712528222705,
+      "running": 0.015171020084889486,
+      "total": 0.09354227290716
+    }
+  },
+  {
+    "name": "syn-nl-lv-01-polytope",
+    "receipt": "records/syn-nl-lv-01-polytope/receipt.json",
+    "raw": "records/syn-nl-lv-01-polytope/raw.zip",
+    "physical_objective": {
+      "terminal": 0.07169412200240828,
+      "running": 0.02023692807515437,
+      "total": 0.09193105007756265
+    }
+  },
+  {
+    "name": "syn-nl-lv-01-zonotope",
+    "receipt": "records/syn-nl-lv-01-zonotope/receipt.json",
+    "raw": "records/syn-nl-lv-01-zonotope/raw.zip",
+    "physical_objective": {
+      "terminal": 0.07626251325897151,
+      "running": 0.01667898741117247,
+      "total": 0.09294150067014398
+    }
+  }
+]
