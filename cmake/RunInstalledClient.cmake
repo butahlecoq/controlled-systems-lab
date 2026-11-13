@@ -39,6 +39,11 @@ file(COPY
   "${CSL_SOURCE_DIR}/examples/native_four_state_reachability.cpp"
   "${CSL_SOURCE_DIR}/examples/native_discrete_models.cpp"
   "${CSL_SOURCE_DIR}/examples/native_catalogue_projection.hpp"
+  "${CSL_SOURCE_DIR}/examples/quadcopter_mpc.cpp"
+  "${CSL_SOURCE_DIR}/examples/quadcopter_mpc_task.cpp"
+  "${CSL_SOURCE_DIR}/examples/quadcopter_mpc_task.hpp"
+  "${CSL_SOURCE_DIR}/examples/quadcopter_mpc_scalar_contract.cpp"
+  "${CSL_SOURCE_DIR}/examples/quadcopter_mpc_check.cmake"
   DESTINATION "${work}/source")
 if(CSL_STAGE_ONLY)
   return()
@@ -144,6 +149,8 @@ foreach(example_file CMakeLists.txt registered_lp.cpp registered_convex.cpp
     nominal_linear_exact_2d.cpp scenario_cli.cpp continuous_policy.cpp
     source_index_geometry_2d.cpp adaptive_ode_replay.cpp scenario_backend_substitution.cpp
     native_model_catalogue.cpp native_four_state_reachability.cpp native_discrete_models.cpp native_catalogue_projection.hpp
+    quadcopter_mpc.cpp quadcopter_mpc_task.cpp quadcopter_mpc_task.hpp quadcopter_mpc_scalar_contract.cpp
+    quadcopter_mpc_check.cmake
     scenario_backend_artifact_check.cpp)
   file(COPY "${CSL_SOURCE_DIR}/examples/${example_file}" DESTINATION "${example_source}")
 endforeach()

@@ -126,6 +126,32 @@ csl_example(native_model_catalogue CSL::model_catalogue CSL::generator_adapter C
 csl_example(native_four_state_reachability CSL::model_catalogue CSL::geometry_generators CSL::quickhull_2d)
 csl_example(native_discrete_models CSL::model_catalogue)
 
+if(TARGET CSL::highs_convex AND TARGET CSL::model_catalogue)
+  add_executable(quadcopter_mpc quadcopter_mpc.cpp quadcopter_mpc_task.cpp)
+  target_link_libraries(quadcopter_mpc PRIVATE CSL::highs_convex CSL::model_catalogue)
+  target_compile_features(quadcopter_mpc PRIVATE cxx_std_20)
+  set_target_properties(quadcopter_mpc PROPERTIES CXX_EXTENSIONS OFF)
+  add_executable(quadcopter_mpc_scalar_contract quadcopter_mpc_scalar_contract.cpp quadcopter_mpc_task.cpp)
+  target_link_libraries(quadcopter_mpc_scalar_contract PRIVATE CSL::highs_convex)
+  target_compile_features(quadcopter_mpc_scalar_contract PRIVATE cxx_std_20)
+  set_target_properties(quadcopter_mpc_scalar_contract PROPERTIES CXX_EXTENSIONS OFF)
+  foreach(target quadcopter_mpc quadcopter_mpc_scalar_contract)
+    if(MSVC)
+      target_compile_options(${target} PRIVATE /W4 /WX /permissive-)
+    else()
+      target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+    endif()
+  endforeach()
+  add_test(NAME quadcopter_mpc_scalar_running_state_cost COMMAND quadcopter_mpc_scalar_contract)
+  set_tests_properties(quadcopter_mpc_scalar_running_state_cost PROPERTIES TIMEOUT 30)
+  add_test(NAME quadcopter_mpc_source21_feedback
+    COMMAND "${CMAKE_COMMAND}"
+      "-DEXAMPLE_EXE=$<TARGET_FILE:quadcopter_mpc>"
+      "-DOUTPUT_PARENT=${CMAKE_CURRENT_BINARY_DIR}"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/quadcopter_mpc_check.cmake")
+  set_tests_properties(quadcopter_mpc_source21_feedback PROPERTIES TIMEOUT 60)
+endif()
+
 function(example_check name executable argument status output)
   if(NOT TARGET ${executable})
     return()
