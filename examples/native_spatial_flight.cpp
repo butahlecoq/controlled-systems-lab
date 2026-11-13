@@ -115,7 +115,7 @@ int main(int argc,char** argv) try {
         reachable.push_back(take(geometry::generators::minkowski_sum(state,control,{prefix+"/reachable"})));
     }
     std::optional<std::filesystem::path> output;
-    std::ofstream supports,generators,projection_output,reference,jacobians,parameter_output,discretization_output;
+    std::ofstream supports,generators,projection_output,reference,jacobians,parameter_output,discretization_output,stage_output,control_output;
     if (argc==2) {
         output=std::filesystem::path(argv[1]);
         if (!std::filesystem::create_directory(*output)) throw std::runtime_error("Output directory must be new");
@@ -126,7 +126,9 @@ int main(int argc,char** argv) try {
         jacobians.open(*output/"endpoint-jacobians.csv");
         parameter_output.open(*output/"synthetic-parameters.csv");
         discretization_output.open(*output/"discretization-receipt.csv");
-        for (auto* stream:{&supports,&generators,&projection_output,&reference,&jacobians,&parameter_output,&discretization_output}) {
+        stage_output.open(*output/"discrete-stages.csv");
+        control_output.open(*output/"control-generators.csv");
+        for (auto* stream:{&supports,&generators,&projection_output,&reference,&jacobians,&parameter_output,&discretization_output,&stage_output,&control_output}) {
             stream->exceptions(std::ios::badbit|std::ios::failbit);
             *stream<<std::setprecision(17);
         }
@@ -136,6 +138,21 @@ int main(int argc,char** argv) try {
         reference<<"stage,time,vx,vy,vz,phi,psi,theta,omega_x,omega_y,omega_z\n";
         jacobians<<"stage,kind,row,column,value\n";
         parameter_output<<"name,value\n";
+        stage_output<<"stage,kind,row,column,value\n";
+        control_output<<"stage,kind,row,column,value\n";
+        auto save_matrix=[](std::ostream& stream,std::size_t k,std::string_view kind,const Matrix& matrix) {
+            for (std::size_t i=0;i<matrix.rows;++i)
+                for (std::size_t j=0;j<matrix.cols;++j)
+                    stream<<k<<','<<kind<<','<<i<<','<<j<<','<<matrix.values[i*matrix.cols+j]<<'\n';
+        };
+        for (std::size_t k=0;k<system.horizon();++k) {
+            const auto stage=take(system.stage({k}));
+            save_matrix(stage_output,k,"state",own(stage.A));
+            save_matrix(stage_output,k,"control",own(stage.B));
+            save_matrix(stage_output,k,"offset",Matrix{9,1,Vector(stage.offset.values().begin(),stage.offset.values().end())});
+            save_matrix(control_output,k,"center",Matrix{3,1,reach.controls[k].center()});
+            save_matrix(control_output,k,"generators",reach.controls[k].generators());
+        }
         const auto& p=data.parameters;
         const std::pair<std::string_view,double> parameters[]{
             {"mass_kg",p.mass},{"inertia_x_kg_m2",p.principal_inertia[0]},
