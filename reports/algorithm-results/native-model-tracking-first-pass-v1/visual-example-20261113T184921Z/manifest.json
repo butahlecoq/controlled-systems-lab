@@ -1,0 +1,131 @@
+{
+  "2d_model_count": 15,
+  "capture": "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T183906Z",
+  "capture_manifest_sha256": "2ce8a1783b4a32463c2accb7c4af80d73b4f6617d8c1ffd8fba13b6c59f491a2",
+  "catalogue_capture": "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T183906Z",
+  "catalogue_manifest_sha256": "2ce8a1783b4a32463c2accb7c4af80d73b4f6617d8c1ffd8fba13b6c59f491a2",
+  "checks_sha256": "3047a6c1bbdcf3dfc279e83afcc1f6f0d47b23e204dcf015b0e85a0b3bb0c8c1",
+  "created_utc": "2026-11-13T18:49:28.625848+00:00",
+  "cross_model_performance_comparison": false,
+  "css_sha256": "11ded2b69cec694ff61ecad0493f175becbfc47bce3d641f2ee512543bb82cf4",
+  "figures": [
+    {
+      "file": "figures/model-02-state-1-2.svg",
+      "model": "catalogue-2026/model-2/1",
+      "preview_png": "figures/model-02-state-1-2.png",
+      "preview_png_sha256": "854c5f5845f2af8d25c84444690ac1a536f49164e47b08bd681d04b463f672ab",
+      "sha256": "c6574ab619c4239a29cf6cbdfdddd3ac1a9612512a6c09ab1c09d9ef89cf124d"
+    },
+    {
+      "file": "figures/model-03-state-1-2.svg",
+      "model": "catalogue-2026/model-3/1",
+      "preview_png": "figures/model-03-state-1-2.png",
+      "preview_png_sha256": "72b85e387efe2df550677456c725d6364958dec28c7b060b0bed6c07f55c991c",
+      "sha256": "6398197f4e21120c35980741485fd690002505d05120234e265028549f340ca3"
+    },
+    {
+      "file": "figures/model-05-state-1-2.svg",
+      "model": "catalogue-2026/model-5/1",
+      "preview_png": "figures/model-05-state-1-2.png",
+      "preview_png_sha256": "80d0244107e5160b7597f773de2858f12cae1873ac11239338f038bb2b39ae82",
+      "sha256": "8718e88ddd86d7e53deaabd61ce2a804afc0eee5a2d48010a0b9ddbd9b31f4ae"
+    },
+    {
+      "file": "figures/model-07-state-1-2.svg",
+      "model": "catalogue-2026/model-7/1",
+      "preview_png": "figures/model-07-state-1-2.png",
+      "preview_png_sha256": "cf25e857d3f2e79e184ef1efc6f5e9d910951d2ed0fccce097d6e39f88614702",
+      "sha256": "d6164a9fb3b2349b36e309af5c079aa6f98d45bfc246656b9fb59434a2faa478"
+    },
+    {
+      "file": "figures/model-08-state-1-2.svg",
+      "model": "catalogue-2026/model-8/1",
+      "preview_png": "figures/model-08-state-1-2.png",
+      "preview_png_sha256": "729511eac67d4c5f38764b6814dfc476cfa3726e910fd43eb84bbb3beb8c1d57",
+      "sha256": "548b0edb686b9320e0b711714028e77daf01d12707fd743fd98f4d8837525bd4"
+    },
+    {
+      "file": "figures/model-11-state-1-2.svg",
+      "model": "catalogue-2026/model-11/1",
+      "preview_png": "figures/model-11-state-1-2.png",
+      "preview_png_sha256": "01e71f3a62c313f0dcc100ceaa7d37d0de3cc6d835cafef59deb9046ec7ffbd8",
+      "sha256": "9fb82b8026ac207b18538afbb2538e3d654449f22a875f23ce4d74f3a4d3cef3"
+    },
+    {
+      "file": "figures/model-12-state-1-2.svg",
+      "model": "catalogue-2026/model-12/1",
+      "preview_png": "figures/model-12-state-1-2.png",
+      "preview_png_sha256": "60bbbafae07c1a643533528c9a8b5a990c59f1c59519754b90e292ffa8a60881",
+      "sha256": "cda7871cf6987c7747027066b48b990d4c84d8bedd43b3f3a1e2dbc3f5fb9ab4"
+    },
+    {
+      "file": "figures/model-13-state-1-2.svg",
+      "model": "catalogue-2026/model-13/1",
+      "preview_png": "figures/model-13-state-1-2.png",
+      "preview_png_sha256": "8b920734dab34fb4684e921d9809658d0a8c4f501fe4a4d96e832ecd8b7ec6ec",
+      "sha256": "49066adb4c8839df7b8d65ad6154f825649a5c27070942bc15e7a253517a7744"
+    },
+    {
+      "file": "figures/model-14-state-1-2.svg",
+      "model": "catalogue-2026/model-14/1",
+      "preview_png": "figures/model-14-state-1-2.png",
+      "preview_png_sha256": "e50e1aeb6727770b845ae7d583f65afe995f6dc8155a1de131fd603604183e5a",
+      "sha256": "29744586d553b528acc52f4f7d40cd28f2988c59cafa0344de0ced6a630283b4"
+    },
+    {
+      "file": "figures/model-15-state-1-2.svg",
+      "model": "catalogue-2026/model-15/1",
+      "preview_png": "figures/model-15-state-1-2.png",
+      "preview_png_sha256": "a60fa07e1642fa7ae76c5293049912ab73de38068f8ac02ea831bbd378bc4e2b",
+      "sha256": "169b5cf65de95c7c6e4cbd7d37ea1b00f4421ed4a858742cdefc58716b047154"
+    },
+    {
+      "file": "figures/model-16-state-1-2.svg",
+      "model": "catalogue-2026/model-16/1",
+      "preview_png": "figures/model-16-state-1-2.png",
+      "preview_png_sha256": "8f31bf450e54ace51d1551099e3fe12d113f2d1d569c5e14737986483b8b61cf",
+      "sha256": "e6768a3e01940a3f00decc80207d167e10dab20bbf6fcf455155a7a5f5a2e8d9"
+    },
+    {
+      "file": "figures/model-17-state-1-2.svg",
+      "model": "catalogue-2026/model-17/1",
+      "preview_png": "figures/model-17-state-1-2.png",
+      "preview_png_sha256": "a169100fc130e63351155a395db1cc1dc48c6c5ffb84c0e6b58212198218f62c",
+      "sha256": "78cfb15c96855a848dc81dd29bf9e14d7f3ae84d227fc3cbaaeb4e21cd0c7077"
+    },
+    {
+      "file": "figures/model-18-state-1-2.svg",
+      "model": "catalogue-2026/model-18/1",
+      "preview_png": "figures/model-18-state-1-2.png",
+      "preview_png_sha256": "09afe03b8a6592f61952d7207e47f670fc77fecfbef81158f8ba23876cfa9cef",
+      "sha256": "28bdb034c8c971b238c0ed64db17d07449183c1e3b814d8f8707650149627a73"
+    },
+    {
+      "file": "figures/model-19-state-1-2.svg",
+      "model": "catalogue-2026/model-19/1",
+      "preview_png": "figures/model-19-state-1-2.png",
+      "preview_png_sha256": "de8a234bcc6d4e90fe8721af33e6e8a86193e7269ac2e70da544ad99930e1e6b",
+      "sha256": "d8ae811c677849588f5bbb5c8330406634bf59bdea6baae25ddab1c718675c8e"
+    },
+    {
+      "file": "figures/model-20-state-1-2.svg",
+      "model": "catalogue-2026/model-20/1",
+      "preview_png": "figures/model-20-state-1-2.png",
+      "preview_png_sha256": "310d8f54dc0d5327190395c1c3a1fc8cb0fd4a9d87e1e26dc61752b219893f47",
+      "sha256": "940cec9bcff662e4526ff7e128f37fa94d074410f64e0515156e3862b395e4b4"
+    },
+    {
+      "file": "figures/model-21-state-3-9.svg",
+      "model": "catalogue-2026/model-21/1",
+      "preview_png": "figures/model-21-state-3-9.png",
+      "preview_png_sha256": "71fe997b74d33427b8cd8cb9f65a1a84c0fe12404ba55b7fef576579b368326f",
+      "sha256": "18691ec75684a7513821d9fd262d511c4f11ff1af31062affee5e552dc4d5882"
+    }
+  ],
+  "independent_checks": "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/independent-checks-20261113T184915Z",
+  "panel_count": 16,
+  "per_model_results_sha256": "fa4f3f597b1aa2357381d108d06e5d029990f157f2b2102745bca9f36defa44a",
+  "renderer_source_sha256": "ef3d03a234433ad685cee727d3bdea1b7f1f1472db47ae441c390799062d2fc5",
+  "schema": "csl.1012-native-model-tracking-visual-example/1",
+  "source21_projection": "indexed state coordinates x3 and x9 from the fully checked 12-state trajectory"
+}

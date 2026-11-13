@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_discrete_models",
+    "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/catalogue-data/native-output"
+  ],
+  "elapsed_seconds": 0.032245990820229053,
+  "finished_utc": "2026-11-13T18:22:01.788667+00:00",
+  "returncode": 0,
+  "started_utc": "2026-11-13T18:22:01.756062+00:00",
+  "status": "completed",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "8b14d0b023510f2e3da96561115701647087c11fb0d0dc81f79663e23c47fb2c",
+  "timeout_seconds": 60
+}

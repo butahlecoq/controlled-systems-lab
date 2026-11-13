@@ -1,0 +1,630 @@
+{
+  "branch": "feat/1012-native-model-tracking-baselines-20261113",
+  "capture_id": "capture-20261113T182201Z",
+  "catalogue_capture": {
+    "command": [
+      "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_discrete_models",
+      "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/catalogue-data/native-output"
+    ],
+    "elapsed_seconds": 0.032245990820229053,
+    "finished_utc": "2026-11-13T18:22:01.788667+00:00",
+    "returncode": 0,
+    "started_utc": "2026-11-13T18:22:01.756062+00:00",
+    "status": "completed",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "8b14d0b023510f2e3da96561115701647087c11fb0d0dc81f79663e23c47fb2c",
+    "timeout_seconds": 60
+  },
+  "code_head": "1a0bb0d15ae504ae07ca9036e168d16e1392ffe4",
+  "created_utc": "2026-11-13T18:22:01.704582+00:00",
+  "executables": {
+    "catalogue": {
+      "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_discrete_models",
+      "sha256": "2dfef4337b41ef82c2b1d4bada42e89e9a48ce8373f29e649ad807f9e46ffd27"
+    },
+    "source21": {
+      "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/quadcopter_mpc",
+      "sha256": "154c9d057f99c471274e43d20d83fd7525ab2b4b3b51445a71059c0516096e9b"
+    },
+    "tracking": {
+      "path": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+      "sha256": "3e37d49d74bef8e30589055b5867d79d798f5350d4bc91e8d92c06cd04e78201"
+    }
+  },
+  "finished_utc": "2026-11-13T18:22:02.820564+00:00",
+  "installed_sdk_component_qualification": {
+    "archive_sha256": "12efd2001ee09b2154e6b18fc5a78e937dface24207bdd850a964f3beedcb00b",
+    "qualification_receipt": "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1012-running-state-design-20261113/candidate-a/qualification-c16-source-binding.json",
+    "receipt_sha256": "7353462a88eac5fe1148fa37a24313ee821b655bac35e8f2269dd7e4d843539a",
+    "source_commit": "c16a19dd900bc5e186273008f610a712dc177981",
+    "source_tree_sha1": "4944d54987055a8747ea6875bf0feb6d58da3dcb",
+    "whole_sdk_qualification_claimed": false
+  },
+  "outcomes": [
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-1/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-01/tracking-output"
+      ],
+      "elapsed_seconds": 0.008033910067752004,
+      "finished_utc": "2026-11-13T18:22:01.798534+00:00",
+      "model": "catalogue-2026/model-1/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:01.790091+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "3de658f93d2461b04ec3667a42241ee730b6b3c9ec3fac3c5ed54c1429af9ba4",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-2/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-02/tracking-output"
+      ],
+      "elapsed_seconds": 0.008238268084824085,
+      "finished_utc": "2026-11-13T18:22:01.808528+00:00",
+      "model": "catalogue-2026/model-2/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:01.799815+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a52e3191e2fd6f729614da80aee45a30e1e3e61ba644d0384efe302ae8ae2325",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-3/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-03/tracking-output"
+      ],
+      "elapsed_seconds": 0.008070227922871709,
+      "finished_utc": "2026-11-13T18:22:01.818257+00:00",
+      "model": "catalogue-2026/model-3/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:01.809729+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "fb8a6f0d1928ccf67197f23abdc5d5278e406dfa786607f9855a0677babd3aa8",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-4/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-04/tracking-output"
+      ],
+      "elapsed_seconds": 0.007981878006830812,
+      "finished_utc": "2026-11-13T18:22:01.828149+00:00",
+      "model": "catalogue-2026/model-4/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:01.819712+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "39f78593e24f2d4b8d9b04640a7c568cf49290b7dc7467af8a646b2a2d9b9c04",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-5/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-05/tracking-output"
+      ],
+      "elapsed_seconds": 0.008029370103031397,
+      "finished_utc": "2026-11-13T18:22:01.837873+00:00",
+      "model": "catalogue-2026/model-5/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:01.829412+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "9aeb9d4356cf2e394c6f0366c602fad2f9ca7455919b25d2347e2532d53ff006",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-6/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-06/tracking-output"
+      ],
+      "elapsed_seconds": 0.00801205006428063,
+      "finished_utc": "2026-11-13T18:22:01.847608+00:00",
+      "model": "catalogue-2026/model-6/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:01.839161+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "c8e5734c6862cdadd1aaa2bb2c354c59f85535f07d323f7cf63b095a90c98f53",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-7/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-07/tracking-output"
+      ],
+      "elapsed_seconds": 0.00796406902372837,
+      "finished_utc": "2026-11-13T18:22:01.857195+00:00",
+      "model": "catalogue-2026/model-7/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:01.848801+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "dd9872bb3b208083c28383a37e5b46aecb29603f1b2df10a9233476a0e47ff26",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-8/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-08/tracking-output"
+      ],
+      "elapsed_seconds": 0.007950658909976482,
+      "finished_utc": "2026-11-13T18:22:01.866701+00:00",
+      "model": "catalogue-2026/model-8/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:01.858367+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "3f99729df05865ec574e4a358bf9b05095722870fda28d1fcbc1da27a3d170cf",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-9/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-09/tracking-output"
+      ],
+      "elapsed_seconds": 0.008005833020433784,
+      "finished_utc": "2026-11-13T18:22:01.876317+00:00",
+      "model": "catalogue-2026/model-9/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:01.867931+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "7020f8e41bd4d1d7467a32a81aa483daedeb746f942dd4bac38a353f32ccf4e1",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-10/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-10/tracking-output"
+      ],
+      "elapsed_seconds": 0.008387519046664238,
+      "finished_utc": "2026-11-13T18:22:01.887672+00:00",
+      "model": "catalogue-2026/model-10/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:01.878387+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "f95be35652ca7f9c69dc3b0c2088adac90eb44bb25e55ae472690322e7b29979",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-11/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-11/tracking-output"
+      ],
+      "elapsed_seconds": 0.016428763046860695,
+      "finished_utc": "2026-11-13T18:22:01.908764+00:00",
+      "model": "catalogue-2026/model-11/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:01.891636+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "11dec2f20955617d7f3659bbf354c52be82b06f8f553b11e6175f96685d3b779",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-12/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-12/tracking-output"
+      ],
+      "elapsed_seconds": 0.01703184680081904,
+      "finished_utc": "2026-11-13T18:22:01.929506+00:00",
+      "model": "catalogue-2026/model-12/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:01.911532+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "99d0cb6cb32a8c59f934fd80f0323a8f062f80a6eb4f01de5d97707432de3bab",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-13/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-13/tracking-output"
+      ],
+      "elapsed_seconds": 0.016837408998981118,
+      "finished_utc": "2026-11-13T18:22:01.949649+00:00",
+      "model": "catalogue-2026/model-13/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:01.931860+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "8e1cbcb9eead08bc4365812161b230a7e5b9704599d3d9334063dba0715bb7a4",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-14/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-14/tracking-output"
+      ],
+      "elapsed_seconds": 0.008464345009997487,
+      "finished_utc": "2026-11-13T18:22:01.961114+00:00",
+      "model": "catalogue-2026/model-14/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:01.951649+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "dec92c4865cb505b2cf71f9af248b28b251d29cc74480c9f38f6650cb40e6ccf",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-15/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-15/tracking-output"
+      ],
+      "elapsed_seconds": 0.008265994023531675,
+      "finished_utc": "2026-11-13T18:22:01.972573+00:00",
+      "model": "catalogue-2026/model-15/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:01.963530+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a9a37f3ea064692cfd1541671dbcb8f2e5a161412dfe15ce9179d101be06c785",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-16/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-16/tracking-output"
+      ],
+      "elapsed_seconds": 0.00838779890909791,
+      "finished_utc": "2026-11-13T18:22:01.984277+00:00",
+      "model": "catalogue-2026/model-16/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:01.975075+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "149dbbb387ca85ab81cfeade5ce4894be9cb85b8859f7a1c9c6f4eb9034b0dd8",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-17/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-17/tracking-output"
+      ],
+      "elapsed_seconds": 0.01671581296250224,
+      "finished_utc": "2026-11-13T18:22:02.004363+00:00",
+      "model": "catalogue-2026/model-17/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:01.986800+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e9675cc3acc19170067aeeb70108aaff316891ad349158416d36b86b24337b7d",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-18/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-18/tracking-output"
+      ],
+      "elapsed_seconds": 0.016721680061891675,
+      "finished_utc": "2026-11-13T18:22:02.025213+00:00",
+      "model": "catalogue-2026/model-18/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:02.007280+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "d4653cfe55fd28b354c2f4eb83da6246ae0902e721e754e70cd1aea32c579c25",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-19/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-19/tracking-output"
+      ],
+      "elapsed_seconds": 0.016860036179423332,
+      "finished_utc": "2026-11-13T18:22:02.046245+00:00",
+      "model": "catalogue-2026/model-19/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:02.028400+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "db2aa7d43b504ee886f067f53503d188d13f2cef335a0e40fc5e0c248dca2315",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-20/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-20/tracking-output"
+      ],
+      "elapsed_seconds": 0.016972271958366036,
+      "finished_utc": "2026-11-13T18:22:02.067251+00:00",
+      "model": "catalogue-2026/model-20/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:02.049311+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e858921fd45c1eba6e5fce06b841c49893daee9ad54eadaffcd933107778cae3",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/quadcopter_mpc",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-21/source21-output"
+      ],
+      "elapsed_seconds": 0.11517545790411532,
+      "finished_utc": "2026-11-13T18:22:02.186639+00:00",
+      "model": "catalogue-2026/model-21/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:02.070403+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "4d954b5124c74a646fac34b23e105970b7121f774b004caeea1565b25654f1d4",
+      "timeout_seconds": 120
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-22/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-22/tracking-output"
+      ],
+      "elapsed_seconds": 0.008369012037292123,
+      "finished_utc": "2026-11-13T18:22:02.197978+00:00",
+      "model": "catalogue-2026/model-22/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:02.188692+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "56858f8d32b2117854515f90e616f0678e70484aaf31612dfb915feb1d83be96",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-23/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-23/tracking-output"
+      ],
+      "elapsed_seconds": 0.004238703055307269,
+      "finished_utc": "2026-11-13T18:22:02.205746+00:00",
+      "model": "catalogue-2026/model-23/1",
+      "returncode": 1,
+      "started_utc": "2026-11-13T18:22:02.200634+00:00",
+      "status": "failed",
+      "stderr_sha256": "f7a481478543f671a3f5d8514cd9804a75e9c950d163140cda3b7332a9bb8c86",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-24/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-24/tracking-output"
+      ],
+      "elapsed_seconds": 0.01650077011436224,
+      "finished_utc": "2026-11-13T18:22:02.225860+00:00",
+      "model": "catalogue-2026/model-24/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:02.208476+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "c3be3bf1dd1643d4a66c9dde7b9462e9457b457f86d21f17b9b2d76a4c6b13e2",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-25/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-25/tracking-output"
+      ],
+      "elapsed_seconds": 0.016986520029604435,
+      "finished_utc": "2026-11-13T18:22:02.247530+00:00",
+      "model": "catalogue-2026/model-25/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:02.229320+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "fc2679da5b4efa5cea3b399fc3234b4b3794609d8a286bf031e33cd4b8724bd2",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-26/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-26/tracking-output"
+      ],
+      "elapsed_seconds": 0.06503877509385347,
+      "finished_utc": "2026-11-13T18:22:02.317190+00:00",
+      "model": "catalogue-2026/model-26/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:02.251099+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "8a0c129399118a010238920c78d8f017361fa5f18af3139eb878bfd42e72bdbf",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-27/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-27/tracking-output"
+      ],
+      "elapsed_seconds": 0.016996925929561257,
+      "finished_utc": "2026-11-13T18:22:02.338570+00:00",
+      "model": "catalogue-2026/model-27/1",
+      "returncode": 1,
+      "started_utc": "2026-11-13T18:22:02.320562+00:00",
+      "status": "failed",
+      "stderr_sha256": "f7a481478543f671a3f5d8514cd9804a75e9c950d163140cda3b7332a9bb8c86",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-28/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-28/tracking-output"
+      ],
+      "elapsed_seconds": 0.03290460002608597,
+      "finished_utc": "2026-11-13T18:22:02.376084+00:00",
+      "model": "catalogue-2026/model-28/1",
+      "returncode": 1,
+      "started_utc": "2026-11-13T18:22:02.342153+00:00",
+      "status": "failed",
+      "stderr_sha256": "f7a481478543f671a3f5d8514cd9804a75e9c950d163140cda3b7332a9bb8c86",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-29/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-29/tracking-output"
+      ],
+      "elapsed_seconds": 0.06473496183753014,
+      "finished_utc": "2026-11-13T18:22:02.443164+00:00",
+      "model": "catalogue-2026/model-29/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:02.378017+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e21fce66298fd3f58820d038909b6a47bd5283e3234e499c14b0dc2ad09b56d8",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-30/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-30/tracking-output"
+      ],
+      "elapsed_seconds": 0.06502843811176717,
+      "finished_utc": "2026-11-13T18:22:02.512569+00:00",
+      "model": "catalogue-2026/model-30/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:02.446476+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "c99e69805d4853a661b335a27bea74cf6218697cfcadb0f6816cac5705d37afc",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-31/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-31/tracking-output"
+      ],
+      "elapsed_seconds": 0.03312432300299406,
+      "finished_utc": "2026-11-13T18:22:02.550250+00:00",
+      "model": "catalogue-2026/model-31/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:02.516094+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "aac16b58561221ce28267def4d33723e42937b47c4db23236b5344582de8347e",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-32/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-32/tracking-output"
+      ],
+      "elapsed_seconds": 0.11534077394753695,
+      "finished_utc": "2026-11-13T18:22:02.669958+00:00",
+      "model": "catalogue-2026/model-32/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:02.553602+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e1b481325c4854ba2539a3cebb1f7ff2bbc22d0ce7ea75d67c9ddd6e17a2cc2f",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-33/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-33/tracking-output"
+      ],
+      "elapsed_seconds": 0.032963616074994206,
+      "finished_utc": "2026-11-13T18:22:02.707486+00:00",
+      "model": "catalogue-2026/model-33/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:02.673489+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "2789d85e18020f2c98bd049f612af91c8dae180ae7affac59e23c8211d4c7730",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-34/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-34/tracking-output"
+      ],
+      "elapsed_seconds": 0.03295418689958751,
+      "finished_utc": "2026-11-13T18:22:02.745391+00:00",
+      "model": "catalogue-2026/model-34/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:02.711391+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "cfc51066b6397fbcc4e9c430425c6ab7a3919f68ec76ae4b2e0a42106f876a72",
+      "timeout_seconds": 60
+    },
+    {
+      "command": [
+        "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build/native_model_tracking",
+        "catalogue-2026/model-35/1",
+        "/home/butahlecoq/.codex/worktrees/1012-native-model-tracking-baselines/controlled-systems-lab/reports/algorithm-results/native-model-tracking-first-pass-v1/capture-20261113T182201Z/model-35/tracking-output"
+      ],
+      "elapsed_seconds": 0.06505337101407349,
+      "finished_utc": "2026-11-13T18:22:02.815842+00:00",
+      "model": "catalogue-2026/model-35/1",
+      "returncode": 0,
+      "started_utc": "2026-11-13T18:22:02.749873+00:00",
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "397653f4fb4965559b99d09c86cdab50761121e4208bdda632f51bb55264cd22",
+      "timeout_seconds": 60
+    }
+  ],
+  "runtime_limits": {
+    "native_tracking_seconds_per_case": 60,
+    "source21_seconds": 120,
+    "threads": 1
+  },
+  "schema": "csl.1012-native-model-tracking-capture/1",
+  "scope": "functional first native MPC/tracking pass across all 35 source-catalogue records; no performance comparison",
+  "summary": {
+    "attempted_model_records": 35,
+    "completed_models": 32,
+    "failed_models": 3,
+    "timed_out_models": 0
+  },
+  "task_profiles": {
+    "external_policy": "fold printed affine offset plus E*w_nominal when catalogue nominal external exists; otherwise explicitly select fixed external zero and retain original E in catalogue data",
+    "model21": "source21 literal horizon=10, Q/QN/R and bounds; 15 observed-state replans from existing native C++ source task",
+    "other34": "authored zero-target quadratic; horizon=3; three closed-loop replans; state weight_i=1/max(1,abs(initial_i))^2; terminal=5x state weight; R=0.02I; recorded-input bounds [-1,1]; no state bounds"
+  },
+  "working_source_sha256": {
+    "examples/CMakeLists.txt": "3a02dc2d243917d6b69fbf0657b5c03b7a7eb582a96bc3a06dbc0f9820aae101",
+    "examples/native_discrete_models.cpp": "cf3c1ae16456693ad814f803b17299d2344839fc6b2a14121ef1861138324b2b",
+    "examples/native_model_tracking.cpp": "6f068980859e2eb24eb953ff73d06111a4fc1849360dff927ec69df66705e0ff",
+    "examples/quadcopter_mpc.cpp": "5946f8603bf4ff3021c3020d90be7fc826173f771693a0d038794c9a8e7ca607",
+    "examples/quadcopter_mpc_task.cpp": "5fa0031706a16c78411a33e3162f04f1862afeff7dfff4f7cd97b7f39097f826",
+    "scripts/reports/native_model_tracking_first_pass.py": "5b19650499c232316a536fc79c4c805e3b50adff6752fac4155231cb73c9b957"
+  }
+}
