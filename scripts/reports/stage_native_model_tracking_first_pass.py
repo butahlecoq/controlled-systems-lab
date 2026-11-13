@@ -217,7 +217,7 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
     outputs = {ROUTE+"/"+name: content for name, content in files.items()}
     figure = ROUTE+"/figures/model-21-state-3-9.svg"
     entry = {"family":"Native mathematical models", "title":"Track 35 source-catalogue models with native MPC",
-             "status":"saved-functional-evidence", "anchor":"native-model-tracking-first-pass",
+             "status":"saved-data-companion", "anchor":"native-model-tracking-first-pass",
              "page":ROUTE+"/index.html", "figure":figure, "source_page":f"https://github.com/butahlecoq/controlled-systems-lab/tree/{source_commit}",
              "raw_record":ROUTE+"/capture-manifest.json"}
     card = (f'<article class="saved-figure" id="{entry["anchor"]}"><p class="eyebrow">Native C++ · 35 model records</p>'

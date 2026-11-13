@@ -54,8 +54,8 @@
         },
         {
           "label": "examples/CMakeLists.txt installed package consumer",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/1582059a8cb3356422234859ae4aa2f81bc339a5/examples/CMakeLists.txt",
-          "source_sha256": "49c3319ad2d4a84412608fffe4e18df5012b554a43e784befb4fac58bcc9f66b"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/df6dec2cfe2d4c7f31abcad283a8e52cd3871cf6/examples/CMakeLists.txt",
+          "source_sha256": "7d5247d6d91dd3753e6050528203332551ec3271513fa0207ecc58933ef1350a"
         }
       ],
       "example_sources": [
@@ -1155,6 +1155,85 @@
       ]
     },
     {
+      "id": "native-forward-models",
+      "title": "From native model factories to full-state forward reachability",
+      "group": "reachable_set_representation",
+      "group_label": "Reachable-set representations",
+      "role": "educational",
+      "status": "ready",
+      "status_label": "Ready · saved native functional evidence",
+      "prerequisites": [
+        "install-consumer",
+        "representation-consumers"
+      ],
+      "module_ids": [],
+      "source": "native-forward-models.html",
+      "summary": "Compare source-supplied models, separately authored initial sets, and synthetic linearized models before interpreting their all-stage projections.",
+      "mathematical_input": "Discrete: x(k+1)=Ax(k)+Bu(k). Continuous deviations: δx′=A(t)δx+B(t)δu. Propagate the declared full-state initial set and independent admissible inputs before projecting.",
+      "command": "cmake -S examples -B build/native-model-examples -DCSL_DIR=/path/to/install/lib/cmake/CSL\ncmake --build build/native-model-examples --target native_model_catalogue native_slide50_reachability native_spatial_flight",
+      "expected_output": "Installed native examples compile; run each executable with a new output directory to capture its declared stages and checks. Existing source-qualified captures are linked below.",
+      "intermediate_geometry": "Inspect the complete saved stages and full-state checks, then compare labelled coordinate-plane projections. A projected overlap is not a full-state intersection.",
+      "support_limits": "These are bounded functional examples with source/build qualification; CI remains required. The slide-50 initial box is separately authored because historical X0 coordinates are unavailable. Flexible-pitch and spatial-flight numerical choices are explicit authored assumptions; spatial flight propagates a linearized deviation model about a nonlinear reference. No historical reconstruction, nonlinear reachable-set enclosure, controller optimum or timing comparison is claimed.",
+      "figure_ids": [],
+      "records": [
+        {
+          "label": "Slide 33: three-state source model and complete initial box",
+          "href": "../examples/native-model-catalogue.html"
+        },
+        {
+          "label": "Four-state source model: fifteen transitions",
+          "href": "../examples/native-four-state-reachability.html"
+        },
+        {
+          "label": "Flexible pitch: coupled models with explicit authored assumptions",
+          "href": "../examples/native-flexible-pitch.html"
+        },
+        {
+          "label": "Slide 50: two independent inputs and a separately authored initial box",
+          "href": "../examples/native-slide50-reachability.html"
+        },
+        {
+          "label": "Synthetic spatial flight: nonlinear reference and nine-state deviations",
+          "href": "../examples/native-spatial-flight.html"
+        },
+        {
+          "label": "Extended-model capture and source/build qualification",
+          "href": "../examples/native-extended-models-v1/manifest.json"
+        }
+      ],
+      "example_sources": [
+        "examples/native_model_catalogue.cpp",
+        "examples/native_slide50_reachability.cpp",
+        "examples/native_spatial_flight.cpp"
+      ],
+      "kind": "saved evidence",
+      "mathematical_tables": [
+        {
+          "label": "Forward propagation before projection",
+          "columns": [
+            "model",
+            "state dimension",
+            "input dimension",
+            "initial-set authority"
+          ],
+          "rows": [
+            [
+              "Slide 50",
+              "3",
+              "2",
+              "Separately authored box; historical X0 unavailable"
+            ],
+            [
+              "Spatial flight",
+              "9",
+              "3",
+              "Authored deviation set about a synthetic nonlinear reference"
+            ]
+          ]
+        }
+      ]
+    },
+    {
       "id": "closed-loop-semantics",
       "title": "Read a closed-loop policy trace",
       "group": "controller",
@@ -1519,60 +1598,6 @@
             [
               "complete optimal family",
               "Complete optimal histories (x₀,x₁,x₂,u₀,u₁)=(0,s,1,s,1−s), 0≤s≤1"
-            ]
-          ]
-        }
-      ]
-    },
-    {
-      "id": "native-model-tracking-first-pass",
-      "title": "Track all 35 native model records",
-      "group": "controller",
-      "group_label": "Reachable-set controllers and MPC",
-      "role": "educational",
-      "status": "ready",
-      "status_label": "Ready · saved native functional evidence",
-      "prerequisites": [
-        "install-consumer"
-      ],
-      "module_ids": [],
-      "source": "native-model-tracking-first-pass.html",
-      "summary": "Inspect matrix-first records and saved native C++ closed-loop tracking outcomes for all 35 discrete models.",
-      "mathematical_input": "xₖ₊₁ = A xₖ + B uₖ + G wₖ + a; 3-stage receding-horizon quadratic tracking for 34 authored profiles, with the source21 literal task retained.",
-      "command": "python -B scripts/reports/visual_examples.py --check",
-      "expected_output": "35 attempted records; 32 completed; three retained native HiGHS refusals with full attempt logs.",
-      "intermediate_geometry": "Full-state executed paths and independent task/dynamics checks are retained; available two-dimensional projections provide views only.",
-      "support_limits": "The objectives for 34 horizon-free records are authored educational profiles. Source21 uses the literal source task. These numerical outcomes do not establish physical calibration, cross-model performance, certified optimality, or nonlinear stability.",
-      "figure_ids": [],
-      "records": [
-        {
-          "label": "Complete saved report, raw matrices, checks, refusals, and offline ZIP",
-          "href": "../examples/native-model-tracking-first-pass-v1/index.html"
-        },
-        {
-          "label": "Source commit and exact producer binding",
-          "href": "../examples/native-model-tracking-first-pass-v1/source-binding.json"
-        }
-      ],
-      "example_sources": [
-        "scripts/reports/stage_native_model_tracking_first_pass.py"
-      ],
-      "kind": "saved evidence",
-      "mathematical_tables": [
-        {
-          "label": "Task profile classes",
-          "columns": [
-            "records",
-            "task"
-          ],
-          "rows": [
-            [
-              "1 · source21",
-              "Literal source task and source constraints"
-            ],
-            [
-              "34 · horizon-free",
-              "Authored three-stage zero-target quadratic tracking"
             ]
           ]
         }
@@ -2012,6 +2037,60 @@
               "minimize ‖Ax−b‖₂",
               "minimize (x−3)²+16",
               "0≤0x≤0, columns above are lower bound, coefficient, upper bound"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "native-model-tracking-first-pass",
+      "title": "Track all 35 native model records",
+      "group": "supporting_operations",
+      "group_label": "4. Conversions, set operations, approximations and optimization",
+      "role": "educational",
+      "status": "ready",
+      "status_label": "Ready · saved native functional evidence",
+      "prerequisites": [
+        "install-consumer"
+      ],
+      "module_ids": [],
+      "source": "native-model-tracking-first-pass.html",
+      "summary": "Inspect matrix-first records and saved native C++ closed-loop tracking outcomes for all 35 discrete models.",
+      "mathematical_input": "xₖ₊₁ = A xₖ + B uₖ + G wₖ + a; 3-stage receding-horizon quadratic tracking for 34 authored profiles, with the source21 literal task retained.",
+      "command": "python -B scripts/reports/visual_examples.py --check",
+      "expected_output": "35 attempted records; 32 completed; three retained native HiGHS refusals with full attempt logs.",
+      "intermediate_geometry": "Full-state executed paths and independent task/dynamics checks are retained; available two-dimensional projections provide views only.",
+      "support_limits": "The objectives for 34 horizon-free records are authored educational profiles. Source21 uses the literal source task. These numerical outcomes do not establish physical calibration, cross-model performance, certified optimality, or nonlinear stability.",
+      "figure_ids": [],
+      "records": [
+        {
+          "label": "Complete saved report, raw matrices, checks, refusals, and offline ZIP",
+          "href": "../examples/native-model-tracking-first-pass-v1/index.html"
+        },
+        {
+          "label": "Source commit and exact producer binding",
+          "href": "../examples/native-model-tracking-first-pass-v1/source-binding.json"
+        }
+      ],
+      "example_sources": [
+        "scripts/reports/stage_native_model_tracking_first_pass.py"
+      ],
+      "kind": "saved evidence",
+      "mathematical_tables": [
+        {
+          "label": "Task profile classes",
+          "columns": [
+            "records",
+            "task"
+          ],
+          "rows": [
+            [
+              "1 · source21",
+              "Literal source task and source constraints"
+            ],
+            [
+              "34 · horizon-free",
+              "Authored three-stage zero-target quadratic tracking"
             ]
           ]
         }

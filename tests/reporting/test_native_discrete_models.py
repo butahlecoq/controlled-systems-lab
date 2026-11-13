@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'scripts/reports'))
 renderer = importlib.import_module("native_discrete_models")
 native = importlib.import_module("stage_native_discrete_models")
+tracking_bundle = importlib.import_module("stage_native_model_tracking_first_pass")
 
 
 class Links(HTMLParser):
@@ -118,6 +119,33 @@ class NativeDiscreteTests(unittest.TestCase):
         chapter = (site / 'learn/native-quadcopter-mpc.html').read_text()
         self.assertIn('../examples/native-quadcopter-mpc.html', chapter)
         self.assertIn('../examples/native-discrete-models-v1/phase-x3-x6-screen.svg', chapter)
+
+    def test_all_model_tracking_saved_bundle_authenticates_inputs_and_refusals(self):
+        import io
+        import json
+        import zipfile
+
+        files, entries, card = tracking_bundle.build(ROOT)
+        route = tracking_bundle.ROUTE + "/"
+        self.assertEqual(len(entries), 1)
+        page = files[route + "index.html"].decode()
+        self.assertIn("A (", page)
+        self.assertIn("models.csv", page)
+        self.assertIn("source-input-inventory.json", page)
+        self.assertIn("native-refusal.json", page)
+        self.assertIn("35 model records", card)
+        self.assertIn(route + "raw/models.csv", files)
+        self.assertIn(route + "raw/model-21/plans.csv", files)
+        archive_bytes = files[route + tracking_bundle.ROUTE + ".zip"]
+        with zipfile.ZipFile(io.BytesIO(archive_bytes)) as archive:
+            self.assertIsNone(archive.testzip())
+            names = set(archive.namelist())
+            self.assertIn("raw/models.csv", names)
+            self.assertIn("raw/model-21/plans.csv", names)
+            for number in (23, 27, 28):
+                refusal = json.loads(archive.read(f"raw/model-{number:02d}/native-refusal.json"))
+                self.assertEqual(refusal["status"], "failed")
+                self.assertIn("native removal threshold 1e-12", refusal["diagnostic"])
 
     def test_rewritten_manifest_unlisted_file_and_symlink_are_rejected(self):
         manifest = self.bundle / 'manifest.json'

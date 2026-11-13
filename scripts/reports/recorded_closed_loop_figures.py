@@ -7,13 +7,20 @@ import html
 import json
 import math
 import os
+import re
+import shlex
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "benchmarks/reporting/closed_loop"))
-from attempt_records import iter_stage_references, read_attempt, verify_v2_attempt
+from attempt_records import (
+    iter_stage_references,
+    read_attempt,
+    read_native_capture_metadata,
+    verify_v2_attempt,
+)
 if __package__:
     from .figure_style import STYLE_ID, configure_numeric_axis
     from .mathematical_notation import matrix_html
@@ -75,7 +82,7 @@ def timeline_end(runs: list[dict[str, Any]]) -> float:
     times = [
         float(row["time"])
         for run in runs
-        for series_name in ("clouds", "nodes", "planned_prediction", "plant_replay")
+        for series_name in ("clouds", "fixed_plan_enclosures", "nodes", "planned_prediction", "plant_replay")
         for row in run.get(series_name, [])
         if "time" in row
     ]
@@ -188,7 +195,7 @@ def _convex_hull(points: list[tuple[float, float]]) -> list[list[float]]:
 
 
 def _zonotope_polygon(center: list[float], generator_vectors: list[list[float]], indices: tuple[int, int]) -> list[list[float]]:
-    segments: list[tuple[float, float]] = []
+    segments: list[tuple[float, float, float]] = []
     for vector in generator_vectors:
         dx, dy = float(vector[indices[0]]), float(vector[indices[1]])
         if dy < 0.0 or (dy == 0.0 and dx < 0.0):
@@ -235,7 +242,7 @@ def project_shape(shape: dict[str, Any], indices: tuple[int, int]) -> list[list[
             return None
         # Serialized zonotope generators are a state-dimension by generator-count
         # matrix. Convert once at the boundary to explicit full-state vectors.
-        return _zonotope_polygon(center, [list(column) for column in zip(*generators)], indices)
+        return _zonotope_polygon(center, [list(column) for column in zip(*generators, strict=False)], indices)
     if kind == "parallelotope":
         frame, lower, upper = shape.get("frame"), shape.get("lower"), shape.get("upper")
         if not isinstance(frame, list) or not isinstance(lower, list) or not isinstance(upper, list):
@@ -244,7 +251,7 @@ def project_shape(shape: dict[str, Any], indices: tuple[int, int]) -> list[list[
         dimension = len(lower)
         if len(matrix) != dimension or any(not isinstance(row, list) or len(row) != dimension for row in matrix):
             return None
-        middle = [(float(a) + float(b)) / 2.0 for a, b in zip(lower, upper)]
+        middle = [(float(a) + float(b)) / 2.0 for a, b in zip(lower, upper, strict=False)]
         center = [sum(float(matrix[i][j]) * middle[j] for j in range(dimension)) for i in range(dimension)]
         generator_vectors = [[float(matrix[i][j]) * (float(upper[j]) - float(lower[j])) / 2.0
                               for i in range(dimension)] for j in range(dimension)]
@@ -258,7 +265,9 @@ def _collect_run(plane: Plane, attempt_id: str, capture_root: Path) -> dict[str,
     manifest = _read_json(attempt_dir / "run-manifest.json")
     resolution = _read_json(attempt_dir / "resolution-receipt.json")
     postcheck = _read_json(attempt_dir / "postcheck-initial.json")
-    if manifest.get("attempt_id") != attempt_id or manifest.get("source_commit") != SOURCE_COMMIT:
+    source_commit = manifest.get("source_commit")
+    if (manifest.get("attempt_id") != attempt_id or not isinstance(source_commit, str)
+            or re.fullmatch(r"[0-9a-f]{40}", source_commit) is None):
         raise ValueError(f"source or attempt identity mismatch for {attempt_id}")
     task_sha = manifest.get("task_sha256")
     if resolution.get("task_id") != plane.task_id or resolution.get("task_sha256") != task_sha:
@@ -267,13 +276,17 @@ def _collect_run(plane: Plane, attempt_id: str, capture_root: Path) -> dict[str,
         raise ValueError(f"postcheck identity mismatch for {attempt_id}")
     if postcheck.get("overall_status") != "complete":
         raise ValueError(f"incomplete attempt {attempt_id} cannot be rendered as a completed record")
-    if manifest.get("resource_profile_id") != "worker-wall-1800-cpu-1800/1":
+    if not isinstance(manifest.get("resource_profile_id"), str) or not manifest["resource_profile_id"].strip():
         raise ValueError(f"unexpected resource profile for {attempt_id}")
 
     attempt_path = attempt_dir / "attempt.json"
     attempt_record = None
     if attempt_path.is_file():
         attempt_record, _ = read_attempt(attempt_path)
+        if (attempt_record.get("attempt_id") != attempt_id
+                or attempt_record.get("task_id") != plane.task_id
+                or attempt_record.get("task_sha256") != task_sha):
+            raise ValueError(f"attempt record identity mismatch for {attempt_id}")
         if attempt_record.get("format_version") == 2:
             try:
                 verify_v2_attempt(attempt_dir, attempt_record)
@@ -281,6 +294,7 @@ def _collect_run(plane: Plane, attempt_id: str, capture_root: Path) -> dict[str,
                 raise ValueError(f"v2 stage evidence is invalid for {attempt_id}: {error}") from error
 
     raw_files: list[dict[str, str]] = []
+    native_capture_files: list[dict[str, str]] = []
     stages: list[dict[str, Any]] = []
     if attempt_record is not None and attempt_record.get("format_version") == 2:
         stage_paths = [attempt_dir / reference["path"]
@@ -307,13 +321,86 @@ def _collect_run(plane: Plane, attempt_id: str, capture_root: Path) -> dict[str,
     if first.get("status") != "applied-and-observed":
         raise ValueError(f"initial stage was not applied and observed for {attempt_id}")
     controller_id = resolution.get("selected_controller_id")
-    predicted = first.get("predicted_sets", [])
+    native_response: dict[str, Any] | None = None
+    native_response_source: dict[str, str] | None = None
+    capture_reference = first.get("native_query_capture")
+    if isinstance(capture_reference, dict) and capture_reference.get("schema") == \
+            "csl.closed-loop.native-query-capture-reference/1":
+        capture_metadata, payload_paths = read_native_capture_metadata(attempt_dir, capture_reference)
+        response_reference = capture_metadata.get("response")
+        response_path = payload_paths.get("response")
+        if (response_reference is not None and response_path is not None
+                and capture_metadata.get("response_parse_status") == "parsed"):
+            response_bytes = response_path.read_bytes()
+            response_sha256 = hashlib.sha256(response_bytes).hexdigest()
+            if (len(response_bytes) != response_reference.get("bytes")
+                    or response_sha256 != response_reference.get("sha256")
+                    or response_sha256 != capture_metadata.get("bridge_response_sha256")):
+                raise ValueError(f"native response payload hash chain is invalid for {attempt_id}")
+            try:
+                parsed_response = json.loads(response_bytes)
+            except (UnicodeDecodeError, json.JSONDecodeError) as error:
+                raise ValueError(f"saved native response is not parsed JSON for {attempt_id}") from error
+            if not isinstance(parsed_response, dict):
+                raise ValueError(f"saved native response is not an object for {attempt_id}")
+            if parsed_response.get("task_id") not in (None, plane.task_id) or \
+                    parsed_response.get("task_sha256") not in (None, task_sha):
+                raise ValueError(f"saved native response task identity mismatch for {attempt_id}")
+            request_path = payload_paths.get("request")
+            request = _read_json(request_path) if request_path is not None else {}
+            receipt = parsed_response.get("query_receipt", {})
+            expected_policy = str(controller_id) + "/receding-fixed-plan-mpc/1"
+            if not receipt and isinstance(parsed_response.get("graph_receipt"), dict):
+                graph_receipt = parsed_response["graph_receipt"]
+                if graph_receipt.get("schema") == "csl.closed-loop.finite-action-backward-graph/1":
+                    receipt = {**graph_receipt,
+                               "absolute_update_index": graph_receipt.get("absolute_stage_offset")}
+                    expected_policy = str(controller_id) + "/budgeted-backward-graph-mpc/1"
+            request_digest = _sha256(request_path) if request_path is not None else None
+            horizon = attempt_record.get("original_intervals") if attempt_record else len(stages)
+            query_identity = {
+                "task_id": plane.task_id, "task_sha256": task_sha,
+                "absolute_update_index": first["update_index"], "original_horizon": horizon,
+            }
+            if (capture_metadata.get("update_index") != first["update_index"]
+                    or any(request.get(key) != value for key, value in query_identity.items())
+                    or any(receipt.get(key) != value for key, value in query_identity.items())
+                    or request_digest != capture_metadata.get("request_sha256")
+                    or request.get("observed_physical_state") != first.get("observed_physical")
+                    or request.get("dt") != plane.dt
+                    or any(receipt.get(key) != request.get(key) for key in
+                           ("source_model_id", "predictor_model_id", "action_profile_id"))
+                    or request.get("controller_id") != controller_id
+                    or ("controller_id" in receipt and receipt["controller_id"] != controller_id)
+                    or parsed_response.get("policy_id") != expected_policy
+                    or not parsed_response.get("selected_plan", {}).get("states")
+                    or parsed_response["selected_plan"]["states"][0] != first.get("observed_physical")):
+                raise ValueError(f"saved native query identity mismatch for {attempt_id}")
+            native_response = parsed_response
+            native_response_source = {"path": response_path.name, "sha256": response_sha256}
+            native_capture_files.append(
+                {"path": capture_reference["path"], "sha256": capture_reference["sha256"]}
+            )
+            for payload_name, payload_path in payload_paths.items():
+                native_capture_files.append({
+                    "path": payload_path.name,
+                    "sha256": capture_metadata[payload_name]["sha256"],
+                })
+    predicted = first.get("predicted_sets")
+    if predicted is None and native_response is not None:
+        predicted = native_response.get("predicted_sets", [])
+    if not isinstance(predicted, list):
+        predicted = []
+    trace_source = native_response_source if first.get("predicted_sets") is None else None
+    trace_source_path = (trace_source or {}).get("path", first["_source_filename"])
+    trace_source_sha256 = (trace_source or {}).get("sha256", first["_source_file_sha256"])
     node_layers = [layer for layer in predicted if layer.get("role") == "retained-stage-layered-singleton-nodes"]
     cloud_layers = [layer for layer in predicted if layer.get("role") == "complete-authored-action-parent-clouds"]
     nodes = node_layers[0].get("nodes", []) if node_layers else []
     clouds = cloud_layers[0].get("clouds", []) if cloud_layers else []
 
     shape_rows: list[dict[str, Any]] = []
+    fixed_plan_enclosures: list[dict[str, Any]] = []
     if clouds:
         for index, cloud in enumerate(clouds):
             shape = cloud.get("selected_outer_shape")
@@ -338,9 +425,59 @@ def _collect_run(plane: Plane, attempt_id: str, capture_root: Path) -> dict[str,
                      "accepted_by_selected_shape_numerical_membership": child.get("accepted_by_selected_shape_numerical_membership")}
                     for child in cloud.get("action_child_witnesses", [])
                 ],
-                "source_pointer": f"stage-000.json#/predicted_sets/{predicted.index(cloud_layers[0])}/clouds/{index}",
-                "source_file": first["_source_filename"],
-                "source_file_sha256": first["_source_file_sha256"],
+                "source_pointer": f"{trace_source_path}#/predicted_sets/{predicted.index(cloud_layers[0])}/clouds/{index}",
+                "source_file": trace_source_path,
+                "source_file_sha256": trace_source_sha256,
+            })
+    for predicted_index, trace in enumerate(predicted):
+        if trace.get("role") != "fixed-plan-trajectory-enclosure":
+            continue
+        representation = trace.get("representation")
+        if representation not in {"exact-polytope", "box", "zonotope", "parallelotope", "ellipsoid"}:
+            continue
+        frame = trace.get("frame")
+        coordinate_semantics = trace.get("coordinate_semantics")
+        for stage_index, bounds in enumerate(trace.get("stages", [])):
+            shape = {"representation": representation, **bounds}
+            frame_is_qualified = (
+                isinstance(frame, list)
+                and coordinate_semantics == {
+                    "physical_state": "x",
+                    "frame_state": "y",
+                    "mapping": "x = frame * y",
+                    "stage_bounds": "lower and upper are frame coordinates y",
+                }
+            )
+            if representation == "parallelotope":
+                # Never infer a missing frame from the source or another record.
+                if not frame_is_qualified:
+                    shape = {}
+                else:
+                    shape["frame"] = frame
+            projected_geometry = project_shape(shape, plane.raw_indices)
+            fixed_plan_enclosures.append({
+                "update_index": 0,
+                "absolute_stage": stage_index,
+                "time": stage_index * plane.dt,
+                "role": trace["role"],
+                "relation": trace.get("relation"),
+                "assurance": trace.get("assurance"),
+                "representation": representation,
+                "coordinate_semantics": coordinate_semantics,
+                "frame_status": (
+                    "not-required" if representation != "parallelotope"
+                    else "provided" if frame_is_qualified and projected_geometry
+                    else "invalid frame geometry; not projected" if frame_is_qualified
+                    else "missing or unrecognized coordinate semantics; not projected"
+                ),
+                "shape": shape,
+                "projected_geometry": projected_geometry,
+                "projection_status": (
+                    "projected" if projected_geometry else "representation geometry unsupported or invalid"
+                ),
+                "source_pointer": f"{trace_source_path}#/predicted_sets/{predicted_index}/stages/{stage_index}",
+                "source_file": trace_source_path,
+                "source_file_sha256": trace_source_sha256,
             })
     node_rows = []
     for node in nodes:
@@ -357,18 +494,20 @@ def _collect_run(plane: Plane, attempt_id: str, capture_root: Path) -> dict[str,
             "backward_membership_witness": node.get("predecessor_contains_parent"),
             "stage_intersection_membership_witness": node.get("stage_set_intersection_nonempty"),
             "backward_viable": node.get("backward_viable"),
-            "source_pointer": "stage-000.json#/predicted_sets/0/nodes",
-            "source_file": first["_source_filename"],
-            "source_file_sha256": first["_source_file_sha256"],
+            "source_pointer": f"{trace_source_path}#/predicted_sets/0/nodes",
+            "source_file": trace_source_path,
+            "source_file_sha256": trace_source_sha256,
         })
 
     predicted_plan = first.get("selected_plan", {})
+    if not predicted_plan and native_response is not None:
+        predicted_plan = native_response.get("selected_plan", {})
     plan_states = predicted_plan.get("states", [])
     planned = [{"absolute_stage": i, "time": i * plane.dt, "state": state,
                 "point": list(plane.project(state)),
-                "source_pointer": f"stage-000.json#/selected_plan/states/{i}",
-                "source_file": first["_source_filename"],
-                "source_file_sha256": first["_source_file_sha256"]}
+                "source_pointer": f"{trace_source_path}#/selected_plan/states/{i}",
+                "source_file": trace_source_path,
+                "source_file_sha256": trace_source_sha256}
                for i, state in enumerate(plan_states) if isinstance(state, list)]
     replay: list[dict[str, Any]] = []
     for stage in stages:
@@ -376,7 +515,7 @@ def _collect_run(plane: Plane, attempt_id: str, capture_root: Path) -> dict[str,
         states, local_times = execution.get("physical_states", []), execution.get("times", [])
         if execution.get("status") != "complete" or len(states) != len(local_times):
             continue
-        for index, (state, local_time) in enumerate(zip(states, local_times)):
+        for index, (state, local_time) in enumerate(zip(states, local_times, strict=False)):
             if replay and index == 0:
                 continue
             replay.append({
@@ -393,13 +532,13 @@ def _collect_run(plane: Plane, attempt_id: str, capture_root: Path) -> dict[str,
     observed = first.get("observed_physical")
     if not isinstance(observed, list) or not replay:
         raise ValueError(f"initial state or completed plant replay missing for {attempt_id}")
-    all_target = first.get("selected_plan", {}).get("states", [])
+    all_target = predicted_plan.get("states", [])
     result = {
         "attempt_id": attempt_id,
         "case_id": case,
         "task_id": plane.task_id,
         "task_sha256": task_sha,
-        "source_commit": SOURCE_COMMIT,
+        "source_commit": source_commit,
         "source_hashes": manifest.get("source_hashes", {}),
         "profile_id": manifest.get("resource_profile_id"),
         "graph_fingerprint": manifest.get("graph_fingerprint"),
@@ -416,6 +555,7 @@ def _collect_run(plane: Plane, attempt_id: str, capture_root: Path) -> dict[str,
         "initial_point": list(plane.project(observed)),
         "nodes": node_rows,
         "clouds": shape_rows,
+        "fixed_plan_enclosures": fixed_plan_enclosures,
         "planned_prediction": planned,
         "plant_replay": replay,
         "stage_count": len(stages),
@@ -433,6 +573,7 @@ def _collect_run(plane: Plane, attempt_id: str, capture_root: Path) -> dict[str,
             "resolution_sha256": _sha256(attempt_dir / "resolution-receipt.json"),
             "postcheck_sha256": _sha256(attempt_dir / "postcheck-initial.json"),
             "stage_files": raw_files,
+            "native_capture_files": native_capture_files,
         },
     }
     if case == "syn-nl-fuel-01":
@@ -465,19 +606,24 @@ def _plot_run(axis, run: dict[str, Any], plane: Plane, cmap, end_time: float,
     all_stages = focused_stage is None
     linestyle = "--" if run["controller_id"] == "native-exact-polytope-backward-graph/1" else "-"
     clouds = run["clouds"] if all_stages else rows_for_output_stage(run["clouds"], focused_stage)
-    for item in clouds:
+    fixed_plan_enclosures = (
+        run.get("fixed_plan_enclosures", []) if all_stages
+        else rows_for_output_stage(run.get("fixed_plan_enclosures", []), focused_stage)
+    )
+    for item in [*clouds, *fixed_plan_enclosures]:
         geometry = item.get("projected_geometry")
         if not geometry:
             continue
         color = cmap(normalized_time(item["time"], end_time))
         kind = item.get("representation")
+        shape_linestyle = "--" if item.get("role") == "fixed-plan-trajectory-enclosure" else linestyle
         if kind == "ellipsoid" and len(geometry) == 2:
             axis.add_patch(_ellipse_patch(geometry[0], geometry[1], color=color,
-                                          alpha=0.055 if all_stages else 0.18, linestyle=linestyle))
+                                          alpha=0.055 if all_stages else 0.18, linestyle=shape_linestyle))
         elif len(geometry) >= 3:
             axis.add_patch(Polygon(geometry, closed=True, facecolor=color,
                                    edgecolor=color, alpha=0.025 if all_stages else 0.12,
-                                   linewidth=0.45, linestyle=linestyle))
+                                   linewidth=0.45, linestyle=shape_linestyle))
     nodes = run["nodes"] if all_stages else rows_for_output_stage(run["nodes"], focused_stage)
     if nodes:
         values = np.asarray([plane.project(row["state"]) for row in nodes], dtype=float)
@@ -548,7 +694,7 @@ def render_figure(entry: dict[str, Any], plane: Plane, output_dir: Path) -> None
     for row in axes:
         for axis in row:
             axis_handles, axis_labels = axis.get_legend_handles_labels()
-            for handle, label in zip(axis_handles, axis_labels):
+            for handle, label in zip(axis_handles, axis_labels, strict=False):
                 if label not in labels:
                     labels.append(label)
                     handles.append(handle)
@@ -556,7 +702,7 @@ def render_figure(entry: dict[str, Any], plane: Plane, output_dir: Path) -> None
         fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(.5, .94),
                    ncol=min(5, len(labels)), frameon=False, fontsize=8)
     scalar = ScalarMappable(norm=Normalize(0.0, max(1e-12, end_time)), cmap=cmap)
-    colorbar_axis = fig.add_axes([.28, .10, .44, .025])
+    colorbar_axis = fig.add_axes((.28, .10, .44, .025))
     colorbar = fig.colorbar(scalar, cax=colorbar_axis, orientation="horizontal")
     colorbar.set_label(f"Recorded physical time ({plane.time_unit}); all stage layers share this scale")
     fig.suptitle(f"{plane.title}: recorded closed-loop views", y=.99, fontsize=14)
@@ -622,7 +768,7 @@ code{{overflow-wrap:anywhere}} .data-links a{{margin-right:1rem}}
 </style></head><body>
 <main><p><a href="../figure-index.json">All recorded closed-loop figures</a></p>
 <h1>{title}</h1>
-<p>Stage-coloured projections from saved records. Solid traces show executed plant replay. Dotted traces show the initial model prediction. Shaded shapes show serialized finite authored-action parent clouds, projected from their stored shape parameters.</p>
+<p>Stage-coloured projections from saved records. Solid traces show executed plant replay. Dotted traces show the initial model prediction. Shaded shapes show serialized finite authored-action parent clouds; dashed outlines show fixed-plan trajectory enclosures. Parallelotope projections use the frame and coordinate semantics stored in that trace.</p>
 <div class="figure-actions"><label for="stage-focus">Output state focus</label><select id="stage-focus" aria-label="Output state focus"><option value="all">All stages</option><option value="0">Output state stage 0 (initial)</option>{stage_options}</select>
 <a href="{ident}.svg">Standalone SVG</a><a href="{ident}.png">PNG</a><a href="{data_url}">Exact plotted-data JSON</a></div>
 <p class="note"><strong>Evidence scope.</strong> Retained graph and finite authored-action model predictions are numerical and policy-conditioned. These plots do not show all-admissible-control reachability. A point or a membership flag is a witness, not a materialized region. The marked terminal objective target is soft, not a hard target set.</p>
@@ -634,8 +780,8 @@ code{{overflow-wrap:anywhere}} .data-links a{{margin-right:1rem}}
 <h2>Tracks without materialized parent-cloud shapes</h2><ul>{shape_gaps or '<li>Each completed track saved its outer parent-cloud shape parameters.</li>'}</ul>
 <h2>Saved source records</h2><ul>{raw_links}</ul>
 <p>The immutable raw capture archive is external to this Pages bundle. The locators and per-file SHA-256 values above identify its records; a public raw archive link is not available in this capture.</p>
-<h2>Rebuild the figures</h2><pre><code>python scripts/reports/recorded_closed_loop_figures.py --capture-root "$CSL_CLOSED_LOOP_CAPTURE_ROOT" --output docs/examples/closed-loop</code></pre>
-<p>Source commit <code>{SOURCE_COMMIT}</code>. Coordinate axes are {x_label} ({x_unit}) and {y_label} ({y_unit}). Figures use style <code>{STYLE_ID}</code>.</p>
+<h2>Rebuild the figures</h2><pre><code>{html.escape(entry["reproduction_command"])}</code></pre>
+<p>Source commits <code>{html.escape(", ".join(entry["source_commits"]))}</code>. Coordinate axes are {x_label} ({x_unit}) and {y_label} ({y_unit}). Figures use style <code>{STYLE_ID}</code>.</p>
 <section class="math-input"><p>Projection matrix P maps raw state coordinates to the displayed axes: {permutation}</p>{scale_view}<p>Exact coordinate-transform metadata is available in the plotted-data JSON.</p></section>
 <script>
 const focus=document.querySelector('#stage-focus'),svg=document.querySelector('#stage-svg');
@@ -658,9 +804,10 @@ function draw(d,selected){{
   svg.append(make('text',{{x:left-9,y:y(yv)+4,'text-anchor':'end','font-size':12,fill:'currentColor'}},Number(yv.toPrecision(5)).toString()));
  }}
  for(let ri=0;ri<runs.length;ri++){{const run=runs[ri], lineColor=['#1769aa','#c04424','#18864b','#8156a8','#bc7b12'][ri%5];
-  for(const c of run.clouds||[]){{if(selected!=='all'&&c.absolute_stage!==Number(selected))continue;const g=c.projected_geometry;if(!g)continue;const col=color(c.time,d.timeline_end);
-   if(c.representation==='ellipsoid'&&g.length===2)svg.append(make('ellipse',{{cx:x(g[0][0]),cy:y(g[0][1]),rx:Math.abs(x(g[0][0]+g[1][0])-x(g[0][0])),ry:Math.abs(y(g[0][1]+g[1][1])-y(g[0][1])),fill:col,'fill-opacity':selected==='all'?.08:.2,stroke:col,'stroke-width':1}}));
-   else if(g.length>2)svg.append(make('polygon',{{points:g.map(p=>`${{x(p[0])}},${{y(p[1])}}`).join(' '),fill:col,'fill-opacity':selected==='all'?.035:.16,stroke:col,'stroke-width':.6}}));
+  for(const c of [...(run.clouds||[]),...(run.fixed_plan_enclosures||[])]){{if(selected!=='all'&&c.absolute_stage!==Number(selected))continue;const g=c.projected_geometry;if(!g)continue;const col=color(c.time,d.timeline_end);
+   const planTrace=c.role==='fixed-plan-trajectory-enclosure', dash=planTrace?'4 3':'';
+   if(c.representation==='ellipsoid'&&g.length===2)svg.append(make('ellipse',{{cx:x(g[0][0]),cy:y(g[0][1]),rx:Math.abs(x(g[0][0]+g[1][0])-x(g[0][0])),ry:Math.abs(y(g[0][1]+g[1][1])-y(g[0][1])),fill:col,'fill-opacity':selected==='all'?.08:.2,stroke:col,'stroke-width':1,'stroke-dasharray':dash}}));
+   else if(g.length>2)svg.append(make('polygon',{{points:g.map(p=>`${{x(p[0])}},${{y(p[1])}}`).join(' '),fill:col,'fill-opacity':selected==='all'?.035:.16,stroke:col,'stroke-width':.6,'stroke-dasharray':dash}}));
   }}
   const graph=(run.nodes||[]).filter(n=>selected==='all'||n.absolute_stage===Number(selected));
   for(const n of graph){{const p=n.state,ix=d.coordinate_transform.raw_indices;svg.append(make('circle',{{cx:x(p[ix[0]]),cy:y(p[ix[1]]),r:2.3,fill:color(n.time,d.timeline_end),'fill-opacity':.65}}));}}
@@ -680,9 +827,10 @@ fetch('{data_url}').then(r=>r.json()).then(d=>{{draw(d,'all');focus.addEventList
 </script></main></body></html>'''
 
 
-def _figure_entry(plane: Plane, capture_root: Path) -> dict[str, Any]:
+def _figure_entry(plane: Plane, capture_root: Path,
+                  attempts: tuple[str, ...] | None = None) -> dict[str, Any]:
     case = plane.case_id
-    runs = [_collect_run(plane, attempt, capture_root) for attempt in ATTEMPTS[case]]
+    runs = [_collect_run(plane, attempt, capture_root) for attempt in (ATTEMPTS[case] if attempts is None else attempts)]
     expected_hashes = {run["task_sha256"] for run in runs}
     if len(expected_hashes) != 1:
         raise ValueError(f"cannot compare different task hashes for {case}")
@@ -704,8 +852,10 @@ def _figure_entry(plane: Plane, capture_root: Path) -> dict[str, Any]:
     shape_gaps = [{
         "attempt_id": run["attempt_id"],
         "controller_id": run["controller_id"],
-        "reason": "The saved response has retained graph points but no materialized parent-cloud shape geometry.",
-    } for run in runs if not run["clouds"]]
+        "reason": "The saved response has no projectable materialized shape geometry.",
+    } for run in runs
+        if not any(row.get("projected_geometry") for row in
+                   [*run["clouds"], *run.get("fixed_plan_enclosures", [])])]
     return {
         "id": plane.figure_id,
         "availability": "ready",
@@ -719,8 +869,10 @@ def _figure_entry(plane: Plane, capture_root: Path) -> dict[str, Any]:
         "stage_count": max(run["stage_count"] for run in runs),
         "time_step": plane.dt,
         "timeline_end": timeline_end(runs),
-        "source_commit": SOURCE_COMMIT,
-        "profile_id": "worker-wall-1800-cpu-1800/1",
+        "source_commit": runs[0]["source_commit"] if len({r["source_commit"] for r in runs}) == 1 else None,
+        "source_commits": sorted({r["source_commit"] for r in runs}),
+        "profile_id": runs[0]["profile_id"] if len({r["profile_id"] for r in runs}) == 1 else None,
+        "profile_ids": sorted({r["profile_id"] for r in runs}),
         "reproduction_command": "python scripts/reports/recorded_closed_loop_figures.py --capture-root \"$CSL_CLOSED_LOOP_CAPTURE_ROOT\" --output docs/examples/closed-loop",
         "coordinate_transform": {
             "raw_indices": list(plane.raw_indices),
@@ -739,6 +891,7 @@ def _figure_entry(plane: Plane, capture_root: Path) -> dict[str, Any]:
             "initial physical state",
             "retained stage-layered graph singleton nodes",
             "serialized complete authored-action parent clouds when present",
+            "serialized fixed-plan trajectory enclosures when present and coordinate-qualified",
             "initial model-predicted plan",
             "executed physical plant replay",
             "soft objective target when defined",
@@ -766,7 +919,7 @@ def _plot_bounds(entry: dict[str, Any], plane: Plane) -> dict[str, list[float]]:
     xs: list[float] = []
     ys: list[float] = []
     for run in entry["runs"]:
-        for row in run["clouds"]:
+        for row in [*run["clouds"], *run.get("fixed_plan_enclosures", [])]:
             geometry = row.get("projected_geometry") or []
             if row.get("representation") == "ellipsoid" and len(geometry) == 2:
                 center, radii = geometry
@@ -791,11 +944,23 @@ def _plot_bounds(entry: dict[str, Any], plane: Plane) -> dict[str, list[float]]:
     return {"x": [xmin - xpad, xmax + xpad], "y": [ymin - ypad, ymax + ypad]}
 
 
-def build(capture_root: Path, destination: Path | None = None) -> dict[str, Any]:
+def build(capture_root: Path, destination: Path | None = None, *,
+          attempts: dict[str, tuple[str, ...]] | None = None) -> dict[str, Any]:
     """Build figures and a read-only FigureIndex from completed saved records."""
     output = destination or (Path(__file__).resolve().parents[2] / "docs/examples/closed-loop")
     figure_dir = output / "figures"
-    entries = [_figure_entry(plane, capture_root) for plane in [*PLANES.values(), FUEL_FUEL_PLANE]]
+    selection = ATTEMPTS if attempts is None else attempts
+    validate_attempt_selection(selection)
+    entries = [_figure_entry(plane, capture_root, selection[plane.case_id])
+               for plane in [*PLANES.values(), FUEL_FUEL_PLANE] if plane.case_id in selection]
+    for entry in entries:
+        options = " ".join("--attempt " + shlex.quote(f"{case}={attempt}")
+                           for case, ids in selection.items() for attempt in ids)
+        entry["reproduction_command"] = (
+            "python scripts/reports/recorded_closed_loop_figures.py "
+            '--capture-root "$CSL_CLOSED_LOOP_CAPTURE_ROOT" --output docs/examples/closed-loop '
+            + options
+        )
     index = {"schema": SCHEMA, "style_id": STYLE_ID, "figures": []}
     for entry in entries:
         plane = next(p for p in [*PLANES.values(), FUEL_FUEL_PLANE] if p.figure_id == entry["id"])
@@ -808,11 +973,13 @@ def build(capture_root: Path, destination: Path | None = None) -> dict[str, Any]
             "task_id": entry["task_id"],
             "task_sha256": entry["task_sha256"],
             "source_commit": entry["source_commit"],
+            "source_commits": entry["source_commits"],
+            "profile_ids": entry["profile_ids"],
             "coordinate_transform": entry["coordinate_transform"],
             "comparison_coverage_gaps": entry["comparison_coverage_gaps"],
             "shape_coverage_gaps": entry["shape_coverage_gaps"],
             "runs": entry["runs"],
-            "reproduction_command": "python scripts/reports/recorded_closed_loop_figures.py --capture-root \"$CSL_CLOSED_LOOP_CAPTURE_ROOT\" --output docs/examples/closed-loop",
+            "reproduction_command": entry["reproduction_command"],
             "stage_count": max(run["stage_count"] for run in entry["runs"]),
             "time_step": plane.dt,
             "timeline_end": timeline_end(entry["runs"]),
@@ -823,7 +990,7 @@ def build(capture_root: Path, destination: Path | None = None) -> dict[str, Any]
         (figure_dir / f"{entry['id']}.html").write_text(_html_page(entry, plane), encoding="utf-8")
         index["figures"].append({key: entry[key] for key in (
             "id", "availability", "href", "plotted_data_href", "svg_href", "png_href",
-            "title", "task_id", "task_sha256", "source_commit", "profile_id",
+            "title", "task_id", "task_sha256", "source_commit", "source_commits", "profile_id", "profile_ids",
             "stage_count", "time_step", "timeline_end",
             "coordinate_transform", "layer_scopes", "missing_layers", "comparison_coverage_gaps",
             "shape_coverage_gaps", "raw_record_refs", "reproduction_command")})
@@ -833,16 +1000,40 @@ def build(capture_root: Path, destination: Path | None = None) -> dict[str, Any]
     return index
 
 
+def validate_attempt_selection(selection: dict[str, tuple[str, ...]]) -> None:
+    if not selection:
+        raise ValueError("select at least one case and attempt")
+    for case, ids in selection.items():
+        if case not in PLANES or not ids or len(set(ids)) != len(ids):
+            raise ValueError(f"invalid case or duplicate/empty attempts: {case}")
+        if any(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", item) is None for item in ids):
+            raise ValueError("attempt IDs must be single safe path components")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--capture-root", type=Path,
                         default=Path(os.environ["CSL_CLOSED_LOOP_CAPTURE_ROOT"])
                         if os.environ.get("CSL_CLOSED_LOOP_CAPTURE_ROOT") else None)
     parser.add_argument("--output", type=Path, default=Path(__file__).resolve().parents[2] / "docs/examples/closed-loop")
+    parser.add_argument("--attempt", action="append", default=[], metavar="CASE=ATTEMPT",
+                        help="render only explicitly selected saved attempts; repeat for comparisons")
     args = parser.parse_args()
     if args.capture_root is None:
         parser.error("provide --capture-root or set CSL_CLOSED_LOOP_CAPTURE_ROOT")
-    index = build(args.capture_root, args.output)
+    selection: dict[str, tuple[str, ...]] | None = None
+    if args.attempt:
+        selection = {}
+        for value in args.attempt:
+            case, separator, attempt = value.partition("=")
+            if not separator:
+                parser.error("--attempt requires CASE=ATTEMPT")
+            selection[case] = (*selection.get(case, ()), attempt)
+        try:
+            validate_attempt_selection(selection)
+        except ValueError as error:
+            parser.error(str(error))
+    index = build(args.capture_root, args.output, attempts=selection)
     print(f"wrote {len(index['figures'])} recorded figure entries to {args.output}")
     return 0
 

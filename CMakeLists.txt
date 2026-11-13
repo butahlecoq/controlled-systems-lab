@@ -160,6 +160,17 @@ target_compile_definitions(csl_closed_loop_native_policy PRIVATE
   CSL_NATIVE_BUILD_TYPE="${CMAKE_BUILD_TYPE}")
 target_include_directories(csl_closed_loop_native_policy SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
 set_target_properties(csl_closed_loop_native_policy PROPERTIES CXX_EXTENSIONS OFF)
+if(BUILD_TESTING)
+  find_program(CSL_NATIVE_FRAME_TEST_PYTHON NAMES python3)
+  if(CSL_NATIVE_FRAME_TEST_PYTHON)
+    add_test(NAME native_parallelotope_frame_serialization
+      COMMAND ${CMAKE_COMMAND} -E env
+        "CSL_NATIVE_POLICY_BRIDGE=$<TARGET_FILE:csl_closed_loop_native_policy>"
+        ${CSL_NATIVE_FRAME_TEST_PYTHON}
+        ${PROJECT_SOURCE_DIR}/tests/reporting/test_native_parallelotope_frame_serialization.py)
+    set_tests_properties(native_parallelotope_frame_serialization PROPERTIES TIMEOUT 30)
+  endif()
+endif()
 include(cmake/OptionalReports.cmake)
 include(cmake/Package.cmake)
 if(BUILD_TESTING)

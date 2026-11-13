@@ -1101,6 +1101,15 @@
       "disposition": "analytic-reference-checked-saved-run-renderer"
     },
     {
+      "source": "scripts/reports/native_fixed_tail_geometry.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "syn-nl-lv-01-plane-0.svg"
+      ],
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Reads authenticated A6 native fixed-tail archives and saved full-state projection receipts. Displays matched-family carriers F, conditional inner B and the recorded full-state identity I=F∩B=B, with affine candidates and separate nonlinear execution; no controller run, global backward set or nonlinear certificate."
+    },
+    {
       "source": "scripts/reports/native_parallelotope_functional.py",
       "signal_count": 7,
       "asset_name_literals": [
@@ -1422,6 +1431,16 @@
       ],
       "disposition": "publication-validation-or-frozen-route",
       "role_and_disposition_reason": "Authenticates the source-bound four-state affine capture and copies its raw record, model manifest, lesson and derived terminal projection into the Pages gallery; no native propagation or numerical analysis runs during staging."
+    },
+    {
+      "source": "scripts/reports/stage_buryatia_volterra.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "buryatia-volterra-affine-2d-terminal-superseded-v1.svg",
+        "buryatia-volterra-affine-2d-terminal.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route",
+      "role_and_disposition_reason": "Authenticates the frozen v2 manifest and native 35a708df producer identity, then copies all current and superseded two-state affine lesson assets byte exactly into the Pages gallery; no numerical execution or historical relabelling."
     },
     {
       "source": "scripts/reports/stage_env717.py",
@@ -1905,6 +1924,15 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_native_extended_models.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "spatial-flight-plane-1-screen.svg",
+        "stages-6-x1-x3-screen.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_native_flexible_pitch.py",
       "signal_count": 1,
       "asset_name_literals": [
@@ -1937,8 +1965,7 @@
         "nominal-quadratic-history-2d.svg",
         "nominal_quadratic_history_2d.svg"
       ],
-      "disposition": "saved-data-illustration-renderer",
-      "role_and_disposition_reason": "Stages an analytic two-state reachable-line diagram, rounded values transcribed from the committed native example output, and a source-bound binary check record using the shared Omarchy page template and stylesheet. It runs no solver and does not present the diagram or CSV as raw solver data."
+      "disposition": "publication-validation-or-frozen-route"
     },
     {
       "source": "scripts/reports/stage_projection_figures.py",
@@ -4145,11 +4172,6 @@
         "lotka-volterra-sampled-v1.svg",
         "lotka-volterra-sampled-v1.png",
         "lotka-volterra-sampled-v1-export.json",
-        "nominal-quadratic-history-2d.html",
-        "nominal-quadratic-history-2d.svg",
-        "nominal_quadratic_history_2d.csv",
-        "nominal_quadratic_history_2d-output.txt",
-        "nominal-quadratic-history-2d.json",
         "app02-diamond-v1.html",
         "app02-diamond-v1.svg",
         "app02-diamond-v1.png",
@@ -4223,6 +4245,14 @@
         "native-model-tracking-first-pass-v1/checks/independent_results.csv",
         "native-model-tracking-first-pass-v1/checks/full_state_trajectory_checked.csv",
         "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip",
+        "buryatia-volterra-affine-2d-manifest.json",
+        "buryatia-volterra-affine-2d.html",
+        "buryatia-volterra-affine-2d-records.json",
+        "buryatia-volterra-affine-2d-terminal.svg",
+        "buryatia-volterra-affine-2d-records-superseded-v1.json",
+        "buryatia-volterra-affine-2d-superseded-v1.html",
+        "buryatia-volterra-affine-2d-terminal-superseded-v1.svg",
+        "buryatia-volterra-affine-2d-manifest-superseded-v1.json",
         "geometry-optimization-v1.html",
         "geometry-opt/geo02/figure.svg",
         "geometry-opt/geo02/figure.png",

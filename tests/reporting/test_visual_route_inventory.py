@@ -19,18 +19,6 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertEqual(delivery["disposition"],"analytic-reference-checked-saved-run-renderer")
         self.assertEqual(inventory["schema"],"csl.visual-route-inventory/1")
         producers={entry["source"]:entry for entry in inventory["producers_and_routes"]}
-        history_stager=producers["scripts/reports/stage_nominal_quadratic_history.py"]
-        self.assertEqual(history_stager["disposition"],"saved-data-illustration-renderer")
-        self.assertIn("as raw solver data",history_stager["role_and_disposition_reason"])
-        gallery_route=next(route for route in inventory["gallery_routes"]
-                           if route["route"]=="examples/index.html")
-        self.assertIn("nominal-quadratic-history-2d.html",gallery_route["assets"])
-        self.assertIn("nominal_quadratic_history_2d.csv",gallery_route["assets"])
-        tracking_route=next(route for route in inventory["gallery_routes"]
-                            if route["route"]=="examples/native-model-tracking-first-pass-v1/index.html")
-        self.assertIn("native-model-tracking-first-pass-v1/capture-manifest.json",tracking_route["assets"])
-        self.assertIn("scripts/reports/stage_native_model_tracking_first_pass.py",
-                      [entry["source"] for entry in inventory["producers_and_routes"]])
         tube_renderer=producers["scripts/reports/nominal_tube_figure.py"]
         self.assertEqual(tube_renderer["disposition"],"saved-data-illustration-renderer")
         self.assertIn("full-state H rows F, B and I",tube_renderer["role_and_disposition_reason"])
@@ -272,12 +260,14 @@ class VisualRouteInventoryTests(unittest.TestCase):
         self.assertTrue(any(name.endswith("terminal-projections.svg")
                             for entry in routes.values() for name in entry["assets"]))
         self.assertEqual(inventory["gallery_routes"][0]["route"],"examples/index.html")
+        tracking_route=next(route for route in inventory["gallery_routes"]
+                            if route["route"]=="examples/native-model-tracking-first-pass-v1/index.html")
+        self.assertIn("native-model-tracking-first-pass-v1/source-binding.json",tracking_route["assets"])
+        self.assertIn("scripts/reports/stage_native_model_tracking_first_pass.py",
+                      [entry["source"] for entry in inventory["producers_and_routes"]])
         gallery_assets=set(inventory["gallery_routes"][0]["assets"])
         self.assertEqual(gallery_assets,{
             "examples.css", "fuel-b06-viz06.html", "fuel-b06-viz06-source.json",
-            "nominal-quadratic-history-2d.html", "nominal-quadratic-history-2d.svg",
-            "nominal-quadratic-history-2d.json", "nominal_quadratic_history_2d.csv",
-            "nominal_quadratic_history_2d-output.txt",
             "adaptive-ode-replay.csv", "adaptive-ode-replay.html",
             "adaptive-ode-replay.json", "adaptive-ode-replay.svg",
             "fuel-b06-viz06-export.json", "fuel-b06-viz03.html", "fuel-b06-viz06-before.svg",
@@ -333,6 +323,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "native-model-tracking-first-pass-v1/checks/independent_results.csv",
             "native-model-tracking-first-pass-v1/checks/full_state_trajectory_checked.csv",
             "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip",
+            *audit_visual_routes.stage_buryatia_volterra.asset_paths(),
             *audit_visual_routes.geometry_companion_assets(),
             *audit_visual_routes.viz10_companion_assets(),
             *audit_visual_routes.control_witness_companions.asset_paths()})

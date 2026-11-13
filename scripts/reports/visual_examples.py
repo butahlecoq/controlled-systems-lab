@@ -19,17 +19,19 @@ import control_witness_companions
 import feedback_geometry_example
 import fixed_tail_example
 import native_fixed_tail_episode_report
+import native_fixed_tail_geometry
 import geometry_opt_companions
 import report_data
 import site_additions
 import site_design
 import stage_ext07 as ext07_reports
 import stage_buryatia_dim4
+import stage_buryatia_volterra
+import stage_native_extended_models
 import stage_native_model_catalogue
 import stage_native_discrete_models
 import stage_native_model_tracking_first_pass
 import stage_native_flexible_pitch
-import stage_nominal_quadratic_history
 import visual_illustrations
 import visual_example_geometry as geometry_examples
 import visual_example_fuel_layers
@@ -896,6 +898,9 @@ def build(catalog, site):
     buryatia_files, buryatia_inventory, buryatia_card = stage_buryatia_dim4.build(
         Path(__file__).resolve().parents[2])
     saved_figures += buryatia_card
+    volterra_files, volterra_inventory, volterra_card = stage_buryatia_volterra.build(
+        Path(__file__).resolve().parents[2])
+    saved_figures += volterra_card
     pitch_files, pitch_inventory, pitch_cards = stage_native_flexible_pitch.build(
         Path(__file__).resolve().parents[2])
     saved_figures += pitch_cards
@@ -905,9 +910,9 @@ def build(catalog, site):
     tracking_files, tracking_inventory, tracking_card = stage_native_model_tracking_first_pass.build(
         Path(__file__).resolve().parents[2])
     saved_figures += tracking_card
-    history_files, history_inventory, history_card = stage_nominal_quadratic_history.build(
+    extended_files, extended_inventory, extended_cards = stage_native_extended_models.build(
         Path(__file__).resolve().parents[2])
-    saved_figures += history_card
+    saved_figures += extended_cards
     saved_figures += ('<article class="saved-figure" id="history-cost-2d-v1"><p class="eyebrow">Nominal optimization · Saved-data illustration</p>'
         '<h3><a href="history-cost-2d-v1/index.html">Full-history cost moves the 2D optimum</a></h3>'
         '<a href="history-cost-2d-v1/index.html"><img src="history-cost-2d-v1/history-cost-2d.svg" alt="Feasible control square, terminal-only optimum at (1,0), and full-cost HiGHS optimum at (1/3,0) with both objective contours"></a>'
@@ -945,13 +950,16 @@ def build(catalog, site):
     outputs.update(fixed_tail_assets)
     episode_assets, episode_entry, episode_card = native_fixed_tail_episode_report.build()
     outputs.update(episode_assets)
+    episode_geometry_assets, episode_geometry_entry, episode_geometry_card = native_fixed_tail_geometry.build(episode_assets)
+    outputs.update(episode_geometry_assets)
     outputs.update(analytic_files)
     outputs.update(native_files)
     outputs.update(buryatia_files)
+    outputs.update(volterra_files)
     outputs.update(pitch_files)
     outputs.update(discrete_files)
     outputs.update(tracking_files)
-    outputs.update(history_files)
+    outputs.update(extended_files)
     repository_root = Path(__file__).resolve().parents[2]
     cost_page_root = repository_root / "docs/examples/history-cost-2d-v1"
     cost_evidence_root = repository_root / "reports/algorithm-results/history-cost-2d-v1"
@@ -998,7 +1006,7 @@ def build(catalog, site):
         _, geometry_inventory, geometry_assets = geometry_opt_companions.build(geometry_root)
         for asset in geometry_assets:
             outputs[asset] = (geometry_root / asset).read_bytes()
-    gallery_inventory = [feedback_entry, fixed_tail_entry, episode_entry, *tracking_inventory, {"family": "Nominal optimization · saved-data illustration",
+    gallery_inventory = [feedback_entry, fixed_tail_entry, episode_entry, episode_geometry_entry, {"family": "Nominal optimization · saved-data illustration",
         "title": "Full-history cost moves the 2D optimum",
         "status": "saved-data-illustration", "anchor": "history-cost-2d-v1",
         "page": "history-cost-2d-v1/index.html", "figure": "history-cost-2d-v1/history-cost-2d.svg",
@@ -1059,10 +1067,11 @@ def build(catalog, site):
     gallery_inventory.extend(fuel_layer_inventory)
     gallery_inventory.extend(native_inventory)
     gallery_inventory.extend(buryatia_inventory)
+    gallery_inventory.extend(volterra_inventory)
     gallery_inventory.extend(pitch_inventory)
     gallery_inventory.extend(discrete_inventory)
     gallery_inventory.extend(tracking_inventory)
-    gallery_inventory.extend(history_inventory)
+    gallery_inventory.extend(extended_inventory)
     geometry_first = geometry_inventory[0]
     gallery_inventory.append({"family": "Geometry and optimization",
                               "title": "Readable geometry and timing figures",
@@ -1277,7 +1286,7 @@ def build(catalog, site):
             '<h2>More algorithms, from saved evidence</h2><p>Most displayed figures are published inside their original reports. '
             'Cards marked “Saved-data companion” are generated into this gallery from frozen records; they do not change those reports. '
             'Open a report for exact inputs, answers, reproduction commands, provenance and evidence limits.</p>'
-            '<div class="saved-grid">' + saved_figures + feedback_card + fixed_tail_card + episode_card +
+            '<div class="saved-grid">' + saved_figures + feedback_card + fixed_tail_card + episode_card + episode_geometry_card +
             '<article class="saved-figure" id="geometry-optimization-companions"><p class="eyebrow">Geometry and optimization · Saved-data companion</p>'
             '<h3>Readable geometry and timing figures</h3><p>Eleven companions replot frozen report records with the shared quantitative axis policy. '
             'The geometry examples use saved 2D coordinates; timing charts show saved medians and observed ranges.</p>'

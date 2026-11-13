@@ -122,6 +122,7 @@ csl_example(nominal_linear_exact_2d CSL::strategy_a CSL::highs_lp CSL::highs_con
 csl_example(source_index_geometry_2d CSL::affine_sum)
 csl_example(continuous_policy CSL::controllers CSL::model)
 csl_example(adaptive_ode_replay CSL::simulation)
+csl_example(native_slide50_reachability CSL::model_catalogue CSL::generator_adapter CSL::quickhull_2d)
 csl_example(native_model_catalogue CSL::model_catalogue CSL::generator_adapter CSL::quickhull_2d)
 csl_example(native_four_state_reachability CSL::model_catalogue CSL::geometry_generators CSL::quickhull_2d)
 csl_example(native_discrete_models CSL::model_catalogue)
@@ -175,6 +176,7 @@ if(TARGET CSL::highs_convex AND TARGET CSL::model_catalogue)
   set_tests_properties(quadcopter_mpc_source21_feedback PROPERTIES TIMEOUT 60)
 endif()
 csl_example(native_flexible_pitch CSL::model_catalogue CSL::geometry_generators CSL::quickhull_2d)
+csl_example(native_spatial_flight CSL::model_catalogue CSL::geometry_generators CSL::quickhull_2d)
 
 function(example_check name executable argument status output)
   if(NOT TARGET ${executable})
@@ -188,6 +190,8 @@ function(example_check name executable argument status output)
 endfunction()
 
 example_check(lp_triangle registered_lp "" 0 "x=0 y=1 original_cost=5")
+example_check(native_slide50_authored_box native_slide50_reachability "" 0
+  "Slide50 authored box: both horizon variants and all full-state corner checks passed")
 example_check(native_catalogue_source_cases native_model_catalogue "" 0
   "Native model catalogue: 2 source cases and all full-state corner checks passed")
 example_check(native_four_state_source_case native_four_state_reachability "" 0
@@ -196,8 +200,11 @@ example_check(native_discrete_source_models native_discrete_models "" 0
   "Native discrete model data: 35 models")
 example_check(native_flexible_pitch_synthetic_ladder native_flexible_pitch "" 0
   "Native flexible pitch: 3 synthetic physical models; support_checks=4920 projection_checks=47232")
+example_check(native_spatial_flight_synthetic_deviation_reachability native_spatial_flight "" 0
+  "Native spatial flight: 20 transitions.*projection_planes=6 full_state_coordinates_covered=9")
 if(TARGET native_flexible_pitch)
-  set_tests_properties(native_flexible_pitch_synthetic_ladder PROPERTIES TIMEOUT 600)
+  set_tests_properties(native_flexible_pitch_synthetic_ladder
+    native_spatial_flight_synthetic_deviation_reachability PROPERTIES TIMEOUT 600)
 endif()
 example_check(convex_original_norm registered_convex "" 0 "original_cost=4.1231056.*squared_cost=17")
 example_check(resolved_history resolved_scenario "" 0 "states=0,0.25,1 controls=0.25,0.75 original_cost=0")

@@ -1,0 +1,15 @@
+{
+  "schema": "csl.published-route-baseline-fixture/1",
+  "baseline": {
+    "artifact_tar_sha256": "8fd7e357923353b3ee68e1d4d1aa3cc33b9c4c456932eeffc95be08a5e93a338",
+    "run_url": "https://github.com/butahlecoq/controlled-systems-lab/actions/runs/43197030720",
+    "source_commit": "6603dbda00ba02332035ba8320b92889463ca693"
+  },
+  "routes_sha256": {
+    "learn/closed-loop-semantics.html": "d733e34cf39ce36152a4d213c79521d21f5c3cf8d018c811e5f87377647b7082",
+    "learn/controller-composition.html": "95310518ac37b15e43dd7693924d91d1941704ed3888be24df99208667f12b73",
+    "learn/index.html": "eac057f7d0f26bf53ce1a92076dd54b7af2999284c4108b398dcb682157bab03",
+    "learn/representation-consumers.html": "c814c5b7ab688a3cedb2336a383eaa96d75419b62b5fc8090d9db81c9e3b9af0",
+    "learn/set-operations.html": "bd4a6afef31c26d6f72a7e14680d7bf776ed9c169ce9d7cc498b85bed9315aa5"
+  }
+}

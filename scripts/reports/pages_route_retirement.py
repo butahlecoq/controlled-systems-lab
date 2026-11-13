@@ -50,6 +50,14 @@ BARE_ROUTE_REPLACEMENTS = {
 EXAMPLE_ROUTE_PRODUCERS = {
     "examples/native-model-tracking-first-pass-v1/index.html": ["scripts/reports/stage_native_model_tracking_first_pass.py", "scripts/reports/visual_examples.py"],
     "examples/native-model-tracking-first-pass-v1/figures/model-21-state-3-9.svg": ["scripts/reports/stage_native_model_tracking_first_pass.py", "reports/algorithm-results/native-model-tracking-first-pass-v1/visual-example-20261113T184921Z/figures/model-21-state-3-9.svg"],
+    "examples/native-fixed-tail-geometry-a6/index.html": [
+        "scripts/reports/native_fixed_tail_geometry.py",
+        "scripts/reports/native_fixed_tail_episode_report.py",
+        "scripts/reports/assets/native-fixed-tail-geometry/index.html",
+        "scripts/reports/assets/native-fixed-tail-geometry/geometry.js",
+        "scripts/reports/assets/native-fixed-tail-geometry/geometry.css"],
+    "examples/native-slide50-reachability.html": ["scripts/reports/stage_native_extended_models.py", "docs/examples/native-slide50-reachability.html"],
+    "examples/native-spatial-flight.html": ["scripts/reports/stage_native_extended_models.py", "docs/examples/native-spatial-flight.html"],
     "examples/native-discrete-models.html": ["scripts/reports/stage_native_discrete_models.py", "docs/examples/native-discrete-models.html"],
     "examples/native-quadcopter-mpc.html": ["scripts/reports/stage_native_discrete_models.py", "scripts/reports/native_discrete_models.py", "docs/examples/native-quadcopter-mpc.html"],
     "examples/adaptive-ode-replay.html": ["scripts/reports/render_adaptive_ode_example.py"],
@@ -59,6 +67,28 @@ EXAMPLE_ROUTE_PRODUCERS = {
     "examples/app03-zonotope-v1.html": ["scripts/reports/approx_extension_companions.py"],
     "examples/app04-square-v1.html": ["scripts/reports/approx_extension_companions.py"],
     "examples/b04-reference-trajectory-projections.html": ["scripts/reports/mpc01/b04_projection_example.py"],
+    "examples/buryatia-volterra-affine-2d.html": [
+        "scripts/reports/stage_buryatia_volterra.py",
+        "docs/examples/buryatia-volterra-affine-2d-manifest.json",
+        "docs/examples/buryatia-volterra-affine-2d.html",
+        "docs/examples/buryatia-volterra-affine-2d-records.json",
+        "docs/examples/buryatia-volterra-affine-2d-terminal.svg",
+        "docs/examples/buryatia-volterra-affine-2d-records-superseded-v1.json",
+        "docs/examples/buryatia-volterra-affine-2d-superseded-v1.html",
+        "docs/examples/buryatia-volterra-affine-2d-terminal-superseded-v1.svg",
+        "docs/examples/buryatia-volterra-affine-2d-manifest-superseded-v1.json",
+    ],
+    "examples/buryatia-volterra-affine-2d-superseded-v1.html": [
+        "scripts/reports/stage_buryatia_volterra.py",
+        "docs/examples/buryatia-volterra-affine-2d-manifest.json",
+        "docs/examples/buryatia-volterra-affine-2d.html",
+        "docs/examples/buryatia-volterra-affine-2d-records.json",
+        "docs/examples/buryatia-volterra-affine-2d-terminal.svg",
+        "docs/examples/buryatia-volterra-affine-2d-records-superseded-v1.json",
+        "docs/examples/buryatia-volterra-affine-2d-superseded-v1.html",
+        "docs/examples/buryatia-volterra-affine-2d-terminal-superseded-v1.svg",
+        "docs/examples/buryatia-volterra-affine-2d-manifest-superseded-v1.json",
+    ],
     "examples/buryatia-dim4-literal-affine-v1/index.html": [
         "scripts/reports/stage_buryatia_dim4.py",
         "docs/examples/buryatia-dim4-literal-affine.html",
@@ -141,6 +171,8 @@ STANDALONE_REPORT_ROUTE_PRODUCERS = {
 }
 
 GALLERY_INDEX_PRODUCERS = [
+    "scripts/reports/stage_buryatia_volterra.py",
+    "scripts/reports/stage_native_extended_models.py",
     "scripts/reports/stage_native_discrete_models.py",
     "scripts/reports/approx_extension_companions.py",
     "scripts/reports/control_witness_companions.py",
@@ -308,6 +340,10 @@ def _producer_record(site: Path, route: str, catalog: dict[str, dict], source_id
         if route == "examples/index.html":
             files.extend(GALLERY_INDEX_PRODUCERS)
             return {"files": files, "owner_status": "gallery-aggregation-pipeline"}
+        if route.startswith("examples/native-extended-models-v1/"):
+            files.extend(["scripts/reports/stage_native_extended_models.py",
+                          "scripts/reports/frozen_native_bundle.py",
+                          "reports/algorithm-results/native-extended-models-v1/manifest.json"])
         files.extend(EXAMPLE_ROUTE_PRODUCERS.get(route, []))
         return {"files": files, "owner_status": "gallery-aggregator"}
     if top == "docs":

@@ -31,6 +31,124 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def source_bound_capability_candidates(root: Path) -> list[dict]:
+    """Discover current closed-loop factories from their source-owned manifests.
+
+    Manifest admission is deliberately kept separate from preparation of a
+    local executable. This discovery validates source/task/provider bindings;
+    it does not construct a policy worker or claim that a runtime is prepared.
+    """
+    import sys
+
+    closed_loop = root / "benchmarks/reporting/closed_loop"
+    if str(closed_loop) not in sys.path:
+        sys.path.insert(0, str(closed_loop))
+    from capabilities import validate_manifest
+
+    from contracts import load_task
+
+    factories = {
+        "native_graph_policy": "native_graph_policy:create_policy",
+        "continuous_history": "history_policy:create_policy",
+        "native_fixed_tail": "native_fixed_tail_policy:create_policy",
+    }
+    import importlib
+
+    for adapter, factory in factories.items():
+        module_name, attribute = factory.split(":")
+        if not callable(getattr(importlib.import_module(module_name), attribute, None)):
+            raise ValueError(f"registered policy factory is unavailable: {adapter} -> {factory}")
+
+    paths = (
+        root / "docs/catalogue/closed-loop-native-capabilities-v1.json",
+        root / "docs/catalogue/closed-loop-history-capabilities-v1.json",
+    )
+    output = []
+    for path in paths:
+        manifest = validate_manifest(manifest_path=path)
+        for graph in manifest["graphs"]:
+            controller = graph["controller"]
+            task_name = (
+                graph["task_id"].split("/")[0]
+                if graph["task_id"].startswith("syn-")
+                else "earth-orbit"
+            )
+            task = load_task(task_name)
+            if controller["policy_factory"] != factories.get(controller["adapter"]):
+                raise ValueError(
+                    "source capability adapter does not select its registered policy factory: "
+                    f"{controller['adapter']} -> {controller['policy_factory']}"
+                )
+            output.append(
+                {
+                    "graph_id": graph["graph_id"],
+                    "graph_fingerprint": graph["graph_fingerprint"],
+                    "status": "preparation_not_attempted",
+                    "task_id": graph["task_id"],
+                    "task_contract_sha256": graph["task_sha256"],
+                    "model_id": graph["model_id"],
+                    "model_dimension": len(task["model"]["states"]),
+                    "control_dimension": len(task["model"]["controls"]),
+                    "objective_id": graph["objective_id"],
+                    "action_profile_id": graph["action_profile_id"],
+                    "action_domain_id": graph["action_profile_id"],
+                    "action_domain_kind": (
+                        "finite" if controller["adapter"] == "native_graph_policy" else "continuous"
+                    ),
+                    "controller_route": controller["adapter"],
+                    "controller_id": controller["id"],
+                    "controller_factory": controller["policy_factory"],
+                    "factory_options": controller.get("factory_options", {}),
+                    "module_tuple": {
+                        "controller": controller,
+                        "role_bindings": graph.get("role_bindings", {}),
+                        "operation_roles": graph.get("operation_roles", {}),
+                    },
+                    "source_owned_graph": graph,
+                    "source_files": graph["source_files"],
+                    "policy_semantics": {
+                        "observation": task["episode"]["closed_loop"]["observation"],
+                        "apply": task["episode"]["closed_loop"]["apply"],
+                        "horizon": task["episode"]["closed_loop"]["optimization_horizon"],
+                        "failure": task["episode"]["closed_loop"]["failure"],
+                    },
+                    "catalogue_source": {
+                        "manifest_id": manifest["manifest_id"],
+                        "manifest_path": str(path.relative_to(root)),
+                        "manifest_sha256": sha256(path),
+                        "declared_admission": graph["admission"],
+                        "factory_registration": "registered",
+                        "runtime_preparation": "not_attempted",
+                        "runtime_binary": "not_inspected",
+                    },
+                    "first_unmet": None,
+                }
+            )
+    identities = [
+        (
+            row["task_id"],
+            row["action_profile_id"],
+            row["objective_id"],
+            row["controller_id"],
+            json.dumps(row["module_tuple"], sort_keys=True, separators=(",", ":")),
+        )
+        for row in output
+    ]
+    if len(identities) != len(set(identities)):
+        raise ValueError("source-bound controller capability identities are not unique")
+    return output
+
+
+def controller_catalogue(historical_rows: list[dict], root: Path) -> list[dict]:
+    """Retain the historical route expansion and append current factory rows."""
+    rows = [*historical_rows, *source_bound_capability_candidates(root)]
+    graph_ids = [row["graph_id"] for row in rows]
+    fingerprints = [row["graph_fingerprint"] for row in rows]
+    if len(graph_ids) != len(set(graph_ids)) or len(fingerprints) != len(set(fingerprints)):
+        raise ValueError("controller candidate identities collide across catalogue sources")
+    return rows
+
+
 def limited_process() -> None:
     resource.setrlimit(resource.RLIMIT_CPU, (300, 300))
     resource.setrlimit(resource.RLIMIT_AS, (8 * 1024**3, 8 * 1024**3))
@@ -462,7 +580,8 @@ def predecessor_graphs(
     ]
     selected_tasks = {}
     for row in controller_rows:
-        selected_tasks[row["task_id"]] = row
+        if row.get("controller_route") == "csl.synthesis.reach-back":
+            selected_tasks[row["task_id"]] = row
     output = []
     for task in selected_tasks.values():
         for representation, (route_symbol, dimension_contract) in representation_routes.items():
@@ -676,6 +795,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--native-cli", type=Path, required=True)
     parser.add_argument(
+        "--native-cli-source-commit",
+        required=True,
+        help="exact source commit used to build --native-cli; provenance is recorded in the output",
+    )
+    parser.add_argument(
         "--mpc11-python",
         type=Path,
         required=True,
@@ -688,6 +812,10 @@ def main() -> int:
         / "docs/catalogue/module-composition-inventory-v1.json",
     )
     args = parser.parse_args()
+    if len(args.native_cli_source_commit) != 40 or any(
+        character not in "0123456789abcdef" for character in args.native_cli_source_commit
+    ):
+        parser.error("--native-cli-source-commit must be a full lowercase Git commit hash")
     root = Path(__file__).resolve().parents[2]
     inventory_path = args.inventory.resolve()
     native_process = subprocess.run(
@@ -731,6 +859,8 @@ def main() -> int:
             assert row["status"] == "backend_unavailable"
             assert row["first_unmet"]["field"] and row["first_unmet"]["reason"]
     controllers = controller_graphs(root, inventory, receipts, native["compiled_backends"])
+    historical_controller_count = len(controllers)
+    controllers = controller_catalogue(controllers, root)
     predecessors = predecessor_graphs(controllers, inventory, native["compiled_backends"])
     contract_records = [
         json.loads((root / f"docs/contracts/closed-loop/{name}.json").read_text())
@@ -740,12 +870,24 @@ def main() -> int:
     task_hashes = {row["task_id"]: row["task_contract_sha256"] for row in controllers}
     group1_references = group1_reference_graphs(contracts, task_hashes, inventory)
     group4_functions = group4_function_graphs(contracts, task_hashes, inventory)
-    assert len(controllers) == 3318
+    assert historical_controller_count == 3318
+    assert len(controllers) == 3383
     assert len(predecessors) == 45
+    current_source_commit = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=root, text=True
+    ).strip()
     output = {
         "schema": "csl.module-composition-output/2",
         "inventory": inventory,
         "native_component_evidence": native,
+        "native_component_tool": {
+            "binary_sha256": sha256(args.native_cli.resolve()),
+            "source_commit": args.native_cli_source_commit,
+            "compiled_backends": native["compiled_backends"],
+            "source_matches_catalogue_commit": args.native_cli_source_commit
+            == current_source_commit,
+            "current_source_commit": current_source_commit,
+        },
         "external_preparation_receipts": receipts,
         "closed_loop_controller_candidates": controllers,
         "closed_loop_predecessor_candidates": predecessors,
@@ -802,7 +944,7 @@ def main() -> int:
                 "solve_performed": False,
             },
         },
-        "scope": "finite source-supported graph universe with captured A and configured B dependencies expanded; no episode solve or benchmark was performed",
+        "scope": "Original finite source-supported graph universe with captured A and configured B dependencies expanded, plus current source-validated closed-loop factory manifests. Manifest admission is not local runtime preparation; no controller episode or benchmark was performed.",
     }
     print(json.dumps(output, sort_keys=True, indent=2))
     return 0
