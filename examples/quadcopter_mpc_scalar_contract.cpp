@@ -13,13 +13,34 @@ int main() try {
     const NominalProblem problem{
         {1,1,{1}}, {1,1,{1}}, {1,1,{1}}, {1,1,{1}}, {1,1,{1}},
         {0}, {1}, 2, {{-10,10}}, {{-10,10}}};
+    auto sample_task=problem;
+    sample_task.initial={0.25};
+    const Vector sample_states{0.25,0.65,0.45};
+    const Vector sample_controls{0.4,-0.2};
+    if(!source_history_feasible(sample_task,sample_states,sample_controls))
+        throw std::runtime_error("Independent source feasibility check rejected a hand-built history");
+    auto sample_program=compile_nominal_quadratic_history(make_task(sample_task));
+    if(!std::holds_alternative<ConvexProgram>(sample_program))
+        throw std::runtime_error("History compiler rejected the source21-shaped sample task");
+    const Vector sample_history{0.25,0.65,0.45,0.4,-0.2};
+    auto compiled_evaluation=evaluate_primal(std::get<ConvexProgram>(sample_program),sample_history,
+        {1e-9,1e-9},{{"source21-literal-cost-and-constraint-cross-check"},"1"});
+    if(!std::holds_alternative<ConvexPrimalEvaluation>(compiled_evaluation) ||
+       std::abs(std::get<ConvexPrimalEvaluation>(compiled_evaluation).original_objective-
+           evaluate_source_cost(sample_task,sample_states,sample_controls))>1e-9 ||
+       std::get<ConvexPrimalEvaluation>(compiled_evaluation).residuals.rows.violation>1e-9)
+        throw std::runtime_error("Compiled cost/constraints disagreed on an arbitrary source21-shaped history");
+    auto invalid_states=sample_states;
+    invalid_states[2]+=0.1;
+    if(source_history_feasible(sample_task,invalid_states,sample_controls))
+        throw std::runtime_error("Independent source feasibility check accepted a changed dynamics state");
     Registry<ConvexPort> registry;
     if (registry.add(std::get<Registration<ConvexPort>>(adapters::convex::make_highs_registration())))
         throw std::runtime_error("HiGHS registration failed");
     Requirements requirements;
     requirements.output.representation = {"csl.program-result.v1"};
     auto solve=[&](const NominalProblem& task) {
-        auto made=compile(task);
+        auto made=compile_nominal_quadratic_history(make_task(task));
         if(const auto* errors=std::get_if<Diagnostics>(&made)) {
             for(const auto& error:*errors) std::cerr<<error.field<<": "<<error.explanation<<'\n';
             throw std::runtime_error("scalar tracking QP rejected");

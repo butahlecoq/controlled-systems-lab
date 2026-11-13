@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 500" role="img" aria-labelledby="title description">
+  <title id="title">Interior-state tracking moves the first control on a reachable state line</title>
+  <desc id="description">For x one equals y one equals u zero, the control-only optimum is the origin. A quadratic penalty toward target (1,0) selects the reachable point (5/11,5/11).</desc>
+  <rect width="660" height="500" fill="#303129"/>
+  <g stroke="#504945" stroke-width="1">
+    <path d="M110 390H570 M110 310H570 M110 230H570 M110 150H570 M110 70H570"/>
+    <path d="M110 70V390 M202 70V390 M294 70V390 M386 70V390 M478 70V390 M570 70V390"/>
+  </g>
+  <g stroke="#d5c4a1" stroke-width="2" fill="none">
+    <path d="M110 405V54 M92 390H590"/>
+  </g>
+  <path d="M110 390L570 70" stroke="#b7b7af" stroke-width="4" stroke-dasharray="10 8"/>
+  <g fill="#f8f8f2" font-family="system-ui,sans-serif" font-size="16">
+    <text x="100" y="422">−1</text><text x="335" y="422">0</text><text x="560" y="422">1</text>
+    <text x="68" y="395">−1</text><text x="76" y="235">0</text><text x="77" y="78">1</text>
+    <text x="276" y="466">interior state coordinate x₁</text><text x="26" y="76">y₁</text>
+    <text x="387" y="117" fill="#b7b7af">reachable x₁ = y₁</text>
+    <text x="135" y="373" fill="#66d9ef">control only: (0,0)</text>
+    <text x="365" y="242" fill="#a6e22e">with running Q: (5/11,5/11)</text>
+    <text x="477" y="378" fill="#fd971f">target (1,0)</text>
+  </g>
+  <circle cx="340" cy="230" r="8" fill="#66d9ef" stroke="#272822" stroke-width="3"/>
+  <circle cx="444.55" cy="157.27" r="9" fill="#a6e22e" stroke="#272822" stroke-width="3"/>
+  <circle cx="570" cy="230" r="9" fill="#fd971f" stroke="#f8f8f2" stroke-width="3"/>
+</svg>

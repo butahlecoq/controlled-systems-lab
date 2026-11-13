@@ -57,7 +57,7 @@ int main(int argc,char** argv) try {
     double total_realized_cost=0;
     for(std::size_t iteration=0;iteration<replans;++iteration) {
         const auto observed_state=task.initial;
-        auto compiled=compile(task);
+        auto compiled=compile_nominal_quadratic_history(make_task(task));
         if(!std::holds_alternative<ConvexProgram>(compiled)) throw std::runtime_error("MPC quadratic program rejected");
         auto program=std::get<ConvexProgram>(std::move(compiled));
         if(!previous_primal.empty()) {
@@ -118,6 +118,8 @@ int main(int argc,char** argv) try {
         const auto& z=*result->primal;
         previous_primal=z;
         const auto state_count=(horizon+1)*nx, control_offset=state_count;
+        if(!source_history_feasible(task,std::span(z).first(state_count),std::span(z).subspan(control_offset)))
+            throw std::runtime_error("Independent source21 dynamics/bounds check rejected the solver history");
         const double physical_cost=evaluate_source_cost(task,std::span(z).first(state_count),std::span(z).subspan(control_offset));
         auto checked=evaluate_primal(program,z,{1e-8,1e-8},{{"source21-independent-plan-cost"},"1"});
         if(!std::holds_alternative<ConvexPrimalEvaluation>(checked) ||

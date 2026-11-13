@@ -33,14 +33,19 @@ class ExtendedNativePublicationTests(unittest.TestCase):
                         files[native.ROUTE + "/" + path.relative_to(bundle).as_posix()],
                         path.read_bytes(),
                     )
-        self.assertEqual({entry["anchor"] for entry in entries}, {
-            "native-slide50-reachability", "native-spatial-flight",
-        })
+        self.assertEqual(
+            {entry["anchor"] for entry in entries},
+            {
+                "native-slide50-reachability",
+                "native-spatial-flight",
+            },
+        )
         for entry in entries:
             self.assertIn('id="' + entry["anchor"] + '"', cards)
             self.assertIn(entry["figure"], files)
-            self.assertEqual(files[entry["page"]],
-                             (ROOT / "docs/examples" / entry["page"]).read_bytes())
+            self.assertEqual(
+                files[entry["page"]], (ROOT / "docs/examples" / entry["page"]).read_bytes()
+            )
 
     def test_canonical_and_offline_lessons_have_resolvable_local_downloads(self):
         files, _, _ = native.build(ROOT)
@@ -57,8 +62,10 @@ class ExtendedNativePublicationTests(unittest.TestCase):
                 path = posixpath.normpath(posixpath.join(posixpath.dirname(page), parts.path))
                 with self.subTest(page=page, reference=reference):
                     self.assertFalse(path.startswith("../"))
-                    self.assertTrue(path in files or path in shared_pages,
-                                    "missing published local asset: " + path)
+                    self.assertTrue(
+                        path in files or path in shared_pages,
+                        "missing published local asset: " + path,
+                    )
 
 
 if __name__ == "__main__":

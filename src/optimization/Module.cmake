@@ -26,6 +26,9 @@ csl_add_library(csl_convex STATIC src/optimization/convex_backend.cpp)
 
 target_link_libraries(csl_convex PUBLIC CSL::objectives CSL::optimization)
 
+csl_add_library(csl_nominal_quadratic_history STATIC src/optimization/nominal_quadratic_history.cpp)
+target_link_libraries(csl_nominal_quadratic_history PUBLIC CSL::convex)
+
 csl_add_library(csl_zoutendijk_projection STATIC src/optimization/zoutendijk/projection.cpp)
 
 target_link_libraries(csl_zoutendijk_projection PUBLIC CSL::optimization)
