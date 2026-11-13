@@ -48,6 +48,12 @@ BARE_ROUTE_REPLACEMENTS = {
 # Gallery pages are assembled by visual_examples.py. These additional sources
 # own page content or figures for the routes they contribute.
 EXAMPLE_ROUTE_PRODUCERS = {
+    "examples/native-fixed-tail-geometry-a6/index.html": [
+        "scripts/reports/native_fixed_tail_geometry.py",
+        "scripts/reports/native_fixed_tail_episode_report.py",
+        "scripts/reports/assets/native-fixed-tail-geometry/index.html",
+        "scripts/reports/assets/native-fixed-tail-geometry/geometry.js",
+        "scripts/reports/assets/native-fixed-tail-geometry/geometry.css"],
     "examples/native-slide50-reachability.html": ["scripts/reports/stage_native_extended_models.py", "docs/examples/native-slide50-reachability.html"],
     "examples/native-spatial-flight.html": ["scripts/reports/stage_native_extended_models.py", "docs/examples/native-spatial-flight.html"],
     "examples/native-discrete-models.html": ["scripts/reports/stage_native_discrete_models.py", "docs/examples/native-discrete-models.html"],

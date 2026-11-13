@@ -174,6 +174,10 @@ SAVED_COMPANION_ROUTES = {
 }
 SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
 SAVED_DATA_ILLUSTRATION_RENDERERS = {
+    "scripts/reports/native_fixed_tail_geometry.py": (
+        "Reads authenticated A6 native fixed-tail archives and saved full-state projection receipts. "
+        "Displays matched-family carriers F, conditional inner B and the recorded full-state identity I=F∩B=B, "
+        "with affine candidates and separate nonlinear execution; no controller run, global backward set or nonlinear certificate."),
     "scripts/reports/native_parallelotope_functional.py": (
         "Renders authenticated saved native parallelotope query slices and affine paths in physical coordinates "
         "using the exact source-bound fixed frame, with the observed nonlinear trajectory shown separately. "
