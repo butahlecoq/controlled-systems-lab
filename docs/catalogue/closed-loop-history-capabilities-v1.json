@@ -63,8 +63,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "2296946cf9204e3cf25c60d606e438af1f4923b450aa2abdb2793b3f49f32b66",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-mpc/1/cfg-2296946cf9204e3c",
+      "graph_fingerprint": "68d2a129fc5a0ffc4c631635bf4ef5da3d7acf09a40bc728300e954b3aa23135",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-mpc/1/cfg-68d2a129fc5a0ffc",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -82,7 +82,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "441e17e06aa42809c4b00ec0403389f7dae97ea2d869693bbfbb3288f1583e30"
+          "sha256": "802631233bbed6ce72884fff3feb0640a56c6514d4f7b6c52476623cb3367185"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -94,7 +94,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+          "sha256": "864b3e92d98bfd87dbaba7a24afefc1627e1ef0dfb1c409a95d481876924eb65"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -241,8 +241,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "a8261521fe976e09cc85bc7e8db967253b27b6a5d0083250c6f29e9265361edf",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ipopt/1/cfg-a8261521fe976e09",
+      "graph_fingerprint": "80e7b77cac6ee10c1780bf780b872b968a4c329aa5a60ce97f15679b27a1c534",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ipopt/1/cfg-80e7b77cac6ee10c",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -260,7 +260,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "441e17e06aa42809c4b00ec0403389f7dae97ea2d869693bbfbb3288f1583e30"
+          "sha256": "802631233bbed6ce72884fff3feb0640a56c6514d4f7b6c52476623cb3367185"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -272,7 +272,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+          "sha256": "864b3e92d98bfd87dbaba7a24afefc1627e1ef0dfb1c409a95d481876924eb65"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -438,8 +438,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "796a708975140e06f0849dde1d14451f040b42b9ed718c052fb9276f6832b78d",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-box-ipopt/1/cfg-796a708975140e06",
+      "graph_fingerprint": "68011702490450b84e5ffa1c3e96109448dd59cd2d1cc0f19427b8d6c5a891a1",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-box-ipopt/1/cfg-68011702490450b8",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -464,7 +464,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "441e17e06aa42809c4b00ec0403389f7dae97ea2d869693bbfbb3288f1583e30"
+          "sha256": "802631233bbed6ce72884fff3feb0640a56c6514d4f7b6c52476623cb3367185"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -476,7 +476,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+          "sha256": "864b3e92d98bfd87dbaba7a24afefc1627e1ef0dfb1c409a95d481876924eb65"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -718,8 +718,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "020106e98ad83d05f2154f375605d1ab10b0ea91307d3cc57a1f9802c07454fd",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-polytope-ipopt/1/cfg-020106e98ad83d05",
+      "graph_fingerprint": "570e8873244602794342603a1ab1e6543ebc3d1b57041bae6588fe31a81ca404",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-polytope-ipopt/1/cfg-570e887324460279",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -744,7 +744,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "441e17e06aa42809c4b00ec0403389f7dae97ea2d869693bbfbb3288f1583e30"
+          "sha256": "802631233bbed6ce72884fff3feb0640a56c6514d4f7b6c52476623cb3367185"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -756,7 +756,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+          "sha256": "864b3e92d98bfd87dbaba7a24afefc1627e1ef0dfb1c409a95d481876924eb65"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -998,8 +998,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "7da6bb528a3d9f9acc163ab6b22c2211be90d845e9f309aa6924a1fe5d518ef9",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-zonotope-ipopt/1/cfg-7da6bb528a3d9f9a",
+      "graph_fingerprint": "dddb023e01001b0099817a6ce43393ceecb5247584cfad8ced32bb006b46fa03",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-zonotope-ipopt/1/cfg-dddb023e01001b00",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1024,7 +1024,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "441e17e06aa42809c4b00ec0403389f7dae97ea2d869693bbfbb3288f1583e30"
+          "sha256": "802631233bbed6ce72884fff3feb0640a56c6514d4f7b6c52476623cb3367185"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -1036,7 +1036,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+          "sha256": "864b3e92d98bfd87dbaba7a24afefc1627e1ef0dfb1c409a95d481876924eb65"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -1278,8 +1278,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "c873e4a4dbdf036eb8573e2fd080757a041aba5d4fcd677a80537420511d47fe",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-parallelotope-ipopt/1/cfg-c873e4a4dbdf036e",
+      "graph_fingerprint": "231c75f7b9f3be4990612b35e2e0dd93802265f86d5a297a37f38b26e97e6971",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-parallelotope-ipopt/1/cfg-231c75f7b9f3be49",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1304,7 +1304,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "441e17e06aa42809c4b00ec0403389f7dae97ea2d869693bbfbb3288f1583e30"
+          "sha256": "802631233bbed6ce72884fff3feb0640a56c6514d4f7b6c52476623cb3367185"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -1316,7 +1316,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+          "sha256": "864b3e92d98bfd87dbaba7a24afefc1627e1ef0dfb1c409a95d481876924eb65"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -1558,8 +1558,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "149fd4f63f7e07ce2ba1507b71372c7c50bd0b73c196e81d7b748227da33eed6",
-      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ellipsoid-ipopt/1/cfg-149fd4f63f7e07ce",
+      "graph_fingerprint": "7691e55cb4d2d6f78880b3336cfdf786d8fe2c7593ea31168b8176cb52ead1b9",
+      "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-ellipsoid-ipopt/1/cfg-7691e55cb4d2d6f7",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1584,7 +1584,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "441e17e06aa42809c4b00ec0403389f7dae97ea2d869693bbfbb3288f1583e30"
+          "sha256": "802631233bbed6ce72884fff3feb0640a56c6514d4f7b6c52476623cb3367185"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -1596,7 +1596,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+          "sha256": "864b3e92d98bfd87dbaba7a24afefc1627e1ef0dfb1c409a95d481876924eb65"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -1819,8 +1819,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "137dbf73d07124ddacbd158995dea7b0404eb010caf1eff5a77c7b4ab9788e53",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-137dbf73d07124dd",
+      "graph_fingerprint": "9f493c5104c4c7ed84b3a5c2ba82a727db991f0720f3974296b3e4ac7b39f2ec",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-mpc/1/cfg-9f493c5104c4c7ed",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -1838,7 +1838,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "441e17e06aa42809c4b00ec0403389f7dae97ea2d869693bbfbb3288f1583e30"
+          "sha256": "802631233bbed6ce72884fff3feb0640a56c6514d4f7b6c52476623cb3367185"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -1850,7 +1850,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+          "sha256": "864b3e92d98bfd87dbaba7a24afefc1627e1ef0dfb1c409a95d481876924eb65"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -2012,8 +2012,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "6a0e250828edb13c8f101247b0a12daa3693bccb0fabf5ba0b62a8e0af67f71d",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-box-ipopt/1/cfg-6a0e250828edb13c",
+      "graph_fingerprint": "44fca9efe30de6cda2b464a66fa9b2576aa58210753e706952e96303c753625d",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-box-ipopt/1/cfg-44fca9efe30de6cd",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2038,7 +2038,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "441e17e06aa42809c4b00ec0403389f7dae97ea2d869693bbfbb3288f1583e30"
+          "sha256": "802631233bbed6ce72884fff3feb0640a56c6514d4f7b6c52476623cb3367185"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -2050,7 +2050,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+          "sha256": "864b3e92d98bfd87dbaba7a24afefc1627e1ef0dfb1c409a95d481876924eb65"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -2288,8 +2288,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "8adb4aae558e0de4e61cadad3260a88fe4ff622d7e97ae01626cd127825ab1fa",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-polytope-ipopt/1/cfg-8adb4aae558e0de4",
+      "graph_fingerprint": "2c3e7c48d547f1bc9b2ec0a16c61e517952e5e206a8c9ecaa29e5b0971cdcc29",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-polytope-ipopt/1/cfg-2c3e7c48d547f1bc",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2314,7 +2314,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "441e17e06aa42809c4b00ec0403389f7dae97ea2d869693bbfbb3288f1583e30"
+          "sha256": "802631233bbed6ce72884fff3feb0640a56c6514d4f7b6c52476623cb3367185"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -2326,7 +2326,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+          "sha256": "864b3e92d98bfd87dbaba7a24afefc1627e1ef0dfb1c409a95d481876924eb65"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -2564,8 +2564,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "bc0240b180e82f3f23931734dd2806dd5a3c6264e0e9a33f39d1b402daa11a0f",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-zonotope-ipopt/1/cfg-bc0240b180e82f3f",
+      "graph_fingerprint": "b3c8ac6f6bf78c94e4ac8ffb2005ddc24c2112e9c42bff884d591f3ad619caee",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-zonotope-ipopt/1/cfg-b3c8ac6f6bf78c94",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2590,7 +2590,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "441e17e06aa42809c4b00ec0403389f7dae97ea2d869693bbfbb3288f1583e30"
+          "sha256": "802631233bbed6ce72884fff3feb0640a56c6514d4f7b6c52476623cb3367185"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -2602,7 +2602,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+          "sha256": "864b3e92d98bfd87dbaba7a24afefc1627e1ef0dfb1c409a95d481876924eb65"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -2840,8 +2840,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "5b364f0ffc7ac2babbccbf0dce367b75fdf5ce5f58f320c103681fd9d29f32c7",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-parallelotope-ipopt/1/cfg-5b364f0ffc7ac2ba",
+      "graph_fingerprint": "4ad31a06db38f4504969d86e0dcd685e318027573e5b6821ba16690a0d8cddaa",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-parallelotope-ipopt/1/cfg-4ad31a06db38f450",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2866,7 +2866,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "441e17e06aa42809c4b00ec0403389f7dae97ea2d869693bbfbb3288f1583e30"
+          "sha256": "802631233bbed6ce72884fff3feb0640a56c6514d4f7b6c52476623cb3367185"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -2878,7 +2878,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+          "sha256": "864b3e92d98bfd87dbaba7a24afefc1627e1ef0dfb1c409a95d481876924eb65"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -3116,8 +3116,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "39ec9c90d5d2f8afa7c7a090c018d22acb654d5fd492d0e9ca359506209f1a8e",
-      "graph_id": "closed-loop/earth-orbit/continuous-history-ellipsoid-ipopt/1/cfg-39ec9c90d5d2f8af",
+      "graph_fingerprint": "79238ea84df5977c6ecb7e5acba715fde41cf9382423f6930b46cd42b79a091a",
+      "graph_id": "closed-loop/earth-orbit/continuous-history-ellipsoid-ipopt/1/cfg-79238ea84df5977c",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3142,7 +3142,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "441e17e06aa42809c4b00ec0403389f7dae97ea2d869693bbfbb3288f1583e30"
+          "sha256": "802631233bbed6ce72884fff3feb0640a56c6514d4f7b6c52476623cb3367185"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -3154,7 +3154,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+          "sha256": "864b3e92d98bfd87dbaba7a24afefc1627e1ef0dfb1c409a95d481876924eb65"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -3373,8 +3373,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "f1a286dc993b40f00d8cf8f035ffbb2da0748c368b5d84739a5de79ae949dd72",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-mpc/1/cfg-f1a286dc993b40f0",
+      "graph_fingerprint": "25a6a7fb672e6e1f1418e83303a36c79571e242fa1436c3e1fcdc693cc6ab95d",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-mpc/1/cfg-25a6a7fb672e6e1f",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -3392,7 +3392,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "441e17e06aa42809c4b00ec0403389f7dae97ea2d869693bbfbb3288f1583e30"
+          "sha256": "802631233bbed6ce72884fff3feb0640a56c6514d4f7b6c52476623cb3367185"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -3404,7 +3404,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+          "sha256": "864b3e92d98bfd87dbaba7a24afefc1627e1ef0dfb1c409a95d481876924eb65"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -3551,8 +3551,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "657a2295d6bbb8dc814b93ce376c82658c8604efe22acd2554ca447b87824b6d",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ipopt/1/cfg-657a2295d6bbb8dc",
+      "graph_fingerprint": "e5f7e9689ab20481272c76cf7e24f94e6d379623414bff5904b9dee6c22cbaa0",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ipopt/1/cfg-e5f7e9689ab20481",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -3570,7 +3570,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "441e17e06aa42809c4b00ec0403389f7dae97ea2d869693bbfbb3288f1583e30"
+          "sha256": "802631233bbed6ce72884fff3feb0640a56c6514d4f7b6c52476623cb3367185"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -3582,7 +3582,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+          "sha256": "864b3e92d98bfd87dbaba7a24afefc1627e1ef0dfb1c409a95d481876924eb65"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -3748,8 +3748,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "cebd60b55ac2c6a3c1552177ddad02048b9d6ac2b3911dfa79c63a481e341050",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-box-ipopt/1/cfg-cebd60b55ac2c6a3",
+      "graph_fingerprint": "3257f1791fb4f38cb8db5e1c69aaf244324a9118d3b0802902803b100900aa14",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-box-ipopt/1/cfg-3257f1791fb4f38c",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -3774,7 +3774,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "441e17e06aa42809c4b00ec0403389f7dae97ea2d869693bbfbb3288f1583e30"
+          "sha256": "802631233bbed6ce72884fff3feb0640a56c6514d4f7b6c52476623cb3367185"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -3786,7 +3786,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+          "sha256": "864b3e92d98bfd87dbaba7a24afefc1627e1ef0dfb1c409a95d481876924eb65"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -4028,8 +4028,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "f2f71325a60d50b334d58d22d1f389559e8bed985a56a4f04e15d0b04776e49c",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-polytope-ipopt/1/cfg-f2f71325a60d50b3",
+      "graph_fingerprint": "9087b2a423b72a488b3b226dde2b0799e79c86dfd1ea829466b89e5cc7197d14",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-polytope-ipopt/1/cfg-9087b2a423b72a48",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4054,7 +4054,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "441e17e06aa42809c4b00ec0403389f7dae97ea2d869693bbfbb3288f1583e30"
+          "sha256": "802631233bbed6ce72884fff3feb0640a56c6514d4f7b6c52476623cb3367185"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -4066,7 +4066,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+          "sha256": "864b3e92d98bfd87dbaba7a24afefc1627e1ef0dfb1c409a95d481876924eb65"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -4308,8 +4308,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "1dcfc62e676f19f270bb73540d2fa755ea9adb281fbe575cf420afb096d1a922",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-zonotope-ipopt/1/cfg-1dcfc62e676f19f2",
+      "graph_fingerprint": "7d4c4202d317b521b6a78a9c353a1825284c63aeae43faccb3cac9956f4dd36b",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-zonotope-ipopt/1/cfg-7d4c4202d317b521",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4334,7 +4334,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "441e17e06aa42809c4b00ec0403389f7dae97ea2d869693bbfbb3288f1583e30"
+          "sha256": "802631233bbed6ce72884fff3feb0640a56c6514d4f7b6c52476623cb3367185"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -4346,7 +4346,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+          "sha256": "864b3e92d98bfd87dbaba7a24afefc1627e1ef0dfb1c409a95d481876924eb65"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -4588,8 +4588,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "0a7ca0d5928ef38a963902f98adf482e3fd0599be27e745928d54ff2aedcb0e8",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-parallelotope-ipopt/1/cfg-0a7ca0d5928ef38a",
+      "graph_fingerprint": "1b1420e5f0f968881f4c130328ed08e3a974f727440376183bbc326e95f626f7",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-parallelotope-ipopt/1/cfg-1b1420e5f0f96888",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4614,7 +4614,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "441e17e06aa42809c4b00ec0403389f7dae97ea2d869693bbfbb3288f1583e30"
+          "sha256": "802631233bbed6ce72884fff3feb0640a56c6514d4f7b6c52476623cb3367185"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -4626,7 +4626,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+          "sha256": "864b3e92d98bfd87dbaba7a24afefc1627e1ef0dfb1c409a95d481876924eb65"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
@@ -4868,8 +4868,8 @@
         "set_operations": 0,
         "vertices": 0
       },
-      "graph_fingerprint": "fc86b93730f979120bf188b3bfeb2d4cacfcca4a26409b8731c8001dd97c84de",
-      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ellipsoid-ipopt/1/cfg-fc86b93730f97912",
+      "graph_fingerprint": "6617cb1f810537e04b8594f48d3ae0fbe097386e3ca00c2bfdedeb07f493756d",
+      "graph_id": "closed-loop/syn-nl-fuel-01/continuous-history-ellipsoid-ipopt/1/cfg-6617cb1f810537e0",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4894,7 +4894,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "441e17e06aa42809c4b00ec0403389f7dae97ea2d869693bbfbb3288f1583e30"
+          "sha256": "802631233bbed6ce72884fff3feb0640a56c6514d4f7b6c52476623cb3367185"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_geometry.py",
@@ -4906,7 +4906,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_policy.py",
-          "sha256": "08d73772e6e9800a588d91eb45fbbe2e2cf5d3ecf64af2cf1439e337efb9fc22"
+          "sha256": "864b3e92d98bfd87dbaba7a24afefc1627e1ef0dfb1c409a95d481876924eb65"
         },
         {
           "path": "benchmarks/reporting/closed_loop/history_validation.py",
