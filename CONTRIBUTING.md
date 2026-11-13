@@ -32,7 +32,8 @@ The C++ quality gate covers every maintained header under `include/csl/core`,
 the outcome-evidence implementation `src/contracts/outcomes.cpp`, and the
 `nominal_forward`, `nominal_predecessor` and `nominal_tube` public headers under
 `include/csl/reachability` and their implementations under `src/reachability`, plus
-`include/csl/numeric/data.hpp` and `src/numeric/data.cpp`. Install
+`include/csl/numeric/data.hpp`, `src/numeric/data.cpp`,
+`include/csl/sets/contracts.hpp`, `include/csl/sets/data.hpp`, and `src/sets/data.cpp`. Install
 `requirements-cpp-quality.txt` in a virtual environment to use clang-format and
 clang-tidy 23.1.3 with CMake 3.31.6. Run the checks from the repository root:
 
@@ -43,11 +44,12 @@ cmake --build build/cpp-quality --parallel 1 \
   --target csl_contracts csl_core_header_checks csl_nominal_header_checks \
   csl_nominal_forward csl_nominal_tube csl_polyhedral \
   csl_numeric header_numeric_data_hpp numeric_tests numeric_buffer_views_tests \
+  csl_sets header_sets_contracts_hpp header_sets_data_hpp sets_tests sets_public_client \
   public_headers_client public_headers_lp_first_client \
   contract_tests public_client projection_predecessor_tests projection_predecessor_public_client
 cmake -DCSL_CPP_QUALITY_MODE=tidy -P scripts/ci/check_cpp_core.cmake
 ctest --test-dir build/cpp-quality --output-on-failure \
-  -R '^(contract_tests|public_client|projection_predecessor_tests|projection_predecessor_public_client|numeric_tests|numeric_buffer_views_tests|public_headers_client|public_headers_lp_first_client|numeric_dependency_direction)$'
+  -R '^(contract_tests|public_client|projection_predecessor_tests|projection_predecessor_public_client|numeric_tests|numeric_buffer_views_tests|public_headers_client|public_headers_lp_first_client|numeric_dependency_direction|sets_tests|sets_public_client)$'
 ```
 
 The analyzer uses the actual selected implementation sources and each selected
@@ -56,12 +58,14 @@ source tree or a tool-version mismatch. New core headers also need their entry
 in `src/contracts/Tests.cmake`; nominal header contexts are registered in
 `src/reachability/Tests.cmake`. This prevents a selected header without a real
 compilation context from passing. The numeric data header uses the existing
-`header_numeric_data_hpp` context in `src/contracts/Tests.cmake`.
+`header_numeric_data_hpp` context in `src/contracts/Tests.cmake`. Set contracts use
+the existing `header_sets_contracts_hpp` context there; the set data header uses
+`header_sets_data_hpp`, registered in `src/sets/Tests.cmake`.
 The focused policy enables core/C++ analyzers, selected bug-prone constructs and
 portability checks, with warnings treated as errors. Formatting applies only to
 the selected maintained source files; third-party code, immutable source captures
 and generated scientific data are excluded. The
-`C++ core, nominal reachability and numeric data tooling quality` workflow enforces this scope.
+`C++ core, nominal reachability, numeric and set data tooling quality` workflow enforces this scope.
 Other maintained C++ modules still require
 coverage under [issue 993](https://github.com/butahlecoq/controlled-systems-lab/issues/993).
 
@@ -83,3 +87,14 @@ The workflow also runs the site-addition and APP-02 tests with the standard
 library. Run them locally with
 `python -m unittest discover -s tests/reporting -p 'test_site_additions.py'` and
 `python -m unittest discover -s tests/reporting -p 'test_app02_saved.py'`.
+
+The same configured gate covers the 57 maintained Python compatibility entry
+points under `reports/algorithm-results/tooling`. `pyproject.toml` defines the
+scope for the default Ruff and ty commands above. The nine real OPT07/OPT11
+implementations in that tree remain excluded and require separate quality
+adoption; immutable report/source captures elsewhere are also outside this gate.
+Use `ruff check --show-files` to inspect Ruff's selected files. No explicit file
+arguments are needed for the lint, format or type checks. The workflow triggers
+on tooling-tree changes and exercises existing compatibility consumers with
+`python -m unittest discover -s tests/reporting -p 'test_syn03_strategy_a_report.py'` and
+`python -m unittest discover -s tests/reporting -p 'test_syn03_ts02_report.py'`.

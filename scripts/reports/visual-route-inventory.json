@@ -1965,7 +1965,8 @@
         "nominal-quadratic-history-2d.svg",
         "nominal_quadratic_history_2d.svg"
       ],
-      "disposition": "publication-validation-or-frozen-route"
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Stages an analytic two-state reachable-line diagram, rounded values transcribed from the committed native example output, and a source-bound binary check record using the shared Omarchy page template and stylesheet. It runs no solver and does not present the diagram or CSV as raw solver data."
     },
     {
       "source": "scripts/reports/stage_projection_figures.py",
@@ -4172,6 +4173,11 @@
         "lotka-volterra-sampled-v1.svg",
         "lotka-volterra-sampled-v1.png",
         "lotka-volterra-sampled-v1-export.json",
+        "nominal-quadratic-history-2d.html",
+        "nominal-quadratic-history-2d.svg",
+        "nominal_quadratic_history_2d.csv",
+        "nominal_quadratic_history_2d-output.txt",
+        "nominal-quadratic-history-2d.json",
         "app02-diamond-v1.html",
         "app02-diamond-v1.svg",
         "app02-diamond-v1.png",
