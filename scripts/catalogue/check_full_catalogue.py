@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Check the emitted finite graph universe against independent source expectations."""
+
 from __future__ import annotations
 
+import argparse
 import copy
 import hashlib
 import json
-import sys
-import argparse
 import tempfile
 from pathlib import Path
 
@@ -16,9 +16,12 @@ EXPECTED_TASKS = {
     "syn-nl-fuel-01/continuous-receding/1",
 }
 EXPECTED_ROUTES = {
-    "csl.synthesis.reach-back", "csl.synthesis.strategy-b",
-    "csl.synthesis.ts01-analytic", "csl::optimization::finite_action_nominal",
-    "csl::reachability::nominal_forward", "csl::reachability::prepare_nominal_predecessor",
+    "csl.synthesis.reach-back",
+    "csl.synthesis.strategy-b",
+    "csl.synthesis.ts01-analytic",
+    "csl::optimization::finite_action_nominal",
+    "csl::reachability::nominal_forward",
+    "csl::reachability::prepare_nominal_predecessor",
     "csl::reachability::finite_feedback::solve",
     "csl::optimization::finite_causal_minimax::solve",
     "benchmarks/reporting/mpc11/run_nmpc.py",
@@ -62,9 +65,11 @@ def collected_strings(value: object) -> set[str]:
 
 def task_binding_negative_checks(root: Path) -> None:
     import sys
+
     sys.path.insert(0, str(root / "benchmarks/reporting/closed_loop"))
-    from contracts import canonical_sha256, load_task
     from task_models import validate_source_binding
+
+    from contracts import canonical_sha256, load_task
 
     original = load_task("syn-nl-lv-01")
     validate_source_binding(original)
@@ -101,15 +106,20 @@ def task_binding_negative_checks(root: Path) -> None:
         except ValueError:
             pass
         else:
-            raise AssertionError("changed source scenario was admitted after its hash was refreshed")
+            raise AssertionError(
+                "changed source scenario was admitted after its hash was refreshed"
+            )
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path)
     parser.add_argument("root", type=Path)
-    parser.add_argument("--mpc11-unavailable", action="store_true",
-        help="expect source-bound MPC11 rows retained as backend_unavailable")
+    parser.add_argument(
+        "--mpc11-unavailable",
+        action="store_true",
+        help="expect source-bound MPC11 rows retained as backend_unavailable",
+    )
     args = parser.parse_args()
     output = json.loads(args.output.read_text())
     root = args.root.resolve()
@@ -131,21 +141,34 @@ def main() -> int:
         assert row["model_id"] == contract["model"]["model_id"]
         assert row["model_dimension"] == len(contract["model"]["states"])
         assert row["control_dimension"] == len(contract["model"]["controls"])
-        assert row["action_domain_id"] == contract["control_domains"][row["action_domain_kind"]]["problem_id"]
+        assert (
+            row["action_domain_id"]
+            == contract["control_domains"][row["action_domain_kind"]]["problem_id"]
+        )
         assert (row["first_unmet"] is None) == (row["status"] == "admitted")
-        canonical = {"task_contract_sha256": row["task_contract_sha256"],
-            "model_id": row["model_id"], "action_domain_id": row["action_domain_id"],
-            "module_tuple": row["module_tuple"]}
-        expected_hash = hashlib.sha256(json.dumps(canonical, sort_keys=True,
-            separators=(",", ":")).encode()).hexdigest()
+        canonical = {
+            "task_contract_sha256": row["task_contract_sha256"],
+            "model_id": row["model_id"],
+            "action_domain_id": row["action_domain_id"],
+            "module_tuple": row["module_tuple"],
+        }
+        expected_hash = hashlib.sha256(
+            json.dumps(canonical, sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest()
         assert row["graph_fingerprint"] == expected_hash
         assert row["graph_id"].endswith(f"cfg-{expected_hash[:16]}")
 
-    reach_back = [row for row in controllers if row["controller_route"] == "csl.synthesis.reach-back"]
+    reach_back = [
+        row for row in controllers if row["controller_route"] == "csl.synthesis.reach-back"
+    ]
     expected_reach_back = {
         (task, domain, reducer, hull_lp, converter_lp, control_lp)
-        for task, contract in contracts.items() for domain in contract["control_domains"]
-        for reducer in REDUCER_IDS for hull_lp in LP_IDS for converter_lp in LP_IDS for control_lp in LP_IDS
+        for task, contract in contracts.items()
+        for domain in contract["control_domains"]
+        for reducer in REDUCER_IDS
+        for hull_lp in LP_IDS
+        for converter_lp in LP_IDS
+        for control_lp in LP_IDS
     }
     actual_reach_back = set()
     for row in reach_back:
@@ -156,22 +179,37 @@ def main() -> int:
         assert modules["control_convex_provider"]["id"] == "csl.convex.highs"
         assert modules["configured_representation"]["id"] == "csl.polyhedron.h"
         assert modules["terminal_optimizer"]["symbol"] == "csl::synthesis::TerminalOptimizer::solve"
-        actual_reach_back.add((row["task_id"], row["action_domain_kind"],
-            identity(modules["vertex_reducer"]), identity(modules["vertex_lp_provider"]),
-            identity(modules["converter_lp_provider"]), identity(modules["control_lp_provider"])))
+        actual_reach_back.add(
+            (
+                row["task_id"],
+                row["action_domain_kind"],
+                identity(modules["vertex_reducer"]),
+                identity(modules["vertex_lp_provider"]),
+                identity(modules["converter_lp_provider"]),
+                identity(modules["control_lp_provider"]),
+            )
+        )
     assert len(reach_back) == 1620
     assert actual_reach_back == expected_reach_back
 
-    strategy_b = [row for row in controllers if row["controller_route"] == "csl.synthesis.strategy-b"]
-    expected_strategy_b = {(task, domain, lp) for task, contract in contracts.items()
-        for domain in contract["control_domains"] for lp in LP_IDS}
+    strategy_b = [
+        row for row in controllers if row["controller_route"] == "csl.synthesis.strategy-b"
+    ]
+    expected_strategy_b = {
+        (task, domain, lp)
+        for task, contract in contracts.items()
+        for domain in contract["control_domains"]
+        for lp in LP_IDS
+    }
     actual_strategy_b = set()
     for row in strategy_b:
         modules = row["module_tuple"]
         assert modules["vertex_lp_provider"].startswith("not_used")
         assert modules["control_convex_provider"]["id"] == "csl.convex.highs"
         assert modules["configured_representation"]["id"] == "csl.polyhedron.h"
-        actual_strategy_b.add((row["task_id"], row["action_domain_kind"], identity(modules["control_lp_provider"])))
+        actual_strategy_b.add(
+            (row["task_id"], row["action_domain_kind"], identity(modules["control_lp_provider"]))
+        )
     assert len(strategy_b) == 18 and actual_strategy_b == expected_strategy_b
     for row in [*reach_back, *strategy_b]:
         if row["action_domain_kind"] == "finite":
@@ -181,53 +219,111 @@ def main() -> int:
             assert row["status"] == "implementation_missing"
             assert row["first_unmet"]["field"] == "controller.model_adapter"
 
-    nominal = [row for row in controllers if row["controller_route"] == "csl::optimization::finite_action_nominal"]
+    nominal = [
+        row
+        for row in controllers
+        if row["controller_route"] == "csl::optimization::finite_action_nominal"
+    ]
     assert len(nominal) == 30
-    assert {(row["task_id"], row["action_domain_kind"], row["module_tuple"]["configured_representation"]["id"])
-        for row in nominal} == {(task, domain, representation) for task, contract in contracts.items()
-        for domain in contract["control_domains"] for representation in REPRESENTATIONS}
-    assert all(row["module_tuple"]["terminal_optimizer"] == "finite_action_enumeration" for row in nominal)
+    assert {
+        (
+            row["task_id"],
+            row["action_domain_kind"],
+            row["module_tuple"]["configured_representation"]["id"],
+        )
+        for row in nominal
+    } == {
+        (task, domain, representation)
+        for task, contract in contracts.items()
+        for domain in contract["control_domains"]
+        for representation in REPRESENTATIONS
+    }
+    assert all(
+        row["module_tuple"]["terminal_optimizer"] == "finite_action_enumeration" for row in nominal
+    )
 
-    forward = [row for row in controllers if row["controller_route"] == "csl::reachability::nominal_forward"]
-    expected_forward = {(task, domain, reducer, lp1, lp2, lp3) for task, contract in contracts.items()
-        for domain in contract["control_domains"] for reducer in REDUCER_IDS
-        for lp1 in LP_IDS for lp2 in LP_IDS for lp3 in LP_IDS}
+    forward = [
+        row
+        for row in controllers
+        if row["controller_route"] == "csl::reachability::nominal_forward"
+    ]
+    expected_forward = {
+        (task, domain, reducer, lp1, lp2, lp3)
+        for task, contract in contracts.items()
+        for domain in contract["control_domains"]
+        for reducer in REDUCER_IDS
+        for lp1 in LP_IDS
+        for lp2 in LP_IDS
+        for lp3 in LP_IDS
+    }
     actual_forward = set()
     for row in forward:
         modules = row["module_tuple"]
         assert modules["geometry_projection"]["id"] == "csl.geometry.projection-materializer"
         assert modules["geometry_affine_sum"]["id"] == "csl.geometry.affine-sum"
-        assert modules["affine_sum_converter"]["id"] == modules["converter"]["id"] == "csl.conversion.qhull"
+        assert (
+            modules["affine_sum_converter"]["id"]
+            == modules["converter"]["id"]
+            == "csl.conversion.qhull"
+        )
         assert modules["terminal_optimizer"].startswith("not_used")
-        actual_forward.add((row["task_id"], row["action_domain_kind"], identity(modules["vertex_reducer"]),
-            identity(modules["vertex_lp_provider"]), identity(modules["affine_sum_converter_lp_provider"]),
-            identity(modules["converter_lp_provider"])))
+        actual_forward.add(
+            (
+                row["task_id"],
+                row["action_domain_kind"],
+                identity(modules["vertex_reducer"]),
+                identity(modules["vertex_lp_provider"]),
+                identity(modules["affine_sum_converter_lp_provider"]),
+                identity(modules["converter_lp_provider"]),
+            )
+        )
     assert len(forward) == 1620 and actual_forward == expected_forward
 
-    nominal_predecessor = [row for row in controllers
-        if row["controller_route"] == "csl::reachability::prepare_nominal_predecessor"]
+    nominal_predecessor = [
+        row
+        for row in controllers
+        if row["controller_route"] == "csl::reachability::prepare_nominal_predecessor"
+    ]
     assert len(nominal_predecessor) == 6
-    assert all(row["module_tuple"]["geometry_projection"]["id"] == "csl.geometry.projection-materializer"
+    assert all(
+        row["module_tuple"]["geometry_projection"]["id"] == "csl.geometry.projection-materializer"
         and row["module_tuple"]["vertex_lp_provider"].startswith("not_used")
-        for row in nominal_predecessor)
+        for row in nominal_predecessor
+    )
 
-    mpc11 = [row for row in controllers if row["controller_route"] == "benchmarks/reporting/mpc11/run_nmpc.py"]
+    mpc11 = [
+        row
+        for row in controllers
+        if row["controller_route"] == "benchmarks/reporting/mpc11/run_nmpc.py"
+    ]
     expected_mpc11_admitted = {
         ("syn-nl-lv-01/continuous-receding/1", "continuous"),
         ("syn-nl-fuel-01/continuous-receding/1", "continuous"),
     }
     expected_mpc11_status = "backend_unavailable" if args.mpc11_unavailable else "admitted"
-    assert {(row["task_id"], row["action_domain_kind"]) for row in mpc11
-        if row["status"] == expected_mpc11_status} == expected_mpc11_admitted
+    assert {
+        (row["task_id"], row["action_domain_kind"])
+        for row in mpc11
+        if row["status"] == expected_mpc11_status
+    } == expected_mpc11_admitted
     receipts = output["external_preparation_receipts"]["routes"]
     assert {row["task_id"] for row in receipts} == {task for task, _ in expected_mpc11_admitted}
-    assert all(row["source_binding_validated"] is True and row["solve_performed"] is False
-        and row["status"] == expected_mpc11_status for row in receipts)
+    assert all(
+        row["source_binding_validated"] is True
+        and row["solve_performed"] is False
+        and row["status"] == expected_mpc11_status
+        for row in receipts
+    )
     if args.mpc11_unavailable:
-        assert all(row["first_unmet"]["field"].startswith("python.dependency.")
-            and row["first_unmet"]["reason"] for row in receipts)
+        assert all(
+            row["first_unmet"]["field"].startswith("python.dependency.")
+            and row["first_unmet"]["reason"]
+            for row in receipts
+        )
     else:
-        assert all(row["runtime"]["solver_interface_prepared"] == "IpoptInterface" for row in receipts)
+        assert all(
+            row["runtime"]["solver_interface_prepared"] == "IpoptInterface" for row in receipts
+        )
     for row in mpc11:
         if row["status"] == "admitted":
             receipt = row["external_prepare_receipt"]
@@ -235,78 +331,150 @@ def main() -> int:
             assert receipt["model_id"] == row["model_id"]
             assert receipt["controller_id"] == row["module_tuple"]["controller"]
             assert row["module_tuple"]["vertex_lp_provider"].startswith("not_used")
-            assert row["module_tuple"]["terminal_optimizer"]["prepared_interface"] == "IpoptInterface"
+            assert (
+                row["module_tuple"]["terminal_optimizer"]["prepared_interface"] == "IpoptInterface"
+            )
         elif row["status"] == "backend_unavailable":
             assert row["external_prepare_receipt"]["task_id"] == row["task_id"]
             assert row["first_unmet"]["field"].startswith("python.dependency.")
 
-    status_rows = {status: [row for row in controllers if row["status"] == status]
-        for status in ("admitted", "incompatible", "implementation_missing", "backend_unavailable", "excluded")}
+    status_rows = {
+        status: [row for row in controllers if row["status"] == status]
+        for status in (
+            "admitted",
+            "incompatible",
+            "implementation_missing",
+            "backend_unavailable",
+            "excluded",
+        )
+    }
     assert len(status_rows["admitted"]) == (0 if args.mpc11_unavailable else 2)
     expected_backend_unavailable = 2 if args.mpc11_unavailable else 0
     assert len(status_rows["backend_unavailable"]) == expected_backend_unavailable
-    assert all(row["first_unmet"]["field"] and row["first_unmet"]["reason"]
-        for row in controllers if row["first_unmet"])
+    assert all(
+        row["first_unmet"]["field"] and row["first_unmet"]["reason"]
+        for row in controllers
+        if row["first_unmet"]
+    )
 
     predecessors = output["closed_loop_predecessor_candidates"]
-    expected_predecessors = {(task, representation, lp) for task in EXPECTED_TASKS
-        for representation in PREDECESSOR_REPRESENTATIONS for lp in LP_IDS}
+    expected_predecessors = {
+        (task, representation, lp)
+        for task in EXPECTED_TASKS
+        for representation in PREDECESSOR_REPRESENTATIONS
+        for lp in LP_IDS
+    }
     assert len(predecessors) == 45
     actual_predecessors = set()
     for row in predecessors:
         modules = row["module_tuple"]
-        actual_predecessors.add((row["task_id"], modules["reachable_set_representation"],
-            identity(modules["terminal_lp_provider"])))
+        actual_predecessors.add(
+            (
+                row["task_id"],
+                modules["reachable_set_representation"],
+                identity(modules["terminal_lp_provider"]),
+            )
+        )
         assert modules["vertex_lp_provider"].startswith("not_used")
         assert modules["terminal_minimizer"]["symbol"] == "csl::synthesis::TerminalOptimizer::solve"
-        assert modules["terminal_optimizer_provider"] == {"id": "csl.convex.highs", "version": "1.0.0+highs.1.11.0"}
+        assert modules["terminal_optimizer_provider"] == {
+            "id": "csl.convex.highs",
+            "version": "1.0.0+highs.1.11.0",
+        }
         contract = contracts[row["task_id"]]
-        canonical = {"task_contract_sha256": row["task_contract_sha256"],
-            "model_id": row["model_id"], "module_tuple": modules}
-        expected_hash = hashlib.sha256(json.dumps(canonical, sort_keys=True,
-            separators=(",", ":")).encode()).hexdigest()
+        canonical = {
+            "task_contract_sha256": row["task_contract_sha256"],
+            "model_id": row["model_id"],
+            "module_tuple": modules,
+        }
+        expected_hash = hashlib.sha256(
+            json.dumps(canonical, sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest()
         assert row["graph_fingerprint"] == expected_hash
         assert row["graph_id"].endswith(f"cfg-{expected_hash[:16]}")
-        assert row["action_domain_ids"] == sorted(domain["problem_id"]
-            for domain in contract["control_domains"].values())
+        assert row["action_domain_ids"] == sorted(
+            domain["problem_id"] for domain in contract["control_domains"].values()
+        )
         assert row["fixed_plan_propagation_delivered_separately"]
         assert row["first_unmet"]["reason"]
     assert actual_predecessors == expected_predecessors
-    assert any(row["status"] == "incompatible" and row["task_id"] ==
-        "syn-nl-lv-01/continuous-receding/1" and row["module_tuple"]["reachable_set_representation"] == "parallelotope"
-        and row["first_unmet"]["field"] == "request.dimension" for row in predecessors)
-    assert any(row["status"] == "excluded" for row in output["inventory"]["known_candidate_classifications"])
+    assert any(
+        row["status"] == "incompatible"
+        and row["task_id"] == "syn-nl-lv-01/continuous-receding/1"
+        and row["module_tuple"]["reachable_set_representation"] == "parallelotope"
+        and row["first_unmet"]["field"] == "request.dimension"
+        for row in predecessors
+    )
+    assert any(
+        row["status"] == "excluded"
+        for row in output["inventory"]["known_candidate_classifications"]
+    )
 
     group1_references = output["full_task_group1_reference_candidates"]
-    expected_reference_ids = {f"{task}/{domain}/vertex-reference/{route}"
-        for task, contract in contracts.items() for domain in contract["control_domains"]
-        for route in ("quickhull2d", "csl::geometry::legacy_btulshor::modif",
-            "csl::geometry::legacy_btulshor::kpabep", "csl::geometry::legacy_btulshor::reach")}
+    expected_reference_ids = {
+        f"{task}/{domain}/vertex-reference/{route}"
+        for task, contract in contracts.items()
+        for domain in contract["control_domains"]
+        for route in (
+            "quickhull2d",
+            "csl::geometry::legacy_btulshor::modif",
+            "csl::geometry::legacy_btulshor::kpabep",
+            "csl::geometry::legacy_btulshor::reach",
+        )
+    }
     assert len(group1_references) == 24
     assert {row["candidate_id"] for row in group1_references} == expected_reference_ids
     for row in group1_references:
-        assert row["task_contract_sha256"] == next(candidate["task_contract_sha256"]
-            for candidate in controllers if candidate["task_id"] == row["task_id"])
-        symbol = row["module_tuple"].get("vertex_geometry_reference", row["module_tuple"].get("source_faithful_vertex_route"))
-        assert symbol and symbol.get("symbol") in {"csl::geometry::quickhull_2d",
-            "csl::geometry::legacy_btulshor::modif", "csl::geometry::legacy_btulshor::kpabep",
-            "csl::geometry::legacy_btulshor::reach"}
-        if row["task_id"] == "syn-nl-lv-01/continuous-receding/1" and symbol.get("symbol") == "csl::geometry::quickhull_2d":
-            assert row["status"] == "implementation_missing" and row["first_unmet"]["field"] == "geometry.reducer_adapter"
+        assert row["task_contract_sha256"] == next(
+            candidate["task_contract_sha256"]
+            for candidate in controllers
+            if candidate["task_id"] == row["task_id"]
+        )
+        symbol = row["module_tuple"].get(
+            "vertex_geometry_reference", row["module_tuple"].get("source_faithful_vertex_route")
+        )
+        assert symbol and symbol.get("symbol") in {
+            "csl::geometry::quickhull_2d",
+            "csl::geometry::legacy_btulshor::modif",
+            "csl::geometry::legacy_btulshor::kpabep",
+            "csl::geometry::legacy_btulshor::reach",
+        }
+        if (
+            row["task_id"] == "syn-nl-lv-01/continuous-receding/1"
+            and symbol.get("symbol") == "csl::geometry::quickhull_2d"
+        ):
+            assert (
+                row["status"] == "implementation_missing"
+                and row["first_unmet"]["field"] == "geometry.reducer_adapter"
+            )
         if row["model_dimension"] == 4 and symbol.get("symbol") == "csl::geometry::quickhull_2d":
-            assert row["status"] == "incompatible" and row["first_unmet"]["field"] == "points.dimension"
-    legacy_reach = next(row for row in group1_references if row["module_tuple"].get(
-        "source_faithful_vertex_route", {}).get("symbol") == "csl::geometry::legacy_btulshor::reach")
+            assert (
+                row["status"] == "incompatible"
+                and row["first_unmet"]["field"] == "points.dimension"
+            )
+    legacy_reach = next(
+        row
+        for row in group1_references
+        if row["module_tuple"].get("source_faithful_vertex_route", {}).get("symbol")
+        == "csl::geometry::legacy_btulshor::reach"
+    )
     assert legacy_reach["module_tuple"]["coupled_source_routes"] == [
-        "csl::geometry::legacy_btulshor::kpabep", "csl::geometry::legacy_btulshor::modif"]
+        "csl::geometry::legacy_btulshor::kpabep",
+        "csl::geometry::legacy_btulshor::modif",
+    ]
     assert output["finite_profile_boundaries"]["quickhull2d"]["dimension"] == 2
     assert output["finite_profile_boundaries"]["finite_action_nominal"]["plan_budget"] == 27
 
     group4_functions = output["full_task_group4_function_candidates"]
-    expected_group4 = {(task, domain, symbol) for task, contract in contracts.items()
-        for domain in contract["control_domains"] for symbol in (
+    expected_group4 = {
+        (task, domain, symbol)
+        for task, contract in contracts.items()
+        for domain in contract["control_domains"]
+        for symbol in (
             "csl::geometry::polyhedral::intersect_h",
-            "csl::geometry::polyhedral::remove_redundant_halfspaces")}
+            "csl::geometry::polyhedral::remove_redundant_halfspaces",
+        )
+    }
     actual_group4 = set()
     for row in group4_functions:
         symbol = row["module_tuple"]["supporting_operation"]["symbol"]
@@ -314,21 +482,37 @@ def main() -> int:
         assert row["status"] == "implementation_missing"
         assert row["module_tuple"]["vertex_lp_provider"].startswith("not_used")
         assert row["module_tuple"]["controller_route"].startswith("not_used")
-        canonical = {"task_contract_sha256": row["task_contract_sha256"],
-            "action_domain_id": row["action_domain_id"], "module_tuple": row["module_tuple"]}
-        expected_hash = hashlib.sha256(json.dumps(canonical, sort_keys=True,
-            separators=(",", ":")).encode()).hexdigest()
+        canonical = {
+            "task_contract_sha256": row["task_contract_sha256"],
+            "action_domain_id": row["action_domain_id"],
+            "module_tuple": row["module_tuple"],
+        }
+        expected_hash = hashlib.sha256(
+            json.dumps(canonical, sort_keys=True, separators=(",", ":")).encode()
+        ).hexdigest()
         assert row["graph_fingerprint"] == expected_hash
         assert row["candidate_id"].endswith(expected_hash[:16])
         assert row["first_unmet"]["reason"]
     assert len(group4_functions) == 12 and actual_group4 == expected_group4
-    source_group4 = [row for row in output["inventory"]["modules"] if row["group"] == "supporting_operations"]
-    observed_identities = collected_strings({key: value for key, value in output.items() if key != "inventory"})
-    assert all((record["identity"].get("id") or record["identity"].get("symbol")) in observed_identities
-        for record in source_group4)
+    source_group4 = [
+        row for row in output["inventory"]["modules"] if row["group"] == "supporting_operations"
+    ]
+    observed_identities = collected_strings(
+        {key: value for key, value in output.items() if key != "inventory"}
+    )
+    assert all(
+        (record["identity"].get("id") or record["identity"].get("symbol")) in observed_identities
+        for record in source_group4
+    )
     task_binding_negative_checks(root)
-    mpc11_count = "2 source-bound external unavailable rows" if args.mpc11_unavailable else "2 source-bound external prepares"
-    print(f"full finite catalogue passed: 3,318 controller tuples, 45 predecessor/representation/terminal-LP tuples, 24 full-task legacy/QuickHull choices, {mpc11_count}")
+    mpc11_count = (
+        "2 source-bound external unavailable rows"
+        if args.mpc11_unavailable
+        else "2 source-bound external prepares"
+    )
+    print(
+        f"full finite catalogue passed: 3,318 controller tuples, 45 predecessor/representation/terminal-LP tuples, 24 full-task legacy/QuickHull choices, {mpc11_count}"
+    )
     return 0
 
 

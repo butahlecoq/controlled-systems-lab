@@ -17,7 +17,16 @@ def theme_tokens():
         raise ValueError("shared examples screen/print themes are required")
     parse = lambda block: dict(re.findall(r"(--[a-z-]+)\s*:\s*([^;]+)\s*;", block))
     values, printed = parse(root.group(1)), parse(print_root.group(1))
-    required = {"--page", "--surface", "--text", "--text-muted", "--accent", "--link", "--warm", "--line"}
+    required = {
+        "--page",
+        "--surface",
+        "--text",
+        "--text-muted",
+        "--accent",
+        "--link",
+        "--warm",
+        "--line",
+    }
     if not required <= values.keys() or not required - {"--link"} <= printed.keys():
         raise ValueError("shared examples screen/print theme tokens are incomplete")
     return values, printed
@@ -27,10 +36,17 @@ def main() -> int:
     record_path, output_path = map(Path, sys.argv[1:3])
     print_mode = sys.argv[3:] == ["--print"]
     record = json.loads(record_path.read_text(encoding="utf-8"))
-    rows = [next(row for row in record["attempts"] if row["task"] == task and
-        row["vertex_reducer"] == "csl.hull.lp-membership" and
-        row["vertex_lp_provider"] == "csl.lp.highs" and row["status"] == "completed")
-        for task in ("linear", "quadratic")]
+    rows = [
+        next(
+            row
+            for row in record["attempts"]
+            if row["task"] == task
+            and row["vertex_reducer"] == "csl.hull.lp-membership"
+            and row["vertex_lp_provider"] == "csl.lp.highs"
+            and row["status"] == "completed"
+        )
+        for task in ("linear", "quadratic")
+    ]
     for row in rows:
         assert row["independent_check"]["forward_hull_is_unit_square"]
         assert row["history_recovery_status"] == "completed"
@@ -42,8 +58,10 @@ def main() -> int:
         return left + point[0] * plot_w, top + (1 - point[1]) * plot_h
 
     vertices = rows[0]["forward_vertices"]
-    center = (sum(point[0] for point in vertices) / len(vertices),
-              sum(point[1] for point in vertices) / len(vertices))
+    center = (
+        sum(point[0] for point in vertices) / len(vertices),
+        sum(point[1] for point in vertices) / len(vertices),
+    )
     vertices.sort(key=lambda point: math.atan2(point[1] - center[1], point[0] - center[0]))
     hull = [xy(point) for point in vertices]
     polygon = " ".join(f"{x},{y}" for x, y in hull)
@@ -64,15 +82,35 @@ def main() -> int:
             f'<line class="history-{index}" x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" '
             f'stroke="{colors[index]}" stroke-width="4" opacity="0.8"/>'
             f'<circle class="history-{index}" cx="{x1}" cy="{y1}" r="5" fill="{colors[index]}"/>'
-            f'<text x="{x1 + 10}" y="{y1 - 12 - index * 14}" class="small">u=({control[0]:g},{control[1]:g})</text>')
+            f'<text x="{x1 + 10}" y="{y1 - 12 - index * 14}" class="small">u=({control[0]:g},{control[1]:g})</text>'
+        )
         terminal_marks.append(
-            f'<circle class="terminal" cx="{x2}" cy="{y2}" r="8" fill="{colors[index]}" stroke="{theme["--page"]}" stroke-width="2"/>')
+            f'<circle class="terminal" cx="{x2}" cy="{y2}" r="8" fill="{colors[index]}" stroke="{theme["--page"]}" stroke-width="2"/>'
+        )
 
-    screen_css = ("text{font-family:Inter,system-ui,sans-serif;fill:" + theme["--text"] + "}" +
-        ".title{font-size:24px;font-weight:bold}.label{font-size:16px}.small{font-size:13px}" +
-        ".muted{fill:" + theme["--text-muted"] + "}.svg-bg{fill:" + theme["--page"] + "}" +
-        ".plot{fill:" + theme["--surface"] + ";stroke:" + theme["--line"] + "}" +
-        ".grid{stroke:" + theme["--line"] + "}.hull{fill:" + theme["--accent"] + ";stroke:" + theme["--accent"] + "}")
+    screen_css = (
+        "text{font-family:Inter,system-ui,sans-serif;fill:"
+        + theme["--text"]
+        + "}"
+        + ".title{font-size:24px;font-weight:bold}.label{font-size:16px}.small{font-size:13px}"
+        + ".muted{fill:"
+        + theme["--text-muted"]
+        + "}.svg-bg{fill:"
+        + theme["--page"]
+        + "}"
+        + ".plot{fill:"
+        + theme["--surface"]
+        + ";stroke:"
+        + theme["--line"]
+        + "}"
+        + ".grid{stroke:"
+        + theme["--line"]
+        + "}.hull{fill:"
+        + theme["--accent"]
+        + ";stroke:"
+        + theme["--accent"]
+        + "}"
+    )
 
     markup = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">
 <style>{screen_css}</style>
@@ -80,14 +118,14 @@ def main() -> int:
 <text x="40" y="42" class="title">Two-state reachable set and selected control history</text>
 <text x="40" y="70" class="label muted">Strategy A, x_next = x + u, x0 = (0,0), u in [0,1]^2</text>
 <rect class="plot" x="{left}" y="{top}" width="{plot_w}" height="{plot_h}" fill="{theme["--surface"]}" stroke="{theme["--line"]}"/>
-<line class="grid" x1="{left}" y1="{top+plot_h/2}" x2="{left+plot_w}" y2="{top+plot_h/2}" stroke="{theme["--line"]}"/>
-<line class="grid" x1="{left+plot_w/2}" y1="{top}" x2="{left+plot_w/2}" y2="{top+plot_h}" stroke="{theme["--line"]}"/>
+<line class="grid" x1="{left}" y1="{top + plot_h / 2}" x2="{left + plot_w}" y2="{top + plot_h / 2}" stroke="{theme["--line"]}"/>
+<line class="grid" x1="{left + plot_w / 2}" y1="{top}" x2="{left + plot_w / 2}" y2="{top + plot_h}" stroke="{theme["--line"]}"/>
 <polygon class="hull" points="{polygon}" fill="{theme["--accent"]}" fill-opacity="0.2" stroke="{theme["--accent"]}" stroke-width="3"/>
-{''.join(trajectories)}{''.join(terminal_marks)}
-<text x="{left+plot_w/2-18}" y="{top+plot_h+34}" class="label">position</text>
-<text x="24" y="{top+plot_h/2}" class="label" transform="rotate(-90 24 {top+plot_h/2})">velocity</text>
-<text x="{left-18}" y="{top+plot_h+18}" class="small">0</text><text x="{left+plot_w-5}" y="{top+plot_h+18}" class="small">1</text>
-<text x="{left-28}" y="{top+plot_h+4}" class="small">0</text><text x="{left-28}" y="{top+12}" class="small">1</text>
+{"".join(trajectories)}{"".join(terminal_marks)}
+<text x="{left + plot_w / 2 - 18}" y="{top + plot_h + 34}" class="label">position</text>
+<text x="24" y="{top + plot_h / 2}" class="label" transform="rotate(-90 24 {top + plot_h / 2})">velocity</text>
+<text x="{left - 18}" y="{top + plot_h + 18}" class="small">0</text><text x="{left + plot_w - 5}" y="{top + plot_h + 18}" class="small">1</text>
+<text x="{left - 28}" y="{top + plot_h + 4}" class="small">0</text><text x="{left - 28}" y="{top + 12}" class="small">1</text>
 <text x="680" y="145" class="label">Independent checks</text>
 <text x="680" y="178" class="small">Reachable hull = unit square</text>
 <text x="680" y="203" class="small">Both recovered histories replay</text>
