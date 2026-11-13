@@ -433,6 +433,10 @@ Q subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2
                 "Q diagonal; terminal QN=Q: 0, 0, 10, 10, 10, 10, 0, 0, 0, 5, 5, 5",
                 "Reference r: 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0",
             ]
+            expected["native-forward-models"] = [
+                "Slide 50", "Separately authored box; historical X0 unavailable",
+                "Spatial flight", "Authored deviation set about a synthetic nonlinear reference",
+            ]
             self.assertEqual(set(expected), {chapter["id"] for chapter in self.manifest["chapters"]
                                              if chapter["status"] == "ready"})
             for chapter_id, values in expected.items():
