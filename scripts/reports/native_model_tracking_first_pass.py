@@ -9,12 +9,10 @@ import hashlib
 import json
 import os
 import pathlib
-import subprocess
-import sys
 import shutil
+import subprocess
 import time
 from datetime import datetime, timezone
-
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
@@ -61,6 +59,16 @@ def verify_inventory(prefix: pathlib.Path, inventory: pathlib.Path) -> tuple[str
     if not count:
         raise SystemExit("SDK SHA256SUMS inventory is empty")
     return sha256(inventory), count
+
+
+def snapshot_identity(inventory_sha256: str, verified_file_count: int) -> dict[str, object]:
+    """Describe a supplied SDK snapshot by verified contents, not the current branch."""
+    return {
+        "kind": "caller-supplied installed SDK snapshot",
+        "inventory_sha256": inventory_sha256,
+        "verified_inventory_file_count": verified_file_count,
+        "whole_sdk_source_qualification_claimed": False,
+    }
 
 
 def run_one(command: list[str], case: pathlib.Path, timeout_s: int) -> dict[str, object]:
@@ -128,7 +136,7 @@ def main() -> int:
         "catalogue": build / "native_discrete_models",
         "source21": build / "quadcopter_mpc",
     }
-    for name, binary in binaries.items():
+    for _name, binary in binaries.items():
         if not binary.is_file():
             raise SystemExit(f"Required built executable is missing: {binary}")
     args.output_parent.mkdir(parents=True, exist_ok=True)
@@ -192,7 +200,7 @@ def main() -> int:
             "linked_archives_sha256": {
                 archive.name: sha256(archive) for archive in sorted((sdk_snapshot / "lib").glob("*.a"))
             },
-            "snapshot_identity": "composed current-main 4ec installed package snapshot; this capture does not claim a whole-SDK qualification",
+            "snapshot_identity": snapshot_identity(inventory_sha, inventory_count),
         },
         "native_build_receipt": {
             "cmake_cache_sha256": sha256(build / "CMakeCache.txt"),

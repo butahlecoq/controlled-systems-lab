@@ -2,6 +2,7 @@
 import hashlib
 import importlib
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -14,6 +15,7 @@ sys.path.insert(0, str(ROOT / 'scripts/reports'))
 renderer = importlib.import_module("native_discrete_models")
 native = importlib.import_module("stage_native_discrete_models")
 tracking_bundle = importlib.import_module("stage_native_model_tracking_first_pass")
+capture_tracking = importlib.import_module("native_model_tracking_first_pass")
 
 
 class Links(HTMLParser):
@@ -133,19 +135,61 @@ class NativeDiscreteTests(unittest.TestCase):
         self.assertIn("models.csv", page)
         self.assertIn("source-input-inventory.json", page)
         self.assertIn("native-refusal.json", page)
+        self.assertIn("observed states only", page)
+        self.assertNotIn("against its saved per-replan prediction", page)
+        self.assertIn('href="REPRODUCING.md"', page)
+        self.assertIn("raw/model-21/plans.csv", page)
+        self.assertIn("raw/model-01/trace.csv", page)
+        self.assertIn("Prediction plans", page)
         self.assertIn("35 model records", card)
         self.assertIn(route + "raw/models.csv", files)
         self.assertIn(route + "raw/model-21/plans.csv", files)
         archive_bytes = files[route + tracking_bundle.ROUTE + ".zip"]
+        self.assertEqual(tracking_bundle.deterministic_zip({
+            name.removeprefix(route): content
+            for name, content in files.items()
+            if name.startswith(route) and not name.endswith(".zip") and not name.endswith(".zip.sha256")
+        }), archive_bytes)
         with zipfile.ZipFile(io.BytesIO(archive_bytes)) as archive:
             self.assertIsNone(archive.testzip())
+            names_in_order = archive.namelist()
+            self.assertEqual(names_in_order, sorted(names_in_order))
+            self.assertTrue(all(info.date_time == (1980, 1, 1, 0, 0, 0)
+                                for info in archive.infolist()))
             names = set(archive.namelist())
             self.assertIn("raw/models.csv", names)
             self.assertIn("raw/model-21/plans.csv", names)
+            self.assertIn("REPRODUCING.md", names)
+            self.assertIn("portable_renderer_commit", archive.read("source-binding.json").decode())
+            self.assertIn("historical producer", archive.read("REPRODUCING.md").decode())
             for number in (23, 27, 28):
                 refusal = json.loads(archive.read(f"raw/model-{number:02d}/native-refusal.json"))
                 self.assertEqual(refusal["status"], "failed")
                 self.assertIn("native removal threshold 1e-12", refusal["diagnostic"])
+
+    def test_snapshot_identity_tracks_supplied_verified_contents(self):
+        first = capture_tracking.snapshot_identity("a" * 64, 240)
+        second = capture_tracking.snapshot_identity("b" * 64, 17)
+        self.assertEqual(first["inventory_sha256"], "a" * 64)
+        self.assertEqual(first["verified_inventory_file_count"], 240)
+        self.assertNotEqual(first, second)
+        self.assertFalse(first["whole_sdk_source_qualification_claimed"])
+
+    def test_tracking_publication_lock_and_read_only_cli_check(self):
+        import json
+
+        publication = ROOT / "reports/algorithm-results" / tracking_bundle.ROUTE
+        lock = json.loads((publication / "publication-lock.json").read_text(encoding="utf-8"))
+        binding = json.loads((tracking_bundle.build(ROOT)[0][
+            tracking_bundle.ROUTE + "/source-binding.json"]).decode())
+        self.assertEqual(lock["archive_sha256"], hashlib.sha256(
+            (publication / (tracking_bundle.ROUTE + ".zip")).read_bytes()).hexdigest())
+        self.assertEqual(binding["portable_renderer_commit"], lock["portable_renderer_commit"])
+        completed = subprocess.run(
+            [sys.executable, str(ROOT / "scripts/reports/stage_native_model_tracking_first_pass.py"), "--check"],
+            cwd=ROOT, capture_output=True, text=True, check=False)
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertIn("verified", completed.stdout)
 
     def test_rewritten_manifest_unlisted_file_and_symlink_are_rejected(self):
         manifest = self.bundle / 'manifest.json'

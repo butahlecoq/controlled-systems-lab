@@ -1,11 +1,12 @@
 """Stage immutable 35-model native tracking evidence; never reruns a solver."""
 from __future__ import annotations
 
+import argparse
 import csv
 import hashlib
 import json
-import zipfile
 import subprocess
+import zipfile
 from html import escape
 from io import BytesIO
 from pathlib import Path
@@ -19,6 +20,20 @@ CHECKS = "independent-checks-20261113T190626Z"
 FIGURES = "visual-example-20261113T184921Z"
 CAPTURE_MANIFEST_SHA256 = "2ce8a1783b4a32463c2accb7c4af80d73b4f6617d8c1ffd8fba13b6c59f491a2"
 INPUT_INVENTORY_SHA256 = "df9e747702b2807d1657e6ce5ca0eebe2da4c50869d1bad02d4bbe5461242fec"
+LOCK = "publication-lock.json"
+
+
+def deterministic_zip(files: dict[str, bytes]) -> bytes:
+    archive_buffer = BytesIO()
+    with zipfile.ZipFile(archive_buffer, "w", compression=zipfile.ZIP_STORED,
+                         strict_timestamps=True) as archive:
+        for name, content in sorted(files.items()):
+            info = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
+            info.compress_type = zipfile.ZIP_STORED
+            info.create_system = 3
+            info.external_attr = (0o100644 & 0xFFFF) << 16
+            archive.writestr(info, content, compress_type=zipfile.ZIP_STORED)
+    return archive_buffer.getvalue()
 
 
 def digest(data: bytes) -> str:
@@ -26,7 +41,26 @@ def digest(data: bytes) -> str:
 
 
 def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]], str]:
-    root = Path(repository_root) / "reports/algorithm-results/native-model-tracking-first-pass-v1"
+    repository_root = Path(repository_root)
+    root = repository_root / "reports/algorithm-results/native-model-tracking-first-pass-v1"
+    lock_path = root / LOCK
+    require(not lock_path.is_symlink(), "publication lock is symlinked")
+    lock = json.loads(lock_path.read_text(encoding="utf-8")) if lock_path.is_file() else None
+    if lock is not None:
+        require(lock.get("schema") == "csl.native-model-tracking-publication-lock/1",
+                "publication lock schema changed")
+        renderer_commit = lock.get("portable_renderer_commit")
+        require(isinstance(renderer_commit, str) and len(renderer_commit) == 40,
+                "portable renderer commit is missing")
+        pinned_renderer = subprocess.run(
+            ["git", "show", f"{renderer_commit}:scripts/reports/stage_native_model_tracking_first_pass.py"],
+            cwd=repository_root, capture_output=True, check=False)
+        require(pinned_renderer.returncode == 0 and pinned_renderer.stdout == Path(__file__).read_bytes(),
+                "portable renderer differs from its pinned commit")
+        archive_sha = lock.get("archive_sha256")
+        require(archive_sha is None or (isinstance(archive_sha, str) and len(archive_sha) == 64 and
+                                        all(ch in "0123456789abcdef" for ch in archive_sha)),
+                "publication lock archive hash is invalid")
     capture = root / CAPTURE
     manifest_bytes = (capture / "manifest.json").read_bytes()
     require(digest(manifest_bytes) == CAPTURE_MANIFEST_SHA256, "frozen model tracking capture changed")
@@ -190,29 +224,47 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
         "producer_commit": source_commit,
         "producer_permalink": f"https://github.com/butahlecoq/controlled-systems-lab/tree/{source_commit}",
         "producer_source_sha256": manifest["working_source_sha256"],
+        "portable_renderer_commit": lock.get("portable_renderer_commit") if lock else None,
+        "portable_renderer_source_sha256": digest(Path(__file__).read_bytes()),
         "supervisor_note": "This binding authenticates the committed producer bytes; the frozen captures predate this staging supervisor and were not run by it.",
     }, indent=2, sort_keys=True)+"\n").encode()
     files["README.txt"] = ("Functional native tracking evidence for 35 catalogue records. Saved outcomes include all refusals. "
         "No performance comparison or nonlinear stability claim is made. The HTML report links to raw records; this folder is self-contained.\n").encode()
+    reproducing_path = root / "REPRODUCING.md"
+    require(reproducing_path.is_file() and not reproducing_path.is_symlink(),
+            "portable reproduction instructions are missing")
+    files["REPRODUCING.md"] = reproducing_path.read_bytes()
 
     links = ''.join('<li>model %d: %s</li>' % (i, ' · '.join(
         f'<a href="raw/model-{i:02d}/{name}">{label}</a>'
         for name, label in (("attempt.json", "attempt"), ("run.txt", "task and outcome"),
-                            ("plans.csv", "plans"), ("trace.csv", "executed trace"),
+                            ("plans.csv", "saved predictions / plans CSV"),
+                            ("trace.csv", "saved predictions and executed trace CSV"),
                             ("native-refusal.json", "typed refusal"),
                             ("stdout.log", "stdout"), ("stderr.log", "stderr"))
         if f"raw/model-{i:02d}/{name}" in files)) for i in range(1, 36))
-    page = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Native model tracking · saved functional evidence</title><link rel="stylesheet" href="examples.css"><style>.matrix{{overflow:auto;max-width:100%}}.matrix table{{border-collapse:collapse;font:0.75rem monospace;white-space:nowrap}}.matrix td{{padding:.15rem .35rem;border:1px solid #8884}}details{{margin:.5rem 0}}summary{{cursor:pointer}}</style></head><body><a class="skip" href="#main">Skip to report</a><main id="main" class="page-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li>Examples</li><li aria-current="page">Native model tracking</li></ol></nav><p class="eyebrow">Native C++ · functional first pass</p><h1>35 native models: matrix inputs and observed-state tracking</h1><p>This saved first pass attempted all 35 public discrete-model records. It completed 32 closed-loop cases and preserved three typed solver refusals. The objectives for 34 horizon-free records are authored educational tracking profiles; source21 keeps its literal source task. These results do not establish a cross-model performance winner, physical calibration, or nonlinear stability.</p><nav><a href="{ROUTE}.zip">Download complete evidence ZIP</a> · <a href="capture-manifest.json">Capture metadata</a> · <a href="source-binding.json">Source binding</a> · <a href="source-input-inventory.json">Input hashes</a> · <a href="https://github.com/butahlecoq/controlled-systems-lab/tree/{source_commit}">Producer source commit</a></nav><h2>Complete model inputs</h2><p>Each record below exposes its full A, B, G, affine offset, initial state and nominal external input. The matrix-first CSV preserves every exact captured numeric cell by model identity and row/column; coordinate names and units are in the companion CSV. Owner-private source locators are omitted; source labels, hashes, qualification, and time units remain.</p><p><a href="raw/models.csv">models.csv</a> · <a href="raw/catalogue.csv">catalogue.csv</a> · <a href="raw/coordinates.csv">coordinates.csv</a></p>{''.join(matrix_sections)}<h2>Saved projections</h2><p>Each available two-state model projection shows the executed path against its saved per-replan prediction. The full-state trajectory and independent dynamics/objective checks are available below and remain authoritative over these two-axis views.</p>{''.join(f'<figure><img src="figures/{Path(name).name}" alt="Saved model projection"><figcaption>{escape(Path(name).stem)}</figcaption></figure>' for name in sorted(n for n in files if n.startswith('figures/')))}<h2>Independent checks and complete trajectories</h2><ul><li><a href="checks/independent_results.csv">Per-model independent objective and dynamics results</a></li><li><a href="checks/full_state_trajectory_checked.csv">All-stage full-state replay trajectories</a></li><li><a href="checks/checks.json">Checker provenance</a></li></ul><h2>Every attempted case</h2><ul>{links}</ul><p>Raw stdout and stderr are preserved for every attempt. Plans, traces, and typed refusals are linked where the solver emitted them. The original capture manifest remains in the repository report archive; the published metadata is a location-free projection bound to its SHA-256.</p></main></body></html>'''
+    page = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Native model tracking · saved functional evidence</title><link rel="stylesheet" href="examples.css"><style>.matrix{{overflow:auto;max-width:100%}}.matrix table{{border-collapse:collapse;font:0.75rem monospace;white-space:nowrap}}.matrix td{{padding:.15rem .35rem;border:1px solid #8884}}details{{margin:.5rem 0}}summary{{cursor:pointer}}</style></head><body><a class="skip" href="#main">Skip to report</a><main id="main" class="page-content"><nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li>Examples</li><li aria-current="page">Native model tracking</li></ol></nav><p class="eyebrow">Native C++ · functional first pass</p><h1>35 native models: matrix inputs and observed-state tracking</h1><p>This saved first pass attempted all 35 public discrete-model records. It completed 32 closed-loop cases and preserved three typed solver refusals. The objectives for 34 horizon-free records are authored educational tracking profiles; source21 keeps its literal source task. These results do not establish a cross-model performance winner, physical calibration, or nonlinear stability.</p><nav><a href="{ROUTE}.zip">Download complete evidence ZIP</a> · <a href="REPRODUCING.md">Reproduce and verify this saved bundle</a> · <a href="capture-manifest.json">Capture metadata</a> · <a href="source-binding.json">Source binding</a> · <a href="source-input-inventory.json">Input hashes</a> · <a href="https://github.com/butahlecoq/controlled-systems-lab/tree/{source_commit}">Historical producer source commit</a></nav><h2>Complete model inputs</h2><p>Each record below exposes its full A, B, G, affine offset, initial state and nominal external input. The matrix-first CSV preserves every exact captured numeric cell by model identity and row/column; coordinate names and units are in the companion CSV. Owner-private source locators are omitted; source labels, hashes, qualification, and time units remain.</p><p><a href="raw/models.csv">models.csv</a> · <a href="raw/catalogue.csv">catalogue.csv</a> · <a href="raw/coordinates.csv">coordinates.csv</a></p>{''.join(matrix_sections)}<h2>Saved projections</h2><p>These two-state SVGs show executed observed states only; they do not overlay planned predictions. The source21 and authored-task CSV links below preserve the saved per-replan predictions alongside the executed traces. Independent full-state dynamics and objective checks are available below.</p>{''.join(f'<figure><img src="figures/{Path(name).name}" alt="Saved observed-state model projection"><figcaption>{escape(Path(name).stem)} · observed path</figcaption></figure>' for name in sorted(n for n in files if n.startswith('figures/')))}<h2>Independent checks and complete trajectories</h2><ul><li><a href="checks/independent_results.csv">Per-model independent objective and dynamics results</a></li><li><a href="checks/full_state_trajectory_checked.csv">All-stage full-state replay trajectories</a></li><li><a href="checks/checks.json">Checker provenance</a></li></ul><h2>Every attempted case</h2><ul>{links}</ul><p>Raw stdout and stderr are preserved for every attempt. Prediction plans, executed traces, and typed refusals are linked where the solver emitted them. The original capture manifest remains in the repository report archive; the published metadata is a location-free projection bound to its SHA-256.</p></main></body></html>'''
     files["index.html"] = page.encode()
     # Include the page and a checksum inventory in the offline bundle. The inventory excludes
     # itself and the ZIP to avoid recursive hashes; the adjacent .zip.sha256 authenticates ZIP.
     files.pop("SHA256SUMS.json", None)
     files["SHA256SUMS.json"] = (json.dumps({n: digest(b) for n, b in sorted(files.items())}, indent=2, sort_keys=True)+"\n").encode()
-    archive_buffer = BytesIO()
-    with zipfile.ZipFile(archive_buffer, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
-        for name, content in sorted(files.items()):
-            archive.writestr(name, content)
-    files[ROUTE+".zip"] = archive_buffer.getvalue()
+    files[ROUTE+".zip"] = deterministic_zip(files)
+    archive_path = root / (ROUTE + ".zip")
+    sidecar_path = root / (ROUTE + ".zip.sha256")
+    lock_path = root / LOCK
+    if lock_path.is_file():
+        lock = json.loads(lock_path.read_text(encoding="utf-8"))
+        expected_archive_sha256 = lock.get("archive_sha256")
+        if expected_archive_sha256 is not None:
+            require(digest(files[ROUTE+".zip"]) == expected_archive_sha256,
+                    "generated archive differs from the pinned publication lock")
+            require(not archive_path.is_symlink() and archive_path.is_file() and
+                    archive_path.read_bytes() == files[ROUTE+".zip"],
+                    "committed archive differs from reproducible output")
+            require(not sidecar_path.is_symlink() and sidecar_path.is_file() and
+                    sidecar_path.read_bytes() == (expected_archive_sha256+"  "+ROUTE+".zip\n").encode("ascii"),
+                    "committed archive checksum differs from the publication lock")
     files[ROUTE+".zip.sha256"] = (digest(files[ROUTE+".zip"])+"  "+ROUTE+".zip\n").encode()
     outputs = {ROUTE+"/"+name: content for name, content in files.items()}
     figure = ROUTE+"/figures/model-21-state-3-9.svg"
@@ -225,3 +277,31 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
             '<p>Matrix-first inputs, 35 attempted cases, 32 completed runs, three retained solver refusals, and independent full-state/objective checks.</p>'
             f'<p><a href="{entry["page"]}">Open the saved report →</a> · <a href="{ROUTE}/{ROUTE}.zip">Download raw evidence</a></p></article>')
     return outputs, [entry], card
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Verify the saved native model tracking publication")
+    parser.add_argument("--check", action="store_true",
+                        help="rebuild the location-free bundle in memory and compare it with committed outputs")
+    parser.add_argument("--repository-root", type=Path, default=ROOT)
+    args = parser.parse_args()
+    if not args.check:
+        parser.error("--check is required; this command never writes or reruns model cases")
+    files, _, _ = build(args.repository_root)
+    output_root = Path(args.repository_root) / "reports/algorithm-results" / ROUTE
+    archive_path = output_root / (ROUTE + ".zip")
+    sidecar_path = output_root / (ROUTE + ".zip.sha256")
+    archive_key = ROUTE + "/" + ROUTE + ".zip"
+    sidecar_key = archive_key + ".sha256"
+    require(not archive_path.is_symlink() and archive_path.is_file() and
+            archive_path.read_bytes() == files[archive_key],
+            "committed archive differs from reproducible output")
+    require(not sidecar_path.is_symlink() and sidecar_path.is_file() and
+            sidecar_path.read_bytes() == files[sidecar_key],
+            "committed archive checksum differs from reproducible output")
+    print(f"verified {len(files)} generated bundle files; archive sha256={digest(files[archive_key])}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

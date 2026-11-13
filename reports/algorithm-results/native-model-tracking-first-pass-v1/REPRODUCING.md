@@ -1,27 +1,69 @@
-# Reproduce a new native tracking capture
+# Verify or reproduce the saved publication
 
-The supervisor requires a configured build directory and an installed CSL prefix. The installed prefix must have a sibling `SHA256SUMS` inventory. Inventory rows may use either prefix-relative paths or the absolute paths emitted by `sha256sum`; every listed file is verified before capture. Keep captures in a new output parent to preserve previous attempts.
+This bundle is a location-free rendering of committed capture, independent-check,
+and figure inputs. Verifying it does not run a solver or repeat the 35 model
+attempts. The exact historical producer for the captures is commit
+`635ac5ba59d230e2b09062690adc943ea6451568`; the portable publication renderer
+is separately pinned in `source-binding.json`. The renderer pin authenticates
+the packaging code, not the earlier native run.
+
+Use a full-history checkout because the bundle verifies both its historical
+producer source and the portable renderer pin with `git show`:
+
+```sh
+git clone https://github.com/butahlecoq/controlled-systems-lab.git
+cd controlled-systems-lab
+```
+
+Compare the working renderer with its published source pin, then regenerate the
+location-free files in memory and compare every staged output, including the
+versioned ZIP:
+
+```sh
+TOOL_COMMIT=$(python3 -c 'import json; print(json.load(open("reports/algorithm-results/native-model-tracking-first-pass-v1/source-binding.json"))["portable_renderer_commit"])')
+git show "$TOOL_COMMIT:scripts/reports/stage_native_model_tracking_first_pass.py" > /tmp/stage-native-model-tracking-pinned.py
+cmp /tmp/stage-native-model-tracking-pinned.py scripts/reports/stage_native_model_tracking_first_pass.py
+python3 -B scripts/reports/stage_native_model_tracking_first_pass.py --check
+```
+
+The check needs only Python's standard library and the committed repository
+inputs. `--check` is read-only. Its ZIP uses sorted member names and fixed file
+metadata, and the committed publication lock authenticates the exact archive
+bytes. `SHA256SUMS.json` inventories the bundle members other than itself and
+the enclosing ZIP; `native-model-tracking-first-pass-v1.zip.sha256` authenticates
+the ZIP.
+
+## Make a new native capture
+
+This creates new evidence; it does not reproduce the historical capture by
+overwriting it. It requires a configured C++ toolchain and an installed CSL
+prefix whose `lib/cmake/CSL` exports the native targets. Set `CSL_PREFIX` to
+that installed prefix:
 
 ```sh
 cmake -S examples -B build/native-tracking \
-  -DCSL_DIR=/path/to/csl-prefix/lib/cmake/CSL \
+  -DCSL_DIR="$CSL_PREFIX/lib/cmake/CSL" \
   -DCMAKE_BUILD_TYPE=Release
-cmake --build build/native-tracking --target native_model_tracking native_discrete_models quadcopter_mpc -j1
-python -B scripts/reports/native_model_tracking_first_pass.py \
+cmake --build build/native-tracking --parallel 1 \
+  --target native_model_tracking native_discrete_models quadcopter_mpc
+python3 -B scripts/reports/native_model_tracking_first_pass.py \
   --build build/native-tracking \
-  --sdk-snapshot /path/to/csl-prefix \
+  --sdk-snapshot "$CSL_PREFIX" \
   --output-parent reports/algorithm-results/native-model-tracking-first-pass-v1
 ```
 
-Add `--component-qualification /path/to/component-receipt.json` only when that receipt's named installed archive exists in the supplied prefix and its bytes match the recorded SHA-256. Without it, the capture records no component qualification. `--cmake /path/to/cmake` is optional when the executable is discoverable from the CMake cache or `PATH`. Set `TMPDIR` to a filesystem with enough space before the command if needed.
-
-The fixed attempt policy is 60 seconds per authored case, 120 seconds for literal source21, and one thread for numerical libraries. All 35 are attempted; failures and timeouts remain in the capture. The source21 task is literal. Other 34 task profiles are authored nominal quadratic educational tracking profiles, with fixed three-stage receding horizon. No performance comparison or physical nonlinear stability claim is made.
-
-After capture, independently check one explicit capture path:
+The supervisor verifies the installed prefix's `SHA256SUMS` inventory and
+creates a timestamped capture. All 35 records are attempted. Model21 follows
+the literal source task; the other 34 use authored educational profiles. The
+fixed attempt limits are 60 seconds per authored case and 120 seconds for
+source21. Failures and timeouts stay in the new capture. To independently
+verify one generated capture, pass its explicit path:
 
 ```sh
-python -B scripts/reports/verify_native_model_tracking_first_pass.py \
+python3 -B scripts/reports/verify_native_model_tracking_first_pass.py \
   reports/algorithm-results/native-model-tracking-first-pass-v1/capture-YYYYMMDDTHHMMSSZ
 ```
 
-The checker rejects altered model identities/statuses and verifies all attempt stdout/stderr digests before evaluating completed trajectories. It writes a new sibling checks directory rather than changing the capture.
+The verifier writes a new sibling check directory and leaves the capture
+unchanged. This workflow makes no performance-ranking or physical nonlinear
+stability claim.

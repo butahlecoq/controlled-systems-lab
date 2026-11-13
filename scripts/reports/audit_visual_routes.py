@@ -512,21 +512,25 @@ def build(root: Path = ROOT) -> dict:
                     "buryatia-dim4-literal-affine-v1/buryatia-dim4-matlab-literal-affine-v1.json",
                     "buryatia-dim4-literal-affine-v1/terminal-x1-x2.svg",
                     "native-model-tracking-first-pass-v1/index.html",
+                    "native-model-tracking-first-pass-v1/REPRODUCING.md",
                     "native-model-tracking-first-pass-v1/figures/model-21-state-3-9.svg",
                     "native-model-tracking-first-pass-v1/raw/models.csv",
                     "native-model-tracking-first-pass-v1/raw/catalogue.csv",
                     "native-model-tracking-first-pass-v1/raw/coordinates.csv",
                     "native-model-tracking-first-pass-v1/checks/independent_results.csv",
                     "native-model-tracking-first-pass-v1/checks/full_state_trajectory_checked.csv",
-                    "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip"] + stage_buryatia_volterra.asset_paths() + geometry_companion_assets() +
+                    "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip",
+                    "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip.sha256"] + stage_buryatia_volterra.asset_paths() + geometry_companion_assets() +
                     viz10_companion_assets() + control_witness_companions.asset_paths(),
                  "disposition": "adopted-shared-quantitative-policy"},
                 {"route": "examples/native-model-tracking-first-pass-v1/index.html",
                  "assets": ["native-model-tracking-first-pass-v1/index.html",
+                            "native-model-tracking-first-pass-v1/REPRODUCING.md",
                             "native-model-tracking-first-pass-v1/capture-manifest.json",
                             "native-model-tracking-first-pass-v1/source-binding.json",
                             "native-model-tracking-first-pass-v1/SHA256SUMS.json",
-                            "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip"],
+                            "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip",
+                            "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip.sha256"],
                  "disposition": "source-owned saved functional bundle; no optimization is rerun"}],
             "migration_owner": "#669 owns the shared policy; deferred family renderers link to scoped follow-up issues #684–#687, while frozen report bundles remain immutable evidence"}
 
