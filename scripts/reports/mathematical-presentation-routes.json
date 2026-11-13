@@ -373,6 +373,13 @@
       "owner": "docs/examples/buryatia-dim4-literal-affine.html"
     },
     {
+      "route": "examples/buryatia-volterra-affine-2d-superseded-v1.html",
+      "disposition": "frozen",
+      "owner": "docs/examples/buryatia-volterra-affine-2d-superseded-v1.html",
+      "sha256": "187f1b0e227b98d4b38efbbb7a2858afcb4b2c2db23b8b17cdfbce340faadf8e",
+      "witness": "Historical superseded-v1 drawing; exact retained source at 4ec928cb9076079f41c0db53db6c8d7fc000090a:docs/examples/buryatia-volterra-affine-2d-superseded-v1.html, authenticated separately from the corrected native v2 drawing by stage_buryatia_volterra."
+    },
+    {
       "route": "examples/buryatia-volterra-affine-2d.html",
       "disposition": "maintained",
       "owner": "docs/examples/buryatia-volterra-affine-2d.html"
@@ -591,6 +598,11 @@
       "route": "examples/native-spatial-flight.html",
       "disposition": "maintained",
       "owner": "docs/examples/native-spatial-flight.html"
+    },
+    {
+      "route": "examples/nominal-quadratic-history-2d.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_nominal_quadratic_history.py"
     },
     {
       "route": "examples/nominal_linear_exact_2d.html",
