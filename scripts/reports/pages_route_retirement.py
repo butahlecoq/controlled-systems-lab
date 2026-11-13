@@ -51,7 +51,7 @@ EXAMPLE_ROUTE_PRODUCERS = {
     "examples/native-row-scaling-diagnostic-v1/index.html": ["scripts/reports/stage_native_row_scaling_diagnostic.py", "reports/algorithm-results/native-row-scaling-diagnostic-v1/index.html"],
     "examples/native-row-scaling-diagnostic-v1/guide.html": ["scripts/reports/stage_native_row_scaling_diagnostic.py", "reports/algorithm-results/native-row-scaling-diagnostic-v1/guide.html"],
     "examples/native-model-tracking-first-pass-v1/index.html": ["scripts/reports/stage_native_model_tracking_first_pass.py", "scripts/reports/visual_examples.py"],
-    "examples/native-model-tracking-first-pass-v1/REPRODUCING.md": ["scripts/reports/stage_native_model_tracking_first_pass.py", "reports/algorithm-results/native-model-tracking-first-pass-v1/REPRODUCING.md"],
+    "examples/native-model-tracking-first-pass-v1/reproducing.html": ["scripts/reports/stage_native_model_tracking_first_pass.py", "reports/algorithm-results/native-model-tracking-first-pass-v1/reproducing.html"],
     "examples/native-model-tracking-first-pass-v1/figures/model-21-state-3-9.svg": ["scripts/reports/stage_native_model_tracking_first_pass.py", "reports/algorithm-results/native-model-tracking-first-pass-v1/visual-example-20261113T184921Z/figures/model-21-state-3-9.svg"],
     "examples/native-fixed-tail-geometry-a6/index.html": [
         "scripts/reports/native_fixed_tail_geometry.py",
