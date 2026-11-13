@@ -4,6 +4,7 @@
 #include <two_points_fixture.hpp>
 
 #include <cmath>
+#include <stop_token>
 
 using namespace csl;
 using namespace csl::reachability;
@@ -39,6 +40,20 @@ FixedPlanRequest planar_request() {
   return {system, initial, {{0}}, {disturbance},
       {planar_safe("planar-safe-initial",2), planar_safe("planar-safe-terminal",2)},
       {"planar-parallelotope"}};
+}
+sets::SetData four_state_domain(std::string id, Matrix inequalities, Vector upper_bounds,
+                                Matrix equalities = {0, 4, {}}, Vector equality_values = {}) {
+    return take(sets::make_h({{std::move(id)}, 4, {}},
+                             {take(numeric::snapshot(std::move(inequalities))),
+                              take(numeric::snapshot_vector(std::move(upper_bounds))),
+                              take(numeric::snapshot(std::move(equalities))),
+                              take(numeric::snapshot_vector(std::move(equality_values)))}));
+}
+sets::SetData wide_four_state_domain() {
+    return four_state_domain("wide-four-state-domain",
+                             {8, 4, {1, 0, 0, 0, -1, 0, 0,  0, 0, 1, 0, 0, 0, -1, 0, 0,
+                                     0, 0, 1, 0, 0,  0, -1, 0, 0, 0, 0, 1, 0, 0,  0, -1}},
+                             Vector(8, 100));
 }
 } // namespace
 
@@ -99,17 +114,101 @@ TEST_CASE("parallelotope route supports bounded two-state LV-shaped propagation"
       "finite_plan_parallelotope.safe_sets");
 }
 
-TEST_CASE("parallelotope keeps its four-state universal-safe-set profile refusal") {
-  auto request = two_points_request();
-  auto bounded = take(sets::make_v(
-      {{"bounded-four-state-safe"}, 4, {}},
-      {take(numeric::snapshot(Matrix{1, 4, {0.0, 0.0, 0.0, 0.0}})),
-       take(numeric::snapshot(Matrix{0, 4, {}}))}));
-  request.admissible_states[1] = std::move(bounded);
+TEST_CASE("four-state parallelotope accepts unconstrained and containing H domains") {
+    auto request = two_points_request();
+    auto domain = four_state_domain("zero-row-four-state-H", {0, 4, {}}, {});
+    SUBCASE("zero-row H represents the unconstrained orbit domain") {}
+    SUBCASE("bounded H contains every propagated outer parallelotope") {
+        domain = wide_four_state_domain();
+    }
+    SUBCASE("coupled H contains every propagated outer parallelotope") {
+        domain = four_state_domain("wide-coupled-H", {1, 4, {1, -1, 0, 0}}, {100});
+    }
+    request.admissible_states.assign(request.admissible_states.size(), domain);
+    const auto result = finite_plan_parallelotope(request);
+    REQUIRE(std::holds_alternative<FinitePlanParallelotopeTrace>(result));
+    const auto &trace = std::get<FinitePlanParallelotopeTrace>(result);
+    CHECK(trace.relation == SetRelation::outer);
+    CHECK(trace.assurance == Assurance::numerical);
+    CHECK(trace.stages.size() == request.system.horizon() + 1);
+}
 
-  const auto result = finite_plan_parallelotope(request);
-  REQUIRE(std::holds_alternative<Unsupported>(result));
-  const auto& diagnostic = std::get<Unsupported>(result).diagnostics[0];
-  CHECK(diagnostic.field == "finite_plan_parallelotope.safe_sets");
-  CHECK(diagnostic.explanation == "Universal state constraints are the only supported profile.");
+TEST_CASE("four-state parallelotope checks initial and later H constraints") {
+    auto request = two_points_request();
+    request.admissible_states.assign(request.admissible_states.size(), wide_four_state_domain());
+    bool initial = false;
+    SUBCASE("initial coordinate bound is violated") {
+        initial = true;
+        request.admissible_states[0] =
+            four_state_domain("tight-initial", {1, 4, {1, 0, 0, 0}}, {4});
+    }
+    SUBCASE("later coordinate bound is violated") {
+        request.admissible_states[1] = four_state_domain("tight-later", {1, 4, {1, 0, 0, 0}}, {4});
+    }
+    SUBCASE("coupled H row excludes the propagated set") {
+        request.admissible_states[1] =
+            four_state_domain("coupled-later", {1, 4, {1, -1, 0, 0}}, {6});
+    }
+    SUBCASE("H equality is not satisfied by the complete outer set") {
+        request.admissible_states[1] =
+            four_state_domain("equality-later", {0, 4, {}}, {}, {1, 4, {1, -1, 0, 0}}, {0});
+    }
+    const auto result = finite_plan_parallelotope(request);
+    REQUIRE(std::holds_alternative<Unsupported>(result));
+    const auto &diagnostic = std::get<Unsupported>(result).diagnostics.front();
+    CHECK(diagnostic.field == "finite_plan_parallelotope.safe_sets");
+    CHECK(
+        diagnostic.explanation ==
+        (initial
+             ? "Initial parallelotope does not certify containment in the physical state constraint."
+             : "Propagated outer parallelotope does not certify containment in the physical state constraint."));
+}
+
+TEST_CASE("four-state parallelotope refuses empty and disjoint singleton domains") {
+    auto request = two_points_request();
+    SUBCASE("empty domain") {
+        request.admissible_states[0] = take(sets::make_empty({{"empty-safe"}, 4, {}}));
+    }
+    SUBCASE("disjoint singleton domain") {
+        request.admissible_states[0] =
+            take(sets::make_singleton({{"disjoint-singleton-safe"}, 4, {}},
+                                      take(numeric::snapshot_vector(Vector{1000, 0, 0, 0}))));
+    }
+    const auto result = finite_plan_parallelotope(request);
+    REQUIRE(std::holds_alternative<Unsupported>(result));
+    CHECK(std::get<Unsupported>(result).diagnostics.front().field ==
+          "finite_plan_parallelotope.safe_sets");
+}
+
+TEST_CASE("four-state parallelotope retains dimension and cancellation boundaries") {
+    auto request = two_points_request();
+    request.admissible_states[0] = planar_safe("wrong-dimensional-safe", 100);
+    const auto malformed = finite_plan_parallelotope(request);
+    REQUIRE(std::holds_alternative<Unsupported>(malformed));
+    CHECK(std::get<Unsupported>(malformed).diagnostics.front().explanation ==
+          "State-constraint dimension differs from model.");
+
+    std::stop_source cancellation;
+    cancellation.request_stop();
+    ExecutionContext context;
+    context.cancellation = cancellation.get_token();
+    const auto cancelled = finite_plan_parallelotope(request, context);
+    REQUIRE(std::holds_alternative<OperationStopped>(cancelled));
+    CHECK(std::get<OperationStopped>(cancelled).reason == StopReason::cancelled);
+}
+
+TEST_CASE("four-state parallelotope refuses unsupported V state domains") {
+    auto request = two_points_request();
+    auto bounded = take(sets::make_v({{"bounded-four-state-safe"}, 4, {}},
+                                     {take(numeric::snapshot(Matrix{1, 4, {0.0, 0.0, 0.0, 0.0}})),
+                                      take(numeric::snapshot(Matrix{0, 4, {}}))}));
+    request.admissible_states[1] = std::move(bounded);
+
+    const auto result = finite_plan_parallelotope(request);
+    REQUIRE(std::holds_alternative<Unsupported>(result));
+    const auto &diagnostic = std::get<Unsupported>(result).diagnostics[0];
+    CHECK(diagnostic.field == "finite_plan_parallelotope.safe_sets");
+    CHECK(
+        diagnostic.explanation ==
+        "Propagated outer parallelotope does not certify containment in the physical state constraint.");
 }
