@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import sys
 import unittest
+import copy
 from pathlib import Path
 from unittest import mock
 
@@ -18,6 +19,7 @@ from full_catalogue import (  # noqa: E402
     predecessor_graphs,
     source_bound_capability_candidates,
 )
+from check_full_catalogue import check_current_factory_rows  # noqa: E402
 
 
 class FullCatalogueDiscoveryTests(unittest.TestCase):
@@ -177,6 +179,31 @@ class FullCatalogueDiscoveryTests(unittest.TestCase):
                 ValueError, "does not select its registered policy factory"
             ):
                 source_bound_capability_candidates(ROOT)
+
+    def test_checker_binds_factory_rows_to_source_task_graphs(self) -> None:
+        candidates = source_bound_capability_candidates(ROOT)
+        check_current_factory_rows(candidates, ROOT)
+
+        role_row = next(
+            row for row in candidates if row["controller_route"] == "continuous_history"
+        )
+        mutations = {
+            "task": lambda row: row.update(task_id="invented-physical-task/1"),
+            "action": lambda row: row.update(action_profile_id="invented-action/1"),
+            "objective": lambda row: row.update(objective_id="invented-objective/1"),
+            "module-role": lambda row: row["module_tuple"]["role_bindings"].update(
+                converter="invented-converter"
+            ),
+            "fingerprint": lambda row: row.update(graph_fingerprint="0" * 64),
+            "source-id": lambda row: row.update(graph_id="invented-source-graph/1"),
+        }
+        for label, mutate in mutations.items():
+            with self.subTest(identity_field=label):
+                selected = copy.deepcopy(candidates)
+                target = next(row for row in selected if row["graph_id"] == role_row["graph_id"])
+                mutate(target)
+                with self.assertRaises(AssertionError):
+                    check_current_factory_rows(selected, ROOT)
 
 
 if __name__ == "__main__":
