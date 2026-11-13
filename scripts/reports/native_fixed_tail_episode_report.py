@@ -87,7 +87,7 @@ def page(records, provenance):
 <h2>Keep source revisions separate</h2><p>All full episodes use source <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{provenance['episode_source_commit']}">{provenance['episode_source_commit']}</a>, with native C++ build <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/{provenance['native_cpp_source_commit']}">{provenance['native_cpp_source_commit']}</a>. The read-only audit checks 450 native queries and 7,925 physical-region instances against original source H/J, literal shifted histories, supplied zero duals, exact command bounds, raw-reference hashes and complete physical costs. Native stderr is retained in the shared supervised worker/native process stream.</p>
 <p class="note">The a6 campaign predates the finer construction-role event trace. Its numerical, warm and stream evidence remains tied to that source; it does not establish current construction-role coverage. Separate <a href="current-role-probe-audit.json">f940 initial-query probes</a> validate declared versus native-observed reference construction, discarded polytope anchor admission and retained family-template construction across all 15 profiles. These probes are not full episodes and do not relabel earlier captures. <a href="current-role-probes.zip">Download their raw records</a>.</p>
 <p>The preserved <a href="historical-orbit-polytope-prefix/raw.zip">historical orbit polytope prefix</a> stopped after 1/20 holds when the raw optimizer missed an actuator bound by about 6×10⁻¹³. Native guarded endpoint recovery fixed that execution failure. The historical recorder discarded separate native stderr; those bytes cannot be reconstructed. <a href="historical-orbit-polytope-prefix/qualification.json">Read its qualification</a>.</p>
-<h2>Reproduce the reading layer</h2><p>Each raw ZIP preserves the original attempt, stage records, requests, responses, solver diagnostics, shared stderr, graph identity, replay and postcheck outputs. Receipts retain source/binary hashes and every archive member hash. No native executable is distributed in these data archives.</p><p><a href="source-build-receipt.json">Original build receipt</a> · <a href="audit-source.py">Audit source snapshot</a> · <a href="render-source.py">Saved-data renderer</a> · <a href="role-audit-source.py">Role-probe audit source</a> · <a href="files.sha256">Frozen file hashes</a></p>
+<h2>Reproduce the reading layer</h2><pre><code>python scripts/reports/native_fixed_tail_episode_report.py --out build/native-fixed-tail-site</code></pre><p>Open build/native-fixed-tail-site/index.html. This reads frozen records and runs no controller or benchmark.</p><p>Each raw ZIP preserves the original attempt, stage records, requests, responses, solver diagnostics, shared stderr, graph identity, replay and postcheck outputs. Receipts retain source/binary hashes and every archive member hash. No native executable is distributed in these data archives.</p><p><a href="source-build-receipt.json">Original build receipt</a> · <a href="audit-source.py">Audit source snapshot</a> · <a href="render-source.py">Saved-data renderer</a> · <a href="role-audit-source.py">Role-probe audit source</a> · <a href="files.sha256">Frozen file hashes</a></p>
 <p>Regenerate projections from the saved a6 attempt tree and its source checkout with the renderer’s <code>--source-root</code>, <code>--root</code>, <code>--task</code> and <code>--output</code> arguments. The producer reads saved data and executes no controller. Full module-composition coverage, review and deployed URL/hash verification remain separate gates.</p></main></body></html>'''.encode()
 
 
@@ -126,3 +126,31 @@ def build(root=ROOT):
         'raw_record': ROUTE+'/independent-audit.json'}
     card = f'<article class="saved-figure" id="{ROUTE}"><h3>Native fixed-tail control: 15 nonlinear episodes</h3><a href="{entry["page"]}"><img src="{entry["figure"]}" alt="Five physical families with every initial-query stage and actual Lotka–Volterra trajectories"></a><p>Lotka–Volterra, fuel and orbit retain their original horizons, complete source costs and immutable raw records.</p><p><a href="{entry["page"]}">Open the source-qualified episodes →</a></p></article>'
     return assets, entry, card
+
+
+def main():
+    import argparse
+    import fixed_tail_example
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--out', type=Path, required=True, help='new standalone site directory')
+    args = parser.parse_args()
+    output = args.out.resolve()
+    if output.exists():
+        raise ValueError('standalone output directory must be new')
+    assets, _, card = build()
+    minimal, _, minimal_card = fixed_tail_example.build()
+    assets.update(minimal)
+    assets['examples.css'] = (ROOT/'docs/examples/examples.css').read_bytes()
+    output.mkdir(parents=True)
+    for name, raw in assets.items():
+        path = output/'examples'/name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(raw)
+    gallery = ('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Native fixed-tail examples</title><link rel="stylesheet" href="examples.css"></head><body><main class="page-content"><h1>Native fixed-tail examples</h1>'+minimal_card+card+'</main></body></html>')
+    (output/'examples/index.html').write_text(gallery)
+    (output/'index.html').write_text('<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Native fixed-tail evidence</title></head><body><a href="examples/index.html">Open the native fixed-tail examples</a></body></html>')
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
