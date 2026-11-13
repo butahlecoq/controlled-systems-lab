@@ -1,0 +1,8 @@
+scope=forward reachability; binary64 algebra, no validated rounding enclosure
+initial_set=authored box [-0.5,0.5] x [-1,1] x [-1,1]; eight corners
+original_initial_set=78 vertices, coordinates unavailable; no historical-set reproduction claim
+controls=independent u1,u2 in [-1,1] each stage
+case=bulaev-2016-slide50/authored-box/illustrated-five/1 source_sha256=029d55dd5b2d2ff1682bb42ffead7e2f5f0133df78864ae5ee583028200a88e5 locator=slide 50: A, B and U; slides 51-57: initial vertex count and illustrated stages
+qualification=Printed dynamics and independent input bounds; separately authored X0 box with radii (0.5,1,1). The original 78 initial vertices are unavailable. Five transitions follow the figures; this is not a reproduction of their initial set.
+case=bulaev-2016-slide50/authored-box/literal-six/1 source_sha256=029d55dd5b2d2ff1682bb42ffead7e2f5f0133df78864ae5ee583028200a88e5 locator=slide 50: A, B, U and inclusive update range 0 through 5
+qualification=Printed dynamics and independent input bounds; separately authored X0 box with radii (0.5,1,1). The original 78 initial vertices are unavailable. Six transitions interpret the printed range literally; this is not a reproduction of their initial set.

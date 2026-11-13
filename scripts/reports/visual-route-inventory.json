@@ -1907,6 +1907,15 @@
       "disposition": "publication-validation-or-frozen-route"
     },
     {
+      "source": "scripts/reports/stage_native_extended_models.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "spatial-flight-plane-1-screen.svg",
+        "stages-6-x1-x3-screen.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
       "source": "scripts/reports/stage_native_flexible_pitch.py",
       "signal_count": 1,
       "asset_name_literals": [
