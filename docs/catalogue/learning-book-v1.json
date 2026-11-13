@@ -54,7 +54,7 @@
         },
         {
           "label": "examples/CMakeLists.txt installed package consumer",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/1582059a8cb3356422234859ae4aa2f81bc339a5/examples/CMakeLists.txt"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/681db4d9e2a18c5962d6bf42aac6913fc9afa937/examples/CMakeLists.txt"
         }
       ],
       "example_sources": [
