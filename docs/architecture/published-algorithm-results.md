@@ -918,3 +918,22 @@ backward winning set. Timings use seven alternating solver-only calls after one
 warmup per method; no speed claim is made. The report route and source hashes
 are staged reproducibly; Pages publication and live URL verification remain
 pending.
+
+## Native discrete catalogue and source21 MPC learning example
+
+The [native discrete catalogue](../examples/native-discrete-models.html) lists
+35 compiled source-qualified models. Its [source21 MPC lesson](../examples/native-quadcopter-mpc.html)
+uses the saved 12-state, four-control, ten-stage native HiGHS functional capture
+with 15 observed-state replans. Every saved predicted path overlays the executed
+trajectory in indexed planes; complete state/input traces, literal source cost,
+bounds, matrices, independent numerical checks and offline raw records accompany
+it. It draws no reachable sets and supplies no benchmark or certified-policy claim.
+
+The immutable receipt in `native-discrete-models-v1` qualifies the pre-commit
+installed build: four compiled example-source blob IDs match `856d7a77`, but no
+whole pre-build tree hash was retained. The saved numerical check is not a
+clean-commit build claim or an optimality certificate. Physical coordinate units
+remain unspecified; the nominal 0.1-second grid is an owner-catalogue assumption.
+Earlier failed attempts remain retained locally. Independent review, exact-head
+CI, main-only Pages deployment and live URL/hash verification remain separate gates;
+the broader model/formulation scope of issue #1012 stays open.

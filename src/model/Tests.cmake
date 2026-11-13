@@ -8,6 +8,15 @@ target_link_libraries(model_catalogue_tests PRIVATE CSL::model_catalogue doctest
 add_test(NAME model_catalogue_tests COMMAND model_catalogue_tests)
 csl_test_target(model_catalogue_tests model)
 
+add_executable(discrete_catalogue_tests tests/unit/model/discrete_catalogue_tests.cpp)
+target_link_libraries(discrete_catalogue_tests PRIVATE CSL::model_catalogue doctest::doctest)
+add_test(NAME discrete_catalogue_tests COMMAND discrete_catalogue_tests)
+csl_test_target(discrete_catalogue_tests model)
+
+add_executable(discrete_catalogue_reference examples/native_discrete_models.cpp)
+target_link_libraries(discrete_catalogue_reference PRIVATE CSL::model_catalogue)
+add_test(NAME discrete_catalogue_reference COMMAND discrete_catalogue_reference)
+csl_test_target(discrete_catalogue_reference model)
 add_executable(flexible_pitch_tests tests/unit/model/flexible_pitch_tests.cpp)
 target_link_libraries(flexible_pitch_tests PRIVATE CSL::model_catalogue doctest::doctest)
 add_test(NAME flexible_pitch_tests COMMAND flexible_pitch_tests)

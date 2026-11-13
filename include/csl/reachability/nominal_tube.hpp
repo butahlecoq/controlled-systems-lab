@@ -60,8 +60,8 @@ struct NominalTubeDependencies {
 
 // Computes full-state F_k, B_k and F_k ∩ B_k for one closed-H continuous
 // nominal affine profile. No objective optimization or nonlinear claim is made.
-NominalTubeOutcome nominal_tube(const problem::ResolvedProblem&, RequestId,
-    const SetHandle& terminal_feasibility, const NominalTubeDependencies&,
-    const ExecutionContext&);
+NominalTubeOutcome nominal_tube(const problem::ResolvedProblem &, RequestId,
+                                const SetHandle &terminal_feasibility,
+                                const NominalTubeDependencies &, const ExecutionContext &);
 
 } // namespace csl::reachability

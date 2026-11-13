@@ -1,0 +1,52 @@
+{
+  "schema": "csl.native-discrete-models.functional/1",
+  "source_commit": "856d7a77c49fca0c6f6cdb8c1a1db9a651da85cb",
+  "followup_source_commit": "b786c9787d979bb6bf402541510cd43b4efce521",
+  "capture_identity": "1012-functional-attempt-05",
+  "evidence_role": "qualified local native installed-SDK functional capture; saved-data learning layer",
+  "capture_qualification": "Build preceded source commit; four compiled example blob IDs match source856. No whole pre-build tree hash captured. Receipt remains immutable. Not a clean-checkout capture. Earlier failed attempts retained locally.",
+  "source_example": "https://osqp.org/docs/examples/mpc.html",
+  "owner_source_sha256": "6c5e7c1b09331186b8cd9ddfcd1a71afbc7bddb438a103f2fd4dcfdf780c081e",
+  "source_blobs": {
+    "examples/quadcopter_mpc.cpp": "dbdfb078144eb7454aa50e0f5bff32ef8fb6fc4a",
+    "examples/quadcopter_mpc_task.cpp": "52885942e6d6073e73d6064830f88758bb68f5ca",
+    "examples/quadcopter_mpc_task.hpp": "9e33a17c49d9b5090afac7f221696bf18077b075",
+    "examples/quadcopter_mpc_scalar_contract.cpp": "92ba875deb5ee7709601387dc8298973cdd193a1",
+    "src/model/discrete_catalogue.cpp": "5c08d5bb2b558d4d4d6ada29a5adbe4cca6dcd8f"
+  },
+  "saved_data_renderer": "scripts/reports/native_discrete_models.py",
+  "quantitative_axis_policy": "csl-report-quantitative-v1",
+  "matplotlib_version": "3.11.2",
+  "scope": "12 indexed states; four deviation controls; horizon10; 15 replans; zero external input; physical units unspecified; owner nominal0.1second grid. No performance, reachable-set, certified-optimum or global feedback policy claim.",
+  "publication_status": "pending independent review, main-only deployment and live URL/hash verification",
+  "files_sha256": {
+    "catalogue.json": "a65c6a45ef312711ecbb0d5577f51a1758c43f132f8836320be0b83f558a0846",
+    "check.json": "5bfedef412f8e3050f0b467d32b1eeb349d8fe28677f80883f0c34004295e0e7",
+    "controls-print.png": "7a7c8b2e519402dc9341242e5bd91fd93886e16f3e90edee0f98f5bbaad76fe2",
+    "controls-print.svg": "20d2140ae0ad389dcc366a924016961570b5d87ab68475c8e334b5a7e60f4324",
+    "controls-screen.png": "ea466635df7dc697264d53e0d82979daed262217326302eebb34f20a82d5132d",
+    "controls-screen.svg": "8d08fa3f9ede0baef6547bf01663a7a6b6d1146af6a488a4d403d62c409e05ea",
+    "offline-examples.css": "11ded2b69cec694ff61ecad0493f175becbfc47bce3d641f2ee512543bb82cf4",
+    "phase-x1-x2-print.png": "e11157945ae31dae065c736f89610eb5ca0c90ad2ffb5f6078c30465a819ce7b",
+    "phase-x1-x2-print.svg": "1b8ff67c58c80ed0d6383b15078a2c6a306ecf39db789ea037069bd35605189a",
+    "phase-x1-x2-screen.png": "76a7d3e17645674b2763df1461af9db78de95303ad4399f5770dca9c9506947a",
+    "phase-x1-x2-screen.svg": "7bdfd7565407a4e857302d3f7cc2bd5512ed174601ada62a87036afd7d497503",
+    "phase-x3-x6-print.png": "984fc2eaa4bf5e7067c40af56230cc3d94b3a98010d4073dd72422367f77f0b0",
+    "phase-x3-x6-print.svg": "3fb59fbcf9fc8209affa991a05e0b8bd1e003942c61286914c6985893a59f00d",
+    "phase-x3-x6-screen.png": "65f22a247af06e2d5d6be889cb42abfe9ca9b441be6afc983ff1a694647b201a",
+    "phase-x3-x6-screen.svg": "6ec375470ce5eb4c4e1907820bd2a094ce2ae859453a38b821ee38d8c9ab69fd",
+    "raw/evidence.txt": "29a69a7ac493ad68c9719b9964a52874c8f3a32b97172c38db0fa54c9ab09fa6",
+    "raw/independent-check.txt": "b96f25dd7bbdf6f8af99c940e23c3cbbed3c1738e2b34f713ce0e804d5e3b94b",
+    "raw/models.csv": "498d3ff2ab5fcf817b7d0d1a22e6fa0a9344bdf40880f41aa8bab2329e5cf514",
+    "raw/plans.csv": "c1a9379f999d2a484d029e52ace29d08b7337b387ecb749e00aab453569f087d",
+    "raw/run.txt": "c32b58155bcf29911e5af1f4a80aa7f491b827ac0fa06078ddd1cb33fcada9ce",
+    "states-print.png": "b6af6b57fcd97845e6b55533b4d04cdffb329cca03dd29c1f9c2c00a43edd8b0",
+    "states-print.svg": "af384a3ff9dd20f01d8db247b65d50b9f44eed113c5b3c68ea4745e0a940c368",
+    "states-screen.png": "3c948e246d2d87762acee738f5089ffcef3fbbf6e8fae6ba7a0bde81fe016f87",
+    "states-screen.svg": "4df91d0284d2077a8fb0917541b6cfc76ddc4e12c9778a043770bec4bdd45b4b"
+  },
+  "lesson_sha256": {
+    "native-discrete-models.html": "0e4aaa1e69383ddcd92ae5a3edfe45b03b17e31fa16338a32fe0fd7c1c3717a5",
+    "native-quadcopter-mpc.html": "2ab3cdbdaab90d534746e6564c3cae8eaa11e7057d298b513032b5a5e2f40ffa"
+  }
+}

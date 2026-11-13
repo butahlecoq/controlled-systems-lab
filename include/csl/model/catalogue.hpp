@@ -1,20 +1,13 @@
 #pragma once
 
 #include <csl/model/contracts.hpp>
+#include <csl/model/catalogue_metadata.hpp>
 #include <csl/sets/generator_sets.hpp>
 
 #include <span>
 #include <string_view>
 
 namespace csl::model::catalogue {
-
-struct Coordinate {
-    std::string_view name, unit;
-};
-
-struct Source {
-    std::string_view title, sha256, locator, qualification;
-};
 
 struct CaseInfo {
     std::string_view id, title;

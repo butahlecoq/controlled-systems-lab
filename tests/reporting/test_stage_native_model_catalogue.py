@@ -1,16 +1,18 @@
 """Frozen native records publish unchanged and reject altered or unsafe inputs."""
 import hashlib
-from html.parser import HTMLParser
-from pathlib import Path
+import importlib
 import shutil
 import sys
 import tempfile
 import unittest
 import zipfile
+from html.parser import HTMLParser
+from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import stage_native_model_catalogue as native
+native = importlib.import_module("stage_native_model_catalogue")
 
 
 class Links(HTMLParser):
@@ -32,6 +34,33 @@ class NativePublicationTests(unittest.TestCase):
         (self.root / "docs/examples").mkdir(parents=True)
         for page in ("native-model-catalogue.html", "native-four-state-reachability.html"):
             shutil.copyfile(ROOT / "docs/examples" / page, self.root / "docs/examples" / page)
+
+    def test_same_payload_repack_with_recomputed_sidecar_is_rejected(self):
+        import zipfile
+        path = self.bundle / (native.ROUTE + '.zip')
+        original = path.read_bytes()
+        with zipfile.ZipFile(path) as archive:
+            payloads = [(name, archive.read(name)) for name in archive.namelist()]
+        with zipfile.ZipFile(path, 'w', compression=zipfile.ZIP_STORED) as archive:
+            for name, content in payloads:
+                archive.writestr(name, content)
+        self.assertNotEqual(path.read_bytes(), original)
+        with zipfile.ZipFile(path) as archive:
+            self.assertEqual([(name, archive.read(name)) for name in archive.namelist()], payloads)
+        path.with_suffix('.zip.sha256').write_text(
+            hashlib.sha256(path.read_bytes()).hexdigest()+'  '+path.name+'\n')
+        with self.assertRaisesRegex(ValueError, 'archive differs from frozen publication identity'):
+            native.build(self.root)
+
+    def test_noncanonical_archive_sidecar_is_rejected(self):
+        path = self.bundle / (native.ROUTE + '.zip.sha256')
+        canonical = path.read_bytes()
+        for content in (canonical.rstrip(b'\n'), canonical+b'\n', b' '+canonical):
+            with self.subTest(content=content):
+                path.write_bytes(content)
+                with self.assertRaisesRegex(ValueError, 'archive checksum differs'):
+                    native.build(self.root)
+        path.write_bytes(canonical)
 
     def test_publication_preserves_every_saved_byte_and_lesson_links(self):
         files, entries, cards = native.build(self.root)
@@ -67,8 +96,9 @@ class NativePublicationTests(unittest.TestCase):
             archive.writestr("unexpected.txt", "not a saved native output")
         path.with_suffix(".zip.sha256").write_text(
             hashlib.sha256(path.read_bytes()).hexdigest() + "  " + path.name + "\n")
-        with self.assertRaisesRegex(ValueError, "archive members differ"):
-            native.build(self.root)
+        with patch.object(native, "ARCHIVE_SHA256", hashlib.sha256(path.read_bytes()).hexdigest()):
+            with self.assertRaisesRegex(ValueError, "archive members differ"):
+                native.build(self.root)
 
     def test_symlinked_capture_and_ancestor_are_rejected(self):
         path = self.bundle / "four-state/full-state-generators.csv"
