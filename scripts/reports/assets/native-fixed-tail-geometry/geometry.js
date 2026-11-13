@@ -74,21 +74,32 @@
     const roles = enabled('layer-controls'), runs = visibleRuns();
     const width=Math.max(320,svg.clientWidth), height=width<650?440:640;
     svg.setAttribute('viewBox',`0 0 ${width} ${height}`);
-    const box = {left:width<650?70:105,right:width-25,top:35,bottom:height-85};
+    const ticks=width<650?3:5, tickLabels=element('g',{visibility:'hidden'});
+    const tickPairs=Array.from({length:ticks+1},(_,i)=>{
+      const values=domain.map(([lo,hi])=>lo+i*(hi-lo)/ticks);
+      const labels=values.map(value=>element('text',{},Number(value.toPrecision(5)).toString()));
+      tickLabels.append(...labels);
+      return {values,labels};
+    });
+    svg.append(tickLabels);
+    const tickHeight=Math.max(...tickPairs.flatMap(({labels})=>labels.map(label=>label.getBBox().height)));
+    const yTickWidth=Math.max(...tickPairs.map(({labels})=>labels[1].getComputedTextLength()));
+    const xTickWidth=Math.max(...tickPairs.map(({labels})=>labels[0].getComputedTextLength()));
+    const box = {left:Math.ceil(yTickWidth+2*tickHeight+20),
+      right:width-Math.ceil(Math.max(25,xTickWidth/2+8)),top:35,bottom:height-85};
     const x = v => box.left+(v-domain[0][0])/(domain[0][1]-domain[0][0])*(box.right-box.left);
     const y = v => box.bottom-(v-domain[1][0])/(domain[1][1]-domain[1][0])*(box.bottom-box.top);
     const defs = element('defs'), clip = element('clipPath',{id:'plot-clip'});
     clip.append(element('rect',{x:box.left,y:box.top,width:box.right-box.left,height:box.bottom-box.top}));defs.append(clip);svg.append(defs);
-    const ticks=width<650?3:5;
-    for (let i = 0; i <= ticks; i++) {
-      const vx = domain[0][0]+i*(domain[0][1]-domain[0][0])/ticks, vy = domain[1][0]+i*(domain[1][1]-domain[1][0])/ticks;
+    for (const {values:[vx,vy],labels:[xLabel,yLabel]} of tickPairs) {
       svg.append(element('path',{d:`M${x(vx)},${box.top}V${box.bottom} M${box.left},${y(vy)}H${box.right}`,stroke:'#59566d','stroke-width':.5}));
-      svg.append(element('text',{x:x(vx),y:box.bottom+27,'text-anchor':'middle'},Number(vx.toPrecision(5)).toString()));
-      svg.append(element('text',{x:box.left-12,y:y(vy)+5,'text-anchor':'end'},Number(vy.toPrecision(5)).toString()));
+      Object.entries({x:x(vx),y:box.bottom+27,'text-anchor':'middle'}).forEach(([key,value])=>xLabel.setAttribute(key,value));
+      Object.entries({x:box.left-12,y:y(vy)+5,'text-anchor':'end'}).forEach(([key,value])=>yLabel.setAttribute(key,value));
     }
+    tickLabels.removeAttribute('visibility');svg.append(tickLabels);
     const labels = task.planes[planeIndex()].labels;
-    svg.append(element('text',{x:(box.left+box.right)/2,y:height-20,'text-anchor':'middle'},labels[0]));
-    svg.append(element('text',{transform:`translate(${width<650?17:22},${(box.top+box.bottom)/2}) rotate(-90)`,'text-anchor':'middle'},labels[1]));
+    svg.append(element('text',{x:width/2,y:height-20,'text-anchor':'middle'},labels[0]));
+    svg.append(element('text',{transform:`translate(${tickHeight+8},${(box.top+box.bottom)/2}) rotate(-90)`,'text-anchor':'middle'},labels[1]));
     const group = element('g',{'clip-path':'url(#plot-clip)'});svg.append(group);
     const line = (points, attrs, title) => {
       if (!points.length) return;
@@ -180,7 +191,7 @@
   $('zoom-in').addEventListener('click',()=>zoom(.65));$('zoom-out').addEventListener('click',()=>zoom(1.5));
   svg.addEventListener('wheel',event=>{event.preventDefault();zoom(event.deltaY<0?.85:1.18);},{passive:false});
   svg.addEventListener('pointerdown',e=>{if(!domain)return;drag={x:e.clientX,y:e.clientY,domain:domain.map(x=>[...x])};svg.setPointerCapture(e.pointerId);});
-  svg.addEventListener('pointermove',e=>{if(!drag)return;const r=svg.getBoundingClientRect(),v=svg.viewBox.baseVal,dx=(e.clientX-drag.x)/r.width*v.width/(v.width-(v.width<650?95:130)),dy=(e.clientY-drag.y)/r.height*v.height/(v.height-120);domain=drag.domain.map(([a,b],i)=>{const d=(i?dy:-dx)*(b-a);return[a+d,b+d];});draw();});
+  svg.addEventListener('pointermove',e=>{if(!drag)return;const r=svg.getBoundingClientRect(),v=svg.viewBox.baseVal,plot=svg.querySelector('#plot-clip rect'),dx=(e.clientX-drag.x)/r.width*v.width/Number(plot.getAttribute('width')),dy=(e.clientY-drag.y)/r.height*v.height/Number(plot.getAttribute('height'));domain=drag.domain.map(([a,b],i)=>{const d=(i?dy:-dx)*(b-a);return[a+d,b+d];});draw();});
   svg.addEventListener('pointerup',()=>{drag=null;});svg.addEventListener('pointercancel',()=>{drag=null;});
   window.addEventListener('resize',()=>draw());
   selectTask();
