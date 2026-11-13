@@ -57,6 +57,28 @@ EXAMPLE_ROUTE_PRODUCERS = {
     "examples/app03-zonotope-v1.html": ["scripts/reports/approx_extension_companions.py"],
     "examples/app04-square-v1.html": ["scripts/reports/approx_extension_companions.py"],
     "examples/b04-reference-trajectory-projections.html": ["scripts/reports/mpc01/b04_projection_example.py"],
+    "examples/buryatia-volterra-affine-2d.html": [
+        "scripts/reports/stage_buryatia_volterra.py",
+        "docs/examples/buryatia-volterra-affine-2d-manifest.json",
+        "docs/examples/buryatia-volterra-affine-2d.html",
+        "docs/examples/buryatia-volterra-affine-2d-records.json",
+        "docs/examples/buryatia-volterra-affine-2d-terminal.svg",
+        "docs/examples/buryatia-volterra-affine-2d-records-superseded-v1.json",
+        "docs/examples/buryatia-volterra-affine-2d-superseded-v1.html",
+        "docs/examples/buryatia-volterra-affine-2d-terminal-superseded-v1.svg",
+        "docs/examples/buryatia-volterra-affine-2d-manifest-superseded-v1.json",
+    ],
+    "examples/buryatia-volterra-affine-2d-superseded-v1.html": [
+        "scripts/reports/stage_buryatia_volterra.py",
+        "docs/examples/buryatia-volterra-affine-2d-manifest.json",
+        "docs/examples/buryatia-volterra-affine-2d.html",
+        "docs/examples/buryatia-volterra-affine-2d-records.json",
+        "docs/examples/buryatia-volterra-affine-2d-terminal.svg",
+        "docs/examples/buryatia-volterra-affine-2d-records-superseded-v1.json",
+        "docs/examples/buryatia-volterra-affine-2d-superseded-v1.html",
+        "docs/examples/buryatia-volterra-affine-2d-terminal-superseded-v1.svg",
+        "docs/examples/buryatia-volterra-affine-2d-manifest-superseded-v1.json",
+    ],
     "examples/buryatia-dim4-literal-affine-v1/index.html": [
         "scripts/reports/stage_buryatia_dim4.py",
         "docs/examples/buryatia-dim4-literal-affine.html",
@@ -139,6 +161,7 @@ STANDALONE_REPORT_ROUTE_PRODUCERS = {
 }
 
 GALLERY_INDEX_PRODUCERS = [
+    "scripts/reports/stage_buryatia_volterra.py",
     "scripts/reports/stage_native_discrete_models.py",
     "scripts/reports/approx_extension_companions.py",
     "scripts/reports/control_witness_companions.py",
