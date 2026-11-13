@@ -1,0 +1,4 @@
+case=spatial-flight/b-consistent-body9-synthetic/1 dimension=9 controls=3 transitions=20 stages=21 terminal_generators=69 support_checks=3213 maximum_support_difference=1.3615546407344525e-16
+Native spatial flight: 20 transitions and 3213 full-state support checks passed
+projection_planes=6 full_state_coordinates_covered=9
+scope=numerical forward reachability of native piecewise-linear variational model; no nonlinear enclosure or domain certificate

@@ -64,6 +64,7 @@ FROZEN_DIAGRAM_EXCEPTIONS = {
     "benchmarks/reporting/mpc08_explicit/explicit_nonunique_double_integrator.py",
 }
 PUBLICATION_EXPORT_ROUTES = {
+    "scripts/reports/stage_native_extended_models.py",
     "scripts/reports/package_feedback_history.py",
     "scripts/reports/package_history_functional.py",
     "scripts/reports/stage_b04_source_moments.py",

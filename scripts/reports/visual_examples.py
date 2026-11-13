@@ -25,6 +25,7 @@ import site_additions
 import site_design
 import stage_ext07 as ext07_reports
 import stage_buryatia_dim4
+import stage_native_extended_models
 import stage_native_model_catalogue
 import stage_native_discrete_models
 import stage_native_flexible_pitch
@@ -904,6 +905,9 @@ def build(catalog, site):
     history_files, history_inventory, history_card = stage_nominal_quadratic_history.build(
         Path(__file__).resolve().parents[2])
     saved_figures += history_card
+    extended_files, extended_inventory, extended_cards = stage_native_extended_models.build(
+        Path(__file__).resolve().parents[2])
+    saved_figures += extended_cards
     saved_figures += ('<article class="saved-figure" id="history-cost-2d-v1"><p class="eyebrow">Nominal optimization · Saved-data illustration</p>'
         '<h3><a href="history-cost-2d-v1/index.html">Full-history cost moves the 2D optimum</a></h3>'
         '<a href="history-cost-2d-v1/index.html"><img src="history-cost-2d-v1/history-cost-2d.svg" alt="Feasible control square, terminal-only optimum at (1,0), and full-cost HiGHS optimum at (1/3,0) with both objective contours"></a>'
@@ -947,6 +951,7 @@ def build(catalog, site):
     outputs.update(pitch_files)
     outputs.update(discrete_files)
     outputs.update(history_files)
+    outputs.update(extended_files)
     repository_root = Path(__file__).resolve().parents[2]
     cost_page_root = repository_root / "docs/examples/history-cost-2d-v1"
     cost_evidence_root = repository_root / "reports/algorithm-results/history-cost-2d-v1"
@@ -1057,6 +1062,7 @@ def build(catalog, site):
     gallery_inventory.extend(pitch_inventory)
     gallery_inventory.extend(discrete_inventory)
     gallery_inventory.extend(history_inventory)
+    gallery_inventory.extend(extended_inventory)
     geometry_first = geometry_inventory[0]
     gallery_inventory.append({"family": "Geometry and optimization",
                               "title": "Readable geometry and timing figures",
