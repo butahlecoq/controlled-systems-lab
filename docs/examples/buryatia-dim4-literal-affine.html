@@ -32,7 +32,7 @@ body{background:var(--page);color:var(--text)}.page-content{max-width:82rem}
 <p><strong>Parameters:</strong> a = 0.15, b = −0.8, c = 0.25; two independent controls vₖ ∈ [−1, 1]²; seven updates. The script uses degree-based <code>sind</code>/<code>cosd</code>.</p>
 <p>At each stage, zₖ₊₁ = Aₖzₖ + Bₖvₖ, with Aₖ(1,2) = cosd(x̄₂,ₖ), Bₖ(1,1) = 1 + 0.5 cosd(x̄₁,ₖ), and the other entries listed in the complete <a href="../../benchmarks/scenarios/buryatia-dim4-matlab-literal-affine-v1.json">model manifest</a>.</p>
 </div>
-<p class="provenance">Private MATLAB source is not included. Source SHA-256: <code>f1b9868dac256a45f144ee5192ec8b789548b34c2be6be094005bcef8dc7293a</code>. This is the literal seven-update affine script variant; it is distinct from the manuscript’s eight-step example and from the optional nonlinear-correction recurrence. The terminal binary64 reference volume is 40808.165574887396, and its independent hull calculation found 756 extreme vertices. The native V record retains 16384 candidate rows and does not claim they are minimal.</p>
+<p class="provenance">Private MATLAB source is not included. Source SHA-256: <code>f1b9868dac256a45f144ee5192ec8b789548b34c2be6be094005bcef8dc7293a</code>. This is the literal seven-update affine script variant; it is distinct from the manuscript’s eight-step example and from the optional nonlinear-correction recurrence. The implementation and producer are at source commit <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/136e30f33fca849ec8814747702ab720e76e22bd"><code>136e30f3</code></a>. The terminal binary64 reference volume is 40808.165574887396, and its independent hull calculation found 756 extreme vertices. The native V record retains 16384 candidate rows and does not claim they are minimal.</p>
 </section>
 
 <section><h2>Inspect each full-state stage</h2>
@@ -53,6 +53,7 @@ body{background:var(--page);color:var(--text)}.page-content{max-width:82rem}
 <p>The exact affine polytope and unreduced zonotope share the same represented set because each independent box-control corner is carried forward without reduction. Volumes use floating-point binary64 formulas and have no certified rounding interval. Directional support checks use 24 directions (the 16 sign corners and eight coordinate axes). They are diagnostics, not a completeness proof; the registered approximation providers’ inclusion evidence is recorded separately.</p>
 <p>Open the <a href="buryatia-dim4-literal-affine-v1-records.json">complete versioned raw record</a> or <a href="../../benchmarks/scenarios/buryatia-dim4-matlab-literal-affine-v1.json">source-qualified scenario manifest</a>.</p>
 <p>The <a href="buryatia-dim4-literal-affine-v1-capture.json">capture receipt</a> records the producer source commit, binary and build configuration hashes, and the raw stream checksum. The raw record preserves every stage and family; displayed point clouds are thinned only for rendering.</p>
+<p>Verify the saved files with the <a href="buryatia-dim4-literal-affine-v1-SHA256SUMS">SHA-256 manifest</a>.</p>
 </section>
 
 <section class="repro"><h2>Reproduce the native record</h2>
@@ -65,7 +66,9 @@ cmake --build build/buryatia-dim4 --target csl_buryatia_dim4_report --parallel 1
 build/buryatia-dim4/csl_buryatia_dim4_report --dim4-literal-affine \
   &gt; buryatia-dim4-literal-affine-v1-records.json
 python3 scripts/reports/buryatia/check_dim4.py \
-  --exe build/buryatia-dim4/csl_buryatia_dim4_report</code></pre>
+  --exe build/buryatia-dim4/csl_buryatia_dim4_report
+python3 scripts/reports/buryatia/check_dim4.py \
+  --raw docs/examples/buryatia-dim4-literal-affine-v1-records.json</code></pre>
 <p>The native record is numerical binary64 evidence. It does not certify real-arithmetic rounding, nonlinear reachability, feedback safety, or a performance comparison.</p>
 </section>
 
