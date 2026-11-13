@@ -263,7 +263,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
         tracking_route=next(route for route in inventory["gallery_routes"]
                             if route["route"]=="examples/native-model-tracking-first-pass-v1/index.html")
         self.assertIn("native-model-tracking-first-pass-v1/source-binding.json",tracking_route["assets"])
-        self.assertIn("native-model-tracking-first-pass-v1/REPRODUCING.md",tracking_route["assets"])
+        self.assertIn("native-model-tracking-first-pass-v1/reproducing.html",tracking_route["assets"])
         self.assertIn("native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip.sha256",
                       tracking_route["assets"])
         self.assertIn("scripts/reports/stage_native_model_tracking_first_pass.py",
@@ -319,7 +319,7 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "buryatia-dim4-literal-affine-v1/buryatia-dim4-matlab-literal-affine-v1.json",
             "buryatia-dim4-literal-affine-v1/terminal-x1-x2.svg",
             "native-model-tracking-first-pass-v1/index.html",
-            "native-model-tracking-first-pass-v1/REPRODUCING.md",
+            "native-model-tracking-first-pass-v1/reproducing.html",
             "native-model-tracking-first-pass-v1/figures/model-21-state-3-9.svg",
             "native-model-tracking-first-pass-v1/raw/models.csv",
             "native-model-tracking-first-pass-v1/raw/catalogue.csv",
