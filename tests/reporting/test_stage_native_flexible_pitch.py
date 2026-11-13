@@ -67,7 +67,21 @@ class FlexiblePitchPublicationTests(unittest.TestCase):
         with zipfile.ZipFile(path, "a") as archive:
             archive.writestr("unexpected.txt", "not native output")
         path.with_suffix(".zip.sha256").write_text(hashlib.sha256(path.read_bytes()).hexdigest() + "  " + path.name + "\n")
-        with self.assertRaisesRegex(ValueError, "archive members differ"):
+        with self.assertRaisesRegex(ValueError, "frozen archive identity"):
+            native.build(self.root)
+
+    def test_same_payload_repack_with_matching_sidecar_is_rejected(self):
+        path = self.bundle / (native.ROUTE + ".zip")
+        before = hashlib.sha256(path.read_bytes()).hexdigest()
+        with zipfile.ZipFile(path) as archive:
+            members = {name: archive.read(name) for name in archive.namelist()}
+        with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_STORED) as archive:
+            for name, content in members.items():
+                archive.writestr(name, content)
+        after = hashlib.sha256(path.read_bytes()).hexdigest()
+        self.assertNotEqual(before, after)
+        path.with_suffix(".zip.sha256").write_text(after + "  " + path.name + "\n")
+        with self.assertRaisesRegex(ValueError, "frozen archive identity"):
             native.build(self.root)
 
     def test_unlisted_and_symlinked_inputs_are_rejected(self):
@@ -78,6 +92,12 @@ class FlexiblePitchPublicationTests(unittest.TestCase):
         path = self.bundle / "8-state-generators.csv"; moved = self.root / "external.csv"
         path.rename(moved); path.symlink_to(moved)
         with self.assertRaisesRegex(ValueError, "symlinked"):
+            native.build(self.root)
+
+    def test_checksum_sidecar_bytes_are_canonical(self):
+        path = self.bundle / (native.ROUTE + ".zip.sha256")
+        path.write_bytes(path.read_bytes() + b" ")
+        with self.assertRaisesRegex(ValueError, "checksum differs"):
             native.build(self.root)
 
     def test_capture_ancestor_must_be_available(self):

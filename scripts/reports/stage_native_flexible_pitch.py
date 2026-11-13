@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import io
 from html import escape
 import json
 from pathlib import Path, PurePosixPath
@@ -13,6 +14,7 @@ from report_data import require
 ROUTE = "native-flexible-pitch-v1"
 SOURCE = "b8c884a0cbca8c5195f82383d4e2bea39a805edc"
 MANIFEST_SHA256 = "59f52235c9f9e31cb24c8bec3df8e861a281beb13a242741d81dc85cb973d596"
+ARCHIVE_SHA256 = "7f718aafbad9f74053a1d30a0097b8ad49d1ae5c54e9bc307a04ade27a3ac85d"
 
 
 def _file(root: Path, relative: str) -> Path:
@@ -87,17 +89,18 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
             installed["consumer_isolated_from_source_tree"] is True,
             "flexible pitch installed consumer differs")
     archive_name = ROUTE + ".zip"
-    archive_path = _file(root, archive_name)
-    with zipfile.ZipFile(archive_path) as archive:
+    archive_bytes = _file(root, archive_name).read_bytes()
+    require(hashlib.sha256(archive_bytes).hexdigest() == ARCHIVE_SHA256,
+            "flexible pitch archive differs from the frozen archive identity")
+    with zipfile.ZipFile(io.BytesIO(archive_bytes)) as archive:
         require(len(archive.namelist()) == len(files) and
                 set(archive.namelist()) == set(files) and archive.testzip() is None,
                 "flexible pitch archive members differ")
         for name, content in files.items():
             require(archive.read(name) == content, "flexible pitch archive bytes differ: " + name)
-    files[archive_name] = archive_path.read_bytes()
+    files[archive_name] = archive_bytes
     sidecar = _file(root, archive_name + ".sha256").read_bytes()
-    require(sidecar.decode("ascii").strip() ==
-            hashlib.sha256(files[archive_name]).hexdigest() + "  " + archive_name,
+    require(sidecar == (ARCHIVE_SHA256 + "  " + archive_name + "\n").encode("ascii"),
             "flexible pitch archive checksum differs")
     files[archive_name + ".sha256"] = sidecar
     paths = list(root.rglob("*"))
