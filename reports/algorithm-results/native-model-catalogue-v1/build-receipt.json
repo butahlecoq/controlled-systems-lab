@@ -1,0 +1,63 @@
+{
+  "schema": "csl.native-model-catalogue-build/1",
+  "source_commit": "19d32a3c37b6860dbf881996da1bf5e2b3f92353",
+  "retention_ref": "evidence/native-model-catalogue-source-19d32a3c-20261112",
+  "source_files_sha256": {
+    "include/csl/model/catalogue.hpp": "92ebc837644209babbc149b5d450d14e238043095d1256022b65c437447545e8",
+    "src/model/catalogue.cpp": "e6a7cd7c6aa12274842391cf29a5fd7776cf608cefcc18be52fb97de19d04825",
+    "examples/native_model_catalogue.cpp": "8bc86a6813f6cc637b5ee746279178af1c4d71dc7ee57e35158530496eb9a0ce",
+    "examples/native_four_state_reachability.cpp": "57fd2ff3af4452af169210ca40ec904ea4ce97016af1164181096c6b55bb4e28",
+    "examples/native_catalogue_projection.hpp": "159558a160bd2cbacc49872062e99262c8adf525d0d17d230fb1a473c506cb1d",
+    "src/model/Module.cmake": "d22cfd09cf48b5e1662cfb03c43dd4e4fd73ca398de72925ee0f3dfeeb07b69a",
+    "src/model/Tests.cmake": "d081222f9824e28cc8373068674326ca641806b6da86719d17d94f718b80c345",
+    "tests/unit/model/catalogue_tests.cpp": "2821cb24f1b4cf18bcc632327c114513a8b66d3c6435a8060ebc17b205115073",
+    "tests/installed/CMakeLists.txt": "54fb1b311496f3963af582ebaed9184097a188fcd812de6182945cd5b4262f22",
+    "examples/CMakeLists.txt": "3d39709418f0f396d1f09a2d48d70c5e32d7f79923cc0933818a3401b1ed852d"
+  },
+  "compiler": "GNU 16.2.1",
+  "configuration": "Release",
+  "CSL_ENABLE_HIGHS": false,
+  "CSL_ENABLE_QHULL": false,
+  "qualification": "Fresh core build from authored source committed byte-for-byte as this source identity; original compilation occurred before commit, then focused tests and this capture ran from the verified clean committed tree. Separate fresh installed-consumer validation is pending.",
+  "captured_utc": "2026-11-12T20:55:02.345804+00:00",
+  "native_runtime": "C++ only; Python is not used for case construction, propagation, checking or figure generation",
+  "numerical_checks": {
+    "native_unit_cases": 3,
+    "native_unit_assertions": 209,
+    "three_state": {
+      "cases": 2,
+      "stages": 17,
+      "complete_cube_corner_rows": 6128,
+      "maximum_materialized_corners": 2048
+    },
+    "four_state": {
+      "transitions": 15,
+      "stages": 16,
+      "terminal_generators": 19,
+      "full_state_support_checks": 1280,
+      "projection_support_checks": 2048,
+      "full_4d_v_materialization": "not performed"
+    }
+  },
+  "capture_processes": [
+    {
+      "name": "three-state",
+      "executable_sha256": "6dbdee291cfd7d8b4f605600fd0115f27dd2485747d93a235c126acc907a60f6",
+      "returncode": 0,
+      "source_commit": "19d32a3c37b6860dbf881996da1bf5e2b3f92353",
+      "scope": "functional numerical reference, no performance measurement"
+    },
+    {
+      "name": "four-state",
+      "executable_sha256": "57de25173efc477270c0732ebe9cdcdeaf5a52f835f16f82c7b39c6fbdc9b70b",
+      "returncode": 0,
+      "source_commit": "19d32a3c37b6860dbf881996da1bf5e2b3f92353",
+      "scope": "functional numerical reference, no performance measurement"
+    }
+  ],
+  "paper_source_sha256": [
+    "029d55dd5b2d2ff1682bb42ffead7e2f5f0133df78864ae5ee583028200a88e5",
+    "565ae84cf2c2661df47ce98a7a3d6c2ffa5cc9f220bf81a54f3b8a64c73a1c2a"
+  ],
+  "assurance": "numerical; no general validated inclusion, performance or control guarantee"
+}
