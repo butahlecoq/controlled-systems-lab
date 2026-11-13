@@ -1,0 +1,120 @@
+{
+  "id": "04-syn-nl-lv-01-polytope",
+  "task": "syn-nl-lv-01",
+  "family": "polytope",
+  "attempt_id": "syn-nl-lv-01-20261113T012556Z-956780d2",
+  "task_id": "syn-nl-lv-01/continuous-receding/1",
+  "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+  "controller_id": "native-continuous-history-polytope-ipopt/1",
+  "source_commit": "9540b8d0b441f3f3e544d2016abb4ee53c94da0b",
+  "sdk_source_commit": "ab3fdba672d9227e7631e7fec9b10bc91196c285",
+  "native_sha256": "c46c3a2d9755c347d8d665af1332c12c2596491bd83d73173308c5b4831e3aa0",
+  "physical_bridge_sha256": "b5d47c14c65f1d2f833eaec4d9713bcc4717b130bd688e943ade7442c363973f",
+  "graph_id": "closed-loop/syn-nl-lv-01/continuous-history-polytope-ipopt/1/cfg-570e887324460279",
+  "graph_fingerprint": "570e8873244602794342603a1ab1e6543ebc3d1b57041bae6588fe31a81ca404",
+  "original_intervals": 30,
+  "completed_holds": 0,
+  "outcome": "inconclusive-nonterminal",
+  "reason": "Original LV polytope lifecycle lacks terminal supervisor result; absence of processes does not identify timeout/cancellation/OOM.",
+  "geometry_terminal": null,
+  "full_episode": false,
+  "physical_objective": null,
+  "audit": {
+    "task": "syn-nl-lv-01",
+    "family": "polytope",
+    "cell": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-warm-gap-functional-9540/04-syn-nl-lv-01-polytope",
+    "accepted_queries_checked": 0,
+    "warm_queries_checked": 0,
+    "memberships_checked": 0,
+    "support_certificates_checked": 0,
+    "errors": [],
+    "attempt_status": {
+      "status": "in-progress",
+      "algorithm_status": null,
+      "overall_status": null,
+      "completed_holds": null
+    },
+    "completed_holds_proven": 0,
+    "audit_status": "pass",
+    "full_episode": false
+  },
+  "unit_terminal": null,
+  "resource_envelope": null,
+  "worker_stderr_available": false,
+  "attempt_prefix": "attempt/",
+  "archive_sha256": "b17174c725bd83220a34d9995ad7089491cb87066e1bd28026d8020eb1ac9aab",
+  "archive_members": {
+    "attempt/attempt.json": {
+      "bytes": 15821,
+      "sha256": "9a81036e3803cc2d004d17305b44f9320b67cd134fb05b999dd77881aa1e9989",
+      "crc32": "3ae20efd"
+    },
+    "attempt/native-query-000-4ad52319967dac2c703a6d2ba1173f79bc818cb2797022e5b4fd0b610c23d58c.json": {
+      "bytes": 551,
+      "sha256": "4ad52319967dac2c703a6d2ba1173f79bc818cb2797022e5b4fd0b610c23d58c",
+      "crc32": "700459d8"
+    },
+    "attempt/native-query-000-5d6c5e501e75f5c5b0273e77e16a6343a69dd7f6b6aac0ac58b25736a885e4d8.json": {
+      "bytes": 552,
+      "sha256": "5d6c5e501e75f5c5b0273e77e16a6343a69dd7f6b6aac0ac58b25736a885e4d8",
+      "crc32": "847c6e27"
+    },
+    "attempt/native-query-000-80135fda1dc129fb501b9db4f8969c8f9bf0955e449a44cc52a8601db9595466.json": {
+      "bytes": 546,
+      "sha256": "80135fda1dc129fb501b9db4f8969c8f9bf0955e449a44cc52a8601db9595466",
+      "crc32": "a95425f6"
+    },
+    "attempt/native-query-000-request.jsonl": {
+      "bytes": 14636,
+      "sha256": "9a3d0d41e73bcceb6d1cb490ca5a39644554768c5efe78f005eff3ad68d7be0e",
+      "crc32": "34d399be"
+    },
+    "attempt/record-io.jsonl": {
+      "bytes": 3451,
+      "sha256": "a2f133f541373814e9fb777c19ddba4cf15e6730b3773f2e42fde44a2296dfb0",
+      "crc32": "7aa4b898"
+    },
+    "attempt/request.json": {
+      "bytes": 966,
+      "sha256": "5cdbe0f154f53289cf2082c1e89c0779067e2292797b94036bd017d748d537d2",
+      "crc32": "38bde6dc"
+    },
+    "attempt/resolution-receipt.json": {
+      "bytes": 994,
+      "sha256": "e0aeaa0f392b40a9ef06a54d9562e12e8f922603ddf508e65e0303eccdb9a3e1",
+      "crc32": "21fef1ea"
+    },
+    "attempt/resolved-graph.json": {
+      "bytes": 10703,
+      "sha256": "6644b7f5fbc2f76dd297c89db3d4b9e257f971a101be482a8f7e4db10c05f552",
+      "crc32": "5fec7dfd"
+    },
+    "attempt/run-manifest.json": {
+      "bytes": 10526,
+      "sha256": "48d4e5b352706b07b6235a850d146b3c8f6ef78f54080218f5b3611986e0e84a",
+      "crc32": "3eae7e23"
+    },
+    "attempt/stage-000.json": {
+      "bytes": 1161,
+      "sha256": "480d238aa4d17ea2990d4548610813ba6c60f2ae71e8310caa1265c44c2eed2a",
+      "crc32": "29d5ebcc"
+    },
+    "supervisor/launch.json": {
+      "bytes": 1932,
+      "sha256": "0329d4d827aa8e5e01ac8f8c3ecdf1c92ebb5d1a3463189baeee66efda4971a6",
+      "crc32": "8b1f5b9d"
+    },
+    "supervisor/parent-stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    },
+    "supervisor/parent-stdout.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    }
+  },
+  "scope": "Archive receipt/index only; authoritative algorithm result remains original csl.closed-loop.attempt/2 and source-bound stage records.",
+  "trace_qualification": "Original native stderr shares worker stream where retained. Initial nonterminal and outer-OOM attempts lack recovered final worker streams; no bytes reconstructed."
+}

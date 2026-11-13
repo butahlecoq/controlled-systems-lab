@@ -1,0 +1,211 @@
+{
+  "id": "14-earth-orbit-polytope",
+  "task": "earth-orbit",
+  "family": "polytope",
+  "attempt_id": "earth-orbit-20261113T061936Z-c7a9bfa8",
+  "task_id": "env717-earth-orbit/continuous-receding/1",
+  "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+  "controller_id": "native-continuous-history-polytope-ipopt/1",
+  "source_commit": "9540b8d0b441f3f3e544d2016abb4ee53c94da0b",
+  "sdk_source_commit": "ab3fdba672d9227e7631e7fec9b10bc91196c285",
+  "native_sha256": "c46c3a2d9755c347d8d665af1332c12c2596491bd83d73173308c5b4831e3aa0",
+  "physical_bridge_sha256": "b5d47c14c65f1d2f833eaec4d9713bcc4717b130bd688e943ade7442c363973f",
+  "graph_id": "closed-loop/earth-orbit/continuous-history-polytope-ipopt/1/cfg-2c3e7c48d547f1bc",
+  "graph_fingerprint": "2c3e7c48d547f1bc9b2ec0a16c61e517952e5e206a8c9ecaa29e5b0971cdcc29",
+  "original_intervals": 20,
+  "completed_holds": 0,
+  "outcome": "geometry-stopped",
+  "reason": "feedback geometry stopped; partial stage prefix retained",
+  "geometry_terminal": {
+    "status": "stopped",
+    "stop_kind": "operation_stopped",
+    "stop_stage": 2,
+    "stop_phase": 0,
+    "diagnostics": "Feedback geometry allocation failed."
+  },
+  "full_episode": false,
+  "physical_objective": null,
+  "audit": {
+    "task": "earth-orbit",
+    "family": "polytope",
+    "cell": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-warm-gap-functional-9540-resume-04/08-earth-orbit-polytope",
+    "accepted_queries_checked": 0,
+    "warm_queries_checked": 0,
+    "memberships_checked": 0,
+    "support_certificates_checked": 0,
+    "errors": [],
+    "attempt_status": {
+      "status": "incomplete",
+      "algorithm_status": "incomplete",
+      "overall_status": "incomplete",
+      "completed_holds": 0
+    },
+    "completed_holds_proven": 0,
+    "audit_status": "pass",
+    "full_episode": false
+  },
+  "unit_terminal": {
+    "observed_unix_seconds": 1794550778.705381,
+    "systemctl_exit_code": 0,
+    "properties": {
+      "Id": "csl943-worker-7682d6cd27084dbb.service",
+      "ActiveState": "failed",
+      "SubState": "failed",
+      "MainPID": "0",
+      "Result": "exit-code",
+      "OOMPolicy": "stop",
+      "ExecMainCode": "1",
+      "ExecMainStatus": "2",
+      "ControlGroup": "",
+      "MemoryCurrent": "[not set]",
+      "MemoryPeak": "79966208",
+      "MemorySwapCurrent": "[not set]",
+      "MemorySwapPeak": "0",
+      "MemoryMax": "2147483648",
+      "MemorySwapMax": "2147483648",
+      "ManagedOOMSwap": "auto",
+      "ManagedOOMMemoryPressure": "auto"
+    },
+    "stderr": "",
+    "systemd_run_returncode": 2
+  },
+  "resource_envelope": {
+    "worker_units": "per-attempt csl943-worker-*.service",
+    "memory_max_bytes": 2147483648,
+    "memory_swap_max_bytes": 2147483648,
+    "oom_policy": "stop",
+    "scope": "numerical worker subtree only; outer supervisor outside worker memory domain; original worker1800s wall/CPU and8GiB per-process RLIMIT_AS retained; not uniform with initial direct runs"
+  },
+  "worker_stderr_available": true,
+  "attempt_prefix": "attempt/",
+  "archive_sha256": "13fb6c0991b8e03d6399dc35964aa1c5c3d5b7505cfcddb4f4a368249e8e7729",
+  "archive_members": {
+    "attempt/attempt.json": {
+      "bytes": 19988,
+      "sha256": "1bca54ee2d9fcec7bcaf8c9f0c18af9481456a53003d4e5bc99282cca476a4a0",
+      "crc32": "5cc2e8e5"
+    },
+    "attempt/native-query-000-1463410136a1164e0484c2d73cf1a7a9298543a14b2dff00db3c353e2d5cca4e.json": {
+      "bytes": 552,
+      "sha256": "1463410136a1164e0484c2d73cf1a7a9298543a14b2dff00db3c353e2d5cca4e",
+      "crc32": "9907f1d1"
+    },
+    "attempt/native-query-000-462e7e7321148f4f35f401b1dc8383315515b9b51f37e181cf3d08f507c49f9a.json": {
+      "bytes": 758,
+      "sha256": "462e7e7321148f4f35f401b1dc8383315515b9b51f37e181cf3d08f507c49f9a",
+      "crc32": "7ad41c81"
+    },
+    "attempt/native-query-000-75b6d91b8b9c453f89a9c4fba2a97171c2f8afc16f16377f7b6a9804df82d980.json": {
+      "bytes": 758,
+      "sha256": "75b6d91b8b9c453f89a9c4fba2a97171c2f8afc16f16377f7b6a9804df82d980",
+      "crc32": "ab55d98f"
+    },
+    "attempt/native-query-000-7789a4769f2e86c0a4b2ed235a9f185b2ea609eb16a9673e023ce1335f1b8d7a.json": {
+      "bytes": 752,
+      "sha256": "7789a4769f2e86c0a4b2ed235a9f185b2ea609eb16a9673e023ce1335f1b8d7a",
+      "crc32": "41801a56"
+    },
+    "attempt/native-query-000-a2278c190f04d1d6a4a89f687799ee746f0fc8789c95385067f14e676c2fc1c9.json": {
+      "bytes": 546,
+      "sha256": "a2278c190f04d1d6a4a89f687799ee746f0fc8789c95385067f14e676c2fc1c9",
+      "crc32": "b42fba00"
+    },
+    "attempt/native-query-000-eb5c11d6e605eb4dc7efcbdb00843d3d48437a00cd4447009b5d7b7d9bb860bb.json": {
+      "bytes": 551,
+      "sha256": "eb5c11d6e605eb4dc7efcbdb00843d3d48437a00cd4447009b5d7b7d9bb860bb",
+      "crc32": "6d7fc62e"
+    },
+    "attempt/native-query-000-request.jsonl": {
+      "bytes": 18242,
+      "sha256": "3a2a2e228ffaa990b7647918121df71480dfb52dcf5f9950a084b404e33885d1",
+      "crc32": "382124be"
+    },
+    "attempt/native-query-000-response.jsonl": {
+      "bytes": 409351,
+      "sha256": "da14ac8b172d5d0b5f85378488f8a2dd743f450ac22856d18f3024a5676d6fd5",
+      "crc32": "8b87791d"
+    },
+    "attempt/record-io.jsonl": {
+      "bytes": 11072,
+      "sha256": "c43807ea6f1b4cc4fc609b456f69061dccdf4c359d60b30d5b41ab8c902332cf",
+      "crc32": "f70500bb"
+    },
+    "attempt/request.json": {
+      "bytes": 964,
+      "sha256": "c1de6209607ee413a4500885ad626c7b8b3151a4fc38b44204625b068b894b3f",
+      "crc32": "648fcccb"
+    },
+    "attempt/resolution-receipt.json": {
+      "bytes": 1001,
+      "sha256": "5107a4ad7dbac1f245b492ce64ac6bc54cbbd8a21538fac79002f7eda6229722",
+      "crc32": "fa4920fe"
+    },
+    "attempt/resolved-graph.json": {
+      "bytes": 10591,
+      "sha256": "0c3c149e46282df97b451cfd1efa20132eb4d18df665fd5a30d2ca76d8abf812",
+      "crc32": "17a7c9c8"
+    },
+    "attempt/run-manifest.json": {
+      "bytes": 10518,
+      "sha256": "90fd88644676e1344800e7f2bc8f18161e61a9c50064d186309b639b6014e11a",
+      "crc32": "9cec1316"
+    },
+    "attempt/stage-000.json": {
+      "bytes": 12051,
+      "sha256": "2964ed65751939cf8885669f25f23c534fae0aadd179739754a27401524254a8",
+      "crc32": "8ac2fc1b"
+    },
+    "attempt/stage-records.jsonl": {
+      "bytes": 178,
+      "sha256": "7d8b5095e10b82b991d949ae5b5da5e6b2d01a625edce7f8a4f81a7d606044a8",
+      "crc32": "788ff2c9"
+    },
+    "attempt/worker-stderr.txt": {
+      "bytes": 295,
+      "sha256": "be8ba2fb1e98caece2d66984758427b094dc307124b35fbbff5c4e28a20a41cf",
+      "crc32": "98ece8e5"
+    },
+    "attempt/worker-stdout.txt": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    },
+    "attempt/worker-systemd-launch.json": {
+      "bytes": 4045,
+      "sha256": "7dfd80666c99bd0640f8fd458650d98a3f58f16143bc10d2308a87566c1e8e48",
+      "crc32": "1fa27b8e"
+    },
+    "attempt/worker-systemd-telemetry.jsonl": {
+      "bytes": 3137,
+      "sha256": "1226b7a37554180514704071e47410a481b6d13f4d37a58fa8dcd5ff52f07f34",
+      "crc32": "8f5d8d3c"
+    },
+    "attempt/worker-systemd-terminal.json": {
+      "bytes": 666,
+      "sha256": "c9d626795b96861371dd88b8aa49af7ccc2bcd3a0cab8162ae3c89e9d61d33d6",
+      "crc32": "1fa0b3a9"
+    },
+    "supervisor/launch.json": {
+      "bytes": 2336,
+      "sha256": "256fbd35ef96d46316c47ae867293f019bfe23b6b5c39ff0a0ef921ce2f85f54",
+      "crc32": "a7c47ebf"
+    },
+    "supervisor/parent-stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "crc32": "00000000"
+    },
+    "supervisor/parent-stdout.log": {
+      "bytes": 1299,
+      "sha256": "c4cfe76f8530a2ae1e0a2df8ecb5988bb30921fd8b219801387cfa866c90b220",
+      "crc32": "b8b9639c"
+    },
+    "supervisor/parent-terminal.json": {
+      "bytes": 631,
+      "sha256": "d9af1c82eec26256aafe27a11e8f994bab9e1dee08f523c1c8fe9e95472aff1a",
+      "crc32": "f334f7ec"
+    }
+  },
+  "scope": "Archive receipt/index only; authoritative algorithm result remains original csl.closed-loop.attempt/2 and source-bound stage records.",
+  "trace_qualification": "Original native stderr shares worker stream where retained. Initial nonterminal and outer-OOM attempts lack recovered final worker streams; no bytes reconstructed."
+}

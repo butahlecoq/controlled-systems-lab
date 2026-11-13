@@ -79,6 +79,11 @@ EXAMPLE_ROUTE_PRODUCERS = {
 }
 
 STANDALONE_REPORT_ROUTE_PRODUCERS = {
+    "closed-loop-history-functional/warm-gap-9540-v1/index.html": [
+        "scripts/reports/stage_history_functional.py",
+        "scripts/reports/history_warm_gap_report.py",
+        "reports/closed-loop-history-functional/warm-gap-9540-v1/render-source.py",
+        ".github/workflows/algorithm-reports.yml"],
     "closed-loop-history-functional/index.html": ["scripts/reports/stage_history_functional.py",
                                                    "reports/closed-loop-history-functional/index.html",
                                                    ".github/workflows/algorithm-reports.yml"],

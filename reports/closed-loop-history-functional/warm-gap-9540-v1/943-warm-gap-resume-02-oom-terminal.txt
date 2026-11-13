@@ -1,0 +1,9 @@
+Result=oom-kill
+OOMPolicy=stop
+ExecMainStartTimestamp=Fri 2026-11-13 08:44:12 MSK
+ExecMainExitTimestamp=Fri 2026-11-13 08:45:12 MSK
+ExecMainCode=2
+ExecMainStatus=9
+MemoryPeak=3194376192
+MemoryMax=infinity
+MemorySwapMax=infinity

@@ -1,0 +1,25 @@
+{
+  "classification": "supervisor-service-oom-kill",
+  "solver_outcome": "inconclusive-no-native-response",
+  "completed_holds_proven": 0,
+  "source_commit": "9540b8d0b441f3f3e544d2016abb4ee53c94da0b",
+  "service_terminal_properties": "Result=oom-kill\nOOMPolicy=stop\nExecMainStartTimestamp=Fri 2026-11-13 08:44:12 MSK\nExecMainExitTimestamp=Fri 2026-11-13 08:45:12 MSK\nExecMainCode=2\nExecMainStatus=9\nMemoryPeak=3194376192\nMemoryMax=infinity\nMemorySwapMax=infinity\n",
+  "files": {
+    "preflight.json": "42a39673833818e0aa89ae9d7ce4a40af344e80e6466d342fb64e5063e59bf66",
+    "launcher-source.py": "877e85c2fcf190c155cb68f31a046a99f0fa30a9f72d78ac5163006f6adfe7a5",
+    "01-syn-nl-lv-01-polytope/launch.json": "a98afb78056ec298dc9be8cb59a62e9962128e9030352c3c7b6fc34d49ae76c6",
+    "01-syn-nl-lv-01-polytope/parent-stdout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "01-syn-nl-lv-01-polytope/parent-stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "01-syn-nl-lv-01-polytope/results/syn-nl-lv-01/attempts/syn-nl-lv-01-20261113T054424Z-f9bdff52/request.json": "39357930102138df244010610363171bde45d0b2183cb4cc14a97ed07477f612",
+    "01-syn-nl-lv-01-polytope/results/syn-nl-lv-01/attempts/syn-nl-lv-01-20261113T054424Z-f9bdff52/record-io.jsonl": "6c072cabb2e59266e7464c8175597afe26b98391806b0a1b5f1a8c183f7eddab",
+    "01-syn-nl-lv-01-polytope/results/syn-nl-lv-01/attempts/syn-nl-lv-01-20261113T054424Z-f9bdff52/run-manifest.json": "739f014983df80e2f6e4af8838ac5139030a98c38434260db0546c769b32da59",
+    "01-syn-nl-lv-01-polytope/results/syn-nl-lv-01/attempts/syn-nl-lv-01-20261113T054424Z-f9bdff52/resolved-graph.json": "6644b7f5fbc2f76dd297c89db3d4b9e257f971a101be482a8f7e4db10c05f552",
+    "01-syn-nl-lv-01-polytope/results/syn-nl-lv-01/attempts/syn-nl-lv-01-20261113T054424Z-f9bdff52/resolution-receipt.json": "e0aeaa0f392b40a9ef06a54d9562e12e8f922603ddf508e65e0303eccdb9a3e1",
+    "01-syn-nl-lv-01-polytope/results/syn-nl-lv-01/attempts/syn-nl-lv-01-20261113T054424Z-f9bdff52/attempt.json": "fe6b0c458ed92c40b69e37279f9f692411cc6bcad60b6b1c0d280f07c292b46e",
+    "01-syn-nl-lv-01-polytope/results/syn-nl-lv-01/attempts/syn-nl-lv-01-20261113T054424Z-f9bdff52/native-query-000-request.jsonl": "9a3d0d41e73bcceb6d1cb490ca5a39644554768c5efe78f005eff3ad68d7be0e",
+    "01-syn-nl-lv-01-polytope/results/syn-nl-lv-01/attempts/syn-nl-lv-01-20261113T054424Z-f9bdff52/native-query-000-4ad52319967dac2c703a6d2ba1173f79bc818cb2797022e5b4fd0b610c23d58c.json": "4ad52319967dac2c703a6d2ba1173f79bc818cb2797022e5b4fd0b610c23d58c",
+    "01-syn-nl-lv-01-polytope/results/syn-nl-lv-01/attempts/syn-nl-lv-01-20261113T054424Z-f9bdff52/native-query-000-5d6c5e501e75f5c5b0273e77e16a6343a69dd7f6b6aac0ac58b25736a885e4d8.json": "5d6c5e501e75f5c5b0273e77e16a6343a69dd7f6b6aac0ac58b25736a885e4d8",
+    "01-syn-nl-lv-01-polytope/results/syn-nl-lv-01/attempts/syn-nl-lv-01-20261113T054424Z-f9bdff52/native-query-000-80135fda1dc129fb501b9db4f8969c8f9bf0955e449a44cc52a8601db9595466.json": "80135fda1dc129fb501b9db4f8969c8f9bf0955e449a44cc52a8601db9595466",
+    "01-syn-nl-lv-01-polytope/results/syn-nl-lv-01/attempts/syn-nl-lv-01-20261113T054424Z-f9bdff52/stage-000.json": "480d238aa4d17ea2990d4548610813ba6c60f2ae71e8310caa1265c44c2eed2a"
+  }
+}

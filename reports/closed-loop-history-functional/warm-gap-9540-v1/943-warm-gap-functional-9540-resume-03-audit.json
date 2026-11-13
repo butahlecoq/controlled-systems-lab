@@ -1,0 +1,30 @@
+{
+  "source_commit": "9540b8d0b441f3f3e544d2016abb4ee53c94da0b",
+  "scope": "saved accepted query witnesses and actual original source objective; failed/nonterminal outcomes remain separate",
+  "cells": [
+    {
+      "task": "syn-nl-fuel-01",
+      "family": "zonotope",
+      "cell": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-warm-gap-functional-9540-resume-03/01-syn-nl-fuel-01-zonotope",
+      "accepted_queries_checked": 40,
+      "warm_queries_checked": 40,
+      "memberships_checked": 2580,
+      "support_certificates_checked": 20640,
+      "errors": [],
+      "attempt_status": {
+        "status": "complete",
+        "algorithm_status": "complete",
+        "overall_status": "complete",
+        "completed_holds": 40
+      },
+      "completed_holds_proven": 40,
+      "audit_status": "pass",
+      "full_episode": true,
+      "applied_original_objective": {
+        "terminal": 0.00020404448520687404,
+        "running": 0.0036301670446699046,
+        "total": 0.0038342115298767784
+      }
+    }
+  ]
+}
