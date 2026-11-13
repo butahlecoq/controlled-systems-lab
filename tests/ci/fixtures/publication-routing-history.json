@@ -53,7 +53,9 @@
       "scripts/reports/stage_history_functional.py",
       "scripts/reports/visual-route-inventory.json",
       "tests/reporting/test_native_parallelotope_functional.py"
-    ]
+    ],
+    "comparison_base": "d6fc399abcca49d4ac96fabeed9d8878d11cf326",
+    "comparison": "Pinned two-dot Git diff; the PR base is recorded separately. This avoids ambiguous three-dot merge-base selection."
   },
   "1022": {
     "title": "Verify reviewed book navigation in preserved Pages baseline",
@@ -63,7 +65,9 @@
       "reports/published-route-preservation/manifest.json",
       "scripts/reports/audit_published_route_preservation.py",
       "tests/reporting/test_published_route_audit_policy.py"
-    ]
+    ],
+    "comparison_base": "ad02f3042f2a208c1f1dfb3c929a7ad23c36d14e",
+    "comparison": "Pinned two-dot Git diff; the PR base is recorded separately. This avoids ambiguous three-dot merge-base selection."
   },
   "1020": {
     "title": "Fix four-state parallelotope admission and bind native source diagnostics",
@@ -85,6 +89,8 @@
       "tests/reporting/test_history_query_diagnostics.py",
       "tests/reporting/test_published_route_audit_policy.py",
       "tests/unit/reachability/finite_plan_parallelotope_tests.cpp"
-    ]
+    ],
+    "comparison_base": "0907629971a8ff3c285896dd5bf117649256f679",
+    "comparison": "Pinned two-dot Git diff; the PR base is recorded separately. This avoids ambiguous three-dot merge-base selection."
   }
 }
