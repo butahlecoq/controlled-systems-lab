@@ -8,9 +8,7 @@ import time
 from collections.abc import Mapping, Sequence
 from typing import TextIO
 
-EMPTY_ARTIFACT_ERROR = (
-    'No artifacts named "github-pages" were found for this workflow run.'
-)
+EMPTY_ARTIFACT_ERROR = 'No artifacts named "github-pages" were found for this workflow run.'
 DEPLOYMENT_STARTED_MARKER = "Creating Pages deployment with payload:"
 MAX_ATTEMPTS = 3
 RETRY_DELAYS_SECONDS = (2, 4)
