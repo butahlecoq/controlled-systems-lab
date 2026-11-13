@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interior-state quadratic cost in a 2D nominal history QP</title>
+<style>
+  body{font:16px/1.5 system-ui,sans-serif;max-width:850px;margin:2rem auto;padding:0 1rem;color:#18212b}
+  svg{display:block;width:min(100%,640px);height:auto;background:#fbfcfe;border:1px solid #ccd5df}
+  .grid{stroke:#dce3ea;stroke-width:1}.axis{stroke:#405366;stroke-width:2}
+  .reachable{stroke:#708090;stroke-width:3;stroke-dasharray:8 6}.base{fill:#657587}
+  .tracked{fill:#bd3b32}.target{fill:#fff;stroke:#172838;stroke-width:3}
+  .label{font-size:16px;fill:#18212b}code{background:#eef2f5;padding:.1rem .3rem;border-radius:3px}
+</style>
+<h1>Interior-state cost changes the chosen control</h1>
+<p>Two state coordinates and one scalar control use <code>x[k+1]=u[k](1,1)</code>,
+<code>x₀=(0,0)</code>, two stages, and <code>u[k]∈[-1,1]</code>. Both cases have
+<code>0.2u[k]²</code> input cost. The red case adds an interior tracking cost at stage one,
+<code>||x₁-(1,0)||²</code>. The terminal cost is zero.</p>
+<svg viewBox="0 0 620 450" role="img" aria-labelledby="title description">
+  <title id="title">Reachable interior states with and without the running state cost</title>
+  <desc id="description">Reachable stage-one states lie on x equals y. With control-only cost the state is zero. Adding a quadratic penalty toward target (1,0) selects (5/11,5/11).</desc>
+  <path class="grid" d="M110 350H510 M110 270H510 M110 190H510 M110 110H510 M190 70V350 M270 70V350 M350 70V350 M430 70V350 M510 70V350"/>
+  <path class="axis" d="M110 370V55 M90 350H530"/>
+  <path class="reachable" d="M110 350L510 70"/>
+  <circle class="base" cx="110" cy="350" r="8"/>
+  <circle class="tracked" cx="292" cy="223" r="9"/>
+  <circle class="target" cx="510" cy="350" r="9"/>
+  <text class="label" x="122" y="342">control-only (0,0)</text>
+  <text class="label" x="300" y="213">running Q: (5/11,5/11)</text>
+  <text class="label" x="394" y="378">target (1,0)</text>
+  <text class="label" x="332" y="104">reachable x₁=y₁</text>
+  <text class="label" x="248" y="420">State coordinate x₁</text>
+  <text class="label" x="30" y="74">y₁</text>
+  <text class="label" x="106" y="394">0</text><text class="label" x="498" y="394">1</text>
+  <text class="label" x="72" y="355">0</text><text class="label" x="72" y="76">1</text>
+</svg>
+<h2>Checkable answer</h2>
+<p>On the reachable line, <code>x₁=(u₀,u₀)</code>. The objective is
+<code>(u₀-1)²+u₀²+0.2u₀²</code>; setting its derivative to zero gives
+<code>u₀=5/11</code>. Without the state penalty the objective is <code>0.2u₀²</code>,
+so <code>u₀=0</code>. The plotted points match the native HiGHS run in
+<a href="nominal_quadratic_history_2d.csv">the captured output</a>.</p>
+<h2>Reproduce</h2>
+<pre><code>cmake -S examples -B build/examples -DCMAKE_PREFIX_PATH=build/dev/install
+cmake --build build/examples --target nominal_quadratic_history_2d
+./build/examples/nominal_quadratic_history_2d</code></pre>
+<p>Source: <a href="nominal_quadratic_history_2d.cpp">example program</a> and
+<a href="../include/csl/optimization/nominal_quadratic_history.hpp">public API declaration</a>.
+This is a two-dimensional mathematical example, not a calibrated physical model or a benchmark.</p>
+</html>

@@ -1,0 +1,3 @@
+case,first_control,stage1_x,stage1_y
+control_only,0.000000,0.000000,0.000000
+interior_state_quadratic,0.454545,0.454545,0.454545

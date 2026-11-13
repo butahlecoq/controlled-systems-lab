@@ -1,6 +1,6 @@
 #pragma once
 
-#include <csl/optimization/convex_backend.hpp>
+#include <csl/optimization/nominal_quadratic_history.hpp>
 
 namespace csl::examples::quadcopter_mpc {
 
@@ -11,12 +11,15 @@ struct NominalProblem {
     std::vector<Interval> state_bounds, input_bounds;
 };
 
-// The source task uses a full state/control history, in x0..xN,u0..uN-1 order.
-optimization::ConvexDataResult<ConvexProgram> compile(const NominalProblem&);
+// Translate authored source costs and constraints to the public history-QP
+// contract; evaluation below remains a literal source-formula implementation.
+optimization::NominalQuadraticHistoryTask make_task(const NominalProblem&);
 
 double evaluate_source_cost(const NominalProblem&, std::span<const double> states,
                             std::span<const double> controls);
 double evaluate_running_stage(const NominalProblem&, std::span<const double> state,
                               std::span<const double> control);
+bool source_history_feasible(const NominalProblem&, std::span<const double> states,
+                             std::span<const double> controls, double tolerance = 1e-7);
 
 } // namespace csl::examples::quadcopter_mpc

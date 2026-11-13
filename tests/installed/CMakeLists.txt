@@ -292,6 +292,14 @@ add_executable(installed_public_client public_client.cpp)
 target_link_libraries(installed_public_client PRIVATE CSL::contracts)
 set_target_properties(installed_public_client PROPERTIES CXX_EXTENSIONS OFF)
 enable_testing()
+
+add_executable(installed_nominal_quadratic_history_client nominal_quadratic_history_client.cpp)
+target_link_libraries(installed_nominal_quadratic_history_client PRIVATE CSL::nominal_quadratic_history)
+set_target_properties(installed_nominal_quadratic_history_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_nominal_quadratic_history_client COMMAND installed_nominal_quadratic_history_client)
+set_tests_properties(installed_nominal_quadratic_history_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed nominal history QP: interior-state and terminal blocks passed")
+
 add_test(NAME installed_public_client COMMAND installed_public_client)
 set_tests_properties(installed_public_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Public contract client: shape guards and literal affine fixture passed")
