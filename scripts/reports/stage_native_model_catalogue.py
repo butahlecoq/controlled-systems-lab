@@ -2,17 +2,18 @@
 from __future__ import annotations
 
 import hashlib
-from html import escape
 import json
-from pathlib import Path, PurePosixPath
 import zipfile
+from html import escape
+from io import BytesIO
+from pathlib import Path, PurePosixPath
 
 from report_data import require
-
 
 ROUTE = "native-model-catalogue-v1"
 SOURCE = "19d32a3c37b6860dbf881996da1bf5e2b3f92353"
 MANIFEST_SHA256 = "4c1c25872414f9ac7c12fa3fdfb9c9cff24b43174f462ac7f72a795889b0e3ad"
+ARCHIVE_SHA256 = "f2c3576403cd367a78d4a81fbdca59db970da43094ad456070561c8ce49bbf30"
 
 
 def _file(root: Path, relative: str) -> Path:
@@ -54,16 +55,18 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
         files[name] = content
     archive_name = ROUTE + ".zip"
     archive_path = _file(root, archive_name)
-    with zipfile.ZipFile(archive_path) as archive:
+    archive_bytes = archive_path.read_bytes()
+    require(hashlib.sha256(archive_bytes).hexdigest() == ARCHIVE_SHA256,
+            "native catalogue archive differs from frozen publication identity")
+    with zipfile.ZipFile(BytesIO(archive_bytes)) as archive:
         require(len(archive.namelist()) == len(files) and
                 set(archive.namelist()) == set(files) and archive.testzip() is None,
                 "native catalogue archive members differ")
         for name, content in files.items():
             require(archive.read(name) == content, "native catalogue archive bytes differ: " + name)
-    files[archive_name] = archive_path.read_bytes()
+    files[archive_name] = archive_bytes
     sidecar = _file(root, archive_name + ".sha256").read_bytes()
-    require(sidecar.decode("ascii").strip() ==
-            hashlib.sha256(files[archive_name]).hexdigest() + "  " + archive_name,
+    require(sidecar == (ARCHIVE_SHA256 + "  " + archive_name + "\n").encode("ascii"),
             "native catalogue archive checksum differs")
     files[archive_name + ".sha256"] = sidecar
     paths = list(root.rglob("*"))

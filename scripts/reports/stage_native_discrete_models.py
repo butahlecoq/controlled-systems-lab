@@ -5,6 +5,7 @@ import hashlib
 import json
 import zipfile
 from html import escape
+from io import BytesIO
 from pathlib import Path
 
 from report_data import require
@@ -13,6 +14,7 @@ from stage_native_model_catalogue import _file
 ROUTE = 'native-discrete-models-v1'
 SOURCE = '856d7a77c49fca0c6f6cdb8c1a1db9a651da85cb'
 MANIFEST_SHA256 = '35339cf09d9789fd66a3fe254867b7c025c8efe970312d9cffe03e0ea2ed9798'
+ARCHIVE_SHA256 = 'e146bcb4d3d55dec08e9fa169923c191a8febe2a1a17e431097b5b2b34647577'
 PAGES = ('native-discrete-models.html', 'native-quadcopter-mpc.html')
 
 
@@ -43,7 +45,9 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
     expected_archive['examples.css'] = files['offline-examples.css']
     archive_name = ROUTE+'.zip'
     archive_bytes = _file(root, archive_name).read_bytes()
-    with zipfile.ZipFile(_file(root, archive_name)) as archive:
+    require(hashlib.sha256(archive_bytes).hexdigest() == ARCHIVE_SHA256,
+            'native discrete archive differs from frozen publication identity')
+    with zipfile.ZipFile(BytesIO(archive_bytes)) as archive:
         require(len(archive.namelist()) == len(expected_archive) and
                 set(archive.namelist()) == set(expected_archive) and archive.testzip() is None,
                 'native discrete archive members differ')
@@ -51,7 +55,7 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
             require(archive.read(name) == content, 'native discrete archive bytes differ: '+name)
     files[archive_name] = archive_bytes
     checksum = _file(root, archive_name+'.sha256').read_bytes()
-    require(checksum.decode().strip() == hashlib.sha256(archive_bytes).hexdigest()+'  '+archive_name,
+    require(checksum == (ARCHIVE_SHA256+'  '+archive_name+'\n').encode('ascii'),
             'native discrete archive checksum differs')
     files[archive_name+'.sha256'] = checksum
     paths = list(root.rglob('*'))

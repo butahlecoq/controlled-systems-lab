@@ -35,6 +35,33 @@ class NativeDiscreteTests(unittest.TestCase):
         for page in (*native.PAGES, 'examples.css'):
             shutil.copyfile(ROOT / 'docs/examples' / page, self.root / 'docs/examples' / page)
 
+    def test_same_payload_repack_with_recomputed_sidecar_is_rejected(self):
+        import zipfile
+        path = self.bundle / (native.ROUTE + '.zip')
+        original = path.read_bytes()
+        with zipfile.ZipFile(path) as archive:
+            payloads = [(name, archive.read(name)) for name in archive.namelist()]
+        with zipfile.ZipFile(path, 'w', compression=zipfile.ZIP_STORED) as archive:
+            for name, content in payloads:
+                archive.writestr(name, content)
+        self.assertNotEqual(path.read_bytes(), original)
+        with zipfile.ZipFile(path) as archive:
+            self.assertEqual([(name, archive.read(name)) for name in archive.namelist()], payloads)
+        path.with_suffix('.zip.sha256').write_text(
+            hashlib.sha256(path.read_bytes()).hexdigest()+'  '+path.name+'\n')
+        with self.assertRaisesRegex(ValueError, 'archive differs from frozen publication identity'):
+            native.build(self.root)
+
+    def test_noncanonical_archive_sidecar_is_rejected(self):
+        path = self.bundle / (native.ROUTE + '.zip.sha256')
+        canonical = path.read_bytes()
+        for content in (canonical.rstrip(b'\n'), canonical+b'\n', b' '+canonical):
+            with self.subTest(content=content):
+                path.write_bytes(content)
+                with self.assertRaisesRegex(ValueError, 'archive checksum differs'):
+                    native.build(self.root)
+        path.write_bytes(canonical)
+
     def test_literal_numerical_replay_and_immutable_raw_identity(self):
         result = renderer.check(self.bundle)
         self.assertEqual(result['replans'], 15)
@@ -117,8 +144,9 @@ class NativeDiscreteTests(unittest.TestCase):
         with zipfile.ZipFile(archive, 'a') as stream:
             stream.writestr('invented.txt', b'not evidence')
         archive.with_suffix('.zip.sha256').write_text(hashlib.sha256(archive.read_bytes()).hexdigest()+'  '+archive.name+'\n')
-        with self.assertRaisesRegex(ValueError, 'archive members differ'):
-            native.build(self.root)
+        with patch.object(native, 'ARCHIVE_SHA256', hashlib.sha256(archive.read_bytes()).hexdigest()):
+            with self.assertRaisesRegex(ValueError, 'archive members differ'):
+                native.build(self.root)
 
     def test_drawn_lines_are_all_saved_predictions_and_executed_values(self):
         import matplotlib.pyplot as plt
