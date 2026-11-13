@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -72,6 +73,99 @@ class RoutingTests(unittest.TestCase):
         self.write("tests/reporting/test_visual_examples.py", "educational assertions")
         self.commit()
         self.assertEqual(self.route(), ("false", "true"))
+
+    def test_reviewed_publication_prs_keep_reporting_without_rebuilding_native(self):
+        history = json.loads(
+            (ROOT / "tests/ci/fixtures/publication-routing-history.json").read_text()
+        )
+        for number in ("1021", "1022"):
+            with self.subTest(pr=number, source=history[number]["head"]):
+                self.git("reset", "--hard", self.base)
+                for path in history[number]["paths"]:
+                    self.write(path, "saved evidence, renderer, audit or publication test")
+                self.commit()
+                self.assertEqual(self.route(), ("false", "true"))
+
+    def test_actual_native_admission_pr_keeps_complete_native_validation(self):
+        history = json.loads(
+            (ROOT / "tests/ci/fixtures/publication-routing-history.json").read_text()
+        )
+        for path in history["1020"]["paths"]:
+            self.write(path, "native admission implementation and consumers")
+        self.commit()
+        self.assertEqual(self.route(), ("true", "true"))
+
+    def test_publication_data_roots_include_archived_source_not_live_drivers(self):
+        self.write("reports/published-route-preservation/reviewed-v2/raw.zip", "saved")
+        self.write(
+            "reports/closed-loop-history-functional/new-capture/qualification/native.cpp",
+            "immutable source snapshot carried as evidence",
+        )
+        self.commit()
+        self.assertEqual(self.route(), ("false", "true"))
+        self.write("scripts/reports/new_native_driver.cpp", "live C++ executable")
+        self.commit()
+        self.assertEqual(self.route(), ("true", "true"))
+
+    def test_native_consumers_fixtures_schemas_and_build_owners_are_never_exempt(self):
+        for name in (
+            "include/csl/model/system.hpp",
+            "src/model/Module.cmake",
+            "tools/closed_loop_native_policy.cpp",
+            "examples/native_consumer.cpp",
+            "tests/installed/finite_plan_parallelotope_client.cpp",
+            "tests/unit/input/fixtures/continuous_model.json",
+            "benchmarks/reporting/closed_loop/attempt_records.py",
+            "benchmarks/reporting/closed_loop/native_graph_policy.py",
+            "benchmarks/reporting/exp824/scenario.json",
+            "scripts/reports/issue6/b06_scenario.hpp.in",
+            "scripts/reports/mpc01/check_native_smoke.py",
+            "scripts/reports/geo07/check_smoke.py",
+            "tests/reporting/test_convex_report.py",
+            "cmake/ReportTargets.cmake",
+            "CMakeLists.txt",
+            "CMakePresets.json",
+            "schemas/model/continuous-v1.schema.json",
+            "docs/artifacts/schemas/closed-loop-attempt-v2.schema.json",
+            ".github/actions/native-cache-setup/action.yml",
+            ".github/workflows/native.yml",
+            ".github/workflows/algorithm-reports.yml",
+            ".github/workflows/validation-routing.yml",
+            "scripts/ci/route_changes.py",
+        ):
+            with self.subTest(name=name):
+                self.git("reset", "--hard", self.base)
+                self.write("scripts/reports/audit_published_route_preservation.py", "audit")
+                self.write(name, "native owner or unknown executable")
+                self.commit()
+                self.assertEqual(self.route(), ("true", "true"))
+
+    def test_current_cmake_owned_reporting_smoke_inputs_keep_native_validation(self):
+        declarations = (ROOT / "cmake/ReportTargets.cmake").read_text() + (
+            ROOT / "cmake/OptionalReports.cmake"
+        ).read_text()
+        native_inputs = sorted(
+            set(
+                re.findall(
+                    r"(?:scripts/reports|tests/reporting)/[A-Za-z0-9_./-]+\.py", declarations
+                )
+            )
+        )
+        self.assertIn("scripts/reports/mpc01/check_native_smoke.py", native_inputs)
+        self.assertIn("tests/reporting/test_convex_report.py", native_inputs)
+        for name in native_inputs:
+            with self.subTest(native_cmake_consumer=name):
+                self.git("reset", "--hard", self.base)
+                self.write(name, "changed actual CMake-owned native smoke input")
+                self.commit()
+                self.assertEqual(self.route(), ("true", "true"))
+
+    def test_native_rename_into_archived_report_cannot_hide_deleted_source(self):
+        target = "reports/closed-loop-history-functional/snapshot/native.cpp"
+        (self.repo / target).parent.mkdir(parents=True)
+        self.git("mv", "src/existing.cpp", target)
+        self.commit()
+        self.assertEqual(self.route(), ("true", "true"))
 
     def test_gallery_stylesheet_alone_uses_complete_reporting_only(self):
         self.write("docs/examples/examples.css", "/* gallery style */")

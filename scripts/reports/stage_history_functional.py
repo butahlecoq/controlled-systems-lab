@@ -6,9 +6,10 @@ import shutil
 import zipfile
 
 if __package__:
-    from . import history_warm_gap_report
+    from . import history_warm_gap_report, native_parallelotope_functional
 else:
     import history_warm_gap_report
+    import native_parallelotope_functional
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORT = "closed-loop-history-functional"
@@ -18,13 +19,16 @@ RECORDS = ("lv-highs-f4", "orbit-ipopt-f4", "fuel-ipopt-3c", "fuel-highs-f4-time
            "warm-tiny-a488", "lv-box-warm-a488-execution-failure", "orbit-box-warm-a488-execution-failure")
 CARD = ('<article class="saved-figure" id="closed-loop-history-functional">'
         '<h3>Continuous affine-history control: functional evidence</h3>'
-        '<p>Original-horizon direct and selected F/B/I family physical episodes, plus a separately retained HiGHS fuel timeout, with source-bound records.</p>'
+        '<p>Original-horizon affine-history and selected F/B/I episodes, plus three native parallelotope finite-plan episodes with saved numerical prediction bounds. Source-qualified functional evidence, with failures retained; no performance ranking.</p>'
         '<p><a href="../closed-loop-history-functional/index.html">Open functional evidence →</a></p></article>')
 
 
 def stage(source: Path, site: Path) -> None:
     source = source.resolve(strict=True)
     site = site.resolve(strict=True)
+    native = source / native_parallelotope_functional.NAME
+    if native.exists():
+        native_parallelotope_functional.check(native)
     warm_gap = source / "warm-gap-9540-v1"
     if warm_gap.exists():
         history_warm_gap_report.validate(warm_gap)

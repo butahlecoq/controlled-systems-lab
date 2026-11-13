@@ -57,6 +57,42 @@ EXAMPLE_ROUTE_PRODUCERS = {
     "examples/app03-zonotope-v1.html": ["scripts/reports/approx_extension_companions.py"],
     "examples/app04-square-v1.html": ["scripts/reports/approx_extension_companions.py"],
     "examples/b04-reference-trajectory-projections.html": ["scripts/reports/mpc01/b04_projection_example.py"],
+    "examples/buryatia-dim4-literal-affine-v1/index.html": [
+        "scripts/reports/stage_buryatia_dim4.py",
+        "docs/examples/buryatia-dim4-literal-affine.html",
+        "docs/examples/buryatia-dim4-literal-affine-v1-records.json",
+        "docs/examples/buryatia-dim4-literal-affine-v1-capture.json",
+        "docs/examples/buryatia-dim4-box-trace-correction-v1.json",
+        "benchmarks/scenarios/buryatia-dim4-matlab-literal-affine-v1.json",
+    ],
+    "examples/buryatia-dim4-literal-affine-v1/terminal-x1-x2.svg": [
+        "scripts/reports/stage_buryatia_dim4.py",
+        "docs/examples/buryatia-dim4-literal-affine-v1-records.json",
+    ],
+    "examples/buryatia-dim4-literal-affine-v1/buryatia-dim4-literal-affine-v1-records.json": [
+        "scripts/reports/stage_buryatia_dim4.py",
+        "docs/examples/buryatia-dim4-literal-affine-v1-records.json",
+    ],
+    "examples/buryatia-dim4-literal-affine-v1/buryatia-dim4-literal-affine-v1-capture.json": [
+        "scripts/reports/stage_buryatia_dim4.py",
+        "docs/examples/buryatia-dim4-literal-affine-v1-capture.json",
+    ],
+    "examples/buryatia-dim4-literal-affine-v1/buryatia-dim4-box-trace-correction-v1.json": [
+        "scripts/reports/stage_buryatia_dim4.py",
+        "docs/examples/buryatia-dim4-box-trace-correction-v1.json",
+    ],
+    "examples/buryatia-dim4-literal-affine-v1/buryatia-dim4-matlab-literal-affine-v1.json": [
+        "scripts/reports/stage_buryatia_dim4.py",
+        "benchmarks/scenarios/buryatia-dim4-matlab-literal-affine-v1.json",
+    ],
+    "examples/buryatia-dim4-literal-affine-v1/buryatia-dim4-literal-affine-v1-SHA256SUMS": [
+        "scripts/reports/stage_buryatia_dim4.py",
+        "docs/examples/buryatia-dim4-literal-affine-v1-SHA256SUMS",
+        "docs/examples/buryatia-dim4-literal-affine-v1-records.json",
+        "docs/examples/buryatia-dim4-literal-affine-v1-capture.json",
+        "docs/examples/buryatia-dim4-box-trace-correction-v1.json",
+        "benchmarks/scenarios/buryatia-dim4-matlab-literal-affine-v1.json",
+    ],
     "examples/control-witness-timing-v1.html": ["scripts/reports/control_witness_companions.py"],
     "examples/control-witness-v1.html": ["scripts/reports/control_witness_companions.py"],
     "examples/ext01-b08-timing-v1.html": ["scripts/reports/approx_extension_companions.py"],
@@ -81,6 +117,11 @@ EXAMPLE_ROUTE_PRODUCERS = {
 }
 
 STANDALONE_REPORT_ROUTE_PRODUCERS = {
+    "closed-loop-history-functional/native-parallelotope-d6fc-v1/index.html": [
+        "scripts/reports/stage_history_functional.py",
+        "scripts/reports/native_parallelotope_functional.py",
+        "reports/closed-loop-history-functional/native-parallelotope-d6fc-v1/index.html",
+        ".github/workflows/algorithm-reports.yml"],
     "closed-loop-history-functional/warm-gap-9540-v1/index.html": [
         "scripts/reports/stage_history_functional.py",
         "scripts/reports/history_warm_gap_report.py",

@@ -1,0 +1,336 @@
+{
+  "targets": [
+    {
+      "target": "CSL::affine_sum",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_affine_sum.a",
+      "sha256": "7299bffdcf70aeb2186d42225d649a697f96b78725f1586cbe62114c0ce8db36",
+      "rebuilt": false,
+      "input_count": 37
+    },
+    {
+      "target": "CSL::artifacts",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_artifacts.a",
+      "sha256": "272e851c9ec76fefd56183eb6eea34ba84f5e68db3913781e57f6cbc6462e399",
+      "rebuilt": false,
+      "input_count": 56
+    },
+    {
+      "target": "CSL::bounded_hull_checker",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_bounded_hull_checker.a",
+      "sha256": "a9c4883d947c43ca75fed69f40915a869e52d5d162fe5ff336965dcaf5fcbadd",
+      "rebuilt": false,
+      "input_count": 22
+    },
+    {
+      "target": "CSL::contracts",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_contracts.a",
+      "sha256": "afbecd584d1732402bb15f9ab6d2773b356ec3ae69c8389afb2350f99c1d73f4",
+      "rebuilt": false,
+      "input_count": 19
+    },
+    {
+      "target": "CSL::control_recovery",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_control_recovery.a",
+      "sha256": "9641143c4fc26115b6893de229ef6b762de1ca60a05cfd6ea2dc904d0cf41898",
+      "rebuilt": false,
+      "input_count": 22
+    },
+    {
+      "target": "CSL::convex",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_convex.a",
+      "sha256": "5121f441f05f964eb88f5facf51ce15d4147f6ae5ca53c16b8b758557b235477",
+      "rebuilt": false,
+      "input_count": 13
+    },
+    {
+      "target": "CSL::execution",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_execution.a",
+      "sha256": "eda285da62afd8ad51a29e18fb9d0543a2da57dc8f07db2172cbb152d7c07ab6",
+      "rebuilt": false,
+      "input_count": 24
+    },
+    {
+      "target": "CSL::feedback_geometry",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_feedback_geometry.a",
+      "sha256": "bec56360f54fc83642fd6b1587e5f5206b8316aedcfede4e854ea36bdaa92dff",
+      "rebuilt": false,
+      "input_count": 40
+    },
+    {
+      "target": "CSL::finite_action_box_minimax",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_finite_action_box_minimax.a",
+      "sha256": "885982b20d657d0270a11466eb8966d9121e9fd947b468d5a2fc43968808708f",
+      "rebuilt": false,
+      "input_count": 31
+    },
+    {
+      "target": "CSL::finite_action_ellipsoid_minimax",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_finite_action_ellipsoid_minimax.a",
+      "sha256": "79e30b27d5f02f40d8f1044ae1f55217000b8d2f0b4dca2fea01dfefce1936a0",
+      "rebuilt": false,
+      "input_count": 32
+    },
+    {
+      "target": "CSL::finite_action_minimax",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_finite_action_minimax.a",
+      "sha256": "c0e36d58cc658294747e187c0b9e8734831c1adf86e70f8eca4464887cc74ad5",
+      "rebuilt": false,
+      "input_count": 31
+    },
+    {
+      "target": "CSL::finite_action_nominal",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_finite_action_nominal.a",
+      "sha256": "e6ef0501dc28fa368d728aa706e131469bf38482f99e821462e32c73fcf771be",
+      "rebuilt": false,
+      "input_count": 47
+    },
+    {
+      "target": "CSL::finite_action_parallelotope_minimax",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_finite_action_parallelotope_minimax.a",
+      "sha256": "dceb98f50ddae6ebb0a23406410cc9aab9839f4a23e96f8a4ca944fb10fdb1bf",
+      "rebuilt": false,
+      "input_count": 31
+    },
+    {
+      "target": "CSL::finite_action_replay",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_finite_action_replay.a",
+      "sha256": "776e910f66b62b310030e5b6a7a0051d3dff4843bd7fba9201963c0da0f9d09c",
+      "rebuilt": false,
+      "input_count": 27
+    },
+    {
+      "target": "CSL::finite_action_zonotope_minimax",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_finite_action_zonotope_minimax.a",
+      "sha256": "8a59fcdc756155c6cb32e1c6526f292ccea01d1710e801ba2f3e5eb9baec5281",
+      "rebuilt": false,
+      "input_count": 32
+    },
+    {
+      "target": "CSL::finite_plan_box",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_finite_plan_box.a",
+      "sha256": "32c077c5b55a45b88c570d82b6dee59aeada4694b14b4e86b2e403d35ca4696e",
+      "rebuilt": false,
+      "input_count": 28
+    },
+    {
+      "target": "CSL::finite_plan_ellipsoid",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_finite_plan_ellipsoid.a",
+      "sha256": "e9173c878ecf7b4f240bdf321985e6b72b59a0c7872e5acdc056426e825b19fb",
+      "rebuilt": false,
+      "input_count": 29
+    },
+    {
+      "target": "CSL::finite_plan_parallelotope",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_finite_plan_parallelotope.a",
+      "sha256": "34f11d2c31eb704da8194d90e4a6768c8bf552e50c57f6f99504af548295ea13",
+      "rebuilt": true,
+      "input_count": 28
+    },
+    {
+      "target": "CSL::finite_plan_zonotope",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_finite_plan_zonotope.a",
+      "sha256": "0af1d086a04f853502bdeaf1abbb8837bb8790f9886a127d5638f9cc413ff7ac",
+      "rebuilt": false,
+      "input_count": 29
+    },
+    {
+      "target": "CSL::fixed_plan_disturbance",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_fixed_plan_disturbance.a",
+      "sha256": "eea7d24d5fe0b99316e473970f4ec86fbc70b77b518281b5ebbe7a72a665d3b8",
+      "rebuilt": false,
+      "input_count": 28
+    },
+    {
+      "target": "CSL::highs_convex",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_highs_convex.a",
+      "sha256": "0e2700c17ec91b8d20ca84b4e400ee8780098ef027964566b82e04bda580794c",
+      "rebuilt": false,
+      "input_count": 28
+    },
+    {
+      "target": "CSL::highs_lp",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_highs_lp.a",
+      "sha256": "cf1b87babbf0ba32d540632e96e63b175d851d6fa8fcc73891b01ef485a7fc27",
+      "rebuilt": false,
+      "input_count": 29
+    },
+    {
+      "target": "CSL::history_cost",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_history_cost.a",
+      "sha256": "2950a2b84b1cb9b4a10a6f14bfe2669f7ad401589d865934c245871a99910f9f",
+      "rebuilt": false,
+      "input_count": 25
+    },
+    {
+      "target": "CSL::hull",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_hull.a",
+      "sha256": "67c1b49009f1d37762a7c2dd45aeeb69ffee47c3866b65248a895d4819a0ff46",
+      "rebuilt": false,
+      "input_count": 42
+    },
+    {
+      "target": "CSL::legacy_btulshor",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_legacy_btulshor.a",
+      "sha256": "4f5a666692818025234ebd52e3ed30391806f389c15ce878b861918e15f3b8a1",
+      "rebuilt": false,
+      "input_count": 3
+    },
+    {
+      "target": "CSL::model",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_model.a",
+      "sha256": "ec0b839de4df11ab76b63b22104bfeacd7df7a4989bd91ae1f43a88e4625d97d",
+      "rebuilt": true,
+      "input_count": 23
+    },
+    {
+      "target": "CSL::nominal_forward",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_nominal_forward.a",
+      "sha256": "5919ac1e4740927a61ed55d0df62d52795d1afc65f65dc44251465e514bf5c47",
+      "rebuilt": true,
+      "input_count": 31
+    },
+    {
+      "target": "CSL::nominal_tube",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_nominal_tube.a",
+      "sha256": "9a9ab92ffde0625cdc66dfc0ce9ad133863842cb94590ada78c38b95b54315b0",
+      "rebuilt": true,
+      "input_count": 30
+    },
+    {
+      "target": "CSL::numeric",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_numeric.a",
+      "sha256": "9160133e117685818d4dc87fb0179633da777fc10fc043401fdc7e4a944ee1f8",
+      "rebuilt": false,
+      "input_count": 4
+    },
+    {
+      "target": "CSL::objectives",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_objectives.a",
+      "sha256": "8b97e48614bcfbad6e04fc1b2d5e2c8f9bc5123d5c18b831b9cf040987560eff",
+      "rebuilt": false,
+      "input_count": 10
+    },
+    {
+      "target": "CSL::optimization",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_optimization.a",
+      "sha256": "8edba0f5b921e3173ee2b800d5eb2736a769afc82bca07abb5ea18652c96e43a",
+      "rebuilt": false,
+      "input_count": 14
+    },
+    {
+      "target": "CSL::phase_one",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_phase_one.a",
+      "sha256": "b2a436c38a683032df7542cc19781eb9158f7776a5cff7d87885616210834b93",
+      "rebuilt": false,
+      "input_count": 26
+    },
+    {
+      "target": "CSL::polyhedral",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_polyhedral.a",
+      "sha256": "f0d832508bc827cb0dbc39bcfd47343cd18a1b17e37927f893e6d4bcd193bbb1",
+      "rebuilt": true,
+      "input_count": 34
+    },
+    {
+      "target": "CSL::private_highs_native",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libhighs.a",
+      "sha256": "3f8aa1c9dcda1e3b5ba07fa8996ecec33956ed4b6cd6d5e8f9007c56a74f75e1",
+      "rebuilt": false,
+      "input_count": "unchanged installed pinned external archive"
+    },
+    {
+      "target": "CSL::problem",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_problem.a",
+      "sha256": "035734b1c901c8dc2a85629aa16be12b15c8b9e3399c2aed53e4fa5a034d2e8e",
+      "rebuilt": false,
+      "input_count": 18
+    },
+    {
+      "target": "CSL::qhull_conversion",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_qhull_conversion.a",
+      "sha256": "a2587c9793b39d6f9e37710756ec3948acf78b507249d50e1b19e97cbf096d2c",
+      "rebuilt": false,
+      "input_count": 30
+    },
+    {
+      "target": "CSL::qhull_r",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_qhull_r.a",
+      "sha256": "cea825ae2f5bb9dbeed2de53477648a4cfff27cbc31cda30d30cb50aca963855",
+      "rebuilt": false,
+      "input_count": "unchanged installed pinned external archive"
+    },
+    {
+      "target": "CSL::quickhull_2d",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_quickhull_2d.a",
+      "sha256": "0c093d9e5cbbbb733560804435c335ea21fa83a986601fa9dcb90887d6671684",
+      "rebuilt": false,
+      "input_count": 5
+    },
+    {
+      "target": "CSL::registry",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_registry.a",
+      "sha256": "9957db3a9e0ffe3161449484a03d8665219283d0f71bbe07110a7fcd1e6828f3",
+      "rebuilt": false,
+      "input_count": 26
+    },
+    {
+      "target": "CSL::resolved_core",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_resolved_core.a",
+      "sha256": "00781522b8177c8676dd0dea85ab5e8e6d75e0321ded3af54a56c8a92b013357",
+      "rebuilt": false,
+      "input_count": 21
+    },
+    {
+      "target": "CSL::resolved_problem",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_resolved_problem.a",
+      "sha256": "422fa8fa56479f04c05d8b85cd7b0e50dd24becab90d1b52950cf04bee92c825",
+      "rebuilt": false,
+      "input_count": 25
+    },
+    {
+      "target": "CSL::running_control_cost",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_running_control_cost.a",
+      "sha256": "ec153d908d9decb77aad1c82c04a08581bb4cf933536275ec473d673769441a8",
+      "rebuilt": false,
+      "input_count": 10
+    },
+    {
+      "target": "CSL::sets",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_sets.a",
+      "sha256": "c9c8889bbc52dfad785246a8a9a67339576bae4b29f324760f07ecad256b8d15",
+      "rebuilt": false,
+      "input_count": 7
+    },
+    {
+      "target": "CSL::simulation",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_simulation.a",
+      "sha256": "9553649dd86502822ddcedcce60a72b08b26701aef1f8522dc3c6912b8c4f7de",
+      "rebuilt": false,
+      "input_count": 5
+    },
+    {
+      "target": "CSL::verification",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_verification.a",
+      "sha256": "2d43c96a29d7974cc2813bda728bf33127e442020d7a9ca45f2bdc9ad71435dc",
+      "rebuilt": false,
+      "input_count": 27
+    },
+    {
+      "target": "CSL::verifiers",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_verifiers.a",
+      "sha256": "408913f944a2f75b51bed292d08eb02cdf3b56f6447c4d0a5208ec7071d0ce9a",
+      "rebuilt": false,
+      "input_count": 49
+    },
+    {
+      "target": "CSL::worst_case_vertex",
+      "archive": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/prefix/lib/libcsl_worst_case_vertex.a",
+      "sha256": "9ef359158d30b67fe4ce62c5e689c33e34234181a556dff14ae5f63de52c9353",
+      "rebuilt": false,
+      "input_count": 13
+    }
+  ],
+  "source_head": "d6fc399abcca49d4ac96fabeed9d8878d11cf326",
+  "original_sdk_producer": "3d7fff0c01ac346000ca6a97ad8d9fc654f38032",
+  "scope": "selected installed component closure; not a freshly rebuilt whole SDK"
+}

@@ -21,8 +21,13 @@ from attempt_records import (
     read_native_capture_metadata,
     verify_v2_attempt,
 )
-from figure_style import STYLE_ID, configure_numeric_axis
-from mathematical_notation import matrix_html
+if __package__:
+    from .figure_style import STYLE_ID, configure_numeric_axis
+    from .mathematical_notation import matrix_html
+else:
+    from figure_style import STYLE_ID, configure_numeric_axis
+    from mathematical_notation import matrix_html
+
 
 SCHEMA = "csl.closed-loop.figure-index/1"
 SOURCE_COMMIT = "64560a03b2d4a04a56a94c86b3abf193bb63f54f"

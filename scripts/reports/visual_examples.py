@@ -24,6 +24,7 @@ import report_data
 import site_additions
 import site_design
 import stage_ext07 as ext07_reports
+import stage_buryatia_dim4
 import stage_native_model_catalogue
 import stage_native_discrete_models
 import stage_native_flexible_pitch
@@ -890,6 +891,9 @@ def build(catalog, site):
     native_files, native_inventory, native_cards = stage_native_model_catalogue.build(
         Path(__file__).resolve().parents[2])
     saved_figures += native_cards
+    buryatia_files, buryatia_inventory, buryatia_card = stage_buryatia_dim4.build(
+        Path(__file__).resolve().parents[2])
+    saved_figures += buryatia_card
     pitch_files, pitch_inventory, pitch_cards = stage_native_flexible_pitch.build(
         Path(__file__).resolve().parents[2])
     saved_figures += pitch_cards
@@ -935,6 +939,7 @@ def build(catalog, site):
     outputs.update(episode_assets)
     outputs.update(analytic_files)
     outputs.update(native_files)
+    outputs.update(buryatia_files)
     outputs.update(pitch_files)
     outputs.update(discrete_files)
     repository_root = Path(__file__).resolve().parents[2]
@@ -1043,6 +1048,7 @@ def build(catalog, site):
     gallery_inventory.extend(analytic_inventory)
     gallery_inventory.extend(fuel_layer_inventory)
     gallery_inventory.extend(native_inventory)
+    gallery_inventory.extend(buryatia_inventory)
     gallery_inventory.extend(pitch_inventory)
     gallery_inventory.extend(discrete_inventory)
     geometry_first = geometry_inventory[0]

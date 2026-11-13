@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buryatia Dim4 affine reachable sets</title>
+<link rel="stylesheet" href="examples.css">
+<style>
+body{background:var(--page);color:var(--text)}.page-content{max-width:82rem}
+.controls{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;padding:1rem;background:var(--surface)}
+.controls input[type=range]{flex:1;min-width:12rem}.views{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+.view{min-width:0}.plot{width:100%;height:auto;background:var(--surface);border-radius:.4rem}
+.legend{display:flex;flex-wrap:wrap;gap:.5rem 1.3rem;list-style:none;padding:0}.legend li{white-space:nowrap}
+.summary{overflow-x:auto}.summary table{border-collapse:collapse;min-width:45rem;width:100%}
+.summary th,.summary td{text-align:right;padding:.45rem;border-bottom:1px solid var(--muted)}
+.summary th:first-child,.summary td:first-child{text-align:left}
+.repro pre{overflow:auto;padding:1rem;background:var(--surface);border-radius:.4rem}
+@media(max-width:900px){.views{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.views{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<main class="page-content" id="main">
+<p class="eyebrow">Source-qualified literal affine variant · four-state model</p>
+<h1>Reachable-set approximations for the Buryatia Dim4 example</h1>
+<p>This page compares six native set representations through the seven affine updates written in the local <code>Dim4.m</code> script. Each state is four-dimensional. The three upper plots are coordinate projections of the full 4D sets; they do not turn the model into a 3D system.</p>
+
+<section><h2>Model and source identity</h2>
+<div class="math-input">
+<p><strong>Deviation state:</strong> z₀ = (1, −1, 1, 1), around nominal state x̄₀ = (1, 1, 1, 1).</p>
+<p><strong>Parameters:</strong> a = 0.15, b = −0.8, c = 0.25; two independent controls vₖ ∈ [−1, 1]²; seven updates. The script uses degree-based <code>sind</code>/<code>cosd</code>.</p>
+<p>At each stage, zₖ₊₁ = Aₖzₖ + Bₖvₖ, with Aₖ(1,2) = cosd(x̄₂,ₖ), Bₖ(1,1) = 1 + 0.5 cosd(x̄₁,ₖ), and the other entries listed in the complete <a href="../../benchmarks/scenarios/buryatia-dim4-matlab-literal-affine-v1.json">model manifest</a>.</p>
+</div>
+<p class="provenance">Private MATLAB source is not included. Source SHA-256: <code>f1b9868dac256a45f144ee5192ec8b789548b34c2be6be094005bcef8dc7293a</code>. This is the literal seven-update affine script variant; it is distinct from the manuscript’s eight-step example and from the optional nonlinear-correction recurrence. The implementation and producer are at source commit <a href="https://github.com/butahlecoq/controlled-systems-lab/commit/136e30f33fca849ec8814747702ab720e76e22bd"><code>136e30f3</code></a>. The terminal binary64 reference volume is 40808.165574887396, and its independent hull calculation found 756 extreme vertices. The native V record retains 16384 candidate rows and does not claim they are minimal.</p>
+<p><strong>Trace erratum:</strong> The immutable raw record above has an incorrect box orientation label at stages 1–7. It prints a 2×2 identity for this 4D set; the box actually uses all four coordinate axes. A fresh native run changed exactly those seven text values and no other JSON values. The <a href="buryatia-dim4-box-trace-correction-v1.json">source-bound correction proof</a> identifies the preserved record, corrected 4×4 labels, executable and captured stream hashes, and checks.</p>
+</section>
+
+<section><h2>Inspect each full-state stage</h2>
+<p>Choose a stage to compare the full-state affine polytope, unreduced and reduced zonotopes, box, parallelotope, and factor ellipsoid. Points are thinned only for drawing; complete 4D records remain in the linked JSON. Support checks use the saved representations, not the rendered clouds.</p>
+<div class="controls"><label for="stage">Stage <output id="stage-value">0</output> / 7</label><input id="stage" type="range" min="0" max="7" value="0"><label><input id="all-stages" type="checkbox"> Overlay earlier stages faintly</label></div>
+<ul class="legend" id="legend"></ul>
+<div class="views" id="views"></div>
+</section>
+
+<section><h2>Terminal detail in two coordinates</h2>
+<p>These two-dimensional coordinate projections show how the six represented sets differ at stage 7. The outer approximations are projected from their full 4D representations.</p>
+<div class="controls"><label for="pair">Coordinate pair</label><select id="pair"><option value="x1_x2">x₁, x₂</option><option value="x1_x3">x₁, x₃</option><option value="x1_x4">x₁, x₄</option><option value="x2_x3">x₂, x₃</option><option value="x2_x4">x₂, x₄</option><option value="x3_x4">x₃, x₄</option></select></div>
+<figure><canvas id="terminal" class="plot" width="1000" height="620" role="img" aria-label="Terminal two-coordinate projection"></canvas><figcaption id="terminal-caption">Stage 7 · coordinate projection</figcaption></figure>
+</section>
+
+<section><h2>Terminal measurements</h2>
+<div class="summary"><table><thead><tr><th>Family</th><th>Volume</th><th>Excess volume</th><th>Stored V rows</th><th>Generators</th><th>Sampled max support error</th><th>Sampled min support excess</th></tr></thead><tbody id="summary"></tbody></table></div>
+<p>The exact affine polytope and unreduced zonotope share the same represented set because each independent box-control corner is carried forward without reduction. Volumes use floating-point binary64 formulas and have no certified rounding interval. Directional support checks use 24 directions (the 16 sign corners and eight coordinate axes). They are diagnostics, not a completeness proof; the registered approximation providers’ inclusion evidence is recorded separately.</p>
+<p>Open the <a href="buryatia-dim4-literal-affine-v1-records.json">complete versioned raw record</a> or <a href="../../benchmarks/scenarios/buryatia-dim4-matlab-literal-affine-v1.json">source-qualified scenario manifest</a>.</p>
+<p>The <a href="buryatia-dim4-literal-affine-v1-capture.json">capture receipt</a> records the producer source commit, binary and build configuration hashes, and the raw stream checksum. The raw record preserves every stage and family; displayed point clouds are thinned only for rendering.</p>
+<p>Verify the saved files with the <a href="buryatia-dim4-literal-affine-v1-SHA256SUMS">SHA-256 manifest</a>.</p>
+</section>
+
+<section class="repro"><h2>Reproduce the native record</h2>
+<p>Configure the optional source-qualified report target, run its executable, then validate the output against the saved source variant and reference values:</p>
+<pre><code>cmake -S . -B build/buryatia-dim4 \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCSL_BUILD_BURYATIA_REPORT=ON \
+  -DCSL_ENABLE_HIGHS=ON -DCSL_ENABLE_QHULL=ON
+cmake --build build/buryatia-dim4 --target csl_buryatia_dim4_report --parallel 1
+build/buryatia-dim4/csl_buryatia_dim4_report --dim4-literal-affine \
+  &gt; buryatia-dim4-literal-affine-v1-records.json
+python3 scripts/reports/buryatia/check_dim4.py \
+  --exe build/buryatia-dim4/csl_buryatia_dim4_report
+python3 scripts/reports/buryatia/check_dim4.py \
+  --raw docs/examples/buryatia-dim4-literal-affine-v1-records.json</code></pre>
+<p>The native record is numerical binary64 evidence. It does not certify real-arithmetic rounding, nonlinear reachability, feedback safety, or a performance comparison.</p>
+</section>
+
+<p id="status" role="status">Loading the saved native record…</p>
+</main>
+<script>
+const colors={exact_affine_polytope:'#f8f8f2',unreduced_zonotope:'#66d9ef',reduced_zonotope:'#a6e22e',box:'#ae81ff',parallelotope:'#fd971f',ellipsoid:'#f92672'};
+const names={exact_affine_polytope:'Exact affine polytope',unreduced_zonotope:'Unreduced zonotope',reduced_zonotope:'Reduced zonotope',box:'Box',parallelotope:'Parallelotope',ellipsoid:'Factor ellipsoid'};
+const projectionNames=['x1_x2_x3','x2_x3_x4','x1_x2_x4'];
+let data;
+const stageSlider=document.getElementById('stage');
+function familyStage(stage,name){return stage.families.find(item=>item.family===name)}
+function points3(stage,name,key){
+ if(name==='exact_affine_polytope'||name==='unreduced_zonotope')return stage.exact_reference.projections_3d[key];
+ const family=familyStage(stage,name);
+ if(name==='ellipsoid')return ellipsoidBoundary(family.coordinate_projections[key],280);
+ return family.coordinate_projections[key];
+}
+function points2(stage,name,key){
+ if(name==='exact_affine_polytope'||name==='unreduced_zonotope')return stage.exact_reference.projections_2d[key];
+ const family=familyStage(stage,name);
+ if(name==='ellipsoid')return ellipsoidBoundary(family.coordinate_projections_2d[key],220);
+ return family.coordinate_projections_2d[key];
+}
+function ellipsoidBoundary(shape,count){
+ const d=shape.dimension,m=shape.factor_columns,c=shape.center,F=shape.factor_row_major,out=[];
+ for(let i=0;i<count;i++){
+  let u;
+  if(d===2){const a=2*Math.PI*i/count;u=[Math.cos(a),Math.sin(a)];}
+  else {const y=1-2*(i+.5)/count,a=i*2.399963229728653,r=Math.sqrt(Math.max(0,1-y*y));u=[r*Math.cos(a),y,r*Math.sin(a)];}
+  const q=Array(m).fill(0);for(let j=0;j<m;j++)for(let k=0;k<d;k++)q[j]+=F[k*m+j]*u[k];
+  const norm=Math.hypot(...q);const p=c.slice();if(norm>0)for(let k=0;k<d;k++)for(let j=0;j<m;j++)p[k]+=F[k*m+j]*q[j]/norm;
+  out.push(p);
+ }
+ return out;
+}
+function thin(points,limit=650){if(points.length<=limit)return points;const stride=Math.ceil(points.length/limit),out=[];for(let i=0;i<points.length;i+=stride)out.push(points[i]);return out;}
+function formatTick(value){if(Math.abs(value)<1e-12)return '0';return Number(value.toPrecision(3)).toString();}
+function makeCanvas(projection){const fig=document.createElement('figure');fig.className='view';const canvas=document.createElement('canvas');canvas.className='plot';canvas.width=760;canvas.height=520;canvas.setAttribute('role','img');canvas.setAttribute('aria-label',`3D coordinate projection ${projection}`);const cap=document.createElement('figcaption');cap.textContent=projection.replaceAll('_',' · ').replaceAll('x','x');fig.append(canvas,cap);document.getElementById('views').append(fig);return canvas;}
+const canvases=projectionNames.map(makeCanvas);
+function draw3d(canvas,stageIndex,projection){
+ const ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height,pad=58,all=[];
+ const stages=document.getElementById('all-stages').checked?data.records.filter(s=>s.stage<=stageIndex):[data.records[stageIndex]];
+ for(const s of stages)for(const name of Object.keys(colors))for(const p of thin(points3(s,name,projection)))all.push(p);
+ const mins=[0,1,2].map(k=>Math.min(...all.map(p=>p[k]))),maxs=[0,1,2].map(k=>Math.max(...all.map(p=>p[k]))),center=mins.map((v,k)=>(v+maxs[k])/2),span=Math.max(...maxs.map((v,k)=>Math.max(1e-9,v-mins[k])));
+ ctx.clearRect(0,0,W,H);ctx.fillStyle='#303129';ctx.fillRect(0,0,W,H);
+ const project=p=>{const x=(p[0]-center[0])/span,y=(p[1]-center[1])/span,z=(p[2]-center[2])/span;return [W/2+((x-z*.58)*.78)*(W-2*pad),H/2-((y-(x+z)*.27)*.78)*(H-2*pad),y+x+z]};
+ const axisNames=projection.split('_');ctx.strokeStyle='#92938b';ctx.lineWidth=1;ctx.font='11px system-ui';
+ for(let axis=0;axis<3;axis++){
+  const start=center.slice(),end=center.slice();start[axis]-=.48*span;end[axis]+=.48*span;
+  const A=project(start),B=project(end);ctx.beginPath();ctx.moveTo(A[0],A[1]);ctx.lineTo(B[0],B[1]);ctx.stroke();
+  for(const fraction of [-.4,0,.4]){
+   const tick=center.slice();tick[axis]+=fraction*span;const P=project(tick),mark=tick.slice();mark[(axis+1)%3]+=.014*span;const M=project(mark);
+   ctx.beginPath();ctx.moveTo(P[0],P[1]);ctx.lineTo(M[0],M[1]);ctx.stroke();
+   if(fraction!==0){ctx.fillStyle='#d9dacd';ctx.fillText(formatTick(tick[axis]),P[0]+5,P[1]-3);}
+  }
+  ctx.fillStyle='#f2f2e8';ctx.font='bold 12px system-ui';ctx.fillText(axisNames[axis],B[0]+5,B[1]-5);ctx.font='11px system-ui';
+ }
+ for(const s of stages)for(const name of Object.keys(colors)){
+  const pts=thin(points3(s,name,projection));ctx.fillStyle=colors[name];ctx.globalAlpha=s.stage===stageIndex?.72:.10;
+  for(const p of pts){const v=project(p);ctx.beginPath();ctx.arc(v[0],v[1],s.stage===stageIndex?2:1.2,0,2*Math.PI);ctx.fill();}
+ }
+ ctx.globalAlpha=1;ctx.fillStyle='#cdd0c0';ctx.fillText(`Stage ${stageIndex} · ${projection.replaceAll('_',' / ')}`,pad,24);
+}
+function draw2d(){
+ const stage=data.records[7],key=document.getElementById('pair').value,canvas=document.getElementById('terminal'),ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height,pad=60;
+ const all=Object.keys(colors).flatMap(name=>thin(points2(stage,name,key),1000));const minx=Math.min(...all.map(p=>p[0])),maxx=Math.max(...all.map(p=>p[0])),miny=Math.min(...all.map(p=>p[1])),maxy=Math.max(...all.map(p=>p[1]));const xspan=Math.max(maxx-minx,1e-12),yspan=Math.max(maxy-miny,1e-12),cx=(minx+maxx)/2,cy=(miny+maxy)/2,scale=Math.min((W-2*pad)/xspan,(H-2*pad)/yspan);
+ const sx=x=>W/2+(x-cx)*scale,sy=y=>H/2-(y-cy)*scale;
+ ctx.fillStyle='#303129';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#77776f';ctx.fillStyle='#d9dacd';ctx.font='12px system-ui';
+ for(let i=0;i<5;i++){const x=minx+(maxx-minx)*i/4,y=miny+(maxy-miny)*i/4,px=sx(x),py=sy(y);ctx.beginPath();ctx.moveTo(px,pad);ctx.lineTo(px,H-pad);ctx.moveTo(pad,py);ctx.lineTo(W-pad,py);ctx.stroke();ctx.fillText(formatTick(x),px-18,H-pad+20);ctx.fillText(formatTick(y),pad-52,py+4);}
+ ctx.strokeStyle='#b9baae';ctx.beginPath();ctx.moveTo(pad,H-pad);ctx.lineTo(W-pad,H-pad);ctx.moveTo(pad,pad);ctx.lineTo(pad,H-pad);ctx.stroke();
+ for(const name of Object.keys(colors)){ctx.fillStyle=colors[name];ctx.globalAlpha=name==='exact_affine_polytope'?.75:.44;for(const p of thin(points2(stage,name,key),1000)){ctx.fillRect(sx(p[0])-1.5,sy(p[1])-1.5,3,3);}}
+ ctx.globalAlpha=1;ctx.fillStyle='#f8f8f2';ctx.font='14px system-ui';ctx.fillText(`${key.replaceAll('_',' / ')} · stage 7`,pad,24);ctx.fillText(key.split('_')[0],W-pad-22,H-pad+40);ctx.fillText(key.split('_')[1],pad-48,pad-14);document.getElementById('terminal-caption').textContent=`Terminal stage 7 · ${key.replaceAll('_',' / ')} · physical ticks and equal coordinate scale; point clouds are projections`;
+}
+function drawSummary(){const rows=data.records[7].families;document.getElementById('summary').innerHTML=rows.map(f=>`<tr><td>${names[f.family]}</td><td>${f.volume.toPrecision(8)}</td><td>${f.excess_volume.toPrecision(6)}</td><td>${f.vertex_count}</td><td>${f.generator_count}</td><td>${f.max_abs_support_error_sampled_directions.toPrecision(5)}</td><td>${f.minimum_sampled_support_excess.toPrecision(5)}</td></tr>`).join('');}
+function draw(){const stage=+stageSlider.value;document.getElementById('stage-value').value=stage;for(let i=0;i<canvases.length;i++)draw3d(canvases[i],stage,projectionNames[i]);}
+stageSlider.addEventListener('input',draw);document.getElementById('all-stages').addEventListener('change',draw);document.getElementById('pair').addEventListener('change',draw2d);
+fetch('./buryatia-dim4-literal-affine-v1-records.json').then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json();}).then(record=>{data=record;document.getElementById('status').textContent='Saved native data loaded. Projections are for viewing; numerical checks use full-state representations.';document.getElementById('legend').innerHTML=Object.keys(colors).map(name=>`<li style="color:${colors[name]}">● ${names[name]}</li>`).join('');drawSummary();draw();draw2d();}).catch(error=>{document.getElementById('status').textContent=`Could not load the adjacent raw record: ${error.message}`;});
+</script>
+</body></html>

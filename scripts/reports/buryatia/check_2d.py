@@ -99,7 +99,8 @@ def native_receipt(exe, cmake_cache):
     }
 
 
-def validate(record):
+def validate(record, *, require_current_sources=False):
+    """Check declared producer blobs; fresh captures must also match current HEAD."""
     assert record["schema"] == "csl.buryatia.recursive-approximation/2"
     assert record["case_id"] == "buryatia-volterra-matlab-literal-affine/1"
     assert record["source_sha256"] == SOURCE_SHA256
@@ -155,15 +156,19 @@ def validate(record):
     assert set(record["native_build"]["source_sha256"]) == set(IMPLEMENTATION_SOURCES)
     receipt = record["native_build"]
     revision = receipt["git_revision"]
-    expected_hashes = {
-        name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
-        for name in IMPLEMENTATION_SOURCES
-    }
-    assert receipt["source_sha256"] == expected_hashes
-    for name, digest in expected_hashes.items():
+    for name, digest in receipt["source_sha256"].items():
         committed = subprocess.run(["git", "show", f"{revision}:{name}"], cwd=ROOT,
                                    check=True, capture_output=True).stdout
         assert hashlib.sha256(committed).hexdigest() == digest
+    if require_current_sources:
+        head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, check=True,
+                              capture_output=True, text=True).stdout.strip()
+        assert revision == head
+        current_hashes = {
+            name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
+            for name in IMPLEMENTATION_SOURCES
+        }
+        assert receipt["source_sha256"] == current_hashes
     return record
 
 
@@ -186,7 +191,7 @@ def main():
         record["native_build"] = native_receipt(args.exe, args.cmake_cache)
     else:
         record = json.loads(args.raw.read_text(encoding="utf-8"))
-    record = validate(record)
+    record = validate(record, require_current_sources=bool(args.exe))
     if args.record_out:
         args.record_out.parent.mkdir(parents=True, exist_ok=True)
         args.record_out.write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
