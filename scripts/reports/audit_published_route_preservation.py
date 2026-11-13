@@ -75,56 +75,104 @@ def _learning_navigation_replacements(manifest: dict) -> dict:
         return {}
     chapters = json.loads(BOOK_MANIFEST.read_text())["chapters"]
     replacements = {}
+    candidates = []
+    seen_chapters = set()
 
     def entry(chapter):
-        return ('<li class="book-chapter"><span class="chapter-state">' +
-                escape(chapter["status_label"]) + '</span> <a href="' +
-                escape(chapter["id"] + '.html', quote=True) + '">' +
-                escape(chapter["title"]) + '</a><p>' +
-                escape(chapter["summary"]) + '</p></li>')
+        return (
+            '<li class="book-chapter"><span class="chapter-state">'
+            + escape(chapter["status_label"])
+            + '</span> <a href="'
+            + escape(chapter["id"] + ".html", quote=True)
+            + '">'
+            + escape(chapter["title"])
+            + "</a><p>"
+            + escape(chapter["summary"])
+            + "</p></li>"
+        )
 
     def link(chapter, direction):
         label = "Previous" if direction == "prev" else "Next"
-        return ('<a rel="' + direction + '" href="' +
-                escape(chapter["id"] + '.html', quote=True) + '"><span>' + label +
-                '</span><strong>' + escape(chapter["title"]) + '</strong></a>')
+        return (
+            '<a rel="'
+            + direction
+            + '" href="'
+            + escape(chapter["id"] + ".html", quote=True)
+            + '"><span>'
+            + label
+            + "</span><strong>"
+            + escape(chapter["title"])
+            + "</strong></a>"
+        )
 
     for insertion in insertions:
-        matches = [i for i, chapter in enumerate(chapters)
-                   if chapter["id"] == insertion["chapter_id"]]
+        chapter_id = insertion["chapter_id"]
+        if chapter_id in seen_chapters:
+            raise ValueError(f"duplicate chapter insertion: {chapter_id}")
+        seen_chapters.add(chapter_id)
+        matches = [i for i, chapter in enumerate(chapters) if chapter["id"] == chapter_id]
         if len(matches) != 1 or not 0 < matches[0] < len(chapters) - 1:
             continue
         index = matches[0]
-        previous, chapter, following = chapters[index - 1:index + 2]
-        if (digest(_canonical_json(chapter).encode()) != insertion["chapter_sha256"]
-                or previous["id"] != insertion["previous_chapter_id"]
-                or following["id"] != insertion["next_chapter_id"]):
+        previous, chapter, following = chapters[index - 1 : index + 2]
+        if (
+            digest(_canonical_json(chapter).encode()) != insertion["chapter_sha256"]
+            or previous["id"] != insertion["previous_chapter_id"]
+            or following["id"] != insertion["next_chapter_id"]
+        ):
             continue
-        changes = {
-            "learn/index.html": (entry(previous), entry(previous) + entry(chapter)),
-            "learn/" + previous["id"] + ".html": (link(following, "next"), link(chapter, "next")),
-            "learn/" + following["id"] + ".html": (link(previous, "prev"), link(chapter, "prev")),
-        }
-        for route, (old, new) in changes.items():
-            if route in replacements:
-                raise ValueError("overlapping reviewed learning navigation insertions")
-            replacements[route] = (old.encode(), new.encode(), insertion["qualification"])
+        candidates.append((index, insertion, previous, chapter, following))
+
+    candidates.sort(key=lambda candidate: candidate[0])
+    for left, right in zip(candidates, candidates[1:], strict=False):
+        if right[0] - left[0] <= 2:
+            raise ValueError("adjacent or overlapping reviewed learning navigation insertions")
+
+    for _, insertion, previous, chapter, following in candidates:
+        changes = (
+            ("learn/index.html", entry(previous), entry(previous) + entry(chapter)),
+            ("learn/" + previous["id"] + ".html", link(following, "next"), link(chapter, "next")),
+            ("learn/" + following["id"] + ".html", link(previous, "prev"), link(chapter, "prev")),
+        )
+        for route, old, new in changes:
+            replacements.setdefault(route, []).append(
+                (old.encode(), new.encode(), insertion["qualification"])
+            )
+
+    for route, route_replacements in replacements.items():
+        old_anchors = [old for old, _, _ in route_replacements]
+        if len(old_anchors) != len(set(old_anchors)):
+            raise ValueError(f"overlapping reviewed learning navigation insertions in {route}")
+        for index, (_, new, _) in enumerate(route_replacements):
+            if any(
+                old in new for other, (old, _, _) in enumerate(route_replacements) if other != index
+            ):
+                raise ValueError(f"overlapping reviewed learning navigation insertions in {route}")
     return replacements
 
 
-def _learning_navigation_only(route: str, expected: bytes, actual: bytes, replacement: tuple) -> bool:
-    old, new, _ = replacement
-    if expected.count(old) != 1:
+def _learning_navigation_only(
+    route: str, expected: bytes, actual: bytes, replacements: list
+) -> bool:
+    if not replacements:
+        return False
+    old_anchors = [old for old, _, _ in replacements]
+    if len(old_anchors) != len(set(old_anchors)) or any(
+        expected.count(old) != 1 for old in old_anchors
+    ):
         return False
     if route != "learn/index.html":
         opening = b'<nav class="lesson-neighbors" aria-label="Lesson navigation">'
         if expected.count(opening) != 1:
             return False
         start = expected.index(opening) + len(opening)
-        end = expected.find(b'</nav>', start)
-        if end < 0 or old not in expected[start:end]:
+        end = expected.find(b"</nav>", start)
+        if end < 0 or any(expected[start:end].count(old) != 1 for old in old_anchors):
             return False
-    return actual == expected.replace(old, new, 1)
+    updated = expected
+    for old, new, _ in replacements:
+        updated = updated.replace(old, new, 1)
+    return actual == updated
 
 
 def audit(baseline: Path, site: Path) -> dict:
@@ -160,9 +208,12 @@ def audit(baseline: Path, site: Path) -> dict:
                 actual_bytes = path.read_bytes()
                 if digest(actual_bytes) != expected:
                     changed.append(route)
-                    if (route in learning_replacements and _learning_navigation_only(
-                            route, expected_bytes, actual_bytes, learning_replacements[route])):
-                        reviewed_learning_navigation_changes[route] = learning_replacements[route][2]
+                    if route in learning_replacements and _learning_navigation_only(
+                        route, expected_bytes, actual_bytes, learning_replacements[route]
+                    ):
+                        reviewed_learning_navigation_changes[route] = "; ".join(
+                            qualification for _, _, qualification in learning_replacements[route]
+                        )
                     if (
                         route == ORDER_INSENSITIVE_RECEIPT_ROUTE
                         and route in order_only_receipts

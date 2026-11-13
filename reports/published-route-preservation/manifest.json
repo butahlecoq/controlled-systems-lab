@@ -3486,6 +3486,13 @@
       "previous_chapter_id": "controller-composition",
       "next_chapter_id": "set-operations",
       "qualification": "Reviewed source21 saved-evidence lesson insertion for issue #1012. Only its exact source-catalogue index entry and the adjacent lessons' previous/next link fragments may change; every other byte remains baseline-identical."
+    },
+    {
+      "chapter_id": "native-forward-models",
+      "chapter_sha256": "b7236c15858c7cd7d0b6fd7cfe4b3122be7f5d034f397e5a4b5b344bae599358",
+      "previous_chapter_id": "representation-consumers",
+      "next_chapter_id": "closed-loop-semantics",
+      "qualification": "Reviewed native forward-models lesson insertion for issue #991. Only its exact source-catalogue index entry and the adjacent lessons' previous/next link fragments may change; every other byte remains baseline-identical."
     }
   ]
 }
