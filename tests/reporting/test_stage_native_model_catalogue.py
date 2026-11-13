@@ -64,6 +64,10 @@ class NativePublicationTests(unittest.TestCase):
 
     def test_publication_preserves_every_saved_byte_and_lesson_links(self):
         files, entries, cards = native.build(self.root)
+        # Navigation crosses publishers; verify those routes against their outputs.
+        linked_files = dict(files)
+        for publisher in ("stage_native_extended_models", "stage_native_flexible_pitch"):
+            linked_files.update(importlib.import_module(publisher).build(ROOT)[0])
         self.assertEqual(len(entries), 2)
         for path in self.bundle.rglob("*"):
             if path.is_file():
@@ -75,7 +79,7 @@ class NativePublicationTests(unittest.TestCase):
             links.feed(files[entry["page"]].decode())
             for link in links.links:
                 if ":" not in link and not link.startswith("#") and link not in {"index.html", "examples.css"}:
-                    self.assertIn(link, files)
+                    self.assertIn(link, linked_files)
         self.assertEqual(native.build(self.root), (files, entries, cards))
 
     def test_modified_raw_capture_is_rejected(self):
