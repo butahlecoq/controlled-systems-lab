@@ -1,0 +1,373 @@
+{
+  "control_domains": {
+    "continuous": {
+      "bounds": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      "problem_id": "syn-nl-fuel-01/continuous-receding/1/continuous-control/1",
+      "semantics": "independent admissible control at every physical interval"
+    },
+    "finite": {
+      "actions": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0
+        ]
+      ],
+      "problem_id": "syn-nl-fuel-01/continuous-receding/1/finite-catalog-adaptation/1",
+      "semantics": "independent catalog choice at every interval; distinct task from continuous control"
+    }
+  },
+  "coordinate_maps": {
+    "projection_comparison_note": "Archived linear stock-balance coordinates are not numerically equivalent to MPC11 absolute propellant mass; use each source case's own coordinates and units.",
+    "projections": [
+      {
+        "id": "oxidizer-mass-flow",
+        "indices": [
+          0,
+          2
+        ],
+        "names": [
+          "m_ox",
+          "q_ox"
+        ],
+        "units": [
+          "kg",
+          "kg/s"
+        ]
+      },
+      {
+        "id": "fuel-mass-flow",
+        "indices": [
+          1,
+          3
+        ],
+        "names": [
+          "m_f",
+          "q_f"
+        ],
+        "units": [
+          "kg",
+          "kg/s"
+        ]
+      }
+    ],
+    "raw_mpc11_state_order": [
+      "m_ox",
+      "m_f",
+      "q_ox",
+      "q_f"
+    ],
+    "requested_physical_planes": [
+      {
+        "id": "oxidizer-flow-mass",
+        "indices": [
+          2,
+          0
+        ],
+        "names": [
+          "q_ox",
+          "m_ox"
+        ],
+        "native_mpc11_plane": "oxidizer-mass-flow",
+        "units": [
+          "kg/s",
+          "kg"
+        ]
+      },
+      {
+        "id": "fuel-flow-mass",
+        "indices": [
+          3,
+          1
+        ],
+        "names": [
+          "q_f",
+          "m_f"
+        ],
+        "native_mpc11_plane": "fuel-mass-flow",
+        "units": [
+          "kg/s",
+          "kg"
+        ]
+      }
+    ]
+  },
+  "episode": {
+    "closed_loop": {
+      "apply": "first-zero-order-held-input",
+      "failure": "stop-before-next-input-no-fallback",
+      "observation": "exact-full-execution-state",
+      "optimization_horizon": "shrinking-to-fixed-terminal",
+      "players": 1,
+      "second_player": false,
+      "warm_start": "shift-prior-primal-drop-applied-stage-no-terminal-repeat;zero-duals"
+    },
+    "dt": 0.5,
+    "execution": {
+      "abstol": 1e-10,
+      "method": "CVODES",
+      "reltol": 1e-09
+    },
+    "final_time": 20,
+    "hold": "zero-order",
+    "intervals": 40,
+    "time_unit": "s"
+  },
+  "legacy_source_case": null,
+  "legacy_source_cases": [
+    {
+      "control_dimension": 1,
+      "identity_note": "source-bound deterministic linear fuel model; distinct from SYN-NL-FUEL-01",
+      "source_path": "docs/examples/fuel-reachability-layers-model.json",
+      "source_sha256": "7986e78028d9da46d31c0a4f70fa1fe191f8372fc40037b53e35aa15c25e64e0",
+      "state_names": [
+        "oxidizer flow",
+        "oxidizer stock balance",
+        "fuel flow",
+        "fuel stock balance"
+      ],
+      "state_order": [
+        "x1",
+        "x2",
+        "x3",
+        "x4"
+      ],
+      "state_units": [
+        "kg/s",
+        "kg",
+        "kg/s",
+        "kg"
+      ],
+      "task_id": "csl.fuel-reachability-model/1"
+    },
+    {
+      "control_dimension": 1,
+      "identity_note": "separate five-stage affine projection illustration; distinct from SYN-NL-FUEL-01",
+      "source_path": "benchmarks/reporting/stage-projection/examples/fuel-four-state.json",
+      "source_sha256": "f66613c4da547075a263a87bc4f1670abb5c920b81fdcea8541303c95fd79b9e",
+      "state_names": [
+        "oxidizer flow x1",
+        "oxidizer stock x2",
+        "fuel flow x3",
+        "fuel stock x4"
+      ],
+      "state_order": [
+        "x1",
+        "x2",
+        "x3",
+        "x4"
+      ],
+      "state_units": [
+        "kg/s",
+        "kg",
+        "kg/s",
+        "kg"
+      ],
+      "task_id": "fuel-four-state-box-control-demo-v1"
+    }
+  ],
+  "model": {
+    "case_id": "SYN-NL-FUEL-01",
+    "controls": [
+      {
+        "bounds": [
+          0,
+          1
+        ],
+        "name": "u_ox",
+        "unit": "1"
+      },
+      {
+        "bounds": [
+          0,
+          1
+        ],
+        "name": "u_f",
+        "unit": "1"
+      }
+    ],
+    "domain": "m_ox,m_f >= 0 and every state/input finite; negative mass raises model-domain error",
+    "equations": [
+      "dm_ox/dt=-q_ox",
+      "dm_f/dt=-q_f",
+      "dq_ox/dt=(Q_ox*u_ox*sqrt(m_ox/m_ox0)-q_ox)/tau_ox",
+      "dq_f/dt=(Q_f*u_f*sqrt(m_f/m_f0)-q_f)/tau_f"
+    ],
+    "model_id": "syn-nl-fuel-01/ode/1",
+    "parameters": {
+      "Q_f": {
+        "unit": "kg/s",
+        "value": 1
+      },
+      "Q_ox": {
+        "unit": "kg/s",
+        "value": 3
+      },
+      "m_f0": {
+        "unit": "kg",
+        "value": 30
+      },
+      "m_ox0": {
+        "unit": "kg",
+        "value": 100
+      },
+      "tau_f": {
+        "unit": "s",
+        "value": 2
+      },
+      "tau_ox": {
+        "unit": "s",
+        "value": 2
+      }
+    },
+    "states": [
+      {
+        "bounds": [
+          40,
+          120
+        ],
+        "initial": 100,
+        "name": "m_ox",
+        "scale": 100,
+        "unit": "kg"
+      },
+      {
+        "bounds": [
+          12,
+          36
+        ],
+        "initial": 30,
+        "name": "m_f",
+        "scale": 30,
+        "unit": "kg"
+      },
+      {
+        "bounds": [
+          0,
+          3
+        ],
+        "initial": 2,
+        "name": "q_ox",
+        "scale": 3,
+        "unit": "kg/s"
+      },
+      {
+        "bounds": [
+          0,
+          1
+        ],
+        "initial": 0.6,
+        "name": "q_f",
+        "scale": 1,
+        "unit": "kg/s"
+      }
+    ]
+  },
+  "objective": {
+    "evaluation": "terminal expression plus every physical running term divided by original interval count; never renormalize a shrinking tail",
+    "kind": "dimensionless-quadratic",
+    "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
+    "running_stage_range": [
+      0,
+      39
+    ],
+    "source_definition": {
+      "running_formula": "running_weight/N*sum_k(sum_i(((u[k,i]-ubar[k,i])/running_scale[i])^2))",
+      "running_reference": "midpoint-sampled-nominal-command",
+      "running_scale": [
+        1,
+        1
+      ],
+      "running_weight": 0.02,
+      "terminal_formula": "sum_i(terminal_weights[i]*((x[N,i]-terminal_target[i])/terminal_scale[i])^2)",
+      "terminal_scale": [
+        100,
+        30,
+        3,
+        1
+      ],
+      "terminal_target": [
+        75,
+        23,
+        1.5,
+        0.45
+      ],
+      "terminal_weights": [
+        1,
+        1,
+        0.1,
+        0.1
+      ]
+    }
+  },
+  "prediction": {
+    "affine_model_id": "syn-nl-fuel-01/midpoint-endpoint-matched-affine/1",
+    "discretization": "per-stage matrix exponential; source-specific LV Taylor offset or fuel endpoint-matched offset",
+    "plant": "original nonlinear ODE",
+    "producer": "benchmarks/reporting/mpc11/affine.py:model",
+    "receipt_fields": [
+      "physical A,B,c",
+      "scaled A,B,c",
+      "continuous Jacobians",
+      "state and input references",
+      "discretization method and version",
+      "validity scope"
+    ],
+    "validity": "numerical local/frozen predictor only; no nonlinear enclosure or off-reference error bound"
+  },
+  "roles": {
+    "backward_feasibility": "predecessors-of-terminal-physical-state-bounds",
+    "forward_reachability": "all-admissible-control-family",
+    "off_trajectory_policy_queries": "any state in the declared model domain and physical state bounds; do not restrict to recorded nominal trajectory",
+    "off_trajectory_query_fixtures": [
+      {
+        "control": [
+          0.31,
+          0.67
+        ],
+        "purpose": "off-nominal policy query away from initial state",
+        "state": [
+          91.0,
+          26.0,
+          1.8,
+          0.49
+        ]
+      }
+    ],
+    "policy_trajectory": "one-deterministic-policy-trajectory"
+  },
+  "schema": "csl.closed-loop.task/1",
+  "source": {
+    "case_id": "SYN-NL-FUEL-01",
+    "kind": "mpc11-scenario",
+    "model_id": "syn-nl-fuel-01/ode/1",
+    "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
+    "path": "benchmarks/reporting/mpc11/scenarios/syn-nl-fuel-01.json",
+    "sha256": "c0fb79df63b9b87116ddb96552d139de177eb9ac71440b662d3d4719f6f65572"
+  },
+  "task_id": "syn-nl-fuel-01/continuous-receding/1",
+  "terminal_condition": {
+    "kind": "physical-state-bounds",
+    "objective_target_is_feasibility_constraint": false
+  }
+}

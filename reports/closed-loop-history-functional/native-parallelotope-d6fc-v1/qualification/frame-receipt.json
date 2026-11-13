@@ -1,0 +1,42 @@
+{
+  "four_state_frame": [
+    [
+      1,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      1,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      1
+    ]
+  ],
+  "interpretation": "x=Qy; saved lower/upper bound y; Q is fixed across all stages in each source route",
+  "planar_frame": [
+    [
+      1,
+      0
+    ],
+    [
+      0,
+      1
+    ]
+  ],
+  "source_commit": "d6fc399abcca49d4ac96fabeed9d8878d11cf326",
+  "source_path": "src/reachability/finite_plan_parallelotope.cpp",
+  "source_sha256": "503bac686cf35038e6fd3d15be76438ed80ecd301fec5b894466a34d6ea8acba"
+}
