@@ -1,0 +1,7 @@
+{
+  "independent_exponential_coefficients": 20000,
+  "full_state_support_records": 4920,
+  "saved_projection_support_checks": 71586,
+  "maximum_generator_recurrence_difference": 6.9959354878201124e-12,
+  "assurance": "binary64 numerical saved-data audit; not a certified global inclusion proof"
+}

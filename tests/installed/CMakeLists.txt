@@ -23,6 +23,14 @@ add_test(NAME installed_four_state_catalogue_client COMMAND installed_four_state
 set_tests_properties(installed_four_state_catalogue_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Native four-state reachability: fifteen transitions and 1280 support checks passed")
 
+add_executable(installed_flexible_pitch_client native_flexible_pitch.cpp)
+target_link_libraries(installed_flexible_pitch_client PRIVATE CSL::model_catalogue CSL::geometry_generators CSL::quickhull_2d)
+set_target_properties(installed_flexible_pitch_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_flexible_pitch_client COMMAND installed_flexible_pitch_client)
+set_tests_properties(installed_flexible_pitch_client PROPERTIES
+  TIMEOUT 600
+  PASS_REGULAR_EXPRESSION "Native flexible pitch: 3 synthetic physical models; support_checks=4920 projection_checks=47232")
+
 # Expectations come from the package-building configuration. Optional clients may
 # be skipped only when the corresponding adapter was deliberately disabled.
 foreach(adapter HIGHS QHULL)

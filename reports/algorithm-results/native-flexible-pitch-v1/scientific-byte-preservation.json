@@ -1,0 +1,24 @@
+{
+  "schema": "csl.capture-visual-correction/1",
+  "current_producer_source_commit": "b8c884a0cbca8c5195f82383d4e2bea39a805edc",
+  "prior_producer_source_commit": "6475d6210cc7d9dade2f7eb98de23c6f1f72e33b",
+  "prior_manifest_sha256": "043e430cda12c900ead50c40a88a594f93dd714bbe0c8db68331adc9ed8b5f11",
+  "prior_archive_sha256": "9b0760a96a36d8d91c1a3868cdc18a26d85998c581f43427d4d62dced6b887d7",
+  "prior_disposition": "Preserved local visual attempt; not published as final delivery. Its native SVG y-axis labels clipped.",
+  "unchanged_scientific_csv_sha256": {
+    "12-state-generators.csv": "e0b4ffce90a102a24f875c9a3e862ff80020f35e7d9c038a3c12213dee27941c",
+    "12-state-matrices.csv": "1d9887df29eb870d6c5145056e9c12f6988667c13729c661c29a4c625a21c9e8",
+    "12-state-projection-witnesses.csv": "996c5dccc2112ef369d1ca329bc6f31024837e3e8e1ccf7e80538a806b6c989c",
+    "12-state-support.csv": "535eaa72aca1e6e5ded7f836659a34fd87cc1744a1dba34f897193edc84892a8",
+    "16-state-generators.csv": "d1429ade77581df7a090ed3e9ac479bb9d8b58a682d03136c9ea150edfe4a917",
+    "16-state-matrices.csv": "147f36b35f466dcf7cf07e1c93bae63ae7426f57720649e58f0e1272be423c6a",
+    "16-state-projection-witnesses.csv": "61b46d66fc85e68cf3a49d3fff114f0e1e108dc29cc0a75678c27188e1870cec",
+    "16-state-support.csv": "a7a8003ad791551a636659b5d38125f41082b5e99e4b4fbefdc3160d5fdcb863",
+    "8-state-generators.csv": "04a6bed77a3c1e81587dfa86d922f63e4062a6de060c45e63913e430f3fa8a14",
+    "8-state-matrices.csv": "edeb68a4884fe908da6ec2cc3fd3f85ad084bfc3170f957ebc0c27cbd3c0a110",
+    "8-state-projection-witnesses.csv": "7a82ef246c95c6c47360c5fb931ec3ed8bddbd3677cb54e2ab850dc2327e7046",
+    "8-state-support.csv": "1c91e9fb3d6eff03ec7c7ecce38a24bc55e340fd1878f8d0042188a50e42bd3b"
+  },
+  "native_stdout_byte_identical": true,
+  "correction": "Conditional physical SVG padding and tick-font correction; no model, coefficient, propagation, objective or API change."
+}

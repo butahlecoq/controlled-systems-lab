@@ -1,0 +1,23 @@
+{
+  "schema": "csl.native-installed-functional/1",
+  "producer_source_commit": "b8c884a0cbca8c5195f82383d4e2bea39a805edc",
+  "sdk_source_commit": "6475d6210cc7d9dade2f7eb98de23c6f1f72e33b",
+  "returncode": 0,
+  "consumer_isolated_from_source_tree": true,
+  "contexts": [
+    {
+      "name": "curated-installed-client",
+      "target": "installed_flexible_pitch_client",
+      "validation": "actual current compiled client, selected CTest 1/1 passed",
+      "binary_sha256": "55ec837dc38d92b9623c81df483a6bf978d569859ae6aac00926fff12b6483fe"
+    },
+    {
+      "name": "shipped-examples",
+      "target": "native_flexible_pitch",
+      "validation": "actual current strict-warning shipped CMake consumer, native capture invocation returned 0 and completed all checks",
+      "binary_sha256": "55ec837dc38d92b9623c81df483a6bf978d569859ae6aac00926fff12b6483fe"
+    }
+  ],
+  "test_budget_seconds": 300,
+  "scope": "Two selected actual installed native clients, not the entire installed-consumer suite."
+}

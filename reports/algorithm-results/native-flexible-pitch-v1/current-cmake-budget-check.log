@@ -1,0 +1,22 @@
+-- Installed complete-family publisher replacement was rejected by the compiler
+-- Installed caller-supplied verifier callback was rejected by the compiler
+-- Installed downstream relation factory definition was rejected by the compiler
+-- Installed downstream ExactFarkasEvidence construction was rejected by the compiler
+-- Configuring done (10.4s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-build/installed-consumer/build
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-installed-examples/build
+[
+  {
+    "test": "installed_flexible_pitch_client",
+    "timeout": 300.0,
+    "source_cmake": "/home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/tests/installed/CMakeLists.txt"
+  },
+  {
+    "test": "native_flexible_pitch_synthetic_ladder",
+    "timeout": 300.0,
+    "source_cmake": "/home/butahlecoq/.codex/worktrees/5dde/controlled-systems-lab/examples/CMakeLists.txt"
+  }
+]
