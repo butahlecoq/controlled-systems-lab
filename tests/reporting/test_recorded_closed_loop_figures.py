@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from itertools import product
 import sys
 import unittest
+from itertools import product
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
@@ -11,6 +11,15 @@ import recorded_closed_loop_figures as figures
 
 
 class RecordedClosedLoopFigureTests(unittest.TestCase):
+    def test_attempt_selection_rejects_path_escapes_and_duplicates(self) -> None:
+        selections: tuple[dict[str, tuple[str, ...]], ...] = ({}, {"unknown": ("attempt",)},
+                          {"syn-nl-fuel-01": ("../escape",)},
+                          {"syn-nl-fuel-01": ("attempt", "attempt")})
+        for selection in selections:
+            with self.subTest(selection=selection), self.assertRaises(ValueError):
+                figures.validate_attempt_selection(selection)
+        figures.validate_attempt_selection({"syn-nl-fuel-01": ("attempt-01",)})
+
     def test_v2_stage_collector_checks_references_and_keeps_canonical_plot_inputs(self) -> None:
         import hashlib
         import json
@@ -72,6 +81,27 @@ class RecordedClosedLoopFigureTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "v2 stage evidence is invalid"):
                 figures._collect_run(plane, attempt_id, capture_root)
 
+    def test_static_fixed_plan_shapes_use_dashed_outlines(self) -> None:
+        import matplotlib.pyplot as plt
+
+        figure, axis = plt.subplots()
+        plane = figures.PLANES["syn-nl-lv-01"]
+        run = {
+            "controller_id": "native-parallelotope-mpc/1", "clouds": [], "nodes": [],
+            "plant_replay": [], "planned_prediction": [],
+            "initial_point": [0, 0], "target": None,
+            "fixed_plan_enclosures": [{
+                "role": "fixed-plan-trajectory-enclosure", "time": 0,
+                "representation": "parallelotope",
+                "projected_geometry": [[0, 0], [1, 0], [1, 1], [0, 1]],
+            }],
+        }
+        try:
+            figures._plot_run(axis, run, plane, plt.get_cmap("viridis"), 1)
+            self.assertEqual(axis.patches[0].get_linestyle(), "--")
+        finally:
+            plt.close(figure)
+
     def test_fuel_planes_apply_requested_indices_to_physical_state_once(self) -> None:
         state = [100.0, 30.0, 2.0, 0.6]
         self.assertEqual(figures.PLANES["syn-nl-fuel-01"].project(state), (2.0, 100.0))
@@ -110,7 +140,7 @@ class RecordedClosedLoopFigureTests(unittest.TestCase):
             "generators": [[1.0, 0.0], [0.0, 2.0], [3.0, 0.0], [0.0, 4.0]],
         }
         projected = figures.project_shape(shape, (2, 3))
-        self.assertIsNotNone(projected)
+        assert projected is not None
         self.assertEqual(len(projected), 5)
         self.assertEqual(min(point[0] for point in projected), 27.0)
         self.assertEqual(max(point[0] for point in projected), 33.0)
@@ -125,9 +155,10 @@ class RecordedClosedLoopFigureTests(unittest.TestCase):
         projected = figures.project_shape(shape, (0, 1))
 
         # Enumerate the defining input box independently, then apply x = frame * y.
+        assert projected is not None
         corners = [
             [sum(frame[i][j] * y[j] for j in range(2)) for i in range(2)]
-            for y in product(*zip(lower, upper))
+            for y in product(*zip(lower, upper, strict=False))
         ]
         expected_bounds = [
             (min(point[axis] for point in corners), max(point[axis] for point in corners))
@@ -152,9 +183,10 @@ class RecordedClosedLoopFigureTests(unittest.TestCase):
             {"representation": "parallelotope", "frame": frame,
              "lower": lower, "upper": upper}, (3, 1)
         )
+        assert projected is not None
         corners = [
             [sum(frame[i][j] * y[j] for j in range(4)) for i in range(4)]
-            for y in product(*zip(lower, upper))
+            for y in product(*zip(lower, upper, strict=False))
         ]
         expected_bounds = [
             (min(point[axis] for point in corners), max(point[axis] for point in corners))

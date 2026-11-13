@@ -6,15 +6,14 @@ import hashlib
 import itertools
 import json
 import os
-from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts/reports"))
 import recorded_closed_loop_figures as figures
-
 
 FRAME = [
     [1.0, 1.0, 0.0, 0.0],
@@ -29,7 +28,7 @@ def _query(representation_index: int) -> dict:
     names = ("exact-polytope", "box", "zonotope", "parallelotope", "ellipsoid")
     return {
         "schema": "csl.closed-loop.native-policy-query/1",
-        "task_id": "serialization-test/four-state",
+        "task_id": "syn-nl-fuel-01/continuous-receding/1",
         "task_sha256": "0" * 64,
         "source_model_id": "serialization-test/identity-plant",
         "controller_id": "native-parallelotope-fixed-plan-mpc/1",
@@ -39,7 +38,7 @@ def _query(representation_index: int) -> dict:
         "absolute_update_index": 0,
         "observed_physical_state": [1.0, 2.0, 3.0, 4.0],
         "original_horizon": 1,
-        "dt": 1.0,
+        "dt": 0.5,
         "predictor_model_id": "serialization-test/identity",
         "predictor_assurance": "binary64 numerical fixture",
         "predictor_stages": [
@@ -85,7 +84,7 @@ def _run_native_query(bridge: Path, representation_index: int) -> tuple[dict, st
 class NativeParallelotopeFrameSerializationTests(unittest.TestCase):
     def test_four_state_frame_projects_real_native_trace_corners_to_physical_state(self):
         bridge_value = os.environ.get("CSL_NATIVE_POLICY_BRIDGE")
-        self.assertTrue(bridge_value, "CSL_NATIVE_POLICY_BRIDGE must name the built native bridge")
+        assert bridge_value, "CSL_NATIVE_POLICY_BRIDGE must name the built native bridge"
         bridge = Path(bridge_value).resolve(strict=True)
 
         native_runs = [_run_native_query(bridge, index) for index in range(5)]
@@ -119,7 +118,7 @@ class NativeParallelotopeFrameSerializationTests(unittest.TestCase):
 
         plan_states = responses[3]["selected_plan"]["states"]
         for stage_index, bounds in enumerate(trace["stages"]):
-            y_corners = itertools.product(*zip(bounds["lower"], bounds["upper"]))
+            y_corners = itertools.product(*zip(bounds["lower"], bounds["upper"], strict=False))
             physical_corners = [
                 [sum(FRAME[row][col] * corner[col] for col in range(4)) for row in range(4)]
                 for corner in y_corners
@@ -131,7 +130,7 @@ class NativeParallelotopeFrameSerializationTests(unittest.TestCase):
                 "upper": bounds["upper"],
             }
             projected = figures.project_shape(shape, (0, 1))
-            self.assertIsNotNone(projected)
+            assert projected is not None
             for projected_axis, physical_axis in enumerate((0, 1)):
                 expected = [point[physical_axis] for point in physical_corners]
                 actual = [point[projected_axis] for point in projected]
@@ -154,14 +153,25 @@ class NativeParallelotopeFrameSerializationTests(unittest.TestCase):
         # report data, not only its lower-level geometry helper.
         with tempfile.TemporaryDirectory() as temporary:
             capture_root = Path(temporary)
-            from attempt_records import STAGE_INDEX, finalize_stage, persist_native_capture, write_attempt
+            from attempt_records import (
+                STAGE_INDEX,
+                finalize_stage,
+                persist_native_capture,
+                write_attempt,
+            )
 
             plane = figures.PLANES["syn-nl-fuel-01"]
-            plane = figures.Plane(**{**plane.__dict__, "task_id": _query(3)["task_id"]})
             task_sha = _query(3)["task_sha256"]
-            request_bytes = (json.dumps(_query(3), separators=(",", ":")) + "\n").encode()
 
-            def write_referenced_attempt(name: str, raw_response: str) -> str:
+            current_source = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"], cwd=Path(__file__).resolve().parents[2], text=True
+            ).strip()
+
+            def write_referenced_attempt(name: str, raw_response: str,
+                                         request: dict | None = None,
+                                         capture_index: int = 0) -> str:
+                request_payload = request or _query(3)
+                request_bytes = (json.dumps(request_payload, separators=(",", ":")) + "\n").encode()
                 attempt_id = f"native-parallelotope-{name}"
                 attempt_dir = capture_root / plane.case_id / "attempts" / attempt_id
                 attempt_dir.mkdir(parents=True)
@@ -176,7 +186,7 @@ class NativeParallelotopeFrameSerializationTests(unittest.TestCase):
                     "bridge_response_raw": raw_response,
                     "response_parse_status": "parsed",
                 }
-                capture_reference = persist_native_capture(attempt_dir, 0, capture, {})
+                capture_reference = persist_native_capture(attempt_dir, capture_index, capture, {})
                 plan_states = json.loads(raw_response)["selected_plan"]["states"]
                 control = json.loads(raw_response)["control"]
                 stage_record = {
@@ -189,7 +199,7 @@ class NativeParallelotopeFrameSerializationTests(unittest.TestCase):
                     "execution": {
                         "status": "complete",
                         "physical_states": plan_states,
-                        "times": [0.0, 1.0],
+                        "times": [0.0, plane.dt],
                     },
                     "native_query_capture": capture_reference,
                 }
@@ -215,9 +225,9 @@ class NativeParallelotopeFrameSerializationTests(unittest.TestCase):
                 write_attempt(attempt_dir, attempt)
                 (attempt_dir / "run-manifest.json").write_text(json.dumps({
                     "attempt_id": attempt_id,
-                    "source_commit": figures.SOURCE_COMMIT,
+                    "source_commit": current_source,
                     "task_sha256": task_sha,
-                    "resource_profile_id": "worker-wall-1800-cpu-1800/1",
+                    "resource_profile_id": "frame-serialization-functional/1",
                 }))
                 (attempt_dir / "resolution-receipt.json").write_text(json.dumps({
                     "task_id": plane.task_id,
@@ -233,6 +243,8 @@ class NativeParallelotopeFrameSerializationTests(unittest.TestCase):
 
             attempt_id = write_referenced_attempt("frame", native_runs[3][1])
             report_data = figures._collect_run(plane, attempt_id, capture_root)
+            self.assertEqual(report_data["source_commit"], current_source)
+            self.assertEqual(report_data["profile_id"], "frame-serialization-functional/1")
             self.assertEqual(len(report_data["fixed_plan_enclosures"]), len(trace["stages"]))
             saved_shape = report_data["fixed_plan_enclosures"][0]
             self.assertEqual(saved_shape["frame_status"], "provided")
@@ -261,7 +273,7 @@ class NativeParallelotopeFrameSerializationTests(unittest.TestCase):
             stage_bounds = trace["stages"][0]
             physical_corners = [
                 [sum(FRAME[row][col] * point[col] for col in range(4)) for row in range(4)]
-                for point in itertools.product(*zip(stage_bounds["lower"], stage_bounds["upper"]))
+                for point in itertools.product(*zip(stage_bounds["lower"], stage_bounds["upper"], strict=False))
             ]
             projected = saved_shape["projected_geometry"]
             for projected_axis, physical_axis in enumerate(plane.raw_indices):
@@ -269,6 +281,27 @@ class NativeParallelotopeFrameSerializationTests(unittest.TestCase):
                 actual = [point[projected_axis] for point in projected]
                 self.assertAlmostEqual(min(actual), min(expected), places=9)
                 self.assertAlmostEqual(max(actual), max(expected), places=9)
+
+            # The actual public CLI can select this fresh, referenced capture.
+            output = capture_root / "rendered"
+            script = Path(figures.__file__).resolve()
+            subprocess.run(
+                [sys.executable, str(script), "--capture-root", str(capture_root),
+                 "--output", str(output), "--attempt", f"{plane.case_id}={attempt_id}"],
+                text=True, capture_output=True, check=True, timeout=60,
+            )
+            figure_index = json.loads((output / "figure-index.json").read_text())
+            self.assertEqual(len(figure_index["figures"]), 2)
+            for entry in figure_index["figures"]:
+                self.assertEqual(entry["source_commits"], [current_source])
+                self.assertEqual(entry["profile_ids"], ["frame-serialization-functional/1"])
+                self.assertIn(f"--attempt {plane.case_id}={attempt_id}", entry["reproduction_command"])
+                page = (output / "figures" / (entry["id"] + ".html")).read_text()
+                self.assertIn(current_source, page)
+                self.assertNotIn(figures.SOURCE_COMMIT, page)
+                data = json.loads((output / "figures" / (entry["id"] + ".plotted-data.json")).read_text())
+                self.assertEqual(data["source_commit"], current_source)
+                self.assertEqual(data["reproduction_command"], entry["reproduction_command"])
 
             # A legacy referenced response without the serialized frame stays source-agnostic.
             legacy_response = json.loads(native_runs[3][1])
@@ -282,6 +315,51 @@ class NativeParallelotopeFrameSerializationTests(unittest.TestCase):
                 "missing or unrecognized coordinate semantics; not projected",
             )
             self.assertIsNone(legacy_data["fixed_plan_enclosures"][0]["projected_geometry"])
+
+            # Graph responses use their own offset receipt; retain that supported path.
+            graph_query = _query(1)
+            graph_query.update({
+                "search_policy": "stage-layered-backward-viability",
+                "reachable_set_method": {"id": "csl.geometry.affine-sum", "version": "1.0.0"},
+                "hull_provider": {"id": "csl.hull.lp-membership", "version": "1.0.0"},
+                "vertex_lp_provider": {"id": "phase-one-bland", "version": "1"},
+                "conversion_provider": "not_used",
+                "checker_budget": {"max_points": 64, "wall_ms": 5000},
+                "control_optimizer": {
+                    "id": "csl.optimization.finite-action-stage-layered-graph", "version": "1.0.0"
+                },
+            })
+            graph_packet = subprocess.run([str(bridge)], input=json.dumps(graph_query) + "\n",
+                                          text=True, capture_output=True, check=True, timeout=20)
+            self.assertEqual(json.loads(graph_packet.stdout)["status"], "accepted")
+            graph_id = write_referenced_attempt("graph", graph_packet.stdout, graph_query)
+            graph_data = figures._collect_run(plane, graph_id, capture_root)
+            self.assertTrue(graph_data["nodes"])
+
+            # A valid later query cannot be relabelled as the initial query.
+            later_query = _query(3)
+            later_query["absolute_update_index"] = 1
+            later_query["original_horizon"] = 2
+            later_query["running_cost"]["stages"][0]["stage"] = 1
+            later = subprocess.run([str(bridge)], input=json.dumps(later_query) + "\n",
+                                   text=True, capture_output=True, check=True, timeout=20)
+            self.assertEqual(json.loads(later.stdout)["status"], "accepted")
+            swapped = write_referenced_attempt("later-query-swap", later.stdout, later_query)
+            with self.assertRaisesRegex(ValueError, "query identity"):
+                figures._collect_run(plane, swapped, capture_root)
+
+            wrong_state = _query(3)
+            wrong_state["observed_physical_state"] = [9.0, 2.0, 3.0, 4.0]
+            wrong_receipt = json.loads(native_runs[3][1])
+            wrong_receipt["query_receipt"]["original_horizon"] = 2
+            for name, raw, request, capture_index in (
+                ("observed-state", native_runs[3][1], wrong_state, 0),
+                ("receipt-horizon", json.dumps(wrong_receipt), _query(3), 0),
+                ("metadata-stage", native_runs[3][1], _query(3), 1),
+            ):
+                bad_id = write_referenced_attempt(name, raw, request, capture_index)
+                with self.subTest(identity=name), self.assertRaisesRegex(ValueError, "query identity"):
+                    figures._collect_run(plane, bad_id, capture_root)
 
             response_file.write_text(response_file.read_text() + " ")
             with self.assertRaisesRegex(ValueError, "v2 stage evidence is invalid"):
