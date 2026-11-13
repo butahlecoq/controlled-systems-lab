@@ -1101,6 +1101,15 @@
       "disposition": "analytic-reference-checked-saved-run-renderer"
     },
     {
+      "source": "scripts/reports/native_parallelotope_functional.py",
+      "signal_count": 7,
+      "asset_name_literals": [
+        "traces.png"
+      ],
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Renders authenticated saved native parallelotope query slices and affine paths in physical coordinates using the exact source-bound fixed frame, with the observed nonlinear trajectory shown separately. It runs no controller and claims no F/B/I sets, nonlinear enclosure or performance comparison."
+    },
+    {
       "source": "scripts/reports/native_terminal_cost_example.py",
       "signal_count": 8,
       "asset_name_literals": [

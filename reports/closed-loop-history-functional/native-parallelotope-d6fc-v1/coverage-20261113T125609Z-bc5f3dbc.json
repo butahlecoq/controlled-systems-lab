@@ -1,0 +1,247 @@
+{
+  "schema": "csl.closed-loop.coverage/1",
+  "source_commit": "d6fc399abcca49d4ac96fabeed9d8878d11cf326",
+  "attempts": [
+    {
+      "attempt_id": "earth-orbit-20261113T125522Z-ea672e64",
+      "task_id": "env717-earth-orbit/continuous-receding/1",
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+      "resource_profile_id": "worker-wall-300-cpu-300/1",
+      "resource_limits": {
+        "requested": {
+          "wall_seconds": 300,
+          "cpu_seconds": 300,
+          "address_space_bytes": 8589934592,
+          "worker_count": 1,
+          "solver_threads": 1
+        },
+        "enforced": {
+          "wall_seconds": 300,
+          "cpu_seconds_soft": 300,
+          "cpu_seconds_hard": 301,
+          "wall_scope": "supervised worker process group; excludes replay, checkers and rendering",
+          "address_space_bytes": "POSIX RLIMIT_AS on worker process",
+          "worker_count": "one worker",
+          "solver_threads": "environment requests one BLAS/OMP/MKL thread"
+        },
+        "observed": {
+          "worker_pid": 91928,
+          "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+          "python": "3.11.14",
+          "effective_cpu_seconds": [
+            300,
+            301
+          ],
+          "effective_address_space_bytes": [
+            8589934592,
+            8589934592
+          ],
+          "thread_environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "python_process_threads": 1,
+          "worker_stage_interval_seconds_sum": 5.2680917638354,
+          "worker_cpu_seconds": 7.2149469999999996,
+          "worker_max_rss_kib": 81836,
+          "rss_accounting_scope": "worker process only; bridge subprocess peaks are not included",
+          "worker_python_traced_current_bytes": 10885620,
+          "worker_python_traced_peak_bytes": 22950214,
+          "python_traced_memory_scope": "worker Python allocations; excludes native allocations and bridge subprocesses",
+          "worker_wall_seconds": 8.85727496817708,
+          "worker_wall_scope": "supervisor monotonic span from worker launch through process exit; includes preparation, checkpoint I/O, early rejection, lifecycle close, and terminal serialization"
+        }
+      },
+      "status": "complete",
+      "overall_status": "complete",
+      "algorithm_status": "complete",
+      "postcheck_status": "complete",
+      "render_status": "complete",
+      "ledger_status": "complete",
+      "supervisor_reconciliation": null,
+      "completed_holds": 20,
+      "original_intervals": 20,
+      "physical_objective": {
+        "terminal": 63.88859760991715,
+        "running": 1.3435028842544405,
+        "total": 65.23210049417159
+      },
+      "common_replay": "complete",
+      "tight_replay": "complete",
+      "postcheck_records": [
+        "initial"
+      ],
+      "phase_receipt_ordering": "initial-record-only",
+      "graph_id": "closed-loop/earth-orbit/native-parallelotope-fixed-plan-mpc/1/cfg-919a4e05399d3c46",
+      "graph_fingerprint": "919a4e05399d3c4622c38b3e196ec27e0a39b477ecbab96eca2f6e526b96569c",
+      "attempt_record_parse": {
+        "bytes_read": 22092,
+        "parse_seconds": 0.002300658030435443,
+        "scope": "attempt top-level fields; the duplicated v1 stages value is skipped without object construction"
+      },
+      "attempt_record": "earth-orbit/attempts/earth-orbit-20261113T125522Z-ea672e64/attempt.json"
+    },
+    {
+      "attempt_id": "syn-nl-fuel-01-20261113T125537Z-e95cd5b9",
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b",
+      "resource_profile_id": "worker-wall-300-cpu-300/1",
+      "resource_limits": {
+        "requested": {
+          "wall_seconds": 300,
+          "cpu_seconds": 300,
+          "address_space_bytes": 8589934592,
+          "worker_count": 1,
+          "solver_threads": 1
+        },
+        "enforced": {
+          "wall_seconds": 300,
+          "cpu_seconds_soft": 300,
+          "cpu_seconds_hard": 301,
+          "wall_scope": "supervised worker process group; excludes replay, checkers and rendering",
+          "address_space_bytes": "POSIX RLIMIT_AS on worker process",
+          "worker_count": "one worker",
+          "solver_threads": "environment requests one BLAS/OMP/MKL thread"
+        },
+        "observed": {
+          "worker_pid": 92010,
+          "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+          "python": "3.11.14",
+          "effective_cpu_seconds": [
+            300,
+            301
+          ],
+          "effective_address_space_bytes": [
+            8589934592,
+            8589934592
+          ],
+          "thread_environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "python_process_threads": 1,
+          "worker_stage_interval_seconds_sum": 12.87338718562387,
+          "worker_cpu_seconds": 16.881899,
+          "worker_max_rss_kib": 88052,
+          "rss_accounting_scope": "worker process only; bridge subprocess peaks are not included",
+          "worker_python_traced_current_bytes": 11225710,
+          "worker_python_traced_peak_bytes": 23253217,
+          "python_traced_memory_scope": "worker Python allocations; excludes native allocations and bridge subprocesses",
+          "worker_wall_seconds": 20.614756893832237,
+          "worker_wall_scope": "supervisor monotonic span from worker launch through process exit; includes preparation, checkpoint I/O, early rejection, lifecycle close, and terminal serialization"
+        }
+      },
+      "status": "complete",
+      "overall_status": "complete",
+      "algorithm_status": "complete",
+      "postcheck_status": "complete",
+      "render_status": "complete",
+      "ledger_status": "complete",
+      "supervisor_reconciliation": null,
+      "completed_holds": 40,
+      "original_intervals": 40,
+      "physical_objective": {
+        "terminal": 0.00028703934756204365,
+        "running": 0.012899959320891906,
+        "total": 0.01318699866845395
+      },
+      "common_replay": "complete",
+      "tight_replay": "complete",
+      "postcheck_records": [
+        "initial"
+      ],
+      "phase_receipt_ordering": "initial-record-only",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-fixed-plan-mpc/1/cfg-8118a9c227d4e7e3",
+      "graph_fingerprint": "8118a9c227d4e7e3915e2c4d233c0c33c700d9400d2d8e20fded7678cb3832a8",
+      "attempt_record_parse": {
+        "bytes_read": 24996,
+        "parse_seconds": 0.00285603990778327,
+        "scope": "attempt top-level fields; the duplicated v1 stages value is skipped without object construction"
+      },
+      "attempt_record": "syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261113T125537Z-e95cd5b9/attempt.json"
+    },
+    {
+      "attempt_id": "syn-nl-lv-01-20261113T125510Z-a662b9b4",
+      "task_id": "syn-nl-lv-01/continuous-receding/1",
+      "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+      "resource_profile_id": "worker-wall-300-cpu-300/1",
+      "resource_limits": {
+        "requested": {
+          "wall_seconds": 300,
+          "cpu_seconds": 300,
+          "address_space_bytes": 8589934592,
+          "worker_count": 1,
+          "solver_threads": 1
+        },
+        "enforced": {
+          "wall_seconds": 300,
+          "cpu_seconds_soft": 300,
+          "cpu_seconds_hard": 301,
+          "wall_scope": "supervised worker process group; excludes replay, checkers and rendering",
+          "address_space_bytes": "POSIX RLIMIT_AS on worker process",
+          "worker_count": "one worker",
+          "solver_threads": "environment requests one BLAS/OMP/MKL thread"
+        },
+        "observed": {
+          "worker_pid": 91849,
+          "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+          "python": "3.11.14",
+          "effective_cpu_seconds": [
+            300,
+            301
+          ],
+          "effective_address_space_bytes": [
+            8589934592,
+            8589934592
+          ],
+          "thread_environment": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1"
+          },
+          "python_process_threads": 1,
+          "worker_stage_interval_seconds_sum": 4.373712986242026,
+          "worker_cpu_seconds": 5.909256,
+          "worker_max_rss_kib": 81764,
+          "rss_accounting_scope": "worker process only; bridge subprocess peaks are not included",
+          "worker_python_traced_current_bytes": 11026740,
+          "worker_python_traced_peak_bytes": 23098508,
+          "python_traced_memory_scope": "worker Python allocations; excludes native allocations and bridge subprocesses",
+          "worker_wall_seconds": 7.47178491181694,
+          "worker_wall_scope": "supervisor monotonic span from worker launch through process exit; includes preparation, checkpoint I/O, early rejection, lifecycle close, and terminal serialization"
+        }
+      },
+      "status": "complete",
+      "overall_status": "complete",
+      "algorithm_status": "complete",
+      "postcheck_status": "complete",
+      "render_status": "complete",
+      "ledger_status": "complete",
+      "supervisor_reconciliation": null,
+      "completed_holds": 30,
+      "original_intervals": 30,
+      "physical_objective": {
+        "terminal": 0.06942389733423829,
+        "running": 0.02375,
+        "total": 0.09317389733423828
+      },
+      "common_replay": "complete",
+      "tight_replay": "complete",
+      "postcheck_records": [
+        "initial"
+      ],
+      "phase_receipt_ordering": "initial-record-only",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-fixed-plan-mpc/1/cfg-3e662f827eaebd96",
+      "graph_fingerprint": "3e662f827eaebd961fe5bd77fbb94eea5673e4eed54ba093acdd2571901403e8",
+      "attempt_record_parse": {
+        "bytes_read": 21210,
+        "parse_seconds": 0.0021052397787570953,
+        "scope": "attempt top-level fields; the duplicated v1 stages value is skipped without object construction"
+      },
+      "attempt_record": "syn-nl-lv-01/attempts/syn-nl-lv-01-20261113T125510Z-a662b9b4/attempt.json"
+    }
+  ],
+  "representation_claim": "Per-graph geometry roles and work are recorded; no representation performance is inferred from zero set work"
+}

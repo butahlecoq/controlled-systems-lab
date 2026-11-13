@@ -1,0 +1,123 @@
+{
+  "source_commit": "d6fc399abcca49d4ac96fabeed9d8878d11cf326",
+  "qualification_receipt": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-qualification/qualification-receipt.json",
+  "scope": "Functional bounded finite-candidate numerical MPC outcomes; no global optimality or validated enclosure or performance claim",
+  "attempts": [
+    {
+      "task": "syn-nl-lv-01",
+      "attempt": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-functional-v1/syn-nl-lv-01/attempts/syn-nl-lv-01-20261113T125510Z-a662b9b4",
+      "holds": 30,
+      "query_statuses": {
+        "accepted": 30
+      },
+      "coverage": {
+        "incomplete": 25,
+        "complete": 5
+      },
+      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-fixed-plan-mpc/1/cfg-3e662f827eaebd96",
+      "stderr_bytes": 0,
+      "replay": {
+        "common": {
+          "status": "complete",
+          "hold_endpoint_max_abs_difference": [
+            2.7000623958883807e-13,
+            1.9895196601282805e-13
+          ],
+          "objective_difference": 0.0
+        },
+        "tight": {
+          "status": "complete",
+          "hold_endpoint_max_abs_difference": [
+            2.7000623958883807e-13,
+            1.9895196601282805e-13
+          ],
+          "objective_difference": 0.0
+        }
+      },
+      "predicted_set_counts_minmax": [
+        1,
+        1
+      ]
+    },
+    {
+      "task": "earth-orbit",
+      "attempt": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-functional-v1/earth-orbit/attempts/earth-orbit-20261113T125522Z-ea672e64",
+      "holds": 20,
+      "query_statuses": {
+        "accepted": 20
+      },
+      "coverage": {
+        "incomplete": 18,
+        "complete": 2
+      },
+      "graph_id": "closed-loop/earth-orbit/native-parallelotope-fixed-plan-mpc/1/cfg-919a4e05399d3c46",
+      "stderr_bytes": 0,
+      "replay": {
+        "common": {
+          "status": "complete",
+          "hold_endpoint_max_abs_difference": [
+            4.547473508864641e-12,
+            3.642919299551295e-15,
+            2.220446049250313e-15,
+            1.951563910473908e-18
+          ],
+          "objective_difference": 0.0
+        },
+        "tight": {
+          "status": "complete",
+          "hold_endpoint_max_abs_difference": [
+            4.547473508864641e-12,
+            3.642919299551295e-15,
+            2.220446049250313e-15,
+            1.951563910473908e-18
+          ],
+          "objective_difference": 0.0
+        }
+      },
+      "predicted_set_counts_minmax": [
+        1,
+        1
+      ]
+    },
+    {
+      "task": "syn-nl-fuel-01",
+      "attempt": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/943-parallelotope-d6fc-functional-v1/syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261113T125537Z-e95cd5b9",
+      "holds": 40,
+      "query_statuses": {
+        "accepted": 40
+      },
+      "coverage": {
+        "incomplete": 36,
+        "complete": 4
+      },
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-fixed-plan-mpc/1/cfg-8118a9c227d4e7e3",
+      "stderr_bytes": 0,
+      "replay": {
+        "common": {
+          "status": "complete",
+          "hold_endpoint_max_abs_difference": [
+            2.842170943040401e-14,
+            7.105427357601002e-15,
+            4.440892098500626e-16,
+            1.1102230246251565e-16
+          ],
+          "objective_difference": 5.204170427930421e-18
+        },
+        "tight": {
+          "status": "complete",
+          "hold_endpoint_max_abs_difference": [
+            2.842170943040401e-14,
+            7.105427357601002e-15,
+            4.440892098500626e-16,
+            1.1102230246251565e-16
+          ],
+          "objective_difference": 5.204170427930421e-18
+        }
+      },
+      "predicted_set_counts_minmax": [
+        1,
+        1
+      ]
+    }
+  ]
+}

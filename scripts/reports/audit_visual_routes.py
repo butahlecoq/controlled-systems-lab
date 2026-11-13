@@ -170,6 +170,10 @@ SAVED_COMPANION_ROUTES = {
 }
 SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
 SAVED_DATA_ILLUSTRATION_RENDERERS = {
+    "scripts/reports/native_parallelotope_functional.py": (
+        "Renders authenticated saved native parallelotope query slices and affine paths in physical coordinates "
+        "using the exact source-bound fixed frame, with the observed nonlinear trajectory shown separately. "
+        "It runs no controller and claims no F/B/I sets, nonlinear enclosure or performance comparison."),
     "scripts/reports/native_discrete_models.py": (
         "Draws all 15 authenticated saved native source21 MPC predictions against the executed path; "
         "checks complete coordinates, literal costs, dynamics, controls and bounds before rendering; "

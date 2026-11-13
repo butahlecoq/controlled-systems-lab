@@ -1,0 +1,17 @@
+{
+  "head": "d6fc399abcca49d4ac96fabeed9d8878d11cf326",
+  "compiler": "c++ (GCC) 16.2.1 20260810",
+  "compiler_sha256": "f04191f6a7b2cd7d9a62e1745872b8a6088791e5af6955488c69c9b2c4668bc9",
+  "runtime_profile": {
+    "CSL_ENABLE_CASADI": false,
+    "CSL_ENABLE_HIGHS": true,
+    "CSL_ENABLE_QHULL": true,
+    "build_type": "Release"
+  },
+  "new_binaries": {
+    "history_policy": "f297e77447e9fa99ebe796b6c0739328d50aea90b47b50573227ac783330aaa0",
+    "nonlinear_replay": "b5d47c14c65f1d2f833eaec4d9713bcc4717b130bd688e943ade7442c363973f",
+    "admission_client": "06222e2f7baf3fa18f197b07141e4fc05101d2084bcd1497e4ed74912b5143fa"
+  },
+  "qualification": "New five selected components and fresh consumer bridge/replay, reused source-equivalent installed SDK closure from producer3d7fff0c; not a fresh whole SDK."
+}

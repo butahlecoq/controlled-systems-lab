@@ -81,6 +81,11 @@ EXAMPLE_ROUTE_PRODUCERS = {
 }
 
 STANDALONE_REPORT_ROUTE_PRODUCERS = {
+    "closed-loop-history-functional/native-parallelotope-d6fc-v1/index.html": [
+        "scripts/reports/stage_history_functional.py",
+        "scripts/reports/native_parallelotope_functional.py",
+        "reports/closed-loop-history-functional/native-parallelotope-d6fc-v1/index.html",
+        ".github/workflows/algorithm-reports.yml"],
     "closed-loop-history-functional/warm-gap-9540-v1/index.html": [
         "scripts/reports/stage_history_functional.py",
         "scripts/reports/history_warm_gap_report.py",
