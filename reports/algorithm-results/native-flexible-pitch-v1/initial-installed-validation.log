@@ -1,0 +1,59 @@
+-- The CXX compiler identification is GNU 16.2.1
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Installed complete-family publisher replacement was rejected by the compiler
+-- Installed caller-supplied verifier callback was rejected by the compiler
+-- Installed downstream relation factory definition was rejected by the compiler
+-- Installed downstream ExactFarkasEvidence construction was rejected by the compiler
+-- Configuring done (11.4s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-build/installed-consumer/build
+[1/4] Scanning /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-build/installed-consumer/source/native_flexible_pitch.cpp for CXX dependencies
+[2/4] Generating CXX dyndep file CMakeFiles/installed_flexible_pitch_client.dir/CXX.dd
+[3/4] Building CXX object CMakeFiles/installed_flexible_pitch_client.dir/native_flexible_pitch.cpp.o
+[4/4] Linking CXX executable installed_flexible_pitch_client
+Internal ctest changing into directory: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-build/installed-consumer/build
+Test project /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-build/installed-consumer/build
+    Start 3: installed_flexible_pitch_client
+1/1 Test #3: installed_flexible_pitch_client ...   Passed   19.32 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =  19.32 sec
+-- The CXX compiler identification is GNU 16.2.1
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Configuring done (0.8s)
+-- Generating done (0.0s)
+CMake Warning:
+  Manually-specified variables were not used by the project:
+
+    CSL_EXPECT_HIGHS
+    CSL_EXPECT_QHULL
+
+
+-- Build files have been written to: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-installed-examples/build
+[1/4] Scanning /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-installed-examples/source/native_flexible_pitch.cpp for CXX dependencies
+[2/4] Generating CXX dyndep file CMakeFiles/native_flexible_pitch.dir/CXX.dd
+[3/4] Building CXX object CMakeFiles/native_flexible_pitch.dir/native_flexible_pitch.cpp.o
+[4/4] Linking CXX executable native_flexible_pitch
+Internal ctest changing into directory: /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-installed-examples/build
+Test project /home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/991-flexible-pitch-installed-examples/build
+    Start 3: native_flexible_pitch_synthetic_ladder
+1/1 Test #3: native_flexible_pitch_synthetic_ladder ...   Passed   19.12 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =  19.13 sec

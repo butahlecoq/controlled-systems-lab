@@ -1,4 +1,5 @@
 #include <csl/model/catalogue.hpp>
+#include <csl/model/flexible_pitch.hpp>
 
 #include <algorithm>
 #include <array>
@@ -43,10 +44,25 @@ constexpr std::array entries{
 };
 }
 
-std::span<const CaseInfo> discrete_reachability_cases() noexcept { return entries; }
+std::span<const CaseInfo> discrete_reachability_cases() noexcept {
+    static const auto all = [] {
+        std::array<CaseInfo, 6> result;
+        std::copy(entries.begin(), entries.end(), result.begin());
+        const auto flexible = flexible_pitch_cases();
+        std::copy(flexible.begin(), flexible.end(), result.begin() + 3);
+        return result;
+    }();
+    return all;
+}
 
 std::variant<DiscreteReachabilityCase, Diagnostics>
 make_discrete_reachability_case(std::string_view id) {
+    for (const auto& flexible : flexible_pitch_cases()) {
+        if (flexible.id != id) continue;
+        auto result = make_flexible_pitch_case(id);
+        if (const auto* error = std::get_if<Diagnostics>(&result)) return *error;
+        return std::move(std::get<FlexiblePitchCase>(result).reachability);
+    }
     const auto entry = std::find_if(entries.begin(), entries.end(),
         [id](const CaseInfo& candidate) { return candidate.id == id; });
     if (entry == entries.end())
