@@ -1,0 +1,81 @@
+{
+  "claim_scope": "Corrects only the published box orientation trace for the literal four-state affine variant. The historical raw record is preserved byte-for-byte; native set coordinates, representation values, volume and support results are unchanged in the fresh report comparison.",
+  "comparison": {
+    "all_other_json_values_equal": true,
+    "changed_json_values": 7,
+    "changed_paths": [
+      "/records/1/families/3/module_invocations/operation/inclusion_evidence/0",
+      "/records/2/families/3/module_invocations/operation/inclusion_evidence/0",
+      "/records/3/families/3/module_invocations/operation/inclusion_evidence/0",
+      "/records/4/families/3/module_invocations/operation/inclusion_evidence/0",
+      "/records/5/families/3/module_invocations/operation/inclusion_evidence/0",
+      "/records/6/families/3/module_invocations/operation/inclusion_evidence/0",
+      "/records/7/families/3/module_invocations/operation/inclusion_evidence/0"
+    ],
+    "new_native_stdout_sha256": "3629f05fa6c6862b606c89b46e2103f104267b4918af307e57bdce28714ae0e4",
+    "old_record_sha256": "d0a8ca600eaa52f9630c87f1e7395c4ca2454c0080d315469e44c06a4403d8ad"
+  },
+  "corrected_native_capture": {
+    "affected_stage_indices": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "attempt_id": "1011-box-trace-fixed-00a9-001",
+    "binary_sha256": "ec4ddb2d6d4158bcbc5a4b5e93d08a5461a893843fcaffa8abdcde163bfd72d6",
+    "build_cache_sha256": "e49e1493e3171bbfa5fa47033b81126e398f98240d68b6175e42b226ff4d120f",
+    "build_configuration": {
+      "BUILD_TESTING": "OFF",
+      "CMAKE_BUILD_TYPE": "Release",
+      "CMAKE_CXX_COMPILER": "c++",
+      "CMAKE_CXX_COMPILER_FRONTEND_VARIANT": "GNU",
+      "CMAKE_CXX_COMPILER_ID": "GNU",
+      "CMAKE_CXX_COMPILER_VERSION": "16.2.1",
+      "CMAKE_CXX_FLAGS": "",
+      "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG",
+      "CMAKE_GENERATOR": "Unix Makefiles",
+      "CSL_BUILD_BURYATIA_REPORT": "ON",
+      "CSL_ENABLE_HIGHS": "ON",
+      "CSL_ENABLE_QHULL": "ON"
+    },
+    "capture_receipt_sha256": "f69567395337ce69f255c3ab49b044b8867a94a399affa2a82ac1a9156f517b1",
+    "corrected_value": "orientation_rows=1,0,0,0;0,1,0,0;0,0,1,0;0,0,0,1",
+    "exit_code": 0,
+    "source_commit": "00a9e3da45ded30906ca7d79d4d1fff4a63fa347",
+    "source_sha256": "555ab4e1ad4198bc249850cb2804b1b72f928947b004eca259b4c48bd4fe3ebd",
+    "source_status": "",
+    "source_tree": "429299560c1b1f3bce2eaafd889d17cb4fcad5a5",
+    "status": "completed",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "3629f05fa6c6862b606c89b46e2103f104267b4918af307e57bdce28714ae0e4"
+  },
+  "historical_record": {
+    "affected_stage_indices": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "field_path_template": "/records/{stage}/families/3/module_invocations/operation/inclusion_evidence/0",
+    "matlab_source_commit": "136e30f33fca849ec8814747702ab720e76e22bd",
+    "meaning": "Incorrectly describes a two-dimensional identity orientation for the four-dimensional state.",
+    "path": "buryatia-dim4-literal-affine-v1-records.json",
+    "recorded_value": "orientation_rows=1,0;0,1",
+    "sha256": "d0a8ca600eaa52f9630c87f1e7395c4ca2454c0080d315469e44c06a4403d8ad",
+    "source_variant_sha256": "f1b9868dac256a45f144ee5192ec8b789548b34c2be6be094005bcef8dc7293a"
+  },
+  "schema": "csl.buryatia.dim4-box-trace-erratum/1",
+  "verification": {
+    "installed_consumer_ctest": "installed_buryatia_dim4_client passed 1/1 from fresh CSL::approximation install",
+    "native_geometry_ctest": "box_parallelotope_tests passed 1/1; includes registered 4D box orientation and enclosure assertion",
+    "native_report_ctest": "buryatia_dim4_native_report passed 1/1; checker requires full 4x4 box orientation",
+    "strict_record_validation": "check_dim4.py --raw <captured stdout> --require-full-box-orientation passed"
+  }
+}

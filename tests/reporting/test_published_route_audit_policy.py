@@ -13,6 +13,76 @@ from scripts.reports import preserve_published_routes as preservation
 
 
 class PublishedRouteAuditPolicyTests(unittest.TestCase):
+    def test_reviewed_chapter_insertion_preserves_body_and_other_links(self):
+        previous = '<a rel="prev" href="controller-composition.html"><span>Previous</span><strong>Compose reachability, recovery, and MPC</strong></a>'
+        following = '<a rel="next" href="set-operations.html"><span>Next</span><strong>Convert, map, sum, intersect, and project sets</strong></a>'
+        added_previous = '<a rel="prev" href="native-quadcopter-mpc.html"><span>Previous</span><strong>From native model data to 15 observed-state MPC replans</strong></a>'
+        added_following = '<a rel="next" href="native-quadcopter-mpc.html"><span>Next</span><strong>From native model data to 15 observed-state MPC replans</strong></a>'
+        added_entry = '<li class="book-chapter"><span class="chapter-state">Ready · saved native functional evidence</span> <a href="native-quadcopter-mpc.html">From native model data to 15 observed-state MPC replans</a><p>Browse 35 native model records, then inspect all predictions, the executed 12-state path and four inputs for source21.</p></li>'
+        previous_entry = '<li class="book-chapter"><span class="chapter-state">Ready · installed package example</span> <a href="controller-composition.html">Compose reachability, recovery, and MPC</a><p>The complete optimal joint family is (x0,x1,x2,u0,u1)=(0,s,1,s,1-s), 0&lt;=s&lt;=1. The exact-family verifier applies only to its registered profiles. Generic Strategy A/B paths are numerical candidates. Local NLP MPC makes no global optimum claim.</p></li>'
+        prefix = '<html><main><p>Saved scientific cost = 1</p><a href="raw.zip">Evidence</a>'
+        nav = '<nav class="lesson-neighbors" aria-label="Lesson navigation">'
+        suffix = '</main></html>'
+        payloads = {
+            "learn/controller-composition.html": (prefix + nav + previous + following + '</nav>' + suffix).encode(),
+            "learn/set-operations.html": (prefix + nav + previous + following + '</nav>' + suffix).encode(),
+            "learn/index.html": (prefix + '<ol>' + previous_entry + '</ol>' + suffix).encode(),
+        }
+        updated = {
+            "learn/controller-composition.html": payloads["learn/controller-composition.html"].replace(following.encode(), added_following.encode()),
+            "learn/set-operations.html": payloads["learn/set-operations.html"].replace(previous.encode(), added_previous.encode()),
+            "learn/index.html": payloads["learn/index.html"].replace(b'</ol>', added_entry.encode() + b'</ol>'),
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source, site = root / "source", root / "site"
+            source.mkdir()
+            site.mkdir()
+            baseline = root / "baseline.tar"
+            with tarfile.open(baseline, "w") as bundle:
+                for route, data in payloads.items():
+                    member = tarfile.TarInfo(route)
+                    member.size = len(data)
+                    bundle.addfile(member, io.BytesIO(data))
+                    target = site / route
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_bytes(updated[route])
+            manifest = json.loads((preservation.SOURCE / "manifest.json").read_text())
+            manifest["baseline"]["artifact_tar_sha256"] = preservation.digest(baseline.read_bytes())
+            (source / "manifest.json").write_text(json.dumps(manifest))
+            with patch.object(baseline_audit, "SOURCE", source):
+                result = baseline_audit.audit(baseline, site)
+                self.assertTrue(result["passed"], result)
+                self.assertEqual(set(result["reviewed_learning_navigation_changes"]), set(payloads))
+                for route, data in updated.items():
+                    for label, bad in {
+                        "scientific body": data.replace(b'cost = 1', b'cost = 2'),
+                        "unrelated link": data.replace(b'raw.zip', b'other.zip'),
+                        "wrong navigation target": data.replace(b'native-quadcopter-mpc.html', b'other-lesson.html'),
+                        "wrong lesson title": data.replace(b'15 observed-state', b'99 observed-state'),
+                    }.items():
+                        with self.subTest(route=route, mutation=label):
+                            (site / route).write_bytes(bad)
+                            result = baseline_audit.audit(baseline, site)
+                            self.assertFalse(result["passed"])
+                            self.assertIn(route, result["unexpected_changed"])
+                            (site / route).write_bytes(data)
+                for field in ("chapter_sha256", "previous_chapter_id", "next_chapter_id"):
+                    with self.subTest(reviewed_identity=field):
+                        changed_manifest = json.loads(json.dumps(manifest))
+                        changed_manifest["learning_navigation_insertions_reviewed_separately"][0][field] = "wrong"
+                        (source / "manifest.json").write_text(json.dumps(changed_manifest))
+                        result = baseline_audit.audit(baseline, site)
+                        self.assertFalse(result["passed"])
+                        self.assertEqual(set(result["unexpected_changed"]), set(payloads))
+                (source / "manifest.json").write_text(json.dumps(manifest))
+                misplaced = payloads["learn/index.html"].replace(
+                    b'<ol>', b'<ol>' + added_entry.encode())
+                (site / "learn/index.html").write_bytes(misplaced)
+                result = baseline_audit.audit(baseline, site)
+                self.assertFalse(result["passed"])
+                self.assertIn("learn/index.html", result["unexpected_changed"])
+
     def test_only_reviewed_learning_links_and_installed_list_order_are_mutable(self):
         learning_routes = ("learn/install-consumer.html", "learn/chapter-manifest.json")
         receipt = baseline_audit.ORDER_INSENSITIVE_RECEIPT_ROUTE
