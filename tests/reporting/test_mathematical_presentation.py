@@ -19,6 +19,20 @@ class PresentationTests(unittest.TestCase):
         findings = audit.inspect_html(html)
         self.assertEqual([f["kind"] for f in findings], ["constant-coordinate-role"])
 
+    def test_original_coordinate_caption_and_row_ids_regression(self):
+        html = ('<table><caption>Coordinates (rounded to six significant digits; '
+                'raw JSON retains binary64 values)</caption><thead><tr>'
+                '<th>Saved output row ID</th><th>x</th><th>y</th><th>Role</th>'
+                '</tr></thead><tbody><tr><td>0</td><td>1</td><td>0.5</td>'
+                '<td>intersection vertex</td></tr><tr><td>1</td><td>0.5</td><td>1</td>'
+                '<td>intersection vertex</td></tr></tbody></table>')
+        self.assertEqual([finding["kind"] for finding in audit.inspect_html(html)],
+                         ["constant-coordinate-role"])
+        self.assertEqual(audit.inspect_html('<details>' + html + '</details>'), [])
+        comparison = html.replace('Coordinates (rounded to six significant digits; '
+                                  'raw JSON retains binary64 values)', 'Objective comparison')
+        self.assertEqual(audit.inspect_html(comparison), [])
+
     def test_actual_feedback_and_direction_regressions(self):
         for html in ('<p><code>K=[[-1, -2]]</code></p>',
                      '<table><tr><td>axis</td><td>[[1,0],[0,1]]</td></tr></table>',

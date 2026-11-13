@@ -34,7 +34,8 @@ class PresentationParser(HTMLParser):
         secondary |= attributes.get("id") in self.exempt_ids
         secondary |= "lesson-reproduction" in attributes.get("class", "").split()
         self.stack.append({"tag": tag, "secondary": secondary,
-                           "line": self.getpos()[0], "text": [], "rows": [], "cells": []})
+                           "line": self.getpos()[0], "text": [], "rows": [], "cells": [],
+                           "caption": ""})
 
     def handle_startendtag(self, tag, attrs):
         self.handle_starttag(tag, attrs)
@@ -91,10 +92,15 @@ class PresentationParser(HTMLParser):
                           if parent["tag"] == "table"), None)
             if table is not None:
                 table["rows"].append(node["cells"])
+        if tag == "caption":
+            table = next((parent for parent in reversed(self.stack)
+                          if parent["tag"] == "table"), None)
+            if table is not None:
+                table["caption"] = text
         if tag == "table" and len(node["rows"]) >= 3:
             headers, *rows = node["rows"]
             normalized = [header.casefold().strip() for header in headers]
-            if "coordinates" in normalized:
+            if "coordinates" in normalized or re.search(r"\bcoordinates\b", node["caption"], re.I):
                 for column, header in enumerate(normalized):
                     if header in {"meaning", "role"}:
                         values = [row[column] for row in rows if len(row) > column]
