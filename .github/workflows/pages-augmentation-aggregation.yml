@@ -110,6 +110,13 @@ jobs:
         run: |
           python scripts/reports/preserve_published_routes.py --site build/report-site
           python scripts/reports/pages_route_retirement.py --site build/report-site
+      - name: Check out the pinned official Pages deployer
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: actions/deploy-pages
+          ref: 368f82528645a54fb793d4d04e342629a3f51346
+          path: build/pinned-pages-deployer
+          persist-credentials: false
       - name: Check that the complete artifact still targets current main
         id: head
         env:
@@ -128,4 +135,11 @@ jobs:
       - name: Deploy the complete augmented report site
         if: steps.head.outputs.current == 'true'
         id: deployment
-        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+        uses: ./.github/actions/pages-deploy
+        with:
+          token: ${{ github.token }}
+          timeout: '600000'
+          error_count: '10'
+          reporting_interval: '5000'
+          artifact_name: github-pages
+          preview: 'false'
