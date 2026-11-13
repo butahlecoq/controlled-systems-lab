@@ -4,8 +4,9 @@ This bundle is a location-free rendering of committed capture, independent-check
 and figure inputs. Verifying it does not run a solver or repeat the 35 model
 attempts. The exact historical producer for the captures is commit
 `635ac5ba59d230e2b09062690adc943ea6451568`; the portable publication renderer
-is separately pinned in `source-binding.json`. The renderer pin authenticates
-the packaging code, not the earlier native run.
+is separately pinned in the tracked `publication-lock.json`. The renderer pin
+authenticates the packaging code, not the earlier native run. The lock stays
+outside the ZIP so its archive hash does not hash itself.
 
 Use a full-history checkout because the bundle verifies both its historical
 producer source and the portable renderer pin with `git show`:
@@ -20,18 +21,20 @@ location-free files in memory and compare every staged output, including the
 versioned ZIP:
 
 ```sh
-TOOL_COMMIT=$(python3 -c 'import json; print(json.load(open("reports/algorithm-results/native-model-tracking-first-pass-v1/source-binding.json"))["portable_renderer_commit"])')
+TOOL_COMMIT=$(python3 -c 'import json; print(json.load(open("reports/algorithm-results/native-model-tracking-first-pass-v1/publication-lock.json"))["portable_renderer_commit"])')
 git show "$TOOL_COMMIT:scripts/reports/stage_native_model_tracking_first_pass.py" > /tmp/stage-native-model-tracking-pinned.py
 cmp /tmp/stage-native-model-tracking-pinned.py scripts/reports/stage_native_model_tracking_first_pass.py
 python3 -B scripts/reports/stage_native_model_tracking_first_pass.py --check
 ```
 
 The check needs only Python's standard library and the committed repository
-inputs. `--check` is read-only. Its ZIP uses sorted member names and fixed file
-metadata, and the committed publication lock authenticates the exact archive
-bytes. `SHA256SUMS.json` inventories the bundle members other than itself and
-the enclosing ZIP; `native-model-tracking-first-pass-v1.zip.sha256` authenticates
-the ZIP.
+inputs. `--check` is read-only: it regenerates the bundle in memory and requires
+the resulting ZIP and sidecar to match the committed publication lock and
+archive. The ZIP contains all generated bundle files; they are not stored as
+separate tracked copies. Members are sorted and use fixed timestamps and stored
+entries for reproducible bytes. `SHA256SUMS.json` inventories the bundle
+members other than itself and the enclosing ZIP;
+`native-model-tracking-first-pass-v1.zip.sha256` authenticates the ZIP.
 
 ## Make a new native capture
 

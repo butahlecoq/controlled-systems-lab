@@ -219,6 +219,53 @@ class NativeDiscreteTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "pinned publication lock"):
                 tracking_bundle.build(ROOT)
 
+    def test_tracking_gallery_requires_complete_lock_and_unchanged_css(self):
+        import json
+
+        publication = ROOT / "reports/algorithm-results" / tracking_bundle.ROUTE
+        lock_path = publication / "publication-lock.json"
+        original_is_file = Path.is_file
+
+        def lock_is_missing(path):
+            if path == lock_path:
+                return False
+            return original_is_file(path)
+
+        with patch.object(Path, "is_file", lock_is_missing):
+            with self.assertRaisesRegex(ValueError, "publication lock is missing"):
+                tracking_bundle.build(ROOT)
+
+        original_read_text = Path.read_text
+        for missing_hash in (True, False):
+            def incomplete_lock_read(path, *args, _missing_hash=missing_hash, **kwargs):
+                content = original_read_text(path, *args, **kwargs)
+                if path == lock_path:
+                    lock = json.loads(content)
+                    if _missing_hash:
+                        lock.pop("archive_sha256")
+                    else:
+                        lock["archive_sha256"] = None
+                    return json.dumps(lock)
+                return content
+
+            with self.subTest(missing_hash=missing_hash):
+                with patch.object(Path, "read_text", incomplete_lock_read):
+                    with self.assertRaisesRegex(ValueError, "complete archive SHA-256"):
+                        tracking_bundle.build(ROOT)
+
+        css_path = ROOT / "docs/examples/examples.css"
+        original_read_bytes = Path.read_bytes
+
+        def altered_css_read(path):
+            content = original_read_bytes(path)
+            if path == css_path:
+                return content + b"\n/* unpinned stylesheet mutation */\n"
+            return content
+
+        with patch.object(Path, "read_bytes", altered_css_read):
+            with self.assertRaisesRegex(ValueError, "generated archive differs"):
+                tracking_bundle.build(ROOT)
+
     def test_rewritten_manifest_unlisted_file_and_symlink_are_rejected(self):
         manifest = self.bundle / 'manifest.json'
         original = manifest.read_bytes()

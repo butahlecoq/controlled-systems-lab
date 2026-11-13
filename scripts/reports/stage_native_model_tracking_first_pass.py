@@ -40,27 +40,15 @@ def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]], str]:
+def _render_bundle(repository_root: Path, lock: dict) -> tuple[dict[str, bytes], list[dict[str, str]], str]:
     repository_root = Path(repository_root)
     root = repository_root / "reports/algorithm-results/native-model-tracking-first-pass-v1"
-    lock_path = root / LOCK
-    require(not lock_path.is_symlink(), "publication lock is symlinked")
-    lock = json.loads(lock_path.read_text(encoding="utf-8")) if lock_path.is_file() else None
-    if lock is not None:
-        require(lock.get("schema") == "csl.native-model-tracking-publication-lock/1",
-                "publication lock schema changed")
-        renderer_commit = lock.get("portable_renderer_commit")
-        require(isinstance(renderer_commit, str) and len(renderer_commit) == 40,
-                "portable renderer commit is missing")
-        pinned_renderer = subprocess.run(
-            ["git", "show", f"{renderer_commit}:scripts/reports/stage_native_model_tracking_first_pass.py"],
-            cwd=repository_root, capture_output=True, check=False)
-        require(pinned_renderer.returncode == 0 and pinned_renderer.stdout == Path(__file__).read_bytes(),
-                "portable renderer differs from its pinned commit")
-        archive_sha = lock.get("archive_sha256")
-        require(archive_sha is None or (isinstance(archive_sha, str) and len(archive_sha) == 64 and
-                                        all(ch in "0123456789abcdef" for ch in archive_sha)),
-                "publication lock archive hash is invalid")
+    renderer_commit = lock["portable_renderer_commit"]
+    pinned_renderer = subprocess.run(
+        ["git", "show", f"{renderer_commit}:scripts/reports/stage_native_model_tracking_first_pass.py"],
+        cwd=repository_root, capture_output=True, check=False)
+    require(pinned_renderer.returncode == 0 and pinned_renderer.stdout == Path(__file__).read_bytes(),
+            "portable renderer differs from its pinned commit")
     capture = root / CAPTURE
     manifest_bytes = (capture / "manifest.json").read_bytes()
     require(digest(manifest_bytes) == CAPTURE_MANIFEST_SHA256, "frozen model tracking capture changed")
@@ -252,19 +240,16 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
     files[ROUTE+".zip"] = deterministic_zip(files)
     archive_path = root / (ROUTE + ".zip")
     sidecar_path = root / (ROUTE + ".zip.sha256")
-    lock_path = root / LOCK
-    if lock_path.is_file():
-        lock = json.loads(lock_path.read_text(encoding="utf-8"))
-        expected_archive_sha256 = lock.get("archive_sha256")
-        if expected_archive_sha256 is not None:
-            require(digest(files[ROUTE+".zip"]) == expected_archive_sha256,
-                    "generated archive differs from the pinned publication lock")
-            require(not archive_path.is_symlink() and archive_path.is_file() and
-                    archive_path.read_bytes() == files[ROUTE+".zip"],
-                    "committed archive differs from reproducible output")
-            require(not sidecar_path.is_symlink() and sidecar_path.is_file() and
-                    sidecar_path.read_bytes() == (expected_archive_sha256+"  "+ROUTE+".zip\n").encode("ascii"),
-                    "committed archive checksum differs from the publication lock")
+    expected_archive_sha256 = lock.get("archive_sha256")
+    if expected_archive_sha256 is not None:
+        require(digest(files[ROUTE+".zip"]) == expected_archive_sha256,
+                "generated archive differs from the pinned publication lock")
+        require(not archive_path.is_symlink() and archive_path.is_file() and
+                archive_path.read_bytes() == files[ROUTE+".zip"],
+                "committed archive differs from reproducible output")
+        require(not sidecar_path.is_symlink() and sidecar_path.is_file() and
+                sidecar_path.read_bytes() == (expected_archive_sha256+"  "+ROUTE+".zip\n").encode("ascii"),
+                "committed archive checksum differs from the publication lock")
     files[ROUTE+".zip.sha256"] = (digest(files[ROUTE+".zip"])+"  "+ROUTE+".zip\n").encode()
     outputs = {ROUTE+"/"+name: content for name, content in files.items()}
     figure = ROUTE+"/figures/model-21-state-3-9.svg"
@@ -277,6 +262,43 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
             '<p>Matrix-first inputs, 35 attempted cases, 32 completed runs, three retained solver refusals, and independent full-state/objective checks.</p>'
             f'<p><a href="{entry["page"]}">Open the saved report →</a> · <a href="{ROUTE}/{ROUTE}.zip">Download raw evidence</a></p></article>')
     return outputs, [entry], card
+
+
+def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]], str]:
+    """Build only against a complete, pinned publication lock and committed archive."""
+    repository_root = Path(repository_root)
+    root = repository_root / "reports/algorithm-results/native-model-tracking-first-pass-v1"
+    lock_path = root / LOCK
+    require(not lock_path.is_symlink() and lock_path.is_file(),
+            "publication lock is missing or symlinked")
+    lock = json.loads(lock_path.read_text(encoding="utf-8"))
+    require(lock.get("schema") == "csl.native-model-tracking-publication-lock/1",
+            "publication lock schema changed")
+    renderer_commit = lock.get("portable_renderer_commit")
+    require(isinstance(renderer_commit, str) and len(renderer_commit) == 40 and
+            all(character in "0123456789abcdef" for character in renderer_commit),
+            "portable renderer commit is missing or invalid")
+    archive_sha = lock.get("archive_sha256")
+    require(isinstance(archive_sha, str) and len(archive_sha) == 64 and
+            all(character in "0123456789abcdef" for character in archive_sha),
+            "publication lock needs a complete archive SHA-256")
+    return _render_bundle(repository_root, lock)
+
+
+def build_unpublished(repository_root: Path, renderer_commit: str
+                      ) -> tuple[dict[str, bytes], list[dict[str, str]], str]:
+    """Explicitly render a candidate ZIP before publishing its archive hash.
+
+    This bootstrap path is never used by the gallery or read-only publication check.
+    """
+    require(isinstance(renderer_commit, str) and len(renderer_commit) == 40 and
+            all(character in "0123456789abcdef" for character in renderer_commit),
+            "unpublished renderer commit is invalid")
+    return _render_bundle(repository_root, {
+        "schema": "csl.native-model-tracking-publication-lock/1",
+        "portable_renderer_commit": renderer_commit,
+        "archive_sha256": None,
+    })
 
 
 def main() -> int:
