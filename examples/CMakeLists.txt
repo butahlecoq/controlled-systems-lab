@@ -153,6 +153,7 @@ if(TARGET CSL::highs_convex AND TARGET CSL::model_catalogue)
   set_tests_properties(quadcopter_mpc_source21_feedback PROPERTIES TIMEOUT 60)
 endif()
 csl_example(native_flexible_pitch CSL::model_catalogue CSL::geometry_generators CSL::quickhull_2d)
+csl_example(native_spatial_flight CSL::model_catalogue CSL::geometry_generators CSL::quickhull_2d)
 
 function(example_check name executable argument status output)
   if(NOT TARGET ${executable})
@@ -176,6 +177,8 @@ example_check(native_discrete_source_models native_discrete_models "" 0
   "Native discrete model data: 35 models")
 example_check(native_flexible_pitch_synthetic_ladder native_flexible_pitch "" 0
   "Native flexible pitch: 3 synthetic physical models; support_checks=4920 projection_checks=47232")
+example_check(native_spatial_flight_synthetic_deviation_reachability native_spatial_flight "" 0
+  "Native spatial flight: 20 transitions.*projection_planes=6 full_state_coordinates_covered=9")
 if(TARGET native_flexible_pitch)
   set_tests_properties(native_flexible_pitch_synthetic_ladder PROPERTIES TIMEOUT 600)
 endif()
