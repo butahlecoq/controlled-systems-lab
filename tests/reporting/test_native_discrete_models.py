@@ -170,7 +170,7 @@ class NativeDiscreteTests(unittest.TestCase):
             self.assertNotIn("README.md", names)
             self.assertIn('href="index.html"', archive.read("reproducing.html").decode())
             self.assertIn("portable_renderer_commit", archive.read("source-binding.json").decode())
-            self.assertIn("historical producer", archive.read("reproducing.html").decode())
+            self.assertIn("original native producer", archive.read("reproducing.html").decode())
             for number in (23, 27, 28):
                 refusal = json.loads(archive.read(f"raw/model-{number:02d}/native-refusal.json"))
                 self.assertEqual(refusal["status"], "failed")
