@@ -20,6 +20,7 @@ else()
     "-DCSL_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}"
     "-DCSL_CXX_FLAGS=${CMAKE_CXX_FLAGS}"
     "-DCSL_EXE_LINKER_FLAGS=${CMAKE_EXE_LINKER_FLAGS}"
+    "-DCSL_BUILD_PARALLELISM=1"
     -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/RunInstalledClient.cmake)
 
   set_tests_properties(installed_public_client PROPERTIES RUN_SERIAL TRUE)

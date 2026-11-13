@@ -1,0 +1,37 @@
+{
+  "schema": "csl.buryatia.affine-model/1",
+  "case_id": "buryatia-dim4-matlab-literal-affine/1",
+  "source_variant_id": "buryatia-dim4-literal-script-affine/1",
+  "source_file": "Dim4.m",
+  "source_sha256": "f1b9868dac256a45f144ee5192ec8b789548b34c2be6be094005bcef8dc7293a",
+  "state_dimension": 4,
+  "control_dimension": 2,
+  "state_order": ["x1", "x2", "x3", "x4"],
+  "intervals": 7,
+  "nominal_initial_state": [1, 1, 1, 1],
+  "deviation_initial_state": [1, -1, 1, 1],
+  "nominal_control": [0.5, 0.5],
+  "deviation_control_bounds": [[-1, 1], [-1, 1]],
+  "parameters": {"a": 0.15, "b": -0.8, "c": 0.25},
+  "nominal_map": [
+    "x1+ = x1 + 0.5*sind(x2) + (1 + 0.5*cosd(x1))*u1",
+    "x2+ = x2 + a*x1",
+    "x3+ = x3 + b*x2",
+    "x4+ = x4 + c*x3 + u2"
+  ],
+  "literal_affine_deviation_map": [
+    "z+ = A_k*z + B_k*v",
+    "A_k = [[1, cosd(xbar2_k), 0, 0], [a, 1, 0, 0], [0, b, 1, 0], [0, 0, c, 1]]",
+    "B_k = [[1 + 0.5*cosd(xbar1_k), 0], [0, 1], [1, 0], [0, 1]]",
+    "z0 = [1, -1, 1, 1]^T; each v_k is independent in [-1,1]^2"
+  ],
+  "angle_unit": "degrees in sind/cosd",
+  "source_notes": [
+    "This is the literal 7-update script-affine recurrence. Its A(1,2) entry is cosd(xbar2), as written in the script, and is not the derivative of the printed nonlinear map.",
+    "The manuscript variant reports 8 updates and prints a different A(1,2) coefficient. These identities are not merged.",
+    "The script's optional nonlinear-correction recurrence is not represented by this affine case.",
+    "Three-dimensional plots are coordinate projections of this 4D state set."
+  ],
+  "assurance": "binary64 numerical; no validated rounding certificate",
+  "private_source_included": false
+}
