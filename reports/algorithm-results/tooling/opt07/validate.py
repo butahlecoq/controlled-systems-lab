@@ -57,7 +57,7 @@ def validate_stream(path: Path, purpose: str) -> dict:
             raise ValueError("unknown raw row kind")
     expected = {(case_id, round_id) for case_id in FIXTURES for round_id in range(expected_rounds)}
     require(set(groups) == expected and set(batches) == expected, "missing or extra fixture batch")
-    for key, calls in groups.items():
+    for _key, calls in groups.items():
         require(
             len(calls) == expected_calls
             and sorted(row.get("ordinal") for row in calls) == list(range(expected_calls)),

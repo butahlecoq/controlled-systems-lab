@@ -15,10 +15,12 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 if __package__:
-    from .oracle import FIXTURES, fixture_digest, require
+    from .oracle import FIXTURES as FIXTURES
+    from .oracle import fixture_digest, require
     from .validate import validate_stream
 else:
-    from oracle import FIXTURES, fixture_digest, require
+    from oracle import FIXTURES as FIXTURES
+    from oracle import fixture_digest, require
     from validate import validate_stream
 
 HERE = Path(__file__).resolve().parent
@@ -283,7 +285,8 @@ def preflight(exe: Path, root: Path, commit: str, build_log: Path, concurrent_no
     ]
     require(len(release_groups) == 1, "Release x64 project configuration is ambiguous")
     compiler_node = release_groups[0].find("m:ClCompile", ns)
-    require(compiler_node is not None, "Release project compiler settings are missing")
+    if compiler_node is None:
+        raise ValueError("Release project compiler settings are missing")
     project_flags = {node.tag.rsplit("}", 1)[-1]: node.text for node in compiler_node}
     require(
         project_flags.get("LanguageStandard") == "stdcpp20"

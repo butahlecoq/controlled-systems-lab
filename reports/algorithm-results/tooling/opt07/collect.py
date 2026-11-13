@@ -75,7 +75,8 @@ def release_project(path: Path) -> dict:
     selected = [group for group in groups if "Release|x64" in group.attrib.get("Condition", "")]
     require(len(selected) == 1, "ambiguous Release x64 project configuration")
     compiler = selected[0].find("m:ClCompile", ns)
-    require(compiler is not None, "missing Release compiler settings")
+    if compiler is None:
+        raise ValueError("missing Release compiler settings")
     fields = {child.tag.rsplit("}", 1)[-1]: child.text for child in compiler}
     require(
         fields.get("LanguageStandard") == "stdcpp20"
@@ -115,7 +116,7 @@ def sanitize_build_log(raw: str, roots: dict[str, Path]) -> str:
         path_pattern = r"[\\/]".join(re.escape(part) for part in parts)
         clean = re.sub(
             path_pattern + r"(?=$|[\\/]|[^A-Za-z0-9_.-])",
-            lambda match: label,
+            lambda match, label=label: label,
             clean,
             flags=re.IGNORECASE,
         )

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import hashlib
 import html
 import io
 import json
@@ -13,6 +12,7 @@ import re
 import statistics
 import zipfile
 from pathlib import Path
+from typing import TypedDict
 
 if __package__:
     from .collect import SOURCE_PATHS, TIMING_TRANSLATION_UNITS, digest
@@ -22,6 +22,27 @@ else:
     from collect import SOURCE_PATHS, TIMING_TRANSLATION_UNITS, digest
     from oracle import FIXTURES, fixture_digest, require
     from validate import validate_stream
+
+
+class TrialRow(TypedDict):
+    fixture: str
+    round: int
+    warmup: bool
+    recursive_first: bool
+    baseline_ns: int
+    recursive_ns: int
+    paired_delta_recursive_minus_baseline_ns: int
+    baseline_lp_calls: int
+    recursive_lp_calls: int
+    leaf_lp_calls: int | None
+    merge_lp_calls: int | None
+    peak_merge_points: int | None
+    concurrent_child_subtrees: int | None
+    parallel_overhead_microseconds: float | None
+    baseline_status: str
+    recursive_status: str
+    status: str
+
 
 SCHEMA = "csl.opt11-recursive-hull-report/1"
 MANIFEST_SCHEMA = "csl.opt11-native-manifest/1"
@@ -175,9 +196,10 @@ def validate_machine_load(machine_load):
 
 def validate_compiler_evidence(compiler_text: str, build_log: str, compiler: dict):
     compiler_path = compiler.get("compiler_path_sanitized")
+    if not isinstance(compiler_path, str):
+        raise ValueError("sanitized compiler path is missing or contains an absolute host path")
     require(
-        isinstance(compiler_path, str)
-        and compiler_path
+        compiler_path
         and not re.search(r"(?<![A-Za-z0-9_$])[A-Za-z]:[\\/]", compiler_path)
         and not re.search(r"(?<![A-Za-z0-9_:$])[\\\\/]{2}[^\\\\/\\s\"']+", compiler_path),
         "sanitized compiler path is missing or contains an absolute host path",
@@ -300,7 +322,7 @@ def make_record(directory: Path, allow_test=False):
         (row["fixture"], row["round"], row["method"]): row for row in rows if row["kind"] == "call"
     }
     pairs = {(row["fixture"], row["round"]): row for row in rows if row["kind"] == "pair"}
-    trials = []
+    trials: list[TrialRow] = []
     summary = []
     rounds = range(7) if meta["purpose"] == "measurement" else range(1)
     for fixture, cloud in FIXTURES.items():
@@ -420,7 +442,9 @@ def svg(record):
 
 
 def page(record):
-    esc = lambda x: html.escape(str(x), quote=True)
+    def esc(x: object) -> str:
+        return html.escape(str(x), quote=True)
+
     summary_rows = "".join(
         "<tr>" + "".join(f"<td>{esc(row[k])}</td>" for k in SUMMARY_FIELDS) + "</tr>"
         for row in record["summary"]
@@ -429,7 +453,10 @@ def page(record):
         "<tr>" + "".join(f"<td>{esc(row[k])}</td>" for k in TRIAL_FIELDS) + "</tr>"
         for row in record["trials"]
     )
-    th = lambda fields: "".join(f'<th scope="col">{esc(k)}</th>' for k in fields)
+
+    def th(fields: tuple[str, ...]) -> str:
+        return "".join(f'<th scope="col">{esc(k)}</th>' for k in fields)
+
     env = record["environment"]
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OPT-11 recursive hull report</title><style>body{{font:16px/1.5 system-ui,sans-serif;max-width:78rem;margin:2rem auto;padding:0 1rem;color:#172b36}}table{{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}}th,td{{border:1px solid #bbc9d0;padding:.35rem;text-align:left}}code{{overflow-wrap:anywhere}}svg{{max-width:100%}}</style></head><body>
 <h1>OPT-11 recursive split-and-merge hull reduction</h1><p>Native record <code>{esc(record["report_id"])}</code>; measured source commit <code>{esc(record["source_commit"])}</code>. Schema <code>{SCHEMA}</code>.</p>

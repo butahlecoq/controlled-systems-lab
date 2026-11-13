@@ -16,6 +16,7 @@ import re
 import statistics
 import zipfile
 from pathlib import Path
+from typing import TypedDict
 
 if __package__:
     from .collect import HARNESS_PATH, SOURCE_PATHS, fixture_sha256, sanitize_build_log
@@ -25,6 +26,17 @@ else:
     from collect import HARNESS_PATH, SOURCE_PATHS, fixture_sha256, sanitize_build_log
     from oracle import FIXTURES, require
     from validate import validate_stream
+
+
+class BatchRow(TypedDict):
+    case_id: str
+    round: int
+    warmup: bool
+    calls: int
+    verified_calls: int
+    elapsed_ns: int
+    status: str
+    failed_calls: int
 
 
 SCHEMA = "csl.opt07-ordered-hull-report/1"
@@ -199,7 +211,7 @@ def read_collection(directory: Path, *, allow_test: bool = False) -> tuple[dict,
 
 def report_record(directory: Path, *, allow_test: bool = False) -> dict:
     collection, raw_rows, validation = read_collection(directory, allow_test=allow_test)
-    batches = []
+    batches: list[BatchRow] = []
     for case_id in FIXTURES:
         for round_id in range(8):
             matching = [
@@ -281,7 +293,10 @@ def latency_svg(record: dict) -> str:
         )
     for index, row in enumerate(rows):
         x = 130 + index * 210
-        scale = lambda value: 245 - 190 * value / top
+
+        def scale(value: float) -> float:
+            return 245 - 190 * value / top
+
         low, med, high = (
             scale(row[key]) for key in ("min_batch_ns", "median_batch_ns", "max_batch_ns")
         )
@@ -313,7 +328,9 @@ def latency_svg(record: dict) -> str:
 
 
 def page(record: dict) -> str:
-    esc = lambda value: html.escape(str(value), quote=True)
+    def esc(value: object) -> str:
+        return html.escape(str(value), quote=True)
+
     test = record["purpose"] == "test"
     rows = "".join(
         "<tr>" + "".join(f"<td>{esc(row[field])}</td>" for field in SUMMARY_FIELDS) + "</tr>"
@@ -323,7 +340,10 @@ def page(record: dict) -> str:
         "<tr>" + "".join(f"<td>{esc(row[field])}</td>" for field in TRIAL_FIELDS) + "</tr>"
         for row in record["batches"]
     )
-    headers = lambda fields: "".join(f'<th scope="col">{esc(field)}</th>' for field in fields)
+
+    def headers(fields: tuple[str, ...]) -> str:
+        return "".join(f'<th scope="col">{esc(field)}</th>' for field in fields)
+
     collection = record["collection"]
     test_notice = (
         "<p><strong>TEST / synthetic data. No algorithm measurement was run; "

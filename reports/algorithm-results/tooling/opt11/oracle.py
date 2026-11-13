@@ -84,7 +84,7 @@ def inside_hull(p, hull) -> bool:
         return p == hull[0]
     if len(hull) == 2:
         return cross(hull[0], hull[1], p) == 0 and all(
-            min(a, b) <= x <= max(a, b) for x, a, b in zip(p, hull[0], hull[1])
+            min(a, b) <= x <= max(a, b) for x, a, b in zip(p, hull[0], hull[1], strict=False)
         )
     return all(cross(hull[i], hull[(i + 1) % len(hull)], p) >= 0 for i in range(len(hull)))
 
@@ -122,7 +122,7 @@ def exact_certificate(call: dict) -> None:
     )
     require(method in {"baseline", "recursive"}, "certificate reducer method is missing")
     allowed_recursive_namespaces = (
-        recursive_query_namespaces(points) if method == "recursive" else None
+        recursive_query_namespaces(points) if method == "recursive" else {}
     )
     retained = call["retained"]
     removed = call["removed"]
