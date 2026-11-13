@@ -169,8 +169,6 @@ class NativeGraphPolicy:
         self.executable = Path(executable).resolve(strict=True)
         if not os.access(self.executable, os.X_OK):
             raise ValueError("native policy bridge is not executable")
-        self.process = subprocess.Popen([str(self.executable)], stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE, stderr=None, text=True, bufsize=1)
         self.last_query_capture = None
         self.query_capture_callback = None
         self.receipt = prediction_receipt(task)
@@ -201,6 +199,9 @@ class NativeGraphPolicy:
             "controller_semantics": ("finite-action receding-horizon graph MPC with source-cost ranking, numerical H predecessor membership, discrete transition witnesses, and the explicitly selected representation's one-step outer edge filter"
                 if self.use_backward_graph else
                 "finite-action receding-horizon fixed-plan MPC using exhaustive full action histories when within budget, otherwise a deterministic bounded catalogue of full-horizon constant and single-switch histories; exact source running-cost ranking, authored state-constraint replay, and a separately recomputed original affine trajectory")}
+
+        self.process = subprocess.Popen([str(self.executable)], stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE, stderr=None, text=True, bufsize=1)
 
     def _limits(self) -> dict[str, int]:
         keys = ("max_beam_width", "max_graph_nodes", "max_plans", "max_points_per_stage",

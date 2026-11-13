@@ -268,6 +268,67 @@ class NativeCapabilityTests(unittest.TestCase):
                 "native-box-fixed-plan-mpc/1", manifest_path=capabilities.NATIVE_MANIFEST)
 
 
+    def test_native_preparation_failures_leave_no_bridge_process(self):
+        import native_graph_policy
+
+        task = capabilities.load_task("earth-orbit")
+        receipt = {"model_id": "test-model", "coefficient_assurance": "test"}
+        cases = (
+            ("receipt", {}, ValueError("injected prediction receipt failure"),
+                "injected prediction receipt failure"),
+            ("limits", {"limits": "invalid"}, None,
+                "factory_options.limits must be a mapping"),
+            ("backend", {"build_backend_profile": "invalid"}, None,
+                "factory_options.build_backend_profile must be a mapping"),
+        )
+        with tempfile.TemporaryDirectory() as raw:
+            executable = Path(raw) / "native-policy"
+            executable.write_text(
+                f"#!{sys.executable}\nimport sys\nsys.stdin.read()\n", encoding="utf-8")
+            executable.chmod(0o755)
+            popen = native_graph_policy.subprocess.Popen
+            for label, options, failure, message in cases:
+                with self.subTest(preparation=label):
+                    children = []
+
+                    def spawn(*args, **kwargs):
+                        child = popen(*args, **kwargs)
+                        children.append(child)
+                        return child
+
+                    try:
+                        with mock.patch.dict("os.environ", {"CSL_NATIVE_POLICY_BRIDGE": str(executable)}), \
+                                mock.patch.object(native_graph_policy, "prediction_receipt",
+                                    return_value=receipt, side_effect=failure), \
+                                mock.patch.object(native_graph_policy.subprocess, "Popen", side_effect=spawn):
+                            with self.assertRaisesRegex(ValueError, message):
+                                native_graph_policy.NativeGraphPolicy(
+                                    task, capabilities.manifest_sha256(task), "native-box-mpc/1",
+                                    task["control_domains"]["finite"]["problem_id"], options)
+                            if label == "receipt":
+                                graph = next(row for row in capabilities.build_native_manifest()["graphs"]
+                                    if row["task_id"] == task["task_id"]
+                                    and row["controller"]["id"] == "native-box-mpc/1")
+                                graph_path = Path(raw) / "graph.json"
+                                graph_path.write_text(json.dumps(graph), encoding="utf-8")
+                                attempt = Path(raw) / "attempt"
+                                attempt.mkdir()
+                                self.assertEqual(run_closed_loop.worker(
+                                    "earth-orbit", attempt, executable, graph_path=graph_path), 2)
+                                record = json.loads((attempt / "attempt.json").read_text())
+                                self.assertEqual(record["status"], "preparation_failed")
+                                self.assertEqual(record["preparation_failure"],
+                                    {"type": "ValueError", "reason": message})
+                        self.assertFalse(any(child.poll() is None for child in children),
+                            "failed preparation left a native bridge running")
+                    finally:
+                        for child in children:
+                            if child.poll() is None:
+                                child.terminate()
+                            child.wait(timeout=10)
+                            child.stdin.close()
+                            child.stdout.close()
+
     def test_native_bridge_failures_persist_request_and_raw_response(self):
         task = capabilities.load_task("earth-orbit")
         graph = next(row for row in capabilities.build_native_manifest()["graphs"]
@@ -305,6 +366,7 @@ class NativeCapabilityTests(unittest.TestCase):
                             graph_path=graph_path)
                     self.assertEqual(result, 2)
                     record = json.loads((attempt / "attempt.json").read_text())
+                    self.assertEqual(record["policy_adapter_lifecycle"]["close"], "complete")
                     stage = json.loads((attempt / "stage-000.json").read_text())
                     self.assertEqual((record["status"], record["completed_holds"]), ("incomplete", 0))
                     from attempt_records import read_native_capture_metadata

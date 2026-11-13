@@ -96,8 +96,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "41da013450f5556febf08f82f4542bf6f0498cc3944c05f500573592c4bcd3c5",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-backward-graph/1/cfg-41da013450f5556f",
+      "graph_fingerprint": "495275b70bedd0700a54078b563978770ccfc7614ad2a12d1b02ccb26039425c",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-backward-graph/1/cfg-495275b70bedd070",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -148,7 +148,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -325,8 +325,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "bf07b5dca061af7c8dc6a6e721b847ff71ea47530746b29db4b778ee1185f526",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-box-mpc/1/cfg-bf07b5dca061af7c",
+      "graph_fingerprint": "0802799fe9e7a6a41e1ec9cbf7bf0edbce9905e1a5a4bcdbfb926ffe1e7339d9",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-box-mpc/1/cfg-0802799fe9e7a6a4",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -378,7 +378,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -575,8 +575,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "4742a66588b2d8a8f60f112e2f5d9b006efdc44b48e5efa1d89893c3325ee33d",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-mpc/1/cfg-4742a66588b2d8a8",
+      "graph_fingerprint": "a802d57dd5a05b5a0badd0ef30cf59e5e76fc9baf6fbcc6ba21c8faa1cd9dd39",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-mpc/1/cfg-a802d57dd5a05b5a",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -628,7 +628,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -825,8 +825,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "8912d28f16977c31d2fb6d0ee1fd34fbafb8caf7c3e30aa357fc906867faf483",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-mpc/1/cfg-8912d28f16977c31",
+      "graph_fingerprint": "6a60a57f8da7228c57f972a341f61fe0a9183ac41d96f3bbbc849d36b3343f00",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-mpc/1/cfg-6a60a57f8da7228c",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -878,7 +878,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -1075,8 +1075,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "55dd5a3e3da7ca5b51177875099c0ddfae15171b2861378002d72959dae2f9e2",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-mpc/1/cfg-55dd5a3e3da7ca5b",
+      "graph_fingerprint": "8fba6e09dfcfd59de85fa0b412f37b04d3e6c436322e7a6810cec840199bb832",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-mpc/1/cfg-8fba6e09dfcfd59d",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1128,7 +1128,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -1297,8 +1297,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "ca33f52b9b9a26ea41fa6fc7848246df3effada673db2ae3a7ce6d41104e5330",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-fixed-plan-mpc/1/cfg-ca33f52b9b9a26ea",
+      "graph_fingerprint": "b4589bf39d7799dd69425a3f0f4b1f77fb4b67974deab90dd19e5eda93b2a238",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-fixed-plan-mpc/1/cfg-b4589bf39d7799dd",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1333,7 +1333,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -1477,8 +1477,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "e5f9ffc5c60a71389f3a062a6a73cebc7aa74f3b40621f2dcdfb76d3a0c05ec2",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-box-fixed-plan-mpc/1/cfg-e5f9ffc5c60a7138",
+      "graph_fingerprint": "51ff71e39528b49c9c4ab655c577c41cfe952030ffb47a943affa7d621f52784",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-box-fixed-plan-mpc/1/cfg-51ff71e39528b49c",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1513,7 +1513,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -1673,8 +1673,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "033800899b83adea2020bdc5347014c48fc320b6d57d1cfd6a8bcf425131b229",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-fixed-plan-mpc/1/cfg-033800899b83adea",
+      "graph_fingerprint": "bfca82cb3894649a3ac1f913ab1404287dcc1a6c87e9ec869040d996ef2edce8",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-fixed-plan-mpc/1/cfg-bfca82cb3894649a",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1709,7 +1709,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -1869,8 +1869,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "068047eaf133974e0efa8591057aca33df74c9610444042e59f19cb94565cd75",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-fixed-plan-mpc/1/cfg-068047eaf133974e",
+      "graph_fingerprint": "4fc1987c898dff156c681af8d92359850abb3772a22f9dd607546ac728d3dd5a",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-fixed-plan-mpc/1/cfg-4fc1987c898dff15",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1905,7 +1905,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -2065,8 +2065,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "1dd3e22321f48858b3e1abadbacfa2381f2c92621e63b552ec86e6d21634896c",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-fixed-plan-mpc/1/cfg-1dd3e22321f48858",
+      "graph_fingerprint": "4a69c1910ae9f4ff9896a43b4accbe060581087f9d971f369015f3d9b02ef262",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-fixed-plan-mpc/1/cfg-4a69c1910ae9f4ff",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -2101,7 +2101,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -2281,8 +2281,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "8008f57b64faff662f7b72c5ea37ad7f5e7df2258766b4e960970f7d4deff6d9",
-      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-backward-graph/1/cfg-8008f57b64faff66",
+      "graph_fingerprint": "7971f355388f2f85f696c0369cd91e6b6099f2899263aa59f6a1254f7b8f9dfd",
+      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-backward-graph/1/cfg-7971f355388f2f85",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2333,7 +2333,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -2510,8 +2510,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "b376f5bfed496b0e8cb2093ace0985e98024cd0d1003118a5faa26171b0f59c1",
-      "graph_id": "closed-loop/earth-orbit/native-box-mpc/1/cfg-b376f5bfed496b0e",
+      "graph_fingerprint": "98e73fa16e5b8c2d68f4b3d44ee625c08bd4e69a72b57eb545a642eb892037c7",
+      "graph_id": "closed-loop/earth-orbit/native-box-mpc/1/cfg-98e73fa16e5b8c2d",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2563,7 +2563,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -2760,8 +2760,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "cee326823b9da1157cd75c823330d56e2edf2cb1212193fcd566be481ae52f50",
-      "graph_id": "closed-loop/earth-orbit/native-zonotope-mpc/1/cfg-cee326823b9da115",
+      "graph_fingerprint": "4ca3a65963c52743a898e7a20a34c59650bb4601f9285ce1b86a280ff28e9172",
+      "graph_id": "closed-loop/earth-orbit/native-zonotope-mpc/1/cfg-4ca3a65963c52743",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2813,7 +2813,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -3010,8 +3010,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "8431fc0018057f1d04ae3382df3deec5984079a3ea8c994490df1f50c9e85a97",
-      "graph_id": "closed-loop/earth-orbit/native-parallelotope-mpc/1/cfg-8431fc0018057f1d",
+      "graph_fingerprint": "aade90a317438e9b2839bc3c1cb6484a403bf3718f9e6cc8ed15edec18679b6f",
+      "graph_id": "closed-loop/earth-orbit/native-parallelotope-mpc/1/cfg-aade90a317438e9b",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3063,7 +3063,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -3260,8 +3260,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "3ab9d66d8a61be350a1117612aa2387e0184034d022abdf1a5b0fbdbdc12c3c1",
-      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-mpc/1/cfg-3ab9d66d8a61be35",
+      "graph_fingerprint": "8f68f10f380f0523bf237cc16a0635e11dc47abc39a60f91241c5aa13ec1e4c5",
+      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-mpc/1/cfg-8f68f10f380f0523",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3313,7 +3313,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -3482,8 +3482,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "22df74123897ef414b5aab87b8b71d5404cd8d27496ea8d7ce52627ce1541199",
-      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-fixed-plan-mpc/1/cfg-22df74123897ef41",
+      "graph_fingerprint": "2806dd2d65efed93d2ff04d448554d81c0e64b0439cb54e6093de54ac231a6a5",
+      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-fixed-plan-mpc/1/cfg-2806dd2d65efed93",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3518,7 +3518,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -3662,8 +3662,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "77bbe735bf5db878f8b4983c8c865b70aefae9987763d1eb0f7e9c6fdbc49631",
-      "graph_id": "closed-loop/earth-orbit/native-box-fixed-plan-mpc/1/cfg-77bbe735bf5db878",
+      "graph_fingerprint": "1910267f650284fe1529c6ef554a03b7e49c596bef95e6d39dc5e9cf4586d1a9",
+      "graph_id": "closed-loop/earth-orbit/native-box-fixed-plan-mpc/1/cfg-1910267f650284fe",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3698,7 +3698,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -3858,8 +3858,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "c6c94276ede301bf2542dacb83588852f237626358e7b2b7bb6433b1d04aa5d3",
-      "graph_id": "closed-loop/earth-orbit/native-zonotope-fixed-plan-mpc/1/cfg-c6c94276ede301bf",
+      "graph_fingerprint": "f8ca2edc407875d86f135e9440308dc00d9b80282f9e60c8c0b1191b8cb0c3db",
+      "graph_id": "closed-loop/earth-orbit/native-zonotope-fixed-plan-mpc/1/cfg-f8ca2edc407875d8",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3894,7 +3894,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -4054,8 +4054,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "4e56e84c005012bbc8771fa7b54a9133513331997b22f1a1b2b8f42575a09a41",
-      "graph_id": "closed-loop/earth-orbit/native-parallelotope-fixed-plan-mpc/1/cfg-4e56e84c005012bb",
+      "graph_fingerprint": "4e0476ffc9230c880c05a2d1c7855dd07a441f8f0ad5936723a9d9cc4b4a1e27",
+      "graph_id": "closed-loop/earth-orbit/native-parallelotope-fixed-plan-mpc/1/cfg-4e0476ffc9230c88",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -4090,7 +4090,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -4250,8 +4250,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "1cc7732b380d4d1bfb15c465a43bf3ed32deb226b76538812301e4c9f3d38ec3",
-      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-fixed-plan-mpc/1/cfg-1cc7732b380d4d1b",
+      "graph_fingerprint": "1e68d6a079cceac0ad21fa7d16fe66227e3efbaeef360cf4c22372c5206f1362",
+      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-fixed-plan-mpc/1/cfg-1e68d6a079cceac0",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -4286,7 +4286,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -4466,8 +4466,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "55c4db9ce295be3924adf21256bc39f1e53108972d5d2c28335dd12c85ba0892",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-backward-graph/1/cfg-55c4db9ce295be39",
+      "graph_fingerprint": "04f0cfa3bab9bf3e26baf63acb5291847d634143270f40be9a31bf51d9ce1642",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-backward-graph/1/cfg-04f0cfa3bab9bf3e",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4518,7 +4518,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -4695,8 +4695,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "70fd950c8ed3c2cb09ba72a95d1ba65e541a824aed7c4e49ae644d32a091daa3",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-mpc/1/cfg-70fd950c8ed3c2cb",
+      "graph_fingerprint": "5897769064603a9b1e75fbf23a193eed473c1d8607bca6b2771ab0de1326356e",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-mpc/1/cfg-5897769064603a9b",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4748,7 +4748,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -4945,8 +4945,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "998c45736b1de69d6590ce90b64b4ff39f6d01caee09c7ddb3834d091f21299c",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-mpc/1/cfg-998c45736b1de69d",
+      "graph_fingerprint": "97c170ed6a250c376f493918ce236abb3f30764e63c38e8d8ca23280b4ed00cc",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-mpc/1/cfg-97c170ed6a250c37",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4998,7 +4998,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -5195,8 +5195,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "cf6c1b694416697ed3e5ee766a22520db540584ae6d49b10068c8ef010b48cf1",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-mpc/1/cfg-cf6c1b694416697e",
+      "graph_fingerprint": "629fceb0eafd3038bcef9e012251f4bce55824d4948c5135db36a57b1a280386",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-mpc/1/cfg-629fceb0eafd3038",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5248,7 +5248,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -5445,8 +5445,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "1eb3c35693a478e1eb25082953fa29ecdd05c52d2cdf015ae73076d1ed174493",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-mpc/1/cfg-1eb3c35693a478e1",
+      "graph_fingerprint": "3827647e3d4f5f91f2af3b794cf1d3b674b89744a9b1b5fc70ac7b944d2f4937",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-mpc/1/cfg-3827647e3d4f5f91",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5498,7 +5498,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -5667,8 +5667,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "efa431e38be219688d40bdbe9ee8071bb28d3b1a640922ba34d36e085f57d4fd",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-fixed-plan-mpc/1/cfg-efa431e38be21968",
+      "graph_fingerprint": "50f8ee4f098a5995dcd21c40bf12d354992edcfcbb2e943201686f4043e1236d",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-fixed-plan-mpc/1/cfg-50f8ee4f098a5995",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5703,7 +5703,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -5847,8 +5847,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "2442208c15eb928432b9e788aca0b714d99900db018d01c86c51496ad3f85418",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-fixed-plan-mpc/1/cfg-2442208c15eb9284",
+      "graph_fingerprint": "deb5fc9b60a079647467df52e99a5203f98abe7be21340c47615a0297c57de7a",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-fixed-plan-mpc/1/cfg-deb5fc9b60a07964",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5883,7 +5883,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -6043,8 +6043,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "25c586893f8a9231b9fc332fcbb4f2faad4833f4c6480ef3abffc4a2865ecbe9",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-fixed-plan-mpc/1/cfg-25c586893f8a9231",
+      "graph_fingerprint": "5442d81bf8c0df956c0e98cd8a293080c8a3b0e5a3094cc0bb01c375fcea2ae7",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-fixed-plan-mpc/1/cfg-5442d81bf8c0df95",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -6079,7 +6079,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -6239,8 +6239,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "02547b8c83aee974c8cd60fa127f202792a5f04783265fa5748a1b82af9da230",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-fixed-plan-mpc/1/cfg-02547b8c83aee974",
+      "graph_fingerprint": "669c013208c824adf3694445811abc3d5c0bff7af8ef5730d89de70c9aae9eb0",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-fixed-plan-mpc/1/cfg-669c013208c824ad",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -6275,7 +6275,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
@@ -6435,8 +6435,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "bb29c7012e12c40c4dd2872df5e1c725c26ad40f9ddb739c5b7056fd36c0b176",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-fixed-plan-mpc/1/cfg-bb29c7012e12c40c",
+      "graph_fingerprint": "fd16c703268ecc88be99ea14b8bc95c0aa08096e3be6a2fe1ed5b140dc4ce1e5",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-fixed-plan-mpc/1/cfg-fd16c703268ecc88",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -6471,7 +6471,7 @@
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
-          "sha256": "7fdf8dc7df2bc14827f533c5a0e27673b60f0c8f9ff36b8849bae98dc37a2e6e"
+          "sha256": "b057762bf683f136e9de36aa1a75572ceaa491a9cdade1ce2404c3b8dcd3081c"
         },
         {
           "path": "benchmarks/reporting/closed_loop/task_models.py",
