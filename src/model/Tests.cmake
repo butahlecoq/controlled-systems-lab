@@ -3,6 +3,21 @@ target_link_libraries(model_tests PRIVATE CSL::model doctest::doctest Threads::T
 add_test(NAME model_tests COMMAND model_tests)
 csl_test_target(model_tests model)
 
+add_executable(model_catalogue_tests tests/unit/model/catalogue_tests.cpp)
+target_link_libraries(model_catalogue_tests PRIVATE CSL::model_catalogue doctest::doctest)
+add_test(NAME model_catalogue_tests COMMAND model_catalogue_tests)
+csl_test_target(model_catalogue_tests model)
+
+add_executable(model_catalogue_reference examples/native_model_catalogue.cpp)
+target_link_libraries(model_catalogue_reference PRIVATE CSL::model_catalogue CSL::generator_adapter CSL::quickhull_2d)
+add_test(NAME model_catalogue_reference COMMAND model_catalogue_reference)
+csl_test_target(model_catalogue_reference model)
+
+add_executable(four_state_catalogue_reference examples/native_four_state_reachability.cpp)
+target_link_libraries(four_state_catalogue_reference PRIVATE CSL::model_catalogue CSL::geometry_generators CSL::quickhull_2d)
+add_test(NAME four_state_catalogue_reference COMMAND four_state_catalogue_reference)
+csl_test_target(four_state_catalogue_reference model)
+
 add_executable(affine_dynamics_tests tests/unit/model/affine_dynamics_test.cpp)
 target_link_libraries(affine_dynamics_tests PRIVATE CSL::model CSL::sets doctest::doctest)
 add_test(NAME affine_dynamics_tests COMMAND affine_dynamics_tests)

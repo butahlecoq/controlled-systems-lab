@@ -541,7 +541,8 @@ def run_task(task_name: str, root: Path, bridge: Path, policy_adapter: str | Non
     try:
         task = load_task(task_name); validate_source_binding(task)
         requested_action_profile_id = action_profile_id
-        history_controller = controller_id in {"native-continuous-affine-history-mpc/1",
+        history_controller = controller_id in {*(f"native-fixed-tail-{family}-ipopt/1"
+            for family in ("polytope", "box", "zonotope", "parallelotope", "ellipsoid")), "native-continuous-affine-history-mpc/1",
             "native-continuous-affine-history-ipopt/1", *(
                 f"native-continuous-history-{family}-ipopt/1"
                 for family in ("polytope", "box", "zonotope", "parallelotope", "ellipsoid"))}

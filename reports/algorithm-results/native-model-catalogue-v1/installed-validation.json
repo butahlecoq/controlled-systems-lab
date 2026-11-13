@@ -1,0 +1,36 @@
+{
+  "schema": "csl.native-model-catalogue-installed-validation/1",
+  "source_commit": "08acccf3e381e67cab6862ba86622d07b7e17dcd",
+  "numerical_source_commit": "19d32a3c37b6860dbf881996da1bf5e2b3f92353",
+  "qualification": "Fresh core SDK built and installed from the unchanged native source; follow-up changes stage the public examples for the existing isolated consumer harness. Model, example and helper bytes match the numerical source. No HiGHS or Qhull. No binary distribution is implied.",
+  "compiler": "GNU 16.2.1",
+  "configuration": "Release",
+  "CSL_ENABLE_HIGHS": false,
+  "CSL_ENABLE_QHULL": false,
+  "staging_source_files_sha256": {
+    "cmake/RunInstalledClient.cmake": "f9341d4c54f1b69d21ccaff8833348bfc3197e9087766751c61df3a55645d9df",
+    "tests/installed/CMakeLists.txt": "20c0d91db5b85408917d7a56c9ab7db2ec439d5b2516341c0953c8cad69d9904"
+  },
+  "numerical_source_files_sha256": {
+    "include/csl/model/catalogue.hpp": "92ebc837644209babbc149b5d450d14e238043095d1256022b65c437447545e8",
+    "src/model/catalogue.cpp": "e6a7cd7c6aa12274842391cf29a5fd7776cf608cefcc18be52fb97de19d04825",
+    "examples/native_model_catalogue.cpp": "8bc86a6813f6cc637b5ee746279178af1c4d71dc7ee57e35158530496eb9a0ce",
+    "examples/native_four_state_reachability.cpp": "57fd2ff3af4452af169210ca40ec904ea4ce97016af1164181096c6b55bb4e28",
+    "examples/native_catalogue_projection.hpp": "159558a160bd2cbacc49872062e99262c8adf525d0d17d230fb1a473c506cb1d"
+  },
+  "results": {
+    "isolated_installed_consumers": {
+      "passed": 2,
+      "failed": 0
+    },
+    "standalone_shipped_examples": {
+      "passed": 2,
+      "failed": 0
+    }
+  },
+  "installed_public_header_sha256": "92ebc837644209babbc149b5d450d14e238043095d1256022b65c437447545e8",
+  "installed_model_catalogue_archive_sha256": "54befb81c936ef02e3f1cd7c9c48bfa4ec70f3515647418392ac541f5c1d889e",
+  "local_original_log_sha256": "43001a44cfc3dc145071a1f477265f5e5c89156d2f90ab1809810e3b1b22d52d",
+  "published_log_sha256": "512d73c946532097a2faf404e474d9029489b36d79dbc3570b4acc10ae87c921",
+  "log_qualification": "The publication log replaces the local validation root with ${LOCAL_VALIDATION_ROOT}; the original log is retained locally with its separate digest."
+}

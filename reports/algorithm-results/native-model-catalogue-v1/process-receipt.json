@@ -1,0 +1,16 @@
+[
+  {
+    "name": "three-state",
+    "executable_sha256": "6dbdee291cfd7d8b4f605600fd0115f27dd2485747d93a235c126acc907a60f6",
+    "returncode": 0,
+    "source_commit": "19d32a3c37b6860dbf881996da1bf5e2b3f92353",
+    "scope": "functional numerical reference, no performance measurement"
+  },
+  {
+    "name": "four-state",
+    "executable_sha256": "57de25173efc477270c0732ebe9cdcdeaf5a52f835f16f82c7b39c6fbdc9b70b",
+    "returncode": 0,
+    "source_commit": "19d32a3c37b6860dbf881996da1bf5e2b3f92353",
+    "scope": "functional numerical reference, no performance measurement"
+  }
+]

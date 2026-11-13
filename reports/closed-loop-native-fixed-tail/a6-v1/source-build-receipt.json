@@ -1,0 +1,45 @@
+{
+  "source_commit": "a6b7d1cb6e655284d7859dfa8f7b010145d463f5",
+  "native_cpp_build_commit": "99fe6e3c",
+  "post_build_change": "Only a fixture correction and external shared-stderr recorder/profile hashes changed after native C++ build; native C++ input bytes match.",
+  "scope": "Functional full nonlinear closed-loop episodes, not timing comparison.",
+  "sources": {
+    "tools/closed_loop_native_policy.cpp": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989",
+    "src/reachability/fixed_tail_policy.cpp": "64e9c38f4d8999a4a7a37140945b55af504a1bb27dba6d38cc4714b9c551ad02",
+    "src/reachability/inner_template.cpp": "280fdc79c2621536c99fd05ed70ec48664751aeec49800e27be748cf1e9f5e3a",
+    "src/adapters/nlp/casadi_fixed_tail.cpp": "58b912a71fea064c6c26827716f8337aa73454ec6c90c361fd38bfc67be51c46",
+    "benchmarks/reporting/mpc11/nonlinear_replay_bridge.cpp": "104adee4c3999daedae08bc6735e6058d7c3cd66e2bca8b306ea4d65142e2f21",
+    "src/simulation/nonlinear_replay.cpp": "50489857172acf83888cb614d416c4fd2b5cc52f1989bbd1ad8dff775bd4fcfd",
+    "benchmarks/reporting/closed_loop/native_fixed_tail_policy.py": "a95e51c34e7a9e06e1f2ae5fe2977bde291f62c96ab3e8b09a0af228c17f2fae",
+    "benchmarks/reporting/closed_loop/fixed_tail_validation.py": "89bee09f7f066b6672bda06fbeeef8b6a43718280b42e3a3ee08d65c9190458b",
+    "docs/catalogue/closed-loop-history-capabilities-v1.json": "fe54f2c07cf844fb1ddc1cddd6080d25964643e566b35dd7a2192a34503ce162"
+  },
+  "binaries": {
+    "csl_closed_loop_native_policy": "fe46f54211831e089b481b94016f5e7ab1e63ca4a41348f77f9c07112264bace",
+    "csl_mpc11_nonlinear_replay": "b51d23be9e2b94603cada264f94d8c2003d27f3ab107d74ce50405bdd358e63d"
+  },
+  "native_profile": {
+    "build_type": "Release",
+    "CSL_ENABLE_CASADI": true,
+    "CSL_ENABLE_HIGHS": false,
+    "CSL_ENABLE_QHULL": false
+  },
+  "native_dependency": {
+    "scope": "Installed native dependency files, no redistribution or stable ABI claim",
+    "files": {
+      "cmake/casadi-config.cmake": "9044789abaf42cc386ca2f1d3c03cf7dad1b80627d0452db31fd3ef57a61dadd",
+      "cmake/casadi-targets.cmake": "6ba12008a6cccf78271f34fa48b1fee111a722209790e769f677f3e90adba694",
+      "cmake/casadi-targets-release.cmake": "d6f08dc48cd40ef1ef91b4be9869efb295603fb2ec5b48d752f7899719205e1b",
+      "libcasadi.so.3.7": "56197fdbc5ddd127b080385723808ef3240d4cc590741822951153fccfd791cb"
+    },
+    "observed_exported_abi": "std::__cxx11::basic_string in Opti constructor and solver; no imported old-ABI definition"
+  },
+  "limits": {
+    "attempt_wall_seconds": 300,
+    "attempt_cpu_seconds": 300,
+    "policy_wall_seconds": 60
+  },
+  "physical_bridge_build": "Verified reuse of c1 campaign current-source C++ replay binary; bridge and simulation source/include bytes unchanged between 7e04e283 and a6b7d1cb.",
+  "external_recorder_revision": "a6b7d1cb",
+  "stderr_policy": "Native stderr inherits retained supervised worker stderr stream; shared process stream, not isolated per-call stderr."
+}

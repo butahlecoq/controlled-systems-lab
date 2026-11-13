@@ -2,6 +2,20 @@ cmake_minimum_required(VERSION 3.31)
 project(CSLInstalledConsumer LANGUAGES CXX)
 find_package(CSL 0.1 CONFIG REQUIRED)
 
+add_executable(installed_model_catalogue_client native_model_catalogue.cpp)
+target_link_libraries(installed_model_catalogue_client PRIVATE CSL::model_catalogue CSL::generator_adapter CSL::quickhull_2d)
+set_target_properties(installed_model_catalogue_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_model_catalogue_client COMMAND installed_model_catalogue_client)
+set_tests_properties(installed_model_catalogue_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Native model catalogue: 2 source cases and all full-state corner checks passed")
+
+add_executable(installed_four_state_catalogue_client native_four_state_reachability.cpp)
+target_link_libraries(installed_four_state_catalogue_client PRIVATE CSL::model_catalogue CSL::geometry_generators CSL::quickhull_2d)
+set_target_properties(installed_four_state_catalogue_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_four_state_catalogue_client COMMAND installed_four_state_catalogue_client)
+set_tests_properties(installed_four_state_catalogue_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Native four-state reachability: fifteen transitions and 1280 support checks passed")
+
 # Expectations come from the package-building configuration. Optional clients may
 # be skipped only when the corresponding adapter was deliberately disabled.
 foreach(adapter HIGHS QHULL)
@@ -577,4 +591,20 @@ set_target_properties(installed_application_client PROPERTIES CXX_EXTENSIONS OFF
 add_test(NAME installed_application_client COMMAND installed_application_client)
 set_tests_properties(installed_application_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed application client: guarded profile rejection passed")
+endif()
+
+add_executable(installed_inner_template_client inner_template_client.cpp)
+target_link_libraries(installed_inner_template_client PRIVATE CSL::inner_template)
+set_target_properties(installed_inner_template_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_inner_template_client COMMAND installed_inner_template_client)
+set_tests_properties(installed_inner_template_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed ND inner-template client passed")
+
+if(TARGET CSL::casadi_fixed_tail)
+  add_executable(installed_fixed_tail_policy_client fixed_tail_policy_client.cpp)
+  target_link_libraries(installed_fixed_tail_policy_client PRIVATE CSL::casadi_fixed_tail)
+  set_target_properties(installed_fixed_tail_policy_client PROPERTIES CXX_EXTENSIONS OFF)
+  add_test(NAME installed_fixed_tail_policy_client COMMAND installed_fixed_tail_policy_client)
+  set_tests_properties(installed_fixed_tail_policy_client PROPERTIES
+    PASS_REGULAR_EXPRESSION "Native fixed-tail policy: all five physical families")
 endif()

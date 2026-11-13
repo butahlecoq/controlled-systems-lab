@@ -192,6 +192,8 @@ SAVED_DATA_ILLUSTRATION_RENDERERS = {
         "global control optimality."),
 }
 SAVED_DATA_COMPANION_RENDERERS = {
+    "scripts/reports/fixed_tail_example.py",
+    "scripts/reports/native_fixed_tail_episode_report.py",
     "benchmarks/reporting/closed_loop/run_closed_loop.py",
     "scripts/reports/recorded_closed_loop_figures.py",
     "scripts/reports/render_closed_loop_pilot.py",

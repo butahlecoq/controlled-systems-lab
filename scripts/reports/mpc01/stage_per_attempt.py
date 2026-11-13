@@ -29,6 +29,8 @@ STRATEGY_AB_FILES = (
 STRATEGY_AB_ROUTE_ASSETS = {
     "strategy-ab-ts03-summary.txt": "strategy-ab-ts03-summary.md",
     "build-note.txt": "build-note.md",
+    "setup-attempts/supervisor-row-count-mismatch/README.txt":
+        "setup-attempts/supervisor-row-count-mismatch/README.md",
 }
 STRATEGY_AB_TS02_ID = "mpc01-strategy-ab-ts02-per-attempt-20261103"
 STRATEGY_AB_TS02_SOURCE = ROOT / "docs/research/evidence" / STRATEGY_AB_TS02_ID
@@ -69,9 +71,11 @@ def _insert_landing_link(site: Path, marker: str, href: str, label: str) -> None
         raise ValueError("built Pages site must have a regular root index.html")
     source_page = landing.read_text(encoding="utf-8")
     marker_attr = f'id="{marker}"'
-    if marker_attr in source_page:
-        raise ValueError("Pages landing link already exists: " + marker)
     link = f'<p {marker_attr}><a href="{href}">{label}</a></p>'
+    if marker_attr in source_page:
+        if source_page.count(marker_attr) == 1 and source_page.count(link) == 1:
+            return
+        raise ValueError("Pages landing link conflicts with the expected route: " + marker)
     updated, count = re.subn(r"(<body\b[^>]*>)", lambda match: match.group(1) + link,
                              source_page, count=1, flags=re.IGNORECASE)
     if count != 1:
@@ -156,23 +160,43 @@ th,td{{border-bottom:1px solid #526174;padding:.45rem .6rem;text-align:left}}img
 
 def _copy_bundle_for_route(source: Path, destination: Path, markdown_routes: dict[str, str],
                            required_files: tuple[str, ...]) -> None:
-    _check_manifest(source, required_files)
-    shutil.copytree(source, destination, symlinks=False)
-    manifest = destination / "SHA256SUMS"
-    contents = manifest.read_bytes()
+    names = _check_manifest(source, required_files)
+    contents = (source / "SHA256SUMS").read_bytes()
+    expected = {}
+    origins = {}
+    for name in names:
+        route_name = markdown_routes.get(name, name)
+        if route_name in expected:
+            raise ValueError("source assets map to the same published route: " + route_name)
+        expected[route_name] = (source / name).read_bytes()
+        origins[route_name] = source / name
     for source_name, route_name in markdown_routes.items():
-        source_path = destination / source_name
-        route_path = destination / route_name
-        if (source_path.is_symlink() or not source_path.is_file() or
-                route_path.exists() or route_path.is_symlink()):
+        if source_name not in names or route_name in names:
             raise ValueError("source asset cannot be mapped to its published route: " + source_name)
         source_entry = b"  " + source_name.encode("ascii") + b"\n"
         route_entry = b"  " + route_name.encode("ascii") + b"\n"
         if contents.count(source_entry) != 1:
             raise ValueError("checksum manifest must contain exactly one source asset: " + source_name)
         contents = contents.replace(source_entry, route_entry)
-        source_path.rename(route_path)
-    manifest.write_bytes(contents)
+    expected["SHA256SUMS"] = contents
+    if destination.is_symlink() or (destination.exists() and not destination.is_dir()):
+        raise ValueError("published report route conflicts with an existing file or symlink")
+    if destination.exists():
+        for path in destination.rglob("*"):
+            name = path.relative_to(destination).as_posix()
+            if path.is_symlink() or (path.is_dir() and name in expected) or (not path.is_dir() and
+                    (not path.is_file() or name not in expected or path.read_bytes() != expected[name])):
+                raise ValueError("published report route conflicts with source bytes: " + name)
+    destination.mkdir(parents=True, exist_ok=True)
+    for name, content in expected.items():
+        target = destination / name
+        if target.exists():
+            continue
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if name == "SHA256SUMS":
+            target.write_bytes(content)
+        else:
+            shutil.copy2(origins[name], target)
 
 
 def _validate_routed_bundle(source: Path, route: Path, source_names: set[str],
@@ -238,8 +262,6 @@ def stage_strategy_ab(site: Path) -> Path:
             site.is_symlink() or not site.is_dir()):
         raise ValueError("Strategy A/B evidence source and built site directory are required")
     destination = site / STRATEGY_AB_ROUTE
-    if destination.exists() or destination.is_symlink():
-        raise ValueError("Strategy A/B report route must be fresh")
     destination.parent.mkdir(parents=True, exist_ok=True)
     _copy_bundle_for_route(
         STRATEGY_AB_SOURCE, destination,
@@ -268,8 +290,6 @@ def stage_strategy_ab_ts02(site: Path) -> Path:
             site.is_symlink() or not site.is_dir()):
         raise ValueError("Strategy A/B T-S02 evidence source and built site directory are required")
     destination = site / STRATEGY_AB_TS02_ROUTE
-    if destination.exists() or destination.is_symlink():
-        raise ValueError("Strategy A/B T-S02 report route must be fresh")
     destination.parent.mkdir(parents=True, exist_ok=True)
     _copy_bundle_for_route(
         STRATEGY_AB_TS02_SOURCE, destination,
@@ -296,8 +316,6 @@ def stage_strategy_ab_ts01(site: Path) -> Path:
             site.is_symlink() or not site.is_dir()):
         raise ValueError("Strategy A/B T-S01 evidence source and built site directory are required")
     destination = site / STRATEGY_AB_TS01_ROUTE
-    if destination.exists() or destination.is_symlink():
-        raise ValueError("Strategy A/B T-S01 report route must be fresh")
     destination.parent.mkdir(parents=True, exist_ok=True)
     _copy_bundle_for_route(
         STRATEGY_AB_TS01_SOURCE, destination,

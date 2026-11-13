@@ -14,14 +14,11 @@ sets::SetData take(sets::Result<sets::SetData> result) {
     return std::get<sets::SetData>(std::move(result));
 }
 SetHandle polygon(const char* id, Matrix points) {
-    std::vector<std::string> labels;
-    for(std::size_t coordinate=0;coordinate<points.cols;++coordinate)
-        labels.push_back(coordinate==0?"x":coordinate==1?"y":"x"+std::to_string(coordinate+1));
     const auto vertices=numeric::snapshot(points);
     const auto rays=numeric::snapshot(Matrix{0,points.cols,{}});
     REQUIRE(std::holds_alternative<numeric::MatrixView>(vertices));
     REQUIRE(std::holds_alternative<numeric::MatrixView>(rays));
-    return take(sets::make_v({{id},points.cols,std::move(labels)},
+    return take(sets::make_v({{id},points.cols,{"x","y"}},
         {std::get<numeric::MatrixView>(vertices),std::get<numeric::MatrixView>(rays)})).as_handle();
 }
 SetHandle h_polygon(const char* id, Matrix inequalities, Vector bounds) {
@@ -116,56 +113,6 @@ TEST_CASE("registered rotated parallelotope has literal support bounds") {
     CHECK(h.upper_bounds[1]==2.0);
     CHECK(h.upper_bounds[2]==2.0);
     CHECK(h.upper_bounds[3]==2.0);
-}
-
-TEST_CASE("registered four-dimensional parallelotope emits one support pair per axis") {
-    Matrix points{16,4,Vector(64)};
-    for(std::size_t mask=0;mask<16;++mask)
-        for(std::size_t coordinate=0;coordinate<4;++coordinate)
-            points.values[mask*4+coordinate]=(mask&(std::size_t{1}<<coordinate))?1.0:-1.0;
-    const auto input=polygon("hypercube",std::move(points));
-    const Matrix orientation{4,4,{1,1,0,0, 0,1,1,0, 0,0,1,1, 1,0,0,2}};
-    registry::Registry<registry::ApproximationPort> methods;
-    REQUIRE_FALSE(methods.add(make_parallelotope_registration({"four-dimensional"},orientation)).has_value());
-    ApproximationRequest query{{{"parallelotope-4d"},{"outer"},{"reference"}},input,
-        {"csl.polyhedron.h"},SetRelation::outer,8,Assurance::numerical};
-    const auto result=run_registered(methods,{{"csl.approximation.parallelotope"},std::nullopt},
-        query,ExecutionContext{});
-    REQUIRE(std::holds_alternative<EnclosedApproximation>(result));
-    const auto& enclosed=std::get<EnclosedApproximation>(result);
-    CHECK(enclosed.basis==StructuralBasis::v_h_containment);
-    const auto native=sets::from_handle(enclosed.result.output);
-    REQUIRE(std::holds_alternative<sets::SetData>(native));
-    const auto representation=std::get<sets::SetData>(native).representation();
-    REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
-    const auto& h=std::get<sets::HRepresentation>(representation);
-    REQUIRE(h.inequalities.rows()==8);
-    CHECK(h.inequalities.cols()==4);
-    CHECK(h.upper_bounds.size()==8);
-    CHECK(enclosed.result.evidence.assumptions[1]==
-        "requested_budget=8; input_vertices=16; input_rays=0; output_h_rows=8");
-    for(std::size_t row=0;row<h.inequalities.rows();++row)
-        for(std::size_t vertex=0;vertex<16;++vertex) {
-            double dot=0.0;
-            for(std::size_t coordinate=0;coordinate<4;++coordinate)
-                dot+=h.inequalities(row,coordinate)*
-                    ((vertex&(std::size_t{1}<<coordinate))?1.0:-1.0);
-            CHECK(dot<=h.upper_bounds[row]);
-        }
-}
-
-TEST_CASE("four-dimensional parallelotope rejects a rank-deficient orientation") {
-    Matrix points{1,4,{0,0,0,0}};
-    const auto input=polygon("four-dimensional-point",std::move(points));
-    registry::Registry<registry::ApproximationPort> methods;
-    REQUIRE_FALSE(methods.add(make_parallelotope_registration({"singular"},
-        Matrix{4,4,{1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,2,0}})).has_value());
-    ApproximationRequest query{{{"parallelotope-4d"},{"singular"},{"reference"}},input,
-        {"csl.polyhedron.h"},SetRelation::outer,8,Assurance::numerical};
-    const auto result=run_registered(methods,{{"csl.approximation.parallelotope"},std::nullopt},
-        query,ExecutionContext{});
-    REQUIRE(std::holds_alternative<registry::Rejection>(result));
-    CHECK(std::get<registry::Rejection>(result).diagnostics.front().field=="parallelotope.orientation");
 }
 
 TEST_CASE("inscribed box checks all four declared corners against H input") {

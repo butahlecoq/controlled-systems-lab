@@ -31,4 +31,15 @@ csl_add_library(csl_finite_feedback STATIC src/reachability/finite_feedback.cpp)
 csl_add_library(csl_finite_feedback_port STATIC src/reachability/finite_feedback_port.cpp)
 target_link_libraries(csl_finite_feedback_port PUBLIC CSL::finite_feedback CSL::registry)
 
+csl_add_library(csl_inner_template STATIC src/reachability/inner_template.cpp)
+target_link_libraries(csl_inner_template PUBLIC CSL::contracts)
+
+csl_add_library(csl_fixed_tail_policy STATIC src/reachability/fixed_tail_policy.cpp)
+target_link_libraries(csl_fixed_tail_policy PUBLIC CSL::inner_template CSL::history_cost CSL::registry)
+if(CSL_ENABLE_CASADI)
+  csl_add_library(csl_casadi_fixed_tail STATIC src/adapters/nlp/casadi_fixed_tail.cpp)
+  target_link_libraries(csl_casadi_fixed_tail PUBLIC CSL::fixed_tail_policy PRIVATE casadi::casadi)
+  csl_install_headers(adapters)
+endif()
+
 csl_install_headers(reachability)

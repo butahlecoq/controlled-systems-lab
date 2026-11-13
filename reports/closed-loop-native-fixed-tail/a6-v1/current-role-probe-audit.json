@@ -1,0 +1,219 @@
+{
+  "source_commit": "f94061ab5afe8848d61c57d9e57f1afcfe0e90b0",
+  "scope": "15 current original-task initial queries, not a closed-loop campaign; role coverage is separate from historical a6 episode evidence",
+  "profiles": [
+    {
+      "profile": "earth-orbit-box",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-box-ipopt/1/cfg-f5a58e49ac80cb04",
+      "graph_fingerprint": "f5a58e49ac80cb0455ddb6222d66d8ef627220bc71fffe52a5333ca50035f9e0",
+      "physical_stages": 21,
+      "construction_events": 42,
+      "source_cost": {
+        "terminal": 98.0360848075845,
+        "running": 0.03771636108976916,
+        "total": 98.07380116867427
+      },
+      "declared_observed_roles_match": true,
+      "accepted": true
+    },
+    {
+      "profile": "earth-orbit-ellipsoid",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-ellipsoid-ipopt/1/cfg-202cd6d6f97318ad",
+      "graph_fingerprint": "202cd6d6f97318ad3fbaadbed04428e4fc809b4c8575755b84732cd1e75f9a06",
+      "physical_stages": 21,
+      "construction_events": 42,
+      "source_cost": {
+        "terminal": 98.91173277917606,
+        "running": 0.019187931872487116,
+        "total": 98.93092071104854
+      },
+      "declared_observed_roles_match": true,
+      "accepted": true
+    },
+    {
+      "profile": "earth-orbit-parallelotope",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-parallelotope-ipopt/1/cfg-c22da0d78d487149",
+      "graph_fingerprint": "c22da0d78d4871490479d3060120a1b7d0efd7ad9aa1506e455be6b58764b32b",
+      "physical_stages": 21,
+      "construction_events": 42,
+      "source_cost": {
+        "terminal": 99.00717224179475,
+        "running": 0.019192075327209374,
+        "total": 99.02636431712196
+      },
+      "declared_observed_roles_match": true,
+      "accepted": true
+    },
+    {
+      "profile": "earth-orbit-polytope",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-polytope-ipopt/1/cfg-239294379854a2a7",
+      "graph_fingerprint": "239294379854a2a70ffda447138f2be8b8ecb0f912fabb09525ef0ccc4cc3f51",
+      "physical_stages": 21,
+      "construction_events": 42,
+      "source_cost": {
+        "terminal": 96.43224798318674,
+        "running": 0.07071067811856613,
+        "total": 96.50295866130531
+      },
+      "declared_observed_roles_match": true,
+      "accepted": true
+    },
+    {
+      "profile": "earth-orbit-zonotope",
+      "graph_id": "closed-loop/earth-orbit/fixed-tail-zonotope-ipopt/1/cfg-eeeb2b9e42fb985e",
+      "graph_fingerprint": "eeeb2b9e42fb985e97d7d17fb0bceb48ed1d9ace9f4fce38de700640849088ce",
+      "physical_stages": 21,
+      "construction_events": 42,
+      "source_cost": {
+        "terminal": 98.58447337912882,
+        "running": 0.027141693217650656,
+        "total": 98.61161507234647
+      },
+      "declared_observed_roles_match": true,
+      "accepted": true
+    },
+    {
+      "profile": "syn-nl-fuel-01-box",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-box-ipopt/1/cfg-85e4beb611547ea5",
+      "graph_fingerprint": "85e4beb611547ea55ec0b4fa0f78348c132763e986e4147bf2813c9a086b5c2b",
+      "physical_stages": 41,
+      "construction_events": 82,
+      "source_cost": {
+        "terminal": 0.02203942114589838,
+        "running": 0.0013612340072341092,
+        "total": 0.02340065515313249
+      },
+      "declared_observed_roles_match": true,
+      "accepted": true
+    },
+    {
+      "profile": "syn-nl-fuel-01-ellipsoid",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-ellipsoid-ipopt/1/cfg-02da5c9a71f5b372",
+      "graph_fingerprint": "02da5c9a71f5b372068378cbb377ffc864156fede11f1acfd169fa5026a32e97",
+      "physical_stages": 41,
+      "construction_events": 82,
+      "source_cost": {
+        "terminal": 0.02248875137290696,
+        "running": 0.0012834008268009344,
+        "total": 0.023772152199707894
+      },
+      "declared_observed_roles_match": true,
+      "accepted": true
+    },
+    {
+      "profile": "syn-nl-fuel-01-parallelotope",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-parallelotope-ipopt/1/cfg-7364f26fb4ad3b3a",
+      "graph_fingerprint": "7364f26fb4ad3b3a6388e3a3548f2b0ae0d1a581f574989943ecb8c62ae07235",
+      "physical_stages": 41,
+      "construction_events": 82,
+      "source_cost": {
+        "terminal": 0.022361896493881355,
+        "running": 0.0012973725938579062,
+        "total": 0.02365926908773926
+      },
+      "declared_observed_roles_match": true,
+      "accepted": true
+    },
+    {
+      "profile": "syn-nl-fuel-01-polytope",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-polytope-ipopt/1/cfg-b612ecf891c1584c",
+      "graph_fingerprint": "b612ecf891c1584c865047d87cc5d746055318387d0fb74dc51faa2faafd0dee",
+      "physical_stages": 41,
+      "construction_events": 82,
+      "source_cost": {
+        "terminal": 0.02106655637533724,
+        "running": 0.0016233249382569509,
+        "total": 0.02268988131359419
+      },
+      "declared_observed_roles_match": true,
+      "accepted": true
+    },
+    {
+      "profile": "syn-nl-fuel-01-zonotope",
+      "graph_id": "closed-loop/syn-nl-fuel-01/fixed-tail-zonotope-ipopt/1/cfg-2aee883fb216a09d",
+      "graph_fingerprint": "2aee883fb216a09d535484fd1108c6ae1d2ac6ec2e7c28515f8ad22c8bf90e66",
+      "physical_stages": 41,
+      "construction_events": 82,
+      "source_cost": {
+        "terminal": 0.02222625136174787,
+        "running": 0.001317053911136148,
+        "total": 0.023543305272884018
+      },
+      "declared_observed_roles_match": true,
+      "accepted": true
+    },
+    {
+      "profile": "syn-nl-lv-01-box",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-box-ipopt/1/cfg-32f3f64bc328a42c",
+      "graph_fingerprint": "32f3f64bc328a42ca7fb86090b827eb9e16b24003d7896ca726eeb79db4053ee",
+      "physical_stages": 31,
+      "construction_events": 62,
+      "source_cost": {
+        "terminal": 0.06639093040451112,
+        "running": 0.012524338114631604,
+        "total": 0.07891526851914273
+      },
+      "declared_observed_roles_match": true,
+      "accepted": true
+    },
+    {
+      "profile": "syn-nl-lv-01-ellipsoid",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-ellipsoid-ipopt/1/cfg-135dedc424bfa5e7",
+      "graph_fingerprint": "135dedc424bfa5e71bd8db688e152abd96030923edcd1b86e6d1326c36694bd9",
+      "physical_stages": 31,
+      "construction_events": 62,
+      "source_cost": {
+        "terminal": 0.06639093033788374,
+        "running": 0.012524338181258967,
+        "total": 0.0789152685191427
+      },
+      "declared_observed_roles_match": true,
+      "accepted": true
+    },
+    {
+      "profile": "syn-nl-lv-01-parallelotope",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-parallelotope-ipopt/1/cfg-0104d6e83ff20290",
+      "graph_fingerprint": "0104d6e83ff2029073672daa2e5a9d18b2dd0ebb6d3cb49cb9d943309fa35caa",
+      "physical_stages": 31,
+      "construction_events": 62,
+      "source_cost": {
+        "terminal": 0.06635799010878159,
+        "running": 0.012558591362370277,
+        "total": 0.07891658147115187
+      },
+      "declared_observed_roles_match": true,
+      "accepted": true
+    },
+    {
+      "profile": "syn-nl-lv-01-polytope",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-polytope-ipopt/1/cfg-989d571b6709614e",
+      "graph_fingerprint": "989d571b6709614ef8efd1ff47121cea24b74765d07e802beb4b02c555ca682a",
+      "physical_stages": 31,
+      "construction_events": 62,
+      "source_cost": {
+        "terminal": 0.06639093041899849,
+        "running": 0.012524338100144188,
+        "total": 0.07891526851914268
+      },
+      "declared_observed_roles_match": true,
+      "accepted": true
+    },
+    {
+      "profile": "syn-nl-lv-01-zonotope",
+      "graph_id": "closed-loop/syn-nl-lv-01/fixed-tail-zonotope-ipopt/1/cfg-fef1164d49c0231b",
+      "graph_fingerprint": "fef1164d49c0231b385d64ccf2bba725c2e105903d05b29486c05baee2cc185a",
+      "physical_stages": 31,
+      "construction_events": 62,
+      "source_cost": {
+        "terminal": 0.06639093037392585,
+        "running": 0.012524338145216857,
+        "total": 0.07891526851914271
+      },
+      "declared_observed_roles_match": true,
+      "accepted": true
+    }
+  ],
+  "all_accepted": true,
+  "physical_stages": 465,
+  "construction_events": 930
+}

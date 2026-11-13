@@ -125,7 +125,7 @@ class HistoryNormSolverTest(unittest.TestCase):
         manifest = build_history_manifest()
         self.assertEqual(validate_manifest(manifest_path=HISTORY_MANIFEST), manifest)
         graphs = manifest["graphs"]
-        self.assertEqual(len(graphs), 20)
+        self.assertEqual(len(graphs), 35)
         feedback = next(row for row in graphs if row["controller"]["id"] == "native-continuous-history-box-ipopt/1")
         self.assertEqual(feedback["role_bindings"]["representation"]["id"], "box")
         self.assertEqual(feedback["role_bindings"]["control_optimizer"]["id"], "casadi-ipopt")

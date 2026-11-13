@@ -599,6 +599,14 @@
       "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
+      "source": "scripts/reports/fixed_tail_example.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "native-fixed-tail-2d.svg"
+      ],
+      "disposition": "analytic-reference-checked-saved-run-renderer"
+    },
+    {
       "source": "scripts/reports/fuel_reachability_layers.py",
       "signal_count": 8,
       "asset_name_literals": [
@@ -1076,6 +1084,14 @@
         "projections.svg"
       ],
       "disposition": "composes-or-copies-existing-saved-figure"
+    },
+    {
+      "source": "scripts/reports/native_fixed_tail_episode_report.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "plane-1.svg"
+      ],
+      "disposition": "analytic-reference-checked-saved-run-renderer"
     },
     {
       "source": "scripts/reports/native_terminal_cost_example.py",
@@ -1847,6 +1863,15 @@
       ],
       "disposition": "publication-validation-or-frozen-route",
       "role_and_disposition_reason": "Rechecks immutable mesh and repeated-controller archives, builds labelled saved-data study companions and copies complete source/raw inputs; no optimization or integration runs."
+    },
+    {
+      "source": "scripts/reports/stage_native_model_catalogue.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "stages-8-x1-x2-screen.svg",
+        "stages-x1-x2-screen.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
     },
     {
       "source": "scripts/reports/stage_projection_figures.py",

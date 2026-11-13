@@ -2,7 +2,7 @@ if((CSL_BUILD_GEO02_REPORT OR CSL_BUILD_GEO03_REPORT OR CSL_BUILD_GEO04_REPORT O
     CSL_BUILD_OPT04_REPORT OR CSL_BUILD_SYN01_REPORT OR CSL_BUILD_MPC03_REPORT OR
     CSL_BUILD_STAGE_PROJECTION_ROUTE OR CSL_BUILD_SYN02_REPORT OR
     CSL_BUILD_MPC04_REPORT OR CSL_BUILD_MPC08_REPORT OR CSL_BUILD_EXT02_REPORT OR
-    CSL_BUILD_REPORTS OR CSL_BUILD_BURYATIA_REPORT) AND NOT CSL_ENABLE_HIGHS)
+    CSL_BUILD_REPORTS) AND NOT CSL_ENABLE_HIGHS)
   message(FATAL_ERROR "The selected report requires CSL_ENABLE_HIGHS")
 endif()
 if(CSL_BUILD_BTULSHOR_REPORT AND NOT CSL_ENABLE_HIGHS)
@@ -10,8 +10,7 @@ if(CSL_BUILD_BTULSHOR_REPORT AND NOT CSL_ENABLE_HIGHS)
 endif()
 if((CSL_BUILD_GEO02_REPORT OR CSL_BUILD_GEO03_REPORT OR CSL_BUILD_GEO04_REPORT OR
     CSL_BUILD_SYN01_REPORT OR CSL_BUILD_STAGE_PROJECTION_ROUTE OR
-    CSL_BUILD_MPC08_REPORT OR CSL_BUILD_EXT02_REPORT OR
-    CSL_BUILD_BURYATIA_REPORT) AND NOT CSL_ENABLE_QHULL)
+    CSL_BUILD_MPC08_REPORT OR CSL_BUILD_EXT02_REPORT) AND NOT CSL_ENABLE_QHULL)
   message(FATAL_ERROR "The selected report requires CSL_ENABLE_QHULL")
 endif()
 
@@ -1651,30 +1650,12 @@ target_compile_options(csl_buryatia_approximation_report PRIVATE /W4 /WX /permis
 else()
 target_compile_options(csl_buryatia_approximation_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
 endif()
-add_executable(csl_buryatia_dim4_report benchmarks/reporting/buryatia/dim4_driver.cpp)
-target_compile_features(csl_buryatia_dim4_report PRIVATE cxx_std_20)
-target_include_directories(csl_buryatia_dim4_report SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/single_include)
-target_link_libraries(csl_buryatia_dim4_report PRIVATE
-  CSL::affine_sum CSL::approximation CSL::generator_adapter CSL::quickhull_2d
-  CSL::highs_lp CSL::qhull_conversion)
-if(MSVC)
-target_compile_options(csl_buryatia_dim4_report PRIVATE /W4 /WX /permissive-)
-else()
-target_compile_options(csl_buryatia_dim4_report PRIVATE -Wall -Wextra -Wpedantic -Werror)
-endif()
 if(BUILD_TESTING)
 find_package(Python3 3.11 REQUIRED COMPONENTS Interpreter)
 add_test(NAME buryatia_volterra_2d_report
   COMMAND Python3::Interpreter
     ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/buryatia/check_2d.py
     --raw ${CMAKE_CURRENT_SOURCE_DIR}/docs/examples/buryatia-volterra-affine-2d-records.json)
-add_test(NAME buryatia_dim4_native_report
-  COMMAND Python3::Interpreter
-    ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/buryatia/check_dim4.py
-    --exe $<TARGET_FILE:csl_buryatia_dim4_report>)
-add_test(NAME buryatia_dim4_capture_protocol
-  COMMAND Python3::Interpreter
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/reporting/test_buryatia_dim4_capture.py)
 add_test(NAME buryatia_volterra_2d_native_capture
   COMMAND Python3::Interpreter
     ${CMAKE_CURRENT_SOURCE_DIR}/scripts/reports/buryatia/check_2d.py
@@ -1682,8 +1663,6 @@ add_test(NAME buryatia_volterra_2d_native_capture
     --cmake-cache ${CMAKE_BINARY_DIR}/CMakeCache.txt
     --record-out ${CMAKE_CURRENT_BINARY_DIR}/buryatia-volterra-affine-2d-native-records.json)
 set_tests_properties(buryatia_volterra_2d_report PROPERTIES LABELS "geometry;example" TIMEOUT 30)
-set_tests_properties(buryatia_dim4_native_report PROPERTIES LABELS "geometry;example;native-report" TIMEOUT 300)
-set_tests_properties(buryatia_dim4_capture_protocol PROPERTIES LABELS "geometry;example" TIMEOUT 30)
 set_tests_properties(buryatia_volterra_2d_native_capture PROPERTIES LABELS "geometry;example;native-report" TIMEOUT 1800)
 add_executable(buryatia_ellipse_boundary_tests
   tests/contract/geometry/buryatia_ellipse_boundary_tests.cpp)

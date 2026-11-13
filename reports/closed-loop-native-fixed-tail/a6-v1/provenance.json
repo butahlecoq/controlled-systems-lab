@@ -1,0 +1,27 @@
+{
+  "episode_source_commit": "a6b7d1cb6e655284d7859dfa8f7b010145d463f5",
+  "native_cpp_source_commit": "99fe6e3c9ac31eaec97a3093570e9fddfb09aa62",
+  "current_role_probe_source_commit": "f94061ab5afe8848d61c57d9e57f1afcfe0e90b0",
+  "current_role_probe_native_cpp_source_commit": "344bbaaeca5ee833db6edb049a114d8299f3e32b",
+  "numerical_scope": "15 original nonlinear closed-loop episodes, 450 native policy queries, all original terminal and running costs. One episode per cell; no performance ranking or nonlinear safety proof.",
+  "construction_role_qualification": "The a6 campaign predates native reference/template-admission event tracing. Its numerical, warm and shared-stderr evidence is retained, but it does not establish current declared/observed construction-role coverage. Current f940 initial-query role probes are separate evidence and do not relabel old captures.",
+  "stderr_qualification": "The corrected a6 recorder inherits the shared supervised worker/native stderr stream. The historical 7e failed prefix discarded separate native stderr; those bytes cannot be reconstructed.",
+  "record_source_mapping": "Native C++ build 99fe, unchanged C++ input bytes through a6; intervening fixture/recorder changes are identified in the original build receipt. Later readback validation/provenance changes do not rewrite these original records.",
+  "projection_scope": "Saved initial-query conditional inner regions and finite all-control carriers; gold nonlinear observed path, dashed affine history, soft-reference cross. H projections use numerical full-state LP support; factor projections preserve all full-state coordinates before projection.",
+  "fuel_coordinate_mapping": {
+    "stored_order": [
+      "m_ox",
+      "m_f",
+      "q_ox",
+      "q_f"
+    ],
+    "displayed_oxidizer_raw_indices": [
+      0,
+      2
+    ],
+    "displayed_fuel_raw_indices": [
+      1,
+      3
+    ]
+  }
+}
