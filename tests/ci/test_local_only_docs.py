@@ -104,6 +104,9 @@ class LocalOnlyDocsTests(unittest.TestCase):
         with temporary:
             assets = {
                 "docs/examples/math-example.html": "<html></html>\n",
+                "docs/examples/buryatia-dim4-literal-affine-v1-SHA256SUMS": ""
+                + "0" * 64
+                + "  record.json\n",
                 "docs/catalogue/capabilities.json": "{}\n",
                 "docs/research/evidence/run-1/record.json": "{}\n",
                 "docs/research/evidence/run-1/stdout.txt": "solver output\n",

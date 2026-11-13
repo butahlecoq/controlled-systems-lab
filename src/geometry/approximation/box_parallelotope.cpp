@@ -51,8 +51,9 @@ registry::Capability outer_capability(const ApproximationRequest& request,
        requirements.output.representation!=request.output)
         return unsupported(prefix+".output","A native H representation is required.");
     const auto dimension=request.input.metadata.dimension;
-    if(dimension<1 || dimension>2)
-        return unsupported(prefix+".dimension","Only one- and two-dimensional outputs are supported.");
+    if(dimension<1 || dimension>std::numeric_limits<std::size_t>::max()/2 ||
+       2*dimension>std::numeric_limits<std::size_t>::max()/dimension)
+        return unsupported(prefix+".dimension","The dimension cannot be represented by a finite 2n-row H matrix.");
     if(request.size_budget<2*dimension)
         return unsupported(prefix+".budget","The budget must admit two H rows per coordinate.");
     const auto native=sets::from_handle(request.input);
@@ -122,9 +123,12 @@ public:
         if(!std::holds_alternative<sets::SetData>(output))
             return Unsupported{unsupported("box.output","Native H output could not be constructed.")};
         if(stopped(context))return stop(context);
+        Matrix orientation{dimension,dimension,Vector(dimension*dimension,0.0)};
+        for(std::size_t coordinate=0;coordinate<dimension;++coordinate)
+            orientation.values[coordinate*dimension+coordinate]=1.0;
         GeometryEvidence evidence{{request.identity,{request.input.id}},GeometryClaimScope::set_relation,
             SymbolicArgument{"native V-coordinate bounds","Stored V coordinates define exact binary64 H slabs."},
-            {"orientation_rows="+(dimension==1?std::string{"1"}:std::string{"1,0;0,1"}),
+            {"orientation_rows="+matrix_rows(orientation),
              "requested_budget="+std::to_string(request.size_budget)+
                  "; input_vertices="+std::to_string(vertices->vertices.rows())+
                  "; input_rays=0; output_h_rows="+std::to_string(2*dimension),
@@ -136,20 +140,53 @@ public:
 };
 bool independent_directions(const Matrix& rows) {
     using namespace detail::exact_detail;
-    if(rows.rows!=2 || rows.cols!=2 || rows.values.size()!=4 ||
+    if(rows.rows==0 || rows.rows!=rows.cols || rows.rows>std::numeric_limits<std::size_t>::max()/rows.cols ||
+       rows.values.size()!=rows.rows*rows.cols ||
        !std::all_of(rows.values.begin(),rows.values.end(),
            [](double value){return std::isfinite(value);} ))return false;
-    Integer determinant;
-    if(!add_product(determinant,decode(rows.values[0]),decode(rows.values[3])))return false;
-    auto negative=decode(rows.values[1]);negative.negative=!negative.negative;
-    return add_product(determinant,negative,decode(rows.values[2])) && !is_zero(determinant);
+    if(rows.rows==2) {
+        Integer determinant;
+        if(!add_product(determinant,decode(rows.values[0]),decode(rows.values[3])))return false;
+        auto negative=decode(rows.values[1]);negative.negative=!negative.negative;
+        return add_product(determinant,negative,decode(rows.values[2])) && !is_zero(determinant);
+    }
+    // Normalize each row before pivoted elimination so scale alone cannot
+    // make a well-conditioned basis appear singular. The conservative binary64
+    // pivot threshold rejects numerically unresolved bases rather than
+    // publishing an unbounded set as a parallelotope.
+    const auto n=rows.rows;
+    std::vector<long double> work(rows.values.begin(),rows.values.end());
+    for(std::size_t row=0;row<n;++row) {
+        long double scale=0.0L;
+        for(std::size_t column=0;column<n;++column)
+            scale=std::max(scale,std::abs(work[row*n+column]));
+        if(scale==0.0L)return false;
+        for(std::size_t column=0;column<n;++column)work[row*n+column]/=scale;
+    }
+    const long double threshold=32.0L*std::numeric_limits<double>::epsilon()*
+        static_cast<long double>(n);
+    for(std::size_t pivot=0;pivot<n;++pivot) {
+        std::size_t best=pivot;
+        for(std::size_t row=pivot+1;row<n;++row)
+            if(std::abs(work[row*n+pivot])>std::abs(work[best*n+pivot]))best=row;
+        if(std::abs(work[best*n+pivot])<=threshold)return false;
+        if(best!=pivot)
+            for(std::size_t column=pivot;column<n;++column)
+                std::swap(work[pivot*n+column],work[best*n+column]);
+        for(std::size_t row=pivot+1;row<n;++row) {
+            const auto multiplier=work[row*n+pivot]/work[pivot*n+pivot];
+            for(std::size_t column=pivot+1;column<n;++column)
+                work[row*n+column]-=multiplier*work[pivot*n+column];
+        }
+    }
+    return true;
 }
 std::optional<double> exact_dot_upper(const Matrix& directions,std::size_t row,
                                       const numeric::MatrixView& vertices,std::size_t vertex) {
     using namespace detail::exact_detail;
     Integer dot;
-    for(std::size_t column=0;column<2;++column)
-        if(!add_product(dot,decode(directions.values[row*2+column]),
+    for(std::size_t column=0;column<directions.cols;++column)
+        if(!add_product(dot,decode(directions.values[row*directions.cols+column]),
                         decode(vertices(vertex,column))))return std::nullopt;
     const bool negative=dot.negative;
     dot.negative=false;
@@ -174,12 +211,18 @@ public:
         const auto* v=std::get_if<sets::VRepresentation>(&representation);
         if(!v || v->vertices.rows()==0 || v->rays.rows()!=0)
             return Unsupported{unsupported("parallelotope.input","A nonempty bounded V set is required.")};
-        Matrix rows{4,2,{directions_.values[0],directions_.values[1],
-                         -directions_.values[0],-directions_.values[1],
-                         directions_.values[2],directions_.values[3],
-                         -directions_.values[2],-directions_.values[3]}};
-        Vector bounds(4);
-        for(std::size_t row=0;row<4;++row) {
+        const auto dimension=request.input.metadata.dimension;
+        if(directions_.rows!=dimension || directions_.cols!=dimension)
+            return Unsupported{unsupported("parallelotope.dimension","A square orientation matching the input dimension is required.")};
+        Matrix rows{2*dimension,dimension,Vector(2*dimension*dimension)};
+        for(std::size_t axis=0;axis<dimension;++axis)
+            for(std::size_t coordinate=0;coordinate<dimension;++coordinate) {
+                const auto value=directions_.values[axis*dimension+coordinate];
+                rows.values[(2*axis)*dimension+coordinate]=value;
+                rows.values[(2*axis+1)*dimension+coordinate]=-value;
+            }
+        Vector bounds(2*dimension);
+        for(std::size_t row=0;row<2*dimension;++row) {
             const auto first=exact_dot_upper(rows,row,v->vertices,0);
             if(!first)return Unsupported{unsupported("parallelotope.numeric","A finite support bound is unavailable.")};
             bounds[row]=*first;
@@ -192,14 +235,14 @@ public:
         }
         const auto h_rows=numeric::snapshot(rows);
         const auto h_bounds=numeric::snapshot_vector(bounds);
-        const auto no_rows=numeric::snapshot(Matrix{0,2,{}});
+        const auto no_rows=numeric::snapshot(Matrix{0,dimension,{}});
         const auto no_values=numeric::snapshot_vector(Vector{});
         if(!std::holds_alternative<numeric::MatrixView>(h_rows) ||
            !std::holds_alternative<numeric::VectorView>(h_bounds) ||
            !std::holds_alternative<numeric::MatrixView>(no_rows) ||
            !std::holds_alternative<numeric::VectorView>(no_values))
             return Unsupported{unsupported("parallelotope.numeric","Finite H output could not be stored.")};
-        const auto output=sets::make_h({output_id_,2,data.metadata()->coordinate_labels},
+        const auto output=sets::make_h({output_id_,dimension,data.metadata()->coordinate_labels},
             {std::get<numeric::MatrixView>(h_rows),std::get<numeric::VectorView>(h_bounds),
              std::get<numeric::MatrixView>(no_rows),std::get<numeric::VectorView>(no_values)});
         if(!std::holds_alternative<sets::SetData>(output))
@@ -210,7 +253,7 @@ public:
             {"orientation_rows="+matrix_rows(directions_),
              "requested_budget="+std::to_string(request.size_budget)+
                  "; input_vertices="+std::to_string(v->vertices.rows())+
-                 "; input_rays=0; output_h_rows=4",
+                 "; input_rays=0; output_h_rows="+std::to_string(2*dimension),
              "error_bound=unavailable"},
             {}};
         return OperationResult{std::get<sets::SetData>(output).as_handle(),
@@ -348,11 +391,9 @@ registry::Registration<registry::ApproximationPort> make_parallelotope_registrat
         [orientation_rows](const ApproximationRequest& request,
                            const registry::Requirements& requirements) -> registry::Capability {
             if(!independent_directions(orientation_rows))
-                return unsupported("parallelotope.orientation","Two independent finite orientation rows are required.");
-            if(request.input.metadata.dimension!=2)
-                return unsupported("parallelotope.dimension","Only two-dimensional parallelotopes are supported.");
-            if(request.size_budget<4)
-                return unsupported("parallelotope.budget","Four H rows are required.");
+                return unsupported("parallelotope.orientation","A full-rank square matrix of finite orientation rows is required.");
+            if(orientation_rows.rows!=request.input.metadata.dimension)
+                return unsupported("parallelotope.dimension","The orientation size must match the input dimension.");
             return outer_capability(request,requirements,"parallelotope");
         },
         [output_id=std::move(output_id),orientation_rows=std::move(orientation_rows)](
