@@ -11,23 +11,12 @@ import os
 import pathlib
 import subprocess
 import sys
+import shutil
 import time
 from datetime import datetime, timezone
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-DEFAULT_BUILD = pathlib.Path(
-    "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-model-first-pass-build"
-)
-DEFAULT_SDK_SNAPSHOT = pathlib.Path(
-    "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-current-main-installed-sdk-4ec-snapshot/prefix"
-)
-SDK_PREFIX = pathlib.Path(
-    "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/1012-history-qp-build/installed-consumer/prefix"
-)
-QUALIFICATION = pathlib.Path(
-    "/home/butahlecoq/.local/state/controlled-systems-lab/working-documents/1012-running-state-design-20261113/candidate-a/qualification-c16-source-binding.json"
-)
 
 
 def sha256(path: pathlib.Path) -> str:
@@ -44,6 +33,36 @@ def save_json(path: pathlib.Path, value: object) -> None:
     temporary.replace(path)
 
 
+def cmake_cache(path: pathlib.Path) -> dict[str, str]:
+    values: dict[str, str] = {}
+    for line in (path / "CMakeCache.txt").read_text(encoding="utf-8").splitlines():
+        if line and not line.startswith(('#', '//')) and '=' in line and ':' in line.split('=', 1)[0]:
+            key, value = line.split('=', 1)
+            values[key.split(':', 1)[0]] = value
+    return values
+
+
+def verify_inventory(prefix: pathlib.Path, inventory: pathlib.Path) -> tuple[str, int]:
+    lines = inventory.read_text(encoding="utf-8").splitlines()
+    count = 0
+    for line in lines:
+        digest, relative = line.split(None, 1)
+        relative = relative.lstrip("* ")
+        relative_path = pathlib.Path(relative)
+        if relative_path.is_absolute():
+            parts = relative_path.parts
+            if "prefix" not in parts:
+                raise SystemExit(f"SDK inventory path is not rooted at a prefix: {relative}")
+            relative_path = pathlib.Path(*parts[parts.index("prefix") + 1:])
+        path = prefix / relative_path
+        if path.is_symlink() or not path.is_file() or sha256(path) != digest:
+            raise SystemExit(f"SDK inventory mismatch: {relative}")
+        count += 1
+    if not count:
+        raise SystemExit("SDK SHA256SUMS inventory is empty")
+    return sha256(inventory), count
+
+
 def run_one(command: list[str], case: pathlib.Path, timeout_s: int) -> dict[str, object]:
     status_path = case / "attempt.json"
     attempt = {
@@ -57,7 +76,6 @@ def run_one(command: list[str], case: pathlib.Path, timeout_s: int) -> dict[str,
     environment = os.environ.copy()
     environment.update(
         {
-            "TMPDIR": "/home/butahlecoq/.local/share/codex/tmp/learning-control-execution-20261111/test-tmp",
             "OPENBLAS_NUM_THREADS": "1",
             "OMP_NUM_THREADS": "1",
             "MKL_NUM_THREADS": "1",
@@ -90,8 +108,11 @@ def run_one(command: list[str], case: pathlib.Path, timeout_s: int) -> dict[str,
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--build", type=pathlib.Path, default=DEFAULT_BUILD)
-    parser.add_argument("--sdk-snapshot", type=pathlib.Path, default=DEFAULT_SDK_SNAPSHOT)
+    parser.add_argument("--build", type=pathlib.Path, required=True, help="Configured CMake build directory")
+    parser.add_argument("--sdk-snapshot", type=pathlib.Path, required=True, help="Installed SDK prefix with adjacent SHA256SUMS")
+    parser.add_argument("--component-qualification", type=pathlib.Path,
+                        help="Optional source-component qualification receipt; no full-SDK qualification is implied")
+    parser.add_argument("--cmake", type=pathlib.Path, help="CMake executable; defaults to CMAKE_COMMAND from the build cache or PATH")
     parser.add_argument("--output-parent", type=pathlib.Path, default=ROOT / "reports/algorithm-results/native-model-tracking-first-pass-v1")
     parser.add_argument("--models", type=int, nargs="+", choices=range(1, 36), default=list(range(1, 36)))
     parser.add_argument("--skip-catalogue", action="store_true")
@@ -123,8 +144,21 @@ def main() -> int:
         except FileExistsError:
             suffix += 1
 
-    qualification = json.loads(QUALIFICATION.read_text(encoding="utf-8"))
-    sdk_archive = qualification["installed_sdk"]["archive"]["sha256"]
+    inventory_sha, inventory_count = verify_inventory(sdk_snapshot, sdk_inventory)
+    qualification = json.loads(args.component_qualification.read_text(encoding="utf-8")) if args.component_qualification else None
+    if qualification is not None:
+        artifact = qualification.get("installed_sdk", {}).get("archive", {})
+        relative = pathlib.Path(artifact.get("path", ""))
+        actual_archive = sdk_snapshot / relative
+        if not relative.parts or not actual_archive.is_file() or sha256(actual_archive) != artifact.get("sha256"):
+            raise SystemExit("Component qualification does not match the supplied SDK snapshot archive bytes")
+    cache = cmake_cache(build)
+    cmake = args.cmake.resolve() if args.cmake else pathlib.Path(cache.get("CMAKE_COMMAND") or shutil.which("cmake") or "")
+    compiler = pathlib.Path(cache.get("CMAKE_CXX_COMPILER", ""))
+    if not cmake.is_file() or not compiler.is_file():
+        raise SystemExit("Could not determine existing CMake and C++ compiler from --build; pass --cmake if needed")
+    cmake_version = subprocess.check_output([str(cmake), "--version"], text=True).splitlines()[0]
+    compiler_version = subprocess.check_output([str(compiler), "--version"], text=True).splitlines()[0]
     manifest: dict[str, object] = {
         "schema": "csl.1012-native-model-tracking-capture/1",
         "capture_id": capture.name,
@@ -142,19 +176,19 @@ def main() -> int:
             "scripts/reports/native_model_tracking_first_pass.py": sha256(pathlib.Path(__file__).resolve()),
         },
         "executables": {name: {"path": str(path), "sha256": sha256(path)} for name, path in binaries.items()},
-        "installed_sdk_component_qualification": {
-            "qualification_receipt": str(QUALIFICATION),
-            "receipt_sha256": sha256(QUALIFICATION),
-            "source_commit": qualification["cpp_source_commit"],
-            "source_tree_sha1": qualification["cpp_source_tree_sha1"],
-            "archive_sha256": sdk_archive,
+        "installed_sdk_component_qualification": (None if qualification is None else {
+            "qualification_receipt": args.component_qualification.name,
+            "receipt_sha256": sha256(args.component_qualification),
+            "source_commit": qualification.get("cpp_source_commit"),
+            "source_tree_sha1": qualification.get("cpp_source_tree_sha1"),
+            "archive_sha256": qualification.get("installed_sdk", {}).get("archive", {}).get("sha256"),
             "whole_sdk_qualification_claimed": False,
-        },
+        }),
         "frozen_installed_sdk_snapshot": {
             "prefix": str(sdk_snapshot),
             "inventory_file": str(sdk_inventory),
-            "inventory_file_sha256": sha256(sdk_inventory),
-            "file_count": sum(1 for path in sdk_snapshot.rglob("*") if path.is_file()),
+            "inventory_file_sha256": inventory_sha,
+            "verified_inventory_file_count": inventory_count,
             "linked_archives_sha256": {
                 archive.name: sha256(archive) for archive in sorted((sdk_snapshot / "lib").glob("*.a"))
             },
@@ -162,12 +196,12 @@ def main() -> int:
         },
         "native_build_receipt": {
             "cmake_cache_sha256": sha256(build / "CMakeCache.txt"),
-            "cmake_version": subprocess.check_output(
-                ["/home/butahlecoq/.local/share/mise/installs/cmake/3.31.6/cmake-3.31.6-linux-x86_64/bin/cmake", "--version"], text=True
-            ).splitlines()[0],
-            "compiler": "GNU C++ 16.2.1",
-            "build_type": "Release",
-            "generator": "Unix Makefiles",
+            "cmake_executable": str(cmake),
+            "cmake_version": cmake_version,
+            "compiler_executable": str(compiler),
+            "compiler_version": compiler_version,
+            "build_type": cache.get("CMAKE_BUILD_TYPE", ""),
+            "generator": cache.get("CMAKE_GENERATOR", ""),
             "build_targets": ["native_model_tracking", "native_discrete_models", "quadcopter_mpc"],
             "link_command_sha256": {
                 name: sha256(build / "CMakeFiles" / f"{binary}.dir" / "link.txt")

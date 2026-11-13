@@ -89,6 +89,11 @@ def _learning_navigation_replacements(manifest: dict) -> dict:
                 escape(chapter["id"] + '.html', quote=True) + '"><span>' + label +
                 '</span><strong>' + escape(chapter["title"]) + '</strong></a>')
 
+    inserted_ids = {item.get("chapter_id") for item in insertions}
+    if len(inserted_ids) != len(insertions):
+        return {}
+    positions = {chapter["id"]: i for i, chapter in enumerate(chapters)}
+    groups = {}
     for insertion in insertions:
         matches = [i for i, chapter in enumerate(chapters)
                    if chapter["id"] == insertion["chapter_id"]]
@@ -100,15 +105,28 @@ def _learning_navigation_replacements(manifest: dict) -> dict:
                 or previous["id"] != insertion["previous_chapter_id"]
                 or following["id"] != insertion["next_chapter_id"]):
             continue
+        previous_base = next((chapters[j] for j in range(index - 1, -1, -1)
+                              if chapters[j]["id"] not in inserted_ids), None)
+        following_base = next((chapters[j] for j in range(index + 1, len(chapters))
+                               if chapters[j]["id"] not in inserted_ids), None)
+        if previous_base is None or following_base is None:
+            continue
+        groups.setdefault((previous_base["id"], following_base["id"]), []).append(chapter)
+    for (previous_id, following_id), inserted in groups.items():
+        previous = chapters[positions[previous_id]]
+        following = chapters[positions[following_id]]
+        inserted.sort(key=lambda item: positions[item["id"]])
+        qualification = "; ".join(next(row["qualification"] for row in insertions
+                                        if row["chapter_id"] == item["id"]) for item in inserted)
         changes = {
-            "learn/index.html": (entry(previous), entry(previous) + entry(chapter)),
-            "learn/" + previous["id"] + ".html": (link(following, "next"), link(chapter, "next")),
-            "learn/" + following["id"] + ".html": (link(previous, "prev"), link(chapter, "prev")),
+            "learn/index.html": (entry(previous), entry(previous) + "".join(entry(item) for item in inserted)),
+            "learn/" + previous_id + ".html": (link(following, "next"), link(inserted[0], "next")),
+            "learn/" + following_id + ".html": (link(previous, "prev"), link(inserted[-1], "prev")),
         }
         for route, (old, new) in changes.items():
             if route in replacements:
                 raise ValueError("overlapping reviewed learning navigation insertions")
-            replacements[route] = (old.encode(), new.encode(), insertion["qualification"])
+            replacements[route] = (old.encode(), new.encode(), qualification)
     return replacements
 
 

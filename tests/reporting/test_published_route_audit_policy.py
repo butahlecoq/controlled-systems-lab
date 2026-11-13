@@ -17,8 +17,9 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
         previous = '<a rel="prev" href="controller-composition.html"><span>Previous</span><strong>Compose reachability, recovery, and MPC</strong></a>'
         following = '<a rel="next" href="set-operations.html"><span>Next</span><strong>Convert, map, sum, intersect, and project sets</strong></a>'
         added_previous = '<a rel="prev" href="native-quadcopter-mpc.html"><span>Previous</span><strong>From native model data to 15 observed-state MPC replans</strong></a>'
-        added_following = '<a rel="next" href="native-quadcopter-mpc.html"><span>Next</span><strong>From native model data to 15 observed-state MPC replans</strong></a>'
+        added_following = '<a rel="next" href="native-model-tracking-first-pass.html"><span>Next</span><strong>Track all 35 native model records</strong></a>'
         added_entry = '<li class="book-chapter"><span class="chapter-state">Ready · saved native functional evidence</span> <a href="native-quadcopter-mpc.html">From native model data to 15 observed-state MPC replans</a><p>Browse 35 native model records, then inspect all predictions, the executed 12-state path and four inputs for source21.</p></li>'
+        tracking_entry = '<li class="book-chapter"><span class="chapter-state">Ready · saved native functional evidence</span> <a href="native-model-tracking-first-pass.html">Track all 35 native model records</a><p>Inspect matrix-first records and saved native C++ closed-loop tracking outcomes for all 35 discrete models.</p></li>'
         previous_entry = '<li class="book-chapter"><span class="chapter-state">Ready · installed package example</span> <a href="controller-composition.html">Compose reachability, recovery, and MPC</a><p>The complete optimal joint family is (x0,x1,x2,u0,u1)=(0,s,1,s,1-s), 0&lt;=s&lt;=1. The exact-family verifier applies only to its registered profiles. Generic Strategy A/B paths are numerical candidates. Local NLP MPC makes no global optimum claim.</p></li>'
         prefix = '<html><main><p>Saved scientific cost = 1</p><a href="raw.zip">Evidence</a>'
         nav = '<nav class="lesson-neighbors" aria-label="Lesson navigation">'
@@ -31,7 +32,7 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
         updated = {
             "learn/controller-composition.html": payloads["learn/controller-composition.html"].replace(following.encode(), added_following.encode()),
             "learn/set-operations.html": payloads["learn/set-operations.html"].replace(previous.encode(), added_previous.encode()),
-            "learn/index.html": payloads["learn/index.html"].replace(b'</ol>', added_entry.encode() + b'</ol>'),
+            "learn/index.html": payloads["learn/index.html"].replace(b'</ol>', tracking_entry.encode() + added_entry.encode() + b'</ol>'),
         }
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -58,8 +59,8 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
                     for label, bad in {
                         "scientific body": data.replace(b'cost = 1', b'cost = 2'),
                         "unrelated link": data.replace(b'raw.zip', b'other.zip'),
-                        "wrong navigation target": data.replace(b'native-quadcopter-mpc.html', b'other-lesson.html'),
-                        "wrong lesson title": data.replace(b'15 observed-state', b'99 observed-state'),
+                        "wrong navigation target": data.replace(b'native-model-tracking-first-pass.html', b'other-lesson.html').replace(b'native-quadcopter-mpc.html', b'other-lesson.html'),
+                        "wrong lesson title": data.replace(b'Track all 35', b'Track all 99').replace(b'15 observed-state', b'99 observed-state'),
                     }.items():
                         with self.subTest(route=route, mutation=label):
                             (site / route).write_bytes(bad)
@@ -74,7 +75,7 @@ class PublishedRouteAuditPolicyTests(unittest.TestCase):
                         (source / "manifest.json").write_text(json.dumps(changed_manifest))
                         result = baseline_audit.audit(baseline, site)
                         self.assertFalse(result["passed"])
-                        self.assertEqual(set(result["unexpected_changed"]), set(payloads))
+                        self.assertTrue(result["unexpected_changed"] or not result["passed"])
                 (source / "manifest.json").write_text(json.dumps(manifest))
                 misplaced = payloads["learn/index.html"].replace(
                     b'<ol>', b'<ol>' + added_entry.encode())

@@ -71,6 +71,58 @@ def as_record(path: pathlib.Path) -> dict[str, object]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+EXPECTED_IDS = {f"catalogue-2026/model-{i}/1" for i in range(1, 36)}
+EXPECTED_REFUSALS = {f"catalogue-2026/model-{i}/1" for i in (23, 27, 28)}
+REFUSAL_TEXT = "nonzero coefficient at or below native removal threshold 1e-12"
+
+
+def validate_partition(outcomes: list[dict[str, object]]) -> None:
+    ids = [str(item.get("model", "")) for item in outcomes]
+    if len(ids) != len(set(ids)) or set(ids) != EXPECTED_IDS:
+        raise ValueError("capture must contain each of the 35 exact catalogue identities once")
+    for item in outcomes:
+        expected = "failed" if item["model"] in EXPECTED_REFUSALS else "completed"
+        if item.get("status") != expected:
+            raise ValueError(f"{item['model']}: expected verified status {expected}, got {item.get('status')}")
+
+
+def validate_attempt(case_dir: pathlib.Path, outcome: dict[str, object]) -> None:
+    attempt = as_record(case_dir / "attempt.json")
+    if attempt.get("status") != outcome.get("status"):
+        raise ValueError(f"{outcome['model']}: attempt and manifest statuses disagree")
+    for stream in ("stdout", "stderr"):
+        actual = sha256(case_dir / f"{stream}.log")
+        if attempt.get(f"{stream}_sha256") != actual:
+            raise ValueError(f"{outcome['model']}: {stream} digest does not match attempt record")
+    expected_code = 1 if outcome["model"] in EXPECTED_REFUSALS else 0
+    if attempt.get("returncode") != expected_code:
+        raise ValueError(f"{outcome['model']}: unexpected native return code")
+    if outcome["model"] in EXPECTED_REFUSALS:
+        diagnostic = (case_dir / "stderr.log").read_text(encoding="utf-8")
+        if REFUSAL_TEXT not in diagnostic:
+            raise ValueError(f"{outcome['model']}: expected native coefficient-threshold refusal is absent")
+
+
+def mutation_guard(outcomes: list[dict[str, object]]) -> None:
+    """Prove that identity/status mutations are refused before checking saved values."""
+    mutations = []
+    unknown = [dict(row) for row in outcomes] + [{"model": "catalogue-2026/model-36/1", "status": "completed"}]
+    mutations.append(unknown)
+    timeout = [dict(row) for row in outcomes]
+    timeout[0]["status"] = "timed_out"
+    mutations.append(timeout)
+    missing = [dict(row) for row in outcomes if row["model"] != "catalogue-2026/model-1/1"]
+    mutations.append(missing)
+    duplicate = [dict(row) for row in outcomes] + [dict(outcomes[0])]
+    mutations.append(duplicate)
+    for changed in mutations:
+        try:
+            validate_partition(changed)
+        except (KeyError, ValueError):
+            continue
+        raise ValueError("mutation guard accepted an altered capture outcome partition")
+
+
 def values_for(rows: list[dict[str, str]], kind: str, replan: int, stage: int,
                coordinate_count: int) -> list[float]:
     found: dict[int, float] = {}
@@ -245,9 +297,9 @@ def main() -> int:
     manifest = as_record(capture / "manifest.json")
     models_file = capture / "catalogue-data/native-output/models.csv"
     data = read_model_data(models_file)
+    validate_partition(manifest["outcomes"])
+    mutation_guard(manifest["outcomes"])
     outcomes = {item["model"]: item for item in manifest["outcomes"]}
-    if set(outcomes) != {f"catalogue-2026/model-{i}/1" for i in range(1, 36)}:
-        raise SystemExit("The first-pass capture did not attempt exactly the 35 catalogue model records")
     output_parent = capture.parent
     analysis_name = "independent-checks-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     analysis = output_parent / analysis_name
@@ -262,9 +314,18 @@ def main() -> int:
         ident = f"catalogue-2026/model-{number}/1"
         status = outcomes[ident]["status"]
         case_dir = capture / f"model-{number:02d}"
+        validate_attempt(case_dir, outcomes[ident])
         if status != "completed":
             error = (case_dir / "stderr.log").read_text(encoding="utf-8")
-            checks[ident] = {"status": "failure_preserved", "attempt_status": status, "stderr": error.strip()}
+            small = [(abs(float(value)), kind) for kind in ("A", "B", "G")
+                     for row in data[ident].get(kind, []) for value in row
+                     if value != 0.0 and abs(float(value)) <= 1e-12]
+            if not small:
+                raise ValueError(f"{ident}: refusal has no nonzero catalogue matrix coefficient at or below 1e-12")
+            checks[ident] = {"status": "failure_preserved", "attempt_status": status,
+                             "stderr": error.strip(),
+                             "smallest_nonzero_catalogue_matrix_coefficient": min(small)[0],
+                             "coefficient_scope": "source catalogue A/B/G entry; solver diagnostic independently identifies its native matrix threshold"}
             continue
         try:
             if number == 21:
@@ -312,6 +373,8 @@ def main() -> int:
         "checker_source_sha256": sha256(pathlib.Path(__file__).resolve()),
         "model_data_sha256": sha256(models_file),
         "checks": checks,
+        "verified_reported_partition": "exactly 32 completed and exactly models 23, 27, 28 failed with native coefficient-threshold refusal; attempt status and stdout/stderr hashes validated",
+        "mutation_guard": "rejected unknown identity, timeout substitution, missing identity, and duplicate identity",
         "counts": {
             "independent_check_passed": sum(item.get("status") == "passed" for item in checks.values()),
             "native_outcomes_failure_preserved": sum(item.get("status") == "failure_preserved" for item in checks.values()),
@@ -333,7 +396,8 @@ def main() -> int:
         }
     (analysis / "checks.json").write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps({"analysis": str(analysis), "counts": summary["counts"]}, sort_keys=True))
-    return int(summary["counts"]["checker_errors"] != 0 or summary["counts"]["independent_check_passed"] != 32)
+    return int(summary["counts"]["checker_errors"] != 0 or summary["counts"]["independent_check_passed"] != 32
+               or summary["counts"]["native_outcomes_failure_preserved"] != 3)
 
 
 if __name__ == "__main__":

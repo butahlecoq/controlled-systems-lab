@@ -27,6 +27,7 @@ import stage_ext07 as ext07_reports
 import stage_buryatia_dim4
 import stage_native_model_catalogue
 import stage_native_discrete_models
+import stage_native_model_tracking_first_pass
 import stage_native_flexible_pitch
 import stage_nominal_quadratic_history
 import visual_illustrations
@@ -901,6 +902,9 @@ def build(catalog, site):
     discrete_files, discrete_inventory, discrete_cards = stage_native_discrete_models.build(
         Path(__file__).resolve().parents[2])
     saved_figures += discrete_cards
+    tracking_files, tracking_inventory, tracking_card = stage_native_model_tracking_first_pass.build(
+        Path(__file__).resolve().parents[2])
+    saved_figures += tracking_card
     history_files, history_inventory, history_card = stage_nominal_quadratic_history.build(
         Path(__file__).resolve().parents[2])
     saved_figures += history_card
@@ -946,6 +950,7 @@ def build(catalog, site):
     outputs.update(buryatia_files)
     outputs.update(pitch_files)
     outputs.update(discrete_files)
+    outputs.update(tracking_files)
     outputs.update(history_files)
     repository_root = Path(__file__).resolve().parents[2]
     cost_page_root = repository_root / "docs/examples/history-cost-2d-v1"
@@ -993,7 +998,7 @@ def build(catalog, site):
         _, geometry_inventory, geometry_assets = geometry_opt_companions.build(geometry_root)
         for asset in geometry_assets:
             outputs[asset] = (geometry_root / asset).read_bytes()
-    gallery_inventory = [feedback_entry, fixed_tail_entry, episode_entry, {"family": "Nominal optimization · saved-data illustration",
+    gallery_inventory = [feedback_entry, fixed_tail_entry, episode_entry, *tracking_inventory, {"family": "Nominal optimization · saved-data illustration",
         "title": "Full-history cost moves the 2D optimum",
         "status": "saved-data-illustration", "anchor": "history-cost-2d-v1",
         "page": "history-cost-2d-v1/index.html", "figure": "history-cost-2d-v1/history-cost-2d.svg",
@@ -1056,6 +1061,7 @@ def build(catalog, site):
     gallery_inventory.extend(buryatia_inventory)
     gallery_inventory.extend(pitch_inventory)
     gallery_inventory.extend(discrete_inventory)
+    gallery_inventory.extend(tracking_inventory)
     gallery_inventory.extend(history_inventory)
     geometry_first = geometry_inventory[0]
     gallery_inventory.append({"family": "Geometry and optimization",

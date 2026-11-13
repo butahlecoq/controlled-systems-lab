@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 from html.parser import HTMLParser
 import json
 from pathlib import Path
@@ -78,8 +79,12 @@ class LearningBookTests(unittest.TestCase):
                     result = subprocess.run(["git", "show", f"{commit}:{source}"],
                                             cwd=ROOT, capture_output=True)
                     self.assertEqual(result.returncode, 0, result.stderr.decode())
-                    self.assertEqual(result.stdout, (ROOT / source).read_bytes(),
-                                     "Source permalink differs from the executed example")
+                    if "source_sha256" in record:
+                        self.assertEqual(hashlib.sha256(result.stdout).hexdigest(), record["source_sha256"],
+                                         "Source permalink differs from its pinned source digest")
+                    else:
+                        self.assertEqual(result.stdout, (ROOT / source).read_bytes(),
+                                         "Source permalink differs from the executed example")
 
     @staticmethod
     def _is_retained_source_commit(repo: Path, commit: str) -> bool:
@@ -432,6 +437,9 @@ Q subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2
             expected["native-quadcopter-mpc"] = [
                 "Q diagonal; terminal QN=Q: 0, 0, 10, 10, 10, 10, 0, 0, 0, 5, 5, 5",
                 "Reference r: 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0",
+            ]
+            expected["native-model-tracking-first-pass"] = [
+                "records", "34 · horizon-free", "Authored three-stage zero-target quadratic tracking",
             ]
             self.assertEqual(set(expected), {chapter["id"] for chapter in self.manifest["chapters"]
                                              if chapter["status"] == "ready"})

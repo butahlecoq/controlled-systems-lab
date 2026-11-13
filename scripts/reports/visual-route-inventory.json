@@ -1335,6 +1335,13 @@
       "role_and_disposition_reason": "Renders the source-bound post-fix Strategy A choice records and independent recovered-history values with shared screen/print tokens; it runs no solver and makes no full-family or performance claim."
     },
     {
+      "source": "scripts/reports/render_native_model_tracking_first_pass.py",
+      "signal_count": 5,
+      "asset_name_literals": [],
+      "disposition": "saved-data-illustration-renderer",
+      "role_and_disposition_reason": "Projects independently checked, immutable all-stage native trajectories into two-dimensional views; it reruns neither the controller nor its optimizer."
+    },
+    {
       "source": "scripts/reports/report_data.py",
       "signal_count": 1,
       "asset_name_literals": [],
@@ -1913,6 +1920,15 @@
         "stages-x1-x2-screen.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_native_model_tracking_first_pass.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "model-21-state-3-9.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route",
+      "role_and_disposition_reason": "Authenticates and stages the immutable 35-model native tracking capture, independent full-state checks, matrix inputs, and saved 2D projections; it does not rerun optimization."
     },
     {
       "source": "scripts/reports/stage_nominal_quadratic_history.py",
@@ -4199,6 +4215,14 @@
         "buryatia-dim4-literal-affine-v1/buryatia-dim4-literal-affine-v1-SHA256SUMS",
         "buryatia-dim4-literal-affine-v1/buryatia-dim4-matlab-literal-affine-v1.json",
         "buryatia-dim4-literal-affine-v1/terminal-x1-x2.svg",
+        "native-model-tracking-first-pass-v1/index.html",
+        "native-model-tracking-first-pass-v1/figures/model-21-state-3-9.svg",
+        "native-model-tracking-first-pass-v1/raw/models.csv",
+        "native-model-tracking-first-pass-v1/raw/catalogue.csv",
+        "native-model-tracking-first-pass-v1/raw/coordinates.csv",
+        "native-model-tracking-first-pass-v1/checks/independent_results.csv",
+        "native-model-tracking-first-pass-v1/checks/full_state_trajectory_checked.csv",
+        "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip",
         "geometry-optimization-v1.html",
         "geometry-opt/geo02/figure.svg",
         "geometry-opt/geo02/figure.png",
@@ -4373,6 +4397,17 @@
         "control-witness/strategy-b-ts03-timing-evidence.json"
       ],
       "disposition": "adopted-shared-quantitative-policy"
+    },
+    {
+      "route": "examples/native-model-tracking-first-pass-v1/index.html",
+      "assets": [
+        "native-model-tracking-first-pass-v1/index.html",
+        "native-model-tracking-first-pass-v1/capture-manifest.json",
+        "native-model-tracking-first-pass-v1/source-binding.json",
+        "native-model-tracking-first-pass-v1/SHA256SUMS.json",
+        "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip"
+      ],
+      "disposition": "source-owned saved functional bundle; no optimization is rerun"
     }
   ],
   "migration_owner": "#669 owns the shared policy; deferred family renderers link to scoped follow-up issues #684–#687, while frozen report bundles remain immutable evidence"

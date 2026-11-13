@@ -78,9 +78,12 @@ PUBLICATION_EXPORT_ROUTES = {
     "scripts/reports/augment_pages_bundle.py",
     "scripts/reports/stage_mpc11_mesh_timing.py",
     "scripts/reports/stage_buryatia_dim4.py",
+    "scripts/reports/stage_native_model_tracking_first_pass.py",
     "benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/figures.py",
 }
 VIZ10_ROLE_REASONS = {
+    "scripts/reports/stage_native_model_tracking_first_pass.py":
+        "Authenticates and stages the immutable 35-model native tracking capture, independent full-state checks, matrix inputs, and saved 2D projections; it does not rerun optimization.",
     "scripts/reports/stage_buryatia_dim4.py":
         "Authenticates the source-bound four-state affine capture and copies its raw record, model manifest, lesson and derived terminal projection into the Pages gallery; no native propagation or numerical analysis runs during staging.",
     "scripts/reports/stage_b04_source_moments.py":
@@ -173,6 +176,8 @@ SAVED_COMPANION_ROUTES = {
 }
 SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
 SAVED_DATA_ILLUSTRATION_RENDERERS = {
+    "scripts/reports/render_native_model_tracking_first_pass.py": (
+        "Projects independently checked, immutable all-stage native trajectories into two-dimensional views; it reruns neither the controller nor its optimizer."),
     "scripts/reports/native_parallelotope_functional.py": (
         "Renders authenticated saved native parallelotope query slices and affine paths in physical coordinates "
         "using the exact source-bound fixed frame, with the observed nonlinear trajectory shown separately. "
@@ -503,9 +508,24 @@ def build(root: Path = ROOT) -> dict:
                     "buryatia-dim4-literal-affine-v1/buryatia-dim4-box-trace-correction-v1.json",
                     "buryatia-dim4-literal-affine-v1/buryatia-dim4-literal-affine-v1-SHA256SUMS",
                     "buryatia-dim4-literal-affine-v1/buryatia-dim4-matlab-literal-affine-v1.json",
-                    "buryatia-dim4-literal-affine-v1/terminal-x1-x2.svg"] + geometry_companion_assets() +
+                    "buryatia-dim4-literal-affine-v1/terminal-x1-x2.svg",
+                    "native-model-tracking-first-pass-v1/index.html",
+                    "native-model-tracking-first-pass-v1/figures/model-21-state-3-9.svg",
+                    "native-model-tracking-first-pass-v1/raw/models.csv",
+                    "native-model-tracking-first-pass-v1/raw/catalogue.csv",
+                    "native-model-tracking-first-pass-v1/raw/coordinates.csv",
+                    "native-model-tracking-first-pass-v1/checks/independent_results.csv",
+                    "native-model-tracking-first-pass-v1/checks/full_state_trajectory_checked.csv",
+                    "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip"] + geometry_companion_assets() +
                     viz10_companion_assets() + control_witness_companions.asset_paths(),
-                 "disposition": "adopted-shared-quantitative-policy"}],
+                 "disposition": "adopted-shared-quantitative-policy"},
+                {"route": "examples/native-model-tracking-first-pass-v1/index.html",
+                 "assets": ["native-model-tracking-first-pass-v1/index.html",
+                            "native-model-tracking-first-pass-v1/capture-manifest.json",
+                            "native-model-tracking-first-pass-v1/source-binding.json",
+                            "native-model-tracking-first-pass-v1/SHA256SUMS.json",
+                            "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip"],
+                 "disposition": "source-owned saved functional bundle; no optimization is rerun"}],
             "migration_owner": "#669 owns the shared policy; deferred family renderers link to scoped follow-up issues #684–#687, while frozen report bundles remain immutable evidence"}
 
 

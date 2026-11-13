@@ -3477,9 +3477,16 @@
   "scope": "Exact previously public scientific report ZIPs and routes; not an archive of current working documents. Historical evidence PLAN/EXPLORATION members remain sealed. Minimal Git object proofs inside original ZIPs remain opaque; only reviewed public members are staged. No numerical execution.",
   "learning_navigation_insertions_reviewed_separately": [
     {
+      "chapter_id": "native-model-tracking-first-pass",
+      "chapter_sha256": "3a37288c26d919b2a4d47cd6f0d39d247628b7b5753bfd1d7620d2989ad30c98",
+      "previous_chapter_id": "controller-composition",
+      "next_chapter_id": "native-quadcopter-mpc",
+      "qualification": "Reviewed source-qualified all-35 native tracking saved-evidence lesson insertion. Staging consumes immutable attempts and does not rerun optimization; only exact chapter and adjacent navigation fragments are approved."
+    },
+    {
       "chapter_id": "native-quadcopter-mpc",
       "chapter_sha256": "34150dc93a0818859960f47eef7a9b698a26ae0c0d099aea4a57d6655bebcfbf",
-      "previous_chapter_id": "controller-composition",
+      "previous_chapter_id": "native-model-tracking-first-pass",
       "next_chapter_id": "set-operations",
       "qualification": "Reviewed source21 saved-evidence lesson insertion for issue #1012. Only its exact source-catalogue index entry and the adjacent lessons' previous/next link fragments may change; every other byte remains baseline-identical."
     }

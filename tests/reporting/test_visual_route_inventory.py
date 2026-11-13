@@ -26,6 +26,11 @@ class VisualRouteInventoryTests(unittest.TestCase):
                            if route["route"]=="examples/index.html")
         self.assertIn("nominal-quadratic-history-2d.html",gallery_route["assets"])
         self.assertIn("nominal_quadratic_history_2d.csv",gallery_route["assets"])
+        tracking_route=next(route for route in inventory["gallery_routes"]
+                            if route["route"]=="examples/native-model-tracking-first-pass-v1/index.html")
+        self.assertIn("native-model-tracking-first-pass-v1/capture-manifest.json",tracking_route["assets"])
+        self.assertIn("scripts/reports/stage_native_model_tracking_first_pass.py",
+                      [entry["source"] for entry in inventory["producers_and_routes"]])
         tube_renderer=producers["scripts/reports/nominal_tube_figure.py"]
         self.assertEqual(tube_renderer["disposition"],"saved-data-illustration-renderer")
         self.assertIn("full-state H rows F, B and I",tube_renderer["role_and_disposition_reason"])
@@ -320,6 +325,14 @@ class VisualRouteInventoryTests(unittest.TestCase):
             "buryatia-dim4-literal-affine-v1/buryatia-dim4-literal-affine-v1-SHA256SUMS",
             "buryatia-dim4-literal-affine-v1/buryatia-dim4-matlab-literal-affine-v1.json",
             "buryatia-dim4-literal-affine-v1/terminal-x1-x2.svg",
+            "native-model-tracking-first-pass-v1/index.html",
+            "native-model-tracking-first-pass-v1/figures/model-21-state-3-9.svg",
+            "native-model-tracking-first-pass-v1/raw/models.csv",
+            "native-model-tracking-first-pass-v1/raw/catalogue.csv",
+            "native-model-tracking-first-pass-v1/raw/coordinates.csv",
+            "native-model-tracking-first-pass-v1/checks/independent_results.csv",
+            "native-model-tracking-first-pass-v1/checks/full_state_trajectory_checked.csv",
+            "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip",
             *audit_visual_routes.geometry_companion_assets(),
             *audit_visual_routes.viz10_companion_assets(),
             *audit_visual_routes.control_witness_companions.asset_paths()})

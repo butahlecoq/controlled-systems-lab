@@ -54,7 +54,8 @@
         },
         {
           "label": "examples/CMakeLists.txt installed package consumer",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/1582059a8cb3356422234859ae4aa2f81bc339a5/examples/CMakeLists.txt"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/1582059a8cb3356422234859ae4aa2f81bc339a5/examples/CMakeLists.txt",
+          "source_sha256": "49c3319ad2d4a84412608fffe4e18df5012b554a43e784befb4fac58bcc9f66b"
         }
       ],
       "example_sources": [
@@ -1518,6 +1519,60 @@
             [
               "complete optimal family",
               "Complete optimal histories (x₀,x₁,x₂,u₀,u₁)=(0,s,1,s,1−s), 0≤s≤1"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "native-model-tracking-first-pass",
+      "title": "Track all 35 native model records",
+      "group": "controller",
+      "group_label": "Reachable-set controllers and MPC",
+      "role": "educational",
+      "status": "ready",
+      "status_label": "Ready · saved native functional evidence",
+      "prerequisites": [
+        "install-consumer"
+      ],
+      "module_ids": [],
+      "source": "native-model-tracking-first-pass.html",
+      "summary": "Inspect matrix-first records and saved native C++ closed-loop tracking outcomes for all 35 discrete models.",
+      "mathematical_input": "xₖ₊₁ = A xₖ + B uₖ + G wₖ + a; 3-stage receding-horizon quadratic tracking for 34 authored profiles, with the source21 literal task retained.",
+      "command": "python -B scripts/reports/visual_examples.py --check",
+      "expected_output": "35 attempted records; 32 completed; three retained native HiGHS refusals with full attempt logs.",
+      "intermediate_geometry": "Full-state executed paths and independent task/dynamics checks are retained; available two-dimensional projections provide views only.",
+      "support_limits": "The objectives for 34 horizon-free records are authored educational profiles. Source21 uses the literal source task. These numerical outcomes do not establish physical calibration, cross-model performance, certified optimality, or nonlinear stability.",
+      "figure_ids": [],
+      "records": [
+        {
+          "label": "Complete saved report, raw matrices, checks, refusals, and offline ZIP",
+          "href": "../examples/native-model-tracking-first-pass-v1/index.html"
+        },
+        {
+          "label": "Source commit and exact producer binding",
+          "href": "../examples/native-model-tracking-first-pass-v1/source-binding.json"
+        }
+      ],
+      "example_sources": [
+        "scripts/reports/stage_native_model_tracking_first_pass.py"
+      ],
+      "kind": "saved evidence",
+      "mathematical_tables": [
+        {
+          "label": "Task profile classes",
+          "columns": [
+            "records",
+            "task"
+          ],
+          "rows": [
+            [
+              "1 · source21",
+              "Literal source task and source constraints"
+            ],
+            [
+              "34 · horizon-free",
+              "Authored three-stage zero-target quadratic tracking"
             ]
           ]
         }
