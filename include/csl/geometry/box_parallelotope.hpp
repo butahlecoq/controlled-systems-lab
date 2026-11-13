@@ -10,7 +10,8 @@ registry::Registration<registry::ApproximationPort> make_box_registration(SetId 
 
 // Orientation rows are a full-rank square matrix of finite binary64
 // directions. The output contains each direction's positive and negative
-// support slab, giving 2n rows for an n-dimensional input.
+// support slab, giving 2n rows for an n-dimensional input. Except in 2D, an exact
+// residual certificate must prove nonsingularity; unresolved bases are rejected.
 registry::Registration<registry::ApproximationPort> make_parallelotope_registration(
     SetId output_id, Matrix orientation_rows);
 

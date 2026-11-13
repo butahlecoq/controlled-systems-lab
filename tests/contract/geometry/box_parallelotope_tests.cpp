@@ -4,6 +4,9 @@
 #include <csl/geometry/box_parallelotope.hpp>
 #include <csl/sets/data.hpp>
 #include <chrono>
+#include <cmath>
+#include <cstdint>
+#include <limits>
 
 using namespace csl;
 using namespace csl::geometry::approximation;
@@ -152,6 +155,95 @@ TEST_CASE("registered four-dimensional parallelotope emits one support pair per 
                     ((vertex&(std::size_t{1}<<coordinate))?1.0:-1.0);
             CHECK(dot<=h.upper_bounds[row]);
         }
+}
+
+TEST_CASE("parallelotope rejects an exactly singular orientation despite elimination growth") {
+    constexpr std::size_t n=32;
+    const int coefficients[31]={-3,-4,-5,-4,-2,1,-4,-1,-2,4,3,-4,3,-5,-4,0,
+        1,-2,0,-1,5,-1,4,3,-5,-2,4,5,-3,-3,-3};
+    Matrix orientation{n,n,Vector(n*n,0.0)};
+    for(std::size_t row=0;row<n-1;++row) {
+        for(std::size_t column=0;column<row;++column)
+            orientation.values[row*n+column]=-1.0;
+        orientation.values[row*n+row]=1.0;
+        orientation.values[row*n+n-1]=1.0;
+    }
+    for(std::size_t column=0;column<n;++column)
+        for(std::size_t row=0;row<n-1;++row)
+            orientation.values[(n-1)*n+column]+=
+                coefficients[row]*orientation.values[row*n+column];
+    // This nonzero exact nullray proves singularity independently of elimination.
+    for(std::size_t row=0;row<n;++row) {
+        std::int64_t dot=static_cast<std::int64_t>(orientation.values[row*n+n-1]);
+        for(std::size_t column=0;column<n-1;++column)
+            dot-=static_cast<std::int64_t>(orientation.values[row*n+column])*
+                (std::int64_t{1}<<column);
+        REQUIRE(dot==0);
+    }
+    const auto input=polygon("singular-growth-origin",Matrix{1,n,Vector(n,0.0)});
+    auto query=outer(input);
+    query.size_budget=2*n;
+    registry::Registry<registry::ApproximationPort> methods;
+    REQUIRE_FALSE(methods.add(make_parallelotope_registration(
+        {"singular-growth-output"},orientation)).has_value());
+    const auto result=run_registered(methods,{{"csl.approximation.parallelotope"},std::nullopt},
+        query,ExecutionContext{});
+    REQUIRE(std::holds_alternative<registry::Rejection>(result));
+    CHECK(std::get<registry::Rejection>(result).diagnostics.front().field==
+        "parallelotope.orientation");
+}
+
+TEST_CASE("high-dimensional parallelotope preserves support rows across extreme row scales") {
+    constexpr std::size_t n=32;
+    for(const bool scaled:{false,true}) {
+        Matrix orientation{n,n,Vector(n*n,0.0)};
+        for(std::size_t row=0;row<n;++row) {
+            const double scale=scaled?std::ldexp(1.0,row%2?900:-900):1.0;
+            const auto pivot=(row+1)%n;
+            orientation.values[row*n+pivot]=2.0*scale;
+            orientation.values[row*n+(pivot+1)%n]=0.3*scale;
+        }
+        const auto input=polygon("scaled-origin",Matrix{1,n,Vector(n,0.0)});
+        auto query=outer(input);
+        query.size_budget=2*n;
+        registry::Registry<registry::ApproximationPort> methods;
+        REQUIRE_FALSE(methods.add(make_parallelotope_registration(
+            {"scaled-output"},orientation)).has_value());
+        const auto result=run_registered(methods,
+            {{"csl.approximation.parallelotope"},std::nullopt},query,ExecutionContext{});
+        REQUIRE(std::holds_alternative<EnclosedApproximation>(result));
+        const auto native=sets::from_handle(std::get<EnclosedApproximation>(result).result.output);
+        REQUIRE(std::holds_alternative<sets::SetData>(native));
+        const auto representation=std::get<sets::SetData>(native).representation();
+        REQUIRE(std::holds_alternative<sets::HRepresentation>(representation));
+        const auto& h=std::get<sets::HRepresentation>(representation);
+        REQUIRE(h.inequalities.rows()==2*n);
+        for(std::size_t row=0;row<n;++row) {
+            CHECK(h.upper_bounds[2*row]==0.0);
+            CHECK(h.upper_bounds[2*row+1]==0.0);
+            for(std::size_t column=0;column<n;++column) {
+                CHECK(h.inequalities(2*row,column)==orientation.values[row*n+column]);
+                CHECK(h.inequalities(2*row+1,column)==-orientation.values[row*n+column]);
+            }
+        }
+    }
+}
+
+TEST_CASE("parallelotope rejects nonfinite and unresolved inverse candidates") {
+    for(const double diagonal:{0.0,std::numeric_limits<double>::denorm_min(),
+        std::numeric_limits<double>::infinity(),std::numeric_limits<double>::quiet_NaN()}) {
+        const auto input=polygon("unresolved-origin",Matrix{1,3,{0,0,0}});
+        auto query=outer(input);
+        query.size_budget=6;
+        registry::Registry<registry::ApproximationPort> methods;
+        REQUIRE_FALSE(methods.add(make_parallelotope_registration({"unresolved-output"},
+            Matrix{3,3,{diagonal,0,0,0,1,0,0,0,1}})).has_value());
+        const auto result=run_registered(methods,
+            {{"csl.approximation.parallelotope"},std::nullopt},query,ExecutionContext{});
+        REQUIRE(std::holds_alternative<registry::Rejection>(result));
+        CHECK(std::get<registry::Rejection>(result).diagnostics.front().field==
+            "parallelotope.orientation");
+    }
 }
 
 TEST_CASE("registered four-dimensional box reports its full identity orientation") {
