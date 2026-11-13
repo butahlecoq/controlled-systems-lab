@@ -337,12 +337,6 @@ finite_plan_parallelotope(const FixedPlanRequest &request,
   if (!detail::fixed_plan_safe_dimensions_match_model(request))
     return unsupported("finite_plan_parallelotope.safe_sets",
                        "State-constraint dimension differs from model.");
-  for (const auto &safe : request.admissible_states)
-    if (!std::holds_alternative<sets::UniversalRepresentation>(
-            safe.representation()))
-      return unsupported("finite_plan_parallelotope.safe_sets",
-                         "Universal state constraints are the only supported profile.");
-
   auto initial = set_bounds_in_frame(
       request.initial, "finite_plan_parallelotope.initial", qi, context);
   if (const auto *error = std::get_if<Unsupported>(&initial))
