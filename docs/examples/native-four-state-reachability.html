@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark light"><title>Four-state reachable sets from a printed linear model</title><link rel="stylesheet" href="examples.css"><style>
+.native-equation{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:1.5rem;margin:1.5rem 0}.native-panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}.native-panels figure{margin:0}.native-panels img{width:100%;height:auto}.source-hash{overflow-wrap:anywhere}.print-figure{display:none}@media(max-width:700px){.native-panels{grid-template-columns:1fr}}@media print{.screen-figure{display:none}.print-figure{display:block}.native-panels{grid-template-columns:1fr}.native-panels figure{break-inside:avoid}.native-panels img{max-height:210mm}}
+</style></head><body><main class="page-content">
+<nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li><a href="index.html">Examples</a></li><li><a href="native-model-catalogue.html">Native model catalogue</a></li><li aria-current="page">Four-state reachability</li></ol></nav>
+<p class="eyebrow">Native C++ models · four states · fifteen transitions</p>
+<h1>Four-state reachable sets from a printed linear model</h1>
+<p>This numerical comparison case comes from the 2017 author manuscript by Bulaev, Goranov and Kalyov, “Constructing optimal programmed control for complex mechanical objects”. Its final example supplies a discrete four-state system, an uncertain initial box and one independent input at every step. The comparison example supplies no optimization objective.</p>
+
+<section><h2>The source data</h2>
+<math display="block"><mrow><msub><mi>x</mi><mrow><mi>k</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>=</mo><mi>A</mi><msub><mi>x</mi><mi>k</mi></msub><mo>+</mo><mi>B</mi><msub><mi>u</mi><mi>k</mi></msub><mo>,</mo><mspace width="1em"/><mi>k</mi><mo>=</mo><mn>0</mn><mo>,</mo><mo>…</mo><mo>,</mo><mn>14</mn></mrow></math>
+<div class="native-equation">
+<math display="block"><mrow><mi>A</mi><mo>=</mo><mo>[</mo><mtable columnalign="right right right right"><mtr><mtd><mn>1</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0.03</mn></mtd><mtd><mn>0</mn></mtd></mtr><mtr><mtd><mn>0.014</mn></mtd><mtd><mn>1</mn></mtd><mtd><mn>0.0001</mn></mtd><mtd><mn>0.03</mn></mtd></mtr><mtr><mtd><mn>0.114</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>1</mn></mtd><mtd><mo>−</mo><mn>0.0002</mn></mtd></mtr><mtr><mtd><mn>0.915</mn></mtd><mtd><mn>0</mn></mtd><mtd><mn>0.014</mn></mtd><mtd><mn>1</mn></mtd></mtr></mtable><mo>]</mo></mrow></math>
+<math display="block"><mrow><mi>B</mi><mo>=</mo><mo>[</mo><mtable columnalign="right"><mtr><mtd><mo>−</mo><mn>0.0024</mn></mtd></mtr><mtr><mtd><mn>0.0051</mn></mtd></mtr><mtr><mtd><mo>−</mo><mn>0.157</mn></mtd></mtr><mtr><mtd><mn>0.339</mn></mtd></mtr></mtable><mo>]</mo></mrow></math>
+</div>
+<math display="block"><mrow><msub><mi>X</mi><mn>0</mn></msub><mo>=</mo><mi>diag</mi><mo>(</mo><mn>0.052</mn><mo>,</mo><mn>5</mn><mo>,</mo><mn>0.018</mn><mo>,</mo><mn>1</mn><mo>)</mo><msup><mrow><mo>[</mo><mo>−</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>]</mo></mrow><mn>4</mn></msup></mrow></math>
+<math display="block"><mrow><msub><mi>u</mi><mi>k</mi></msub><mo>∈</mo><mo>[</mo><mo>−</mo><mn>0.14</mn><mo>,</mo><mn>0.14</mn><mo>]</mo></mrow></math>
+<p>The box bounds apply to <strong>x(0)</strong>. They are not imposed on subsequent states. The printed updates 0 through 14 and the table’s stages 1 through 15 agree: this case has 15 transitions. State coordinates and the sampling period have no declared physical units in this comparison; the native case keeps integer stages and the printed numbers.</p>
+</section>
+
+<section><h2>All sixteen sets on each plane</h2>
+<p>The computation propagates the full four-dimensional generator set. The two planes are selected only afterward. Each input receives a fresh factor ID; at stage 15 the unreduced set has 19 generator factors: four initial factors and fifteen independent inputs.</p>
+<div class="native-panels">
+<figure><a href="native-model-catalogue-v1/four-state/stages-x1-x2-screen.svg"><img class="screen-figure" src="native-model-catalogue-v1/four-state/stages-x1-x2-screen.svg" alt="All sixteen full-state reachable sets projected onto x1 and x2"></a><img class="print-figure" src="native-model-catalogue-v1/four-state/stages-x1-x2-print.svg" alt="All-stage x1-x2 projection for print"><figcaption>Raw coordinates x₁–x₂, stages 0 through 15.</figcaption></figure>
+<figure><a href="native-model-catalogue-v1/four-state/stages-x3-x4-screen.svg"><img class="screen-figure" src="native-model-catalogue-v1/four-state/stages-x3-x4-screen.svg" alt="All sixteen full-state reachable sets projected onto x3 and x4"></a><img class="print-figure" src="native-model-catalogue-v1/four-state/stages-x3-x4-print.svg" alt="All-stage x3-x4 projection for print"><figcaption>Raw coordinates x₃–x₄, stages 0 through 15.</figcaption></figure>
+</div>
+<p>The projected boundary is constructed with repeated two-dimensional segment sums and the existing native QuickHull. Its saved full-state witnesses belong to these projection boundaries; their union is <strong>not a full four-dimensional V representation</strong>. The complete four-dimensional result is preserved as centre and generator matrices.</p>
+</section>
+
+<section><h2>An independent support check</h2>
+<p>For a direction d, the independent native checker works backward through the printed matrix. It adds the support of every input interval and finally evaluates the initial box:</p>
+<math display="block"><mrow><msub><mi>h</mi><msub><mi>X</mi><mi>k</mi></msub></msub><mo>(</mo><mi>d</mi><mo>)</mo><mo>=</mo><msub><mi>h</mi><msub><mi>X</mi><mn>0</mn></msub></msub><mo>(</mo><msup><mrow><mo>(</mo><msup><mi>A</mi><mi>k</mi></msup><mo>)</mo></mrow><mi>T</mi></msup><mi>d</mi><mo>)</mo><mo>+</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>0</mn></mrow><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></munderover><mn>0.14</mn><mo>|</mo><msup><mi>d</mi><mi>T</mi></msup><msup><mi>A</mi><mi>j</mi></msup><mi>B</mi><mo>|</mo></mrow></math>
+<p>The saved run passes 1,280 full-state support checks and 2,048 checks of the projected boundaries. It compares the printed-decimal reference calculation with binary64 generator propagation using a declared numerical tolerance. Finite directional checks are numerical evidence, not a general certified inclusion proof. No full 2¹⁹-corner materialization, controller result or speed comparison is claimed.</p>
+</section>
+
+<section><h2>Use and reproduce the native case</h2>
+<pre><code>auto data = std::get&lt;csl::model::catalogue::DiscreteReachabilityCase&gt;(
+    csl::model::catalogue::make_discrete_reachability_case(
+        "archival-2017-4d-scalar-reachability/1"));</code></pre>
+<pre><code>cmake -S examples -B build/native-model-examples \
+  -DCSL_DIR=/path/to/install/lib/cmake/CSL
+cmake --build build/native-model-examples --target native_four_state_reachability
+build/native-model-examples/native_four_state_reachability new-output-directory</code></pre>
+<p>The C++ executable constructs the model, propagates the sets, checks supports and generates the CSV and screen/print SVG files. No Python environment, HiGHS or Qhull is required for this path.</p>
+<p><a href="native-model-catalogue-v1/four-state/full-state-generators.csv">All full-state generators</a> · <a href="native-model-catalogue-v1/four-state/full-state-support-checks.csv">Support checks</a> · <a href="native-model-catalogue-v1/four-state/projection-boundary-witnesses.csv">Projection witnesses</a> · <a href="native-model-catalogue-v1/manifest.json">Source and digest manifest</a> · <a href="native-model-catalogue-v1/native-model-catalogue-v1.zip">Offline records</a></p>
+</section>
+
+<section><h2>Source qualification</h2>
+<p>The model is on page 11 of the local 14-page rendering of the UralENIN 2017 author document; its table continues on page 12. The original DOC SHA-256 is <code class="source-hash">565ae84cf2c2661df47ce98a7a3d6c2ffa5cc9f220bf81a54f3b8a64c73a1c2a</code>. A different, longer document with the same filename is a separate source and is not substituted for this one. Private originals are not redistributed.</p>
+<p>This entry belongs to the <a href="native-model-catalogue.html">native mathematical model catalogue</a>. The broader model catalogue and higher-dimensional family remain tracked in <a href="https://github.com/butahlecoq/controlled-systems-lab/issues/991">issue 991</a>.</p>
+</section>
+<footer class="provenance">CSL · Native mathematical model catalogue · numerical forward reachability</footer>
+</main></body></html>

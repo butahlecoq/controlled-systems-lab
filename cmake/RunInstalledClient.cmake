@@ -34,6 +34,11 @@ foreach(consumer_source IN LISTS installed_consumer_sources)
 endforeach()
 file(COPY "${CSL_SOURCE_DIR}/tests/contract/public_client.cpp" DESTINATION "${work}/source")
 file(COPY "${CSL_SOURCE_DIR}/tests/contract/public_headers_client.cpp" DESTINATION "${work}/source")
+file(COPY
+  "${CSL_SOURCE_DIR}/examples/native_model_catalogue.cpp"
+  "${CSL_SOURCE_DIR}/examples/native_four_state_reachability.cpp"
+  "${CSL_SOURCE_DIR}/examples/native_catalogue_projection.hpp"
+  DESTINATION "${work}/source")
 if(CSL_STAGE_ONLY)
   return()
 endif()
@@ -137,6 +142,7 @@ foreach(example_file CMakeLists.txt registered_lp.cpp registered_convex.cpp
     resolved_scenario.cpp scenario_file.cpp backend_substitution.cpp registered_synthesis_comparison.cpp
     nominal_linear_exact_2d.cpp scenario_cli.cpp continuous_policy.cpp
     source_index_geometry_2d.cpp adaptive_ode_replay.cpp scenario_backend_substitution.cpp
+    native_model_catalogue.cpp native_four_state_reachability.cpp native_catalogue_projection.hpp
     scenario_backend_artifact_check.cpp)
   file(COPY "${CSL_SOURCE_DIR}/examples/${example_file}" DESTINATION "${example_source}")
 endforeach()

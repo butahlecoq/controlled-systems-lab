@@ -136,6 +136,37 @@ class StageB04SourceMomentsTests(unittest.TestCase):
             stage_b04.stage(second)
         self.assertEqual((second / "index.html").read_text(), "<!doctype html><html><body></body></html>")
 
+    def test_live_style_changes_do_not_change_historical_source_or_bundle(self):
+        baseline = stage_b04.stage(self.site)
+        live_style = ROOT / "scripts/reports/figure_style.py"
+        read_bytes = Path.read_bytes
+
+        def changed_style(path):
+            content = read_bytes(path)
+            return content + b"\nPALETTE = ('new-live-color',)\n" if path == live_style else content
+
+        changed_site = self.make_site("changed-live-style")
+        with patch.object(Path, "read_bytes", changed_style):
+            changed = stage_b04.stage(changed_site)
+        self.assertEqual(changed, baseline)
+        self.assertEqual((changed_site / (changed + ".zip")).read_bytes(),
+                         (self.site / (baseline + ".zip")).read_bytes())
+        self.assertEqual((changed_site / changed / "source-root/scripts/reports/figure_style.py").read_bytes(),
+                         read_bytes(live_style))
+
+    def test_tampered_selected_historical_style_is_rejected(self):
+        historical_style = ROOT / "benchmarks/reporting/mpc11/evidence/figures-60bda0fb/source/figure_style.py"
+        read_bytes = Path.read_bytes
+
+        def tampered_style(path):
+            content = read_bytes(path)
+            return content + b"\n# changed historical source\n" if path == historical_style else content
+
+        with patch.object(Path, "read_bytes", tampered_style):
+            with self.assertRaisesRegex(ValueError, "source-anchor Git blob: scripts/reports/figure_style.py"):
+                stage_b04.stage(self.site)
+        self.assertEqual({path.name for path in self.site.iterdir()}, {"examples", "index.html"})
+
 
 if __name__ == "__main__":
     unittest.main()

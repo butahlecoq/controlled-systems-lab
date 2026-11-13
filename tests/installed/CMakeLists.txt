@@ -2,6 +2,20 @@ cmake_minimum_required(VERSION 3.31)
 project(CSLInstalledConsumer LANGUAGES CXX)
 find_package(CSL 0.1 CONFIG REQUIRED)
 
+add_executable(installed_model_catalogue_client native_model_catalogue.cpp)
+target_link_libraries(installed_model_catalogue_client PRIVATE CSL::model_catalogue CSL::generator_adapter CSL::quickhull_2d)
+set_target_properties(installed_model_catalogue_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_model_catalogue_client COMMAND installed_model_catalogue_client)
+set_tests_properties(installed_model_catalogue_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Native model catalogue: 2 source cases and all full-state corner checks passed")
+
+add_executable(installed_four_state_catalogue_client native_four_state_reachability.cpp)
+target_link_libraries(installed_four_state_catalogue_client PRIVATE CSL::model_catalogue CSL::geometry_generators CSL::quickhull_2d)
+set_target_properties(installed_four_state_catalogue_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_four_state_catalogue_client COMMAND installed_four_state_catalogue_client)
+set_tests_properties(installed_four_state_catalogue_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Native four-state reachability: fifteen transitions and 1280 support checks passed")
+
 # Expectations come from the package-building configuration. Optional clients may
 # be skipped only when the corresponding adapter was deliberately disabled.
 foreach(adapter HIGHS QHULL)
@@ -55,6 +69,12 @@ set_target_properties(installed_ellipsoidal_client PROPERTIES CXX_EXTENSIONS OFF
 add_test(NAME installed_ellipsoidal_client COMMAND installed_ellipsoidal_client)
 set_tests_properties(installed_ellipsoidal_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed ellipsoidal client: two reviewed outer members passed")
+add_executable(installed_factor_ellipsoid_client factor_ellipsoid_client.cpp)
+target_link_libraries(installed_factor_ellipsoid_client PRIVATE CSL::approximation)
+set_target_properties(installed_factor_ellipsoid_client PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME installed_factor_ellipsoid_client COMMAND installed_factor_ellipsoid_client)
+set_tests_properties(installed_factor_ellipsoid_client PROPERTIES
+  PASS_REGULAR_EXPRESSION "Installed factor-ellipsoid client: singleton Minkowski enclosure and affine image passed")
 set_tests_properties(installed_box_parallelotope_client PROPERTIES
   PASS_REGULAR_EXPRESSION "Installed box/parallelotope client: rotated diamond bounds passed")
 

@@ -1,0 +1,3 @@
+case=archival-2017-4d-scalar-reachability/1 dimension=4 controls=1 transitions=15 stages=16 terminal_generators=19 support_checks=1280 projection_checks=2048 maximum_support_difference=6.3967928176644762e-16
+scope=numerical support checks; projection witnesses are not a full 4D V representation
+Native four-state reachability: fifteen transitions and 1280 support checks passed
