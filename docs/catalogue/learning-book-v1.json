@@ -54,7 +54,7 @@
         },
         {
           "label": "examples/CMakeLists.txt installed package consumer",
-          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/681db4d9e2a18c5962d6bf42aac6913fc9afa937/examples/CMakeLists.txt"
+          "href": "https://github.com/butahlecoq/controlled-systems-lab/blob/e487affa2ad0edb3d6e615fe0a8f4dd6aeabd785/examples/CMakeLists.txt"
         }
       ],
       "example_sources": [
@@ -1148,6 +1148,85 @@
               "ellipsoid family",
               "outer, 1 ellipsoid per member",
               "convex hull of the square vertices; no rays; intersect both members"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "native-forward-models",
+      "title": "From native model factories to full-state forward reachability",
+      "group": "reachable_set_representation",
+      "group_label": "Reachable-set representations",
+      "role": "educational",
+      "status": "ready",
+      "status_label": "Ready · saved native functional evidence",
+      "prerequisites": [
+        "install-consumer",
+        "representation-consumers"
+      ],
+      "module_ids": [],
+      "source": "native-forward-models.html",
+      "summary": "Compare source-supplied models, separately authored initial sets, and synthetic linearized models before interpreting their all-stage projections.",
+      "mathematical_input": "Discrete: x(k+1)=Ax(k)+Bu(k). Continuous deviations: δx′=A(t)δx+B(t)δu. Propagate the declared full-state initial set and independent admissible inputs before projecting.",
+      "command": "cmake -S examples -B build/native-model-examples -DCSL_DIR=/path/to/install/lib/cmake/CSL\ncmake --build build/native-model-examples --target native_model_catalogue native_slide50_reachability native_spatial_flight",
+      "expected_output": "Installed native examples compile; run each executable with a new output directory to capture its declared stages and checks. Existing source-qualified captures are linked below.",
+      "intermediate_geometry": "Inspect the complete saved stages and full-state checks, then compare labelled coordinate-plane projections. A projected overlap is not a full-state intersection.",
+      "support_limits": "These are bounded functional examples with source/build qualification; CI remains required. The slide-50 initial box is separately authored because historical X0 coordinates are unavailable. Flexible-pitch and spatial-flight numerical choices are explicit authored assumptions; spatial flight propagates a linearized deviation model about a nonlinear reference. No historical reconstruction, nonlinear reachable-set enclosure, controller optimum or timing comparison is claimed.",
+      "figure_ids": [],
+      "records": [
+        {
+          "label": "Slide 33: three-state source model and complete initial box",
+          "href": "../examples/native-model-catalogue.html"
+        },
+        {
+          "label": "Four-state source model: fifteen transitions",
+          "href": "../examples/native-four-state-reachability.html"
+        },
+        {
+          "label": "Flexible pitch: coupled models with explicit authored assumptions",
+          "href": "../examples/native-flexible-pitch.html"
+        },
+        {
+          "label": "Slide 50: two independent inputs and a separately authored initial box",
+          "href": "../examples/native-slide50-reachability.html"
+        },
+        {
+          "label": "Synthetic spatial flight: nonlinear reference and nine-state deviations",
+          "href": "../examples/native-spatial-flight.html"
+        },
+        {
+          "label": "Extended-model capture and source/build qualification",
+          "href": "../examples/native-extended-models-v1/manifest.json"
+        }
+      ],
+      "example_sources": [
+        "examples/native_model_catalogue.cpp",
+        "examples/native_slide50_reachability.cpp",
+        "examples/native_spatial_flight.cpp"
+      ],
+      "kind": "saved evidence",
+      "mathematical_tables": [
+        {
+          "label": "Forward propagation before projection",
+          "columns": [
+            "model",
+            "state dimension",
+            "input dimension",
+            "initial-set authority"
+          ],
+          "rows": [
+            [
+              "Slide 50",
+              "3",
+              "2",
+              "Separately authored box; historical X0 unavailable"
+            ],
+            [
+              "Spatial flight",
+              "9",
+              "3",
+              "Authored deviation set about a synthetic nonlinear reference"
             ]
           ]
         }

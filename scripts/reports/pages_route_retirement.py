@@ -48,6 +48,8 @@ BARE_ROUTE_REPLACEMENTS = {
 # Gallery pages are assembled by visual_examples.py. These additional sources
 # own page content or figures for the routes they contribute.
 EXAMPLE_ROUTE_PRODUCERS = {
+    "examples/native-slide50-reachability.html": ["scripts/reports/stage_native_extended_models.py", "docs/examples/native-slide50-reachability.html"],
+    "examples/native-spatial-flight.html": ["scripts/reports/stage_native_extended_models.py", "docs/examples/native-spatial-flight.html"],
     "examples/native-discrete-models.html": ["scripts/reports/stage_native_discrete_models.py", "docs/examples/native-discrete-models.html"],
     "examples/native-quadcopter-mpc.html": ["scripts/reports/stage_native_discrete_models.py", "scripts/reports/native_discrete_models.py", "docs/examples/native-quadcopter-mpc.html"],
     "examples/adaptive-ode-replay.html": ["scripts/reports/render_adaptive_ode_example.py"],
@@ -98,6 +100,7 @@ STANDALONE_REPORT_ROUTE_PRODUCERS = {
 }
 
 GALLERY_INDEX_PRODUCERS = [
+    "scripts/reports/stage_native_extended_models.py",
     "scripts/reports/stage_native_discrete_models.py",
     "scripts/reports/approx_extension_companions.py",
     "scripts/reports/control_witness_companions.py",
@@ -265,6 +268,10 @@ def _producer_record(site: Path, route: str, catalog: dict[str, dict], source_id
         if route == "examples/index.html":
             files.extend(GALLERY_INDEX_PRODUCERS)
             return {"files": files, "owner_status": "gallery-aggregation-pipeline"}
+        if route.startswith("examples/native-extended-models-v1/"):
+            files.extend(["scripts/reports/stage_native_extended_models.py",
+                          "scripts/reports/frozen_native_bundle.py",
+                          "reports/algorithm-results/native-extended-models-v1/manifest.json"])
         files.extend(EXAMPLE_ROUTE_PRODUCERS.get(route, []))
         return {"files": files, "owner_status": "gallery-aggregator"}
     if top == "docs":
