@@ -79,3 +79,14 @@ The workflow also runs the site-addition and APP-02 tests with the standard
 library. Run them locally with
 `python -m unittest discover -s tests/reporting -p 'test_site_additions.py'` and
 `python -m unittest discover -s tests/reporting -p 'test_app02_saved.py'`.
+
+The same configured gate covers the 57 maintained Python compatibility entry
+points under `reports/algorithm-results/tooling`. `pyproject.toml` defines the
+scope for the default Ruff and ty commands above. The nine real OPT07/OPT11
+implementations in that tree remain excluded and require separate quality
+adoption; immutable report/source captures elsewhere are also outside this gate.
+Use `ruff check --show-files` to inspect Ruff's selected files. No explicit file
+arguments are needed for the lint, format or type checks. The workflow triggers
+on tooling-tree changes and exercises existing compatibility consumers with
+`python -m unittest discover -s tests/reporting -p 'test_syn03_strategy_a_report.py'` and
+`python -m unittest discover -s tests/reporting -p 'test_syn03_ts02_report.py'`.
