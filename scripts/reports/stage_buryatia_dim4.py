@@ -17,7 +17,9 @@ SOURCE = "136e30f33fca849ec8814747702ab720e76e22bd"
 RAW_SHA256 = "d0a8ca600eaa52f9630c87f1e7395c4ca2454c0080d315469e44c06a4403d8ad"
 CAPTURE_SHA256 = "70955d039aa581072fc7dbf8d539404b9bf152160f682dfae95712dcbf8932d4"
 SCENARIO_SHA256 = "276f1c0d456cf2f27a8fcae827538746670a5f04ae5e86b4b17c9a28db51cd35"
-PAGE_SHA256 = "46fab34b37fbc947870f6fb15379c4bf5a527453e5ea493c91b1826720b8143f"
+PAGE_SHA256 = "d19e112576d836c45692054319d45edcecd9db0d61a3270762c47273fefda6d6"
+BOX_TRACE_PROOF = "buryatia-dim4-box-trace-correction-v1.json"
+BOX_TRACE_PROOF_SHA256 = "86ceeb2cc3bb6064dfd16b57c9c62b62e7651afa8ac784b8ffa260057f4cb89a"
 SOURCE_VARIANT_SHA256 = "f1b9868dac256a45f144ee5192ec8b789548b34c2be6be094005bcef8dc7293a"
 COLOR = {
     "exact_affine_polytope": "#f8f8f2",
@@ -135,14 +137,18 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
     scenario_name = "buryatia-dim4-matlab-literal-affine-v1.json"
     raw = _safe_file(docs, raw_name).read_bytes()
     capture_bytes = _safe_file(docs, capture_name).read_bytes()
+    box_trace_proof = _safe_file(docs, BOX_TRACE_PROOF).read_bytes()
     scenario = _safe_file(benchmark, scenario_name).read_bytes()
     sums = _safe_file(docs, sums_name).read_text(encoding="ascii")
     require(hashlib.sha256(raw).hexdigest() == RAW_SHA256, "Buryatia raw capture hash differs")
     require(hashlib.sha256(capture_bytes).hexdigest() == CAPTURE_SHA256,
             "Buryatia capture receipt hash differs")
+    require(hashlib.sha256(box_trace_proof).hexdigest() == BOX_TRACE_PROOF_SHA256,
+            "Buryatia box-trace correction proof hash differs")
     require(hashlib.sha256(scenario).hexdigest() == SCENARIO_SHA256,
             "Buryatia source scenario hash differs")
     receipt = json.loads(capture_bytes)
+    trace_proof = json.loads(box_trace_proof)
     record = _saved_record()
     scenario_data = json.loads(scenario)
     require(receipt["source_commit"] == SOURCE and receipt["stdout_sha256"] == RAW_SHA256,
@@ -152,9 +158,16 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
             "Buryatia raw record source identity differs")
     require(scenario_data["case_id"] == record["case_id"],
             "Buryatia scenario and saved record IDs differ")
+    require(trace_proof["schema"] == "csl.buryatia.dim4-box-trace-erratum/1" and
+            trace_proof["historical_record"]["sha256"] == RAW_SHA256 and
+            trace_proof["corrected_native_capture"]["source_commit"] == "00a9e3da45ded30906ca7d79d4d1fff4a63fa347" and
+            trace_proof["comparison"]["all_other_json_values_equal"] is True and
+            trace_proof["comparison"]["changed_json_values"] == 7,
+            "Buryatia box-trace correction proof does not match the immutable source record")
     expected = {
         raw_name: RAW_SHA256,
         capture_name: CAPTURE_SHA256,
+        BOX_TRACE_PROOF: BOX_TRACE_PROOF_SHA256,
         "buryatia-dim4-literal-affine.html": PAGE_SHA256,
         "../../benchmarks/scenarios/" + scenario_name: SCENARIO_SHA256,
     }
@@ -179,6 +192,7 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
         ROUTE + "/index.html": page.encode("utf-8"),
         ROUTE + "/" + raw_name: raw,
         ROUTE + "/" + capture_name: capture_bytes,
+        ROUTE + "/" + BOX_TRACE_PROOF: box_trace_proof,
         ROUTE + "/" + scenario_name: scenario,
     }
     thumbnail = _svg_thumbnail(record)

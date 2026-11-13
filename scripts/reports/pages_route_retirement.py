@@ -60,6 +60,7 @@ EXAMPLE_ROUTE_PRODUCERS = {
         "docs/examples/buryatia-dim4-literal-affine.html",
         "docs/examples/buryatia-dim4-literal-affine-v1-records.json",
         "docs/examples/buryatia-dim4-literal-affine-v1-capture.json",
+        "docs/examples/buryatia-dim4-box-trace-correction-v1.json",
         "benchmarks/scenarios/buryatia-dim4-matlab-literal-affine-v1.json",
     ],
     "examples/buryatia-dim4-literal-affine-v1/terminal-x1-x2.svg": [
@@ -74,6 +75,10 @@ EXAMPLE_ROUTE_PRODUCERS = {
         "scripts/reports/stage_buryatia_dim4.py",
         "docs/examples/buryatia-dim4-literal-affine-v1-capture.json",
     ],
+    "examples/buryatia-dim4-literal-affine-v1/buryatia-dim4-box-trace-correction-v1.json": [
+        "scripts/reports/stage_buryatia_dim4.py",
+        "docs/examples/buryatia-dim4-box-trace-correction-v1.json",
+    ],
     "examples/buryatia-dim4-literal-affine-v1/buryatia-dim4-matlab-literal-affine-v1.json": [
         "scripts/reports/stage_buryatia_dim4.py",
         "benchmarks/scenarios/buryatia-dim4-matlab-literal-affine-v1.json",
@@ -83,6 +88,7 @@ EXAMPLE_ROUTE_PRODUCERS = {
         "docs/examples/buryatia-dim4-literal-affine-v1-SHA256SUMS",
         "docs/examples/buryatia-dim4-literal-affine-v1-records.json",
         "docs/examples/buryatia-dim4-literal-affine-v1-capture.json",
+        "docs/examples/buryatia-dim4-box-trace-correction-v1.json",
         "benchmarks/scenarios/buryatia-dim4-matlab-literal-affine-v1.json",
     ],
     "examples/control-witness-timing-v1.html": ["scripts/reports/control_witness_companions.py"],

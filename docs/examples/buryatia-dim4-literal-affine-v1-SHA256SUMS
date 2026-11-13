@@ -1,4 +1,5 @@
 d0a8ca600eaa52f9630c87f1e7395c4ca2454c0080d315469e44c06a4403d8ad  buryatia-dim4-literal-affine-v1-records.json
 70955d039aa581072fc7dbf8d539404b9bf152160f682dfae95712dcbf8932d4  buryatia-dim4-literal-affine-v1-capture.json
-46fab34b37fbc947870f6fb15379c4bf5a527453e5ea493c91b1826720b8143f  buryatia-dim4-literal-affine.html
+86ceeb2cc3bb6064dfd16b57c9c62b62e7651afa8ac784b8ffa260057f4cb89a  buryatia-dim4-box-trace-correction-v1.json
+d19e112576d836c45692054319d45edcecd9db0d61a3270762c47273fefda6d6  buryatia-dim4-literal-affine.html
 276f1c0d456cf2f27a8fcae827538746670a5f04ae5e86b4b17c9a28db51cd35  ../../benchmarks/scenarios/buryatia-dim4-matlab-literal-affine-v1.json
