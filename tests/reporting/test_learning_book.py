@@ -368,8 +368,8 @@ Q subset E; E subset [-sqrt(2),sqrt(2)]^2; Q is [-1,1]^2
                     "Zonotope generator columns before reduction: 1, 0, 0.5; 0, 1, 0.5",
                     "Zonotope center: 0; 0",
                     "Square V input for ellipsoid family: -1, -1; 1, -1; 1, 1; -1, 1",
-                    "<td>axis</td><td>[[1,0],[0,1]]</td>",
-                    "<td>rotated</td><td>[[1,1],[1,−1]]</td>",
+                    "Axis ellipsoid directions, 2 by 2; one direction per row in x,y order: 1, 0; 0, 1",
+                    "Rotated ellipsoid directions, 2 by 2; one direction per row in x,y order: 1, 1; 1, -1",
                     "−1≤ξ₁,ξ₂,ξ₃≤1; no factor constraints",
                 ],
                 "closed-loop-semantics": [
