@@ -1,12 +1,13 @@
 """Prepare and apply validated additions to an existing static report site."""
+
 from __future__ import annotations
 
-from dataclasses import dataclass
 import hashlib
 import os
-from pathlib import Path, PurePosixPath
 import stat
 import tempfile
+from dataclasses import dataclass
+from pathlib import Path, PurePosixPath
 from typing import Callable, Mapping
 
 
@@ -21,8 +22,14 @@ class Plan:
 
 def _relative(value: str) -> PurePosixPath:
     path = PurePosixPath(value)
-    if (not value or "\\" in value or ":" in value or path.is_absolute() or
-            str(path) != value or any(part in {".", ".."} for part in path.parts)):
+    if (
+        not value
+        or "\\" in value
+        or ":" in value
+        or path.is_absolute()
+        or str(path) != value
+        or any(part in {".", ".."} for part in path.parts)
+    ):
         raise ValueError("site addition path must be a normalized relative path")
     return path
 
@@ -93,9 +100,19 @@ def prepare(
         if fingerprint is not None and relative not in replacements:
             raise ValueError("site addition destination already exists: " + str(relative))
         fingerprints.append((relative, fingerprint))
-    ordered = tuple(sorted(additions, key=lambda item: (
-        2 if item[0] == PurePosixPath("index.html") else
-        1 if item[0].name == "index.html" else 0, str(item[0]))))
+    ordered = tuple(
+        sorted(
+            additions,
+            key=lambda item: (
+                2
+                if item[0] == PurePosixPath("index.html")
+                else 1
+                if item[0].name == "index.html"
+                else 0,
+                str(item[0]),
+            ),
+        )
+    )
     return Plan(site, ordered, replacements, absent, tuple(fingerprints))
 
 
@@ -104,8 +121,9 @@ def _write(path: Path, content: bytes) -> None:
     mode = stat.S_IMODE(path.stat().st_mode) if path.exists() else 0o644
     staged: Path | None = None
     try:
-        with tempfile.NamedTemporaryFile(prefix="." + path.name + ".", suffix=".tmp",
-                                         dir=path.parent, delete=False) as stream:
+        with tempfile.NamedTemporaryFile(
+            prefix="." + path.name + ".", suffix=".tmp", dir=path.parent, delete=False
+        ) as stream:
             staged = Path(stream.name)
             stream.write(content)
             stream.flush()
