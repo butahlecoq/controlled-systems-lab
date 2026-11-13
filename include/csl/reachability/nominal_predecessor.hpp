@@ -28,27 +28,27 @@ struct NominalPredecessorFailure {
     std::vector<GeometryEvidence> completed_lineage;
     std::variant<Unsupported, OperationStopped> cause;
 };
-using NominalPredecessorOutcome =
-    std::variant<NominalPredecessorResult, NominalPredecessorFailure>;
+using NominalPredecessorOutcome = std::variant<NominalPredecessorResult, NominalPredecessorFailure>;
 
 class PreparedNominalPredecessor {
     NominalPredecessorRequest request_;
     OperationRequest projection_;
     registry::PreparedPipeline<registry::GeometryPort> prepared_;
     PreparedNominalPredecessor(NominalPredecessorRequest, OperationRequest,
-        registry::PreparedPipeline<registry::GeometryPort>);
+                               registry::PreparedPipeline<registry::GeometryPort>);
     friend std::variant<PreparedNominalPredecessor, Diagnostics, registry::Rejection>
-        prepare_nominal_predecessor(const NominalPredecessorRequest&,
-            const registry::PreparedProvider<registry::GeometryPort>&);
-public:
+    prepare_nominal_predecessor(const NominalPredecessorRequest &,
+                                const registry::PreparedProvider<registry::GeometryPort> &);
+
+  public:
     // Creates its exclusive projection workspace only after preparation has
     // admitted the complete concrete operation through the selected provider.
-    NominalPredecessorOutcome run(const ExecutionContext&) const;
+    NominalPredecessorOutcome run(const ExecutionContext &) const;
 };
 using NominalPredecessorPreparation =
     std::variant<PreparedNominalPredecessor, Diagnostics, registry::Rejection>;
-NominalPredecessorPreparation prepare_nominal_predecessor(
-    const NominalPredecessorRequest&,
-    const registry::PreparedProvider<registry::GeometryPort>&);
+NominalPredecessorPreparation
+prepare_nominal_predecessor(const NominalPredecessorRequest &,
+                            const registry::PreparedProvider<registry::GeometryPort> &);
 
 } // namespace csl::reachability
