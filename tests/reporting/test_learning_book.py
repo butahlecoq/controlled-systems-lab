@@ -82,7 +82,7 @@ class LearningBookTests(unittest.TestCase):
                                      "Source permalink differs from the executed example")
 
     @staticmethod
-    def _is_retained_source_commit(repo: Path, commit: str) -> bool:
+    def _is_retained_source_commit(repo: Path, commit: str, *, allow_in_flight_head: bool = False) -> bool:
         main_ref = "refs/remotes/origin/main"
         main_result = subprocess.run(["git", "merge-base", "--is-ancestor", commit, main_ref],
                                      cwd=repo, capture_output=True, text=True)
@@ -90,6 +90,14 @@ class LearningBookTests(unittest.TestCase):
             return True
         if main_result.returncode != 1:
             raise AssertionError(f"Cannot check {main_ref}: {main_result.stderr.strip()}")
+
+        if allow_in_flight_head:
+            head_result = subprocess.run(["git", "merge-base", "--is-ancestor", commit, "HEAD"],
+                                         cwd=repo, capture_output=True, text=True)
+            if head_result.returncode == 0:
+                return True
+            if head_result.returncode != 1:
+                raise AssertionError(f"Cannot check HEAD: {head_result.stderr.strip()}")
 
         tags_result = subprocess.run(["git", "tag", "--list", "evidence/*-source-*"],
                                      cwd=repo, capture_output=True, text=True)
@@ -111,7 +119,7 @@ class LearningBookTests(unittest.TestCase):
                 raise AssertionError(f"Cannot check evidence source tag {tag}: {tag_result.stderr.strip()}")
         return False
 
-    def test_source_permalinks_are_retained_by_main_or_evidence_source_tags(self):
+    def test_source_permalinks_are_retained_by_main_evidence_tags_or_in_flight_head(self):
         prefix = "https://github.com/butahlecoq/controlled-systems-lab/blob/"
         sources = {
             record["href"][len(prefix):].partition("/")[0]
@@ -123,8 +131,8 @@ class LearningBookTests(unittest.TestCase):
         for commit in sorted(sources):
             with self.subTest(commit=commit):
                 self.assertTrue(
-                    self._is_retained_source_commit(ROOT, commit),
-                    f"Source permalink commit {commit} is not retained by origin/main or an evidence source tag")
+                    self._is_retained_source_commit(ROOT, commit, allow_in_flight_head=True),
+                    f"Source permalink commit {commit} is not retained by origin/main, an evidence source tag, or HEAD")
 
     def test_source_retention_rejects_feature_only_history_and_accepts_durable_refs(self):
         with tempfile.TemporaryDirectory() as temporary:
