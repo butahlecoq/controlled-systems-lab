@@ -5,7 +5,10 @@ from pathlib import Path
 import shutil
 import zipfile
 
-import history_warm_gap_report
+if __package__:
+    from . import history_warm_gap_report
+else:
+    import history_warm_gap_report
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORT = "closed-loop-history-functional"
