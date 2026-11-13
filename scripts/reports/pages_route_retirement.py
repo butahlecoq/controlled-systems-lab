@@ -895,7 +895,8 @@ def main() -> None:
     parser.add_argument("--site", type=Path, required=True)
     parser.add_argument("--source-commit", default=os.environ.get("GITHUB_SHA", "unknown"))
     args = parser.parse_args()
-    result = finalize(args.site, source_commit=args.source_commit)
+    result = finalize(args.site, source_commit=args.source_commit,
+                      original_root_bytes=legacy_root_snapshot())
     print(json.dumps({"html_route_count": result["html_route_count"],
                       "zip_route_count": result["zip_route_count"],
                       "inventory": "pages-route-inventory.json",

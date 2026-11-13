@@ -31,7 +31,8 @@ Before retiring local worktrees or builds, inspect their status and preserve aut
 The C++ quality gate covers every maintained header under `include/csl/core`,
 the outcome-evidence implementation `src/contracts/outcomes.cpp`, and the
 `nominal_forward`, `nominal_predecessor` and `nominal_tube` public headers under
-`include/csl/reachability` and their implementations under `src/reachability`. Install
+`include/csl/reachability` and their implementations under `src/reachability`, plus
+`include/csl/numeric/data.hpp` and `src/numeric/data.cpp`. Install
 `requirements-cpp-quality.txt` in a virtual environment to use clang-format and
 clang-tidy 23.1.3 with CMake 3.31.6. Run the checks from the repository root:
 
@@ -41,10 +42,12 @@ cmake --preset core -B build/cpp-quality -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 cmake --build build/cpp-quality --parallel 1 \
   --target csl_contracts csl_core_header_checks csl_nominal_header_checks \
   csl_nominal_forward csl_nominal_tube csl_polyhedral \
+  csl_numeric header_numeric_data_hpp numeric_tests numeric_buffer_views_tests \
+  public_headers_client public_headers_lp_first_client \
   contract_tests public_client projection_predecessor_tests projection_predecessor_public_client
 cmake -DCSL_CPP_QUALITY_MODE=tidy -P scripts/ci/check_cpp_core.cmake
 ctest --test-dir build/cpp-quality --output-on-failure \
-  -R '^(contract_tests|public_client|projection_predecessor_tests|projection_predecessor_public_client)$'
+  -R '^(contract_tests|public_client|projection_predecessor_tests|projection_predecessor_public_client|numeric_tests|numeric_buffer_views_tests|public_headers_client|public_headers_lp_first_client|numeric_dependency_direction)$'
 ```
 
 The analyzer uses the actual selected implementation sources and each selected
@@ -52,12 +55,13 @@ header's standalone CMake compilation context. It refuses a missing command, a f
 source tree or a tool-version mismatch. New core headers also need their entry
 in `src/contracts/Tests.cmake`; nominal header contexts are registered in
 `src/reachability/Tests.cmake`. This prevents a selected header without a real
-compilation context from passing.
+compilation context from passing. The numeric data header uses the existing
+`header_numeric_data_hpp` context in `src/contracts/Tests.cmake`.
 The focused policy enables core/C++ analyzers, selected bug-prone constructs and
 portability checks, with warnings treated as errors. Formatting applies only to
 the selected maintained source files; third-party code, immutable source captures
 and generated scientific data are excluded. The
-`C++ core and nominal reachability tooling quality` workflow enforces this scope.
+`C++ core, nominal reachability and numeric data tooling quality` workflow enforces this scope.
 Other maintained C++ modules still require
 coverage under [issue 993](https://github.com/butahlecoq/controlled-systems-lab/issues/993).
 

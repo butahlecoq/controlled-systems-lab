@@ -1,0 +1,1839 @@
+{
+  "schema": "csl.mathematical-presentation-routes/1",
+  "scope": "Every HTML route in the composed site must be explicitly maintained or match an exact frozen HTML witness. New producer inventory routes require source ownership; absent optional source assets are not publication failures. Scientific JSON/ZIP bytes are checked separately by published-route preservation.",
+  "routes": [
+    {
+      "route": "app01-plan-20261016-969e78e97747c512b0b406eb3329365da3c8d648521a13242cf56fa78c23a578/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "54947c78cf175f3b6647234ef5dc33117d7ee01375a251520fc270f0a6411211",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "app02-box-8ff979de60ea9d22/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/app02-box-8ff979de60ea9d22/index.html",
+      "sha256": "bf8bfd6d96c99670cad420a66a4c4b9d77a840f04aeab5c057a15459a45b3307",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "app02-example/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "b8743ba9047bc536e6d637e98df90846f082c7c08bd22b634063a11753cd60ef",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "app03-example/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "264f97f2a57937ca2f68d598ee830f14919e444fb292be5c98c73cc6efaf3eef",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "app03-zonotope-4522855018fa9b0b/example-2d.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/app03-zonotope-4522855018fa9b0b/example-2d.html",
+      "sha256": "6cab005abba2139863c9642a6ca1e8b2d379ea67977f4eeca11fa14217669a6b",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "app03-zonotope-4522855018fa9b0b/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/app03-zonotope-4522855018fa9b0b/index.html",
+      "sha256": "b3d4b04afd09d1b70f3936da477a144d76010aa29ff326a055706d01927da9ef",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "app04-ellipsoid-fd302c34092f8b19/example-2d.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/app04-ellipsoid-fd302c34092f8b19/example-2d.html",
+      "sha256": "cd541bf8e48199f0c62a07091cbbe47d42b19058e346069606b5bb8e241aa9c9",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "app04-ellipsoid-fd302c34092f8b19/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/app04-ellipsoid-fd302c34092f8b19/index.html",
+      "sha256": "356ca56e0cd84e0f498fde14b0e70c25665e3c83ee8531977bdf4ebc468dbc8f",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "archive.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/site.py"
+    },
+    {
+      "route": "b04-c-research-dossier-b0427b6a8ef2e7ef9a5538e118edc1953c27ad4d1de0745aaac356ee694c804b/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "f27ee97ddedddf6012ca69220d7040bfd09a73ef18be1f2d042f70a03d7192a6",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "b04-c-strategy-a-bb5eb77fce5c2cd70b5c/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "72a2383be80f95b6ed5f789358049e2f32dd26af826e9a840d053b7e5766a0b9",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "b04-source-moments-11fb3cd7d83f868d3c3d/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "0dbe72ef55a59cf9f1cb50b497c748f1db55dbb456e2ff0bccd2b30aec1c1c82",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "b04-source-moments-8d52bbc7b0918e8aec0f/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "2ab83c9e6121691658b810a21adefc35c76b3e900ea2b3ab94aae0b890b27abd",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "b08-displayed-exact-5db00478351f310ecece0eae0187ace7de79b8c0850c958568232dd0bc779116/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "ebe27cc4c9563ef4da06b47534f168d46fb3f00698b87b323b0c0792302d1c2a",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "btulshor-source-faithful-4adbb0ed60b8c2f2d5f83ebef2ee1bb75e0dcb8c627f369e18f7826e438e8d39/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "f02785bb85f72e1d8260a34b80a08a87006d036ce6377a8ef88ddcba1beee75f",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "closed-loop-history-functional/index.html",
+      "disposition": "maintained",
+      "owner": "reports/closed-loop-history-functional/index.html"
+    },
+    {
+      "route": "closed-loop-history-functional/native-parallelotope-d6fc-v1/index.html",
+      "disposition": "frozen",
+      "owner": "scripts/reports/native_parallelotope_functional.py",
+      "sha256": "9e1f2569c95f13a21afb65627c69260e12710ac0bec6d53985002f977f3d875d",
+      "witness": "Authenticated saved native functional evidence; source ad42e7a993486769e6f00b82f6c9ee10ec70d6a4:reports/closed-loop-history-functional/native-parallelotope-d6fc-v1/index.html; native episode source d6fc399abcca49d4ac96fabeed9d8878d11cf326; checked against bundle files.sha256 by stage_history_functional/native_parallelotope_functional.check"
+    },
+    {
+      "route": "closed-loop-history-functional/warm-gap-9540-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/closed-loop-history-functional/warm-gap-9540-v1/index.html",
+      "sha256": "36d164c4fd8fac4bfb8c999529a889854a1d58dc45db01a0f57a0105b12f444b",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "closed-loop-native-feedback/figures/analytic-action-clouds.html",
+      "disposition": "maintained",
+      "owner": "reports/closed-loop-native-feedback/figures/analytic-action-clouds.html"
+    },
+    {
+      "route": "closed-loop-pilot-v1/example-2d.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "47698e261607f5e0ca2fb6668e91d6cb69e3090620029b0a48535215876873bf",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "closed-loop-pilot-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "25c8181872cd9e6e1f3be52cd8e01ad9d81abd25ad14ce7b89ed17c54a9b127b",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "convex-20261012T041854Z-2a87a229b670431a399a070008bc871c97d696444f0a80e8061b42d0ffc79a59/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "36c7891110e8eb2656f7e4182b3b3834d9905c1a453dbf2689408ee9dc24c6e9",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "convex-20261012T041854Z-4d54a407c9b2/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/convex-20261012T041854Z-4d54a407c9b2/index.html",
+      "sha256": "14882d50e392e3abfd57504c6f9fb175aa73f6ace856a8f20322ffdc9f1220fc",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "docs/research/evidence/mpc01-strategy-ab-ts01-per-attempt-20261103/strategy-ab-ts01-summary.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "34e3312a964c1f8bfa8040987a0161545d4016e52bf014dedd508149155da389",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "docs/research/evidence/mpc01-strategy-ab-ts02-per-attempt-20261103/strategy-ab-ts02-summary.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "a9701f23c21a43f4bcc917d0b1ee94771a1aa7aede82037dbcb5d502dfcb7faf",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "docs/research/evidence/mpc01-strategy-ab-ts03-20261103-r1/strategy-ab-ts03-summary.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "18fcf3a49e27fa5f79d4d2db26b0dcc1b16c600dd14e3ec9b1b4aca7e850c602",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-air-to-air-32985fda3c8312da3566/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "5220fdea13e24484363b8421ede557db2c242dbd4b8901aaf9309321e4321b40",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-broken-triangle-9f6110ba0f279f0796e9/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "9d509aa9be7db6baf3fee789e8d1eb1fc5497a3cf97f3866000a91fd48b86ed6",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-cartpole-80ef217d60ba94910d3d/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "f5eb6c9b69d5b69a0c159c8205cc723b4bd03cb5621a0a564f0a2e98f274b93f",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-dubins-car-eb4d25d6244afc5de2f2/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "41341dcc23277dbeec1c7e91da753d3787a79274edb36e745d7cf9b4337716d8",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-earth-orbit-d89c89a7460a98d8297b/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "ba3ca1fb7713a3ef1acef6811af4be7b1e3fd79a55acca3397a6e1b21d26891f",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-homicidal-chauffeur-1ead2fc0b1513493d2ea/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "7a30e60b9de01988aa73e12803a18c42dde667af44157e11a5013f1481c27a97",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-max-coordinate-b38d01d47e4de3cffae3/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "61c5dc7bed2f4c973853eedbe1874037e4bf2a7a2c20df53385b1ce1e0c4a682",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-multipoint-96e7f4fa2a0f7bc543a5/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "ac5fb9f0cde558e9ea458471293772ee537c25073459e99b6509502321b0fc6e",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-pendulum-1e596033992c263d451e/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "b7ca67713ff58acb131bce53a9e01dd296bd4ffe202b8740caa506e5ef73d6c7",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-pendulum-terminal-18c1b2ac58bdc43be172/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "f6fdb2ba922ac2f1d6fb7f51a1861c7a203616a1d37b18700b546ce7eb9ad85d",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-point-on-plane-c19c55ac5163174af9d4/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "21d7be1e9f137249304be2fee470d687e0d60b470da200c0593b3b8b12c52ab6",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-simple-control-65a4341b28e95682f6de/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "e7b627db0dc946a0ce7101da4c80310f7b8811e99152381a499cb3273d6de717",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-sphere-game-daf5f2eab900c226334f/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "59f1bc6fc52669ee58fe282748598abe77a7e3e8551ad35941d53ff5317fa17e",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-time-sphere-75e9ca324bc41601eff4/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "5bd8bed3718a8d0a587d08f8d885c4f87793d33fbacd45c2c29820f89a55b278",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-time-sphere-minimax-c50898f716ff6fdc8ea9/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "4bc4b929d851be54186f6b7f80f1fed64cf0a89b5aab51af4247ac9afa8c7a7c",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-two-particle-minimax-31bb367020af7a94b1a7/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "a7aee9dfdf1f5ccdc11274c8ba7672bcf067a9fc0621a6dd219e353ce7347eb1",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-two-points-33ebdad360671940fb54/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "4cd648369d88206996fd4e8e6d9a0f96204279b11cb983d1d8dc1924b15bdff4",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-two-points-4fbedf73c6f198fd57e2/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "885cb5619cc6de3780ab92a96b454e40a409a8520fe664ee94e4b98051e4df09",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-two-points-a6ccaf470aaa2b1c92d1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "cfef194cf20eaf07c8e6b794c8841a099416a203b9b1fd18da0c0ab84b6a4847",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-unequal-game-0184b7d45c1bdb804fc4/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "e820bcff9163a76e617b0de5e68608f89591ddea7a64484f477373a3ee178126",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-unlimited-bolza-6f645469efd8fab2a0c7/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "25994b9a0745af8e4139776c7724007027cf8032e2c3ac6a9e9b8f1ec39c731d",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "env717-vanderpol-12eb9b40481b84febbe8/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "77574629ecffc1ae5ce955754a611e434f93a244427c021008ed69988c445a89",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "examples/adaptive-ode-replay.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/adaptive-ode-replay.html"
+    },
+    {
+      "route": "examples/app01-plan-timing-v1.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/approx_extension_companions.py"
+    },
+    {
+      "route": "examples/app02-diamond-v1.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/approx_extension_companions.py"
+    },
+    {
+      "route": "examples/app03-zonotope-v1.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/approx_extension_companions.py"
+    },
+    {
+      "route": "examples/app04-square-v1.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/approx_extension_companions.py"
+    },
+    {
+      "route": "examples/b04-reference-trajectory-projections.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/b04-reference-trajectory-projections.html"
+    },
+    {
+      "route": "examples/buryatia-dim4-literal-affine-v1/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_buryatia_dim4.py"
+    },
+    {
+      "route": "examples/buryatia-dim4-literal-affine.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/buryatia-dim4-literal-affine.html"
+    },
+    {
+      "route": "examples/buryatia-volterra-affine-2d-superseded-v1.html",
+      "disposition": "frozen",
+      "owner": "docs/examples/buryatia-volterra-affine-2d-superseded-v1.html",
+      "sha256": "187f1b0e227b98d4b38efbbb7a2858afcb4b2c2db23b8b17cdfbce340faadf8e",
+      "witness": "Historical superseded-v1 drawing; exact retained source at 4ec928cb9076079f41c0db53db6c8d7fc000090a:docs/examples/buryatia-volterra-affine-2d-superseded-v1.html, authenticated separately from the corrected native v2 drawing by stage_buryatia_volterra."
+    },
+    {
+      "route": "examples/buryatia-volterra-affine-2d.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/buryatia-volterra-affine-2d.html"
+    },
+    {
+      "route": "examples/closed-loop-pilot-2d.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_closed_loop_pilot.py"
+    },
+    {
+      "route": "examples/closed-loop/figures/earth-orbit.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/closed-loop/figures/earth-orbit.html"
+    },
+    {
+      "route": "examples/closed-loop/figures/fuel-fuel-flow.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/closed-loop/figures/fuel-fuel-flow.html"
+    },
+    {
+      "route": "examples/closed-loop/figures/fuel-state.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/closed-loop/figures/fuel-state.html"
+    },
+    {
+      "route": "examples/closed-loop/figures/lotka-populations.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/closed-loop/figures/lotka-populations.html"
+    },
+    {
+      "route": "examples/closed-loop/figures/nominal-h-tube-lotka.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/closed-loop/figures/nominal-h-tube-lotka.html"
+    },
+    {
+      "route": "examples/continuous-policy-2d.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/continuous-policy-2d.html"
+    },
+    {
+      "route": "examples/control-witness-timing-v1.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/control_witness_companions.py"
+    },
+    {
+      "route": "examples/control-witness-v1.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/control_witness_companions.py"
+    },
+    {
+      "route": "examples/ext01-b08-timing-v1.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/approx_extension_companions.py"
+    },
+    {
+      "route": "examples/ext04-affine-synthesis-v1.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/approx_extension_companions.py"
+    },
+    {
+      "route": "examples/ext04-observed-replay-v1.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/approx_extension_companions.py"
+    },
+    {
+      "route": "examples/ext05-states-v1.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/approx_extension_companions.py"
+    },
+    {
+      "route": "examples/ext07-feasible-relation-v1.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/approx_extension_companions.py"
+    },
+    {
+      "route": "examples/ext07-two-control-family-v1.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/approx_extension_companions.py"
+    },
+    {
+      "route": "examples/feedback_geometry_2d.html",
+      "disposition": "maintained",
+      "owner": "examples/feedback_geometry_2d.html"
+    },
+    {
+      "route": "examples/finite-feedback-timing-v1.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/approx_extension_companions.py"
+    },
+    {
+      "route": "examples/fixed-plan-minimax-2d.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/fixed-plan-minimax-2d.html"
+    },
+    {
+      "route": "examples/fuel-b06-viz03.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/fuel-b06-viz03.html"
+    },
+    {
+      "route": "examples/fuel-b06-viz06.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/fuel-b06-viz06.html"
+    },
+    {
+      "route": "examples/fuel-reachability-layers/index.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/fuel-reachability-layers/index.html"
+    },
+    {
+      "route": "examples/geometry-optimization-v1.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/geometry_opt_companions.py"
+    },
+    {
+      "route": "examples/history-cost-2d-v1-current-source.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/history-cost-2d-v1-current-source.html"
+    },
+    {
+      "route": "examples/history-cost-2d-v1-reproduction.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/history-cost-2d-v1-reproduction.html"
+    },
+    {
+      "route": "examples/history-cost-2d-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "aba080d3ebe75fe7e59b4f224f0f81066ee8f03a0aeebe34698b2e54a17fe40b",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "examples/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/visual_examples.py"
+    },
+    {
+      "route": "examples/issue3-control-walkthrough.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/visual_examples.py"
+    },
+    {
+      "route": "examples/lotka-volterra-sampled-v1.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/approx_extension_companions.py"
+    },
+    {
+      "route": "examples/native-discrete-models.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/native-discrete-models.html"
+    },
+    {
+      "route": "examples/native-extended-models-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/native-extended-models-v1/index.html",
+      "sha256": "dec5a396710e25c71c16bcd915e88312a7b0bc72992c451b4f5fbe7c8c6d525c",
+      "witness": "Frozen native extended-model bundle at 8e5f502f6df888ddc70d330ca26fb11226cd5857; retained source reports/algorithm-results/native-extended-models-v1/index.html"
+    },
+    {
+      "route": "examples/native-extended-models-v1/lessons/native-slide50-reachability.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/native-extended-models-v1/lessons/native-slide50-reachability.html",
+      "sha256": "6859d189e799d439c3959b78980f226b1a71c86d52ecc898cb8810872a152b53",
+      "witness": "Frozen native extended-model bundle at 8e5f502f6df888ddc70d330ca26fb11226cd5857; retained source reports/algorithm-results/native-extended-models-v1/lessons/native-slide50-reachability.html"
+    },
+    {
+      "route": "examples/native-extended-models-v1/lessons/native-spatial-flight.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/native-extended-models-v1/lessons/native-spatial-flight.html",
+      "sha256": "67d8ec1b8cff3c301660bee30ae07fdc48823ba484e76809b3e922e059074723",
+      "witness": "Frozen native extended-model bundle at 8e5f502f6df888ddc70d330ca26fb11226cd5857; retained source reports/algorithm-results/native-extended-models-v1/lessons/native-spatial-flight.html"
+    },
+    {
+      "route": "examples/native-fixed-tail-2d.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/fixed_tail_example.py"
+    },
+    {
+      "route": "examples/native-fixed-tail-episodes-a6/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "3e3091eaa06f330febcd4feb2ace5449c4430d0d767458f2f6430d7db35cbc04",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "examples/native-fixed-tail-geometry-a6/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/native_fixed_tail_geometry.py"
+    },
+    {
+      "route": "examples/native-flexible-pitch.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/native-flexible-pitch.html"
+    },
+    {
+      "route": "examples/native-four-state-reachability.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/native-four-state-reachability.html"
+    },
+    {
+      "route": "examples/native-model-catalogue.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/native-model-catalogue.html"
+    },
+    {
+      "route": "examples/native-model-tracking-first-pass-v1/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_native_model_tracking_first_pass.py"
+    },
+    {
+      "route": "examples/native-quadcopter-mpc.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/native-quadcopter-mpc.html"
+    },
+    {
+      "route": "examples/native-slide50-reachability.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/native-slide50-reachability.html"
+    },
+    {
+      "route": "examples/native-spatial-flight.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/native-spatial-flight.html"
+    },
+    {
+      "route": "examples/nominal-quadratic-history-2d.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_nominal_quadratic_history.py"
+    },
+    {
+      "route": "examples/nominal_linear_exact_2d.html",
+      "disposition": "maintained",
+      "owner": "examples/nominal_linear_exact_2d.html"
+    },
+    {
+      "route": "examples/qhull-highs-strategy-a-2d.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/qhull_highs_strategy_a_example.py"
+    },
+    {
+      "route": "examples/source-index-geometry-2d.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/source-index-geometry-2d.html"
+    },
+    {
+      "route": "examples/viz04-replay-comparison.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/viz04-replay-comparison.html"
+    },
+    {
+      "route": "examples/viz10/index.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/viz10/index.html"
+    },
+    {
+      "route": "exp02-it17-a44-paper-order-20261027-r2/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/exp02-it17-a44-paper-order-20261027-r2/index.html",
+      "sha256": "1da8dc942527df3f275e294b7df38e802cbd04745be8cf936dd8614c056d200b",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "exp02-it17-a44-paper-order-20261028-r3/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/exp02-it17-a44-paper-order-20261028-r3/index.html",
+      "sha256": "508c9f1f0cf1584261c936f83267c4b8810be4b49fdf7b16162d8f070ce76907",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "exp02-it17-dyadic-250-20261029-r1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/exp02-it17-dyadic-250-20261029-r1/index.html",
+      "sha256": "9cdc3ab5942662dea19f54d55601074286bc5b274d0294e8db4cca49bfa8695d",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "exp02-it17-dyadic-interior-20261027-r1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/exp02-it17-dyadic-interior-20261027-r1/index.html",
+      "sha256": "855ea9b5c2394ddfa36f81665c42a4b67d69a07e8efa5f165bed85591da54579",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "exp02-it17-dyadic-interior-20261027-r1/prior-halton-ladder/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/exp02-it17-dyadic-interior-20261027-r1/prior-halton-ladder/index.html",
+      "sha256": "884e59c57a2a4a18cce40630a37b6c495abbddb3ea8eda4be128262a9ee2ea79",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "exp02-it17-hull-3d-halton-cloud-20261028-r1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/exp02-it17-hull-3d-halton-cloud-20261028-r1/index.html",
+      "sha256": "d399a9e2423277751787fd12ab29b76e84c422903a61a54364a9e66340b21eec",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "exp02-it17-hull-3d-simplex-20261028-r1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/exp02-it17-hull-3d-simplex-20261028-r1/index.html",
+      "sha256": "02ca77a79382b12276690ce0ae8a864a51e4aeb25c72b2a3ea9f61281b54ca82",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "exp02-it17-hull-4d-simplex-20261028-r1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/exp02-it17-hull-4d-simplex-20261028-r1/index.html",
+      "sha256": "10aead96440697f962f8b49befb19f527219c51f326a40286a425352278b2bbd",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "exp03-two-points-approx-publication-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "57f69f67f0236976b89c02032b23357892588c9d5f544cbcfaaa41d9e6a5905e",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "exp03-two-points-approx-publication-v2/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "7e832b062a8ca058c34404a505e2825b567a7d3585b956347df18ff986fbc921",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "exp04-replay-93fe3b87795e1d3a/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/exp04-replay-93fe3b87795e1d3a/index.html",
+      "sha256": "ffbd787b7a01ecafae6c8e9b37e4abc98a1db1a134e94214388aa37b4ee9d76f",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "exp06-1d8f520bff781737/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "fd23f6d79bf3fafc8e40d6db5225fb2c24f23836c31607077ee86bb6d60f62bf",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "exp06-e370442c00de7368/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "90f53c6504df729183fae07e980841bb799e48f5c321ee5e7b3207dc664d1059",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext01-fixed-plan-303ad863ca3af58dc6a515844c474fe0e1af9349e55cb8acd1ff1a3f220f1b54/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "294fb5c387e16ac4f8933071ed1792a37da64caed1989e206680c4142dff12dd",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext02-two-state-mixed-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext02-two-state-mixed-v1/index.html",
+      "sha256": "e66fb7b33f4a2f449aa50dda1e170e1334c2e901aeda5b7f30d6a6fda36fbc9d",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext03-transform-a40248163f1a8d9b8673140080d83525173af0b73737fe7f1a61e4b470ea2d1a/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "f5d9b20d0f449a88431cb881718e44cdd576a4ed69c137f1f0db394d0fc9af77",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext04-affine-synthesis-7eadf7c7ecbb2bbd/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext04-affine-synthesis-7eadf7c7ecbb2bbd/index.html",
+      "sha256": "b1eeb7fd72d3c0fe3f7919868c653137185d966c1491eb03c87bbc1dc8b4df4b",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext04-continuous-ebcf879d07ee9157/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext04-continuous-ebcf879d07ee9157/index.html",
+      "sha256": "0b0f4f17fada63805df159fc4ddf22e33760062e607ccdc859b3741b88d2384f",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext04-h-policy-0c0a95116ce4642b/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext04-h-policy-0c0a95116ce4642b/index.html",
+      "sha256": "394559ac751d35b750ef0515411b811a5092f59310d41511e64edc7ff291a076",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext04-observed-replay-eb0b06e560360611d2f2a16fba9b1204e0415b4ba5cd0d5210427c6349963b34/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "ab8f2e3b5039d3c52e73e8d7f6b052c891cf099a45845257f23e2258c0dd22e1",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext05-discretization-a40ba9647cc023dc/example-2d.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext05-discretization-a40ba9647cc023dc/example-2d.html",
+      "sha256": "9396f8e14b35825acbef0f131527a689f8b5f2618a77132143103078e1b0466a",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext05-discretization-a40ba9647cc023dc/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext05-discretization-a40ba9647cc023dc/index.html",
+      "sha256": "291c9e51e95d68bf83a91af850399825d66f7b888c05bfd351ac723a136c52ee",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext07-hybrid-4f2ed937429c4908/example-2d.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext07-hybrid-4f2ed937429c4908/example-2d.html",
+      "sha256": "588654bc46ac9909ead2d09396ca52c1bb7aec9ca20538289ab86a38f97543fc",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext07-hybrid-4f2ed937429c4908/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext07-hybrid-4f2ed937429c4908/index.html",
+      "sha256": "204e5e0e3e9ef283039fa39051f270c9c6aee1b60d1fe947a6f7f47b09a528f9",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext07-hybrid-51d9ee2e89d240eb/example-2d.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext07-hybrid-51d9ee2e89d240eb/example-2d.html",
+      "sha256": "8337486000b490bae7631faa801e74e9745d0be71c8c12dccfa07449bcdc051d",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext07-hybrid-51d9ee2e89d240eb/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext07-hybrid-51d9ee2e89d240eb/index.html",
+      "sha256": "9b914e6355ab9b0ca480b3b50712d2d9182f0c81985cc411bf140f8015359496",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext07-hybrid-9d4034480963bb5e/example-2d.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext07-hybrid-9d4034480963bb5e/example-2d.html",
+      "sha256": "455bb8468b0cdfab1fe7ca1e63cce9ffa8b2a332fc1b6d95017c691c667391e6",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext07-hybrid-9d4034480963bb5e/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext07-hybrid-9d4034480963bb5e/index.html",
+      "sha256": "e5ed72c799c2989b9effc17a1904596fddfee25bc4c02da6091e21d15c7e7ecd",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext07-hybrid-e7bb939d854b1907/example-2d.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext07-hybrid-e7bb939d854b1907/example-2d.html",
+      "sha256": "7553666bde77d8e504d05ce33e02843212d1b604c49611aeb5c09a2de4d859df",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext07-hybrid-e7bb939d854b1907/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext07-hybrid-e7bb939d854b1907/index.html",
+      "sha256": "78bd3abebffe4e8be9b822a785938c2a35066682dd13393ce96b0a9a1784979d",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext07-hybrid-two-parameter-336c1476ce078d8f/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext07-hybrid-two-parameter-336c1476ce078d8f/index.html",
+      "sha256": "5dcd1645b43fdb5981c084af8fc3450f3fe166ee06cb4d9f6ef3870890b3ea3b",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext07-hybrid-two-parameter-336c1476ce078d8f/two-control-example.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext07-hybrid-two-parameter-336c1476ce078d8f/two-control-example.html",
+      "sha256": "8a3e33d0aa5ab2375f9d345bbe10bbc1f4eb1afc0cee6da5ab004202564595c9",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext07-hybrid-two-parameter-6f2799c9acfcc5f2/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext07-hybrid-two-parameter-6f2799c9acfcc5f2/index.html",
+      "sha256": "65c82b0c9022b4a8d6d7f54d72a5648b60a927b10f48300003e503147306b4e9",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext07-hybrid-two-parameter-6f2799c9acfcc5f2/two-control-example.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext07-hybrid-two-parameter-6f2799c9acfcc5f2/two-control-example.html",
+      "sha256": "059626d65b117df6cb658655da79472ce87b087f71964d6e5e9c5f7d208f5acc",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext07-hybrid-two-parameter-8ad871b5ea29fc7b/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext07-hybrid-two-parameter-8ad871b5ea29fc7b/index.html",
+      "sha256": "8a68ed07ff8b49750fc3d56cb21e20a3c3dbd01bd869251af7768b47a9dfae10",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext07-hybrid-two-parameter-8ad871b5ea29fc7b/two-control-example.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext07-hybrid-two-parameter-8ad871b5ea29fc7b/two-control-example.html",
+      "sha256": "a84346df299a62fdb131a2bc2ea58da65c03fa823c4bb7faa14c2e6b0d31c3c7",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext07-hybrid-two-parameter-9732c471bf065c33/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext07-hybrid-two-parameter-9732c471bf065c33/index.html",
+      "sha256": "eab2605004e7bb00ff39196820c90dd3cee53784d624d31c3e12aefd1e2bf3e4",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext07-hybrid-two-parameter-9732c471bf065c33/two-control-example.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext07-hybrid-two-parameter-9732c471bf065c33/two-control-example.html",
+      "sha256": "87b0cf5edae9e53fdf50c31c12e80dc340a29a8a8d24cd8af36b0b14b3662400",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext07-hybrid-two-parameter-bc3c6ca5f7a606ee/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext07-hybrid-two-parameter-bc3c6ca5f7a606ee/index.html",
+      "sha256": "f12f3d57675d90f51ac358b62f6843007c98269185b07a642dac33b3eeddc7c3",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext07-hybrid-two-parameter-bc3c6ca5f7a606ee/two-control-example.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext07-hybrid-two-parameter-bc3c6ca5f7a606ee/two-control-example.html",
+      "sha256": "aee51cd628620e3f745652aca433e3f8c128d8ab209f42035a8c6c9e03979af0",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "ext07-resource-observation-cfec938d120c95cb/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/ext07-resource-observation-cfec938d120c95cb/index.html",
+      "sha256": "3b635cba192fa0d87cc7b139fda1ed42cf85f82256f64387be843aec583ce37e",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "finite-feedback-registered-f874133e442eb0fb884b8813a06591cc0f077063ee75ddf627de74656fc11c0f/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "f1ea91785a505993b4e14bbff199a210c5c96ade6654eb6f74774e0ad0ffbd02",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "geo02-20261012T235755Z-7275580339899c6ac27496fc2b05cb040d9fec14f8ec7f8bf219cc299c55eefc/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "61f29ca4c2bd4d793d975e8808369494654b8d70f298dc3c00b4600bf0942c0e",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "geo02-20261013T061151Z-449f188d2de1f50164a55a7b3b3931132dfa8384306ac3c93d5fb3a958cbd754/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "af42bbdf3d7dde3d69e13737ff90cfda3716a5c0fd40792667a53cd03a2d051f",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "geo03-20261012-30157d9ac59269cc26a2ca24dfd1744297971b435a8bba13dcb68f2a1dbcd104/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "7a776b99e0efbf9a372622fd822c408f1a4dc9e3d1c780d65e58893add5f7e02",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "geo04-20261012T224946Z-30606c76deb657567eb86a451c474c5aa796827651262a550b15fa4cb4ece549/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "982d7b59bc629268f83adf822877d5e831005f69386b4668853d429bbfc69f0c",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "geo05-8918ad3ac4b0b3d1ff9c8b807d6b509f324ef3e9b11716be496c8e6e437f6795/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "9cf29bd3fb45f6796d89a6b2875b3b486ddd8939186b79548ee4d17ad04dad9a",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "geo06-f8bee6d8f950343215dd24afeff5091669b8940e7d2106e6834e904b6ec4c074/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "481ecb8ab9ada69a70cf09c87ff35c6237d8b497f2fc5d5c41056d7da4725074",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "geo07-dependent-registered-ee5345877b14a0ebd234a92fe30b371426cfee1e72aa8abf9ea2f9ac3454483b/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "0602ff85fae69a48db590a29462d0074a1d9aa92fbf43efbf7eb79cd1817fcbb",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "geo07-generator-sets-7890194735a81238f91e32d598a44eb48cca751ea6ec8af31c58910f89f0dbb6/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "0aad949ae95b3ce982387612338e48a863c20f7d082179d61e7c30f50facf4d4",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "geo07-registered-ports-5da2b9dfd2650afff575e2294b58d817d4bb58013e1332efe95725b9901f559b/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "1d26842d6e43996f705c5c2e7bdcae44d19f8ccdbb7d58a833662fec7703fc62",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "geo08-lazy-6dbdd6b2f9235837/example-2d.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/geo08-lazy-6dbdd6b2f9235837/example-2d.html",
+      "sha256": "76d4feb73d55a6eea4ba4de8131f39a9cbcc829b99e62a11a41d462c6e86f8d3",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "geo08-lazy-6dbdd6b2f9235837/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/geo08-lazy-6dbdd6b2f9235837/index.html",
+      "sha256": "0d66d413d542281e6060962ec6ec9b515784119104c87bceb1ed4a9b2fd25867",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/site.py"
+    },
+    {
+      "route": "issue3-finite-catalogue-388b4be3a35ac10c9b42bf8f92ac5ae06b2120049dc6003791bc6487628478de/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "0827c87958005ea9be02d5b41d1fa770875bfec096c97f7c12d9d2c34cb234bd",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue3-validated-minimax-aa73872236deca412e8471c2812f4e0e015f169a4f8de28d6caef450d7e26f3f/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "73da6fa025ca7f81a89908a9b960b3745fcb3f8e15a6342982af6156cb598f49",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue4-volterra-7dce05b47c50c27a/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/issue4-volterra-7dce05b47c50c27a/index.html",
+      "sha256": "9ae62adb575c44a4da216c5fbf2d396375f6965c742c5ca2dddb06d644b4a3d1",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue6-b06-manifest-correction-abbcd7aaf4ce35b7d08d332386516cc16f7b6757d69524beab8ba8244b504e5c/example-2d.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "b090d1062223855d457bdb53e68b82beecababc5e25860e54265e9e43383072b",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue6-b06-manifest-correction-abbcd7aaf4ce35b7d08d332386516cc16f7b6757d69524beab8ba8244b504e5c/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "138c12fbc389f6239734619dedab0e6b0ba6a5a1d939d9cd593491a25b8abde7",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue6-b06-manifest-correction-abbcd7aaf4ce35b7d08d332386516cc16f7b6757d69524beab8ba8244b504e5c/source-report/example-2d.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "773ab6ef2b69b2893fb3d3d82112c224f1d29a6038e0975a82ddd91925d1f6ff",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue6-b06-manifest-correction-abbcd7aaf4ce35b7d08d332386516cc16f7b6757d69524beab8ba8244b504e5c/source-report/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "54958057c49eda62d81d627583e69707cb1f5f7b0635d24da33659db686d095c",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue6-b06-reference-761bdc6e40b93814f873f105313d1eed4f63711653aa583a16a2ddfbc67c2a82/example-2d.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "773ab6ef2b69b2893fb3d3d82112c224f1d29a6038e0975a82ddd91925d1f6ff",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue6-b06-reference-761bdc6e40b93814f873f105313d1eed4f63711653aa583a16a2ddfbc67c2a82/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "ea9c39f80560ea12a6bb7034b2da5b3a696075794fcec3585842158b33c7d91e",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue6-b07-reference-a394915af10636430cdcd757d95a9d987eaa6c4c0b742bef7ba1aa04638a2cdd/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "40985df3c197a9d0eab9c6acfffbc0820d5e939998eb599652b78b1f747059f8",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue6-b09-reference-55ce58aad204a251a0122d56189dc496133ebc2d38f8aaf8a201ff034fbdd49f/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "9759c28fa67e4d38906e4d3c3ea07d900117bc93b362ac0b30211e3f41c1d5df",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue824-two-points-box-pilot-v4/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/issue824-two-points-box-pilot-v4/index.html",
+      "sha256": "0995a3886750b668d062e61f34918fb1fbf0593f05cee0efa97e11f5cd722f6e",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue824-two-points-ellipsoid-minimax-v1/ellipsoid-planar-example.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/issue824-two-points-ellipsoid-minimax-v1/ellipsoid-planar-example.html",
+      "sha256": "fe1e7ec043efa5c606a8cfa57db77243c289a6ff72ba1f58819e809683918fff",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue824-two-points-ellipsoid-minimax-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/issue824-two-points-ellipsoid-minimax-v1/index.html",
+      "sha256": "810b6a9030165d0771f510e6525032ffb93830d4bf34b9f26dec387c6e12fe45",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue824-two-points-ellipsoid-minimax-v1/planar-example.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/issue824-two-points-ellipsoid-minimax-v1/planar-example.html",
+      "sha256": "b217f5a31aa727a6aecb3564b5e45826a22d93aa6d6afa478654e2a94162ff78",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue824-two-points-ellipsoid-minimax-v2/ellipsoid-planar-example.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/issue824-two-points-ellipsoid-minimax-v2/ellipsoid-planar-example.html",
+      "sha256": "fe1e7ec043efa5c606a8cfa57db77243c289a6ff72ba1f58819e809683918fff",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue824-two-points-ellipsoid-minimax-v2/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/issue824-two-points-ellipsoid-minimax-v2/index.html",
+      "sha256": "e92b4f8476e5dceb69e816df244016882da7e01f328c8c3599356a434a2a3d0d",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue824-two-points-ellipsoid-minimax-v2/planar-example.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/issue824-two-points-ellipsoid-minimax-v2/planar-example.html",
+      "sha256": "0427152e079a435ead5ea14aa7dee268ac1afb78d7967278aaf63d35724819f8",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue824-two-points-matched-minimax-resource-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/issue824-two-points-matched-minimax-resource-v1/index.html",
+      "sha256": "d779cc3904c8ed65e35fd6b5afa7ce53f86330d46c50bc11fcb898da01b44ba4",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue824-two-points-matched-minimax-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/issue824-two-points-matched-minimax-v1/index.html",
+      "sha256": "5811bfc15d750a0c9dea3210ad550105ced19916ffb512f6dcfd937487566995",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue824-two-points-nominal-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/issue824-two-points-nominal-v1/index.html",
+      "sha256": "0feb35d9b2ade7311a6131c76cdda18655c24fece27453b6788070ce3c6fb24d",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue824-two-points-nominal-v2/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/issue824-two-points-nominal-v2/index.html",
+      "sha256": "6b2a83bb5dd7465afbba5c392b9b6c851daaec48953cd8bb4dec74085109b239",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue824-two-points-zonotope-minimax-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/issue824-two-points-zonotope-minimax-v1/index.html",
+      "sha256": "f0b5c5b9961aa1099da4ecf410a8e2e5198cd5c8bb26ccf55bc24f5d63deec25",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue824-two-points-zonotope-minimax-v1/planar-example.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/issue824-two-points-zonotope-minimax-v1/planar-example.html",
+      "sha256": "dc917afe7f6851968388aed140be485d96c36db05ff2505dd08572a219ea3275",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue824-two-points-zonotope-minimax-v2/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/issue824-two-points-zonotope-minimax-v2/index.html",
+      "sha256": "9ce5cd54fa3948f9199161f56c0db1b918c10aa60a82dd6c0403025e43f08112",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue824-two-points-zonotope-minimax-v2/planar-example.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/issue824-two-points-zonotope-minimax-v2/planar-example.html",
+      "sha256": "0427152e079a435ead5ea14aa7dee268ac1afb78d7967278aaf63d35724819f8",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue824-two-points-zonotope-pilot-v2/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/issue824-two-points-zonotope-pilot-v2/index.html",
+      "sha256": "0bf8ded5f8788fba839ee346be6fb8937a1d5e972939d9556e3ad794583a20f8",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue824-two-points-zonotope-pilot-v2/planar-example.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/issue824-two-points-zonotope-pilot-v2/planar-example.html",
+      "sha256": "226d8b7e834e1cb7a75334d607d4a2f74bbbc3620662b054c073602e73a9179b",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue944-strategy-a-each-choice-postfix-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/issue944-strategy-a-each-choice-postfix-v1/index.html",
+      "sha256": "3d9e3200345b967b8f00ccfd3a33b7b38f307cc2b7234c1203f3c3a7d358ab07",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "issue944-strategy-a-each-choice-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/issue944-strategy-a-each-choice-v1/index.html",
+      "sha256": "5d638e285fd10398cf2c55e0ff1e96d9437338d0c3ce2949f8916397c6b2dcef",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "learn/closed-loop-semantics.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/controller-composition.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/coordinates-and-outcomes.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/finite-controller-consumers.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/fuel-capstone.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/install-consumer.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/lotka-capstone.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/module-catalogue.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/native-forward-models.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/native-model-tracking-first-pass.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/native-quadcopter-mpc.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/native-substitution-matrix.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/optimization-backends.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/orbit-capstone.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/representation-consumers.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/same-geometry-five-representations.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/set-operations.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/simplex-and-comparators.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/terminal-optimization.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "learn/vertex-membership.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/learning_book.py"
+    },
+    {
+      "route": "legacy-index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "29376974f806ad83816be9b42bda19fbeccaebc9a7ca79c291ed3d9ea3d522d2",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "lotka-volterra-sampled-20261023/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/lotka-volterra-sampled-20261023/index.html",
+      "sha256": "63858310c070de048bfa01cb796174ba2a4fd73a3135dcf4fa80c3d57ea9c675",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "lp-20261012T000346Z-9b916da6a4ffd6685e99df3129f6cbaaa73d85c9f12533a828c1e1714dd12ff0/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "8f2e8550fb417041b8459e415446903c1892adbd0237195de66508f0d2c6dea6",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "lp-20261012T000346Z-ee5e9193b7a5/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/lp-20261012T000346Z-ee5e9193b7a5/index.html",
+      "sha256": "2b7d31cb884861fdab7abe2d1fad8dadb4be1489f5e1edda4afdc8b05b3c22c2",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc01-per-attempt-20261103-r3/b04-repeated-projections.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "1f5170245b457f7e4b5b0db23e0de5475d6ab234a10d600fd47c783e6d983d00",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc01-per-attempt-20261103-r3/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "4ba2333ecea63a27b98570916e738a68d13a13f6625d713c59026e5431efb4e9",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc03-b08-l04-miQCP-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/mpc03-b08-l04-miQCP-v1/index.html",
+      "sha256": "7b48219ce49783ba136465797d0bc19eb69c554072ba22f380d69fca3cdd464f",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc03-open-loop-pilot-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/mpc03-open-loop-pilot-v1/index.html",
+      "sha256": "89635ada87c2ce2f9665ec7f285c052e3f281abfb91f4f3e03cadbd4d83681ca",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc04-max-coordinate-replanning-9737632b9802b7f5dc32/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "ee1845f2c4531f6f4caf243163ef40ee5941d9b7de73772042684bf82198e667",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc05-causal-tree-b3806c9080aea34bf291/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "0d87b8ac5653853a9c858565e0d517af448e1dc033597c917cfafb12ee93a391",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc06-complete-6b7059d62473d32d4210/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "3698ce8d8866306a85beaaa65e44472ded4ae38f8b659e68ed786c522c15123e",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc06-complete-6b7059d62473d32d4210/input/online/checked-inputs/mpc06-online-anchor-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "de5b23cab244f6b5b8043e44fb23b3f69bcf4f2a1cbe47c4922f6dfeae5234aa",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc06-complete-6b7059d62473d32d4210/input/online/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "b90ce19e5bb85dc741947b6fedaa00c3078d52486a3e038d0f87f52e8ca9a677",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc06-offline-costs-3dc087df21e7c19c2d37/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "d92e696be460eab6896691a8265aa71357347f79b1808c01e5538dddfdd453ad",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc06-offline-costs-ff0186caf3e1ac2f4425/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "c80e695d278c9d7b466a49e9ea41fca029b69f7bd6c650ce9d8d82b017267680",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc06-tube-405a8ac4eb2bea7ebec8/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "7cd5900aa298e60d799e81abf7ad95cf47b571b8a5dc592cb9bea5cb6751533e",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc06-tube-cost-7e3fe044f4cecc83a90c/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "229f79d63ec68fb960002e9823b5e0ebf2a70a7f4c1c2024b88e95b5aea2a838",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc07-comparison-4ba2055717354b59/evidence/bounded-policy-0e821c2a-recheck-v2/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "250519a67c5db9b886edc763e86af2694926898424dc3ed1075971f9624e434a",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc07-comparison-4ba2055717354b59/evidence/bounded-policy-0e821c2a/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "3d1882bdb1703a784c0be7caef55c304d236db0e5cdc4a1a2cfb85c8a8d4587f",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc07-comparison-4ba2055717354b59/evidence/joint-filter-04369201-recheck-v2/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "a399e7c8c95ca9cd194a69e9ac405a601288056b7b3f74bbcec12f7741d660dd",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc07-comparison-4ba2055717354b59/evidence/joint-filter-04369201/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "dc1391e0456a35e704ee7722d52e0577cc3d22650f5a09a587a76a921fb8da63",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc07-comparison-4ba2055717354b59/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "1f48137c2d6e946aec1512e556368951b5e146f6a7ec511ef8e38fab17b4ea27",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc07-comparison-cac7e2016472c6be/evidence/bounded-policy-0e821c2a-recheck-v2/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "250519a67c5db9b886edc763e86af2694926898424dc3ed1075971f9624e434a",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc07-comparison-cac7e2016472c6be/evidence/bounded-policy-0e821c2a/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "3d1882bdb1703a784c0be7caef55c304d236db0e5cdc4a1a2cfb85c8a8d4587f",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc07-comparison-cac7e2016472c6be/evidence/joint-filter-04369201-recheck-v2/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "a399e7c8c95ca9cd194a69e9ac405a601288056b7b3f74bbcec12f7741d660dd",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc07-comparison-cac7e2016472c6be/evidence/joint-filter-04369201/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "dc1391e0456a35e704ee7722d52e0577cc3d22650f5a09a587a76a921fb8da63",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc07-comparison-cac7e2016472c6be/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "7a434b3fc19f4ab96a5d00823708815ca99e909d58bf896e884308d8bb839b7c",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc08-complete-5a9414f2ae07b6708738/captures/exact/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "65cd8f5d0c153d0f9016d3d5aec28168db3ecf03b3fa2fec664433bee664dd98",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc08-complete-5a9414f2ae07b6708738/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "3f21fedacbf63bb28514c7cee67e7d63ec4eb0e51d437c1d2216701209f419b6",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc08-explicit-nonunique-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/mpc08-explicit-nonunique-v1/index.html",
+      "sha256": "37746b4db8bddd482ad5b07122fbe50ebc2f21149a00c6926f72e7532c1708fa",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc08-explicit-pilot-v1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/mpc08-explicit-pilot-v1/index.html",
+      "sha256": "79899001122229a18ab337373d5081de2b3ce09775486f75ab21ce920c59244d",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc09-output-feedback-62e43f8e4f58eda35210/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "3c9ba0fdec049bb9bd662e10d2d7aa1dab045a616f834258542b2536dfd245b2",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc10-comparison-cbf22e8c7e22c30bf91f/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "db23e5cd7c0d23c662824aa83f6c1e3845ebe7c5e08ee45b35deb986332e7b5a",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc11-controller-comparison-5d94c9106e1cf07e4a2e/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "098b138368dfc0465eadc54de788a2bcfeb3a77188fde4714ca9e2b4f69da3c4",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc11-controller-comparison-967db980c95590a5150b/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "4e8aea2ea0b762c6226cfd16cc84ac101a5134fc075927c48c50e643eddbc8ec",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc11-controller-comparison-b6e1bdd5f50bd8123001/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "5a7986fb08894a38451072ff96b3c61427d19064226f455cb0d117cef017ced5",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc11-controller-comparison-cc50fc8473b24ee929ac/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "20f55a3fab25342798cef26d723514e44aacd42fc003752b1f69a1e171e769a2",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc11-mesh-timing-924055126ac3856ac279/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "2711197d0dd01b050ed069ede583bee022684a656bce1bd19e9e17359afb281c",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc11-mesh-timing-dcb9e6e302ed2fabeb71/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "0d0738eee532cb36904e96737402f9154288b43889f3b49509bc3b23c1d3395a",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "mpc11-mesh-timing-e1d5ebe497051adfdfad/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "2f228116ec6b624f60d41e18f940e7ab2d1ff4cb6e3eae834cb84f2a3e8c7c35",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "native-terminal-cost-33f907a0/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/native-terminal-cost-33f907a0/index.html",
+      "sha256": "87ca880c5b75a633e81005cfdaddf1db5c653b10139144b39600d133e353d99d",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "opt04-20261013T172839Z-bf1844fdf81c94c82ca91aadbd9d0988c7367093c5cf70269c2d0e0ca7d44b2f/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "575119b96b8061cbc8e9a7901d107418d1a0b80b5fe4a6117ac3d0da9f0582b6",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "opt04-20261013T172839Z-bf1844fdf81c94c82ca91aadbd9d0988c7367093c5cf70269c2d0e0ca7d44b2f/source-evidence/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "315886d8b30c2e00147c6a52e94c14694c558c44f4520edd734d3098ba3e47fd",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "opt05-hull-20261012-d6d3282081d5ea90d8a0c440ccc1ec774d40221e209a01d8207ebd06a551dbf5/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "b76fabf535482274ca2d76bfb9c0f45130a334c9540f308e3a6cad4469da4552",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "opt06-basis-reuse-20261014-ef70e8c5-57c666a4f82b1f7c84d3507fbad32982a7928129c18f80348ea2c9ad457b3a8d/evidence/accepted-002/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "6df67c44cdcd92535e878297b77a7e09252935bd2d26dad5d17174be68d447cd",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "opt06-basis-reuse-20261014-ef70e8c5-57c666a4f82b1f7c84d3507fbad32982a7928129c18f80348ea2c9ad457b3a8d/evidence/superseded/superseded-b52-report/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "183bc7dbb012165a7ecc914dc30c5393adb1656df571d2ced6af38a2d0dc0349",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "opt06-basis-reuse-20261014-ef70e8c5-57c666a4f82b1f7c84d3507fbad32982a7928129c18f80348ea2c9ad457b3a8d/evidence/superseded/superseded-before-basis-solve-counter/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "115a0694a81ee7efd6897f51ac7ddf914f007dc4161ca1de485f0cadebfec1c5",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "opt06-basis-reuse-20261014-ef70e8c5-57c666a4f82b1f7c84d3507fbad32982a7928129c18f80348ea2c9ad457b3a8d/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "773b7a81e8b091002c1436a9809a7c10df4e5d41f2a2874911697f5efa9a3705",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "opt07-6e77b298e159fa0b80d5d69ccd8c14233eb8830513a5d060f98ee76d8e414c96/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "ca04cb9a4cc42fac9330d63886c68cc684c83434d6f075704a7de4f8044b96c8",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "opt10-smooth-188130d94d7bf2de/example-2d.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/opt10-smooth-188130d94d7bf2de/example-2d.html",
+      "sha256": "3ba5c1596048539196ea6f6325d5497c8e3d4490e9112f1b5e426a5e70949e5d",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "opt10-smooth-188130d94d7bf2de/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/opt10-smooth-188130d94d7bf2de/index.html",
+      "sha256": "089785059008e29003e134f6863776d5cbf57f71526811124bb2a9d12415c8c5",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "opt11-a43ae7725dd3ab72d2034473aeb6c5805f2d1820b2ccd70b8383ef300a4b9865/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "702e8a91d3a757978289ef7b565ec03e841ba6dd765fe81af49fe4fd01aa2116",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "opt12-warm-start-b45c68fc3a6b164919ba3dac5e863688fd39cbb867dcc06c75f1e124c94b1386/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "3a23baa6caa9438ee82d09ec4010bec44a4932ea9b4285c82e1325a598bf9bbe",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "perf03-ts01-single-process-correlation-20261014-365f6e659e316219/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "11053008684a14ba29041426dff02f18ffb7e7279059607576d222af0ab3e27d",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "quickhull-it17-paper-adaptations-20261024-r1/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/quickhull-it17-paper-adaptations-20261024-r1/index.html",
+      "sha256": "9bb9a9c7f8c9d317d457e7449c9271f1317a8843c5640f921bc051789581f058",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "review05-family-query-9bae24f102e3bdf5e56a/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "30da5c929fc4493609d29e760850236b7e5c36baa1283506711da6772acd0de1",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "review05-family-query-9bae24f102e3bdf5e56a/review05-build-phases-20261110-468cc0eb/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "c4d7c5391a79e9bb6a9fb9751207d82c836596c35778d9df2281e003faf2bf38",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "review05-family-query-9bae24f102e3bdf5e56a/review05-family-query-20261110-3b98f5b0/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "49902c79e0b9e39cb5f9b383649fe095b9206776293a89bbfdb019fdd80b5e06",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "review05-family-query-d6af180b0e398d78ebd2/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "eb17c93e141e9d418d403c279ba249d7a4802560f7b2445f025e9bc65dbd767d",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "review05-family-query-d6af180b0e398d78ebd2/review05-build-phases-20261110-468cc0eb/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "c4d7c5391a79e9bb6a9fb9751207d82c836596c35778d9df2281e003faf2bf38",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "review05-family-query-d6af180b0e398d78ebd2/review05-family-query-20261110-3b98f5b0/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "49902c79e0b9e39cb5f9b383649fe095b9206776293a89bbfdb019fdd80b5e06",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "syn-ts01-paired-411d200c8ca76b1aee772297aaf6ed97738b72f2c2cb2a6035e1002a4a57ad22/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "d7996d79d6e8634e6b27cf0c26acc7095c40d1528885e7a9d49792db6e9cbf4d",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "syn01-6e207b2ee1f300929f054e679c8cd5707f979c02b173292660520e403ebf2852/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "35057c7760eda8fa054b01a3c37b91b9fa8f975d60aae6764f1769507ed77c4c",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "syn02-1b07970d73d90c79c4bba2c65d429ba05bd798751d885146cb21d8a876a067c3/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "bf4dc6a8e7fb04b1bab9f34cd78984c73fb4e2bac58463a5ac37c683e0a64d4d",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "syn03-nominal-exact-2d-8b94095/index.html",
+      "disposition": "frozen",
+      "owner": "reports/algorithm-results/syn03-nominal-exact-2d-8b94095/index.html",
+      "sha256": "65fd3369fb5ce4e1a708ced00c707bba6c1fd38f115e26aa82c0dc3420eaa05b",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "syn03-strategy-a-ts01-77f669553a7c803b4f061401d5c1f7ffb22ef7f973368cd1b7c3494686fa8e2a/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "11a5375e95953c25798aa3cd524ba7c9ec9c88126b3dcabdef0e21e2c1876c66",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "syn03-strategy-a-ts02-cfe716d94d74b7da3caf38130d9dd88f1b17c50711c69cbfbb2531e60a1fe416/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "642e097066ce4dd1dadc54e6d37910f173719827f018f81dc03f8c11f3acdf4d",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "syn04-strategy-b-ts01-46513fc77b3e1e9e7795b887b1d2a12d7bfa5dbde4d6c74563b7f06c6a0aff24/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "5d16f92707029799385564f6e226230f531c7ce3bd9b52c27070c3e57305f9e8",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "syn04-strategy-b-ts02-3999b008c529fd57b5cfb6a78841a9963a7e9c4c9919e0c4edafe705b236f929/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "30ff1daf763e0265d09ec5bfe0b36b017a8e90ca79f12874e9fa32f21d473de9",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "syn04-strategy-b-ts03-5f6197a02fda13363fb51ff318abc1529e494223d0fdcc11fbd2a0a5f665aaf0/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "27665373620101e1dcf3063532c0ad148cce861725e7c919c96999f9bde0bf0d",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "syn06-verifier-20261012-7c39d67859c50ffb697ab07b1d788134ef15ac05485207d1428dbf4a2d335cbc/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "6a8224b6b50cc551615ea2a0e151960f34e79a1eb66eb895cdff59837fd11b1f",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "syn07-ts01-5f46eaee678c04b251c4bd9a78dcfb5ea45ce4f417c6bff7b8ba6225e04a6d66/index.html",
+      "disposition": "frozen",
+      "owner": "reports/published-route-preservation/manifest.json",
+      "sha256": "bf6b18d8a47066eb5a67dcb2ef2e0880adea0a1de24b04fb0a0915a90175c631",
+      "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    }
+  ],
+  "required_inventories": [
+    "examples/visual-coverage.json",
+    "learn/chapter-manifest.json",
+    "examples/closed-loop/figure-index.json"
+  ],
+  "require_source_declared_routes": true
+}

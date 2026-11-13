@@ -13,6 +13,7 @@ from typing import Literal
 
 import b04_native_smoke_companion
 import geometry_figures
+import mathematical_notation
 import site_design
 
 
@@ -21,6 +22,23 @@ SourceRole = Literal[
     "collector-and-plot-renderer", "bundle-composer", "bundle-composer-and-plot-renderer",
     "bundle-regenerator", "publication-mapper", "analytic-diagram-renderer",
 ]
+
+
+def _matrix_figure(rows: list[list[int | float]], label: str) -> str:
+    return ('<figure><figcaption>' + html.escape(label) + '</figcaption>'
+            '<div class="scroll" tabindex="0" role="region" aria-label="' +
+            html.escape(label, quote=True) + '">' +
+            mathematical_notation.matrix_html(rows, label) + '</div></figure>')
+
+
+def _box_math(label: str, bounds: list[list[int | float]]) -> str:
+    intervals = '<mo>×</mo>'.join(
+        '<mrow><mo>[</mo><mn>' + html.escape(str(lower)) + '</mn><mo>,</mo><mn>' +
+        html.escape(str(upper)) + '</mn><mo>]</mo></mrow>' for lower, upper in bounds)
+    return ('<p>' + html.escape(label) + ' = <math aria-label="' +
+            html.escape(label + ': ' + ' times '.join(
+                f'[{lower}, {upper}]' for lower, upper in bounds), quote=True) +
+            '"><mrow>' + intervals + '</mrow></math>.</p>')
 
 
 @dataclass(frozen=True)
@@ -939,15 +957,16 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
         record_link = "../" + card["route_id"] + "/records.json"
         page_link = "../" + card["route_id"] + "/index.html"
         stem = card["stem"]
-        table_rows = "".join(f"<tr><th>({p[0]}, {p[1]})</th><td>saved projection vertex</td></tr>" for p in card["vertices"])
+        vertices = card["vertices"]
+        point_columns = [[point[axis] for point in vertices] for axis in range(2)]
+        label = f"Projected vertices, 2 by {len(vertices)}, columns in saved order"
         body.append(
             '<article><h2>' + html.escape(card["title"]) + '</h2><p>' + html.escape(card["description"]) +
             '<br>Saved parametric relation: <code>' + html.escape(card["relation"]) + '</code>.</p>'
             '<figure><a href="' + stem + '.svg"><img src="' + stem + '.svg" alt="' +
             html.escape(card["description"], quote=True) + '"></a><figcaption>Projection axes: u₀ and u₁. '
-            'Exact saved vertices are listed below. <a href="' + stem + '.png">Open PNG figure ↗</a></figcaption></figure>'
-            '<table><caption>Exact displayed projection vertices</caption><thead><tr><th>Coordinates</th><th>Meaning</th></tr></thead><tbody>' +
-            table_rows + '</tbody></table><p><a href="' + record_link + '">Raw saved record ↗</a> · '
+            'Exact saved vertices are columns below; rows are u₀ and u₁. <a href="' + stem + '.png">Open PNG figure ↗</a></figcaption></figure>' +
+            _matrix_figure(point_columns, label) + '<p><a href="' + record_link + '">Raw saved record ↗</a> · '
             '<a href="' + page_link + '">Published report ↗</a> · <a href="' + stem + '-evidence.json">Figure evidence JSON ↗</a></p></article>')
     mpc06_bounds = json.loads(mpc06_evidence)["plot_data"]["sets"]
     mpc06_profile = json.loads(mpc06_evidence)["profile"]
@@ -978,7 +997,8 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
         '<p>This two-state discrete double-integrator fixture uses a three-step horizon. '
         'The checked feasibility case uses the fixed zero nominal plan and full-state feedback '
         '<code>' + html.escape(mpc06_profile["feedback_law"]) + '</code> with '
-        '<code>K=' + html.escape(str(mpc06_profile["feedback_gain"])) + '</code>. '
+        'the feedback matrix below (columns follow the position–velocity state order).</p>' +
+        _matrix_figure(mpc06_profile["feedback_gain"], 'Feedback matrix K, 1 by 2') + '<p>'
         'The figure re-plots the frozen position–velocity box, support tightening and exact dyadic RPI tube. '
         'The source declares no physical units for the state coordinates; equal data scaling is a display choice, '
         'not physical dimensional scaling. The underlying study checks feasibility and safety for one fixed '
@@ -987,13 +1007,13 @@ def build(site: Path, catalog_path: Path) -> BuildResult:
         'alt="Saved position-velocity state box, tightened state set, and exact RPI tube on equal numeric axes"></a>'
         '<figcaption>Numeric ticks and major gridlines follow csl-report-quantitative-v1. '
         '<a href="control-witness/mpc06-tube.png">Open PNG figure ↗</a></figcaption></figure>'
-        '<div class="scroll" tabindex="0" role="region" aria-label="MPC-06 saved geometry coordinates">'
-        '<table><caption>Exact values retained in the frozen result</caption><thead><tr><th scope="col">Set</th>'
-        '<th scope="col">Saved coordinates</th></tr></thead><tbody>'
-        '<tr><th scope="row">State constraint X</th><td>' + html.escape(str(state_box_bounds)) + '</td></tr>'
-        '<tr><th scope="row">Tightened state set X ⊖ Z</th><td>' + html.escape(str(state_bounds)) + '</td></tr>'
-        '<tr><th scope="row">Exact RPI error tube Z</th><td>' + html.escape(str(tube_vertices)) + '</td></tr>'
-        '</tbody></table></div><p><a href="../' + mpc06_route + '/index.html">Frozen MPC-06 report ↗</a> · '
+        '<p>Exact saved sets in position–velocity coordinate order:</p>' +
+        _box_math('State constraint X', state_box_bounds) +
+        _box_math('Tightened state set X ⊖ Z', state_bounds) +
+        '<p>The exact RPI error tube is Z = conv(V_Z), with one saved vertex per column.</p>' +
+        _matrix_figure([[point[axis] for point in tube_vertices] for axis in range(2)],
+                       'V_Z, 2 by 4, vertices in columns') +
+        '<p><a href="../' + mpc06_route + '/index.html">Frozen MPC-06 report ↗</a> · '
         '<a href="../' + mpc06_route + '/result.json">Saved result ↗</a> · '
         '<a href="../' + mpc06_route + '/figure-data.json">Original saved figure data ↗</a> · '
         '<a href="control-witness/mpc06-tube-evidence.json">Companion data and hashes ↗</a></p></article>')

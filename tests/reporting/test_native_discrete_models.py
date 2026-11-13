@@ -191,6 +191,34 @@ class NativeDiscreteTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stderr)
         self.assertIn("verified", completed.stdout)
 
+        archive_path = publication / (tracking_bundle.ROUTE + ".zip")
+        original_read_bytes = Path.read_bytes
+
+        def altered_archive_read(path):
+            content = original_read_bytes(path)
+            if path == archive_path:
+                return content[:-1] + bytes([content[-1] ^ 1])
+            return content
+
+        with patch.object(Path, "read_bytes", altered_archive_read):
+            with self.assertRaisesRegex(ValueError, "committed archive differs"):
+                tracking_bundle.build(ROOT)
+
+        lock_path = publication / "publication-lock.json"
+        original_read_text = Path.read_text
+
+        def altered_lock_read(path, *args, **kwargs):
+            content = original_read_text(path, *args, **kwargs)
+            if path == lock_path:
+                lock = json.loads(content)
+                lock["archive_sha256"] = "0" * 64
+                return json.dumps(lock)
+            return content
+
+        with patch.object(Path, "read_text", altered_lock_read):
+            with self.assertRaisesRegex(ValueError, "pinned publication lock"):
+                tracking_bundle.build(ROOT)
+
     def test_rewritten_manifest_unlisted_file_and_symlink_are_rejected(self):
         manifest = self.bundle / 'manifest.json'
         original = manifest.read_bytes()
