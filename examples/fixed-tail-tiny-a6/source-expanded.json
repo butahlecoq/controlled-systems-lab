@@ -1,0 +1,16 @@
+{
+  "fixture_source": "a6b7d1cb",
+  "native_cpp_source": "99fe6e3c",
+  "native_binary_sha256": "fe46f54211831e089b481b94016f5e7ab1e63ca4a41348f77f9c07112264bace",
+  "task_sha256": "ce2d613295a650db22a08bbe6db33a3f4337eab1800be3201e7301d724ff5681",
+  "scope": "Functional query captures; raw stderr captured directly by external subprocess for each fixture; no performance claim.",
+  "fixture_source_commit": "a6b7d1cb6e655284d7859dfa8f7b010145d463f5",
+  "native_cpp_source_commit": "99fe6e3c9ac31eaec97a3093570e9fddfb09aa62",
+  "native_source_sha256": {
+    "include/csl/reachability/fixed_tail_policy.hpp": "d51c6d200d1c2a054da6d5e44b2afb3f4b0ecc47c699f3d3114cca6d87515319",
+    "src/reachability/fixed_tail_policy.cpp": "64e9c38f4d8999a4a7a37140945b55af504a1bb27dba6d38cc4714b9c551ad02",
+    "src/reachability/inner_template.cpp": "280fdc79c2621536c99fd05ed70ec48664751aeec49800e27be748cf1e9f5e3a",
+    "src/adapters/nlp/casadi_fixed_tail.cpp": "58b912a71fea064c6c26827716f8337aa73454ec6c90c361fd38bfc67be51c46",
+    "tools/closed_loop_native_policy.cpp": "141d0a85cb5fb4f662664f867329da7794bd6db92d75cd4a4e015d16ee7ea989"
+  }
+}

@@ -599,6 +599,14 @@
       "disposition": "frozen-renderer-preserved-with-shared-policy-companion"
     },
     {
+      "source": "scripts/reports/fixed_tail_example.py",
+      "signal_count": 2,
+      "asset_name_literals": [
+        "native-fixed-tail-2d.svg"
+      ],
+      "disposition": "analytic-reference-checked-saved-run-renderer"
+    },
+    {
       "source": "scripts/reports/fuel_reachability_layers.py",
       "signal_count": 8,
       "asset_name_literals": [

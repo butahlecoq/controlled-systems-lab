@@ -66,6 +66,10 @@ option(CSL_BUILD_MPC04_REPORT "Build the finite MPC-04 closed-loop report driver
 
 option(CSL_BUILD_REPORTS "Build the non-installed algorithm report driver" OFF)
 option(CSL_BUILD_NOMINAL_TUBE_CAPTURE "Build the source-bound closed-H nominal tube capture tool" OFF)
+option(CSL_ENABLE_CASADI "Build the optional native C++ CasADi/IPOPT fixed-tail optimizer" OFF)
+if(CSL_ENABLE_CASADI)
+  include(cmake/CasadiDependencies.cmake)
+endif()
 option(CSL_ENABLE_HIGHS "Build the native HiGHS LP/convex adapters" ON)
 option(CSL_ENABLE_QHULL "Build the native Qhull converter (requires HiGHS)" ${CSL_ENABLE_HIGHS})
 if(CSL_ENABLE_QHULL AND NOT CSL_ENABLE_HIGHS)
@@ -128,9 +132,20 @@ if(CSL_ENABLE_HIGHS AND CSL_ENABLE_QHULL)
   set_target_properties(csl_strategy_a_each_choice_pipeline PROPERTIES CXX_EXTENSIONS OFF)
 endif()
 
+add_executable(csl_fixed_tail_inner_region tools/fixed_tail_inner_region.cpp)
+target_link_libraries(csl_fixed_tail_inner_region PRIVATE CSL::inner_template)
+target_include_directories(csl_fixed_tail_inner_region SYSTEM PRIVATE ${csl_json_SOURCE_DIR}/include)
+target_compile_features(csl_fixed_tail_inner_region PRIVATE cxx_std_20)
+set_target_properties(csl_fixed_tail_inner_region PROPERTIES CXX_EXTENSIONS OFF)
+
 add_executable(csl_closed_loop_native_policy tools/closed_loop_native_policy.cpp)
 target_link_libraries(csl_closed_loop_native_policy PRIVATE CSL::finite_action_nominal CSL::polyhedral
   CSL::affine_sum CSL::phase_one CSL::history_cost CSL::feedback_geometry)
+if(CSL_ENABLE_CASADI)
+  target_link_libraries(csl_closed_loop_native_policy PRIVATE CSL::casadi_fixed_tail)
+  target_compile_definitions(csl_closed_loop_native_policy PRIVATE CSL_NATIVE_HAS_CASADI=1)
+endif()
+
 if(CSL_ENABLE_HIGHS)
   target_link_libraries(csl_closed_loop_native_policy PRIVATE CSL::highs_lp CSL::highs_convex)
   target_compile_definitions(csl_closed_loop_native_policy PRIVATE CSL_NATIVE_HAS_HIGHS=1)

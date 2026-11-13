@@ -366,6 +366,54 @@ def _history_definitions() -> list[dict]:
                 family_graph["graph_fingerprint"] = fingerprint
                 family_graph["graph_id"] = f"closed-loop/{task_name}/continuous-history-{family}-ipopt/1/cfg-{fingerprint[:16]}"
                 rows.append(family_graph)
+    return rows + _fixed_tail_definitions()
+
+
+def _fixed_tail_definitions() -> list[dict]:
+    from fixed_tail_validation import declared_geometry_roles
+    paths = {"benchmarks/reporting/closed_loop/native_fixed_tail_policy.py",
+        "benchmarks/reporting/closed_loop/fixed_tail_validation.py",
+        "benchmarks/reporting/closed_loop/history_validation.py",
+        "benchmarks/reporting/closed_loop/history_policy.py",
+        "benchmarks/reporting/closed_loop/native_graph_policy.py",
+        "benchmarks/reporting/closed_loop/task_models.py", "tools/closed_loop_native_policy.cpp",
+        "include/csl/reachability/inner_template.hpp", "src/reachability/inner_template.cpp",
+        "include/csl/reachability/fixed_tail_policy.hpp", "src/reachability/fixed_tail_policy.cpp",
+        "include/csl/adapters/nlp/casadi_fixed_tail.hpp", "src/adapters/nlp/casadi_fixed_tail.cpp",
+        "include/csl/optimization/history_cost.hpp", "src/optimization/history_cost.cpp",
+        "src/optimization/running_control_cost.cpp", "src/synthesis/control_recovery.cpp",
+        "src/reachability/Module.cmake", "cmake/CasadiDependencies.cmake", "cmake/CSLConfig.cmake.in",
+        "CMakeLists.txt"}
+    rows = []
+    for base in _definitions():
+        task_name = base["task_id"].split("/")[0] if base["task_id"].startswith("syn-") else "earth-orbit"
+        task = load_task(task_name)
+        sources = paths | {task["source"]["path"]} | set(base["execution"]["source_files"])
+        if task["source"]["kind"] == "mpc11-scenario":
+            sources.add("benchmarks/reporting/mpc11/affine.py")
+        for family in ("polytope", "box", "zonotope", "parallelotope", "ellipsoid"):
+            geometry_roles = declared_geometry_roles(family)
+            graph = {key: copy.deepcopy(base[key]) for key in ("task_id", "task_sha256", "model_id",
+                "objective_id", "action_profile_id", "execution")}
+            graph.update({"controller": {"id": f"native-fixed-tail-{family}-ipopt/1", "version": "1",
+                "adapter": "native_fixed_tail", "policy_factory": "native_fixed_tail_policy:create_policy",
+                "factory_options": {"wall_seconds": 60, "geometry_roles": geometry_roles, "build_backend_profile": {"build_type": "Release",
+                    "CSL_ENABLE_HIGHS": False, "CSL_ENABLE_QHULL": False, "CSL_ENABLE_CASADI": True}},
+                "source_files": sorted(paths), "prediction": "full remaining source-bound affine physical predictor",
+                "control_semantics": "C++ feasible frozen tail; continuous current-action argmin of complete original J under every selected physical stage region",
+                "solver": {"provider": "csl.nlp.casadi-ipopt.fixed-tail", "assurance": "local numerical"}},
+                "role_bindings": {**{value["role"]: {"id": value["owner"]} for value in geometry_roles.values()},
+                    "representation": {"id": family}, "vertex_lp": "not_used", "converter": "not_used",
+                    "control_optimizer": {"id": "csl.nlp.casadi-ipopt.fixed-tail"}},
+                "operation_roles": {"controller.solve": "control_optimizer", **{operation: value["role"] for operation, value in geometry_roles.items()}},
+                "admission": {"status": "admitted", "basis": "native C++ five-family original-task queries, all-stage H/J/membership and warm initialization checks; episode outcomes retained separately"},
+                "geometry_work": {"claim": "all-stage physical inner fixed-tail B within finite all-control axis carriers; F carrier intersection B equals B; no global backward-set or nonlinear safety claim"},
+                "source_files": [{"path": path, "sha256": hashlib.sha256((ROOT / path).read_bytes()).hexdigest()}
+                                 for path in sorted(sources)]})
+            fingerprint = canonical_sha256(graph)
+            graph["graph_fingerprint"] = fingerprint
+            graph["graph_id"] = f"closed-loop/{task_name}/fixed-tail-{family}-ipopt/1/cfg-{fingerprint[:16]}"
+            rows.append(graph)
     return rows
 
 
@@ -373,8 +421,8 @@ def build_history_manifest() -> dict:
     return {"schema": "csl.closed-loop-capability-manifest/2",
         "manifest_id": "source-bound-continuous-history-profiles/1",
         "registration_status": "source-frozen", "catalogue_parent": "csl.module-composition-inventory/1",
-        "purpose": "Continuous full-source-cost affine-history MPC on the three common tasks.",
-        "claim_scope": "Numerical observed-state affine MPC; no set-representation, global nonlinear or safety guarantee.",
+        "purpose": "Continuous full-source-cost affine-history MPC and native fixed-tail set policies on the three common tasks.",
+        "claim_scope": "Numerical observed-state affine policies with explicitly distinct MPC/fixed-tail semantics; no global nonlinear or safety guarantee.",
         "graphs": _history_definitions()}
 
 

@@ -1,3 +1,9 @@
+#ifndef CSL_NATIVE_HAS_CASADI
+#define CSL_NATIVE_HAS_CASADI 0
+#endif
+#if CSL_NATIVE_HAS_CASADI
+#include <csl/adapters/nlp/casadi_fixed_tail.hpp>
+#endif
 #include <csl/model/linear_system.hpp>
 #include <csl/geometry/polyhedral_projection.hpp>
 #include <csl/geometry/affine_sum.hpp>
@@ -55,7 +61,8 @@ using namespace csl;
 Json native_build_backend_profile() {
     return {{"build_type", CSL_NATIVE_BUILD_TYPE},
         {"CSL_ENABLE_HIGHS", CSL_NATIVE_HAS_HIGHS != 0},
-        {"CSL_ENABLE_QHULL", CSL_NATIVE_HAS_QHULL != 0}};
+        {"CSL_ENABLE_QHULL", CSL_NATIVE_HAS_QHULL != 0},
+        {"CSL_ENABLE_CASADI", CSL_NATIVE_HAS_CASADI != 0}};
 }
 
 template<class T> T take(std::variant<T, Diagnostic> result, const char* field) {
@@ -967,6 +974,134 @@ Json feedback_export(const problem::ResolvedProblem& resolved, const Json& in,
 }
 #endif
 
+#if CSL_NATIVE_HAS_CASADI
+Json fixed_tail_query(const Json& in,const problem::ResolvedProblem& source,
+        const optimization::RunningControlCost& running,std::size_t absolute_stage) {
+    using namespace reachability;
+    const auto family_name=in.at("fixed_tail_family").get<std::string>();
+    const std::map<std::string,FixedTailFamily> families{{"polytope",FixedTailFamily::polytope},
+        {"box",FixedTailFamily::box},{"zonotope",FixedTailFamily::zonotope},
+        {"parallelotope",FixedTailFamily::parallelotope},{"ellipsoid",FixedTailFamily::ellipsoid}};
+    const auto found=families.find(family_name);
+    if(found==families.end())throw std::runtime_error("unknown native fixed-tail physical family");
+    auto model=take_history(prepare_fixed_tail(source,running,absolute_stage),"prepare-fixed-tail");
+    std::optional<FixedTailWarmHistory> previous;
+    if(in.contains("previous_history")) {
+        const auto& p=in.at("previous_history");
+        if(p.at("task_sha256")!=in.at("task_sha256") || p.at("policy_id")!=in.at("controller_id"))
+            throw std::runtime_error("prior warm history has different source task or policy identity");
+        previous=FixedTailWarmHistory{{model.source_cost.coordinates.dimensions,p.at("remaining_horizon").get<std::size_t>()},
+            p.at("absolute_stage").get<std::size_t>(),p.at("source_objective_id").get<std::string>(),
+            p.at("original_horizon").get<std::size_t>(),vector(p.at("history"))};
+    }
+    auto initialization=take_history(initialize_fixed_tail(model,previous),"initialize-fixed-tail");
+    if(in.contains("initial_primal")) {
+        if(previous)throw std::runtime_error("supply a prior accepted history or an explicit initial primal, not both");
+        initialization={vector(in.at("initial_primal")),"caller-declared-base-primal",{}};
+    }
+    std::vector<std::size_t> strict=in.value("strictly_positive_state_coordinates",std::vector<std::size_t>{});
+    if(in.at("task_id")=="env717-earth-orbit/continuous-receding/1") {
+        if(!strict.empty() && strict!=std::vector<std::size_t>{0})throw std::runtime_error("orbit strict physical radius metadata differs");
+        strict={0};
+    }
+    registry::Registry<registry::FixedTailOptimizerPort> registry;
+    auto entry=adapters::nlp::make_casadi_fixed_tail_registration();
+    const registry::Method method{entry.identity.id,entry.identity.version};
+    if(registry.add(std::move(entry)))throw std::runtime_error("native fixed-tail optimizer registration failed");
+    registry::Requirements requirements;requirements.output.representation={"csl.fixed-tail-solve.v1"};
+    auto prepared=registry::prepare_provider(registry::select_provider(registry,method,requirements));
+    if(std::holds_alternative<registry::Rejection>(prepared))throw std::runtime_error("native fixed-tail provider selection failed");
+    const auto resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
+    ExecutionContext context{resources,{},{},{1e-7,1e-8},"native-fixed-tail"};
+    if(in.contains("wall_seconds")) {
+        const auto seconds=in.at("wall_seconds").get<double>();
+        if(!std::isfinite(seconds) || seconds<=0)throw std::runtime_error("positive finite wall_seconds required");
+        context.deadline=std::chrono::steady_clock::now()+std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(seconds));
+    }
+    const auto outcome=fixed_tail_policy({model,{in.at("request_id").get<std::string>()},found->second,
+        initialization.history,strict},std::get<registry::PreparedProvider<registry::FixedTailOptimizerPort>>(prepared),context);
+    Json response{{"task_id",in.at("task_id")},{"task_sha256",in.at("task_sha256")},
+        {"action_profile_id",in.at("action_profile_id")},{"policy_id",in.at("controller_id")},
+        {"requested_solver","casadi-ipopt"},{"family",family_name},{"resolved_problem_id",source.identity().value},
+        {"initialization",{{"policy",initialization.policy},{"initial_primal",initialization.history},
+            {"dual_policy","zero-every-solve"},{"source_stage",initialization.source_stage?Json(*initialization.source_stage):Json(nullptr)}}}};
+    const auto receipt=[](const FixedTailSolveResult& solve) {
+        return Json{{"primary",solve.primary},{"history",solve.history},{"objective",solve.objective},
+            {"supplied_initial_primary",solve.supplied_initial_primary},{"supplied_initial_duals",solve.supplied_initial_duals},
+            {"provider_initial_primary_readback",solve.provider_initial_primary_readback},
+            {"region_factors",solve.region_factors},{"diagnostics",solve.diagnostics}};
+    };
+    if(const auto* failure=std::get_if<FixedTailPolicyFailure>(&outcome)) {
+        response.update({{"status","failed"},{"phase",failure->phase},{"reason",failure->cause.explanation},
+            {"completed_region_prefix",failure->region_prefix.size()}});
+        if(failure->feasibility)response["feasibility"]=receipt(*failure->feasibility);
+        if(failure->reduced_argmin)response["reduced_argmin"]=receipt(*failure->reduced_argmin);
+        return response;
+    }
+    if(const auto* stop=std::get_if<OperationStopped>(&outcome)) {
+        response.update({{"status","stopped"},{"reason",stop->diagnostics}});return response;
+    }
+    const auto& result=std::get<FixedTailPolicyResult>(outcome);
+    const auto matrix_rows=[](const Matrix& A) {
+        return matrix_json(A.rows,A.cols,[&](std::size_t i,std::size_t j){return A.values[i*A.cols+j];});
+    };
+    const auto h_rows=[&](const FixedTailHRows& h) {
+        return Json{{"inequalities",matrix_rows(h.inequalities)},{"upper_bounds",h.upper_bounds},
+            {"equalities",matrix_rows(h.equalities)},{"equality_values",h.equality_values}};
+    };
+    Json regions=Json::array();
+    for(const auto& r:result.regions) {
+        Json item{{"stage",r.stage.value},{"family",family_name},{"reference",h_rows(r.reference)},
+            {"carrier_lower",r.carrier_lower},{"carrier_upper",r.carrier_upper},
+            {"strict_coordinates",r.strict_coordinates},{"algorithmic_strict_margins",r.strict_margins_by_future_stage},
+            {"relation","inner"},{"scope","fixed-feasible-tail intersect finite all-control carrier"},
+            {"intersection_identity","F carrier intersect B equals B: carrier rows participate in B admission"}};
+        item["construction"]=Json::array({
+            {{"operation","fixed-tail.reference"},{"role","reachable_set_method"},
+             {"owner","csl::reachability::fixed_tail_policy"},{"retained",true}},
+            {{"operation",r.inner?"fixed-tail.inner-template":"fixed-tail.anchor-admission"},
+             {"role",r.inner?"inner_constructor":"anchor_admission"},
+             {"owner","csl::reachability::inscribe_template"},{"retained",r.inner.has_value()}}
+        });
+        if(r.inner)item["membership"]={{"center",r.inner->center},{"factor",matrix_rows(r.inner->factor)},
+            {"support_norm",r.inner->norm==InnerTemplateNorm::euclidean_ball?"l2":"l1"},
+            {"factor_domain_norm",r.inner->norm==InnerTemplateNorm::euclidean_ball?"l2":"linf"},
+            {"radius",r.inner->radius},{"point",r.inner->point},{"rounding_shrinks",r.inner->rounding_shrinks}};
+        else item["membership"]=h_rows(r.reference);
+        Json maps=Json::array();for(const auto& C:r.tail.maps)maps.push_back(matrix_rows(C));
+        item["tail_state_lift"]={{"maps",maps},{"offsets",r.tail.offsets}};
+        regions.push_back(std::move(item));
+    }
+    const auto adjustment_rows=[](const std::vector<FixedTailCommandAdjustment>& adjustments) {
+        Json rows=Json::array();
+        for(const auto& value:adjustments)rows.push_back({{"stage",value.stage.value},{"coordinate",value.coordinate},
+            {"side",value.side==FixedTailCommandBoundSide::lower?"lower":"upper"},{"raw",value.raw},
+            {"recovered",value.recovered},{"source_bound",value.source_bound},
+            {"adjustment",value.recovered-value.raw},{"allowed_absolute_adjustment",value.allowed_absolute_adjustment}});
+        return rows;
+    };
+    response.update({{"status","accepted"},{"control",result.control},{"history",result.history},
+        {"source_recovery",{{"anchor_history",result.recovered_anchor_history},{"applied_control",result.control},
+            {"rule","only tolerance-sized violations of authored literal unit-axis bounds are recovered; raw solver primals remain in phase receipts; history and full original J are recomputed and all constraints/memberships rechecked"},
+            {"absolute_tolerance",fixed_tail_command_recovery_tolerance.absolute_tolerance},
+            {"relative_tolerance",fixed_tail_command_recovery_tolerance.relative_tolerance},
+            {"anchor_control_adjustments",adjustment_rows(result.anchor_control_adjustments)},
+            {"command_adjustments",adjustment_rows(result.command_adjustments)}}},
+        {"source_history",h_rows(model.full_history)},
+        {"source_cost",{{"terminal",result.cost.terminal},{"running",result.cost.running},{"total",result.cost.total}}},
+        {"regions",regions},{"full_history_lift",{{"map",matrix_rows(result.lift.map)},{"offset",result.lift.offset}}},
+        {"feasibility",receipt(result.feasibility)},{"reduced_argmin",receipt(result.reduced_argmin)},
+        {"assurance","local numerical fixed-tail rollout; no global optimum, recursive feasibility or nonlinear safety claim"}});
+    response["providers"]=Json::array();
+    for(const auto& p:result.providers)response["providers"].push_back({{"port",p.port},{"requested",p.requested.id.value},
+        {"actual",p.actual?p.actual->id.value:"unavailable"},{"version",p.actual?p.actual->version:"unavailable"}});
+    response["next_warm_history"]={{"task_sha256",in.at("task_sha256")},{"policy_id",in.at("controller_id")},
+        {"absolute_stage",absolute_stage},{"remaining_horizon",model.stages.size()},
+        {"source_objective_id",running.objective_id},{"original_horizon",running.original_horizon},{"history",result.history}};
+    return response;
+}
+#endif
+
 Json continuous_history_query(const Json& in) {
     const auto solver = in.at("history_solver").get<std::string>();
     if (solver != "csl.convex.highs" && solver != "casadi-ipopt")
@@ -1003,6 +1138,17 @@ Json continuous_history_query(const Json& in) {
     const auto history = take_history(synthesis::recover_joint_history(resolved, universal), "recover-history");
     const auto cost = running_cost(in.at("running_cost"), original, m);
     const auto program = take_history(optimization::compile_history_cost(history, terminal, cost, stage), "compile-history-cost");
+    if(in.value("mode",std::string{})=="fixed-tail-policy/1") {
+        if(solver!="casadi-ipopt")throw std::runtime_error("fixed-tail policy requires explicitly selected native CasADi/IPOPT");
+#if CSL_NATIVE_HAS_CASADI
+        return fixed_tail_query(in,resolved,cost,stage);
+#else
+        return {{"status","unavailable"},{"reason","optional native C++ CasADi adapter is disabled"},
+            {"requested_solver",solver},{"task_id",in.at("task_id")},{"task_sha256",in.at("task_sha256")},
+            {"action_profile_id",in.at("action_profile_id")},{"policy_id",in.at("controller_id")}};
+#endif
+    }
+
     const auto h = std::get<sets::HRepresentation>(history.relation.representation());
     const auto& q = program.quadratic;
     Json norms = Json::array();
@@ -1119,7 +1265,7 @@ Json continuous_history_query(const Json& in) {
 }
 
 Json query(const Json& in) {
-    if(in.value("mode", std::string{}) == "continuous-history/1") return continuous_history_query(in);
+    if(in.value("mode", std::string{}) == "continuous-history/1" || in.value("mode",std::string{})=="fixed-tail-policy/1") return continuous_history_query(in);
     if(in.contains("candidate_action_indices") &&
             (!in.at("candidate_action_indices").is_array() || in.at("candidate_action_indices").empty())) {
         auto result=query_failure(in,"rejected",
