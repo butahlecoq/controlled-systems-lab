@@ -21,6 +21,55 @@ SPEC.loader.exec_module(stage_module)
 
 
 class PerAttemptPublicationTests(unittest.TestCase):
+    def test_completes_preserved_partial_route_without_changing_frozen_bytes(self):
+        from scripts.reports.preserve_published_routes import stage as preserve_routes
+
+        with tempfile.TemporaryDirectory(prefix="mpc01-preserved-route-") as temporary:
+            site = Path(temporary)
+            (site / "index.html").write_text("<!doctype html><html><body>Reports</body></html>")
+            (site / "examples").mkdir()
+            (site / "examples/index.html").write_text("<html><body>Examples</body></html>")
+            preserve_routes(site)
+            route = site / stage_module.STRATEGY_AB_ROUTE
+            self.assertTrue((route / "SHA256SUMS").is_file())
+            self.assertFalse((route / "comparison-record.json").exists())
+            original = {p.relative_to(site): p.read_bytes() for p in site.rglob("*")
+                        if p.is_file() and p != site / "index.html"}
+
+            stage_module.stage(site)
+            stage_module.validate(site)
+            preserve_routes(site)
+            stage_module.validate(site)
+            for name, content in original.items():
+                self.assertEqual((site / name).read_bytes(), content, name)
+            completed = {p.relative_to(site): p.read_bytes() for p in site.rglob("*") if p.is_file()}
+            stage_module.stage_strategy_ab(site)
+            self.assertEqual(completed, {p.relative_to(site): p.read_bytes()
+                                         for p in site.rglob("*") if p.is_file()})
+
+    def test_rejects_conflicting_preserved_route_without_writing(self):
+        from scripts.reports.preserve_published_routes import stage as preserve_routes
+
+        for corruption in ("alias", "unexpected", "directory"):
+            with self.subTest(corruption=corruption), tempfile.TemporaryDirectory(
+                    prefix="mpc01-conflicting-route-") as temporary:
+                site = Path(temporary)
+                (site / "index.html").write_text("<!doctype html><html><body>Reports</body></html>")
+                preserve_routes(site)
+                route = site / stage_module.STRATEGY_AB_ROUTE
+                target = (route / "setup-attempts/supervisor-row-count-mismatch/README.md"
+                          if corruption != "unexpected" else route / "unexpected.txt")
+                if corruption == "directory":
+                    target.unlink()
+                    target.mkdir()
+                else:
+                    target.write_bytes(b"conflicting existing bytes")
+                before = {p.relative_to(site): p.read_bytes() for p in site.rglob("*") if p.is_file()}
+                with self.assertRaisesRegex(ValueError, "conflicts"):
+                    stage_module.stage_strategy_ab(site)
+                self.assertEqual(before, {p.relative_to(site): p.read_bytes()
+                                          for p in site.rglob("*") if p.is_file()})
+
     def test_summary_generator_writes_current_text_without_replacing_captured_summary(self):
         source = stage_module.SOURCE / "benchmark-summary.txt"
         captured_sha = "e8a3f56c88e300e6f787ad2033eb14bfbfbcceaa4c406376708ec125bfec70fa"
