@@ -36,7 +36,7 @@ struct DiscreteReachabilityCase {
     std::vector<sets::GeneratorSet> controls;
 };
 
-std::span<const CaseInfo> discrete_reachability_cases() noexcept;
+std::span<const CaseInfo> discrete_reachability_cases();
 std::variant<DiscreteReachabilityCase, Diagnostics>
 make_discrete_reachability_case(std::string_view id);
 

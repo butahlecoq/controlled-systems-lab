@@ -3,6 +3,7 @@
 #include <csl/model/flexible_pitch.hpp>
 #include <csl/model/linear_system.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <limits>
 
@@ -104,8 +105,10 @@ TEST_CASE("flexible pitch rejects a singular descriptor before explicit dynamics
 TEST_CASE("flexible pitch catalogue executes physical-time zero-order hold cases") {
     using namespace csl;
     using namespace csl::model::catalogue;
-    CHECK(discrete_reachability_cases().size() == 6);
+    const auto catalogue = discrete_reachability_cases();
     for (const auto& info : flexible_pitch_cases()) {
+        CHECK(std::count_if(catalogue.begin(), catalogue.end(),
+            [&](const CaseInfo& entry) { return entry.id == info.id; }) == 1);
         const auto data = take(make_flexible_pitch_case(info.id));
         const auto& reach = data.reachability;
         CHECK(reach.info.id == info.id);
@@ -125,6 +128,8 @@ TEST_CASE("flexible pitch ZOH agrees with an independent augmented matrix expone
     using namespace csl;
     using namespace csl::model::catalogue;
     for (const auto& info : flexible_pitch_cases()) {
+        CHECK(std::count_if(catalogue.begin(), catalogue.end(),
+            [&](const CaseInfo& entry) { return entry.id == info.id; }) == 1);
         const auto data = take(make_flexible_pitch_case(info.id));
         const auto n = info.states.size(), m = n + 1;
         // Long-double Taylor series of exp(h*[A B; 0 0]), independent of RK4.

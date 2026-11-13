@@ -122,6 +122,7 @@ csl_example(nominal_linear_exact_2d CSL::strategy_a CSL::highs_lp CSL::highs_con
 csl_example(source_index_geometry_2d CSL::affine_sum)
 csl_example(continuous_policy CSL::controllers CSL::model)
 csl_example(adaptive_ode_replay CSL::simulation)
+csl_example(native_slide50_reachability CSL::model_catalogue CSL::generator_adapter CSL::quickhull_2d)
 csl_example(native_model_catalogue CSL::model_catalogue CSL::generator_adapter CSL::quickhull_2d)
 csl_example(native_four_state_reachability CSL::model_catalogue CSL::geometry_generators CSL::quickhull_2d)
 csl_example(native_flexible_pitch CSL::model_catalogue CSL::geometry_generators CSL::quickhull_2d)
@@ -138,6 +139,8 @@ function(example_check name executable argument status output)
 endfunction()
 
 example_check(lp_triangle registered_lp "" 0 "x=0 y=1 original_cost=5")
+example_check(native_slide50_authored_box native_slide50_reachability "" 0
+  "Slide50 authored box: both horizon variants and all full-state corner checks passed")
 example_check(native_catalogue_source_cases native_model_catalogue "" 0
   "Native model catalogue: 2 source cases and all full-state corner checks passed")
 example_check(native_four_state_source_case native_four_state_reachability "" 0

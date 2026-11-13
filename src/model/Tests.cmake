@@ -57,3 +57,8 @@ add_executable(flexible_pitch_reference examples/native_flexible_pitch.cpp)
 target_link_libraries(flexible_pitch_reference PRIVATE CSL::model_catalogue CSL::geometry_generators CSL::quickhull_2d)
 add_test(NAME flexible_pitch_reference COMMAND flexible_pitch_reference)
 csl_test_target(flexible_pitch_reference model)
+
+add_executable(slide50_catalogue_reference examples/native_slide50_reachability.cpp)
+target_link_libraries(slide50_catalogue_reference PRIVATE CSL::model_catalogue CSL::generator_adapter CSL::quickhull_2d)
+add_test(NAME slide50_catalogue_reference COMMAND slide50_catalogue_reference)
+csl_test_target(slide50_catalogue_reference model)
