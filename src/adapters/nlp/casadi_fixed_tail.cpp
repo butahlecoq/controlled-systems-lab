@@ -79,7 +79,8 @@ class NativeWorkspace final : public FixedTailOptimizerWorkspace {
                     factors.push_back({});
                     continue;
                 }
-                const auto first = static_cast<casadi_int>(region.stage.value * n);
+                const auto first =
+                    static_cast<casadi_int>(region.stage.value) * static_cast<casadi_int>(n);
                 const auto x = z(casadi::Slice(first, first + static_cast<casadi_int>(n)));
                 if (region.family == FixedTailFamily::polytope) {
                     constrain(opti, x, region.reference);
