@@ -1978,6 +1978,17 @@
       "role_and_disposition_reason": "Stages an analytic two-state reachable-line diagram, rounded values transcribed from the committed native example output, and a source-bound binary check record using the shared Omarchy page template and stylesheet. It runs no solver and does not present the diagram or CSV as raw solver data."
     },
     {
+      "source": "scripts/reports/stage_history_optimizer_native.py",
+      "signal_count": 3,
+      "asset_name_literals": [
+        "history.svg",
+        "history.csv",
+        "history-optimizer-native-2d-v1.zip"
+      ],
+      "disposition": "source-bound-native-result-stager",
+      "role_and_disposition_reason": "Validates and stages an actual saved native CasADi/IPOPT whole-history solve, including its full source-J/H readback, compiler/binary provenance, immutable raw files and offline archive; staging never invokes the solver."
+    },
+    {
       "source": "scripts/reports/stage_projection_figures.py",
       "signal_count": 4,
       "asset_name_literals": [],

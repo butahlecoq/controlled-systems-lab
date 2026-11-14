@@ -116,6 +116,18 @@ target_link_libraries(history_cost_tests PRIVATE CSL::history_cost doctest::doct
 add_test(NAME history_cost_tests COMMAND history_cost_tests)
 csl_test_target(history_cost_tests optimization)
 
+add_executable(history_optimizer_tests tests/unit/optimization/history_optimizer_tests.cpp)
+target_link_libraries(history_optimizer_tests PRIVATE CSL::history_optimizer doctest::doctest)
+add_test(NAME history_optimizer_tests COMMAND history_optimizer_tests)
+csl_test_target(history_optimizer_tests optimization)
+
+if(TARGET CSL::casadi_history_optimizer)
+  add_executable(history_optimizer_casadi_tests tests/unit/optimization/history_optimizer_casadi_tests.cpp)
+  target_link_libraries(history_optimizer_casadi_tests PRIVATE CSL::casadi_history_optimizer doctest::doctest)
+  add_test(NAME history_optimizer_casadi_tests COMMAND history_optimizer_casadi_tests)
+  csl_test_target(history_optimizer_casadi_tests optimization)
+endif()
+
 add_executable(nominal_quadratic_history_tests tests/unit/optimization/nominal_quadratic_history_tests.cpp)
 target_link_libraries(nominal_quadratic_history_tests PRIVATE CSL::nominal_quadratic_history doctest::doctest)
 add_test(NAME nominal_quadratic_history_tests COMMAND nominal_quadratic_history_tests)
