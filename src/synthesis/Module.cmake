@@ -16,6 +16,8 @@ target_link_libraries(csl_history_optimizer PUBLIC CSL::history_cost CSL::regist
 if(CSL_ENABLE_CASADI)
   csl_add_library(csl_casadi_history_optimizer STATIC src/adapters/nlp/casadi_history_optimizer.cpp)
   target_link_libraries(csl_casadi_history_optimizer PUBLIC CSL::history_optimizer PRIVATE casadi::casadi)
+  csl_add_library(csl_casadi_superscs_history_optimizer STATIC src/adapters/nlp/casadi_superscs_history_optimizer.cpp)
+  target_link_libraries(csl_casadi_superscs_history_optimizer PUBLIC CSL::history_optimizer PRIVATE casadi::casadi)
 endif()
 
 csl_add_library(csl_strategy_a STATIC

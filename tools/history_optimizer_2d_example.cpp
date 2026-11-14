@@ -1,4 +1,4 @@
-#include <csl/adapters/nlp/casadi_history_optimizer.hpp>
+#include <csl/adapters/nlp/casadi_superscs_history_optimizer.hpp>
 #include <csl/sets/data.hpp>
 
 #include <filesystem>
@@ -38,7 +38,7 @@ optimization::HistoryOptimizationRequest make_request() {
         throw std::runtime_error("source objective did not compile");
     return {{ProblemId{"two-state-integrator"},ProgramId{"terminal-euclidean-plus-running-l1"}},
         std::move(histories),std::get<optimization::HistoryCostProgram>(std::move(compiled)),
-        {0,0,0.5,0,0.5,0.5,0.5,0.5}};
+        optimization::ColdStart{}};
 }
 void write_outputs(const std::filesystem::path& directory,const optimization::HistoryOptimizationResult& result) {
     std::filesystem::create_directories(directory);
@@ -72,7 +72,7 @@ void write_outputs(const std::filesystem::path& directory,const optimization::Hi
     html<<"<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Native whole-history source-cost example</title>"
         <<"<style>body{font:16px system-ui;max-width:900px;margin:2rem auto;padding:0 1rem;color:#202124}figure{margin:1rem 0}img{max-width:100%;height:auto}table{border-collapse:collapse}td,th{border:1px solid #bbb;padding:.45rem .7rem;text-align:left}code{background:#f2f2f2;padding:.1rem .2rem}</style>"
         <<"<main><h1>Native whole-history source-cost example</h1><p>Two-step integrator: <code>x₀=(0,0)</code>, <code>x₁=x₀+(u₀,0)</code>, <code>x₂=x₁+(0,u₁)</code>, with <code>u₀,u₁∈[0,1]</code>.</p>"
-        <<"<p>Authored objective: <code>J=||x₂−(1,1)||₂ + 0.5(|u₀|+|u₁|)</code>. The native CasADi/IPOPT provider optimized all state and control history coordinates and the checked core recomputed this source objective. Squaring only the terminal norm gives the distinct surrogate <code>J_sq=||x₂−(1,1)||₂² + 0.5(|u₀|+|u₁|)</code>, whose minimizer is (3/4,3/4); its original source cost is about 1.104.</p>"
+        <<"<p>Authored objective: <code>J=||x₂−(1,1)||₂ + 0.5(|u₀|+|u₁|)</code>. The native CasADi/SuperSCS provider optimized all state and control history coordinates from an explicit cold start, and the checked core recomputed this source objective. Squaring only the terminal norm gives the distinct surrogate <code>J_sq=||x₂−(1,1)||₂² + 0.5(|u₀|+|u₁|)</code>, whose minimizer is (3/4,3/4); its original source cost is about 1.104.</p>"
         <<"<figure><img src=\"history.svg\" alt=\"Actual whole-history source-cost trajectory and squared-terminal surrogate trajectory plotted in state x and state y coordinates\"><figcaption>Blue is the actual whole-history source-J result; dashed orange is the minimizer of the squared-terminal surrogate; green marks the target.</figcaption></figure>"
         <<"<table><tr><th>Candidate</th><th>u₀</th><th>u₁</th><th>Original source J</th></tr><tr><td>Whole-history solve</td><td>"<<result.history[6]<<"</td><td>"<<result.history[7]<<"</td><td>"<<result.source_cost.total<<"</td></tr><tr><td>Squared-terminal surrogate</td><td>3/4</td><td>3/4</td><td>1.1035533906</td></tr></table>"
         <<"<p>Independent full-H residual: "<<result.maximum_history_violation<<". Backend: <code>"<<result.diagnostics<<"</code>.</p>"
@@ -86,7 +86,7 @@ int main(int argc,char** argv) {
     if(argc!=2) {std::cerr<<"usage: history_optimizer_2d_example OUTPUT_DIR\n";return 2;}
     try {
         auto request=make_request();
-        auto entry=adapters::nlp::make_casadi_history_optimizer_registration();
+        auto entry=adapters::nlp::make_casadi_superscs_history_optimizer_registration();
         registry::Registry<registry::HistoryOptimizerPort> providers;
         const registry::Method method{entry.identity.id,entry.identity.version};
         if(providers.add(std::move(entry)))throw std::runtime_error("could not register CasADi history optimizer");

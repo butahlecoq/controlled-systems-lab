@@ -96,8 +96,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "cbfa54b7dc2395ba789e09b35c421051cdbb1b7bab2f8bcb5e606a197c79ff99",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-backward-graph/1/cfg-cbfa54b7dc2395ba",
+      "graph_fingerprint": "ee4a76ea786cc2dc92dc378093783e05beebe64864e77d72592d3641cdb82d03",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-backward-graph/1/cfg-ee4a76ea786cc2dc",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -144,7 +144,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -164,7 +164,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -325,8 +325,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "09142bf311bf38d653d14693788b3f936766bb3e3c1d45a303d191b01f31d1f1",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-box-mpc/1/cfg-09142bf311bf38d6",
+      "graph_fingerprint": "267ecd319abbeea0a4984d6899d1e3659375e849e04528e09cc7803a705fb917",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-box-mpc/1/cfg-267ecd319abbeea0",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -374,7 +374,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -394,7 +394,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -575,8 +575,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "803c112d8bd9702b5ddf3d768b48a809f615b65ea0cbb17ea470297bf490dbab",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-mpc/1/cfg-803c112d8bd9702b",
+      "graph_fingerprint": "1cb5bf7f33d7c93c15218099518b35b7306a4ce14100e5c65d20103ed1a7a70b",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-mpc/1/cfg-1cb5bf7f33d7c93c",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -624,7 +624,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -644,7 +644,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -825,8 +825,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "9f4bb8f5abc3297aa97db8035ceda640666aeb7a141ea2ebc5abb2c0a42c7cf3",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-mpc/1/cfg-9f4bb8f5abc3297a",
+      "graph_fingerprint": "20470765b9bcaf66c347a81d88a4784539d01de6d4147c59f2f588b72b32a89e",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-mpc/1/cfg-20470765b9bcaf66",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -874,7 +874,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -894,7 +894,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -1075,8 +1075,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "d51a9b815ee0328178b29626297cbc7dc784397764b8cb3099a24b649bf2c9c3",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-mpc/1/cfg-d51a9b815ee03281",
+      "graph_fingerprint": "72876a9566d96c9936358877ff97a7691a0897dfca39a4d0cd1c5ca365c56b06",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-mpc/1/cfg-72876a9566d96c99",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1124,7 +1124,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -1144,7 +1144,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -1297,8 +1297,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "add1520103e5472449b601d9e25f57a0fa41a0501f302b138f35b4e3400b429d",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-fixed-plan-mpc/1/cfg-add1520103e54724",
+      "graph_fingerprint": "deaa80037ff4cfa88361d4536a28b66a711fed406847250a0bd99a5c29bc47cb",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-exact-polytope-fixed-plan-mpc/1/cfg-deaa80037ff4cfa8",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1329,7 +1329,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -1349,7 +1349,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
@@ -1477,8 +1477,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "7fba698c08108d1f05a896b43f0cb9777cc1208c71f1c68f1b7772ff8f42ac5f",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-box-fixed-plan-mpc/1/cfg-7fba698c08108d1f",
+      "graph_fingerprint": "d7e247019291bf29614680143b72685dd5b20177e41e3389e57f6dece3bf1d23",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-box-fixed-plan-mpc/1/cfg-d7e247019291bf29",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1509,7 +1509,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -1529,7 +1529,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/optimization/finite_action_box_minimax.hpp",
@@ -1673,8 +1673,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "3784c2a015fa7ba6b811916fe2de1616a4fa1f9ac4f9f085e0d75f329289d4c0",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-fixed-plan-mpc/1/cfg-3784c2a015fa7ba6",
+      "graph_fingerprint": "292c1ff3a08f59e2f16aa7d600a6a7baf1394f81a02d61f3533d362805e775ce",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-zonotope-fixed-plan-mpc/1/cfg-292c1ff3a08f59e2",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1705,7 +1705,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -1725,7 +1725,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
@@ -1869,8 +1869,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "c1ff4134ce65f8ff3d60f86184daa7569147e44998d8af83fdecb375423a7720",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-fixed-plan-mpc/1/cfg-c1ff4134ce65f8ff",
+      "graph_fingerprint": "ed0ccbc764bf1411b6f5c4328129d6128252b289b40352644037cd1483b33585",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-parallelotope-fixed-plan-mpc/1/cfg-ed0ccbc764bf1411",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -1901,7 +1901,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -1921,7 +1921,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
@@ -2065,8 +2065,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "142f37031e28f19ecb1de693c52dda1e255f99be5f8525da4c853504180d2511",
-      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-fixed-plan-mpc/1/cfg-142f37031e28f19e",
+      "graph_fingerprint": "0ed33b5b423d72890a5d443bc8e4f6a01648c4a080c1f1555735d25a0410432e",
+      "graph_id": "closed-loop/syn-nl-lv-01/native-ellipsoid-fixed-plan-mpc/1/cfg-0ed33b5b423d7289",
       "model_id": "syn-nl-lv-01/ode/1",
       "objective_id": "syn-nl-lv-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -2097,7 +2097,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -2117,7 +2117,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/optimization/finite_action_ellipsoid_minimax.hpp",
@@ -2281,8 +2281,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "ace5f3e60a2db8725bf3fb77f6a59f50e5dc2b4dbf518f32b193c159c6256749",
-      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-backward-graph/1/cfg-ace5f3e60a2db872",
+      "graph_fingerprint": "493230b951936cd670e528b2fd8cf4837774725dc6608b3be68297a4ced49cba",
+      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-backward-graph/1/cfg-493230b951936cd6",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2329,7 +2329,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -2349,7 +2349,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -2510,8 +2510,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "d6f5d25d27bcd89ca90c55c3779e0640d9507475b92f7c6ad4f60efd16cd7f00",
-      "graph_id": "closed-loop/earth-orbit/native-box-mpc/1/cfg-d6f5d25d27bcd89c",
+      "graph_fingerprint": "f4649df063353f2d8e197636536086914ea6cfeeb13dde83c4b3862788a21c6a",
+      "graph_id": "closed-loop/earth-orbit/native-box-mpc/1/cfg-f4649df063353f2d",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2559,7 +2559,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -2579,7 +2579,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -2760,8 +2760,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "15784c327df042c80be1dc1c761fff9b77fc2006e51c06304425bde1ec409911",
-      "graph_id": "closed-loop/earth-orbit/native-zonotope-mpc/1/cfg-15784c327df042c8",
+      "graph_fingerprint": "60a6324a3b64c5071c5b9e384e120085bcb2dfea05fc43e580d08460683a9d6b",
+      "graph_id": "closed-loop/earth-orbit/native-zonotope-mpc/1/cfg-60a6324a3b64c507",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -2809,7 +2809,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -2829,7 +2829,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -3010,8 +3010,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "f1f3b9e35dcd62084e6282bdad930ad4e54cc953db34cc8edefc3349e5071170",
-      "graph_id": "closed-loop/earth-orbit/native-parallelotope-mpc/1/cfg-f1f3b9e35dcd6208",
+      "graph_fingerprint": "62eccfa52afe1162115b96edbfa586dd14a85a8f05131f6c0948bfb99e8daddf",
+      "graph_id": "closed-loop/earth-orbit/native-parallelotope-mpc/1/cfg-62eccfa52afe1162",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3059,7 +3059,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -3079,7 +3079,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -3260,8 +3260,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "636e14258aa99fb5123a2d74ba2a94c1315883ee37caf30fad2da74d6c57726f",
-      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-mpc/1/cfg-636e14258aa99fb5",
+      "graph_fingerprint": "bb8592ccce8a55ce321eeef0f15a6b0e92685f258add276440bebe94cba1f877",
+      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-mpc/1/cfg-bb8592ccce8a55ce",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3309,7 +3309,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -3329,7 +3329,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -3482,8 +3482,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "d659409ac124817ead87eecd3c4e77030e459c81959fb7187e2c755e7dfd0408",
-      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-fixed-plan-mpc/1/cfg-d659409ac124817e",
+      "graph_fingerprint": "056f3a12d423dba7c05107d22427272bd05cc0dcaa8340130255ec18a3152707",
+      "graph_id": "closed-loop/earth-orbit/native-exact-polytope-fixed-plan-mpc/1/cfg-056f3a12d423dba7",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3514,7 +3514,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -3534,7 +3534,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
@@ -3662,8 +3662,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "45a09995a2e4e914d82661567c63daae3f611f7887b1528713740324d8ed48d3",
-      "graph_id": "closed-loop/earth-orbit/native-box-fixed-plan-mpc/1/cfg-45a09995a2e4e914",
+      "graph_fingerprint": "7f10a6915ff3b77f3ac430ae6efd31b8f0aa3eefd8e7c8d9057ee984f96cde86",
+      "graph_id": "closed-loop/earth-orbit/native-box-fixed-plan-mpc/1/cfg-7f10a6915ff3b77f",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3694,7 +3694,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -3714,7 +3714,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/optimization/finite_action_box_minimax.hpp",
@@ -3858,8 +3858,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "cf9ee538a24023bc39784bb7b3b2be652636ba28a750f8673d46a01f70b93fcb",
-      "graph_id": "closed-loop/earth-orbit/native-zonotope-fixed-plan-mpc/1/cfg-cf9ee538a24023bc",
+      "graph_fingerprint": "ecde23cbc18ff6ae0868d5380cd0e9556fd2a1c954bfc6f2286da6ba1b5c0a03",
+      "graph_id": "closed-loop/earth-orbit/native-zonotope-fixed-plan-mpc/1/cfg-ecde23cbc18ff6ae",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -3890,7 +3890,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -3910,7 +3910,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
@@ -4054,8 +4054,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "7c41159ab225047b91c7793d924060ea9569215a9032e35be0a019156dfc3595",
-      "graph_id": "closed-loop/earth-orbit/native-parallelotope-fixed-plan-mpc/1/cfg-7c41159ab225047b",
+      "graph_fingerprint": "b696bfec441f833468c42377b630db14917422e871c0d18e5067caef74f6eb8d",
+      "graph_id": "closed-loop/earth-orbit/native-parallelotope-fixed-plan-mpc/1/cfg-b696bfec441f8334",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -4086,7 +4086,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -4106,7 +4106,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
@@ -4250,8 +4250,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "424fc23c10bf77f195b4ac8d53f852a9e1861c037f40519d152832e02d0bb434",
-      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-fixed-plan-mpc/1/cfg-424fc23c10bf77f1",
+      "graph_fingerprint": "67d746c3d2af1399220ea38132e0319ccc92ff3ed6bbecec65bbf07487f79011",
+      "graph_id": "closed-loop/earth-orbit/native-ellipsoid-fixed-plan-mpc/1/cfg-67d746c3d2af1399",
       "model_id": "env717-earth-orbit/two-body-force-ode/continuous/1",
       "objective_id": "env717-earth-orbit/source-cost-continuous/1",
       "operation_roles": {
@@ -4282,7 +4282,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -4302,7 +4302,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/optimization/finite_action_ellipsoid_minimax.hpp",
@@ -4466,8 +4466,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "76022adca66cc6697939b95d2fc7be1690a147a4bf66635fbf48100f575dfaed",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-backward-graph/1/cfg-76022adca66cc669",
+      "graph_fingerprint": "8bcac97919eaad9adfca6ddd85806b5df6474aa873145e1ce9eb1467b00f5c06",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-backward-graph/1/cfg-8bcac97919eaad9a",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4514,7 +4514,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -4534,7 +4534,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -4695,8 +4695,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "89e426ecaf122aa351af8f0d0c3518d57fa43c1616f5540e5192a043184f6b03",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-mpc/1/cfg-89e426ecaf122aa3",
+      "graph_fingerprint": "3ef02e26a80de3368b47a6eb988c0a902e78da03107a979ba77fd8ec14611d35",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-mpc/1/cfg-3ef02e26a80de336",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4744,7 +4744,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -4764,7 +4764,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -4945,8 +4945,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "e00a4f845a9f74c98cced3c3e461fb5aa230a7bb695d3e893769b125c4801635",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-mpc/1/cfg-e00a4f845a9f74c9",
+      "graph_fingerprint": "6472989c22f04b3309aabbdd7fcf7950a2a45d8f9b83c13528683b127bed87c4",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-mpc/1/cfg-6472989c22f04b33",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -4994,7 +4994,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -5014,7 +5014,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -5195,8 +5195,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "4150dcdfc817192f9c6d44184253b00e4aa27fa2409f9484d0bb8a52c15a9d42",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-mpc/1/cfg-4150dcdfc817192f",
+      "graph_fingerprint": "b5824ece0223d93e20af9466f33ef4481525ff746cd94f64589fcb9183a4bcb6",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-mpc/1/cfg-b5824ece0223d93e",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5244,7 +5244,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -5264,7 +5264,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -5445,8 +5445,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "4a809cf43f8228e17704ae28ba427ca7572956164caa61b877df5ac8d2f55ad6",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-mpc/1/cfg-4a809cf43f8228e1",
+      "graph_fingerprint": "41d21f271bba1ec7a12c3a5e6cee7f0490b57ef7e841003ee5dabcfb02c0ca61",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-mpc/1/cfg-41d21f271bba1ec7",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5494,7 +5494,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -5514,7 +5514,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/geometry/polyhedral_intersection.hpp",
@@ -5667,8 +5667,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "fb338bff8e463eb1d54c767efb893a34ede815d5df65aa82062ca18e798c9672",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-fixed-plan-mpc/1/cfg-fb338bff8e463eb1",
+      "graph_fingerprint": "186d804e10b3a2158258fa87a5448bfb9786f3346325fdff49c9786974555111",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-exact-polytope-fixed-plan-mpc/1/cfg-186d804e10b3a215",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5699,7 +5699,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -5719,7 +5719,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
@@ -5847,8 +5847,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "6ca7a9cbd62c3d4890c4f419a9520f7cb82791b72c6291a132b3529e9cc9283e",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-fixed-plan-mpc/1/cfg-6ca7a9cbd62c3d48",
+      "graph_fingerprint": "03390ce2c5c6ceb718854539d18fd7f49ddeb30c073c965e203313470d8fdc9a",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-box-fixed-plan-mpc/1/cfg-03390ce2c5c6ceb7",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -5879,7 +5879,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -5899,7 +5899,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/optimization/finite_action_box_minimax.hpp",
@@ -6043,8 +6043,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "3ee1fb174d23ab371ad8bb72bb46d8ed9b8453d987eeeffc243e2beed06f37ba",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-fixed-plan-mpc/1/cfg-3ee1fb174d23ab37",
+      "graph_fingerprint": "c87db0941b06983717524a608467607a8570f3c99e64fbf88d5f16a810d5b4c7",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-zonotope-fixed-plan-mpc/1/cfg-c87db0941b069837",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -6075,7 +6075,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -6095,7 +6095,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
@@ -6239,8 +6239,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "1b18d98f4a040c07f89114700da7a438b2d264836f297af61b60ae5b0185cef1",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-fixed-plan-mpc/1/cfg-1b18d98f4a040c07",
+      "graph_fingerprint": "0846de204efd67a3563a4d3f248a2a709357243ffd558fbe12daead9b21ccec7",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-parallelotope-fixed-plan-mpc/1/cfg-0846de204efd67a3",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -6271,7 +6271,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -6291,7 +6291,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/optimization/finite_action_minimax.hpp",
@@ -6435,8 +6435,8 @@
         ],
         "version": "1"
       },
-      "graph_fingerprint": "5b724334cf812bbeb377076235eed5adf05c98d4baf80d931d9cbaeafc870594",
-      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-fixed-plan-mpc/1/cfg-5b724334cf812bbe",
+      "graph_fingerprint": "5ca929f0fdffe5546aff7591ede07acade11968039172ffabfcd7a9fa9c449c3",
+      "graph_id": "closed-loop/syn-nl-fuel-01/native-ellipsoid-fixed-plan-mpc/1/cfg-5ca929f0fdffe554",
       "model_id": "syn-nl-fuel-01/ode/1",
       "objective_id": "syn-nl-fuel-01/dimensionless-quadratic/1",
       "operation_roles": {
@@ -6467,7 +6467,7 @@
       "source_files": [
         {
           "path": "CMakeLists.txt",
-          "sha256": "47b683ba9765b20f249acd93369db0fe0bb0a8aeb8e5842d4e76e6f17da9f7b0"
+          "sha256": "f81a2eb9f069cac505029d1cffdef9cea8e4a8a545c617432765f5e167d13e2d"
         },
         {
           "path": "benchmarks/reporting/closed_loop/native_graph_policy.py",
@@ -6487,7 +6487,7 @@
         },
         {
           "path": "docs/catalogue/module-composition-inventory-v1.json",
-          "sha256": "61086bae498c8f6c320e98a223f59eaae855b580e3283947f5915e4e5c1ec7ee"
+          "sha256": "ba57f3776a1dab62e9c2aa43013c3ca17cb27dab7c1e7f1c471c5c1438c276e1"
         },
         {
           "path": "include/csl/optimization/finite_action_ellipsoid_minimax.hpp",

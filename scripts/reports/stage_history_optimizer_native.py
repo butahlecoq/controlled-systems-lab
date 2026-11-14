@@ -38,8 +38,19 @@ SOURCE_PATHS = (
     "src/optimization/history_optimizer.cpp",
     "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
     "src/adapters/nlp/casadi_history_optimizer.cpp",
+    "include/csl/adapters/nlp/casadi_superscs_history_optimizer.hpp",
+    "src/adapters/nlp/casadi_superscs_history_optimizer.cpp",
     "include/csl/optimization/history_cost.hpp",
     "src/optimization/history_cost.cpp",
+    "src/synthesis/Module.cmake",
+    "CMakeLists.txt",
+    "tests/unit/optimization/history_optimizer_tests.cpp",
+    "tests/unit/optimization/history_optimizer_casadi_tests.cpp",
+    "tests/unit/optimization/history_optimizer_superscs_tests.cpp",
+    "tests/installed/casadi_superscs_history_optimizer_client.cpp",
+    "tests/installed/CMakeLists.txt",
+    "scripts/reports/capture_history_optimizer_native.py",
+    "scripts/reports/stage_history_optimizer_native.py",
     "tools/history_optimizer_2d_example.cpp",
 )
 
@@ -73,7 +84,7 @@ def _receipt(bundle: Path) -> dict:
         "history optimizer native binary hash is not pinned",
     )
     report_data.require(
-        receipt.get("provider") == "csl.nlp.casadi-ipopt.history-cost@1",
+        receipt.get("provider") == "csl.conic.superscs.history-cost@1",
         "history optimizer provider identity differs",
     )
     report_data.require(
@@ -130,7 +141,7 @@ def _page(receipt: dict) -> bytes:
                 ("Whole-history source cost", ""),
             ),
         ),
-        '<p class="eyebrow">Nominal optimization · native CasADi/IPOPT result</p>',
+        '<p class="eyebrow">Nominal optimization · native CasADi/SuperSCS result</p>',
         "<h1>Optimize the complete history under the authored source cost</h1>",
         "<p>The fixture is a two-state, two-step integrator: <code>x₀=(0,0)</code>, "
         "<code>x₁=x₀+(u₀,0)</code>, <code>x₂=x₁+(0,u₁)</code>, and "
@@ -149,9 +160,13 @@ def _page(receipt: dict) -> bytes:
         "</tbody></table>",
         "<p>Squaring only the terminal norm changes the authored objective. The surrogate "
         "selects <code>(0.75,0.75)</code>, whose original source cost is "
-        "<code>1.1035533906</code>. The native provider instead models each source norm "
+        "<code>1.1035533906</code>. The native SuperSCS provider instead models each source norm "
         "separately over all history coordinates; the checked result independently "
         "reevaluates the authored <code>J</code> and the full H-relation.</p>",
+        "<p>This provider uses an explicit cold start: it creates a fresh conic function "
+        "without primal or dual warm-start inputs. CasADi's conic result does not expose "
+        "internal initialization readbacks, so the receipt records that limitation. The "
+        "core still checks the returned complete history against H and recomputes source J.</p>",
         "<h2>Saved native result</h2>",
         f"<p>Provider: <code>{escape(receipt['provider'])}</code>; binary SHA-256: "
         f"<code>{escape(receipt['binary_sha256'])}</code>; maximum full-H violation: "
@@ -304,7 +319,7 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
         '<p class="eyebrow">Nominal optimization · source-cost fidelity</p>'
         f'<h3><a href="{ROUTE}">Optimize the complete history under the original source cost</a></h3>'
         f'<a href="{ROUTE}"><img src="{FIGURE}" alt="Actual native full-history source-cost solve compared with a squared-terminal surrogate in two state coordinates."></a>'
-        "<p>A native CasADi/IPOPT solve over all state and control coordinates, with "
+        "<p>A native CasADi/SuperSCS solve over all state and control coordinates, with "
         "separate source-norm epigraphs and an independent source-J and full-H readback.</p>"
         f'<p><a href="{ROUTE}">Read the inputs and checked answer →</a> · '
         f'<a href="{ARCHIVE}">Offline evidence bundle</a></p></article>'

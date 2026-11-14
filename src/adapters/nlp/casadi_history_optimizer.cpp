@@ -28,7 +28,7 @@ bool fits_casadi_dimension(std::size_t dimension) {
     return dimension<=static_cast<std::size_t>(std::numeric_limits<casadi_int>::max());
 }
 bool fits_casadi_request(const optimization::HistoryOptimizationRequest& request) {
-    if(!fits_casadi_dimension(request.initial_history.size()))return false;
+    if(!fits_casadi_dimension(request.source_cost.quadratic.dimension))return false;
     const auto representation=request.feasible_histories.relation.representation();
     if(const auto* h=std::get_if<sets::HRepresentation>(&representation))
         if(!fits_casadi_dimension(h->inequalities.rows())||!fits_casadi_dimension(h->inequalities.cols())||
@@ -59,6 +59,10 @@ class NativeWorkspace final:public optimization::HistoryOptimizerWorkspace {
 public:
     optimization::RawHistorySolveOutcome solve_candidate(const optimization::HistoryOptimizationRequest& request,
         const ExecutionContext& context) override {
+        const auto* supplied=std::get_if<optimization::SuppliedStart>(&request.start);
+        if(!supplied)return Diagnostic{DiagnosticCode::unsupported,"history.start",
+            "CasADi/IPOPT requires an explicitly supplied feasible full-history start."};
+        const auto& initial_history=supplied->history;
         if(!fits_casadi_request(request))
             return Diagnostic{DiagnosticCode::unsupported,"history.casadi_ipopt.dimensions",
                 "A canonical history or constraint dimension exceeds CasADi's integer index range."};
@@ -67,10 +71,10 @@ public:
             return OperationStopped{StopReason::deadline_expired,"Native CasADi history optimization deadline expired before solve"};
         try {
             const auto& cost=request.source_cost;
-            const auto size=request.initial_history.size();
+            const auto size=request.source_cost.quadratic.dimension;
             casadi::Opti opti;
             const auto z=opti.variable(static_cast<casadi_int>(size));
-            opti.set_initial(z,DM(request.initial_history));
+            opti.set_initial(z,DM(initial_history));
             constrain(opti,z,request.feasible_histories.relation);
             const auto& q=cost.quadratic;
             MX objective=0.5*MX::mtimes(std::vector<MX>{z.T(),dense(q.Q),z})+
@@ -96,7 +100,7 @@ public:
                 double squared=0;
                 for(std::size_t i=0;i<weighted.rows;++i) {
                     double value=-target[i];
-                    for(std::size_t j=0;j<size;++j)value+=weighted.values[i*size+j]*request.initial_history[j];
+                    for(std::size_t j=0;j<size;++j)value+=weighted.values[i*size+j]*initial_history[j];
                     squared+=value*value;
                 }
                 opti.set_initial(epigraph,std::sqrt(squared)+1e-3);
@@ -125,7 +129,8 @@ public:
             const auto diagnostics="native C++ CasADi "+std::string(casadi::CasadiMeta::version())+
                 "; IPOPT; "+opti.stats().at("return_status").to_string()+"; all history coordinates free; local numerical";
             return optimization::RawHistorySolve{values(solution.value(z)),static_cast<double>(solution.value(objective)),
-                request.initial_history,initial_primal,Vector(initial_dual.size(),0.0),initial_dual,diagnostics};
+                optimization::SuppliedReadbacks{initial_history,initial_primal,
+                    Vector(initial_dual.size(),0.0),initial_dual},diagnostics};
         } catch(const std::exception& error) {
             if(context.cancellation.stop_requested())return OperationStopped{StopReason::cancelled,"Native CasADi history optimization cancelled"};
             if(context.deadline&&std::chrono::steady_clock::now()>=*context.deadline)
@@ -141,6 +146,9 @@ registry::Registration<registry::HistoryOptimizerPort> make_casadi_history_optim
         [](const optimization::HistoryOptimizationRequest& request,const registry::Requirements&)->registry::Capability {
             const auto diagnostics=optimization::check_history_optimization_request(request);
             if(!diagnostics.empty())return diagnostics;
+            if(!std::holds_alternative<optimization::SuppliedStart>(request.start))
+                return Diagnostics{{DiagnosticCode::unsupported,"history.start",
+                    "CasADi/IPOPT requires an explicitly supplied feasible full-history start."}};
             return registry::Offer{{{"csl.whole-history-source-cost.v1"},Assurance::numerical,{},{},{}}};
         },
         [](const optimization::HistoryOptimizationRequest&)->std::unique_ptr<optimization::HistoryOptimizerWorkspace> {

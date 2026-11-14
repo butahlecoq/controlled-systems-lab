@@ -108,7 +108,10 @@ Diagnostics check_history_optimization_request(const HistoryOptimizationRequest&
        r.source_cost.quadratic.Q.values.size()!=size*size||r.source_cost.quadratic.linear.size()!=size||
        !finite(r.source_cost.quadratic.Q.values)||!finite(r.source_cost.quadratic.linear)||
        !std::isfinite(r.source_cost.quadratic.offset))out.push_back(invalid("history.cost","Compiled source-cost polynomial does not match canonical history coordinates."));
-    if(r.initial_history.size()!=size||!finite(r.initial_history))out.push_back(invalid("history.initial","Initial full-history vector has invalid shape or non-finite entries."));
+    if(const auto* supplied=std::get_if<SuppliedStart>(&r.start)) {
+        if(supplied->history.size()!=size||!finite(supplied->history))
+            out.push_back(invalid("history.initial","Supplied full-history vector has invalid shape or non-finite entries."));
+    }
     if(r.feasible_histories.relation.metadata()->set.dimension!=size)out.push_back(invalid("history.domain","Full feasible-history domain has the wrong ambient dimension."));
     const auto representation=r.feasible_histories.relation.representation();
     if(!std::holds_alternative<sets::HRepresentation>(representation)&&
@@ -149,11 +152,13 @@ Diagnostics check_history_optimization_request(const HistoryOptimizationRequest&
 namespace detail {
 std::optional<Diagnostic> check_history_initialization(const HistoryOptimizationRequest& r,
     const ExecutionContext& context) {
+    const auto* supplied=std::get_if<SuppliedStart>(&r.start);
+    if(!supplied)return std::nullopt;
     Diagnostic error{DiagnosticCode::invalid_input,"history.domain",""};
-    const double violation=domain_violation(r.feasible_histories.relation,r.initial_history,error);
+    const double violation=domain_violation(r.feasible_histories.relation,supplied->history,error);
     if(!error.explanation.empty())return error;
-    if(violation>tolerance(context,domain_scale(r.feasible_histories.relation,r.initial_history)))
-        return invalid("history.initial","Supplied initial history is outside the full feasible-history domain.");
+    if(violation>tolerance(context,domain_scale(r.feasible_histories.relation,supplied->history)))
+        return invalid("history.initial","Supplied start history is outside the full feasible-history domain.");
     return std::nullopt;
 }
 
@@ -162,13 +167,26 @@ HistoryOptimizationOutcome check_history_optimization_result(const HistoryOptimi
     const auto request_diagnostics=check_history_optimization_request(r);
     if(!request_diagnostics.empty())return request_diagnostics.front();
     const auto size=history_size(r.feasible_histories.coordinates);
-    if(raw.history.size()!=size||!finite(raw.history)||raw.supplied_initial_history!=r.initial_history||
-       raw.initial_primal_readback!=r.initial_history||
-       raw.initial_dual_readback.size()!=raw.supplied_initial_duals.size()||!finite(raw.supplied_initial_duals)||
-       raw.initial_dual_readback!=raw.supplied_initial_duals||
-       std::any_of(raw.supplied_initial_duals.begin(),raw.supplied_initial_duals.end(),[](double v){return v!=0;})||
-       !std::isfinite(raw.reported_objective))
-        return invalid("history.backend.readback","Backend returned malformed history, objective, or actual initialization readback.");
+    if(raw.history.size()!=size||!finite(raw.history)||!std::isfinite(raw.reported_objective))
+        return invalid("history.backend.result","Backend returned malformed history or objective.");
+    HistoryInitializationReceipt initialization;
+    if(const auto* supplied=std::get_if<SuppliedStart>(&r.start)) {
+        const auto* evidence=std::get_if<SuppliedReadbacks>(&raw.initialization);
+        if(!evidence||evidence->supplied_history!=supplied->history||
+           evidence->primal_readback!=supplied->history||
+           evidence->dual_readback.size()!=evidence->supplied_duals.size()||
+           !finite(evidence->supplied_duals)||evidence->dual_readback!=evidence->supplied_duals||
+           std::any_of(evidence->supplied_duals.begin(),evidence->supplied_duals.end(),[](double v){return v!=0;}))
+            return invalid("history.backend.readback","Backend returned malformed supplied-start or actual primal/zero-dual readback evidence.");
+        initialization=VerifiedSuppliedStart{evidence->supplied_history,evidence->primal_readback,
+            evidence->supplied_duals,evidence->dual_readback};
+    } else {
+        const auto* evidence=std::get_if<BackendColdStartEvidence>(&raw.initialization);
+        if(!evidence||evidence->backend_identity.empty()||evidence->start_policy.empty()||
+           evidence->readback_unavailable_reason.empty())
+            return invalid("history.backend.cold_start","Backend cold-start evidence must identify its backend, policy, and unavailable readback reason.");
+        initialization=*evidence;
+    }
     if(const auto diagnostic=check_history_initialization(r,context))return *diagnostic;
     Diagnostic error{DiagnosticCode::invalid_input,"history.domain",""};
     const double violation=domain_violation(r.feasible_histories.relation,raw.history,error);
@@ -182,8 +200,7 @@ HistoryOptimizationOutcome check_history_optimization_result(const HistoryOptimi
     if(std::abs(evaluation.total-raw.reported_objective)>tolerance(context,std::max(std::abs(evaluation.total),std::abs(raw.reported_objective))))
         return Diagnostic{DiagnosticCode::evidence_mismatch,"history.backend.objective","Backend objective does not match re-evaluation of the authored source cost."};
     return HistoryOptimizationResult{r.identity,std::move(raw.history),evaluation,raw.reported_objective,
-        violation,std::move(raw.supplied_initial_history),std::move(raw.initial_primal_readback),
-        std::move(raw.supplied_initial_duals),std::move(raw.initial_dual_readback),std::move(raw.diagnostics)};
+        violation,std::move(initialization),std::move(raw.diagnostics)};
 }
 } // namespace detail
 } // namespace csl::optimization

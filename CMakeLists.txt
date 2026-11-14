@@ -162,7 +162,7 @@ target_include_directories(csl_closed_loop_native_policy SYSTEM PRIVATE ${csl_js
 set_target_properties(csl_closed_loop_native_policy PROPERTIES CXX_EXTENSIONS OFF)
 if(CSL_ENABLE_CASADI)
   add_executable(history_optimizer_2d_example tools/history_optimizer_2d_example.cpp)
-  target_link_libraries(history_optimizer_2d_example PRIVATE CSL::casadi_history_optimizer)
+  target_link_libraries(history_optimizer_2d_example PRIVATE CSL::casadi_superscs_history_optimizer)
   set_target_properties(history_optimizer_2d_example PROPERTIES CXX_EXTENSIONS OFF)
   csl_strict_warnings(history_optimizer_2d_example)
 endif()

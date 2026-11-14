@@ -36,7 +36,7 @@ def _fixture(bundle: Path) -> None:
     (records / "CMakeCache.txt").write_text("CSL_ENABLE_CASADI:BOOL=ON\n", encoding="utf-8")
     (records / "native-output.html").write_text("<html>native output</html>\n", encoding="utf-8")
     (records / "stdout.txt").write_text(
-        "provider=csl.nlp.casadi-ipopt.history-cost@1\n", encoding="utf-8"
+        "provider=csl.conic.superscs.history-cost@1\n", encoding="utf-8"
     )
     source_commit = subprocess.run(
         ["git", "rev-parse", "HEAD"],
@@ -62,7 +62,7 @@ def _fixture(bundle: Path) -> None:
         "source_files": source_files,
         "source_tree": "controlled-systems-lab",
         "binary_sha256": "1" * 64,
-        "provider": "csl.nlp.casadi-ipopt.history-cost@1",
+        "provider": "csl.conic.superscs.history-cost@1",
         "source_objective": "||x2-(1,1)||_2 + 0.5(|u0|+|u1|)",
         "result": {
             "source_J": 1,
@@ -114,7 +114,7 @@ class NativeHistoryReportTests(unittest.TestCase):
         self.assertIn(report.ARCHIVE, files)
         self.assertIn(report.RECORD, card)
         receipt = json.loads(files[report.RECORD])
-        self.assertEqual(receipt["provider"], "csl.nlp.casadi-ipopt.history-cost@1")
+        self.assertEqual(receipt["provider"], "csl.conic.superscs.history-cost@1")
         self.assertEqual(
             hashlib.sha256(files[report.FIGURE]).hexdigest(), receipt["artifacts"]["figure_sha256"]
         )

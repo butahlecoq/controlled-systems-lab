@@ -36,33 +36,18 @@ optimization::HistoryOptimizationRequest integrator_request(double running_weigh
         throw std::runtime_error("2D integrator source cost did not compile");
     return {{ProblemId{"2d-integrator"},ProgramId{"terminal-l2-plus-running-l1"}},histories,
         std::get<optimization::HistoryCostProgram>(compiled),
-        {0,0,0.5,0,0.5,0.5,0.5,0.5}};
+        optimization::SuppliedStart{{0,0,0.5,0,0.5,0.5,0.5,0.5}}};
 }
 }
 
-TEST_CASE("native CasADi optimizes the original sum of separate source norms on complete history") {
+TEST_CASE("CasADi/IPOPT requires a supplied feasible full-history start") {
     auto request=integrator_request(0.5);
+    request.start=optimization::ColdStart{};
     auto registration=adapters::nlp::make_casadi_history_optimizer_registration();
-    registry::Registry<registry::HistoryOptimizerPort> available_registry;
-    const registry::Method method{registration.identity.id,registration.identity.version};
-    REQUIRE_FALSE(available_registry.add(std::move(registration)).has_value());
-    registry::Requirements requirements;
-    requirements.output.representation={"csl.whole-history-source-cost.v1"};
-    auto prepared=registry::prepare_provider(registry::select_provider(available_registry,method,requirements));
-    REQUIRE(std::holds_alternative<registry::PreparedProvider<registry::HistoryOptimizerPort>>(prepared));
-    auto pipeline=std::get<registry::PreparedProvider<registry::HistoryOptimizerPort>>(prepared).prepare(request);
-    REQUIRE(std::holds_alternative<registry::PreparedPipeline<registry::HistoryOptimizerPort>>(pipeline));
-    auto workspace=std::get<registry::PreparedPipeline<registry::HistoryOptimizerPort>>(pipeline).create();
-    const auto result=std::get<0>(workspace)->run(ExecutionContext{});
-    if(const auto* diagnostic=std::get_if<Diagnostic>(&result)) {
-        INFO(diagnostic->field);
-        FAIL_CHECK(diagnostic->explanation);
-    }
-    REQUIRE(std::holds_alternative<optimization::HistoryOptimizationResult>(result));
-    const auto& solved=std::get<optimization::HistoryOptimizationResult>(result);
-    CHECK(solved.source_cost.total==doctest::Approx(1.0).epsilon(1e-6));
-    CHECK(solved.history[6]==doctest::Approx(1.0).epsilon(1e-6));
-    CHECK(solved.history[7]==doctest::Approx(1.0).epsilon(1e-6));
+    auto workspace=registration.factory(request);
+    const auto result=registry::HistoryOptimizerPort::run(*workspace,request,ExecutionContext{});
+    REQUIRE(std::holds_alternative<Diagnostic>(result));
+    CHECK(std::get<Diagnostic>(result).field=="history.start");
 }
 
 TEST_CASE("running cost can choose a different history from the terminal-only minimizer") {

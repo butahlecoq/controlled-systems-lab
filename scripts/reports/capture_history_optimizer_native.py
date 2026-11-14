@@ -116,7 +116,7 @@ def capture(source_root: Path, build_root: Path, output_root: Path, build_log: P
         r"max H violation=([^;]+); (.+)$",
         line,
     )
-    if match is None or match.group(1) != "csl.nlp.casadi-ipopt.history-cost@1":
+    if match is None or match.group(1) != "csl.conic.superscs.history-cost@1":
         raise RuntimeError(
             "native example stdout does not match the expected provider/result contract"
         )
