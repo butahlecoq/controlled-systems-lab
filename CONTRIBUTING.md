@@ -142,3 +142,7 @@ and its collector tests with
 These checks validate saved evidence and synthetic test records without running
 algorithm measurements. The ty search path includes the maintained tooling root
 so each OPT07/OPT11 namespace retains its local imports and direct CLI behavior.
+
+The same default Ruff and ty scope covers the maintained discrete MPC 2D
+stager and the focused discrete-MPC stager tests. The workflow runs the gallery test, which
+also verifies the example's saved native output and source-owned route entry.

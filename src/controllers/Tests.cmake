@@ -10,3 +10,7 @@ add_executable(continuous_policy_tests tests/unit/controllers/continuous_policy_
 target_link_libraries(continuous_policy_tests PRIVATE CSL::controllers CSL::model CSL::phase_one doctest::doctest)
 add_test(NAME continuous_policy_tests COMMAND continuous_policy_tests)
 csl_test_target(continuous_policy_tests controllers)
+add_executable(discrete_mpc_tests tests/unit/controllers/discrete_mpc_tests.cpp)
+target_link_libraries(discrete_mpc_tests PRIVATE CSL::controllers doctest::doctest)
+add_test(NAME discrete_mpc_tests COMMAND discrete_mpc_tests)
+csl_test_target(discrete_mpc_tests controllers)
