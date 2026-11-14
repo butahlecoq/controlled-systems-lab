@@ -63,7 +63,8 @@ make_task(const csl::model::catalogue::DiscreteModelData &model, const csl::Vect
             std::move(control_bounds),
             std::nullopt,
             std::move(running),
-            {std::move(terminal_q), Vector(nx, 0.0), 0.0}};
+            {std::move(terminal_q), Vector(nx, 0.0), 0.0},
+            {}};
 }
 
 void write_values(std::ostream &out, const std::string &id, const std::string &kind,
