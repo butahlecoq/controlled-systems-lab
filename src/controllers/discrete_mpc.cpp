@@ -597,6 +597,11 @@ ProfileAdmission make_source_task_profile(std::string_view model_id,
         return Diagnostics{
             invalid("task.source_constraints", "Catalogue source identity is not registered.")};
     const auto model_number = static_cast<std::size_t>(std::distance(catalogue.begin(), found)) + 1;
+    const auto expected_model_id = "catalogue-2026/model-" + std::to_string(model_number) + "/1";
+    if (found->id != expected_model_id)
+        return Diagnostics{invalid(
+            "task.source_constraints",
+            "Source constraint profiles require the catalogue's stable model-ID ordering.")};
     auto profile = source_constraints(model_number, nx, nu, nw);
     if (profile.states.size() != nx || profile.controls.size() != nu)
         return Diagnostics{invalid("task.source_constraints",

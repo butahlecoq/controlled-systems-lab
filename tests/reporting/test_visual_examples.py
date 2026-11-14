@@ -684,6 +684,35 @@ class GalleryTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "capture differs"):
                 stage_discrete_mpc_2d.build(copied_root)
 
+    def test_discrete_mpc_stager_uses_stdout_from_the_explicit_repository_root(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            checked_root = Path(temporary) / "checked-root"
+            module_checkout = Path(temporary) / "other-module-checkout"
+            for relative in ("examples/discrete_mpc_2d-output.csv",
+                             "examples/discrete_mpc_2d-output.txt"):
+                target = checked_root / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(ROOT / relative, target)
+            other_stdout = module_checkout / "examples/discrete_mpc_2d-output.txt"
+            other_stdout.parent.mkdir(parents=True)
+            other_stdout.write_text("unverified module-checkout stdout\n", encoding="ascii")
+            module_path = module_checkout / "scripts/reports/stage_discrete_mpc_2d.py"
+            module_path.parent.mkdir(parents=True)
+            module_path.write_text("test placeholder\n", encoding="ascii")
+            with patch.object(stage_discrete_mpc_2d, "__file__", str(module_path)):
+                files, _, _ = stage_discrete_mpc_2d.build(checked_root)
+            record = json.loads(files[stage_discrete_mpc_2d.RECORD])
+            self.assertEqual(
+                record["evidence"]["native_example_stdout"],
+                (checked_root / "examples/discrete_mpc_2d-output.txt")
+                .read_text(encoding="ascii")
+                .rstrip("\n"),
+            )
+            self.assertNotIn(
+                "unverified module-checkout",
+                record["evidence"]["native_example_stdout"],
+            )
+
     def test_build_preserves_reports_and_has_resolvable_links(self):
         before = {p.relative_to(self.site): hashlib.sha256(p.read_bytes()).hexdigest()
                   for p in self.site.rglob("*") if p.is_file() and p.name != "index.html"}

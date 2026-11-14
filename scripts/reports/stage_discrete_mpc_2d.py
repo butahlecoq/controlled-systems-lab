@@ -118,7 +118,8 @@ def _parse_capture(data: bytes) -> dict[tuple[str, str, str, int], tuple[float, 
     return parsed
 
 
-def _record(capture: dict[tuple[str, str, str, int], tuple[float, ...]]) -> dict:
+def _record(capture: dict[tuple[str, str, str, int], tuple[float, ...]],
+            stdout_bytes: bytes) -> dict:
     return {
         "schema": "csl.educational-example.discrete-mpc-2d/1",
         "source_commit": SOURCE,
@@ -168,8 +169,7 @@ def _record(capture: dict[tuple[str, str, str, int], tuple[float, ...]]) -> dict
             "native_example_binary_sha256": CPP_BINARY_SHA256,
             "native_example_csv_sha256": CSV_SHA256,
             "native_example_stdout_sha256": STDOUT_SHA256,
-            "native_example_stdout": _read(Path(__file__).resolve().parents[2],
-                                            "examples/discrete_mpc_2d-output.txt").decode("ascii").rstrip("\n"),
+            "native_example_stdout": stdout_bytes.decode("ascii").rstrip("\n"),
             "provider": "csl.convex.highs@1.0.0+highs.1.11.0",
             "build_scope": "Installed consumer linked a fresh csl_controllers archive and generated target export metadata over a byte-copied complete installed SDK; this is component-consumer evidence, not a fresh full-SDK install qualification.",
             "actual_replay_csv_is_solver_output": True,
@@ -321,7 +321,7 @@ def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]]
         "native discrete MPC summary differs from the checked episode",
     )
     capture = _parse_capture(csv_bytes)
-    record = _record(capture)
+    record = _record(capture, stdout_bytes)
     figure = _svg(capture)
     record_bytes = (json.dumps(record, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
     page = _page(record).encode("utf-8")

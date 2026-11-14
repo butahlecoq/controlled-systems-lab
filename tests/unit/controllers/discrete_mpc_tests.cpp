@@ -96,6 +96,8 @@ TEST_CASE("source profile factory records an explicit admission for every catalo
     std::size_t runnable = 0;
     std::size_t deferred = 0;
     for (std::size_t i = 1; i <= models.size(); ++i) {
+        const auto expected_model_id = "catalogue-2026/model-" + std::to_string(i) + "/1";
+        CHECK(models[i - 1].id == expected_model_id);
         auto loaded = load_model(i);
         REQUIRE(std::holds_alternative<DiscreteModelData>(loaded));
         auto data = std::get<DiscreteModelData>(std::move(loaded));
