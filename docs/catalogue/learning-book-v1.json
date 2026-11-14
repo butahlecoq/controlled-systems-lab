@@ -2125,8 +2125,7 @@
       "intermediate_geometry": "Plot P against R from saved execution states. Keep plant replay and prediction stages distinct.",
       "support_limits": "This is one local-NLP policy path. Native module substitution rows remain pending until #943; every bypassed module must read not_used. The saved figure shows the captured path-conditioned and retained-node evidence only. The FigureIndex lists the missing complete all-stage forward sets, all-admissible-control forward sets, materialized backward/predecessor sets, and materialized full-state intersections. Figure availability means a source-bound view is published; it does not mean the geometry acceptance criteria are complete.",
       "figure_ids": [
-        "lotka-populations",
-        "baseline-089075e9-lotka-populations"
+        "lotka-populations"
       ],
       "records": [
         {
@@ -2187,8 +2186,7 @@
       "intermediate_geometry": "Plot r against v for the recorded execution states. The target radius and rate remain soft objective terms.",
       "support_limits": "The finite nine-action three-block source task differs from this continuous per-interval domain. Native substitutions await #943. The saved figure shows the captured path-conditioned and retained-node evidence only. The FigureIndex lists the missing complete all-stage forward sets, all-admissible-control forward sets, materialized backward/predecessor sets, and materialized full-state intersections. Figure availability means a source-bound view is published; it does not mean the geometry acceptance criteria are complete.",
       "figure_ids": [
-        "earth-orbit",
-        "baseline-089075e9-earth-orbit"
+        "earth-orbit"
       ],
       "records": [
         {
@@ -2256,8 +2254,7 @@
       "support_limits": "Do not conflate absolute propellant mass with the older stock-balance example. The pilot is one local-NLP path. Native substitutions await #943. The saved figure shows the captured path-conditioned and retained-node evidence only. The FigureIndex lists the missing complete all-stage forward sets, all-admissible-control forward sets, materialized backward/predecessor sets, and materialized full-state intersections. Figure availability means a source-bound view is published; it does not mean the geometry acceptance criteria are complete.",
       "figure_ids": [
         "fuel-state",
-        "fuel-fuel-flow",
-        "baseline-089075e9-fuel-state"
+        "fuel-fuel-flow"
       ],
       "records": [
         {
