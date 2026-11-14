@@ -569,213 +569,117 @@ ST(ModulePin, F(scope), F(sha256))
     };
 ID(ProblemId)
 ID(ProgramId)
-ID(ModuleId) ID(RepresentationId) ID(ConfigId) ID(RunId) ID(ClockId) ID(AttachmentId) ID(
-    RequestId) ID(ReferenceId) ID(SetId)
+ID(ModuleId)
+ID(RepresentationId)
+ID(ConfigId)
+ID(RunId)
+ID(ClockId)
+ID(AttachmentId)
+ID(RequestId)
+ID(ReferenceId)
+ID(SetId)
 #undef ID
-    ST(ProgramIdentity, F(problem), F(program)) ST(ModuleIdentity, F(id), F(version), F(pin)) ST(
-        SpanId, F(value)) EN(CollectionMode, EV(CollectionMode, detail),
-                             EV(CollectionMode, summary)) ST(CollectionSettings, F(enabled),
-                                                             F(mode), F(plan_spans), F(plan_bytes),
-                                                             F(detail_spans), F(detail_bytes))
-        EN(Assurance, EV(Assurance, numerical), EV(Assurance, validated)) EN(
-            SetRelation, EV(SetRelation, equivalent),
-            EV(SetRelation, inner),
-            EV(SetRelation, outer),
-            EV(SetRelation,
-               heuristic)) EN(Termination, EV(Termination, completed), EV(Termination, cancelled),
-                              EV(Termination, deadline_expired), EV(Termination, resource_limit),
-                              EV(Termination, numerical_failure),
-                              EV(Termination, operation_rejected),
-                              EV(Termination,
-                                 contract_rejected)) EN(StopReason, EV(StopReason, cancelled),
-                                                        EV(StopReason, deadline_expired),
-                                                        EV(StopReason, resource_limit), EV(StopReason, numerical_failure))
-            EN(
-                MathematicalOutcome, EV(MathematicalOutcome, optimal),
-                EV(MathematicalOutcome, infeasible),
-                EV(MathematicalOutcome, unbounded),
-                EV(MathematicalOutcome, infimum_not_attained),
-                EV(MathematicalOutcome,
-                   undetermined)) EN(MinimaxOutcome, EV(MinimaxOutcome, optimal),
-                                     EV(MinimaxOutcome, infeasible),
-                                     EV(MinimaxOutcome, empty_catalogue),
-                                     EV(MinimaxOutcome, no_scenarios),
-                                     EV(MinimaxOutcome, undetermined))
-                EN(
-                    FamilyTarget, EV(FamilyTarget, exact_optimal_relation),
-                    EV(FamilyTarget, candidate_relaxation),
-                    EV(FamilyTarget,
-                       partial_relation)) EN(ClockMetric, EV(ClockMetric, steady_wall),
-                                             EV(ClockMetric, thread_cpu),
-                                             EV(ClockMetric, process_cpu))
-                    EN(ParentKind, EV(ParentKind, nested), EV(ParentKind, spawned)) EN(
-                        DetailState, EV(DetailState, not_observed),
-                        EV(DetailState, retained),
-                        EV(DetailState, capacity_dropped),
-                        EV(DetailState, rejected),
-                        EV(DetailState,
-                           not_requested)) EN(NotCalledReason,
-                                              EV(NotCalledReason, capability_rejected),
-                                              EV(NotCalledReason, task_not_admitted),
-                                              EV(NotCalledReason, before_public_entry),
-                                              EV(NotCalledReason, explicit_pre_entry_stop),
-                                              EV(NotCalledReason, constant_rows_wrapper),
-                                              EV(NotCalledReason, stopped_before_phase_call),
-                                              EV(NotCalledReason, earlier_phase_exit),
-                                              EV(NotCalledReason, invalid_qp_start),
-                                              EV(NotCalledReason, route_not_selected))
-                        EN(
-                            AttachmentRole,
-                            EV(AttachmentRole, diagnostics), EV(AttachmentRole, family),
-                            EV(AttachmentRole, certificate),
-                            EV(AttachmentRole,
-                               profiler)) EN(SkippedReason, EV(SkippedReason, cancelled),
-                                             EV(SkippedReason, deadline),
-                                             EV(SkippedReason, task_limit),
-                                             EV(SkippedReason, reservation_exceeds_budget),
-                                             EV(SkippedReason, batch_failed))
-                            EN(
-                                FailurePhase, EV(FailurePhase, create),
-                                EV(FailurePhase, invoke),
-                                EV(FailurePhase, launch),
-                                EV(
-                                    FailurePhase,
-                                    publication)) EN(FailureReason, EV(FailureReason, allocation),
-                                                     EV(FailureReason, adapter_exception),
-                                                     EV(FailureReason, thread_launch))
-                                EN(AdmissionCause, EV(AdmissionCause, cancelled),
-                                   EV(AdmissionCause, deadline),
-                                   EV(AdmissionCause, task_limit),
-                                   EV(AdmissionCause, allocation),
-                                   EV(AdmissionCause, adapter_exception),
-                                   EV(AdmissionCause,
-                                      thread_launch)) EN(MemoryAccounting,
-                                                         EV(MemoryAccounting, unlimited),
-                                                         EV(MemoryAccounting, active_reservations))
-                                    EN(
-                                        ProblemProvenance,
-                                        EV(ProblemProvenance, problem_revalidated),
-                                        EV(ProblemProvenance,
-                                           identity_recorded)) EN(DiagnosticCode,
-                                                                  EV(DiagnosticCode, invalid_input),
-                                                                  EV(DiagnosticCode, unsupported),
-                                                                  EV(DiagnosticCode,
-                                                                     evidence_mismatch),
-                                                                  EV(DiagnosticCode, invalid_claim))
-                                        ST(Diagnostic, F(code), F(field), F(explanation)) ST(
-                                            ClockDomain, F(id),
-                                            F(metric),
-                                            F(scope), F(period_numerator),
-                                            F(period_denominator),
-                                            F(resolution_ticks), F(origin_label),
-                                            F(calibration)) ST(TickInterval, F(start), F(end))
-                                            ST(LegacySecondsInterval, F(start), F(end)) TAG(
-                                                TickInterval,
-                                                "ticks") TAG(LegacySecondsInterval,
-                                                             "legacy_seconds") ST(SpanParent, F(id), F(kind))
-                                                EMPTY(ReturnedObservation) EMPTY(UnknownObservation) ST(
-                                                    NotCalledObservation, F(reason),
-                                                    F(source_location),
-                                                    F(source_version)) TAG(ReturnedObservation,
-                                                                           "observed_return") TAG(NotCalledObservation, "known_not_called")
-                                                    TAG(UnknownObservation, "unknown") ST(
-                                                        RepresentationSize,
-                                                        F(quantity), F(unit),
-                                                        F(value)) ST(RepresentationSummary,
-                                                                     F(representation),
-                                                                     F(dimension),
-                                                                     F(sizes))
-                                                        ST(SpanDescriptor, F(id), F(parent),
-                                                           F(shard), F(bucket),
-                                                           F(task),
-                                                           F(operation),
-                                                           F(module), F(backend), F(clock),
-                                                           F(program),
-                                                           F(stage), F(query),
-                                                           F(input_representation),
-                                                           F(output_representation), F(input_size),
-                                                           F(output_size),
-                                                           F(requested_assurance),
-                                                           F(applied_assurance),
-                                                           F(relation),
-                                                           F(relation_evidence), F(input_summary),
-                                                           F(output_summary), F(observation_source))
-                                                            EMPTY(IncompleteSpan) ST(
-                                                                ReturnedSpan, F(termination),
-                                                                F(
-                                                                    outcome)) ST(RejectedSpan,
-                                                                                 F(reason))
-                                                                ST(SkippedSpan, F(reason)) ST(
-                                                                    FailedSpan,
-                                                                    F(phase),
-                                                                    F(reason)) TAG(IncompleteSpan,
-                                                                                   "incomplete")
-                                                                    TAG(ReturnedSpan, "returned") TAG(
-                                                                        RejectedSpan,
-                                                                        "capability_rejected") TAG(SkippedSpan,
-                                                                                                   "skipped")
-                                                                        TAG(FailedSpan, "failed") ST(
-                                                                            SpanRecord,
-                                                                            F(descriptor),
-                                                                            F(interval),
-                                                                            F(execution),
-                                                                            F(termination),
-                                                                            F(iterations),
-                                                                            F(detail),
-                                                                            F(status),
-                                                                            F(completion_observed),
-                                                                            F(detail_state))
-                                                                            ST(ExactCount, F(value), F(exact)) ST(
-                                                                                BucketSummary,
-                                                                                F(id),
-                                                                                F(clock),
-                                                                                F(observed),
-                                                                                F(detail_dropped),
-                                                                                F(duplicate),
-                                                                                F(wrong_shard),
-                                                                                F(declared_overflow),
-                                                                                F(duration_contributors),
-                                                                                F(inclusive_ticks),
-                                                                                F(failed),
-                                                                                F(not_called),
-                                                                                F(unknown),
-                                                                                F(incomplete))
-                                                                                ST(CollectionRecord,
-                                                                                   F(problem),
-                                                                                   F(configuration),
-                                                                                   F(run),
-                                                                                   F(settings),
-                                                                                   F(clocks),
-                                                                                   F(spans),
-                                                                                   F(buckets),
-                                                                                   F(complete),
-                                                                                   F(tasks),
-                                                                                   F(operations)) EMPTY(Unestablished)
-                                                                                    ST(NumericalCheck,
-                                                                                       F(absolute_tolerance),
-                                                                                       F(relative_tolerance),
-                                                                                       F(max_residual),
-                                                                                       F(verifier)) ST(SymbolicArgument,
-                                                                                                       F(reference),
-                                                                                                       F(assumptions))
-                                                                                        ST(CertificateReference,
-                                                                                           F(artifact),
-                                                                                           F(verifier)) TAG(Unestablished,
-                                                                                                            "unestablished")
-                                                                                            TAG(NumericalCheck, "numerical_check") TAG(
-                                                                                                SymbolicArgument,
-                                                                                                "symbolic_argument") TAG(CertificateReference,
-                                                                                                                         "certificate_reference")
-                                                                                                ST(LinearInfeasibilityCertificate,
-                                                                                                   F(subject),
-                                                                                                   F(row_lower),
-                                                                                                   F(row_upper),
-                                                                                                   F(variable_lower),
-                                                                                                   F(variable_upper))
-                                                                                                    TAG(ExactFarkasEvidence,
-                                                                                                        "exact_farkas") template <>
-                                                                                                    struct
-    Codec<ExactFarkasEvidence> {
+ST(ProgramIdentity, F(problem), F(program))
+ST(ModuleIdentity, F(id), F(version), F(pin))
+ST(SpanId, F(value))
+EN(CollectionMode, EV(CollectionMode, detail), EV(CollectionMode, summary))
+ST(CollectionSettings, F(enabled), F(mode), F(plan_spans), F(plan_bytes), F(detail_spans),
+   F(detail_bytes))
+EN(Assurance, EV(Assurance, numerical), EV(Assurance, validated))
+EN(SetRelation, EV(SetRelation, equivalent), EV(SetRelation, inner), EV(SetRelation, outer),
+   EV(SetRelation, heuristic))
+EN(Termination, EV(Termination, completed), EV(Termination, cancelled),
+   EV(Termination, deadline_expired), EV(Termination, resource_limit),
+   EV(Termination, numerical_failure), EV(Termination, operation_rejected),
+   EV(Termination, contract_rejected))
+EN(StopReason, EV(StopReason, cancelled), EV(StopReason, deadline_expired),
+   EV(StopReason, resource_limit), EV(StopReason, numerical_failure))
+EN(MathematicalOutcome, EV(MathematicalOutcome, optimal), EV(MathematicalOutcome, infeasible),
+   EV(MathematicalOutcome, unbounded), EV(MathematicalOutcome, infimum_not_attained),
+   EV(MathematicalOutcome, undetermined))
+EN(MinimaxOutcome, EV(MinimaxOutcome, optimal), EV(MinimaxOutcome, infeasible),
+   EV(MinimaxOutcome, empty_catalogue), EV(MinimaxOutcome, no_scenarios),
+   EV(MinimaxOutcome, undetermined))
+EN(FamilyTarget, EV(FamilyTarget, exact_optimal_relation), EV(FamilyTarget, candidate_relaxation),
+   EV(FamilyTarget, partial_relation))
+EN(ClockMetric, EV(ClockMetric, steady_wall), EV(ClockMetric, thread_cpu),
+   EV(ClockMetric, process_cpu))
+EN(ParentKind, EV(ParentKind, nested), EV(ParentKind, spawned))
+EN(DetailState, EV(DetailState, not_observed), EV(DetailState, retained),
+   EV(DetailState, capacity_dropped), EV(DetailState, rejected), EV(DetailState, not_requested))
+EN(NotCalledReason, EV(NotCalledReason, capability_rejected),
+   EV(NotCalledReason, task_not_admitted), EV(NotCalledReason, before_public_entry),
+   EV(NotCalledReason, explicit_pre_entry_stop), EV(NotCalledReason, constant_rows_wrapper),
+   EV(NotCalledReason, stopped_before_phase_call), EV(NotCalledReason, earlier_phase_exit),
+   EV(NotCalledReason, invalid_qp_start), EV(NotCalledReason, route_not_selected))
+EN(AttachmentRole, EV(AttachmentRole, diagnostics), EV(AttachmentRole, family),
+   EV(AttachmentRole, certificate), EV(AttachmentRole, profiler))
+EN(SkippedReason, EV(SkippedReason, cancelled), EV(SkippedReason, deadline),
+   EV(SkippedReason, task_limit), EV(SkippedReason, reservation_exceeds_budget),
+   EV(SkippedReason, batch_failed))
+EN(FailurePhase, EV(FailurePhase, create), EV(FailurePhase, invoke), EV(FailurePhase, launch),
+   EV(FailurePhase, publication))
+EN(FailureReason, EV(FailureReason, allocation), EV(FailureReason, adapter_exception),
+   EV(FailureReason, thread_launch))
+EN(AdmissionCause, EV(AdmissionCause, cancelled), EV(AdmissionCause, deadline),
+   EV(AdmissionCause, task_limit), EV(AdmissionCause, allocation),
+   EV(AdmissionCause, adapter_exception), EV(AdmissionCause, thread_launch))
+EN(MemoryAccounting, EV(MemoryAccounting, unlimited), EV(MemoryAccounting, active_reservations))
+EN(ProblemProvenance, EV(ProblemProvenance, problem_revalidated),
+   EV(ProblemProvenance, identity_recorded))
+EN(DiagnosticCode, EV(DiagnosticCode, invalid_input), EV(DiagnosticCode, unsupported),
+   EV(DiagnosticCode, evidence_mismatch), EV(DiagnosticCode, invalid_claim))
+ST(Diagnostic, F(code), F(field), F(explanation))
+ST(ClockDomain, F(id), F(metric), F(scope), F(period_numerator), F(period_denominator),
+   F(resolution_ticks), F(origin_label), F(calibration))
+ST(TickInterval, F(start), F(end))
+ST(LegacySecondsInterval, F(start), F(end))
+TAG(TickInterval, "ticks")
+TAG(LegacySecondsInterval, "legacy_seconds")
+ST(SpanParent, F(id), F(kind))
+EMPTY(ReturnedObservation)
+EMPTY(UnknownObservation)
+ST(NotCalledObservation, F(reason), F(source_location), F(source_version))
+TAG(ReturnedObservation, "observed_return")
+TAG(NotCalledObservation, "known_not_called")
+TAG(UnknownObservation, "unknown")
+ST(RepresentationSize, F(quantity), F(unit), F(value))
+ST(RepresentationSummary, F(representation), F(dimension), F(sizes))
+ST(SpanDescriptor, F(id), F(parent), F(shard), F(bucket), F(task), F(operation), F(module),
+   F(backend), F(clock), F(program), F(stage), F(query), F(input_representation),
+   F(output_representation), F(input_size), F(output_size), F(requested_assurance),
+   F(applied_assurance), F(relation), F(relation_evidence), F(input_summary), F(output_summary),
+   F(observation_source))
+EMPTY(IncompleteSpan)
+ST(ReturnedSpan, F(termination), F(outcome))
+ST(RejectedSpan, F(reason))
+ST(SkippedSpan, F(reason))
+ST(FailedSpan, F(phase), F(reason))
+TAG(IncompleteSpan, "incomplete")
+TAG(ReturnedSpan, "returned")
+TAG(RejectedSpan, "capability_rejected")
+TAG(SkippedSpan, "skipped")
+TAG(FailedSpan, "failed")
+ST(SpanRecord, F(descriptor), F(interval), F(execution), F(termination), F(iterations), F(detail),
+   F(status), F(completion_observed), F(detail_state))
+ST(ExactCount, F(value), F(exact))
+ST(BucketSummary, F(id), F(clock), F(observed), F(detail_dropped), F(duplicate), F(wrong_shard),
+   F(declared_overflow), F(duration_contributors), F(inclusive_ticks), F(failed), F(not_called),
+   F(unknown), F(incomplete))
+ST(CollectionRecord, F(problem), F(configuration), F(run), F(settings), F(clocks), F(spans),
+   F(buckets), F(complete), F(tasks), F(operations))
+EMPTY(Unestablished)
+ST(NumericalCheck, F(absolute_tolerance), F(relative_tolerance), F(max_residual), F(verifier))
+ST(SymbolicArgument, F(reference), F(assumptions))
+ST(CertificateReference, F(artifact), F(verifier))
+TAG(Unestablished, "unestablished")
+TAG(NumericalCheck, "numerical_check")
+TAG(SymbolicArgument, "symbolic_argument")
+TAG(CertificateReference, "certificate_reference")
+ST(LinearInfeasibilityCertificate, F(subject), F(row_lower), F(row_upper), F(variable_lower),
+   F(variable_upper))
+TAG(ExactFarkasEvidence, "exact_farkas")
+template <> struct Codec<ExactFarkasEvidence> {
     static Json put(const ExactFarkasEvidence &value) {
         return {{"subject", artifacts::put(value.subject())},
                 {"certificate", artifacts::put(value.certificate())}};
@@ -816,49 +720,44 @@ EN(GeometryClaimScope, EV(GeometryClaimScope, set_relation), EV(GeometryClaimSco
    EV(GeometryClaimScope, containment))
 ST(GeometryRequestIdentity, F(problem), F(request), F(ideal_output))
 ST(GeometryReference, F(identity), F(inputs))
-ST(GeometryErrorBound, F(metric), F(bound),
-   F(units)) ST(GeometryEvidence, F(reference), F(scope), F(support), F(assumptions),
-                F(error_bound)) ST(ClaimEvidence, F(problem), F(support))
-    ST(FamilyEvidence, F(feasibility), F(optimality),
-       F(completeness)) ST(NumericalPolicy, F(absolute_tolerance),
-                           F(relative_tolerance)) ST(FamilyRequest, F(profile), F(objective),
-                                                     F(target), F(numerical), F(assurance),
-                                                     F(representation), F(materialization_limit))
-        ST(TransformStepIdentity, F(request), F(input), F(output), F(module),
-           F(version)) ST(FamilyIdentity, F(problem), F(request), F(coordinates), F(strategy),
-                          F(strategy_version),
-                          F(lineage)) ST(OptimumEvidence, F(optimum), F(bounds))
-            ST(NumericalCoverageEvidence, F(procedure), F(policy), F(verifier),
-               F(diagnostics)) ST(ValidatedCoverageEvidence, F(certificate), F(verifier),
-                                  F(arithmetic_profile)) TAG(NumericalCoverageEvidence, "numerical")
-                TAG(ValidatedCoverageEvidence, "validated")
-                    ST(RegisteredCompletenessEvidence, F(verifier), F(verifier_version),
-                       F(proof)) TAG(RegisteredCompletenessEvidence, "registered_verifier")
-                        ST(CompletenessEvidence, F(binding),
-                           F(support)) ST(JointRelation, F(coordinates), F(representation))
-                            ST(CompleteOptimalFamily, F(relation), F(optimum), F(completeness),
-                               F(assurance)) ST(InnerSubsetEvidence, F(every_history_optimal),
-                                                F(procedure)) ST(CoverageScope, F(description))
-                                ST(PartialOptimalFamily, F(relation), F(optimum), F(optimal_subset),
-                                   F(known_scope)) ST(OuterCandidateEvidence, F(enclosure))
-                                    ST(FeasibleCandidateEvidence,
-                                       F(feasibility)) ST(HeuristicRelationEvidence, F(method))
-                                        TAG(OuterCandidateEvidence,
-                                            "outer") TAG(FeasibleCandidateEvidence, "feasible")
-                                            TAG(HeuristicRelationEvidence,
-                                                "heuristic") ST(RelationFeasibilityEvidence,
-                                                                F(support))
-                                                ST(WitnessFeasibilityEvidence, F(witness),
-                                                   F(support)) TAG(RelationFeasibilityEvidence,
-                                                                   "relation")
-                                                    TAG(WitnessFeasibilityEvidence, "witness")
-                                                        ST(CandidateFamily, F(relation),
-                                                           F(relation_to_target), F(feasibility))
-                                                            TAG(CompleteOptimalFamily, "complete")
-                                                                TAG(PartialOptimalFamily, "partial")
-                                                                    TAG(CandidateFamily,
-                                                                        "candidate") template <>
-                                                                    struct Codec<OptimalFamily> {
+ST(GeometryErrorBound, F(metric), F(bound), F(units))
+ST(GeometryEvidence, F(reference), F(scope), F(support), F(assumptions), F(error_bound))
+ST(ClaimEvidence, F(problem), F(support))
+ST(FamilyEvidence, F(feasibility), F(optimality), F(completeness))
+ST(NumericalPolicy, F(absolute_tolerance), F(relative_tolerance))
+ST(FamilyRequest, F(profile), F(objective), F(target), F(numerical), F(assurance),
+   F(representation), F(materialization_limit))
+ST(TransformStepIdentity, F(request), F(input), F(output), F(module), F(version))
+ST(FamilyIdentity, F(problem), F(request), F(coordinates), F(strategy), F(strategy_version),
+   F(lineage))
+ST(OptimumEvidence, F(optimum), F(bounds))
+ST(NumericalCoverageEvidence, F(procedure), F(policy), F(verifier), F(diagnostics))
+ST(ValidatedCoverageEvidence, F(certificate), F(verifier), F(arithmetic_profile))
+TAG(NumericalCoverageEvidence, "numerical")
+TAG(ValidatedCoverageEvidence, "validated")
+ST(RegisteredCompletenessEvidence, F(verifier), F(verifier_version), F(proof))
+TAG(RegisteredCompletenessEvidence, "registered_verifier")
+ST(CompletenessEvidence, F(binding), F(support))
+ST(JointRelation, F(coordinates), F(representation))
+ST(CompleteOptimalFamily, F(relation), F(optimum), F(completeness), F(assurance))
+ST(InnerSubsetEvidence, F(every_history_optimal), F(procedure))
+ST(CoverageScope, F(description))
+ST(PartialOptimalFamily, F(relation), F(optimum), F(optimal_subset), F(known_scope))
+ST(OuterCandidateEvidence, F(enclosure))
+ST(FeasibleCandidateEvidence, F(feasibility))
+ST(HeuristicRelationEvidence, F(method))
+TAG(OuterCandidateEvidence, "outer")
+TAG(FeasibleCandidateEvidence, "feasible")
+TAG(HeuristicRelationEvidence, "heuristic")
+ST(RelationFeasibilityEvidence, F(support))
+ST(WitnessFeasibilityEvidence, F(witness), F(support))
+TAG(RelationFeasibilityEvidence, "relation")
+TAG(WitnessFeasibilityEvidence, "witness")
+ST(CandidateFamily, F(relation), F(relation_to_target), F(feasibility))
+TAG(CompleteOptimalFamily, "complete")
+TAG(PartialOptimalFamily, "partial")
+TAG(CandidateFamily, "candidate")
+template <> struct Codec<OptimalFamily> {
     static Json put(const OptimalFamily &v) {
         return object(field("identity", v.identity()), field("outcome", v.outcome()));
     }
@@ -881,10 +780,11 @@ ST(ScopedOperationStopped, F(stop), F(request), F(retained))
 ST(ScopedRequestRejection, F(request), F(diagnostics), F(completed_lineage), F(retained))
 EMPTY(std::monostate)
 TAG(std::monostate, "none")
-TAG(ScopedOperationStopped, "operation_stopped") TAG(ScopedRequestRejection, "request_rejected")
-    ST(ContractValidationFailure, F(diagnostics), F(retained), F(source_stop))
-        TAG(ContractValidationFailure, "contract_validation_failure") template <class Subject>
-        struct Codec<OutcomeClaim<Subject>> {
+TAG(ScopedOperationStopped, "operation_stopped")
+TAG(ScopedRequestRejection, "request_rejected")
+ST(ContractValidationFailure, F(diagnostics), F(retained), F(source_stop))
+TAG(ContractValidationFailure, "contract_validation_failure")
+template <class Subject> struct Codec<OutcomeClaim<Subject>> {
     static Json put(const OutcomeClaim<Subject> &v) {
         return object(F(subject), F(value), F(support), F(assumptions));
     }
@@ -896,29 +796,29 @@ TAG(ScopedOperationStopped, "operation_stopped") TAG(ScopedRequestRejection, "re
 };
 ST(ObjectiveBound, F(value), F(evidence))
 ST(ObjectiveEvidence, F(lower), F(upper))
-ST(ProgramBoundEvidence, F(subject), F(support),
-   F(assumptions)) ST(ProgramObjectiveBound, F(value), F(evidence)) ST(ProgramObjectiveEvidence,
-                                                                       F(lower), F(upper))
-    ST(Verifier, F(id), F(version)) ST(ResidualMeasure, F(violation), F(scale))
-        ST(ResidualContext, F(subject), F(verifier), F(absolute_tolerance),
-           F(relative_tolerance)) ST(PrimalResiduals, F(context), F(rows), F(variables))
-            ST(DualResiduals, F(context), F(stationarity), F(signs), F(complementarity))
-                ST(ProgramResiduals, F(primal), F(dual)) ST(ProgramResult, F(termination),
-                                                            F(outcome), F(primal), F(objective),
-                                                            F(raw_diagnostics), F(residuals))
-                    ST(Dimensions, F(state), F(control), F(external)) ST(JointCoordinates,
-                                                                         F(dimensions), F(horizon))
-                        ST(Witness, F(problem), F(states), F(controls), F(original_objective))
-                            ST(FeasibleIncumbent, F(witness), F(feasibility))
-                                ST(WitnessBatch, F(witnesses), F(requested), F(selector), F(seed),
-                                   F(source_family), F(directions), F(distinctness_tolerance))
-                                    ST(WitnessSelection, F(batch), F(termination), F(diagnostics))
-                                        ST(ExternalFamilyPayload, F(attachment))
-                                            EMPTY(FamilyWithoutExporter)
-                                                TAG(ExternalFamilyPayload, "external_reference")
-                                                    TAG(FamilyWithoutExporter,
-                                                        "unavailable_no_exporter") template <>
-                                                    struct Codec<FamilyRecord> {
+ST(ProgramBoundEvidence, F(subject), F(support), F(assumptions))
+ST(ProgramObjectiveBound, F(value), F(evidence))
+ST(ProgramObjectiveEvidence, F(lower), F(upper))
+ST(Verifier, F(id), F(version))
+ST(ResidualMeasure, F(violation), F(scale))
+ST(ResidualContext, F(subject), F(verifier), F(absolute_tolerance), F(relative_tolerance))
+ST(PrimalResiduals, F(context), F(rows), F(variables))
+ST(DualResiduals, F(context), F(stationarity), F(signs), F(complementarity))
+ST(ProgramResiduals, F(primal), F(dual))
+ST(ProgramResult, F(termination), F(outcome), F(primal), F(objective), F(raw_diagnostics),
+   F(residuals))
+ST(Dimensions, F(state), F(control), F(external))
+ST(JointCoordinates, F(dimensions), F(horizon))
+ST(Witness, F(problem), F(states), F(controls), F(original_objective))
+ST(FeasibleIncumbent, F(witness), F(feasibility))
+ST(WitnessBatch, F(witnesses), F(requested), F(selector), F(seed), F(source_family), F(directions),
+   F(distinctness_tolerance))
+ST(WitnessSelection, F(batch), F(termination), F(diagnostics))
+ST(ExternalFamilyPayload, F(attachment))
+EMPTY(FamilyWithoutExporter)
+TAG(ExternalFamilyPayload, "external_reference")
+TAG(FamilyWithoutExporter, "unavailable_no_exporter")
+template <> struct Codec<FamilyRecord> {
     static Json put(const FamilyRecord &v) {
         return object(field("family", v.family), field("payload", v.payload));
     }
@@ -931,22 +831,26 @@ ST(ProgramBoundEvidence, F(subject), F(support),
 ST(SynthesisFinal, F(termination), F(outcome), F(objective), F(family), F(incumbents), F(stop))
 ST(ProgramFinal, F(result), F(raw_diagnostics))
 ST(MinimaxFinal, F(termination), F(outcome), F(assurance), F(subject), F(objective),
-   F(outcome_attachment)) ST(UnsupportedFinal, F(diagnostics)) ST(SkippedFinal, F(reason))
-    ST(FailedFinal, F(phase), F(reason), F(message), F(raw_diagnostics))
-        TAG(SynthesisFinal, "synthesis") TAG(ProgramFinal, "program")
-            TAG(MinimaxFinal, "finite_minimax") TAG(UnsupportedFinal, "unsupported")
-                TAG(SkippedFinal, "skipped") TAG(FailedFinal, "failed") ST(AdmissionObservation,
-                                                                           F(cause), F(at))
-                    ST(ExecutionSummary::Task, F(id), F(queued), F(admitted), F(create_started),
-                       F(create_finished), F(call_started), F(call_finished), F(released),
-                       F(status)) ST(ExecutionSummary, F(configured_deadline), F(admission_closed),
-                                     F(external_cancellation), F(workers_joined), F(completed),
-                                     F(clock), F(started), F(tasks))
-                        ST(ResourceObservation, F(peak_active_tasks), F(peak_reserved_threads),
-                           F(peak_reserved_bytes), F(actual_threads), F(outer_admission_enforced),
-                           F(memory)) ST(ScenarioDefaultRecord, F(path), F(meaning), F(authored))
-                            ST(ScenarioSourceRecord::ExternalData, F(uri), F(digest),
-                               F(byte_count)) std::vector<std::byte> parse_hex(const Json &);
+   F(outcome_attachment))
+ST(UnsupportedFinal, F(diagnostics))
+ST(SkippedFinal, F(reason))
+ST(FailedFinal, F(phase), F(reason), F(message), F(raw_diagnostics))
+TAG(SynthesisFinal, "synthesis")
+TAG(ProgramFinal, "program")
+TAG(MinimaxFinal, "finite_minimax")
+TAG(UnsupportedFinal, "unsupported")
+TAG(SkippedFinal, "skipped")
+TAG(FailedFinal, "failed")
+ST(AdmissionObservation, F(cause), F(at))
+ST(ExecutionSummary::Task, F(id), F(queued), F(admitted), F(create_started), F(create_finished),
+   F(call_started), F(call_finished), F(released), F(status))
+ST(ExecutionSummary, F(configured_deadline), F(admission_closed), F(external_cancellation),
+   F(workers_joined), F(completed), F(clock), F(started), F(tasks))
+ST(ResourceObservation, F(peak_active_tasks), F(peak_reserved_threads), F(peak_reserved_bytes),
+   F(actual_threads), F(outer_admission_enforced), F(memory))
+ST(ScenarioDefaultRecord, F(path), F(meaning), F(authored))
+ST(ScenarioSourceRecord::ExternalData, F(uri), F(digest), F(byte_count))
+std::vector<std::byte> parse_hex(const Json &);
 template <> struct Codec<ScenarioSourceRecord> {
     static Json put(const ScenarioSourceRecord &v) {
         require(!v.input_schema.empty(), "scenario_source.schema", "Input schema is required");
