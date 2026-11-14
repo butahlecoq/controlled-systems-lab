@@ -153,7 +153,7 @@ foreach(example_file CMakeLists.txt registered_lp.cpp registered_convex.cpp
     nominal_linear_exact_2d.cpp scenario_cli.cpp continuous_policy.cpp
     source_index_geometry_2d.cpp adaptive_ode_replay.cpp scenario_backend_substitution.cpp
     native_slide50_reachability.cpp native_model_catalogue.cpp native_four_state_reachability.cpp
-    native_discrete_models.cpp native_catalogue_projection.hpp
+    native_discrete_models.cpp native_model_tracking.cpp native_catalogue_projection.hpp
     quadcopter_mpc.cpp quadcopter_mpc_task.cpp quadcopter_mpc_task.hpp quadcopter_mpc_scalar_contract.cpp
     quadcopter_mpc_check.cmake native_flexible_pitch.cpp
     nominal_quadratic_history_2d.cpp native_spatial_flight.cpp
