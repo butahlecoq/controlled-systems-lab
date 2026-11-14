@@ -1,0 +1,11 @@
+solver=csl.convex.highs
+objective_convention=0.5*z_transpose_H_z+q_transpose_z+c
+control_target=(0.2,-0.2)
+source_constraint=sum(max(u_i,0))<=0.1
+literal_source_objective=0.5*((u0-0.2)^2+(u1+0.2)^2)
+native_control=(0.10000000000000001,-0.20000000000000001)
+native_positive_part_sum=0.10000000000000001
+literal_recomputed_objective=0.005000000000000001
+net_sum_surrogate_admits_target=true
+feasible_polygon_vertices=analytically_derived_from_box_and_source_budget
+assurance=numerical; no robustness or policy claim

@@ -86,7 +86,8 @@ optimization::NominalQuadraticHistoryTask make_task(const NominalProblem &p,
             std::move(staged_control_bounds),
             std::nullopt,
             running,
-            source_terminal_cost(p)};
+            source_terminal_cost(p),
+            {}};
 }
 
 controllers::AuthoredTaskChoices make_source21_choices(const NominalProblem &p,

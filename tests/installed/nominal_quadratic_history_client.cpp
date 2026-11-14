@@ -18,14 +18,17 @@ int main() {
                                      {},
                                      std::nullopt,
                                      {empty, interior},
-                                     {zero_state, {0, 0}, 0}};
+                                     {zero_state, {0, 0}, 0},
+                                     {{{{0}, 0.5}}, {{{0}, 0.5}}}};
     auto compiled = compile_nominal_quadratic_history(task);
-    const auto *program = std::get_if<ConvexProgram>(&compiled);
-    if (!program || program->quadratic_program().hessian().rows() != 8)
+    const auto *history = std::get_if<CompiledNominalQuadraticHistory>(&compiled);
+    if (!history || history->program.quadratic_program().hessian().rows() != 10 ||
+        history->layout.base_variable_count != 8 || history->layout.auxiliary_variable_count != 2 ||
+        history->layout.total_variable_count != 10 || !history->layout.accepts_primal_size(10))
         return 1;
-    if (program->quadratic_program().hessian()(2, 2) != 2.0 ||
-        program->quadratic_program().hessian()(3, 3) != 2.0 ||
-        program->quadratic_program().hessian()(4, 4) != 0.0)
+    if (history->program.quadratic_program().hessian()(2, 2) != 2.0 ||
+        history->program.quadratic_program().hessian()(3, 3) != 2.0 ||
+        history->program.quadratic_program().hessian()(4, 4) != 0.0)
         return 1;
     std::cout << "Installed nominal history QP: interior-state and terminal blocks passed\n";
 }

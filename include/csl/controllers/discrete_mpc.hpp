@@ -84,6 +84,7 @@ struct NominalMpcTask {
     std::vector<std::vector<Interval>> state_bounds;
     std::vector<std::vector<Interval>> control_bounds;
     std::vector<StageLinearConstraint> stage_constraints;
+    std::vector<std::vector<optimization::ControlPositivePartBudget>> control_positive_part_budgets;
     std::vector<TerminalStateConstraint> terminal_state_constraints;
     std::vector<optimization::QuadraticHistoryStageCost> running_costs;
     QuadraticTerminal terminal_cost;
@@ -109,9 +110,9 @@ ProfileAdmission make_source_task_profile(std::string_view model_id,
                                           const AuthoredTaskChoices &choices);
 
 // Compiles the suffix [start_stage, final_stage] for a new observation. The
-// returned QP keeps the existing full history coordinates and objective
-// convention; no cost normalization or task re-identification is applied.
-optimization::ConvexDataResult<ConvexProgram>
+// returned QP keeps the existing base history coordinates and objective
+// convention; auxiliary variable mappings are explicit in its layout.
+optimization::ConvexDataResult<optimization::CompiledNominalQuadraticHistory>
 compile_mpc_decision(const NominalMpcTask &task, StageIndex start_stage,
                      std::span<const double> observed_state);
 
@@ -130,6 +131,7 @@ struct MpcDecisionEvidence {
     std::optional<WorkspaceIdentity> workspace_identity;
     std::optional<std::variant<ProgramResult, Unsupported, Diagnostics, OperationStopped>> solve;
     std::optional<ConvexSolveAttempt> attempt;
+    std::optional<optimization::HistoryVariableLayout> variable_layout;
     std::vector<Vector> predicted_states;
     std::vector<Vector> predicted_controls;
     Diagnostics replay_constraint_diagnostics;

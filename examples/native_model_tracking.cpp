@@ -63,7 +63,8 @@ make_task(const csl::model::catalogue::DiscreteModelData &model, const csl::Vect
             std::move(control_bounds),
             std::nullopt,
             std::move(running),
-            {std::move(terminal_q), Vector(nx, 0.0), 0.0}};
+            {std::move(terminal_q), Vector(nx, 0.0), 0.0},
+            {}};
 }
 
 void write_values(std::ostream &out, const std::string &id, const std::string &kind,
@@ -134,9 +135,11 @@ int main(int argc, char **argv) try {
     for (std::size_t replan = 0; replan < replans; ++replan) {
         const auto task = make_task(model, observed, horizon, weights, affine);
         auto compiled = compile_nominal_quadratic_history(task);
-        if (!std::holds_alternative<ConvexProgram>(compiled))
+        if (!std::holds_alternative<CompiledNominalQuadraticHistory>(compiled))
             throw std::runtime_error("Nominal history QP compilation rejected the authored task");
-        auto program = std::get<ConvexProgram>(std::move(compiled));
+        auto history = std::get<CompiledNominalQuadraticHistory>(std::move(compiled));
+        const auto layout = history.layout;
+        auto program = std::move(history.program);
         Requirements requirements;
         requirements.output.representation = {"csl.program-result.v1"};
         auto selected =
@@ -163,46 +166,69 @@ int main(int argc, char **argv) try {
         const auto *result = std::get_if<ProgramResult>(&outcome);
         if (!result || !result->primal || result->termination != Termination::completed ||
             result->outcome.value != MathematicalOutcome::optimal ||
+            !layout.accepts_primal_size(result->primal->size()) ||
             !check_program_result(*result, program, Assurance::numerical).empty())
             throw std::runtime_error(
                 "Numerical optimizer did not return a checked completed optimum");
         const auto &z = *result->primal;
-        const auto state_count = (horizon + 1) * nx;
-        const auto control_offset = state_count;
+        const auto history_state = [&](std::size_t stage) {
+            Vector values;
+            values.reserve(nx);
+            for (std::size_t coordinate = 0; coordinate < nx; ++coordinate) {
+                const auto index = layout.state_index(stage, coordinate);
+                if (!index || *index >= z.size())
+                    throw std::runtime_error("History layout omitted a state coordinate");
+                values.push_back(z[*index]);
+            }
+            return values;
+        };
+        const auto history_control = [&](std::size_t stage) {
+            Vector values;
+            values.reserve(nu);
+            for (std::size_t coordinate = 0; coordinate < nu; ++coordinate) {
+                const auto index = layout.control_index(stage, coordinate);
+                if (!index || *index >= z.size())
+                    throw std::runtime_error("History layout omitted a control coordinate");
+                values.push_back(z[*index]);
+            }
+            return values;
+        };
         Vector plan(horizon * nu);
-        std::copy_n(z.begin() + static_cast<std::ptrdiff_t>(control_offset), plan.size(),
-                    plan.begin());
-        const auto &first_control = std::span(z).subspan(control_offset, nu);
+        for (std::size_t stage = 0; stage < horizon; ++stage) {
+            const auto controls = history_control(stage);
+            std::copy(controls.begin(), controls.end(),
+                      plan.begin() + static_cast<std::ptrdiff_t>(stage * nu));
+        }
+        const auto first_control = history_control(0);
+        const auto first_state = history_state(0);
         for (std::size_t i = 0; i < nx; ++i)
-            if (std::abs(z[i] - observed[i]) > 1e-7 * (1 + std::abs(observed[i])))
+            if (std::abs(first_state[i] - observed[i]) > 1e-7 * (1 + std::abs(observed[i])))
                 throw std::runtime_error("QP initial-state binding check failed");
         for (std::size_t k = 0; k < horizon; ++k) {
+            const auto current_state = history_state(k);
+            const auto current_control = history_control(k);
+            const auto next_state = history_state(k + 1);
             for (std::size_t i = 0; i < nx; ++i) {
                 double expected = affine[i];
                 for (std::size_t j = 0; j < nx; ++j)
-                    expected += model.coefficients.A.values[i * nx + j] * z[k * nx + j];
+                    expected += model.coefficients.A.values[i * nx + j] * current_state[j];
                 for (std::size_t j = 0; j < nu; ++j)
-                    expected +=
-                        model.coefficients.B.values[i * nu + j] * z[control_offset + k * nu + j];
-                const double actual = z[(k + 1) * nx + i];
+                    expected += model.coefficients.B.values[i * nu + j] * current_control[j];
+                const double actual = next_state[i];
                 if (!std::isfinite(actual) ||
                     std::abs(actual - expected) > 1e-6 * (1 + std::abs(expected)))
                     throw std::runtime_error("Independent compiled-history dynamics check failed");
             }
-            for (std::size_t i = 0; i < nu; ++i) {
-                const double u = z[control_offset + k * nu + i];
+            for (const double u : current_control) {
                 if (!std::isfinite(u) || u < -1.000001 || u > 1.000001)
                     throw std::runtime_error("Independent actuator-box check failed");
             }
         }
         double independent_cost = 0.0;
         for (std::size_t k = 0; k < horizon; ++k) {
-            const auto x = std::span(z).subspan(k * nx, nx);
-            const auto u = std::span(z).subspan(control_offset + k * nu, nu);
-            independent_cost +=
-                dot_cost(Vector(x.begin(), x.end()), Vector(u.begin(), u.end()), weights);
+            independent_cost += dot_cost(history_state(k), history_control(k), weights);
         }
-        const auto terminal = std::span(z).subspan(horizon * nx, nx);
+        const auto terminal = history_state(horizon);
         for (std::size_t i = 0; i < nx; ++i)
             independent_cost += 5.0 * weights[i] * terminal[i] * terminal[i];
         const auto evaluated =
@@ -212,25 +238,16 @@ int main(int argc, char **argv) try {
                      independent_cost) > 1e-6 * (1 + std::abs(independent_cost)))
             throw std::runtime_error("Independent task-cost evaluator disagrees with compiled QP");
 
-        write_values(trace, id, "predicted_state", replan, 0,
-                     Vector(z.begin(), z.begin() + static_cast<std::ptrdiff_t>(nx)));
+        write_values(trace, id, "predicted_state", replan, 0, first_state);
         for (std::size_t k = 0; k <= horizon; ++k)
-            write_values(trace, id, "predicted_state", replan, k,
-                         Vector(z.begin() + static_cast<std::ptrdiff_t>(k * nx),
-                                z.begin() + static_cast<std::ptrdiff_t>((k + 1) * nx)));
+            write_values(trace, id, "predicted_state", replan, k, history_state(k));
         for (std::size_t k = 0; k < horizon; ++k)
-            write_values(
-                trace, id, "predicted_control", replan, k,
-                Vector(z.begin() + static_cast<std::ptrdiff_t>(control_offset + k * nu),
-                       z.begin() + static_cast<std::ptrdiff_t>(control_offset + (k + 1) * nu)));
+            write_values(trace, id, "predicted_control", replan, k, history_control(k));
         write_values(trace, id, "observed_state", replan, 0, observed);
-        write_values(trace, id, "applied_control", replan, 0,
-                     Vector(first_control.begin(), first_control.end()));
-        const double current_cost =
-            dot_cost(observed, Vector(first_control.begin(), first_control.end()), weights);
+        write_values(trace, id, "applied_control", replan, 0, first_control);
+        const double current_cost = dot_cost(observed, first_control, weights);
         accumulated_stage_cost += current_cost;
-        auto next = take<Vector>(system.step(
-            {0}, observed, Vector(first_control.begin(), first_control.end()), selected_external));
+        auto next = take<Vector>(system.step({0}, observed, first_control, selected_external));
         write_values(trace, id, "observed_next_state", replan, 1, next);
         trace << id << ",independent_plan_cost," << replan << ",0,0," << independent_cost << '\n'
               << id << ",compiled_plan_cost," << replan << ",0,0,"

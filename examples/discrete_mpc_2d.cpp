@@ -72,16 +72,32 @@ NominalMpcTask make_task(bool disturbance_replayed) {
 }
 
 MpcEpisodeEvidence run(const NominalMpcTask &task, EpisodePolicy policy,
-                       const ConvexProgram &capability_probe,
+                       const CompiledNominalQuadraticHistory &capability_probe,
                        const Registration<ConvexPort> &registration) {
+    const auto &probe_program = capability_probe.program;
+    const auto &probe_layout = capability_probe.layout;
+    const auto variable_count = probe_program.quadratic_program().variables().size();
+    if (!probe_layout.accepts_primal_size(variable_count) ||
+        probe_layout.total_variable_count != variable_count)
+        throw std::runtime_error("History probe and solver-coordinate layout differ");
+    for (std::size_t coordinate = 0; coordinate < task.model.coefficients.A.rows; ++coordinate) {
+        const auto index = probe_layout.state_index(0, coordinate);
+        if (!index || *index >= variable_count)
+            throw std::runtime_error("History probe omitted an initial state coordinate");
+    }
+    for (std::size_t coordinate = 0; coordinate < task.model.coefficients.B.cols; ++coordinate) {
+        const auto index = probe_layout.control_index(0, coordinate);
+        if (!index || *index >= variable_count)
+            throw std::runtime_error("History probe omitted a first-stage control coordinate");
+    }
     Requirements requirements;
     requirements.output.representation = {"csl.program-result.v1"};
-    const auto capability = registration.capabilities(capability_probe, requirements);
+    const auto capability = registration.capabilities(probe_program, requirements);
     const auto *offer = std::get_if<Offer>(&capability);
     if (!offer || offer->output.assurance != Assurance::numerical ||
         offer->output.representation.value != "csl.program-result.v1")
         throw std::runtime_error("HiGHS does not advertise the required numerical QP capability");
-    auto workspace = registration.factory(capability_probe);
+    auto workspace = registration.factory(probe_program);
     if (!workspace)
         throw std::runtime_error("HiGHS returned no ConvexWorkspace");
     const ExecutionContext context{
@@ -112,6 +128,40 @@ MpcEpisodeEvidence run(const NominalMpcTask &task, EpisodePolicy policy,
 }
 
 bool close(double left, double right) { return std::abs(left - right) <= 1e-7; }
+
+void verify_episode_layout(const MpcEpisodeEvidence &episode) {
+    for (const auto &decision : episode.decisions) {
+        if (!decision.variable_layout)
+            continue;
+        const auto *result =
+            decision.solve ? std::get_if<ProgramResult>(&*decision.solve) : nullptr;
+        if (!result || !result->primal)
+            throw std::runtime_error("Solved history omitted its primal for layout verification");
+        const auto &layout = *decision.variable_layout;
+        if (!layout.accepts_primal_size(result->primal->size()) ||
+            decision.predicted_states.size() != decision.predicted_controls.size() + 1)
+            throw std::runtime_error("Solved history and its coordinate layout differ");
+        for (std::size_t local = 0; local < decision.predicted_states.size(); ++local) {
+            for (std::size_t coordinate = 0; coordinate < decision.predicted_states[local].size();
+                 ++coordinate) {
+                const auto index = layout.state_index(local, coordinate);
+                if (!index || *index >= result->primal->size() ||
+                    !close((*result->primal)[*index], decision.predicted_states[local][coordinate]))
+                    throw std::runtime_error("State projection disagrees with history layout");
+            }
+        }
+        for (std::size_t local = 0; local < decision.predicted_controls.size(); ++local) {
+            for (std::size_t coordinate = 0; coordinate < decision.predicted_controls[local].size();
+                 ++coordinate) {
+                const auto index = layout.control_index(local, coordinate);
+                if (!index || *index >= result->primal->size() ||
+                    !close((*result->primal)[*index],
+                           decision.predicted_controls[local][coordinate]))
+                    throw std::runtime_error("Control projection disagrees with history layout");
+            }
+        }
+    }
+}
 
 double literal_episode_objective(const MpcEpisodeEvidence &episode) {
     double objective = 0.0;
@@ -185,7 +235,7 @@ int main(int argc, char **argv) try {
         take<Registration<ConvexPort>>(adapters::convex::make_highs_registration());
 
     const auto matched_task = make_task(false);
-    const auto matched_probe = std::get<ConvexProgram>(
+    const auto matched_probe = take<CompiledNominalQuadraticHistory>(
         compile_mpc_decision(matched_task, StageIndex{0}, matched_task.initial.point));
     const auto open_loop =
         run(matched_task, EpisodePolicy::nominal_open_loop, matched_probe, registration);
@@ -194,9 +244,11 @@ int main(int argc, char **argv) try {
     require_matching(open_loop, matched_mpc);
     require_realized_objective(open_loop);
     require_realized_objective(matched_mpc);
+    verify_episode_layout(open_loop);
+    verify_episode_layout(matched_mpc);
 
     const auto replay_task = make_task(true);
-    const auto replay_probe = std::get<ConvexProgram>(
+    const auto replay_probe = take<CompiledNominalQuadraticHistory>(
         compile_mpc_decision(replay_task, StageIndex{0}, replay_task.initial.point));
     const auto open_loop_replay =
         run(replay_task, EpisodePolicy::nominal_open_loop, replay_probe, registration);
@@ -204,6 +256,8 @@ int main(int argc, char **argv) try {
         run(replay_task, EpisodePolicy::observed_state_mpc, replay_probe, registration);
     require_realized_objective(open_loop_replay);
     require_realized_objective(observed_mpc_replay);
+    verify_episode_layout(open_loop_replay);
+    verify_episode_layout(observed_mpc_replay);
     std::optional<std::size_t> first_divergence;
     for (std::size_t stage = 1; stage < replay_task.final_stage; ++stage)
         if (!first_divergence && !close(open_loop_replay.applied_controls[stage][0],

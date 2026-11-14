@@ -1,8 +1,8 @@
 """Keep plant-specific presentation dependencies outside mathematical modules."""
-from pathlib import Path
+
 import re
 import sys
-
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 MATH_MODULES = (
@@ -19,9 +19,7 @@ MATH_MODULES = (
     "verification",
 )
 MATH_ROOTS = tuple(
-    root
-    for module in MATH_MODULES
-    for root in (f"include/csl/{module}", f"src/{module}")
+    root for module in MATH_MODULES for root in (f"include/csl/{module}", f"src/{module}")
 )
 PRESENTATION_INCLUDE = re.compile(
     r"#\s*include\s*[<\"]csl/(?:visualization/|artifacts/"
@@ -54,6 +52,5 @@ def violations():
 if __name__ == "__main__":
     found = list(violations())
     if found:
-        sys.exit("mathematical modules depend on plant-specific presentation:\n" +
-                 "\n".join(found))
+        sys.exit("mathematical modules depend on plant-specific presentation:\n" + "\n".join(found))
     print("mathematical modules have no plant-specific stage-visualization dependencies")

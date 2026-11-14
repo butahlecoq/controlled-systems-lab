@@ -45,6 +45,8 @@ file(COPY
   "${CSL_SOURCE_DIR}/examples/discrete_mpc_2d_check.cmake"
   "${CSL_SOURCE_DIR}/examples/native_flexible_pitch.cpp"
   "${CSL_SOURCE_DIR}/examples/nominal_quadratic_history_2d.cpp"
+  "${CSL_SOURCE_DIR}/examples/positive_part_budget_2d.cpp"
+  "${CSL_SOURCE_DIR}/examples/positive_part_budget_2d_check.cmake"
   "${CSL_SOURCE_DIR}/examples/native_spatial_flight.cpp"
   "${CSL_SOURCE_DIR}/examples/native_catalogue_projection.hpp"
   "${CSL_SOURCE_DIR}/examples/quadcopter_mpc.cpp"
@@ -163,7 +165,8 @@ foreach(example_file CMakeLists.txt registered_lp.cpp registered_convex.cpp
     discrete_mpc_2d.cpp discrete_mpc_2d_check.cmake
     quadcopter_mpc.cpp quadcopter_mpc_task.cpp quadcopter_mpc_task.hpp quadcopter_mpc_scalar_contract.cpp
     quadcopter_mpc_check.cmake native_flexible_pitch.cpp
-    nominal_quadratic_history_2d.cpp native_spatial_flight.cpp
+    nominal_quadratic_history_2d.cpp positive_part_budget_2d.cpp
+    positive_part_budget_2d_check.cmake native_spatial_flight.cpp
     scenario_backend_artifact_check.cpp)
   file(COPY "${CSL_SOURCE_DIR}/examples/${example_file}" DESTINATION "${example_source}")
 endforeach()

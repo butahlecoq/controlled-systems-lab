@@ -4,6 +4,19 @@ on:
   pull_request:
     paths:
       - '.github/actions/pages-deploy/**'
+      - 'benchmarks/reporting/closed_loop/capabilities.py'
+      - 'benchmarks/reporting/closed_loop/native_compositions.py'
+      - 'benchmarks/reporting/closed_loop/run_closed_loop.py'
+      - 'tests/reporting/test_native_compositions.py'
+      - 'tests/reporting/test_closed_loop_tracing.py'
+      - 'docs/catalogue/closed-loop-native-compositions-v1.*'
+      - 'benchmarks/reporting/closed_loop/requirements.txt'
+      - 'tests/architecture/check_numeric_dependencies.py'
+      - 'tests/architecture/check_stage_projection_boundaries.py'
+      - 'tests/cmake/test_dependency_archive.py'
+      - 'tests/obs04/perf_control_mock.py'
+      - 'tests/obs04/perf_probe_tests.py'
+      - 'scripts/obs04_perf_probe.py'
       - 'scripts/ci/**'
       - 'tests/ci/**'
       - 'scripts/catalogue/**'
@@ -52,6 +65,7 @@ on:
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
       - 'scripts/reports/stage_discrete_mpc_2d.py'
       - 'tests/reporting/test_discrete_mpc_2d.py'
+      - 'scripts/reports/stage_positive_part_budget_2d.py'
       - 'reports/algorithm-results/native-row-scaling-diagnostic-v1/**'
       - 'tests/reporting/test_syn03_strategy_a_report.py'
       - 'tests/reporting/test_syn03_ts02_report.py'
@@ -64,6 +78,19 @@ on:
     branches: [main]
     paths:
       - '.github/actions/pages-deploy/**'
+      - 'benchmarks/reporting/closed_loop/capabilities.py'
+      - 'benchmarks/reporting/closed_loop/native_compositions.py'
+      - 'benchmarks/reporting/closed_loop/run_closed_loop.py'
+      - 'tests/reporting/test_native_compositions.py'
+      - 'tests/reporting/test_closed_loop_tracing.py'
+      - 'docs/catalogue/closed-loop-native-compositions-v1.*'
+      - 'benchmarks/reporting/closed_loop/requirements.txt'
+      - 'tests/architecture/check_numeric_dependencies.py'
+      - 'tests/architecture/check_stage_projection_boundaries.py'
+      - 'tests/cmake/test_dependency_archive.py'
+      - 'tests/obs04/perf_control_mock.py'
+      - 'tests/obs04/perf_probe_tests.py'
+      - 'scripts/obs04_perf_probe.py'
       - 'scripts/ci/**'
       - 'tests/ci/**'
       - 'scripts/catalogue/**'
@@ -112,6 +139,7 @@ on:
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
       - 'scripts/reports/stage_discrete_mpc_2d.py'
       - 'tests/reporting/test_discrete_mpc_2d.py'
+      - 'scripts/reports/stage_positive_part_budget_2d.py'
       - 'reports/algorithm-results/native-row-scaling-diagnostic-v1/**'
       - 'tests/reporting/test_syn03_strategy_a_report.py'
       - 'tests/reporting/test_syn03_ts02_report.py'
@@ -137,7 +165,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install pinned quality tools
-        run: python -m pip install --disable-pip-version-check -r requirements-quality.txt -r scripts/reports/requirements.txt
+        run: python -m pip install --disable-pip-version-check -r requirements-quality.txt -r scripts/reports/requirements.txt -r benchmarks/reporting/closed_loop/requirements.txt
       - name: Lint selected maintained Python tooling
         run: ruff check
       - name: Check formatting
@@ -177,3 +205,11 @@ jobs:
           python -m unittest discover -s tests/reporting -p 'test_opt07_*.py'
           python -m unittest discover -s tests/reporting -p 'test_opt11_publication.py'
           python -m unittest discover -s reports/algorithm-results/tooling/opt11 -p 'test_collect.py'
+
+      - name: Check explicit native compositions and common runner failure paths
+        run: python -m unittest tests.reporting.test_native_compositions tests.reporting.test_closed_loop_native_capabilities tests.reporting.test_closed_loop_runner_failures tests.reporting.test_closed_loop_tracing
+      - name: Check architecture boundaries and decoded perf sample parsing
+        run: |
+          python tests/architecture/check_numeric_dependencies.py
+          python tests/architecture/check_stage_projection_boundaries.py
+          python tests/obs04/perf_probe_tests.py
