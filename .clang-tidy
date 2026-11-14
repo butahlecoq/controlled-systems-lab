@@ -17,6 +17,5 @@ Checks: >
   portability-std-allocator-const,
   portability-template-virtual-member-function
 WarningsAsErrors: '*'
-HeaderFilterRegex: '(^|/)include/csl/(core/|numeric/data\.hpp$|sets/(contracts|data)\.hpp$|reachability/nominal_(forward|predecessor|tube)\.hpp$)'
 SystemHeaders: false
 FormatStyle: none

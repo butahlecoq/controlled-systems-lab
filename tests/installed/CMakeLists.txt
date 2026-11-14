@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.31)
 project(CSLInstalledConsumer LANGUAGES CXX)
 find_package(CSL 0.1 CONFIG REQUIRED)
+if(CMAKE_EXPORT_COMPILE_COMMANDS)
+  cmake_file_api(QUERY API_VERSION 1 CODEMODEL 2 CACHE 2 CMAKEFILES 1 TOOLCHAINS 1)
+endif()
 
 add_executable(installed_discrete_model_client native_discrete_models.cpp)
 target_link_libraries(installed_discrete_model_client PRIVATE CSL::model_catalogue)
@@ -584,6 +587,18 @@ if(NOT farkas_factory_forge_output MATCHES "(C2248|private|inaccessible)")
 endif()
 message(STATUS "Installed downstream ExactFarkasEvidence construction was rejected by the compiler")
 
+# Preserve the actual checked compiler refusals for quality coverage. Their
+# source hashes distinguish these intentional failures from stale/missing TUs.
+set(csl_negative_compile_receipt "{}")
+foreach(probe IN ITEMS ts01_issuer_forge ts01_callback_forge ts01_relation_factory_forge farkas_factory_forge)
+  set(source "${CMAKE_CURRENT_SOURCE_DIR}/${probe}_client.cpp")
+  file(SHA256 "${source}" source_sha256)
+  string(JSON entry SET "{}" "sha256" "\"${source_sha256}\"")
+  string(JSON entry SET "${entry}" "refused" true)
+  string(JSON csl_negative_compile_receipt SET "${csl_negative_compile_receipt}" "${probe}_client.cpp" "${entry}")
+endforeach()
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/cpp-quality-negative-compiles.json" "${csl_negative_compile_receipt}\n")
+
 if(TARGET CSL::highs_lp)
 add_executable(installed_witness_selector_client witness_selector_client.cpp)
 target_link_libraries(installed_witness_selector_client PRIVATE CSL::witness_selector CSL::highs_lp)
@@ -592,33 +607,7 @@ add_test(NAME installed_witness_selector_client COMMAND installed_witness_select
 
 endif()
 
-# A separate translation unit per contract prevents umbrella/include-order masking.
-set(installed_contract_headers
-  core/values.hpp
-  core/diagnostics.hpp
-  core/outcomes.hpp
-  evidence/contracts.hpp
-  model/contracts.hpp
-  sets/contracts.hpp
-  optimization/objective_contracts.hpp
-  problem/contracts.hpp
-  execution/contracts.hpp
-  optimization/contracts.hpp
-  optimization/zoutendijk/projection.hpp
-  optimization/feasible_directions/smooth_convex.hpp
-  geometry/contracts.hpp
-  geometry/lazy.hpp
-  geometry/legacy_btulshor.hpp
-  synthesis/contracts.hpp
-  numeric/data.hpp
-)
-foreach(header IN LISTS installed_contract_headers)
-  string(MAKE_C_IDENTIFIER "${header}" header_name)
-  set(source "${CMAKE_CURRENT_BINARY_DIR}/header-checks/${header_name}.cpp")
-  file(GENERATE OUTPUT "${source}" CONTENT "#include <csl/${header}>\n")
-  add_library(installed_header_${header_name} OBJECT "${source}")
-  target_link_libraries(installed_header_${header_name} PRIVATE CSL::contracts)
-endforeach()
+include("${CMAKE_CURRENT_LIST_DIR}/HeaderContexts.cmake")
 
 if(TARGET CSL::application)
 add_executable(installed_application_client application_client.cpp)

@@ -16,7 +16,8 @@ set(work "${CSL_BUILD_DIR}/installed-consumer")
 file(MAKE_DIRECTORY "${work}/source")
 set(prefix "${work}/prefix")
 file(MAKE_DIRECTORY "${work}/source")
-file(COPY "${CSL_SOURCE_DIR}/tests/installed/CMakeLists.txt" DESTINATION "${work}/source")
+file(COPY "${CSL_SOURCE_DIR}/tests/installed/CMakeLists.txt"
+  "${CSL_SOURCE_DIR}/tests/installed/HeaderContexts.cmake" DESTINATION "${work}/source")
 # Installed consumers are curated by tests/installed/CMakeLists.txt. Stage all
 # consumer translation units from that directory so adding a target cannot
 # silently omit its source from this isolated package check.
@@ -136,6 +137,8 @@ execute_process(COMMAND "${CMAKE_COMMAND}" -S "${work}/source" -B "${work}/build
   "-DCMAKE_CXX_COMPILER_LAUNCHER=${CSL_CXX_COMPILER_LAUNCHER}"
   "-DCMAKE_CXX_FLAGS=${CSL_CXX_FLAGS}"
   "-DCMAKE_EXE_LINKER_FLAGS=${CSL_EXE_LINKER_FLAGS}"
+  "-DCMAKE_EXPORT_COMPILE_COMMANDS=${CSL_EXPORT_COMPILE_COMMANDS}"
+  "-DCMAKE_SUPPRESS_REGENERATION=${CSL_EXPORT_COMPILE_COMMANDS}"
   "-DCSL_EXPECT_HIGHS=${CSL_EXPECT_HIGHS}" "-DCSL_EXPECT_QHULL=${CSL_EXPECT_QHULL}"
   COMMAND_ERROR_IS_FATAL ANY)
 execute_process(COMMAND "${CMAKE_COMMAND}" --build "${work}/build"
@@ -176,6 +179,8 @@ execute_process(COMMAND "${CMAKE_COMMAND}" -S "${example_source}" -B "${work}/ex
   "-DCMAKE_CXX_COMPILER=${CSL_CXX_COMPILER}" "-DCMAKE_CXX_FLAGS=${CSL_CXX_FLAGS}"
   "-DCMAKE_CXX_COMPILER_LAUNCHER=${CSL_CXX_COMPILER_LAUNCHER}"
   "-DCMAKE_EXE_LINKER_FLAGS=${CSL_EXE_LINKER_FLAGS}"
+  "-DCMAKE_EXPORT_COMPILE_COMMANDS=${CSL_EXPORT_COMPILE_COMMANDS}"
+  "-DCMAKE_SUPPRESS_REGENERATION=${CSL_EXPORT_COMPILE_COMMANDS}"
   COMMAND_ERROR_IS_FATAL ANY)
 execute_process(COMMAND "${CMAKE_COMMAND}" --build "${work}/examples-build"
   --config "${CSL_CONFIG}" --parallel "${CSL_BUILD_PARALLELISM}"
