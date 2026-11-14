@@ -370,13 +370,13 @@ public:
                     if (checked.bindings != verification::CheckStatus::numerical_pass ||
                         checked.feasibility != verification::CheckStatus::numerical_pass ||
                         checked.objective != verification::CheckStatus::numerical_pass) {
-                        contract_failure(
-                            result,
-                            checked.diagnostics.empty()
-                                ? Diagnostics{{DiagnosticCode::evidence_mismatch,
-                                               "strategy_a.history_optimizer.trajectory",
-                                               "Independent source trajectory verification rejected the optimizer history."}}
-                                : checked.diagnostics);
+                        auto errors = checked.diagnostics;
+                        if (errors.empty())
+                            errors.push_back(
+                                {DiagnosticCode::evidence_mismatch,
+                                 "strategy_a.history_optimizer.trajectory",
+                                 "Independent source trajectory verification rejected the optimizer history."});
+                        contract_failure(result, std::move(errors));
                         return result;
                     }
                     double residual = 0;

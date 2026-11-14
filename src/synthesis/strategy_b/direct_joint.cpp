@@ -628,12 +628,11 @@ SynthesisResult detail::DirectJointExecutionRunner::solve_impl(const problem::Re
             if (checked.bindings != verification::CheckStatus::numerical_pass ||
                 checked.feasibility != verification::CheckStatus::numerical_pass ||
                 checked.objective != verification::CheckStatus::numerical_pass) {
-                const Diagnostics errors =
-                    checked.diagnostics.empty()
-                        ? Diagnostics{{DiagnosticCode::evidence_mismatch,
-                                       "joint.history_optimizer.trajectory",
-                                       "Independent source trajectory verification rejected the optimizer history."}}
-                        : checked.diagnostics;
+                auto errors = checked.diagnostics;
+                if (errors.empty())
+                    errors.push_back(
+                        {DiagnosticCode::evidence_mismatch, "joint.history_optimizer.trajectory",
+                         "Independent source trajectory verification rejected the optimizer history."});
                 result.termination = Termination::contract_rejected;
                 result.stop = ContractValidationFailure{errors, retained(result), std::monostate{}};
                 return result;
