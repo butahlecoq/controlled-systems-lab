@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 520" role="img" aria-labelledby="title desc">
+  <title id="title">Two-control positive-part budget feasible set</title>
+  <desc id="desc">A pentagon inside the control box. The analytic feasible set for max of u zero plus max of u one at most 0.1 is shaded. The target (0.2,-0.2) is outside, and the native optimum (0.1,-0.2) lies on the boundary.</desc>
+  <rect x="0" y="0" width="760" height="520" fill="#fff"/>
+  <text x="380" y="34" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="700" fill="#243447">Exact positive-part constraint</text>
+  <g stroke="#d9e0e8" stroke-width="1">
+    <path d="M150 450H600M150 376H600M150 302H600M150 228H600M150 154H600M150 80H600"/>
+    <path d="M150 80V450M240 80V450M330 80V450M420 80V450M510 80V450M600 80V450"/>
+  </g>
+  <g stroke="#394b5a" stroke-width="2">
+    <path d="M150 265H610M375 460V70"/>
+  </g>
+  <polygon points="195,413 465,413 465,265 375,191 195,191" fill="#9ad8c4" fill-opacity="0.62" stroke="#087f5b" stroke-width="3"/>
+  <path d="M465 413L555 413" stroke="#b42318" stroke-width="3" stroke-dasharray="7 6"/>
+  <circle cx="555" cy="413" r="7" fill="#b42318"/>
+  <circle cx="465" cy="413" r="7" fill="#074f8a" stroke="#fff" stroke-width="2"/>
+  <g font-family="sans-serif" font-size="14" fill="#243447">
+    <text x="380" y="492" text-anchor="middle">u₀</text>
+    <text x="112" y="270" text-anchor="middle" transform="rotate(-90 112 270)">u₁</text>
+    <text x="195" y="438" text-anchor="middle">−0.2</text><text x="375" y="438" text-anchor="middle">0</text><text x="555" y="438" text-anchor="middle">0.2</text>
+    <text x="136" y="418" text-anchor="end">−0.2</text><text x="136" y="270" text-anchor="end">0</text><text x="136" y="196" text-anchor="end">0.1</text><text x="136" y="85" text-anchor="end">0.25</text>
+    <text x="475" y="398" fill="#074f8a">native optimum (0.1,−0.2)</text>
+    <text x="540" y="390" text-anchor="end" fill="#b42318">target (0.2,−0.2)</text>
+    <text x="300" y="145" fill="#087f5b">max(u₀,0)+max(u₁,0)=0.1</text>
+  </g>
+  <g font-family="sans-serif" font-size="13" fill="#415466">
+    <text x="625" y="170">Shaded region:</text><text x="625" y="190">box ∩ exact budget</text>
+    <rect x="625" y="210" width="16" height="16" fill="#9ad8c4" stroke="#087f5b"/><text x="650" y="223">feasible</text>
+    <circle cx="633" cy="252" r="6" fill="#074f8a"/><text x="650" y="257">native solution</text>
+    <circle cx="633" cy="284" r="6" fill="#b42318"/><text x="650" y="289">infeasible target</text>
+  </g>
+</svg>

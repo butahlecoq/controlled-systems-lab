@@ -112,6 +112,7 @@ StageLinearConstraint pack_rows(std::size_t nx, std::size_t nu, std::size_t nw,
 struct SourceConstraints {
     std::vector<Interval> states;
     std::vector<Interval> controls;
+    std::vector<optimization::ControlPositivePartBudget> control_positive_part_budgets;
     std::vector<ConstraintRow> rows;
     std::vector<ConstraintRow> terminal_rows;
     bool needs_relaxation{};
@@ -315,9 +316,9 @@ SourceConstraints source_constraints(std::size_t model_number, std::size_t nx, s
         add_control_budget(result.rows, nx, nu, nw, every_control, 100.0);
         break;
     case 30:
-        result.deferred = true;
-        result.reason =
-            "The source positive-part budget sum(max(u_i,0))<=1 requires auxiliary variables or an explicit bounded subset-row contract; the history QP compiler has neither.";
+        for (std::size_t i = 0; i < nu; ++i)
+            control(i, -0.2, 0.2);
+        result.control_positive_part_budgets.push_back({all_control_indices(nu), 1.0});
         break;
     case 31:
         all_controls(10.0);
@@ -478,6 +479,47 @@ Diagnostics check_stage_constraints(const NominalMpcTask &task, std::size_t stag
             diagnostics.push_back(
                 invalid("episode.control_bounds[" + std::to_string(i) + "]",
                         "Applied control lies outside the declared stage interval."));
+    if (!task.control_positive_part_budgets.empty()) {
+        if (task.control_positive_part_budgets.size() != task.final_stage) {
+            diagnostics.push_back(
+                invalid("episode.control_positive_part_budgets",
+                        "Positive-part budget stages must match the task transition count."));
+        } else {
+            const auto &budgets = task.control_positive_part_budgets[stage];
+            for (std::size_t budget_index = 0; budget_index < budgets.size(); ++budget_index) {
+                const auto &budget = budgets[budget_index];
+                auto field =
+                    "episode.control_positive_part_budgets[" + std::to_string(budget_index) + "]";
+                if (budget.control_indices.empty() || !std::isfinite(budget.upper_bound) ||
+                    budget.upper_bound < 0.0) {
+                    diagnostics.push_back(invalid(
+                        std::move(field),
+                        "A positive-part budget needs controls and a finite nonnegative upper bound."));
+                    continue;
+                }
+                auto indices = budget.control_indices;
+                std::ranges::sort(indices);
+                if (indices.back() >= control.size() ||
+                    std::adjacent_find(indices.begin(), indices.end()) != indices.end()) {
+                    diagnostics.push_back(invalid(
+                        std::move(field),
+                        "Budget control indices must be unique and within the applied control vector."));
+                    continue;
+                }
+                double positive_sum = 0.0;
+                bool finite_sum = true;
+                for (const auto index : budget.control_indices) {
+                    positive_sum += std::max(control[index], 0.0);
+                    finite_sum = finite_sum && std::isfinite(positive_sum);
+                }
+                if (!finite_sum ||
+                    !within(positive_sum, {std::nullopt, budget.upper_bound}, policy))
+                    diagnostics.push_back(
+                        invalid(std::move(field),
+                                "Replayed controls violate the source sum(max(u[i], 0)) budget."));
+            }
+        }
+    }
     if (task.stage_constraints.empty())
         return diagnostics;
     const auto &constraints = task.stage_constraints[stage];
@@ -667,6 +709,8 @@ ProfileAdmission make_source_task_profile(std::string_view model_id,
         choices.initial_state_override ? *choices.initial_state_override : data.initial_state;
     std::vector<std::vector<Interval>> states(choices.final_stage + 1, profile.states);
     std::vector<std::vector<Interval>> controls(choices.final_stage, profile.controls);
+    std::vector<std::vector<optimization::ControlPositivePartBudget>> positive_part_budgets(
+        choices.final_stage, profile.control_positive_part_budgets);
     std::vector<StageLinearConstraint> staged;
     if (!profile.rows.empty()) {
         const auto packed = pack_rows(nx, nu, nw, profile.rows);
@@ -694,6 +738,7 @@ ProfileAdmission make_source_task_profile(std::string_view model_id,
                           std::move(states),
                           std::move(controls),
                           std::move(staged),
+                          std::move(positive_part_budgets),
                           std::move(terminal_constraints),
                           choices.running_costs,
                           choices.terminal_cost,
@@ -703,7 +748,7 @@ ProfileAdmission make_source_task_profile(std::string_view model_id,
                           std::move(provenance)};
 }
 
-optimization::ConvexDataResult<ConvexProgram>
+optimization::ConvexDataResult<optimization::CompiledNominalQuadraticHistory>
 compile_mpc_decision(const NominalMpcTask &task, StageIndex start_stage,
                      std::span<const double> observed_state) {
     const auto nx = task.model.coefficients.A.rows;
@@ -719,15 +764,17 @@ compile_mpc_decision(const NominalMpcTask &task, StageIndex start_stage,
         task.control_bounds.size() != task.final_stage ||
         task.running_costs.size() != task.final_stage ||
         task.forecast_external.size() != task.final_stage ||
+        (!task.control_positive_part_budgets.empty() &&
+         task.control_positive_part_budgets.size() != task.final_stage) ||
         (task.stage_constraints.size() != 0 && task.stage_constraints.size() != task.final_stage))
         return Diagnostics{
             invalid("mpc.task", "Task arrays must match the declared fixed final stage.")};
-    std::size_t state_count{}, control_count{}, variable_count{};
+    std::size_t state_count{}, control_count{}, base_variable_count{};
     if (!product(remaining + 1, nx, state_count) || !product(remaining, nu, control_count) ||
         state_count > std::numeric_limits<std::size_t>::max() - control_count)
         return Diagnostics{
             invalid("mpc.dimensions", "Suffix history coordinate count overflows size_t.")};
-    variable_count = state_count + control_count;
+    base_variable_count = state_count + control_count;
 
     optimization::NominalQuadraticHistoryTask history{
         {{task.problem_id}, {task.program_id.value + "-from-" + std::to_string(start_stage.value)}},
@@ -740,6 +787,7 @@ compile_mpc_decision(const NominalMpcTask &task, StageIndex start_stage,
         task.terminal_cost};
     history.dynamics.reserve(remaining);
     history.running_costs.reserve(remaining);
+    history.control_positive_part_budgets.reserve(remaining);
     for (std::size_t local = 0; local < remaining; ++local) {
         const auto absolute = start_stage.value + local;
         const auto &source = task.model.coefficients;
@@ -754,6 +802,10 @@ compile_mpc_decision(const NominalMpcTask &task, StageIndex start_stage,
         history.dynamics.push_back({source.A, source.B, Matrix{nx, 0, {}}, std::move(offset)});
         history.running_costs.push_back(task.running_costs[absolute]);
         history.control_bounds.push_back(task.control_bounds[absolute]);
+        history.control_positive_part_budgets.push_back(
+            task.control_positive_part_budgets.empty()
+                ? std::vector<optimization::ControlPositivePartBudget>{}
+                : task.control_positive_part_budgets[absolute]);
     }
     for (std::size_t local = 0; local <= remaining; ++local)
         history.state_bounds.push_back(task.state_bounds[start_stage.value + local]);
@@ -785,7 +837,7 @@ compile_mpc_decision(const NominalMpcTask &task, StageIndex start_stage,
         rows += constraint.bounds.size();
     }
     if (rows != 0) {
-        SparseMatrix map{rows, variable_count, std::vector<std::size_t>{0}, {}, {}};
+        SparseMatrix map{rows, base_variable_count, std::vector<std::size_t>{0}, {}, {}};
         std::vector<Interval> bounds;
         bounds.reserve(rows);
         for (std::size_t local = 0; local < remaining; ++local) {
@@ -915,7 +967,11 @@ MpcEpisodeEvidence execute_nominal_episode(const NominalMpcTask &task, EpisodePo
                 evidence.stop = EpisodeStop::simulation_stopped;
                 return evidence;
             }
-            auto program = std::get<ConvexProgram>(std::move(compiled));
+            auto compiled_history =
+                std::get<optimization::CompiledNominalQuadraticHistory>(std::move(compiled));
+            decision.variable_layout = compiled_history.layout;
+            const auto &layout = *decision.variable_layout;
+            auto program = std::move(compiled_history.program);
             decision.program_identity = program.identity();
             decision.workspace_identity = workspace.workspace_identity();
             auto outcome = workspace.solve(program, context);
@@ -931,30 +987,51 @@ MpcEpisodeEvidence execute_nominal_episode(const NominalMpcTask &task, EpisodePo
             const auto diagnostics =
                 optimization::check_program_result(result, program, Assurance::numerical);
             if (!result.primal || result.termination != Termination::completed ||
-                result.outcome.value != MathematicalOutcome::optimal || !diagnostics.empty()) {
+                result.outcome.value != MathematicalOutcome::optimal || !diagnostics.empty() ||
+                !layout.accepts_primal_size(result.primal->size())) {
                 evidence.decisions.push_back(std::move(decision));
                 evidence.stop = EpisodeStop::solver_not_optimal;
                 return evidence;
             }
             const auto remaining = task.final_stage - stage;
-            const auto state_count = (remaining + 1) * nx;
-            const auto control_offset = state_count;
             decision.predicted_states.reserve(remaining + 1);
             decision.predicted_controls.reserve(remaining);
-            for (std::size_t local = 0; local <= remaining; ++local)
-                decision.predicted_states.emplace_back(
-                    result.primal->begin() + static_cast<std::ptrdiff_t>(local * nx),
-                    result.primal->begin() + static_cast<std::ptrdiff_t>((local + 1) * nx));
-            for (std::size_t local = 0; local < remaining; ++local)
-                decision.predicted_controls.emplace_back(
-                    result.primal->begin() +
-                        static_cast<std::ptrdiff_t>(control_offset + local * nu),
-                    result.primal->begin() +
-                        static_cast<std::ptrdiff_t>(control_offset + (local + 1) * nu));
+            for (std::size_t local = 0; local <= remaining; ++local) {
+                Vector state;
+                state.reserve(nx);
+                for (std::size_t coordinate = 0; coordinate < nx; ++coordinate) {
+                    const auto index = layout.state_index(local, coordinate);
+                    if (!index || *index >= result.primal->size()) {
+                        decision.solve = Diagnostics{invalid(
+                            "mpc.history_layout", "State coordinates do not fit the solved QP.")};
+                        evidence.decisions.push_back(std::move(decision));
+                        evidence.stop = EpisodeStop::solver_not_optimal;
+                        return evidence;
+                    }
+                    state.push_back((*result.primal)[*index]);
+                }
+                decision.predicted_states.push_back(std::move(state));
+            }
+            for (std::size_t local = 0; local < remaining; ++local) {
+                Vector control;
+                control.reserve(nu);
+                for (std::size_t coordinate = 0; coordinate < nu; ++coordinate) {
+                    const auto index = layout.control_index(local, coordinate);
+                    if (!index || *index >= result.primal->size()) {
+                        decision.solve = Diagnostics{invalid(
+                            "mpc.history_layout", "Control coordinates do not fit the solved QP.")};
+                        evidence.decisions.push_back(std::move(decision));
+                        evidence.stop = EpisodeStop::solver_not_optimal;
+                        return evidence;
+                    }
+                    control.push_back((*result.primal)[*index]);
+                }
+                decision.predicted_controls.push_back(std::move(control));
+            }
             if (policy == EpisodePolicy::nominal_open_loop) {
-                open_loop_controls.assign(result.primal->begin() +
-                                              static_cast<std::ptrdiff_t>(control_offset),
-                                          result.primal->end());
+                for (const auto &control : decision.predicted_controls)
+                    open_loop_controls.insert(open_loop_controls.end(), control.begin(),
+                                              control.end());
             }
         }
         if (policy == EpisodePolicy::nominal_open_loop) {
