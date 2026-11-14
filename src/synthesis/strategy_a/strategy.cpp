@@ -1,4 +1,5 @@
 #include <csl/synthesis/strategy_a/strategy.hpp>
+#include <csl/verification/trajectory.hpp>
 #include <csl/synthesis/strategy_a/nominal_linear_exact_profile.hpp>
 #include <csl/synthesis/b04_c_exact_family.hpp>
 #include <csl/synthesis/strategy_ts01/analytic_profile.hpp>
