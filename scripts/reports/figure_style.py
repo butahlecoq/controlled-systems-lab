@@ -1,4 +1,5 @@
 """Versioned tick and grid policy for static quantitative report figures."""
+
 from __future__ import annotations
 
 import math
@@ -36,8 +37,11 @@ def configure_numeric_axis(axis, direction: str = "both", bins: int = 5) -> None
         dimension = getattr(axis, name + "axis")
         dimension.set_major_locator(MaxNLocator(nbins=bins, min_n_ticks=3))
         dimension.set_major_formatter(
-            FuncFormatter(lambda value, _position, a=axis, d=name:
-                          format_tick(value, getattr(a, d + "axis").get_majorticklocs()))
+            FuncFormatter(
+                lambda value, _position, a=axis, d=name: format_tick(
+                    value, getattr(a, d + "axis").get_majorticklocs()
+                )
+            )
         )
     axis.set_axisbelow(True)
-    axis.grid(True, which="major", axis=direction, color="#8290a3", alpha=.22, linewidth=.65)
+    axis.grid(True, which="major", axis=direction, color="#8290a3", alpha=0.22, linewidth=0.65)
