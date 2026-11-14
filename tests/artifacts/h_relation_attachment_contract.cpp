@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/artifacts/h_relation_attachment.hpp>
 #include <csl/optimization/linear_infeasibility_certificate.hpp>

@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/synthesis/strategy_b/direct_joint.hpp>
 #include <csl/input/scenario_loader.hpp>

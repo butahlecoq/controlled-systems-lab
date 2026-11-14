@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <csl/artifacts/plot_document_json.hpp>
 #include <doctest/doctest.h>
 

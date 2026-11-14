@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/execution/executor.hpp>
 #include <csl/optimization/lp_backend.hpp>

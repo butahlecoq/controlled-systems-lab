@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/reachability/finite_plan_ellipsoid.hpp>
 #include <csl/reachability/fixed_plan_disturbance.hpp>

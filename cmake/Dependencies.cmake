@@ -12,6 +12,17 @@ FetchContent_Declare(doctest
   EXCLUDE_FROM_ALL)
 FetchContent_MakeAvailable(doctest)
 
+if(NOT TARGET doctest::doctest_with_main)
+  message(FATAL_ERROR "CSL tests require DOCTEST_WITH_MAIN_IN_STATIC_LIB=ON")
+endif()
+# The two custom entry points use the unchanged vendor implementation without
+# its default main. First-party test translation units contain declarations only.
+add_library(csl_doctest_runtime STATIC EXCLUDE_FROM_ALL
+  "${doctest_SOURCE_DIR}/doctest/parts/doctest.cpp")
+target_link_libraries(csl_doctest_runtime PUBLIC doctest::doctest)
+set_target_properties(csl_doctest_runtime PROPERTIES
+  CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF SYSTEM ON)
+
 # Preinclude the one obsolete detection header with its diagnostic contained.
 # The unchanged test dependency and all first-party code follow after the pop.
 set(csl_doctest_adapter [=[

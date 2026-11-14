@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <csl/reachability/finite_plan_parallelotope.hpp>
 #include <doctest/doctest.h>
 #include <two_points_fixture.hpp>

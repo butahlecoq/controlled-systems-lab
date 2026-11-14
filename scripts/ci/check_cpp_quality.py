@@ -18,6 +18,23 @@ ROOT = Path(__file__).resolve().parents[2]
 LLVM = "23.1.3"
 NATIVE_SUFFIXES = {".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx", ".inl", ".ipp", ".tpp"}
 TRANSLATION_UNITS = {".c", ".cc", ".cpp", ".cxx"}
+DOCTEST_IMPLEMENTATIONS = {"DOCTEST_CONFIG_IMPLEMENT", "DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN"}
+CPP_NONCODE = re.compile(
+    rb"""
+    // [^\n]*
+    | /\* .*? \*/
+    | R" (?P<delimiter>[^\s()\\]{0,16}) \( .*? \) (?P=delimiter) "
+    | " (?: \\. | [^"\\\n] )* "
+    | ' (?: \\. | [^'\\\n] )* '
+    """,
+    re.DOTALL | re.VERBOSE,
+)
+DOCTEST_RUNTIME_FIX = (
+    "Remove the implementation definition and link doctest::doctest_with_main; "
+    "custom main entry points link csl_doctest_runtime. Vendor implementation belongs to its compiled target."
+)
+
+
 PROFILE_OPTIONS = {
     "core": (False, False, False),
     "highs": (True, True, False),
@@ -28,6 +45,13 @@ PROFILE_OPTIONS = {
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise ValueError(message)
+
+
+def check_test_runtime_source(path: str, contents: bytes) -> None:
+    spliced = re.sub(rb"\\\r?\n", b"", contents)
+    code = CPP_NONCODE.sub(lambda match: re.sub(rb"[^\n]", b" ", match[0]), spliced)
+    found = re.search(rb"(?m)^\s*#\s*define\s+(DOCTEST_CONFIG_IMPLEMENT(?:_WITH_MAIN)?)\b", code)
+    require(found is None, f"{path}: inline Doctest implementation. {DOCTEST_RUNTIME_FIX}")
 
 
 def digest(path: Path) -> str:
@@ -147,7 +171,9 @@ def corpus(root: Path) -> Corpus:
     hashes = {}
     for path in sorted(selected - frozen):
         require(not (root / path).is_symlink(), f"Native source must not be a symlink: {path}")
-        hashes[path] = digest(root / path)
+        contents = (root / path).read_bytes()
+        check_test_runtime_source(path, contents)
+        hashes[path] = hashlib.sha256(contents).hexdigest()
     require(bool(hashes), "No retained native sources discovered")
     return Corpus(root, hashes, failures, frozenset(frozen), tuple(roots))
 
@@ -320,16 +346,34 @@ def ninja_dependencies(build: Path) -> dict[Path, set[Path]]:
     return result
 
 
+def compiler_arguments(command: dict[str, object]) -> list[str]:
+    arguments = command.get("arguments")
+    return (
+        [string_value(v, "argument") for v in list_value(arguments, "arguments")]
+        if arguments is not None
+        else shlex.split(string_value(command.get("command"), "compiler command"))
+    )
+
+
+def check_test_runtime_flags(command: dict[str, object], path: Path) -> None:
+    words = compiler_arguments(command)
+    for index, word in enumerate(words):
+        definition = ""
+        if word in {"-D", "/D"} and index + 1 < len(words):
+            definition = words[index + 1]
+        elif word.startswith(("-D", "/D")):
+            definition = word[2:]
+        require(
+            definition.split("=", 1)[0] not in DOCTEST_IMPLEMENTATIONS,
+            f"{path}: compiler flag enables inline Doctest implementation. {DOCTEST_RUNTIME_FIX}",
+        )
+
+
 def object_output(command: dict[str, object]) -> Path:
     directory = Path(string_value(command.get("directory"), "command directory"))
     value = command.get("output")
     if value is None:
-        arguments = command.get("arguments")
-        words = (
-            [string_value(v, "argument") for v in list_value(arguments, "arguments")]
-            if arguments is not None
-            else shlex.split(string_value(command.get("command"), "compiler command"))
-        )
+        words = compiler_arguments(command)
         require(
             "-o" in words and words.index("-o") + 1 < len(words),
             "Compiler command has no actual object output",
@@ -478,6 +522,7 @@ def analyze(build: Path, source: Corpus) -> dict[str, object]:
             )
             if selected is None and not generated:
                 continue
+            check_test_runtime_flags(command, path)
             require(path in targets, f"Source has no actual CMake target: {path}")
             output = object_output(command)
             require(output in dependencies, f"Missing built dependency evidence: {output}")

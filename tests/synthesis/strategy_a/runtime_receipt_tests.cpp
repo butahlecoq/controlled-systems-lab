@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/registry/registry.hpp>
 #include <csl/synthesis/strategy_a/strategy.hpp>

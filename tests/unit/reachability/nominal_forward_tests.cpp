@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/reachability/nominal_forward.hpp>
 #include <csl/execution/timing_collector.hpp>

@@ -1,6 +1,5 @@
 #include <csl/model/discrete_catalogue.hpp>
 #include <csl/model/linear_system.hpp>
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 
 #include <cmath>

@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/reachability/finite_plan_zonotope.hpp>
 #include <two_points_fixture.hpp>

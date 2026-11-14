@@ -80,7 +80,11 @@ CI jobs can be reconciled only against identical native and quality inputs;
 their compilation databases are never reused in another checkout.
 
 The existing analyzer, portability and strict warning policy remains enforced;
-compiler warnings, installed clients and sanitizer CI are retained. The
+compiler warnings, installed clients and sanitizer CI are retained. First-party
+tests link the compiled `doctest::doctest_with_main` target; custom entry points
+link `csl_doctest_runtime`. Do not define `DOCTEST_CONFIG_IMPLEMENT` or
+`DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN` in maintained sources or compiler flags.
+The gate rejects that ownership regression with the required target names. The
 `Maintained native tooling quality` workflow enforces this complete retained-root
 scope. Its artifacts contain context/coverage JSON, with 14-day retention,
 without native binaries or scientific capture rewrites.

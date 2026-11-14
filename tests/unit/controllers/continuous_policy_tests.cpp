@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/controllers/continuous_policy.hpp>
 #include <csl/optimization/phase_one.hpp>

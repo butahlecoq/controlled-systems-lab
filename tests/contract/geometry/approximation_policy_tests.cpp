@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/geometry/approximation.hpp>
 #include <csl/execution/timing_collector.hpp>

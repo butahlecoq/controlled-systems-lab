@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <doctest/doctest.h>
 #include <csl/adapters/lp/highs.hpp>
 #include "highs_interrupt_test_hook.hpp"

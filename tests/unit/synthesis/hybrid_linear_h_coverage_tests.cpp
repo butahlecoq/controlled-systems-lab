@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <csl/sets/data.hpp>
 #include <csl/synthesis/hybrid_path_program.hpp>
 #include <doctest/doctest.h>

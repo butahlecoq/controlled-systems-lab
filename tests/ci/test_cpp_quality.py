@@ -92,6 +92,40 @@ class NativeQualityBoundaryTests(unittest.TestCase):
         self.assertIn("src/new/nested.cpp", source.sources)
         self.assertIn("include/csl/future.hpp", source.public_headers)
 
+    def test_default_test_main_must_use_its_compiled_vendor_owner(self) -> None:
+        self.write("tests/future.cpp", "#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN\n")
+        with self.assertRaisesRegex(ValueError, "link doctest::doctest_with_main"):
+            quality.corpus(self.root)
+
+    def test_custom_test_main_must_preserve_its_own_entry_point(self) -> None:
+        self.write("tests/custom.cpp", "# define DOCTEST_CONFIG_IMPLEMENT\nint main() {}\n")
+        with self.assertRaisesRegex(
+            ValueError, "custom main entry points link csl_doctest_runtime"
+        ):
+            quality.corpus(self.root)
+
+    def test_compiler_flags_cannot_restore_inline_vendor_implementation(self) -> None:
+        for words in (
+            ["clang++", "-DDOCTEST_CONFIG_IMPLEMENT_WITH_MAIN=1"],
+            ["clang++", "-D", "DOCTEST_CONFIG_IMPLEMENT"],
+            ["cl", "/DDOCTEST_CONFIG_IMPLEMENT"],
+        ):
+            with self.subTest(words=words), self.assertRaisesRegex(ValueError, "compiled target"):
+                quality.check_test_runtime_flags({"arguments": words}, self.root / "tests/a.cpp")
+
+    def test_quoted_or_commented_example_is_not_a_runtime_definition(self) -> None:
+        self.write(
+            "tests/documented.cpp",
+            'const char *example = R"doc(\n#define DOCTEST_CONFIG_IMPLEMENT\n)doc";\n'
+            "/*\n#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN\n*/\n",
+        )
+        quality.corpus(self.root)
+
+    def test_line_splicing_cannot_restore_inline_implementation(self) -> None:
+        self.write("tests/spliced.cpp", "#def" + "\\" + "\nine DOCTEST_CONFIG_IMPLEMENT\n")
+        with self.assertRaisesRegex(ValueError, "inline Doctest implementation"):
+            quality.corpus(self.root)
+
     def test_source_symlink_cannot_import_foreign_bytes(self) -> None:
         foreign = self.root.parent / "foreign.cpp"
         foreign.write_text("int foreign;\n")

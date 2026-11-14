@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <csl/optimization/finite_action_parallelotope_minimax.hpp>
 #include <doctest/doctest.h>
 #include <two_points_fixture.hpp>

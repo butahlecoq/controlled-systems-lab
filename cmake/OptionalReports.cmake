@@ -1699,7 +1699,7 @@ add_executable(buryatia_ellipse_boundary_tests
   tests/contract/geometry/buryatia_ellipse_boundary_tests.cpp)
 target_include_directories(buryatia_ellipse_boundary_tests PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/reporting/buryatia)
-target_link_libraries(buryatia_ellipse_boundary_tests PRIVATE CSL::approximation doctest::doctest)
+target_link_libraries(buryatia_ellipse_boundary_tests PRIVATE CSL::approximation doctest::doctest_with_main)
 add_test(NAME buryatia_ellipse_boundary_tests COMMAND buryatia_ellipse_boundary_tests)
 csl_test_target(buryatia_ellipse_boundary_tests geometry)
 endif()
