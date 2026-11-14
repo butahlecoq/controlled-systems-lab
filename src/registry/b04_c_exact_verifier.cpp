@@ -322,9 +322,10 @@ bool feasible_strictly(const Payload &family, std::span<const Rational> controls
 bool exact_optimum(const problem::ResolvedProblem &problem, Payload &family,
                    Rational &objective_squared, er::Budget &budget, std::string &failed_stage) {
     failed_stage = "affine dynamics reconstruction";
-    if (!set_exact_state_maps(problem, family.history_lift, budget) ||
-        (failed_stage = "100 hard constraint reconstruction",
-         !append_feasible_rows(family, family.history_lift, budget)))
+    if (!set_exact_state_maps(problem, family.history_lift, budget))
+        return false;
+    failed_stage = "100 hard constraint reconstruction";
+    if (!append_feasible_rows(family, family.history_lift, budget))
         return false;
 
     failed_stage = "exact KKT witness parsing";
