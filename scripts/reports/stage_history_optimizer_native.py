@@ -9,6 +9,7 @@ import io
 import json
 from pathlib import Path
 import re
+import subprocess
 import zipfile
 
 import report_data
@@ -32,6 +33,15 @@ EXPECTED_FILES = {
     "records/receipt.json",
     "records/stdout.txt",
 }
+SOURCE_PATHS = (
+    "include/csl/optimization/history_optimizer.hpp",
+    "src/optimization/history_optimizer.cpp",
+    "include/csl/adapters/nlp/casadi_history_optimizer.hpp",
+    "src/adapters/nlp/casadi_history_optimizer.cpp",
+    "include/csl/optimization/history_cost.hpp",
+    "src/optimization/history_cost.cpp",
+    "tools/history_optimizer_2d_example.cpp",
+)
 
 
 def _safe_read(root: Path, relative: str) -> bytes:
@@ -164,7 +174,7 @@ def finalize_capture(bundle: Path) -> None:
     )
 
 
-def validate(bundle: Path) -> dict:
+def validate(bundle: Path, repository_root: Path) -> dict:
     bundle = Path(bundle)
     report_data.require(not bundle.is_symlink() and bundle.is_dir(),
                         "native history optimizer bundle is missing or symlinked")
@@ -174,6 +184,18 @@ def validate(bundle: Path) -> dict:
                         manifest.get("source_commit") == receipt["source_commit"] and
                         manifest.get("binary_sha256") == receipt["binary_sha256"],
                         "native history optimizer manifest provenance differs")
+    source_files = receipt.get("source_files", {})
+    report_data.require(isinstance(source_files, dict) and set(source_files) == set(SOURCE_PATHS),
+                        "native history optimizer source fingerprint set differs")
+    for relative in SOURCE_PATHS:
+        blob = subprocess.run(
+            ["git", "show", f"{receipt['source_commit']}:{relative}"],
+            cwd=Path(repository_root).resolve(strict=True),
+            check=True,
+            stdout=subprocess.PIPE,
+        ).stdout
+        report_data.require(hashlib.sha256(blob).hexdigest() == source_files[relative],
+                            "native history optimizer Git source bytes differ: " + relative)
     files = manifest.get("files")
     report_data.require(isinstance(files, dict) and set(files) == EXPECTED_FILES,
                         "native history optimizer evidence file set differs")
@@ -206,7 +228,7 @@ def validate(bundle: Path) -> dict:
 def build(repository_root: Path) -> tuple[dict[str, bytes], list[dict[str, str]], str]:
     root = Path(repository_root)
     bundle = root / BUNDLE
-    receipt = validate(bundle)
+    receipt = validate(bundle, root)
     outputs = {}
     for relative in sorted((*EXPECTED_FILES, "manifest.json", REPORT_ID + ".zip",
                             REPORT_ID + ".zip.sha256")):

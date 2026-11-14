@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -34,9 +35,21 @@ def _fixture(bundle: Path) -> None:
     (records / "CMakeCache.txt").write_text("CSL_ENABLE_CASADI:BOOL=ON\n", encoding="utf-8")
     (records / "native-output.html").write_text("<html>native output</html>\n", encoding="utf-8")
     (records / "stdout.txt").write_text("provider=csl.nlp.casadi-ipopt.history-cost@1\n", encoding="utf-8")
+    source_commit = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, check=True,
+        stdout=subprocess.PIPE, text=True,
+    ).stdout.strip()
+    source_files = {
+        relative: hashlib.sha256(subprocess.run(
+            ["git", "show", f"{source_commit}:{relative}"], cwd=ROOT,
+            check=True, stdout=subprocess.PIPE,
+        ).stdout).hexdigest()
+        for relative in report.SOURCE_PATHS
+    }
     receipt = {
         "schema": report.SCHEMA,
-        "source_commit": "0" * 40,
+        "source_commit": source_commit,
+        "source_files": source_files,
         "source_tree": "controlled-systems-lab",
         "binary_sha256": "1" * 64,
         "provider": "csl.nlp.casadi-ipopt.history-cost@1",
@@ -64,8 +77,8 @@ class NativeHistoryReportTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             bundle = Path(temporary) / report.REPORT_ID
             _fixture(bundle)
-            receipt = report.validate(bundle)
-            self.assertEqual(receipt["source_commit"], "0" * 40)
+            receipt = report.validate(bundle, ROOT)
+            self.assertEqual(len(receipt["source_commit"]), 40)
             page = (bundle / "index.html").read_text(encoding="utf-8")
             self.assertIn("authored source cost", page)
             self.assertIn("1.1035533906", page)
@@ -75,7 +88,7 @@ class NativeHistoryReportTests(unittest.TestCase):
                 self.assertIsNone(saved.testzip())
             (bundle / "history.csv").write_text("changed\n", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "receipt digest differs|file digest differs"):
-                report.validate(bundle)
+                report.validate(bundle, ROOT)
 
     def test_current_source_capture_is_present_in_gallery_outputs(self):
         files, inventory, card = report.build(ROOT)

@@ -66,6 +66,16 @@ def capture(source_root: Path, build_root: Path, output_root: Path,
     ).stdout.strip()
     if re.fullmatch(r"[0-9a-f]{40}", source) is None:
         raise RuntimeError("git did not return a pinned source commit")
+    source_files = {}
+    for relative in report.SOURCE_PATHS:
+        committed = subprocess.run(
+            ["git", "show", f"{source}:{relative}"], cwd=source_root,
+            check=True, stdout=subprocess.PIPE,
+        ).stdout
+        working = (source_root / relative).read_bytes()
+        if committed != working:
+            raise RuntimeError("working source differs from committed Git bytes: " + relative)
+        source_files[relative] = _sha256(committed)
     output_root = output_root.resolve()
     records = output_root / "records"
     if output_root.exists() and any(output_root.iterdir()):
@@ -94,6 +104,7 @@ def capture(source_root: Path, build_root: Path, output_root: Path,
         "schema": report.SCHEMA,
         "source_commit": source,
         "source_tree": "controlled-systems-lab",
+        "source_files": source_files,
         "binary_sha256": _sha256(binary.read_bytes()),
         "provider": match.group(1),
         "source_objective": "||x2-(1,1)||_2 + 0.5(|u0|+|u1|)",
