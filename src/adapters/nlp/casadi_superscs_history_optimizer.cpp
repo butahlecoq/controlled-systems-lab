@@ -115,9 +115,12 @@ class SuperSCSWorkspace final : public optimization::HistoryOptimizerWorkspace {
 
             const auto domain = linear_domain(request);
             const auto constraint_rows = domain.coefficients.rows;
-            if (!fits_casadi_dimension(constraint_rows))
-                return Diagnostic{DiagnosticCode::unsupported, "history.superscs.constraints",
-                                  "Linear constraint count exceeds CasADi's index range."};
+            if (!fits_casadi_dimension(constraint_rows) ||
+                (constraint_rows != 0 &&
+                 variables > std::numeric_limits<std::size_t>::max() / constraint_rows))
+                return Diagnostic{
+                    DiagnosticCode::unsupported, "history.superscs.constraints",
+                    "Linear constraint dimensions exceed addressable storage or CasADi's index range."};
             const auto z = MX::sym("history_and_epigraphs", static_cast<casadi_int>(variables));
             std::vector<MX> cones;
             cones.reserve(terms.size());
@@ -159,7 +162,13 @@ class SuperSCSWorkspace final : public optimization::HistoryOptimizerWorkspace {
                 q_matrix = DM::zeros(0, static_cast<casadi_int>(variables));
                 p_matrix = DM::zeros(0, 0);
             }
-            const auto a_matrix = dense(domain.coefficients);
+            Matrix extended_domain{constraint_rows, variables,
+                                   Vector(constraint_rows * variables, 0.0)};
+            for (std::size_t row = 0; row < constraint_rows; ++row)
+                for (std::size_t column = 0; column < history_size; ++column)
+                    extended_domain.values[row * variables + column] =
+                        domain.coefficients.values[row * history_size + column];
+            const auto a_matrix = dense(extended_domain);
             const auto lower = DM(domain.lower), upper = DM(domain.upper);
             casadi::SpDict sparsities{{"h", hessian.sparsity()},
                                       {"a", a_matrix.sparsity()},
@@ -231,8 +240,9 @@ make_casadi_superscs_history_optimizer_registration() {
                 if (!diagnostics.empty())
                     return diagnostics;
                 if (!request.domain.memberships.empty())
-                    return Diagnostics{{DiagnosticCode::unsupported, "history.memberships",
-                        "SuperSCS history-domain membership lifting is not implemented."}};
+                    return Diagnostics{
+                        {DiagnosticCode::unsupported, "history.memberships",
+                         "SuperSCS history-domain membership lifting is not implemented."}};
                 if (!std::holds_alternative<optimization::ColdStart>(request.start))
                     return Diagnostics{
                         {DiagnosticCode::unsupported, "history.start",
