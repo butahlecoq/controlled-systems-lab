@@ -148,6 +148,26 @@ EXAMPLE_ROUTE_PRODUCERS = {
     "examples/lotka-volterra-sampled-v1.html": ["scripts/reports/approx_extension_companions.py"],
     "examples/closed-loop-pilot-2d.html": ["scripts/reports/stage_closed_loop_pilot.py",
                                            "scripts/reports/render_closed_loop_pilot.py"],
+    "examples/closed-loop/figures/baseline-089075e9-earth-orbit.html": [
+        "scripts/reports/learning_book.py",
+        "docs/examples/closed-loop/figure-index.json",
+        "docs/examples/closed-loop/figures/baseline-089075e9-earth-orbit.html",
+    ],
+    "examples/closed-loop/figures/baseline-089075e9-fuel-fuel-flow.html": [
+        "scripts/reports/learning_book.py",
+        "docs/examples/closed-loop/figure-index.json",
+        "docs/examples/closed-loop/figures/baseline-089075e9-fuel-fuel-flow.html",
+    ],
+    "examples/closed-loop/figures/baseline-089075e9-fuel-state.html": [
+        "scripts/reports/learning_book.py",
+        "docs/examples/closed-loop/figure-index.json",
+        "docs/examples/closed-loop/figures/baseline-089075e9-fuel-state.html",
+    ],
+    "examples/closed-loop/figures/baseline-089075e9-lotka-populations.html": [
+        "scripts/reports/learning_book.py",
+        "docs/examples/closed-loop/figure-index.json",
+        "docs/examples/closed-loop/figures/baseline-089075e9-lotka-populations.html",
+    ],
     "examples/viz10/index.html": ["scripts/reports/viz10_plot_companions.py"],
 }
 

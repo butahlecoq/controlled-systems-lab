@@ -415,6 +415,26 @@
       "owner": "scripts/reports/stage_closed_loop_pilot.py"
     },
     {
+      "route": "examples/closed-loop/figures/baseline-089075e9-earth-orbit.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/closed-loop/figures/baseline-089075e9-earth-orbit.html"
+    },
+    {
+      "route": "examples/closed-loop/figures/baseline-089075e9-fuel-fuel-flow.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/closed-loop/figures/baseline-089075e9-fuel-fuel-flow.html"
+    },
+    {
+      "route": "examples/closed-loop/figures/baseline-089075e9-fuel-state.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/closed-loop/figures/baseline-089075e9-fuel-state.html"
+    },
+    {
+      "route": "examples/closed-loop/figures/baseline-089075e9-lotka-populations.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/closed-loop/figures/baseline-089075e9-lotka-populations.html"
+    },
+    {
       "route": "examples/closed-loop/figures/earth-orbit.html",
       "disposition": "maintained",
       "owner": "docs/examples/closed-loop/figures/earth-orbit.html"
