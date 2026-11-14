@@ -283,7 +283,7 @@
       "source scale unspecified"
     ],
     "control_units": [
-      "dimensionless source interval"
+      "source scale unspecified"
     ],
     "title": "2017 programmed-control fuel task",
     "description": "Article-derived open-loop task. Bulaev, Goranov, Kalev, “Constructing optimal programmed control for complex mechanical objects” (2017), section 4, pp. 11–13. Source SHA-256 a8ed876c8a34d4eb798c031c6ede02a662e771b73cbead65cc42be8ff6132dc0. State bounds apply at t=0,...,10. No disturbance set, initial uncertainty, or feedback policy is specified. Physical unit scales remain unspecified."

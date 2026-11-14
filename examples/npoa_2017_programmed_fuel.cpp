@@ -117,7 +117,7 @@ void write_projection(const std::filesystem::path &file, const std::vector<Polyg
     out << std::setprecision(12)
         << "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 940 720\" role=\"img\" aria-labelledby=\"title desc\">"
         << "<title id=\"title\">" << title
-        << "</title><desc id=\"desc\">Exact two-dimensional marginal reachable polygons at stages zero through ten, clipped by both source flow constraints, with the optimized state trajectory overlaid.</desc>"
+        << "</title><desc id=\"desc\">Numerically computed two-dimensional marginal reachable polygons at stages zero through ten, clipped by both source flow constraints, with the analytically optimal state trajectory overlaid.</desc>"
         << "<rect width=\"940\" height=\"720\" fill=\"#fff\"/><g font-family=\"sans-serif\" fill=\"#202124\">"
         << "<text x=\"470\" y=\"34\" text-anchor=\"middle\" font-size=\"23\">" << title
         << "</text>";
