@@ -27,6 +27,16 @@ bool finite(std::span<const double> x) {
 double tolerance(const ExecutionContext& c,double scale) {
     return c.numerical.absolute_tolerance+c.numerical.relative_tolerance*scale;
 }
+bool valid_numerical_policy(const NumericalPolicy& policy) {
+    return std::isfinite(policy.absolute_tolerance) && policy.absolute_tolerance >= 0.0 &&
+           std::isfinite(policy.relative_tolerance) && policy.relative_tolerance >= 0.0;
+}
+bool within_tolerance(double violation,double scale,const ExecutionContext& context) {
+    if (!std::isfinite(violation) || violation < 0.0 || !std::isfinite(scale) || scale < 0.0)
+        return false;
+    const auto limit = tolerance(context, scale);
+    return std::isfinite(limit) && limit >= 0.0 && violation <= limit;
+}
 double coordinate_scale(std::span<const double> values) {
     double scale=1;
     for(const double value:values)scale=std::max(scale,std::abs(value));
@@ -47,11 +57,16 @@ double domain_violation(const sets::SetData& set,std::span<const double> x,Diagn
         for(std::size_t i=0;i<h->inequalities.rows();++i) {
             double lhs=0;
             for(std::size_t j=0;j<x.size();++j)lhs+=h->inequalities(i,j)*x[j];
+            if (!std::isfinite(lhs))
+                return INFINITY;
             worst=std::max(worst,lhs-h->upper_bounds[i]);
         }
         for(std::size_t i=0;i<h->equalities.rows();++i) {
             double lhs=0; for(std::size_t j=0;j<x.size();++j)lhs+=h->equalities(i,j)*x[j];
-            worst=std::max(worst,std::abs(lhs-h->equality_values[i]));
+            const auto residual = lhs - h->equality_values[i];
+            if (!std::isfinite(residual))
+                return INFINITY;
+            worst=std::max(worst,std::abs(residual));
         }
         return std::max(0.0,worst);
     }
@@ -156,6 +171,9 @@ Diagnostics check_history_optimization_request(const HistoryOptimizationRequest&
 namespace detail {
 std::optional<Diagnostic> check_history_initialization(const HistoryOptimizationRequest& r,
     const ExecutionContext& context) {
+    if (!valid_numerical_policy(context.numerical))
+        return invalid("history.numerical_policy",
+                       "Absolute and relative numerical tolerances must be finite and nonnegative.");
     const auto *supplied = std::get_if<SuppliedStart>(&r.start);
     if (!supplied)
         return std::nullopt;
@@ -163,8 +181,8 @@ std::optional<Diagnostic> check_history_initialization(const HistoryOptimization
     const double violation =
         domain_violation(r.domain.original.relation, supplied->history, error);
     if(!error.explanation.empty())return error;
-    if (violation >
-        tolerance(context, domain_scale(r.domain.original.relation, supplied->history)))
+    if (!within_tolerance(violation,
+                          domain_scale(r.domain.original.relation, supplied->history), context))
         return invalid("history.initial",
                        "Supplied start history is outside the full feasible-history domain.");
     const auto membership_errors = check_history_membership_witnesses(
@@ -176,6 +194,9 @@ std::optional<Diagnostic> check_history_initialization(const HistoryOptimization
 
 HistoryOptimizationOutcome check_history_optimization_result(const HistoryOptimizationRequest& r,
     RawHistorySolve raw,const ExecutionContext& context) {
+    if (!valid_numerical_policy(context.numerical))
+        return invalid("history.numerical_policy",
+                       "Absolute and relative numerical tolerances must be finite and nonnegative.");
     const auto request_diagnostics=check_history_optimization_request(r);
     if(!request_diagnostics.empty())return request_diagnostics.front();
     const auto size=history_size(r.domain.original.coordinates);
@@ -216,7 +237,7 @@ HistoryOptimizationOutcome check_history_optimization_result(const HistoryOptimi
     Diagnostic error{DiagnosticCode::invalid_input,"history.domain",""};
     const double violation=domain_violation(r.domain.original.relation,raw.history,error);
     if(!error.explanation.empty())return error;
-    if(violation>tolerance(context,domain_scale(r.domain.original.relation,raw.history)))return invalid("history.backend.feasibility","Backend history violates the full feasible-history relation.");
+    if(!within_tolerance(violation,domain_scale(r.domain.original.relation,raw.history),context))return invalid("history.backend.feasibility","Backend history violates the full feasible-history relation or its effective tolerance is non-finite.");
     const auto membership_errors = check_history_membership_witnesses(
         r.domain, raw.history, raw.membership_witnesses, context.numerical);
     if (!membership_errors.empty())
@@ -226,7 +247,7 @@ HistoryOptimizationOutcome check_history_optimization_result(const HistoryOptimi
     if(const auto* d=std::get_if<Diagnostics>(&cost))return d->front();
     if(const auto* stopped=std::get_if<OperationStopped>(&cost))return *stopped;
     const auto evaluation=std::get<HistoryCostEvaluation>(cost);
-    if(std::abs(evaluation.total-raw.reported_objective)>tolerance(context,std::max(std::abs(evaluation.total),std::abs(raw.reported_objective))))
+    if(!within_tolerance(std::abs(evaluation.total-raw.reported_objective),std::max(std::abs(evaluation.total),std::abs(raw.reported_objective)),context))
         return Diagnostic{DiagnosticCode::evidence_mismatch,"history.backend.objective","Backend objective does not match re-evaluation of the authored source cost."};
     return HistoryOptimizationResult{r.identity,
                                      std::move(raw.history),

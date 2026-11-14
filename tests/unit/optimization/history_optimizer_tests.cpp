@@ -4,6 +4,8 @@
 #include <csl/optimization/history_optimizer.hpp>
 #include <csl/sets/data.hpp>
 
+#include <limits>
+
 using namespace csl;
 
 namespace {
@@ -75,6 +77,22 @@ TEST_CASE("whole-history port checks backend output against the original cost") 
     CHECK(checked.history==Vector{0.0,0.0,0.0});
     CHECK(checked.source_cost.total==doctest::Approx(0.0));
     CHECK(std::holds_alternative<optimization::VerifiedSuppliedStart>(checked.initialization));
+}
+
+TEST_CASE("whole-history port rejects invalid numerical policies before backend execution") {
+    for (const auto policy : {
+             NumericalPolicy{std::numeric_limits<double>::quiet_NaN(), 0.0},
+             NumericalPolicy{0.0, -1.0},
+             NumericalPolicy{std::numeric_limits<double>::infinity(), 0.0}}) {
+        auto r = request();
+        Candidate candidate;
+        ExecutionContext context;
+        context.numerical = policy;
+        const auto result = registry::HistoryOptimizerPort::run(candidate, r, context);
+        REQUIRE(std::holds_alternative<Diagnostic>(result));
+        CHECK(std::get<Diagnostic>(result).field == "history.numerical_policy");
+        CHECK(candidate.calls == 0);
+    }
 }
 
 TEST_CASE("whole-history port accepts explicit cold start without fabricated readbacks") {
@@ -267,6 +285,9 @@ TEST_CASE("whole-history memberships check real latent witnesses and retain the 
     SUBCASE("a full-rank frame permits a singleton coordinate interval") {
         auto &region = std::get<HistoryParallelotopeMembership>(r.domain.memberships[3].shape);
         region.lower[0] = region.upper[0] = 0.5;
+        auto &source_region = std::get<HistoryParallelotopeMembership>(
+            r.domain.memberships[3].origin.source->geometry);
+        source_region.lower[0] = source_region.upper[0] = 0.5;
         CHECK(std::holds_alternative<HistoryOptimizationResult>(run()));
     }
     SUBCASE("family and shape cannot be relabeled") {
@@ -329,6 +350,14 @@ TEST_CASE("whole-history memberships check real latent witnesses and retain the 
     SUBCASE("native source payload identity mismatch is rejected") {
         r.domain.memberships[0].origin.source->id = {"another-h-source"};
         r.domain.memberships[0].origin.reference = {"another-h-source"};
+        const auto before = candidate.calls;
+        CHECK(std::holds_alternative<Diagnostic>(run()));
+        CHECK(candidate.calls == before);
+    }
+    SUBCASE("reused set identity cannot bind contradictory zonotope payloads") {
+        auto &member = r.domain.memberships[1];
+        auto &source = std::get<HistoryZonotopeMembership>(member.origin.source->geometry);
+        source.generators.values[0] = 2.0;
         const auto before = candidate.calls;
         CHECK(std::holds_alternative<Diagnostic>(run()));
         CHECK(candidate.calls == before);

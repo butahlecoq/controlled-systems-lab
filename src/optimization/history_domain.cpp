@@ -18,6 +18,82 @@ bool finite(std::span<const double> values) {
     return std::all_of(values.begin(), values.end(), [](double v) { return std::isfinite(v); });
 }
 
+bool same_matrix(const Matrix &left, const Matrix &right) {
+    return left.rows == right.rows && left.cols == right.cols &&
+           left.values == right.values;
+}
+
+bool same_matrix(const numeric::MatrixView &left, const numeric::MatrixView &right) {
+    if (left.rows() != right.rows() || left.cols() != right.cols())
+        return false;
+    for (std::size_t row = 0; row < left.rows(); ++row)
+        for (std::size_t column = 0; column < left.cols(); ++column)
+            if (left(row, column) != right(row, column))
+                return false;
+    return true;
+}
+
+bool same_vector(const numeric::VectorView &left, const numeric::VectorView &right) {
+    return std::equal(left.values().begin(), left.values().end(), right.values().begin(),
+                      right.values().end());
+}
+
+bool same_set_payload(const sets::SetData &left, const sets::SetData &right) {
+    const auto left_metadata = left.metadata();
+    const auto right_metadata = right.metadata();
+    if (left_metadata->id != right_metadata->id ||
+        left_metadata->set.dimension != right_metadata->set.dimension ||
+        left_metadata->coordinate_labels != right_metadata->coordinate_labels)
+        return false;
+    const auto left_representation = left.representation();
+    const auto right_representation = right.representation();
+    if (left_representation.index() != right_representation.index())
+        return false;
+    if (const auto *left_h = std::get_if<sets::HRepresentation>(&left_representation)) {
+        const auto &right_h = std::get<sets::HRepresentation>(right_representation);
+        return same_matrix(left_h->inequalities, right_h.inequalities) &&
+               same_vector(left_h->upper_bounds, right_h.upper_bounds) &&
+               same_matrix(left_h->equalities, right_h.equalities) &&
+               same_vector(left_h->equality_values, right_h.equality_values);
+    }
+    if (const auto *left_v = std::get_if<sets::VRepresentation>(&left_representation)) {
+        const auto &right_v = std::get<sets::VRepresentation>(right_representation);
+        return same_matrix(left_v->vertices, right_v.vertices) &&
+               same_matrix(left_v->rays, right_v.rays);
+    }
+    return false;
+}
+
+bool same_membership_payload(const HistoryMembershipShape &left,
+                             const HistoryMembershipShape &right) {
+    return std::visit(
+        [&](const auto &left_shape) {
+            using T = std::decay_t<decltype(left_shape)>;
+            const auto *right_shape = std::get_if<T>(&right);
+            if (!right_shape)
+                return false;
+            if constexpr (std::is_same_v<T, HistoryHMembership> ||
+                          std::is_same_v<T, HistoryVSimplexMembership>) {
+                return same_set_payload(left_shape.selected, right_shape->selected);
+            } else if constexpr (std::is_same_v<T, HistoryAxisBoxMembership>) {
+                return left_shape.center == right_shape->center &&
+                       left_shape.radii == right_shape->radii;
+            } else if constexpr (std::is_same_v<T, HistoryZonotopeMembership>) {
+                return left_shape.center == right_shape->center &&
+                       same_matrix(left_shape.generators, right_shape->generators);
+            } else if constexpr (std::is_same_v<T, HistoryParallelotopeMembership>) {
+                return left_shape.center == right_shape->center &&
+                       same_matrix(left_shape.frame, right_shape->frame) &&
+                       left_shape.lower == right_shape->lower &&
+                       left_shape.upper == right_shape->upper;
+            } else {
+                return left_shape.selected.center == right_shape->selected.center &&
+                       same_matrix(left_shape.selected.factor, right_shape->selected.factor);
+            }
+        },
+        left);
+}
+
 bool shape(const Matrix &matrix, std::size_t rows) {
     return matrix.rows == rows &&
            (!matrix.cols || matrix.rows <= std::numeric_limits<std::size_t>::max() / matrix.cols) &&
@@ -210,7 +286,10 @@ Diagnostics check_history_domain_memberships(const HistoryDomain &domain) {
             valid_geometry(member.shape, member.origin.selected, member.origin.selected_family) &&
             member.origin.source && member.origin.source->id == member.origin.reference &&
             valid_geometry(member.origin.source->geometry, member.origin.source->id,
-                           member.origin.source->family);
+                           member.origin.source->family) &&
+            (member.origin.reference != member.origin.selected ||
+             (member.origin.source->family == member.origin.selected_family &&
+              same_membership_payload(member.shape, member.origin.source->geometry)));
         if (!valid)
             errors.push_back(invalid(
                 field,

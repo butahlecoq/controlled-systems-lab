@@ -1,4 +1,15 @@
-# Whole-history source-cost optimizer
+# ADR 0006: Whole-history source-cost optimization
+
+Date: 2026-11-14. Status: accepted for the incremental #1050 implementation.
+
+## Context
+
+The native comparison program needs an optimizer that searches the complete
+state-and-control history under the original feasible relation. It must retain
+the authored objective and preserve optional solver integrations without
+turning a feasible numerical result into a claim of global optimality.
+
+## Decision
 
 `optimization::HistoryOptimizerPort` optimizes a `HistoryCostProgram` over the supplied complete feasible relation in canonical
 `[x0, …, xT, u0, …, u(T−1)]` coordinates. It does not restrict candidates to a terminal-optimal fiber. Requests may use a supplied full-history start or an explicit backend cold start; in either case, the optimized variables remain every state and control coordinate.
@@ -9,3 +20,11 @@ The optional `CSL_ENABLE_CASADI` build registers `csl.nlp.casadi-ipopt.history-c
 
 The public CMake target is `CSL::history_optimizer`. With the optional backend enabled, `CSL::casadi_history_optimizer` and `CSL::casadi_superscs_history_optimizer` export their registration factories. The `history_optimizer_2d_example` executable uses SuperSCS and writes an actual solver result to `history.csv` and `history.svg`; its source objective is
 `||x2 − (1,1)||₂ + 0.5(|u0| + |u1|)` for a two-step planar integrator with `u0,u1 ∈ [0,1]`.
+
+## Consequences
+
+The selected result is checked for feasibility and source-objective agreement,
+but these checks do not establish global optimality, validated set inclusion,
+or nonlinear physical safety. Optional backend availability is a build-time
+capability. Strategies A/B and the complete three-task × two-strategy ×
+five-family comparison matrix remain required under #1050.
