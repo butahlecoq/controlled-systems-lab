@@ -32,6 +32,7 @@ CompiledNominalQuadraticHistory make_program() {
     const Matrix control_hessian{2, 2, {1.0, 0.0, 0.0, 1.0}};
     const QuadraticHistoryStageCost cost{zero_state, zero_cross,  control_hessian,
                                          {0.0},      {-0.2, 0.2}, 0.04};
+    QuadraticTerminal terminal_cost{zero_state, Vector{0.0}, 0.0};
     NominalQuadraticHistoryTask task{
         {{"example.positive-part-budget-2d"}, {"exact-positive-part-epigraph-v1"}},
         {{a, b, e, {0.0}}},
@@ -40,7 +41,7 @@ CompiledNominalQuadraticHistory make_program() {
         {{{-0.2, 0.2}, {-0.2, 0.2}}},
         std::nullopt,
         {cost},
-        {zero_state, {0.0}, 0.0},
+        std::move(terminal_cost),
         {{{{0, 1}, 0.1}}}};
     auto compiled = compile_nominal_quadratic_history(task);
     if (!std::holds_alternative<CompiledNominalQuadraticHistory>(compiled))
