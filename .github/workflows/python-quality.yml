@@ -9,6 +9,7 @@ on:
       - 'benchmarks/reporting/closed_loop/run_closed_loop.py'
       - 'tests/reporting/test_native_compositions.py'
       - 'docs/catalogue/closed-loop-native-compositions-v1.*'
+      - 'benchmarks/reporting/closed_loop/requirements.txt'
       - 'scripts/ci/**'
       - 'tests/ci/**'
       - 'scripts/catalogue/**'
@@ -72,6 +73,7 @@ on:
       - 'benchmarks/reporting/closed_loop/run_closed_loop.py'
       - 'tests/reporting/test_native_compositions.py'
       - 'docs/catalogue/closed-loop-native-compositions-v1.*'
+      - 'benchmarks/reporting/closed_loop/requirements.txt'
       - 'scripts/ci/**'
       - 'tests/ci/**'
       - 'scripts/catalogue/**'
@@ -143,7 +145,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install pinned quality tools
-        run: python -m pip install --disable-pip-version-check -r requirements-quality.txt -r scripts/reports/requirements.txt
+        run: python -m pip install --disable-pip-version-check -r requirements-quality.txt -r scripts/reports/requirements.txt -r benchmarks/reporting/closed_loop/requirements.txt
       - name: Lint selected maintained Python tooling
         run: ruff check
       - name: Check formatting
