@@ -193,13 +193,19 @@ NominalQuadraticHistoryTask make_task() {
         stage[2] = {19.33, 20.66};
     }
     std::vector<std::vector<Interval>> control_bounds(horizon, {{-1.0, 1.0}});
+    const Matrix zero_state{4, 4, Vector(16, 0)};
+    const Matrix zero_cross{4, 1, Vector(4, 0)};
+    const Matrix zero_control{1, 1, Vector(1, 0)};
+    const QuadraticHistoryStageCost zero_running_cost{zero_state,   zero_cross,   zero_control,
+                                                      Vector(4, 0), Vector(1, 0), 0};
+    std::vector<QuadraticHistoryStageCost> running_costs(horizon, zero_running_cost);
     return {{{"npoa-2017-programmed-fuel"}, {"article-task-v1"}},
             std::move(dynamics),
             KnownInitial{{25.14, 247, 19.915, 199.92}},
             std::move(state_bounds),
             std::move(control_bounds),
             std::nullopt,
-            {},
+            std::move(running_costs),
             {{4, 4, {2, 0, 0, 0, 0, 4, 0, -2, 0, 0, 2, 0, 0, -2, 0, 4}}, {-50, 0, -40, 0}, 1025},
             {}};
 }
