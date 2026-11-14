@@ -120,5 +120,14 @@ render reports; they do not launch benchmarks. Frozen evidence source capsules
 remain outside the maintained-file formatting/type scope. In particular, B04-C
 publication checks select its authenticated, versioned historical source bytes;
 formatting a maintained helper does not change the execution source of an old
-capture. This expands the gate to 99 Python files on this branch; broader
+capture. The EXT04 observed-replay, finite-feedback and three GEO07 publication owners
+use the same exact inventory and archive checks for retained routes and join
+the default quality scope. This expands the gate to 104 Python files on this branch; broader
 Python adoption remains tracked in issue 993.
+
+The workflow additionally exercises the saved convex/collector/gallery consumers,
+publication lifecycle tests, and the EXT04, finite-feedback and GEO07 owner
+families. Publisher-byte identity checks apply to unpinned publications; retained
+historical routes require both their exact source inventory and the exact
+regenerated archive. Repacking a native evidence ZIP changes its identity bytes
+and cannot reuse a historical route.

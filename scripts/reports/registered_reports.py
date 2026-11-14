@@ -1012,7 +1012,7 @@ def assemble_publication(bundle, publication, *, page, envelope, source_files):
     return files
 
 
-# Exact pre-#251 source and publication bytes; never applies to changed evidence.
+# Exact historical source and publication bytes; never applies to changed evidence.
 class _HistoricalPublicationPin(TypedDict):
     inventory_sha256: str
     report_id: str
@@ -1114,6 +1114,36 @@ _HISTORICAL_PUBLICATIONS: dict[str, _HistoricalPublicationPin] = {
         "inventory_sha256": "d756b967fd2af2ac3fd9b8d2c7c7a5b3a9dc8610a32914e1ba9094f76c9fe865",
         "report_id": "syn07-ts01-5f46eaee678c04b251c4bd9a78dcfb5ea45ce4f417c6bff7b8ba6225e04a6d66",
         "zip_sha256": "998c864e16f70274cee1a4dcd23a7dfc7a1681171ed7499346918650a9efd5fb",
+    },
+    "app01-plan-20261016-22d406fd": {
+        "inventory_sha256": "ddc9ef0370934629af59013e1e55515f87e8195d68d2c619343b4d92aa24d326",
+        "report_id": "app01-plan-20261016-969e78e97747c512b0b406eb3329365da3c8d648521a13242cf56fa78c23a578",
+        "zip_sha256": "fee221923e1c55ce12a67dd1f045c46c80040a64be3e9dc15dd1531b1eaf70ec",
+    },
+    "ext04-df62c7c6d295e135": {
+        "inventory_sha256": "cbc7795704b8695f7507f498d5f3902508678649fc0aed313d63a005b8f96dba",
+        "report_id": "ext04-observed-replay-eb0b06e560360611d2f2a16fba9b1204e0415b4ba5cd0d5210427c6349963b34",
+        "zip_sha256": "b55221859b711d1ff17eab550fbc18db75417957657d55be731fc79662619803",
+    },
+    "finite-feedback-a6e96fd96c7ac7cc": {
+        "inventory_sha256": "2ff2001e1d8f71f569f15be2a08569716680198ef5f30fb4fc4053dc76853b20",
+        "report_id": "finite-feedback-registered-f874133e442eb0fb884b8813a06591cc0f077063ee75ddf627de74656fc11c0f",
+        "zip_sha256": "38aae20a086e9497d1f948ac43a9bec5410402533777536059efb6f65ab17538",
+    },
+    "geo07-9ef0d347291774da": {
+        "inventory_sha256": "6e556182a62ad507dafd0f9badee553573926575b27b0904efce80d0fd71b892",
+        "report_id": "geo07-generator-sets-7890194735a81238f91e32d598a44eb48cca751ea6ec8af31c58910f89f0dbb6",
+        "zip_sha256": "0847d3fe95df1d6481ada90bb523aee5b971afd58d1dc00415c74b579ec2083c",
+    },
+    "geo07-port-4dee19cde3d50259": {
+        "inventory_sha256": "1e451e5e4b5296fdc5a7579733493f7d88a40681a24a5e2a00cd2fe05dd219d8",
+        "report_id": "geo07-registered-ports-5da2b9dfd2650afff575e2294b58d817d4bb58013e1332efe95725b9901f559b",
+        "zip_sha256": "63a226d6e5a5df0352e2e44ff39dcbc7aa586c1a3b82f4d10effea718cd62fcc",
+    },
+    "geo07-dependent-4dcc5a8fe36f17ed": {
+        "inventory_sha256": "751060823c9290a9aed7d89e1d7842a7be83cfb5af75de259b416edcc137ca9f",
+        "report_id": "geo07-dependent-registered-ee5345877b14a0ebd234a92fe30b371426cfee1e72aa8abf9ea2f9ac3454483b",
+        "zip_sha256": "c046a49dea35dc3c12f77061d92b3166f994c821f9a2f14fb494354541b8fda9",
     },
 }
 

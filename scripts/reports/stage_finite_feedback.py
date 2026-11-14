@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-from html import escape
 import importlib.util
 import io
 import json
-from pathlib import Path
 import zipfile
+from html import escape
+from pathlib import Path
 
 import registered_reports as common
 
@@ -17,14 +17,16 @@ ROOT = Path(__file__).resolve().parents[2]
 _spec = importlib.util.spec_from_file_location(
     "finite_feedback_saved_renderer", ROOT / "scripts/reports/finite_feedback/render_saved.py"
 )
+if _spec is None or _spec.loader is None:
+    raise ImportError("cannot load stage_finite_feedback publication dependency: _spec")
 report = importlib.util.module_from_spec(_spec)
-assert _spec.loader is not None
 _spec.loader.exec_module(report)
 _site_spec = importlib.util.spec_from_file_location(
     "finite_feedback_site", Path(__file__).with_name("site.py")
 )
+if _site_spec is None or _site_spec.loader is None:
+    raise ImportError("cannot load stage_finite_feedback publication dependency: _site_spec")
 site = importlib.util.module_from_spec(_site_spec)
-assert _site_spec.loader is not None
 _site_spec.loader.exec_module(site)
 
 KIND = "finite-feedback-registered-port"
@@ -73,7 +75,7 @@ def validate(bundle: Path) -> common.PublicationRecord:
     }
     public_id = "finite-feedback-registered-" + common._digest(identity)
     payload_hash = common._digest(record)
-    return common.PublicationRecord(
+    publication = common.PublicationRecord(
         KIND,
         public_id,
         payload_hash,
@@ -84,6 +86,11 @@ def validate(bundle: Path) -> common.PublicationRecord:
         record["schema"],
         payload_hash,
         bundle.name,
+    )
+    return common.preserve_historical_publication(
+        bundle,
+        publication,
+        lambda source, item: public_zip(item.report_id, public_files(source, item)),
     )
 
 

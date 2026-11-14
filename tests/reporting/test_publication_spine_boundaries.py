@@ -4,15 +4,18 @@ import copy
 import importlib
 import importlib.util
 import json
+import shutil
 import sys
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 report_data = importlib.import_module("report_data")
+registered = importlib.import_module("registered_reports")
 collector = importlib.import_module("collector_common")
 figure_style = importlib.import_module("figure_style")
 site_design = importlib.import_module("site_design")
@@ -24,6 +27,16 @@ if site_spec is None or site_spec.loader is None:
     raise ImportError("report site helper is unavailable")
 report_site = importlib.util.module_from_spec(site_spec)
 site_spec.loader.exec_module(report_site)
+
+
+HISTORICAL_OWNERS = (
+    ("app01", "stage_app01"),
+    ("ext04", "stage_ext04"),
+    ("finite-feedback", "stage_finite_feedback"),
+    ("geo07", "stage_geo07"),
+    ("geo07-port", "stage_geo07_port"),
+    ("geo07-dependent", "stage_geo07_dependent"),
+)
 
 
 class PublicationSpineBoundaryTests(unittest.TestCase):
@@ -105,6 +118,68 @@ class PublicationSpineBoundaryTests(unittest.TestCase):
         scenario["input"]["linear"].append(0)
         with self.assertRaisesRegex(ValueError, "zip\\(\\) argument 2 is shorter"):
             report_data.reference_matches(trial, scenario)
+
+    def test_retained_publisher_routes_require_both_inventory_and_archive_match(self) -> None:
+        for family, owner_name in HISTORICAL_OWNERS:
+            owner = importlib.import_module(owner_name)
+            catalog = ROOT / "reports/algorithm-results" / (family + "-publications.json")
+            row = json.loads(catalog.read_text(encoding="utf-8"))["reports"][0]
+            bundle = catalog.parent / row["source_report_id"]
+            with self.subTest(owner=owner_name):
+                self.assertEqual(owner.catalogue_entry(bundle), row)
+                for field in ("inventory_sha256", "zip_sha256"):
+                    bad_pin = dict(registered._HISTORICAL_PUBLICATIONS[row["source_report_id"]])
+                    bad_pin[field] = "0" * 64
+                    with (
+                        self.subTest(field=field),
+                        patch.dict(
+                            registered._HISTORICAL_PUBLICATIONS, {row["source_report_id"]: bad_pin}
+                        ),
+                    ):
+                        self.assertNotEqual(owner.validate(bundle).report_id, row["report_id"])
+
+    def test_changed_inventory_and_valid_repacked_native_zip_cannot_reuse_old_routes(self) -> None:
+        for family, owner_name in HISTORICAL_OWNERS:
+            owner = importlib.import_module(owner_name)
+            catalog = ROOT / "reports/algorithm-results" / (family + "-publications.json")
+            row = json.loads(catalog.read_text(encoding="utf-8"))["reports"][0]
+            with self.subTest(owner=owner_name), tempfile.TemporaryDirectory() as directory:
+                bundle = Path(directory) / row["source_report_id"]
+                shutil.copytree(catalog.parent / bundle.name, bundle)
+                extra = bundle / "unexpected-input.txt"
+                extra.write_text("additional identity input", encoding="utf-8")
+                with self.assertRaises(ValueError):
+                    owner.validate(bundle)
+                extra.unlink()
+                native_zip = bundle / "bundle.zip"
+                with zipfile.ZipFile(native_zip) as original:
+                    members = [(name, original.read(name)) for name in original.namelist()]
+                before = native_zip.read_bytes()
+                with zipfile.ZipFile(native_zip, "w", compression=zipfile.ZIP_STORED) as repacked:
+                    repacked.comment = b"valid ZIP; different identity bytes"
+                    for name, content in members:
+                        repacked.writestr(name, content)
+                self.assertNotEqual(native_zip.read_bytes(), before)
+                with zipfile.ZipFile(native_zip) as repacked:
+                    self.assertEqual(
+                        [(name, repacked.read(name)) for name in repacked.namelist()], members
+                    )
+                with self.assertRaises(ValueError):
+                    owner.validate(bundle)
+
+    def test_publication_loaders_reject_missing_specs_and_loaders_without_asserts(self) -> None:
+        for _family, owner_name in HISTORICAL_OWNERS[1:]:
+            path = ROOT / "scripts/reports" / (owner_name + ".py")
+            code = compile(path.read_bytes(), str(path), "exec")
+            for missing in (None, importlib.util.spec_from_loader("missing_owner", loader=None)):
+                with (
+                    self.subTest(owner=owner_name, missing=missing),
+                    patch.object(importlib.util, "spec_from_file_location", return_value=missing),
+                ):
+                    with self.assertRaisesRegex(
+                        ImportError, "cannot load .* publication dependency"
+                    ):
+                        exec(code, {"__name__": "owner_loader_boundary", "__file__": str(path)})
 
     def test_process_timeout_retains_partial_output_and_replacement_decoding(self) -> None:
         command = [sys.executable, "-c", "import os,time;os.write(1,b'partial\\xff');time.sleep(3)"]

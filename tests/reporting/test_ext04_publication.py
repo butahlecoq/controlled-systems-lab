@@ -82,7 +82,8 @@ class Ext04Publication(unittest.TestCase):
                             with self.subTest(page=page_name, href=href):
                                 self.assertIn((parent / href).as_posix(), entries)
 
-    def test_public_identity_binds_every_byte_generating_module(self):
+    @mock.patch.dict(stage_ext04.common._HISTORICAL_PUBLICATIONS, {}, clear=True)
+    def test_unpinned_public_identity_binds_every_byte_generating_module(self):
         original = stage_ext04.validate(SOURCE).report_id
         with tempfile.TemporaryDirectory() as directory:
             fake = Path(directory)

@@ -25,6 +25,21 @@ on:
       - 'scripts/reports/b04_c_exact_registered_reports.py'
       - 'tests/reporting/test_b04_publication_source_snapshot.py'
       - 'tests/reporting/test_publication_spine_boundaries.py'
+      - 'scripts/reports/stage_ext04.py'
+      - 'scripts/reports/stage_finite_feedback.py'
+      - 'scripts/reports/stage_geo07.py'
+      - 'scripts/reports/stage_geo07_port.py'
+      - 'scripts/reports/stage_geo07_dependent.py'
+      - 'tests/reporting/test_convex_report.py'
+      - 'tests/reporting/test_opt07_collector.py'
+      - 'tests/reporting/test_opt12_collector.py'
+      - 'tests/reporting/test_visual_examples.py'
+      - 'tests/reporting/test_geo07_publication.py'
+      - 'tests/reporting/test_geo07_port_publication.py'
+      - 'tests/reporting/test_geo07_dependent_publication.py'
+      - 'tests/reporting/test_finite_feedback_publication.py'
+      - 'tests/reporting/test_ext04_publication.py'
+      - 'tests/reporting/test_report_lifecycle.py'
       - 'scripts/reports/requirements.txt'
       - 'scripts/reports/frozen_native_bundle.py'
       - 'scripts/reports/stage_native_model_catalogue.py'
@@ -63,6 +78,21 @@ on:
       - 'scripts/reports/b04_c_exact_registered_reports.py'
       - 'tests/reporting/test_b04_publication_source_snapshot.py'
       - 'tests/reporting/test_publication_spine_boundaries.py'
+      - 'scripts/reports/stage_ext04.py'
+      - 'scripts/reports/stage_finite_feedback.py'
+      - 'scripts/reports/stage_geo07.py'
+      - 'scripts/reports/stage_geo07_port.py'
+      - 'scripts/reports/stage_geo07_dependent.py'
+      - 'tests/reporting/test_convex_report.py'
+      - 'tests/reporting/test_opt07_collector.py'
+      - 'tests/reporting/test_opt12_collector.py'
+      - 'tests/reporting/test_visual_examples.py'
+      - 'tests/reporting/test_geo07_publication.py'
+      - 'tests/reporting/test_geo07_port_publication.py'
+      - 'tests/reporting/test_geo07_dependent_publication.py'
+      - 'tests/reporting/test_finite_feedback_publication.py'
+      - 'tests/reporting/test_ext04_publication.py'
+      - 'tests/reporting/test_report_lifecycle.py'
       - 'scripts/reports/requirements.txt'
       - 'scripts/reports/frozen_native_bundle.py'
       - 'scripts/reports/stage_native_model_catalogue.py'
@@ -114,3 +144,8 @@ jobs:
           MPLBACKEND: Agg
         run: |
           python -m unittest tests.reporting.test_report_data tests.reporting.test_render tests.reporting.test_publication_policy tests.reporting.test_report_source_identity tests.reporting.test_registered_kinds tests.reporting.test_landing tests.reporting.test_learning_book tests.reporting.test_plot tests.reporting.test_b04_publication_source_snapshot tests.reporting.test_publication_spine_boundaries
+      - name: Exercise saved publication and collector consumer families
+        env:
+          MPLBACKEND: Agg
+        run: |
+          python -m unittest tests.reporting.test_convex_report tests.reporting.test_opt07_collector tests.reporting.test_opt12_collector tests.reporting.test_visual_examples tests.reporting.test_geo07_publication tests.reporting.test_geo07_port_publication tests.reporting.test_geo07_dependent_publication tests.reporting.test_finite_feedback_publication tests.reporting.test_ext04_publication tests.reporting.test_report_lifecycle

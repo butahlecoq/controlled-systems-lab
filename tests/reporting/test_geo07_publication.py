@@ -79,7 +79,8 @@ class Geo07PublicationTests(unittest.TestCase):
                     with self.subTest(page=page_name, href=href):
                         self.assertTrue(((extracted / page_name).parent / href).is_file())
 
-    def test_public_id_binds_all_publisher_modules_with_lf_line_endings(self):
+    @mock.patch.dict(stage_geo07.common._HISTORICAL_PUBLICATIONS, {}, clear=True)
+    def test_unpinned_public_id_binds_all_publisher_modules_with_lf_line_endings(self):
         publisher_files = ("stage_geo07.py", "geo07/render_saved.py",
                            "geo07/collect.py", "registered_reports.py")
         original_id = stage_geo07.validate(SOURCE).report_id

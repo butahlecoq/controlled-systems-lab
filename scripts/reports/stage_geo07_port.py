@@ -4,28 +4,29 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-from html import escape
 import importlib.util
 import io
 import json
-from pathlib import Path
 import zipfile
+from html import escape
+from pathlib import Path
 
 import registered_reports as common
-
 
 ROOT = Path(__file__).resolve().parents[2]
 report_spec = importlib.util.spec_from_file_location(
     "csl_geo07_port_saved_renderer", ROOT / "scripts/reports/geo07_port/render_saved.py"
 )
+if report_spec is None or report_spec.loader is None:
+    raise ImportError("cannot load stage_geo07_port publication dependency: report_spec")
 report = importlib.util.module_from_spec(report_spec)
-assert report_spec.loader is not None
 report_spec.loader.exec_module(report)
 site_spec = importlib.util.spec_from_file_location(
     "csl_geo07_port_site", Path(__file__).with_name("site.py")
 )
+if site_spec is None or site_spec.loader is None:
+    raise ImportError("cannot load stage_geo07_port publication dependency: site_spec")
 site = importlib.util.module_from_spec(site_spec)
-assert site_spec.loader is not None
 site_spec.loader.exec_module(site)
 
 KIND = "geo07-registered-generator-ports"
@@ -85,7 +86,7 @@ def validate(bundle: Path) -> common.PublicationRecord:
     public_id = "geo07-registered-ports-" + common._digest(identity)
     record = read_json(bundle / "records.json")
     payload_hash = common._digest(record)
-    return common.PublicationRecord(
+    publication = common.PublicationRecord(
         KIND,
         public_id,
         payload_hash,
@@ -96,6 +97,11 @@ def validate(bundle: Path) -> common.PublicationRecord:
         record["schema"],
         payload_hash,
         bundle.name,
+    )
+    return common.preserve_historical_publication(
+        bundle,
+        publication,
+        lambda source, item: public_zip(item.report_id, public_artifacts(source, item)),
     )
 
 

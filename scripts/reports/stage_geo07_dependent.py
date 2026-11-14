@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-from html import escape
 import importlib.util
 import io
 import json
-from pathlib import Path
 import zipfile
+from html import escape
+from pathlib import Path
 
 import registered_reports as common
 
@@ -17,14 +17,16 @@ ROOT = Path(__file__).resolve().parents[2]
 _spec = importlib.util.spec_from_file_location(
     "geo07_dependent_saved_renderer", ROOT / "scripts/reports/geo07_dependent/render_saved.py"
 )
+if _spec is None or _spec.loader is None:
+    raise ImportError("cannot load stage_geo07_dependent publication dependency: _spec")
 report = importlib.util.module_from_spec(_spec)
-assert _spec.loader is not None
 _spec.loader.exec_module(report)
 _site_spec = importlib.util.spec_from_file_location(
     "geo07_dependent_site", Path(__file__).with_name("site.py")
 )
+if _site_spec is None or _site_spec.loader is None:
+    raise ImportError("cannot load stage_geo07_dependent publication dependency: _site_spec")
 site = importlib.util.module_from_spec(_site_spec)
-assert _site_spec.loader is not None
 _site_spec.loader.exec_module(site)
 
 KIND = "geo07-registered-dependent-generator-sum"
@@ -89,7 +91,7 @@ def validate(bundle: Path) -> common.PublicationRecord:
     report_id = "geo07-dependent-registered-" + common._digest(identity)
     record = read_json(bundle / "records.json")
     payload_hash = common._digest(record)
-    return common.PublicationRecord(
+    publication = common.PublicationRecord(
         KIND,
         report_id,
         payload_hash,
@@ -100,6 +102,11 @@ def validate(bundle: Path) -> common.PublicationRecord:
         record["schema"],
         payload_hash,
         bundle.name,
+    )
+    return common.preserve_historical_publication(
+        bundle,
+        publication,
+        lambda source, item: public_zip(item.report_id, public_artifacts(source, item)),
     )
 
 
