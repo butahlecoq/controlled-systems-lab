@@ -1,14 +1,14 @@
 """Exercise verified archive reuse through real FetchContent configurations."""
+
 import hashlib
 import io
 import os
-from pathlib import Path
 import subprocess
 import sys
 import tarfile
 import tempfile
 import unittest
-
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 HELPER = ROOT / "cmake/DependencyArchive.cmake"
@@ -33,7 +33,7 @@ class DependencyArchiveTests(unittest.TestCase):
         return hashlib.sha256(self.archive.read_bytes()).hexdigest()
 
     def configure(self, name, digest, cache=True):
-        template = '''cmake_minimum_required(VERSION 3.31)
+        template = """cmake_minimum_required(VERSION 3.31)
 project(ArchiveFixture NONE)
 include("@HELPER@")
 csl_dependency_archive_url(archive_url fixture "@URL@" "@HASH@")
@@ -43,12 +43,15 @@ FetchContent_Declare(fixture URL "${archive_url}" URL_HASH SHA256=@HASH@
 FetchContent_MakeAvailable(fixture)
 file(READ "${fixture_SOURCE_DIR}/value.txt" value)
 file(WRITE "${CMAKE_BINARY_DIR}/answer.txt" "${value}")
-'''
+"""
         # FetchContent's Windows local-file handling expects a plain path;
         # file(DOWNLOAD), exercised by the cache, expects the file URI.
         remote = self.archive.as_uri() if cache else self.archive.as_posix()
-        cmake = template.replace("@HELPER@", HELPER.as_posix()).replace(
-            "@URL@", remote).replace("@HASH@", digest)
+        cmake = (
+            template.replace("@HELPER@", HELPER.as_posix())
+            .replace("@URL@", remote)
+            .replace("@HASH@", digest)
+        )
         (self.source / "CMakeLists.txt").write_text(cmake, encoding="utf-8")
         build = self.area / name
         command = [sys.executable, "-m", "cmake", "-S", str(self.source), "-B", str(build)]
@@ -56,9 +59,12 @@ file(WRITE "${CMAKE_BINARY_DIR}/answer.txt" "${value}")
             command.append("-DCSL_DEPENDENCY_ARCHIVE_CACHE=" + self.cache.as_posix())
         else:
             command.append("-DCSL_DEPENDENCY_ARCHIVE_CACHE=")
-        result = subprocess.run(command, text=True, capture_output=True,
-                                env={**os.environ, "CSL_DEPENDENCY_ARCHIVE_CACHE":
-                                     str(self.area / "inherited-cache")})
+        result = subprocess.run(
+            command,
+            text=True,
+            capture_output=True,
+            env={**os.environ, "CSL_DEPENDENCY_ARCHIVE_CACHE": str(self.area / "inherited-cache")},
+        )
         return result, build
 
     def require_success(self, result):
