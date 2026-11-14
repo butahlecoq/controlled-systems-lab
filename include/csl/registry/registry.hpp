@@ -302,8 +302,8 @@ class LPWorkspaceView final : public LPWorkspace {
 };
 namespace detail {
 template <class Port> struct CheckedEntry {
-    const Registration<Port> *entry;
-    const typename Port::Request *request;
+    const Registration<Port> *entry{};
+    const typename Port::Request *request{};
     Requirements requirements;
     Provenance provenance;
     Offer offer;

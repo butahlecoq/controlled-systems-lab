@@ -1,5 +1,6 @@
 #include <doctest/doctest.h>
 #include <csl/execution/timing_collector.hpp>
+#include <algorithm>
 #include <atomic>
 #include <latch>
 #include <limits>
