@@ -238,7 +238,8 @@ inline std::optional<double> outward_binary64(const Integer &magnitude) noexcept
     }
     if (exponent > 1023)
         return std::nullopt;
-    const auto exponent_bits = static_cast<std::uint64_t>(exponent + 1023);
+    const auto biased_exponent = static_cast<std::int64_t>(exponent) + 1023;
+    const auto exponent_bits = static_cast<std::uint64_t>(biased_exponent);
     const auto fraction = significand - (std::uint64_t{1} << 52);
     return std::bit_cast<double>((exponent_bits << 52) | fraction);
 }
