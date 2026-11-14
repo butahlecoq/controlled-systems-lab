@@ -300,12 +300,27 @@ int main(int argc, char **argv) try {
                         {1e-8, 1e-8},
                         "npoa-2017-fuel"});
     const auto *result = std::get_if<ProgramResult>(&outcome);
-    if (!result || !result->primal || !result->objective.upper ||
+    if (!result) {
+        if (const auto *unsupported = std::get_if<Unsupported>(&outcome)) {
+            std::string message = "HiGHS rejected the compiled task";
+            for (const auto &diagnostic : unsupported->diagnostics)
+                message += "; " + diagnostic.field + ": " + diagnostic.explanation;
+            throw std::runtime_error(message);
+        }
+        throw std::runtime_error("HiGHS stopped before returning a program result");
+    }
+    const auto diagnostics = check_program_result(*result, history.program, Assurance::numerical);
+    if (!result->primal || !result->objective.upper ||
         result->termination != Termination::completed ||
         result->outcome.value != MathematicalOutcome::optimal ||
-        !history.layout.accepts_primal_size(result->primal->size()) ||
-        !check_program_result(*result, history.program, Assurance::numerical).empty())
-        throw std::runtime_error("HiGHS returned no checked numerical optimum");
+        !history.layout.accepts_primal_size(result->primal->size()) || !diagnostics.empty()) {
+        std::string message = "HiGHS did not return a checked optimum: termination=" +
+                              std::to_string(static_cast<int>(result->termination)) +
+                              " outcome=" + std::to_string(static_cast<int>(result->outcome.value));
+        for (const auto &diagnostic : diagnostics)
+            message += "; " + diagnostic.field + ": " + diagnostic.explanation;
+        throw std::runtime_error(message);
+    }
     Vector trajectory;
     trajectory.reserve(44);
     for (std::size_t stage = 0; stage <= 10; ++stage)
