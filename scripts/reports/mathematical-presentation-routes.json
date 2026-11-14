@@ -517,9 +517,19 @@
       "owner": "scripts/reports/stage_history_membership_2d.py"
     },
     {
+      "route": "examples/history-membership-zonotope-2d-v1/records/native-output.html",
+      "disposition": "maintained",
+      "owner": "reports/algorithm-results/history-membership-zonotope-2d-v1/records/native-output.html"
+    },
+    {
       "route": "examples/history-optimizer-native-2d-v1/index.html",
       "disposition": "maintained",
       "owner": "scripts/reports/stage_history_optimizer_native.py"
+    },
+    {
+      "route": "examples/history-optimizer-native-2d-v1/records/native-output.html",
+      "disposition": "maintained",
+      "owner": "reports/algorithm-results/history-optimizer-native-2d-v1/records/native-output.html"
     },
     {
       "route": "examples/index.html",
