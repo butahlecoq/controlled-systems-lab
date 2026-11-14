@@ -793,15 +793,64 @@ SynthesisResult run_strategy_a(const problem::ResolvedProblem& p,const FamilyReq
     ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
     return accepted(workspace->run(context));
 }
+class ZeroHistoryOptimizer final : public optimization::HistoryOptimizerWorkspace {
+    optimization::RawHistorySolveOutcome
+    solve_candidate(const optimization::HistoryOptimizationRequest &request,
+                    const ExecutionContext &) override {
+        const auto coordinates = request.domain.original.coordinates;
+        const auto n = coordinates.dimensions.state, m = coordinates.dimensions.control;
+        const auto horizon = coordinates.horizon;
+        std::vector<Vector> states(horizon + 1, Vector(n, 0.0));
+        std::vector<Vector> controls(horizon, Vector(m, 0.0));
+        Vector history((horizon + 1) * n + horizon * m, 0.0);
+        const auto cost =
+            optimization::evaluate_history_cost(request.source_cost, states, controls);
+        if (const auto *errors = std::get_if<Diagnostics>(&cost))
+            return errors->front();
+        if (const auto *stopped = std::get_if<OperationStopped>(&cost))
+            return *stopped;
+        const auto evaluated = std::get<optimization::HistoryCostEvaluation>(cost);
+        return optimization::RawHistorySolve{
+            std::move(history),
+            evaluated.total,
+            optimization::BackendColdStartEvidence{
+                "test.zero-history", "zero cold start",
+                "test provider exposes no primal or dual readbacks"},
+            "deterministic zero-history integration fixture",
+            {}};
+    }
+};
+registry::PreparedProvider<registry::HistoryOptimizerPort> zero_history_optimizer() {
+    registry::Registry<registry::HistoryOptimizerPort> providers;
+    REQUIRE_FALSE(
+        providers.add({{{"test.zero-history-optimizer"}, "1"},
+                       [](const optimization::HistoryOptimizationRequest &,
+                          const registry::Requirements &requirements) -> registry::Capability {
+                           return registry::Offer{requirements.output};
+                       },
+                       [](const optimization::HistoryOptimizationRequest &)
+                           -> std::unique_ptr<optimization::HistoryOptimizerWorkspace> {
+                           return std::make_unique<ZeroHistoryOptimizer>();
+                       }}));
+    registry::Requirements requirements;
+    requirements.output.representation = {"csl.history-optimization-result.v1"};
+    return accepted(registry::prepare_provider(registry::select_provider(
+        providers, registry::Method{{"test.zero-history-optimizer"}, "1"}, requirements)));
+}
 const sets::SetData& strategy_a_relation(const SynthesisResult& result) {
     REQUIRE(result.family);REQUIRE(result.family->target()==FamilyTarget::candidate_relaxation);
     const auto& candidate=std::get<CandidateFamily>(result.family->outcome());
     const auto* data=dynamic_cast<const synthesis::strategy_a::CandidateHistory*>(candidate.relation.payload.get());
     REQUIRE(data);return data->history.relation;
 }
-registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p,const FamilyRequest& q,
-    bool foreign_provider=false,Termination solver_termination=Termination::completed,std::stop_source* stop=nullptr,
-    std::function<void()> before_return={},MathematicalOutcome solver_outcome=MathematicalOutcome::optimal) {
+registry::PreparedStrategy registered_prepared(
+    const problem::ResolvedProblem &p, const FamilyRequest &q, bool foreign_provider = false,
+    Termination solver_termination = Termination::completed, std::stop_source *stop = nullptr,
+    std::function<void()> before_return = {},
+    MathematicalOutcome solver_outcome = MathematicalOutcome::optimal,
+    std::optional<registry::PreparedProvider<registry::HistoryOptimizerPort>> history_optimizer =
+        {},
+    std::shared_ptr<const optimization::StrategyHistoryOptimizationProfile> history_profile = {}) {
     registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;registry::StrategyRegistry strategies;
     auto linear=accepted(adapters::lp::make_highs_registration());auto convex=accepted(adapters::convex::make_highs_registration());
     if(foreign_provider) {
@@ -816,14 +865,21 @@ registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p
         convex={{{"oracle-qp"},"1"},offer,[=](const ConvexProgram&){return std::make_unique<OracleWorkspace<ConvexProgram,ConvexWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,stop,before_return,solver_outcome);}};
     }
     const auto lid=linear.identity.id,qid=convex.identity.id;lp.add(std::move(linear));qp.add(std::move(convex));
-    CHECK_FALSE(strategies.add(make_registration(lp,qp)));
+    const auto history_module =
+        history_optimizer ? std::optional<ModuleId>{history_optimizer->provenance().requested.id}
+                          : std::nullopt;
+    CHECK_FALSE(strategies.add(make_registration(lp, qp, std::move(history_optimizer))));
     StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};configuration.lp=lid;configuration.convex=qid;
     configuration.representation={"csl.polyhedron.h"};
+    if (history_module)
+        configuration.history_optimizer = *history_module;
     registry::Requirements requirements;requirements.output.representation={"csl.polyhedron.h"};
     requirements.output.family=q.target;
     requirements.output.completeness=q.target==FamilyTarget::exact_optimal_relation?
         registry::Completeness::established:registry::Completeness::unestablished;
-    return accepted(strategies.prepare({p,configuration,q,"1"},requirements));
+    registry::StrategyRequest request{p, configuration, q, "1"};
+    request.history_optimization = std::move(history_profile);
+    return accepted(strategies.prepare(request, requirements));
 }
 struct PlannedStrategyTiming {
     std::shared_ptr<ob::TimingCollector> collector;
@@ -1144,6 +1200,34 @@ TEST_CASE("T-S03 singular A preserves earlier controls at a unique terminal opti
         CHECK_FALSE(contains(relation,point));CHECK_FALSE(contains(a_relation,point,1e-7));
     }
 }
+TEST_CASE("Strategy B invokes the prepared whole-history optimizer before its terminal solver") {
+    const auto problem = resolve(integrator());
+    const auto family = request(problem);
+    auto profile = std::make_shared<const optimization::StrategyHistoryOptimizationProfile>(
+        optimization::StrategyHistoryOptimizationProfile{ProgramId{"strategy-b-history-run"},
+                                                         {"strategy-b-history-running-cost", 2, {}},
+                                                         0,
+                                                         "state",
+                                                         {},
+                                                         optimization::ColdStart{}});
+    const auto prepared =
+        registered_prepared(problem, family, false, Termination::completed, nullptr, {},
+                            MathematicalOutcome::optimal, zero_history_optimizer(), profile);
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    const auto result = accepted(prepared.create()->run(context));
+    REQUIRE(result.history_optimization);
+    CHECK(result.history_optimization->program.value == "strategy-b-history-run");
+    REQUIRE(result.history_optimization->provider.actual_module);
+    CHECK(result.history_optimization->provider.actual_module->value ==
+          "test.zero-history-optimizer");
+    REQUIRE(std::holds_alternative<optimization::BackendColdStartEvidence>(
+        result.history_optimization->result->initialization));
+    REQUIRE(result.incumbents.size() >= 1);
+    CHECK(result.incumbents.front().witness.states.size() == 3);
+    CHECK(result.incumbents.front().witness.controls.size() == 2);
+}
+
 TEST_CASE("registered Strategy B publishes the exact T-S03 singular-dynamics family") {
     auto input=integrator();
     auto model=*input.model;
