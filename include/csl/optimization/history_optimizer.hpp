@@ -7,9 +7,11 @@ namespace csl::registry { struct HistoryOptimizerPort; }
 
 namespace csl::optimization {
 
-struct SuppliedStart { Vector history; };
+struct SuppliedStart {
+    Vector history;
+};
 struct ColdStart {};
-using HistoryOptimizationStart=std::variant<SuppliedStart,ColdStart>;
+using HistoryOptimizationStart = std::variant<SuppliedStart, ColdStart>;
 
 struct SuppliedReadbacks {
     Vector supplied_history;
@@ -29,8 +31,8 @@ struct BackendColdStartEvidence {
     std::string start_policy;
     std::string readback_unavailable_reason;
 };
-using RawHistoryInitializationEvidence=std::variant<SuppliedReadbacks,BackendColdStartEvidence>;
-using HistoryInitializationReceipt=std::variant<VerifiedSuppliedStart,BackendColdStartEvidence>;
+using RawHistoryInitializationEvidence = std::variant<SuppliedReadbacks, BackendColdStartEvidence>;
+using HistoryInitializationReceipt = std::variant<VerifiedSuppliedStart, BackendColdStartEvidence>;
 
 struct HistoryOptimizationRequest {
     ProgramIdentity identity;

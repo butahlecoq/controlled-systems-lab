@@ -36,9 +36,10 @@ optimization::HistoryOptimizationRequest make_request() {
     auto compiled=optimization::compile_history_cost(histories,terminal,running,0);
     if(!std::holds_alternative<optimization::HistoryCostProgram>(compiled))
         throw std::runtime_error("source objective did not compile");
-    return {{ProblemId{"two-state-integrator"},ProgramId{"terminal-euclidean-plus-running-l1"}},
-        std::move(histories),std::get<optimization::HistoryCostProgram>(std::move(compiled)),
-        optimization::ColdStart{}};
+    return {{ProblemId{"two-state-integrator"}, ProgramId{"terminal-euclidean-plus-running-l1"}},
+            std::move(histories),
+            std::get<optimization::HistoryCostProgram>(std::move(compiled)),
+            optimization::ColdStart{}};
 }
 void write_outputs(const std::filesystem::path& directory,const optimization::HistoryOptimizationResult& result) {
     std::filesystem::create_directories(directory);
@@ -69,14 +70,19 @@ void write_outputs(const std::filesystem::path& directory,const optimization::Hi
     if(!svg)throw std::runtime_error("failed to write history.svg");
     std::ofstream html(directory/"index.html");
     html<<std::setprecision(17);
-    html<<"<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Native whole-history source-cost example</title>"
-        <<"<style>body{font:16px system-ui;max-width:900px;margin:2rem auto;padding:0 1rem;color:#202124}figure{margin:1rem 0}img{max-width:100%;height:auto}table{border-collapse:collapse}td,th{border:1px solid #bbb;padding:.45rem .7rem;text-align:left}code{background:#f2f2f2;padding:.1rem .2rem}</style>"
-        <<"<main><h1>Native whole-history source-cost example</h1><p>Two-step integrator: <code>x₀=(0,0)</code>, <code>x₁=x₀+(u₀,0)</code>, <code>x₂=x₁+(0,u₁)</code>, with <code>u₀,u₁∈[0,1]</code>.</p>"
-        <<"<p>Authored objective: <code>J=||x₂−(1,1)||₂ + 0.5(|u₀|+|u₁|)</code>. The native CasADi/SuperSCS provider optimized all state and control history coordinates from an explicit cold start, and the checked core recomputed this source objective. Squaring only the terminal norm gives the distinct surrogate <code>J_sq=||x₂−(1,1)||₂² + 0.5(|u₀|+|u₁|)</code>, whose minimizer is (3/4,3/4); its original source cost is about 1.104.</p>"
-        <<"<figure><img src=\"history.svg\" alt=\"Actual whole-history source-cost trajectory and squared-terminal surrogate trajectory plotted in state x and state y coordinates\"><figcaption>Blue is the actual whole-history source-J result; dashed orange is the minimizer of the squared-terminal surrogate; green marks the target.</figcaption></figure>"
-        <<"<table><tr><th>Candidate</th><th>u₀</th><th>u₁</th><th>Original source J</th></tr><tr><td>Whole-history solve</td><td>"<<result.history[6]<<"</td><td>"<<result.history[7]<<"</td><td>"<<result.source_cost.total<<"</td></tr><tr><td>Squared-terminal surrogate</td><td>3/4</td><td>3/4</td><td>1.1035533906</td></tr></table>"
-        <<"<p>Independent full-H residual: "<<result.maximum_history_violation<<". Backend: <code>"<<result.diagnostics<<"</code>.</p>"
-        <<"<p><a href=\"history.csv\">Download the trajectory and source-cost data (CSV)</a>.</p><h2>Evidence boundary</h2><p>This is one functional 2D demonstration of a local numerical candidate and independent binary64 checks. It is not a benchmark, global-optimality proof, nonlinear plant guarantee or validated completeness result.</p></main></html>";
+    html
+        << "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Native whole-history source-cost example</title>"
+        << "<style>body{font:16px system-ui;max-width:900px;margin:2rem auto;padding:0 1rem;color:#202124}figure{margin:1rem 0}img{max-width:100%;height:auto}table{border-collapse:collapse}td,th{border:1px solid #bbb;padding:.45rem .7rem;text-align:left}code{background:#f2f2f2;padding:.1rem .2rem}</style>"
+        << "<main><h1>Native whole-history source-cost example</h1><p>Two-step integrator: <code>x₀=(0,0)</code>, <code>x₁=x₀+(u₀,0)</code>, <code>x₂=x₁+(0,u₁)</code>, with <code>u₀,u₁∈[0,1]</code>.</p>"
+        << "<p>Authored objective: <code>J=||x₂−(1,1)||₂ + 0.5(|u₀|+|u₁|)</code>. The native CasADi/SuperSCS provider optimized all state and control history coordinates from an explicit cold start, and the checked core recomputed this source objective. Squaring only the terminal norm gives the distinct surrogate <code>J_sq=||x₂−(1,1)||₂² + 0.5(|u₀|+|u₁|)</code>, whose minimizer is (3/4,3/4); its original source cost is about 1.104.</p>"
+        << "<figure><img src=\"history.svg\" alt=\"Actual whole-history source-cost trajectory and squared-terminal surrogate trajectory plotted in state x and state y coordinates\"><figcaption>Blue is the actual whole-history source-J result; dashed orange is the minimizer of the squared-terminal surrogate; green marks the target.</figcaption></figure>"
+        << "<table><tr><th>Candidate</th><th>u₀</th><th>u₁</th><th>Original source J</th></tr><tr><td>Whole-history solve</td><td>"
+        << result.history[6] << "</td><td>" << result.history[7] << "</td><td>"
+        << result.source_cost.total
+        << "</td></tr><tr><td>Squared-terminal surrogate</td><td>3/4</td><td>3/4</td><td>1.1035533906</td></tr></table>"
+        << "<p>Independent full-H residual: " << result.maximum_history_violation
+        << ". Backend: <code>" << result.diagnostics << "</code>.</p>"
+        << "<p><a href=\"history.csv\">Download the trajectory and source-cost data (CSV)</a>.</p><h2>Evidence boundary</h2><p>This is one functional 2D demonstration of a local numerical candidate and independent binary64 checks. It is not a benchmark, global-optimality proof, nonlinear plant guarantee or validated completeness result.</p></main></html>";
     html.close();
     if(!html)throw std::runtime_error("failed to write index.html");
 }
@@ -86,7 +92,7 @@ int main(int argc,char** argv) {
     if(argc!=2) {std::cerr<<"usage: history_optimizer_2d_example OUTPUT_DIR\n";return 2;}
     try {
         auto request=make_request();
-        auto entry=adapters::nlp::make_casadi_superscs_history_optimizer_registration();
+        auto entry = adapters::nlp::make_casadi_superscs_history_optimizer_registration();
         registry::Registry<registry::HistoryOptimizerPort> providers;
         const registry::Method method{entry.identity.id,entry.identity.version};
         if(providers.add(std::move(entry)))throw std::runtime_error("could not register CasADi history optimizer");
@@ -104,12 +110,15 @@ int main(int argc,char** argv) {
             throw std::runtime_error("whole-history solve failed");
         const auto& solved=std::get<optimization::HistoryOptimizationResult>(result);
         write_outputs(argv[1],solved);
-        const auto& cold=std::get<optimization::BackendColdStartEvidence>(solved.initialization);
+        const auto &cold = std::get<optimization::BackendColdStartEvidence>(solved.initialization);
         std::cout<<std::setprecision(17);
-        std::cout<<"provider="<<method.id.value<<'@'<<*method.version<<"; source J="<<solved.source_cost.total
-            <<"; u0="<<solved.history[6]<<"; u1="<<solved.history[7]<<"; max H violation="
-            <<solved.maximum_history_violation<<"; start=cold; start policy="<<cold.start_policy
-            <<"; readback unavailable="<<cold.readback_unavailable_reason<<"; "<<solved.diagnostics<<"\n";
+        std::cout << "provider=" << method.id.value << '@' << *method.version
+                  << "; source J=" << solved.source_cost.total << "; u0=" << solved.history[6]
+                  << "; u1=" << solved.history[7]
+                  << "; max H violation=" << solved.maximum_history_violation
+                  << "; start=cold; start policy=" << cold.start_policy
+                  << "; readback unavailable=" << cold.readback_unavailable_reason << "; "
+                  << solved.diagnostics << "\n";
         return 0;
     } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 1;}
 }
