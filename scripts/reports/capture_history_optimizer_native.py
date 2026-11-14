@@ -14,8 +14,26 @@ from pathlib import Path
 import stage_history_optimizer_native as report
 
 
+_LOCAL_PATH = re.compile(r"(?<!:)(?<!/)/(?:[^/\s;<>\"']+/)*[^/\s;<>\"']+")
+
+
 def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def _public_text(data: bytes) -> bytes:
+    text = data.decode("utf-8", errors="replace")
+    urls = []
+
+    def preserve_url(match: re.Match[str]) -> str:
+        urls.append(match.group(0))
+        return f"\x00URL{len(urls) - 1}\x00"
+
+    text = re.sub(r"https?://[^\s<>\"']+", preserve_url, text)
+    text = _LOCAL_PATH.sub("<local-path>", text)
+    for index, url in enumerate(urls):
+        text = text.replace(f"\x00URL{index}\x00", url)
+    return text.encode("utf-8")
 
 
 def _run(binary: Path, output: Path) -> tuple[bytes, bytes]:
@@ -108,8 +126,8 @@ def capture(source_root: Path, build_root: Path, output_root: Path, build_log: P
     if stderr:
         (records / "stderr.txt").write_bytes(stderr)
         raise RuntimeError("native example wrote stderr; inspect preserved capture")
-    shutil.copyfile(build_log, records / "build.log")
-    shutil.copyfile(cache, records / "CMakeCache.txt")
+    (records / "build.log").write_bytes(_public_text(build_log.read_bytes()))
+    (records / "CMakeCache.txt").write_bytes(_public_text(cache.read_bytes()))
     line = stdout.decode("utf-8").strip()
     match = re.search(
         r"provider=([^;]+); source J=([^;]+); u0=([^;]+); u1=([^;]+); "
@@ -163,8 +181,8 @@ def capture(source_root: Path, build_root: Path, output_root: Path, build_log: P
             "native_html_sha256": _sha256((output_root / "native-output.html").read_bytes()),
             "stdout_sha256": _sha256(stdout),
             "stderr_sha256": _sha256(stderr),
-            "build_log_sha256": _sha256(build_log.read_bytes()),
-            "cmake_cache_sha256": _sha256(cache.read_bytes()),
+            "build_log_sha256": _sha256((records / "build.log").read_bytes()),
+            "cmake_cache_sha256": _sha256((records / "CMakeCache.txt").read_bytes()),
         },
     }
     (records / "receipt.json").write_text(

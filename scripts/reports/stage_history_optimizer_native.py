@@ -53,6 +53,7 @@ SOURCE_PATHS = (
     "scripts/reports/stage_history_optimizer_native.py",
     "tools/history_optimizer_2d_example.cpp",
 )
+LOCAL_PATH = re.compile(r"(?<!:)(?<!/)/(?:[^/\s;<>\"']+/)*[^/\s;<>\"']+")
 
 
 def _safe_read(root: Path, relative: str) -> bytes:
@@ -267,6 +268,12 @@ def validate(bundle: Path, repository_root: Path) -> dict:
             hashlib.sha256(_safe_read(bundle, relative)).hexdigest() == expected,
             "native history optimizer file digest differs: " + relative,
         )
+    for relative in ("records/build.log", "records/CMakeCache.txt"):
+        text = _safe_read(bundle, relative).decode("utf-8", errors="replace")
+        report_data.require(
+            LOCAL_PATH.search(text) is None,
+            "native history optimizer evidence contains a local path: " + relative,
+        )
     csv_bytes = _safe_read(bundle, "history.csv").decode("utf-8")
     rows = list(csv.DictReader(io.StringIO(csv_bytes)))
     report_data.require(
@@ -290,6 +297,11 @@ def validate(bundle: Path, repository_root: Path) -> dict:
                 saved.read(name) == expected,
                 "native history optimizer archive bytes differ: " + name,
             )
+            if name in {"records/build.log", "records/CMakeCache.txt"}:
+                report_data.require(
+                    LOCAL_PATH.search(saved.read(name).decode("utf-8", errors="replace")) is None,
+                    "native history optimizer archive contains a local path: " + name,
+                )
     checksum = archive.with_suffix(archive.suffix + ".sha256")
     report_data.require(
         not checksum.is_symlink()

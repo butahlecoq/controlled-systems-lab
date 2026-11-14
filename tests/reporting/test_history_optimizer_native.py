@@ -16,6 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
 report = importlib.import_module("stage_history_optimizer_native")
+capture = importlib.import_module("capture_history_optimizer_native")
 
 
 def _fixture(bundle: Path) -> None:
@@ -96,6 +97,13 @@ def _fixture(bundle: Path) -> None:
 
 
 class NativeHistoryReportTests(unittest.TestCase):
+    def test_capture_redacts_local_paths_and_preserves_urls(self):
+        content = b"build=/home/alice/project; compiler=/usr/bin/c++; url=https://example.org/path\n"
+        public = capture._public_text(content).decode("utf-8")
+        self.assertNotIn("/home/alice", public)
+        self.assertNotIn("/usr/bin", public)
+        self.assertIn("https://example.org/path", public)
+
     def test_archive_is_hash_pinned_and_tampering_is_rejected(self):
         with tempfile.TemporaryDirectory() as temporary:
             bundle = Path(temporary) / report.REPORT_ID
