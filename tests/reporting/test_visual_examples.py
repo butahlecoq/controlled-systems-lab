@@ -21,6 +21,7 @@ import control_witness_companions
 import stage_mpc06_tube
 import stage_syn03_nominal_exact_example as nominal_exact_example
 import stage_nominal_quadratic_history
+import stage_discrete_mpc_2d
 
 
 class Links(HTMLParser):
@@ -647,6 +648,42 @@ class GalleryTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "rounded output table changed"):
                 stage_nominal_quadratic_history.build(copied_root)
 
+    def test_discrete_mpc_stager_uses_actual_capture_and_declares_feedback_limits(self):
+        files, entries, card = stage_discrete_mpc_2d.build(ROOT)
+        page = files[stage_discrete_mpc_2d.PAGE].decode("utf-8")
+        record = json.loads(files[stage_discrete_mpc_2d.RECORD])
+        figure = ET.fromstring(files[stage_discrete_mpc_2d.FIGURE])
+        self.assertIn('href="examples.css"', page)
+        self.assertNotIn("<style", page)
+        self.assertIn("The same compiled running-state, control and terminal costs", page)
+        self.assertIn("does not establish robustness", page)
+        self.assertIn("nominal-quadratic-history-2d.html", page)
+        self.assertEqual(record["answer"]["first_disturbed_replay_action_divergence_stage"], 4)
+        self.assertEqual(record["answer"]["open_loop_first_control_coordinate"], 0.0)
+        self.assertAlmostEqual(record["answer"]["observed_mpc_first_control_coordinate"],
+                               1.050202086852605)
+        self.assertTrue(record["evidence"]["actual_replay_csv_is_solver_output"])
+        self.assertTrue(record["evidence"][
+            "realized_objectives_independently_recomputed_from_executed_states_and_actions"])
+        self.assertIn("not a fresh full-SDK install qualification",
+                      record["evidence"]["build_scope"])
+        self.assertEqual(entries[0]["status"], "educational-example")
+        self.assertIn(stage_discrete_mpc_2d.PAGE, card)
+        self.assertEqual(figure.tag, "{http://www.w3.org/2000/svg}svg")
+        self.assertTrue(figure.find("{http://www.w3.org/2000/svg}desc").text)
+        self.assertEqual(files[stage_discrete_mpc_2d.CSV],
+                         (ROOT / "examples/discrete_mpc_2d-output.csv").read_bytes())
+        with tempfile.TemporaryDirectory() as temporary:
+            copied_root = Path(temporary)
+            (copied_root / "examples").mkdir()
+            for relative in ("examples/discrete_mpc_2d-output.csv",
+                             "examples/discrete_mpc_2d-output.txt"):
+                shutil.copyfile(ROOT / relative, copied_root / relative)
+            tampered = copied_root / "examples/discrete_mpc_2d-output.csv"
+            tampered.write_bytes(tampered.read_bytes() + b"tampered\n")
+            with self.assertRaisesRegex(ValueError, "capture differs"):
+                stage_discrete_mpc_2d.build(copied_root)
+
     def test_build_preserves_reports_and_has_resolvable_links(self):
         before = {p.relative_to(self.site): hashlib.sha256(p.read_bytes()).hexdigest()
                   for p in self.site.rglob("*") if p.is_file() and p.name != "index.html"}
@@ -668,6 +705,36 @@ class GalleryTests(unittest.TestCase):
                              if entry["anchor"] == "nominal-quadratic-history-2d")
         self.assertEqual(history_entry["status"], "analytic-illustration")
         self.assertEqual(history_entry["raw_record"], "nominal-quadratic-history-2d.json")
+        mpc_page = self.site / "examples/discrete-mpc-2d.html"
+        self.assertTrue(mpc_page.is_file())
+        self.assertTrue((self.site / "examples/discrete-mpc-2d.svg").is_file())
+        self.assertTrue((self.site / "examples/discrete-mpc-2d.json").is_file())
+        self.assertEqual((self.site / "examples/discrete_mpc_2d-output.csv").read_bytes(),
+                         (ROOT / "examples/discrete_mpc_2d-output.csv").read_bytes())
+        gallery_html = (self.site / "examples/index.html").read_text(encoding="utf-8")
+        self.assertIn('id="discrete-mpc-2d"', gallery_html)
+        mpc_html = mpc_page.read_text(encoding="utf-8")
+        self.assertIn("first changes its first control coordinate at stage 4", mpc_html)
+        self.assertIn('href="examples.css"', mpc_html)
+        from scripts.reports import audit_mathematical_presentation
+        route_registry = json.loads(
+            (ROOT / "scripts/reports/mathematical-presentation-routes.json").read_text())
+        route_entry = next(entry for entry in route_registry["routes"]
+                           if entry["route"] == "examples/discrete-mpc-2d.html")
+        with tempfile.TemporaryDirectory() as temporary:
+            guard_site = Path(temporary)
+            (guard_site / "examples").mkdir()
+            shutil.copyfile(mpc_page, guard_site / "examples/discrete-mpc-2d.html")
+            shutil.copyfile(self.site / "examples/index.html", guard_site / "examples/index.html")
+            (guard_site / "examples/visual-coverage.json").write_text(json.dumps({
+                "entries": [{"page": "discrete-mpc-2d.html"}]}))
+            presentation = audit_mathematical_presentation.audit_site(
+                guard_site,
+                {"routes": [route_entry, next(
+                    entry for entry in route_registry["routes"]
+                    if entry["route"] == "examples/index.html")],
+                 "required_inventories": []})
+        self.assertTrue(presentation["passed"], presentation["findings"][:8])
         cost_page = self.site / "examples/history-cost-2d-v1/index.html"
         self.assertTrue(cost_page.is_file())
         staged_archive = self.site / "examples/history-cost-2d-v1/history-cost-2d-v1.zip"
@@ -847,7 +914,7 @@ class GalleryTests(unittest.TestCase):
             if not urlsplit(link).scheme and not link.startswith("#"):
                 self.assertTrue((self.site / "examples" / link.split("#")[0]).is_file(), link)
         figures = list((self.site / "examples").glob("*.svg"))
-        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 30)
+        self.assertEqual(len(figures), len(self.examples) + len(gallery.visual_illustrations.CASES) + 31)
         self.assertIn('id="saved-feedback-geometry-2d"', page)
         self.assertIn('id="native-fixed-tail-2d"', page)
         self.assertTrue((self.site / "examples/native-fixed-tail-2d.html").is_file())

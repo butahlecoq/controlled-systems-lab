@@ -605,6 +605,11 @@
       "owner": "scripts/reports/stage_nominal_quadratic_history.py"
     },
     {
+      "route": "examples/discrete-mpc-2d.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_discrete_mpc_2d.py"
+    },
+    {
       "route": "examples/nominal_linear_exact_2d.html",
       "disposition": "maintained",
       "owner": "examples/nominal_linear_exact_2d.html"
