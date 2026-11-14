@@ -164,7 +164,7 @@
     },
     {
       "source": "scripts/reports/capture_history_membership_2d.py",
-      "signal_count": 2,
+      "signal_count": 4,
       "asset_name_literals": [
         "history.svg"
       ],
@@ -172,7 +172,7 @@
     },
     {
       "source": "scripts/reports/capture_history_optimizer_native.py",
-      "signal_count": 2,
+      "signal_count": 4,
       "asset_name_literals": [
         "history.svg"
       ],
@@ -3502,7 +3502,7 @@
       "assets": [
         "history.svg"
       ],
-      "index_sha256": "b9c3d2bcb398da09181b7de4f94402657787e0b6d745064c0ea2f2ce69a6921c",
+      "index_sha256": "6076aed8e481d1ff1087f2e74e67031ba2fc1fda9d68e56812e806415858c449",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },
@@ -3512,7 +3512,7 @@
       "assets": [
         "history.svg"
       ],
-      "index_sha256": "a4d94265d6c69b3e5a38305d47d5c0d27283ae668f517bb20f936796ee076196",
+      "index_sha256": "7ee4c39ada696aab724b5ebb6dcd9f476a3328d82a5f182a566e2b41092f08dc",
       "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
       "follow_up_issue": 669
     },
