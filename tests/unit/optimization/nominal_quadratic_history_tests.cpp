@@ -37,6 +37,18 @@ CompiledNominalQuadraticHistory accepted(ConvexDataResult<CompiledNominalQuadrat
 }
 }
 
+TEST_CASE("history task aggregates default to no positive-part budgets") {
+    NominalQuadraticHistoryTask no_budgets{{{"history-test"}, {"default-empty-budget-field"}},
+                                           {},
+                                           KnownInitial{{0.0}},
+                                           {},
+                                           {},
+                                           std::nullopt,
+                                           {},
+                                           {Matrix{1, 1, {0.0}}, {0.0}, 0.0}};
+    CHECK(no_budgets.control_positive_part_budgets.empty());
+}
+
 TEST_CASE("history compiler preserves stage blocks, cross terms and source polynomial") {
     const auto compiled = accepted(compile_nominal_quadratic_history(task()));
     const auto &program = compiled.program;

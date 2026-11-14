@@ -44,7 +44,7 @@ struct NominalQuadraticHistoryTask {
     QuadraticTerminal terminal_cost;
     // Empty or T stage entries. The compiler adds private epigraph columns;
     // they follow the canonical state/control prefix and are described below.
-    std::vector<std::vector<ControlPositivePartBudget>> control_positive_part_budgets;
+    std::vector<std::vector<ControlPositivePartBudget>> control_positive_part_budgets{};
 };
 
 enum class HistoryAuxiliaryKind { positive_part_witness };
