@@ -11,7 +11,7 @@ target_link_libraries(continuous_policy_tests PRIVATE CSL::controllers CSL::mode
 add_test(NAME continuous_policy_tests COMMAND continuous_policy_tests)
 csl_test_target(continuous_policy_tests controllers)
 add_executable(discrete_mpc_tests tests/unit/controllers/discrete_mpc_tests.cpp)
-target_link_libraries(discrete_mpc_tests PRIVATE CSL::controllers CSL::highs_convex doctest::doctest)
+target_link_libraries(discrete_mpc_tests PRIVATE CSL::controllers doctest::doctest)
 add_test(NAME discrete_mpc_tests COMMAND discrete_mpc_tests)
 csl_test_target(discrete_mpc_tests controllers)
 if(TARGET CSL::highs_convex)

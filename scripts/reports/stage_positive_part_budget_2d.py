@@ -155,7 +155,7 @@ def _page(record: dict) -> str:
             "the source-shaped constraint <code>max(u₀,0)+max(u₁,0)≤0.1</code>. A net-sum row "
             "<code>u₀+u₁≤0.1</code> is weaker: it admits <code>(0.2,−0.2)</code>, whose net sum "
             "is zero while its positive-part sum is <code>0.2</code>.</p>",
-            f'<figure><img src="{FIGURE}" alt="The box control domain cut by the positive-part budget is a pentagon; the target (0.2,-0.2) is outside it and the native optimum (0.1,-0.2) lies on its slanted edge."><figcaption>The pentagon vertices are derived analytically from the box and budget. The dot is the checked HiGHS solution to the authored quadratic task.</figcaption></figure>',
+            f'<figure><img src="{FIGURE}" alt="The box control domain cut by the positive-part budget is a pentagon; the target (0.2,-0.2) is outside it and the native optimum (0.1,-0.2) is a boundary vertex."><figcaption>The pentagon vertices are derived analytically from the box and budget. The dot is the checked HiGHS solution to the authored quadratic task.</figcaption></figure>',
             '<section><h2>Why the epigraph is exact</h2><div class="math-input">',
             "<p>Introduce witnesses <code>p₀,p₁</code> and require <code>pᵢ≥uᵢ</code>, "
             "<code>pᵢ≥0</code>, and <code>p₀+p₁≤0.1</code>. For any fixed controls, the smallest "

@@ -8,7 +8,7 @@ execute_process(COMMAND "${EXAMPLE_EXE}" "${output_dir}"
 if(NOT "${status}" STREQUAL "0")
   message(FATAL_ERROR "Positive-part example failed: ${status}: ${output}${error}")
 endif()
-if(NOT "${output}" MATCHES "u=\\(0.1,-0.2\\); sum\\(max\\(u,0\\)\\)=0.1; literal objective=0.005")
+if(NOT "${output}" STREQUAL "Positive-part budget QP: u=(0.1,-0.2); sum(max(u,0))=0.1; literal objective=0.005\n")
   message(FATAL_ERROR "Unexpected native solution: ${output}")
 endif()
 foreach(file vertices.csv native-solution.csv run.txt native-example.stdout)
@@ -21,9 +21,13 @@ file(READ "${output_dir}/native-example.stdout" recorded_output)
 if(NOT "${recorded_output}" STREQUAL "${output}")
   message(FATAL_ERROR "Saved stdout differs from the actual native example output")
 endif()
-if(NOT "${solution}" MATCHES "u0,0[.]2,0[.]1[0-9]*,-0[.]2,0[.]2" OR
-   NOT "${solution}" MATCHES "u1,-0[.]2,-0[.]2[0-9]*,-0[.]2,0[.]2" OR
-   NOT "${solution}" MATCHES "positive_part_budget,0[.]1,0[.]1[0-9]*,0,0[.]1")
-  message(FATAL_ERROR "Saved native solution differs from the checked output: ${solution}")
-endif()
+foreach(expected_row IN ITEMS
+    "u0,0.2,0.10000000000000001,-0.2,0.2"
+    "u1,-0.2,-0.20000000000000001,-0.2,0.2"
+    "positive_part_budget,0.1,0.10000000000000001,0,0.1")
+  string(FIND "${solution}" "${expected_row}\n" row_position)
+  if(row_position EQUAL -1)
+    message(FATAL_ERROR "Saved native solution differs from the checked output: ${solution}")
+  endif()
+endforeach()
 message(STATUS "${output}")
