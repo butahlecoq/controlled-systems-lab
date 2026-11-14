@@ -9,6 +9,27 @@
 using namespace csl;
 
 namespace {
+problem::ResolvedProblem source_problem() {
+    Problem source{{"history-profile-problem"},
+                   std::make_shared<const SystemModel>(SystemModel{
+                       Dynamics{{1, 1, 0},
+                                TimeDomain::discrete,
+                                LinearStage{{1, 1, {1.0}}, {1, 1, {1.0}}, {1, 0, {}}, {0.0}}},
+                       {}}),
+                   {0.0, 1.0},
+                   KnownInitial{{0.0}},
+                   ContinuousDomain{{UniversalSet{1}}},
+                   {UniversalSet{1}, UniversalSet{1}},
+                   {},
+                   {},
+                   InformationPattern::nominal_open_loop,
+                   LinearTerminal{{1.0}, 0.0}};
+    const auto resolved =
+        problem::resolve(source, {problem::UncertaintyStructure::stage_product_uncoupled, {}, {}});
+    if (!std::holds_alternative<problem::ResolvedProblem>(resolved))
+        throw std::logic_error("history profile fixture must resolve");
+    return std::get<problem::ResolvedProblem>(resolved);
+}
 optimization::HistoryOptimizationRequest request() {
     const JointCoordinates coordinates{{1,1,0},1};
     auto set=sets::make_h({{"full-history"},3,{}},
@@ -65,6 +86,64 @@ struct Candidate final:optimization::HistoryOptimizerWorkspace {
                                              candidate_memberships};
     }
 };
+}
+
+TEST_CASE(
+    "strategy profile binds authored running cost to the resolved terminal objective and full history") {
+    const auto problem = source_problem();
+    const auto existing = request();
+    optimization::StrategyHistoryOptimizationProfile profile{
+        ProgramId{"strategy-profile-run"},
+        {"separately-authored-running-cost",
+         1,
+         {{0, {optimization::QuadraticControlPenalty{{0.0}, {1.0}, {1.0}, 2.0, 1}}}}},
+        0,
+        "state",
+        {},
+        optimization::ColdStart{}};
+
+    const auto compiled = optimization::compile_strategy_history_optimization_request(
+        problem, existing.domain.original, profile);
+    REQUIRE(std::holds_alternative<optimization::HistoryOptimizationRequest>(compiled));
+    const auto &result = std::get<optimization::HistoryOptimizationRequest>(compiled);
+    CHECK((result.identity ==
+           ProgramIdentity{problem.identity(), ProgramId{"strategy-profile-run"}}));
+    CHECK(result.domain.original.coordinates == existing.domain.original.coordinates);
+    CHECK(result.domain.original.relation.metadata()->id ==
+          existing.domain.original.relation.metadata()->id);
+    CHECK(result.source_cost.running_source.objective_id == "separately-authored-running-cost");
+    CHECK(result.source_cost.absolute_stage_offset == 0);
+    CHECK(result.source_cost.quadratic.Q.values.back() == doctest::Approx(4.0));
+    CHECK(std::holds_alternative<optimization::ColdStart>(result.start));
+}
+
+TEST_CASE("strategy profile refuses a missing immutable problem or program identity") {
+    const auto problem = source_problem();
+    const auto existing = request();
+    optimization::StrategyHistoryOptimizationProfile profile{
+        {}, {"running", 1, {}}, 0, "state", {}, optimization::ColdStart{}};
+    const auto compiled = optimization::compile_strategy_history_optimization_request(
+        problem, existing.domain.original, profile);
+    REQUIRE(std::holds_alternative<Diagnostics>(compiled));
+    CHECK(std::get<Diagnostics>(compiled).front().field == "history.profile.identity");
+}
+
+TEST_CASE("strategy preparation snapshots the authored history profile") {
+    const auto resolved = source_problem();
+    auto authored = std::make_shared<optimization::StrategyHistoryOptimizationProfile>(
+        optimization::StrategyHistoryOptimizationProfile{ProgramId{"frozen-profile"},
+                                                         {"running", 1, {}},
+                                                         0,
+                                                         "state",
+                                                         {},
+                                                         optimization::ColdStart{}});
+    registry::StrategyRequest request{resolved, {}, {}, "strategy-1", {}, authored};
+
+    const auto snapshot = registry::StrategyPort::snapshot(request);
+    authored->running_cost.objective_id = "mutated-after-prepare";
+    REQUIRE(snapshot.history_optimization);
+    CHECK(snapshot.history_optimization.get() != authored.get());
+    CHECK(snapshot.history_optimization->running_cost.objective_id == "running");
 }
 
 TEST_CASE("whole-history port checks backend output against the original cost") {

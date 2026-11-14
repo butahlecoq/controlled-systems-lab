@@ -47,6 +47,27 @@ struct HistoryOptimizationRequest {
     HistoryOptimizationStart start;
 };
 
+// Authored, immutable inputs needed to optimize a recovered full history.
+// The resolved problem supplies the terminal objective and binds the task;
+// these fields retain the separately authored running cost and selected set
+// memberships without reducing the original feasible-history relation.
+struct StrategyHistoryOptimizationProfile {
+    ProgramId program;
+    RunningControlCost running_cost;
+    std::size_t absolute_stage_offset{};
+    std::string state_frame;
+    std::vector<HistoryMembership> memberships;
+    HistoryOptimizationStart start{ColdStart{}};
+};
+
+using HistoryOptimizationRequestCompilation =
+    std::variant<HistoryOptimizationRequest, Diagnostics, OperationStopped>;
+
+HistoryOptimizationRequestCompilation
+compile_strategy_history_optimization_request(const problem::ResolvedProblem &,
+                                              const synthesis::JointHistoryRelation &,
+                                              const StrategyHistoryOptimizationProfile &);
+
 struct RawHistorySolve {
     Vector history;
     double reported_objective;

@@ -1,4 +1,5 @@
 #include <csl/registry/registry.hpp>
+#include <csl/optimization/history_optimizer.hpp>
 #include "compiled_verifiers.hpp"
 #include <algorithm>
 #include <chrono>
@@ -187,7 +188,12 @@ std::variant<WitnessSelection,Unsupported> SelectorPort::run(Workspace& workspac
     return selection;
 }
 StrategyRequest StrategyPort::snapshot(const Request& request) {
-    return request; // ResolvedProblem already owns immutable canonical data and its content.
+    auto snapshot = request;
+    if (request.history_optimization)
+        snapshot.history_optimization =
+            std::make_shared<const optimization::StrategyHistoryOptimizationProfile>(
+                *request.history_optimization);
+    return snapshot; // The resolved problem and profile own frozen canonical inputs.
 }
 SynthesisOutcome StrategyPort::run(Workspace& workspace,const Request& request,const ExecutionContext& context) {
     auto admission=check_family_request(request.family,request.problem.identity());

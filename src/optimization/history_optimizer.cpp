@@ -107,6 +107,32 @@ std::pair<std::vector<Vector>,std::vector<Vector>> unpack(const JointCoordinates
 }
 }
 
+HistoryOptimizationRequestCompilation
+compile_strategy_history_optimization_request(const problem::ResolvedProblem &problem,
+                                              const synthesis::JointHistoryRelation &history,
+                                              const StrategyHistoryOptimizationProfile &profile) {
+    if (problem.identity().value.empty() || profile.program.value.empty())
+        return Diagnostics{
+            invalid("history.profile.identity",
+                    "Resolved problem and history-optimization program identities are required.")};
+    const auto source = problem.description();
+    if (!source)
+        return Diagnostics{
+            invalid("history.profile.problem",
+                    "Resolved problem must retain its immutable source description.")};
+    auto compiled = compile_history_cost(history, source->objective, profile.running_cost,
+                                         profile.absolute_stage_offset);
+    if (const auto *errors = std::get_if<Diagnostics>(&compiled))
+        return *errors;
+    if (const auto *stopped = std::get_if<OperationStopped>(&compiled))
+        return *stopped;
+    HistoryDomain domain{history, profile.memberships, profile.state_frame};
+    return HistoryOptimizationRequest{{problem.identity(), profile.program},
+                                      std::move(domain),
+                                      std::get<HistoryCostProgram>(std::move(compiled)),
+                                      profile.start};
+}
+
 Diagnostics check_history_optimization_request(const HistoryOptimizationRequest& r) {
     Diagnostics out;
     const auto& c=r.domain.original.coordinates;

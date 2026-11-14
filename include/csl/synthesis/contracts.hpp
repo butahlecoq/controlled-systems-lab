@@ -305,6 +305,7 @@ using SynthesisOutcome = std::variant<SynthesisResult, Unsupported>;
 struct StrategyConfiguration {
     ModuleId strategy, lp, convex, hull, geometry, converter, approximation, selector;
     RepresentationId representation;
+    ModuleId history_optimizer{};
 };
 class SynthesisWorkspace : public ExclusiveWorkspace {
 public: virtual SynthesisResult solve(const problem::ResolvedProblem&, const FamilyRequest&, const ExecutionContext&) = 0;
