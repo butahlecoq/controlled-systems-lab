@@ -53,7 +53,9 @@ LinearDomain linear_domain(const optimization::HistoryOptimizationRequest &reque
         Matrix a{n, n, Vector(n * n, 0.0)};
         for (std::size_t i = 0; i < n; ++i)
             a.values[i * n + i] = 1.0;
-        return {std::move(a), point->point, point->point};
+        const auto values = point->point.values();
+        Vector bound(values.begin(), values.end());
+        return {std::move(a), bound, std::move(bound)};
     }
     return {Matrix{0, n, {}}, {}, {}};
 }
@@ -133,8 +135,7 @@ class SuperSCSWorkspace final : public optimization::HistoryOptimizerWorkspace {
                     MX::mtimes(dense(weighted),
                                z(casadi::Slice(0, static_cast<casadi_int>(history_size)))) -
                     DM(target);
-                cones.push_back(
-                    casadi::soc(residual, z(static_cast<casadi_int>(history_size + i))));
+                cones.push_back(MX::soc(residual, z(static_cast<casadi_int>(history_size + i))));
                 objective_linear(static_cast<casadi_int>(history_size + i)) = term.coefficient;
             }
             const auto hessian =
@@ -142,7 +143,7 @@ class SuperSCSWorkspace final : public optimization::HistoryOptimizerWorkspace {
             MX psd;
             DM q_matrix, p_matrix;
             if (!cones.empty()) {
-                psd = casadi::diagcat(cones);
+                psd = MX::diagcat(cones);
                 const auto flattened =
                     MX::reshape(psd, static_cast<casadi_int>(psd_dimension * psd_dimension), 1);
                 const casadi::Function build_conic_data("history_soc_data", {z},
