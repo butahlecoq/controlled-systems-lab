@@ -182,7 +182,10 @@ SAVED_COMPANION_ROUTES = {
     "benchmarks/reporting/issue6/b07_render_projection.py",
     "benchmarks/reporting/issue6/b09_render_projection.py",
 }
-SAVED_DATA_COMPANION_COLLECTORS = {"scripts/reports/app01/collect.py"}
+SAVED_DATA_COMPANION_COLLECTORS = {
+    "scripts/reports/app01/collect.py",
+    "scripts/reports/capture_history_optimizer_native.py",
+}
 SAVED_DATA_ILLUSTRATION_RENDERERS = {
     "scripts/reports/render_native_model_tracking_first_pass.py": (
         "Projects independently checked, immutable all-stage native trajectories into two-dimensional views; it reruns neither the controller nor its optimizer."),
