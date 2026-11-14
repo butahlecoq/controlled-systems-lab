@@ -8,8 +8,30 @@ csl_dependency_archive_url(csl_doctest_archive_url doctest
 FetchContent_Declare(doctest
   URL "${csl_doctest_archive_url}"
   URL_HASH SHA256=${csl_doctest_archive_sha256}
+  SYSTEM
   EXCLUDE_FROM_ALL)
 FetchContent_MakeAvailable(doctest)
+
+# Preinclude the one obsolete detection header with its diagnostic contained.
+# The unchanged test dependency and all first-party code follow after the pop.
+set(csl_doctest_adapter [=[
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-W#warnings"
+#include <ciso646>
+#pragma clang diagnostic pop
+#endif
+#include "@doctest_SOURCE_DIR@/doctest/doctest.h"
+]=])
+string(CONFIGURE "${csl_doctest_adapter}" csl_doctest_adapter @ONLY)
+file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/test-framework/doctest/doctest.h"
+  CONTENT "${csl_doctest_adapter}")
+target_include_directories(doctest BEFORE INTERFACE "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/test-framework>")
+get_target_property(csl_doctest_system doctest SYSTEM)
+if(NOT csl_doctest_system)
+  message(FATAL_ERROR "The test dependency must retain its SYSTEM header boundary")
+endif()
+message(STATUS "Doctest test-only header boundary: SYSTEM=${csl_doctest_system}")
 
 if(CSL_DEPENDENCY_PROBES)
   # Keep native dependencies and their install rules in an isolated project.
