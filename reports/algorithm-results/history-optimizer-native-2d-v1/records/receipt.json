@@ -1,28 +1,28 @@
 {
   "schema": "csl.history-optimizer-native-2d/1",
-  "source_commit": "47465979bc317ac02b3596c20777827f496e33c1",
+  "source_commit": "bac6ff91fbb41b44603638a73ff963e7cd8467c0",
   "source_tree": "controlled-systems-lab",
   "source_files": {
-    "include/csl/optimization/history_optimizer.hpp": "0c270ee4bf0bdb6770d0e4d836d63264d2ffc9c4ec5ac86f22c0b0b564c55b74",
-    "src/optimization/history_optimizer.cpp": "11d63f77b14060ed642b11b6f63b6d5cb4ef7d32a90f471c543e9a00c8bbebf9",
+    "include/csl/optimization/history_optimizer.hpp": "e689e134f9d71f24e213670d67bd5177d288a25d1de07582e2de5775fc46ccdc",
+    "src/optimization/history_optimizer.cpp": "1e81b1d46e099b5a3b3c90fff6b27169adc951ac810a850eef5867b89c8d4c1c",
     "include/csl/adapters/nlp/casadi_history_optimizer.hpp": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7",
     "src/adapters/nlp/casadi_history_optimizer.cpp": "27a061edc3d8d7238a8e16219437d80f121849e55c0e085ddb066bac354b930a",
     "include/csl/adapters/nlp/casadi_superscs_history_optimizer.hpp": "993953751013c2fb2db64927e51e0964c270504a192d9342f888bdad105c7ee6",
     "src/adapters/nlp/casadi_superscs_history_optimizer.cpp": "b5345a10c5e2f20cb119945798f874aa3f5a581c13b66e18740e59729865a556",
     "include/csl/optimization/history_cost.hpp": "8a3a7ad74ca31439af995a3009a669707af7440b31e04666f433c19cc59cc347",
     "src/optimization/history_cost.cpp": "19a009ceeda4358391c2460475e3332df0fb6af21baa8d5a862816046aabff86",
-    "src/synthesis/Module.cmake": "68cae27ffb359df0ea8e90ffa1daaaa5f6081cfea02ca43adbe2fe49831b0504",
+    "src/synthesis/Module.cmake": "a62e56f1de84b6ba897810b953357961a6182bbefe2d5b65805047040fa13ac9",
     "CMakeLists.txt": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1",
-    "tests/unit/optimization/history_optimizer_tests.cpp": "7d95bef57fd69f593cddef4c802b0a61f18750c090d98b09ffd3a3cdb1ef0de9",
+    "tests/unit/optimization/history_optimizer_tests.cpp": "a1bc56a216e4746519d217307b71118548ac75fc26219267c9d918e585634fad",
     "tests/unit/optimization/history_optimizer_casadi_tests.cpp": "f72fc80e672e53da077352af0796f2d9098ad76ddaefffa61005536d331a6413",
     "tests/unit/optimization/history_optimizer_superscs_tests.cpp": "68b151d2d55b0ec7619dec80077041acf1bc2e61fe3d86c639364126f1b43234",
     "tests/installed/casadi_superscs_history_optimizer_client.cpp": "925478e030af04faae219a2efcc7f2da7e2902408563d930cc51ed506535546e",
     "tests/installed/CMakeLists.txt": "7ba81ea2ba5b084c2bc4021670e55f0645826fe676b8aad29c40901c098d0180",
-    "scripts/reports/capture_history_optimizer_native.py": "1429263cb97af7f0cb2a9c9ff89abb5996c4771a238062ba4dc1dbd96f5c5c4b",
+    "scripts/reports/capture_history_optimizer_native.py": "2e9e7eca32783d44351d3ce8d6b1e3784a50932516efc98e1f1e9bf44c70b473",
     "scripts/reports/stage_history_optimizer_native.py": "691548d5fcff228f84d182f01d84269d8762b9aef39ec6961f72205ce2b7a60e",
     "tools/history_optimizer_2d_example.cpp": "803d01208f814bdbc6e68552fcc15788291d20d165a5c1cf9f611f7c7e48fd39"
   },
-  "binary_sha256": "ebaac7d6e873da6e28af3c1359518c3f2ca9f89037865030df14f4fd28e1fb89",
+  "binary_sha256": "88b8b62bafbba8ae40de71eadf5d0da0736e9bd5d1fa4c7a4c443e529e35a534",
   "provider": "csl.conic.superscs.history-cost@1",
   "source_objective": "||x2-(1,1)||_2 + 0.5(|u0|+|u1|)",
   "initialization": {
@@ -42,10 +42,10 @@
   "artifacts": {
     "csv_sha256": "bd3ca2851670dbb0b4ce4762671e21cb730dd6483b0cbe1a8845dace5cdf3042",
     "figure_sha256": "ef843f1c79660308606ddb82101794a8d210075a801f3d3b6a8a8703e29cff8c",
-    "native_html_sha256": "b6e526d6896fa8f084c881e16fdbc90568fb8c229dfa4303be73be746ed4e96f",
+    "native_html_sha256": "4007ef029ec5613cc14cd8f3e09387abe66843b3169e37c9c4a21f835927b490",
     "stdout_sha256": "010e21a45d1bd43dddcdd4e88646603faa529a3fda57cbdb6c8776797da3d6ad",
     "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "build_log_sha256": "8c35b1682f73592d30612d7b0fabdb384fcfff35cb5a076cb48b85b1368aa794",
-    "cmake_cache_sha256": "66e70ff3c28a80119372341199f396f7b17ad999cf32821a6938fb73c759a224"
+    "cmake_cache_sha256": "c31817eba6a8280e01b35eb7e57a847e54107a64b4ff3b193ff54f268dd32992"
   }
 }

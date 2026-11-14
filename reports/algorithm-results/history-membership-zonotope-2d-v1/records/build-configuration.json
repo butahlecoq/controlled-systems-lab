@@ -1,7 +1,7 @@
 {
   "schema": "csl.history-membership-build-identity/1",
   "source_root_matches_checkout": true,
-  "source_commit": "dc1155cb700f4ec0e5cce7d45106258be10f18ed",
+  "source_commit": "bac6ff91fbb41b44603638a73ff963e7cd8467c0",
   "build_type": "Release",
   "generator": "Ninja",
   "casadi_enabled": true,

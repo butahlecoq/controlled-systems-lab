@@ -1,25 +1,25 @@
 {
   "schema": "csl.history-membership-zonotope-2d/1",
-  "source_commit": "dc1155cb700f4ec0e5cce7d45106258be10f18ed",
+  "source_commit": "bac6ff91fbb41b44603638a73ff963e7cd8467c0",
   "source_files": {
     "CMakeLists.txt": "0092d88c7664d73ac493896bb29db14319102ded00f877e5ab80bf5669dffea1",
     "include/csl/optimization/history_domain.hpp": "6656217315d3ce8a17ef98e297a4f6e8058c780e915a5112c74f5cdad88be640",
-    "include/csl/optimization/history_optimizer.hpp": "0c270ee4bf0bdb6770d0e4d836d63264d2ffc9c4ec5ac86f22c0b0b564c55b74",
-    "src/optimization/history_domain.cpp": "3c95e11ae46868cc0a310f5eac245e00d85ebda936e8fc90116332d3295a1d3e",
-    "src/optimization/history_optimizer.cpp": "11d63f77b14060ed642b11b6f63b6d5cb4ef7d32a90f471c543e9a00c8bbebf9",
+    "include/csl/optimization/history_optimizer.hpp": "e689e134f9d71f24e213670d67bd5177d288a25d1de07582e2de5775fc46ccdc",
+    "src/optimization/history_domain.cpp": "c0464b0c53b9bd210a7c5d390ad3bb66b3452ea9b0a99ecf633cbd1fa5dfb3c5",
+    "src/optimization/history_optimizer.cpp": "1e81b1d46e099b5a3b3c90fff6b27169adc951ac810a850eef5867b89c8d4c1c",
     "include/csl/adapters/nlp/casadi_history_optimizer.hpp": "280122c63cbd4fc67c242855347b09677bf9590a110add6a3635ec9bc8c541b7",
     "src/adapters/nlp/casadi_history_optimizer.cpp": "27a061edc3d8d7238a8e16219437d80f121849e55c0e085ddb066bac354b930a",
-    "src/synthesis/Module.cmake": "68cae27ffb359df0ea8e90ffa1daaaa5f6081cfea02ca43adbe2fe49831b0504",
+    "src/synthesis/Module.cmake": "a62e56f1de84b6ba897810b953357961a6182bbefe2d5b65805047040fa13ac9",
     "tools/history_membership_2d_example.cpp": "19b51228e2541326f3f33c108667241271e0ed05970e6cca7978ced5ebba271c",
-    "scripts/reports/capture_history_membership_2d.py": "b7ee7b18298d6b608db9b8d058537cc94aad4f42684c362488e2677c0037cfee",
+    "scripts/reports/capture_history_membership_2d.py": "cf3d2f3938e7b56efd5e17f0a84ede313ec37ac4ba565c4477853f8f2fb521c5",
     "scripts/reports/stage_history_membership_2d.py": "9e12541e894db19c7bf1f937bf53fb586dc0b3993aaad52aba16c2eb85a67dca"
   },
-  "binary_sha256": "5ee684f67f4dbd9bcc22d55634dcf8e061a3956c1715a19bc875450c37985f88",
+  "binary_sha256": "e94d051f24d89299caf36b5e24726e8f847faf16880588012cb75527d91382bd",
   "provider": "csl.nlp.casadi-ipopt.history-cost@1",
   "build_identity": {
     "schema": "csl.history-membership-build-identity/1",
     "source_root_matches_checkout": true,
-    "source_commit": "dc1155cb700f4ec0e5cce7d45106258be10f18ed",
+    "source_commit": "bac6ff91fbb41b44603638a73ff963e7cd8467c0",
     "build_type": "Release",
     "generator": "Ninja",
     "casadi_enabled": true,
@@ -89,9 +89,9 @@
   "artifacts": {
     "history.csv": "7cf161ac4f12b1baaf2697c3ec9d378e5c433b907d3ca8422e09ec879018858e",
     "history.svg": "7be407e2aeeba1a1718b4320cbfce77f3c39b9ffc22516d082b50273170a0fbf",
-    "records/stdout.txt": "ad24301c00db37a2e093d4948855ddc8aded1aa610e2fc747e350c6f7781fd8e",
-    "records/build.log": "93f450f84871719ef2a400290a108dd0865c888690006776e2553927ee9ef1d5",
-    "records/build-configuration.json": "4b3dec3a798cfd7293cabcb6722eebd8b3129eed998401dcff252c852021f06b",
-    "records/native-output.html": "4213b05551caeb137b223a9bae41c47445c166e9b514a03cd1ccc3617f5ff9fc"
+    "records/stdout.txt": "e7f1161b5f293305a199a0f3cff040d74d6357575bfdb6aafd3d07073acb1185",
+    "records/build.log": "1cab7b71c95b7629470ada4d5e5a99ad1028be54af9a8a27b45edbfd9358d8d9",
+    "records/build-configuration.json": "bfcbabe4765e560e2e9a198166937475a911b9e2653b49cbdef647f3b9170152",
+    "records/native-output.html": "da73c8cc2423c376a03b14a8fafbe77dcead97ce3b14c0231ca913446052defa"
   }
 }
