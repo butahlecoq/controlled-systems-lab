@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 namespace csl::adapters::nlp {
 namespace {
@@ -22,6 +23,19 @@ DM dense(const numeric::MatrixView& matrix) {
         for(std::size_t j=0;j<matrix.cols();++j)
             out(static_cast<casadi_int>(i),static_cast<casadi_int>(j))=matrix(i,j);
     return DM::sparsify(out);
+}
+bool fits_casadi_dimension(std::size_t dimension) {
+    return dimension<=static_cast<std::size_t>(std::numeric_limits<casadi_int>::max());
+}
+bool fits_casadi_request(const optimization::HistoryOptimizationRequest& request) {
+    if(!fits_casadi_dimension(request.initial_history.size()))return false;
+    const auto representation=request.feasible_histories.relation.representation();
+    if(const auto* h=std::get_if<sets::HRepresentation>(&representation))
+        if(!fits_casadi_dimension(h->inequalities.rows())||!fits_casadi_dimension(h->inequalities.cols())||
+           !fits_casadi_dimension(h->equalities.rows())||!fits_casadi_dimension(h->equalities.cols()))return false;
+    for(const auto& term:request.source_cost.residual_norms)
+        if(!fits_casadi_dimension(term.map.rows)||!fits_casadi_dimension(term.map.cols))return false;
+    return true;
 }
 Vector values(const DM& vector) {return static_cast<Vector>(vector);}
 Vector values(const numeric::VectorView& vector) {
@@ -45,6 +59,9 @@ class NativeWorkspace final:public optimization::HistoryOptimizerWorkspace {
 public:
     optimization::RawHistorySolveOutcome solve_candidate(const optimization::HistoryOptimizationRequest& request,
         const ExecutionContext& context) override {
+        if(!fits_casadi_request(request))
+            return Diagnostic{DiagnosticCode::unsupported,"history.casadi_ipopt.dimensions",
+                "A canonical history or constraint dimension exceeds CasADi's integer index range."};
         if(context.cancellation.stop_requested())return OperationStopped{StopReason::cancelled,"Native CasADi history optimization cancelled before solve"};
         if(context.deadline&&std::chrono::steady_clock::now()>=*context.deadline)
             return OperationStopped{StopReason::deadline_expired,"Native CasADi history optimization deadline expired before solve"};

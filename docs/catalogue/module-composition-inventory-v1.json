@@ -1622,7 +1622,7 @@
       ],
       "action_domain": "the supplied full-horizon control coordinates and original source constraints",
       "tolerance_policy": "ExecutionContext numerical policy for independent full-H and authored-cost readback checks.",
-      "budget_policy": "ExecutionContext deadline and cancellation are passed to IPOPT; absent an explicit limit, no wall-time guarantee is claimed."
+      "budget_policy": "An ExecutionContext deadline caps IPOPT wall time when present; cancellation is checked before and after the synchronous solve. Without an explicit deadline, no wall-time guarantee is claimed."
     }
   ],
   "finite_probe_profiles": [
