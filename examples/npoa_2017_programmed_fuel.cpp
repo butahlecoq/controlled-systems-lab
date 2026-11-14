@@ -272,6 +272,16 @@ void write_result(const HistoryVariableLayout &layout, const Vector &primal,
         trace << '\n';
     }
 }
+
+void write_controls(const HistoryVariableLayout &layout, const Vector &primal,
+                    const std::filesystem::path &output) {
+    std::ofstream trace(output);
+    if (!trace)
+        throw std::runtime_error("Could not create control CSV");
+    trace << std::setprecision(17) << "stage,u\n";
+    for (std::size_t stage = 0; stage < layout.horizon; ++stage)
+        trace << stage << ',' << primal.at(*layout.control_index(stage, 0)) << '\n';
+}
 }
 
 int main(int argc, char **argv) try {
@@ -333,8 +343,9 @@ int main(int argc, char **argv) try {
     const auto oracle_objective = terminal_objective(oracle.terminal);
     if (std::abs(recomputed - oracle_objective) > 1e-7 * (1 + std::abs(oracle_objective)))
         throw std::runtime_error(
-            "Feasible optimizer witness does not attain the independent lower bound");
+            "Feasible control witness does not attain the independent lower bound");
     write_result(history.layout, primal, output / "trajectory.csv");
+    write_controls(history.layout, primal, output / "controls.csv");
     const auto x1_lower = std::max(24.167, 25.14 + (19.915 - 20.66) / 0.8);
     const auto x1_upper = std::min(25.833, 25.14 + (19.915 - 19.33) / 0.8);
     const auto x3_lower = std::max(19.33, 19.915 - 0.8 * (25.833 - 25.14));
