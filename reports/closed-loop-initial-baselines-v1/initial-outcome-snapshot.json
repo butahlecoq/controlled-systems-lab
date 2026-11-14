@@ -1,0 +1,215 @@
+{
+  "scope": "initial three default native backward configurations only; driver coverage finalization still running",
+  "source": "089075e919cdea0a59d6535235d62b0c06ceb7a9",
+  "rows": [
+    {
+      "attempt_id": "earth-orbit-20261114T080440Z-38040600",
+      "task_id": "env717-earth-orbit/continuous-receding/1",
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+      "record_sha256": "b32bd676e6244a80c43b07303086bfe98b28016fca8663f035c7b394642c65b2",
+      "completed_holds": 20,
+      "original_intervals": 20,
+      "physical_objective": {
+        "terminal": 63.88859760991715,
+        "running": 1.3435028842544405,
+        "total": 65.23210049417159
+      },
+      "overall_status": "complete",
+      "replay": {
+        "common": {
+          "status": "complete",
+          "objective_difference": 0.0,
+          "sampled_constraint_diagnostics": {
+            "state_bound_violation_by_coordinate": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "hold_endpoint_state_bound_violation_by_coordinate": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "sampled_state_count": 401,
+            "sampled_state_scope": "CSL replay initial state and report samples, including 20 samples per original hold; numerical diagnostics only",
+            "control_bound_violation_by_coordinate": [
+              0.0,
+              0.0
+            ],
+            "model_domain": {
+              "minimum_radius_km": 6963.870542802318,
+              "positive_radius": true
+            }
+          }
+        },
+        "tight": {
+          "status": "complete",
+          "objective_difference": 0.0,
+          "sampled_constraint_diagnostics": {
+            "state_bound_violation_by_coordinate": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "hold_endpoint_state_bound_violation_by_coordinate": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "sampled_state_count": 401,
+            "sampled_state_scope": "CSL replay initial state and report samples, including 20 samples per original hold; numerical diagnostics only",
+            "control_bound_violation_by_coordinate": [
+              0.0,
+              0.0
+            ],
+            "model_domain": {
+              "minimum_radius_km": 6963.870542802318,
+              "positive_radius": true
+            }
+          }
+        }
+      },
+      "plots": [
+        "trajectory.png",
+        "phase.png",
+        "controls.png"
+      ]
+    },
+    {
+      "attempt_id": "syn-nl-fuel-01-20261114T081002Z-4065cce8",
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b",
+      "record_sha256": "190e4a9f620f8882ae897bd4d4daa85c3ce54443f9dff11cac27dd356259daba",
+      "completed_holds": 40,
+      "original_intervals": 40,
+      "physical_objective": {
+        "terminal": 0.011533358724140953,
+        "running": 0.011278849708878755,
+        "total": 0.022812208433019707
+      },
+      "overall_status": "complete",
+      "replay": {
+        "common": {
+          "status": "complete",
+          "objective_difference": 0.0,
+          "sampled_constraint_diagnostics": {
+            "state_bound_violation_by_coordinate": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "hold_endpoint_state_bound_violation_by_coordinate": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "sampled_state_count": 801,
+            "sampled_state_scope": "CSL replay initial state and report samples, including 20 samples per original hold; numerical diagnostics only",
+            "control_bound_violation_by_coordinate": [
+              0.0,
+              0.0
+            ],
+            "model_domain": {}
+          }
+        },
+        "tight": {
+          "status": "complete",
+          "objective_difference": 0.0,
+          "sampled_constraint_diagnostics": {
+            "state_bound_violation_by_coordinate": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "hold_endpoint_state_bound_violation_by_coordinate": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "sampled_state_count": 801,
+            "sampled_state_scope": "CSL replay initial state and report samples, including 20 samples per original hold; numerical diagnostics only",
+            "control_bound_violation_by_coordinate": [
+              0.0,
+              0.0
+            ],
+            "model_domain": {}
+          }
+        }
+      },
+      "plots": [
+        "trajectory.png",
+        "phase.png",
+        "controls.png"
+      ]
+    },
+    {
+      "attempt_id": "syn-nl-lv-01-20261114T075910Z-d5019063",
+      "task_id": "syn-nl-lv-01/continuous-receding/1",
+      "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+      "record_sha256": "e5a8dde0bf74c18d853714359a3e9a9659830aba78d81ff6c2ee87fe049001ec",
+      "completed_holds": 30,
+      "original_intervals": 30,
+      "physical_objective": {
+        "terminal": 0.051421896407747504,
+        "running": 0.046250000000000006,
+        "total": 0.09767189640774751
+      },
+      "overall_status": "complete",
+      "replay": {
+        "common": {
+          "status": "complete",
+          "objective_difference": 0.0,
+          "sampled_constraint_diagnostics": {
+            "state_bound_violation_by_coordinate": [
+              0.0,
+              0.0
+            ],
+            "hold_endpoint_state_bound_violation_by_coordinate": [
+              0.0,
+              0.0
+            ],
+            "sampled_state_count": 601,
+            "sampled_state_scope": "CSL replay initial state and report samples, including 20 samples per original hold; numerical diagnostics only",
+            "control_bound_violation_by_coordinate": [
+              0.0
+            ],
+            "model_domain": {}
+          }
+        },
+        "tight": {
+          "status": "complete",
+          "objective_difference": 0.0,
+          "sampled_constraint_diagnostics": {
+            "state_bound_violation_by_coordinate": [
+              0.0,
+              0.0
+            ],
+            "hold_endpoint_state_bound_violation_by_coordinate": [
+              0.0,
+              0.0
+            ],
+            "sampled_state_count": 601,
+            "sampled_state_scope": "CSL replay initial state and report samples, including 20 samples per original hold; numerical diagnostics only",
+            "control_bound_violation_by_coordinate": [
+              0.0
+            ],
+            "model_domain": {}
+          }
+        }
+      },
+      "plots": [
+        "trajectory.png",
+        "phase.png",
+        "controls.png"
+      ]
+    }
+  ]
+}

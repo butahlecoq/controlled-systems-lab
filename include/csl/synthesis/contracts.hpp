@@ -18,6 +18,9 @@
 
 namespace csl {
 namespace problem { class ResolvedProblem; }
+namespace optimization {
+struct HistoryOptimizationResult;
+}
 namespace sets { class SetData; }
 namespace registry { class StrategyRegistry; namespace detail { class VerifiedFamilyAuthority; class VerifiedPartialFamilyAuthority; } }
 class JointRelationPayload {
@@ -270,6 +273,12 @@ struct RetainedEvidenceScope {
     std::size_t incumbents{};
     bool partial_or_candidate_family{};
 };
+struct HistoryOptimizationExecution {
+    RequestProvenance provider;
+    ProblemId problem;
+    ProgramId program;
+    std::shared_ptr<const optimization::HistoryOptimizationResult> result;
+};
 struct ScopedOperationStopped {
     OperationStopped stop;
     RequestProvenance request;
@@ -300,11 +309,13 @@ struct SynthesisResult {
     SynthesisStopEvidence stop{};
     std::optional<CompleteFamilyProposal> complete_proposal{};
     std::optional<PartialFamilyProposal> partial_proposal{};
+    std::optional<HistoryOptimizationExecution> history_optimization{};
 };
 using SynthesisOutcome = std::variant<SynthesisResult, Unsupported>;
 struct StrategyConfiguration {
     ModuleId strategy, lp, convex, hull, geometry, converter, approximation, selector;
     RepresentationId representation;
+    ModuleId history_optimizer{};
 };
 class SynthesisWorkspace : public ExclusiveWorkspace {
 public: virtual SynthesisResult solve(const problem::ResolvedProblem&, const FamilyRequest&, const ExecutionContext&) = 0;

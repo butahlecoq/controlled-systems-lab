@@ -3,6 +3,7 @@
 #include <csl/registry/registry.hpp>
 #include <csl/registry/provider.hpp>
 #include <csl/registry/strategy_catalogue.hpp>
+#include <csl/optimization/history_optimizer.hpp>
 #include <limits>
 #include <functional>
 #include <set>
@@ -42,6 +43,50 @@ TEST_CASE("registry identity snapshots reflect actual registrations in stable mo
     REQUIRE(strategy_identities.size() == 1);
     CHECK(strategy_identities[0].id.value == "fixture-strategy");
     CHECK(strategy_identities[0].version == "fixture-1");
+}
+
+TEST_CASE("strategy request freezes the history profile before capability and planner callbacks") {
+    Registry<LPPort> dependencies;
+    REQUIRE_FALSE(dependencies.add(endpoint_registration()));
+    StrategyRegistry strategies;
+    auto registration = forward_registration(dependencies, "profile-freeze");
+    auto authored = std::make_shared<optimization::StrategyHistoryOptimizationProfile>(
+        optimization::StrategyHistoryOptimizationProfile{ProgramId{"profile-run"},
+                                                         {"source-cost", 1, {}},
+                                                         0,
+                                                         "state",
+                                                         {},
+                                                         optimization::ColdStart{}});
+    bool capability_saw_frozen = false;
+    bool planner_saw_frozen = false;
+    const auto original_capability = registration.capabilities;
+    registration.capabilities = [&, original_capability](const StrategyRequest &frozen,
+                                                         const Requirements &requirements) {
+        capability_saw_frozen =
+            frozen.history_optimization &&
+            frozen.history_optimization->running_cost.objective_id == "source-cost";
+        authored->running_cost.objective_id = "mutated-after-capability";
+        return original_capability(frozen, requirements);
+    };
+    const auto original_planner = registration.planner;
+    registration.planner = [original_planner, &planner_saw_frozen](
+                               const StrategyRequest &frozen, const Requirements &requirements) {
+        planner_saw_frozen =
+            frozen.history_optimization &&
+            frozen.history_optimization->running_cost.objective_id == "source-cost";
+        return original_planner(frozen, requirements);
+    };
+    REQUIRE_FALSE(strategies.add(std::move(registration)));
+
+    auto request = strategy_request();
+    request.configuration.strategy = {"profile-freeze"};
+    request.configuration.lp = {"endpoint"};
+    request.history_optimization = authored;
+    const auto prepared = strategies.prepare(request);
+    REQUIRE(std::holds_alternative<PreparedStrategy>(prepared));
+    CHECK(capability_saw_frozen);
+    CHECK(planner_saw_frozen);
+    CHECK(authored->running_cost.objective_id == "mutated-after-capability");
 }
 
 TEST_CASE("strategy catalogue enumerates an independent registry universe and prepares concrete requests") {

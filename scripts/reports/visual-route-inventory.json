@@ -163,6 +163,22 @@
       "role_and_disposition_reason": "Renders all saved source-qualified native affine 2D stages and a terminal overlay; the factor matrix is retained in each ellipse record and the sampled boundary is checked against that represented set. The page makes no nonlinear, feedback, minimax or timing claim."
     },
     {
+      "source": "scripts/reports/capture_history_membership_2d.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "history.svg"
+      ],
+      "disposition": "measurement-collector-preserved-with-saved-data-companion"
+    },
+    {
+      "source": "scripts/reports/capture_history_optimizer_native.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "history.svg"
+      ],
+      "disposition": "measurement-collector-preserved-with-saved-data-companion"
+    },
+    {
       "source": "scripts/reports/control_figures.py",
       "signal_count": 13,
       "asset_name_literals": [],
@@ -1681,6 +1697,22 @@
       "signal_count": 1,
       "asset_name_literals": [
         "resource-scope.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_history_membership_2d.py",
+      "signal_count": 5,
+      "asset_name_literals": [
+        "history.svg"
+      ],
+      "disposition": "publication-validation-or-frozen-route"
+    },
+    {
+      "source": "scripts/reports/stage_history_optimizer_native.py",
+      "signal_count": 4,
+      "asset_name_literals": [
+        "history.svg"
       ],
       "disposition": "publication-validation-or-frozen-route"
     },
@@ -3465,6 +3497,26 @@
       "follow_up_issue": 669
     },
     {
+      "route": "history-membership-zonotope-2d-v1",
+      "source_bundle": "history-membership-zonotope-2d-v1",
+      "assets": [
+        "history.svg"
+      ],
+      "index_sha256": "6076aed8e481d1ff1087f2e74e67031ba2fc1fda9d68e56812e806415858c449",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
+      "route": "history-optimizer-native-2d-v1",
+      "source_bundle": "history-optimizer-native-2d-v1",
+      "assets": [
+        "history.svg"
+      ],
+      "index_sha256": "7ee4c39ada696aab724b5ebb6dcd9f476a3328d82a5f182a566e2b41092f08dc",
+      "disposition": "deferred: original frozen route-level readability review remains; companion availability is listed separately",
+      "follow_up_issue": 669
+    },
+    {
       "route": "issue3-finite-catalogue-b4632ce76510aa4f",
       "source_bundle": "issue3-finite-catalogue-b4632ce76510aa4f",
       "assets": [
@@ -4303,6 +4355,11 @@
         "native-model-tracking-first-pass-v1/checks/full_state_trajectory_checked.csv",
         "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip",
         "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip.sha256",
+        "history-membership-zonotope-2d-v1/index.html",
+        "history-membership-zonotope-2d-v1/history.svg",
+        "history-membership-zonotope-2d-v1/history.csv",
+        "history-membership-zonotope-2d-v1/records/receipt.json",
+        "history-membership-zonotope-2d-v1/history-membership-zonotope-2d-v1.zip",
         "buryatia-volterra-affine-2d-manifest.json",
         "buryatia-volterra-affine-2d.html",
         "buryatia-volterra-affine-2d-records.json",
@@ -4496,6 +4553,17 @@
         "native-model-tracking-first-pass-v1/SHA256SUMS.json",
         "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip",
         "native-model-tracking-first-pass-v1/native-model-tracking-first-pass-v1.zip.sha256"
+      ],
+      "disposition": "source-owned saved functional bundle; no optimization is rerun"
+    },
+    {
+      "route": "examples/history-membership-zonotope-2d-v1/index.html",
+      "assets": [
+        "history-membership-zonotope-2d-v1/index.html",
+        "history-membership-zonotope-2d-v1/history.svg",
+        "history-membership-zonotope-2d-v1/history.csv",
+        "history-membership-zonotope-2d-v1/records/receipt.json",
+        "history-membership-zonotope-2d-v1/history-membership-zonotope-2d-v1.zip"
       ],
       "disposition": "source-owned saved functional bundle; no optimization is rerun"
     }

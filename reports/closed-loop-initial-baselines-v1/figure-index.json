@@ -1,0 +1,968 @@
+{
+  "figures": [
+    {
+      "availability": "ready",
+      "comparison_coverage_gaps": [
+        {
+          "controller_id": "native-box-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        },
+        {
+          "controller_id": "native-zonotope-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        },
+        {
+          "controller_id": "native-parallelotope-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        },
+        {
+          "controller_id": "native-ellipsoid-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        }
+      ],
+      "coordinate_transform": {
+        "description": "Physical state coordinates; no scaling applied.",
+        "names": [
+          "Prey population P",
+          "Predator population R"
+        ],
+        "permutation_matrix": [
+          [
+            1.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0
+          ]
+        ],
+        "raw_indices": [
+          0,
+          1
+        ],
+        "raw_scales": null,
+        "scale_applied_to_source_values": false,
+        "source_values_are_physical": true,
+        "units": [
+          "thousand individuals",
+          "thousand individuals"
+        ]
+      },
+      "href": "examples/closed-loop/figures/lotka-populations.html",
+      "id": "lotka-populations",
+      "layer_scopes": [
+        "initial physical state",
+        "retained stage-layered graph singleton nodes",
+        "serialized complete authored-action parent clouds when present",
+        "serialized fixed-plan trajectory enclosures when present and coordinate-qualified",
+        "initial model-predicted plan",
+        "executed physical plant replay",
+        "soft objective target when defined"
+      ],
+      "missing_layers": [
+        "complete all-stage forward-set geometry over the full reachable parent set",
+        "all-admissible-control forward reachable sets",
+        "materialized backward/predecessor sets",
+        "materialized full-state intersections"
+      ],
+      "plotted_data_href": "examples/closed-loop/figures/lotka-populations.plotted-data.json",
+      "png_href": "examples/closed-loop/figures/lotka-populations.png",
+      "profile_id": "worker-wall-300-cpu-300/1",
+      "profile_ids": [
+        "worker-wall-300-cpu-300/1"
+      ],
+      "raw_record_refs": [
+        {
+          "attempt_id": "syn-nl-lv-01-20261114T075910Z-d5019063",
+          "capture_relative_path": "syn-nl-lv-01/attempts/syn-nl-lv-01-20261114T075910Z-d5019063",
+          "manifest_sha256": "620cd664cf45e1f4bbe96a794e91d7011b21cc10a643b0fb875eba4c196ba780",
+          "raw_stage_hashes": [
+            {
+              "path": "stage-000.json",
+              "sha256": "67aeb45ae57e1367a9cf15b764d62cd22ed36ff04506c84aa5ad9bc5a5d71f48"
+            },
+            {
+              "path": "stage-001.json",
+              "sha256": "688821cdd297d5062db2c0051e4142aa6f0056e6efd0b26fe18b454e6d04d73a"
+            },
+            {
+              "path": "stage-002.json",
+              "sha256": "c3f02d44df238e1c5d1fe60ce35599c4450d1a313c26e7c1f60e5307e9f1912c"
+            },
+            {
+              "path": "stage-003.json",
+              "sha256": "5ef332f67e42befa42fdb003582c31665b5450fe10ba901d1773b1d2e5ae9d04"
+            },
+            {
+              "path": "stage-004.json",
+              "sha256": "f0781e2c315f1564e40f392a56fc2986152147ecdc007c712fcf4d43ceaf4d50"
+            },
+            {
+              "path": "stage-005.json",
+              "sha256": "b0bac647178dada0a1df72f5445d923853bda1e597a727ccc9bbac5fb5224157"
+            },
+            {
+              "path": "stage-006.json",
+              "sha256": "141edfd2f6c099b8ae98f28f875be1fcb8054ae2a1a2608ba37cfbacf97db4ee"
+            },
+            {
+              "path": "stage-007.json",
+              "sha256": "3c4ccf23d97b0679f3ee9aaa1a8c1df12c632e88d320363ec2e07891bae1f2cc"
+            },
+            {
+              "path": "stage-008.json",
+              "sha256": "4f82d9944c757f2323616f220d549c9f7e3b341ecc1fbd88551768bf06ea96ed"
+            },
+            {
+              "path": "stage-009.json",
+              "sha256": "0668ede56539f5edc033bdbdd88c2f9586d0329244d12e1e36a8f9d4c14d2030"
+            },
+            {
+              "path": "stage-010.json",
+              "sha256": "2bc70bbbdcc390e66cd4e76817a7bce34fcd81e6417f31aa2d82aa050bc53ddc"
+            },
+            {
+              "path": "stage-011.json",
+              "sha256": "48fe536f729b49e77ad501b76167777f2b96f19b766392d3fc5627aabab82be6"
+            },
+            {
+              "path": "stage-012.json",
+              "sha256": "fac22f12b6dee66bdf21a7175b14d80fb037cd0adb711ca5416ab7898e78a147"
+            },
+            {
+              "path": "stage-013.json",
+              "sha256": "0b0622d09cb50a842abce1b576d5dd910a4bd35e2ac3d42f9b521cca4a5597b5"
+            },
+            {
+              "path": "stage-014.json",
+              "sha256": "a63162225c986a82ef661561eb38c6892d4856eb2077d879fc0bff35ea155ded"
+            },
+            {
+              "path": "stage-015.json",
+              "sha256": "470802b838dddb492b6e2ece59cfbde4284499bcd81240a64ebad8f62eecd5ae"
+            },
+            {
+              "path": "stage-016.json",
+              "sha256": "583dc3adf0e2b102279dd736332d4da03ded5a3458aa86239a217d5a91d6027e"
+            },
+            {
+              "path": "stage-017.json",
+              "sha256": "9e069305ebe2d376f6b069e44015f9979b281eb3e6d4bba6af0f9a1381c1712c"
+            },
+            {
+              "path": "stage-018.json",
+              "sha256": "23d8f90500243619342ffe08ebf3870c398cab3c1fed5c25301e7a8fc25b5be9"
+            },
+            {
+              "path": "stage-019.json",
+              "sha256": "0d8933c70b3081c085764dabb9555a10da9c1a9849c4ffd02b07d6ffc2022a07"
+            },
+            {
+              "path": "stage-020.json",
+              "sha256": "0bafa439f4a6808a75e862b57a0264e8de9577a67f6806d3a8014a8e42de8ce7"
+            },
+            {
+              "path": "stage-021.json",
+              "sha256": "175be219fda0e5bb790dbd5fc0f187ffe60251f0a67d50bc8af6cccad0ccbe99"
+            },
+            {
+              "path": "stage-022.json",
+              "sha256": "752520b3ed3f65865f1d8168d87133cb7806e0d97d08236f1e0b59bc3b0bf266"
+            },
+            {
+              "path": "stage-023.json",
+              "sha256": "03f8bb6ed321981d093031bad329498c2ea0fb09b91b88cecc2686fe547f5774"
+            },
+            {
+              "path": "stage-024.json",
+              "sha256": "26732534cd463b87615d95176ec816f91b52ffb05fe957c842f313a7b3f56fec"
+            },
+            {
+              "path": "stage-025.json",
+              "sha256": "d9d37729b47729edc24b6536ed126a22d80ec2f6509105758d99be7de648fa8b"
+            },
+            {
+              "path": "stage-026.json",
+              "sha256": "b120c3fa7b5b0d5042f941a055dbb40d7bc31db2bc0b36969e89c861a0604650"
+            },
+            {
+              "path": "stage-027.json",
+              "sha256": "ded7e21ca5baae297052948ecea1b52450df1e67f59399ca686d2c40643cce2c"
+            },
+            {
+              "path": "stage-028.json",
+              "sha256": "994d249ae37383f1e9275e52883c89e9f34f1a6c48d2af2b799234427bd03dbf"
+            },
+            {
+              "path": "stage-029.json",
+              "sha256": "35fcbf9b591f6ec9fe62ec99bd5b4bb16d3cb1b212475506ecf065c45476e940"
+            }
+          ],
+          "stage_count": 30
+        }
+      ],
+      "reproduction_command": "python scripts/reports/recorded_closed_loop_figures.py --capture-root \"$CSL_CLOSED_LOOP_CAPTURE_ROOT\" --output docs/examples/closed-loop --attempt earth-orbit=earth-orbit-20261114T080440Z-38040600 --attempt syn-nl-fuel-01=syn-nl-fuel-01-20261114T081002Z-4065cce8 --attempt syn-nl-lv-01=syn-nl-lv-01-20261114T075910Z-d5019063",
+      "shape_coverage_gaps": [
+        {
+          "attempt_id": "syn-nl-lv-01-20261114T075910Z-d5019063",
+          "controller_id": "native-exact-polytope-backward-graph/1",
+          "reason": "The saved response has no projectable materialized shape geometry."
+        }
+      ],
+      "source_commit": "089075e919cdea0a59d6535235d62b0c06ceb7a9",
+      "source_commits": [
+        "089075e919cdea0a59d6535235d62b0c06ceb7a9"
+      ],
+      "stage_count": 30,
+      "svg_href": "examples/closed-loop/figures/lotka-populations.svg",
+      "task_id": "syn-nl-lv-01/continuous-receding/1",
+      "task_sha256": "520ab0f686c4c33efd7ecc2aebdf73735e528e1ae410e42224b82e7200769cec",
+      "time_step": 0.1,
+      "timeline_end": 3.0000000000000004,
+      "title": "Lotka population plane"
+    },
+    {
+      "availability": "ready",
+      "comparison_coverage_gaps": [
+        {
+          "controller_id": "native-box-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        },
+        {
+          "controller_id": "native-zonotope-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        },
+        {
+          "controller_id": "native-parallelotope-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        },
+        {
+          "controller_id": "native-ellipsoid-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        }
+      ],
+      "coordinate_transform": {
+        "description": "Raw physical state order [r, v, theta, omega]; no scaling applied.",
+        "names": [
+          "Radius r",
+          "Angular rate \u03c9"
+        ],
+        "permutation_matrix": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "raw_indices": [
+          0,
+          3
+        ],
+        "raw_scales": null,
+        "scale_applied_to_source_values": false,
+        "source_values_are_physical": true,
+        "units": [
+          "km",
+          "rad/s"
+        ]
+      },
+      "href": "examples/closed-loop/figures/earth-orbit.html",
+      "id": "earth-orbit",
+      "layer_scopes": [
+        "initial physical state",
+        "retained stage-layered graph singleton nodes",
+        "serialized complete authored-action parent clouds when present",
+        "serialized fixed-plan trajectory enclosures when present and coordinate-qualified",
+        "initial model-predicted plan",
+        "executed physical plant replay",
+        "soft objective target when defined"
+      ],
+      "missing_layers": [
+        "complete all-stage forward-set geometry over the full reachable parent set",
+        "all-admissible-control forward reachable sets",
+        "materialized backward/predecessor sets",
+        "materialized full-state intersections"
+      ],
+      "plotted_data_href": "examples/closed-loop/figures/earth-orbit.plotted-data.json",
+      "png_href": "examples/closed-loop/figures/earth-orbit.png",
+      "profile_id": "worker-wall-300-cpu-300/1",
+      "profile_ids": [
+        "worker-wall-300-cpu-300/1"
+      ],
+      "raw_record_refs": [
+        {
+          "attempt_id": "earth-orbit-20261114T080440Z-38040600",
+          "capture_relative_path": "earth-orbit/attempts/earth-orbit-20261114T080440Z-38040600",
+          "manifest_sha256": "0fd450e67a11e66c375e171764c8f96ba6396e880415195a96de6dac53524005",
+          "raw_stage_hashes": [
+            {
+              "path": "stage-000.json",
+              "sha256": "a51ce5245dd81d6d519a5e52d1b7e9a0b4218c526a3d12c4a7f735ea8633f999"
+            },
+            {
+              "path": "stage-001.json",
+              "sha256": "6e0ddcfeabf842e0196b634436948b83b119d1d06375141748f441a936127f3b"
+            },
+            {
+              "path": "stage-002.json",
+              "sha256": "215424708c0020df6ca0983746dea7d557c7925e42f115d74b7f9241745ecff1"
+            },
+            {
+              "path": "stage-003.json",
+              "sha256": "fe8bce1bf0d2933d5de1b243efe49b89dd229cbc902261333039576d6dcea4ae"
+            },
+            {
+              "path": "stage-004.json",
+              "sha256": "24a8cee5ca3d250bdf99b2be9bd4a688635fe11757fe382abde2a7182f5d7595"
+            },
+            {
+              "path": "stage-005.json",
+              "sha256": "cb5d7c7993a3348b99d2583189b71037b1408897493c0632d2c29fc0d5779f17"
+            },
+            {
+              "path": "stage-006.json",
+              "sha256": "e55b2d283a4406281f82fd11fb5a9f4317e5848d962a082ad7b22e2aed44d05e"
+            },
+            {
+              "path": "stage-007.json",
+              "sha256": "e64cf1e915a4fdd15c192199406cbdd34523516b0d85ad616c7344823e92adba"
+            },
+            {
+              "path": "stage-008.json",
+              "sha256": "f009cd6ae84ce713bdc394111d15952401cec8d9542a268aa64efd965540c2cd"
+            },
+            {
+              "path": "stage-009.json",
+              "sha256": "5b0f96068b04ab003fd3dbc0b9f93e1b79315865cc2f19a98ac8884f644cc124"
+            },
+            {
+              "path": "stage-010.json",
+              "sha256": "1830aa93e009e7047a99f95cbc3ec3801dd6f5782de56dd58f9c5d837b302d88"
+            },
+            {
+              "path": "stage-011.json",
+              "sha256": "abde8c3d147fd9f767efe7eac8d323c8c10895ad283b1300a756b8b1b0f2c52e"
+            },
+            {
+              "path": "stage-012.json",
+              "sha256": "861919b784d229438395319c8392a1c47420862a209ae99649f7fd8fe8941642"
+            },
+            {
+              "path": "stage-013.json",
+              "sha256": "022cb7f824ed0225c01682057144aa0880e07570b09bc267f42ce04dcab09e19"
+            },
+            {
+              "path": "stage-014.json",
+              "sha256": "dbe7b7a5b5162186146c33ea75db764192a39dc73652a759209a12c67324ffeb"
+            },
+            {
+              "path": "stage-015.json",
+              "sha256": "26b9b14e704701c255e27bfdac97c590de9ee14e6f09fdfaecdddbebc4318821"
+            },
+            {
+              "path": "stage-016.json",
+              "sha256": "7da22020bf846363167bcb74e93db15773f2836d45b1d783828d31f71ff96900"
+            },
+            {
+              "path": "stage-017.json",
+              "sha256": "d5810ea72f1f5795bf88597c3bc3406af163ece10d314b74f56235b59a45ebe1"
+            },
+            {
+              "path": "stage-018.json",
+              "sha256": "e697153dfbbe7a607eb4ce6a108e3302b3cd7959c7e3f423e4dbef4cd4340579"
+            },
+            {
+              "path": "stage-019.json",
+              "sha256": "5770aceb24f11b6979a019f30fe848173beb9c24fec85a907aab6cc3a51e0723"
+            }
+          ],
+          "stage_count": 20
+        }
+      ],
+      "reproduction_command": "python scripts/reports/recorded_closed_loop_figures.py --capture-root \"$CSL_CLOSED_LOOP_CAPTURE_ROOT\" --output docs/examples/closed-loop --attempt earth-orbit=earth-orbit-20261114T080440Z-38040600 --attempt syn-nl-fuel-01=syn-nl-fuel-01-20261114T081002Z-4065cce8 --attempt syn-nl-lv-01=syn-nl-lv-01-20261114T075910Z-d5019063",
+      "shape_coverage_gaps": [
+        {
+          "attempt_id": "earth-orbit-20261114T080440Z-38040600",
+          "controller_id": "native-exact-polytope-backward-graph/1",
+          "reason": "The saved response has no projectable materialized shape geometry."
+        }
+      ],
+      "source_commit": "089075e919cdea0a59d6535235d62b0c06ceb7a9",
+      "source_commits": [
+        "089075e919cdea0a59d6535235d62b0c06ceb7a9"
+      ],
+      "stage_count": 20,
+      "svg_href": "examples/closed-loop/figures/earth-orbit.svg",
+      "task_id": "env717-earth-orbit/continuous-receding/1",
+      "task_sha256": "0210849704e7756a782319568d544eef239da5aee533411a5b792f9950702744",
+      "time_step": 100.0,
+      "timeline_end": 2000.0,
+      "title": "Earth orbit phase plane"
+    },
+    {
+      "availability": "ready",
+      "comparison_coverage_gaps": [
+        {
+          "controller_id": "native-box-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        },
+        {
+          "controller_id": "native-zonotope-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        },
+        {
+          "controller_id": "native-parallelotope-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        },
+        {
+          "controller_id": "native-ellipsoid-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        }
+      ],
+      "coordinate_transform": {
+        "description": "Raw order [m_ox, m_f, q_ox, q_f]; requested oxidizer indices [2, 0] and fuel indices [3, 1]; raw scale [100, 30, 3, 1] is not reapplied to physical data.",
+        "names": [
+          "Oxidizer flow q\u2092\u2093",
+          "Oxidizer mass m\u2092\u2093"
+        ],
+        "permutation_matrix": [
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "raw_indices": [
+          2,
+          0
+        ],
+        "raw_scales": [
+          100.0,
+          30.0,
+          3.0,
+          1.0
+        ],
+        "scale_applied_to_source_values": false,
+        "source_values_are_physical": true,
+        "units": [
+          "kg/s",
+          "kg"
+        ]
+      },
+      "href": "examples/closed-loop/figures/fuel-state.html",
+      "id": "fuel-state",
+      "layer_scopes": [
+        "initial physical state",
+        "retained stage-layered graph singleton nodes",
+        "serialized complete authored-action parent clouds when present",
+        "serialized fixed-plan trajectory enclosures when present and coordinate-qualified",
+        "initial model-predicted plan",
+        "executed physical plant replay",
+        "soft objective target when defined"
+      ],
+      "missing_layers": [
+        "complete all-stage forward-set geometry over the full reachable parent set",
+        "all-admissible-control forward reachable sets",
+        "materialized backward/predecessor sets",
+        "materialized full-state intersections"
+      ],
+      "plotted_data_href": "examples/closed-loop/figures/fuel-state.plotted-data.json",
+      "png_href": "examples/closed-loop/figures/fuel-state.png",
+      "profile_id": "worker-wall-300-cpu-300/1",
+      "profile_ids": [
+        "worker-wall-300-cpu-300/1"
+      ],
+      "raw_record_refs": [
+        {
+          "attempt_id": "syn-nl-fuel-01-20261114T081002Z-4065cce8",
+          "capture_relative_path": "syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261114T081002Z-4065cce8",
+          "manifest_sha256": "4c77f065390f10e0772a5258d9057370d2690abd6fa32ee078e5ba898d4b04ab",
+          "raw_stage_hashes": [
+            {
+              "path": "stage-000.json",
+              "sha256": "c2de3bb576d4d064b9314e8593a296eaab79ecca2c0f94c793b8156589718aff"
+            },
+            {
+              "path": "stage-001.json",
+              "sha256": "3b9e8fd28545b96c7a7ed33f255ffc8886f85087aaf896682d7e12a6e305ae15"
+            },
+            {
+              "path": "stage-002.json",
+              "sha256": "c2d8594aa627d17b16091eee488b078bdd4f48d21a9782cb1feb850d074ebcb9"
+            },
+            {
+              "path": "stage-003.json",
+              "sha256": "5d59392739a888ab9a3d808703eaf9e882bf546134655ffeaf820ec82da4f509"
+            },
+            {
+              "path": "stage-004.json",
+              "sha256": "db92f6cabeb658e697f7553a51b3df9e4e8c36f20cf4fae24c0c79a32d2ff5b6"
+            },
+            {
+              "path": "stage-005.json",
+              "sha256": "b9aadaee0ecf4cafb57ae181b6dba4cc28126a58b68dad8e38ddf546dd13b492"
+            },
+            {
+              "path": "stage-006.json",
+              "sha256": "fc3b6672c12851407cbfa58e9de60d7b57c04f871412014f543da13cd22f6ebb"
+            },
+            {
+              "path": "stage-007.json",
+              "sha256": "54548a11e7faf0de152cb6129c4eade3e51e0bbc49faae7ffac42b32c3d61b08"
+            },
+            {
+              "path": "stage-008.json",
+              "sha256": "ea70cbb30417a815674b2c41481b986b4ff1cf559ee6823906846284a7659fea"
+            },
+            {
+              "path": "stage-009.json",
+              "sha256": "0721a7ac45feed82ac13fcbcc709cc963fddb5eb71c8c71c84b5f042452eab79"
+            },
+            {
+              "path": "stage-010.json",
+              "sha256": "091a2fe6972f7911728a45d7f77e89e517e9a5fea0b58713796957728fdb4a5d"
+            },
+            {
+              "path": "stage-011.json",
+              "sha256": "d957671d1b5d6703799fb8e3d3874486b640812ccc80d944c82d626b3564bee2"
+            },
+            {
+              "path": "stage-012.json",
+              "sha256": "49b2afb35d94ef2d71ea441d40307354ecf5a35bee05287ed1021f2a411a8193"
+            },
+            {
+              "path": "stage-013.json",
+              "sha256": "38f4bfe52ee801e837308f3bfa922e124d40130f8209124cbf5ee27ab18a11a9"
+            },
+            {
+              "path": "stage-014.json",
+              "sha256": "c5f2326756d37cb220ff8a3e57c82b9f072c95d5126c784264895a155de538db"
+            },
+            {
+              "path": "stage-015.json",
+              "sha256": "8fb32f642a645628b01274b5752f25b5f99a3a2542b68169f3a4af2cf4632186"
+            },
+            {
+              "path": "stage-016.json",
+              "sha256": "9f61d86d682b8f57037863ad3faf1ed255e4949131252cc80bfa50a72cac4cac"
+            },
+            {
+              "path": "stage-017.json",
+              "sha256": "6081a8ee3c55404fcb2f7c4f167289af5c9f87f59026878f27c16969ce048c89"
+            },
+            {
+              "path": "stage-018.json",
+              "sha256": "f1929fd01820a313e637c58aaede9570b1c91f2dc31e6b7fe0140bd89edf0be2"
+            },
+            {
+              "path": "stage-019.json",
+              "sha256": "edb57b67c0b4a756ec8b8ab3262c2d8f07732adf7b00ac06a5921a30969d2a84"
+            },
+            {
+              "path": "stage-020.json",
+              "sha256": "1c37b34dbd44d5be420ada038e4c61c3552606d896c31254e088af34d91f56a6"
+            },
+            {
+              "path": "stage-021.json",
+              "sha256": "2c12a3658453005613192bf698da552ec5618390f9923da48a7addacfcd3f27c"
+            },
+            {
+              "path": "stage-022.json",
+              "sha256": "3802295f09f9eaa99d8fc2ea2e8529d2017e4860a47604cac1069166a866166f"
+            },
+            {
+              "path": "stage-023.json",
+              "sha256": "87cfbba405a3920b7b1b555f206ea35af10e1e7d214b9825ec4760f25ef9215e"
+            },
+            {
+              "path": "stage-024.json",
+              "sha256": "eac8a79050bae4359f6c9a0e807872124cd189b43a9e385a23d06d0df3aba2c3"
+            },
+            {
+              "path": "stage-025.json",
+              "sha256": "32b968a2db5575f22b80e6c8ed45100883253e8fead46471db41582e40fd793b"
+            },
+            {
+              "path": "stage-026.json",
+              "sha256": "5a8347767a4601a709cf848e43394792bb130a61e92294cf4a1201b00d49dfce"
+            },
+            {
+              "path": "stage-027.json",
+              "sha256": "84c563fe9021da3d40634068f1de72264006b95caa4b27f91b3f95bb74586402"
+            },
+            {
+              "path": "stage-028.json",
+              "sha256": "37fb565ff8abcc44e445dd90477fd254343378a1018acee20ba936ba70af8e55"
+            },
+            {
+              "path": "stage-029.json",
+              "sha256": "2ec29744a6bf4d522def6788f4ad107612fa6d8f0d3cbb2970dd3106bb5f465a"
+            },
+            {
+              "path": "stage-030.json",
+              "sha256": "0e5919b2fac803774cbfd5a9f7782bf5dbecc39dc4d696863d8e511f61de3900"
+            },
+            {
+              "path": "stage-031.json",
+              "sha256": "87d2d06e6984000672ee2090b030ea1faa46a9cdb145b3fcd817e4a1ecac7797"
+            },
+            {
+              "path": "stage-032.json",
+              "sha256": "18b9ff154dad6254fe63614a4f8ae7da421ba0e3e1e3cd5b2d5ca834a88fe0e0"
+            },
+            {
+              "path": "stage-033.json",
+              "sha256": "dcc0aa3abb4a20b07668e7ccad3fe174f7c86d5bf5b50621196309eb103714af"
+            },
+            {
+              "path": "stage-034.json",
+              "sha256": "5462a92662e063f8bbc0d79f1ad7b8d3148a7ef41d01116979924356cd378488"
+            },
+            {
+              "path": "stage-035.json",
+              "sha256": "8d2598d4603a136a382eb10c2052ef67d5703647b2c8700d5fe71d9b6abfd7de"
+            },
+            {
+              "path": "stage-036.json",
+              "sha256": "1e856f72886d51bf4ca3b71dfd873fe49e64cb4090e3acaba8066c1b85ec3a67"
+            },
+            {
+              "path": "stage-037.json",
+              "sha256": "d5120ae62829f2e6e714ccc01957cd8c22a1cb084c8b3556693c62f59eb0d555"
+            },
+            {
+              "path": "stage-038.json",
+              "sha256": "41b6e2f259a77c90d99e90a143ea934ce11ccadb5563d4e5f8413b100c10243b"
+            },
+            {
+              "path": "stage-039.json",
+              "sha256": "73bdd963d011372906ec1a5f4f49f337c6c1caf3399ceb56bc15ae827b034451"
+            }
+          ],
+          "stage_count": 40
+        }
+      ],
+      "reproduction_command": "python scripts/reports/recorded_closed_loop_figures.py --capture-root \"$CSL_CLOSED_LOOP_CAPTURE_ROOT\" --output docs/examples/closed-loop --attempt earth-orbit=earth-orbit-20261114T080440Z-38040600 --attempt syn-nl-fuel-01=syn-nl-fuel-01-20261114T081002Z-4065cce8 --attempt syn-nl-lv-01=syn-nl-lv-01-20261114T075910Z-d5019063",
+      "shape_coverage_gaps": [
+        {
+          "attempt_id": "syn-nl-fuel-01-20261114T081002Z-4065cce8",
+          "controller_id": "native-exact-polytope-backward-graph/1",
+          "reason": "The saved response has no projectable materialized shape geometry."
+        }
+      ],
+      "source_commit": "089075e919cdea0a59d6535235d62b0c06ceb7a9",
+      "source_commits": [
+        "089075e919cdea0a59d6535235d62b0c06ceb7a9"
+      ],
+      "stage_count": 40,
+      "svg_href": "examples/closed-loop/figures/fuel-state.svg",
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b",
+      "time_step": 0.5,
+      "timeline_end": 20.0,
+      "title": "Fuel control state planes"
+    },
+    {
+      "availability": "ready",
+      "comparison_coverage_gaps": [
+        {
+          "controller_id": "native-box-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        },
+        {
+          "controller_id": "native-zonotope-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        },
+        {
+          "controller_id": "native-parallelotope-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        },
+        {
+          "controller_id": "native-ellipsoid-mpc/1",
+          "outcome": "no complete matched record in the selected source capture",
+          "reason": "No geometry or trajectory is inferred from an absent or incomplete attempt."
+        }
+      ],
+      "coordinate_transform": {
+        "description": "Raw order [m_ox, m_f, q_ox, q_f]; requested fuel indices [3, 1]; raw scale [100, 30, 3, 1] is not reapplied to physical data.",
+        "names": [
+          "Fuel flow q_f",
+          "Fuel mass m_f"
+        ],
+        "permutation_matrix": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "raw_indices": [
+          3,
+          1
+        ],
+        "raw_scales": [
+          100.0,
+          30.0,
+          3.0,
+          1.0
+        ],
+        "scale_applied_to_source_values": false,
+        "source_values_are_physical": true,
+        "units": [
+          "kg/s",
+          "kg"
+        ]
+      },
+      "href": "examples/closed-loop/figures/fuel-fuel-flow.html",
+      "id": "fuel-fuel-flow",
+      "layer_scopes": [
+        "initial physical state",
+        "retained stage-layered graph singleton nodes",
+        "serialized complete authored-action parent clouds when present",
+        "serialized fixed-plan trajectory enclosures when present and coordinate-qualified",
+        "initial model-predicted plan",
+        "executed physical plant replay",
+        "soft objective target when defined"
+      ],
+      "missing_layers": [
+        "complete all-stage forward-set geometry over the full reachable parent set",
+        "all-admissible-control forward reachable sets",
+        "materialized backward/predecessor sets",
+        "materialized full-state intersections"
+      ],
+      "plotted_data_href": "examples/closed-loop/figures/fuel-fuel-flow.plotted-data.json",
+      "png_href": "examples/closed-loop/figures/fuel-fuel-flow.png",
+      "profile_id": "worker-wall-300-cpu-300/1",
+      "profile_ids": [
+        "worker-wall-300-cpu-300/1"
+      ],
+      "raw_record_refs": [
+        {
+          "attempt_id": "syn-nl-fuel-01-20261114T081002Z-4065cce8",
+          "capture_relative_path": "syn-nl-fuel-01/attempts/syn-nl-fuel-01-20261114T081002Z-4065cce8",
+          "manifest_sha256": "4c77f065390f10e0772a5258d9057370d2690abd6fa32ee078e5ba898d4b04ab",
+          "raw_stage_hashes": [
+            {
+              "path": "stage-000.json",
+              "sha256": "c2de3bb576d4d064b9314e8593a296eaab79ecca2c0f94c793b8156589718aff"
+            },
+            {
+              "path": "stage-001.json",
+              "sha256": "3b9e8fd28545b96c7a7ed33f255ffc8886f85087aaf896682d7e12a6e305ae15"
+            },
+            {
+              "path": "stage-002.json",
+              "sha256": "c2d8594aa627d17b16091eee488b078bdd4f48d21a9782cb1feb850d074ebcb9"
+            },
+            {
+              "path": "stage-003.json",
+              "sha256": "5d59392739a888ab9a3d808703eaf9e882bf546134655ffeaf820ec82da4f509"
+            },
+            {
+              "path": "stage-004.json",
+              "sha256": "db92f6cabeb658e697f7553a51b3df9e4e8c36f20cf4fae24c0c79a32d2ff5b6"
+            },
+            {
+              "path": "stage-005.json",
+              "sha256": "b9aadaee0ecf4cafb57ae181b6dba4cc28126a58b68dad8e38ddf546dd13b492"
+            },
+            {
+              "path": "stage-006.json",
+              "sha256": "fc3b6672c12851407cbfa58e9de60d7b57c04f871412014f543da13cd22f6ebb"
+            },
+            {
+              "path": "stage-007.json",
+              "sha256": "54548a11e7faf0de152cb6129c4eade3e51e0bbc49faae7ffac42b32c3d61b08"
+            },
+            {
+              "path": "stage-008.json",
+              "sha256": "ea70cbb30417a815674b2c41481b986b4ff1cf559ee6823906846284a7659fea"
+            },
+            {
+              "path": "stage-009.json",
+              "sha256": "0721a7ac45feed82ac13fcbcc709cc963fddb5eb71c8c71c84b5f042452eab79"
+            },
+            {
+              "path": "stage-010.json",
+              "sha256": "091a2fe6972f7911728a45d7f77e89e517e9a5fea0b58713796957728fdb4a5d"
+            },
+            {
+              "path": "stage-011.json",
+              "sha256": "d957671d1b5d6703799fb8e3d3874486b640812ccc80d944c82d626b3564bee2"
+            },
+            {
+              "path": "stage-012.json",
+              "sha256": "49b2afb35d94ef2d71ea441d40307354ecf5a35bee05287ed1021f2a411a8193"
+            },
+            {
+              "path": "stage-013.json",
+              "sha256": "38f4bfe52ee801e837308f3bfa922e124d40130f8209124cbf5ee27ab18a11a9"
+            },
+            {
+              "path": "stage-014.json",
+              "sha256": "c5f2326756d37cb220ff8a3e57c82b9f072c95d5126c784264895a155de538db"
+            },
+            {
+              "path": "stage-015.json",
+              "sha256": "8fb32f642a645628b01274b5752f25b5f99a3a2542b68169f3a4af2cf4632186"
+            },
+            {
+              "path": "stage-016.json",
+              "sha256": "9f61d86d682b8f57037863ad3faf1ed255e4949131252cc80bfa50a72cac4cac"
+            },
+            {
+              "path": "stage-017.json",
+              "sha256": "6081a8ee3c55404fcb2f7c4f167289af5c9f87f59026878f27c16969ce048c89"
+            },
+            {
+              "path": "stage-018.json",
+              "sha256": "f1929fd01820a313e637c58aaede9570b1c91f2dc31e6b7fe0140bd89edf0be2"
+            },
+            {
+              "path": "stage-019.json",
+              "sha256": "edb57b67c0b4a756ec8b8ab3262c2d8f07732adf7b00ac06a5921a30969d2a84"
+            },
+            {
+              "path": "stage-020.json",
+              "sha256": "1c37b34dbd44d5be420ada038e4c61c3552606d896c31254e088af34d91f56a6"
+            },
+            {
+              "path": "stage-021.json",
+              "sha256": "2c12a3658453005613192bf698da552ec5618390f9923da48a7addacfcd3f27c"
+            },
+            {
+              "path": "stage-022.json",
+              "sha256": "3802295f09f9eaa99d8fc2ea2e8529d2017e4860a47604cac1069166a866166f"
+            },
+            {
+              "path": "stage-023.json",
+              "sha256": "87cfbba405a3920b7b1b555f206ea35af10e1e7d214b9825ec4760f25ef9215e"
+            },
+            {
+              "path": "stage-024.json",
+              "sha256": "eac8a79050bae4359f6c9a0e807872124cd189b43a9e385a23d06d0df3aba2c3"
+            },
+            {
+              "path": "stage-025.json",
+              "sha256": "32b968a2db5575f22b80e6c8ed45100883253e8fead46471db41582e40fd793b"
+            },
+            {
+              "path": "stage-026.json",
+              "sha256": "5a8347767a4601a709cf848e43394792bb130a61e92294cf4a1201b00d49dfce"
+            },
+            {
+              "path": "stage-027.json",
+              "sha256": "84c563fe9021da3d40634068f1de72264006b95caa4b27f91b3f95bb74586402"
+            },
+            {
+              "path": "stage-028.json",
+              "sha256": "37fb565ff8abcc44e445dd90477fd254343378a1018acee20ba936ba70af8e55"
+            },
+            {
+              "path": "stage-029.json",
+              "sha256": "2ec29744a6bf4d522def6788f4ad107612fa6d8f0d3cbb2970dd3106bb5f465a"
+            },
+            {
+              "path": "stage-030.json",
+              "sha256": "0e5919b2fac803774cbfd5a9f7782bf5dbecc39dc4d696863d8e511f61de3900"
+            },
+            {
+              "path": "stage-031.json",
+              "sha256": "87d2d06e6984000672ee2090b030ea1faa46a9cdb145b3fcd817e4a1ecac7797"
+            },
+            {
+              "path": "stage-032.json",
+              "sha256": "18b9ff154dad6254fe63614a4f8ae7da421ba0e3e1e3cd5b2d5ca834a88fe0e0"
+            },
+            {
+              "path": "stage-033.json",
+              "sha256": "dcc0aa3abb4a20b07668e7ccad3fe174f7c86d5bf5b50621196309eb103714af"
+            },
+            {
+              "path": "stage-034.json",
+              "sha256": "5462a92662e063f8bbc0d79f1ad7b8d3148a7ef41d01116979924356cd378488"
+            },
+            {
+              "path": "stage-035.json",
+              "sha256": "8d2598d4603a136a382eb10c2052ef67d5703647b2c8700d5fe71d9b6abfd7de"
+            },
+            {
+              "path": "stage-036.json",
+              "sha256": "1e856f72886d51bf4ca3b71dfd873fe49e64cb4090e3acaba8066c1b85ec3a67"
+            },
+            {
+              "path": "stage-037.json",
+              "sha256": "d5120ae62829f2e6e714ccc01957cd8c22a1cb084c8b3556693c62f59eb0d555"
+            },
+            {
+              "path": "stage-038.json",
+              "sha256": "41b6e2f259a77c90d99e90a143ea934ce11ccadb5563d4e5f8413b100c10243b"
+            },
+            {
+              "path": "stage-039.json",
+              "sha256": "73bdd963d011372906ec1a5f4f49f337c6c1caf3399ceb56bc15ae827b034451"
+            }
+          ],
+          "stage_count": 40
+        }
+      ],
+      "reproduction_command": "python scripts/reports/recorded_closed_loop_figures.py --capture-root \"$CSL_CLOSED_LOOP_CAPTURE_ROOT\" --output docs/examples/closed-loop --attempt earth-orbit=earth-orbit-20261114T080440Z-38040600 --attempt syn-nl-fuel-01=syn-nl-fuel-01-20261114T081002Z-4065cce8 --attempt syn-nl-lv-01=syn-nl-lv-01-20261114T075910Z-d5019063",
+      "shape_coverage_gaps": [
+        {
+          "attempt_id": "syn-nl-fuel-01-20261114T081002Z-4065cce8",
+          "controller_id": "native-exact-polytope-backward-graph/1",
+          "reason": "The saved response has no projectable materialized shape geometry."
+        }
+      ],
+      "source_commit": "089075e919cdea0a59d6535235d62b0c06ceb7a9",
+      "source_commits": [
+        "089075e919cdea0a59d6535235d62b0c06ceb7a9"
+      ],
+      "stage_count": 40,
+      "svg_href": "examples/closed-loop/figures/fuel-fuel-flow.svg",
+      "task_id": "syn-nl-fuel-01/continuous-receding/1",
+      "task_sha256": "358e07950c02b47faef287a93555d1f5d7ad15bbb6cb2df73709afdb291b991b",
+      "time_step": 0.5,
+      "timeline_end": 20.0,
+      "title": "Fuel flow and mass plane"
+    }
+  ],
+  "schema": "csl.closed-loop.figure-index/1",
+  "style_id": "csl-report-quantitative-v1"
+}

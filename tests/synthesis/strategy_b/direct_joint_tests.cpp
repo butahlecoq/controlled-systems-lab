@@ -793,15 +793,125 @@ SynthesisResult run_strategy_a(const problem::ResolvedProblem& p,const FamilyReq
     ExecutionContext context;context.resources=std::make_shared<const ResourcePolicy>(ResourcePolicy{1,1,1,{}});
     return accepted(workspace->run(context));
 }
+class ZeroHistoryOptimizer final : public optimization::HistoryOptimizerWorkspace {
+    optimization::RawHistorySolveOutcome
+    solve_candidate(const optimization::HistoryOptimizationRequest &request,
+                    const ExecutionContext &) override {
+        const auto coordinates = request.domain.original.coordinates;
+        const auto n = coordinates.dimensions.state, m = coordinates.dimensions.control;
+        const auto horizon = coordinates.horizon;
+        std::vector<Vector> states(horizon + 1, Vector(n, 0.0));
+        std::vector<Vector> controls(horizon, Vector(m, 0.0));
+        Vector history((horizon + 1) * n + horizon * m, 0.0);
+        const auto cost =
+            optimization::evaluate_history_cost(request.source_cost, states, controls);
+        if (const auto *errors = std::get_if<Diagnostics>(&cost))
+            return errors->front();
+        if (const auto *stopped = std::get_if<OperationStopped>(&cost))
+            return *stopped;
+        const auto evaluated = std::get<optimization::HistoryCostEvaluation>(cost);
+        std::vector<optimization::HistoryMembershipWitness> witnesses;
+        for (const auto &membership : request.domain.memberships) {
+            std::visit(
+                [&](const auto &shape) {
+                    using Shape = std::decay_t<decltype(shape)>;
+                    if constexpr (std::is_same_v<Shape, optimization::HistoryHMembership>)
+                        witnesses.emplace_back(optimization::HistoryHWitness{});
+                    else if constexpr (std::is_same_v<Shape,
+                                                      optimization::HistoryAxisBoxMembership>)
+                        witnesses.emplace_back(optimization::HistoryAxisBoxWitness{{-1.0}});
+                    else if constexpr (std::is_same_v<Shape,
+                                                      optimization::HistoryZonotopeMembership>)
+                        witnesses.emplace_back(optimization::HistoryZonotopeWitness{{-1.0}});
+                    else if constexpr (std::is_same_v<Shape,
+                                                      optimization::HistoryParallelotopeMembership>)
+                        witnesses.emplace_back(optimization::HistoryParallelotopeWitness{{-1.0}});
+                    else if constexpr (std::is_same_v<Shape,
+                                                      optimization::HistoryBallFactorMembership>)
+                        witnesses.emplace_back(optimization::HistoryBallFactorWitness{{-1.0}});
+                    else
+                        witnesses.emplace_back(optimization::HistoryVSimplexWitness{{1.0, 0.0}});
+                },
+                membership.shape);
+        }
+        return optimization::RawHistorySolve{
+            std::move(history), evaluated.total,
+            optimization::BackendColdStartEvidence{
+                "test.zero-history", "zero cold start",
+                "test provider exposes no primal or dual readbacks"},
+            "deterministic zero-history integration fixture", std::move(witnesses)};
+    }
+};
+registry::PreparedProvider<registry::HistoryOptimizerPort> zero_history_optimizer() {
+    registry::Registry<registry::HistoryOptimizerPort> providers;
+    REQUIRE_FALSE(
+        providers.add({{{"test.zero-history-optimizer"}, "1"},
+                       [](const optimization::HistoryOptimizationRequest &,
+                          const registry::Requirements &requirements) -> registry::Capability {
+                           return registry::Offer{requirements.output};
+                       },
+                       [](const optimization::HistoryOptimizationRequest &)
+                           -> std::unique_ptr<optimization::HistoryOptimizerWorkspace> {
+                           return std::make_unique<ZeroHistoryOptimizer>();
+                       }}));
+    registry::Requirements requirements;
+    requirements.output.representation = {"csl.history-optimization-result.v1"};
+    return accepted(registry::prepare_provider(registry::select_provider(
+        providers, registry::Method{{"test.zero-history-optimizer"}, "1"}, requirements)));
+}
+std::vector<optimization::HistoryMembership> typed_history_memberships() {
+    using namespace optimization;
+    const auto h = [](const char *id) {
+        return accepted(
+            sets::make_h({{id}, 1, {}}, {accepted(numeric::snapshot(Matrix{2, 1, {1, -1}})),
+                                         accepted(numeric::snapshot_vector(Vector{1, 0})),
+                                         accepted(numeric::snapshot(Matrix{0, 1, {}})),
+                                         accepted(numeric::snapshot_vector(Vector{}))}));
+    };
+    auto polytope = h("strategy-history-polytope");
+    const auto v = accepted(sets::make_v({{"strategy-history-simplex"}, 1, {}},
+                                         {accepted(numeric::snapshot(Matrix{2, 1, {0, 1}})),
+                                          accepted(numeric::snapshot(Matrix{0, 1, {}}))}));
+    const auto add = [](StageIndex stage, SetId id, HistorySetFamily family,
+                        HistoryMembershipShape shape) {
+        HistoryMembershipOrigin origin{id,
+                                       id,
+                                       family,
+                                       SetRelation::equivalent,
+                                       "state",
+                                       {1},
+                                       HistorySourceGeometry{id, family, shape}};
+        return HistoryMembership{stage, std::move(origin), std::move(shape)};
+    };
+    const HistoryMembershipShape hshape{HistoryHMembership{polytope}};
+    const HistoryMembershipShape box{HistoryAxisBoxMembership{{0.5}, {0.5}}};
+    const HistoryMembershipShape zonotope{HistoryZonotopeMembership{{0.5}, {1, 1, {0.5}}}};
+    const HistoryMembershipShape parallelotope{
+        HistoryParallelotopeMembership{{0.5}, {1, 1, {0.5}}, {-1}, {1}}};
+    const HistoryMembershipShape ellipsoid{HistoryBallFactorMembership{{{0.5}, {1, 1, {0.5}}}}};
+    const HistoryMembershipShape simplex{HistoryVSimplexMembership{v}};
+    return {add({1}, {"strategy-history-polytope"}, HistorySetFamily::polytope, hshape),
+            add({1}, {"strategy-history-box"}, HistorySetFamily::box, box),
+            add({1}, {"strategy-history-zonotope"}, HistorySetFamily::zonotope, zonotope),
+            add({1}, {"strategy-history-parallelotope"}, HistorySetFamily::parallelotope,
+                parallelotope),
+            add({1}, {"strategy-history-ellipsoid"}, HistorySetFamily::ellipsoid, ellipsoid),
+            add({1}, {"strategy-history-simplex"}, HistorySetFamily::polytope, simplex)};
+}
 const sets::SetData& strategy_a_relation(const SynthesisResult& result) {
     REQUIRE(result.family);REQUIRE(result.family->target()==FamilyTarget::candidate_relaxation);
     const auto& candidate=std::get<CandidateFamily>(result.family->outcome());
     const auto* data=dynamic_cast<const synthesis::strategy_a::CandidateHistory*>(candidate.relation.payload.get());
     REQUIRE(data);return data->history.relation;
 }
-registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p,const FamilyRequest& q,
-    bool foreign_provider=false,Termination solver_termination=Termination::completed,std::stop_source* stop=nullptr,
-    std::function<void()> before_return={},MathematicalOutcome solver_outcome=MathematicalOutcome::optimal) {
+registry::PreparedStrategy registered_prepared(
+    const problem::ResolvedProblem &p, const FamilyRequest &q, bool foreign_provider = false,
+    Termination solver_termination = Termination::completed, std::stop_source *stop = nullptr,
+    std::function<void()> before_return = {},
+    MathematicalOutcome solver_outcome = MathematicalOutcome::optimal,
+    std::optional<registry::PreparedProvider<registry::HistoryOptimizerPort>> history_optimizer =
+        {},
+    std::shared_ptr<const optimization::StrategyHistoryOptimizationProfile> history_profile = {}) {
     registry::Registry<registry::LPPort> lp;registry::Registry<registry::ConvexPort> qp;registry::StrategyRegistry strategies;
     auto linear=accepted(adapters::lp::make_highs_registration());auto convex=accepted(adapters::convex::make_highs_registration());
     if(foreign_provider) {
@@ -816,14 +926,21 @@ registry::PreparedStrategy registered_prepared(const problem::ResolvedProblem& p
         convex={{{"oracle-qp"},"1"},offer,[=](const ConvexProgram&){return std::make_unique<OracleWorkspace<ConvexProgram,ConvexWorkspace>>(Vector{0,0.25,1,0.25,0.75},0,false,solver_termination,stop,before_return,solver_outcome);}};
     }
     const auto lid=linear.identity.id,qid=convex.identity.id;lp.add(std::move(linear));qp.add(std::move(convex));
-    CHECK_FALSE(strategies.add(make_registration(lp,qp)));
+    const auto history_module =
+        history_optimizer ? std::optional<ModuleId>{history_optimizer->provenance().requested.id}
+                          : std::nullopt;
+    CHECK_FALSE(strategies.add(make_registration(lp, qp, std::move(history_optimizer))));
     StrategyConfiguration configuration;configuration.strategy={"csl.synthesis.strategy-b"};configuration.lp=lid;configuration.convex=qid;
     configuration.representation={"csl.polyhedron.h"};
+    if (history_module)
+        configuration.history_optimizer = *history_module;
     registry::Requirements requirements;requirements.output.representation={"csl.polyhedron.h"};
     requirements.output.family=q.target;
     requirements.output.completeness=q.target==FamilyTarget::exact_optimal_relation?
         registry::Completeness::established:registry::Completeness::unestablished;
-    return accepted(strategies.prepare({p,configuration,q,"1"},requirements));
+    registry::StrategyRequest request{p, configuration, q, "1"};
+    request.history_optimization = std::move(history_profile);
+    return accepted(strategies.prepare(request, requirements));
 }
 struct PlannedStrategyTiming {
     std::shared_ptr<ob::TimingCollector> collector;
@@ -1144,6 +1261,55 @@ TEST_CASE("T-S03 singular A preserves earlier controls at a unique terminal opti
         CHECK_FALSE(contains(relation,point));CHECK_FALSE(contains(a_relation,point,1e-7));
     }
 }
+TEST_CASE("Strategy B invokes the prepared whole-history optimizer before its terminal solver") {
+    const auto problem = resolve(integrator());
+    const auto family = request(problem);
+    auto profile = std::make_shared<const optimization::StrategyHistoryOptimizationProfile>(
+        optimization::StrategyHistoryOptimizationProfile{ProgramId{"strategy-b-history-run"},
+                                                         {{}, 0, {}},
+                                                         0,
+                                                         "state",
+                                                         typed_history_memberships(),
+                                                         optimization::ColdStart{}});
+    const auto prepared =
+        registered_prepared(problem, family, false, Termination::completed, nullptr, {},
+                            MathematicalOutcome::optimal, zero_history_optimizer(), profile);
+    ExecutionContext context;
+    context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
+    const auto result = accepted(prepared.create()->run(context));
+    INFO("termination=" << static_cast<int>(result.termination) << " stop=" << result.stop.index()
+                         << " family=" << result.family.has_value()
+                         << " incumbents=" << result.incumbents.size());
+    std::string diagnostic_text;
+    if (const auto *failure = std::get_if<ContractValidationFailure>(&result.stop))
+        for (const auto &diagnostic : failure->diagnostics)
+            diagnostic_text += diagnostic.field + ": " + diagnostic.explanation + "; ";
+    INFO("diagnostics=" << diagnostic_text);
+    REQUIRE(result.history_optimization);
+    CHECK(result.history_optimization->program.value == "strategy-b-history-run");
+    REQUIRE(result.history_optimization->provider.actual_module);
+    CHECK(result.history_optimization->provider.actual_module->value ==
+          "test.zero-history-optimizer");
+    REQUIRE(std::holds_alternative<optimization::BackendColdStartEvidence>(
+        result.history_optimization->result->initialization));
+    REQUIRE(result.history_optimization->result->membership_witnesses.size() == 6);
+    CHECK(std::holds_alternative<optimization::HistoryHWitness>(
+        result.history_optimization->result->membership_witnesses[0]));
+    CHECK(std::holds_alternative<optimization::HistoryAxisBoxWitness>(
+        result.history_optimization->result->membership_witnesses[1]));
+    CHECK(std::holds_alternative<optimization::HistoryZonotopeWitness>(
+        result.history_optimization->result->membership_witnesses[2]));
+    CHECK(std::holds_alternative<optimization::HistoryParallelotopeWitness>(
+        result.history_optimization->result->membership_witnesses[3]));
+    CHECK(std::holds_alternative<optimization::HistoryBallFactorWitness>(
+        result.history_optimization->result->membership_witnesses[4]));
+    CHECK(std::holds_alternative<optimization::HistoryVSimplexWitness>(
+        result.history_optimization->result->membership_witnesses[5]));
+    REQUIRE(result.incumbents.size() >= 1);
+    CHECK(result.incumbents.front().witness.states.size() == 3);
+    CHECK(result.incumbents.front().witness.controls.size() == 2);
+}
+
 TEST_CASE("registered Strategy B publishes the exact T-S03 singular-dynamics family") {
     auto input=integrator();
     auto model=*input.model;

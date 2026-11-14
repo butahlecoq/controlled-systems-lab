@@ -125,6 +125,31 @@
       "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
     },
     {
+      "route": "closed-loop-initial-baselines-v1/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_closed_loop_initial_baselines.py"
+    },
+    {
+      "route": "closed-loop-initial-baselines-v1/figures/baseline-089075e9-earth-orbit.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_closed_loop_initial_baselines.py"
+    },
+    {
+      "route": "closed-loop-initial-baselines-v1/figures/baseline-089075e9-fuel-fuel-flow.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_closed_loop_initial_baselines.py"
+    },
+    {
+      "route": "closed-loop-initial-baselines-v1/figures/baseline-089075e9-fuel-state.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_closed_loop_initial_baselines.py"
+    },
+    {
+      "route": "closed-loop-initial-baselines-v1/figures/baseline-089075e9-lotka-populations.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_closed_loop_initial_baselines.py"
+    },
+    {
       "route": "closed-loop-native-feedback/figures/analytic-action-clouds.html",
       "disposition": "maintained",
       "owner": "reports/closed-loop-native-feedback/figures/analytic-action-clouds.html"
@@ -390,6 +415,26 @@
       "owner": "scripts/reports/stage_closed_loop_pilot.py"
     },
     {
+      "route": "examples/closed-loop/figures/baseline-089075e9-earth-orbit.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/closed-loop/figures/baseline-089075e9-earth-orbit.html"
+    },
+    {
+      "route": "examples/closed-loop/figures/baseline-089075e9-fuel-fuel-flow.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/closed-loop/figures/baseline-089075e9-fuel-fuel-flow.html"
+    },
+    {
+      "route": "examples/closed-loop/figures/baseline-089075e9-fuel-state.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/closed-loop/figures/baseline-089075e9-fuel-state.html"
+    },
+    {
+      "route": "examples/closed-loop/figures/baseline-089075e9-lotka-populations.html",
+      "disposition": "maintained",
+      "owner": "docs/examples/closed-loop/figures/baseline-089075e9-lotka-populations.html"
+    },
+    {
       "route": "examples/closed-loop/figures/earth-orbit.html",
       "disposition": "maintained",
       "owner": "docs/examples/closed-loop/figures/earth-orbit.html"
@@ -510,6 +555,26 @@
       "owner": "reports/published-route-preservation/manifest.json",
       "sha256": "aba080d3ebe75fe7e59b4f224f0f81066ee8f03a0aeebe34698b2e54a17fe40b",
       "witness": "GitHub Pages artifact 14045315006; source e0c0d9beb874a2fa820b135ab3bb237f64647e35; verified issue 966 retained publication baseline"
+    },
+    {
+      "route": "examples/history-membership-zonotope-2d-v1/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_history_membership_2d.py"
+    },
+    {
+      "route": "examples/history-membership-zonotope-2d-v1/records/native-output.html",
+      "disposition": "maintained",
+      "owner": "reports/algorithm-results/history-membership-zonotope-2d-v1/records/native-output.html"
+    },
+    {
+      "route": "examples/history-optimizer-native-2d-v1/index.html",
+      "disposition": "maintained",
+      "owner": "scripts/reports/stage_history_optimizer_native.py"
+    },
+    {
+      "route": "examples/history-optimizer-native-2d-v1/records/native-output.html",
+      "disposition": "maintained",
+      "owner": "reports/algorithm-results/history-optimizer-native-2d-v1/records/native-output.html"
     },
     {
       "route": "examples/index.html",
