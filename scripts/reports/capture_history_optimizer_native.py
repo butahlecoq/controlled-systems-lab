@@ -13,7 +13,6 @@ from pathlib import Path
 
 import stage_history_optimizer_native as report
 
-
 _LOCAL_PATH = re.compile(r"(?<!:)(?<!/)/(?:[^/\s;<>\"']+/)*[^/\s;<>\"']+")
 
 
