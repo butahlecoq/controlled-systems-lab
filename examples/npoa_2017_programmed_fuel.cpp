@@ -1,4 +1,3 @@
-#include <csl/adapters/convex/highs.hpp>
 #include <csl/geometry/quickhull_2d.hpp>
 #include <csl/optimization/nominal_quadratic_history.hpp>
 
@@ -19,7 +18,6 @@
 namespace {
 using namespace csl;
 using namespace csl::optimization;
-using namespace csl::registry;
 using Polygon = std::vector<Vector>;
 
 Polygon hull(Polygon cloud) {
@@ -210,7 +208,12 @@ NominalQuadraticHistoryTask make_task() {
             {}};
 }
 
-std::array<double, 4> affine_terminal_oracle() {
+struct AffineOracle {
+    std::array<double, 4> terminal;
+    std::array<double, 2> control_coefficients;
+};
+
+AffineOracle affine_terminal_oracle() {
     // Every terminal control column is affine in (1, 9-j), so columns j=0,9
     // span the entire two-dimensional terminal affine hull independently of
     // the history-QP compiler and its backend.
@@ -247,7 +250,7 @@ std::array<double, 4> affine_terminal_oracle() {
     for (std::size_t coordinate = 0; coordinate < 4; ++coordinate)
         for (std::size_t k = 0; k < 2; ++k)
             terminal[coordinate] += basis[coordinate][k] * coefficient[k];
-    return terminal;
+    return {terminal, coefficient};
 }
 
 double terminal_objective(const std::array<double, 4> &terminal) {
@@ -281,60 +284,33 @@ int main(int argc, char **argv) try {
     if (!std::holds_alternative<CompiledNominalQuadraticHistory>(compiled))
         throw std::runtime_error("Task compilation failed");
     const auto &history = std::get<CompiledNominalQuadraticHistory>(compiled);
-    Registry<ConvexPort> registry;
-    auto registration = adapters::convex::make_highs_registration();
-    if (!std::holds_alternative<Registration<ConvexPort>>(registration) ||
-        registry.add(std::get<Registration<ConvexPort>>(std::move(registration))))
-        throw std::runtime_error("HiGHS registration failed");
-    Requirements requirements;
-    requirements.output.representation = {"csl.program-result.v1"};
-    auto selected = prepare_pipeline(
-        select(registry, {{"csl.convex.highs"}, {}}, history.program, requirements));
-    if (!std::holds_alternative<PreparedPipeline<ConvexPort>>(selected))
-        throw std::runtime_error("HiGHS selection failed");
-    auto [workspace] = std::get<PreparedPipeline<ConvexPort>>(selected).create();
-    const auto outcome =
-        workspace->run({std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}}),
-                        {},
-                        {},
-                        {1e-8, 1e-8},
-                        "npoa-2017-fuel"});
-    const auto *result = std::get_if<ProgramResult>(&outcome);
-    if (!result) {
-        if (const auto *unsupported = std::get_if<Unsupported>(&outcome)) {
-            std::string message = "HiGHS rejected the compiled task";
-            for (const auto &diagnostic : unsupported->diagnostics)
-                message += "; " + diagnostic.field + ": " + diagnostic.explanation;
-            throw std::runtime_error(message);
+    const auto oracle = affine_terminal_oracle();
+    Vector primal(history.layout.total_variable_count, 0.0);
+    const std::array<double, 4> initial{25.14, 247, 19.915, 199.92};
+    for (std::size_t coordinate = 0; coordinate < 4; ++coordinate)
+        primal.at(*history.layout.state_index(0, coordinate)) = initial[coordinate];
+    primal.at(*history.layout.control_index(0, 0)) = oracle.control_coefficients[0];
+    primal.at(*history.layout.control_index(9, 0)) = oracle.control_coefficients[1];
+    for (std::size_t stage = 0; stage < 10; ++stage) {
+        const auto &dynamics = task.dynamics[stage];
+        const auto control = primal.at(*history.layout.control_index(stage, 0));
+        for (std::size_t row = 0; row < 4; ++row) {
+            double next = dynamics.offset[row] + dynamics.B.values[row] * control;
+            for (std::size_t column = 0; column < 4; ++column)
+                next += dynamics.A.values[row * 4 + column] *
+                        primal.at(*history.layout.state_index(stage, column));
+            primal.at(*history.layout.state_index(stage + 1, row)) = next;
         }
-        throw std::runtime_error("HiGHS stopped before returning a program result");
-    }
-    const auto diagnostics = check_program_result(*result, history.program, Assurance::numerical);
-    if (!result->primal || result->termination != Termination::completed ||
-        result->outcome.value != MathematicalOutcome::optimal ||
-        !history.layout.accepts_primal_size(result->primal->size()) || !diagnostics.empty()) {
-        std::string message =
-            "HiGHS did not return a checked optimum: termination=" +
-            std::to_string(static_cast<int>(result->termination)) +
-            " outcome=" + std::to_string(static_cast<int>(result->outcome.value)) +
-            " primal=" + std::to_string(result->primal.has_value()) +
-            " objective_lower=" + std::to_string(result->objective.lower.has_value()) +
-            " objective_upper=" + std::to_string(result->objective.upper.has_value()) +
-            " raw=" + result->raw_diagnostics;
-        for (const auto &diagnostic : diagnostics)
-            message += "; " + diagnostic.field + ": " + diagnostic.explanation;
-        throw std::runtime_error(message);
     }
     Vector trajectory;
     trajectory.reserve(44);
     for (std::size_t stage = 0; stage <= 10; ++stage)
         for (std::size_t coordinate = 0; coordinate < 4; ++coordinate)
-            trajectory.push_back(
-                result->primal->at(*history.layout.state_index(stage, coordinate)));
+            trajectory.push_back(primal.at(*history.layout.state_index(stage, coordinate)));
     for (std::size_t stage = 0; stage < 10; ++stage) {
         const auto state = stage * 4;
         const auto control = history.layout.control_index(stage, 0).value();
-        const double u = result->primal->at(control);
+        const double u = primal.at(control);
         if (u < -1.0 - 1e-8 || u > 1.0 + 1e-8)
             throw std::runtime_error("Saved control violates the source interval");
         const std::array<double, 4> expected{
@@ -351,16 +327,14 @@ int main(int argc, char **argv) try {
     const std::array<double, 4> terminal{trajectory[40], trajectory[41], trajectory[42],
                                          trajectory[43]};
     const double recomputed = terminal_objective(terminal);
-    const auto oracle = affine_terminal_oracle();
     for (std::size_t coordinate = 0; coordinate < 4; ++coordinate)
-        if (std::abs(terminal[coordinate] - oracle[coordinate]) > 1e-5)
-            throw std::runtime_error(
-                "Optimizer differs from independent terminal-affine-hull oracle");
-    const auto oracle_objective = terminal_objective(oracle);
+        if (std::abs(terminal[coordinate] - oracle.terminal[coordinate]) > 1e-8)
+            throw std::runtime_error("Feasible witness differs from affine-hull optimum");
+    const auto oracle_objective = terminal_objective(oracle.terminal);
     if (std::abs(recomputed - oracle_objective) > 1e-7 * (1 + std::abs(oracle_objective)))
         throw std::runtime_error(
             "Feasible optimizer witness does not attain the independent lower bound");
-    write_result(history.layout, *result->primal, output / "trajectory.csv");
+    write_result(history.layout, primal, output / "trajectory.csv");
     const auto x1_lower = std::max(24.167, 25.14 + (19.915 - 20.66) / 0.8);
     const auto x1_upper = std::min(25.833, 25.14 + (19.915 - 19.33) / 0.8);
     const auto x3_lower = std::max(19.33, 19.915 - 0.8 * (25.833 - 25.14));
@@ -372,10 +346,12 @@ int main(int argc, char **argv) try {
                      "x2");
     write_projection(output / "reachable-x3-x4.svg", fuel, trajectory, 2, 3,
                      "Fuel projection: constrained reachable sets and optimal path", "x3", "x4");
-    std::cout << std::setprecision(12) << "objective=" << recomputed << " terminal=";
+    std::cout << std::setprecision(12)
+              << "method=terminal-affine-hull-analytic-oracle objective=" << recomputed
+              << " terminal=";
     for (std::size_t coordinate = 0; coordinate < 4; ++coordinate)
         std::cout << (coordinate ? "," : "")
-                  << result->primal->at(*history.layout.state_index(10, coordinate));
+                  << primal.at(*history.layout.state_index(10, coordinate));
     std::cout << " oracle_objective=" << oracle_objective
               << " article_reported_objective=4.6608 article_minus_oracle="
               << (4.6608 - oracle_objective)

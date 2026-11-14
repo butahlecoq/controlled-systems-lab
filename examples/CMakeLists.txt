@@ -128,8 +128,7 @@ csl_example(native_four_state_reachability CSL::model_catalogue CSL::geometry_ge
 csl_example(native_discrete_models CSL::model_catalogue)
 csl_example(discrete_mpc_2d CSL::controllers CSL::model_catalogue CSL::highs_convex)
 csl_example(positive_part_budget_2d CSL::highs_convex CSL::nominal_quadratic_history)
-csl_example(npoa_2017_programmed_fuel CSL::highs_convex CSL::nominal_quadratic_history
-  CSL::quickhull_2d)
+csl_example(npoa_2017_programmed_fuel CSL::nominal_quadratic_history CSL::quickhull_2d)
 if(TARGET npoa_2017_programmed_fuel)
   add_test(NAME npoa_2017_programmed_fuel
     COMMAND "${CMAKE_COMMAND}"

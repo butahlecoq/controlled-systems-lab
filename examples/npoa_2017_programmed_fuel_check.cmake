@@ -4,7 +4,7 @@ execute_process(COMMAND "${EXAMPLE_EXE}" "${OUTPUT_DIRECTORY}"
 if(NOT "${status}" STREQUAL "0")
   message(FATAL_ERROR "Fuel optimization failed: ${output}${error}")
 endif()
-if(NOT "${output}" MATCHES "oracle=terminal-affine-hull-lower-bound-attained-by-feasible-witness")
+if(NOT "${output}" MATCHES "method=terminal-affine-hull-analytic-oracle.*oracle=terminal-affine-hull-lower-bound-attained-by-feasible-witness")
   message(FATAL_ERROR "The run must report its independent optimum qualification: ${output}")
 endif()
 if(NOT "${output}" MATCHES "article_reported_objective=4.6608 article_minus_oracle=0.0112")
