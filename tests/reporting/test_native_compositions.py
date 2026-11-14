@@ -88,6 +88,51 @@ class NativeCompositionTests(unittest.TestCase):
                 manifest_path=capabilities.COMPOSITIONS_MANIFEST,
             )
 
+    def test_cli_selects_graph_ids_from_each_explicit_catalogue(self):
+        manifest_paths = (
+            capabilities.MANIFEST,
+            capabilities.NATIVE_MANIFEST,
+            capabilities.HISTORY_MANIFEST,
+            capabilities.COMPOSITIONS_MANIFEST,
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for manifest_path in manifest_paths:
+                manifest = capabilities.validate_manifest(manifest_path=manifest_path)
+                graph = manifest["graphs"][0]
+                task_name = (
+                    graph["task_id"].split("/")[0]
+                    if graph["task_id"].startswith("syn-")
+                    else "earth-orbit"
+                )
+                argv = [
+                    "run_closed_loop",
+                    "--task",
+                    task_name,
+                    "--bridge",
+                    str(root / "missing-bridge"),
+                    "--output-root",
+                    str(root),
+                    "--graph-id",
+                    graph["graph_id"],
+                    "--capability-manifest",
+                    str(manifest_path),
+                ]
+                with (
+                    patch.object(sys, "argv", argv),
+                    contextlib.redirect_stdout(io.StringIO()),
+                ):
+                    self.assertEqual(run_closed_loop.main(), 1)
+                attempt = next(
+                    path.parent
+                    for path in root.glob("*/attempts/*/request.json")
+                    if json.loads(path.read_text())["requested"]["graph_id"] == graph["graph_id"]
+                )
+                request = json.loads((attempt / "request.json").read_text())
+                self.assertEqual(request["requested"]["graph_id"], graph["graph_id"])
+                refusal = json.loads((attempt / "resolution-refusal.json").read_text())
+                self.assertIn("common execution bridge does not exist", refusal["reason"])
+
     def test_signed_but_incorrect_exclusion_ledger_is_rejected(self):
         forged = copy.deepcopy(self.manifest)
         excluded = next(c for c in forged["candidates"] if c["status"] == "incompatible")

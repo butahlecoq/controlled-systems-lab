@@ -922,6 +922,7 @@ def run_task(
     attempt_wall_seconds: int = DEFAULT_ATTEMPT_WALL_SECONDS,
     attempt_cpu_seconds: int = DEFAULT_ATTEMPT_CPU_SECONDS,
     graph_id: str | None = None,
+    capability_manifest_path: Path | None = None,
 ) -> dict:
     resource_profile = attempt_resource_profile(attempt_wall_seconds, attempt_cpu_seconds)
     attempt_started = time.monotonic()
@@ -988,18 +989,22 @@ def run_task(
         native_controller = graph_id is not None or (
             bool(controller_id and controller_id.startswith("native-")) and not history_controller
         )
-        if native_controller and action_profile_id is None:
-            action_profile_id = task["control_domains"]["finite"]["problem_id"]
-        action_profile_id = action_profile_id or task["control_domains"]["continuous"]["problem_id"]
-        selected_manifest_path = (
-            COMPOSITIONS_MANIFEST
-            if graph_id is not None
-            else HISTORY_MANIFEST
-            if history_controller
-            else NATIVE_MANIFEST
-            if native_controller
-            else MANIFEST
-        )
+        if graph_id is not None:
+            selected_manifest_path = capability_manifest_path or COMPOSITIONS_MANIFEST
+        else:
+            if native_controller and action_profile_id is None:
+                action_profile_id = task["control_domains"]["finite"]["problem_id"]
+            else:
+                action_profile_id = (
+                    action_profile_id or task["control_domains"]["continuous"]["problem_id"]
+                )
+            selected_manifest_path = capability_manifest_path or (
+                HISTORY_MANIFEST
+                if history_controller
+                else NATIVE_MANIFEST
+                if native_controller
+                else MANIFEST
+            )
         capability_manifest, graph = resolve_graph(
             task,
             action_profile_id,
@@ -1007,6 +1012,8 @@ def run_task(
             manifest_path=selected_manifest_path,
             graph_id=graph_id,
         )
+        if graph_id is not None:
+            action_profile_id = graph["action_profile_id"]
         selected_manifest_sha256 = manifest_digest(capability_manifest)
         selected_controller_id = graph["controller"]["id"]
         if policy_adapter and policy_adapter != graph["controller"].get("policy_factory"):
@@ -2075,7 +2082,12 @@ def main() -> int:
     )
     parser.add_argument(
         "--graph-id",
-        help="exact source-bound native composition graph; default profiles remain unchanged",
+        help="exact source-bound admitted graph; default profiles remain unchanged",
+    )
+    parser.add_argument(
+        "--capability-manifest",
+        type=Path,
+        help="catalogue used with --graph-id (validated against its source definition)",
     )
     parser.add_argument(
         "--controller-id", help="selected policy identity passed to an external adapter"
@@ -2114,6 +2126,8 @@ def main() -> int:
     args = parser.parse_args()
     if args.graph_id is not None and args.task == "all":
         parser.error("--graph-id requires a single --task")
+    if args.capability_manifest is not None and args.graph_id is None:
+        parser.error("--capability-manifest requires --graph-id")
     if args.worker:
         if args.bridge is None or args.attempt is None or args.graph is None:
             parser.error("worker mode requires --bridge, --attempt, and --graph")
@@ -2239,6 +2253,7 @@ def main() -> int:
             args.attempt_wall_seconds,
             args.attempt_cpu_seconds,
             args.graph_id,
+            args.capability_manifest.resolve() if args.capability_manifest else None,
         )
         for name in names
     ]

@@ -11,10 +11,21 @@ target_link_libraries(csl_control_recovery PUBLIC CSL::resolved_problem CSL::set
 csl_add_library(csl_history_cost STATIC src/optimization/history_cost.cpp)
 target_link_libraries(csl_history_cost PUBLIC CSL::control_recovery CSL::running_control_cost CSL::objectives)
 
+csl_add_library(csl_history_optimizer STATIC src/optimization/history_optimizer.cpp
+  src/optimization/history_domain.cpp)
+target_link_libraries(csl_history_optimizer PUBLIC CSL::history_cost CSL::registry)
+if(CSL_ENABLE_CASADI)
+  csl_add_library(csl_casadi_history_optimizer STATIC src/adapters/nlp/casadi_history_optimizer.cpp)
+  target_link_libraries(csl_casadi_history_optimizer PUBLIC CSL::history_optimizer PRIVATE casadi::casadi)
+  csl_add_library(csl_casadi_superscs_history_optimizer STATIC src/adapters/nlp/casadi_superscs_history_optimizer.cpp)
+  target_link_libraries(csl_casadi_superscs_history_optimizer PUBLIC CSL::history_optimizer PRIVATE casadi::casadi)
+endif()
+
 csl_add_library(csl_strategy_a STATIC
   src/synthesis/strategy_a/strategy.cpp)
 
-target_link_libraries(csl_strategy_a PUBLIC CSL::nominal_forward CSL::terminal_minimizers CSL::control_recovery CSL::artifacts)
+target_link_libraries(csl_strategy_a PUBLIC CSL::nominal_forward CSL::terminal_minimizers
+  CSL::control_recovery CSL::history_optimizer CSL::artifacts)
 
 csl_add_library(csl_strategy_ts01 STATIC src/synthesis/strategy_ts01/analytic_profile.cpp)
 
@@ -24,7 +35,7 @@ csl_add_library(csl_strategy_b STATIC src/synthesis/strategy_b/direct_joint.cpp)
 
 target_link_libraries(csl_strategy_b PUBLIC
   CSL::resolved_problem CSL::sets CSL::registry CSL::convex CSL::verification
-  CSL::strategy_ts01
+  CSL::strategy_ts01 CSL::history_optimizer
   PRIVATE CSL::artifacts)
 
 csl_add_library(csl_witness_selector STATIC src/synthesis/witness_selector.cpp)

@@ -862,7 +862,7 @@ def validate_resolved_graph(graph: dict) -> None:
 
 def resolve_graph(
     task: dict,
-    action_profile_id: str,
+    action_profile_id: str | None,
     controller_id: str | None = None,
     manifest_path: Path | None = None,
     graph_id: str | None = None,
@@ -873,7 +873,7 @@ def resolve_graph(
         for row in manifest["graphs"]
         if row["task_id"] == task["task_id"]
         and row["task_sha256"] == manifest_sha256(task)
-        and row["action_profile_id"] == action_profile_id
+        and (action_profile_id is None or row["action_profile_id"] == action_profile_id)
         and (controller_id is None or row["controller"]["id"] == controller_id)
         and (graph_id is None or row["graph_id"] == graph_id)
     ]

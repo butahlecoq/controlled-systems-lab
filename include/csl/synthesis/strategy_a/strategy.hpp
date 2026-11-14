@@ -4,6 +4,7 @@
 #include <csl/reachability/nominal_forward.hpp>
 #include <csl/synthesis/control_recovery.hpp>
 #include <csl/synthesis/terminal_minimizers.hpp>
+#include <csl/optimization/history_optimizer.hpp>
 #include <csl/artifacts/run_statistics.hpp>
 
 namespace csl::synthesis::strategy_a {
@@ -42,4 +43,7 @@ using Providers =
 // allocation; other profile materialization caps are refused. Singular A needs
 // no inverse.
 registry::StrategyRegistration make_registration(Providers);
+registry::StrategyRegistration
+    make_registration(Providers,
+                      std::optional<registry::PreparedProvider<registry::HistoryOptimizerPort>>);
 } // namespace csl::synthesis::strategy_a
