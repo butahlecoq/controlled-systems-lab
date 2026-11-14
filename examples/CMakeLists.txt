@@ -128,6 +128,16 @@ csl_example(native_four_state_reachability CSL::model_catalogue CSL::geometry_ge
 csl_example(native_discrete_models CSL::model_catalogue)
 csl_example(discrete_mpc_2d CSL::controllers CSL::model_catalogue CSL::highs_convex)
 csl_example(positive_part_budget_2d CSL::highs_convex CSL::nominal_quadratic_history)
+csl_example(npoa_2017_programmed_fuel CSL::highs_convex CSL::nominal_quadratic_history
+  CSL::quickhull_2d)
+if(TARGET npoa_2017_programmed_fuel)
+  add_test(NAME npoa_2017_programmed_fuel
+    COMMAND "${CMAKE_COMMAND}"
+      "-DEXAMPLE_EXE=$<TARGET_FILE:npoa_2017_programmed_fuel>"
+      "-DOUTPUT_DIRECTORY=${CMAKE_CURRENT_BINARY_DIR}/npoa-2017-programmed-fuel"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/npoa_2017_programmed_fuel_check.cmake")
+  set_tests_properties(npoa_2017_programmed_fuel PROPERTIES TIMEOUT 30)
+endif()
 if(TARGET positive_part_budget_2d)
   add_test(NAME positive_part_budget_2d
     COMMAND "${CMAKE_COMMAND}"
@@ -236,6 +246,9 @@ example_check(source_index_geometry_btulshor source_index_geometry_2d "btulshor"
   "csl.hull.source.btulshor-kpabep.*status=verified.*csl.geometry.bounded-hull-checker")
 example_check(scenario_cli_valid scenario_cli "--validate-only;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json" 0
   "validation=valid.*schema=csl.scenario/1.*requested=comparison.*mode=validate_only solvers=not_invoked")
+example_check(scenario_cli_npoa_2017_fuel scenario_cli
+  "--validate-only;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/npoa-2017-programmed-fuel-v1.json" 0
+  "validation=valid.*schema=csl.scenario/1.*horizon=10.*state_dimension=4.*control_dimension=1.*mode=validate_only solvers=not_invoked")
 example_check(scenario_cli_missing scenario_cli "--validate-only;${CMAKE_CURRENT_BINARY_DIR}/no-such-scenario.json" 2
   "Input rejected: category=io.*expected")
 example_check(scenario_cli_run_ts01 scenario_cli "--run;${CMAKE_CURRENT_SOURCE_DIR}/scenarios/two-stage-integrator.json;--seed;42;--threads;2" 0
