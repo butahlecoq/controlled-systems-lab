@@ -4,7 +4,9 @@
 #include <csl/optimization/history_domain.hpp>
 #include <csl/registry/provider.hpp>
 
-namespace csl::registry { struct HistoryOptimizerPort; }
+namespace csl::registry {
+struct HistoryOptimizerPort;
+}
 
 namespace csl::optimization {
 
@@ -75,13 +77,14 @@ struct RawHistorySolve {
     std::string diagnostics;
     std::vector<HistoryMembershipWitness> membership_witnesses{};
 };
-using RawHistorySolveOutcome=std::variant<RawHistorySolve,Diagnostic,OperationStopped>;
+using RawHistorySolveOutcome = std::variant<RawHistorySolve, Diagnostic, OperationStopped>;
 
-class HistoryOptimizerWorkspace:public ExclusiveWorkspace {
+class HistoryOptimizerWorkspace : public ExclusiveWorkspace {
     friend struct registry::HistoryOptimizerPort;
-protected:
-    virtual RawHistorySolveOutcome solve_candidate(const HistoryOptimizationRequest&,
-        const ExecutionContext&)=0;
+
+  protected:
+    virtual RawHistorySolveOutcome solve_candidate(const HistoryOptimizationRequest &,
+                                                   const ExecutionContext &) = 0;
 };
 
 struct HistoryOptimizationResult {
@@ -94,7 +97,8 @@ struct HistoryOptimizationResult {
     std::string diagnostics;
     std::vector<HistoryMembershipWitness> membership_witnesses{};
 };
-using HistoryOptimizationOutcome=std::variant<HistoryOptimizationResult,Diagnostic,OperationStopped>;
+using HistoryOptimizationOutcome =
+    std::variant<HistoryOptimizationResult, Diagnostic, OperationStopped>;
 
 struct HistoryOptimizationCall {
     registry::Provenance provider;
@@ -104,18 +108,18 @@ using StrategyHistoryOptimizationOutcome =
     std::variant<HistoryOptimizationCall, registry::Rejection, Diagnostics, Diagnostic,
                  OperationStopped>;
 
-Diagnostics check_history_optimization_request(const HistoryOptimizationRequest&);
+Diagnostics check_history_optimization_request(const HistoryOptimizationRequest &);
 
 } // namespace csl::optimization
 
 namespace csl::registry {
 struct HistoryOptimizerPort {
-    using Request=optimization::HistoryOptimizationRequest;
-    using Workspace=optimization::HistoryOptimizerWorkspace;
-    static constexpr const char* name="whole-history-optimizer";
-    static Request snapshot(const Request& request) { return request; }
-    static optimization::HistoryOptimizationOutcome run(Workspace& workspace,const Request& request,
-        const ExecutionContext& context);
+    using Request = optimization::HistoryOptimizationRequest;
+    using Workspace = optimization::HistoryOptimizerWorkspace;
+    static constexpr const char *name = "whole-history-optimizer";
+    static Request snapshot(const Request &request) { return request; }
+    static optimization::HistoryOptimizationOutcome
+    run(Workspace &workspace, const Request &request, const ExecutionContext &context);
 };
 } // namespace csl::registry
 
