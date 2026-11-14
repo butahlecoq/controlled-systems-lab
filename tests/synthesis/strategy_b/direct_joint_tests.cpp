@@ -1266,7 +1266,7 @@ TEST_CASE("Strategy B invokes the prepared whole-history optimizer before its te
     const auto family = request(problem);
     auto profile = std::make_shared<const optimization::StrategyHistoryOptimizationProfile>(
         optimization::StrategyHistoryOptimizationProfile{ProgramId{"strategy-b-history-run"},
-                                                         {"strategy-b-history-running-cost", 2, {}},
+                                                         {{}, 0, {}},
                                                          0,
                                                          "state",
                                                          typed_history_memberships(),
@@ -1277,6 +1277,14 @@ TEST_CASE("Strategy B invokes the prepared whole-history optimizer before its te
     ExecutionContext context;
     context.resources = std::make_shared<const ResourcePolicy>(ResourcePolicy{1, 1, 1, {}});
     const auto result = accepted(prepared.create()->run(context));
+    INFO("termination=" << static_cast<int>(result.termination) << " stop=" << result.stop.index()
+                         << " family=" << result.family.has_value()
+                         << " incumbents=" << result.incumbents.size());
+    std::string diagnostic_text;
+    if (const auto *failure = std::get_if<ContractValidationFailure>(&result.stop))
+        for (const auto &diagnostic : failure->diagnostics)
+            diagnostic_text += diagnostic.field + ": " + diagnostic.explanation + "; ";
+    INFO("diagnostics=" << diagnostic_text);
     REQUIRE(result.history_optimization);
     CHECK(result.history_optimization->program.value == "strategy-b-history-run");
     REQUIRE(result.history_optimization->provider.actual_module);
