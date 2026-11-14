@@ -217,7 +217,9 @@ AffineOracle affine_terminal_oracle() {
     // Every terminal control column is affine in (1, 9-j), so columns j=0,9
     // span the entire two-dimensional terminal affine hull independently of
     // the history-QP compiler and its backend.
-    constexpr std::array<double, 4> initial{25.14, 247, 19.915, 199.92};
+    // Zero-control terminal state: tank-mass coordinates decrease by ten
+    // initial mass-flow values before the control-effect basis is applied.
+    constexpr std::array<double, 4> terminal_base{25.14, -4.4, 19.915, 0.77};
     constexpr std::array<std::array<double, 4>, 4> q{
         {{{2, 0, 0, 0}}, {{0, 4, 0, -2}}, {{0, 0, 2, 0}}, {{0, -2, 0, 4}}}};
     constexpr std::array<double, 4> linear{-50, 0, -40, 0};
@@ -235,7 +237,7 @@ AffineOracle affine_terminal_oracle() {
         for (std::size_t row = 0; row < 4; ++row) {
             double q_initial = linear[row];
             for (std::size_t column = 0; column < 4; ++column)
-                q_initial += q[row][column] * initial[column];
+                q_initial += q[row][column] * terminal_base[column];
             gradient[i] += basis[row][i] * q_initial;
             for (std::size_t j = 0; j < 2; ++j)
                 for (std::size_t column = 0; column < 4; ++column)
@@ -246,7 +248,7 @@ AffineOracle affine_terminal_oracle() {
     const std::array<double, 2> coefficient{
         (-gradient[0] * hessian[1][1] + hessian[0][1] * gradient[1]) / determinant,
         (-hessian[0][0] * gradient[1] + hessian[1][0] * gradient[0]) / determinant};
-    std::array<double, 4> terminal = initial;
+    std::array<double, 4> terminal = terminal_base;
     for (std::size_t coordinate = 0; coordinate < 4; ++coordinate)
         for (std::size_t k = 0; k < 2; ++k)
             terminal[coordinate] += basis[coordinate][k] * coefficient[k];
