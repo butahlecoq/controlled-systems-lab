@@ -97,6 +97,15 @@ def _fixture(bundle: Path) -> None:
 
 
 class NativeHistoryReportTests(unittest.TestCase):
+    def test_captured_native_output_links_resolve_from_records_directory(self):
+        rewritten = capture._record_native_html(
+            b'<img src="history.svg"><a href="history.csv">history</a>'
+        )
+        self.assertEqual(
+            rewritten,
+            b'<img src="../history.svg"><a href="../history.csv">history</a>',
+        )
+
     def test_capture_redacts_local_paths_and_preserves_urls(self):
         content = (
             b"build=/home/alice/project; compiler=/usr/bin/c++; url=https://example.org/path\n"

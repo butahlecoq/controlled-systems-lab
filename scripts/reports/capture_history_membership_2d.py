@@ -147,6 +147,13 @@ def _native_output(
     return match
 
 
+def _record_native_html(content: bytes) -> bytes:
+    """Adjust native output links for its archived records/ location."""
+    return content.replace(b'src="history.svg"', b'src="../history.svg"').replace(
+        b'href="history.csv"', b'href="../history.csv"'
+    )
+
+
 def capture(source_root: Path, build_root: Path, output_root: Path, build_log: Path) -> dict:
     source_root = source_root.resolve(strict=True)
     build_root = build_root.resolve(strict=True)
@@ -276,7 +283,9 @@ def capture(source_root: Path, build_root: Path, output_root: Path, build_log: P
         if source_file.is_symlink() or not source_file.is_file():
             raise RuntimeError("native tool did not write " + name)
         shutil.copyfile(source_file, output_root / name)
-    shutil.copyfile(native_output / "index.html", records / "native-output.html")
+    (records / "native-output.html").write_bytes(
+        _record_native_html((native_output / "index.html").read_bytes())
+    )
     shutil.rmtree(native_output)
     receipt = {
         "schema": report.SCHEMA,

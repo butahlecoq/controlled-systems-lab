@@ -112,6 +112,15 @@ def _fixture(bundle: Path) -> dict[str, bytes]:
 
 
 class HistoryMembershipPublicationTests(unittest.TestCase):
+    def test_captured_native_output_links_resolve_from_records_directory(self):
+        rewritten = capture._record_native_html(
+            b'<img src="history.svg"><a href="history.csv">history</a>'
+        )
+        self.assertEqual(
+            rewritten,
+            b'<img src="../history.svg"><a href="../history.csv">history</a>',
+        )
+
     def test_report_contains_membership_answer_and_offline_evidence(self):
         with tempfile.TemporaryDirectory() as temporary:
             bundle = Path(temporary) / report.REPORT_ID

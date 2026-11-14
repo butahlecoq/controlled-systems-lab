@@ -35,6 +35,13 @@ def _public_text(data: bytes) -> bytes:
     return text.encode("utf-8")
 
 
+def _record_native_html(content: bytes) -> bytes:
+    """Adjust native output links for its archived records/ location."""
+    return content.replace(b'src="history.svg"', b'src="../history.svg"').replace(
+        b'href="history.csv"', b'href="../history.csv"'
+    )
+
+
 def _run(binary: Path, output: Path) -> tuple[bytes, bytes]:
     with tempfile.TemporaryDirectory(prefix="csl-history-optimizer-run-") as temporary:
         result_dir = Path(temporary) / "native-result"
@@ -60,7 +67,10 @@ def _run(binary: Path, output: Path) -> tuple[bytes, bytes]:
             target = (
                 output / "records/native-output.html" if name == "index.html" else output / name
             )
-            shutil.copyfile(source, target)
+            if name == "index.html":
+                target.write_bytes(_record_native_html(source.read_bytes()))
+            else:
+                shutil.copyfile(source, target)
         return completed.stdout, completed.stderr
 
 
