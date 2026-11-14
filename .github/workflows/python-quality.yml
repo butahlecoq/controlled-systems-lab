@@ -15,6 +15,10 @@ on:
       - 'scripts/reports/stage_app02.py'
       - 'tests/reporting/test_site_additions.py'
       - 'tests/reporting/test_app02_saved.py'
+      - 'scripts/reports/capture_history_optimizer_native.py'
+      - 'scripts/reports/stage_history_optimizer_native.py'
+      - 'tests/reporting/test_history_optimizer_native.py'
+      - 'reports/algorithm-results/history-optimizer-native-2d-v1/**'
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
       - 'reports/algorithm-results/native-row-scaling-diagnostic-v1/**'
@@ -40,6 +44,10 @@ on:
       - 'scripts/reports/stage_app02.py'
       - 'tests/reporting/test_site_additions.py'
       - 'tests/reporting/test_app02_saved.py'
+      - 'scripts/reports/capture_history_optimizer_native.py'
+      - 'scripts/reports/stage_history_optimizer_native.py'
+      - 'tests/reporting/test_history_optimizer_native.py'
+      - 'reports/algorithm-results/history-optimizer-native-2d-v1/**'
       - 'scripts/reports/stage_native_row_scaling_diagnostic.py'
       - 'tests/reporting/test_stage_native_row_scaling_diagnostic.py'
       - 'reports/algorithm-results/native-row-scaling-diagnostic-v1/**'
@@ -62,6 +70,7 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.12'
@@ -85,6 +94,8 @@ jobs:
           python -m unittest discover -s tests/reporting -p 'test_syn03_ts02_report.py'
       - name: Check the locked source-only native row-scaling publication
         run: python -m unittest discover -s tests/reporting -p 'test_stage_native_row_scaling_diagnostic.py'
+      - name: Check the saved native whole-history optimizer route
+        run: python -m unittest discover -s tests/reporting -p 'test_history_optimizer_native.py'
       - name: Exercise OPT07 and OPT11 collectors, oracles and saved reports
         run: |
           python -m unittest discover -s tests/reporting -p 'test_opt07_*.py'

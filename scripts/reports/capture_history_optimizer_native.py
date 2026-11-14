@@ -5,11 +5,11 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from pathlib import Path
 import re
 import shutil
 import subprocess
 import tempfile
+from pathlib import Path
 
 import stage_history_optimizer_native as report
 
@@ -30,7 +30,9 @@ def _run(binary: Path, output: Path) -> tuple[bytes, bytes]:
         )
         if completed.returncode != 0:
             raise RuntimeError(
-                "native example exited with " + str(completed.returncode) + ": "
+                "native example exited with "
+                + str(completed.returncode)
+                + ": "
                 + completed.stderr.decode("utf-8", errors="replace")
             )
         output.mkdir(parents=True, exist_ok=True)
@@ -38,12 +40,14 @@ def _run(binary: Path, output: Path) -> tuple[bytes, bytes]:
             source = result_dir / name
             if source.is_symlink() or not source.is_file():
                 raise RuntimeError("native example did not write " + name)
-            shutil.copyfile(source, output / ("native-output.html" if name == "index.html" else name))
+            target = (
+                output / "records/native-output.html" if name == "index.html" else output / name
+            )
+            shutil.copyfile(source, target)
         return completed.stdout, completed.stderr
 
 
-def capture(source_root: Path, build_root: Path, output_root: Path,
-            build_log: Path) -> dict:
+def capture(source_root: Path, build_root: Path, output_root: Path, build_log: Path) -> dict:
     source_root = source_root.resolve(strict=True)
     build_root = build_root.resolve(strict=True)
     binary = build_root / "history_optimizer_2d_example"
@@ -64,23 +68,31 @@ def capture(source_root: Path, build_root: Path, output_root: Path,
         text=True,
     ).stdout
     unexpected = [
-        line for line in status.splitlines()
-        if not (line.startswith("?? ") and
-                (line[3:] == output_relative or line[3:].startswith(output_relative + "/")))
+        line
+        for line in status.splitlines()
+        if not (
+            line.startswith("?? ")
+            and (line[3:] == output_relative or line[3:].startswith(output_relative + "/"))
+        )
     ]
     if unexpected:
         raise RuntimeError("native capture requires a committed and clean source tree")
     source = subprocess.run(
-        ["git", "rev-parse", "HEAD"], cwd=source_root, check=True,
-        stdout=subprocess.PIPE, text=True,
+        ["git", "rev-parse", "HEAD"],
+        cwd=source_root,
+        check=True,
+        stdout=subprocess.PIPE,
+        text=True,
     ).stdout.strip()
     if re.fullmatch(r"[0-9a-f]{40}", source) is None:
         raise RuntimeError("git did not return a pinned source commit")
     source_files = {}
     for relative in report.SOURCE_PATHS:
         committed = subprocess.run(
-            ["git", "show", f"{source}:{relative}"], cwd=source_root,
-            check=True, stdout=subprocess.PIPE,
+            ["git", "show", f"{source}:{relative}"],
+            cwd=source_root,
+            check=True,
+            stdout=subprocess.PIPE,
         ).stdout
         working = (source_root / relative).read_bytes()
         if committed != working:
@@ -105,9 +117,16 @@ def capture(source_root: Path, build_root: Path, output_root: Path,
         line,
     )
     if match is None or match.group(1) != "csl.nlp.casadi-ipopt.history-cost@1":
-        raise RuntimeError("native example stdout does not match the expected provider/result contract")
+        raise RuntimeError(
+            "native example stdout does not match the expected provider/result contract"
+        )
     source_j, u0, u1, violation = map(float, match.group(2, 3, 4, 5))
-    if abs(source_j - 1.0) > 1e-6 or abs(u0 - 1.0) > 1e-5 or abs(u1 - 1.0) > 1e-5 or violation > 1e-7:
+    if (
+        abs(source_j - 1.0) > 1e-6
+        or abs(u0 - 1.0) > 1e-5
+        or abs(u1 - 1.0) > 1e-5
+        or violation > 1e-7
+    ):
         raise RuntimeError("native example did not meet its analytic 2D answer and full-H check")
     receipt = {
         "schema": report.SCHEMA,
@@ -124,11 +143,13 @@ def capture(source_root: Path, build_root: Path, output_root: Path,
             "maximum_history_violation": violation,
             "diagnostics": match.group(6),
         },
-        "reproduction_command": "\n".join((
-            "cmake -S . -B build/history-optimizer-native-2d -DCSL_ENABLE_CASADI=ON -DCMAKE_BUILD_TYPE=Release",
-            "cmake --build build/history-optimizer-native-2d --target history_optimizer_2d_example -j1",
-            "build/history-optimizer-native-2d/history_optimizer_2d_example build/history-optimizer-native-2d/output",
-        )),
+        "reproduction_command": "\n".join(
+            (
+                "cmake -S . -B build/history-optimizer-native-2d -DCSL_ENABLE_CASADI=ON -DCMAKE_BUILD_TYPE=Release",
+                "cmake --build build/history-optimizer-native-2d --target history_optimizer_2d_example -j1",
+                "build/history-optimizer-native-2d/history_optimizer_2d_example build/history-optimizer-native-2d/output",
+            )
+        ),
         "artifacts": {
             "csv_sha256": _sha256((output_root / "history.csv").read_bytes()),
             "figure_sha256": _sha256((output_root / "history.svg").read_bytes()),

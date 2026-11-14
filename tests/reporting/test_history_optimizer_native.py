@@ -3,18 +3,19 @@
 from __future__ import annotations
 
 import hashlib
+import importlib
 import json
-from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
 import zipfile
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/reports"))
-import stage_history_optimizer_native as report
+report = importlib.import_module("stage_history_optimizer_native")
 
 
 def _fixture(bundle: Path) -> None:
@@ -34,16 +35,25 @@ def _fixture(bundle: Path) -> None:
     (records / "build.log").write_text("Release target built\n", encoding="utf-8")
     (records / "CMakeCache.txt").write_text("CSL_ENABLE_CASADI:BOOL=ON\n", encoding="utf-8")
     (records / "native-output.html").write_text("<html>native output</html>\n", encoding="utf-8")
-    (records / "stdout.txt").write_text("provider=csl.nlp.casadi-ipopt.history-cost@1\n", encoding="utf-8")
+    (records / "stdout.txt").write_text(
+        "provider=csl.nlp.casadi-ipopt.history-cost@1\n", encoding="utf-8"
+    )
     source_commit = subprocess.run(
-        ["git", "rev-parse", "HEAD"], cwd=ROOT, check=True,
-        stdout=subprocess.PIPE, text=True,
+        ["git", "rev-parse", "HEAD"],
+        cwd=ROOT,
+        check=True,
+        stdout=subprocess.PIPE,
+        text=True,
     ).stdout.strip()
     source_files = {
-        relative: hashlib.sha256(subprocess.run(
-            ["git", "show", f"{source_commit}:{relative}"], cwd=ROOT,
-            check=True, stdout=subprocess.PIPE,
-        ).stdout).hexdigest()
+        relative: hashlib.sha256(
+            subprocess.run(
+                ["git", "show", f"{source_commit}:{relative}"],
+                cwd=ROOT,
+                check=True,
+                stdout=subprocess.PIPE,
+            ).stdout
+        ).hexdigest()
         for relative in report.SOURCE_PATHS
     }
     receipt = {
@@ -54,21 +64,28 @@ def _fixture(bundle: Path) -> None:
         "binary_sha256": "1" * 64,
         "provider": "csl.nlp.casadi-ipopt.history-cost@1",
         "source_objective": "||x2-(1,1)||_2 + 0.5(|u0|+|u1|)",
-        "result": {"source_J": 1, "u0": 1, "u1": 1,
-                   "maximum_history_violation": 0, "diagnostics": "local numerical"},
+        "result": {
+            "source_J": 1,
+            "u0": 1,
+            "u1": 1,
+            "maximum_history_violation": 0,
+            "diagnostics": "local numerical",
+        },
         "reproduction_command": "cmake --build build --target history_optimizer_2d_example",
         "artifacts": {
             "csv_sha256": hashlib.sha256((bundle / "history.csv").read_bytes()).hexdigest(),
             "figure_sha256": hashlib.sha256((bundle / "history.svg").read_bytes()).hexdigest(),
-            "native_html_sha256": hashlib.sha256((records / "native-output.html").read_bytes()).hexdigest(),
+            "native_html_sha256": hashlib.sha256(
+                (records / "native-output.html").read_bytes()
+            ).hexdigest(),
             "stdout_sha256": hashlib.sha256((records / "stdout.txt").read_bytes()).hexdigest(),
             "build_log_sha256": hashlib.sha256((records / "build.log").read_bytes()).hexdigest(),
-            "cmake_cache_sha256": hashlib.sha256((records / "CMakeCache.txt").read_bytes()).hexdigest(),
+            "cmake_cache_sha256": hashlib.sha256(
+                (records / "CMakeCache.txt").read_bytes()
+            ).hexdigest(),
         },
     }
-    (records / "receipt.json").write_text(
-        json.dumps(receipt, indent=2) + "\n", encoding="utf-8"
-    )
+    (records / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
     report.finalize_capture(bundle)
 
 
@@ -98,8 +115,9 @@ class NativeHistoryReportTests(unittest.TestCase):
         self.assertIn(report.RECORD, card)
         receipt = json.loads(files[report.RECORD])
         self.assertEqual(receipt["provider"], "csl.nlp.casadi-ipopt.history-cost@1")
-        self.assertEqual(hashlib.sha256(files[report.FIGURE]).hexdigest(),
-                         receipt["artifacts"]["figure_sha256"])
+        self.assertEqual(
+            hashlib.sha256(files[report.FIGURE]).hexdigest(), receipt["artifacts"]["figure_sha256"]
+        )
 
 
 if __name__ == "__main__":
